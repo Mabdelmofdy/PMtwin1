@@ -28,6 +28,16 @@ async function initDashboard(params) {
     } else {
         loadRecommendedOpportunities(user.id);
     }
+
+    // Read-only demo: disable Create Opportunity for pending users
+    if (authService.isPendingApproval && authService.isPendingApproval()) {
+        document.querySelectorAll('a[data-route="/opportunities/create"]').forEach(link => {
+            link.removeAttribute('data-route');
+            link.href = '#';
+            link.setAttribute('title', 'Action disabled until your account is approved.');
+            link.classList.add('opacity-75', 'cursor-not-allowed', 'pointer-events-none');
+        });
+    }
 }
 
 async function loadDashboardData(userId) {

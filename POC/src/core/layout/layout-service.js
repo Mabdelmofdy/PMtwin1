@@ -89,6 +89,7 @@ class LayoutService {
                 await this.renderSidebar(user);
             }
             this.renderMaintenanceBanner();
+            this.renderPendingApprovalBanner();
             this.attachSidebarHandlers();
         } else {
             await this.renderPublicNav(user);
@@ -142,8 +143,13 @@ class LayoutService {
         html += '<div class="portal-sidebar-user-card portal-user-dropdown-trigger" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">';
         html += `<div class="portal-user-avatar" aria-hidden="true">${initial}</div>`;
         html += '<div class="portal-user-info">';
-        html += `<span class="portal-user-name">${displayName}</span>`;
+        html += `<span class="portal-user-name" title="${displayName.replace(/"/g, '&quot;')}">${displayName}</span>`;
         html += `<span class="portal-user-role-tag">${roleLabel}</span>`;
+        if (user?.status === 'pending') {
+            html += '<span class="portal-account-status"><span class="badge badge-warning">Pending</span></span>';
+        } else if (user?.status === 'active') {
+            html += '<span class="portal-account-status"><span class="badge badge-success">Active</span></span>';
+        }
         html += '</div>';
         html += '<i class="ph-duotone ph-caret-down portal-user-chevron" aria-hidden="true"></i>';
         html += '</div>';
@@ -169,11 +175,11 @@ class LayoutService {
         ];
         links.forEach(({ route, label, icon }) => {
             const active = isActive(route);
-            html += `<a href="#" data-route="${route}" class="portal-nav-link ${active ? 'portal-nav-active' : ''}"><i class="${icon}"></i><span>${label}</span></a>`;
+            html += `<a href="#" data-route="${route}" class="portal-nav-link ${active ? 'portal-nav-active' : ''}" title="${label.replace(/"/g, '&quot;')}"><i class="${icon}"></i><span class="portal-nav-link-text">${label}</span></a>`;
         });
         if (this.authService.canAccessAdmin()) {
-            html += `<a href="#" data-route="${CONFIG.ROUTES.ADMIN}" class="portal-nav-link ${isActive(CONFIG.ROUTES.ADMIN) ? 'portal-nav-active' : ''}"><i class="ph-duotone ph-shield-check"></i><span>Admin</span></a>`;
-            html += `<a href="#" data-route="${CONFIG.ROUTES.ADMIN_REPORTS}" class="portal-nav-link ${isActive(CONFIG.ROUTES.ADMIN_REPORTS) ? 'portal-nav-active' : ''}"><i class="ph-duotone ph-chart-bar"></i><span>Reports</span></a>`;
+            html += `<a href="#" data-route="${CONFIG.ROUTES.ADMIN}" class="portal-nav-link ${isActive(CONFIG.ROUTES.ADMIN) ? 'portal-nav-active' : ''}" title="Admin"><i class="ph-duotone ph-shield-check"></i><span class="portal-nav-link-text">Admin</span></a>`;
+            html += `<a href="#" data-route="${CONFIG.ROUTES.ADMIN_REPORTS}" class="portal-nav-link ${isActive(CONFIG.ROUTES.ADMIN_REPORTS) ? 'portal-nav-active' : ''}" title="Reports"><i class="ph-duotone ph-chart-bar"></i><span class="portal-nav-link-text">Reports</span></a>`;
         }
         html += '</nav>';
         html += `<div class="portal-sidebar-footer"><button type="button" class="portal-logout-btn" onclick="layoutService.handleLogout()"><i class="ph-duotone ph-sign-out"></i><span>Logout</span></button></div>`;
@@ -208,8 +214,13 @@ class LayoutService {
         html += '<div class="portal-sidebar-user-card portal-user-dropdown-trigger" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">';
         html += `<div class="portal-user-avatar" aria-hidden="true">${initial}</div>`;
         html += '<div class="portal-user-info">';
-        html += `<span class="portal-user-name">${displayName}</span>`;
+        html += `<span class="portal-user-name" title="${displayName.replace(/"/g, '&quot;')}">${displayName}</span>`;
         html += `<span class="portal-user-role-tag">${roleLabel}</span>`;
+        if (user?.status === 'pending') {
+            html += '<span class="portal-account-status"><span class="badge badge-warning">Pending</span></span>';
+        } else if (user?.status === 'active') {
+            html += '<span class="portal-account-status"><span class="badge badge-success">Active</span></span>';
+        }
         html += '</div>';
         html += '<i class="ph-duotone ph-caret-down portal-user-chevron" aria-hidden="true"></i>';
         html += '</div>';
@@ -240,12 +251,37 @@ class LayoutService {
 
         adminLinks.forEach(({ route, label, icon }) => {
             const active = isActive(route);
-            html += `<a href="#" data-route="${route}" class="portal-nav-link ${active ? 'portal-nav-active' : ''}"><i class="${icon}"></i><span>${label}</span></a>`;
+            html += `<a href="#" data-route="${route}" class="portal-nav-link ${active ? 'portal-nav-active' : ''}" title="${label.replace(/"/g, '&quot;')}"><i class="${icon}"></i><span class="portal-nav-link-text">${label}</span></a>`;
         });
         html += '</nav>';
         html += `<div class="portal-sidebar-footer"><button type="button" class="portal-logout-btn" onclick="layoutService.handleLogout()"><i class="ph-duotone ph-sign-out"></i><span>Logout</span></button></div>`;
         html += '</div>';
         sidebarEl.innerHTML = html;
+    }
+
+    /**
+     * Show or hide pending approval banner in portal layout (read-only demo mode)
+     */
+    renderPendingApprovalBanner() {
+        const user = this.authService.getCurrentUser();
+        const portalLayout = document.getElementById(this.portalLayoutId);
+        const appMain = portalLayout?.querySelector('.portal-main, #app-main');
+        if (!appMain) return;
+
+        let banner = document.getElementById('pending-approval-banner');
+        if (user?.status === 'pending') {
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'pending-approval-banner';
+                banner.setAttribute('role', 'alert');
+                banner.style.cssText = 'background: #fef3c7; border-bottom: 1px solid #f59e0b; color: #92400e; padding: 0.5rem 1rem; font-size: 0.875rem;';
+                appMain.insertBefore(banner, appMain.firstChild);
+            }
+            banner.textContent = 'Your account is pending admin approval. You can explore the platform but actions are temporarily disabled.';
+            banner.style.display = '';
+        } else if (banner) {
+            banner.style.display = 'none';
+        }
     }
 
     /**

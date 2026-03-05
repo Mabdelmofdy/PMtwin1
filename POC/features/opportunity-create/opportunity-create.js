@@ -360,6 +360,24 @@ function setLocationsData(data) {
 }
 
 async function initOpportunityCreate() {
+    // Read-only demo: pending users can view but not submit
+    if (authService.isPendingApproval && authService.isPendingApproval()) {
+        const form = document.getElementById('opportunity-form');
+        if (form) {
+            const banner = document.createElement('div');
+            banner.setAttribute('role', 'alert');
+            banner.className = 'mb-4 p-4 rounded-lg border border-amber-300 bg-amber-50 text-amber-900';
+            banner.textContent = 'Your account is pending admin approval. You can explore the form but cannot create opportunities until approved.';
+            form.insertBefore(banner, form.firstChild);
+        }
+        const submitBtn = document.getElementById('submit-form');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.setAttribute('title', 'Action disabled until your account is approved.');
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        }
+    }
+
     // Load data files
     await loadDataFiles();
     
@@ -2734,6 +2752,9 @@ function setupFormHandlers() {
     
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (authService.isPendingApproval && authService.isPendingApproval()) {
+            return;
+        }
         
         // Remove required attribute from hidden fields to prevent HTML5 validation errors
         const allRequiredFields = form.querySelectorAll('[required]');

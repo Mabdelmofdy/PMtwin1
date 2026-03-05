@@ -153,12 +153,12 @@ class ModalService {
      * Show a modal with custom HTML content
      * @param {string} contentHTML - HTML string for the modal body (e.g. table, div)
      * @param {string} title - Modal title
-     * @param {Object} options - Optional: confirmText (default 'Close'), showCancel (default false)
+     * @param {Object} options - Optional: confirmText (default 'Close'), showCancel (default false), cancelText (default 'Cancel')
      * @returns {Promise<boolean>} - Resolves to true when closed
      */
     async showCustom(contentHTML, title = 'Information', options = {}) {
         return new Promise((resolve) => {
-            const { confirmText = 'Close', showCancel = false } = options;
+            const { confirmText = 'Close', showCancel = false, cancelText = 'Cancel' } = options;
             const closeIcon = IconHelper ? IconHelper.render('x', { size: 24, weight: 'duotone' }) : '&times;';
 
             const modal = document.createElement('div');
@@ -173,7 +173,7 @@ class ModalService {
                         ${contentHTML}
                     </div>
                     <div class="modal-footer">
-                        ${showCancel ? '<button class="btn btn-secondary modal-btn-cancel">Cancel</button>' : ''}
+                        ${showCancel ? '<button class="btn btn-secondary modal-btn-cancel">' + cancelText + '</button>' : ''}
                         <button class="btn btn-primary modal-btn-confirm">${confirmText}</button>
                     </div>
                 </div>

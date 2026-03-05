@@ -282,6 +282,18 @@ async function initProfile() {
     loadMatchingPreferences(user);
     setupMatchingPreferencesSave();
     setupSkillAutocomplete();
+
+    // Read-only demo: disable profile edits for pending users
+    if (authService.isPendingApproval && authService.isPendingApproval()) {
+        const msg = 'Action disabled until your account is approved.';
+        document.querySelectorAll('#matching-preferences-save, #company-profile-edit-btn, #professional-profile-edit-btn, #team-add-member-btn').forEach(el => {
+            if (el) {
+                el.disabled = true;
+                el.setAttribute('title', msg);
+                el.classList.add('opacity-75', 'cursor-not-allowed');
+            }
+        });
+    }
 }
 
 async function loadCompanyAffiliation(user) {
@@ -381,9 +393,15 @@ function setupMatchingPreferencesSave() {
     const btn = document.getElementById('matching-preferences-save');
     const input = document.getElementById('matching-min-score');
     if (!btn || !input) return;
+    if (authService.isPendingApproval && authService.isPendingApproval()) {
+        btn.disabled = true;
+        btn.setAttribute('title', 'Action disabled until your account is approved.');
+        return;
+    }
     btn.addEventListener('click', async () => {
         const user = authService.getCurrentUser();
         if (!user) return;
+        if (authService.isPendingApproval && authService.isPendingApproval()) return;
         const raw = parseInt(input.value, 10);
         const pct = isNaN(raw) ? 70 : Math.min(100, Math.max(70, raw));
         const minScore = pct / 100;
@@ -448,6 +466,7 @@ async function loadTeamMembers(user) {
 }
 
 function showAddTeamMemberModal(companyId) {
+    if (authService.isPendingApproval && authService.isPendingApproval()) return;
     const roleOptions = [
         { value: CONFIG.ROLES.COMPANY_ADMIN, label: 'Admin' },
         { value: CONFIG.ROLES.COMPANY_MEMBER, label: 'Member' }
@@ -489,6 +508,7 @@ function showAddTeamMemberModal(companyId) {
     const errorEl = modalEl.querySelector('#add-team-member-error');
     if (submitBtn) {
         submitBtn.addEventListener('click', async () => {
+            if (authService.isPendingApproval && authService.isPendingApproval()) return;
             const email = emailInput?.value?.trim();
             const role = roleSelect?.value || CONFIG.ROLES.COMPANY_MEMBER;
             if (!email) {
@@ -528,6 +548,7 @@ async function addTeamMemberByEmail(companyId, email, role) {
 }
 
 async function removeTeamMember(memberId, companyId) {
+    if (authService.isPendingApproval && authService.isPendingApproval()) return;
     if (!confirm('Remove this member from your company? They will no longer have access to company opportunities.')) return;
     try {
         await dataService.updateUser(memberId, { companyId: null, role: CONFIG.ROLES.PROFESSIONAL });
@@ -1231,6 +1252,10 @@ function setupCompanyForm(userId) {
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (authService.isPendingApproval && authService.isPendingApproval()) {
+            alert('Action disabled until your account is approved.');
+            return;
+        }
         const formData = new FormData(form);
         const payEl = document.getElementById('company-paymentModes');
         const preferredPaymentModes = payEl ? Array.from(payEl.selectedOptions).map(o => o.value) : [];
@@ -1309,6 +1334,10 @@ function setupProfessionalForm(userId) {
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (authService.isPendingApproval && authService.isPendingApproval()) {
+            alert('Action disabled until your account is approved.');
+            return;
+        }
         const formData = new FormData(form);
         const payEl = document.getElementById('prof-paymentModes');
         const preferredPaymentModes = payEl ? Array.from(payEl.selectedOptions).map(o => o.value) : [];

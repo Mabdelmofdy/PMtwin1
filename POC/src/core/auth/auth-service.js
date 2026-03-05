@@ -126,10 +126,7 @@ class AuthService {
             throw new Error('Invalid email or password');
         }
         
-        // Check user status
-        if (user.status === 'pending') {
-            throw new Error('Account pending approval. Please wait for admin verification.');
-        }
+        // Check user status (pending allowed for read-only demo mode)
         if (user.status === 'rejected') {
             throw new Error('Account registration was rejected. Please contact support.');
         }
@@ -209,8 +206,8 @@ class AuthService {
         
         const user = await this.dataService.getUserOrCompanyById(session.userId);
         if (!user) return false;
-        // Allow active and clarification_requested (user can complete registration)
-        if (user.status !== 'active' && user.status !== 'clarification_requested') {
+        // Reject only rejected/suspended; allow active, clarification_requested, and pending (read-only demo)
+        if (user.status === 'rejected' || user.status === 'suspended') {
             return false;
         }
         
@@ -224,6 +221,14 @@ class AuthService {
      */
     getCurrentUser() {
         return this.currentUser;
+    }
+
+    /**
+     * Whether the current user is in read-only demo mode (pending approval).
+     * Use to disable mutating actions and show the pending banner/badge.
+     */
+    isPendingApproval() {
+        return !!(this.currentUser && this.currentUser.status === 'pending');
     }
     
     /**

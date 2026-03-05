@@ -17,9 +17,9 @@ class OpportunityService {
         await this._ensureNormalized(opportunity);
         const updated = await this.dataService.getOpportunityById(opportunity.id);
 
-        // If published, trigger matching
+        // If published, trigger matching (await so callers can show results immediately)
         if (updated.status === 'published') {
-            this.matchingService.findMatchesForOpportunity(updated.id)
+            await this.matchingService.findMatchesForOpportunity(updated.id)
                 .catch(error => console.error('Error running matching:', error));
         }
 
@@ -71,7 +71,7 @@ class OpportunityService {
         });
         if (newStatus === 'published') {
             await this._ensureNormalized(opportunity);
-            this.matchingService.findMatchesForOpportunity(opportunityId)
+            await this.matchingService.findMatchesForOpportunity(opportunityId)
                 .catch(error => console.error('Error running matching:', error));
             return this.dataService.getOpportunityById(opportunityId);
         }

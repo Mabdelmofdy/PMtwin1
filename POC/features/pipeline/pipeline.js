@@ -56,6 +56,7 @@ function addDropZone(element, type, containerId) {
     element.addEventListener('drop', async (e) => {
         e.preventDefault();
         element.closest('.kanban-column')?.classList.remove('kanban-column-drag-over');
+        if (authService.isPendingApproval && authService.isPendingApproval()) return;
         try {
             const raw = e.dataTransfer.getData('application/json') || e.dataTransfer.getData('text/plain');
             const payload = JSON.parse(raw);
@@ -301,21 +302,32 @@ async function renderKanbanColumn(containerId, items) {
     
     container.innerHTML = html;
     
+    const isPendingDrag = authService.isPendingApproval && authService.isPendingApproval();
     container.querySelectorAll('.kanban-item').forEach(item => {
-        item.setAttribute('draggable', 'true');
-        item.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('application/json', JSON.stringify({ id: item.dataset.id, type: 'opportunity' }));
-            e.dataTransfer.effectAllowed = 'move';
-        });
+        item.setAttribute('draggable', isPendingDrag ? 'false' : 'true');
+        if (!isPendingDrag) {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('application/json', JSON.stringify({ id: item.dataset.id, type: 'opportunity' }));
+                e.dataTransfer.effectAllowed = 'move';
+            });
+        }
         item.addEventListener('click', (e) => {
             if (e.target.closest('.kanban-item-action')) return;
             const id = item.dataset.id;
             router.navigate(`/opportunities/${id}`);
         });
     });
+    const isPending = authService.isPendingApproval && authService.isPendingApproval();
+    const actionTooltip = 'Action disabled until your account is approved.';
     container.querySelectorAll('.kanban-btn-publish').forEach(btn => {
+        if (isPending) {
+            btn.disabled = true;
+            btn.setAttribute('title', actionTooltip);
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+        }
         btn.addEventListener('click', async (e) => {
             e.stopPropagation();
+            if (isPending) return;
             const id = btn.dataset.id;
             const oppService = window.opportunityService || (typeof opportunityService !== 'undefined' ? opportunityService : null);
             if (oppService && typeof oppService.updateOpportunityStatus === 'function') {
@@ -327,8 +339,14 @@ async function renderKanbanColumn(containerId, items) {
         });
     });
     container.querySelectorAll('.kanban-btn-close').forEach(btn => {
+        if (isPending) {
+            btn.disabled = true;
+            btn.setAttribute('title', actionTooltip);
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+        }
         btn.addEventListener('click', async (e) => {
             e.stopPropagation();
+            if (isPending) return;
             const id = btn.dataset.id;
             await dataService.updateOpportunity(id, { status: 'closed' });
             await loadOpportunitiesPipeline();
@@ -372,12 +390,15 @@ async function renderApplicationColumn(containerId, items) {
     
     container.innerHTML = html;
     
+    const isPendingApp = authService.isPendingApproval && authService.isPendingApproval();
     container.querySelectorAll('.kanban-item').forEach(item => {
-        item.setAttribute('draggable', 'true');
-        item.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('application/json', JSON.stringify({ id: item.dataset.id, type: 'application' }));
-            e.dataTransfer.effectAllowed = 'move';
-        });
+        item.setAttribute('draggable', isPendingApp ? 'false' : 'true');
+        if (!isPendingApp) {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('application/json', JSON.stringify({ id: item.dataset.id, type: 'application' }));
+                e.dataTransfer.effectAllowed = 'move';
+            });
+        }
         item.addEventListener('click', (e) => {
             if (e.target.closest('.kanban-item-action')) return;
             const id = item.dataset.id;
@@ -388,8 +409,14 @@ async function renderApplicationColumn(containerId, items) {
         });
     });
     container.querySelectorAll('.kanban-btn-withdraw').forEach(btn => {
+        if (isPendingApp) {
+            btn.disabled = true;
+            btn.setAttribute('title', 'Action disabled until your account is approved.');
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+        }
         btn.addEventListener('click', async (e) => {
             e.stopPropagation();
+            if (isPendingApp) return;
             const id = btn.dataset.id;
             await dataService.updateApplication(id, { status: 'withdrawn' });
             await loadApplicationsPipeline();

@@ -55,10 +55,11 @@ async function loadOpportunity(id) {
         
         currentOpportunity = opportunity;
         
-        // Get current user and vetting status
+        // Get current user and vetting status (pending allowed for read-only demo; only rejected/suspended see teaser)
         const user = authService.getCurrentUser();
         const isVetted = user && user.status === 'active';
-        if (user && !isVetted) {
+        const isPending = user && user.status === 'pending';
+        if (user && !isVetted && !isPending) {
             renderTeaserView(opportunity);
             loadingDiv.style.display = 'none';
             contentDiv.style.display = 'block';
@@ -69,7 +70,7 @@ async function loadOpportunity(id) {
         const creator = await dataService.getUserOrCompanyById(opportunity.creatorId);
         
         const isOwner = user && opportunity.creatorId === user.id;
-        const canApply = user && !isOwner && (opportunity.status === 'published' || opportunity.status === 'in_negotiation');
+        const canApply = user && !isOwner && (opportunity.status === 'published' || opportunity.status === 'in_negotiation') && !(authService.isPendingApproval && authService.isPendingApproval());
         
         // Check if user has already applied
         if (canApply) {
@@ -273,6 +274,16 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply) 
             document.getElementById('btn-start-apply').addEventListener('click', () => {
                 startApplicationWizard();
             });
+        }
+    } else if (authService.isPendingApproval && authService.isPendingApproval() && !isOwner && (opportunity.status === 'published' || opportunity.status === 'in_negotiation')) {
+        // Pending user: show apply section with disabled button and tooltip
+        const applySection = document.getElementById('apply-section');
+        const applyBtn = document.getElementById('btn-start-apply');
+        if (applySection) applySection.style.display = 'block';
+        if (applyBtn) {
+            applyBtn.disabled = true;
+            applyBtn.setAttribute('title', 'Action disabled until your account is approved.');
+            applyBtn.classList.add('opacity-75', 'cursor-not-allowed');
         }
     }
     
