@@ -430,9 +430,282 @@ body {
 }
 
 .badge-match {
-    background: linear-gradient(135deg, var(--success-color), var(--primary-color));
     color: white;
+    font-weight: 700;
+    font-size: var(--font-size-xs);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.badge-match-high {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.badge-match-medium {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.badge-match-low {
+    background-color: var(--text-muted);
+    color: white;
+}
+
+.match-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.match-card-title {
+    font-size: var(--font-size-base);
     font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+}
+
+.match-card-body {
+    padding-top: var(--spacing-sm);
+}
+
+.match-card-meta {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin: 0 0 var(--spacing-xs) 0;
+}
+
+.match-card-meta-label {
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.match-card-meta-sep {
+    margin: 0 var(--spacing-xs);
+    color: var(--border-color);
+}
+
+.match-card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+/* Vertical opportunity match card (like photo: sections + labels + button + links) */
+.match-card-vertical {
+    display: flex;
+    flex-direction: column;
+}
+
+.match-card-vertical-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    padding-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.match-card-vertical-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.match-card-vertical-body {
+    flex: 1;
+    min-height: 0;
+}
+
+.match-card-vertical-section {
+    padding-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.match-card-vertical-section:last-of-type {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.match-card-vertical-label {
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin: 0 0 var(--spacing-xs) 0;
+}
+
+.match-card-vertical-content {
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.match-card-vertical-meta {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin: var(--spacing-sm) 0 0 0;
+}
+
+.match-card-vertical-footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding-top: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+}
+
+.match-card-vertical-footer .btn {
+    align-self: flex-start;
+}
+
+.match-card-vertical-link {
+    font-size: var(--font-size-sm);
+    color: var(--primary-color);
+    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    align-self: flex-start;
+}
+
+.match-card-vertical-link:hover {
+    text-decoration: underline;
+}
+
+/* Partners list inside vertical card (e.g. consortium) – no scroll, flows with content */
+.match-card-vertical-partners {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: var(--font-size-base);
+    color: var(--text-primary);
+}
+
+.match-card-vertical-partners li {
+    padding: 0.2em 0;
+}
+
+.match-card-vertical-partner-role {
+    font-weight: 500;
+}
+
+/* Horizontal list-style match card (optional compact layout) */
+.match-card-horizontal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: var(--spacing-md);
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* Ensure card has room so title/metadata/actions stay visible */
+.match-cards-grid .match-card-horizontal {
+    min-width: 260px;
+}
+
+.match-card-horizontal .match-card-left {
+    min-width: 140px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.match-card-horizontal .match-card-title {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs) 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.match-card-meta-row {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    min-width: 0;
+    overflow: hidden;
+    margin: 0;
+}
+
+.match-card-meta-item {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.match-card-meta-item:not(:last-child)::after {
+    content: '|';
+    margin-left: var(--spacing-sm);
+    color: var(--border-color);
+    flex-shrink: 0;
+}
+
+.match-card-horizontal .match-card-right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-shrink: 0;
+}
+
+.match-card-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-wrap: nowrap;
+}
+
+.match-card-actions .btn {
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .match-card-horizontal {
+        flex-direction: column;
+        flex-wrap: wrap;
+        align-items: stretch;
+        overflow: visible;
+    }
+    .match-card-horizontal .match-card-left {
+        overflow: visible;
+    }
+    .match-card-horizontal .match-card-title {
+        white-space: normal;
+    }
+    .match-card-meta-row {
+        flex-wrap: wrap;
+        overflow: visible;
+    }
+    .match-card-horizontal .match-card-right {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+    .match-card-actions {
+        flex-wrap: wrap;
+    }
 }
 
 .badge-intent-offer-project_based { background-color: var(--intent-offer-project_based); color: #1e3a8a; }

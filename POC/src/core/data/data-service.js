@@ -196,6 +196,15 @@ class DataService {
                     console.log(`Merged ${json.data.length} demo post matches`);
                 }
             }
+            const demoNegotiationsRes = await fetch(`${base}demo-negotiations.json`);
+            if (demoNegotiationsRes.ok) {
+                const json = await demoNegotiationsRes.json();
+                if (json.data && json.data.length) {
+                    const negotiations = this.storage.get(CONFIG.STORAGE_KEYS.NEGOTIATIONS) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.NEGOTIATIONS, mergeById(negotiations, json.data));
+                    console.log(`Merged ${json.data.length} demo negotiations`);
+                }
+            }
             const demoAppReqsRes = await fetch(`${base}demo-application-requirements.json`);
             if (demoAppReqsRes.ok) {
                 const json = await demoAppReqsRes.json();
@@ -1118,6 +1127,7 @@ class DataService {
             paymentSchedule: contractData.paymentSchedule || null,
             equityVesting: contractData.equityVesting || null,
             profitShare: contractData.profitShare || null,
+            milestonesSnapshot: contractData.milestonesSnapshot || null,
             status: contractData.status || CONFIG.CONTRACT_STATUS.PENDING,
             signedAt: contractData.signedAt || null,
             createdAt: new Date().toISOString(),

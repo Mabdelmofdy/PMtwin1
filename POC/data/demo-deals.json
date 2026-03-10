@@ -60,18 +60,26 @@
         {
           "id": "m2",
           "title": "Shop drawing review completion",
-          "description": "",
+          "description": "Full review of structural shop drawings and sign-off report",
           "dueDate": "2026-06-30",
-          "status": "pending",
+          "status": "in_progress",
           "deliverables": "Reviewed drawings report",
           "createdAt": "2026-03-07T12:30:00.000Z",
-          "updatedAt": "2026-03-07T12:30:00.000Z",
+          "updatedAt": "2026-03-10T09:00:00.000Z",
           "submittedAt": null,
           "approvedAt": null,
           "approvedBy": null
         }
       ],
-      "negotiationId": null,
+      "progressUpdates": [
+        { "date": "2026-03-07T12:30:00.000Z", "text": "Deal signed; kick-off scheduled for April 2026.", "userId": "demo-c01" },
+        { "date": "2026-03-10T09:00:00.000Z", "text": "Scope agreed. Shop drawing review in progress.", "userId": "demo-u06" }
+      ],
+      "documents": [
+        { "name": "Signed scope of work", "urlOrRef": "/docs/demo-deal-01-scope.pdf" },
+        { "name": "Drawing set v1", "urlOrRef": "/docs/demo-deal-01-drawings.pdf" }
+      ],
+      "negotiationId": "demo-neg-01",
       "contractId": "demo-contract-01",
       "createdAt": "2026-03-07T12:30:00.000Z",
       "updatedAt": "2026-03-07T12:30:00.000Z",
@@ -118,7 +126,7 @@
       },
       "deliverables": "",
       "milestones": [],
-      "negotiationId": null,
+      "negotiationId": "demo-neg-03",
       "contractId": "demo-contract-02",
       "createdAt": "2026-03-07T15:00:00.000Z",
       "updatedAt": "2026-03-07T15:00:00.000Z",
@@ -181,18 +189,25 @@
         {
           "id": "m2",
           "title": "Supervision period",
-          "description": "",
+          "description": "Site supervision and progress reports",
           "dueDate": "2026-09-30",
-          "status": "pending",
+          "status": "in_progress",
           "deliverables": "Reports",
           "createdAt": "2026-03-10T14:00:00.000Z",
-          "updatedAt": "2026-03-10T14:00:00.000Z",
+          "updatedAt": "2026-03-10T16:00:00.000Z",
           "submittedAt": null,
           "approvedAt": null,
           "approvedBy": null
         }
       ],
-      "negotiationId": null,
+      "progressUpdates": [
+        { "date": "2026-03-10T14:00:00.000Z", "text": "Contract signed. Mobilization completed.", "userId": "demo-c02" },
+        { "date": "2026-03-10T16:00:00.000Z", "text": "Supervision period started; first report due end of month.", "userId": "demo-u21" }
+      ],
+      "documents": [
+        { "name": "Mobilization certificate", "urlOrRef": "/docs/demo-deal-03-mob.pdf" }
+      ],
+      "negotiationId": "demo-neg-04",
       "contractId": "demo-contract-03",
       "createdAt": "2026-03-10T14:00:00.000Z",
       "updatedAt": "2026-03-10T14:00:00.000Z",
@@ -205,7 +220,7 @@
       "applicationId": "demo-app-52",
       "opportunityId": "demo-need-43",
       "matchType": "one_way",
-      "status": "draft",
+      "status": "review",
       "title": "Need: Cost estimation for hospital project",
       "participants": [
         {
@@ -353,6 +368,12 @@
       ],
       "opportunityIds": [
         "demo-consortium-41"
+      ],
+      "roleSlots": [
+        { "role": "consortium_lead", "userId": "demo-c05", "opportunityId": "demo-consortium-41" },
+        { "role": "Investor", "userId": "demo-c04", "opportunityId": "demo-group-offer-01" },
+        { "role": "Contractor", "userId": "demo-u24", "opportunityId": "demo-group-offer-02" },
+        { "role": "Equipment supplier", "userId": "demo-c03", "opportunityId": "demo-group-offer-03" }
       ],
       "scope": "Need: Solar plant EPC — equity, EPC, and O&M partners",
       "timeline": {
@@ -728,6 +749,70 @@
       "contractId": "demo-contract-11",
       "createdAt": "2026-03-10T14:00:00.000Z",
       "updatedAt": "2026-03-10T14:00:00.000Z",
+      "completedAt": null,
+      "closedAt": null
+    },
+    {
+      "id": "demo-deal-12",
+      "matchId": "demo-pm-consortium-02",
+      "applicationId": null,
+      "opportunityId": "demo-consortium-42",
+      "matchType": "consortium",
+      "status": "signing",
+      "title": "Need: Highway corridor — lead, financier, contractor",
+      "participants": [
+        { "userId": "demo-c05", "role": "creator", "approvalStatus": "approved", "signedAt": "2026-03-10T16:00:00.000Z" },
+        { "userId": "demo-u23", "role": "contractor", "approvalStatus": "approved", "signedAt": "2026-03-10T16:00:00.000Z" },
+        { "userId": "demo-u26", "role": "contractor", "approvalStatus": "pending", "signedAt": null }
+      ],
+      "opportunityIds": ["demo-consortium-42"],
+      "roleSlots": [
+        { "role": "consortium_lead", "userId": "demo-c05", "opportunityId": "demo-group-lead-02" },
+        { "role": "Consultant", "userId": "demo-u23", "opportunityId": "demo-group-offer-04" },
+        { "role": "Consultant", "userId": "demo-u26", "opportunityId": "demo-group-offer-05" }
+      ],
+      "scope": "Highway corridor consortium: lead, financier, contractor",
+      "timeline": { "start": "2026-05-01", "end": "2027-12-31" },
+      "exchangeMode": "cash",
+      "valueTerms": { "agreedValue": { "cash": 5000000, "currency": "SAR" }, "paymentSchedule": "Milestone-based" },
+      "deliverables": "",
+      "milestones": [],
+      "negotiationId": null,
+      "contractId": null,
+      "createdAt": "2026-03-10T16:00:00.000Z",
+      "updatedAt": "2026-03-10T16:00:00.000Z",
+      "completedAt": null,
+      "closedAt": null
+    },
+    {
+      "id": "demo-deal-13",
+      "matchId": "demo-pm-consortium-03",
+      "applicationId": null,
+      "opportunityId": "demo-group-lead-02",
+      "matchType": "consortium",
+      "status": "draft",
+      "title": "Need: Infrastructure program — PMO and consulting partners",
+      "participants": [
+        { "userId": "demo-c05", "role": "creator", "approvalStatus": "pending", "signedAt": null },
+        { "userId": "demo-u23", "role": "contractor", "approvalStatus": "pending", "signedAt": null },
+        { "userId": "demo-u26", "role": "contractor", "approvalStatus": "pending", "signedAt": null }
+      ],
+      "opportunityIds": ["demo-group-lead-02"],
+      "roleSlots": [
+        { "role": "consortium_lead", "userId": "demo-c05", "opportunityId": "demo-group-lead-02" },
+        { "role": "Consultant", "userId": "demo-u23", "opportunityId": "demo-group-offer-04" },
+        { "role": "Consultant", "userId": "demo-u26", "opportunityId": "demo-group-offer-05" }
+      ],
+      "scope": "Infrastructure program PMO and consulting consortium",
+      "timeline": { "start": null, "end": null },
+      "exchangeMode": "cash",
+      "valueTerms": { "agreedValue": null, "paymentSchedule": "" },
+      "deliverables": "",
+      "milestones": [],
+      "negotiationId": null,
+      "contractId": null,
+      "createdAt": "2026-03-10T17:00:00.000Z",
+      "updatedAt": "2026-03-10T17:00:00.000Z",
       "completedAt": null,
       "closedAt": null
     }

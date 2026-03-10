@@ -147,6 +147,10 @@
           "Stakeholder and lender coordination",
           "Project and portfolio advisory"
         ],
+        "financialCapacity": 2000000,
+        "preferredPaymentModes": ["cash"],
+        "preferredCollaborationModels": ["project", "consortium"],
+        "primaryDomain": "Infrastructure",
         "caseStudies": [
           { "title": "Highway project financing", "description": "Lead financier and equity partner for major highway PPP; structured debt and equity.", "url": null },
           { "title": "Mixed-use development investment", "description": "Equity investment and board representation for mixed-use development in Riyadh.", "url": null }
@@ -223,8 +227,10 @@
           "Project management and PM coordination",
           "BIM and delivery management"
         ],
+        "financialCapacity": 4000000,
         "preferredPaymentModes": ["cash"],
         "preferredCollaborationModels": ["project"],
+        "primaryDomain": "Real Estate",
         "caseStudies": [
           { "title": "Mixed-use tower Jeddah", "description": "30-storey mixed-use tower; led development, design coordination, and consortium of design lead, MEP contractor, and PM.", "url": null },
           { "title": "Hospitality and retail complex", "description": "Mixed hospitality and retail development; full design and construction oversight.", "url": null }

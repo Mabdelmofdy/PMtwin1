@@ -1,0 +1,350 @@
+{
+  "domain": "negotiations",
+  "version": "1.0",
+  "dataset": "demo40",
+  "description": "Demo negotiations linking applications and matches to value-exchange terms; statuses open, counter_offered, agreed, failed, expired",
+  "data": [
+    {
+      "id": "demo-neg-01",
+      "opportunityId": "demo-oneway-need-01",
+      "matchId": "demo-pm-oneway-01",
+      "applicationId": "demo-app-01",
+      "parties": [
+        { "userId": "demo-c01", "role": "need_owner" },
+        { "userId": "demo-u06", "role": "offer_provider" }
+      ],
+      "status": "agreed",
+      "initialTerms": { "value": 10000, "currency": "SAR", "duration": "3 months", "paymentSchedule": "50% on start, 50% on completion" },
+      "rounds": [
+        { "by": "demo-u06", "at": "2026-03-07T10:30:00.000Z", "proposal": { "value": 10000, "paymentSchedule": "50% upfront, 50% on completion" }, "message": "Proposing 10K SAR as stated in application." },
+        { "by": "demo-c01", "at": "2026-03-07T11:00:00.000Z", "proposal": { "value": 10000, "paymentSchedule": "50% on start, 50% on completion" }, "message": "Accepted. Proceeding to deal." }
+      ],
+      "agreedTerms": { "value": 10000, "currency": "SAR", "duration": "3 months", "paymentSchedule": "50% on start, 50% on completion" },
+      "createdAt": "2026-03-07T10:30:00.000Z",
+      "updatedAt": "2026-03-07T12:00:00.000Z"
+    },
+    {
+      "id": "demo-neg-02",
+      "opportunityId": "demo-oneway-need-02",
+      "matchId": "demo-pm-oneway-02",
+      "applicationId": "demo-app-02",
+      "parties": [
+        { "userId": "demo-c02", "role": "need_owner" },
+        { "userId": "demo-u07", "role": "offer_provider" }
+      ],
+      "status": "open",
+      "initialTerms": { "value": 90000, "currency": "SAR", "duration": "6 months" },
+      "rounds": [
+        { "by": "demo-u07", "at": "2026-03-07T11:00:00.000Z", "proposal": { "value": 90000, "timeline": "6 months" }, "message": "Proposing 90K SAR for full PM role." }
+      ],
+      "agreedTerms": null,
+      "createdAt": "2026-03-07T11:30:00.000Z",
+      "updatedAt": "2026-03-07T11:30:00.000Z"
+    },
+    {
+      "id": "demo-neg-03",
+      "opportunityId": "demo-oneway-need-04",
+      "matchId": null,
+      "applicationId": "demo-app-05",
+      "parties": [
+        { "userId": "demo-u04", "role": "need_owner" },
+        { "userId": "demo-u09", "role": "offer_provider" }
+      ],
+      "status": "agreed",
+      "initialTerms": { "value": 25000, "currency": "SAR", "paymentSchedule": "Milestone-based" },
+      "rounds": [
+        { "by": "demo-u09", "at": "2026-03-07T09:45:00.000Z", "proposal": { "value": 25000 }, "message": "25K SAR as per application; milestone-based payment." },
+        { "by": "demo-u04", "at": "2026-03-07T10:00:00.000Z", "proposal": { "value": 25000 }, "message": "Agreed. Proceeding to draft." }
+      ],
+      "agreedTerms": { "value": 25000, "currency": "SAR", "paymentSchedule": "Milestone-based" },
+      "createdAt": "2026-03-07T09:45:00.000Z",
+      "updatedAt": "2026-03-07T15:00:00.000Z"
+    },
+    {
+      "id": "demo-neg-04",
+      "opportunityId": "demo-need-41",
+      "matchId": null,
+      "applicationId": "demo-app-50",
+      "parties": [
+        { "userId": "demo-c02", "role": "need_owner" },
+        { "userId": "demo-u16", "role": "offer_provider" }
+      ],
+      "status": "agreed",
+      "initialTerms": { "value": 45000, "currency": "SAR", "duration": "2 months" },
+      "rounds": [
+        { "by": "demo-u16", "at": "2026-03-09T10:00:00.000Z", "proposal": { "value": 45000 }, "message": "Site supervision for residential compound; 45K SAR." },
+        { "by": "demo-c02", "at": "2026-03-10T14:00:00.000Z", "proposal": { "value": 45000 }, "message": "Accepted. Ready for contract." }
+      ],
+      "agreedTerms": { "value": 45000, "currency": "SAR", "duration": "2 months" },
+      "createdAt": "2026-03-09T10:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-neg-05",
+      "opportunityId": "demo-oneway-need-03",
+      "matchId": null,
+      "applicationId": "demo-app-04",
+      "parties": [
+        { "userId": "demo-u03", "role": "need_owner" },
+        { "userId": "demo-u08", "role": "offer_provider" }
+      ],
+      "status": "counter_offered",
+      "initialTerms": { "value": 50000, "currency": "SAR" },
+      "rounds": [
+        { "by": "demo-u08", "at": "2026-03-07T14:15:00.000Z", "proposal": { "value": 50000 }, "message": "50K SAR for MEP design as per budget." },
+        { "by": "demo-u03", "at": "2026-03-08T09:00:00.000Z", "proposal": { "value": 48000, "timeline": "4 months" }, "message": "Counter: 48K SAR with extended timeline to Q4." }
+      ],
+      "agreedTerms": null,
+      "createdAt": "2026-03-07T14:15:00.000Z",
+      "updatedAt": "2026-03-08T09:00:00.000Z"
+    },
+    {
+      "id": "demo-neg-06",
+      "opportunityId": "demo-oneway-need-05",
+      "matchId": null,
+      "applicationId": "demo-app-06",
+      "parties": [
+        { "userId": "demo-c01", "role": "need_owner" },
+        { "userId": "demo-c03", "role": "offer_provider" }
+      ],
+      "status": "failed",
+      "initialTerms": { "value": 220000, "currency": "SAR" },
+      "rounds": [
+        { "by": "demo-c03", "at": "2026-03-07T12:00:00.000Z", "proposal": { "value": 220000 }, "message": "Rates above your budget for 3-month fleet." },
+        { "by": "demo-c01", "at": "2026-03-07T15:00:00.000Z", "proposal": null, "message": "Budget cannot exceed 200K. Withdrawing from negotiation." }
+      ],
+      "agreedTerms": null,
+      "createdAt": "2026-03-07T12:00:00.000Z",
+      "updatedAt": "2026-03-07T15:00:00.000Z"
+    },
+    {
+      "id": "demo-neg-07",
+      "opportunityId": "demo-barter-na-11",
+      "matchId": "demo-pm-twoway-01",
+      "applicationId": null,
+      "parties": [
+        { "userId": "demo-u11", "role": "barter_side_a" },
+        { "userId": "demo-u12", "role": "barter_side_b" }
+      ],
+      "status": "open",
+      "initialTerms": { "exchange": "Office space for engineering consulting", "valueEquivalence": "~1.1x" },
+      "rounds": [
+        { "by": "demo-u11", "at": "2026-03-08T10:30:00.000Z", "proposal": { "spaceMonths": 3, "consultingDays": 15 }, "message": "3 months office space in exchange for 15 consulting days." },
+        { "by": "demo-u12", "at": "2026-03-08T11:00:00.000Z", "proposal": { "spaceMonths": 3, "consultingDays": 12 }, "message": "Counter: 12 days consulting for 3 months space." }
+      ],
+      "agreedTerms": null,
+      "createdAt": "2026-03-08T10:30:00.000Z",
+      "updatedAt": "2026-03-08T11:00:00.000Z"
+    },
+    {
+      "id": "demo-neg-08",
+      "opportunityId": "demo-group-lead-01",
+      "matchId": "demo-pm-consortium-01",
+      "applicationId": null,
+      "parties": [
+        { "userId": "demo-c05", "role": "consortium_lead" },
+        { "userId": "demo-u23", "role": "consortium_member" },
+        { "userId": "demo-u24", "role": "consortium_member" },
+        { "userId": "demo-u25", "role": "consortium_member" }
+      ],
+      "status": "agreed",
+      "initialTerms": { "roles": ["Investor", "Contractor", "Equipment supplier"], "valueShare": "Lead 40%, members 20% each" },
+      "rounds": [
+        { "by": "demo-c05", "at": "2026-03-08T11:00:00.000Z", "proposal": { "valueShare": "Lead 40%, members 20% each" }, "message": "Proposed value split and role assignments." },
+        { "by": "demo-u23", "at": "2026-03-09T09:00:00.000Z", "proposal": { "valueShare": "Lead 35%, members 21.67% each" }, "message": "Request slight adjustment for investor role." },
+        { "by": "demo-c05", "at": "2026-03-09T14:00:00.000Z", "proposal": { "valueShare": "Lead 40%, members 20% each" }, "message": "Accepted as initial. All agreed." }
+      ],
+      "agreedTerms": { "roles": ["Investor", "Contractor", "Equipment supplier"], "valueShare": "Lead 40%, members 20% each" },
+      "createdAt": "2026-03-08T11:00:00.000Z",
+      "updatedAt": "2026-03-09T14:00:00.000Z"
+    },
+    {
+      "id": "demo-neg-09",
+      "opportunityId": "demo-need-42",
+      "matchId": null,
+      "applicationId": "demo-app-51",
+      "parties": [
+        { "userId": "demo-c01", "role": "need_owner" },
+        { "userId": "demo-u17", "role": "offer_provider" }
+      ],
+      "status": "open",
+      "initialTerms": { "value": 60000, "currency": "SAR", "duration": "4 months" },
+      "rounds": [
+        { "by": "demo-u17", "at": "2026-03-09T11:00:00.000Z", "proposal": { "value": 60000 }, "message": "Civil and structural design package; 60K SAR." }
+      ],
+      "agreedTerms": null,
+      "createdAt": "2026-03-09T11:00:00.000Z",
+      "updatedAt": "2026-03-09T11:00:00.000Z"
+    },
+    {
+      "id": "demo-neg-10",
+      "opportunityId": "demo-need-43",
+      "matchId": null,
+      "applicationId": "demo-app-52",
+      "parties": [
+        { "userId": "demo-c02", "role": "need_owner" },
+        { "userId": "demo-u18", "role": "offer_provider" }
+      ],
+      "status": "expired",
+      "initialTerms": { "value": 35000, "currency": "SAR" },
+      "rounds": [
+        { "by": "demo-u18", "at": "2026-03-01T10:00:00.000Z", "proposal": { "value": 35000 }, "message": "JV formation advisory; 35K SAR." }
+      ],
+      "agreedTerms": null,
+      "createdAt": "2026-03-01T10:00:00.000Z",
+      "updatedAt": "2026-03-15T00:00:00.000Z"
+    },
+    {
+      "id": "demo-neg-11",
+      "opportunityId": "demo-oneway-need-01",
+      "matchId": "demo-pm-oneway-01",
+      "applicationId": "demo-app-01",
+      "parties": [
+        { "userId": "demo-c01", "role": "need_owner" },
+        { "userId": "demo-u06", "role": "offer_provider" }
+      ],
+      "status": "agreed",
+      "initialTerms": { "value": 10000, "currency": "SAR" },
+      "rounds": [],
+      "agreedTerms": { "value": 10000, "currency": "SAR", "paymentSchedule": "50% on start, 50% on completion" },
+      "createdAt": "2026-03-07T10:00:00.000Z",
+      "updatedAt": "2026-03-07T12:00:00.000Z"
+    },
+    {
+      "id": "demo-neg-12",
+      "opportunityId": "demo-offer-41",
+      "matchId": null,
+      "applicationId": "demo-app-53",
+      "parties": [
+        { "userId": "demo-u16", "role": "offer_owner" },
+        { "userId": "demo-c02", "role": "need_provider" }
+      ],
+      "status": "counter_offered",
+      "initialTerms": { "value": 45000, "currency": "SAR" },
+      "rounds": [
+        { "by": "demo-c02", "at": "2026-03-08T09:00:00.000Z", "proposal": { "value": 40000 }, "message": "Invitation to apply; budget 40K." },
+        { "by": "demo-u16", "at": "2026-03-08T12:00:00.000Z", "proposal": { "value": 42000 }, "message": "Counter: 42K SAR for site supervision." }
+      ],
+      "agreedTerms": null,
+      "createdAt": "2026-03-08T09:00:00.000Z",
+      "updatedAt": "2026-03-08T12:00:00.000Z"
+    },
+    {
+      "id": "demo-neg-13",
+      "opportunityId": "demo-consortium-41",
+      "matchId": "demo-pm-consortium-01",
+      "applicationId": null,
+      "parties": [
+        { "userId": "demo-c05", "role": "consortium_lead" },
+        { "userId": "demo-c04", "role": "consortium_member" },
+        { "userId": "demo-u24", "role": "consortium_member" },
+        { "userId": "demo-c03", "role": "consortium_member" }
+      ],
+      "status": "agreed",
+      "initialTerms": { "value": 12000000, "currency": "SAR", "roles": ["Lead", "Investor", "Contractor", "Equipment supplier"] },
+      "rounds": [
+        { "by": "demo-c05", "at": "2026-03-10T10:00:00.000Z", "proposal": { "value": 12000000, "paymentSchedule": "Milestone-based" }, "message": "Solar plant EPC consortium terms." },
+        { "by": "demo-c04", "at": "2026-03-10T12:00:00.000Z", "proposal": { "value": 12000000 }, "message": "Equity share agreed." },
+        { "by": "demo-u24", "at": "2026-03-10T13:00:00.000Z", "proposal": { "value": 12000000 }, "message": "Contractor scope agreed." },
+        { "by": "demo-c03", "at": "2026-03-10T14:00:00.000Z", "proposal": { "value": 12000000 }, "message": "Equipment supply agreed. All terms accepted." }
+      ],
+      "agreedTerms": { "value": 12000000, "currency": "SAR", "paymentSchedule": "Milestone-based", "roles": ["Lead", "Investor", "Contractor", "Equipment supplier"] },
+      "createdAt": "2026-03-10T10:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-neg-14",
+      "opportunityId": "demo-need-44",
+      "matchId": null,
+      "applicationId": "demo-app-54",
+      "parties": [
+        { "userId": "demo-u04", "role": "need_owner" },
+        { "userId": "demo-u10", "role": "offer_provider" }
+      ],
+      "status": "open",
+      "initialTerms": { "value": 55000, "currency": "SAR" },
+      "rounds": [
+        { "by": "demo-u10", "at": "2026-03-10T08:00:00.000Z", "proposal": { "value": 55000 }, "message": "Construction management for 6-month package." }
+      ],
+      "agreedTerms": null,
+      "createdAt": "2026-03-10T08:00:00.000Z",
+      "updatedAt": "2026-03-10T08:00:00.000Z"
+    },
+    {
+      "id": "demo-neg-15",
+      "opportunityId": "demo-need-45",
+      "matchId": null,
+      "applicationId": "demo-app-55",
+      "parties": [
+        { "userId": "demo-c06", "role": "need_owner" },
+        { "userId": "demo-u20", "role": "offer_provider" }
+      ],
+      "status": "agreed",
+      "initialTerms": { "value": 38000, "currency": "SAR", "duration": "3 months" },
+      "rounds": [
+        { "by": "demo-u20", "at": "2026-03-09T14:00:00.000Z", "proposal": { "value": 38000 }, "message": "Design review and value engineering; 38K SAR." },
+        { "by": "demo-c06", "at": "2026-03-10T09:00:00.000Z", "proposal": { "value": 38000 }, "message": "Accepted. Proceeding to deal." }
+      ],
+      "agreedTerms": { "value": 38000, "currency": "SAR", "duration": "3 months" },
+      "createdAt": "2026-03-09T14:00:00.000Z",
+      "updatedAt": "2026-03-10T09:00:00.000Z"
+    },
+    {
+      "id": "demo-neg-16",
+      "opportunityId": "demo-circ-n31",
+      "matchId": "demo-pm-circular-01",
+      "applicationId": null,
+      "parties": [
+        { "userId": "demo-u31", "role": "chain_participant" },
+        { "userId": "demo-u32", "role": "chain_participant" },
+        { "userId": "demo-u33", "role": "chain_participant" }
+      ],
+      "status": "open",
+      "initialTerms": { "cycle": "MEP coordination → Sustainability → PMO", "valueFlow": "circular" },
+      "rounds": [
+        { "by": "demo-u31", "at": "2026-03-08T10:45:00.000Z", "proposal": { "deliverable": "MEP coordination for Party B project" }, "message": "Proposing circular exchange: I provide MEP to B, B provides sustainability to C, C provides PMO to me." }
+      ],
+      "agreedTerms": null,
+      "createdAt": "2026-03-08T10:45:00.000Z",
+      "updatedAt": "2026-03-08T10:45:00.000Z"
+    },
+    {
+      "id": "demo-neg-17",
+      "opportunityId": "demo-oneway-need-02",
+      "matchId": null,
+      "applicationId": "demo-app-03",
+      "parties": [
+        { "userId": "demo-c02", "role": "need_owner" },
+        { "userId": "demo-u08", "role": "offer_provider" }
+      ],
+      "status": "failed",
+      "initialTerms": { "value": 85000, "currency": "SAR" },
+      "rounds": [
+        { "by": "demo-u08", "at": "2026-03-08T11:00:00.000Z", "proposal": { "value": 85000 }, "message": "PM role with MEP background; 85K." },
+        { "by": "demo-c02", "at": "2026-03-08T15:00:00.000Z", "proposal": null, "message": "We need dedicated PM only. Declining this application." }
+      ],
+      "agreedTerms": null,
+      "createdAt": "2026-03-08T11:00:00.000Z",
+      "updatedAt": "2026-03-08T15:00:00.000Z"
+    },
+    {
+      "id": "demo-neg-18",
+      "opportunityId": "demo-need-46",
+      "matchId": null,
+      "applicationId": "demo-app-56",
+      "parties": [
+        { "userId": "demo-c05", "role": "need_owner" },
+        { "userId": "demo-u25", "role": "offer_provider" }
+      ],
+      "status": "agreed",
+      "initialTerms": { "value": 95000, "currency": "SAR", "duration": "5 months" },
+      "rounds": [
+        { "by": "demo-u25", "at": "2026-03-10T09:00:00.000Z", "proposal": { "value": 95000 }, "message": "Civil and construction execution for highway package; 95K SAR." },
+        { "by": "demo-c05", "at": "2026-03-10T11:00:00.000Z", "proposal": { "value": 95000 }, "message": "Accepted. Consortium role confirmed." }
+      ],
+      "agreedTerms": { "value": 95000, "currency": "SAR", "duration": "5 months" },
+      "createdAt": "2026-03-10T09:00:00.000Z",
+      "updatedAt": "2026-03-10T11:00:00.000Z"
+    }
+  ]
+}

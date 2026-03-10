@@ -1,25 +1,22 @@
-<div class="card">
-    <div class="card-header">
-        <h3>{{cardTitle}}</h3>
-        <span class="badge badge-success">{{matchScorePercent}}% Match</span>
+<div class="card match-card-legacy match-card-vertical">
+    <div class="match-card-vertical-header">
+        <h3 class="match-card-vertical-title">{{cardTitle}}</h3>
+        <span class="badge badge-match {{matchBadgeClass}}">{{matchScorePercent}}% MATCH</span>
     </div>
-    <div class="card-body">
-        <div>
-            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{section1Label}}</p>
-            <p class="text-gray-900 font-medium">{{section1Content}}</p>
+    <div class="match-card-vertical-body">
+        <div class="match-card-vertical-section">
+            <p class="match-card-vertical-label">{{section1Label}}</p>
+            <p class="match-card-vertical-content">{{section1Content}}</p>
         </div>
-        <div style="margin-top: var(--spacing-md);">
-            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{section2Label}}</p>
-            <p class="text-gray-900 font-medium">{{section2Content}}</p>
+        <div class="match-card-vertical-section">
+            <p class="match-card-vertical-label">{{section2Label}}</p>
+            <p class="match-card-vertical-content">{{section2Content}}</p>
+            <p class="match-card-vertical-meta">Model: {{opportunity.modelType}} | Status: {{opportunity.status}}</p>
         </div>
-        <p class="text-muted" style="font-size: var(--font-size-sm); margin-top: var(--spacing-md);">
-            Model: {{opportunity.modelType}} |
-            Status: {{opportunity.status}}
-        </p>
     </div>
-    <div class="card-footer flex flex-wrap gap-2">
+    <div class="match-card-vertical-footer">
         <a href="#" data-route="{{primaryActionRoute}}" class="btn btn-primary btn-sm">{{primaryActionLabel}}</a>
-        <a href="#" data-route="{{secondaryActionRoute}}" class="btn btn-outline btn-sm">{{secondaryActionLabel}}</a>
-        <a href="#" data-route="{{tertiaryActionRoute}}" class="btn btn-outline btn-sm">{{tertiaryActionLabel}}</a>
+        <a href="#" data-route="{{secondaryActionRoute}}" class="match-card-vertical-link">{{secondaryActionLabel}}</a>
+        <a href="#" data-route="{{tertiaryActionRoute}}" class="match-card-vertical-link">{{tertiaryActionLabel}}</a>
     </div>
 </div>

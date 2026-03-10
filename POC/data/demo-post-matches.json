@@ -109,6 +109,237 @@
       "createdAt": "2026-03-08T10:20:00.000Z",
       "updatedAt": "2026-03-08T10:20:00.000Z",
       "expiresAt": null
+    },
+    {
+      "id": "demo-pm-oneway-03",
+      "matchType": "one_way",
+      "status": "accepted",
+      "matchScore": 0.85,
+      "participants": [
+        { "userId": "demo-c01", "opportunityId": "demo-oneway-need-01", "role": "need_owner", "participantStatus": "accepted", "respondedAt": "2026-03-07T11:00:00.000Z" },
+        { "userId": "demo-u06", "opportunityId": "demo-oneway-offer-01", "role": "offer_provider", "participantStatus": "accepted", "respondedAt": "2026-03-07T11:05:00.000Z" }
+      ],
+      "payload": { "needOpportunityId": "demo-oneway-need-01", "offerOpportunityId": "demo-oneway-offer-01", "breakdown": { "skills": 0.95, "budget": 0.85, "timeline": 0.9, "location": 1 } },
+      "createdAt": "2026-03-07T10:00:00.000Z",
+      "updatedAt": "2026-03-07T11:05:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-oneway-04",
+      "matchType": "one_way",
+      "status": "declined",
+      "matchScore": 0.72,
+      "participants": [
+        { "userId": "demo-c02", "opportunityId": "demo-oneway-need-02", "role": "need_owner", "participantStatus": "declined", "respondedAt": "2026-03-08T14:00:00.000Z" },
+        { "userId": "demo-u08", "opportunityId": "demo-oneway-offer-03", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }
+      ],
+      "payload": { "needOpportunityId": "demo-oneway-need-02", "offerOpportunityId": "demo-oneway-offer-03", "breakdown": { "skills": 0.75, "budget": 0.7, "timeline": 0.72, "location": 0.9 } },
+      "createdAt": "2026-03-08T09:00:00.000Z",
+      "updatedAt": "2026-03-08T14:00:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-oneway-05",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "participants": [
+        { "userId": "demo-u03", "opportunityId": "demo-oneway-need-03", "role": "need_owner", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u08", "opportunityId": "demo-oneway-offer-03", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }
+      ],
+      "payload": { "needOpportunityId": "demo-oneway-need-03", "offerOpportunityId": "demo-oneway-offer-03", "breakdown": { "skills": 0.9, "budget": 0.9, "timeline": 0.85, "location": 0.9 } },
+      "createdAt": "2026-03-08T10:00:00.000Z",
+      "updatedAt": "2026-03-08T10:00:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-oneway-06",
+      "matchType": "one_way",
+      "status": "accepted",
+      "matchScore": 0.9,
+      "participants": [
+        { "userId": "demo-u04", "opportunityId": "demo-oneway-need-04", "role": "need_owner", "participantStatus": "accepted", "respondedAt": "2026-03-07T09:45:00.000Z" },
+        { "userId": "demo-u09", "opportunityId": "demo-oneway-offer-04", "role": "offer_provider", "participantStatus": "accepted", "respondedAt": "2026-03-07T09:50:00.000Z" }
+      ],
+      "payload": { "needOpportunityId": "demo-oneway-need-04", "offerOpportunityId": "demo-oneway-offer-04", "breakdown": { "skills": 0.92, "budget": 0.95, "timeline": 0.88, "location": 1 } },
+      "createdAt": "2026-03-07T09:30:00.000Z",
+      "updatedAt": "2026-03-07T09:50:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-oneway-07",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.78,
+      "participants": [
+        { "userId": "demo-c02", "opportunityId": "demo-need-41", "role": "need_owner", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u16", "opportunityId": "demo-offer-41", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }
+      ],
+      "payload": { "needOpportunityId": "demo-need-41", "offerOpportunityId": "demo-offer-41", "breakdown": { "skills": 0.8, "budget": 0.78, "timeline": 0.75, "location": 0.9 } },
+      "createdAt": "2026-03-09T09:00:00.000Z",
+      "updatedAt": "2026-03-09T09:00:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-oneway-08",
+      "matchType": "one_way",
+      "status": "declined",
+      "matchScore": 0.65,
+      "participants": [
+        { "userId": "demo-c01", "opportunityId": "demo-oneway-need-05", "role": "need_owner", "participantStatus": "accepted", "respondedAt": "2026-03-07T11:00:00.000Z" },
+        { "userId": "demo-c03", "opportunityId": "demo-oneway-offer-05", "role": "offer_provider", "participantStatus": "declined", "respondedAt": "2026-03-07T12:00:00.000Z" }
+      ],
+      "payload": { "needOpportunityId": "demo-oneway-need-05", "offerOpportunityId": "demo-oneway-offer-05", "breakdown": { "skills": 0.7, "budget": 0.5, "timeline": 0.8, "location": 0.9 } },
+      "createdAt": "2026-03-07T11:30:00.000Z",
+      "updatedAt": "2026-03-07T12:00:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-oneway-09",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.82,
+      "participants": [
+        { "userId": "demo-c01", "opportunityId": "demo-need-42", "role": "need_owner", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u17", "opportunityId": "demo-offer-42", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }
+      ],
+      "payload": { "needOpportunityId": "demo-need-42", "offerOpportunityId": "demo-offer-42", "breakdown": { "skills": 0.85, "budget": 0.82, "timeline": 0.8, "location": 0.85 } },
+      "createdAt": "2026-03-09T10:00:00.000Z",
+      "updatedAt": "2026-03-09T10:00:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-oneway-10",
+      "matchType": "one_way",
+      "status": "accepted",
+      "matchScore": 0.86,
+      "participants": [
+        { "userId": "demo-c06", "opportunityId": "demo-need-45", "role": "need_owner", "participantStatus": "accepted", "respondedAt": "2026-03-10T08:30:00.000Z" },
+        { "userId": "demo-u20", "opportunityId": "demo-offer-45", "role": "offer_provider", "participantStatus": "accepted", "respondedAt": "2026-03-10T09:00:00.000Z" }
+      ],
+      "payload": { "needOpportunityId": "demo-need-45", "offerOpportunityId": "demo-offer-45", "breakdown": { "skills": 0.88, "budget": 0.85, "timeline": 0.86, "location": 0.85 } },
+      "createdAt": "2026-03-09T14:00:00.000Z",
+      "updatedAt": "2026-03-10T09:00:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-twoway-02",
+      "matchType": "two_way",
+      "status": "pending",
+      "matchScore": 0.84,
+      "participants": [
+        { "userId": "demo-u13", "opportunityId": "demo-barter-na-11", "role": "need_owner", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u13", "opportunityId": "demo-barter-oa-11", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u14", "opportunityId": "demo-barter-nb-12", "role": "need_owner", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u14", "opportunityId": "demo-barter-ob-12", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }
+      ],
+      "payload": { "sideA": { "userId": "demo-u13", "needId": "demo-barter-na-11", "offerId": "demo-barter-oa-11" }, "sideB": { "userId": "demo-u14", "needId": "demo-barter-nb-12", "offerId": "demo-barter-ob-12" }, "scoreAtoB": 0.82, "scoreBtoA": 0.86 },
+      "createdAt": "2026-03-08T11:00:00.000Z",
+      "updatedAt": "2026-03-08T11:00:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-twoway-03",
+      "matchType": "two_way",
+      "status": "declined",
+      "matchScore": 0.7,
+      "participants": [
+        { "userId": "demo-u11", "opportunityId": "demo-barter-nc-13", "role": "need_owner", "participantStatus": "declined", "respondedAt": "2026-03-09T10:00:00.000Z" },
+        { "userId": "demo-u11", "opportunityId": "demo-barter-oc-13", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u12", "opportunityId": "demo-barter-nd-14", "role": "need_owner", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u12", "opportunityId": "demo-barter-od-14", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }
+      ],
+      "payload": { "sideA": { "userId": "demo-u11", "needId": "demo-barter-nc-13", "offerId": "demo-barter-oc-13" }, "sideB": { "userId": "demo-u12", "needId": "demo-barter-nd-14", "offerId": "demo-barter-od-14" }, "scoreAtoB": 0.68, "scoreBtoA": 0.72 },
+      "createdAt": "2026-03-09T09:00:00.000Z",
+      "updatedAt": "2026-03-09T10:00:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-consortium-02",
+      "matchType": "consortium",
+      "status": "accepted",
+      "matchScore": 0.83,
+      "participants": [
+        { "userId": "demo-c05", "opportunityId": "demo-consortium-41", "role": "consortium_lead", "participantStatus": "accepted", "respondedAt": "2026-03-10T10:00:00.000Z" },
+        { "userId": "demo-c04", "opportunityId": "demo-group-offer-01", "role": "consortium_member", "participantStatus": "accepted", "respondedAt": "2026-03-10T11:00:00.000Z" },
+        { "userId": "demo-u24", "opportunityId": "demo-group-offer-02", "role": "consortium_member", "participantStatus": "accepted", "respondedAt": "2026-03-10T12:00:00.000Z" },
+        { "userId": "demo-c03", "opportunityId": "demo-group-offer-03", "role": "consortium_member", "participantStatus": "accepted", "respondedAt": "2026-03-10T14:00:00.000Z" }
+      ],
+      "payload": { "leadNeedId": "demo-consortium-41", "roles": [{ "role": "Investor", "opportunityId": "demo-group-offer-01", "userId": "demo-c04", "score": 0.88 }, { "role": "Contractor", "opportunityId": "demo-group-offer-02", "userId": "demo-u24", "score": 0.84 }, { "role": "Equipment supplier", "opportunityId": "demo-group-offer-03", "userId": "demo-c03", "score": 0.83 }], "valueBalance": { "consortiumBalanceScore": 0.82, "viable": true } },
+      "createdAt": "2026-03-10T09:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-consortium-03",
+      "matchType": "consortium",
+      "status": "pending",
+      "matchScore": 0.8,
+      "participants": [
+        { "userId": "demo-c05", "opportunityId": "demo-group-lead-02", "role": "consortium_lead", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u23", "opportunityId": "demo-group-offer-04", "role": "consortium_member", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u26", "opportunityId": "demo-group-offer-05", "role": "consortium_member", "participantStatus": "pending", "respondedAt": null }
+      ],
+      "payload": { "leadNeedId": "demo-group-lead-02", "roles": [{ "role": "Consultant", "opportunityId": "demo-group-offer-04", "userId": "demo-u23", "score": 0.82 }, { "role": "Consultant", "opportunityId": "demo-group-offer-05", "userId": "demo-u26", "score": 0.78 }], "valueBalance": { "consortiumBalanceScore": 0.8, "viable": true } },
+      "createdAt": "2026-03-10T15:00:00.000Z",
+      "updatedAt": "2026-03-10T15:00:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-circular-02",
+      "matchType": "circular",
+      "status": "pending",
+      "matchScore": 0.81,
+      "participants": [
+        { "userId": "demo-u32", "opportunityId": "demo-circ-o32", "role": "chain_participant", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u33", "opportunityId": "demo-circ-o33", "role": "chain_participant", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u31", "opportunityId": "demo-circ-o31", "role": "chain_participant", "participantStatus": "pending", "respondedAt": null }
+      ],
+      "payload": { "cycle": ["demo-u32", "demo-u33", "demo-u31"], "links": [{ "fromCreatorId": "demo-u32", "toCreatorId": "demo-u33", "offerId": "demo-circ-o32", "needId": "demo-circ-n33", "score": 0.82 }, { "fromCreatorId": "demo-u33", "toCreatorId": "demo-u31", "offerId": "demo-circ-o33", "needId": "demo-circ-n31", "score": 0.8 }, { "fromCreatorId": "demo-u31", "toCreatorId": "demo-u32", "offerId": "demo-circ-o31", "needId": "demo-circ-n32", "score": 0.81 }], "chainBalance": { "chainBalanceScore": 0.81, "viable": true } },
+      "createdAt": "2026-03-08T12:00:00.000Z",
+      "updatedAt": "2026-03-08T12:00:00.000Z",
+      "expiresAt": null
+    },
+    { "id": "demo-pm-oneway-11", "matchType": "one_way", "status": "pending", "matchScore": 0.79, "participants": [{ "userId": "demo-c02", "opportunityId": "demo-need-43", "role": "need_owner", "participantStatus": "pending", "respondedAt": null }, { "userId": "demo-u18", "opportunityId": "demo-offer-43", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }], "payload": { "needOpportunityId": "demo-need-43", "offerOpportunityId": "demo-offer-43" }, "createdAt": "2026-03-09T10:00:00.000Z", "updatedAt": "2026-03-09T10:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-12", "matchType": "one_way", "status": "accepted", "matchScore": 0.87, "participants": [{ "userId": "demo-u04", "opportunityId": "demo-need-44", "role": "need_owner", "participantStatus": "accepted", "respondedAt": "2026-03-10T08:15:00.000Z" }, { "userId": "demo-u10", "opportunityId": "demo-offer-44", "role": "offer_provider", "participantStatus": "accepted", "respondedAt": "2026-03-10T08:30:00.000Z" }], "payload": { "needOpportunityId": "demo-need-44", "offerOpportunityId": "demo-offer-44" }, "createdAt": "2026-03-10T08:00:00.000Z", "updatedAt": "2026-03-10T08:30:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-13", "matchType": "one_way", "status": "pending", "matchScore": 0.76, "participants": [{ "userId": "demo-c01", "opportunityId": "demo-need-47", "role": "need_owner", "participantStatus": "pending", "respondedAt": null }, { "userId": "demo-u21", "opportunityId": "demo-offer-47", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }], "payload": { "needOpportunityId": "demo-need-47", "offerOpportunityId": "demo-offer-47" }, "createdAt": "2026-03-10T12:00:00.000Z", "updatedAt": "2026-03-10T12:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-14", "matchType": "one_way", "status": "declined", "matchScore": 0.68, "participants": [{ "userId": "demo-u03", "opportunityId": "demo-oneway-need-03", "role": "need_owner", "participantStatus": "accepted", "respondedAt": "2026-03-08T09:00:00.000Z" }, { "userId": "demo-u09", "opportunityId": "demo-oneway-offer-04", "role": "offer_provider", "participantStatus": "declined", "respondedAt": "2026-03-08T10:00:00.000Z" }], "payload": { "needOpportunityId": "demo-oneway-need-03", "offerOpportunityId": "demo-oneway-offer-04" }, "createdAt": "2026-03-08T08:00:00.000Z", "updatedAt": "2026-03-08T10:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-15", "matchType": "one_way", "status": "pending", "matchScore": 0.81, "participants": [{ "userId": "demo-c06", "opportunityId": "demo-need-48", "role": "need_owner", "participantStatus": "pending", "respondedAt": null }, { "userId": "demo-u14", "opportunityId": "demo-offer-48", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }], "payload": { "needOpportunityId": "demo-need-48", "offerOpportunityId": "demo-offer-48" }, "createdAt": "2026-03-10T13:00:00.000Z", "updatedAt": "2026-03-10T13:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-16", "matchType": "one_way", "status": "pending", "matchScore": 0.84, "participants": [{ "userId": "demo-c02", "opportunityId": "demo-need-49", "role": "need_owner", "participantStatus": "pending", "respondedAt": null }, { "userId": "demo-u28", "opportunityId": "demo-offer-49", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }], "payload": { "needOpportunityId": "demo-need-49", "offerOpportunityId": "demo-offer-49" }, "createdAt": "2026-03-10T14:00:00.000Z", "updatedAt": "2026-03-10T14:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-17", "matchType": "one_way", "status": "accepted", "matchScore": 0.89, "participants": [{ "userId": "demo-c01", "opportunityId": "demo-need-42", "role": "need_owner", "participantStatus": "accepted", "respondedAt": "2026-03-09T11:30:00.000Z" }, { "userId": "demo-u17", "opportunityId": "demo-offer-42", "role": "offer_provider", "participantStatus": "accepted", "respondedAt": "2026-03-09T11:35:00.000Z" }], "payload": { "needOpportunityId": "demo-need-42", "offerOpportunityId": "demo-offer-42" }, "createdAt": "2026-03-09T11:00:00.000Z", "updatedAt": "2026-03-09T11:35:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-18", "matchType": "one_way", "status": "pending", "matchScore": 0.77, "participants": [{ "userId": "demo-u04", "opportunityId": "demo-need-50", "role": "need_owner", "participantStatus": "pending", "respondedAt": null }, { "userId": "demo-u29", "opportunityId": "demo-offer-50", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }], "payload": { "needOpportunityId": "demo-need-50", "offerOpportunityId": "demo-offer-50" }, "createdAt": "2026-03-10T15:00:00.000Z", "updatedAt": "2026-03-10T15:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-19", "matchType": "one_way", "status": "declined", "matchScore": 0.62, "participants": [{ "userId": "demo-c06", "opportunityId": "demo-need-45", "role": "need_owner", "participantStatus": "pending", "respondedAt": null }, { "userId": "demo-u15", "opportunityId": "demo-offer-45", "role": "offer_provider", "participantStatus": "declined", "respondedAt": "2026-03-09T16:00:00.000Z" }], "payload": { "needOpportunityId": "demo-need-45", "offerOpportunityId": "demo-offer-45" }, "createdAt": "2026-03-09T15:00:00.000Z", "updatedAt": "2026-03-09T16:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-20", "matchType": "one_way", "status": "pending", "matchScore": 0.83, "participants": [{ "userId": "demo-c05", "opportunityId": "demo-need-46", "role": "need_owner", "participantStatus": "pending", "respondedAt": null }, { "userId": "demo-u25", "opportunityId": "demo-offer-46", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }], "payload": { "needOpportunityId": "demo-need-46", "offerOpportunityId": "demo-offer-46" }, "createdAt": "2026-03-10T08:00:00.000Z", "updatedAt": "2026-03-10T08:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-21", "matchType": "one_way", "status": "pending", "matchScore": 0.8, "participants": [{ "userId": "demo-c01", "opportunityId": "demo-need-41", "role": "need_owner", "participantStatus": "pending", "respondedAt": null }, { "userId": "demo-u13", "opportunityId": "demo-offer-41", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }], "payload": { "needOpportunityId": "demo-need-41", "offerOpportunityId": "demo-offer-41" }, "createdAt": "2026-03-09T08:00:00.000Z", "updatedAt": "2026-03-09T08:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-22", "matchType": "one_way", "status": "accepted", "matchScore": 0.86, "participants": [{ "userId": "demo-c02", "opportunityId": "demo-oneway-need-02", "role": "need_owner", "participantStatus": "accepted", "respondedAt": "2026-03-08T12:00:00.000Z" }, { "userId": "demo-u07", "opportunityId": "demo-oneway-offer-02", "role": "offer_provider", "participantStatus": "accepted", "respondedAt": "2026-03-08T12:05:00.000Z" }], "payload": { "needOpportunityId": "demo-oneway-need-02", "offerOpportunityId": "demo-oneway-offer-02" }, "createdAt": "2026-03-08T10:05:00.000Z", "updatedAt": "2026-03-08T12:05:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-23", "matchType": "one_way", "status": "pending", "matchScore": 0.75, "participants": [{ "userId": "demo-u03", "opportunityId": "demo-need-43", "role": "need_owner", "participantStatus": "pending", "respondedAt": null }, { "userId": "demo-u20", "opportunityId": "demo-offer-43", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }], "payload": { "needOpportunityId": "demo-need-43", "offerOpportunityId": "demo-offer-43" }, "createdAt": "2026-03-09T11:00:00.000Z", "updatedAt": "2026-03-09T11:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-24", "matchType": "one_way", "status": "declined", "matchScore": 0.7, "participants": [{ "userId": "demo-c06", "opportunityId": "demo-need-48", "role": "need_owner", "participantStatus": "declined", "respondedAt": "2026-03-10T16:00:00.000Z" }, { "userId": "demo-u22", "opportunityId": "demo-offer-48", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }], "payload": { "needOpportunityId": "demo-need-48", "offerOpportunityId": "demo-offer-48" }, "createdAt": "2026-03-10T13:30:00.000Z", "updatedAt": "2026-03-10T16:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-25", "matchType": "one_way", "status": "pending", "matchScore": 0.82, "participants": [{ "userId": "demo-c01", "opportunityId": "demo-need-47", "role": "need_owner", "participantStatus": "pending", "respondedAt": null }, { "userId": "demo-u19", "opportunityId": "demo-offer-47", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }], "payload": { "needOpportunityId": "demo-need-47", "offerOpportunityId": "demo-offer-47" }, "createdAt": "2026-03-10T11:00:00.000Z", "updatedAt": "2026-03-10T11:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-26", "matchType": "one_way", "status": "accepted", "matchScore": 0.88, "participants": [{ "userId": "demo-c02", "opportunityId": "demo-need-41", "role": "need_owner", "participantStatus": "accepted", "respondedAt": "2026-03-09T14:00:00.000Z" }, { "userId": "demo-u16", "opportunityId": "demo-offer-41", "role": "offer_provider", "participantStatus": "accepted", "respondedAt": "2026-03-09T14:05:00.000Z" }], "payload": { "needOpportunityId": "demo-need-41", "offerOpportunityId": "demo-offer-41" }, "createdAt": "2026-03-09T09:30:00.000Z", "updatedAt": "2026-03-09T14:05:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-27", "matchType": "one_way", "status": "pending", "matchScore": 0.79, "participants": [{ "userId": "demo-u05", "opportunityId": "demo-need-49", "role": "need_owner", "participantStatus": "pending", "respondedAt": null }, { "userId": "demo-u27", "opportunityId": "demo-offer-49", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }], "payload": { "needOpportunityId": "demo-need-49", "offerOpportunityId": "demo-offer-49" }, "createdAt": "2026-03-10T14:30:00.000Z", "updatedAt": "2026-03-10T14:30:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-28", "matchType": "one_way", "status": "pending", "matchScore": 0.81, "participants": [{ "userId": "demo-c06", "opportunityId": "demo-need-50", "role": "need_owner", "participantStatus": "pending", "respondedAt": null }, { "userId": "demo-u30", "opportunityId": "demo-offer-50", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }], "payload": { "needOpportunityId": "demo-need-50", "offerOpportunityId": "demo-offer-50" }, "createdAt": "2026-03-10T15:30:00.000Z", "updatedAt": "2026-03-10T15:30:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-29", "matchType": "one_way", "status": "accepted", "matchScore": 0.85, "participants": [{ "userId": "demo-c01", "opportunityId": "demo-oneway-need-04", "role": "need_owner", "participantStatus": "accepted", "respondedAt": "2026-03-07T10:00:00.000Z" }, { "userId": "demo-u02", "opportunityId": "demo-oneway-offer-04", "role": "offer_provider", "participantStatus": "accepted", "respondedAt": "2026-03-07T10:10:00.000Z" }], "payload": { "needOpportunityId": "demo-oneway-need-04", "offerOpportunityId": "demo-oneway-offer-04" }, "createdAt": "2026-03-07T09:00:00.000Z", "updatedAt": "2026-03-07T10:10:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-30", "matchType": "one_way", "status": "pending", "matchScore": 0.78, "participants": [{ "userId": "demo-c02", "opportunityId": "demo-need-44", "role": "need_owner", "participantStatus": "pending", "respondedAt": null }, { "userId": "demo-u26", "opportunityId": "demo-offer-44", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }], "payload": { "needOpportunityId": "demo-need-44", "offerOpportunityId": "demo-offer-44" }, "createdAt": "2026-03-10T07:00:00.000Z", "updatedAt": "2026-03-10T07:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-31", "matchType": "one_way", "status": "declined", "matchScore": 0.64, "participants": [{ "userId": "demo-u04", "opportunityId": "demo-oneway-need-04", "role": "need_owner", "participantStatus": "accepted", "respondedAt": "2026-03-07T08:00:00.000Z" }, { "userId": "demo-u29", "opportunityId": "demo-oneway-offer-05", "role": "offer_provider", "participantStatus": "declined", "respondedAt": "2026-03-07T09:00:00.000Z" }], "payload": { "needOpportunityId": "demo-oneway-need-04", "offerOpportunityId": "demo-oneway-offer-05" }, "createdAt": "2026-03-07T08:00:00.000Z", "updatedAt": "2026-03-07T09:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-32", "matchType": "one_way", "status": "pending", "matchScore": 0.8, "participants": [{ "userId": "demo-c05", "opportunityId": "demo-consortium-42", "role": "need_owner", "participantStatus": "pending", "respondedAt": null }, { "userId": "demo-u33", "opportunityId": "demo-group-offer-06", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }], "payload": { "needOpportunityId": "demo-consortium-42", "offerOpportunityId": "demo-group-offer-06" }, "createdAt": "2026-03-10T16:00:00.000Z", "updatedAt": "2026-03-10T16:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-33", "matchType": "one_way", "status": "pending", "matchScore": 0.77, "participants": [{ "userId": "demo-c06", "opportunityId": "demo-need-43", "role": "need_owner", "participantStatus": "pending", "respondedAt": null }, { "userId": "demo-u35", "opportunityId": "demo-offer-43", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }], "payload": { "needOpportunityId": "demo-need-43", "offerOpportunityId": "demo-offer-43" }, "createdAt": "2026-03-09T12:00:00.000Z", "updatedAt": "2026-03-09T12:00:00.000Z", "expiresAt": null },
+    { "id": "demo-pm-oneway-34", "matchType": "one_way", "status": "accepted", "matchScore": 0.84, "participants": [{ "userId": "demo-c01", "opportunityId": "demo-oneway-need-05", "role": "need_owner", "participantStatus": "accepted", "respondedAt": "2026-03-08T09:00:00.000Z" }, { "userId": "demo-u05", "opportunityId": "demo-oneway-offer-05", "role": "offer_provider", "participantStatus": "accepted", "respondedAt": "2026-03-08T09:10:00.000Z" }], "payload": { "needOpportunityId": "demo-oneway-need-05", "offerOpportunityId": "demo-oneway-offer-05" }, "createdAt": "2026-03-08T08:30:00.000Z", "updatedAt": "2026-03-08T09:10:00.000Z", "expiresAt": null },
+    {
+      "id": "demo-pm-replacement-01",
+      "matchType": "consortium",
+      "status": "pending",
+      "matchScore": 0.82,
+      "participants": [
+        { "userId": "demo-u25", "opportunityId": "demo-group-offer-02", "role": "consortium_member", "participantStatus": "pending", "respondedAt": null }
+      ],
+      "payload": { "replacementRole": "Contractor", "replacementOpportunityId": "demo-group-offer-02" },
+      "createdAt": "2026-03-11T10:00:00.000Z",
+      "updatedAt": "2026-03-11T10:00:00.000Z",
+      "expiresAt": "2026-03-25T10:00:00.000Z",
+      "isReplacement": true,
+      "replacementDealId": "demo-deal-06",
+      "replacementRole": "Contractor",
+      "replacementPayload": { "droppedUserId": "demo-u24", "droppedAt": "2026-03-11T09:00:00.000Z" }
     }
   ]
 }

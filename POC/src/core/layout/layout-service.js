@@ -161,29 +161,44 @@ class LayoutService {
         html += '</div>';
         html += '</div>';
 
-        html += '<p class="portal-sidebar-section">MAIN</p>';
-        html += '<nav class="portal-sidebar-nav">';
-
-        const links = [
+        const workspaceLinks = [
             { route: CONFIG.ROUTES.DASHBOARD, label: 'Dashboard', icon: 'ph-duotone ph-house' },
             ...(this.authService.isCompanyUser && this.authService.isCompanyUser() ? [{ route: CONFIG.ROUTES.COMPANY_DASHBOARD, label: 'Company dashboard', icon: 'ph-duotone ph-buildings' }] : []),
-            { route: CONFIG.ROUTES.OPPORTUNITIES, label: 'Opportunities', icon: 'ph-duotone ph-briefcase' },
             { route: '/pipeline', label: 'Pipeline', icon: 'ph-duotone ph-git-branch' },
-            { route: CONFIG.ROUTES.CONTRACTS, label: 'Contracts', icon: 'ph-duotone ph-file-text' },
-            { route: CONFIG.ROUTES.DEALS, label: 'Deals', icon: 'ph-duotone ph-handshake' },
             { route: '/people', label: 'People', icon: 'ph-duotone ph-users' },
+        ];
+        const opportunitiesLinks = [
+            { route: CONFIG.ROUTES.OPPORTUNITIES, label: 'Opportunities', icon: 'ph-duotone ph-briefcase' },
+            { route: '/pipeline/matches', label: 'Matches', icon: 'ph-duotone ph-heart' },
+        ];
+        const collaborationLinks = [
+            { route: CONFIG.ROUTES.DEALS, label: 'Deals', icon: 'ph-duotone ph-handshake' },
+            { route: CONFIG.ROUTES.CONTRACTS, label: 'Contracts', icon: 'ph-duotone ph-file-text' },
+        ];
+        const communicationLinks = [
             { route: CONFIG.ROUTES.MESSAGES, label: 'Messages', icon: 'ph-duotone ph-chat-circle' },
             { route: CONFIG.ROUTES.NOTIFICATIONS, label: 'Notifications', icon: 'ph-duotone ph-bell' },
         ];
-        links.forEach(({ route, label, icon }) => {
-            const active = isActive(route);
-            html += `<a href="#" data-route="${route}" class="portal-nav-link ${active ? 'portal-nav-active' : ''}" title="${label.replace(/"/g, '&quot;')}"><i class="${icon}"></i><span class="portal-nav-link-text">${label}</span></a>`;
-        });
+        const renderGroup = (title, links) => {
+            html += `<p class="portal-sidebar-section">${title}</p>`;
+            html += '<nav class="portal-sidebar-nav">';
+            links.forEach(({ route, label, icon }) => {
+                const active = isActive(route);
+                html += `<a href="#" data-route="${route}" class="portal-nav-link ${active ? 'portal-nav-active' : ''}" title="${label.replace(/"/g, '&quot;')}"><i class="${icon}"></i><span class="portal-nav-link-text">${label}</span></a>`;
+            });
+            html += '</nav>';
+        };
+        renderGroup('WORKSPACE', workspaceLinks);
+        renderGroup('OPPORTUNITIES', opportunitiesLinks);
+        renderGroup('COLLABORATION', collaborationLinks);
+        renderGroup('COMMUNICATION', communicationLinks);
         if (this.authService.canAccessAdmin()) {
+            html += '<p class="portal-sidebar-section">ADMIN</p>';
+            html += '<nav class="portal-sidebar-nav">';
             html += `<a href="#" data-route="${CONFIG.ROUTES.ADMIN}" class="portal-nav-link ${isActive(CONFIG.ROUTES.ADMIN) ? 'portal-nav-active' : ''}" title="Admin"><i class="ph-duotone ph-shield-check"></i><span class="portal-nav-link-text">Admin</span></a>`;
             html += `<a href="#" data-route="${CONFIG.ROUTES.ADMIN_REPORTS}" class="portal-nav-link ${isActive(CONFIG.ROUTES.ADMIN_REPORTS) ? 'portal-nav-active' : ''}" title="Reports"><i class="ph-duotone ph-chart-bar"></i><span class="portal-nav-link-text">Reports</span></a>`;
+            html += '</nav>';
         }
-        html += '</nav>';
         html += `<div class="portal-sidebar-footer"><button type="button" class="portal-logout-btn" onclick="layoutService.handleLogout()"><i class="ph-duotone ph-sign-out"></i><span>Logout</span></button></div>`;
         html += '</div>';
         sidebarEl.innerHTML = html;

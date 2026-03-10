@@ -216,11 +216,13 @@ function getOneWayViewerRole(postMatch, currentUserId) {
 async function buildPostMatchViewModelPipeline(postMatch, currentUserId) {
     const ds = dataService;
     const scorePct = Math.round((postMatch.matchScore || 0) * 100);
+    const matchBadgeClass = scorePct >= 90 ? 'badge-match-high' : scorePct >= 70 ? 'badge-match-medium' : 'badge-match-low';
     const base = {
         id: postMatch.id,
         matchType: postMatch.matchType,
         matchScore: postMatch.matchScore,
         matchScorePercent: scorePct,
+        matchBadgeClass,
         status: postMatch.status,
         tierLabel: postMatch.matchScore >= 0.85 ? 'Top match' : postMatch.matchScore >= 0.70 ? 'Good match' : 'Possible match'
     };
@@ -281,8 +283,10 @@ async function buildPostMatchViewModelPipeline(postMatch, currentUserId) {
     }
     if (postMatch.matchType === 'consortium') {
         const leadOpp = await ds.getOpportunityById(payload.leadNeedId);
+        const rawTitle = leadOpp?.title || 'Project';
+        const projectTitle = rawTitle.replace(/^Need:\s*/i, '').trim() || rawTitle;
         const roles = await Promise.all((payload.roles || []).map(async (r) => { const u = await ds.getUserOrCompanyById(r.userId); return { role: r.role || 'Partner', partnerName: u?.profile?.name || r.userId }; }));
-        return { ...base, projectTitle: leadOpp?.title || 'Project', roles };
+        return { ...base, projectTitle, roles };
     }
     if (postMatch.matchType === 'circular') {
         const cycle = payload.cycle || [], links = payload.links || [];
@@ -303,23 +307,21 @@ function setupMatchesSubTabs() {
     const tabMatches = document.getElementById('tab-matches');
     const btnRecommended = document.getElementById('matches-subtab-recommended');
     const btnOpportunity = document.getElementById('matches-subtab-opportunity');
+    const btnConsortium = document.getElementById('matches-subtab-consortium');
     const panelRecommended = document.getElementById('matches-recommended');
     const panelOpportunity = document.getElementById('matches-opportunity');
+    const panelConsortium = document.getElementById('matches-consortium');
     if (!tabMatches || !btnRecommended || !btnOpportunity || !panelRecommended || !panelOpportunity) return;
-    function showRecommended() {
-        btnRecommended.classList.add('active');
-        btnOpportunity.classList.remove('active');
-        panelRecommended.classList.add('active');
-        panelOpportunity.classList.remove('active');
+    function setActive(btn, panel) {
+        [btnRecommended, btnOpportunity, btnConsortium].forEach(b => b && b.classList.remove('active'));
+        [panelRecommended, panelOpportunity, panelConsortium].forEach(p => p && p.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        if (panel) panel.classList.add('active');
+        [btnRecommended, btnOpportunity, btnConsortium].forEach(b => { if (b) b.setAttribute('aria-selected', b === btn ? 'true' : 'false'); });
     }
-    function showOpportunity() {
-        btnOpportunity.classList.add('active');
-        btnRecommended.classList.remove('active');
-        panelOpportunity.classList.add('active');
-        panelRecommended.classList.remove('active');
-    }
-    btnRecommended.addEventListener('click', showRecommended);
-    btnOpportunity.addEventListener('click', showOpportunity);
+    btnRecommended.addEventListener('click', () => setActive(btnRecommended, panelRecommended));
+    btnOpportunity.addEventListener('click', () => setActive(btnOpportunity, panelOpportunity));
+    if (btnConsortium) btnConsortium.addEventListener('click', () => setActive(btnConsortium, panelConsortium));
 }
 
 async function loadMatchesPipeline() {
@@ -328,10 +330,12 @@ async function loadMatchesPipeline() {
 
     const recommendedContainer = document.getElementById('matches-recommended-list');
     const opportunityContainer = document.getElementById('matches-opportunity-list');
+    const consortiumContainer = document.getElementById('matches-consortium-list');
     if (!recommendedContainer || !opportunityContainer) return;
 
     recommendedContainer.innerHTML = '<div class="spinner"></div>';
     opportunityContainer.innerHTML = '<div class="spinner"></div>';
+    if (consortiumContainer) consortiumContainer.innerHTML = '<div class="spinner"></div>';
     setupMatchesSubTabs();
 
     try {
@@ -354,10 +358,13 @@ async function loadMatchesPipeline() {
         if (!hasLegacy && !hasPost) {
             recommendedContainer.innerHTML = '<div class="empty-state">' + emptyStateProfile + '</div>';
             opportunityContainer.innerHTML = '<div class="empty-state">' + emptyStateProfile + '</div>';
+            if (consortiumContainer) consortiumContainer.innerHTML = '<div class="empty-state">' + emptyStateProfile + '</div>';
             document.getElementById('matches-recommended')?.classList.add('active');
             document.getElementById('matches-opportunity')?.classList.remove('active');
+            document.getElementById('matches-consortium')?.classList.remove('active');
             document.getElementById('matches-subtab-recommended')?.classList.add('active');
             document.getElementById('matches-subtab-opportunity')?.classList.remove('active');
+            document.getElementById('matches-subtab-consortium')?.classList.remove('active');
             return;
         }
 
@@ -369,14 +376,14 @@ async function loadMatchesPipeline() {
                 byType[t].push(pm);
             });
             const recommendedParts = [];
-            ['one_way', 'two_way', 'consortium', 'circular'].forEach(matchType => {
+            ['one_way', 'two_way', 'circular'].forEach(matchType => {
                 const list = (byType[matchType] || []).sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
                 if (list.length === 0) return;
                 const label = MATCH_TYPE_LABELS[matchType];
-                recommendedParts.push('<div class="mb-6"><h3 class="text-lg font-semibold text-gray-900 mb-3">' + label + '</h3><div class="space-y-3 post-match-cards-' + matchType + '"></div></div>');
+                recommendedParts.push('<div class="matches-section"><h3 class="matches-section-title">' + label + '</h3><div class="match-cards-grid post-match-cards-' + matchType + '"></div></div>');
             });
-            recommendedContainer.innerHTML = recommendedParts.join('');
-            for (const matchType of ['one_way', 'two_way', 'consortium', 'circular']) {
+            recommendedContainer.innerHTML = recommendedParts.length ? recommendedParts.join('') : '<div class="empty-state">' + emptyStateRecommended + '</div>';
+            for (const matchType of ['one_way', 'two_way', 'circular']) {
                 const list = (byType[matchType] || []).sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
                 if (list.length === 0) continue;
                 const subContainer = recommendedContainer.querySelector('.post-match-cards-' + matchType);
@@ -390,12 +397,30 @@ async function loadMatchesPipeline() {
                 }
                 subContainer.innerHTML = htmlParts.join('');
             }
+            if (consortiumContainer) {
+                const consortiumList = (byType.consortium || []).sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+                if (consortiumList.length > 0) {
+                    consortiumContainer.innerHTML = '<div class="matches-section"><div class="match-cards-grid post-match-cards-consortium"></div></div>';
+                    const consortiumSub = consortiumContainer.querySelector('.post-match-cards-consortium');
+                    if (consortiumSub) {
+                        const template = await templateLoader.load('match-card-consortium');
+                        const htmlParts = [];
+                        for (const pm of consortiumList) {
+                            const viewModel = await buildPostMatchViewModelPipeline(pm, user.id);
+                            htmlParts.push(templateRenderer.render(template, viewModel));
+                        }
+                        consortiumSub.innerHTML = htmlParts.join('');
+                    }
+                } else {
+                    consortiumContainer.innerHTML = '<div class="empty-state">No consortium invitations.</div>';
+                }
+            }
         } else {
             recommendedContainer.innerHTML = '<div class="empty-state">' + emptyStateRecommended + '</div>';
         }
 
         if (hasLegacy) {
-            opportunityContainer.innerHTML = '<div class="mb-6"><h3 class="text-lg font-semibold text-gray-900 mb-3">Opportunity Matches</h3><div class="space-y-3 legacy-match-cards"></div></div>';
+            opportunityContainer.innerHTML = '<div class="matches-section"><h3 class="matches-section-title">Opportunity Matches</h3><div class="match-cards-grid legacy-match-cards"></div></div>';
             const legacyContainer = opportunityContainer.querySelector('.legacy-match-cards');
             if (legacyContainer) {
                 const matchesWithOpps = await Promise.all(
@@ -415,6 +440,7 @@ async function loadMatchesPipeline() {
                         const section2Label = isNeedOwner ? 'Provider Offer' : 'Your Offer';
                         const section1Content = opp.title + (opp.description ? ': ' + opp.description : '');
                         const section2Content = isNeedOwner ? providerName || 'Provider' : 'Your application / offer';
+                        const industryLabel = (Array.isArray(opp.sectors) && opp.sectors[0]) ? opp.sectors[0] : (opp.industry || (opp.sectors && !Array.isArray(opp.sectors) ? opp.sectors : null));
                         let primaryActionLabel, primaryActionRoute, secondaryActionLabel, secondaryActionRoute, tertiaryActionLabel, tertiaryActionRoute;
                         if (isNeedOwner) {
                             primaryActionLabel = 'View Provider';
@@ -441,6 +467,7 @@ async function loadMatchesPipeline() {
                             section2Label,
                             section1Content,
                             section2Content,
+                            industryLabel: industryLabel || null,
                             primaryActionLabel,
                             primaryActionRoute,
                             secondaryActionLabel,
@@ -453,10 +480,13 @@ async function loadMatchesPipeline() {
                 matchesWithOpps.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
                 const template = await templateLoader.load('match-card');
                 legacyContainer.innerHTML = matchesWithOpps.map(match => {
+                    const matchScorePercent = Math.round((match.matchScore || 0) * 100);
+                    const matchBadgeClass = matchScorePercent >= 90 ? 'badge-match-high' : matchScorePercent >= 70 ? 'badge-match-medium' : 'badge-match-low';
                     const data = {
                         ...match,
                         opportunity: { ...match.opportunity, description: match.opportunity.description || 'No description' },
-                        matchScorePercent: Math.round((match.matchScore || 0) * 100)
+                        matchScorePercent,
+                        matchBadgeClass
                     };
                     return templateRenderer.render(template, data);
                 }).join('');
@@ -482,23 +512,30 @@ async function loadMatchesPipeline() {
 
         const panelRecommendedEl = document.getElementById('matches-recommended');
         const panelOpportunityEl = document.getElementById('matches-opportunity');
+        const panelConsortiumEl = document.getElementById('matches-consortium');
         const btnRec = document.getElementById('matches-subtab-recommended');
         const btnOpp = document.getElementById('matches-subtab-opportunity');
+        const btnCons = document.getElementById('matches-subtab-consortium');
+        [panelRecommendedEl, panelOpportunityEl, panelConsortiumEl].forEach(p => p && p.classList.remove('active'));
+        [btnRec, btnOpp, btnCons].forEach(b => b && b.classList.remove('active'));
         if (hasPost) {
             panelRecommendedEl?.classList.add('active');
-            panelOpportunityEl?.classList.remove('active');
             btnRec?.classList.add('active');
-            btnOpp?.classList.remove('active');
-        } else {
+        } else if (hasLegacy) {
             panelOpportunityEl?.classList.add('active');
-            panelRecommendedEl?.classList.remove('active');
             btnOpp?.classList.add('active');
-            btnRec?.classList.remove('active');
+        } else if (consortiumContainer && consortiumContainer.querySelector('.match-cards-grid')) {
+            panelConsortiumEl?.classList.add('active');
+            btnCons?.classList.add('active');
+        } else {
+            panelRecommendedEl?.classList.add('active');
+            btnRec?.classList.add('active');
         }
     } catch (error) {
         console.error('Error loading matches:', error);
         recommendedContainer.innerHTML = '<div class="empty-state">Error loading matches. Please try again.</div>';
         opportunityContainer.innerHTML = '<div class="empty-state">Error loading matches. Please try again.</div>';
+        if (consortiumContainer) consortiumContainer.innerHTML = '<div class="empty-state">Error loading matches. Please try again.</div>';
     }
 }
 

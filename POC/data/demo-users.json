@@ -240,6 +240,8 @@
         "country": "Saudi Arabia",
         "city": "Riyadh",
         "preferredPaymentModes": ["cash"],
+        "preferredCollaborationModels": ["project"],
+        "primaryDomain": "Construction",
         "caseStudies": [{ "title": "Office fit-out delivery", "description": "Managed construction and handover of 5-storey office fit-out", "url": null }],
         "experienceEntries": [{ "role": "Construction Manager", "company": "Riyadh Builders", "startDate": "2020", "endDate": "Present" }],
         "bio": "Construction manager with 5 years of experience in commercial construction and site management in Riyadh."
@@ -493,9 +495,9 @@
         "preferredCollaborationModels": ["project"],
         "preferredWorkMode": "On-Site",
         "primaryDomain": "Construction",
-        "caseStudies": [{ "title": "Mixed-use delivery", "description": "Full delivery", "url": null }],
+        "caseStudies": [{ "title": "Mixed-use delivery", "description": "Full construction and handover of mixed-use commercial and residential development in Riyadh; coordinated structure, MEP, and finishes.", "url": null }],
         "experienceEntries": [{ "role": "Construction Manager", "company": "Al-Qarni Builders", "startDate": "2019", "endDate": "Present" }],
-        "bio": "Construction professional with 6 years of experience in commercial and mixed-use project delivery in Riyadh."
+        "bio": "Construction professional with 6 years of experience in commercial and mixed-use project delivery in Riyadh. Strong track record in site management and stakeholder coordination."
       }
     },
     {

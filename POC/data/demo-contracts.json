@@ -32,6 +32,10 @@
       },
       "equityVesting": null,
       "profitShare": null,
+      "milestonesSnapshot": [
+        { "title": "Kick-off and scope agreement", "dueDate": "2026-04-15", "deliverables": "Signed scope" },
+        { "title": "Shop drawing review completion", "dueDate": "2026-06-30", "deliverables": "Reviewed drawings report" }
+      ],
       "signedAt": "2026-03-07T12:30:00.000Z",
       "createdAt": "2026-03-07T12:30:00.000Z",
       "updatedAt": "2026-03-07T12:30:00.000Z"
@@ -96,6 +100,10 @@
       },
       "equityVesting": null,
       "profitShare": null,
+      "milestonesSnapshot": [
+        { "title": "Mobilization", "dueDate": "2026-06-15", "deliverables": "Signed scope" },
+        { "title": "Supervision period", "dueDate": "2026-09-30", "deliverables": "Reports" }
+      ],
       "signedAt": "2026-03-10T14:00:00.000Z",
       "createdAt": "2026-03-10T14:00:00.000Z",
       "updatedAt": "2026-03-10T14:00:00.000Z"
@@ -109,7 +117,7 @@
         {
           "userId": "demo-c01",
           "role": "creator",
-          "signedAt": null
+          "signedAt": "2026-03-10T14:00:00.000Z"
         },
         {
           "userId": "demo-u09",
@@ -342,18 +350,18 @@
         {
           "userId": "demo-c06",
           "role": "creator",
-          "signedAt": null
+          "signedAt": "2026-03-09T10:00:00.000Z"
         },
         {
           "userId": "demo-u24",
           "role": "contractor",
-          "signedAt": null
+          "signedAt": "2026-03-09T10:00:00.000Z"
         }
       ],
       "scope": "Need: Interior design and FF&E",
       "paymentMode": "cash",
       "duration": "3 months",
-      "status": "pending",
+      "status": "terminated",
       "paymentSchedule": "Milestone-based",
       "agreedValue": {
         "cash": 120000,
