@@ -19,10 +19,31 @@
             <div class="card-header"><h2>Vetting</h2></div>
             <div class="card-body">
                 <div id="user-detail-vetting"></div>
+                <div id="user-detail-verification-edit" class="mt-4" style="display: none;">
+                    <h4 class="font-medium mb-2">Verification status</h4>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select id="admin-verification-status" class="form-input">
+                            <option value="unverified">Unverified</option>
+                            <option value="professional_verified">Verified Professional</option>
+                            <option value="consultant_verified">Verified Consultant</option>
+                            <option value="company_verified">Verified Company</option>
+                        </select>
+                    </div>
+                    <button type="button" id="admin-save-verification" class="btn btn-primary btn-sm">Save verification status</button>
+                </div>
                 <div id="user-detail-interview-edit" class="mt-4" style="display: none;">
                     <h4 class="font-medium mb-2">Set interview</h4>
                     <div class="form-group"><label class="form-label">Interview link (e.g. Zoom)</label><input type="url" id="admin-interview-link" class="form-input" placeholder="https://"></div>
                     <div class="form-group"><label class="form-label">Scheduled at</label><input type="datetime-local" id="admin-interview-scheduledAt" class="form-input"></div>
+                    <div class="form-group">
+                        <label class="form-label">Interview result</label>
+                        <select id="admin-interview-result" class="form-input">
+                            <option value="pending">Pending</option>
+                            <option value="pass">Pass</option>
+                            <option value="fail">Fail</option>
+                        </select>
+                    </div>
                     <button type="button" id="admin-save-interview" class="btn btn-primary btn-sm">Save interview details</button>
                 </div>
             </div>

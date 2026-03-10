@@ -115,6 +115,66 @@ function collectCaseStudiesFromList(listId) {
     })).filter(c => c.title || c.url || c.description);
 }
 
+function renderPortfolioList(containerId, items) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    (items || []).forEach((p) => {
+        const row = document.createElement('div');
+        row.className = 'border border-gray-200 rounded p-3 portfolio-row';
+        row.innerHTML = `
+            <input type="text" class="portfolio-title form-input w-full mb-2" placeholder="Project title" value="${escapeHtml(p.projectTitle || '')}">
+            <textarea class="portfolio-description form-input w-full mb-2" rows="2" placeholder="Description">${escapeHtml(p.description || '')}</textarea>
+            <input type="text" class="portfolio-role form-input w-full mb-2" placeholder="Your role" value="${escapeHtml(p.role || '')}">
+            <textarea class="portfolio-results form-input w-full mb-2" rows="1" placeholder="Results">${escapeHtml(p.results || '')}</textarea>
+            <input type="url" class="portfolio-link form-input w-full mb-2" placeholder="Media/link URL (optional)" value="${escapeHtml((p.mediaAttachments && p.mediaAttachments[0]) ? (p.mediaAttachments[0].url || '') : '')}">
+            <button type="button" class="portfolio-remove btn btn-ghost btn-sm">Remove</button>
+        `;
+        row.querySelector('.portfolio-remove').addEventListener('click', () => row.remove());
+        container.appendChild(row);
+    });
+}
+
+function collectPortfolioFromList(listId) {
+    const list = document.getElementById(listId);
+    if (!list) return [];
+    return Array.from(list.querySelectorAll('.portfolio-row')).map(row => {
+        const title = row.querySelector('.portfolio-title')?.value?.trim();
+        const description = row.querySelector('.portfolio-description')?.value?.trim();
+        const role = row.querySelector('.portfolio-role')?.value?.trim();
+        const results = row.querySelector('.portfolio-results')?.value?.trim();
+        const url = row.querySelector('.portfolio-link')?.value?.trim();
+        if (!title && !description && !role && !results) return null;
+        return {
+            projectTitle: title || null,
+            description: description || null,
+            role: role || null,
+            results: results || null,
+            mediaAttachments: url ? [{ url }] : []
+        };
+    }).filter(Boolean);
+}
+
+function setupPortfolioAddButton(btnId, listId) {
+    const btn = document.getElementById(btnId);
+    const list = document.getElementById(listId);
+    if (!btn || !list) return;
+    btn.onclick = () => {
+        const row = document.createElement('div');
+        row.className = 'border border-gray-200 rounded p-3 portfolio-row';
+        row.innerHTML = `
+            <input type="text" class="portfolio-title form-input w-full mb-2" placeholder="Project title">
+            <textarea class="portfolio-description form-input w-full mb-2" rows="2" placeholder="Description"></textarea>
+            <input type="text" class="portfolio-role form-input w-full mb-2" placeholder="Your role">
+            <textarea class="portfolio-results form-input w-full mb-2" rows="1" placeholder="Results"></textarea>
+            <input type="url" class="portfolio-link form-input w-full mb-2" placeholder="Media/link URL (optional)">
+            <button type="button" class="portfolio-remove btn btn-ghost btn-sm">Remove</button>
+        `;
+        row.querySelector('.portfolio-remove').addEventListener('click', () => row.remove());
+        list.appendChild(row);
+    };
+}
+
 function renderReferencesList(containerId, refs) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -123,10 +183,11 @@ function renderReferencesList(containerId, refs) {
         const row = document.createElement('div');
         row.className = 'flex flex-wrap gap-2 items-start border border-gray-200 rounded p-2 reference-row';
         row.innerHTML = `
-            <input type="text" class="ref-name form-input flex-1 min-w-[100px]" placeholder="Name" value="${escapeHtml(r.name || '')}">
-            <input type="text" class="ref-role form-input flex-1 min-w-[100px]" placeholder="Role" value="${escapeHtml(r.role || '')}">
-            <input type="text" class="ref-contact form-input flex-1 min-w-[120px]" placeholder="Contact" value="${escapeHtml(r.contact || '')}">
-            <textarea class="ref-text form-input flex-1 min-w-[180px]" rows="1" placeholder="Testimonial">${escapeHtml(r.text || '')}</textarea>
+            <input type="text" class="ref-name form-input flex-1 min-w-[100px]" placeholder="Reference name" value="${escapeHtml(r.name || '')}">
+            <input type="text" class="ref-company form-input flex-1 min-w-[100px]" placeholder="Company" value="${escapeHtml(r.company || '')}">
+            <input type="text" class="ref-relationship form-input flex-1 min-w-[100px]" placeholder="Relationship" value="${escapeHtml(r.relationship || r.role || '')}">
+            <input type="text" class="ref-contact form-input flex-1 min-w-[120px]" placeholder="Contact (optional)" value="${escapeHtml(r.contact || '')}">
+            <textarea class="ref-text form-input flex-1 min-w-[180px]" rows="2" placeholder="Testimonial">${escapeHtml(r.text || r.testimonial || '')}</textarea>
             <button type="button" class="ref-remove btn btn-ghost btn-sm">Remove</button>
         `;
         row.querySelector('.ref-remove').addEventListener('click', () => row.remove());
@@ -142,10 +203,11 @@ function setupReferenceAddButton(btnId, listId) {
         const row = document.createElement('div');
         row.className = 'flex flex-wrap gap-2 items-start border border-gray-200 rounded p-2 reference-row';
         row.innerHTML = `
-            <input type="text" class="ref-name form-input flex-1 min-w-[100px]" placeholder="Name">
-            <input type="text" class="ref-role form-input flex-1 min-w-[100px]" placeholder="Role">
-            <input type="text" class="ref-contact form-input flex-1 min-w-[120px]" placeholder="Contact">
-            <textarea class="ref-text form-input flex-1 min-w-[180px]" rows="1" placeholder="Testimonial"></textarea>
+            <input type="text" class="ref-name form-input flex-1 min-w-[100px]" placeholder="Reference name">
+            <input type="text" class="ref-company form-input flex-1 min-w-[100px]" placeholder="Company">
+            <input type="text" class="ref-relationship form-input flex-1 min-w-[100px]" placeholder="Relationship">
+            <input type="text" class="ref-contact form-input flex-1 min-w-[120px]" placeholder="Contact (optional)">
+            <textarea class="ref-text form-input flex-1 min-w-[180px]" rows="2" placeholder="Testimonial"></textarea>
             <button type="button" class="ref-remove btn btn-ghost btn-sm">Remove</button>
         `;
         row.querySelector('.ref-remove').addEventListener('click', () => row.remove());
@@ -158,16 +220,254 @@ function collectReferencesFromList(listId) {
     if (!list) return [];
     return Array.from(list.querySelectorAll('.reference-row')).map(row => ({
         name: row.querySelector('.ref-name')?.value?.trim() || null,
-        role: row.querySelector('.ref-role')?.value?.trim() || null,
+        company: row.querySelector('.ref-company')?.value?.trim() || null,
+        relationship: row.querySelector('.ref-relationship')?.value?.trim() || null,
+        role: row.querySelector('.ref-relationship')?.value?.trim() || null,
         contact: row.querySelector('.ref-contact')?.value?.trim() || null,
         text: row.querySelector('.ref-text')?.value?.trim() || null,
+        testimonial: row.querySelector('.ref-text')?.value?.trim() || null,
         createdAt: new Date().toISOString()
-    })).filter(r => r.name || r.role || r.contact || r.text);
+    })).filter(r => r.name || r.company || r.relationship || r.contact || r.text);
 }
 
 function getProfileDomainsList() {
     const cats = profileLookups?.jobCategories || [];
     return cats.map(c => (typeof c === 'string' ? { id: c, label: c } : { id: c.id || c, label: c.label || c.id || c }));
+}
+
+function getProfessionalFieldsList() {
+    const fields = profileLookups?.professionalFields || [];
+    return fields.map(f => (typeof f === 'string' ? { id: f, label: f } : { id: f.id || f, label: f.label || f.id || f }));
+}
+
+function getExperienceLevelsList() {
+    const levels = profileLookups?.experienceLevels || [];
+    return Array.isArray(levels) ? levels : [];
+}
+
+function renderProfessionalFieldsList(containerId, fields) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    const fieldList = getProfessionalFieldsList();
+    const levels = getExperienceLevelsList();
+    const levelOpts = levels.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join('');
+    (fields || []).forEach((pf) => {
+        const row = document.createElement('div');
+        row.className = 'flex flex-wrap gap-2 items-center border border-gray-200 rounded p-2 professional-field-row';
+        const fieldOpts = fieldList.map(f => `<option value="${escapeHtml(f.id)}" ${pf.fieldId === f.id ? 'selected' : ''}>${escapeHtml(f.label)}</option>`).join('');
+        row.innerHTML = `
+            <select class="pf-field form-input flex-1 min-w-[140px]">
+                <option value="">Select field</option>${fieldOpts}
+            </select>
+            <label class="inline-flex items-center gap-1"><input type="checkbox" class="pf-primary" ${pf.isPrimary ? 'checked' : ''}> Primary</label>
+            <select class="pf-level form-input min-w-[120px]">
+                <option value="professional" ${pf.level === 'professional' ? 'selected' : ''}>Professional</option>
+                <option value="consultant" ${pf.level === 'consultant' ? 'selected' : ''}>Consultant</option>
+            </select>
+            <select class="pf-experience form-input min-w-[100px]">
+                <option value="">Level</option>${levelOpts}
+            </select>
+            <button type="button" class="pf-remove btn btn-ghost btn-sm">Remove</button>
+        `;
+        const expSelect = row.querySelector('.pf-experience');
+        if (expSelect && pf.experienceLevel) expSelect.value = pf.experienceLevel;
+        row.querySelector('.pf-remove').addEventListener('click', () => row.remove());
+        container.appendChild(row);
+    });
+}
+
+function collectProfessionalFieldsFromList(listId) {
+    const list = document.getElementById(listId);
+    if (!list) return [];
+    const fieldList = getProfessionalFieldsList();
+    const rows = list.querySelectorAll('.professional-field-row');
+    const collected = Array.from(rows).map(row => {
+        const fieldId = row.querySelector('.pf-field')?.value?.trim();
+        if (!fieldId) return null;
+        const label = fieldList.find(f => f.id === fieldId)?.label;
+        return {
+            fieldId,
+            label: label || fieldId,
+            isPrimary: row.querySelector('.pf-primary')?.checked === true,
+            level: row.querySelector('.pf-level')?.value || 'professional',
+            experienceLevel: row.querySelector('.pf-experience')?.value || null
+        };
+    }).filter(Boolean);
+    if (collected.length > 0 && !collected.some(p => p.isPrimary)) collected[0].isPrimary = true;
+    return collected;
+}
+
+function normalizeCertifications(certs) {
+    if (!certs) return [];
+    if (Array.isArray(certs)) {
+        return certs.map(c => typeof c === 'object' && c !== null && ('name' in c || 'url' in c || 'fileRef' in c)
+            ? { name: c.name || null, type: c.type || null, url: c.url || null, fileRef: c.fileRef || null }
+            : { name: typeof c === 'string' ? c : null, type: null, url: null, fileRef: null });
+    }
+    if (typeof certs === 'string') return parseArray(certs).map(s => ({ name: s, type: null, url: null, fileRef: null }));
+    return [];
+}
+
+function renderCertificationsList(containerId, certs) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    const normalized = normalizeCertifications(certs);
+    normalized.forEach((cert) => {
+        const row = document.createElement('div');
+        row.className = 'flex flex-wrap gap-2 items-center border border-gray-200 rounded p-2 certification-row';
+        row.innerHTML = `
+            <select class="cert-type form-input min-w-[110px]">
+                <option value="">Type</option>
+                <option value="certificate" ${cert.type === 'certificate' ? 'selected' : ''}>Certificate</option>
+                <option value="degree" ${cert.type === 'degree' ? 'selected' : ''}>Degree</option>
+                <option value="license" ${cert.type === 'license' ? 'selected' : ''}>License</option>
+            </select>
+            <input type="text" class="cert-name form-input flex-1 min-w-[120px]" placeholder="Name" value="${escapeHtml(cert.name || '')}">
+            <input type="url" class="cert-url form-input flex-1 min-w-[140px]" placeholder="URL (optional)" value="${escapeHtml(cert.url || '')}">
+            <input type="file" class="cert-file form-input min-w-[120px]" accept=".pdf,.jpg,.jpeg,.png" title="Optional file (POC: stored in browser)">
+            <button type="button" class="cert-remove btn btn-ghost btn-sm">Remove</button>
+        `;
+        row.querySelector('.cert-remove').addEventListener('click', () => row.remove());
+        if (cert.fileRef) row.dataset.fileRef = cert.fileRef;
+        container.appendChild(row);
+    });
+}
+
+async function collectCertificationsFromList(listId) {
+    const list = document.getElementById(listId);
+    if (!list) return [];
+    const promises = Array.from(list.querySelectorAll('.certification-row')).map(row => {
+        const name = row.querySelector('.cert-name')?.value?.trim();
+        const type = row.querySelector('.cert-type')?.value?.trim() || null;
+        const url = row.querySelector('.cert-url')?.value?.trim() || null;
+        const fileRef = row.dataset.fileRef || null;
+        const fileInput = row.querySelector('.cert-file');
+        if (fileInput?.files?.[0] && !fileRef) {
+            return new Promise((resolve) => {
+                const r = new FileReader();
+                r.onload = () => resolve({ name: name || null, type, url, fileRef: r.result });
+                r.readAsDataURL(fileInput.files[0]);
+            });
+        }
+        return Promise.resolve((name || url || fileRef) ? { name: name || null, type, url, fileRef } : null);
+    });
+    const results = await Promise.all(promises);
+    return results.filter(Boolean);
+}
+
+function setupCertificationsAddButton(btnId, listId) {
+    const btn = document.getElementById(btnId);
+    const list = document.getElementById(listId);
+    if (!btn || !list) return;
+    btn.onclick = () => {
+        const row = document.createElement('div');
+        row.className = 'flex flex-wrap gap-2 items-center border border-gray-200 rounded p-2 certification-row';
+        row.innerHTML = `
+            <select class="cert-type form-input min-w-[110px]">
+                <option value="">Type</option>
+                <option value="certificate">Certificate</option>
+                <option value="degree">Degree</option>
+                <option value="license">License</option>
+            </select>
+            <input type="text" class="cert-name form-input flex-1 min-w-[120px]" placeholder="Name">
+            <input type="url" class="cert-url form-input flex-1 min-w-[140px]" placeholder="URL (optional)">
+            <input type="file" class="cert-file form-input min-w-[120px]" accept=".pdf,.jpg,.jpeg,.png" title="Optional file">
+            <button type="button" class="cert-remove btn btn-ghost btn-sm">Remove</button>
+        `;
+        row.querySelector('.cert-remove').addEventListener('click', () => row.remove());
+        list.appendChild(row);
+    };
+}
+
+function renderVettingCaseStudyDocuments(containerId, documents) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    const docs = Array.isArray(documents) ? documents : [];
+    docs.forEach((doc) => {
+        const row = document.createElement('div');
+        row.className = 'flex flex-wrap gap-2 items-center border border-gray-200 rounded p-2 vc-doc-row';
+        row.innerHTML = `
+            <input type="text" class="vc-doc-name form-input flex-1 min-w-[120px]" placeholder="File name" value="${escapeHtml(doc.name || '')}">
+            <input type="file" class="vc-doc-file form-input min-w-[140px]" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+            <span class="vc-doc-current text-sm text-gray-500">${doc.name ? doc.name + ((doc.url || doc.fileRef) ? ' (saved)' : '') : ''}</span>
+            <button type="button" class="vc-doc-remove btn btn-ghost btn-sm">Remove</button>
+        `;
+        if (doc.url || doc.fileRef) row.dataset.fileRef = doc.url || doc.fileRef;
+        row.querySelector('.vc-doc-remove').addEventListener('click', () => row.remove());
+        container.appendChild(row);
+    });
+}
+
+function setupVettingCaseStudyDocumentsAddButton(btnId, listId) {
+    const btn = document.getElementById(btnId);
+    const list = document.getElementById(listId);
+    if (!btn || !list) return;
+    btn.onclick = () => {
+        const row = document.createElement('div');
+        row.className = 'flex flex-wrap gap-2 items-center border border-gray-200 rounded p-2 vc-doc-row';
+        row.innerHTML = `
+            <input type="text" class="vc-doc-name form-input flex-1 min-w-[120px]" placeholder="File name">
+            <input type="file" class="vc-doc-file form-input min-w-[140px]" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+            <span class="vc-doc-current text-sm text-gray-500"></span>
+            <button type="button" class="vc-doc-remove btn btn-ghost btn-sm">Remove</button>
+        `;
+        row.querySelector('.vc-doc-remove').addEventListener('click', () => row.remove());
+        list.appendChild(row);
+    };
+}
+
+async function collectVettingCaseStudyDocuments(listId) {
+    const list = document.getElementById(listId);
+    if (!list) return [];
+    const rows = list.querySelectorAll('.vc-doc-row');
+    const promises = Array.from(rows).map(row => {
+        const name = row.querySelector('.vc-doc-name')?.value?.trim() || null;
+        const fileRef = row.dataset.fileRef || null;
+        const fileInput = row.querySelector('.vc-doc-file');
+        if (fileInput?.files?.[0] && !fileRef) {
+            return new Promise((resolve) => {
+                const r = new FileReader();
+                r.onload = () => resolve({ name: name || fileInput.files[0].name, url: r.result, fileRef: r.result });
+                r.readAsDataURL(fileInput.files[0]);
+            });
+        }
+        return Promise.resolve((name || fileRef) ? { name: name || null, url: fileRef || null, fileRef: fileRef || null } : null);
+    });
+    const results = await Promise.all(promises);
+    return results.filter(Boolean);
+}
+
+function setupProfessionalFieldsAddButton(btnId, listId) {
+    const btn = document.getElementById(btnId);
+    const list = document.getElementById(listId);
+    if (!btn || !list) return;
+    btn.onclick = () => {
+        const fieldList = getProfessionalFieldsList();
+        const levels = getExperienceLevelsList();
+        const levelOpts = levels.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join('');
+        const row = document.createElement('div');
+        row.className = 'flex flex-wrap gap-2 items-center border border-gray-200 rounded p-2 professional-field-row';
+        const fieldOpts = fieldList.map(f => `<option value="${escapeHtml(f.id)}">${escapeHtml(f.label)}</option>`).join('');
+        row.innerHTML = `
+            <select class="pf-field form-input flex-1 min-w-[140px]">
+                <option value="">Select field</option>${fieldOpts}
+            </select>
+            <label class="inline-flex items-center gap-1"><input type="checkbox" class="pf-primary"> Primary</label>
+            <select class="pf-level form-input min-w-[120px]">
+                <option value="professional">Professional</option>
+                <option value="consultant">Consultant</option>
+            </select>
+            <select class="pf-experience form-input min-w-[100px]">
+                <option value="">Level</option>${levelOpts}
+            </select>
+            <button type="button" class="pf-remove btn btn-ghost btn-sm">Remove</button>
+        `;
+        row.querySelector('.pf-remove').addEventListener('click', () => row.remove());
+        list.appendChild(row);
+    };
 }
 
 function renderExpertiseAreasList(containerId, areas) {
@@ -246,6 +546,9 @@ function collectExpertiseAreasFromList(listId) {
 }
 
 function getPreferredCollaborationModelsList() {
+    if (profileLookups?.preferredCollaborationLabels?.length) {
+        return profileLookups.preferredCollaborationLabels.map(m => ({ id: m.id, label: m.label || m.id }));
+    }
     const list = [];
     if (window.CONFIG?.MODELS) {
         Object.entries(CONFIG.MODELS).forEach(([key, id]) => {
@@ -264,6 +567,15 @@ function getPreferredModelsLabel(ids) {
     if (!Array.isArray(ids) || ids.length === 0) return '—';
     const list = getPreferredCollaborationModelsList();
     return ids.map(id => list.find(m => m.id === id)?.label || id).join(', ');
+}
+
+/** Return HTML for verification badge (Verified Professional / Consultant / Company) or empty string. */
+function getVerificationBadgeHtml(verificationStatus) {
+    if (!verificationStatus || verificationStatus === CONFIG.VERIFICATION_STATUS.UNVERIFIED) return '';
+    if (verificationStatus === CONFIG.VERIFICATION_STATUS.PROFESSIONAL_VERIFIED) return '<span class="badge badge-success verification-badge">Verified Professional</span>';
+    if (verificationStatus === CONFIG.VERIFICATION_STATUS.CONSULTANT_VERIFIED) return '<span class="badge badge-success verification-badge">Verified Consultant</span>';
+    if (verificationStatus === CONFIG.VERIFICATION_STATUS.COMPANY_VERIFIED) return '<span class="badge badge-success verification-badge">Verified Company</span>';
+    return '';
 }
 
 async function initProfile() {
@@ -768,9 +1080,9 @@ function setCompanyViewMode(profile) {
         const refs = profile?.references || [];
         refEl.innerHTML = refs.length === 0 ? '—' : refs.map(r => `
             <div class="border border-gray-200 rounded p-2">
-                <div class="font-medium">${escapeHtml(r.name || '—')}${r.role ? ` · ${escapeHtml(r.role)}` : ''}</div>
+                <div class="font-medium">${escapeHtml(r.name || '—')}${r.company ? ` · ${escapeHtml(r.company)}` : ''}${(r.relationship || r.role) ? ` · ${escapeHtml(r.relationship || r.role)}` : ''}</div>
                 ${r.contact ? `<div class="text-sm text-gray-600">${escapeHtml(r.contact)}</div>` : ''}
-                ${r.text ? `<div class="text-sm mt-1">${escapeHtml(r.text)}</div>` : ''}
+                ${(r.testimonial || r.text) ? `<div class="text-sm mt-1">${escapeHtml(r.testimonial || r.text)}</div>` : ''}
             </div>
         `).join('');
     }
@@ -840,7 +1152,16 @@ function setProfessionalViewMode(profile) {
 
     document.getElementById('view-prof-sectors').textContent = formatArray(profile?.sectors || profile?.industry);
     document.getElementById('view-prof-education').textContent = profile?.education || '—';
-    document.getElementById('view-certifications').textContent = formatArray(profile?.certifications);
+    const certsEl = document.getElementById('view-certifications');
+    if (certsEl) {
+        const certs = normalizeCertifications(profile?.certifications);
+        if (certs.length === 0) certsEl.textContent = '—';
+        else certsEl.innerHTML = certs.map(c => {
+            const typeLabel = c.type ? ` (${c.type})` : '';
+            const link = c.url ? `<a href="${escapeHtml(c.url)}" target="_blank" rel="noopener">${escapeHtml(c.name || 'Link')}</a>` : escapeHtml(c.name || '—');
+            return `<span class="inline-block mr-2 mb-1">${link}${typeLabel}</span>`;
+        }).join('');
+    }
     document.getElementById('view-years-experience').textContent = exp != null && exp !== '' ? exp : '—';
     document.getElementById('view-prof-services').textContent = formatArray(profile?.services);
     document.getElementById('view-prof-interests').textContent = formatArray(profile?.interests);
@@ -875,6 +1196,17 @@ function setProfessionalViewMode(profile) {
         const areas = profile?.expertiseAreas || [];
         expertiseEl.textContent = areas.length === 0 ? '—' : areas.map(ea => `${ea.domain || '?'} (${ea.role || 'professional'})`).join(', ');
     }
+    const profFieldsEl = document.getElementById('view-prof-professionalFields');
+    if (profFieldsEl) {
+        const pfs = profile?.professionalFields || [];
+        if (pfs.length === 0) profFieldsEl.textContent = '—';
+        else profFieldsEl.innerHTML = pfs.map(pf => {
+            const primary = pf.isPrimary ? ' (Primary)' : '';
+            const level = pf.level === 'consultant' ? 'Consultant' : 'Professional';
+            const exp = pf.experienceLevel ? ` · ${escapeHtml(pf.experienceLevel)}` : '';
+            return `<span class="inline-block mr-2 mb-1">${escapeHtml(pf.label || pf.fieldId)}${primary} — ${level}${exp}</span>`;
+        }).join('');
+    }
     const caseEl = document.getElementById('view-prof-caseStudies');
     if (caseEl) {
         const cases = profile?.caseStudies || [];
@@ -886,14 +1218,28 @@ function setProfessionalViewMode(profile) {
             </div>
         `).join('');
     }
+    const portfolioEl = document.getElementById('view-prof-portfolio');
+    if (portfolioEl) {
+        const portfolio = profile?.portfolio || [];
+        if (portfolio.length === 0) portfolioEl.innerHTML = '—';
+        else portfolioEl.innerHTML = portfolio.map(p => `
+            <div class="border border-gray-200 rounded p-3">
+                <div class="font-medium">${escapeHtml(p.projectTitle || '—')}</div>
+                ${p.role ? `<div class="text-sm text-gray-600">Role: ${escapeHtml(p.role)}</div>` : ''}
+                ${p.description ? `<div class="text-sm mt-1">${escapeHtml(p.description)}</div>` : ''}
+                ${p.results ? `<div class="text-sm mt-1"><strong>Results:</strong> ${escapeHtml(p.results)}</div>` : ''}
+                ${p.mediaAttachments?.length ? `<a href="${escapeHtml(p.mediaAttachments[0].url)}" target="_blank" rel="noopener" class="text-sm text-primary">Link</a>` : ''}
+            </div>
+        `).join('');
+    }
     const refEl = document.getElementById('view-prof-references');
     if (refEl) {
         const refs = profile?.references || [];
         refEl.innerHTML = refs.length === 0 ? '—' : refs.map(r => `
             <div class="border border-gray-200 rounded p-2">
-                <div class="font-medium">${escapeHtml(r.name || '—')}${r.role ? ` · ${escapeHtml(r.role)}` : ''}</div>
+                <div class="font-medium">${escapeHtml(r.name || '—')}${r.company ? ` · ${escapeHtml(r.company)}` : ''}${(r.relationship || r.role) ? ` · ${escapeHtml(r.relationship || r.role)}` : ''}</div>
                 ${r.contact ? `<div class="text-sm text-gray-600">${escapeHtml(r.contact)}</div>` : ''}
-                ${r.text ? `<div class="text-sm mt-1">${escapeHtml(r.text)}</div>` : ''}
+                ${(r.testimonial || r.text) ? `<div class="text-sm mt-1">${escapeHtml(r.testimonial || r.text)}</div>` : ''}
             </div>
         `).join('');
     }
@@ -905,8 +1251,19 @@ function setProfessionalViewMode(profile) {
     const vcEl = document.getElementById('view-prof-vettingCaseStudy');
     if (vcEl) {
         const vc = profile?.vettingCaseStudy;
-        if (!vc || (!vc.title && !vc.description && !vc.url)) vcEl.textContent = '—';
-        else vcEl.innerHTML = (vc.title ? escapeHtml(vc.title) : '') + (vc.url ? ` · <a href="${escapeHtml(vc.url)}" target="_blank" rel="noopener">Link</a>` : '') + (vc.description ? ` · ${escapeHtml(vc.description)}` : '');
+        if (!vc || (!vc.title && !vc.projectTitle && !vc.description && !vc.url && !vc.role && !vc.problem && !vc.solution && !vc.impact)) vcEl.textContent = '—';
+        else {
+            const title = vc.projectTitle || vc.title;
+            const parts = [];
+            if (title) parts.push(escapeHtml(title));
+            if (vc.role) parts.push('Role: ' + escapeHtml(vc.role));
+            if (vc.problem) parts.push('Problem: ' + escapeHtml(vc.problem).slice(0, 80) + (vc.problem.length > 80 ? '…' : ''));
+            if (vc.solution) parts.push('Solution: ' + escapeHtml(vc.solution).slice(0, 80) + (vc.solution.length > 80 ? '…' : ''));
+            if (vc.impact) parts.push('Impact: ' + escapeHtml(vc.impact).slice(0, 80) + (vc.impact.length > 80 ? '…' : ''));
+            if (vc.url) parts.push('<a href="' + escapeHtml(vc.url) + '" target="_blank" rel="noopener">Link</a>');
+            if (vc.description) parts.push(escapeHtml(vc.description));
+            vcEl.innerHTML = parts.join(' · ');
+        }
     }
     const intEl = document.getElementById('view-prof-interview');
     if (intEl) {
@@ -1011,11 +1368,73 @@ function fillProfessionalLookups() {
     }
 }
 
+function renderProfileClarificationDocuments(user, lookups) {
+    const container = document.getElementById('profile-clarification-documents');
+    if (!container) return;
+    const profile = user.profile || {};
+    const isCompany = profile.type === 'company';
+    const existingDocs = profile.documents || [];
+    const docList = isCompany
+        ? (lookups?.companyRoleDocuments?.[profile.companyRole] || [])
+        : (lookups?.individualTypeDocuments?.[profile.type || profile.individualType || 'professional'] || []);
+    container.innerHTML = '';
+    docList.forEach(d => {
+        const existing = existingDocs.find(x => x.type === d.id);
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <label class="block mb-1 font-medium text-gray-700">${escapeHtml(d.label)} ${d.required ? '<span class="text-red-600">*</span>' : ''}</label>
+            <input type="file" data-doc-type="${escapeHtml(d.id)}" data-doc-label="${escapeHtml(d.label)}" class="profile-clarification-doc-input form-input w-full" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+            <span class="profile-clarification-doc-name text-sm text-gray-500">${existing?.fileName ? existing.fileName + ' (current)' : ''}</span>
+        `;
+        container.appendChild(div);
+    });
+}
+
+async function collectProfileClarificationDocuments() {
+    const container = document.getElementById('profile-clarification-documents');
+    const user = authService.getCurrentUser();
+    if (!container || !user) return user?.profile?.documents || [];
+    const existingDocs = user.profile?.documents || [];
+    const inputs = container.querySelectorAll('.profile-clarification-doc-input');
+    const result = [];
+    for (const input of inputs) {
+        const type = input.dataset.docType;
+        const label = input.dataset.docLabel;
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            if (file.size > 5 * 1024 * 1024) continue;
+            const data = await new Promise((resolve) => {
+                const r = new FileReader();
+                r.onload = () => resolve(r.result);
+                r.readAsDataURL(file);
+            });
+            result.push({ type, label, fileName: file.name, data });
+        } else {
+            const existing = existingDocs.find(x => x.type === type);
+            if (existing) result.push(existing);
+        }
+    }
+    return result;
+}
+
 async function loadProfile(user) {
     // Basic info
     document.getElementById('profile-email').value = user.email || '';
     document.getElementById('profile-role').value = user.role || '';
     document.getElementById('profile-status').value = user.status || '';
+    // Verification badge (for professional/consultant only)
+    const verificationGroup = document.getElementById('profile-verification-group');
+    const verificationBadgeEl = document.getElementById('profile-verification-badge');
+    if (verificationGroup && verificationBadgeEl) {
+        const isIndividual = user.role === CONFIG.ROLES.PROFESSIONAL || user.role === CONFIG.ROLES.CONSULTANT;
+        if (isIndividual) {
+            verificationGroup.style.display = 'block';
+            const status = user.profile?.verificationStatus;
+            verificationBadgeEl.innerHTML = getVerificationBadgeHtml(status) || '<span class="badge badge-secondary verification-badge">Unverified</span>';
+        } else {
+            verificationGroup.style.display = 'none';
+        }
+    }
     // Social media in Account card (always visible)
     const accountSocialEl = document.getElementById('view-account-socialMedia');
     if (accountSocialEl) accountSocialEl.innerHTML = getSocialIconsHtml(user.profile?.socialMediaLinks);
@@ -1036,20 +1455,30 @@ async function loadProfile(user) {
     }
     // Show clarification banner and "Submit for review again" when status is clarification_requested
     const clarificationBanner = document.getElementById('profile-clarification-banner');
+    const clarificationDocsWrap = document.getElementById('profile-clarification-documents-wrap');
     const submitReviewBtn = document.getElementById('profile-submit-review-again');
     if (clarificationBanner) {
         clarificationBanner.style.display = user.status === 'clarification_requested' ? 'block' : 'none';
+    }
+    if (clarificationDocsWrap) {
+        clarificationDocsWrap.style.display = user.status === 'clarification_requested' ? 'block' : 'none';
+    }
+    if (user.status === 'clarification_requested') {
+        const lookups = await loadProfileLookups();
+        renderProfileClarificationDocuments(user, lookups);
     }
     if (submitReviewBtn) {
         submitReviewBtn.onclick = null;
         if (user.status === 'clarification_requested') {
             submitReviewBtn.onclick = async () => {
                 try {
+                    const documents = await collectProfileClarificationDocuments();
                     const isCompany = user.profile?.type === 'company';
+                    const updatedProfile = { ...(user.profile || {}), documents };
                     if (isCompany) {
-                        await dataService.updateCompany(user.id, { status: 'pending' });
+                        await dataService.updateCompany(user.id, { status: 'pending', profile: updatedProfile });
                     } else {
-                        await dataService.updateUser(user.id, { status: 'pending' });
+                        await dataService.updateUser(user.id, { status: 'pending', profile: updatedProfile });
                     }
                     alert('Your account has been resubmitted for review. You will be notified once an admin reviews it.');
                     location.reload();
@@ -1118,6 +1547,8 @@ async function loadProfile(user) {
         document.getElementById('company-vettingCaseStudy-title').value = vc.title || '';
         document.getElementById('company-vettingCaseStudy-url').value = vc.url || '';
         document.getElementById('company-vettingCaseStudy-description').value = vc.description || '';
+        renderVettingCaseStudyDocuments('company-vettingCaseStudy-documents', vc.documents || []);
+        setupVettingCaseStudyDocumentsAddButton('company-add-vettingCaseStudy-doc', 'company-vettingCaseStudy-documents');
 
         setCompanyViewMode(profile);
         renderCompleteness(profile, true);
@@ -1143,7 +1574,8 @@ async function loadProfile(user) {
         document.getElementById('skills').value = Array.isArray(profile.skills) ? profile.skills.join(', ') : (profile.skills || '');
         document.getElementById('prof-sectors').value = Array.isArray(profile.sectors) ? profile.sectors.join(', ') : (profile.sectors || profile.industry || '');
         document.getElementById('prof-education').value = profile.education || '';
-        document.getElementById('certifications').value = Array.isArray(profile.certifications) ? profile.certifications.join(', ') : (profile.certifications || '');
+        renderCertificationsList('prof-certifications-list', profile.certifications || []);
+        setupCertificationsAddButton('prof-add-certification', 'prof-certifications-list');
         document.getElementById('years-experience').value = profile.yearsExperience ?? profile.experience ?? '';
         document.getElementById('prof-services').value = Array.isArray(profile.services) ? profile.services.join(', ') : (profile.services || '');
         document.getElementById('prof-interests').value = Array.isArray(profile.interests) ? profile.interests.join(', ') : (profile.interests || '');
@@ -1169,16 +1601,26 @@ async function loadProfile(user) {
                 profPrimaryDomainSelect.appendChild(opt);
             });
         }
+        renderProfessionalFieldsList('prof-professionalFields-list', profile.professionalFields || []);
+        setupProfessionalFieldsAddButton('prof-add-professionalField', 'prof-professionalFields-list');
         renderExpertiseAreasList('prof-expertiseAreas-list', profile.expertiseAreas || []);
         setupExpertiseAddButton('prof-add-expertise', 'prof-expertiseAreas-list');
         renderCaseStudiesList('prof-caseStudies-list', profile.caseStudies || []);
         setupCaseStudyAddButton('prof-add-caseStudy', 'prof-caseStudies-list');
+        renderPortfolioList('prof-portfolio-list', profile.portfolio || []);
+        setupPortfolioAddButton('prof-add-portfolio', 'prof-portfolio-list');
         renderReferencesList('prof-references-list', profile.references || []);
         setupReferenceAddButton('prof-add-reference', 'prof-references-list');
         const profVc = profile.vettingCaseStudy || {};
-        document.getElementById('prof-vettingCaseStudy-title').value = profVc.title || '';
+        document.getElementById('prof-vettingCaseStudy-title').value = profVc.projectTitle || profVc.title || '';
+        document.getElementById('prof-vettingCaseStudy-role').value = profVc.role || '';
+        document.getElementById('prof-vettingCaseStudy-problem').value = profVc.problem || '';
+        document.getElementById('prof-vettingCaseStudy-solution').value = profVc.solution || '';
+        document.getElementById('prof-vettingCaseStudy-impact').value = profVc.impact || '';
         document.getElementById('prof-vettingCaseStudy-url').value = profVc.url || '';
         document.getElementById('prof-vettingCaseStudy-description').value = profVc.description || '';
+        renderVettingCaseStudyDocuments('prof-vettingCaseStudy-documents', profVc.documents || []);
+        setupVettingCaseStudyDocumentsAddButton('prof-add-vettingCaseStudy-doc', 'prof-vettingCaseStudy-documents');
         const req = profileLookups?.vettingRequirements?.[profile.type || 'professional'];
         const hintEl = document.getElementById('prof-vetting-case-study-hint');
         if (hintEl) hintEl.textContent = req?.caseStudy === 'required' ? 'Required for Consultants.' : 'Optional for Professionals.';
@@ -1297,7 +1739,8 @@ function setupCompanyForm(userId) {
             vettingCaseStudy: {
                 title: document.getElementById('company-vettingCaseStudy-title')?.value?.trim() || null,
                 description: document.getElementById('company-vettingCaseStudy-description')?.value?.trim() || null,
-                url: document.getElementById('company-vettingCaseStudy-url')?.value?.trim() || null
+                url: document.getElementById('company-vettingCaseStudy-url')?.value?.trim() || null,
+                documents: await collectVettingCaseStudyDocuments('company-vettingCaseStudy-documents')
             }
         };
         try {
@@ -1363,7 +1806,7 @@ function setupProfessionalForm(userId) {
             skills: parseArray(formData.get('skills')),
             sectors: parseArray(formData.get('sectors')),
             education: formData.get('education') || null,
-            certifications: parseArray(formData.get('certifications')),
+            certifications: await collectCertificationsFromList('prof-certifications-list'),
             yearsExperience: yearsExperience != null ? yearsExperience : 0,
             experience: yearsExperience,
             services: parseArray(formData.get('services')),
@@ -1373,13 +1816,21 @@ function setupProfessionalForm(userId) {
             preferredPaymentModes,
             preferredCollaborationModels,
             caseStudies,
+            portfolio: collectPortfolioFromList('prof-portfolio-list'),
             references: collectReferencesFromList('prof-references-list'),
             primaryDomain: document.getElementById('prof-primaryDomain')?.value?.trim() || null,
+            professionalFields: collectProfessionalFieldsFromList('prof-professionalFields-list'),
             expertiseAreas: collectExpertiseAreasFromList('prof-expertiseAreas-list'),
             vettingCaseStudy: {
+                projectTitle: document.getElementById('prof-vettingCaseStudy-title')?.value?.trim() || null,
                 title: document.getElementById('prof-vettingCaseStudy-title')?.value?.trim() || null,
+                role: document.getElementById('prof-vettingCaseStudy-role')?.value?.trim() || null,
+                problem: document.getElementById('prof-vettingCaseStudy-problem')?.value?.trim() || null,
+                solution: document.getElementById('prof-vettingCaseStudy-solution')?.value?.trim() || null,
+                impact: document.getElementById('prof-vettingCaseStudy-impact')?.value?.trim() || null,
                 description: document.getElementById('prof-vettingCaseStudy-description')?.value?.trim() || null,
-                url: document.getElementById('prof-vettingCaseStudy-url')?.value?.trim() || null
+                url: document.getElementById('prof-vettingCaseStudy-url')?.value?.trim() || null,
+                documents: await collectVettingCaseStudyDocuments('prof-vettingCaseStudy-documents')
             },
             hourlyRate: formData.get('hourlyRate') !== '' ? parseFloat(formData.get('hourlyRate')) : null,
             currency: formData.get('currency') || 'SAR',

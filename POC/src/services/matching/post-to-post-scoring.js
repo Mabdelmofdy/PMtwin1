@@ -1,20 +1,27 @@
 /**
  * Post-to-Post Scoring
  * Weighted match score between a Need post and an Offer post.
- * Weights: Attribute Overlap 40%, Budget Fit 30%, Timeline 15%, Location 10%, Reputation 5%.
+ * Weights: Skill Match 25%, Exchange Compatibility 20%, Value Compatibility 20%,
+ * Budget Fit 10%, Timeline 10%, Location 10%, Reputation 5%.
  * Labels: Match / Partial / No Match per factor.
  */
 
 (function (global) {
     const CONFIG = global.CONFIG || {};
     const W = CONFIG.MATCHING?.WEIGHTS || {
-        ATTRIBUTE_OVERLAP: 0.40,
-        BUDGET_FIT: 0.30,
-        TIMELINE: 0.15,
+        SKILL_MATCH: 0.25,
+        EXCHANGE_COMPATIBILITY: 0.20,
+        VALUE_COMPATIBILITY: 0.20,
+        BUDGET_FIT: 0.10,
+        TIMELINE: 0.10,
         LOCATION: 0.10,
         REPUTATION: 0.05
     };
     const LABEL_PARTIAL = 0.25;
+
+    function valueCompat() {
+        return global.valueCompatibility || (typeof window !== 'undefined' && window.valueCompatibility) || null;
+    }
 
     /**
      * Label from raw score: 1 = Match, 0.25-0.99 = Partial, <0.25 = No Match
@@ -26,7 +33,7 @@
     }
 
     /**
-     * Attribute overlap: Jaccard-like overlap of skills/categories (and expanded if provided).
+     * Skill/attribute overlap: Jaccard-like overlap of skills/categories (and expanded if provided).
      */
     function attributeOverlap(needNorm, offerNorm, needProfile, offerProfile) {
         const needSkills = needProfile?.expandedSkillsOrCategories || needNorm.skills || [];
@@ -47,6 +54,33 @@
         const union = needSet.size + offerSet.size - intersection;
         const score = union > 0 ? intersection / Math.max(needSet.size, 1) : 0;
         return { score, label: labelFromScore(score) };
+    }
+
+    /**
+     * Exchange mode compatibility (fuzzy): uses valueCompatibility.exchangeCompatibility when available.
+     */
+    function exchangeCompatibility(needPost, offerPost) {
+        const vc = valueCompat();
+        if (vc && typeof vc.exchangeCompatibility === 'function') {
+            const score = vc.exchangeCompatibility(needPost, offerPost);
+            return { score, label: labelFromScore(score) };
+        }
+        const needMode = (needPost.value_exchange && needPost.value_exchange.mode) || needPost.exchangeMode || '';
+        const offerMode = (offerPost.value_exchange && offerPost.value_exchange.mode) || offerPost.exchangeMode || '';
+        const score = needMode && offerMode && String(needMode).toLowerCase() === String(offerMode).toLowerCase() ? 1 : 0.5;
+        return { score, label: labelFromScore(score) };
+    }
+
+    /**
+     * Value compatibility: offer vs need expected value ratio. Uses valueCompatibility.valueCompatibility when available.
+     */
+    function valueCompatibility(needPost, offerPost) {
+        const vc = valueCompat();
+        if (vc && typeof vc.valueCompatibility === 'function') {
+            const score = vc.valueCompatibility(needPost, offerPost);
+            return { score, label: labelFromScore(score) };
+        }
+        return { score: 0.5, label: 'Partial' };
     }
 
     /**
@@ -118,26 +152,26 @@
 
     /**
      * Compute full weighted score and breakdown.
-     * @param {Object} needPost - Full Need opportunity
-     * @param {Object} offerPost - Full Offer opportunity
-     * @param {Object} [normalizedNeed] - needPost.normalized (optional, fallback to needPost.normalized)
-     * @param {Object} [normalizedOffer] - offerPost.normalized
-     * @param {Object} [semanticNeed] - optional semantic profile for need
-     * @param {Object} [semanticOffer] - optional semantic profile for offer
-     * @returns {Object} { score, breakdown, labels }
+     * Uses: Skill Match 25%, Exchange Compatibility 20%, Value Compatibility 20%,
+     * Budget Fit 10%, Timeline 10%, Location 10%, Reputation 5%.
      */
     function scorePair(needPost, offerPost, normalizedNeed, normalizedOffer, semanticNeed, semanticOffer) {
         const nNorm = normalizedNeed || needPost.normalized || {};
         const oNorm = normalizedOffer || offerPost.normalized || {};
 
-        const attr = attributeOverlap(nNorm, oNorm, semanticNeed, semanticOffer);
+        const skill = attributeOverlap(nNorm, oNorm, semanticNeed, semanticOffer);
+        const exchange = exchangeCompatibility(needPost, offerPost);
+        const value = valueCompatibility(needPost, offerPost);
         const budget = budgetFit(nNorm, oNorm);
         const timeline = timelineFit(nNorm, oNorm);
         const location = locationFit(nNorm, oNorm);
         const reputation = reputationScore(oNorm);
 
         const breakdown = {
-            attributeOverlap: attr.score,
+            skillMatch: skill.score,
+            attributeOverlap: skill.score,
+            exchangeCompatibility: exchange.score,
+            valueCompatibility: value.score,
             budgetFit: budget.score,
             timelineFit: timeline.score,
             locationFit: location.score,
@@ -145,7 +179,10 @@
         };
 
         const labels = {
-            attributeOverlap: attr.label,
+            skillMatch: skill.label,
+            attributeOverlap: skill.label,
+            exchangeCompatibility: exchange.label,
+            valueCompatibility: value.label,
             budgetFit: budget.label,
             timelineFit: timeline.label,
             locationFit: location.label,
@@ -153,15 +190,18 @@
         };
 
         const score =
-            attr.score * W.ATTRIBUTE_OVERLAP +
-            budget.score * W.BUDGET_FIT +
-            timeline.score * W.TIMELINE +
-            location.score * W.LOCATION +
-            reputation.score * W.REPUTATION;
+            (skill.score * (W.SKILL_MATCH ?? W.ATTRIBUTE_OVERLAP ?? 0.25)) +
+            (exchange.score * (W.EXCHANGE_COMPATIBILITY ?? 0.20)) +
+            (value.score * (W.VALUE_COMPATIBILITY ?? 0.20)) +
+            (budget.score * (W.BUDGET_FIT ?? 0.10)) +
+            (timeline.score * (W.TIMELINE ?? 0.10)) +
+            (location.score * (W.LOCATION ?? 0.10)) +
+            (reputation.score * (W.REPUTATION ?? 0.05));
 
         const rounded = Math.round(score * 1000) / 1000;
-        if (CONFIG.MATCHING && CONFIG.MATCHING.DEBUG && needPost && offerPost && (rounded >= 0.45 && rounded <= 0.55)) {
-            console.log('[post-to-post-scoring] need=' + (needPost.id || '') + ' offer=' + (offerPost.id || '') + ' score=' + rounded + ' threshold=0.50');
+        const threshold = CONFIG.MATCHING?.POST_TO_POST_THRESHOLD ?? 0.50;
+        if (CONFIG.MATCHING && CONFIG.MATCHING.DEBUG && needPost && offerPost && (rounded >= threshold - 0.05 && rounded <= threshold + 0.05)) {
+            console.log('[post-to-post-scoring] need=' + (needPost.id || '') + ' offer=' + (offerPost.id || '') + ' score=' + rounded + ' threshold=' + threshold);
         }
         return {
             score: rounded,
@@ -173,6 +213,8 @@
     const postToPostScoring = {
         scorePair,
         attributeOverlap,
+        exchangeCompatibility,
+        valueCompatibility,
         budgetFit,
         timelineFit,
         locationFit,

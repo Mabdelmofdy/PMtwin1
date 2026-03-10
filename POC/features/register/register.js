@@ -63,6 +63,10 @@ function hideRegMessages() {
 function getRegStepId() {
     if (regState.currentStep === 0) return 'reg-step-0';
     if (regState.accountType === 'company') return `reg-step-a${Math.min(regState.currentStep, 5)}`;
+    // Professional/Consultant: no B1; step 1->B2, 2->B3, 3->B4, 4->B5
+    if (regState.accountType === 'professional' || regState.accountType === 'consultant') {
+        return `reg-step-b${Math.min(regState.currentStep + 1, 5)}`;
+    }
     return `reg-step-b${Math.min(regState.currentStep, 5)}`;
 }
 
@@ -75,6 +79,9 @@ function showRegStep(stepId) {
 }
 
 function getRegPreferredModelsList() {
+    if (lookupsData?.preferredCollaborationLabels?.length) {
+        return lookupsData.preferredCollaborationLabels.map(m => ({ id: m.id, label: m.label || m.id }));
+    }
     const list = [];
     if (window.CONFIG?.MODELS) {
         Object.entries(CONFIG.MODELS).forEach(([key, id]) => {
@@ -120,7 +127,7 @@ function updateRegProgress() {
         return;
     }
     if (progressWrap) progressWrap.classList.remove('hidden');
-    const total = 5;
+    const total = (regState.accountType === 'company') ? 5 : 4;
     const pct = (regState.currentStep / total) * 100;
     if (label) label.textContent = `Step ${regState.currentStep} of ${total}`;
     if (bar) bar.style.width = `${pct}%`;
@@ -139,6 +146,10 @@ function goToRegStep(step) {
     if (stepId === 'reg-step-b4') fillRegPreferredModels('reg-individual-preferred-models');
     if (stepId === 'reg-step-a5') fillRegVettingStep('company');
     if (stepId === 'reg-step-b5') fillRegVettingStep('individual');
+    if (stepId === 'reg-step-b2') {
+        document.getElementById('reg-specialty-wrap')?.classList.toggle('hidden', regState.individualType !== 'professional');
+        document.getElementById('reg-expertise-wrap')?.classList.toggle('hidden', regState.individualType !== 'consultant');
+    }
     updateRegProgress();
     hideRegMessages();
 }
@@ -374,13 +385,9 @@ function validateRegStep(step) {
             return true;
         }
     }
-    if (regState.accountType === 'individual') {
+    if (regState.accountType === 'professional' || regState.accountType === 'consultant') {
+        // Step 1 = B2 (details), 2 = B3 (documents), 3 = B4 (review), 4 = B5 (vetting)
         if (step === 1) {
-            const type = document.querySelector('input[name="individualType"]:checked')?.value;
-            if (!type) { showRegError('Please select Professional or Consultant'); return false; }
-            return true;
-        }
-        if (step === 2) {
             const name = document.getElementById('reg-full-name')?.value?.trim();
             if (!name) { showRegError('Full name is required'); return false; }
             const email = document.getElementById('reg-ind-email')?.value?.trim();
@@ -405,7 +412,7 @@ function validateRegStep(step) {
             }
             return true;
         }
-        if (step === 3) {
+        if (step === 2) {
             const type = regState.individualType;
             const docs = lookupsData?.individualTypeDocuments?.[type] || [];
             const required = docs.filter(d => d.required);
@@ -417,6 +424,7 @@ function validateRegStep(step) {
             if (!terms) { showRegError('You must accept the Terms & Conditions'); return false; }
             return true;
         }
+        if (step === 3 || step === 4) return true;
     }
     return true;
 }
@@ -435,8 +443,8 @@ function syncRegStateFromForm() {
             city: document.getElementById('reg-address-city')?.value || ''
         };
         regState.password = document.getElementById('reg-password')?.value || '';
-    } else if (regState.accountType === 'individual') {
-        regState.individualType = document.querySelector('input[name="individualType"]:checked')?.value || null;
+    } else if (regState.accountType === 'professional' || regState.accountType === 'consultant') {
+        regState.individualType = regState.individualType || regState.accountType;
         regState.fullName = document.getElementById('reg-full-name')?.value?.trim() || '';
         regState.email = document.getElementById('reg-ind-email')?.value?.trim() || '';
         regState.mobile = document.getElementById('reg-ind-mobile')?.value?.trim() || '';
@@ -832,17 +840,18 @@ function initRegister() {
     document.getElementById('reg-btn-continue')?.addEventListener('click', () => {
         regState.accountType = document.querySelector('input[name="accountType"]:checked')?.value || null;
         if (!regState.accountType) return;
+        if (regState.accountType === 'professional' || regState.accountType === 'consultant') {
+            regState.individualType = regState.accountType;
+        }
         regState.currentStep = 1;
         if (regState.accountType === 'company') {
             showRegStep('reg-step-a1');
             document.getElementById('reg-wizard-progress')?.classList.remove('hidden');
             updateRegProgress();
         } else {
-            showRegStep('reg-step-b1');
-            document.getElementById('reg-wizard-progress')?.classList.remove('hidden');
-            updateRegProgress();
+            document.getElementById('reg-step-0').classList.add('hidden');
+            goToRegStep(1);
         }
-        document.getElementById('reg-step-0').classList.add('hidden');
     });
 
     document.getElementById('reg-btn-back-a1')?.addEventListener('click', () => {
@@ -910,27 +919,33 @@ function initRegister() {
         renderIndividualDocuments();
         goToRegStep(2);
     });
-    document.getElementById('reg-btn-back-b2')?.addEventListener('click', () => goToRegStep(1));
+    document.getElementById('reg-btn-back-b2')?.addEventListener('click', () => {
+        showRegStep('reg-step-0');
+        document.getElementById('reg-wizard-progress')?.classList.add('hidden');
+        document.getElementById('reg-step-0').classList.remove('hidden');
+        regState.currentStep = 0;
+    });
     document.getElementById('reg-btn-next-b2')?.addEventListener('click', () => {
-        if (!validateRegStep(2)) return;
-        goToRegStep(3);
+        if (!validateRegStep(1)) return;
+        renderIndividualDocuments();
+        goToRegStep(2);
     });
     document.getElementById('reg-btn-back-b3')?.addEventListener('click', () => goToRegStep(2));
     document.getElementById('reg-btn-next-b3')?.addEventListener('click', () => {
         regState.termsAccepted = document.getElementById('reg-terms-individual')?.checked;
-        if (!validateRegStep(3)) return;
+        if (!validateRegStep(2)) return;
         renderReviewIndividual();
-        goToRegStep(4);
+        goToRegStep(3);
     });
-    document.getElementById('reg-btn-back-b4')?.addEventListener('click', () => goToRegStep(3));
+    document.getElementById('reg-btn-back-b4')?.addEventListener('click', () => goToRegStep(2));
     document.getElementById('reg-btn-next-b4')?.addEventListener('click', () => {
         syncRegStateFromForm();
         const indPrefEl = document.getElementById('reg-individual-preferred-models');
         if (indPrefEl) regState.preferredCollaborationModels = Array.from(indPrefEl.querySelectorAll('input:checked')).map(cb => cb.value);
         renderReviewIndividual();
-        goToRegStep(5);
+        goToRegStep(4);
     });
-    document.getElementById('reg-btn-back-b5')?.addEventListener('click', () => goToRegStep(4));
+    document.getElementById('reg-btn-back-b5')?.addEventListener('click', () => goToRegStep(3));
     document.querySelectorAll('input[name="reg-vetting-choice-ind"]').forEach(radio => {
         radio.addEventListener('change', () => {
             regState.vettingSkippedAtRegistration = document.querySelector('input[name="reg-vetting-choice-ind"]:checked')?.value === 'skip';

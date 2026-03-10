@@ -38,11 +38,14 @@ async function loadUserDetail(userId) {
     const isCompany = person.profile?.type === 'company';
     document.getElementById('user-detail-name').textContent = person.profile?.name || person.email || userId;
     document.getElementById('user-detail-email').textContent = person.email || '-';
+    const verificationStatus = person.profile?.verificationStatus;
+    const verificationBadge = verificationStatus === 'professional_verified' ? 'Verified Professional' : verificationStatus === 'consultant_verified' ? 'Verified Consultant' : verificationStatus === 'company_verified' ? 'Verified Company' : null;
     const badgesEl = document.getElementById('user-detail-badges');
     badgesEl.innerHTML = `
         <span class="badge badge-${person.status === 'active' ? 'success' : person.status === 'pending' ? 'warning' : 'secondary'}">${person.status}</span>
         <span class="badge badge-secondary">${person.role || '-'}</span>
         <span class="badge badge-secondary">${isCompany ? 'Company' : 'User'}</span>
+        ${verificationBadge ? `<span class="badge badge-success">${verificationBadge}</span>` : ''}
     `;
 
     const profileEl = document.getElementById('user-detail-profile');
@@ -61,27 +64,66 @@ async function loadUserDetail(userId) {
     const inv = person.profile?.interview;
     const caseStudies = person.profile?.caseStudies || [];
     const hasCaseStudy = (vc && (vc.title || vc.url || vc.description)) || caseStudies.length > 0;
+    const supportingFiles = vc?.documents || [];
     const type = person.profile?.type === 'consultant' || person.role === 'consultant' ? 'consultant' : 'professional';
     const req = adminDetailLookups?.vettingRequirements?.[type] || {};
     const certOk = docs.length > 0;
     const caseStudyOk = req.caseStudy === 'optional' ? true : hasCaseStudy;
     const interviewOk = !!(inv?.link || inv?.scheduledAt);
     const vettingEl = document.getElementById('user-detail-vetting');
+    const supportingFilesHtml = supportingFiles.length > 0
+        ? '<div class="detail-item">Case study supporting files: ' + supportingFiles.map(f => f.name || 'File').join(', ') + '</div>'
+        : '';
     vettingEl.innerHTML = `
         <div class="detail-item"><strong>Requirements</strong> <span class="badge badge-secondary">${type === 'consultant' ? 'Consultant' : 'Professional'}</span></div>
         <div class="detail-item">Certifications ${req.certifications === 'required' ? (certOk ? '✓' : '✗') : '—'} ${docs.length === 0 ? 'None' : docs.map(d => d.label || d.type || 'Document').join(', ')}</div>
         <div class="detail-item">Case study ${req.caseStudy ? (caseStudyOk ? '✓' : '✗') : '—'} ${vc && (vc.title || vc.url || vc.description) ? (vc.title || '') + (vc.url ? ' · ' + vc.url : '') + (vc.description ? ' · ' + vc.description : '') : (caseStudies.length ? 'Portfolio provided' : '—')}</div>
-        <div class="detail-item">Interview ${req.interview === 'required' ? (interviewOk ? '✓' : '✗') : '—'} ${inv?.link ? '<a href="' + inv.link + '" target="_blank">Link</a>' : '—'} ${inv?.scheduledAt ? ' · ' + new Date(inv.scheduledAt).toLocaleString() : ''}</div>
+        ${supportingFilesHtml}
+        <div class="detail-item">Interview ${req.interview === 'required' ? (interviewOk ? '✓' : '✗') : '—'} ${inv?.link ? '<a href="' + inv.link + '" target="_blank">Link</a>' : '—'} ${inv?.scheduledAt ? ' · ' + new Date(inv.scheduledAt).toLocaleString() : ''} ${inv?.result ? ' · Result: ' + inv.result : ''}</div>
     `;
+    const isIndividual = !isCompany && (person.role === 'professional' || person.role === 'consultant');
+    const verificationEditWrap = document.getElementById('user-detail-verification-edit');
+    const showVerificationEdit = isIndividual || isCompany;
+    if (verificationEditWrap) verificationEditWrap.style.display = showVerificationEdit ? 'block' : 'none';
+    const verificationSelect = document.getElementById('admin-verification-status');
+    if (verificationSelect) {
+        verificationSelect.innerHTML = [
+            '<option value="unverified">Unverified</option>',
+            '<option value="professional_verified">Verified Professional</option>',
+            '<option value="consultant_verified">Verified Consultant</option>',
+            '<option value="company_verified">Verified Company</option>'
+        ].join('');
+        verificationSelect.value = person.profile?.verificationStatus || 'unverified';
+    }
+    if (showVerificationEdit) {
+        document.getElementById('admin-save-verification').onclick = async () => {
+            const status = document.getElementById('admin-verification-status').value;
+            const updatedProfile = { ...(person.profile || {}), verificationStatus: status };
+            try {
+                if (isCompany) await dataService.updateCompany(userId, { profile: updatedProfile });
+                else await dataService.updateUser(userId, { profile: updatedProfile });
+                await loadUserDetail(userId);
+            } catch (e) {
+                console.error(e);
+                alert('Failed to save verification status.');
+            }
+        };
+    }
     const interviewEditWrap = document.getElementById('user-detail-interview-edit');
     if (interviewEditWrap) interviewEditWrap.style.display = 'block';
     document.getElementById('admin-interview-link').value = inv?.link || '';
     document.getElementById('admin-interview-scheduledAt').value = inv?.scheduledAt ? new Date(inv.scheduledAt).toISOString().slice(0, 16) : '';
+    const resultSelect = document.getElementById('admin-interview-result');
+    if (resultSelect) resultSelect.value = inv?.result || 'pending';
     document.getElementById('admin-save-interview').onclick = async () => {
         const link = document.getElementById('admin-interview-link').value.trim();
         const scheduledAt = document.getElementById('admin-interview-scheduledAt').value;
-        const interview = { link: link || null, scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : null };
-        const updatedProfile = { ...(person.profile || {}), interview };
+        const result = document.getElementById('admin-interview-result')?.value || 'pending';
+        const interview = { link: link || null, scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : null, result: result || null };
+        let updatedProfile = { ...(person.profile || {}), interview };
+        if (!isCompany && person.role === 'consultant' && result === 'pass') {
+            updatedProfile = { ...updatedProfile, verificationStatus: 'consultant_verified' };
+        }
         try {
             if (isCompany) await dataService.updateCompany(userId, { profile: updatedProfile });
             else await dataService.updateUser(userId, { profile: updatedProfile });

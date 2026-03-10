@@ -9,7 +9,7 @@ class DataService {
         this.storage = window.storageService || storageService;
         this.initialized = false;
         this.SEED_DATA_VERSION_KEY = 'pmtwin_seed_version';
-        this.CURRENT_SEED_VERSION = '1.15.0'; // Demo expansion: 20-30 professionals, 10-15 companies, 40-50 opportunities, more applications/matches
+        this.CURRENT_SEED_VERSION = '1.18.0'; // Production data cleanup: opportunities/contacts cleared; admin-only user seed
     }
     
     /**
@@ -279,6 +279,7 @@ class DataService {
             'audit': CONFIG.STORAGE_KEYS.AUDIT,
             'sessions': CONFIG.STORAGE_KEYS.SESSIONS,
             'contracts': CONFIG.STORAGE_KEYS.CONTRACTS,
+            'negotiations': CONFIG.STORAGE_KEYS.NEGOTIATIONS,
             'reviews': CONFIG.STORAGE_KEYS.REVIEWS,
             'subscription_plans': CONFIG.STORAGE_KEYS.SUBSCRIPTION_PLANS,
             'subscriptions': CONFIG.STORAGE_KEYS.SUBSCRIPTIONS
@@ -609,12 +610,36 @@ class DataService {
 
     async createContract(contractData) {
         const contracts = await this.getContracts();
+        const parties = contractData.parties || (contractData.creatorId && contractData.contractorId
+            ? [{ userId: contractData.creatorId, role: 'creator', companyId: contractData.creatorCompanyId || null }, { userId: contractData.contractorId, role: 'contractor', companyId: contractData.contractorCompanyId || null }]
+            : []);
+        const agreedValue = contractData.agreedValue || null;
+        const milestones = (contractData.milestones || []).map(m => ({
+            id: m.id || this.generateId(),
+            title: m.title,
+            deliverables: m.deliverables,
+            dueDate: m.dueDate,
+            valueRelease: m.valueRelease || { cash: 0, equityVested: 0, barterDelivered: '' },
+            status: m.status || 'pending'
+        }));
         const newContract = {
             id: this.generateId(),
-            ...contractData,
+            opportunityId: contractData.opportunityId,
+            applicationId: contractData.applicationId,
+            negotiationId: contractData.negotiationId || null,
+            creatorId: contractData.creatorId,
+            contractorId: contractData.contractorId,
+            scope: contractData.scope,
+            paymentMode: contractData.paymentMode,
+            duration: contractData.duration,
+            parties,
+            agreedValue,
+            milestones,
             status: contractData.status || CONFIG.CONTRACT_STATUS.PENDING,
-            milestones: contractData.milestones || [],
             signedAt: contractData.signedAt || null,
+            paymentSchedule: contractData.paymentSchedule,
+            equityVesting: contractData.equityVesting || null,
+            profitShare: contractData.profitShare || null,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
@@ -634,6 +659,59 @@ class DataService {
         };
         this.storage.set(CONFIG.STORAGE_KEYS.CONTRACTS, contracts);
         return contracts[index];
+    }
+
+    // Negotiation Operations (value exchange negotiation phase)
+    async getNegotiations() {
+        return this.storage.get(CONFIG.STORAGE_KEYS.NEGOTIATIONS) || [];
+    }
+
+    async getNegotiationById(id) {
+        const list = await this.getNegotiations();
+        return list.find(n => n.id === id) || null;
+    }
+
+    async getNegotiationsByOpportunityId(opportunityId) {
+        const list = await this.getNegotiations();
+        return list.filter(n => n.opportunityId === opportunityId);
+    }
+
+    async getNegotiationsByApplicationId(applicationId) {
+        const list = await this.getNegotiations();
+        return list.filter(n => n.applicationId === applicationId);
+    }
+
+    async createNegotiation(negotiationData) {
+        const list = await this.getNegotiations();
+        const newNegotiation = {
+            id: this.generateId(),
+            opportunityId: negotiationData.opportunityId,
+            matchId: negotiationData.matchId || null,
+            applicationId: negotiationData.applicationId,
+            parties: negotiationData.parties || [],
+            status: negotiationData.status || 'open',
+            initialTerms: negotiationData.initialTerms || null,
+            rounds: negotiationData.rounds || [],
+            agreedTerms: negotiationData.agreedTerms || null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+        list.push(newNegotiation);
+        this.storage.set(CONFIG.STORAGE_KEYS.NEGOTIATIONS, list);
+        return newNegotiation;
+    }
+
+    async updateNegotiation(id, updates) {
+        const list = await this.getNegotiations();
+        const index = list.findIndex(n => n.id === id);
+        if (index === -1) return null;
+        list[index] = {
+            ...list[index],
+            ...updates,
+            updatedAt: new Date().toISOString()
+        };
+        this.storage.set(CONFIG.STORAGE_KEYS.NEGOTIATIONS, list);
+        return list[index];
     }
 
     // Review Operations (post-completion reputation)

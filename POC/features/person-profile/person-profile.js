@@ -98,6 +98,16 @@ function populateProfile(person) {
     setTextContent('profile-name', profile.name || 'Unknown');
     setTextContent('profile-headline', profile.headline || profile.title || '');
     
+    // Verification badge (professional/consultant)
+    const verificationBadgeEl = document.getElementById('profile-verification-badge');
+    if (verificationBadgeEl && !isCompany) {
+        const status = person.profile?.verificationStatus;
+        if (status === 'professional_verified') verificationBadgeEl.innerHTML = '<span class="badge badge-success verification-badge">Verified Professional</span>';
+        else if (status === 'consultant_verified') verificationBadgeEl.innerHTML = '<span class="badge badge-success verification-badge">Verified Consultant</span>';
+        else if (status === 'company_verified') verificationBadgeEl.innerHTML = '<span class="badge badge-success verification-badge">Verified Company</span>';
+        else verificationBadgeEl.innerHTML = '';
+    } else if (verificationBadgeEl) verificationBadgeEl.innerHTML = '';
+    
     // Location
     const locationEl = document.getElementById('profile-location');
     if (locationEl) {

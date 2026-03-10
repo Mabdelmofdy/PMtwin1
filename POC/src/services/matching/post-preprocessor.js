@@ -118,6 +118,7 @@
         if (att.startDate) start = att.startDate;
         if (att.tenderDeadline) end = att.tenderDeadline;
         if (att.applicationDeadline) end = att.applicationDeadline || end;
+        if (att.endDate && !end) end = att.endDate;
         if (att.availability && typeof att.availability === 'object') {
             start = att.availability.start || start;
             end = att.availability.end || end;
@@ -173,6 +174,19 @@
         } else if (creator && creator.profile?.completedProjects != null) {
             const c = Number(creator.profile.completedProjects);
             reputation = isNaN(c) ? 0.5 : Math.min(1, 0.3 + Math.min(c, 20) / 100);
+        }
+
+        if (opportunity.value_exchange) {
+            const valueNormalizer = (typeof global !== 'undefined' && global.valueNormalizer) || (typeof window !== 'undefined' && window.valueNormalizer);
+            if (valueNormalizer && typeof valueNormalizer.buildNormalized === 'function') {
+                try {
+                    opportunity.value_exchange._normalized = valueNormalizer.buildNormalized(opportunity.value_exchange);
+                } catch (e) {
+                    if (global.CONFIG && global.CONFIG.MATCHING && global.CONFIG.MATCHING.DEBUG) {
+                        console.warn('[post-preprocessor] value normalization failed:', e);
+                    }
+                }
+            }
         }
 
         return {

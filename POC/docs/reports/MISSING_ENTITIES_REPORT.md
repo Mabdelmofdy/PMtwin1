@@ -1,6 +1,6 @@
 # Missing Entities Report
 
-Generated: 2026-03-05T13:31:57.141Z
+Generated: 2026-03-06T12:50:46.835Z
 
 ## Industries / sectors
 

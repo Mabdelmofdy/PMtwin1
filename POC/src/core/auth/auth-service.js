@@ -38,6 +38,10 @@ class AuthService {
         if (userData.profile?.vettingSkippedAtRegistration !== undefined) profile.vettingSkippedAtRegistration = userData.profile.vettingSkippedAtRegistration === true;
         if (userData.profile?.primaryDomain) profile.primaryDomain = userData.profile.primaryDomain;
         if (Array.isArray(userData.profile?.expertiseAreas)) profile.expertiseAreas = userData.profile.expertiseAreas;
+        // Set verification status: unverified when evaluation skipped; otherwise leave for admin to set after review
+        if (profile.vettingSkippedAtRegistration === true) {
+            profile.verificationStatus = CONFIG.VERIFICATION_STATUS.UNVERIFIED;
+        }
         
         const user = await this.dataService.createUser({
             email: userData.email,

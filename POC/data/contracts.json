@@ -1,57 +1,5 @@
 {
   "domain": "contracts",
   "version": "1.0",
-  "data": [
-    {
-      "id": "contract-001",
-      "opportunityId": "opp-007",
-      "applicationId": "app-004",
-      "creatorId": "user-company-001",
-      "contractorId": "user-pro-004",
-      "scope": "Sustainability Consultant - LEED Certification",
-      "paymentMode": "cash",
-      "duration": "18",
-      "status": "pending",
-      "milestones": [],
-      "signedAt": null,
-      "createdAt": "2026-01-22T14:00:00.000Z",
-      "updatedAt": "2026-01-22T14:00:00.000Z"
-    },
-    {
-      "id": "contract-002",
-      "opportunityId": "opp-003",
-      "applicationId": "app-006",
-      "creatorId": "user-company-003",
-      "contractorId": "user-company-004",
-      "scope": "Bulk Purchasing - Structural Steel (5000 Tons)",
-      "paymentMode": "cash",
-      "duration": "",
-      "status": "active",
-      "milestones": [
-        {"id": "m1", "title": "Order placement", "dueDate": "2026-04-15", "status": "completed", "completedAt": "2026-04-10T12:00:00.000Z"},
-        {"id": "m2", "title": "Delivery", "dueDate": "2026-05-01", "status": "pending"}
-      ],
-      "signedAt": null,
-      "createdAt": "2026-01-18T11:00:00.000Z",
-      "updatedAt": "2026-01-18T11:00:00.000Z"
-    },
-    {
-      "id": "contract-003",
-      "opportunityId": "opp-009",
-      "applicationId": "app-007",
-      "creatorId": "user-company-002",
-      "contractorId": "user-pro-001",
-      "scope": "Mentorship Program - Young Engineers",
-      "paymentMode": "cash",
-      "duration": "12",
-      "status": "completed",
-      "milestones": [
-        {"id": "m1", "title": "Program kickoff", "dueDate": "2026-02-01", "status": "completed", "completedAt": "2026-02-01T09:00:00.000Z"},
-        {"id": "m2", "title": "Mid-term review", "dueDate": "2026-08-01", "status": "completed", "completedAt": "2026-08-05T10:00:00.000Z"}
-      ],
-      "signedAt": null,
-      "createdAt": "2026-01-23T09:00:00.000Z",
-      "updatedAt": "2026-01-23T09:00:00.000Z"
-    }
-  ]
+  "data": []
 }

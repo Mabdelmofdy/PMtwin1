@@ -152,6 +152,15 @@ async function editPopulateForm(opportunity) {
     // Populate location fields
     editPopulateLocation(opportunity);
     editInitMapPicker(opportunity);
+    const att = opportunity.attributes || {};
+    const locReqEl = document.getElementById('location-requirement');
+    if (locReqEl && att.locationRequirement) locReqEl.value = att.locationRequirement;
+    const startEl = document.getElementById('attr-startDate');
+    if (startEl && att.startDate) startEl.value = att.startDate;
+    const deadlineEl = document.getElementById('attr-applicationDeadline');
+    if (deadlineEl && att.applicationDeadline) deadlineEl.value = att.applicationDeadline;
+    const endEl = document.getElementById('attr-endDate');
+    if (endEl && att.endDate) endEl.value = att.endDate;
     
     // Render and populate dynamic fields
     editRenderDynamicFields(opportunity);
@@ -700,6 +709,14 @@ function editPopulateExchangeMode(opportunity) {
     // Setup exchange mode selection
     editSetupExchangeModeSelection();
     
+    // Payment method checkboxes from opportunity.paymentModes
+    const paymentModes = opportunity.paymentModes || (exchangeMode ? [exchangeMode] : []);
+    setTimeout(() => {
+        document.querySelectorAll('.payment-method-cb').forEach(cb => {
+            cb.checked = paymentModes.indexOf(cb.value) !== -1;
+        });
+    }, 100);
+    
     // Select the exchange mode
     setTimeout(() => {
         const card = document.querySelector(`.exchange-mode-card[data-mode="${exchangeMode}"]`);
@@ -749,6 +766,10 @@ function editPopulateExchangeMode(opportunity) {
                             }, 200);
                         }
                     }
+                    if (exchangeData.companyValuation) {
+                        const field = document.getElementById('equity-company-valuation');
+                        if (field) field.value = exchangeData.companyValuation;
+                    }
                 } else if (exchangeMode === 'profit_sharing') {
                     if (exchangeData.profitSplit) {
                         const field = document.getElementById('profit-split');
@@ -768,6 +789,14 @@ function editPopulateExchangeMode(opportunity) {
                                 }
                             }, 200);
                         }
+                    }
+                    if (exchangeData.profitSharePercentage != null) {
+                        const field = document.getElementById('profit-share-percentage');
+                        if (field) field.value = exchangeData.profitSharePercentage;
+                    }
+                    if (exchangeData.expectedProfit) {
+                        const field = document.getElementById('expected-profit');
+                        if (field) field.value = exchangeData.expectedProfit;
                     }
                 } else if (exchangeMode === 'barter') {
                     if (exchangeData.barterOffer) {
@@ -923,7 +952,9 @@ function editSetupExchangeModeSelection() {
         if (selectedDisplay) {
             selectedDisplay.classList.remove('hidden');
         }
-        
+        const primaryCb = document.querySelector(`.payment-method-cb[value="${mode}"]`);
+        if (primaryCb && !primaryCb.checked) primaryCb.checked = true;
+
         // Render mode-specific fields (reuse from create form logic)
         editRenderExchangeModeFields(mode);
     }
@@ -970,6 +1001,11 @@ function editSetupExchangeModeSelection() {
                             <p class="text-sm text-gray-500 mt-1">Percentage of ownership stake</p>
                         </div>
                         <div class="form-group">
+                            <label for="equity-company-valuation" class="block text-sm font-medium text-gray-700 mb-2">Company Valuation (SAR)</label>
+                            <input type="text" id="equity-company-valuation" name="companyValuation" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., 5000000">
+                            <p class="text-sm text-gray-500 mt-1">Used to calculate estimated value</p>
+                        </div>
+                        <div class="form-group">
                             <label for="equity-vesting" class="block text-sm font-medium text-gray-700 mb-2">Vesting Period</label>
                             <select id="equity-vesting" name="equityVesting" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                                 <option value="">Select vesting period</option>
@@ -994,9 +1030,17 @@ function editSetupExchangeModeSelection() {
                 html = `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div class="form-group">
-                            <label for="profit-split" class="block text-sm font-medium text-gray-700 mb-2">Profit Split Percentage <span class="text-red-600">*</span></label>
+                            <label for="profit-split" class="block text-sm font-medium text-gray-700 mb-2">Profit Split (e.g. 60-40) <span class="text-red-600">*</span></label>
                             <input type="text" id="profit-split" name="profitSplit" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., 60-40 or 50-30-20" required>
-                            <p class="text-sm text-gray-500 mt-1">Enter profit split (e.g., 60-40 for 60% partner, 40% partner)</p>
+                            <p class="text-sm text-gray-500 mt-1">Enter profit split</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="profit-share-percentage" class="block text-sm font-medium text-gray-700 mb-2">Partner Share % (for value estimate)</label>
+                            <input type="number" id="profit-share-percentage" name="profitSharePercentage" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., 10" min="0" max="100" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="expected-profit" class="block text-sm font-medium text-gray-700 mb-2">Expected Profit (SAR)</label>
+                            <input type="text" id="expected-profit" name="expectedProfit" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., 2000000">
                         </div>
                         <div class="form-group">
                             <label for="profit-basis" class="block text-sm font-medium text-gray-700 mb-2">Profit Basis</label>
@@ -1220,10 +1264,16 @@ function editSetupFormHandlers() {
                 exchangeData.equityPercentage = parseFloat(formData.equityPercentage);
                 exchangeData.equityVesting = formData.equityVesting || '';
                 exchangeData.equityContribution = formData.equityContribution || '';
+                const companyValEl = document.getElementById('equity-company-valuation');
+                if (companyValEl?.value) exchangeData.companyValuation = companyValEl.value.trim();
             } else if (formData.exchangeMode === 'profit_sharing') {
                 exchangeData.profitSplit = formData.profitSplit;
                 exchangeData.profitBasis = formData.profitBasis || 'profit';
                 exchangeData.profitDistribution = formData.profitDistribution || '';
+                const sharePctEl = document.getElementById('profit-share-percentage');
+                const expectedProfitEl = document.getElementById('expected-profit');
+                if (sharePctEl?.value) exchangeData.profitSharePercentage = parseFloat(sharePctEl.value) || null;
+                if (expectedProfitEl?.value) exchangeData.expectedProfit = expectedProfitEl.value.trim();
             } else if (formData.exchangeMode === 'barter') {
                 exchangeData.barterOffer = formData.barterOffer;
                 exchangeData.barterNeed = formData.barterNeed;
@@ -1236,12 +1286,40 @@ function editSetupFormHandlers() {
                 exchangeData.hybridEquityDetails = formData.hybridEquityDetails || '';
                 exchangeData.hybridBarterDetails = formData.hybridBarterDetails || '';
             }
+
+            let value_exchange = null;
+            const estimator = window.valueEstimator;
+            if (estimator) {
+                const valueExpected = (editingOpportunity.value_exchange && editingOpportunity.value_exchange.value_expected) || [];
+                value_exchange = estimator.buildValueExchange(exchangeData, formData.exchangeMode, valueExpected);
+                if (formData.exchangeMode === 'hybrid' && !estimator.validateHybrid(exchangeData)) {
+                    throw new Error('Hybrid mode must include at least 2 value types with non-zero percentages.');
+                }
+                if (value_exchange.estimated_value != null && exchangeData.budgetRange && !estimator.isWithinBudgetRange(value_exchange.estimated_value, exchangeData.budgetRange)) {
+                    const min = exchangeData.budgetRange.min;
+                    const max = exchangeData.budgetRange.max;
+                    if (!confirm('Estimated value is outside the budget range. Continue anyway?')) return;
+                }
+            }
             
             // Update location string
             editUpdateLocationString();
             
-            // paymentModes for matching: use current exchange mode
-            const paymentModes = formData.exchangeMode ? [formData.exchangeMode] : (editingOpportunity.paymentModes || (editingOpportunity.exchangeMode ? [editingOpportunity.exchangeMode] : ['cash']));
+            // Common attributes: key dates and location requirement
+            const locationRequirement = document.getElementById('location-requirement')?.value?.trim();
+            const attrStartDate = document.getElementById('attr-startDate')?.value?.trim();
+            const attrApplicationDeadline = document.getElementById('attr-applicationDeadline')?.value?.trim();
+            const attrEndDate = document.getElementById('attr-endDate')?.value?.trim();
+            if (locationRequirement) formData.locationRequirement = locationRequirement;
+            if (attrStartDate) formData.startDate = attrStartDate;
+            if (attrApplicationDeadline) formData.applicationDeadline = attrApplicationDeadline;
+            if (attrEndDate) formData.endDate = attrEndDate;
+            
+            // paymentModes from checkboxes or fallback to primary exchange mode
+            const paymentMethodCheckboxes = document.querySelectorAll('.payment-method-cb:checked');
+            const paymentModes = paymentMethodCheckboxes.length > 0
+                ? Array.from(paymentMethodCheckboxes).map(cb => cb.value)
+                : (formData.exchangeMode ? [formData.exchangeMode] : (editingOpportunity.paymentModes || (editingOpportunity.exchangeMode ? [editingOpportunity.exchangeMode] : ['cash'])));
             
             // scope for matching: from form (attributes) or existing opportunity
             const attrs = formData || {};
@@ -1276,6 +1354,7 @@ function editSetupFormHandlers() {
                 attributes: formData,
                 modelData: formData
             };
+            if (value_exchange) updates.value_exchange = value_exchange;
             
             const updated = await dataService.updateOpportunity(editingOpportunity.id, updates);
             

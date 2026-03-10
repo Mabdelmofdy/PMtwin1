@@ -31,6 +31,7 @@ const CONFIG = {
         CONNECTIONS: 'pmtwin_connections',
         MESSAGES: 'pmtwin_messages',
         CONTRACTS: 'pmtwin_contracts',
+        NEGOTIATIONS: 'pmtwin_negotiations',
         REVIEWS: 'pmtwin_reviews',
         SYSTEM_SETTINGS: 'pmtwin_system_settings',
         LOOKUPS_OVERRIDE: 'pmtwin_lookups_override',
@@ -117,7 +118,8 @@ const CONFIG = {
     // Opportunity Intent (label-driven)
     OPPORTUNITY_INTENT: {
         REQUEST: 'request',
-        OFFER: 'offer'
+        OFFER: 'offer',
+        HYBRID: 'hybrid'
     },
 
     // Collaboration Model (wizard step 4)
@@ -176,6 +178,14 @@ const CONFIG = {
         CLARIFICATION_REQUESTED: 'clarification_requested'
     },
 
+    // Expertise verification status (professional/consultant/company)
+    VERIFICATION_STATUS: {
+        UNVERIFIED: 'unverified',
+        PROFESSIONAL_VERIFIED: 'professional_verified',
+        CONSULTANT_VERIFIED: 'consultant_verified',
+        COMPANY_VERIFIED: 'company_verified'
+    },
+
     // Matching
     MATCHING: {
         MIN_THRESHOLD: 0.70, // 70% minimum match score
@@ -184,12 +194,37 @@ const CONFIG = {
         CANDIDATE_MAX: 200,
         POST_TO_POST_THRESHOLD: 0.50,
         WEIGHTS: {
-            ATTRIBUTE_OVERLAP: 0.40,
-            BUDGET_FIT: 0.30,
-            TIMELINE: 0.15,
+            SKILL_MATCH: 0.25,
+            EXCHANGE_COMPATIBILITY: 0.20,
+            VALUE_COMPATIBILITY: 0.20,
+            BUDGET_FIT: 0.10,
+            TIMELINE: 0.10,
             LOCATION: 0.10,
-            REPUTATION: 0.05
+            REPUTATION: 0.05,
+            // Legacy aliases
+            ATTRIBUTE_OVERLAP: 0.25,
+            BUDGET_FIT_LEGACY: 0.10
         },
+        // Value normalization risk factors (used by value-normalizer)
+        VALUE_RISK_FACTORS: {
+            cash: 1.0,
+            equity: 0.6,
+            profit_share: 0.5,
+            service: 0.85,
+            equipment: 0.9,
+            resource: 0.85,
+            knowledge: 0.7,
+            barter: 0.75,
+            hybrid: 0.8
+        },
+        // Negotiation
+        NEGOTIATION: {
+            MAX_ROUNDS: 10,
+            EXPIRE_DAYS: 14,
+            STATUS: { OPEN: 'open', COUNTER_OFFERED: 'counter_offered', AGREED: 'agreed', FAILED: 'failed', EXPIRED: 'expired' }
+        },
+        // Opportunity–candidate matching: extra weight for value compatibility (budget + exchange mode)
+        VALUE_COMPATIBILITY_MAX_POINTS: 15,
         LABEL_THRESHOLDS: { MATCH: 1, PARTIAL: 0.25 }
     },
     

@@ -21,6 +21,16 @@ async function initDashboard(params) {
 
     await loadDashboardData(user.id);
 
+    // Show verification reminder for unverified professionals/consultants
+    const unverifiedReminder = document.getElementById('dashboard-unverified-reminder');
+    if (unverifiedReminder) {
+        const isIndividual = user.role === CONFIG.ROLES.PROFESSIONAL || user.role === CONFIG.ROLES.CONSULTANT;
+        const verificationStatus = user.profile?.verificationStatus;
+        const vettingSkipped = user.profile?.vettingSkippedAtRegistration === true;
+        const showReminder = isIndividual && (verificationStatus === CONFIG.VERIFICATION_STATUS.UNVERIFIED || (vettingSkipped && !verificationStatus));
+        unverifiedReminder.style.display = showReminder ? 'block' : 'none';
+    }
+
     const isCompany = authService.isCompanyUser && authService.isCompanyUser();
     if (isCompany) {
         loadCompanyRecommendations(user.id);

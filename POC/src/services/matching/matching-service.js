@@ -11,11 +11,55 @@ class MatchingService {
     }
 
     /**
+     * Detect which matching models apply to this opportunity (for auto-routing).
+     * @param {Object} opportunity
+     * @returns {string[]} model names: one_way, two_way, consortium, circular
+     */
+    detectMatchingModel(opportunity) {
+        const intent = opportunity.intent || 'request';
+        const hasNeed = intent === 'request' || intent === 'hybrid';
+        const hasOffer = intent === 'offer' || intent === 'hybrid';
+        const acceptedModes = opportunity.value_exchange?.accepted_modes || [];
+        const isBarter = (opportunity.exchangeMode || '').toLowerCase() === 'barter' ||
+            acceptedModes.some(m => String(m).toLowerCase() === 'barter');
+        const hasRoles = Array.isArray(opportunity.attributes?.memberRoles) && opportunity.attributes.memberRoles.length > 0 ||
+            Array.isArray(opportunity.attributes?.partnerRoles) && opportunity.attributes.partnerRoles.length > 0;
+        const subModelType = (opportunity.subModelType || '').toLowerCase();
+
+        const modelList = [];
+        if (hasNeed) modelList.push('one_way');
+        if (isBarter && (hasNeed || hasOffer)) modelList.push('two_way');
+        if (hasRoles || subModelType === 'consortium') modelList.push('consortium');
+        return modelList;
+    }
+
+    /**
+     * Add recommendation tier and composite rank to post-to-post matches.
+     */
+    rankMatches(matches, model) {
+        const vc = window.valueCompatibility || (typeof valueCompatibility !== 'undefined' ? valueCompatibility : null);
+        return (matches || []).map(m => {
+            const valueFit = (m.valueAnalysis && m.valueAnalysis.valueFit) || (m.valueAnalysis && m.valueAnalysis.equivalence && m.valueAnalysis.equivalence.equivalenceScore >= 0.7 ? 'strong' : null);
+            const coverageRatio = (m.valueAnalysis && m.valueAnalysis.coverageRatio) != null ? m.valueAnalysis.coverageRatio : (m.valueAnalysis && m.valueAnalysis.equivalence ? (m.valueAnalysis.equivalence.aCoversB + m.valueAnalysis.equivalence.bCoversA) / 2 : 0.5);
+            const repScore = (m.breakdown && m.breakdown.reputation) != null ? m.breakdown.reputation : 0.5;
+            const timelineScore = (m.breakdown && m.breakdown.timelineFit) != null ? m.breakdown.timelineFit : 0.5;
+            const compositeRank = 0.50 * (m.matchScore || 0) + 0.30 * (coverageRatio != null ? Math.min(coverageRatio, 1) : 0.5) + 0.10 * repScore + 0.10 * timelineScore;
+            const tier = (m.matchScore >= 0.85 && valueFit === 'strong') ? 'top' : (m.matchScore >= 0.70 ? 'good' : 'possible');
+            const recommendation = {
+                tier,
+                reason: tier === 'top' ? 'Strong skill and value fit' : (tier === 'good' ? 'Good match; review value terms' : 'Possible match; negotiation may be needed'),
+                actionRequired: tier === 'top' ? 'Ready to contract' : (tier === 'good' ? 'Review and negotiate' : 'Negotiate value exchange')
+            };
+            return Object.assign({}, m, { compositeRank, recommendation, scoreBreakdown: m.breakdown });
+        }).sort((a, b) => (b.compositeRank != null ? b.compositeRank : b.matchScore) - (a.compositeRank != null ? a.compositeRank : a.matchScore));
+    }
+
+    /**
      * Post-to-post matching: route by post type and options, return { model, matches }.
-     * Models: one_way (Need -> Offers), two_way (barter), consortium, circular.
+     * When options.model is omitted, auto-detects and may run multiple models and merge (one_way + two_way if barter, etc.).
      */
     async findMatchesForPost(opportunityId, options = {}) {
-        const models = window.matchingModels || typeof matchingModels !== 'undefined' && matchingModels;
+        const models = window.matchingModels || (typeof matchingModels !== 'undefined' && matchingModels);
         if (!models) return { model: 'one_way', matches: [] };
 
         const opportunity = await this.dataService.getOpportunityById(opportunityId);
@@ -26,20 +70,35 @@ class MatchingService {
         const subModelType = (opportunity.subModelType || '').toLowerCase();
 
         if (options.model === 'circular') {
-            return await models.findCircularExchanges(options);
+            const result = await models.findCircularExchanges(options);
+            result.matches = this.rankMatches(result.matches || [], 'circular');
+            return result;
         }
         if (options.model === 'consortium' || subModelType === 'consortium') {
             const result = await models.findConsortiumCandidates(opportunityId, options);
+            result.matches = this.rankMatches(result.matches || [], 'consortium');
             return result;
         }
-        if ((options.model === 'two_way' || exchangeMode === 'barter') && intent === 'offer') {
-            return await models.findBarterMatches(opportunityId, options);
-        }
-        if ((options.model === 'two_way' || exchangeMode === 'barter') && intent === 'request') {
-            return await models.findBarterMatches(opportunityId, options);
+        if (options.model === 'two_way' || exchangeMode === 'barter') {
+            const result = await models.findBarterMatches(opportunityId, options);
+            result.matches = this.rankMatches(result.matches || [], 'two_way');
+            return result;
         }
         if (intent === 'request') {
-            return await models.findOffersForNeed(opportunityId, options);
+            const result = await models.findOffersForNeed(opportunityId, options);
+            result.matches = this.rankMatches(result.matches || [], 'one_way');
+            return result;
+        }
+        if (intent === 'offer') {
+            const result = await models.findNeedsForOffer(opportunityId, options);
+            result.matches = this.rankMatches(result.matches || [], 'one_way');
+            return result;
+        }
+        if (intent === 'hybrid') {
+            const oneWay = await models.findOffersForNeed(opportunityId, options);
+            const twoWay = await models.findBarterMatches(opportunityId, options);
+            const combined = this.rankMatches([].concat(oneWay.matches || [], twoWay.matches || []));
+            return { model: 'auto', matches: combined, byModel: { one_way: oneWay.matches, two_way: twoWay.matches } };
         }
         return { model: 'one_way', matches: [] };
     }
@@ -113,11 +172,15 @@ class MatchingService {
         const skills = scope.requiredSkills || scope.offeredSkills || [];
         const skillsArr = Array.isArray(skills) ? skills : (skills ? [skills] : []);
         if (skillsArr.length > 0) {
+            const professionalFieldLabels = (candidateProfile.professionalFields || [])
+                .map(pf => pf.label || pf.fieldId)
+                .filter(Boolean);
             const rawCandidateSkills = [].concat(
                 candidateProfile.specializations || [],
                 candidateProfile.skills || [],
                 candidateProfile.services || [],
-                (candidateProfile.classifications || []).map(c => typeof c === 'string' ? c : c.label)
+                (candidateProfile.classifications || []).map(c => typeof c === 'string' ? c : c.label),
+                professionalFieldLabels
             ).filter(Boolean);
 
             const svc = window.skillService || (typeof skillService !== 'undefined' ? skillService : null);
@@ -161,8 +224,9 @@ class MatchingService {
         if (certArr.length > 0) {
             const candidateCerts = candidateProfile.certifications || [];
             const candCerts = Array.isArray(candidateCerts) ? candidateCerts : (candidateCerts ? [candidateCerts] : []);
+            const candCertStrings = candCerts.map(cd => typeof cd === 'object' && cd !== null && cd.name != null ? cd.name : String(cd));
             const certMatch = certArr.filter(c =>
-                candCerts.some(cd => String(cd).toLowerCase().includes(String(c).toLowerCase()))
+                candCertStrings.some(cd => cd.toLowerCase().includes(String(c).toLowerCase()))
             ).length;
             totalScore += (certMatch / certArr.length) * 15;
             maxScore += 15;
@@ -170,15 +234,39 @@ class MatchingService {
         
         // Payment compatibility: opportunity.paymentModes vs candidate preferredPaymentModes (use same id convention, e.g. lookup ids: cash, barter, equity)
         const paymentModes = opportunity.paymentModes || (opportunity.exchangeMode ? [opportunity.exchangeMode] : []);
+        let paymentCompatible = false;
         if (paymentModes.length > 0) {
             const candidatePreferred = candidateProfile.preferredPaymentModes || candidateProfile.exchangeTypes || [];
             const preferredArr = Array.isArray(candidatePreferred) ? candidatePreferred : (candidatePreferred ? [candidatePreferred] : []);
-            const compatible = paymentModes.some(pm =>
+            paymentCompatible = paymentModes.some(pm =>
                 preferredArr.some(pp => String(pp).toLowerCase() === String(pm).toLowerCase())
             );
-            totalScore += compatible ? 10 : (preferredArr.length === 0 ? 5 : 0);
+            totalScore += paymentCompatible ? 10 : (preferredArr.length === 0 ? 5 : 0);
             maxScore += 10;
         }
+
+        // Value compatibility: budget fit (opportunity estimated_value / budgetRange vs candidate desired range if any)
+        const valueCompatPoints = CONFIG.MATCHING.VALUE_COMPATIBILITY_MAX_POINTS != null ? CONFIG.MATCHING.VALUE_COMPATIBILITY_MAX_POINTS : 15;
+        const oppBudget = opportunity.exchangeData?.budgetRange || opportunity.attributes?.budgetRange;
+        const oppEstimated = (opportunity.value_exchange && opportunity.value_exchange.estimated_value) != null
+            ? Number(opportunity.value_exchange.estimated_value)
+            : (oppBudget && (oppBudget.min != null || oppBudget.max != null))
+                ? ((Number(oppBudget.min) || 0) + (Number(oppBudget.max) || 0)) / 2
+                : null;
+        const candMin = candidateProfile.desiredBudgetMin != null ? Number(candidateProfile.desiredBudgetMin) : (candidateProfile.salaryRange && candidateProfile.salaryRange.min != null ? Number(candidateProfile.salaryRange.min) : null);
+        const candMax = candidateProfile.desiredBudgetMax != null ? Number(candidateProfile.desiredBudgetMax) : (candidateProfile.salaryRange && candidateProfile.salaryRange.max != null ? Number(candidateProfile.salaryRange.max) : null);
+        let valueCompatScore = 0.5;
+        if (oppEstimated != null && !isNaN(oppEstimated)) {
+            if (candMin != null && candMax != null && !isNaN(candMin) && !isNaN(candMax)) {
+                const overlapMin = Math.max(oppBudget?.min != null ? Number(oppBudget.min) : 0, candMin);
+                const overlapMax = Math.min(oppBudget?.max != null ? Number(oppBudget.max) : oppEstimated * 2, candMax);
+                valueCompatScore = overlapMax > overlapMin ? Math.min(1, (overlapMax - overlapMin) / (candMax - candMin)) : 0;
+            } else {
+                valueCompatScore = 1;
+            }
+        }
+        totalScore += valueCompatScore * valueCompatPoints;
+        maxScore += valueCompatPoints;
         
         const modelType = opportunity.modelType;
         const subModelType = opportunity.subModelType;

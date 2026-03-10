@@ -396,7 +396,25 @@
   ],
   "intentLabels": [
     { "id": "request", "label": "NEED" },
-    { "id": "offer", "label": "OFFER" }
+    { "id": "offer", "label": "OFFER" },
+    { "id": "hybrid", "label": "NEED + OFFER" }
+  ],
+  "valueCategories": [
+    { "id": "cash", "label": "Cash" },
+    { "id": "service", "label": "Service" },
+    { "id": "equipment", "label": "Equipment" },
+    { "id": "resource", "label": "Resource" },
+    { "id": "equity", "label": "Equity" },
+    { "id": "knowledge", "label": "Knowledge" },
+    { "id": "barter", "label": "Barter" },
+    { "id": "profit_share", "label": "Profit Share" }
+  ],
+  "negotiationStatuses": [
+    { "id": "open", "label": "Open" },
+    { "id": "counter_offered", "label": "Counter Offered" },
+    { "id": "agreed", "label": "Agreed" },
+    { "id": "failed", "label": "Failed" },
+    { "id": "expired", "label": "Expired" }
   ],
   "collaborationModels": [
     { "id": "project", "label": "Project" },
@@ -459,40 +477,41 @@
   },
   "companyRoleDocuments": {
     "beneficiary": [
-      { "id": "cr", "label": "Commercial Registration (CR)", "required": true },
-      { "id": "vat", "label": "VAT Certificate", "required": true },
-      { "id": "company_profile", "label": "Company Profile", "required": true }
+      { "id": "cr", "label": "Commercial registration (CR)", "required": true },
+      { "id": "vat", "label": "Tax ID (VAT)", "required": true },
+      { "id": "company_profile", "label": "Company license", "required": true }
     ],
     "vendor": [
-      { "id": "cr", "label": "Commercial Registration (CR)", "required": true },
-      { "id": "vat", "label": "VAT Certificate", "required": true },
-      { "id": "trade_license", "label": "Trade License", "required": true }
+      { "id": "cr", "label": "Commercial registration (CR)", "required": true },
+      { "id": "vat", "label": "Tax ID (VAT)", "required": true },
+      { "id": "trade_license", "label": "Company license", "required": true }
     ],
     "skill_service_provider": [
-      { "id": "cr", "label": "Commercial Registration (CR)", "required": true },
-      { "id": "vat", "label": "VAT Certificate", "required": true },
+      { "id": "cr", "label": "Commercial registration (CR)", "required": true },
+      { "id": "vat", "label": "Tax ID (VAT)", "required": true },
       { "id": "certifications", "label": "Certifications", "required": true }
     ],
     "sub_contractor": [
-      { "id": "cr", "label": "Commercial Registration (CR)", "required": true },
-      { "id": "vat", "label": "VAT Certificate", "required": true },
-      { "id": "trade_license", "label": "Trade License", "required": true }
+      { "id": "cr", "label": "Commercial registration (CR)", "required": true },
+      { "id": "vat", "label": "Tax ID (VAT)", "required": true },
+      { "id": "trade_license", "label": "Company license", "required": true }
     ],
     "consultant_company": [
-      { "id": "cr", "label": "Commercial Registration (CR)", "required": true },
-      { "id": "vat", "label": "VAT Certificate", "required": true },
-      { "id": "company_profile", "label": "Company Profile", "required": true }
+      { "id": "cr", "label": "Commercial registration (CR)", "required": true },
+      { "id": "vat", "label": "Tax ID (VAT)", "required": true },
+      { "id": "company_profile", "label": "Company license", "required": true }
     ]
   },
   "individualTypeDocuments": {
     "professional": [
       { "id": "national_id_passport", "label": "National ID / Passport", "required": true },
       { "id": "cv_resume", "label": "CV / Resume", "required": true },
-      { "id": "certificates", "label": "Certificates (optional)", "required": false }
+      { "id": "certificates", "label": "Certifications", "required": false }
     ],
     "consultant": [
       { "id": "professional_license", "label": "Professional License / Certification", "required": true },
       { "id": "cv_resume", "label": "CV / Resume", "required": true },
+      { "id": "case_studies", "label": "Case studies (optional)", "required": false },
       { "id": "portfolio", "label": "Portfolio (optional)", "required": false }
     ]
   },
@@ -509,5 +528,30 @@
       "portfolio": "required",
       "interview": "required"
     }
-  }
+  },
+  "professionalFields": [
+    { "id": "engineering", "label": "Engineering" },
+    { "id": "project_management", "label": "Project Management" },
+    { "id": "architecture", "label": "Architecture" },
+    { "id": "quantity_surveying", "label": "Quantity Surveying" },
+    { "id": "site_supervision", "label": "Site Supervision" },
+    { "id": "safety", "label": "Safety" },
+    { "id": "construction_management", "label": "Construction Management" },
+    { "id": "bim", "label": "BIM" },
+    { "id": "project_controls", "label": "Project Controls" },
+    { "id": "mep", "label": "MEP" },
+    { "id": "design", "label": "Design" },
+    { "id": "other", "label": "Other" }
+  ],
+  "expertiseLevelPerField": [
+    { "id": "professional", "label": "Professional" },
+    { "id": "consultant", "label": "Consultant" }
+  ],
+  "preferredCollaborationLabels": [
+    { "id": "advisory", "label": "Consulting" },
+    { "id": "project_based", "label": "Project-based collaboration" },
+    { "id": "strategic_partnership", "label": "Strategic partnership" },
+    { "id": "consortium", "label": "Consortium" },
+    { "id": "resource_pooling", "label": "Resource sharing" }
+  ]
 }

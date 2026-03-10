@@ -1,12 +1,12 @@
 # Matching Readiness Report
 
-Generated: 2026-03-05T13:31:57.141Z
+Generated: 2026-03-06T12:50:46.835Z
 
 ## One-way matching (need → offers)
 
 - **Status:** Ready
-- **Needs (published, intent=request):** 11
-- **Offers (published, intent=offer):** 10
+- **Needs (published, intent=request):** 22
+- **Offers (published, intent=offer):** 16
 - **Requirement:** At least one need and one offer with overlapping skills/sectors so the matcher can return results.
 
 ## Two-way barter matching
@@ -18,8 +18,8 @@ Generated: 2026-03-05T13:31:57.141Z
 ## Consortium (group formation)
 
 - **Status:** Ready
-- **Consortium lead needs:** 1 (memberRoles or subModelType=consortium)
-- **Other published offers:** 10
+- **Consortium lead needs:** 6 (memberRoles or subModelType=consortium)
+- **Other published offers:** 16
 - **Requirement:** At least one lead need with memberRoles and enough published offers from different creators to fill roles.
 
 ## Circular exchange

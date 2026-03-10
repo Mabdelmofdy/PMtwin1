@@ -25,7 +25,12 @@
     
     <div id="profile-clarification-banner" class="card border-warning mb-4" style="display: none;">
         <div class="card-body">
-            <p class="mb-2"><strong>Your registration needs clarification.</strong> Please update your profile or documents below, then click "Submit for review again" to resubmit for admin review.</p>
+            <p class="mb-2"><strong>Your registration needs clarification.</strong> You can upload additional documents below, then click "Submit for review again" to resubmit for admin review.</p>
+            <div id="profile-clarification-documents-wrap" class="mb-4" style="display: none;">
+                <h4 class="font-medium text-gray-700 mb-2">Verification documents</h4>
+                <p class="text-sm text-gray-600 mb-2">Add or replace documents to support your verification.</p>
+                <div id="profile-clarification-documents" class="space-y-3"></div>
+            </div>
             <button type="button" id="profile-submit-review-again" class="btn btn-primary">Submit for review again</button>
         </div>
     </div>
@@ -55,6 +60,10 @@
                     <div class="form-group">
                         <label class="form-label">Status</label>
                         <input type="text" id="profile-status" class="form-input" readonly>
+                    </div>
+                    <div id="profile-verification-group" class="form-group" style="display: none;">
+                        <label class="form-label">Verification</label>
+                        <div id="profile-verification-badge" class="mt-1"></div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Social media</label>
@@ -169,6 +178,11 @@
                             <div class="form-group"><label for="company-vettingCaseStudy-title" class="form-label">Case study title</label><input type="text" id="company-vettingCaseStudy-title" class="form-input" placeholder="Title"></div>
                             <div class="form-group"><label for="company-vettingCaseStudy-url" class="form-label">URL or document link</label><input type="url" id="company-vettingCaseStudy-url" class="form-input" placeholder="https://"></div>
                             <div class="form-group sm:col-span-2"><label for="company-vettingCaseStudy-description" class="form-label">Description</label><textarea id="company-vettingCaseStudy-description" class="form-input" rows="2" placeholder="Brief case study summary"></textarea></div>
+                            <div class="form-group sm:col-span-2">
+                                <label class="form-label">Supporting files</label>
+                                <div id="company-vettingCaseStudy-documents" class="space-y-2 mb-2"></div>
+                                <button type="button" id="company-add-vettingCaseStudy-doc" class="btn btn-secondary btn-sm">Add file</button>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                     </form>
@@ -219,9 +233,12 @@
                             <div class="profile-view-item sm:col-span-2"><span class="text-gray-600">Preferred Collaboration Models</span><span id="view-prof-preferredModels">—</span></div>
                             <div class="profile-view-item"><span class="text-gray-600">Primary domain</span><span id="view-prof-primaryDomain">—</span></div>
                             <div class="profile-view-item sm:col-span-2"><span class="text-gray-600">Expertise areas</span><span id="view-prof-expertiseAreas">—</span></div>
+                            <div class="profile-view-item sm:col-span-2"><span class="text-gray-600">Professional fields</span><span id="view-prof-professionalFields">—</span></div>
                         </div>
                         <h4 class="font-medium text-gray-700 mb-2 mt-4">Portfolio / case studies</h4>
                         <div id="view-prof-caseStudies" class="space-y-2 mb-4"></div>
+                        <h4 class="font-medium text-gray-700 mb-2 mt-4">Portfolio</h4>
+                        <div id="view-prof-portfolio" class="space-y-2 mb-4">—</div>
                         <h4 class="font-medium text-gray-700 mb-2 mt-4">References & testimonials</h4>
                         <div id="view-prof-references" class="space-y-2 mb-4"></div>
                         <h4 class="font-medium text-gray-700 mb-2 mt-4">Vetting steps</h4>
@@ -258,7 +275,12 @@
                             </div>
                             <div class="form-group"><label for="prof-sectors" class="form-label">Sectors / Industry</label><input type="text" id="prof-sectors" name="sectors" class="form-input" placeholder="Comma-separated (e.g. Construction, Energy)"></div>
                             <div class="form-group"><label for="prof-education" class="form-label">Education</label><input type="text" id="prof-education" name="education" class="form-input"></div>
-                            <div class="form-group"><label for="certifications" class="form-label">Certifications</label><input type="text" id="certifications" name="certifications" class="form-input" placeholder="Comma-separated"></div>
+                            <div class="form-group sm:col-span-2">
+                                <label class="form-label">Certifications &amp; qualifications</label>
+                                <p class="text-sm text-gray-600 mb-2">Add certificates, degrees, or licenses. You can enter a name and optional URL, or upload a file (POC: stored in browser).</p>
+                                <div id="prof-certifications-list" class="space-y-2 mb-2"></div>
+                                <button type="button" id="prof-add-certification" class="btn btn-secondary btn-sm">Add certification</button>
+                            </div>
                             <div class="form-group"><label for="years-experience" class="form-label">Years of Experience</label><input type="number" id="years-experience" name="yearsExperience" class="form-input" min="0"></div>
                             <div class="form-group"><label for="prof-services" class="form-label">Services</label><input type="text" id="prof-services" name="services" class="form-input" placeholder="Comma-separated"></div>
                             <div class="form-group sm:col-span-2"><label for="prof-interests" class="form-label">Interests</label><input type="text" id="prof-interests" name="interests" class="form-input" placeholder="Comma-separated"></div>
@@ -274,6 +296,12 @@
                             <div class="form-group sm:col-span-2"><label class="form-label">Preferred Collaboration Models</label><div id="prof-preferredModels-checkboxes" class="flex flex-wrap gap-2"></div></div>
                             <div class="form-group"><label for="prof-primaryDomain" class="form-label">Primary domain</label><select id="prof-primaryDomain" name="primaryDomain" class="form-input"><option value="">Select domain</option></select></div>
                             <div class="form-group sm:col-span-2">
+                                <label class="form-label">Professional fields</label>
+                                <p class="text-sm text-gray-600 mb-2">Select primary and secondary fields; set expertise level (Professional / Consultant) and experience level for each.</p>
+                                <div id="prof-professionalFields-list" class="space-y-2 mb-2"></div>
+                                <button type="button" id="prof-add-professionalField" class="btn btn-secondary btn-sm">Add field</button>
+                            </div>
+                            <div class="form-group sm:col-span-2">
                                 <label class="form-label">Expertise areas (domain + role)</label>
                                 <div id="prof-expertiseAreas-list" class="space-y-2 mb-2"></div>
                                 <button type="button" id="prof-add-expertise" class="btn btn-secondary btn-sm">Add expertise area</button>
@@ -284,17 +312,32 @@
                                 <button type="button" id="prof-add-caseStudy" class="btn btn-secondary btn-sm">Add case study</button>
                             </div>
                             <div class="form-group sm:col-span-2">
+                                <label class="form-label">Portfolio</label>
+                                <p class="text-sm text-gray-600 mb-2">Showcase projects: title, description, your role, results, and optional links.</p>
+                                <div id="prof-portfolio-list" class="space-y-3 mb-3"></div>
+                                <button type="button" id="prof-add-portfolio" class="btn btn-secondary btn-sm">Add portfolio item</button>
+                            </div>
+                            <div class="form-group sm:col-span-2">
                                 <label class="form-label">References & testimonials</label>
                                 <div id="prof-references-list" class="space-y-3 mb-3"></div>
                                 <button type="button" id="prof-add-reference" class="btn btn-secondary btn-sm">Add reference</button>
                             </div>
                         </div>
                         <h4 class="font-medium text-gray-700 mb-2 mt-4">Vetting: case study</h4>
-                        <p id="prof-vetting-case-study-hint" class="text-sm text-gray-600 mb-2">Optional for Professionals; required for Consultants.</p>
+                        <p id="prof-vetting-case-study-hint" class="text-sm text-gray-600 mb-2">Optional for Professionals; required for Consultants. Include project title, your role, problem, solution, and impact.</p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                            <div class="form-group"><label for="prof-vettingCaseStudy-title" class="form-label">Case study title</label><input type="text" id="prof-vettingCaseStudy-title" class="form-input" placeholder="Title"></div>
+                            <div class="form-group"><label for="prof-vettingCaseStudy-title" class="form-label">Project title</label><input type="text" id="prof-vettingCaseStudy-title" class="form-input" placeholder="Title"></div>
+                            <div class="form-group"><label for="prof-vettingCaseStudy-role" class="form-label">Your role</label><input type="text" id="prof-vettingCaseStudy-role" class="form-input" placeholder="e.g. Lead Consultant"></div>
+                            <div class="form-group sm:col-span-2"><label for="prof-vettingCaseStudy-problem" class="form-label">Problem</label><textarea id="prof-vettingCaseStudy-problem" class="form-input" rows="2" placeholder="Brief description of the challenge"></textarea></div>
+                            <div class="form-group sm:col-span-2"><label for="prof-vettingCaseStudy-solution" class="form-label">Solution</label><textarea id="prof-vettingCaseStudy-solution" class="form-input" rows="2" placeholder="What you did"></textarea></div>
+                            <div class="form-group sm:col-span-2"><label for="prof-vettingCaseStudy-impact" class="form-label">Impact</label><textarea id="prof-vettingCaseStudy-impact" class="form-input" rows="2" placeholder="Outcomes and results"></textarea></div>
                             <div class="form-group"><label for="prof-vettingCaseStudy-url" class="form-label">URL or document link</label><input type="url" id="prof-vettingCaseStudy-url" class="form-input" placeholder="https://"></div>
-                            <div class="form-group sm:col-span-2"><label for="prof-vettingCaseStudy-description" class="form-label">Description</label><textarea id="prof-vettingCaseStudy-description" class="form-input" rows="2" placeholder="Brief case study summary"></textarea></div>
+                            <div class="form-group sm:col-span-2"><label for="prof-vettingCaseStudy-description" class="form-label">Description (summary)</label><textarea id="prof-vettingCaseStudy-description" class="form-input" rows="2" placeholder="Brief case study summary"></textarea></div>
+                            <div class="form-group sm:col-span-2">
+                                <label class="form-label">Supporting files</label>
+                                <div id="prof-vettingCaseStudy-documents" class="space-y-2 mb-2"></div>
+                                <button type="button" id="prof-add-vettingCaseStudy-doc" class="btn btn-secondary btn-sm">Add file</button>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                     </form>

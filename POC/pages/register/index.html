@@ -19,15 +19,28 @@
             
             <!-- Step 0: Account type selection -->
             <div id="reg-step-0" class="reg-step-content">
-                <p class="block mb-4 font-medium text-gray-900">I am registering as:</p>
+                <p class="block mb-4 font-medium text-gray-900">Select your account type so we can guide you through the right verification process:</p>
                 <div class="space-y-3">
-                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-colors has-[:checked]:border-primary has-[:checked]:bg-blue-50">
-                        <input type="radio" name="accountType" value="company" class="mr-3 w-4 h-4 text-primary">
-                        <span class="font-medium text-gray-900">Company / Entity</span>
+                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-colors has-[:checked]:border-primary has-[:checked]:bg-blue-50">
+                        <input type="radio" name="accountType" value="professional" class="mr-3 mt-1 w-4 h-4 text-primary">
+                        <div>
+                            <span class="font-medium text-gray-900">Professional</span>
+                            <p class="text-sm text-gray-600 mt-1">Hands-on delivery: design, engineering, project execution. Verification: CV, experience, skills.</p>
+                        </div>
                     </label>
-                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-colors has-[:checked]:border-primary has-[:checked]:bg-blue-50">
-                        <input type="radio" name="accountType" value="individual" class="mr-3 w-4 h-4 text-primary">
-                        <span class="font-medium text-gray-900">Individual (Professional / Consultant)</span>
+                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-colors has-[:checked]:border-primary has-[:checked]:bg-blue-50">
+                        <input type="radio" name="accountType" value="consultant" class="mr-3 mt-1 w-4 h-4 text-primary">
+                        <div>
+                            <span class="font-medium text-gray-900">Consultant</span>
+                            <p class="text-sm text-gray-600 mt-1">Advisory and strategic input: expertise review, advice, case-based validation. Verification: certificates, case studies, interview.</p>
+                        </div>
+                    </label>
+                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-colors has-[:checked]:border-primary has-[:checked]:bg-blue-50">
+                        <input type="radio" name="accountType" value="company" class="mr-3 mt-1 w-4 h-4 text-primary">
+                        <div>
+                            <span class="font-medium text-gray-900">Company</span>
+                            <p class="text-sm text-gray-600 mt-1">Organization or entity. Verification: commercial registration, tax ID, company license.</p>
+                        </div>
                     </label>
                 </div>
                 <div class="mt-6 flex justify-end">
@@ -191,14 +204,21 @@
             <!-- Individual path: B1 Type -->
             <div id="reg-step-b1" class="reg-step-content hidden">
                 <h2 class="text-lg font-semibold text-gray-900 mb-4">Individual type</h2>
+                <p class="text-gray-600 mb-4">Choose how you will use the platform. You can change this later in Settings.</p>
                 <div class="space-y-3">
-                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-blue-50">
-                        <input type="radio" name="individualType" value="professional" class="mr-3 w-4 h-4 text-primary">
-                        <span class="font-medium text-gray-900">Professional</span>
+                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-blue-50">
+                        <input type="radio" name="individualType" value="professional" class="mr-3 mt-1 w-4 h-4 text-primary">
+                        <div>
+                            <span class="font-medium text-gray-900">Professional</span>
+                            <p class="text-sm text-gray-600 mt-1">Hands-on delivery: design, engineering, project execution, and technical work.</p>
+                        </div>
                     </label>
-                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-blue-50">
-                        <input type="radio" name="individualType" value="consultant" class="mr-3 w-4 h-4 text-primary">
-                        <span class="font-medium text-gray-900">Consultant</span>
+                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-blue-50">
+                        <input type="radio" name="individualType" value="consultant" class="mr-3 mt-1 w-4 h-4 text-primary">
+                        <div>
+                            <span class="font-medium text-gray-900">Consultant</span>
+                            <p class="text-sm text-gray-600 mt-1">Advisory and strategic input: expertise review, advice, and case-based validation.</p>
+                        </div>
                     </label>
                 </div>
                 <div class="mt-6 flex justify-between">
@@ -310,18 +330,18 @@
                 </div>
             </div>
             
-            <!-- Individual path: B5 Vetting (optional) -->
+            <!-- Individual path: B5 Verification (optional) -->
             <div id="reg-step-b5" class="reg-step-content hidden">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Vetting</h2>
-                <p class="text-gray-600 mb-4">You can complete vetting now to get full access to opportunities, or skip and complete it later from your profile.</p>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Verification</h2>
+                <p class="text-gray-600 mb-4">You can start verification now to get full access to opportunity details, or skip for now. You can return to verification later from the Profile page.</p>
                 <div class="mb-4 space-y-2">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="reg-vetting-choice-ind" value="skip" class="w-4 h-4 text-primary">
-                        <span>Skip and complete later</span>
+                        <input type="radio" name="reg-vetting-choice-ind" value="complete" class="w-4 h-4 text-primary">
+                        <span>Start verification</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="reg-vetting-choice-ind" value="complete" class="w-4 h-4 text-primary">
-                        <span>Complete vetting now</span>
+                        <input type="radio" name="reg-vetting-choice-ind" value="skip" class="w-4 h-4 text-primary">
+                        <span>Skip for now</span>
                     </label>
                 </div>
                 <div id="reg-vetting-form-individual" class="mb-6 hidden">

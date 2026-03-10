@@ -28,6 +28,32 @@
         return window.postPreprocessor || global.postPreprocessor;
     }
 
+    function getValueCompatibility() {
+        return window.valueCompatibility || global.valueCompatibility || null;
+    }
+
+    /** Build a synthetic "post" for barter side: need (expected) + offer (offered). */
+    function barterSidePost(needPost, offerPost) {
+        const vc = getValueCompatibility();
+        const getNorm = vc && vc.getNormalized ? vc.getNormalized : function (p) {
+            const ve = p.value_exchange || {};
+            const est = ve.estimated_value != null ? Number(ve.estimated_value) : 0;
+            return { totalOffered: est, totalExpected: est, riskAdjustedOffered: est, riskAdjustedExpected: est };
+        };
+        const needNorm = getNorm(needPost);
+        const offerNorm = getNorm(offerPost);
+        return {
+            value_exchange: {
+                _normalized: {
+                    totalOffered: offerNorm.totalOffered,
+                    totalExpected: needNorm.totalExpected,
+                    riskAdjustedOffered: offerNorm.riskAdjustedOffered,
+                    riskAdjustedExpected: needNorm.riskAdjustedExpected
+                }
+            }
+        };
+    }
+
     /** Estimate numeric value (SAR) from opportunity for value equivalence. */
     function estimateValueSar(opportunity) {
         const ed = opportunity.exchangeData || {};
@@ -99,10 +125,13 @@
                 console.log('[matching-models one-way] needId=' + needPostId + ' offerId=' + offer.id + ' score=' + score + ' below threshold ' + POST_THRESHOLD);
             }
             if (score < POST_THRESHOLD) continue;
+            const vc = getValueCompatibility();
+            const valueAnalysis = vc && vc.oneWayValueFit ? vc.oneWayValueFit(needPost, offer) : null;
             results.push({
                 matchScore: score,
                 breakdown,
                 labels,
+                valueAnalysis: valueAnalysis || undefined,
                 suggestedPartners: [{ opportunityId: offer.id, creatorId: offer.creatorId }],
                 matchedOpportunity: offer
             });
@@ -110,6 +139,54 @@
         results.sort((a, b) => b.matchScore - a.matchScore);
         const topN = options.topN ?? 20;
         return { model: 'one_way', matches: results.slice(0, topN) };
+    }
+
+    /**
+     * One-Way reverse: Find top Need posts for an Offer post.
+     */
+    async function findNeedsForOffer(offerPostId, options = {}) {
+        const ds = getDataService();
+        const scoring = getScoring();
+        const gen = getCandidateGenerator();
+        const semantic = getSemanticProfile();
+        const preprocessor = getPreprocessor();
+
+        const offerPost = await ds.getOpportunityById(offerPostId);
+        if (!offerPost) return { model: 'one_way', direction: 'offer_to_needs', matches: [] };
+        if ((offerPost.intent || '') !== 'offer' || offerPost.status !== 'published') {
+            return { model: 'one_way', direction: 'offer_to_needs', matches: [] };
+        }
+
+        const all = await ds.getOpportunities();
+        const needPosts = all.filter(o => (o.intent || '') === 'request' && o.status === 'published');
+
+        const canonical = preprocessor ? await preprocessor.loadSkillCanonical(CONFIG.BASE_PATH || '') : {};
+        let offerNorm = offerPost.normalized;
+        if (!offerNorm && preprocessor) offerNorm = preprocessor.extractAndNormalize(offerPost, canonical);
+        const offerProfile = semantic ? semantic.buildSemanticProfile(offerNorm || {}, offerPost, canonical) : null;
+
+        const candidates = gen.getCandidatesForOffer(offerPost, needPosts, {
+            maxCandidates: options.maxCandidates ?? CANDIDATE_MAX,
+            offerNormalized: offerNorm
+        });
+
+        const results = [];
+        for (const need of candidates) {
+            const needNorm = need.normalized || (preprocessor ? preprocessor.extractAndNormalize(need, canonical) : {});
+            const needProfile = semantic && needNorm ? semantic.buildSemanticProfile(needNorm, need, {}) : null;
+            const { score, breakdown, labels } = scoring.scorePair(need, offerPost, needNorm, offerNorm, needProfile, offerProfile);
+            if (score < POST_THRESHOLD) continue;
+            results.push({
+                matchScore: score,
+                breakdown,
+                labels,
+                suggestedPartners: [{ opportunityId: need.id, creatorId: need.creatorId }],
+                matchedOpportunity: need
+            });
+        }
+        results.sort((a, b) => b.matchScore - a.matchScore);
+        const topN = options.topN ?? 20;
+        return { model: 'one_way', direction: 'offer_to_needs', matches: results.slice(0, topN) };
     }
 
     /**
@@ -153,10 +230,18 @@
                 if (scoreAtoB >= POST_THRESHOLD && scoreBtoA >= POST_THRESHOLD) {
                     const pairScore = (scoreAtoB + scoreBtoA) / 2;
                     const valueEquivalence = valueEquivalenceText(offerA, needB) || valueEquivalenceText(offerB, needA);
+                    const vc = getValueCompatibility();
+                    let equivalence = null;
+                    if (vc && vc.barterValueEquivalence) {
+                        const sideA = barterSidePost(needA, offerA);
+                        const sideB = barterSidePost(needB, offerB);
+                        equivalence = vc.barterValueEquivalence(sideA, sideB);
+                    }
                     matches.push({
                         matchScore: pairScore,
                         breakdown: { scoreAtoB, scoreBtoA },
                         valueEquivalence: valueEquivalence || undefined,
+                        valueAnalysis: equivalence ? { equivalence } : undefined,
                         suggestedPartners: [
                             { opportunityId: needB.id, creatorId: needB.creatorId },
                             { opportunityId: offerB.id, creatorId: offerB.creatorId }
@@ -232,11 +317,22 @@
             ? roleResults.reduce((s, r) => s + r.matchScore, 0) / roleResults.length
             : 0;
 
+        const partnerOffers = suggestedPartners.map(sp => {
+            const opp = offerPosts.find(o => o.id === sp.opportunityId);
+            return opp ? Object.assign({}, opp, { role: sp.role }) : null;
+        }).filter(Boolean);
+        const vc = getValueCompatibility();
+        let valueAnalysis = null;
+        if (vc && vc.consortiumValueBalance && partnerOffers.length > 0) {
+            valueAnalysis = { consortiumBalance: vc.consortiumValueBalance(leadNeed, partnerOffers) };
+        }
+
         return {
             model: 'consortium',
             matches: [{
                 matchScore: aggregateScore,
                 breakdown: roleResults.reduce((acc, r) => ({ ...acc, [r.role]: r.matchScore }), {}),
+                valueAnalysis,
                 suggestedPartners
             }],
             roles
@@ -315,6 +411,13 @@
             visit(start, 0, start);
         });
 
+        const vc = getValueCompatibility();
+        const getNorm = vc && vc.getNormalized ? vc.getNormalized : function (p) {
+            const ve = p && p.value_exchange || {};
+            const est = ve.estimated_value != null ? Number(ve.estimated_value) : 0;
+            return { totalOffered: est, totalExpected: est, riskAdjustedOffered: est, riskAdjustedExpected: est };
+        };
+
         const uniqueCycles = [];
         const seen = new Set();
         cycles.forEach(cycle => {
@@ -323,6 +426,8 @@
             seen.add(key);
             let cycleScore = 0;
             const suggestedPartners = [];
+            const linkScores = [];
+            const edgeScoresForBalance = [];
             for (let i = 0; i < cycle.length; i++) {
                 const from = cycle[i];
                 const to = cycle[(i + 1) % cycle.length];
@@ -330,17 +435,32 @@
                 const detail = edgeDetails[edgeKey];
                 if (detail) {
                     cycleScore += detail.score;
+                    linkScores.push({ fromCreatorId: from, toCreatorId: to, score: detail.score });
                     suggestedPartners.push({
                         opportunityId: detail.offer?.id,
                         creatorId: to
                     });
+                    const needNorm = getNorm(detail.need);
+                    const offerNorm = getNorm(detail.offer);
+                    edgeScoresForBalance.push({
+                        from,
+                        to,
+                        offeredValue: offerNorm.totalOffered || offerNorm.riskAdjustedOffered || 0,
+                        expectedValue: needNorm.totalExpected || needNorm.riskAdjustedExpected || 1
+                    });
                 }
             }
             cycleScore = cycle.length > 0 ? cycleScore / cycle.length : 0;
+            let chainBalance = null;
+            if (vc && vc.circularValueBalance && edgeScoresForBalance.length > 0) {
+                chainBalance = vc.circularValueBalance(cycle, edgeScoresForBalance);
+            }
             uniqueCycles.push({
                 matchScore: cycleScore,
                 cycle: cycle,
-                suggestedPartners
+                suggestedPartners,
+                linkScores,
+                valueAnalysis: chainBalance ? { chainBalance } : undefined
             });
         });
         uniqueCycles.sort((a, b) => b.matchScore - a.matchScore);
@@ -353,6 +473,7 @@
 
     const matchingModels = {
         findOffersForNeed,
+        findNeedsForOffer,
         findBarterMatches,
         findConsortiumCandidates,
         findCircularExchanges,

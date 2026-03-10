@@ -7,6 +7,32 @@
     </div>
     <div class="page-body">
 
+    <div id="settings-account-type-card" class="card mb-4" style="display: none;">
+        <div class="card-header">
+            <h2>Account type</h2>
+        </div>
+        <div class="card-body">
+            <p class="text-sm text-gray-600 mb-4">Your role on the platform. This affects how opportunities are tailored for you.</p>
+            <div class="space-y-3">
+                <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-blue-50">
+                    <input type="radio" name="settings-account-type" value="professional" class="mt-1 w-4 h-4 text-primary">
+                    <div>
+                        <span class="font-medium text-gray-900">Professional</span>
+                        <p class="text-sm text-gray-600 mt-0.5">Hands-on delivery: design, engineering, project execution, and technical work.</p>
+                    </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-blue-50">
+                    <input type="radio" name="settings-account-type" value="consultant" class="mt-1 w-4 h-4 text-primary">
+                    <div>
+                        <span class="font-medium text-gray-900">Consultant</span>
+                        <p class="text-sm text-gray-600 mt-0.5">Advisory and strategic input: expertise review, advice, and case-based validation.</p>
+                    </div>
+                </label>
+            </div>
+            <button type="button" id="settings-save-account-type" class="btn btn-primary btn-sm mt-4" style="display: none;">Save account type</button>
+        </div>
+    </div>
+
     <div class="card mb-4">
         <div class="card-header">
             <h2>Account &amp; security</h2>

@@ -68,9 +68,12 @@ async function loadVettingList() {
 
         container.innerHTML = list.map(user => {
             const isCompany = user.profile?.type === 'company';
-            const typeLabel = isCompany ? 'Company' : 'User';
+            const accountTypeLabel = isCompany ? 'Company' : (user.role === 'consultant' || user.profile?.type === 'consultant' || user.profile?.individualType === 'consultant' ? 'Consultant' : 'Professional');
             const statusLabel = user.status === 'clarification_requested' ? 'Clarification Requested' : 'Pending';
             const statusClass = user.status === 'clarification_requested' ? 'warning' : 'warning';
+            const docCount = (user.profile?.documents || []).length;
+            const hasCaseStudy = !!(user.profile?.vettingCaseStudy && (user.profile.vettingCaseStudy.title || user.profile.vettingCaseStudy.url || user.profile.vettingCaseStudy.description)) || (user.profile?.caseStudies || []).length > 0;
+            const docSummary = isCompany ? `Documents: ${docCount}` : `Documents: ${docCount} · Case study: ${hasCaseStudy ? 'Yes' : 'No'}`;
             return `
             <div class="vetting-card flex gap-2" data-id="${user.id}" data-company="${isCompany}">
                 <label class="vetting-checkbox-label flex-shrink-0 mt-1">
@@ -81,11 +84,12 @@ async function loadVettingList() {
                     <div>
                         <h3 class="vetting-email">${user.email}</h3>
                         <span class="badge badge-${statusClass}">${statusLabel}</span>
-                        <span class="badge badge-secondary">${typeLabel}</span>
+                        <span class="badge badge-secondary">${accountTypeLabel}</span>
                     </div>
                 </div>
                 <div class="vetting-card-body">
-                    <p><strong>Role:</strong> ${user.role}</p>
+                    <p><strong>Account type:</strong> ${accountTypeLabel}</p>
+                    <p><strong>${docSummary}</strong></p>
                     <p><strong>Registered:</strong> ${new Date(user.createdAt).toLocaleDateString()}</p>
                     ${user.profile?.name ? `<p><strong>Name:</strong> ${user.profile.name}</p>` : ''}
                 </div>
@@ -125,9 +129,15 @@ async function approveUser(userId, isCompany = false) {
 
     try {
         if (isCompany) {
-            await dataService.updateCompany(userId, { status: 'active' });
+            const company = await dataService.getCompanyById(userId);
+            const profile = { ...(company?.profile || {}), verificationStatus: 'company_verified' };
+            await dataService.updateCompany(userId, { status: 'active', profile });
         } else {
-            await dataService.updateUser(userId, { status: 'active' });
+            const user = await dataService.getUserById(userId);
+            const profile = { ...(user?.profile || {}) };
+            if (user?.role === 'professional') profile.verificationStatus = 'professional_verified';
+            else if (user?.role === 'consultant') profile.verificationStatus = 'consultant_verified';
+            await dataService.updateUser(userId, { status: 'active', profile });
         }
 
         await dataService.createNotification({

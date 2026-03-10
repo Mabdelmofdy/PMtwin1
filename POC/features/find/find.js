@@ -405,6 +405,7 @@ function renderPreviewPersonCard(person, profile, initials) {
             </div>
             <div class="preview-badges">
                 <span class="badge badge-secondary">${profile.type === 'consultant' ? 'Consultant' : 'Professional'}</span>
+                ${profile.verificationStatus === 'professional_verified' ? '<span class="badge badge-success verification-badge">Verified Professional</span>' : profile.verificationStatus === 'consultant_verified' ? '<span class="badge badge-success verification-badge">Verified Consultant</span>' : ''}
                 ${profile.availability ? `<span class="badge badge-outline">${profile.availability}</span>` : ''}
             </div>
             ${skills.length > 0 ? `
@@ -439,6 +440,7 @@ function renderFullPersonCard(person, profile, initials) {
             </div>
             <div class="preview-badges">
                 <span class="badge badge-secondary">${profile.type === 'consultant' ? 'Consultant' : 'Professional'}</span>
+                ${profile.verificationStatus === 'professional_verified' ? '<span class="badge badge-success verification-badge">Verified Professional</span>' : profile.verificationStatus === 'consultant_verified' ? '<span class="badge badge-success verification-badge">Verified Consultant</span>' : ''}
                 ${profile.availability ? `<span class="badge badge-outline">${profile.availability}</span>` : ''}
                 ${profile.experience ? `<span class="badge badge-info">${profile.experience} yrs exp.</span>` : ''}
             </div>
@@ -516,6 +518,7 @@ function renderPreviewCompanyCard(company, profile, initials) {
             </div>
             <div class="preview-badges">
                 <span class="badge badge-primary">Company</span>
+                ${profile.verificationStatus === 'company_verified' ? '<span class="badge badge-success verification-badge">Verified Company</span>' : ''}
                 ${profile.employeeCount ? `<span class="badge badge-outline">${profile.employeeCount} employees</span>` : ''}
             </div>
             ${sectors.length > 0 ? `
@@ -550,6 +553,7 @@ function renderFullCompanyCard(company, profile, initials) {
             </div>
             <div class="preview-badges">
                 <span class="badge badge-primary">Company</span>
+                ${profile.verificationStatus === 'company_verified' ? '<span class="badge badge-success verification-badge">Verified Company</span>' : ''}
                 ${profile.employeeCount ? `<span class="badge badge-outline">${profile.employeeCount} employees</span>` : ''}
                 ${profile.yearEstablished ? `<span class="badge badge-info">Est. ${profile.yearEstablished}</span>` : ''}
             </div>

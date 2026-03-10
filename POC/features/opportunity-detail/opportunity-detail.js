@@ -55,12 +55,23 @@ async function loadOpportunity(id) {
         
         currentOpportunity = opportunity;
         
-        // Get current user and vetting status (pending allowed for read-only demo; only rejected/suspended see teaser)
         const user = authService.getCurrentUser();
         const isVetted = user && user.status === 'active';
         const isPending = user && user.status === 'pending';
+        const isIndividual = user && (user.role === CONFIG.ROLES.PROFESSIONAL || user.role === CONFIG.ROLES.CONSULTANT);
+        const verificationStatus = user?.profile?.verificationStatus;
+        const vettingSkipped = user?.profile?.vettingSkippedAtRegistration === true;
+        const isUnverified = isIndividual && (verificationStatus === CONFIG.VERIFICATION_STATUS.UNVERIFIED || (vettingSkipped && !verificationStatus));
+        // Teaser for rejected/suspended users
         if (user && !isVetted && !isPending) {
-            renderTeaserView(opportunity);
+            renderTeaserView(opportunity, false);
+            loadingDiv.style.display = 'none';
+            contentDiv.style.display = 'block';
+            return;
+        }
+        // Teaser for unverified professionals/consultants: title, industry, location only; no company, scope, budget
+        if (user && isUnverified) {
+            renderTeaserView(opportunity, true);
             loadingDiv.style.display = 'none';
             contentDiv.style.display = 'block';
             return;
@@ -110,7 +121,7 @@ async function loadOpportunity(id) {
     }
 }
 
-function renderTeaserView(opportunity) {
+function renderTeaserView(opportunity, forUnverified) {
     const contentDiv = document.getElementById('content');
     if (!contentDiv) return;
     const shortDesc = (opportunity.description || '')
@@ -118,7 +129,31 @@ function renderTeaserView(opportunity) {
         .trim()
         .slice(0, 300);
     const profileRoute = (window.CONFIG && window.CONFIG.ROUTES && window.CONFIG.ROUTES.PROFILE) || '/profile';
-    contentDiv.innerHTML = `
+    const scope = opportunity.scope || opportunity.attributes || {};
+    const industry = (scope.sectors || scope.industry || opportunity.sectors || opportunity.industry || [])[0] || (Array.isArray(scope.sectors) ? scope.sectors[0] : scope.sectors) || '—';
+    const industryStr = Array.isArray(industry) ? industry[0] : (industry && typeof industry === 'object' ? industry.label || industry.id : industry);
+    const loc = scope.location || scope.locationCountry || opportunity.location || opportunity.attributes?.location || scope.workMode || '—';
+    const locationStr = typeof loc === 'string' ? loc : (loc && (loc.country || loc.region || loc.city) ? [loc.country, loc.region, loc.city].filter(Boolean).join(', ') : '—');
+    if (forUnverified) {
+        contentDiv.innerHTML = `
+        <div class="card max-w-2xl mx-auto mt-6">
+            <div class="card-body">
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">${escapeHtml(opportunity.title || 'Opportunity')}</h1>
+                <div class="flex flex-wrap gap-4 text-sm text-gray-600 mb-2">
+                    <span><strong>Industry:</strong> ${escapeHtml(industryStr)}</span>
+                    <span><strong>Location:</strong> ${escapeHtml(locationStr)}</span>
+                </div>
+                <p class="text-gray-600 mb-4">${escapeHtml(shortDesc)}${shortDesc.length >= 300 ? '…' : ''}</p>
+                <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg mb-4">
+                    <p class="font-medium text-amber-800">Complete verification to unlock full opportunity details.</p>
+                    <p class="text-sm text-amber-700 mt-1">You cannot see company name, full scope, contact details, or budget until you complete verification. You can return to verification from the Profile page.</p>
+                </div>
+                <a href="#" data-route="${profileRoute}" class="btn btn-primary">Complete verification</a>
+            </div>
+        </div>
+        `;
+    } else {
+        contentDiv.innerHTML = `
         <div class="card max-w-2xl mx-auto mt-6">
             <div class="card-body">
                 <h1 class="text-2xl font-bold text-gray-900 mb-2">${escapeHtml(opportunity.title || 'Opportunity')}</h1>
@@ -130,8 +165,12 @@ function renderTeaserView(opportunity) {
                 <a href="#" data-route="${profileRoute}" class="btn btn-primary">Complete your vetting</a>
             </div>
         </div>
-    `;
+        `;
+    }
     contentDiv.style.display = 'block';
+    contentDiv.querySelectorAll('a[data-route]').forEach(a => {
+        a.addEventListener('click', (e) => { e.preventDefault(); if (window.router) router.navigate(a.getAttribute('data-route')); });
+    });
 }
 
 function determineWizardSteps(opportunity) {
@@ -224,7 +263,7 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply) 
     // Exchange details
     if (opportunity.exchangeData && Object.keys(opportunity.exchangeData).length > 0) {
         document.getElementById('exchange-section').style.display = 'block';
-        renderExchangeDetails(opportunity.exchangeData);
+        renderExchangeDetails(opportunity);
     }
     
     const actionsDiv = document.getElementById('opportunity-actions');
@@ -578,9 +617,22 @@ async function submitMilestoneForm(contractId, title, dueDate) {
     }
 }
 
-function renderExchangeDetails(exchangeData) {
+function renderExchangeDetails(opportunity) {
     const container = document.getElementById('exchange-details');
+    const exchangeData = opportunity.exchangeData || opportunity;
     let html = '<div class="detail-grid">';
+
+    // Payment methods (when multiple accepted)
+    const paymentModes = opportunity.paymentModes || (exchangeData.exchangeMode ? [exchangeData.exchangeMode] : []);
+    if (Array.isArray(paymentModes) && paymentModes.length > 0) {
+        const modeLabels = paymentModes.map(m => formatExchangeMode(m));
+        html += `
+            <div class="detail-item">
+                <div class="detail-label">Payment methods</div>
+                <div class="detail-value">${escapeHtml(modeLabels.join(', '))}</div>
+            </div>
+        `;
+    }
     
     // Budget Range (now part of exchange data)
     if (exchangeData.budgetRange) {
@@ -645,6 +697,17 @@ function renderExchangeDetails(exchangeData) {
     container.innerHTML = html;
 }
 
+// Matching-system attributes shown first in Opportunity Details (labels for display)
+const MATCHING_DETAIL_LABELS = {
+    startDate: 'Start Date',
+    applicationDeadline: 'Application Deadline',
+    tenderDeadline: 'Tender Deadline',
+    endDate: 'End Date',
+    locationRequirement: 'Location',
+    workMode: 'Work Mode',
+    availability: 'Availability'
+};
+
 async function renderModelDetails(opportunity) {
     const container = document.getElementById('model-details');
     const modelSpecificData = opportunity.attributes || opportunity.modelData;
@@ -662,24 +725,34 @@ async function renderModelDetails(opportunity) {
             attributeMap[attr.key] = attr.label;
         });
     }
-    
-    // Filter out system fields
-    const detailKeys = Object.keys(modelSpecificData)
-        .filter(key => !['title', 'description', 'status', 'modelType', 'subModelType', 
-                        'location', 'locationCountry', 'locationRegion', 'locationCity', 
-                        'locationDistrict', 'exchangeMode', 'exchangeData'].includes(key));
-    
+    Object.assign(attributeMap, MATCHING_DETAIL_LABELS);
+
+    // System / non-detail keys to exclude from display
+    const systemKeys = ['title', 'description', 'status', 'modelType', 'subModelType',
+        'location', 'locationCountry', 'locationRegion', 'locationCity',
+        'locationDistrict', 'exchangeMode', 'exchangeData'];
+    const detailKeys = Object.keys(modelSpecificData).filter(key => !systemKeys.includes(key));
+
     if (detailKeys.length === 0) {
         container.innerHTML = '<p class="text-muted">No additional details available.</p>';
         return;
     }
-    
-    // Render detail items
-    const detailsHTML = detailKeys.map(key => {
+
+    // Sort so matching-related fields (timeline, location) appear first
+    const priorityKeys = ['startDate', 'applicationDeadline', 'tenderDeadline', 'endDate', 'locationRequirement', 'workMode', 'availability'];
+    const sortedKeys = [...detailKeys].sort((a, b) => {
+        const ai = priorityKeys.indexOf(a);
+        const bi = priorityKeys.indexOf(b);
+        if (ai !== -1 && bi !== -1) return ai - bi;
+        if (ai !== -1) return -1;
+        if (bi !== -1) return 1;
+        return a.localeCompare(b);
+    });
+
+    const detailsHTML = sortedKeys.map(key => {
         const value = modelSpecificData[key];
-        let displayValue = formatModelDetailValue(value, key);
+        const displayValue = formatModelDetailValue(value, key);
         const label = attributeMap[key] || formatLabel(key);
-        
         return `
             <div class="detail-item">
                 <div class="detail-label">${escapeHtml(label)}</div>
@@ -687,7 +760,7 @@ async function renderModelDetails(opportunity) {
             </div>
         `;
     }).join('');
-    
+
     container.innerHTML = detailsHTML;
 }
 
@@ -839,16 +912,31 @@ function goToWizardStep(step) {
     
     currentWizardStep = step;
     
-    // Populate step 4 (Payment mode) when entering: opportunity exchange mode text and prefill if editing
+    // Populate step 4 (Payment / Your Offer) when entering
     if (step === 4 && currentOpportunity) {
         const mode = currentOpportunity.exchangeMode || currentOpportunity.exchangeData?.exchangeMode;
         const labelEl = document.getElementById('payment-opportunity-mode-label');
         if (labelEl) labelEl.textContent = mode ? formatExchangeMode(mode) : 'Not specified';
+        const currencySelect = document.getElementById('application-requested-currency');
+        if (currencySelect) {
+            const oppCurrency = (currentOpportunity.value_exchange && currentOpportunity.value_exchange.currency)
+                || (currentOpportunity.exchangeData && currentOpportunity.exchangeData.currency) || 'SAR';
+            currencySelect.value = oppCurrency;
+        }
         if (isEditMode && currentApplication && currentApplication.responses) {
             const prefEl = document.getElementById('application-payment-preference');
             const commentsEl = document.getElementById('application-payment-comments');
             if (prefEl && currentApplication.responses.paymentPreference) prefEl.value = currentApplication.responses.paymentPreference;
             if (commentsEl && currentApplication.responses.paymentComments != null) commentsEl.value = currentApplication.responses.paymentComments;
+        }
+        if (currentApplication && currentApplication.application_value) {
+            const av = currentApplication.application_value;
+            const offeredEl = document.getElementById('application-offered-value');
+            const requestedEl = document.getElementById('application-requested-value');
+            const currencyEl = document.getElementById('application-requested-currency');
+            if (offeredEl) offeredEl.value = typeof av.offered_value === 'string' ? av.offered_value : (av.offered_value && av.offered_value.description) || '';
+            if (requestedEl && av.requested_value != null) requestedEl.value = av.requested_value;
+            if (currencyEl && av.currency) currencyEl.value = av.currency;
         }
     }
     
@@ -911,11 +999,17 @@ function validateCurrentStep() {
             // Optional validation for required fields
             break;
             
-        case 4: // Payment mode
+        case 4: // Payment / Your Offer
             const paymentPref = document.getElementById('application-payment-preference');
             if (paymentPref && !paymentPref.value) {
                 alert('Please select your payment preference');
                 paymentPref.focus();
+                return false;
+            }
+            const offeredValueEl = document.getElementById('application-offered-value');
+            if (offeredValueEl && !offeredValueEl.value.trim()) {
+                alert('Please describe what you are offering');
+                offeredValueEl.focus();
                 return false;
             }
             break;
@@ -973,8 +1067,13 @@ function populateReview() {
         const pref = paymentPrefEl ? paymentPrefEl.value : '';
         const prefLabel = pref === 'accept' ? 'Accept as stated' : pref === 'discuss' ? 'Prefer to discuss' : '—';
         const comments = paymentCommentsEl ? paymentCommentsEl.value.trim() : '';
+        const offeredVal = (document.getElementById('application-offered-value')?.value || '').trim();
+        const requestedVal = (document.getElementById('application-requested-value')?.value || '').trim();
+        const requestedCur = document.getElementById('application-requested-currency')?.value || 'SAR';
         reviewPaymentEl.innerHTML = `
             <div style="margin-bottom: 0.5rem;"><strong>Preference:</strong> ${escapeHtml(prefLabel)}</div>
+            ${offeredVal ? `<div style="margin-bottom: 0.5rem;"><strong>Your offer:</strong> ${escapeHtml(offeredVal)}</div>` : ''}
+            ${requestedVal ? `<div style="margin-bottom: 0.5rem;"><strong>Requested value:</strong> ${escapeHtml(requestedVal)} ${escapeHtml(requestedCur)}</div>` : ''}
             ${comments ? `<div><strong>Comments:</strong><br>${escapeHtml(comments)}</div>` : ''}
         `;
     }
@@ -1013,6 +1112,25 @@ async function submitApplication() {
     const paymentPreference = document.getElementById('application-payment-preference')?.value || '';
     const paymentComments = (document.getElementById('application-payment-comments')?.value || '').trim();
     const paymentResponses = { paymentPreference, paymentComments };
+
+    const oppMode = currentOpportunity.exchangeMode || currentOpportunity.exchangeData?.exchangeMode || (currentOpportunity.value_exchange && currentOpportunity.value_exchange.mode);
+    const offeredValue = (document.getElementById('application-offered-value')?.value || '').trim();
+    const requestedValueRaw = (document.getElementById('application-requested-value')?.value || '').trim();
+    const requestedCurrency = document.getElementById('application-requested-currency')?.value || 'SAR';
+    const requestedValueNum = requestedValueRaw ? parseFloat(String(requestedValueRaw).replace(/,/g, '')) : null;
+    const application_value = {
+        offered_value: offeredValue,
+        requested_value: requestedValueNum != null && !isNaN(requestedValueNum) ? requestedValueNum : requestedValueRaw || null,
+        exchange_mode: oppMode,
+        currency: requestedCurrency
+    };
+    if (window.valueCompatibility && currentOpportunity) {
+        const compat = window.valueCompatibility.computeValueCompatibility(currentOpportunity, application_value);
+        application_value.value_score = compat.value_score;
+        application_value.value_breakdown = compat.value_breakdown;
+        application_value.value_gap = compat.value_gap;
+        application_value.lowValueMatch = compat.lowValueMatch;
+    }
     
     try {
         if (isEditMode && currentApplication) {
@@ -1024,7 +1142,8 @@ async function submitApplication() {
                     ...detailedResponses,
                     ...taskBids,
                     ...paymentResponses
-                }
+                },
+                application_value
             };
             
             await dataService.updateApplication(currentApplication.id, updateData);
@@ -1048,7 +1167,8 @@ async function submitApplication() {
                     ...detailedResponses,
                     ...taskBids,
                     ...paymentResponses
-                }
+                },
+                application_value
             };
             
             await dataService.createApplication(applicationData);
@@ -1619,7 +1739,12 @@ async function loadApplications(opportunityId) {
     
     try {
         const allApplications = await dataService.getApplications();
-        const opportunityApplications = allApplications.filter(a => a.opportunityId === opportunityId);
+        let opportunityApplications = allApplications.filter(a => a.opportunityId === opportunityId);
+        opportunityApplications.sort((a, b) => {
+            const scoreA = a.application_value?.value_score != null ? a.application_value.value_score : -1;
+            const scoreB = b.application_value?.value_score != null ? b.application_value.value_score : -1;
+            return scoreB - scoreA;
+        });
         
         applicationsCount.textContent = opportunityApplications.length;
         
@@ -1667,13 +1792,24 @@ async function loadApplications(opportunityId) {
             }
             actionsHtml += '</div>';
             const negotiationLine = app.status === 'in_negotiation' ? '<p class="text-xs text-gray-500 mt-1">Negotiation: In progress</p>' : '';
+            const vs = app.applicant?.profile?.verificationStatus;
+            const verificationBadge = vs === 'professional_verified' ? '<span class="badge badge-success verification-badge ml-1">Verified Professional</span>' : vs === 'consultant_verified' ? '<span class="badge badge-success verification-badge ml-1">Verified Consultant</span>' : vs === 'company_verified' ? '<span class="badge badge-success verification-badge ml-1">Verified Company</span>' : '';
+            const av = app.application_value;
+            const valueScorePct = av?.value_score != null ? Math.round(av.value_score * 100) : null;
+            const valueScoreHtml = valueScorePct != null ? `<span class="badge badge-info ml-1" title="Value compatibility">Value: ${valueScorePct}%</span>` : '';
+            const lowValueBadge = av?.lowValueMatch ? '<span class="badge badge-warning ml-1" title="Applicant requested value is more than 30% below opportunity expected value">Low Value Match</span>' : '';
+            const breakdown = av?.value_breakdown;
+            const breakdownTip = breakdown ? `Budget ${Math.round(breakdown.budgetFit * 100)}% | Mode ${Math.round(breakdown.exchangeModeFit * 100)}% | Scope ${Math.round(breakdown.scopeFit * 100)}%` : '';
             return `
             <div class="application-card" data-application-id="${escapeHtml(app.id)}">
                 <div class="application-header">
-                    <strong>${escapeHtml(app.applicant?.profile?.name || app.applicant?.email || 'Unknown')}</strong>
+                    <strong>${escapeHtml(app.applicant?.profile?.name || app.applicant?.email || 'Unknown')}</strong>${verificationBadge}
+                    ${valueScoreHtml}
+                    ${lowValueBadge}
                     <span class="badge badge-${getApplicationStatusBadgeClass(app.status)}">${escapeHtml(getApplicationStatusLabel(app.status))}</span>
                 </div>
                 <p class="application-proposal">${escapeHtml((app.coverLetter || app.proposal) || 'No proposal')}</p>
+                ${valueScorePct != null && breakdownTip ? `<p class="text-xs text-gray-500 mt-1" title="${escapeHtml(breakdownTip)}">${escapeHtml(breakdownTip)}</p>` : ''}
                 <div class="application-meta">
                     Applied: ${new Date(app.createdAt).toLocaleDateString()}
                 </div>
@@ -1913,6 +2049,17 @@ async function showApplicationDetailModal(applicationId) {
                 responsesEntries.map(([key, value]) => `<div><dt class="text-xs text-gray-500">${escapeHtml(formatLabel(key))}</dt><dd class="text-sm text-gray-900">${escapeHtml(String(value))}</dd></div>`).join('') +
                 '</dl></div>';
         }
+        const av = application.application_value;
+        const valueScorePct = av?.value_score != null ? Math.round(av.value_score * 100) : null;
+        const valueSection = valueScorePct != null ? `
+            <div class="mb-3 p-3 bg-gray-50 rounded-lg">
+                <h4 class="text-sm font-semibold text-gray-700 mb-1">Value compatibility</h4>
+                <p class="text-sm text-gray-900"><strong>${valueScorePct}%</strong>${av?.lowValueMatch ? ' <span class="badge badge-warning">Low Value Match</span>' : ''}</p>
+                ${av?.value_breakdown ? `<p class="text-xs text-gray-500 mt-1">Budget ${Math.round(av.value_breakdown.budgetFit * 100)}% · Mode ${Math.round(av.value_breakdown.exchangeModeFit * 100)}% · Scope ${Math.round(av.value_breakdown.scopeFit * 100)}%</p>` : ''}
+                ${av?.offered_value ? `<p class="text-xs mt-1"><strong>Offers:</strong> ${escapeHtml(typeof av.offered_value === 'string' ? av.offered_value : av.offered_value?.description || '')}</p>` : ''}
+                ${av?.requested_value != null ? `<p class="text-xs"><strong>Requested:</strong> ${typeof av.requested_value === 'number' ? av.requested_value.toLocaleString() : escapeHtml(String(av.requested_value))} ${escapeHtml(av.currency || 'SAR')}</p>` : ''}
+            </div>
+        ` : '';
         const contentHTML = `
             <div class="application-detail-modal">
                 <div class="mb-3">
@@ -1920,6 +2067,7 @@ async function showApplicationDetailModal(applicationId) {
                     <span class="badge badge-${getApplicationStatusBadgeClass(application.status)} ml-2">${escapeHtml(getApplicationStatusLabel(application.status))}</span>
                 </div>
                 <div class="text-sm text-gray-500 mb-3">Applied: ${new Date(application.createdAt).toLocaleDateString()}</div>
+                ${valueSection}
                 <div class="mb-3">
                     <h4 class="text-sm font-semibold text-gray-700 mb-1">Cover letter / Proposal</h4>
                     <p class="text-sm text-gray-900 whitespace-pre-wrap">${escapeHtml(proposalText)}</p>
@@ -2063,6 +2211,10 @@ async function updateApplicationStatus(applicationId, status) {
             const opp = await dataService.getOpportunityById(currentOpportunity.id);
             const creatorId = opp.creatorId;
             const contractorId = application.applicantId;
+            const ed = opp.exchangeData || {};
+            const paymentSchedule = ed.cashMilestones || (opp.value_exchange && opp.value_exchange.value_offered && opp.value_exchange.value_offered.paymentTerms) || '';
+            const equityVesting = ed.equityVesting ? { period: ed.equityVesting, percentage: ed.equityPercentage } : null;
+            const profitShare = (ed.profitSplit || ed.profitSharePercentage != null) ? { percentage: ed.profitSharePercentage != null ? ed.profitSharePercentage : null, split: ed.profitSplit, basis: ed.profitBasis, distribution: ed.profitDistribution } : null;
             const newContract = await dataService.createContract({
                 opportunityId: currentOpportunity.id,
                 applicationId: application.id,
@@ -2071,7 +2223,10 @@ async function updateApplicationStatus(applicationId, status) {
                 scope: opp.title || '',
                 paymentMode: opp.exchangeMode || opp.paymentModes?.[0] || 'cash',
                 duration: '',
-                status: window.CONFIG?.CONTRACT_STATUS?.PENDING || 'pending'
+                status: window.CONFIG?.CONTRACT_STATUS?.PENDING || 'pending',
+                paymentSchedule: paymentSchedule || undefined,
+                equityVesting: equityVesting || undefined,
+                profitShare: profitShare || undefined
             });
             await dataService.updateOpportunity(currentOpportunity.id, { status: 'contracted' });
             const user = authService.getCurrentUser();

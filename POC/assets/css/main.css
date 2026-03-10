@@ -285,6 +285,26 @@ body {
     display: block;
 }
 
+/* Location form (create/edit opportunity) – selected value display & Change button */
+.location-change-btn {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--primary-color);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+}
+.location-change-btn:hover {
+    text-decoration: underline;
+    color: var(--primary-dark);
+}
+.location-dropdown-container .selected-display .flex {
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
 /* Cards */
 .card {
     background-color: var(--bg-primary);

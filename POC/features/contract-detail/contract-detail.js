@@ -117,11 +117,29 @@ async function initContractDetail(params) {
 
         const paymentMode = contract.paymentMode || (opportunity && opportunity.exchangeMode) || '—';
         const duration = contract.duration || '—';
-        document.getElementById('contract-scope-terms').innerHTML = `
+        const paymentSchedule = contract.paymentSchedule || (opportunity && opportunity.exchangeData && opportunity.exchangeData.cashMilestones) || '';
+        const equityVesting = contract.equityVesting;
+        const profitShare = contract.profitShare;
+        let termsHtml = `
             <p><strong>Scope</strong><br/>${escapeHtml(scopeDisplay)}</p>
             <p><strong>Payment mode</strong><br/>${escapeHtml(paymentMode)}</p>
             <p><strong>Duration</strong><br/>${escapeHtml(duration)}</p>
         `;
+        if (paymentSchedule) {
+            termsHtml += `<p><strong>Payment schedule</strong><br/>${escapeHtml(typeof paymentSchedule === 'string' ? paymentSchedule : JSON.stringify(paymentSchedule))}</p>`;
+        }
+        if (equityVesting) {
+            const eqStr = typeof equityVesting === 'string' ? equityVesting : (equityVesting.period || equityVesting.percentage != null ? (equityVesting.percentage != null ? equityVesting.percentage + '% ' : '') + (equityVesting.period || '') : '');
+            if (eqStr) termsHtml += `<p><strong>Equity vesting</strong><br/>${escapeHtml(eqStr)}</p>`;
+        }
+        if (profitShare) {
+            if (typeof profitShare === 'string') {
+                termsHtml += `<p><strong>Profit share agreement</strong><br/>${escapeHtml(profitShare)}</p>`;
+            } else if (profitShare.percentage != null || profitShare.split) {
+                termsHtml += `<p><strong>Profit share agreement</strong><br/>${profitShare.percentage != null ? profitShare.percentage + '%' : ''} ${profitShare.split ? escapeHtml(profitShare.split) : ''}${profitShare.basis ? ' · ' + escapeHtml(profitShare.basis) : ''}${profitShare.distribution ? '<br/><span class="text-muted">' + escapeHtml(profitShare.distribution) + '</span>' : ''}</p>`;
+            }
+        }
+        document.getElementById('contract-scope-terms').innerHTML = termsHtml;
 
         const milestones = contract.milestones || [];
         const milestonesHtml = milestones.length
@@ -173,7 +191,13 @@ async function initContractDetail(params) {
         document.getElementById('contract-close-btn')?.addEventListener('click', () => closeContract(contractId, contract.opportunityId, oppStatus));
 
         document.getElementById('contract-edit-btn')?.addEventListener('click', () => {
-            showEditContractModal(contractId, contract.scope || '', contract.duration || '');
+            showEditContractModal(contractId, {
+                scope: contract.scope || '',
+                duration: contract.duration || '',
+                paymentSchedule: typeof contract.paymentSchedule === 'string' ? contract.paymentSchedule : (contract.paymentSchedule ? JSON.stringify(contract.paymentSchedule) : ''),
+                equityVesting: contract.equityVesting ? (typeof contract.equityVesting === 'string' ? contract.equityVesting : JSON.stringify(contract.equityVesting)) : '',
+                profitShare: contract.profitShare ? (typeof contract.profitShare === 'string' ? contract.profitShare : JSON.stringify(contract.profitShare)) : ''
+            });
         });
 
         document.getElementById('contract-print-btn')?.addEventListener('click', () => {
@@ -233,16 +257,34 @@ async function initContractDetail(params) {
     }
 }
 
-function showEditContractModal(contractId, currentScope, currentDuration) {
+function showEditContractModal(contractId, current) {
+    const opts = typeof current === 'object' && current !== null ? current : { scope: current || '', duration: '' };
+    const scope = opts.scope || '';
+    const duration = opts.duration || '';
+    const paymentSchedule = opts.paymentSchedule || '';
+    const equityVesting = opts.equityVesting || '';
+    const profitShare = opts.profitShare || '';
     const contentHTML = `
         <form id="contract-edit-form" class="space-y-3">
             <div>
                 <label for="edit-contract-scope" class="block text-sm font-medium text-gray-700 mb-1">Scope <span class="text-red-500">*</span></label>
-                <input type="text" id="edit-contract-scope" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" value="${escapeHtml(currentScope || '')}" required placeholder="Contract scope / title" />
+                <input type="text" id="edit-contract-scope" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" value="${escapeHtml(scope)}" required placeholder="Contract scope / title" />
             </div>
             <div>
                 <label for="edit-contract-duration" class="block text-sm font-medium text-gray-700 mb-1">Duration (optional)</label>
-                <input type="text" id="edit-contract-duration" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" value="${escapeHtml(currentDuration || '')}" placeholder="e.g. 3 months, Q2 2026" />
+                <input type="text" id="edit-contract-duration" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" value="${escapeHtml(duration)}" placeholder="e.g. 3 months, Q2 2026" />
+            </div>
+            <div>
+                <label for="edit-contract-payment-schedule" class="block text-sm font-medium text-gray-700 mb-1">Payment schedule (optional)</label>
+                <textarea id="edit-contract-payment-schedule" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" rows="2" placeholder="e.g. 30% upfront, 70% on completion">${escapeHtml(paymentSchedule)}</textarea>
+            </div>
+            <div>
+                <label for="edit-contract-equity-vesting" class="block text-sm font-medium text-gray-700 mb-1">Equity vesting (optional)</label>
+                <input type="text" id="edit-contract-equity-vesting" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" value="${escapeHtml(equityVesting)}" placeholder="e.g. 2 years, 25% per year" />
+            </div>
+            <div>
+                <label for="edit-contract-profit-share" class="block text-sm font-medium text-gray-700 mb-1">Profit share agreement (optional)</label>
+                <textarea id="edit-contract-profit-share" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" rows="2" placeholder="e.g. 10% of net profit, quarterly">${escapeHtml(profitShare)}</textarea>
             </div>
             <div class="flex gap-2 pt-2">
                 <button type="button" id="contract-edit-save" class="btn btn-primary">Save</button>
@@ -252,14 +294,14 @@ function showEditContractModal(contractId, currentScope, currentDuration) {
     `;
 
     if (typeof modalService === 'undefined') {
-        const scope = prompt('Scope (required):', currentScope || '');
-        if (scope === null) return;
-        if (!scope.trim()) {
+        const scopeVal = prompt('Scope (required):', scope);
+        if (scopeVal === null) return;
+        if (!scopeVal.trim()) {
             alert('Scope is required.');
             return;
         }
-        const duration = prompt('Duration (optional):', currentDuration || '') || '';
-        saveContractEdit(contractId, scope.trim(), duration.trim());
+        const durationVal = prompt('Duration (optional):', duration) || '';
+        saveContractEdit(contractId, { scope: scopeVal.trim(), duration: durationVal.trim() });
         return;
     }
 
@@ -272,18 +314,24 @@ function showEditContractModal(contractId, currentScope, currentDuration) {
     const cancelBtn = modalEl.querySelector('#contract-edit-cancel');
     const scopeInput = modalEl.querySelector('#edit-contract-scope');
     const durationInput = modalEl.querySelector('#edit-contract-duration');
+    const paymentScheduleInput = modalEl.querySelector('#edit-contract-payment-schedule');
+    const equityVestingInput = modalEl.querySelector('#edit-contract-equity-vesting');
+    const profitShareInput = modalEl.querySelector('#edit-contract-profit-share');
 
     if (saveBtn) {
         saveBtn.addEventListener('click', async () => {
-            const scope = scopeInput?.value != null ? String(scopeInput.value).trim() : '';
-            const duration = durationInput?.value != null ? String(durationInput.value).trim() : '';
-            if (!scope) {
+            const scopeVal = scopeInput?.value != null ? String(scopeInput.value).trim() : '';
+            const durationVal = durationInput?.value != null ? String(durationInput.value).trim() : '';
+            if (!scopeVal) {
                 alert('Scope is required.');
                 if (scopeInput) scopeInput.focus();
                 return;
             }
+            const paymentScheduleVal = paymentScheduleInput?.value != null ? String(paymentScheduleInput.value).trim() : '';
+            const equityVestingVal = equityVestingInput?.value != null ? String(equityVestingInput.value).trim() : '';
+            const profitShareVal = profitShareInput?.value != null ? String(profitShareInput.value).trim() : '';
             modalService.close();
-            await saveContractEdit(contractId, scope, duration);
+            await saveContractEdit(contractId, { scope: scopeVal, duration: durationVal, paymentSchedule: paymentScheduleVal || undefined, equityVesting: equityVestingVal || undefined, profitShare: profitShareVal || undefined });
         });
     }
     if (cancelBtn) {
@@ -291,9 +339,10 @@ function showEditContractModal(contractId, currentScope, currentDuration) {
     }
 }
 
-async function saveContractEdit(contractId, scope, duration) {
+async function saveContractEdit(contractId, updates) {
     try {
-        await dataService.updateContract(contractId, { scope, duration });
+        const payload = typeof updates === 'object' && updates !== null ? updates : { scope: updates, duration: '' };
+        await dataService.updateContract(contractId, payload);
         if (typeof initContractDetail === 'function') {
             await initContractDetail({ id: contractId });
         }

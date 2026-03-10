@@ -30,38 +30,36 @@
             </div>
         </section>
 
-        <!-- Step 2: Run on current platform data -->
+        <!-- Step 2: Matching report -->
         <section class="dashboard-section run-section">
-            <h2 class="section-title">Run matching on current platform data</h2>
+            <h2 class="section-title">Matching report</h2>
             <div class="matching-action-card">
                 <p class="section-desc">Uses the same opportunities, users, and companies as the rest of the platform (Admin Dashboard). When an opportunity is published, matching runs automatically; opportunity owners see matches on the opportunity detail page.</p>
-                <div class="matching-action-row">
-                    <button type="button" id="matching-run-btn" class="btn btn-primary">Run matching on current data</button>
-                    <div id="matching-run-loading" class="matching-loading" hidden><span class="spinner"></span> Running matching…</div>
-                </div>
+                <div id="matching-run-loading" class="matching-loading" hidden><span class="spinner"></span> Running matching…</div>
                 <div id="matching-report-block" class="report-block matching-report-block" hidden>
                     <h3 class="report-block-title">Report</h3>
                     <div class="stats-grid" id="matching-stats-grid"></div>
-                    <div id="matching-report-details" class="matching-details"></div>
+                    <div class="matching-type-section">
+                        <h4 class="matching-type-section-title">One-way Matching</h4>
+                        <h5 class="matching-subsection-title">Need → Offers</h5>
+                        <div id="matching-one-way-need-to-offers" class="matching-type-content"></div>
+                        <h5 class="matching-subsection-title">Offer → Needs</h5>
+                        <div id="matching-one-way-offer-to-needs" class="matching-type-content"></div>
+                    </div>
+                    <div class="matching-type-section">
+                        <h4 class="matching-type-section-title">Two-way Matching (Barter)</h4>
+                        <div id="matching-two-way" class="matching-type-content"></div>
+                    </div>
+                    <div class="matching-type-section">
+                        <h4 class="matching-type-section-title">Consortium (Group Formation)</h4>
+                        <div id="matching-consortium" class="matching-type-content"></div>
+                    </div>
+                    <div class="matching-type-section">
+                        <h4 class="matching-type-section-title">Circular Exchange</h4>
+                        <div id="matching-circular" class="matching-type-content"></div>
+                    </div>
                 </div>
                 <div id="matching-run-error" class="matching-error" hidden></div>
-            </div>
-        </section>
-
-        <!-- Step 3: Last simulation report -->
-        <section class="dashboard-section simulation-section">
-            <h2 class="section-title">Last simulation report</h2>
-            <div class="matching-action-card">
-                <p class="section-desc">Report from the standalone simulation. Run locally: <code>node scripts/simulation/run-matching-simulation.js</code>. If the file is not served, this section will show a message.</p>
-                <div class="matching-action-row">
-                    <button type="button" id="matching-load-simulation-btn" class="btn btn-secondary">Load simulation report</button>
-                    <div id="matching-simulation-loading" class="matching-loading" hidden><span class="spinner"></span> Loading…</div>
-                </div>
-                <div id="matching-simulation-block" class="report-block matching-report-block" hidden>
-                    <h3 class="report-block-title">Simulation report</h3>
-                    <div class="stats-grid" id="matching-simulation-stats"></div>
-                </div>
-                <div id="matching-simulation-unavailable" class="matching-unavailable" hidden>Simulation report not available. Run the simulation script and ensure the app can read <code>data/simulation/matching-report.json</code>.</div>
             </div>
         </section>
     </div>
@@ -94,8 +92,33 @@
     padding: var(--spacing-lg);
 }
 .section-desc { color: var(--text-secondary); margin-bottom: var(--spacing-md); font-size: var(--font-size-sm); line-height: 1.5; }
-.matching-action-row { display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap; }
-.matching-loading { display: flex; align-items: center; gap: var(--spacing-sm); font-size: var(--font-size-sm); color: var(--text-secondary); }
+.matching-loading { display: flex; align-items: center; gap: var(--spacing-sm); font-size: var(--font-size-sm); color: var(--text-secondary); margin-bottom: var(--spacing-md); }
+.matching-type-section { margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 1px solid var(--border-color); }
+.matching-type-section-title { font-size: var(--font-size-base); font-weight: 600; margin: 0 0 var(--spacing-sm); color: var(--primary-color); }
+.matching-subsection-title { font-size: var(--font-size-sm); font-weight: 600; margin: var(--spacing-md) 0 var(--spacing-sm); color: var(--text-secondary); }
+.matching-type-content { font-size: var(--font-size-sm); color: var(--text-secondary); line-height: 1.5; }
+.matching-opp-card { margin-bottom: var(--spacing-lg); padding: var(--spacing-md); background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+.matching-opp-card-title { font-weight: 600; margin: 0 0 var(--spacing-sm); }
+.matching-opp-card-title a { color: var(--primary-color); text-decoration: none; }
+.matching-opp-card-title a:hover { text-decoration: underline; }
+.matching-creator-name { font-weight: normal; color: var(--text-secondary); font-size: var(--font-size-sm); }
+.matching-match-list { margin: var(--spacing-sm) 0 0; padding-left: var(--spacing-lg); list-style: none; }
+.matching-match-row { margin-bottom: var(--spacing-xs); font-size: var(--font-size-sm); }
+.matching-match-score { font-weight: 600; color: var(--primary-color); }
+.matching-tier { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-right: 6px; }
+.matching-tier-top { background: #dcfce7; color: #166534; }
+.matching-tier-good { background: #dbeafe; color: #1e40af; }
+.matching-tier-possible { background: #fef3c7; color: #92400e; }
+.matching-consortium-balance { margin-top: var(--spacing-sm); font-size: var(--font-size-sm); color: var(--text-secondary); }
+.matching-two-way-pair { margin-bottom: var(--spacing-lg); padding: var(--spacing-md); background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+.matching-two-way-participants { margin-bottom: var(--spacing-sm); }
+.matching-two-way-scores { font-size: var(--font-size-sm); color: var(--text-secondary); }
+.matching-consortium-lead { margin-bottom: var(--spacing-sm); font-weight: 600; }
+.matching-consortium-roles { padding-left: var(--spacing-md); }
+.matching-consortium-role { margin-bottom: var(--spacing-xs); font-size: var(--font-size-sm); }
+.matching-circular-cycle { margin-bottom: var(--spacing-lg); padding: var(--spacing-md); background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+.matching-circular-sequence { font-weight: 600; margin-bottom: var(--spacing-xs); }
+.matching-circular-links { font-size: var(--font-size-sm); color: var(--text-secondary); }
 .matching-loading .spinner { width: 1rem; height: 1rem; border: 2px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -108,4 +131,5 @@
 .matching-details { font-size: var(--font-size-sm); color: var(--text-secondary); }
 .matching-error { color: var(--danger-color, #dc2626); margin-top: var(--spacing-sm); font-size: var(--font-size-sm); }
 .matching-unavailable { color: var(--text-secondary); margin-top: var(--spacing-sm); font-size: var(--font-size-sm); }
+
 </style>

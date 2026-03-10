@@ -3,71 +3,63 @@
  * Uses window.dataService, window.matchingService, window.matchingModels (loaded at app init).
  */
 
-async function initAdminMatching() {
-    if (!authService.canAccessAdmin()) {
-        router.navigate(CONFIG.ROUTES.DASHBOARD);
-        return;
-    }
+const MATCHING_REFRESH_INTERVAL_MS = 60000;
+let matchingRefreshIntervalId = null;
+let matchingVisibilityHandler = null;
 
-    const runBtn = document.getElementById('matching-run-btn');
+async function runAndShowReport() {
     const runLoading = document.getElementById('matching-run-loading');
     const reportBlock = document.getElementById('matching-report-block');
     const reportGrid = document.getElementById('matching-stats-grid');
     const reportDetails = document.getElementById('matching-report-details');
     const runError = document.getElementById('matching-run-error');
 
-    const loadSimBtn = document.getElementById('matching-load-simulation-btn');
-    const simLoading = document.getElementById('matching-simulation-loading');
-    const simBlock = document.getElementById('matching-simulation-block');
-    const simStats = document.getElementById('matching-simulation-stats');
-    const simUnavailable = document.getElementById('matching-simulation-unavailable');
+    if (!window.matchingService || !window.matchingModels || !window.dataService) {
+        if (runError) {
+            runError.hidden = false;
+            runError.textContent = 'Matching service not available. Ensure the app has loaded matching scripts.';
+        }
+        return;
+    }
+    if (runError) runError.hidden = true;
+    if (reportBlock) reportBlock.hidden = true;
+    if (runLoading) runLoading.hidden = false;
+    try {
+        const report = await runMatchingOnCurrentData();
+        renderReport(reportGrid, reportDetails || null, report);
+        if (reportBlock) reportBlock.hidden = false;
+    } catch (e) {
+        if (runError) {
+            runError.hidden = false;
+            runError.textContent = e && e.message ? e.message : 'Run failed.';
+        }
+    } finally {
+        if (runLoading) runLoading.hidden = true;
+    }
+}
 
-    if (runBtn) {
-        runBtn.addEventListener('click', async () => {
-            if (!window.matchingService || !window.matchingModels || !window.dataService) {
-                if (runError) {
-                    runError.hidden = false;
-                    runError.textContent = 'Matching service not available. Ensure the app has loaded matching scripts.';
-                }
-                return;
-            }
-            runError.hidden = true;
-            reportBlock.hidden = true;
-            runLoading.hidden = false;
-            runBtn.disabled = true;
-            try {
-                const report = await runMatchingOnCurrentData();
-                renderReport(reportGrid, reportDetails, report);
-                reportBlock.hidden = false;
-            } catch (e) {
-                runError.hidden = false;
-                runError.textContent = e && e.message ? e.message : 'Run failed.';
-            } finally {
-                runLoading.hidden = true;
-                runBtn.disabled = false;
-            }
-        });
+async function initAdminMatching() {
+    if (!authService.canAccessAdmin()) {
+        router.navigate(CONFIG.ROUTES.DASHBOARD);
+        return;
     }
 
-    if (loadSimBtn) {
-        loadSimBtn.addEventListener('click', async () => {
-            simBlock.hidden = true;
-            simUnavailable.hidden = true;
-            simLoading.hidden = false;
-            try {
-                const basePath = (window.CONFIG && window.CONFIG.BASE_PATH) || '';
-                const res = await fetch(basePath + 'data/simulation/matching-report.json');
-                if (!res.ok) throw new Error('Not found');
-                const report = await res.json();
-                renderSimulationReport(simStats, report);
-                simBlock.hidden = false;
-            } catch (e) {
-                simUnavailable.hidden = false;
-            } finally {
-                simLoading.hidden = true;
-            }
-        });
+    if (matchingRefreshIntervalId != null) {
+        clearInterval(matchingRefreshIntervalId);
+        matchingRefreshIntervalId = null;
     }
+    if (matchingVisibilityHandler) {
+        document.removeEventListener('visibilitychange', matchingVisibilityHandler);
+        matchingVisibilityHandler = null;
+    }
+
+    await runAndShowReport();
+
+    matchingRefreshIntervalId = setInterval(runAndShowReport, MATCHING_REFRESH_INTERVAL_MS);
+    matchingVisibilityHandler = function () {
+        if (document.visibilityState === 'visible') runAndShowReport();
+    };
+    document.addEventListener('visibilitychange', matchingVisibilityHandler);
 }
 
 async function runMatchingOnCurrentData() {
@@ -89,40 +81,67 @@ async function runMatchingOnCurrentData() {
         groupFormations: 0,
         circularExchanges: 0,
         totalMatchesFound: 0,
-        oneWayDetails: [],
-        twoWayDetails: [],
-        groupDetails: [],
-        circularDetails: []
+        oneWayNeedToOffers: [],
+        oneWayOfferToNeeds: [],
+        twoWayPairs: [],
+        consortiumLeads: [],
+        circularCycles: []
     };
 
     const oneWayLimit = Math.min(20, needs.length);
     for (let i = 0; i < oneWayLimit; i++) {
         const need = needs[i];
         const result = await matchingService.findMatchesForPost(need.id);
-        if (result.model === 'one_way' && result.matches && result.matches.length > 0) {
-            report.oneWayMatches += result.matches.length;
-            if (report.oneWayDetails.length < 3) {
-                report.oneWayDetails.push({ needId: need.id, matchCount: result.matches.length, topScore: result.matches[0]?.matchScore });
-            }
-        }
+        const matches = result.model === 'one_way' && result.matches ? result.matches : [];
+        if (matches.length > 0) report.oneWayMatches += matches.length;
+        report.oneWayNeedToOffers.push({
+            opportunityId: need.id,
+            title: need.title || need.id,
+            creatorId: need.creatorId,
+            direction: 'need_to_offers',
+            matches: matches
+        });
+    }
+    report.totalMatchesFound += report.oneWayMatches;
+
+    const offerLimit = Math.min(20, offers.length);
+    for (let i = 0; i < offerLimit; i++) {
+        const offer = offers[i];
+        const result = await matchingService.findMatchesForPost(offer.id);
+        const matches = (result.model === 'one_way' && result.matches) ? result.matches : [];
+        if (matches.length > 0) report.oneWayMatches += matches.length;
+        report.oneWayOfferToNeeds.push({
+            opportunityId: offer.id,
+            title: offer.title || offer.id,
+            creatorId: offer.creatorId,
+            direction: 'offer_to_needs',
+            matches: matches
+        });
     }
     report.totalMatchesFound += report.oneWayMatches;
 
     const barterNeeds = needs.filter(o => (o.exchangeMode || '').toLowerCase() === 'barter');
-    const barterCreatorIds = new Set();
+    const twoWayPairKeys = new Set();
     for (const need of barterNeeds) {
         const result = await matchingService.findMatchesForPost(need.id, { model: 'two_way' });
-        if (result.model === 'two_way' && result.matches && result.matches.length > 0) {
-            for (const m of result.matches) {
-                const key = [need.creatorId, ...(m.suggestedPartners || []).map(p => p.creatorId).sort()].join('|');
-                if (!barterCreatorIds.has(key)) {
-                    barterCreatorIds.add(key);
-                    report.twoWayMatches++;
-                }
-            }
-            if (report.twoWayDetails.length < 3) {
-                report.twoWayDetails.push({ needId: need.id, pairCount: result.matches.length });
-            }
+        const matches = result.model === 'two_way' && result.matches ? result.matches : [];
+        const needA = need;
+        const offerA = offers.find(o => o.creatorId === need.creatorId);
+        if (!offerA) continue;
+        for (const m of matches) {
+            const key = [need.creatorId, (m.matchedNeed && m.matchedNeed.creatorId) || (m.suggestedPartners && m.suggestedPartners[0] && m.suggestedPartners[0].creatorId)].filter(Boolean).sort().join('|');
+            if (!key || twoWayPairKeys.has(key)) continue;
+            twoWayPairKeys.add(key);
+            report.twoWayMatches++;
+            report.twoWayPairs.push({
+                matchScore: m.matchScore,
+                breakdown: m.breakdown || {},
+                valueEquivalence: m.valueEquivalence,
+                needA,
+                offerA,
+                matchedNeed: m.matchedNeed,
+                matchedOffer: m.matchedOffer
+            });
         }
     }
     report.totalMatchesFound += report.twoWayMatches;
@@ -133,11 +152,16 @@ async function runMatchingOnCurrentData() {
     });
     for (const need of consortiumNeeds) {
         const result = await matchingService.findMatchesForPost(need.id, { model: 'consortium' });
-        if (result.model === 'consortium' && result.matches && result.matches.length > 0) {
-            report.groupFormations += result.matches.length;
-            if (report.groupDetails.length < 3) {
-                report.groupDetails.push({ needId: need.id, roles: result.roles, partnerCount: (result.matches[0]?.suggestedPartners || []).length });
-            }
+        const matches = result.model === 'consortium' && result.matches ? result.matches : [];
+        if (matches.length > 0) {
+            report.groupFormations += matches.length;
+        report.consortiumLeads.push({
+            opportunityId: need.id,
+            title: need.title || need.id,
+            creatorId: need.creatorId,
+            roles: result.roles || [],
+            matches: matches
+        });
         }
     }
     report.totalMatchesFound += report.groupFormations;
@@ -146,10 +170,69 @@ async function runMatchingOnCurrentData() {
     if (circularResult.model === 'circular' && circularResult.matches && circularResult.matches.length > 0) {
         report.circularExchanges = circularResult.matches.length;
         report.totalMatchesFound += report.circularExchanges;
-        report.circularDetails = circularResult.matches.slice(0, 3).map(m => ({ cycle: m.cycle, score: m.matchScore }));
+        report.circularCycles = circularResult.matches;
     }
 
+    report.creatorNames = await buildCreatorNamesMap(dataService, report);
     return report;
+}
+
+function escapeHtml(s) {
+    if (s == null || s === '') return '';
+    const t = String(s);
+    return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function getCreatorDisplayName(entity) {
+    if (!entity) return '';
+    return entity.profile?.name || entity.name || entity.email || entity.id || '';
+}
+
+async function buildCreatorNamesMap(dataService, report) {
+    const ids = new Set();
+    for (const item of report.oneWayNeedToOffers || []) {
+        if (item.creatorId) ids.add(item.creatorId);
+        for (const m of item.matches || []) {
+            const cid = (m.matchedOpportunity && m.matchedOpportunity.creatorId) || (m.suggestedPartners && m.suggestedPartners[0] && m.suggestedPartners[0].creatorId);
+            if (cid) ids.add(cid);
+        }
+    }
+    for (const item of report.oneWayOfferToNeeds || []) {
+        if (item.creatorId) ids.add(item.creatorId);
+        for (const m of item.matches || []) {
+            const cid = (m.matchedOpportunity && m.matchedOpportunity.creatorId) || (m.suggestedPartners && m.suggestedPartners[0] && m.suggestedPartners[0].creatorId);
+            if (cid) ids.add(cid);
+        }
+    }
+    for (const p of report.twoWayPairs || []) {
+        if (p.needA && p.needA.creatorId) ids.add(p.needA.creatorId);
+        if (p.offerA && p.offerA.creatorId) ids.add(p.offerA.creatorId);
+        if (p.matchedNeed && p.matchedNeed.creatorId) ids.add(p.matchedNeed.creatorId);
+        if (p.matchedOffer && p.matchedOffer.creatorId) ids.add(p.matchedOffer.creatorId);
+    }
+    for (const lead of report.consortiumLeads || []) {
+        if (lead.creatorId) ids.add(lead.creatorId);
+        const match = (lead.matches && lead.matches[0]) ? lead.matches[0] : null;
+        for (const sp of (match && match.suggestedPartners) || []) {
+            if (sp.creatorId) ids.add(sp.creatorId);
+        }
+    }
+    for (const c of report.circularCycles || []) {
+        for (const id of c.cycle || []) ids.add(id);
+    }
+    const creatorNames = {};
+    for (const id of ids) {
+        const entity = await dataService.getUserOrCompanyById(id);
+        creatorNames[id] = getCreatorDisplayName(entity) || id;
+    }
+    return creatorNames;
+}
+
+function getOpportunityRoute(id) {
+    const routeBase = (window.CONFIG && window.CONFIG.ROUTES && window.CONFIG.ROUTES.OPPORTUNITY_DETAIL)
+        ? window.CONFIG.ROUTES.OPPORTUNITY_DETAIL.replace(':id', '')
+        : '/opportunities/';
+    return routeBase && routeBase.endsWith('/') ? routeBase + id : '/opportunities/' + id;
 }
 
 function renderReport(gridEl, detailsEl, report) {
@@ -162,28 +245,180 @@ function renderReport(gridEl, detailsEl, report) {
         + '<div class="stat-card"><div class="stat-value">' + report.groupFormations + '</div><div class="stat-label">Group (consortium)</div></div>'
         + '<div class="stat-card"><div class="stat-value">' + report.circularExchanges + '</div><div class="stat-label">Circular</div></div>';
 
-    if (detailsEl) {
-        let html = '';
-        if (report.oneWayDetails.length) {
-            html += '<p>One-way samples: ' + report.oneWayDetails.map(d => 'Need ' + d.needId + ' → ' + d.matchCount + ' matches').join('; ') + '.</p>';
-        }
-        if (report.twoWayDetails.length) {
-            html += '<p>Two-way samples: ' + report.twoWayDetails.map(d => 'Need ' + d.needId + ' → ' + d.pairCount + ' pair(s)').join('; ') + '.</p>';
-        }
-        if (report.circularDetails.length) {
-            html += '<p>Circular samples: ' + report.circularDetails.map(d => 'Cycle ' + (d.cycle && d.cycle.join('→')) + ' (score ' + (d.score != null ? d.score.toFixed(2) : '-') + ')').join('; ') + '.</p>';
-        }
-        detailsEl.innerHTML = html || '<p>No sample details.</p>';
-    }
-}
+    const creatorNames = report.creatorNames || {};
+    const getMatchCreatorId = (m) => (m.matchedOpportunity && m.matchedOpportunity.creatorId) || (m.suggestedPartners && m.suggestedPartners[0] && m.suggestedPartners[0].creatorId);
+    const getMatchCreatorName = (m) => escapeHtml(creatorNames[getMatchCreatorId(m)] || getMatchCreatorId(m) || '');
 
-function renderSimulationReport(statsEl, report) {
-    if (!statsEl) return;
-    statsEl.innerHTML = ''
-        + '<div class="stat-card"><div class="stat-value">' + (report.totalPostsAnalyzed ?? '-') + '</div><div class="stat-label">Total posts</div></div>'
-        + '<div class="stat-card"><div class="stat-value">' + (report.totalMatchesFound ?? '-') + '</div><div class="stat-label">Total matches</div></div>'
-        + '<div class="stat-card"><div class="stat-value">' + (report.oneWayMatches ?? '-') + '</div><div class="stat-label">One-way</div></div>'
-        + '<div class="stat-card"><div class="stat-value">' + (report.twoWayMatches ?? '-') + '</div><div class="stat-label">Two-way</div></div>'
-        + '<div class="stat-card"><div class="stat-value">' + (report.groupFormations ?? '-') + '</div><div class="stat-label">Group</div></div>'
-        + '<div class="stat-card"><div class="stat-value">' + (report.circularExchanges ?? '-') + '</div><div class="stat-label">Circular</div></div>';
+    const needToOffersEl = document.getElementById('matching-one-way-need-to-offers');
+    if (needToOffersEl) {
+        const items = report.oneWayNeedToOffers || [];
+        if (items.length === 0) {
+            needToOffersEl.innerHTML = '<p class="matching-details">No need posts analyzed.</p>';
+        } else {
+            let html = '';
+            for (const item of items) {
+                const route = getOpportunityRoute(item.opportunityId);
+                const title = escapeHtml(item.title || item.opportunityId);
+                const oppCreatorName = escapeHtml(creatorNames[item.creatorId] || item.creatorId || '');
+                html += '<div class="matching-opp-card"><div class="matching-opp-card-title"><a href="#" class="matching-opp-link" data-route="' + escapeHtml(route) + '">' + title + '</a>' + (oppCreatorName ? ' <span class="matching-creator-name">(' + oppCreatorName + ')</span>' : '') + '</div>';
+                if (item.matches && item.matches.length > 0) {
+                    html += '<ul class="matching-match-list">';
+                    for (const m of item.matches) {
+                        const matchTitle = (m.matchedOpportunity && m.matchedOpportunity.title) ? escapeHtml(m.matchedOpportunity.title) : (m.suggestedPartners && m.suggestedPartners[0] ? escapeHtml(m.suggestedPartners[0].opportunityId) : '');
+                        const score = (m.matchScore != null) ? Math.round(m.matchScore * 100) + '%' : '-';
+                        const creatorName = getMatchCreatorName(m);
+                        const labels = m.labels || m.breakdown;
+                        const breakdownParts = labels ? [labels.skillMatch || labels.attributeOverlap, labels.exchangeCompatibility, labels.valueCompatibility, labels.budgetFit, labels.timelineFit, labels.locationFit, labels.reputation].filter(Boolean) : [];
+                        const breakdown = breakdownParts.length ? ' (' + breakdownParts.join(', ') + ')' : '';
+                        const tier = (m.recommendation && m.recommendation.tier) ? m.recommendation.tier : '';
+                        const tierBadge = tier ? '<span class="matching-tier matching-tier-' + tier + '">' + escapeHtml(tier) + '</span>' : '';
+                        const valueFit = (m.valueAnalysis && m.valueAnalysis.valueFit) ? ' Value: ' + m.valueAnalysis.valueFit : '';
+                        const coverage = (m.valueAnalysis && m.valueAnalysis.coverageRatio != null) ? ' Coverage: ' + (m.valueAnalysis.coverageRatio * 100).toFixed(0) + '%' : '';
+                        html += '<li class="matching-match-row">' + tierBadge + ' <span class="matching-match-score">' + score + '</span> ' + (creatorName ? creatorName + ': ' : '') + matchTitle + breakdown + valueFit + coverage + '</li>';
+                    }
+                    html += '</ul>';
+                } else {
+                    html += '<p class="matching-details">No matching offers.</p>';
+                }
+                html += '</div>';
+            }
+            needToOffersEl.innerHTML = html;
+        }
+    }
+
+    const offerToNeedsEl = document.getElementById('matching-one-way-offer-to-needs');
+    if (offerToNeedsEl) {
+        const items = report.oneWayOfferToNeeds || [];
+        if (items.length === 0) {
+            offerToNeedsEl.innerHTML = '<p class="matching-details">No offer posts analyzed.</p>';
+        } else {
+            let html = '';
+            for (const item of items) {
+                const route = getOpportunityRoute(item.opportunityId);
+                const title = escapeHtml(item.title || item.opportunityId);
+                const oppCreatorName = escapeHtml(creatorNames[item.creatorId] || item.creatorId || '');
+                html += '<div class="matching-opp-card"><div class="matching-opp-card-title"><a href="#" class="matching-opp-link" data-route="' + escapeHtml(route) + '">' + title + '</a>' + (oppCreatorName ? ' <span class="matching-creator-name">(' + oppCreatorName + ')</span>' : '') + '</div>';
+                if (item.matches && item.matches.length > 0) {
+                    html += '<ul class="matching-match-list">';
+                    for (const m of item.matches) {
+                        const matchTitle = (m.matchedOpportunity && m.matchedOpportunity.title) ? escapeHtml(m.matchedOpportunity.title) : (m.suggestedPartners && m.suggestedPartners[0] ? escapeHtml(m.suggestedPartners[0].opportunityId) : '');
+                        const score = (m.matchScore != null) ? Math.round(m.matchScore * 100) + '%' : '-';
+                        const creatorName = getMatchCreatorName(m);
+                        const labels = m.labels || m.breakdown;
+                        const breakdownParts = labels ? [labels.skillMatch || labels.attributeOverlap, labels.exchangeCompatibility, labels.valueCompatibility, labels.budgetFit, labels.timelineFit, labels.locationFit, labels.reputation].filter(Boolean) : [];
+                        const breakdown = breakdownParts.length ? ' (' + breakdownParts.join(', ') + ')' : '';
+                        const tier = (m.recommendation && m.recommendation.tier) ? m.recommendation.tier : '';
+                        const tierBadge = tier ? '<span class="matching-tier matching-tier-' + tier + '">' + escapeHtml(tier) + '</span>' : '';
+                        const valueFit = (m.valueAnalysis && m.valueAnalysis.valueFit) ? ' Value: ' + m.valueAnalysis.valueFit : '';
+                        html += '<li class="matching-match-row">' + tierBadge + ' <span class="matching-match-score">' + score + '</span> ' + (creatorName ? creatorName + ': ' : '') + matchTitle + breakdown + valueFit + '</li>';
+                    }
+                    html += '</ul>';
+                } else {
+                    html += '<p class="matching-details">No matching needs.</p>';
+                }
+                html += '</div>';
+            }
+            offerToNeedsEl.innerHTML = html;
+        }
+    }
+
+    const twoWayEl = document.getElementById('matching-two-way');
+    if (twoWayEl) {
+        const pairs = report.twoWayPairs || [];
+        if (pairs.length === 0) {
+            twoWayEl.innerHTML = '<p class="matching-details">No two-way pairs found.</p>';
+        } else {
+            let html = '';
+            for (const p of pairs) {
+                const nameA = escapeHtml(creatorNames[p.needA && p.needA.creatorId] || (p.needA && p.needA.creatorId) || '');
+                const nameB = escapeHtml(creatorNames[p.matchedNeed && p.matchedNeed.creatorId] || (p.matchedNeed && p.matchedNeed.creatorId) || '');
+                const needATitle = (p.needA && (p.needA.title || p.needA.id)) ? escapeHtml(p.needA.title || p.needA.id) : '-';
+                const offerATitle = (p.offerA && (p.offerA.title || p.offerA.id)) ? escapeHtml(p.offerA.title || p.offerA.id) : '-';
+                const needBTitle = (p.matchedNeed && (p.matchedNeed.title || p.matchedNeed.id)) ? escapeHtml(p.matchedNeed.title || p.matchedNeed.id) : '-';
+                const offerBTitle = (p.matchedOffer && (p.matchedOffer.title || p.matchedOffer.id)) ? escapeHtml(p.matchedOffer.title || p.matchedOffer.id) : '-';
+                const scoreAtoB = (p.breakdown && p.breakdown.scoreAtoB != null) ? Math.round(p.breakdown.scoreAtoB * 100) + '%' : '-';
+                const scoreBtoA = (p.breakdown && p.breakdown.scoreBtoA != null) ? Math.round(p.breakdown.scoreBtoA * 100) + '%' : '-';
+                const valueEq = p.valueEquivalence ? escapeHtml(p.valueEquivalence) : '';
+                const equiv = (p.valueAnalysis && p.valueAnalysis.equivalence) ? p.valueAnalysis.equivalence : null;
+                const equivScore = equiv && equiv.equivalenceScore != null ? (equiv.equivalenceScore * 100).toFixed(0) + '%' : '';
+                const suggestion = equiv && equiv.suggestion ? escapeHtml(equiv.suggestion) : '';
+                html += '<div class="matching-two-way-pair">'
+                    + '<div class="matching-two-way-participants">Participant A ' + (nameA ? '(' + nameA + '): ' : '') + 'Need ' + needATitle + ' / Offer ' + offerATitle + ' &harr; Participant B ' + (nameB ? '(' + nameB + '): ' : '') + 'Need ' + needBTitle + ' / Offer ' + offerBTitle + '</div>'
+                    + '<div class="matching-two-way-scores">Score A&rarr;B: ' + scoreAtoB + ', Score B&rarr;A: ' + scoreBtoA + (valueEq ? '; Value: ' + valueEq : '') + (equivScore ? '; Equivalence: ' + equivScore : '') + (suggestion ? '; ' + suggestion : '') + '</div></div>';
+            }
+            twoWayEl.innerHTML = html;
+        }
+    }
+
+    const consortiumEl = document.getElementById('matching-consortium');
+    if (consortiumEl) {
+        const leads = report.consortiumLeads || [];
+        if (leads.length === 0) {
+            consortiumEl.innerHTML = '<p class="matching-details">No consortium formations.</p>';
+        } else {
+            let html = '';
+            for (const lead of leads) {
+                const route = getOpportunityRoute(lead.opportunityId);
+                const title = escapeHtml(lead.title || lead.opportunityId);
+                const leadCreatorName = escapeHtml(creatorNames[lead.creatorId] || lead.creatorId || '');
+                html += '<div class="matching-opp-card"><div class="matching-consortium-lead"><a href="#" class="matching-opp-link" data-route="' + escapeHtml(route) + '">' + title + '</a>' + (leadCreatorName ? ' <span class="matching-creator-name">(' + leadCreatorName + ')</span>' : '') + '</div><div class="matching-consortium-roles">';
+                const match = (lead.matches && lead.matches[0]) ? lead.matches[0] : null;
+                const partners = (match && match.suggestedPartners) ? match.suggestedPartners : [];
+                const balance = (match && match.valueAnalysis && match.valueAnalysis.consortiumBalance) ? match.valueAnalysis.consortiumBalance : null;
+                for (const rolePartner of partners) {
+                    const role = rolePartner.role || 'Partner';
+                    const oppId = rolePartner.opportunityId || '';
+                    const partnerName = escapeHtml(creatorNames[rolePartner.creatorId] || rolePartner.creatorId || '');
+                    html += '<div class="matching-consortium-role">' + escapeHtml(role) + ': ' + (partnerName ? partnerName + ' (' + escapeHtml(oppId) + ')' : escapeHtml(oppId)) + '</div>';
+                }
+                if (balance) {
+                    const balanceScore = (balance.balanceScore != null) ? (balance.balanceScore * 100).toFixed(0) + '%' : '';
+                    const viable = balance.viable ? 'Viable' : 'Review balance';
+                    html += '<div class="matching-consortium-balance">Value balance: ' + balanceScore + ' ' + viable + (balance.budgetSurplus != null ? '; Budget surplus: ' + Math.round(balance.budgetSurplus) + ' SAR' : '') + '</div>';
+                }
+                html += '</div></div>';
+            }
+            consortiumEl.innerHTML = html;
+        }
+    }
+
+    const circularEl = document.getElementById('matching-circular');
+    if (circularEl) {
+        const cycles = report.circularCycles || [];
+        if (cycles.length === 0) {
+            circularEl.innerHTML = '<p class="matching-details">No circular exchanges found.</p>';
+        } else {
+            let html = '';
+            for (const c of cycles) {
+                const cycleIds = c.cycle || [];
+                const cycleNames = cycleIds.map(id => escapeHtml(creatorNames[id] || id));
+                const sequence = cycleNames.length > 0 ? cycleNames.join(' &rarr; ') + ' &rarr; ' + cycleNames[0] : (cycleIds.join(' &rarr; ') + ' &rarr; ' + (cycleIds[0] || ''));
+                const linkScores = c.linkScores || [];
+                const linkStr = linkScores.length > 0 ? linkScores.map(l => {
+                    const fromName = escapeHtml(creatorNames[l.fromCreatorId] || l.fromCreatorId || '');
+                    const toName = escapeHtml(creatorNames[l.toCreatorId] || l.toCreatorId || '');
+                    return fromName + '&rarr;' + toName + ': ' + (l.score != null ? (l.score * 100).toFixed(0) + '%' : '-');
+                }).join(', ') : '';
+                const overall = (c.matchScore != null) ? Math.round(c.matchScore * 100) + '%' : '';
+                const chainBal = (c.valueAnalysis && c.valueAnalysis.chainBalance) ? c.valueAnalysis.chainBalance : null;
+                const chainScore = chainBal && chainBal.chainBalanceScore != null ? (chainBal.chainBalanceScore * 100).toFixed(0) + '%' : '';
+                const chainViable = chainBal && chainBal.viable != null ? (chainBal.viable ? '; Viable' : '; Review balance') : '';
+                html += '<div class="matching-circular-cycle"><div class="matching-circular-sequence">' + sequence + '</div>'
+                    + (linkStr ? '<div class="matching-circular-links">Link scores: ' + linkStr + (overall ? '; overall ' + overall : '') + (chainScore ? '; chain balance ' + chainScore + chainViable : '') + '</div>' : '')
+                    + '</div>';
+            }
+            circularEl.innerHTML = html;
+        }
+    }
+
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+        mainContent.querySelectorAll('.matching-opp-link').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const route = this.getAttribute('data-route');
+                if (route && typeof router !== 'undefined' && router.navigate) router.navigate(route);
+            });
+        });
+    }
 }

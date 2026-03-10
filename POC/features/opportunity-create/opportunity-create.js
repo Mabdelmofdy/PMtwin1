@@ -3,7 +3,7 @@
  */
 
 let currentStep = 1;
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
 let allLocations = [];
 let demoDataIndex = 0;
 
@@ -18,6 +18,7 @@ let demoDataIndex = 0;
  */
 const DEMO_DATASETS = [
     {
+        projectType: 'single',
         step1: {
             title: 'Structural Engineering Services for Commercial Building Project',
             description: 'We are seeking an experienced structural engineer to provide design and consultation services for a new 5-story commercial building in Riyadh. The project involves reinforced concrete design, foundation analysis, and construction supervision.',
@@ -61,6 +62,7 @@ const DEMO_DATASETS = [
         step6: { status: 'draft' }
     },
     {
+        projectType: 'multi',
         step1: {
             title: 'Strategic JV Partnership – Construction & Engineering',
             description: 'We offer a long-term strategic joint venture in construction and engineering. Seeking a partner for equity participation, shared governance, and expansion across the GCC.',
@@ -120,6 +122,7 @@ const DEMO_DATASETS = [
         step6: { status: 'draft' }
     },
     {
+        projectType: 'multi',
         step1: {
             title: 'Consortium – Large-Scale Infrastructure Tender',
             description: 'Request for consortium members for a major infrastructure tender. Profit-sharing and scope division by trade. Lead member role available.',
@@ -179,6 +182,7 @@ const DEMO_DATASETS = [
         step6: { status: 'draft' }
     },
     {
+        projectType: 'single',
         step1: {
             title: 'Consulting Services Offer – Barter or Hybrid',
             description: 'We offer project management and sustainability consulting. Open to barter (office space, software licenses) or hybrid compensation.',
@@ -225,6 +229,7 @@ const DEMO_DATASETS = [
         step6: { status: 'draft' }
     },
     {
+        projectType: 'multi',
         step1: {
             title: 'Bulk Steel Purchase – Consortium for Riyadh Projects',
             description: 'Organizing a bulk purchase of structural steel for multiple construction projects in Riyadh. Seeking 4–6 participants to achieve volume discount. Lead organizer; delivery to central depot.',
@@ -274,6 +279,7 @@ const DEMO_DATASETS = [
         step6: { status: 'draft' }
     },
     {
+        projectType: 'single',
         step1: {
             title: 'Innovation Contest – Sustainable Construction Solutions',
             description: 'Open innovation contest for sustainable construction solutions. Winner receives 500K SAR and pilot opportunity. Open to companies and professionals. Submission deadline 60 days.',
@@ -604,6 +610,28 @@ function getScopeTagsFromInput(inputId) {
     }
 }
 
+function collectValueExpectedFromForm() {
+    const container = document.getElementById('value-expected-list');
+    if (!container) return [];
+    const items = container.querySelectorAll('[data-value-expected-item]');
+    const out = [];
+    items.forEach(node => {
+        const label = (node.querySelector('[data-value-expected-label]')?.textContent || node.textContent || '').trim();
+        if (label) out.push({ label });
+    });
+    const tagsInput = document.getElementById('value-expected-tags');
+    if (tagsInput) {
+        try {
+            const arr = JSON.parse(tagsInput.dataset.tagsArray || '[]');
+            arr.forEach(t => out.push(typeof t === 'string' ? { label: t } : { label: t.label || t.description || '' }));
+        } catch {
+            const v = (tagsInput.value || '').trim();
+            if (v) v.split(',').map(s => s.trim()).filter(Boolean).forEach(s => out.push({ label: s }));
+        }
+    }
+    return out;
+}
+
 function getOpportunityModels() {
     return window.OPPORTUNITY_MODELS || {};
 }
@@ -816,8 +844,8 @@ function setupWizardNavigation() {
     
     nextBtn.addEventListener('click', () => {
         if (validateCurrentStep()) {
-            if (currentStep === 3) persistScopeTags();
-            if (currentStep === 6) fillReviewSummary();
+            if (currentStep === 4) persistScopeTags();
+            if (currentStep === 7) fillReviewSummary();
             goToStep(currentStep + 1);
         }
     });
@@ -856,10 +884,13 @@ function fillReviewSummary() {
     const summary = document.getElementById('review-summary');
     if (!summary) return;
     const models = getOpportunityModels();
+    const projectTypeEl = document.querySelector('input[name="projectType"]:checked');
+    const projectTypeLabel = projectTypeEl ? (projectTypeEl.value === 'single' ? 'Single Project' : 'Multi Project') : '—';
     const title = document.getElementById('title')?.value || '—';
     const desc = document.getElementById('description')?.value || '—';
     const intentEl = document.querySelector('input[name="intent"]:checked');
-    const intent = intentEl ? (intentEl.value === 'request' ? 'NEED' : 'OFFER') : '—';
+    const intentLabel = intentEl ? (intentEl.value === 'request' ? 'NEED' : intentEl.value === 'hybrid' ? 'NEED + OFFER' : 'OFFER') : '—';
+    const intent = intentLabel;
     const location = document.getElementById('location')?.value || document.getElementById('location-country')?.value || '—';
     const modelType = document.getElementById('model-type')?.value;
     const subModelType = document.getElementById('submodel-type')?.value;
@@ -877,6 +908,12 @@ function fillReviewSummary() {
     const budgetMin = document.getElementById('budgetRange_min')?.value;
     const budgetMax = document.getElementById('budgetRange_max')?.value;
     const budgetLabel = (budgetMin != null && budgetMax != null && budgetMin !== '' && budgetMax !== '') ? `${Number(budgetMin).toLocaleString()} – ${Number(budgetMax).toLocaleString()} SAR` : '—';
+    const locationReq = document.getElementById('location-requirement')?.value?.trim();
+    const attrStart = document.getElementById('attr-startDate')?.value?.trim();
+    const attrDeadline = document.getElementById('attr-applicationDeadline')?.value?.trim();
+    const attrEnd = document.getElementById('attr-endDate')?.value?.trim();
+    const paymentCbs = document.querySelectorAll('.payment-method-cb:checked');
+    const paymentMethodsLabel = paymentCbs.length > 0 ? Array.from(paymentCbs).map(c => modeNames[c.value] || c.value).join(', ') : modeLabel;
     const skills = getScopeTagsFromInput('scope-skills');
     let modelDetailsLine = '—';
     if (modelType && subModelType && window.opportunityFormService) {
@@ -892,12 +929,16 @@ function fillReviewSummary() {
         if (keyLabels.length) modelDetailsLine = keyLabels.join('; ');
     }
     summary.innerHTML = `
+        <p><strong>Project Type:</strong> ${escapeHtml(projectTypeLabel)}</p>
         <p><strong>Title:</strong> ${escapeHtml(title)}</p>
         <p><strong>Intent:</strong> ${escapeHtml(intent)}</p>
         <p><strong>Location:</strong> ${escapeHtml(location)}</p>
+        ${locationReq ? `<p><strong>Location requirement:</strong> ${escapeHtml(locationReq)}</p>` : ''}
+        ${(attrStart || attrDeadline || attrEnd) ? `<p><strong>Key dates:</strong> Start ${attrStart || '—'}, Deadline ${attrDeadline || '—'}, End ${attrEnd || '—'}</p>` : ''}
         <p><strong>Category:</strong> ${escapeHtml(categoryLabel)}</p>
         <p><strong>Sub-Model:</strong> ${escapeHtml(subModelLabel)}</p>
         <p><strong>Exchange mode:</strong> ${escapeHtml(modeLabel)}</p>
+        ${paymentCbs.length > 1 ? `<p><strong>Payment methods:</strong> ${escapeHtml(paymentMethodsLabel)}</p>` : ''}
         <p><strong>Budget range:</strong> ${escapeHtml(budgetLabel)}</p>
         <p><strong>Skills:</strong> ${skills.length ? escapeHtml(skills.join(', ')) : '—'}</p>
         <p><strong>Model details:</strong> ${escapeHtml(modelDetailsLine)}</p>
@@ -918,6 +959,14 @@ function validateCurrentStep() {
     
     switch (currentStep) {
         case 1: {
+            const projectType = document.querySelector('input[name="projectType"]:checked');
+            if (!projectType) {
+                showError('Please select a project type (Single Project or Multi Project)');
+                return false;
+            }
+            break;
+        }
+        case 2: {
             const title = document.getElementById('title').value.trim();
             const country = document.getElementById('location-country').value;
             const region = document.getElementById('location-region').value;
@@ -940,15 +989,15 @@ function validateCurrentStep() {
             }
             break;
         }
-        case 2: {
+        case 3: {
             const intent = document.querySelector('input[name="intent"]:checked');
             if (!intent) {
-                showError('Please select an intent (NEED or OFFER)');
+                showError('Please select an intent (NEED, OFFER, or NEED + OFFER)');
                 return false;
             }
             break;
         }
-        case 3: {
+        case 4: {
             const skills = getScopeTagsFromInput('scope-skills');
             const scopeInput = document.getElementById('scope-skills');
             const pending = (scopeInput?.value || '').trim().replace(/,/g, '');
@@ -959,7 +1008,7 @@ function validateCurrentStep() {
             }
             break;
         }
-        case 4: {
+        case 5: {
             const modelType = document.getElementById('model-type')?.value;
             const subModelType = document.getElementById('submodel-type')?.value;
             if (!modelType) {
@@ -1007,7 +1056,7 @@ function validateCurrentStep() {
             }
             break;
         }
-        case 5: {
+        case 6: {
             const budgetMin = document.getElementById('budgetRange_min')?.value?.trim();
             const budgetMax = document.getElementById('budgetRange_max')?.value?.trim();
             if (!budgetMin || !budgetMax) {
@@ -1066,7 +1115,7 @@ function validateCurrentStep() {
             }
             break;
         }
-        case 6: {
+        case 7: {
             const status = document.getElementById('status')?.value;
             if (!status) {
                 showError('Please choose Save as Draft or Publish');
@@ -1091,14 +1140,16 @@ function goToStep(step) {
     
     updateWizardUI();
     
-    if (currentStep === 2) updateScopeLabels();
-    if (currentStep === 6) {
+    if (currentStep === 3) updateScopeLabels();
+    if (currentStep === 6 && typeof refreshEstimatedValueDisplay === 'function') refreshEstimatedValueDisplay();
+    if (currentStep === 7) {
         fillReviewSummary();
         const statusField = document.getElementById('status');
         if (statusField && !statusField.value) statusField.value = 'draft';
     }
     
     setTimeout(() => {
+        if (currentStep === 6 && typeof refreshEstimatedValueDisplay === 'function') refreshEstimatedValueDisplay();
         if (window.RichTextEditor && typeof Quill !== 'undefined') {
             const currentStepContainer = document.getElementById(`step-${currentStep}`);
             if (currentStepContainer) {
@@ -1761,10 +1812,110 @@ function setupExchangeModeSelection() {
         
         document.getElementById('selected-exchange-name').textContent = modeNames[mode];
         selectedDisplay.classList.remove('hidden');
-        
+        const primaryCb = document.querySelector(`.payment-method-cb[value="${mode}"]`);
+        if (primaryCb && !primaryCb.checked) primaryCb.checked = true;
         // Render mode-specific fields
         renderExchangeModeFields(mode);
+        setTimeout(refreshEstimatedValueDisplay, 100);
     }
+
+    function refreshEstimatedValueDisplay() {
+        const section = document.getElementById('estimated-value-section');
+        const display = document.getElementById('estimated-value-display');
+        if (!section || !display) return;
+        const estimator = window.valueEstimator;
+        const modeInput = document.getElementById('exchange-mode');
+        const mode = modeInput?.value;
+        if (!estimator || !mode) {
+            section.classList.add('hidden');
+            return;
+        }
+        const currency = document.getElementById('currency')?.value || 'SAR';
+        const budgetMin = parseFloat(document.getElementById('budgetRange_min')?.value) || 0;
+        const budgetMax = parseFloat(document.getElementById('budgetRange_max')?.value) || 0;
+        const exchangeData = {
+            currency,
+            budgetRange: { min: budgetMin, max: budgetMax, currency }
+        };
+        if (mode === 'cash') {
+            exchangeData.cashAmount = parseFloat(document.getElementById('cash-amount')?.value);
+        } else if (mode === 'equity') {
+            exchangeData.equityPercentage = parseFloat(document.getElementById('equity-percentage')?.value);
+            const cv = document.getElementById('equity-company-valuation')?.value;
+            if (cv) exchangeData.companyValuation = cv.trim();
+        } else if (mode === 'profit_sharing') {
+            const pct = document.getElementById('profit-share-percentage')?.value;
+            const exp = document.getElementById('expected-profit')?.value;
+            if (pct) exchangeData.profitSharePercentage = parseFloat(pct);
+            if (exp) exchangeData.expectedProfit = exp.trim();
+        } else if (mode === 'barter') {
+            const bv = document.getElementById('barter-value')?.value;
+            if (bv) exchangeData.barterValue = bv.trim();
+        } else if (mode === 'hybrid') {
+            exchangeData.hybridCash = parseFloat(document.getElementById('hybrid-cash')?.value || 0);
+            exchangeData.hybridEquity = parseFloat(document.getElementById('hybrid-equity')?.value || 0);
+            exchangeData.hybridBarter = parseFloat(document.getElementById('hybrid-barter')?.value || 0);
+        }
+        const result = estimator.estimateFromExchangeData(exchangeData, mode);
+        if (result.estimated_value != null && !isNaN(result.estimated_value)) {
+            display.textContent = (result.estimated_value.toLocaleString()) + ' ' + (result.currency || 'SAR');
+            section.classList.remove('hidden');
+        } else {
+            display.textContent = '—';
+            section.classList.remove('hidden');
+        }
+    }
+    window.refreshEstimatedValueDisplay = refreshEstimatedValueDisplay;
+
+    const step6 = document.getElementById('step-6');
+    if (step6) {
+        step6.addEventListener('input', () => refreshEstimatedValueDisplay());
+        step6.addEventListener('change', () => refreshEstimatedValueDisplay());
+    }
+
+    function getValueCategories() {
+        try {
+            const lookups = window.dataService && typeof window.dataService.getLookups === 'function' ? window.dataService.getLookups() : null;
+            const arr = lookups && lookups.valueCategories ? lookups.valueCategories : null;
+            if (Array.isArray(arr) && arr.length > 0) return arr;
+        } catch (e) {}
+        return [
+            { id: 'cash', label: 'Cash' },
+            { id: 'service', label: 'Service' },
+            { id: 'equipment', label: 'Equipment' },
+            { id: 'resource', label: 'Resource' },
+            { id: 'equity', label: 'Equity' },
+            { id: 'knowledge', label: 'Knowledge' }
+        ];
+    }
+
+    function addValueItemRow(data) {
+        const container = document.getElementById('value-items-container');
+        if (!container) return;
+        const categories = getValueCategories();
+        const opts = categories.map(c => '<option value="' + (c.id || c) + '">' + (c.label || c) + '</option>').join('');
+        const row = document.createElement('div');
+        row.className = 'value-item-row flex flex-wrap gap-2 items-end border border-gray-200 rounded p-2 bg-white';
+        row.innerHTML = '<select class="value-item-category px-3 py-2 border border-gray-300 rounded-md flex-1 min-w-[120px]" name="valueItemCategory">' + opts + '</select>' +
+            '<input type="text" class="value-item-desc px-3 py-2 border border-gray-300 rounded-md flex-2 min-w-[160px]" placeholder="Description" name="valueItemDesc">' +
+            '<input type="number" class="value-item-est px-3 py-2 border border-gray-300 rounded-md w-28" placeholder="SAR" min="0" step="0.01" name="valueItemEst">' +
+            '<button type="button" class="value-item-remove btn btn-secondary btn-sm">Remove</button>';
+        if (data && data.category) {
+            const sel = row.querySelector('.value-item-category');
+            if (sel) sel.value = data.category;
+            const desc = row.querySelector('.value-item-desc');
+            if (desc && data.description) desc.value = data.description;
+            const est = row.querySelector('.value-item-est');
+            if (est && data.estimatedValue != null) est.value = data.estimatedValue;
+        }
+        row.querySelector('.value-item-remove').addEventListener('click', () => row.remove());
+        container.appendChild(row);
+    }
+
+    const addValueItemBtn = document.getElementById('add-value-item');
+    if (addValueItemBtn) addValueItemBtn.addEventListener('click', () => addValueItemRow());
+    const valueItemsContainer = document.getElementById('value-items-container');
+    if (valueItemsContainer && valueItemsContainer.children.length === 0) addValueItemRow();
     
     function renderExchangeModeFields(mode) {
         let html = '';
@@ -1839,6 +1990,17 @@ function setupExchangeModeSelection() {
                             <p class="text-sm text-gray-500 mt-1">Percentage of ownership stake</p>
                         </div>
                         <div class="form-group">
+                            <label for="equity-company-valuation" class="form-label">Company Valuation (SAR)</label>
+                            <input 
+                                type="text" 
+                                id="equity-company-valuation" 
+                                name="companyValuation" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="e.g., 5000000"
+                            >
+                            <p class="text-sm text-gray-500 mt-1">Used to calculate estimated value (e.g. 5M = 5,000,000 SAR)</p>
+                        </div>
+                        <div class="form-group">
                             <label for="equity-vesting" class="form-label">Vesting Period</label>
                             <select 
                                 id="equity-vesting" 
@@ -1875,7 +2037,7 @@ function setupExchangeModeSelection() {
                 html = `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div class="form-group">
-                            <label for="profit-split" class="form-label">Profit Split Percentage <span class="text-red-600">*</span></label>
+                            <label for="profit-split" class="form-label">Profit Split (e.g. 60-40) <span class="text-red-600">*</span></label>
                             <input 
                                 type="text" 
                                 id="profit-split" 
@@ -1885,6 +2047,31 @@ function setupExchangeModeSelection() {
                                 required
                             >
                             <p class="text-sm text-gray-500 mt-1">Enter profit split (e.g., 60-40 for 60% partner, 40% partner)</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="profit-share-percentage" class="form-label">Partner Share % (for value estimate)</label>
+                            <input 
+                                type="number" 
+                                id="profit-share-percentage" 
+                                name="profitSharePercentage" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="e.g., 10"
+                                min="0"
+                                max="100"
+                                step="0.1"
+                            >
+                            <p class="text-sm text-gray-500 mt-1">Percentage of profit for partner (used to calculate estimated value)</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="expected-profit" class="form-label">Expected Profit (SAR)</label>
+                            <input 
+                                type="text" 
+                                id="expected-profit" 
+                                name="expectedProfit" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="e.g., 2000000"
+                            >
+                            <p class="text-sm text-gray-500 mt-1">Expected profit for the project (e.g. 2M = 2,000,000 SAR)</p>
                         </div>
                         <div class="form-group">
                             <label for="profit-basis" class="form-label">Profit Basis</label>
@@ -2278,7 +2465,12 @@ function fillDemoStep5ModeFields(modeFields, currency, agreement) {
 async function fillDemoData(dataset) {
     const d = dataset || DEMO_DATASETS[0];
     try {
-        // Step 1: Basic info
+        // Step 1: Project Type
+        const projectType = (d.projectType != null ? d.projectType : 'single');
+        const projectTypeRadio = document.querySelector(`input[name="projectType"][value="${projectType}"]`);
+        if (projectTypeRadio) projectTypeRadio.checked = true;
+
+        // Step 2: Basic info
         const titleInput = document.getElementById('title');
         const descriptionInput = document.getElementById('description');
         if (titleInput && d.step1) titleInput.value = d.step1.title || '';
@@ -2803,13 +2995,17 @@ function setupFormHandlers() {
                 throw new Error('You must be logged in to create an opportunity');
             }
             
+            const projectType = document.querySelector('input[name="projectType"]:checked')?.value || 'single';
             const intent = document.querySelector('input[name="intent"]:checked')?.value || 'request';
             const modelType = document.getElementById('model-type')?.value;
             const subModelType = document.getElementById('submodel-type')?.value;
             if (!modelType || !subModelType) throw new Error('Please select category and sub-model');
             const exchangeMode = document.getElementById('exchange-mode')?.value;
             if (!exchangeMode) throw new Error('Please select an exchange mode');
-            const paymentModesArr = [exchangeMode];
+            const paymentMethodCheckboxes = document.querySelectorAll('.payment-method-cb:checked');
+            const paymentModesArr = paymentMethodCheckboxes.length > 0
+                ? Array.from(paymentMethodCheckboxes).map(cb => cb.value)
+                : [exchangeMode];
             
             const title = document.getElementById('title')?.value?.trim();
             const description = document.getElementById('description')?.value?.trim() || '';
@@ -2821,21 +3017,40 @@ function setupFormHandlers() {
             const status = document.getElementById('status')?.value || 'draft';
             const currency = document.getElementById('currency')?.value || 'SAR';
             
-            const requiredSkills = getScopeTagsFromInput('scope-skills');
-            const offeredSkills = intent === 'offer' ? getScopeTagsFromInput('scope-skills') : [];
-            const requiredSkillsForRequest = intent === 'request' ? getScopeTagsFromInput('scope-skills') : [];
+            const scopeSkillsTags = getScopeTagsFromInput('scope-skills');
+            const requiredSkillsForRequest = (intent === 'request' || intent === 'hybrid') ? scopeSkillsTags : [];
+            const offeredSkills = (intent === 'offer' || intent === 'hybrid') ? scopeSkillsTags : [];
             const sectors = getScopeTagsFromInput('scope-sectors');
             const interests = getScopeTagsFromInput('scope-interests');
             const certifications = getScopeTagsFromInput('scope-certifications');
             
             const scope = {
-                requiredSkills: intent === 'request' ? requiredSkillsForRequest : [],
-                offeredSkills: intent === 'offer' ? offeredSkills : [],
+                requiredSkills: requiredSkillsForRequest,
+                offeredSkills: offeredSkills,
                 sectors,
                 interests,
                 certifications
             };
             
+            const acceptedModesEls = document.querySelectorAll('.accepted-mode-cb:checked');
+            const accepted_modes = acceptedModesEls.length > 0 ? Array.from(acceptedModesEls).map(cb => cb.value) : [exchangeMode];
+            const valueItemsRows = document.querySelectorAll('#value-items-container .value-item-row');
+            const valueItems = [];
+            valueItemsRows.forEach(row => {
+                const cat = row.querySelector('.value-item-category')?.value;
+                const desc = row.querySelector('.value-item-desc')?.value?.trim();
+                const est = row.querySelector('.value-item-est')?.value;
+                if (cat) valueItems.push({ category: cat, description: desc || '', estimatedValue: est ? parseFloat(est) : null });
+            });
+            const flexibilityNegotiable = document.getElementById('flexibility-negotiable')?.checked || false;
+            const flexibilityMin = document.getElementById('flexibility-min')?.value;
+            const flexibilityMax = document.getElementById('flexibility-max')?.value;
+            const flexibility = {
+                negotiable: flexibilityNegotiable,
+                min_acceptable: flexibilityMin ? parseFloat(flexibilityMin) : null,
+                max_offer: flexibilityMax ? parseFloat(flexibilityMax) : null
+            };
+
             const exchangeData = {
                 exchangeMode,
                 currency,
@@ -2846,6 +3061,7 @@ function setupFormHandlers() {
                     currency
                 }
             };
+            if (valueItems.length > 0) exchangeData.valueItems = valueItems;
             if (exchangeMode === 'cash') {
                 exchangeData.cashAmount = parseFloat(document.getElementById('cash-amount')?.value) || 0;
                 exchangeData.cashPaymentTerms = document.getElementById('cash-payment-terms')?.value || '';
@@ -2854,10 +3070,16 @@ function setupFormHandlers() {
                 exchangeData.equityPercentage = parseFloat(document.getElementById('equity-percentage')?.value) || 0;
                 exchangeData.equityVesting = document.getElementById('equity-vesting')?.value || '';
                 exchangeData.equityContribution = (document.getElementById('equity-contribution')?.value || '').trim();
+                const companyValEl = document.getElementById('equity-company-valuation');
+                if (companyValEl?.value) exchangeData.companyValuation = companyValEl.value.trim();
             } else if (exchangeMode === 'profit_sharing') {
                 exchangeData.profitSplit = document.getElementById('profit-split')?.value || '';
                 exchangeData.profitBasis = document.getElementById('profit-basis')?.value || 'profit';
                 exchangeData.profitDistribution = (document.getElementById('profit-distribution')?.value || '').trim();
+                const sharePctEl = document.getElementById('profit-share-percentage');
+                const expectedProfitEl = document.getElementById('expected-profit');
+                if (sharePctEl?.value) exchangeData.profitSharePercentage = parseFloat(sharePctEl.value) || null;
+                if (expectedProfitEl?.value) exchangeData.expectedProfit = expectedProfitEl.value.trim();
             } else if (exchangeMode === 'barter') {
                 exchangeData.barterOffer = (document.getElementById('barter-offer')?.value || '').trim();
                 exchangeData.barterNeed = (document.getElementById('barter-need')?.value || '').trim();
@@ -2870,6 +3092,26 @@ function setupFormHandlers() {
                 exchangeData.hybridEquityDetails = (document.getElementById('hybrid-equity-details')?.value || '').trim();
                 exchangeData.hybridBarterDetails = (document.getElementById('hybrid-barter-details')?.value || '').trim();
             }
+
+            const valueExpected = collectValueExpectedFromForm();
+            const estimator = window.valueEstimator;
+            let value_exchange = null;
+            if (estimator) {
+                const buildOptions = { accepted_modes, flexibility };
+                value_exchange = estimator.buildValueExchange(exchangeData, exchangeMode, valueExpected, buildOptions);
+                if (exchangeMode === 'hybrid' && !estimator.validateHybrid(exchangeData)) {
+                    throw new Error('Hybrid mode must include at least 2 value types with non-zero percentages.');
+                }
+                if (value_exchange.estimated_value != null && exchangeData.budgetRange && !estimator.isWithinBudgetRange(value_exchange.estimated_value, exchangeData.budgetRange)) {
+                    const min = exchangeData.budgetRange.min;
+                    const max = exchangeData.budgetRange.max;
+                    if (confirm('Estimated value is outside the budget range (' + (min != null ? min : '?') + '–' + (max != null ? max : '?') + ' ' + (exchangeData.budgetRange.currency || 'SAR') + '). Continue anyway?')) {
+                        // proceed
+                    } else {
+                        return;
+                    }
+                }
+            }
             
             let modelData = {};
             const formService = window.opportunityFormService;
@@ -2880,7 +3122,16 @@ function setupFormHandlers() {
                     if (allData[key] !== undefined) modelData[key] = allData[key];
                 });
             }
-            const attributesPayload = { ...scope, paymentModes: paymentModesArr, ...modelData };
+            const locationRequirement = document.getElementById('location-requirement')?.value?.trim();
+            const attrStartDate = document.getElementById('attr-startDate')?.value?.trim();
+            const attrApplicationDeadline = document.getElementById('attr-applicationDeadline')?.value?.trim();
+            const attrEndDate = document.getElementById('attr-endDate')?.value?.trim();
+            const commonAttrs = {};
+            if (locationRequirement) commonAttrs.locationRequirement = locationRequirement;
+            if (attrStartDate) commonAttrs.startDate = attrStartDate;
+            if (attrApplicationDeadline) commonAttrs.applicationDeadline = attrApplicationDeadline;
+            if (attrEndDate) commonAttrs.endDate = attrEndDate;
+            const attributesPayload = { ...scope, paymentModes: paymentModesArr, ...commonAttrs, ...modelData };
             
             let latVal = parseFloat(document.getElementById('latitude')?.value);
             let lngVal = parseFloat(document.getElementById('longitude')?.value);
@@ -2892,8 +3143,8 @@ function setupFormHandlers() {
                 }
             }
 
-            const oppService = window.opportunityService;
-            const opportunity = await oppService.createOpportunity({
+            const oppPayload = {
+                projectType,
                 title,
                 description,
                 intent,
@@ -2914,7 +3165,11 @@ function setupFormHandlers() {
                 creatorId: user.id,
                 attributes: attributesPayload,
                 modelData
-            });
+            };
+            if (value_exchange) oppPayload.value_exchange = value_exchange;
+
+            const oppService = window.opportunityService;
+            const opportunity = await oppService.createOpportunity(oppPayload);
             
             await dataService.createAuditLog({
                 userId: user.id,

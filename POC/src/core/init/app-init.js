@@ -107,6 +107,8 @@ loadScript('src/core/config/config.js').then(async () => {
     // Load skill service (shared by profiles, opportunities, and matching)
     await loadScript('src/services/skill-service.js');
 
+    // Load value-exchange (normalizer first so preprocessor and estimator can use it)
+    await loadScript('src/services/value-exchange/value-normalizer.js');
     // Load services (matching pipeline: preprocessor, semantic profile, then matching)
     await loadScript('src/services/matching/post-preprocessor.js');
     await loadScript('src/services/matching/semantic-profile.js');
@@ -115,6 +117,8 @@ loadScript('src/core/config/config.js').then(async () => {
     await loadScript('src/services/matching/matching-models.js');
     await loadScript('src/services/matching/matching-service.js');
     await loadScript('src/services/opportunities/opportunity-service.js');
+    await loadScript('src/services/value-exchange/value-estimator.js');
+    await loadScript('src/services/value-exchange/value-compatibility.js');
     await loadScript('src/services/map/map-service.js');
     
     // Initialize application
