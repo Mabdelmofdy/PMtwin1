@@ -1,0 +1,1863 @@
+{
+  "domain": "applications",
+  "version": "1.1",
+  "dataset": "demo40",
+  "description": "Demo applications with full workflow statuses including new opportunities.",
+  "data": [
+    {
+      "id": "demo-app-01",
+      "opportunityId": "demo-oneway-need-01",
+      "applicantId": "demo-u06",
+      "status": "accepted",
+      "matchType": "one_way",
+      "matchScore": 0.88,
+      "matchBreakdown": {
+        "skillMatch": 0.9,
+        "budgetFit": 0.95,
+        "timelineFit": 0.7,
+        "locationFit": 1,
+        "reputation": 0.85
+      },
+      "availabilityDate": "2026-04-01",
+      "estimatedDurationDays": 14,
+      "deadlineCompatibility": "full",
+      "proposal": "I offer structural engineering and shop drawing review services. I have 10+ years experience in Riyadh and can start in April 2026. My rate fits within your 10K SAR budget.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 10000,
+        "requestedCurrency": "SAR",
+        "offeredValue": 10000,
+        "value_score": 0.92,
+        "value_breakdown": {
+          "budgetFit": 1,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.95
+        },
+        "value_gap": null,
+        "lowValueMatch": false
+      },
+      "responses": {
+        "paymentPreference": "accept",
+        "paymentComments": "Accept as stated.",
+        "taskBidAmount": 10000,
+        "taskBidDuration": 14,
+        "taskBidComments": "Two-week delivery with milestone at design review and BOQ submission."
+      },
+      "createdAt": "2026-03-07T10:00:00.000Z",
+      "updatedAt": "2026-03-07T12:00:00.000Z"
+    },
+    {
+      "id": "demo-app-02",
+      "opportunityId": "demo-oneway-need-02",
+      "applicantId": "demo-u07",
+      "status": "in_negotiation",
+      "matchType": "one_way",
+      "proposal": "Experienced PM with PMP certification. I can deliver the 6-month construction project in Jeddah. Open to discussing rate within 80K–100K SAR.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 90000,
+        "requestedCurrency": "SAR",
+        "offeredValue": 90000,
+        "value_score": 0.85,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "value_gap": null,
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T10:15:00.000Z",
+      "updatedAt": "2026-03-07T11:30:00.000Z"
+    },
+    {
+      "id": "demo-app-03",
+      "opportunityId": "demo-oneway-need-02",
+      "applicantId": "demo-u08",
+      "status": "shortlisted",
+      "matchType": "one_way",
+      "proposal": "I have project management experience alongside MEP design. Would like to be considered for the PM role.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 85000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.78,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.7
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T11:00:00.000Z",
+      "updatedAt": "2026-03-07T11:00:00.000Z"
+    },
+    {
+      "id": "demo-app-04",
+      "opportunityId": "demo-oneway-need-03",
+      "applicantId": "demo-u08",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "MEP design and BIM services for commercial building. Rate 50K SAR as per your budget.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 50000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.88,
+        "value_breakdown": {
+          "budgetFit": 0.95,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.9
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T14:00:00.000Z",
+      "updatedAt": "2026-03-07T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-05",
+      "opportunityId": "demo-oneway-need-04",
+      "applicantId": "demo-u09",
+      "status": "accepted",
+      "matchType": "one_way",
+      "proposal": "Quantity surveyor with BOQ and tender experience. Can deliver within 25K SAR and your timeline.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 25000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.9,
+        "value_breakdown": {
+          "budgetFit": 0.95,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.9
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T09:30:00.000Z",
+      "updatedAt": "2026-03-07T09:30:00.000Z"
+    },
+    {
+      "id": "demo-app-06",
+      "opportunityId": "demo-oneway-need-05",
+      "applicantId": "demo-c03",
+      "status": "rejected",
+      "matchType": "one_way",
+      "proposal": "Heavy equipment rental offer. Our rates are above 220K for 3 months for the requested fleet.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 250000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.65,
+        "value_breakdown": {
+          "budgetFit": 0.6,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": true
+      },
+      "responses": {},
+      "createdAt": "2026-03-06T16:00:00.000Z",
+      "updatedAt": "2026-03-07T08:00:00.000Z"
+    },
+    {
+      "id": "demo-app-07",
+      "opportunityId": "demo-oneway-need-01",
+      "applicantId": "demo-u09",
+      "status": "rejected",
+      "matchType": "one_way",
+      "proposal": "I do quantity surveying but can support structural review documentation.",
+      "application_value": {
+        "requestedValue": 8000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.45,
+        "value_breakdown": {
+          "budgetFit": 0.8,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.3
+        },
+        "lowValueMatch": true
+      },
+      "responses": {},
+      "createdAt": "2026-03-06T14:00:00.000Z",
+      "updatedAt": "2026-03-07T11:00:00.000Z"
+    },
+    {
+      "id": "demo-app-08",
+      "opportunityId": "demo-oneway-need-03",
+      "applicantId": "demo-u07",
+      "status": "shortlisted",
+      "matchType": "one_way",
+      "proposal": "PM with MEP coordination experience. Can lead design phase and coordinate with your team.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 55000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.72,
+        "value_breakdown": {
+          "budgetFit": 0.75,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.65
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T12:00:00.000Z",
+      "updatedAt": "2026-03-07T12:00:00.000Z"
+    },
+    {
+      "id": "demo-app-09",
+      "opportunityId": "demo-barter-na-11",
+      "applicantId": "demo-u12",
+      "status": "pending",
+      "matchType": "two_way",
+      "proposal": "I can offer engineering consulting and design review. Open to barter for office space or other services.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 15000,
+        "requestedCurrency": "SAR",
+        "offeredValue": 15000,
+        "value_score": 0.82,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T11:00:00.000Z",
+      "updatedAt": "2026-03-07T11:00:00.000Z"
+    },
+    {
+      "id": "demo-app-10",
+      "opportunityId": "demo-barter-nb-12",
+      "applicantId": "demo-u11",
+      "status": "shortlisted",
+      "matchType": "two_way",
+      "proposal": "We have office space in Riyadh. Willing to barter for engineering or consulting services.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 12000,
+        "requestedCurrency": "SAR",
+        "offeredValue": 14000,
+        "value_score": 0.88,
+        "value_breakdown": {
+          "budgetFit": 0.95,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T10:30:00.000Z",
+      "updatedAt": "2026-03-07T10:30:00.000Z"
+    },
+    {
+      "id": "demo-app-11",
+      "opportunityId": "demo-barter-nc-13",
+      "applicantId": "demo-u14",
+      "status": "pending",
+      "matchType": "two_way",
+      "proposal": "Accounting and financial reporting services. Barter for construction materials or other services.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 20000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.85,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T13:00:00.000Z",
+      "updatedAt": "2026-03-07T13:00:00.000Z"
+    },
+    {
+      "id": "demo-app-12",
+      "opportunityId": "demo-barter-nd-14",
+      "applicantId": "demo-u13",
+      "status": "reviewing",
+      "matchType": "two_way",
+      "proposal": "Construction materials supply — rebar, cement, formwork. Barter for accounting services.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 25000,
+        "requestedCurrency": "SAR",
+        "offeredValue": 22000,
+        "value_score": 0.8,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.75
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T09:00:00.000Z",
+      "updatedAt": "2026-03-07T09:00:00.000Z"
+    },
+    {
+      "id": "demo-app-13",
+      "opportunityId": "demo-barter-ne-15",
+      "applicantId": "demo-u16",
+      "status": "pending",
+      "matchType": "two_way",
+      "proposal": "Construction consultant with legal contract experience. Can review construction contracts in exchange for design or other services.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 18000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.75,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.7
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T14:30:00.000Z",
+      "updatedAt": "2026-03-07T14:30:00.000Z"
+    },
+    {
+      "id": "demo-app-14",
+      "opportunityId": "demo-group-lead-01",
+      "applicantId": "demo-u23",
+      "status": "shortlisted",
+      "matchType": "consortium",
+      "proposal": "Financial investment for infrastructure. We can provide equity or debt financing for the highway project (Financial partner role).",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 5000000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.88,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.9
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T08:00:00.000Z",
+      "updatedAt": "2026-03-07T08:00:00.000Z"
+    },
+    {
+      "id": "demo-app-15",
+      "opportunityId": "demo-group-lead-01",
+      "applicantId": "demo-u24",
+      "status": "pending",
+      "matchType": "consortium",
+      "proposal": "Construction execution and civil works for highway project (Construction partner role).",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 8000000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.82,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T09:00:00.000Z",
+      "updatedAt": "2026-03-07T09:00:00.000Z"
+    },
+    {
+      "id": "demo-app-16",
+      "opportunityId": "demo-group-lead-01",
+      "applicantId": "demo-c03",
+      "status": "reviewing",
+      "matchType": "consortium",
+      "proposal": "Heavy equipment supply for highway construction (Equipment provider role). Excavators, bulldozers, cranes.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 2000000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.9,
+        "value_breakdown": {
+          "budgetFit": 0.95,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.9
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T08:30:00.000Z",
+      "updatedAt": "2026-03-07T08:30:00.000Z"
+    },
+    {
+      "id": "demo-app-17",
+      "opportunityId": "demo-group-lead-02",
+      "applicantId": "demo-u08",
+      "status": "shortlisted",
+      "matchType": "consortium",
+      "proposal": "MEP design and installation for mixed-use tower (MEP contractor role).",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 1500000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.86,
+        "value_breakdown": {
+          "budgetFit": 0.88,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.88
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T10:00:00.000Z",
+      "updatedAt": "2026-03-07T10:00:00.000Z"
+    },
+    {
+      "id": "demo-app-18",
+      "opportunityId": "demo-group-lead-02",
+      "applicantId": "demo-u07",
+      "status": "pending",
+      "matchType": "consortium",
+      "proposal": "Project management and coordination for mixed-use development (Project manager role).",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 800000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.84,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.82
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T11:00:00.000Z",
+      "updatedAt": "2026-03-07T11:00:00.000Z"
+    },
+    {
+      "id": "demo-app-19",
+      "opportunityId": "demo-circ-n31",
+      "applicantId": "demo-u27",
+      "status": "pending",
+      "matchType": "circular",
+      "proposal": "Applying as part of circular exchange. My offer can satisfy the next participant in the cycle.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 12000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.78,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.75
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T12:00:00.000Z",
+      "updatedAt": "2026-03-07T12:00:00.000Z"
+    },
+    {
+      "id": "demo-app-20",
+      "opportunityId": "demo-circ-n32",
+      "applicantId": "demo-u28",
+      "status": "pending",
+      "matchType": "circular",
+      "proposal": "Circular exchange application. Offering services that complete the cycle.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 10000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.8,
+        "value_breakdown": {
+          "budgetFit": 0.88,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.78
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T12:15:00.000Z",
+      "updatedAt": "2026-03-07T12:15:00.000Z"
+    },
+    {
+      "id": "demo-app-21",
+      "opportunityId": "demo-circ-n33",
+      "applicantId": "demo-u29",
+      "status": "reviewing",
+      "matchType": "circular",
+      "proposal": "Participating in circular exchange. My offer fits the chain.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 11000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.76,
+        "value_breakdown": {
+          "budgetFit": 0.82,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.72
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T12:30:00.000Z",
+      "updatedAt": "2026-03-07T12:30:00.000Z"
+    },
+    {
+      "id": "demo-app-22",
+      "opportunityId": "demo-circ-n34",
+      "applicantId": "demo-u30",
+      "status": "pending",
+      "matchType": "circular",
+      "proposal": "Circular match application. Ready to close the loop.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 9500,
+        "requestedCurrency": "SAR",
+        "value_score": 0.82,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T12:45:00.000Z",
+      "updatedAt": "2026-03-07T12:45:00.000Z"
+    },
+    {
+      "id": "demo-app-23",
+      "opportunityId": "demo-circ-n35",
+      "applicantId": "demo-u31",
+      "status": "pending",
+      "matchType": "circular",
+      "proposal": "Applying for circular exchange. My services complete the cycle.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 10500,
+        "requestedCurrency": "SAR",
+        "value_score": 0.79,
+        "value_breakdown": {
+          "budgetFit": 0.86,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.76
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T13:00:00.000Z",
+      "updatedAt": "2026-03-07T13:00:00.000Z"
+    },
+    {
+      "id": "demo-app-24",
+      "opportunityId": "demo-oneway-need-01",
+      "applicantId": "demo-u04",
+      "status": "shortlisted",
+      "matchType": "one_way",
+      "proposal": "Cost estimation and BOQ background; can support structural review documentation and quantity take-offs for shop drawings. Rate within 10K SAR budget.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 9500,
+        "requestedCurrency": "SAR",
+        "offeredValue": 9500,
+        "value_score": 0.88,
+        "value_breakdown": {
+          "budgetFit": 0.95,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.82
+        },
+        "value_gap": null,
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T11:30:00.000Z",
+      "updatedAt": "2026-03-07T12:00:00.000Z"
+    },
+    {
+      "id": "demo-app-25",
+      "opportunityId": "demo-oneway-need-02",
+      "applicantId": "demo-u04",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Experience in cost estimation and tender preparation; can support PM with budget tracking and reporting. Open to discussing scope and rate.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 85000,
+        "requestedCurrency": "SAR",
+        "offeredValue": 85000,
+        "value_score": 0.82,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.75
+        },
+        "value_gap": null,
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T14:00:00.000Z",
+      "updatedAt": "2026-03-07T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-26",
+      "opportunityId": "demo-oneway-offer-01",
+      "applicantId": "demo-u04",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Interested in engaging structural engineering services for our upcoming project. Would like to discuss timeline and deliverables.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 10000,
+        "requestedCurrency": "SAR",
+        "offeredValue": 10000,
+        "value_score": 0.9,
+        "value_breakdown": {
+          "budgetFit": 1,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.88
+        },
+        "value_gap": null,
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T13:30:00.000Z",
+      "updatedAt": "2026-03-07T13:30:00.000Z"
+    },
+    {
+      "id": "demo-app-27",
+      "opportunityId": "demo-oneway-offer-02",
+      "applicantId": "demo-u01",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Looking for PM support on a construction project. Would like to learn more about your availability and approach.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 80000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.8,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.78
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T12:30:00.000Z",
+      "updatedAt": "2026-03-07T12:30:00.000Z"
+    },
+    {
+      "id": "demo-app-28",
+      "opportunityId": "demo-oneway-offer-03",
+      "applicantId": "demo-u02",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Interested in MEP design services for our project.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 50000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.84,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.82
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T10:30:00.000Z",
+      "updatedAt": "2026-03-07T10:30:00.000Z"
+    },
+    {
+      "id": "demo-app-29",
+      "opportunityId": "demo-oneway-need-02",
+      "applicantId": "demo-u03",
+      "status": "shortlisted",
+      "matchType": "one_way",
+      "proposal": "MEP design background; can support PM coordination for design phase.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 88000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.83,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T10:45:00.000Z",
+      "updatedAt": "2026-03-07T11:00:00.000Z"
+    },
+    {
+      "id": "demo-app-30",
+      "opportunityId": "demo-oneway-need-01",
+      "applicantId": "demo-u05",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Can provide equipment logistics support alongside structural review scope.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 9500,
+        "requestedCurrency": "SAR",
+        "value_score": 0.8,
+        "value_breakdown": {
+          "budgetFit": 0.95,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.75
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T11:00:00.000Z",
+      "updatedAt": "2026-03-07T11:00:00.000Z"
+    },
+    {
+      "id": "demo-app-31",
+      "opportunityId": "demo-oneway-offer-04",
+      "applicantId": "demo-u10",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Need quantity surveying support for tender. Open to 25K SAR.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 24000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.86,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T12:00:00.000Z",
+      "updatedAt": "2026-03-07T12:00:00.000Z"
+    },
+    {
+      "id": "demo-app-32",
+      "opportunityId": "demo-barter-na-11",
+      "applicantId": "demo-u15",
+      "status": "pending",
+      "matchType": "two_way",
+      "proposal": "Can offer architectural design and 3D in barter for engineering review.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 15000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.81,
+        "value_breakdown": {
+          "budgetFit": 0.88,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.78
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T11:15:00.000Z",
+      "updatedAt": "2026-03-07T11:15:00.000Z"
+    },
+    {
+      "id": "demo-app-33",
+      "opportunityId": "demo-oneway-need-03",
+      "applicantId": "demo-u18",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Consultant with MEP and design experience. Rate 48K SAR.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 48000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.85,
+        "value_breakdown": {
+          "budgetFit": 0.92,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.82
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T13:00:00.000Z",
+      "updatedAt": "2026-03-07T13:00:00.000Z"
+    },
+    {
+      "id": "demo-app-34",
+      "opportunityId": "demo-oneway-offer-01",
+      "applicantId": "demo-u19",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Need structural review for our project. Budget 10K SAR.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 10000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.9,
+        "value_breakdown": {
+          "budgetFit": 1,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.88
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T13:15:00.000Z",
+      "updatedAt": "2026-03-07T13:15:00.000Z"
+    },
+    {
+      "id": "demo-app-35",
+      "opportunityId": "demo-group-lead-01",
+      "applicantId": "demo-u20",
+      "status": "pending",
+      "matchType": "consortium",
+      "proposal": "Consulting and design review for highway project.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 500000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.82,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T09:30:00.000Z",
+      "updatedAt": "2026-03-07T09:30:00.000Z"
+    },
+    {
+      "id": "demo-app-36",
+      "opportunityId": "demo-oneway-need-05",
+      "applicantId": "demo-u21",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Equipment support for earthworks. Rate within budget.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 200000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.88,
+        "value_breakdown": {
+          "budgetFit": 0.92,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T14:00:00.000Z",
+      "updatedAt": "2026-03-07T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-37",
+      "opportunityId": "demo-oneway-need-01",
+      "applicantId": "demo-u22",
+      "status": "reviewing",
+      "matchType": "one_way",
+      "proposal": "Structural and design support. 9.5K SAR.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 9500,
+        "requestedCurrency": "SAR",
+        "value_score": 0.87,
+        "value_breakdown": {
+          "budgetFit": 0.95,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.82
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T11:45:00.000Z",
+      "updatedAt": "2026-03-07T12:00:00.000Z"
+    },
+    {
+      "id": "demo-app-38",
+      "opportunityId": "demo-oneway-need-02",
+      "applicantId": "demo-u25",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Civil and construction execution. Open to PM role.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 92000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.81,
+        "value_breakdown": {
+          "budgetFit": 0.88,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.78
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T12:45:00.000Z",
+      "updatedAt": "2026-03-07T12:45:00.000Z"
+    },
+    {
+      "id": "demo-app-39",
+      "opportunityId": "demo-oneway-need-03",
+      "applicantId": "demo-u26",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Full design and BIM for commercial building. 52K SAR.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 52000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.83,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T13:30:00.000Z",
+      "updatedAt": "2026-03-07T13:30:00.000Z"
+    },
+    {
+      "id": "demo-app-40",
+      "opportunityId": "demo-circ-n31",
+      "applicantId": "demo-u32",
+      "status": "pending",
+      "matchType": "circular",
+      "proposal": "Accounting for 2 months. Part of circular exchange.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 12000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.79,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.76
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T12:10:00.000Z",
+      "updatedAt": "2026-03-07T12:10:00.000Z"
+    },
+    {
+      "id": "demo-app-41",
+      "opportunityId": "demo-circ-n32",
+      "applicantId": "demo-u33",
+      "status": "pending",
+      "matchType": "circular",
+      "proposal": "Office space for 3 months. Circular exchange.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 10000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.8,
+        "value_breakdown": {
+          "budgetFit": 0.88,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.76
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T12:20:00.000Z",
+      "updatedAt": "2026-03-07T12:20:00.000Z"
+    },
+    {
+      "id": "demo-app-42",
+      "opportunityId": "demo-circ-n33",
+      "applicantId": "demo-u34",
+      "status": "pending",
+      "matchType": "circular",
+      "proposal": "Structural design review. Completing the cycle.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 11000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.77,
+        "value_breakdown": {
+          "budgetFit": 0.84,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.74
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T12:35:00.000Z",
+      "updatedAt": "2026-03-07T12:35:00.000Z"
+    },
+    {
+      "id": "demo-app-43",
+      "opportunityId": "demo-circ-n34",
+      "applicantId": "demo-u35",
+      "status": "pending",
+      "matchType": "circular",
+      "proposal": "Co-working space. Circular exchange.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 9500,
+        "requestedCurrency": "SAR",
+        "value_score": 0.82,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.78
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T12:50:00.000Z",
+      "updatedAt": "2026-03-07T12:50:00.000Z"
+    },
+    {
+      "id": "demo-app-44",
+      "opportunityId": "demo-oneway-need-02",
+      "applicantId": "demo-c01",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Construction company offering PM and execution support.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 95000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.84,
+        "value_breakdown": {
+          "budgetFit": 0.92,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.82
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T10:20:00.000Z",
+      "updatedAt": "2026-03-07T10:20:00.000Z"
+    },
+    {
+      "id": "demo-app-45",
+      "opportunityId": "demo-oneway-need-03",
+      "applicantId": "demo-c02",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Developer seeking MEP design for commercial project.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 48000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.86,
+        "value_breakdown": {
+          "budgetFit": 0.92,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.84
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T11:20:00.000Z",
+      "updatedAt": "2026-03-07T11:20:00.000Z"
+    },
+    {
+      "id": "demo-app-46",
+      "opportunityId": "demo-group-lead-01",
+      "applicantId": "demo-c04",
+      "status": "shortlisted",
+      "matchType": "consortium",
+      "proposal": "Investor role for highway project. Equity or debt.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 4500000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.85,
+        "value_breakdown": {
+          "budgetFit": 0.88,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T08:45:00.000Z",
+      "updatedAt": "2026-03-07T09:00:00.000Z"
+    },
+    {
+      "id": "demo-app-47",
+      "opportunityId": "demo-oneway-offer-01",
+      "applicantId": "demo-c05",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Infrastructure lead seeking structural engineering for highway project.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 11000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.88,
+        "value_breakdown": {
+          "budgetFit": 0.95,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T09:15:00.000Z",
+      "updatedAt": "2026-03-07T09:15:00.000Z"
+    },
+    {
+      "id": "demo-app-48",
+      "opportunityId": "demo-oneway-need-01",
+      "applicantId": "demo-c06",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Building developer needs structural review for mixed-use tower.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 9800,
+        "requestedCurrency": "SAR",
+        "value_score": 0.89,
+        "value_breakdown": {
+          "budgetFit": 0.98,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.84
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T10:00:00.000Z",
+      "updatedAt": "2026-03-07T10:00:00.000Z"
+    },
+    {
+      "id": "demo-app-49",
+      "opportunityId": "demo-barter-oa-11",
+      "applicantId": "demo-u17",
+      "status": "pending",
+      "matchType": "two_way",
+      "proposal": "Can offer design review services in barter for co-working space.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 12000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.83,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-07T11:30:00.000Z",
+      "updatedAt": "2026-03-07T11:30:00.000Z"
+    },
+    {
+      "id": "demo-app-50",
+      "opportunityId": "demo-need-41",
+      "applicantId": "demo-u21",
+      "status": "accepted",
+      "matchType": "one_way",
+      "proposal": "Proposal for Need: Site supervision for residential compound. Ready to proceed.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 120000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.88,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-51",
+      "opportunityId": "demo-need-42",
+      "applicantId": "demo-u08",
+      "status": "accepted",
+      "matchType": "one_way",
+      "proposal": "Proposal for Need: BIM coordination for mixed-use tower. Ready to proceed.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 120000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.88,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-52",
+      "opportunityId": "demo-need-43",
+      "applicantId": "demo-u09",
+      "status": "accepted",
+      "matchType": "one_way",
+      "proposal": "Proposal for Need: Cost estimation for hospital project. Ready to proceed.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 120000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.88,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-53",
+      "opportunityId": "demo-need-44",
+      "applicantId": "demo-u32",
+      "status": "accepted",
+      "matchType": "one_way",
+      "proposal": "Proposal for Need: Sustainability and LEED advisory. Ready to proceed.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 120000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.88,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-54",
+      "opportunityId": "demo-need-45",
+      "applicantId": "demo-u16",
+      "status": "accepted",
+      "matchType": "one_way",
+      "proposal": "Proposal for Need: Claims and dispute support. Ready to proceed.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 120000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.88,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-55",
+      "opportunityId": "demo-barter-41",
+      "applicantId": "demo-u33",
+      "status": "accepted",
+      "matchType": "two_way",
+      "proposal": "Proposal for Need: Training space for 2-day workshop. Ready to proceed.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 120000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.88,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-56",
+      "opportunityId": "demo-consortium-41",
+      "applicantId": "demo-c04",
+      "status": "accepted",
+      "matchType": "consortium",
+      "proposal": "Proposal for Need: Solar plant EPC — equity, EPC, and O&M partners. Ready to proceed.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 120000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.88,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-57",
+      "opportunityId": "demo-need-46",
+      "applicantId": "demo-u17",
+      "status": "accepted",
+      "matchType": "one_way",
+      "proposal": "Proposal for Need: Geotechnical investigation. Ready to proceed.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 120000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.88,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-58",
+      "opportunityId": "demo-need-47",
+      "applicantId": "demo-u24",
+      "status": "accepted",
+      "matchType": "one_way",
+      "proposal": "Proposal for Need: Interior design and FF&E. Ready to proceed.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 120000,
+        "requestedCurrency": "SAR",
+        "value_score": 0.88,
+        "value_breakdown": {
+          "budgetFit": 0.9,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.85
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-59",
+      "opportunityId": "demo-need-41",
+      "applicantId": "demo-u03",
+      "status": "reviewing",
+      "matchType": "one_way",
+      "proposal": "Application for Need: Site supervision for residential compound.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 109376,
+        "requestedCurrency": "SAR",
+        "value_score": 0.8345681807000964,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-60",
+      "opportunityId": "demo-need-41",
+      "applicantId": "demo-u04",
+      "status": "shortlisted",
+      "matchType": "one_way",
+      "proposal": "Application for Need: Site supervision for residential compound.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 72019,
+        "requestedCurrency": "SAR",
+        "value_score": 0.9021937784705409,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-61",
+      "opportunityId": "demo-need-42",
+      "applicantId": "demo-c04",
+      "status": "reviewing",
+      "matchType": "one_way",
+      "proposal": "Application for Need: BIM coordination for mixed-use tower.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 51589,
+        "requestedCurrency": "SAR",
+        "value_score": 0.7537213885246805,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-62",
+      "opportunityId": "demo-need-42",
+      "applicantId": "demo-u24",
+      "status": "reviewing",
+      "matchType": "one_way",
+      "proposal": "Application for Need: BIM coordination for mixed-use tower.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 86104,
+        "requestedCurrency": "SAR",
+        "value_score": 0.8804227633057443,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-63",
+      "opportunityId": "demo-need-43",
+      "applicantId": "demo-u34",
+      "status": "reviewing",
+      "matchType": "one_way",
+      "proposal": "Application for Need: Cost estimation for hospital project.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 87774,
+        "requestedCurrency": "SAR",
+        "value_score": 0.7357578632903763,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-64",
+      "opportunityId": "demo-need-43",
+      "applicantId": "demo-u02",
+      "status": "shortlisted",
+      "matchType": "one_way",
+      "proposal": "Application for Need: Cost estimation for hospital project.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 63424,
+        "requestedCurrency": "SAR",
+        "value_score": 0.8910891855212035,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-65",
+      "opportunityId": "demo-need-44",
+      "applicantId": "demo-u33",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Application for Need: Sustainability and LEED advisory.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 61750,
+        "requestedCurrency": "SAR",
+        "value_score": 0.850409468225264,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-66",
+      "opportunityId": "demo-need-44",
+      "applicantId": "demo-u23",
+      "status": "shortlisted",
+      "matchType": "one_way",
+      "proposal": "Application for Need: Sustainability and LEED advisory.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 119985,
+        "requestedCurrency": "SAR",
+        "value_score": 0.9082541977821327,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-67",
+      "opportunityId": "demo-need-48",
+      "applicantId": "demo-u02",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Application for Need: Primavera P6 scheduling.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 88795,
+        "requestedCurrency": "SAR",
+        "value_score": 0.8584680453410567,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-68",
+      "opportunityId": "demo-need-48",
+      "applicantId": "demo-c02",
+      "status": "rejected",
+      "matchType": "one_way",
+      "proposal": "Application for Need: Primavera P6 scheduling.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 126270,
+        "requestedCurrency": "SAR",
+        "value_score": 0.7493705103004384,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-69",
+      "opportunityId": "demo-need-49",
+      "applicantId": "demo-u29",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Application for Need: Fire protection design.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 92315,
+        "requestedCurrency": "SAR",
+        "value_score": 0.8018262774512974,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-70",
+      "opportunityId": "demo-need-49",
+      "applicantId": "demo-u35",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Application for Need: Fire protection design.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 104112,
+        "requestedCurrency": "SAR",
+        "value_score": 0.8962787590515331,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-71",
+      "opportunityId": "demo-offer-41",
+      "applicantId": "demo-u27",
+      "status": "rejected",
+      "matchType": "one_way",
+      "proposal": "Application for Offer: Site supervision and quality control.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 102082,
+        "requestedCurrency": "SAR",
+        "value_score": 0.7708225007965919,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-72",
+      "opportunityId": "demo-offer-41",
+      "applicantId": "demo-c06",
+      "status": "in_negotiation",
+      "matchType": "one_way",
+      "proposal": "Application for Offer: Site supervision and quality control.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 57590,
+        "requestedCurrency": "SAR",
+        "value_score": 0.8845390590658825,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {
+        "taskBidAmount": 55000,
+        "paymentComments": "Counter-offer sent."
+      },
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-73",
+      "opportunityId": "demo-offer-42",
+      "applicantId": "demo-u04",
+      "status": "in_negotiation",
+      "matchType": "one_way",
+      "proposal": "Application for Offer: BIM coordination and clash detection.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 119519,
+        "requestedCurrency": "SAR",
+        "value_score": 0.855481354825385,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {
+        "taskBidAmount": 55000,
+        "paymentComments": "Counter-offer sent."
+      },
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-74",
+      "opportunityId": "demo-offer-42",
+      "applicantId": "demo-c05",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Application for Offer: BIM coordination and clash detection.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 94979,
+        "requestedCurrency": "SAR",
+        "value_score": 0.7918859083667278,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-75",
+      "opportunityId": "demo-barter-42",
+      "applicantId": "demo-u31",
+      "status": "pending",
+      "matchType": "two_way",
+      "proposal": "Application for Offer: 2-day workshop facilitation.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 127351,
+        "requestedCurrency": "SAR",
+        "value_score": 0.7648044193886181,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-76",
+      "opportunityId": "demo-barter-43",
+      "applicantId": "demo-u21",
+      "status": "reviewing",
+      "matchType": "two_way",
+      "proposal": "Application for Need: Translation and documentation review.",
+      "application_value": {
+        "paymentPreference": "barter",
+        "requestedValue": 71109,
+        "requestedCurrency": "SAR",
+        "value_score": 0.7942540071274812,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-77",
+      "opportunityId": "demo-consortium-42",
+      "applicantId": "demo-u29",
+      "status": "shortlisted",
+      "matchType": "consortium",
+      "proposal": "Application for Need: Airport expansion — design, construction, and systems partners.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 89549,
+        "requestedCurrency": "SAR",
+        "value_score": 0.737350055438315,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-78",
+      "opportunityId": "demo-consortium-42",
+      "applicantId": "demo-u25",
+      "status": "shortlisted",
+      "matchType": "consortium",
+      "proposal": "Application for Need: Airport expansion — design, construction, and systems partners.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 104272,
+        "requestedCurrency": "SAR",
+        "value_score": 0.7505208189154368,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {},
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-app-79",
+      "opportunityId": "demo-consortium-43",
+      "applicantId": "demo-u05",
+      "status": "in_negotiation",
+      "matchType": "consortium",
+      "proposal": "Application for Need: Desalination plant — financial, EPC, and technology partners.",
+      "application_value": {
+        "paymentPreference": "cash",
+        "requestedValue": 84944,
+        "requestedCurrency": "SAR",
+        "value_score": 0.7607755133180009,
+        "value_breakdown": {
+          "budgetFit": 0.85,
+          "exchangeModeFit": 1,
+          "scopeFit": 0.8
+        },
+        "lowValueMatch": false
+      },
+      "responses": {
+        "taskBidAmount": 55000,
+        "paymentComments": "Counter-offer sent."
+      },
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    }
+  ]
+}

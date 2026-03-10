@@ -1315,11 +1315,14 @@ function editSetupFormHandlers() {
             if (attrApplicationDeadline) formData.applicationDeadline = attrApplicationDeadline;
             if (attrEndDate) formData.endDate = attrEndDate;
             
-            // paymentModes from checkboxes or fallback to primary exchange mode
+            // paymentModes: same shape as create — canonical set, primary mode always included
+            const validModes = ['cash', 'equity', 'profit_sharing', 'barter', 'hybrid'];
             const paymentMethodCheckboxes = document.querySelectorAll('.payment-method-cb:checked');
-            const paymentModes = paymentMethodCheckboxes.length > 0
-                ? Array.from(paymentMethodCheckboxes).map(cb => cb.value)
+            let paymentModes = paymentMethodCheckboxes.length > 0
+                ? Array.from(paymentMethodCheckboxes).map(cb => cb.value).filter(m => validModes.includes(m))
                 : (formData.exchangeMode ? [formData.exchangeMode] : (editingOpportunity.paymentModes || (editingOpportunity.exchangeMode ? [editingOpportunity.exchangeMode] : ['cash'])));
+            const primaryMode = formData.exchangeMode || editingOpportunity.exchangeMode;
+            if (primaryMode && !paymentModes.includes(primaryMode)) paymentModes = [primaryMode, ...paymentModes];
             
             // scope for matching: from form (attributes) or existing opportunity
             const attrs = formData || {};

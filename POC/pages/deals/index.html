@@ -1,0 +1,22 @@
+<div class="page-container deals-page">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Deals</h1>
+            <p class="page-subtitle">Post-match deals: negotiation, draft, review, signing, and execution</p>
+        </div>
+    </div>
+    <div class="page-body">
+        <div id="deals-list" class="deals-list">
+            <div class="spinner"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+.deals-page .deals-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+.deal-card { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.25rem; transition: box-shadow 0.2s; }
+.deal-card:hover { box-shadow: var(--shadow-md); }
+.deal-card-title { font-weight: 600; font-size: 1.125rem; margin-bottom: 0.5rem; color: var(--text-primary); }
+.deal-card-meta { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.75rem; }
+.deal-card-actions { margin-top: 0.75rem; }
+</style>

@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build:css": "tailwindcss -i ./src/input.css -o ./assets/css/tailwind.css --minify"
   },
   "devDependencies": {
+    "tailwindcss": "^3.4.0",
     "vitest": "^3.0.0"
   }
 }

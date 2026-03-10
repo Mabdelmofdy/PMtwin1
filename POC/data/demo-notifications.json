@@ -1,0 +1,848 @@
+{
+  "domain": "notifications",
+  "version": "1.0",
+  "dataset": "demo40",
+  "description": "Demo notifications for matches, applications, deals, milestones.",
+  "data": [
+    {
+      "id": "demo-notif-01",
+      "userId": "demo-u04",
+      "title": "New match",
+      "message": "You have a new match for \"Need: Structural engineer for shop drawing review\".",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-need-01",
+      "createdAt": "2026-03-07T11:35:00.000Z"
+    },
+    {
+      "id": "demo-notif-02",
+      "userId": "demo-u04",
+      "title": "Application shortlisted",
+      "message": "Your application to \"Need: Structural engineer for shop drawing review\" was shortlisted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-oneway-need-01",
+      "createdAt": "2026-03-07T12:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-03",
+      "userId": "demo-u04",
+      "title": "Value match update",
+      "message": "Your application value score (88%) was recorded for demo-oneway-need-01.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-oneway-need-01",
+      "createdAt": "2026-03-07T12:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-04",
+      "userId": "demo-u04",
+      "title": "New message",
+      "message": "Demo Construction Co sent you a message about your application.",
+      "read": false,
+      "type": "message",
+      "link": "/messages",
+      "createdAt": "2026-03-07T13:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-05",
+      "userId": "demo-u04",
+      "title": "Match recommendation",
+      "message": "You match \"Offer: Structural engineering services\" at 90% value fit.",
+      "read": true,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-offer-01",
+      "createdAt": "2026-03-07T13:30:00.000Z"
+    },
+    {
+      "id": "demo-notif-06",
+      "userId": "demo-u01",
+      "title": "New match",
+      "message": "You have a new match for \"Offer: Project management and PMO\".",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-offer-02",
+      "createdAt": "2026-03-07T12:35:00.000Z"
+    },
+    {
+      "id": "demo-notif-07",
+      "userId": "demo-u06",
+      "title": "Application accepted",
+      "message": "Your application to \"Need: Structural engineer for shop drawing review\" was accepted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-oneway-need-01",
+      "createdAt": "2026-03-07T12:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-08",
+      "userId": "demo-u07",
+      "title": "Negotiation update",
+      "message": "Your application to \"Need: Project management for 6-month construction project\" is in negotiation.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-oneway-need-02",
+      "createdAt": "2026-03-07T11:35:00.000Z"
+    },
+    {
+      "id": "demo-notif-09",
+      "userId": "demo-u07",
+      "title": "New match",
+      "message": "You match \"Need: MEP design for commercial building\" at 72% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-need-03",
+      "createdAt": "2026-03-07T12:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-10",
+      "userId": "demo-u02",
+      "title": "New match",
+      "message": "You match \"Offer: MEP design and BIM\" at 84% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-offer-03",
+      "createdAt": "2026-03-07T10:35:00.000Z"
+    },
+    {
+      "id": "demo-notif-11",
+      "userId": "demo-u03",
+      "title": "Application shortlisted",
+      "message": "Your application to \"Need: Project management for 6-month construction project\" was shortlisted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-oneway-need-02",
+      "createdAt": "2026-03-07T11:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-12",
+      "userId": "demo-u05",
+      "title": "New match",
+      "message": "You have a new match for \"Need: Structural engineer for shop drawing review\".",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-need-01",
+      "createdAt": "2026-03-07T11:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-13",
+      "userId": "demo-u08",
+      "title": "Application update",
+      "message": "Your application to \"Need: MEP design for commercial building\" is under review.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-oneway-need-03",
+      "createdAt": "2026-03-07T14:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-14",
+      "userId": "demo-u09",
+      "title": "Application accepted",
+      "message": "Your application to \"Need: Quantity surveyor for tender preparation\" was accepted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-oneway-need-04",
+      "createdAt": "2026-03-07T09:35:00.000Z"
+    },
+    {
+      "id": "demo-notif-15",
+      "userId": "demo-u10",
+      "title": "New match",
+      "message": "You match \"Offer: Quantity surveying and BOQ\" at 86% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-offer-04",
+      "createdAt": "2026-03-07T12:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-16",
+      "userId": "demo-u11",
+      "title": "New match",
+      "message": "You match \"Need office or co-working space in Riyadh\" (barter) at 88% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-barter-nb-12",
+      "createdAt": "2026-03-07T10:35:00.000Z"
+    },
+    {
+      "id": "demo-notif-17",
+      "userId": "demo-u12",
+      "title": "Application shortlisted",
+      "message": "Your application to \"Offer office space\" (barter) was shortlisted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-barter-od-14",
+      "createdAt": "2026-03-07T10:35:00.000Z"
+    },
+    {
+      "id": "demo-notif-18",
+      "userId": "demo-u13",
+      "title": "New match",
+      "message": "You match \"Supply of rebar, cement, formwork\" (barter) at 80% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-barter-nd-14",
+      "createdAt": "2026-03-07T09:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-19",
+      "userId": "demo-u14",
+      "title": "New match",
+      "message": "You match \"Need accounting services\" (barter) at 85% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-barter-nc-13",
+      "createdAt": "2026-03-07T13:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-20",
+      "userId": "demo-u15",
+      "title": "New match",
+      "message": "You match \"Need engineering consulting for design review\" (barter) at 81% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-barter-na-11",
+      "createdAt": "2026-03-07T11:20:00.000Z"
+    },
+    {
+      "id": "demo-notif-21",
+      "userId": "demo-u16",
+      "title": "New match",
+      "message": "You match \"Legal review of construction contract\" (barter) at 75% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-barter-ne-15",
+      "createdAt": "2026-03-07T14:35:00.000Z"
+    },
+    {
+      "id": "demo-notif-22",
+      "userId": "demo-u18",
+      "title": "New match",
+      "message": "You match \"Need: MEP design for commercial building\" at 85% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-need-03",
+      "createdAt": "2026-03-07T13:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-23",
+      "userId": "demo-u19",
+      "title": "New match",
+      "message": "You match \"Offer: Structural engineering services\" at 90% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-offer-01",
+      "createdAt": "2026-03-07T13:20:00.000Z"
+    },
+    {
+      "id": "demo-notif-24",
+      "userId": "demo-u20",
+      "title": "New match",
+      "message": "You match \"Large highway project\" (consortium) at 82% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-group-lead-01",
+      "createdAt": "2026-03-07T09:35:00.000Z"
+    },
+    {
+      "id": "demo-notif-25",
+      "userId": "demo-u21",
+      "title": "New match",
+      "message": "You match \"Need: Heavy equipment for earthworks\" at 88% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-need-05",
+      "createdAt": "2026-03-07T14:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-26",
+      "userId": "demo-u22",
+      "title": "Application under review",
+      "message": "Your application to \"Need: Structural engineer for shop drawing review\" is under review.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-oneway-need-01",
+      "createdAt": "2026-03-07T12:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-27",
+      "userId": "demo-u23",
+      "title": "Application shortlisted",
+      "message": "Your application to \"Large highway project\" (consortium) was shortlisted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-group-lead-01",
+      "createdAt": "2026-03-07T08:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-28",
+      "userId": "demo-u24",
+      "title": "New match",
+      "message": "You match \"Large highway project\" (consortium) at 82% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-group-lead-01",
+      "createdAt": "2026-03-07T09:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-29",
+      "userId": "demo-u25",
+      "title": "New match",
+      "message": "You match \"Need: Project management for 6-month construction project\" at 81% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-need-02",
+      "createdAt": "2026-03-07T12:50:00.000Z"
+    },
+    {
+      "id": "demo-notif-30",
+      "userId": "demo-u26",
+      "title": "New match",
+      "message": "You match \"Need: MEP design for commercial building\" at 83% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-need-03",
+      "createdAt": "2026-03-07T13:35:00.000Z"
+    },
+    {
+      "id": "demo-notif-31",
+      "userId": "demo-u27",
+      "title": "New match",
+      "message": "You match circular exchange \"Need excavator for site work\" at 78% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-circ-n31",
+      "createdAt": "2026-03-07T12:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-32",
+      "userId": "demo-u28",
+      "title": "New match",
+      "message": "You match circular exchange at 80% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-circ-n32",
+      "createdAt": "2026-03-07T12:20:00.000Z"
+    },
+    {
+      "id": "demo-notif-33",
+      "userId": "demo-u29",
+      "title": "Application under review",
+      "message": "Your circular exchange application is under review.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-circ-n33",
+      "createdAt": "2026-03-07T12:35:00.000Z"
+    },
+    {
+      "id": "demo-notif-34",
+      "userId": "demo-u30",
+      "title": "New match",
+      "message": "You match circular exchange at 82% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-circ-n34",
+      "createdAt": "2026-03-07T12:50:00.000Z"
+    },
+    {
+      "id": "demo-notif-35",
+      "userId": "demo-u31",
+      "title": "New match",
+      "message": "You match circular exchange at 79% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-circ-n35",
+      "createdAt": "2026-03-07T13:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-36",
+      "userId": "demo-u32",
+      "title": "New match",
+      "message": "You match circular exchange \"Need excavator\" at 79% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-circ-n31",
+      "createdAt": "2026-03-07T12:15:00.000Z"
+    },
+    {
+      "id": "demo-notif-37",
+      "userId": "demo-u33",
+      "title": "New match",
+      "message": "You match circular exchange \"Office space\" at 80% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-circ-n32",
+      "createdAt": "2026-03-07T12:25:00.000Z"
+    },
+    {
+      "id": "demo-notif-38",
+      "userId": "demo-u34",
+      "title": "New match",
+      "message": "You match circular exchange at 77% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-circ-n33",
+      "createdAt": "2026-03-07T12:40:00.000Z"
+    },
+    {
+      "id": "demo-notif-39",
+      "userId": "demo-u35",
+      "title": "New match",
+      "message": "You match circular exchange \"Co-working space\" at 82% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-circ-n34",
+      "createdAt": "2026-03-07T12:55:00.000Z"
+    },
+    {
+      "id": "demo-notif-40",
+      "userId": "demo-c01",
+      "title": "New match",
+      "message": "Your company matches \"Need: Project management for 6-month construction project\" at 84% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-need-02",
+      "createdAt": "2026-03-07T10:25:00.000Z"
+    },
+    {
+      "id": "demo-notif-41",
+      "userId": "demo-c02",
+      "title": "New match",
+      "message": "Your company matches \"Need: MEP design for commercial building\" at 86% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-need-03",
+      "createdAt": "2026-03-07T11:25:00.000Z"
+    },
+    {
+      "id": "demo-notif-42",
+      "userId": "demo-c03",
+      "title": "Application under review",
+      "message": "Your application to \"Large highway project\" (consortium) is under review.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-group-lead-01",
+      "createdAt": "2026-03-07T08:35:00.000Z"
+    },
+    {
+      "id": "demo-notif-43",
+      "userId": "demo-c04",
+      "title": "Application shortlisted",
+      "message": "Your application to \"Large highway project\" (investor role) was shortlisted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-group-lead-01",
+      "createdAt": "2026-03-07T09:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-44",
+      "userId": "demo-c05",
+      "title": "New match",
+      "message": "Your company matches \"Offer: Structural engineering services\" at 88% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-offer-01",
+      "createdAt": "2026-03-07T09:20:00.000Z"
+    },
+    {
+      "id": "demo-notif-45",
+      "userId": "demo-c06",
+      "title": "New match",
+      "message": "Your company matches \"Need: Structural engineer for shop drawing review\" at 89% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-oneway-need-01",
+      "createdAt": "2026-03-07T10:05:00.000Z"
+    },
+    {
+      "id": "demo-notif-46",
+      "userId": "demo-u17",
+      "title": "New match",
+      "message": "You match \"Offer co-working office space\" (barter) at 83% value fit.",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-barter-oa-11",
+      "createdAt": "2026-03-07T11:35:00.000Z"
+    },
+    {
+      "id": "demo-notif-47",
+      "userId": "demo-u07",
+      "title": "New match",
+      "message": "You have a new match for this opportunity (94% fit).",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-need-41",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-48",
+      "userId": "demo-c02",
+      "title": "New match",
+      "message": "You have a new match for this opportunity (75% fit).",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-need-41",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-49",
+      "userId": "demo-u34",
+      "title": "New match",
+      "message": "You have a new match for this opportunity (84% fit).",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-need-42",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-50",
+      "userId": "demo-c01",
+      "title": "New match",
+      "message": "You have a new match for this opportunity (74% fit).",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-need-42",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-51",
+      "userId": "demo-u12",
+      "title": "New match",
+      "message": "You have a new match for this opportunity (84% fit).",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-need-43",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-52",
+      "userId": "demo-u11",
+      "title": "New match",
+      "message": "You have a new match for this opportunity (85% fit).",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-need-43",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-53",
+      "userId": "demo-u10",
+      "title": "New match",
+      "message": "You have a new match for this opportunity (85% fit).",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-need-44",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-54",
+      "userId": "demo-u09",
+      "title": "New match",
+      "message": "You have a new match for this opportunity (86% fit).",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-need-44",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-55",
+      "userId": "demo-u05",
+      "title": "New match",
+      "message": "You have a new match for this opportunity (79% fit).",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-need-45",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-56",
+      "userId": "demo-c05",
+      "title": "New match",
+      "message": "You have a new match for this opportunity (72% fit).",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-need-45",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-57",
+      "userId": "demo-u06",
+      "title": "New match",
+      "message": "You have a new match for this opportunity (84% fit).",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-need-46",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-58",
+      "userId": "demo-u18",
+      "title": "New match",
+      "message": "You have a new match for this opportunity (75% fit).",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-need-46",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-59",
+      "userId": "demo-u35",
+      "title": "New match",
+      "message": "You have a new match for this opportunity (87% fit).",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-need-47",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-60",
+      "userId": "demo-u04",
+      "title": "New match",
+      "message": "You have a new match for this opportunity (78% fit).",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-need-47",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-61",
+      "userId": "demo-u13",
+      "title": "New match",
+      "message": "You have a new match for this opportunity (77% fit).",
+      "read": false,
+      "type": "match",
+      "link": "/opportunities/demo-need-48",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-62",
+      "userId": "demo-u21",
+      "title": "Application accepted",
+      "message": "Your application was accepted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-need-41",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-63",
+      "userId": "demo-u08",
+      "title": "Application accepted",
+      "message": "Your application was accepted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-need-42",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-64",
+      "userId": "demo-u09",
+      "title": "Application accepted",
+      "message": "Your application was accepted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-need-43",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-65",
+      "userId": "demo-u32",
+      "title": "Application accepted",
+      "message": "Your application was accepted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-need-44",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-66",
+      "userId": "demo-u16",
+      "title": "Application accepted",
+      "message": "Your application was accepted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-need-45",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-67",
+      "userId": "demo-u33",
+      "title": "Application accepted",
+      "message": "Your application was accepted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-barter-41",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-68",
+      "userId": "demo-c04",
+      "title": "Application accepted",
+      "message": "Your application was accepted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-consortium-41",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-69",
+      "userId": "demo-u17",
+      "title": "Application accepted",
+      "message": "Your application was accepted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-need-46",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-70",
+      "userId": "demo-u24",
+      "title": "Application accepted",
+      "message": "Your application was accepted.",
+      "read": false,
+      "type": "application",
+      "link": "/opportunities/demo-need-47",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-71",
+      "userId": "demo-c02",
+      "title": "Deal in execution",
+      "message": "Deal \"Need: Site supervision for residential compound\" is now in execution.",
+      "read": false,
+      "type": "deal",
+      "link": "/deals/demo-deal-03",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-72",
+      "userId": "demo-u21",
+      "title": "Deal in execution",
+      "message": "Deal \"Need: Site supervision for residential compound\" is now in execution.",
+      "read": false,
+      "type": "deal",
+      "link": "/deals/demo-deal-03",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-73",
+      "userId": "demo-u14",
+      "title": "Deal in execution",
+      "message": "Deal \"Need: Training space for 2-day workshop\" is now in execution.",
+      "read": false,
+      "type": "deal",
+      "link": "/deals/demo-deal-05",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-74",
+      "userId": "demo-u33",
+      "title": "Deal in execution",
+      "message": "Deal \"Need: Training space for 2-day workshop\" is now in execution.",
+      "read": false,
+      "type": "deal",
+      "link": "/deals/demo-deal-05",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-75",
+      "userId": "demo-c05",
+      "title": "Deal in execution",
+      "message": "Deal \"Need: Solar plant EPC — equity, EPC, and O&M partners\" is now in execution.",
+      "read": true,
+      "type": "deal",
+      "link": "/deals/demo-deal-06",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-76",
+      "userId": "demo-c04",
+      "title": "Deal in execution",
+      "message": "Deal \"Need: Solar plant EPC — equity, EPC, and O&M partners\" is now in execution.",
+      "read": false,
+      "type": "deal",
+      "link": "/deals/demo-deal-06",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-77",
+      "userId": "demo-u24",
+      "title": "Deal in execution",
+      "message": "Deal \"Need: Solar plant EPC — equity, EPC, and O&M partners\" is now in execution.",
+      "read": false,
+      "type": "deal",
+      "link": "/deals/demo-deal-06",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-78",
+      "userId": "demo-c03",
+      "title": "Deal in execution",
+      "message": "Deal \"Need: Solar plant EPC — equity, EPC, and O&M partners\" is now in execution.",
+      "read": false,
+      "type": "deal",
+      "link": "/deals/demo-deal-06",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-79",
+      "userId": "demo-c02",
+      "title": "Deal in execution",
+      "message": "Deal \"Need: Sustainability and LEED advisory\" is now in execution.",
+      "read": true,
+      "type": "deal",
+      "link": "/deals/demo-deal-07",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-80",
+      "userId": "demo-u32",
+      "title": "Deal in execution",
+      "message": "Deal \"Need: Sustainability and LEED advisory\" is now in execution.",
+      "read": true,
+      "type": "deal",
+      "link": "/deals/demo-deal-07",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-81",
+      "userId": "demo-c06",
+      "title": "Deal in execution",
+      "message": "Deal \"Need: BIM coordination for mixed-use tower\" is now in execution.",
+      "read": true,
+      "type": "deal",
+      "link": "/deals/demo-deal-09",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-82",
+      "userId": "demo-u08",
+      "title": "Deal in execution",
+      "message": "Deal \"Need: BIM coordination for mixed-use tower\" is now in execution.",
+      "read": true,
+      "type": "deal",
+      "link": "/deals/demo-deal-09",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-83",
+      "userId": "demo-c02",
+      "title": "Deal completed",
+      "message": "Deal \"Need: Sustainability and LEED advisory\" has been completed.",
+      "read": false,
+      "type": "deal",
+      "link": "/deals/demo-deal-07",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-notif-84",
+      "userId": "demo-u32",
+      "title": "Deal completed",
+      "message": "Deal \"Need: Sustainability and LEED advisory\" has been completed.",
+      "read": false,
+      "type": "deal",
+      "link": "/deals/demo-deal-07",
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    }
+  ]
+}

@@ -112,6 +112,19 @@ class MatchingService {
     }
 
     /**
+     * Find replacement candidates for a single role in a consortium deal.
+     * @param {string} leadNeedId - Lead opportunity id
+     * @param {string} missingRole - Role label to fill
+     * @param {{ excludeUserIds?: string[], topN?: number }} options
+     * @returns {{ candidates: Array<{ userId, opportunityId, role, matchScore }> }}
+     */
+    async findReplacementCandidatesForRole(leadNeedId, missingRole, options = {}) {
+        const models = window.matchingModels || (typeof matchingModels !== 'undefined' && matchingModels);
+        if (!models || typeof models.findReplacementCandidatesForRole !== 'function') return { candidates: [] };
+        return await models.findReplacementCandidatesForRole(leadNeedId, missingRole, options);
+    }
+
+    /**
      * Find matches for an opportunity
      */
     async findMatchesForOpportunity(opportunityId) {
@@ -175,12 +188,15 @@ class MatchingService {
             const professionalFieldLabels = (candidateProfile.professionalFields || [])
                 .map(pf => pf.label || pf.fieldId)
                 .filter(Boolean);
+            const candidateSectorsForSkills = candidateProfile.sectors || (candidateProfile.industry ? (Array.isArray(candidateProfile.industry) ? candidateProfile.industry : [candidateProfile.industry]) : []);
             const rawCandidateSkills = [].concat(
                 candidateProfile.specializations || [],
                 candidateProfile.skills || [],
                 candidateProfile.services || [],
                 (candidateProfile.classifications || []).map(c => typeof c === 'string' ? c : c.label),
-                professionalFieldLabels
+                professionalFieldLabels,
+                candidateProfile.primaryDomain ? [candidateProfile.primaryDomain] : [],
+                Array.isArray(candidateSectorsForSkills) ? candidateSectorsForSkills : []
             ).filter(Boolean);
 
             const svc = window.skillService || (typeof skillService !== 'undefined' ? skillService : null);
@@ -659,6 +675,230 @@ class MatchingService {
         
         // Update match as notified
         await this.dataService.updateMatch(match.id, { notified: true });
+    }
+
+    /**
+     * Notify all participants of a post-match (type-specific message, link to match detail).
+     */
+    async notifyPostMatch(postMatch) {
+        if (!postMatch || !postMatch.participants || !postMatch.id) return;
+        const ds = this.dataService;
+        const scorePct = Math.round((postMatch.matchScore || 0) * 100);
+        const matchLink = `/matches/${postMatch.id}`;
+        let title = 'New Match Found';
+        let message = `You have a ${scorePct}% match.`;
+
+        if (postMatch.matchType === 'one_way') {
+            const needId = postMatch.payload?.needOpportunityId;
+            const offerId = postMatch.payload?.offerOpportunityId;
+            const needOpp = needId ? await ds.getOpportunityById(needId) : null;
+            const offerOpp = offerId ? await ds.getOpportunityById(offerId) : null;
+            const needTitle = needOpp?.title || 'Need';
+            const offerTitle = offerOpp?.title || 'Offer';
+            title = 'Recommended Provider Found';
+            message = `${offerTitle} matches ${needTitle} (${scorePct}% match).`;
+        } else if (postMatch.matchType === 'two_way') {
+            title = 'Barter Match Found';
+            const eq = postMatch.payload?.valueEquivalence || '';
+            message = `Exchange opportunity found (${scorePct}% match). ${eq ? `Value: ${eq}` : ''}`;
+        } else if (postMatch.matchType === 'consortium') {
+            title = 'Consortium Opportunity';
+            const leadId = postMatch.payload?.leadNeedId;
+            const leadOpp = leadId ? await ds.getOpportunityById(leadId) : null;
+            const projectTitle = leadOpp?.title || 'Project';
+            const n = (postMatch.payload?.roles || []).length;
+            message = `${projectTitle} has found potential partners for ${n} role(s).`;
+        } else if (postMatch.matchType === 'circular') {
+            title = 'Circular Exchange Detected';
+            const n = (postMatch.payload?.cycle || []).length;
+            message = `A ${n}-party exchange chain includes you (${scorePct}% match).`;
+        }
+
+        const seen = new Set();
+        for (const p of postMatch.participants) {
+            if (!p.userId || seen.has(p.userId)) continue;
+            seen.add(p.userId);
+            await ds.createNotification({
+                userId: p.userId,
+                type: 'match',
+                title,
+                message,
+                link: matchLink,
+                read: false
+            });
+        }
+    }
+
+    /**
+     * Persist post-to-post matches when an opportunity is published.
+     * Runs findMatchesForPost, converts results to PostMatch records, deduplicates, and notifies participants.
+     */
+    async persistPostMatches(opportunityId) {
+        const opportunity = await this.dataService.getOpportunityById(opportunityId);
+        if (!opportunity || opportunity.status !== 'published') return [];
+
+        const ds = this.dataService;
+        const created = [];
+        const threshold = CONFIG.MATCHING.POST_TO_POST_THRESHOLD ?? 0.50;
+
+        // One-way or two-way from findMatchesForPost(opportunityId)
+        const result = await this.findMatchesForPost(opportunityId, {});
+        const model = result.model || 'one_way';
+        const matches = result.matches || [];
+
+        if (model === 'one_way' || (result.direction === 'offer_to_needs')) {
+            for (const m of matches) {
+                if ((m.matchScore || 0) < threshold) continue;
+                const needId = opportunity.intent === 'request' ? opportunityId : (m.matchedOpportunity?.id);
+                const offerId = opportunity.intent === 'offer' ? opportunityId : (m.matchedOpportunity?.id);
+                if (!needId || !offerId) continue;
+                const needOpp = await ds.getOpportunityById(needId);
+                const offerOpp = await ds.getOpportunityById(offerId);
+                if (!needOpp || !offerOpp) continue;
+                const participants = [
+                    { userId: needOpp.creatorId, opportunityId: needId, role: 'need_owner', participantStatus: 'pending', respondedAt: null },
+                    { userId: offerOpp.creatorId, opportunityId: offerId, role: 'offer_provider', participantStatus: 'pending', respondedAt: null }
+                ];
+                const payload = {
+                    needOpportunityId: needId,
+                    offerOpportunityId: offerId,
+                    breakdown: m.breakdown || m.scoreBreakdown || {},
+                    valueAnalysis: m.valueAnalysis || null
+                };
+                const postMatch = await ds.createPostMatch({
+                    matchType: 'one_way',
+                    status: CONFIG.POST_MATCH_STATUS.PENDING,
+                    matchScore: m.matchScore,
+                    participants,
+                    payload
+                });
+                if (postMatch) {
+                    created.push(postMatch);
+                    await this.notifyPostMatch(postMatch);
+                }
+            }
+        } else if (model === 'two_way') {
+            for (const m of matches) {
+                if ((m.matchScore || 0) < threshold) continue;
+                const matchedNeed = m.matchedNeed;
+                const matchedOffer = m.matchedOffer;
+                if (!matchedNeed || !matchedOffer) continue;
+                const otherUserId = matchedNeed.creatorId;
+                const ourUserId = opportunity.creatorId;
+                const ourOppId = opportunityId;
+                const ourRole = opportunity.intent === 'request' ? 'need_owner' : 'offer_provider';
+                const participants = [
+                    { userId: ourUserId, opportunityId: ourOppId, role: ourRole, participantStatus: 'pending', respondedAt: null },
+                    { userId: otherUserId, opportunityId: matchedNeed.id, role: 'need_owner', participantStatus: 'pending', respondedAt: null },
+                    { userId: otherUserId, opportunityId: matchedOffer.id, role: 'offer_provider', participantStatus: 'pending', respondedAt: null }
+                ];
+                const payload = {
+                    sideA: { userId: ourUserId, needId: opportunity.intent === 'request' ? ourOppId : null, offerId: opportunity.intent === 'offer' ? ourOppId : null },
+                    sideB: { userId: otherUserId, needId: matchedNeed.id, offerId: matchedOffer.id },
+                    scoreAtoB: m.breakdown?.scoreAtoB,
+                    scoreBtoA: m.breakdown?.scoreBtoA,
+                    valueEquivalence: m.valueEquivalence || null
+                };
+                const postMatch = await ds.createPostMatch({
+                    matchType: 'two_way',
+                    status: CONFIG.POST_MATCH_STATUS.PENDING,
+                    matchScore: m.matchScore,
+                    participants,
+                    payload
+                });
+                if (postMatch) {
+                    created.push(postMatch);
+                    await this.notifyPostMatch(postMatch);
+                }
+            }
+        } else if (model === 'consortium') {
+            for (const m of matches) {
+                if ((m.matchScore || 0) < threshold) continue;
+                const leadNeedId = opportunityId;
+                const roles = m.suggestedPartners || [];
+                const participants = [
+                    { userId: opportunity.creatorId, opportunityId: leadNeedId, role: 'consortium_lead', participantStatus: 'pending', respondedAt: null }
+                ];
+                roles.forEach(r => {
+                    participants.push({
+                        userId: r.creatorId,
+                        opportunityId: r.opportunityId,
+                        role: 'consortium_member',
+                        participantStatus: 'pending',
+                        respondedAt: null
+                    });
+                });
+                const payload = {
+                    leadNeedId,
+                    roles: roles.map(r => ({ role: r.role, opportunityId: r.opportunityId, userId: r.creatorId, score: m.breakdown?.[r.role] })),
+                    valueBalance: m.valueAnalysis || null
+                };
+                const postMatch = await ds.createPostMatch({
+                    matchType: 'consortium',
+                    status: CONFIG.POST_MATCH_STATUS.PENDING,
+                    matchScore: m.matchScore,
+                    participants,
+                    payload
+                });
+                if (postMatch) {
+                    created.push(postMatch);
+                    await this.notifyPostMatch(postMatch);
+                }
+            }
+        }
+
+        // Circular: run global scan and persist cycles that include this opportunity's creator
+        try {
+            const circularResult = await this.findMatchesForPost(opportunityId, { model: 'circular' });
+            const cycles = circularResult.matches || [];
+            for (const m of cycles) {
+                if ((m.matchScore || 0) < threshold) continue;
+                const cycle = m.cycle || [];
+                if (!cycle.includes(opportunity.creatorId)) continue;
+                const links = m.linkScores || m.links || [];
+                const participants = [];
+                const seenUser = new Set();
+                for (const uid of cycle) {
+                    if (seenUser.has(uid)) continue;
+                    seenUser.add(uid);
+                    const link = links.find(l => l.fromCreatorId === uid || l.from === uid);
+                    const oppId = link?.offerId || null;
+                    participants.push({
+                        userId: uid,
+                        opportunityId: oppId,
+                        role: 'chain_participant',
+                        participantStatus: 'pending',
+                        respondedAt: null
+                    });
+                }
+                const payload = {
+                    cycle,
+                    links: links.map(l => ({
+                        fromCreatorId: l.fromCreatorId || l.from,
+                        toCreatorId: l.toCreatorId || l.to,
+                        offerId: l.offerId,
+                        needId: l.needId,
+                        score: l.score
+                    })),
+                    chainBalance: m.valueAnalysis || null
+                };
+                const postMatch = await ds.createPostMatch({
+                    matchType: 'circular',
+                    status: CONFIG.POST_MATCH_STATUS.PENDING,
+                    matchScore: m.matchScore,
+                    participants,
+                    payload
+                });
+                if (postMatch) {
+                    created.push(postMatch);
+                    await this.notifyPostMatch(postMatch);
+                }
+            }
+        } catch (err) {
+            console.warn('persistPostMatches circular:', err);
+        }
+
+        return created;
     }
     
     /**

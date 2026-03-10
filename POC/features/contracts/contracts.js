@@ -118,9 +118,9 @@ async function loadContracts() {
             contracts = contracts.filter(c => c.status === statusFilter);
         }
         if (roleFilter === 'creator') {
-            contracts = contracts.filter(c => c.creatorId === user.id);
+            contracts = contracts.filter(c => dataService.getContractParties(c).some(p => p.userId === user.id && (p.role === 'creator' || p.role === 'need_owner')));
         } else if (roleFilter === 'contractor') {
-            contracts = contracts.filter(c => c.contractorId === user.id);
+            contracts = contracts.filter(c => dataService.getContractParties(c).some(p => p.userId === user.id && (p.role === 'contractor' || p.role === 'offer_provider')));
         }
 
         if (contracts.length === 0) {
@@ -140,25 +140,25 @@ async function loadContracts() {
             contracts.map(async (c) => {
                 const opportunity = await dataService.getOpportunityById(c.opportunityId);
                 const application = c.applicationId ? await dataService.getApplicationById(c.applicationId) : null;
-                const otherPartyId = c.creatorId === user.id ? c.contractorId : c.creatorId;
-                const otherParty = await dataService.getUserOrCompanyById(otherPartyId);
-                const otherName = otherParty?.profile?.name || otherParty?.email || otherPartyId;
-                const myRole = c.creatorId === user.id ? 'creator' : 'contractor';
+                const parties = dataService.getContractParties(c);
+                const myParty = parties.find(p => p.userId === user.id);
+                const myRole = (myParty && myParty.role) ? myParty.role : 'participant';
+                const otherParties = parties.filter(p => p.userId !== user.id);
+                const otherNames = await Promise.all(otherParties.map(p => dataService.getUserOrCompanyById(p.userId)));
+                const otherPartyName = otherNames.length === 0 ? '—' : otherNames.length === 1 ? (otherNames[0]?.profile?.name || otherNames[0]?.email || otherParties[0].userId) : otherNames.length + ' parties';
                 const opportunityTitle = (opportunity && opportunity.title) || c.scope || '—';
                 const applicationStatusLabel = application ? formatApplicationStatus(application.status) : '—';
                 const negotiationLabel = opportunity ? getNegotiationLabel(opportunity.status) : '—';
-                const milestoneSummary = getMilestoneSummary(c);
                 return {
                     ...c,
                     opportunity,
                     application,
-                    otherPartyName: otherName,
+                    otherPartyName,
                     myRole,
                     scopeDisplay: c.scope || opportunityTitle,
                     opportunityTitle,
                     applicationStatusLabel,
-                    negotiationLabel,
-                    milestoneSummary
+                    negotiationLabel
                 };
             })
         );
@@ -170,20 +170,21 @@ async function loadContracts() {
                 (c) => `
             <div class="contract-card" data-contract-id="${escapeHtml(c.id)}">
                 <div class="contract-card-title">${escapeHtml(c.scopeDisplay)}</div>
-                <span class="contract-card-role ${c.myRole}">${c.myRole === 'creator' ? 'Creator' : 'Contractor'}</span>
+                <span class="contract-card-role ${escapeHtml(c.myRole)}">${escapeHtml((c.myRole || '').charAt(0).toUpperCase() + (c.myRole || '').slice(1))}</span>
                 <div class="contract-card-meta">
                     <span class="badge badge-${getContractStatusBadgeClass(c.status)}">${getContractStatusLabel(c.status)}</span>
                     <span class="ml-2 text-gray-500">with ${escapeHtml(c.otherPartyName)}</span>
                 </div>
                 <div class="contract-card-links mt-3 space-y-1.5 text-sm">
-                    ${c.milestoneSummary ? `<div class="flex items-center gap-2"><i class="ph-duotone ph-list-checks text-gray-400"></i><span class="text-gray-600">${escapeHtml(c.milestoneSummary)}</span></div>` : ''}
-                    <div class="flex items-center gap-2"><i class="ph-duotone ph-briefcase text-gray-400"></i><span class="text-gray-600">Linked opportunity:</span> <a href="#" data-route="/opportunities/${escapeHtml(c.opportunityId)}" class="contract-link text-primary font-medium">${escapeHtml(c.opportunityTitle)}</a></div>
+                    ${c.dealId ? `<div class="flex items-center gap-2"><i class="ph-duotone ph-list-checks text-gray-400"></i><a href="#" data-route="/deals/${escapeHtml(c.dealId)}" class="text-primary font-medium">View Deal (execution)</a></div>` : ''}
+                    ${c.opportunityId ? `<div class="flex items-center gap-2"><i class="ph-duotone ph-briefcase text-gray-400"></i><span class="text-gray-600">Linked opportunity:</span> <a href="#" data-route="/opportunities/${escapeHtml(c.opportunityId)}" class="contract-link text-primary font-medium">${escapeHtml(c.opportunityTitle)}</a></div>` : ''}
                     <div class="flex items-center gap-2"><i class="ph-duotone ph-file-text text-gray-400"></i><span class="text-gray-600">Application:</span> <span>${escapeHtml(c.applicationStatusLabel)}</span></div>
                     <div class="flex items-center gap-2"><i class="ph-duotone ph-handshake text-gray-400"></i><span class="text-gray-600">Negotiation:</span> <span>${escapeHtml(c.negotiationLabel)}</span></div>
                 </div>
                 <div class="flex flex-wrap gap-2 mt-3">
                     <a href="#" data-route="/contracts/${escapeHtml(c.id)}" class="btn btn-sm btn-secondary">View contract</a>
-                    <a href="#" data-route="/opportunities/${escapeHtml(c.opportunityId)}" class="btn btn-sm btn-primary">View opportunity</a>
+                    ${c.dealId ? `<a href="#" data-route="/deals/${escapeHtml(c.dealId)}" class="btn btn-sm btn-primary">View deal</a>` : ''}
+                    ${c.opportunityId ? `<a href="#" data-route="/opportunities/${escapeHtml(c.opportunityId)}" class="btn btn-sm btn-primary">View opportunity</a>` : ''}
                 </div>
             </div>
         `

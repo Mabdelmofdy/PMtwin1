@@ -471,11 +471,66 @@
         return { model: 'circular', matches: uniqueCycles };
     }
 
+    /**
+     * Replacement matching for consortium: find top candidates for a single missing role.
+     * @param {string} leadNeedId - Lead opportunity id
+     * @param {string} missingRole - Role label to fill (e.g. from deal.roleSlots or payload.roles)
+     * @param {{ excludeUserIds?: string[], topN?: number }} options
+     * @returns {{ candidates: Array<{ userId, opportunityId, role, matchScore }> }}
+     */
+    async function findReplacementCandidatesForRole(leadNeedId, missingRole, options = {}) {
+        const excludeUserIds = new Set(options.excludeUserIds || []);
+        const topN = options.topN ?? 5;
+        const ds = getDataService();
+        const scoring = getScoring();
+        const gen = getCandidateGenerator();
+        const preprocessor = getPreprocessor();
+
+        const leadNeed = await ds.getOpportunityById(leadNeedId);
+        if (!leadNeed) return { candidates: [] };
+
+        const att = leadNeed.attributes || {};
+        const memberRoles = att.memberRoles || att.partnerRoles || [];
+        const roles = Array.isArray(memberRoles)
+            ? memberRoles.map(r => (typeof r === 'string' ? r : (r && (r.role || r.label)) || '')).filter(Boolean)
+            : [];
+        const roleToUse = (missingRole && roles.includes(missingRole)) ? missingRole : (roles[0] || 'General');
+
+        const all = await ds.getOpportunities();
+        const offerPosts = all.filter(o => (o.intent || '') === 'offer' && o.status === 'published');
+        const canonical = preprocessor ? await preprocessor.loadSkillCanonical(CONFIG.BASE_PATH || '') : {};
+        const leadNormResolved = leadNeed.normalized || (preprocessor ? preprocessor.extractAndNormalize(leadNeed, canonical) : {});
+
+        const syntheticNeed = {
+            ...leadNeed,
+            id: leadNeed.id + '-role-' + roleToUse.replace(/\s/g, '_'),
+            scope: { ...(leadNeed.scope || {}), requiredSkills: [roleToUse].concat((leadNormResolved && leadNormResolved.skills) || []).slice(0, 10) },
+            normalized: { ...leadNormResolved, skills: [roleToUse].concat((leadNormResolved && leadNormResolved.skills) || []).slice(0, 10) }
+        };
+        const candidates = gen.getCandidates(syntheticNeed, offerPosts, { needNormalized: syntheticNeed.normalized, maxCandidates: 50 });
+        const scored = [];
+        for (const offer of candidates) {
+            if (excludeUserIds.has(offer.creatorId)) continue;
+            const { score } = scoring.scorePair(syntheticNeed, offer, syntheticNeed.normalized, offer.normalized);
+            if (score >= POST_THRESHOLD) {
+                scored.push({
+                    userId: offer.creatorId,
+                    opportunityId: offer.id,
+                    role: roleToUse,
+                    matchScore: score
+                });
+            }
+        }
+        scored.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+        return { candidates: scored.slice(0, topN) };
+    }
+
     const matchingModels = {
         findOffersForNeed,
         findNeedsForOffer,
         findBarterMatches,
         findConsortiumCandidates,
+        findReplacementCandidatesForRole,
         findCircularExchanges,
         estimateValueSar,
         valueEquivalenceText

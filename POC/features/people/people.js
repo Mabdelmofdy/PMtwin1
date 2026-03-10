@@ -331,12 +331,14 @@ async function handleConnect(userId) {
     }
     
     try {
-        await dataService.createConnection(currentUser.id, userId);
+        const conn = await dataService.createConnection(currentUser.id, userId);
         await dataService.createNotification({
             userId: userId,
             type: 'connection_request',
             title: 'Connection request',
-            message: `${currentUser.profile?.name || currentUser.email} wants to connect with you.`
+            message: `${currentUser.profile?.name || currentUser.email} wants to connect with you.`,
+            connectionId: conn.id,
+            link: '/people/' + currentUser.id
         });
         await window.modalService.success('Connection request sent!', 'Success');
         applyFilters(); // refresh list to show Pending

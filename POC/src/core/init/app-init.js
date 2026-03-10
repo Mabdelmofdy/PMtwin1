@@ -51,21 +51,27 @@ const APP_BASE_PATH = detectBasePath();
 console.log('PMTwin App base path:', APP_BASE_PATH);
 
 /**
- * Load script dynamically with base path
+ * Load script dynamically with base path.
+ * Uses cache-busting query param (?v=APP_VERSION) so updated scripts are fetched after deploys.
  */
 function loadScript(relativeSrc) {
     const fullSrc = APP_BASE_PATH + relativeSrc;
-    
+    const bustSrc = fullSrc + '?v=' + (window.CONFIG?.APP_VERSION || Date.now());
+
     return new Promise((resolve, reject) => {
-        // Check if script already loaded (check both relative and full paths)
-        const existingScript = document.querySelector(`script[src="${fullSrc}"], script[src="${relativeSrc}"]`);
-        if (existingScript) {
+        // Check if this script (by base path) is already loaded to avoid duplicates
+        const existing = document.querySelectorAll('script[src]');
+        const alreadyLoaded = Array.from(existing).some(s => {
+            const src = s.getAttribute('src') || '';
+            return src === fullSrc || src === relativeSrc || src.startsWith(fullSrc + '?') || src.startsWith(relativeSrc + '?');
+        });
+        if (alreadyLoaded) {
             resolve();
             return;
         }
-        
+
         const script = document.createElement('script');
-        script.src = fullSrc;
+        script.src = bustSrc;
         script.onload = resolve;
         script.onerror = () => {
             document.head.removeChild(script);
@@ -98,6 +104,7 @@ loadScript('src/core/config/config.js').then(async () => {
     await loadScript('src/utils/modal.js');
     await loadScript('src/utils/badge-helpers.js');
     await loadScript('src/utils/decimal-helper.js');
+    await loadScript('src/utils/profile-completion.js');
     
     // Load business logic
     await loadScript('src/business-logic/models/opportunity-models.js');
@@ -169,6 +176,7 @@ async function initializeStorage() {
         [CONFIG.STORAGE_KEYS.OPPORTUNITIES]: [],
         [CONFIG.STORAGE_KEYS.APPLICATIONS]: [],
         [CONFIG.STORAGE_KEYS.MATCHES]: [],
+        [CONFIG.STORAGE_KEYS.POST_MATCHES]: [],
         [CONFIG.STORAGE_KEYS.AUDIT]: [],
         [CONFIG.STORAGE_KEYS.NOTIFICATIONS]: [],
         [CONFIG.STORAGE_KEYS.SYSTEM_SETTINGS]: {}
@@ -291,6 +299,11 @@ function initializeRoutes() {
     router.register(CONFIG.ROUTES.FIND, async () => {
         await loadPage('find');
     });
+
+    // Public: Platform workflow (how it works)
+    router.register(CONFIG.ROUTES.WORKFLOW, async () => {
+        await loadPage('workflow');
+    });
     
     // Dashboard route (protected)
     router.register(CONFIG.ROUTES.DASHBOARD, authGuard.protect(async () => {
@@ -354,6 +367,17 @@ function initializeRoutes() {
     router.register('/contracts/:id', authGuard.protect(async (params) => {
         await loadPage('contract-detail', params);
     }));
+
+    // Deals routes (post-match collaboration workflow)
+    router.register(CONFIG.ROUTES.DEALS, authGuard.protect(async () => {
+        await loadPage('deals');
+    }));
+    router.register('/deals/:id/rate', authGuard.protect(async (params) => {
+        await loadPage('deal-rate', params);
+    }));
+    router.register(CONFIG.ROUTES.DEAL_DETAIL, authGuard.protect(async (params) => {
+        await loadPage('deal-detail', params);
+    }));
     
     // People routes (accessible to all users)
     router.register('/people', authGuard.protect(async () => {
@@ -370,6 +394,11 @@ function initializeRoutes() {
     
     router.register('/messages/:id', authGuard.protect(async (params) => {
         await loadPage('messages', params);
+    }));
+
+    // Match detail route (protected) – user-facing post-match discovery
+    router.register(CONFIG.ROUTES.MATCH_DETAIL, authGuard.protect(async (params) => {
+        await loadPage('match-detail', params);
     }));
     
     // Admin routes (protected: admin/moderator get dashboard, auditor gets audit)

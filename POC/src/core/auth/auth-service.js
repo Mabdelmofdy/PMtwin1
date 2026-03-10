@@ -33,7 +33,13 @@ class AuthService {
         if (userData.specialty !== undefined) profile.specialty = userData.specialty;
         if (userData.documents) profile.documents = userData.documents;
         if (userData.emailVerified !== undefined) profile.emailVerified = userData.emailVerified;
-        if (userData.mobileVerified !== undefined) profile.mobileVerified = userData.mobileVerified;
+        if (userData.mobileVerified !== undefined) {
+            profile.mobileVerified = userData.mobileVerified;
+            profile.phoneVerified = userData.mobileVerified === true;
+        }
+        if (userData.documents && userData.documents.some(d => (d.type || '').toLowerCase().includes('national_id') || (d.type || '').toLowerCase().includes('passport'))) {
+            profile.idVerified = true;
+        }
         if (userData.preferredCollaborationModels) profile.preferredCollaborationModels = userData.preferredCollaborationModels;
         if (userData.profile?.vettingSkippedAtRegistration !== undefined) profile.vettingSkippedAtRegistration = userData.profile.vettingSkippedAtRegistration === true;
         if (userData.profile?.primaryDomain) profile.primaryDomain = userData.profile.primaryDomain;
@@ -84,11 +90,20 @@ class AuthService {
             documents: payload.documents || [],
             emailVerified: payload.emailVerified === true,
             mobileVerified: payload.mobileVerified === true,
+            phoneVerified: payload.mobileVerified === true,
             preferredCollaborationModels: payload.preferredCollaborationModels || [],
             vettingSkippedAtRegistration: payload.vettingSkippedAtRegistration === true,
             primaryDomain: payload.primaryDomain || null,
             expertiseAreas: Array.isArray(payload.expertiseAreas) ? payload.expertiseAreas : []
         };
+        if (payload.industry) profile.sectors = [payload.industry];
+        if (payload.companySize) profile.employeeCount = payload.companySize;
+        if (payload.companyDescription) profile.description = payload.companyDescription;
+        if (payload.crNumber) profile.crNumber = payload.crNumber;
+        if (payload.taxId) profile.taxId = payload.taxId;
+        if (payload.authorizedRepresentative && (payload.authorizedRepresentative.name || payload.authorizedRepresentative.role)) {
+            profile.authorizedRepresentative = payload.authorizedRepresentative;
+        }
         if (payload.address) {
             profile.location = [payload.address.country, payload.address.region, payload.address.city].filter(Boolean).join(', ');
         }
@@ -300,6 +315,25 @@ class AuthService {
      */
     generateToken() {
         return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    /**
+     * Change password for the current user (requires current password).
+     * @param {string} currentPassword - Current password to verify
+     * @param {string} newPassword - New password to set
+     */
+    async changePassword(currentPassword, newPassword) {
+        const user = this.currentUser;
+        if (!user || !user.id) throw new Error('You must be logged in to change your password.');
+        const currentHash = this.encodePassword(currentPassword);
+        if (currentHash !== user.passwordHash) throw new Error('Current password is incorrect.');
+        const passwordHash = this.encodePassword(newPassword);
+        const isCompany = user.profile?.type === 'company';
+        if (isCompany) {
+            await this.dataService.updateCompany(user.id, { passwordHash });
+        } else {
+            await this.dataService.updateUser(user.id, { passwordHash });
+        }
     }
 
     /**

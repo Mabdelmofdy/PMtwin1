@@ -456,6 +456,13 @@
     "Profit Share (After Costs)",
     "Gross Profit Share"
   ],
+  "companySizes": [
+    { "id": "1-10", "label": "1–10 employees" },
+    { "id": "11-50", "label": "11–50 employees" },
+    { "id": "51-200", "label": "51–200 employees" },
+    { "id": "201-500", "label": "201–500 employees" },
+    { "id": "500+", "label": "500+ employees" }
+  ],
   "companyRoles": [
     { "id": "beneficiary", "label": "Beneficiary", "hasSubTypes": false, "mobileRequired": true },
     { "id": "vendor", "label": "Vendor", "hasSubTypes": true, "mobileRequired": true },

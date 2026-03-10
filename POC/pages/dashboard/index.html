@@ -12,6 +12,20 @@
         <p class="text-sm text-amber-800 mt-1">As an unverified user you can browse opportunities but cannot see company name, full scope, budget, or contact details. You can complete verification or return to it later from the Profile page.</p>
         <a href="#" data-route="/profile" id="dashboard-unverified-link" class="inline-block mt-3 px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-md hover:bg-amber-700 no-underline">Complete verification</a>
     </div>
+
+    <div id="dashboard-profile-completeness" class="mb-6 p-4 bg-white border border-gray-200 rounded-lg flex items-center justify-between flex-wrap gap-3" style="display: none;">
+        <div class="flex-1 min-w-0">
+            <h3 class="font-semibold text-gray-900 mb-1">Profile completeness</h3>
+            <p class="text-sm text-gray-600">Complete your profile to improve match recommendations.</p>
+            <div class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden max-w-xs">
+                <div id="dashboard-completeness-bar" class="h-full bg-primary rounded-full transition-all" style="width: 0%;"></div>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <span id="dashboard-completeness-percent" class="text-2xl font-bold text-primary">0%</span>
+            <a href="#" data-route="/profile" class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-dark no-underline">Complete profile</a>
+        </div>
+    </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <a href="#" data-route="/pipeline" class="stat-card-link bg-white border border-gray-200 rounded-lg p-6 text-center no-underline block hover:border-primary hover:shadow-md transition-all cursor-pointer">
@@ -35,6 +49,24 @@
     <div class="flex gap-4 mb-8">
         <a href="#" data-route="/opportunities/create" class="inline-block px-6 py-2 bg-primary text-white font-medium rounded-md hover:bg-primary-dark transition-all shadow-md no-underline">Create Opportunity</a>
         <a href="#" data-route="/opportunities" class="inline-block px-6 py-2 bg-gray-100 text-gray-900 font-medium rounded-md hover:bg-gray-200 transition-all no-underline">Browse Opportunities</a>
+    </div>
+
+    <div id="your-matches-section" class="bg-white border border-gray-200 rounded-lg p-6 mb-8" style="display: none;">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="text-xl font-semibold">Your Matches</h2>
+                <p class="text-sm text-gray-500">Collaboration opportunities found by the matching engine</p>
+            </div>
+            <a href="#" data-route="/pipeline/matches" class="text-primary text-sm font-medium no-underline hover:underline">View all</a>
+        </div>
+        <div class="flex gap-2 mb-4 flex-wrap" id="match-category-tabs">
+            <button type="button" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 match-tab active" data-category="all">All</button>
+            <button type="button" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 match-tab" data-category="one_way">Recommended</button>
+            <button type="button" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 match-tab" data-category="two_way">Barter</button>
+            <button type="button" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 match-tab" data-category="consortium">Consortium</button>
+            <button type="button" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 match-tab" data-category="circular">Circular</button>
+        </div>
+        <div id="your-matches-list" class="space-y-3"></div>
     </div>
     
     <div id="recommended-opportunities-section" class="bg-white border border-gray-200 rounded-lg p-6 mb-8" style="display: none;">

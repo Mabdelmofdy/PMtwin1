@@ -1,0 +1,19 @@
+{
+  "domain": "application_payment_terms",
+  "version": "1.0",
+  "description": "Payment structure selected by applicant (Section 6)",
+  "data": [
+    {
+      "id": "demo-app-pay-01",
+      "applicationId": "demo-app-01",
+      "type": "milestone",
+      "details": {
+        "milestones": [
+          { "id": "m1", "title": "Design review", "dueDate": "2026-05-15", "amount": 5000 },
+          { "id": "m2", "title": "BOQ submission", "dueDate": "2026-06-30", "amount": 5000 }
+        ]
+      },
+      "sortOrder": 0
+    }
+  ]
+}

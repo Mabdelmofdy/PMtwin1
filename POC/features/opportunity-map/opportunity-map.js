@@ -41,16 +41,60 @@ async function getCityCoordinatesMap() {
     }
 }
 
+/** Build country:region id -> { lat, lng } from locations.json (regions have lat/lng) */
+async function getRegionCoordinatesMap() {
+    const base = (window.CONFIG && window.CONFIG.BASE_PATH) || '';
+    try {
+        const res = await fetch(base + 'data/locations.json');
+        const data = await res.json();
+        const map = {};
+        (data.countries || []).forEach(c => {
+            const countryId = (c.id || '').toLowerCase();
+            (c.regions || []).forEach(r => {
+                if (r.lat != null && r.lng != null) {
+                    const regionId = (r.id || '').toLowerCase();
+                    map[`${countryId}:${regionId}`] = { lat: r.lat, lng: r.lng };
+                }
+            });
+        });
+        return map;
+    } catch (e) {
+        return {};
+    }
+}
+
+/** Resolve region id from demo data (e.g. "eastern" -> "eastern-province") */
+function normalizeRegionId(regionId) {
+    if (!regionId) return regionId;
+    const s = (regionId || '').toLowerCase();
+    if (s === 'eastern') return 'eastern-province';
+    return s;
+}
+
 async function loadMapOpportunities() {
     try {
-        const opportunities = await dataService.getOpportunities();
+        const raw = await dataService.getOpportunities();
+        const publishedOnly = (raw || []).filter(opp => (opp.status || '').toLowerCase() === 'published');
         const cityCoords = await getCityCoordinatesMap();
-        const withCoords = opportunities.map(opp => {
+        const regionCoords = await getRegionCoordinatesMap();
+        const withCoords = publishedOnly.map(opp => {
             let lat = opp.latitude;
             let lng = opp.longitude;
-            if ((lat == null || lng == null) && opp.locationCity && cityCoords[opp.locationCity]) {
+            if (lat != null && lng != null) {
+                return { ...opp, latitude: lat, longitude: lng };
+            }
+            if (opp.locationCity && cityCoords[opp.locationCity]) {
                 lat = cityCoords[opp.locationCity].lat;
                 lng = cityCoords[opp.locationCity].lng;
+            }
+            if ((lat == null || lng == null) && opp.locationCountry && opp.locationRegion) {
+                const countryId = (opp.locationCountry || '').toLowerCase();
+                const regionId = normalizeRegionId(opp.locationRegion);
+                const key = `${countryId}:${regionId}`;
+                if (regionCoords[key]) {
+                    lat = regionCoords[key].lat;
+                    lng = regionCoords[key].lng;
+                }
             }
             return { ...opp, latitude: lat, longitude: lng };
         }).filter(opp => opp.latitude != null && opp.longitude != null);

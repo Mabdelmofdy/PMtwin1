@@ -7,5 +7,10 @@
         <p class="text-muted" style="font-size: var(--font-size-sm);">
             Applied: {{createdDate}}
         </p>
+        {{#if valueScoreLabel}}
+        <p class="text-muted" style="font-size: var(--font-size-sm);">
+            {{valueScoreLabel}}
+        </p>
+        {{/if}}
     </div>
 </div>

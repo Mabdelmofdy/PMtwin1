@@ -1,0 +1,369 @@
+{
+  "domain": "contracts",
+  "version": "1.0",
+  "dataset": "demo40",
+  "description": "Demo contracts (one per deal); legal only, execution on Deal.",
+  "data": [
+    {
+      "id": "demo-contract-01",
+      "dealId": "demo-deal-01",
+      "opportunityId": "demo-oneway-need-01",
+      "applicationId": "demo-app-01",
+      "parties": [
+        {
+          "userId": "demo-c01",
+          "role": "creator",
+          "signedAt": "2026-03-07T12:30:00.000Z"
+        },
+        {
+          "userId": "demo-u06",
+          "role": "contractor",
+          "signedAt": "2026-03-07T12:30:00.000Z"
+        }
+      ],
+      "scope": "Need: Structural engineer for shop drawing review",
+      "paymentMode": "cash",
+      "duration": "3 months",
+      "status": "active",
+      "paymentSchedule": "50% on start, 50% on completion",
+      "agreedValue": {
+        "cash": 10000,
+        "currency": "SAR"
+      },
+      "equityVesting": null,
+      "profitShare": null,
+      "signedAt": "2026-03-07T12:30:00.000Z",
+      "createdAt": "2026-03-07T12:30:00.000Z",
+      "updatedAt": "2026-03-07T12:30:00.000Z"
+    },
+    {
+      "id": "demo-contract-02",
+      "dealId": "demo-deal-02",
+      "opportunityId": "demo-oneway-need-04",
+      "applicationId": "demo-app-05",
+      "parties": [
+        {
+          "userId": "demo-u04",
+          "role": "creator",
+          "signedAt": null
+        },
+        {
+          "userId": "demo-u09",
+          "role": "contractor",
+          "signedAt": null
+        }
+      ],
+      "scope": "Need: Quantity surveyor for tender preparation",
+      "paymentMode": "cash",
+      "duration": "3 months",
+      "status": "pending",
+      "paymentSchedule": "Milestone-based",
+      "agreedValue": {
+        "cash": 25000,
+        "currency": "SAR"
+      },
+      "equityVesting": null,
+      "profitShare": null,
+      "signedAt": null,
+      "createdAt": "2026-03-07T15:00:00.000Z",
+      "updatedAt": "2026-03-07T15:00:00.000Z"
+    },
+    {
+      "id": "demo-contract-03",
+      "dealId": "demo-deal-03",
+      "opportunityId": "demo-need-41",
+      "applicationId": "demo-app-50",
+      "parties": [
+        {
+          "userId": "demo-c02",
+          "role": "creator",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-u21",
+          "role": "contractor",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        }
+      ],
+      "scope": "Need: Site supervision for residential compound",
+      "paymentMode": "cash",
+      "duration": "3 months",
+      "status": "active",
+      "paymentSchedule": "50% on start, 50% on completion",
+      "agreedValue": {
+        "cash": 130000,
+        "currency": "SAR"
+      },
+      "equityVesting": null,
+      "profitShare": null,
+      "signedAt": "2026-03-10T14:00:00.000Z",
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-contract-04",
+      "dealId": "demo-deal-04",
+      "opportunityId": "demo-need-43",
+      "applicationId": "demo-app-52",
+      "parties": [
+        {
+          "userId": "demo-c01",
+          "role": "creator",
+          "signedAt": null
+        },
+        {
+          "userId": "demo-u09",
+          "role": "contractor",
+          "signedAt": null
+        }
+      ],
+      "scope": "Need: Cost estimation for hospital project",
+      "paymentMode": "cash",
+      "duration": "3 months",
+      "status": "pending",
+      "paymentSchedule": "Milestone-based",
+      "agreedValue": {
+        "cash": 50000,
+        "currency": "SAR"
+      },
+      "equityVesting": null,
+      "profitShare": null,
+      "signedAt": null,
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-contract-05",
+      "dealId": "demo-deal-05",
+      "opportunityId": "demo-barter-41",
+      "applicationId": "demo-app-55",
+      "parties": [
+        {
+          "userId": "demo-u14",
+          "role": "creator",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-u33",
+          "role": "contractor",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        }
+      ],
+      "scope": "Need: Training space for 2-day workshop",
+      "paymentMode": "barter",
+      "duration": "3 months",
+      "status": "active",
+      "paymentSchedule": "Barter: workshop for space",
+      "agreedValue": {
+        "barter": "Workshop for space"
+      },
+      "equityVesting": null,
+      "profitShare": null,
+      "signedAt": "2026-03-10T14:00:00.000Z",
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-contract-06",
+      "dealId": "demo-deal-06",
+      "opportunityId": "demo-consortium-41",
+      "applicationId": "demo-app-56",
+      "parties": [
+        {
+          "userId": "demo-c05",
+          "role": "creator",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-c04",
+          "role": "contractor",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-u24",
+          "role": "contractor",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-c03",
+          "role": "contractor",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        }
+      ],
+      "scope": "Need: Solar plant EPC — equity, EPC, and O&M partners",
+      "paymentMode": "cash",
+      "duration": "3 months",
+      "status": "active",
+      "paymentSchedule": "Milestone-based",
+      "agreedValue": {
+        "cash": 12000000,
+        "currency": "SAR"
+      },
+      "equityVesting": null,
+      "profitShare": null,
+      "signedAt": "2026-03-10T14:00:00.000Z",
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-contract-07",
+      "dealId": "demo-deal-07",
+      "opportunityId": "demo-need-44",
+      "applicationId": "demo-app-53",
+      "parties": [
+        {
+          "userId": "demo-c02",
+          "role": "creator",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-u32",
+          "role": "contractor",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        }
+      ],
+      "scope": "Need: Sustainability and LEED advisory",
+      "paymentMode": "cash",
+      "duration": "3 months",
+      "status": "completed",
+      "paymentSchedule": "Milestone-based",
+      "agreedValue": {
+        "cash": 38000,
+        "currency": "SAR"
+      },
+      "equityVesting": null,
+      "profitShare": null,
+      "signedAt": "2026-03-10T14:00:00.000Z",
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-contract-08",
+      "dealId": "demo-deal-08",
+      "opportunityId": "demo-need-45",
+      "applicationId": "demo-app-54",
+      "parties": [
+        {
+          "userId": "demo-c01",
+          "role": "creator",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-u16",
+          "role": "contractor",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        }
+      ],
+      "scope": "Need: Claims and dispute support",
+      "paymentMode": "cash",
+      "duration": "3 months",
+      "status": "completed",
+      "paymentSchedule": "Upon completion",
+      "agreedValue": {
+        "cash": 60000,
+        "currency": "SAR"
+      },
+      "equityVesting": null,
+      "profitShare": null,
+      "signedAt": "2026-03-10T14:00:00.000Z",
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-contract-09",
+      "dealId": "demo-deal-09",
+      "opportunityId": "demo-need-42",
+      "applicationId": "demo-app-51",
+      "parties": [
+        {
+          "userId": "demo-c06",
+          "role": "creator",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-u08",
+          "role": "contractor",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        }
+      ],
+      "scope": "Need: BIM coordination for mixed-use tower",
+      "paymentMode": "cash",
+      "duration": "3 months",
+      "status": "active",
+      "paymentSchedule": "33% per milestone",
+      "agreedValue": {
+        "cash": 85000,
+        "currency": "SAR"
+      },
+      "equityVesting": null,
+      "profitShare": null,
+      "signedAt": "2026-03-10T14:00:00.000Z",
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-contract-10",
+      "dealId": "demo-deal-10",
+      "opportunityId": "demo-need-46",
+      "applicationId": "demo-app-57",
+      "parties": [
+        {
+          "userId": "demo-c05",
+          "role": "creator",
+          "signedAt": null
+        },
+        {
+          "userId": "demo-u17",
+          "role": "contractor",
+          "signedAt": null
+        }
+      ],
+      "scope": "Need: Geotechnical investigation",
+      "paymentMode": "cash",
+      "duration": "3 months",
+      "status": "pending",
+      "paymentSchedule": "50% on report",
+      "agreedValue": {
+        "cash": 90000,
+        "currency": "SAR"
+      },
+      "equityVesting": null,
+      "profitShare": null,
+      "signedAt": null,
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-contract-11",
+      "dealId": "demo-deal-11",
+      "opportunityId": "demo-need-47",
+      "applicationId": "demo-app-58",
+      "parties": [
+        {
+          "userId": "demo-c06",
+          "role": "creator",
+          "signedAt": null
+        },
+        {
+          "userId": "demo-u24",
+          "role": "contractor",
+          "signedAt": null
+        }
+      ],
+      "scope": "Need: Interior design and FF&E",
+      "paymentMode": "cash",
+      "duration": "3 months",
+      "status": "pending",
+      "paymentSchedule": "Milestone-based",
+      "agreedValue": {
+        "cash": 120000,
+        "currency": "SAR"
+      },
+      "equityVesting": null,
+      "profitShare": null,
+      "signedAt": null,
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z"
+    }
+  ]
+}

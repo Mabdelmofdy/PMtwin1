@@ -34,8 +34,17 @@ function parseArray(val) {
 }
 
 function formatArray(arr) {
-    if (!Array.isArray(arr) || arr.length === 0) return '—';
+    if (!Array.isArray(arr) || arr.length === 0) return '';
     return arr.join(', ');
+}
+
+/** Returns HTML for empty list sections: message + "Add X" button (or link for company). No em-dash. */
+function getEmptySectionHtml(emptyMessage, addLabel, sectionId) {
+    const section = sectionId || 'professional';
+    if (section === 'company') {
+        return `<p class="text-gray-500 text-sm mb-2">${escapeHtml(emptyMessage)}</p><a href="#company-profile-card" class="btn btn-secondary btn-sm">${escapeHtml(addLabel)}</a>`;
+    }
+    return `<p class="text-gray-500 text-sm mb-2">${escapeHtml(emptyMessage)}</p><button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="${escapeHtml(section)}">${escapeHtml(addLabel)}</button>`;
 }
 
 function escapeHtml(str) {
@@ -55,14 +64,14 @@ const SOCIAL_ICONS = {
 const SOCIAL_LABELS = { linkedin: 'LinkedIn', twitter: 'Twitter', facebook: 'Facebook', instagram: 'Instagram' };
 
 function getSocialIconsHtml(sm) {
-    if (!sm) return '—';
+    if (!sm) return '';
     const items = [
         { key: 'linkedin', url: sm.linkedin },
         { key: 'twitter', url: sm.twitter },
         { key: 'facebook', url: sm.facebook },
         { key: 'instagram', url: sm.instagram }
     ].filter(x => x.url);
-    if (items.length === 0) return '—';
+    if (items.length === 0) return '';
     return '<div class="social-icons flex flex-wrap gap-3 items-center">' + items.map(item =>
         `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener" class="social-icon-link text-gray-600 hover:text-primary" title="${escapeHtml(SOCIAL_LABELS[item.key])}">${SOCIAL_ICONS[item.key]}</a>`
     ).join('') + '</div>';
@@ -213,6 +222,59 @@ function setupReferenceAddButton(btnId, listId) {
         row.querySelector('.ref-remove').addEventListener('click', () => row.remove());
         list.appendChild(row);
     };
+}
+
+function renderExperienceEntriesList(containerId, entries) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    (entries || []).forEach((e) => {
+        const row = document.createElement('div');
+        row.className = 'flex flex-wrap gap-2 items-start border border-gray-200 rounded p-2 experience-entry-row';
+        const endVal = (e.endDate === 'Present' || e.endDate === 'present' || !e.endDate) ? 'Present' : (e.endDate || '');
+        row.innerHTML = `
+            <input type="text" class="exp-role form-input flex-1 min-w-[140px]" placeholder="Role / title" value="${escapeHtml(e.role || '')}">
+            <input type="text" class="exp-company form-input flex-1 min-w-[140px]" placeholder="Company" value="${escapeHtml(e.company || '')}">
+            <input type="text" class="exp-start form-input w-24" placeholder="Start (e.g. 2019)" value="${escapeHtml(e.startDate || '')}">
+            <input type="text" class="exp-end form-input w-24" placeholder="End or Present" value="${escapeHtml(endVal)}">
+            <button type="button" class="exp-remove btn btn-ghost btn-sm">Remove</button>
+        `;
+        row.querySelector('.exp-remove').addEventListener('click', () => row.remove());
+        container.appendChild(row);
+    });
+}
+
+function setupExperienceAddButton(btnId, listId) {
+    const btn = document.getElementById(btnId);
+    const list = document.getElementById(listId);
+    if (!btn || !list) return;
+    btn.onclick = () => {
+        const row = document.createElement('div');
+        row.className = 'flex flex-wrap gap-2 items-start border border-gray-200 rounded p-2 experience-entry-row';
+        row.innerHTML = `
+            <input type="text" class="exp-role form-input flex-1 min-w-[140px]" placeholder="Role / title">
+            <input type="text" class="exp-company form-input flex-1 min-w-[140px]" placeholder="Company">
+            <input type="text" class="exp-start form-input w-24" placeholder="Start (e.g. 2019)">
+            <input type="text" class="exp-end form-input w-24" placeholder="End or Present">
+            <button type="button" class="exp-remove btn btn-ghost btn-sm">Remove</button>
+        `;
+        row.querySelector('.exp-remove').addEventListener('click', () => row.remove());
+        list.appendChild(row);
+    };
+}
+
+function collectExperienceFromList(listId) {
+    const list = document.getElementById(listId);
+    if (!list) return [];
+    return Array.from(list.querySelectorAll('.experience-entry-row')).map(row => {
+        const role = row.querySelector('.exp-role')?.value?.trim();
+        const company = row.querySelector('.exp-company')?.value?.trim();
+        const startDate = row.querySelector('.exp-start')?.value?.trim();
+        const endRaw = row.querySelector('.exp-end')?.value?.trim();
+        const endDate = !endRaw || endRaw.toLowerCase() === 'present' ? 'Present' : endRaw;
+        if (!role && !company && !startDate) return null;
+        return { role: role || null, company: company || null, startDate: startDate || null, endDate };
+    }).filter(Boolean);
 }
 
 function collectReferencesFromList(listId) {
@@ -564,7 +626,7 @@ function getPreferredCollaborationModelsList() {
 }
 
 function getPreferredModelsLabel(ids) {
-    if (!Array.isArray(ids) || ids.length === 0) return '—';
+    if (!Array.isArray(ids) || ids.length === 0) return '';
     const list = getPreferredCollaborationModelsList();
     return ids.map(id => list.find(m => m.id === id)?.label || id).join(', ');
 }
@@ -578,14 +640,73 @@ function getVerificationBadgeHtml(verificationStatus) {
     return '';
 }
 
+/** Return HTML for verification badges including status, phone verified, ID verified, and tier (e.g. Top Expert). */
+function getVerificationBadgesFullHtml(profile) {
+    const status = profile?.verificationStatus;
+    let html = getVerificationBadgeHtml(status) || '<span class="badge badge-secondary verification-badge">Unverified</span>';
+    if (profile?.phoneVerified === true || profile?.mobileVerified === true) html += ' <span class="badge badge-info verification-badge">Phone verified</span>';
+    if (profile?.idVerified === true) html += ' <span class="badge badge-info verification-badge">ID verified</span>';
+    if (profile?.verificationTier === 'top_expert') html += ' <span class="badge badge-primary verification-badge">Top Expert</span>';
+    return html;
+}
+
+/**
+ * Profile page init: data comes from the data service (localStorage), not directly from JSON files.
+ * The data service (data-service.js) is populated from users.json / companies.json and from demo JSON
+ * files (demo-users.json, demo-companies.json, etc.) via mergeDemoData(). This page gets the current
+ * user via dataService.getUserOrCompanyById(user.id), with fallback to getUsers() / getCompanies().
+ */
 async function initProfile() {
-    const user = authService.getCurrentUser();
+    let user = authService.getCurrentUser();
     if (!user) {
         router.navigate(CONFIG.ROUTES.LOGIN);
         return;
     }
-    await loadProfileLookups();
+    // Always re-fetch from data service so all data (email, name, role, skills, certifications, etc.) appears.
+    if (user.id && typeof dataService.getUserOrCompanyById === 'function') {
+        let fresh = await dataService.getUserOrCompanyById(user.id);
+        if (!fresh && typeof dataService.getUsers === 'function') {
+            const users = await dataService.getUsers();
+            fresh = users.find(u => u.id === user.id) || null;
+        }
+        if (!fresh && typeof dataService.getCompanies === 'function') {
+            const companies = await dataService.getCompanies();
+            fresh = companies.find(c => c.id === user.id) || null;
+        }
+        if (fresh) {
+            user = fresh;
+            if (authService.currentUser) authService.currentUser = fresh;
+        }
+    }
+    // Disable Quick Stats: hide the sidebar card
+    const quickStatsCard = document.getElementById('quick-stats-card');
+    if (quickStatsCard) quickStatsCard.style.display = 'none';
+
+    try {
+        await loadProfileLookups();
+    } catch (e) {
+        console.warn('Profile lookups failed, continuing with profile load:', e);
+    }
     await loadProfile(user);
+    // Retry once if account fields still empty (ensure all login/registration data appears)
+    const emailEl = document.getElementById('profile-email');
+    const emptyOrPlaceholder = !(emailEl.value || '').trim() || emailEl.value === '\u2014';
+    if (user.id && emailEl && emptyOrPlaceholder) {
+        let retryUser = await dataService.getUserOrCompanyById(user.id);
+        if (!retryUser && typeof dataService.getUsers === 'function') {
+            const users = await dataService.getUsers();
+            retryUser = users.find(u => u.id === user.id) || null;
+        }
+        if (!retryUser && typeof dataService.getCompanies === 'function') {
+            const companies = await dataService.getCompanies();
+            retryUser = companies.find(c => c.id === user.id) || null;
+        }
+        if (retryUser) {
+            user = retryUser;
+            if (authService.currentUser) authService.currentUser = retryUser;
+            await loadProfile(user);
+        }
+    }
     await loadProfileStats(user.id);
     await loadCompanyAffiliation(user);
     await loadReputation(user.id);
@@ -594,16 +715,45 @@ async function initProfile() {
     loadMatchingPreferences(user);
     setupMatchingPreferencesSave();
     setupSkillAutocomplete();
+    setupProfileTabs();
 
     // Read-only demo: disable profile edits for pending users
     if (authService.isPendingApproval && authService.isPendingApproval()) {
         const msg = 'Action disabled until your account is approved.';
-        document.querySelectorAll('#matching-preferences-save, #company-profile-edit-btn, #professional-profile-edit-btn, #team-add-member-btn').forEach(el => {
+        document.querySelectorAll('#matching-preferences-save, #company-profile-edit-btn, .profile-edit-section-btn, #profile-edit-professional-btn, #profile-edit-basic-btn, #profile-edit-skills-btn, #profile-edit-certifications-btn, #profile-edit-experience-btn, #profile-edit-portfolio-btn, #profile-edit-references-btn, #profile-edit-preferences-btn, #team-add-member-btn').forEach(el => {
             if (el) {
                 el.disabled = true;
                 el.setAttribute('title', msg);
                 el.classList.add('opacity-75', 'cursor-not-allowed');
             }
+        });
+    }
+
+    // Optional: show "Password updated" when returning from Settings after password change
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('passwordChanged') === '1') {
+        showProfileSuccess('Your password was updated successfully.');
+        const u = new URL(window.location.href);
+        u.searchParams.delete('passwordChanged');
+        window.history.replaceState({}, '', u.toString());
+    }
+
+    // Change Password: open pop-up modal instead of navigating to Settings
+    const changePwdBtn = document.getElementById('profile-action-change-password');
+    if (changePwdBtn) {
+        changePwdBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showChangePasswordModal();
+        });
+    }
+
+    // Account Settings Edit: scroll to Change Password / actions
+    const editAccountBtn = document.getElementById('profile-edit-account-btn');
+    if (editAccountBtn) {
+        editAccountBtn.addEventListener('click', () => {
+            const target = document.getElementById('profile-action-change-password');
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
     }
 }
@@ -638,7 +788,7 @@ async function loadReputation(userId) {
             const contracts = typeof dataService.getContracts === 'function'
                 ? await dataService.getContracts() : [];
             const completed = contracts.filter(c =>
-                c.status === 'completed' && (c.creatorId === userId || c.contractorId === userId)
+                c.status === 'completed' && dataService.getContractParties(c).some(p => p.userId === userId)
             );
             count = completed.length;
             score = count > 0 ? Math.min(5, 3 + (count * 0.4)) : 0;
@@ -690,6 +840,15 @@ async function loadReviewsReceived(userId) {
     } catch (e) { /* ignore */ }
 }
 
+function updateMatchingScoreSummary() {
+    const input = document.getElementById('matching-min-score');
+    const valueEl = document.getElementById('matching-min-score-value');
+    const valueMain = document.getElementById('matching-min-score-value-main');
+    const pct = input ? (() => { const raw = parseInt(input.value, 10); return isNaN(raw) ? 70 : Math.min(100, Math.max(70, raw)); })() : 70;
+    if (valueEl) valueEl.textContent = pct;
+    if (valueMain) valueMain.textContent = pct;
+}
+
 function loadMatchingPreferences(user) {
     const input = document.getElementById('matching-min-score');
     if (!input) return;
@@ -698,6 +857,22 @@ function loadMatchingPreferences(user) {
         input.value = Math.round(Math.min(100, Math.max(70, minScore * 100)));
     } else {
         input.value = 70;
+    }
+    updateMatchingScoreSummary();
+    input.addEventListener('input', updateMatchingScoreSummary);
+    input.addEventListener('change', updateMatchingScoreSummary);
+    const editPrefsBtn = document.getElementById('profile-edit-preferences-btn');
+    if (editPrefsBtn) {
+        editPrefsBtn.addEventListener('click', () => {
+            document.getElementById('matching-preferences-card')?.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+    const reviewBtn = document.getElementById('matching-preferences-review');
+    if (reviewBtn) {
+        reviewBtn.addEventListener('click', () => {
+            input.focus();
+            input.select?.();
+        });
     }
 }
 
@@ -997,21 +1172,166 @@ function getProfessionalCompleteness(profile) {
     return { percent: Math.round((filled / total) * 100), total, filled };
 }
 
+function getCompletenessNextSteps(profile, isCompany) {
+    const hashCompany = '#company-profile-card';
+    const hashPro = '#profile-section-professional';
+    const hashBasic = '#profile-section-basic';
+    const hashPortfolio = '#profile-section-portfolio';
+    const hashRefs = '#profile-section-references';
+    const steps = [];
+    if (isCompany) {
+        if (!profile?.name) steps.push({ label: 'Add company name', hash: hashCompany });
+        if (!(profile?.crNumber || profile?.registrationNumber)) steps.push({ label: 'Add CR / registration number', hash: hashCompany });
+        const hasSectors = (Array.isArray(profile?.sectors) ? profile.sectors.length : parseArray(profile?.sectors).length) > 0;
+        const hasClassifications = (Array.isArray(profile?.classifications) ? profile.classifications.length : parseArray(profile?.classifications).length) > 0;
+        if (!hasSectors && !hasClassifications) steps.push({ label: 'Add sectors or classifications', hash: hashCompany });
+        if ((profile?.financialCapacity == null || profile?.financialCapacity === '') || Number(profile?.financialCapacity) < 0) steps.push({ label: 'Add financial capacity', hash: hashCompany });
+        if (!profile?.companyRole) steps.push({ label: 'Select company role', hash: hashCompany });
+        if ((Array.isArray(profile?.preferredPaymentModes) ? profile.preferredPaymentModes.length : 0) === 0) steps.push({ label: 'Add preferred payment modes', hash: hashCompany });
+        if ((Array.isArray(profile?.preferredCollaborationModels) ? profile.preferredCollaborationModels.length : 0) === 0) steps.push({ label: 'Add collaboration models', hash: hashCompany });
+        if ((Array.isArray(profile?.caseStudies) ? profile.caseStudies.length : 0) === 0) steps.push({ label: 'Add at least one case study', hash: hashCompany });
+        if ((Array.isArray(profile?.references) ? profile.references.length : 0) === 0) steps.push({ label: 'Add references', hash: hashCompany });
+        if (!profile?.primaryDomain && (!Array.isArray(profile?.expertiseAreas) || profile.expertiseAreas.length === 0)) steps.push({ label: 'Add primary domain or expertise areas', hash: hashCompany });
+    } else {
+        if (!profile?.name) steps.push({ label: 'Add your name', hash: hashBasic });
+        const hasSpec = Array.isArray(profile?.specializations) ? profile.specializations.length > 0 : !!profile?.specializations;
+        const hasSkills = Array.isArray(profile?.skills) ? profile.skills.length > 0 : !!profile?.skills;
+        if (!hasSpec && !hasSkills) steps.push({ label: 'Add specializations or skills', hash: hashPro });
+        if ((Array.isArray(profile?.certifications) ? profile.certifications.length : 0) === 0) steps.push({ label: 'Add certifications', hash: hashPro });
+        const hasExp = (profile?.yearsExperience != null && profile?.yearsExperience !== '') || (profile?.experience != null && profile?.experience !== '');
+        if (!hasExp) steps.push({ label: 'Add years of experience', hash: hashPro });
+        if (!profile?.headline) steps.push({ label: 'Add headline', hash: hashBasic });
+        if (!profile?.location) steps.push({ label: 'Add location', hash: hashBasic });
+        if (!profile?.preferredWorkMode) steps.push({ label: 'Select preferred work mode', hash: hashPro });
+        if ((Array.isArray(profile?.preferredPaymentModes) ? profile.preferredPaymentModes.length : 0) === 0) steps.push({ label: 'Add payment modes', hash: hashPro });
+        if ((Array.isArray(profile?.preferredCollaborationModels) ? profile.preferredCollaborationModels.length : 0) === 0) steps.push({ label: 'Add collaboration models', hash: hashPro });
+        if ((Array.isArray(profile?.caseStudies) ? profile.caseStudies.length : 0) === 0) steps.push({ label: 'Add at least one case study', hash: hashPortfolio });
+        if ((Array.isArray(profile?.references) ? profile.references.length : 0) === 0) steps.push({ label: 'Add references', hash: hashRefs });
+        if (!profile?.primaryDomain && (!Array.isArray(profile?.expertiseAreas) || profile.expertiseAreas.length === 0)) steps.push({ label: 'Add primary domain or expertise areas', hash: hashPro });
+    }
+    return steps.slice(0, 5);
+}
+
+/** Profile completion: Photo, Bio, Skills, Experience, Portfolio, Certificates (6 criteria). */
+function getProfileCompletionSix(profile) {
+    const hasPhoto = !!(profile?.photoUrl && profile.photoUrl.trim());
+    const hasBio = !!(profile?.bio && String(profile.bio).trim());
+    const hasSkills = Array.isArray(profile?.skills) ? profile.skills.length > 0 : !!(profile?.skills && String(profile.skills).trim());
+    const hasExperience = (Array.isArray(profile?.experienceEntries) && profile.experienceEntries.length > 0) || (profile?.yearsExperience != null && profile.yearsExperience !== '') || (profile?.experience != null && profile.experience !== '');
+    const hasPortfolio = (Array.isArray(profile?.caseStudies) && profile.caseStudies.length > 0) || (Array.isArray(profile?.portfolio) && profile.portfolio.length > 0);
+    const hasCertificates = Array.isArray(profile?.certifications) ? profile.certifications.length > 0 : !!(profile?.certifications && String(profile.certifications).trim());
+    const criteria = [
+        { key: 'photo', label: 'Profile photo', done: hasPhoto },
+        { key: 'bio', label: 'Bio', done: hasBio },
+        { key: 'skills', label: 'Skills', done: hasSkills },
+        { key: 'experience', label: 'Experience', done: hasExperience },
+        { key: 'portfolio', label: 'Portfolio', done: hasPortfolio },
+        { key: 'certificates', label: 'Certificates', done: hasCertificates }
+    ];
+    const filled = criteria.filter(c => c.done).length;
+    const percent = total => (total === 0 ? 100 : Math.round((filled / total) * 100));
+    return { percent: percent(6), filled, total: 6, criteria };
+}
+
 function renderCompleteness(profile, isCompany) {
-    const card = document.getElementById('profile-completeness-card');
-    const textEl = document.getElementById('profile-completeness-text');
     const barEl = document.getElementById('profile-completeness-bar');
     const percentEl = document.getElementById('profile-completeness-percent');
-    if (!card || !barEl) return;
-    const result = isCompany ? getCompanyCompleteness(profile) : getProfessionalCompleteness(profile);
-    card.style.display = 'block';
-    barEl.style.width = result.percent + '%';
-    percentEl.textContent = result.percent + '%';
-    if (result.percent === 100) {
-        textEl.textContent = 'Your profile is complete. Keeping it updated improves your match recommendations.';
-    } else {
-        textEl.textContent = 'Complete your profile to improve match recommendations.';
+    if (!barEl) return;
+    const result = isCompany ? getCompanyCompleteness(profile) : (getProfileCompletionSix(profile).percent !== undefined ? getProfileCompletionSix(profile) : getProfessionalCompleteness(profile));
+    const pct = typeof result.percent === 'number' ? result.percent : (result.percent != null ? result.percent : 0);
+    barEl.style.width = pct + '%';
+    if (percentEl) percentEl.textContent = pct + '%';
+}
+
+function setupProfileTabs() {
+    const tabs = document.querySelectorAll('.profile-tab[data-tab]');
+    const panels = document.querySelectorAll('.profile-tab-panel');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabId = tab.getAttribute('data-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            panels.forEach(p => {
+                const panelId = p.id;
+                if (panelId === 'profile-tab-' + tabId) {
+                    p.classList.remove('hidden');
+                } else {
+                    p.classList.add('hidden');
+                }
+            });
+            tab.classList.add('active');
+        });
+    });
+    if (tabs.length) tabs[0].classList.add('active');
+    const firstPanel = document.getElementById('profile-tab-profile');
+    if (firstPanel) firstPanel.classList.remove('hidden');
+}
+
+function renderProfileHeader(user, profile, isCompany) {
+    const nameEl = document.getElementById('profile-header-name');
+    const roleEl = document.getElementById('profile-header-role');
+    const locationEl = document.getElementById('profile-header-location');
+    const availabilityEl = document.getElementById('profile-header-availability');
+    const hourlyEl = document.getElementById('profile-header-hourly');
+    const editBtn = document.getElementById('profile-header-edit-btn');
+    if (!nameEl) return;
+    const name = isCompany ? (profile?.name || 'Company') : (profile?.name || '—');
+    const role = getRoleDisplayLabel(user?.role) || (user?.role || '—');
+    const title = profile?.headline || profile?.title || '';
+    nameEl.textContent = name;
+    roleEl.textContent = title ? role + ' · ' + title : role;
+    if (locationEl) locationEl.textContent = profile?.location || profile?.address || '—';
+    if (availabilityEl) availabilityEl.textContent = profile?.availability ? 'Availability: ' + profile.availability : '—';
+    if (hourlyEl) {
+        const rate = profile?.hourlyRate;
+        const currency = profile?.currency || 'SAR';
+        hourlyEl.textContent = (rate != null && rate !== '') ? 'Hourly rate: ' + rate + ' ' + currency : '—';
     }
+    if (editBtn) {
+        editBtn.onclick = () => {
+            if (isCompany) {
+                document.getElementById('company-profile-card')?.scrollIntoView({ behavior: 'smooth' });
+                showCompanyEdit();
+            } else {
+                showProfessionalEdit();
+                document.getElementById('professional-profile-card')?.scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+    }
+}
+
+function renderProfilePortfolioCards(profile) {
+    const container = document.getElementById('profile-portfolio-cards');
+    if (!container) return;
+    const caseStudies = Array.isArray(profile?.caseStudies) ? profile.caseStudies : [];
+    const portfolio = Array.isArray(profile?.portfolio) ? profile.portfolio : [];
+    const items = caseStudies.map(c => ({ type: 'caseStudy', ...c })).concat(portfolio.map(p => ({ type: 'portfolio', ...p })));
+    if (items.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-sm">No projects or case studies yet. Click Add Project to add one.</p>';
+        return;
+    }
+    container.innerHTML = items.map((item, i) => {
+        const title = item.title || 'Untitled';
+        const role = item.role || '';
+        const client = item.client || '';
+        const year = item.year || '';
+        const problem = item.problem || '';
+        const solution = item.solution || item.description || '';
+        const impact = item.impact || '';
+        return `
+            <div class="profile-portfolio-card" data-index="${i}">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <h4 class="font-semibold text-gray-900">${escapeHtml(title)}</h4>
+                        ${role || client || year ? `<p class="text-sm text-gray-600 mt-0.5">${[role, client, year].filter(Boolean).join(' · ')}</p>` : ''}
+                    </div>
+                </div>
+                ${problem ? `<p class="text-sm text-gray-700 mt-2"><strong>Problem:</strong> ${escapeHtml(problem)}</p>` : ''}
+                ${solution ? `<p class="text-sm text-gray-700 mt-1"><strong>Solution:</strong> ${escapeHtml(solution)}</p>` : ''}
+                ${impact ? `<p class="text-sm text-gray-700 mt-1"><strong>Impact:</strong> ${escapeHtml(impact)}</p>` : ''}
+                ${item.url ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener" class="text-primary text-sm mt-2 inline-block">View</a>` : ''}
+            </div>
+        `;
+    }).join('');
 }
 
 function showProfileSuccess(message) {
@@ -1022,69 +1342,185 @@ function showProfileSuccess(message) {
     setTimeout(() => el.classList.add('hidden'), 6000);
 }
 
+/** Open Change Password modal; validate and call authService.changePassword on submit. */
+function showChangePasswordModal() {
+    const container = window.modalService && window.modalService.modalContainer;
+    if (!container) return;
+    const closeIcon = typeof IconHelper !== 'undefined' && IconHelper ? IconHelper.render('x', { size: 24, weight: 'duotone' }) : '&times;';
+    const contentHTML = `
+        <div class="space-y-4">
+            <p id="change-pwd-error" class="text-red-600 text-sm hidden"></p>
+            <div class="form-group">
+                <label for="change-pwd-current" class="form-label">Current password</label>
+                <input type="password" id="change-pwd-current" class="form-input" autocomplete="current-password" placeholder="Enter current password">
+            </div>
+            <div class="form-group">
+                <label for="change-pwd-new" class="form-label">New password</label>
+                <input type="password" id="change-pwd-new" class="form-input" autocomplete="new-password" placeholder="Enter new password">
+            </div>
+            <div class="form-group">
+                <label for="change-pwd-confirm" class="form-label">Confirm new password</label>
+                <input type="password" id="change-pwd-confirm" class="form-input" autocomplete="new-password" placeholder="Confirm new password">
+            </div>
+        </div>
+    `;
+    const modal = document.createElement('div');
+    modal.className = 'modal-dialog';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Change Password</h3>
+                <button class="modal-close" aria-label="Close">${closeIcon}</button>
+            </div>
+            <div class="modal-body modal-body-custom">${contentHTML}</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary modal-btn-cancel">Cancel</button>
+                <button type="button" class="btn btn-primary" id="change-pwd-submit">Update password</button>
+            </div>
+        </div>
+    `;
+    container.innerHTML = '';
+    container.appendChild(modal);
+    container.style.display = 'flex';
+
+    const hideError = () => {
+        const errEl = modal.querySelector('#change-pwd-error');
+        if (errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; }
+    };
+    const showError = (msg) => {
+        const errEl = modal.querySelector('#change-pwd-error');
+        if (errEl) { errEl.textContent = msg; errEl.classList.remove('hidden'); }
+    };
+
+    const close = () => {
+        if (window.modalService && typeof window.modalService.close === 'function') window.modalService.close();
+    };
+
+    modal.querySelector('.modal-close').addEventListener('click', close);
+    modal.querySelector('.modal-btn-cancel').addEventListener('click', close);
+    container.addEventListener('click', (e) => { if (e.target === container) close(); });
+    const escapeHandler = (e) => { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', escapeHandler); } };
+    document.addEventListener('keydown', escapeHandler);
+
+    modal.querySelector('#change-pwd-submit').addEventListener('click', async () => {
+        hideError();
+        const current = (modal.querySelector('#change-pwd-current').value || '').trim();
+        const newPwd = (modal.querySelector('#change-pwd-new').value || '').trim();
+        const confirmPwd = (modal.querySelector('#change-pwd-confirm').value || '').trim();
+        if (!current) { showError('Please enter your current password.'); return; }
+        if (!newPwd) { showError('Please enter a new password.'); return; }
+        if (newPwd.length < 4) { showError('New password must be at least 4 characters.'); return; }
+        if (newPwd !== confirmPwd) { showError('New password and confirmation do not match.'); return; }
+        try {
+            await authService.changePassword(current, newPwd);
+            close();
+            showProfileSuccess('Your password was updated successfully.');
+        } catch (err) {
+            showError(err.message || 'Failed to update password. Please try again.');
+        }
+    });
+}
+
+/** Company view: set element to value or "Add X" link (no em-dash). */
+function setCompanyViewFieldOrAdd(elId, value, addLabel) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const hasValue = value != null && value !== '' && String(value).trim() !== '';
+    if (hasValue) {
+        el.textContent = value;
+    } else {
+        el.innerHTML = getProfileAddPromptHtml(addLabel, '#company-profile-card');
+    }
+}
+
 function setCompanyViewMode(profile) {
     const lookups = profileLookups || {};
     const roles = lookups.companyRoles || [];
-    const roleLabel = profile?.companyRole ? (roles.find(r => r.id === profile.companyRole)?.label || profile.companyRole) : '—';
+    const roleLabel = profile?.companyRole ? (roles.find(r => r.id === profile.companyRole)?.label || profile.companyRole) : '';
     const subTypes = lookups.companyRoleSubTypes?.[profile?.companyRole] || [];
-    const subLabel = profile?.companySubType ? (subTypes.find(s => s.id === profile.companySubType)?.label || profile.companySubType) : '—';
+    const subLabel = profile?.companySubType ? (subTypes.find(s => s.id === profile.companySubType)?.label || profile.companySubType) : '';
     const paymentModes = lookups.paymentModes || [];
     const preferredLabels = (Array.isArray(profile?.preferredPaymentModes) ? profile.preferredPaymentModes : [])
         .map(id => paymentModes.find(p => p.id === id || p.label === id)?.label || id);
-    const preferredText = preferredLabels.length ? preferredLabels.join(', ') : '—';
+    const preferredText = preferredLabels.length ? preferredLabels.join(', ') : '';
 
-    document.getElementById('view-company-name').textContent = profile?.name || '—';
-    document.getElementById('view-company-headline').textContent = profile?.headline || '—';
-    document.getElementById('view-company-role').textContent = roleLabel;
-    document.getElementById('view-company-subtype').textContent = subLabel;
-    document.getElementById('view-cr-number').textContent = profile?.crNumber || profile?.registrationNumber || '—';
-    document.getElementById('view-company-website').textContent = profile?.website || '—';
-    document.getElementById('view-company-phone').textContent = profile?.phone || '—';
-    document.getElementById('view-company-location').textContent = profile?.location || profile?.address || '—';
-    document.getElementById('view-company-description').textContent = profile?.description || '—';
+    // Basic Profile section (shared) – for company show company name/headline
+    setCompanyViewFieldOrAdd('view-full-name', profile?.name, 'company name');
+    setCompanyViewFieldOrAdd('view-prof-headline', profile?.headline, 'headline');
+    setCompanyViewFieldOrAdd('view-prof-location', profile?.location || profile?.address, 'location');
+    setCompanyViewFieldOrAdd('view-prof-bio', profile?.description, 'description');
+
+    setCompanyViewFieldOrAdd('view-company-name', profile?.name, 'company name');
+    setCompanyViewFieldOrAdd('view-company-headline', profile?.headline, 'headline');
+    setCompanyViewFieldOrAdd('view-company-role', roleLabel, 'company role');
+    setCompanyViewFieldOrAdd('view-company-subtype', subLabel, 'sub-type');
+    setCompanyViewFieldOrAdd('view-cr-number', profile?.crNumber || profile?.registrationNumber, 'CR / registration number');
+    setCompanyViewFieldOrAdd('view-company-website', profile?.website, 'website');
+    setCompanyViewFieldOrAdd('view-company-phone', profile?.phone, 'phone');
+    setCompanyViewFieldOrAdd('view-company-location', profile?.location || profile?.address, 'address');
+    setCompanyViewFieldOrAdd('view-company-description', profile?.description, 'description');
     const socialEl = document.getElementById('view-company-socialMedia');
-    if (socialEl) socialEl.innerHTML = getSocialIconsHtml(profile?.socialMediaLinks);
-    document.getElementById('view-company-sectors').textContent = formatArray(profile?.sectors);
-    document.getElementById('view-company-classifications').textContent = formatArray(profile?.classifications);
-    document.getElementById('view-company-employeeCount').textContent = profile?.employeeCount || '—';
-    document.getElementById('view-company-yearEstablished').textContent = profile?.yearEstablished != null && profile?.yearEstablished !== '' ? profile.yearEstablished : '—';
-    document.getElementById('view-company-certifications').textContent = formatArray(profile?.certifications);
-    document.getElementById('view-company-services').textContent = formatArray(profile?.services);
-    document.getElementById('view-company-interests').textContent = formatArray(profile?.interests);
-    document.getElementById('view-financial-capacity').textContent =
-        profile?.financialCapacity != null && profile?.financialCapacity !== ''
-            ? Number(profile.financialCapacity).toLocaleString() + ' SAR' : '—';
-    document.getElementById('view-company-paymentModes').textContent = preferredText;
+    if (socialEl) {
+        const socialHtml = getSocialIconsHtml(profile?.socialMediaLinks);
+        socialEl.innerHTML = socialHtml || getProfileAddPromptHtml('social media', '#company-profile-card');
+    }
+    const sectorsVal = formatArray(profile?.sectors);
+    setCompanyViewFieldOrAdd('view-company-sectors', sectorsVal, 'sectors');
+    setCompanyViewFieldOrAdd('view-company-classifications', formatArray(profile?.classifications), 'classifications');
+    setCompanyViewFieldOrAdd('view-company-employeeCount', profile?.employeeCount, 'employee count');
+    const yearEst = profile?.yearEstablished != null && profile?.yearEstablished !== '' ? profile.yearEstablished : '';
+    setCompanyViewFieldOrAdd('view-company-yearEstablished', yearEst, 'year established');
+    setCompanyViewFieldOrAdd('view-company-certifications', formatArray(profile?.certifications), 'certifications');
+    setCompanyViewFieldOrAdd('view-company-services', formatArray(profile?.services), 'services');
+    setCompanyViewFieldOrAdd('view-company-interests', formatArray(profile?.interests), 'interests');
+    const finCap = profile?.financialCapacity != null && profile?.financialCapacity !== '' ? Number(profile.financialCapacity).toLocaleString() + ' SAR' : '';
+    setCompanyViewFieldOrAdd('view-financial-capacity', finCap, 'financial capacity');
+    setCompanyViewFieldOrAdd('view-company-paymentModes', preferredText, 'payment modes');
     const prefModelsEl = document.getElementById('view-company-preferredModels');
-    if (prefModelsEl) prefModelsEl.textContent = getPreferredModelsLabel(profile?.preferredCollaborationModels);
-    const primaryDomainEl = document.getElementById('view-company-primaryDomain');
-    if (primaryDomainEl) primaryDomainEl.textContent = profile?.primaryDomain || '—';
+    if (prefModelsEl) {
+        const pmLabel = getPreferredModelsLabel(profile?.preferredCollaborationModels);
+        prefModelsEl.textContent = pmLabel || '';
+        if (!pmLabel) prefModelsEl.innerHTML = getProfileAddPromptHtml('collaboration models', '#company-profile-card');
+    }
+    setCompanyViewFieldOrAdd('view-company-primaryDomain', profile?.primaryDomain, 'primary domain');
     const expertiseEl = document.getElementById('view-company-expertiseAreas');
     if (expertiseEl) {
         const areas = profile?.expertiseAreas || [];
-        expertiseEl.textContent = areas.length === 0 ? '—' : areas.map(ea => `${ea.domain || '?'} (${ea.role || 'professional'})`).join(', ');
+        if (areas.length === 0) {
+            expertiseEl.innerHTML = getProfileAddPromptHtml('expertise areas', '#company-profile-card');
+        } else {
+            expertiseEl.textContent = areas.map(ea => `${ea.domain || '?'} (${ea.role || 'professional'})`).join(', ');
+        }
     }
     const caseEl = document.getElementById('view-company-caseStudies');
     if (caseEl) {
         const cases = profile?.caseStudies || [];
-        caseEl.innerHTML = cases.length === 0 ? '—' : cases.map(c => `
-            <div class="border border-gray-200 rounded p-2">
-                <div class="font-medium">${escapeHtml(c.title || 'Untitled')}</div>
-                ${c.description ? `<div class="text-sm text-gray-600">${escapeHtml(c.description)}</div>` : ''}
-                ${c.url ? `<a href="${escapeHtml(c.url)}" target="_blank" rel="noopener" class="text-primary text-sm">View</a>` : ''}
-            </div>
-        `).join('');
+        if (cases.length === 0) {
+            caseEl.innerHTML = getEmptySectionHtml('No case studies yet', 'Add case study', 'company');
+        } else {
+            caseEl.innerHTML = cases.map(c => `
+                <div class="border border-gray-200 rounded p-2">
+                    <div class="font-medium">${escapeHtml(c.title || 'Untitled')}</div>
+                    ${c.description ? `<div class="text-sm text-gray-600">${escapeHtml(c.description)}</div>` : ''}
+                    ${c.url ? `<a href="${escapeHtml(c.url)}" target="_blank" rel="noopener" class="text-primary text-sm">View</a>` : ''}
+                </div>
+            `).join('');
+        }
     }
     const refEl = document.getElementById('view-company-references');
     if (refEl) {
         const refs = profile?.references || [];
-        refEl.innerHTML = refs.length === 0 ? '—' : refs.map(r => `
-            <div class="border border-gray-200 rounded p-2">
-                <div class="font-medium">${escapeHtml(r.name || '—')}${r.company ? ` · ${escapeHtml(r.company)}` : ''}${(r.relationship || r.role) ? ` · ${escapeHtml(r.relationship || r.role)}` : ''}</div>
-                ${r.contact ? `<div class="text-sm text-gray-600">${escapeHtml(r.contact)}</div>` : ''}
-                ${(r.testimonial || r.text) ? `<div class="text-sm mt-1">${escapeHtml(r.testimonial || r.text)}</div>` : ''}
-            </div>
-        `).join('');
+        if (refs.length === 0) {
+            refEl.innerHTML = getEmptySectionHtml('No references yet', 'Add reference', 'company');
+        } else {
+            refEl.innerHTML = refs.map(r => `
+                <div class="border border-gray-200 rounded p-2">
+                    <div class="font-medium">${escapeHtml(r.name || 'Reference')}${r.company ? ` · ${escapeHtml(r.company)}` : ''}${(r.relationship || r.role) ? ` · ${escapeHtml(r.relationship || r.role)}` : ''}</div>
+                    ${r.contact ? `<div class="text-sm text-gray-600">${escapeHtml(r.contact)}</div>` : ''}
+                    ${(r.testimonial || r.text) ? `<div class="text-sm mt-1">${escapeHtml(r.testimonial || r.text)}</div>` : ''}
+                </div>
+            `).join('');
+        }
     }
     const certVettingEl = document.getElementById('view-company-certifications-vetting');
     if (certVettingEl) {
@@ -1094,8 +1530,11 @@ function setCompanyViewMode(profile) {
     const vcEl = document.getElementById('view-company-vettingCaseStudy');
     if (vcEl) {
         const vc = profile?.vettingCaseStudy;
-        if (!vc || (!vc.title && !vc.description && !vc.url)) vcEl.textContent = '—';
-        else vcEl.innerHTML = (vc.title ? escapeHtml(vc.title) : '') + (vc.url ? ` · <a href="${escapeHtml(vc.url)}" target="_blank" rel="noopener">Link</a>` : '') + (vc.description ? ` · ${escapeHtml(vc.description)}` : '');
+        if (!vc || (!vc.title && !vc.description && !vc.url)) {
+            vcEl.innerHTML = getProfileAddPromptHtml('vetting case study', '#company-profile-card');
+        } else {
+            vcEl.innerHTML = (vc.title ? escapeHtml(vc.title) : '') + (vc.url ? ` · <a href="${escapeHtml(vc.url)}" target="_blank" rel="noopener">Link</a>` : '') + (vc.description ? ` · ${escapeHtml(vc.description)}` : '');
+        }
     }
     const intEl = document.getElementById('view-company-interview');
     if (intEl) {
@@ -1106,43 +1545,70 @@ function setCompanyViewMode(profile) {
     }
 }
 
+function setViewFieldOrAdd(elId, value, addLabel, sectionForButton) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const hasValue = value != null && value !== '' && String(value).trim() !== '';
+    if (hasValue) {
+        el.textContent = value;
+    } else {
+        el.innerHTML = getProfileAddPromptHtml(addLabel, sectionForButton ? '#profile-section-' + sectionForButton : '#profile-section-professional', sectionForButton);
+    }
+}
+
 function setProfessionalViewMode(profile) {
     const lookups = profileLookups || {};
     const workModes = lookups.workModes || [];
-    const workModeLabel = profile?.preferredWorkMode ? (workModes.includes(profile.preferredWorkMode) ? profile.preferredWorkMode : profile.preferredWorkMode) : '—';
+    const workModeLabel = profile?.preferredWorkMode ? (workModes.includes(profile.preferredWorkMode) ? profile.preferredWorkMode : profile.preferredWorkMode) : '';
     const paymentModes = lookups.paymentModes || [];
     const preferredLabels = (Array.isArray(profile?.preferredPaymentModes) ? profile.preferredPaymentModes : [])
         .map(id => paymentModes.find(p => p.id === id || p.label === id)?.label || id);
-    const preferredText = preferredLabels.length ? preferredLabels.join(', ') : '—';
+    const preferredText = preferredLabels.length ? preferredLabels.join(', ') : '';
     const exp = profile?.yearsExperience ?? profile?.experience;
 
-    document.getElementById('view-full-name').textContent = profile?.name || '—';
-    document.getElementById('view-prof-headline').textContent = profile?.headline || '—';
-    document.getElementById('view-prof-title').textContent = profile?.title || '—';
-    document.getElementById('view-prof-phone').textContent = profile?.phone || '—';
-    document.getElementById('view-prof-location').textContent = profile?.location || '—';
+    setViewFieldOrAdd('view-full-name', profile?.name, 'Name', 'basic');
+    const photoPlaceholder = document.getElementById('profile-photo-placeholder');
+    if (photoPlaceholder) {
+        if (profile?.photoUrl) {
+            photoPlaceholder.innerHTML = `<img src="${escapeHtml(profile.photoUrl)}" alt="Profile" class="w-full h-full rounded-full object-cover">`;
+            photoPlaceholder.classList.remove('bg-primary/10', 'text-primary', 'flex', 'items-center', 'justify-center', 'text-2xl', 'font-bold');
+        } else {
+            const name = profile?.name || '';
+            const initials = name.split(/\s+/).map(s => s[0]).slice(0, 2).join('').toUpperCase() || '?';
+            photoPlaceholder.textContent = initials;
+            photoPlaceholder.className = 'profile-photo-placeholder w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary flex-shrink-0';
+        }
+    }
+    setViewFieldOrAdd('view-prof-headline', profile?.headline, 'Headline', 'basic');
+    setViewFieldOrAdd('view-prof-title', profile?.title, 'Title', 'basic');
+    setViewFieldOrAdd('view-prof-phone', profile?.phone, 'Phone', 'basic');
+    setViewFieldOrAdd('view-prof-location', profile?.location, 'Location', 'basic');
 
     const expLevelEl = document.getElementById('view-prof-experienceLevel');
     if (expLevelEl) {
         const years = Number(exp) || 0;
-        let level = '—';
+        let level = '';
         if (years >= 15) level = 'Expert (' + years + ' years)';
         else if (years >= 8) level = 'Senior (' + years + ' years)';
         else if (years >= 3) level = 'Mid-Level (' + years + ' years)';
         else if (years > 0) level = 'Junior (' + years + ' years)';
-        expLevelEl.textContent = level;
+        if (level) expLevelEl.textContent = level;
+        else expLevelEl.innerHTML = getProfileAddPromptHtml('years of experience', '#profile-section-professional', 'professional');
     }
 
-    document.getElementById('view-prof-bio').textContent = profile?.bio || '—';
+    setViewFieldOrAdd('view-prof-bio', profile?.bio, 'Bio', 'basic');
     const profSocialEl = document.getElementById('view-prof-socialMedia');
-    if (profSocialEl) profSocialEl.innerHTML = getSocialIconsHtml(profile?.socialMediaLinks);
-    document.getElementById('view-specializations').textContent = formatArray(profile?.specializations);
+    if (profSocialEl) {
+        const socialHtml = getSocialIconsHtml(profile?.socialMediaLinks);
+        profSocialEl.innerHTML = socialHtml || getProfileAddPromptHtml('social media', '#profile-section-basic', 'basic');
+    }
+    setViewFieldOrAdd('view-specializations', formatArray(profile?.specializations), 'specializations', 'professional');
 
     const skillsViewEl = document.getElementById('view-skills');
     if (skillsViewEl) {
         const skills = Array.isArray(profile?.skills) ? profile.skills : [];
         if (skills.length === 0) {
-            skillsViewEl.innerHTML = '—';
+            skillsViewEl.innerHTML = getEmptySectionHtml('No skills added yet', 'Add Skills', 'skills');
         } else {
             skillsViewEl.innerHTML = skills.map(s =>
                 `<span class="skill-tag">${escapeHtml(s)}</span>`
@@ -1150,21 +1616,31 @@ function setProfessionalViewMode(profile) {
         }
     }
 
-    document.getElementById('view-prof-sectors').textContent = formatArray(profile?.sectors || profile?.industry);
-    document.getElementById('view-prof-education').textContent = profile?.education || '—';
-    const certsEl = document.getElementById('view-certifications');
-    if (certsEl) {
-        const certs = normalizeCertifications(profile?.certifications);
-        if (certs.length === 0) certsEl.textContent = '—';
-        else certsEl.innerHTML = certs.map(c => {
+    setViewFieldOrAdd('view-prof-sectors', formatArray(profile?.sectors || profile?.industry), 'sectors', 'professional');
+    setViewFieldOrAdd('view-prof-education', profile?.education, 'education', 'professional');
+    const certs = normalizeCertifications(profile?.certifications);
+    const certsHtml = certs.length === 0
+        ? getEmptySectionHtml('No certifications added', 'Add Certification', 'certifications')
+        : certs.map(c => {
             const typeLabel = c.type ? ` (${c.type})` : '';
-            const link = c.url ? `<a href="${escapeHtml(c.url)}" target="_blank" rel="noopener">${escapeHtml(c.name || 'Link')}</a>` : escapeHtml(c.name || '—');
-            return `<span class="inline-block mr-2 mb-1">${link}${typeLabel}</span>`;
+            const link = c.url ? `<a href="${escapeHtml(c.url)}" target="_blank" rel="noopener">${escapeHtml(c.name || 'Link')}</a>` : escapeHtml(c.name || 'Certification');
+            return `<span class="cert-tag">${link}${typeLabel}</span>`;
         }).join('');
+    const certsEl = document.getElementById('view-certifications');
+    if (certsEl) certsEl.innerHTML = certsHtml;
+    const experienceCertsEl = document.getElementById('view-experience-certifications');
+    if (experienceCertsEl) experienceCertsEl.innerHTML = certsHtml;
+    setViewFieldOrAdd('view-years-experience', exp != null && exp !== '' ? String(exp) : '', 'years of experience', 'professional');
+    setViewFieldOrAdd('view-prof-services', formatArray(profile?.services), 'services', 'professional');
+    const interestsViewEl = document.getElementById('view-prof-interests');
+    if (interestsViewEl) {
+        const interests = Array.isArray(profile?.interests) ? profile.interests : (profile?.interests ? [profile.interests] : []);
+        if (interests.length > 0) {
+            interestsViewEl.innerHTML = interests.map(i => `<span class="interest-tag">${escapeHtml(i)}</span>`).join(' ');
+        } else {
+            interestsViewEl.innerHTML = getProfileAddPromptHtml('interests', '#profile-section-professional', 'professional');
+        }
     }
-    document.getElementById('view-years-experience').textContent = exp != null && exp !== '' ? exp : '—';
-    document.getElementById('view-prof-services').textContent = formatArray(profile?.services);
-    document.getElementById('view-prof-interests').textContent = formatArray(profile?.interests);
 
     const availEl = document.getElementById('view-prof-availability');
     if (availEl) {
@@ -1176,72 +1652,117 @@ function setProfessionalViewMode(profile) {
         else if (lower.includes('unavailable')) badgeClass = 'unavailable';
         if (avail && badgeClass) {
             availEl.innerHTML = `<span class="availability-badge ${badgeClass}">${escapeHtml(avail)}</span>`;
+        } else if (avail) {
+            availEl.textContent = avail;
+        } else if (workModeLabel) {
+            availEl.textContent = workModeLabel;
         } else {
-            availEl.textContent = avail || '—';
+            availEl.innerHTML = getProfileAddPromptHtml('availability', '#profile-section-professional', 'professional');
         }
     }
 
-    document.getElementById('view-prof-workMode').textContent = workModeLabel;
-    document.getElementById('view-prof-paymentModes').textContent = preferredText;
+    setViewFieldOrAdd('view-prof-workMode', workModeLabel, 'preferred work mode', 'professional');
+    setViewFieldOrAdd('view-prof-paymentModes', preferredText, 'payment modes', 'professional');
     const rate = profile?.hourlyRate;
     const currency = profile?.currency || 'SAR';
-    document.getElementById('view-prof-hourlyRate').textContent = rate != null && rate !== '' ? rate + ' ' + currency : '—';
-    document.getElementById('view-prof-languages').textContent = formatArray(profile?.languages);
-    const prefModelsEl = document.getElementById('view-prof-preferredModels');
-    if (prefModelsEl) prefModelsEl.textContent = getPreferredModelsLabel(profile?.preferredCollaborationModels);
-    const primaryDomainEl = document.getElementById('view-prof-primaryDomain');
-    if (primaryDomainEl) primaryDomainEl.textContent = profile?.primaryDomain || '—';
+    setViewFieldOrAdd('view-prof-hourlyRate', rate != null && rate !== '' ? rate + ' ' + currency : '', 'hourly rate');
+    const languagesViewEl = document.getElementById('view-prof-languages');
+    if (languagesViewEl) {
+        const langs = Array.isArray(profile?.languages) ? profile.languages : (profile?.languages ? [profile.languages] : []);
+        if (langs.length > 0) {
+            languagesViewEl.innerHTML = langs.map(l => `<span class="language-tag">${escapeHtml(l)}</span>`).join(' ');
+        } else {
+            languagesViewEl.innerHTML = getProfileAddPromptHtml('Languages', '#profile-section-basic', 'basic');
+        }
+    }
+    const prefModelsLabel = getPreferredModelsLabel(profile?.preferredCollaborationModels);
+    setViewFieldOrAdd('view-prof-preferredModels', prefModelsLabel, 'collaboration models', 'professional');
+    setViewFieldOrAdd('view-prof-primaryDomain', profile?.primaryDomain, 'primary domain', 'professional');
     const expertiseEl = document.getElementById('view-prof-expertiseAreas');
     if (expertiseEl) {
         const areas = profile?.expertiseAreas || [];
-        expertiseEl.textContent = areas.length === 0 ? '—' : areas.map(ea => `${ea.domain || '?'} (${ea.role || 'professional'})`).join(', ');
+        if (areas.length === 0) {
+            expertiseEl.innerHTML = getProfileAddPromptHtml('expertise areas', '#profile-section-professional', 'professional');
+        } else {
+            expertiseEl.textContent = areas.map(ea => `${ea.domain || '?'} (${ea.role || 'professional'})`).join(', ');
+        }
     }
     const profFieldsEl = document.getElementById('view-prof-professionalFields');
     if (profFieldsEl) {
         const pfs = profile?.professionalFields || [];
-        if (pfs.length === 0) profFieldsEl.textContent = '—';
-        else profFieldsEl.innerHTML = pfs.map(pf => {
+        if (pfs.length === 0) {
+            profFieldsEl.innerHTML = getProfileAddPromptHtml('professional fields', '#profile-section-professional', 'professional');
+        } else {
+            profFieldsEl.innerHTML = pfs.map(pf => {
             const primary = pf.isPrimary ? ' (Primary)' : '';
             const level = pf.level === 'consultant' ? 'Consultant' : 'Professional';
-            const exp = pf.experienceLevel ? ` · ${escapeHtml(pf.experienceLevel)}` : '';
-            return `<span class="inline-block mr-2 mb-1">${escapeHtml(pf.label || pf.fieldId)}${primary} — ${level}${exp}</span>`;
+            const expLevel = pf.experienceLevel ? ` · ${escapeHtml(pf.experienceLevel)}` : '';
+            return `<span class="inline-block mr-2 mb-1">${escapeHtml(pf.label || pf.fieldId)}${primary} &mdash; ${level}${expLevel}</span>`;
         }).join('');
+        }
+    }
+    const experienceEntriesEl = document.getElementById('view-experience-entries');
+    if (experienceEntriesEl) {
+        const entries = profile?.experienceEntries || [];
+        if (entries.length === 0) {
+            experienceEntriesEl.innerHTML = getEmptySectionHtml('No experience entries yet', 'Add Experience', 'experience');
+        } else {
+            experienceEntriesEl.innerHTML = entries.map(e => {
+                const role = escapeHtml(e.role || 'Role');
+                const company = escapeHtml(e.company || 'Company');
+                const start = escapeHtml(e.startDate || '');
+                const end = (e.endDate === 'Present' || e.endDate === 'present' || !e.endDate) ? 'Present' : escapeHtml(e.endDate);
+                const period = start && end ? `${start} – ${end}` : (start || end || '');
+                return `<div class="border border-gray-200 rounded p-3 mb-2"><div class="font-medium">${role}</div><div class="text-sm text-gray-600">${company}</div>${period ? `<div class="text-sm text-gray-500">${period}</div>` : ''}</div>`;
+            }).join('');
+        }
     }
     const caseEl = document.getElementById('view-prof-caseStudies');
     if (caseEl) {
         const cases = profile?.caseStudies || [];
-        caseEl.innerHTML = cases.length === 0 ? '—' : cases.map(c => `
-            <div class="border border-gray-200 rounded p-2">
-                <div class="font-medium">${escapeHtml(c.title || 'Untitled')}</div>
-                ${c.description ? `<div class="text-sm text-gray-600">${escapeHtml(c.description)}</div>` : ''}
-                ${c.url ? `<a href="${escapeHtml(c.url)}" target="_blank" rel="noopener" class="text-primary text-sm">View</a>` : ''}
-            </div>
-        `).join('');
+        if (cases.length === 0) {
+            caseEl.innerHTML = getEmptySectionHtml('No case studies yet', 'Add Portfolio', 'portfolio');
+        } else {
+            caseEl.innerHTML = cases.map(c => `
+                <div class="border border-gray-200 rounded p-2">
+                    <div class="font-medium">${escapeHtml(c.title || 'Untitled')}</div>
+                    ${c.description ? `<div class="text-sm text-gray-600">${escapeHtml(c.description)}</div>` : ''}
+                    ${c.url ? `<a href="${escapeHtml(c.url)}" target="_blank" rel="noopener" class="text-primary text-sm">View</a>` : ''}
+                </div>
+            `).join('');
+        }
     }
     const portfolioEl = document.getElementById('view-prof-portfolio');
     if (portfolioEl) {
         const portfolio = profile?.portfolio || [];
-        if (portfolio.length === 0) portfolioEl.innerHTML = '—';
-        else portfolioEl.innerHTML = portfolio.map(p => `
-            <div class="border border-gray-200 rounded p-3">
-                <div class="font-medium">${escapeHtml(p.projectTitle || '—')}</div>
-                ${p.role ? `<div class="text-sm text-gray-600">Role: ${escapeHtml(p.role)}</div>` : ''}
-                ${p.description ? `<div class="text-sm mt-1">${escapeHtml(p.description)}</div>` : ''}
-                ${p.results ? `<div class="text-sm mt-1"><strong>Results:</strong> ${escapeHtml(p.results)}</div>` : ''}
-                ${p.mediaAttachments?.length ? `<a href="${escapeHtml(p.mediaAttachments[0].url)}" target="_blank" rel="noopener" class="text-sm text-primary">Link</a>` : ''}
-            </div>
-        `).join('');
+        if (portfolio.length === 0) {
+            portfolioEl.innerHTML = getEmptySectionHtml('No projects or case studies yet', 'Add Portfolio', 'portfolio');
+        } else {
+            portfolioEl.innerHTML = portfolio.map(p => `
+                <div class="border border-gray-200 rounded p-3">
+                    <div class="font-medium">${escapeHtml(p.projectTitle || 'Project')}</div>
+                    ${p.role ? `<div class="text-sm text-gray-600">Role: ${escapeHtml(p.role)}</div>` : ''}
+                    ${p.description ? `<div class="text-sm mt-1">${escapeHtml(p.description)}</div>` : ''}
+                    ${p.results ? `<div class="text-sm mt-1"><strong>Results:</strong> ${escapeHtml(p.results)}</div>` : ''}
+                    ${p.mediaAttachments?.length ? `<a href="${escapeHtml(p.mediaAttachments[0].url)}" target="_blank" rel="noopener" class="text-sm text-primary">Link</a>` : ''}
+                </div>
+            `).join('');
+        }
     }
     const refEl = document.getElementById('view-prof-references');
     if (refEl) {
         const refs = profile?.references || [];
-        refEl.innerHTML = refs.length === 0 ? '—' : refs.map(r => `
-            <div class="border border-gray-200 rounded p-2">
-                <div class="font-medium">${escapeHtml(r.name || '—')}${r.company ? ` · ${escapeHtml(r.company)}` : ''}${(r.relationship || r.role) ? ` · ${escapeHtml(r.relationship || r.role)}` : ''}</div>
-                ${r.contact ? `<div class="text-sm text-gray-600">${escapeHtml(r.contact)}</div>` : ''}
-                ${(r.testimonial || r.text) ? `<div class="text-sm mt-1">${escapeHtml(r.testimonial || r.text)}</div>` : ''}
-            </div>
-        `).join('');
+        if (refs.length === 0) {
+            refEl.innerHTML = getEmptySectionHtml('No references yet', 'Add Reference', 'references');
+        } else {
+            refEl.innerHTML = refs.map(r => `
+                <div class="border border-gray-200 rounded p-2">
+                    <div class="font-medium">${escapeHtml(r.name || 'Reference')}${r.company ? ` · ${escapeHtml(r.company)}` : ''}${(r.relationship || r.role) ? ` · ${escapeHtml(r.relationship || r.role)}` : ''}</div>
+                    ${r.contact ? `<div class="text-sm text-gray-600">${escapeHtml(r.contact)}</div>` : ''}
+                    ${(r.testimonial || r.text) ? `<div class="text-sm mt-1">${escapeHtml(r.testimonial || r.text)}</div>` : ''}
+                </div>
+            `).join('');
+        }
     }
     const certVettingEl = document.getElementById('view-prof-certifications-vetting');
     if (certVettingEl) {
@@ -1251,8 +1772,9 @@ function setProfessionalViewMode(profile) {
     const vcEl = document.getElementById('view-prof-vettingCaseStudy');
     if (vcEl) {
         const vc = profile?.vettingCaseStudy;
-        if (!vc || (!vc.title && !vc.projectTitle && !vc.description && !vc.url && !vc.role && !vc.problem && !vc.solution && !vc.impact)) vcEl.textContent = '—';
-        else {
+        if (!vc || (!vc.title && !vc.projectTitle && !vc.description && !vc.url && !vc.role && !vc.problem && !vc.solution && !vc.impact)) {
+            vcEl.innerHTML = getProfileAddPromptHtml('vetting case study', '#profile-section-professional', 'professional');
+        } else {
             const title = vc.projectTitle || vc.title;
             const parts = [];
             if (title) parts.push(escapeHtml(title));
@@ -1417,22 +1939,196 @@ async function collectProfileClarificationDocuments() {
     return result;
 }
 
+/** Returns HTML for an "Add X" prompt. If sectionForButton is set, returns a button that opens edit; else a link. No em-dash. */
+function getProfileAddPromptHtml(label, editHash, sectionForButton) {
+    const hash = editHash || '#profile-section-professional';
+    const text = 'Add ' + escapeHtml(label);
+    if (sectionForButton) {
+        return `<button type="button" class="profile-add-prompt profile-edit-section-btn text-gray-500 hover:text-primary text-sm underline cursor-pointer bg-transparent border-0 p-0 font-inherit" data-section="${escapeHtml(sectionForButton)}">${text}</button>`;
+    }
+    return `<a href="${hash}" class="profile-add-prompt text-gray-500 hover:text-primary text-sm">${text}</a>`;
+}
+
+function populateProfilePreview(user) {
+    if (!document.getElementById('profile-preview-card')) return;
+    const profile = user.profile || {};
+    const isCompany = profile.type === 'company';
+    const editHash = isCompany ? '#company-profile-card' : '#profile-section-professional';
+
+    const setEl = (id, textOrHtml, isHtml = false) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (isHtml) el.innerHTML = textOrHtml || '—';
+        else el.textContent = textOrHtml || '—';
+    };
+
+    const setElOrAdd = (id, value, addLabel) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (value != null && value !== '' && value !== '—') {
+            el.innerHTML = typeof value === 'string' ? escapeHtml(value) : value;
+        } else {
+            el.innerHTML = getProfileAddPromptHtml(addLabel, editHash);
+        }
+    };
+
+    const certsElPreview = document.getElementById('my-profile-preview-certifications');
+    if (certsElPreview) {
+        const certs = profile.certifications;
+        const certList = Array.isArray(certs) ? certs : (certs ? [certs] : []);
+        if (certList.length > 0) {
+            certsElPreview.innerHTML = certList.map(c => {
+                const name = typeof c === 'object' && c && (c.name || c.label) ? (c.name || c.label) : String(c);
+                return `<span class="cert-tag">${escapeHtml(name)}</span>`;
+            }).join(' ');
+        } else {
+            certsElPreview.innerHTML = getProfileAddPromptHtml('certifications', editHash);
+        }
+    }
+    const exp = profile.yearsExperience ?? profile.experience;
+    setElOrAdd('my-profile-preview-experience', (exp != null && exp !== '') ? `${exp} years` : '', 'years of experience');
+    setElOrAdd('my-profile-preview-education', profile.education || '', 'education');
+    setElOrAdd('my-profile-preview-about', profile.bio || profile.description || '', 'about');
+
+    const skillsEl = document.getElementById('my-profile-preview-skills');
+    if (skillsEl) {
+        const skills = Array.isArray(profile.skills) ? profile.skills : (profile.skills ? [profile.skills] : []);
+        if (skills.length) {
+            skillsEl.innerHTML = skills.map((s, i) => `<span class="skill-tag${i % 2 === 1 ? ' skill-tag-alt' : ''}">${escapeHtml(s)}</span>`).join(' ');
+        } else {
+            skillsEl.innerHTML = getProfileAddPromptHtml('skills', editHash);
+        }
+    }
+
+    const servicesEl = document.getElementById('my-profile-preview-services');
+    if (servicesEl) {
+        const services = Array.isArray(profile.services) ? profile.services : (profile.services ? [profile.services] : []);
+        if (services.length) {
+            servicesEl.innerHTML = services.map(s => `<div class="service-item">${escapeHtml(s)}</div>`).join('');
+        } else {
+            servicesEl.innerHTML = getProfileAddPromptHtml('services', editHash);
+        }
+    }
+
+    setEl('my-profile-preview-contact-email', user.email || '—');
+    const phoneWrap = document.getElementById('my-profile-preview-phone-wrap');
+    const phoneEl = document.getElementById('my-profile-preview-phone');
+    if (phoneWrap && phoneEl) {
+        if (profile.phone) {
+            phoneWrap.style.display = 'block';
+            phoneEl.textContent = profile.phone;
+        } else phoneWrap.style.display = 'none';
+    }
+    const websiteWrap = document.getElementById('my-profile-preview-website-wrap');
+    const websiteEl = document.getElementById('my-profile-preview-website');
+    if (websiteWrap && websiteEl) {
+        if (profile.website) {
+            websiteWrap.style.display = 'block';
+            websiteEl.href = profile.website;
+            websiteEl.textContent = profile.website.replace(/^https?:\/\//, '');
+        } else websiteWrap.style.display = 'none';
+    }
+
+    const socialCard = document.getElementById('my-profile-preview-social-card');
+    const socialEl = document.getElementById('my-profile-preview-social');
+    if (socialCard && socialEl) {
+        const sm = profile.socialMediaLinks || {};
+        const hasSocial = sm.linkedin || sm.twitter || sm.facebook || sm.instagram;
+        if (hasSocial) {
+            socialCard.style.display = 'block';
+            socialEl.innerHTML = getSocialIconsHtml(sm);
+        } else socialCard.style.display = 'none';
+    }
+
+    const availCard = document.getElementById('my-profile-preview-availability-card');
+    const availEl = document.getElementById('my-profile-preview-availability');
+    if (availCard && availEl) {
+        if (!isCompany) {
+            availCard.style.display = 'block';
+            const parts = [];
+            if (profile.availability) parts.push(profile.availability);
+            if (profile.preferredWorkMode) parts.push(`Preferred: ${profile.preferredWorkMode}`);
+            if (profile.hourlyRate) parts.push(`Hourly Rate ${profile.hourlyRate} ${profile.currency || 'SAR'}/hr`);
+            availEl.innerHTML = parts.length ? parts.join('<br>') : getProfileAddPromptHtml('availability', editHash);
+        } else availCard.style.display = 'none';
+    }
+
+    const interestsCard = document.getElementById('my-profile-preview-interests-card');
+    const interestsEl = document.getElementById('my-profile-preview-interests');
+    if (interestsCard && interestsEl) {
+        const interests = Array.isArray(profile.interests) ? profile.interests : (profile.interests ? [profile.interests] : []);
+        if (interests.length) {
+            interestsCard.style.display = 'block';
+            interestsEl.innerHTML = interests.map(i => `<span class="interest-tag">${escapeHtml(i)}</span>`).join(' ');
+        } else {
+            interestsCard.style.display = 'block';
+            interestsEl.innerHTML = getProfileAddPromptHtml('interests', editHash);
+        }
+    }
+
+    const langCard = document.getElementById('my-profile-preview-languages-card');
+    const langEl = document.getElementById('my-profile-preview-languages');
+    if (langCard && langEl) {
+        const langs = Array.isArray(profile.languages) ? profile.languages : (profile.languages ? [profile.languages] : []);
+        if (langs.length) {
+            langCard.style.display = 'block';
+            langEl.innerHTML = langs.map(l => `<span class="language-tag">${escapeHtml(l)}</span>`).join(' ');
+        } else {
+            langCard.style.display = 'block';
+            langEl.innerHTML = getProfileAddPromptHtml('languages', editHash);
+        }
+    }
+}
+
+function getRoleDisplayLabel(role) {
+    if (!role) return '';
+    const r = String(role).toLowerCase();
+    if (r === 'consultant') return 'Consultant';
+    if (r === 'professional') return 'Professional';
+    if (r === 'company_owner') return 'Company Owner';
+    if (r === 'company_admin') return 'Company Admin';
+    if (r === 'company_member') return 'Company Member';
+    if (r === 'admin') return 'Admin';
+    if (r === 'moderator') return 'Moderator';
+    if (r === 'auditor') return 'Auditor';
+    return String(role);
+}
+
 async function loadProfile(user) {
-    // Basic info
-    document.getElementById('profile-email').value = user.email || '';
-    document.getElementById('profile-role').value = user.role || '';
-    document.getElementById('profile-status').value = user.status || '';
+    if (!user) return;
+    const previewCard = document.getElementById('profile-preview-card');
+    const previewEditLink = document.getElementById('profile-preview-edit-link');
+
+    // Basic account info (always set with defensive fallbacks; use placeholder when empty)
+    const emailEl = document.getElementById('profile-email');
+    const roleEl = document.getElementById('profile-role');
+    const statusEl = document.getElementById('profile-status');
+    const placeholder = '\u2014'; // em dash
+    if (emailEl) emailEl.value = (user.email != null && String(user.email).trim() !== '') ? String(user.email) : placeholder;
+    if (roleEl) roleEl.value = getRoleDisplayLabel(user.role) || (user.role != null ? String(user.role) : '') || placeholder;
+    if (statusEl) statusEl.value = (user.status != null && String(user.status).trim() !== '') ? String(user.status) : placeholder;
     // Verification badge (for professional/consultant only)
     const verificationGroup = document.getElementById('profile-verification-group');
     const verificationBadgeEl = document.getElementById('profile-verification-badge');
+    const emailHintEl = document.getElementById('profile-email-verification-hint');
     if (verificationGroup && verificationBadgeEl) {
         const isIndividual = user.role === CONFIG.ROLES.PROFESSIONAL || user.role === CONFIG.ROLES.CONSULTANT;
         if (isIndividual) {
             verificationGroup.style.display = 'block';
+            verificationBadgeEl.innerHTML = getVerificationBadgesFullHtml(user.profile);
             const status = user.profile?.verificationStatus;
-            verificationBadgeEl.innerHTML = getVerificationBadgeHtml(status) || '<span class="badge badge-secondary verification-badge">Unverified</span>';
+            if (emailHintEl) {
+                const isUnverified = !status || status === CONFIG.VERIFICATION_STATUS.UNVERIFIED;
+                if (isUnverified) {
+                    emailHintEl.classList.remove('hidden');
+                    emailHintEl.setAttribute('title', 'Complete verification to unlock full opportunity details and build trust.');
+                } else {
+                    emailHintEl.classList.add('hidden');
+                }
+            }
         } else {
             verificationGroup.style.display = 'none';
+            if (emailHintEl) emailHintEl.classList.add('hidden');
         }
     }
     // Social media in Account card (always visible)
@@ -1451,7 +2147,7 @@ async function loadProfile(user) {
             (user.profile?.type === 'company' || user.role === 'professional' || user.role === 'consultant');
         vettingBanner.style.display = showVetting ? 'block' : 'none';
         const cta = document.getElementById('profile-vetting-cta');
-        if (cta) cta.href = user.profile?.type === 'company' ? '#company-profile-card' : '#professional-profile-card';
+        if (cta) cta.href = user.profile?.type === 'company' ? '#company-profile-card' : '#profile-section-professional';
     }
     // Show clarification banner and "Submit for review again" when status is clarification_requested
     const clarificationBanner = document.getElementById('profile-clarification-banner');
@@ -1491,10 +2187,58 @@ async function loadProfile(user) {
     }
     
     const profile = user.profile || {};
-    
-    if (authService.isCompanyUser()) {
-        document.getElementById('company-profile-card').style.display = 'block';
-        document.getElementById('professional-profile-card').style.display = 'none';
+    const isCompany = authService.isCompanyUser && authService.isCompanyUser();
+    const rolePro = user.role && ['professional', 'consultant'].includes(String(user.role).toLowerCase());
+    // Prefer role-based: consultant/professional always get pro sections even if authService not ready
+    const isPro = rolePro || (authService.isProfessional && authService.isProfessional());
+
+    // Section visibility: account, basic, matching, security always visible; professional/company/portfolio/references by type
+    const sectionAccount = document.getElementById('profile-section-account');
+    const sectionBasic = document.getElementById('profile-section-basic');
+    const sectionSkills = document.getElementById('profile-section-skills');
+    const sectionCertifications = document.getElementById('profile-section-certifications');
+    const sectionExperience = document.getElementById('profile-section-experience');
+    const sectionProfessional = document.getElementById('profile-section-professional');
+    const sectionPortfolio = document.getElementById('profile-section-portfolio');
+    const sectionReferences = document.getElementById('profile-section-references');
+    const sectionMatching = document.getElementById('profile-section-matching');
+    const sectionSecurity = document.getElementById('profile-section-security');
+    const formContainer = document.getElementById('professional-profile-card');
+    if (sectionAccount) sectionAccount.style.display = 'block';
+    if (sectionBasic) sectionBasic.style.display = 'block';
+    if (sectionMatching) sectionMatching.style.display = 'block';
+    if (sectionSecurity) sectionSecurity.style.display = 'block';
+    if (formContainer) formContainer.style.display = 'none';
+
+    if (isCompany) {
+        const companyCard = document.getElementById('company-profile-card');
+        if (companyCard) companyCard.style.display = 'block';
+        if (sectionSkills) sectionSkills.style.display = 'none';
+        if (sectionCertifications) sectionCertifications.style.display = 'none';
+        if (sectionExperience) sectionExperience.style.display = 'none';
+        if (sectionProfessional) sectionProfessional.style.display = 'none';
+        if (sectionPortfolio) sectionPortfolio.style.display = 'none';
+        if (sectionReferences) sectionReferences.style.display = 'none';
+        if (previewCard) previewCard.style.display = 'block';
+        if (previewEditLink) {
+            previewEditLink.href = '#company-profile-card';
+            previewEditLink.textContent = 'Edit profile';
+            previewEditLink.onclick = (e) => {
+                e.preventDefault();
+                document.getElementById('company-profile-card')?.scrollIntoView({ behavior: 'smooth' });
+                showCompanyEdit();
+            };
+        }
+        // Show Edit Basic Profile for company users (scroll to company card / open company edit)
+        const editBasicBtn = document.getElementById('profile-edit-basic-btn');
+        if (editBasicBtn) {
+            editBasicBtn.style.display = 'inline-block';
+            editBasicBtn.onclick = () => {
+                document.getElementById('company-profile-card')?.scrollIntoView({ behavior: 'smooth' });
+                showCompanyEdit();
+            };
+        }
+        populateProfilePreview(user);
 
         fillCompanyLookups();
         document.getElementById('company-name').value = profile.name || '';
@@ -1551,88 +2295,135 @@ async function loadProfile(user) {
         setupVettingCaseStudyDocumentsAddButton('company-add-vettingCaseStudy-doc', 'company-vettingCaseStudy-documents');
 
         setCompanyViewMode(profile);
+        renderProfileHeader(user, profile, true);
+        const photoPlaceholder = document.getElementById('profile-photo-placeholder');
+        if (photoPlaceholder && profile) {
+            if (profile.photoUrl) {
+                photoPlaceholder.innerHTML = `<img src="${escapeHtml(profile.photoUrl)}" alt="Profile" class="w-full h-full rounded-full object-cover">`;
+                photoPlaceholder.classList.remove('bg-primary/10', 'text-primary', 'flex', 'items-center', 'justify-center', 'text-2xl', 'font-bold');
+            } else {
+                const name = profile.name || '';
+                const initials = name.split(/\s+/).map(s => s[0]).slice(0, 2).join('').toUpperCase() || '?';
+                photoPlaceholder.textContent = initials;
+                photoPlaceholder.className = 'profile-photo-placeholder w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary flex-shrink-0';
+            }
+        }
         renderCompleteness(profile, true);
         showCompanyView();
         setupCompanyForm(user.id);
-    } else if (authService.isProfessional()) {
-        document.getElementById('professional-profile-card').style.display = 'block';
-        document.getElementById('company-profile-card').style.display = 'none';
-
-        fillProfessionalLookups();
-        document.getElementById('full-name').value = profile.name || '';
-        document.getElementById('prof-headline').value = profile.headline || '';
-        document.getElementById('prof-title').value = profile.title || '';
-        document.getElementById('prof-phone').value = profile.phone || '';
-        document.getElementById('prof-location').value = profile.location || '';
-        document.getElementById('prof-bio').value = profile.bio || '';
-        const profSm = profile.socialMediaLinks || {};
-        document.getElementById('prof-linkedin').value = profSm.linkedin || '';
-        document.getElementById('prof-twitter').value = profSm.twitter || '';
-        document.getElementById('prof-facebook').value = profSm.facebook || '';
-        document.getElementById('prof-instagram').value = profSm.instagram || '';
-        document.getElementById('specializations').value = Array.isArray(profile.specializations) ? profile.specializations.join(', ') : (profile.specializations || '');
-        document.getElementById('skills').value = Array.isArray(profile.skills) ? profile.skills.join(', ') : (profile.skills || '');
-        document.getElementById('prof-sectors').value = Array.isArray(profile.sectors) ? profile.sectors.join(', ') : (profile.sectors || profile.industry || '');
-        document.getElementById('prof-education').value = profile.education || '';
-        renderCertificationsList('prof-certifications-list', profile.certifications || []);
-        setupCertificationsAddButton('prof-add-certification', 'prof-certifications-list');
-        document.getElementById('years-experience').value = profile.yearsExperience ?? profile.experience ?? '';
-        document.getElementById('prof-services').value = Array.isArray(profile.services) ? profile.services.join(', ') : (profile.services || '');
-        document.getElementById('prof-interests').value = Array.isArray(profile.interests) ? profile.interests.join(', ') : (profile.interests || '');
-        document.getElementById('prof-availability').value = profile.availability || '';
-        document.getElementById('prof-workMode').value = profile.preferredWorkMode || '';
-        const preferredPayment = profile.preferredPaymentModes || [];
-        const paySelect = document.getElementById('prof-paymentModes');
-        if (paySelect) Array.from(paySelect.options).forEach(opt => { opt.selected = preferredPayment.indexOf(opt.value) !== -1; });
-        document.getElementById('prof-hourlyRate').value = profile.hourlyRate ?? '';
-        document.getElementById('prof-currency').value = profile.currency || 'SAR';
-        document.getElementById('prof-languages').value = Array.isArray(profile.languages) ? profile.languages.join(', ') : (profile.languages || '');
-        const preferredModels = profile.preferredCollaborationModels || [];
-        const profPrefContainer = document.getElementById('prof-preferredModels-checkboxes');
-        if (profPrefContainer) profPrefContainer.querySelectorAll('input[name="preferredCollaborationModels"]').forEach(cb => { cb.checked = preferredModels.indexOf(cb.value) !== -1; });
-        const profPrimaryDomainSelect = document.getElementById('prof-primaryDomain');
-        if (profPrimaryDomainSelect) {
-            profPrimaryDomainSelect.innerHTML = '<option value="">Select domain</option>';
-            getProfileDomainsList().forEach(d => {
-                const opt = document.createElement('option');
-                opt.value = d.id;
-                opt.textContent = d.label;
-                if (profile.primaryDomain === d.id) opt.selected = true;
-                profPrimaryDomainSelect.appendChild(opt);
-            });
+    } else if (isPro) {
+        const companyCard = document.getElementById('company-profile-card');
+        if (companyCard) companyCard.style.display = 'none';
+        if (sectionSkills) sectionSkills.style.display = 'block';
+        if (sectionCertifications) sectionCertifications.style.display = 'block';
+        if (sectionExperience) sectionExperience.style.display = 'block';
+        if (sectionProfessional) sectionProfessional.style.display = 'block';
+        if (sectionPortfolio) sectionPortfolio.style.display = 'block';
+        if (sectionReferences) sectionReferences.style.display = 'block';
+        const editBasicBtn = document.getElementById('profile-edit-basic-btn');
+        if (editBasicBtn) editBasicBtn.style.display = 'inline-block';
+        if (previewCard) previewCard.style.display = 'block';
+        if (previewEditLink) {
+            previewEditLink.href = '#profile-section-professional';
+            previewEditLink.textContent = 'Edit profile';
+            previewEditLink.onclick = (e) => {
+                e.preventDefault();
+                showProfessionalEdit();
+                document.getElementById('professional-profile-card')?.scrollIntoView({ behavior: 'smooth' });
+            };
         }
-        renderProfessionalFieldsList('prof-professionalFields-list', profile.professionalFields || []);
-        setupProfessionalFieldsAddButton('prof-add-professionalField', 'prof-professionalFields-list');
-        renderExpertiseAreasList('prof-expertiseAreas-list', profile.expertiseAreas || []);
-        setupExpertiseAddButton('prof-add-expertise', 'prof-expertiseAreas-list');
-        renderCaseStudiesList('prof-caseStudies-list', profile.caseStudies || []);
-        setupCaseStudyAddButton('prof-add-caseStudy', 'prof-caseStudies-list');
-        renderPortfolioList('prof-portfolio-list', profile.portfolio || []);
-        setupPortfolioAddButton('prof-add-portfolio', 'prof-portfolio-list');
-        renderReferencesList('prof-references-list', profile.references || []);
-        setupReferenceAddButton('prof-add-reference', 'prof-references-list');
-        const profVc = profile.vettingCaseStudy || {};
-        document.getElementById('prof-vettingCaseStudy-title').value = profVc.projectTitle || profVc.title || '';
-        document.getElementById('prof-vettingCaseStudy-role').value = profVc.role || '';
-        document.getElementById('prof-vettingCaseStudy-problem').value = profVc.problem || '';
-        document.getElementById('prof-vettingCaseStudy-solution').value = profVc.solution || '';
-        document.getElementById('prof-vettingCaseStudy-impact').value = profVc.impact || '';
-        document.getElementById('prof-vettingCaseStudy-url').value = profVc.url || '';
-        document.getElementById('prof-vettingCaseStudy-description').value = profVc.description || '';
-        renderVettingCaseStudyDocuments('prof-vettingCaseStudy-documents', profVc.documents || []);
-        setupVettingCaseStudyDocumentsAddButton('prof-add-vettingCaseStudy-doc', 'prof-vettingCaseStudy-documents');
-        const req = profileLookups?.vettingRequirements?.[profile.type || 'professional'];
-        const hintEl = document.getElementById('prof-vetting-case-study-hint');
-        if (hintEl) hintEl.textContent = req?.caseStudy === 'required' ? 'Required for Consultants.' : 'Optional for Professionals.';
-
         setProfessionalViewMode(profile);
+        renderProfileHeader(user, profile, false);
+        renderProfilePortfolioCards(profile);
         renderCompleteness(profile, false);
         showProfessionalView();
-        setupProfessionalForm(user.id);
+        populateProfilePreview(user);
+        try {
+            fillProfessionalLookups();
+            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val != null ? val : ''; };
+            setVal('full-name', profile.name);
+            setVal('prof-headline', profile.headline);
+            setVal('prof-title', profile.title);
+            setVal('prof-phone', profile.phone);
+            setVal('prof-location', profile.location);
+            setVal('prof-bio', profile.bio);
+            const profSm = profile.socialMediaLinks || {};
+            setVal('prof-linkedin', profSm.linkedin);
+            setVal('prof-twitter', profSm.twitter);
+            setVal('prof-facebook', profSm.facebook);
+            setVal('prof-instagram', profSm.instagram);
+            setVal('specializations', Array.isArray(profile.specializations) ? profile.specializations.join(', ') : (profile.specializations || ''));
+            setVal('skills', Array.isArray(profile.skills) ? profile.skills.join(', ') : (profile.skills || ''));
+            setVal('prof-sectors', Array.isArray(profile.sectors) ? profile.sectors.join(', ') : (profile.sectors || profile.industry || ''));
+            setVal('prof-education', profile.education);
+            renderCertificationsList('prof-certifications-list', profile.certifications || []);
+            setupCertificationsAddButton('prof-add-certification', 'prof-certifications-list');
+            setVal('years-experience', profile.yearsExperience ?? profile.experience ?? '');
+            setVal('prof-services', Array.isArray(profile.services) ? profile.services.join(', ') : (profile.services || ''));
+            setVal('prof-interests', Array.isArray(profile.interests) ? profile.interests.join(', ') : (profile.interests || ''));
+            setVal('prof-availability', profile.availability);
+            setVal('prof-workMode', profile.preferredWorkMode);
+            const preferredPayment = profile.preferredPaymentModes || [];
+            const paySelect = document.getElementById('prof-paymentModes');
+            if (paySelect) Array.from(paySelect.options).forEach(opt => { opt.selected = preferredPayment.indexOf(opt.value) !== -1; });
+            setVal('prof-hourlyRate', profile.hourlyRate ?? '');
+            setVal('prof-currency', profile.currency || 'SAR');
+            setVal('prof-languages', Array.isArray(profile.languages) ? profile.languages.join(', ') : (profile.languages || ''));
+            const preferredModels = profile.preferredCollaborationModels || [];
+            const profPrefContainer = document.getElementById('prof-preferredModels-checkboxes');
+            if (profPrefContainer) profPrefContainer.querySelectorAll('input[name="preferredCollaborationModels"]').forEach(cb => { cb.checked = preferredModels.indexOf(cb.value) !== -1; });
+            const profPrimaryDomainSelect = document.getElementById('prof-primaryDomain');
+            if (profPrimaryDomainSelect) {
+                profPrimaryDomainSelect.innerHTML = '<option value="">Select domain</option>';
+                getProfileDomainsList().forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d.id;
+                    opt.textContent = d.label;
+                    if (profile.primaryDomain === d.id) opt.selected = true;
+                    profPrimaryDomainSelect.appendChild(opt);
+                });
+            }
+            renderProfessionalFieldsList('prof-professionalFields-list', profile.professionalFields || []);
+            setupProfessionalFieldsAddButton('prof-add-professionalField', 'prof-professionalFields-list');
+            renderExpertiseAreasList('prof-expertiseAreas-list', profile.expertiseAreas || []);
+            setupExpertiseAddButton('prof-add-expertise', 'prof-expertiseAreas-list');
+            renderCaseStudiesList('prof-caseStudies-list', profile.caseStudies || []);
+            setupCaseStudyAddButton('prof-add-caseStudy', 'prof-caseStudies-list');
+            renderPortfolioList('prof-portfolio-list', profile.portfolio || []);
+            setupPortfolioAddButton('prof-add-portfolio', 'prof-portfolio-list');
+            renderReferencesList('prof-references-list', profile.references || []);
+            setupReferenceAddButton('prof-add-reference', 'prof-references-list');
+            renderExperienceEntriesList('prof-experience-entries-list', profile.experienceEntries || []);
+            setupExperienceAddButton('prof-add-experience-entry', 'prof-experience-entries-list');
+            const profVc = profile.vettingCaseStudy || {};
+            setVal('prof-vettingCaseStudy-title', profVc.projectTitle || profVc.title);
+            setVal('prof-vettingCaseStudy-role', profVc.role);
+            setVal('prof-vettingCaseStudy-problem', profVc.problem);
+            setVal('prof-vettingCaseStudy-solution', profVc.solution);
+            setVal('prof-vettingCaseStudy-impact', profVc.impact);
+            setVal('prof-vettingCaseStudy-url', profVc.url);
+            setVal('prof-vettingCaseStudy-description', profVc.description);
+            renderVettingCaseStudyDocuments('prof-vettingCaseStudy-documents', profVc.documents || []);
+            setupVettingCaseStudyDocumentsAddButton('prof-add-vettingCaseStudy-doc', 'prof-vettingCaseStudy-documents');
+            const req = profileLookups?.vettingRequirements?.[profile.type || 'professional'];
+            const hintEl = document.getElementById('prof-vetting-case-study-hint');
+            if (hintEl) hintEl.textContent = req?.caseStudy === 'required' ? 'Required for Consultants.' : 'Optional for Professionals.';
+            setupProfessionalForm(user.id);
+        } catch (err) {
+            console.error('Profile form setup error:', err);
+            setupProfessionalForm(user.id);
+        }
     } else {
         if (otherCard) otherCard.style.display = 'block';
-        document.getElementById('company-profile-card').style.display = 'none';
-        document.getElementById('professional-profile-card').style.display = 'none';
+        const companyCard = document.getElementById('company-profile-card');
+        if (companyCard) companyCard.style.display = 'none';
+        if (sectionSkills) sectionSkills.style.display = 'none';
+        if (sectionCertifications) sectionCertifications.style.display = 'none';
+        if (sectionExperience) sectionExperience.style.display = 'none';
+        if (sectionProfessional) sectionProfessional.style.display = 'none';
+        if (sectionPortfolio) sectionPortfolio.style.display = 'none';
+        if (sectionReferences) sectionReferences.style.display = 'none';
+        if (previewCard) previewCard.style.display = 'none';
     }
 }
 
@@ -1659,25 +2450,17 @@ function showCompanyEdit() {
 }
 
 function showProfessionalView() {
-    const view = document.getElementById('professional-profile-view');
+    const formContainer = document.getElementById('professional-profile-card');
     const form = document.getElementById('professional-profile-form');
-    const editBtn = document.getElementById('professional-profile-edit-btn');
-    const cancelBtn = document.getElementById('professional-profile-cancel-btn');
-    if (view) view.style.display = 'block';
+    if (formContainer) formContainer.style.display = 'none';
     if (form) form.style.display = 'none';
-    if (editBtn) editBtn.style.display = 'inline-block';
-    if (cancelBtn) cancelBtn.style.display = 'none';
 }
 
 function showProfessionalEdit() {
-    const view = document.getElementById('professional-profile-view');
+    const formContainer = document.getElementById('professional-profile-card');
     const form = document.getElementById('professional-profile-form');
-    const editBtn = document.getElementById('professional-profile-edit-btn');
-    const cancelBtn = document.getElementById('professional-profile-cancel-btn');
-    if (view) view.style.display = 'none';
+    if (formContainer) formContainer.style.display = 'block';
     if (form) form.style.display = 'block';
-    if (editBtn) editBtn.style.display = 'none';
-    if (cancelBtn) cancelBtn.style.display = 'inline-block';
     setupSkillAutocomplete();
 }
 
@@ -1752,6 +2535,7 @@ function setupCompanyForm(userId) {
             setCompanyViewMode(merged);
             renderCompleteness(merged, true);
             showCompanyView();
+            populateProfilePreview(authService.getCurrentUser());
             const ms = window.matchingService;
             if (ms && typeof ms.findOpportunitiesForCandidate === 'function') {
                 ms.findOpportunitiesForCandidate(userId).catch(e =>
@@ -1768,11 +2552,25 @@ function setupCompanyForm(userId) {
 
 function setupProfessionalForm(userId) {
     const form = document.getElementById('professional-profile-form');
-    const editBtn = document.getElementById('professional-profile-edit-btn');
     const cancelBtn = document.getElementById('professional-profile-cancel-btn');
     if (!form) return;
 
-    if (editBtn) editBtn.addEventListener('click', () => showProfessionalEdit());
+    // All "Edit [Section]" buttons open the professional form and scroll to it
+    const openEditAndScroll = () => {
+        showProfessionalEdit();
+        document.getElementById('professional-profile-card')?.scrollIntoView({ behavior: 'smooth' });
+    };
+    document.querySelectorAll('.profile-edit-section-btn').forEach(btn => {
+        btn.addEventListener('click', openEditAndScroll);
+    });
+    const editProBtn = document.getElementById('profile-edit-professional-btn');
+    if (editProBtn) editProBtn.addEventListener('click', openEditAndScroll);
+    const editBasicBtn = document.getElementById('profile-edit-basic-btn');
+    if (editBasicBtn) editBasicBtn.addEventListener('click', openEditAndScroll);
+    const editPortfolioBtn = document.getElementById('profile-edit-portfolio-btn');
+    if (editPortfolioBtn) editPortfolioBtn.addEventListener('click', openEditAndScroll);
+    const editRefsBtn = document.getElementById('profile-edit-references-btn');
+    if (editRefsBtn) editRefsBtn.addEventListener('click', openEditAndScroll);
     if (cancelBtn) cancelBtn.addEventListener('click', () => showProfessionalView());
 
     form.addEventListener('submit', async (e) => {
@@ -1818,6 +2616,7 @@ function setupProfessionalForm(userId) {
             caseStudies,
             portfolio: collectPortfolioFromList('prof-portfolio-list'),
             references: collectReferencesFromList('prof-references-list'),
+            experienceEntries: collectExperienceFromList('prof-experience-entries-list'),
             primaryDomain: document.getElementById('prof-primaryDomain')?.value?.trim() || null,
             professionalFields: collectProfessionalFieldsFromList('prof-professionalFields-list'),
             expertiseAreas: collectExpertiseAreasFromList('prof-expertiseAreas-list'),
@@ -1846,6 +2645,7 @@ function setupProfessionalForm(userId) {
             setProfessionalViewMode(merged);
             renderCompleteness(merged, false);
             showProfessionalView();
+            populateProfilePreview(authService.getCurrentUser());
             const ms = window.matchingService;
             if (ms && typeof ms.findOpportunitiesForCandidate === 'function') {
                 ms.findOpportunitiesForCandidate(userId).catch(e =>
@@ -1877,7 +2677,7 @@ async function loadProfileStats(userId) {
         const contracts = typeof dataService.getContracts === 'function'
             ? await dataService.getContracts() : [];
         const collaborations = contracts.filter(c =>
-            c.status === 'completed' && (c.creatorId === userId || c.contractorId === userId)
+            c.status === 'completed' && dataService.getContractParties(c).some(p => p.userId === userId)
         ).length;
         const collabEl = document.getElementById('stat-collaborations');
         if (collabEl) collabEl.textContent = collaborations;

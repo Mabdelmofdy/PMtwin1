@@ -1,0 +1,238 @@
+{
+  "domain": "companies",
+  "version": "1.1",
+  "dataset": "demo40",
+  "description": "Demo company records with full business profiles for demo-40-opportunities and matching",
+  "data": [
+    {
+      "id": "demo-c01",
+      "email": "company01@demo.test",
+      "passwordHash": "ZGVtbzEyMw==",
+      "role": "company_owner",
+      "status": "active",
+      "profile": {
+        "name": "Al-Riyadh Construction",
+        "type": "company",
+        "companyType": "Construction Company",
+        "companyRole": "contractor",
+        "industry": "Construction & Infrastructure",
+        "companySize": "51-200",
+        "registrationNumber": "DEMO-C01",
+        "location": "Riyadh, Saudi Arabia",
+        "country": "Saudi Arabia",
+        "city": "Riyadh",
+        "description": "Al-Riyadh Construction is a mid-size contractor based in Riyadh with over two decades of experience in commercial and infrastructure projects across the central region. We deliver construction management, structural packages, and PMO support for building and civil works. Strong track record in high-rise and mixed-use delivery.",
+        "sectors": ["Construction", "Infrastructure"],
+        "servicesOffered": [
+          "Construction management",
+          "Structural and civil works execution",
+          "PMO and construction supervision",
+          "General contracting",
+          "Shop drawing review coordination",
+          "Quality control and handover"
+        ],
+        "financialCapacity": 5000000,
+        "preferredPaymentModes": ["cash"],
+        "preferredCollaborationModels": ["project"],
+        "primaryDomain": "Construction",
+        "caseStudies": [
+          { "title": "Riyadh tower", "description": "Full structural package and construction management for 28-storey commercial tower; delivered on time and within budget.", "url": null },
+          { "title": "Central ring road civil package", "description": "Civil works and bridge construction for 15 km ring road segment.", "url": null }
+        ],
+        "references": []
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-07T00:00:00.000Z"
+    },
+    {
+      "id": "demo-c02",
+      "email": "company02@demo.test",
+      "passwordHash": "ZGVtbzEyMw==",
+      "role": "company_owner",
+      "status": "active",
+      "profile": {
+        "name": "Gulf Development Co",
+        "type": "company",
+        "companyType": "Developer",
+        "companyRole": "developer",
+        "industry": "Real Estate",
+        "companySize": "51-200",
+        "registrationNumber": "DEMO-C02",
+        "location": "Jeddah, Saudi Arabia",
+        "country": "Saudi Arabia",
+        "city": "Jeddah",
+        "description": "Gulf Development Co is a Jeddah-based real estate developer focused on residential and mixed-use projects in the Western Province. We develop, procure, and deliver projects through partnerships with contractors and consultants. Active in Vision 2030-aligned residential and hospitality developments.",
+        "sectors": ["Real Estate", "Construction"],
+        "servicesOffered": [
+          "Real estate development",
+          "Project procurement and tendering",
+          "Construction and PM oversight",
+          "Design and engineering coordination",
+          "Stakeholder and authority liaison",
+          "Handover and facility readiness"
+        ],
+        "financialCapacity": 3000000,
+        "preferredPaymentModes": ["cash"],
+        "preferredCollaborationModels": ["project"],
+        "primaryDomain": "Real Estate",
+        "caseStudies": [
+          { "title": "Jeddah waterfront residential", "description": "200-unit residential and amenity development; full development and delivery.", "url": null },
+          { "title": "Corporate campus Phase 1", "description": "Office and retail mixed-use; led design, tender, and construction phases.", "url": null }
+        ],
+        "references": [{ "name": "Bank ref", "contact": "ref@bank.com" }]
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-07T00:00:00.000Z"
+    },
+    {
+      "id": "demo-c03",
+      "email": "company03@demo.test",
+      "passwordHash": "ZGVtbzEyMw==",
+      "role": "company_owner",
+      "status": "active",
+      "profile": {
+        "name": "Eastern Equipment & Supply",
+        "type": "company",
+        "companyType": "Equipment Supplier",
+        "companyRole": "supplier",
+        "industry": "Construction & Equipment Supply",
+        "companySize": "11-50",
+        "registrationNumber": "DEMO-C03",
+        "location": "Eastern Province, Saudi Arabia",
+        "country": "Saudi Arabia",
+        "city": "Dammam",
+        "description": "Eastern Equipment & Supply provides heavy equipment rental, earthworks machinery, and construction equipment to contractors across the Eastern Province and GCC. We offer excavators, bulldozers, cranes, and related maintenance and logistics support for civil and infrastructure projects.",
+        "sectors": ["Construction", "Equipment Supply"],
+        "servicesOffered": [
+          "Heavy equipment rental",
+          "Earthworks machinery supply",
+          "Crane and lifting equipment",
+          "Equipment maintenance and repair",
+          "On-site logistics and positioning",
+          "Short- and long-term lease packages"
+        ],
+        "preferredPaymentModes": ["cash"],
+        "caseStudies": [
+          { "title": "Highway earthworks fleet", "description": "Provided and maintained excavator and bulldozer fleet for 40 km highway earthworks package.", "url": null },
+          { "title": "Industrial site preparation", "description": "Equipment package for large-scale site clearance and grading.", "url": null }
+        ],
+        "references": []
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-07T00:00:00.000Z"
+    },
+    {
+      "id": "demo-c04",
+      "email": "company04@demo.test",
+      "passwordHash": "ZGVtbzEyMw==",
+      "role": "company_owner",
+      "status": "active",
+      "profile": {
+        "name": "Najd Investment Group",
+        "type": "company",
+        "companyType": "Investor",
+        "industry": "Financial / Investment",
+        "companySize": "11-50",
+        "registrationNumber": "DEMO-C04",
+        "location": "Riyadh, Saudi Arabia",
+        "country": "Saudi Arabia",
+        "city": "Riyadh",
+        "description": "Najd Investment Group invests in infrastructure and real estate projects across Saudi Arabia and the GCC. We provide equity and debt financing, consortium participation, and strategic advisory for large-scale construction and infrastructure developments aligned with national vision programs.",
+        "sectors": ["Financial", "Infrastructure"],
+        "servicesOffered": [
+          "Equity and debt financing",
+          "Infrastructure and real estate investment",
+          "Consortium and JV structuring",
+          "Financial due diligence",
+          "Stakeholder and lender coordination",
+          "Project and portfolio advisory"
+        ],
+        "caseStudies": [
+          { "title": "Highway project financing", "description": "Lead financier and equity partner for major highway PPP; structured debt and equity.", "url": null },
+          { "title": "Mixed-use development investment", "description": "Equity investment and board representation for mixed-use development in Riyadh.", "url": null }
+        ],
+        "references": []
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-07T00:00:00.000Z"
+    },
+    {
+      "id": "demo-c05",
+      "email": "company05@demo.test",
+      "passwordHash": "ZGVtbzEyMw==",
+      "role": "company_owner",
+      "status": "active",
+      "profile": {
+        "name": "Saudi Infrastructure Partners",
+        "type": "company",
+        "companyType": "Large Enterprise",
+        "companyRole": "lead",
+        "industry": "Infrastructure Development",
+        "companySize": "500+",
+        "registrationNumber": "DEMO-C05",
+        "location": "Riyadh, Saudi Arabia",
+        "country": "Saudi Arabia",
+        "city": "Riyadh",
+        "description": "Saudi Infrastructure Partners is a large-scale infrastructure lead and consortium partner for highways, utilities, and civil works across Saudi Arabia. We lead or participate in PPP and major government-backed projects, partnering with financial, construction, and equipment providers to deliver complex programs.",
+        "sectors": ["Infrastructure", "Construction"],
+        "servicesOffered": [
+          "Infrastructure program leadership",
+          "Consortium formation and management",
+          "Highway and road development",
+          "Utilities and civil works",
+          "PPP and project finance coordination",
+          "Engineering and construction oversight"
+        ],
+        "financialCapacity": 10000000,
+        "preferredPaymentModes": ["cash"],
+        "preferredCollaborationModels": ["project", "consortium"],
+        "primaryDomain": "Infrastructure",
+        "caseStudies": [
+          { "title": "Highway corridor lead", "description": "Lead partner for 80 km highway project; formed and managed consortium of financial, construction, and equipment partners.", "url": null },
+          { "title": "Utilities backbone program", "description": "Program lead for regional utilities backbone; multi-phase delivery.", "url": null }
+        ],
+        "references": []
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-07T00:00:00.000Z"
+    },
+    {
+      "id": "demo-c06",
+      "email": "company06@demo.test",
+      "passwordHash": "ZGVtbzEyMw==",
+      "role": "company_owner",
+      "status": "active",
+      "profile": {
+        "name": "Red Sea Building Co",
+        "type": "company",
+        "companyType": "Developer",
+        "companyRole": "developer",
+        "industry": "Real Estate & Construction",
+        "companySize": "51-200",
+        "registrationNumber": "DEMO-C06",
+        "location": "Jeddah, Saudi Arabia",
+        "country": "Saudi Arabia",
+        "city": "Jeddah",
+        "description": "Red Sea Building Co is a Jeddah-based developer specializing in mixed-use and commercial building projects. We develop, design, and deliver towers and mixed-use schemes, partnering with design leads, MEP contractors, and project managers for full lifecycle delivery.",
+        "sectors": ["Construction", "Real Estate"],
+        "servicesOffered": [
+          "Mixed-use development",
+          "Commercial and residential building",
+          "Design and architecture coordination",
+          "MEP and construction procurement",
+          "Project management and PM coordination",
+          "BIM and delivery management"
+        ],
+        "preferredPaymentModes": ["cash"],
+        "preferredCollaborationModels": ["project"],
+        "caseStudies": [
+          { "title": "Mixed-use tower Jeddah", "description": "30-storey mixed-use tower; led development, design coordination, and consortium of design lead, MEP contractor, and PM.", "url": null },
+          { "title": "Hospitality and retail complex", "description": "Mixed hospitality and retail development; full design and construction oversight.", "url": null }
+        ],
+        "references": []
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-07T00:00:00.000Z"
+    }
+  ]
+}

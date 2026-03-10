@@ -2,23 +2,53 @@
  * Login Page Component
  */
 
-const DEMO_CREDENTIALS = [
-    { type: 'Admin', email: 'admin@pmtwin.com', password: 'admin123' },
-    { type: 'Professional (pending)', email: 'youssef.rashid@email.com', password: 'password123' },
-    { type: 'Professional (pending)', email: 'maha.otaibi@email.com', password: 'password123' },
-    { type: 'Company', email: 'info@alkhorayef.com', password: 'password123' },
-    { type: 'Company', email: 'contact@saudibinladin.com', password: 'password123' },
-    { type: 'Company', email: 'info@almabani.com', password: 'password123' },
-    { type: 'Company', email: 'projects@nesma.com', password: 'password123' },
-    { type: 'Professional', email: 'ahmed.hassan@email.com', password: 'password123' },
-    { type: 'Professional', email: 'fatima.almutairi@email.com', password: 'password123' },
-    { type: 'Professional', email: 'mohammed.alqahtani@email.com', password: 'password123' },
-    { type: 'Consultant', email: 'sara.alzahrani@email.com', password: 'password123' },
-    { type: 'Professional', email: 'khalid.alharbi@email.com', password: 'password123' },
-    { type: 'Professional', email: 'noura.alsaud@email.com', password: 'password123' },
-    { type: 'Professional', email: 'omar.almansour@email.com', password: 'password123' },
-    { type: 'Professional', email: 'layla.ibrahim@email.com', password: 'password123' }
-];
+/** Build demo credentials list from data service so display names match profile.name (real names). */
+async function getDemoCredentials() {
+    const rows = [
+        { type: 'Admin', email: 'admin@pmtwin.com', password: 'admin123' }
+    ];
+    const dataService = window.dataService || (typeof dataService !== 'undefined' ? dataService : null);
+    if (dataService && typeof dataService.getUsers === 'function' && typeof dataService.getCompanies === 'function') {
+        try {
+            const [users, companies] = await Promise.all([dataService.getUsers(), dataService.getCompanies()]);
+            const demoPassword = 'demo123';
+            const pending = (users || []).filter((u) => (u.email || '').startsWith('pending'));
+            const demoUsers = (users || []).filter((u) => (u.email || '').match(/^demo\d+@demo\.test$/));
+            const demoCompanies = (companies || []).filter((c) => (c.email || '').match(/^company\d+@demo\.test$/));
+            pending.sort((a, b) => (a.email || '').localeCompare(b.email || ''));
+            demoCompanies.sort((a, b) => (a.email || '').localeCompare(b.email || ''));
+            demoUsers.sort((a, b) => (a.email || '').localeCompare(b.email || ''));
+            pending.forEach((u) => rows.push({ type: (u.profile && u.profile.name) || u.email, email: u.email, password: demoPassword }));
+            demoCompanies.forEach((c) => rows.push({ type: (c.profile && c.profile.name) || c.email, email: c.email, password: demoPassword }));
+            demoUsers.forEach((u) => rows.push({ type: (u.profile && u.profile.name) || u.email, email: u.email, password: demoPassword }));
+        } catch (_) {
+            rows.push(...getDemoCredentialsFallback());
+        }
+    } else {
+        rows.push(...getDemoCredentialsFallback());
+    }
+    return rows;
+}
+
+/** Fallback when data service not available: use static list with generic labels. */
+function getDemoCredentialsFallback() {
+    return [
+        { type: 'Pending (vetting)', email: 'pending01@demo.test', password: 'demo123' },
+        { type: 'Pending (clarification)', email: 'pending02@demo.test', password: 'demo123' },
+        { type: 'Company', email: 'company01@demo.test', password: 'demo123' },
+        { type: 'Company', email: 'company02@demo.test', password: 'demo123' },
+        { type: 'Company', email: 'company03@demo.test', password: 'demo123' },
+        { type: 'Company', email: 'company04@demo.test', password: 'demo123' },
+        { type: 'Company', email: 'company05@demo.test', password: 'demo123' },
+        { type: 'Company', email: 'company06@demo.test', password: 'demo123' }
+    ].concat(
+        Array.from({ length: 35 }, (_, i) => ({
+            type: 'User',
+            email: `demo${String(i + 1).padStart(2, '0')}@demo.test`,
+            password: 'demo123'
+        }))
+    );
+}
 
 function initLogin() {
     const loginForm = document.getElementById('login-form');
@@ -76,8 +106,9 @@ function initLogin() {
     
     const btnViewDemo = document.getElementById('btn-view-demo-credentials');
     if (btnViewDemo) {
-        btnViewDemo.addEventListener('click', () => {
-            const tableRows = DEMO_CREDENTIALS.map(
+        btnViewDemo.addEventListener('click', async () => {
+            const credentials = await getDemoCredentials();
+            const tableRows = credentials.map(
                 (row) => `<tr class="cursor-pointer hover:bg-blue-50 border-b border-gray-100" data-email="${escapeHtml(row.email)}" data-password="${escapeHtml(row.password)}" title="Click to use this account"><td class="py-2 px-3">${escapeHtml(row.type)}</td><td class="py-2 px-3">${escapeHtml(row.email)}</td><td class="py-2 px-3">${escapeHtml(row.password)}</td></tr>`
             ).join('');
             const contentHTML = `
@@ -86,7 +117,7 @@ function initLogin() {
                     <table class="w-full text-left border-collapse text-sm">
                         <thead>
                             <tr class="border-b border-gray-200">
-                                <th class="py-2 px-3 font-semibold text-gray-900">Account type</th>
+                                <th class="py-2 px-3 font-semibold text-gray-900">Name</th>
                                 <th class="py-2 px-3 font-semibold text-gray-900">Email</th>
                                 <th class="py-2 px-3 font-semibold text-gray-900">Password</th>
                             </tr>
@@ -98,7 +129,7 @@ function initLogin() {
             if (window.modalService && typeof window.modalService.showCustom === 'function') {
                 modalService.showCustom(contentHTML, 'Demo user credentials');
             } else {
-                alert(DEMO_CREDENTIALS.map((r) => `${r.type}: ${r.email} / ${r.password}`).join('\n'));
+                alert(credentials.map((r) => `${r.type}: ${r.email} / ${r.password}`).join('\n'));
             }
         });
     }

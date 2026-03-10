@@ -194,6 +194,17 @@
                         Include your background, relevant experience, and what unique value you bring.
                     </p>
                 </div>
+                <div class="form-group">
+                    <label for="application-deliverables" class="form-label">Deliverables you promise (optional)</label>
+                    <textarea 
+                        id="application-deliverables" 
+                        name="deliverables" 
+                        class="form-textarea" 
+                        rows="4"
+                        placeholder="One per line, e.g.&#10;Shop drawing review&#10;Quantity take-off&#10;BOQ report"
+                    ></textarea>
+                    <p class="text-sm text-gray-500 mt-1">List key deliverables you will provide.</p>
+                </div>
             </div>
         </div>
 
@@ -222,6 +233,7 @@
                         <option value="">Select your preference</option>
                         <option value="accept">Accept as stated</option>
                         <option value="discuss">Prefer to discuss</option>
+                        <option value="custom">Custom terms</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -247,6 +259,17 @@
                 <div class="form-group">
                     <label for="application-payment-comments" class="form-label">Comments on payment terms (optional)</label>
                     <textarea id="application-payment-comments" name="paymentComments" class="form-textarea" rows="3" placeholder="Any comments or questions about payment terms..."></textarea>
+                </div>
+                <div class="form-group grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="application-availability-date" class="form-label">Availability date (optional)</label>
+                        <input type="date" id="application-availability-date" name="availabilityDate" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <p class="text-sm text-gray-500 mt-1">When you can start</p>
+                    </div>
+                    <div>
+                        <label for="application-estimated-duration" class="form-label">Estimated duration in days (optional)</label>
+                        <input type="number" id="application-estimated-duration" name="estimatedDurationDays" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" min="1" placeholder="e.g. 14">
+                    </div>
                 </div>
             </div>
         </div>

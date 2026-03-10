@@ -3002,10 +3002,12 @@ function setupFormHandlers() {
             if (!modelType || !subModelType) throw new Error('Please select category and sub-model');
             const exchangeMode = document.getElementById('exchange-mode')?.value;
             if (!exchangeMode) throw new Error('Please select an exchange mode');
+            const validModes = ['cash', 'equity', 'profit_sharing', 'barter', 'hybrid'];
             const paymentMethodCheckboxes = document.querySelectorAll('.payment-method-cb:checked');
-            const paymentModesArr = paymentMethodCheckboxes.length > 0
-                ? Array.from(paymentMethodCheckboxes).map(cb => cb.value)
+            let paymentModesArr = paymentMethodCheckboxes.length > 0
+                ? Array.from(paymentMethodCheckboxes).map(cb => cb.value).filter(m => validModes.includes(m))
                 : [exchangeMode];
+            if (!paymentModesArr.includes(exchangeMode)) paymentModesArr = [exchangeMode, ...paymentModesArr];
             
             const title = document.getElementById('title')?.value?.trim();
             const description = document.getElementById('description')?.value?.trim() || '';

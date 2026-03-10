@@ -90,7 +90,7 @@
 }
 
 .hero {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 50%, #0f766e 100%);
     color: white;
     padding: var(--spacing-2xl) var(--spacing-lg);
     text-align: center;
@@ -103,7 +103,9 @@
 
 .hero h1 {
     font-size: var(--font-size-3xl);
+    font-weight: 700;
     margin-bottom: var(--spacing-md);
+    letter-spacing: -0.02em;
 }
 
 .hero-subtitle {
@@ -126,13 +128,20 @@
 }
 
 .features,
-.models,
+.models {
+    padding: var(--spacing-2xl) var(--spacing-lg);
+    background-color: var(--bg-primary);
+}
+
 .cta {
     padding: var(--spacing-2xl) var(--spacing-lg);
+    background-color: var(--bg-tertiary);
+    text-align: center;
 }
 
 .section-title {
     font-size: var(--font-size-2xl);
+    font-weight: 700;
     text-align: center;
     margin-bottom: var(--spacing-xl);
     color: var(--text-primary);
@@ -155,11 +164,6 @@
 
 .card ul li:last-child {
     border-bottom: none;
-}
-
-.cta {
-    background-color: var(--bg-tertiary);
-    text-align: center;
 }
 
 .cta h2 {

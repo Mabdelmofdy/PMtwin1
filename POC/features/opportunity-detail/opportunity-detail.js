@@ -87,7 +87,7 @@ async function loadOpportunity(id) {
         if (canApply) {
             const allApplications = await dataService.getApplications();
             currentApplication = allApplications.find(
-                app => app.opportunityId === id && app.applicantId === user.id
+                app => app.opportunityId === opportunity.id && app.applicantId === user.id
             );
         }
         
@@ -97,13 +97,13 @@ async function loadOpportunity(id) {
         // Render comprehensive view
         await renderComprehensiveView(opportunity, creator, isOwner, canApply);
         
-        // Load applications if owner
+        // Load applications if owner (use opportunity.id so canonical id matches application records)
         if (isOwner) {
-            await loadApplications(id);
+            await loadApplications(opportunity.id);
         }
         // Load matching section if owner and opportunity is published or in negotiation
         if (isOwner && (opportunity.status === 'published' || opportunity.status === 'in_negotiation')) {
-            await loadMatchingSection(id);
+            await loadMatchingSection(opportunity.id);
         }
         
         // Setup wizard navigation
@@ -342,100 +342,119 @@ async function loadAndRenderContract(opportunity) {
     const actionsEl = document.getElementById('contract-actions');
     if (!section || !summaryEl) return;
     
-    const contract = await dataService.getContractByOpportunityId(opportunity.id);
-    if (!contract) {
+    const deal = await dataService.getDealByOpportunityId(opportunity.id);
+    const contract = deal ? await dataService.getContractByDealId(deal.id) : await dataService.getContractByOpportunityId(opportunity.id);
+
+    if (!deal && !contract) {
         section.style.display = 'block';
-        summaryEl.innerHTML = '<p class="text-gray-500">No contract record found.</p>';
+        summaryEl.innerHTML = '<p class="text-gray-500">No deal or contract record found.</p>';
+        if (milestonesEl) milestonesEl.innerHTML = '';
+        if (actionsEl) actionsEl.innerHTML = '';
         return;
     }
-    
+
     section.style.display = 'block';
-    const creator = await dataService.getUserOrCompanyById(contract.creatorId);
-    const contractor = await dataService.getUserOrCompanyById(contract.contractorId);
-    const creatorName = creator?.profile?.name || creator?.email || contract.creatorId;
-    const contractorName = contractor?.profile?.name || contractor?.email || contract.contractorId;
-    
+    const parties = contract ? dataService.getContractParties(contract) : (deal.participants || []).map(p => ({ userId: p.userId, role: p.role || 'participant', signedAt: p.signedAt }));
+    const partyUsers = await Promise.all(parties.map(p => dataService.getUserOrCompanyById(p.userId)));
+    const partiesLabel = parties.map((p, i) => {
+        const u = partyUsers[i];
+        const name = u?.profile?.name || u?.email || p.userId;
+        return name + ' (' + (p.role || 'participant') + ')';
+    }).join(' – ');
+
     summaryEl.innerHTML = `
-        <p><strong>Parties:</strong> ${escapeHtml(creatorName)} (creator) &ndash; ${escapeHtml(contractorName)} (contractor)</p>
-        <p><strong>Scope:</strong> ${escapeHtml(contract.scope || opportunity.title)}</p>
-        <p><strong>Payment:</strong> ${escapeHtml(contract.paymentMode || opportunity.exchangeMode || '—')}</p>
-        <p><strong>Duration:</strong> ${escapeHtml(contract.duration || '—')}</p>
+        <p><strong>Parties:</strong> ${escapeHtml(partiesLabel)}</p>
+        <p><strong>Scope:</strong> ${escapeHtml((deal || contract).scope || opportunity.title)}</p>
+        <p><strong>Payment:</strong> ${escapeHtml((deal || contract).paymentMode || (deal && deal.exchangeMode) || opportunity.exchangeMode || '—')}</p>
+        <p><strong>Duration:</strong> ${escapeHtml((deal && deal.timeline && (deal.timeline.start || deal.timeline.end)) ? (deal.timeline.start || '') + ' to ' + (deal.timeline.end || '') : (contract && contract.duration) || '—')}</p>
+        ${deal ? `<p><a href="#" data-route="/deals/${escapeHtml(deal.id)}" class="text-primary font-medium">Open Deal (execution)</a></p>` : ''}
     `;
-    
-    const milestones = contract.milestones || [];
-    milestonesEl.innerHTML = milestones.length ? `
-        <h3 class="text-sm font-semibold text-gray-700 mb-2">Milestones</h3>
+
+    const milestones = (deal && deal.milestones) ? deal.milestones : [];
+    const dealId = deal ? deal.id : (contract && contract.dealId) || null;
+    if (milestonesEl) {
+        if (dealId) {
+            milestonesEl.innerHTML = milestones.length ? `
+        <h3 class="text-sm font-semibold text-gray-700 mb-2">Milestones (Deal)</h3>
         <ul id="milestones-list" class="space-y-2">
             ${milestones.map((m, i) => `
-                <li class="flex items-center justify-between p-2 border rounded ${m.status === 'completed' ? 'bg-green-50' : ''}" data-milestone-index="${i}">
-                    <span>${escapeHtml(m.title)} ${m.dueDate ? '(' + m.dueDate + ')' : ''}</span>
-                    <span class="badge badge-${m.status === 'completed' ? 'success' : 'secondary'}">${m.status === 'completed' ? 'Done' : 'Pending'}</span>
-                    ${m.status !== 'completed' && opportunity.status === 'in_execution' ? `<button type="button" class="btn btn-sm btn-primary mark-milestone-done" data-contract-id="${contract.id}" data-index="${i}">Mark complete</button>` : ''}
+                <li class="flex items-center justify-between p-2 border rounded ${(m.status || 'pending') === 'approved' ? 'bg-green-50' : ''}" data-milestone-index="${i}" data-milestone-id="${escapeHtml(m.id)}">
+                    <span>${escapeHtml(m.title)} ${m.dueDate ? '(' + escapeHtml(m.dueDate) + ')' : ''}</span>
+                    <span class="badge badge-${(m.status || 'pending') === 'approved' ? 'success' : 'secondary'}">${(m.status || 'pending') === 'approved' ? 'Done' : (m.status || 'pending')}</span>
+                    ${(m.status || 'pending') !== 'approved' && (deal.status === 'execution' || deal.status === 'active') ? `<button type="button" class="btn btn-sm btn-primary mark-milestone-done" data-deal-id="${escapeHtml(dealId)}" data-milestone-id="${escapeHtml(m.id)}">Mark complete</button>` : ''}
                 </li>
             `).join('')}
         </ul>
-        ${opportunity.status === 'in_execution' ? `<button type="button" id="add-milestone-btn" class="btn btn-secondary btn-sm mt-2" data-contract-id="${contract.id}">Add milestone</button>` : ''}
-    ` : (opportunity.status === 'in_execution' ? `<p class="text-gray-500">No milestones yet.</p><button type="button" id="add-milestone-btn" class="btn btn-secondary btn-sm" data-contract-id="${contract.id}">Add milestone</button>` : '<p class="text-gray-500">No milestones.</p>');
-    
-    milestonesEl.querySelectorAll('.mark-milestone-done').forEach(btn => {
-        btn.addEventListener('click', () => markMilestoneComplete(btn.dataset.contractId, parseInt(btn.dataset.index, 10)));
-    });
-    const addBtn = document.getElementById('add-milestone-btn');
-    if (addBtn) addBtn.addEventListener('click', () => addMilestone(addBtn.dataset.contractId));
-    
+        ${(deal.status === 'execution' || deal.status === 'active') ? `<a href="#" data-route="/deals/${escapeHtml(dealId)}" class="btn btn-secondary btn-sm mt-2">Manage milestones in Deal</a>` : ''}
+            ` : `<p class="text-gray-500">No milestones yet. <a href="#" data-route="/deals/${escapeHtml(dealId)}">Open Deal</a> to add milestones.</p>`;
+        } else {
+            milestonesEl.innerHTML = '<p class="text-muted">Execution is managed by the linked Deal.</p>';
+        }
+    }
+
+    if (dealId && milestonesEl) {
+        milestonesEl.querySelectorAll('.mark-milestone-done').forEach(btn => {
+            btn.addEventListener('click', () => markDealMilestoneComplete(btn.dataset.dealId, btn.dataset.milestoneId));
+        });
+    }
+
     const user = authService.getCurrentUser();
     const isOwner = user && opportunity.creatorId === user.id;
     let actionsHtml = '';
-    if (opportunity.status === 'contracted' && isOwner) {
-        actionsHtml += `<button type="button" id="start-execution-btn" class="btn btn-primary" data-opp-id="${opportunity.id}" data-contract-id="${contract.id}">Start execution</button>`;
+    if (dealId && opportunity.status === 'contracted' && deal && (deal.status === 'active' || deal.status === 'execution') && isOwner) {
+        actionsHtml += `<button type="button" id="start-execution-btn" class="btn btn-primary" data-opp-id="${opportunity.id}" data-deal-id="${dealId}">Start execution</button>`;
     }
-    const allDone = milestones.length > 0 && milestones.every(m => m.status === 'completed');
-    if (opportunity.status === 'in_execution' && allDone && isOwner) {
-        actionsHtml += `<button type="button" id="confirm-completion-btn" class="btn btn-success" data-opp-id="${opportunity.id}" data-contract-id="${contract.id}">Confirm completion</button>`;
+    const allDone = milestones.length > 0 && milestones.every(m => (m.status || 'pending') === 'approved');
+    if (dealId && opportunity.status === 'in_execution' && allDone && isOwner) {
+        actionsHtml += `<button type="button" id="confirm-completion-btn" class="btn btn-success" data-opp-id="${opportunity.id}" data-deal-id="${dealId}">Confirm completion</button>`;
     }
     if (opportunity.status === 'completed' && isOwner) {
         actionsHtml += `<button type="button" id="close-opportunity-btn" class="btn btn-secondary" data-opp-id="${opportunity.id}">Close opportunity</button>`;
     }
-    if (opportunity.status === 'in_execution' && isOwner) {
-        actionsHtml += `<button type="button" id="terminate-contract-btn" class="btn btn-danger" data-opp-id="${opportunity.id}" data-contract-id="${contract.id}">Terminate contract</button>`;
+    if (dealId && deal && (deal.status === 'execution' || deal.status === 'active') && isOwner) {
+        actionsHtml += `<button type="button" id="terminate-contract-btn" class="btn btn-danger" data-opp-id="${opportunity.id}" data-deal-id="${dealId}">Terminate deal</button>`;
     }
-    actionsEl.innerHTML = actionsHtml;
-    
+    if (dealId) {
+        actionsHtml += `<a href="#" data-route="/deals/${escapeHtml(dealId)}" class="btn btn-primary">Manage execution</a>`;
+    }
+    if (actionsEl) actionsEl.innerHTML = actionsHtml;
+
     document.getElementById('start-execution-btn')?.addEventListener('click', async () => {
         const oppId = document.getElementById('start-execution-btn').dataset.oppId;
-        const cId = document.getElementById('start-execution-btn').dataset.contractId;
+        const dId = document.getElementById('start-execution-btn').dataset.dealId;
         await dataService.updateOpportunity(oppId, { status: 'in_execution' });
-        await dataService.updateContract(cId, { status: 'active' });
+        if (dId) await dataService.updateDeal(dId, { status: (window.CONFIG && window.CONFIG.DEAL_STATUS && window.CONFIG.DEAL_STATUS.EXECUTION) || 'execution' });
         const user = authService.getCurrentUser();
         if (user) {
             await dataService.createAuditLog({
                 userId: user.id,
                 action: 'execution_started',
-                entityType: 'contract',
-                entityId: cId,
+                entityType: 'deal',
+                entityId: dId,
                 details: { opportunityId: oppId }
             });
         }
-        const contract = await dataService.getContractById(cId);
-        if (contract && contract.contractorId) {
-            const opp = await dataService.getOpportunityById(oppId);
-            const title = opp?.title || 'the opportunity';
-            await dataService.createNotification({
-                userId: contract.contractorId,
-                type: 'execution_started',
-                title: 'Execution started',
-                message: `Work has started for "${title}".`,
-                link: `/opportunities/${oppId}`
-            });
+        if (dId) {
+            const dealObj = await dataService.getDealById(dId);
+            const otherIds = (dealObj.participants || []).filter(p => p.userId !== user.id).map(p => p.userId);
+            for (const uid of otherIds) {
+                await dataService.createNotification({
+                    userId: uid,
+                    type: 'execution_started',
+                    title: 'Execution started',
+                    message: `Work has started for "${opportunity.title}".`,
+                    link: `/opportunities/${oppId}`
+                });
+            }
         }
         await loadOpportunity(oppId);
     });
     document.getElementById('confirm-completion-btn')?.addEventListener('click', async () => {
         const btn = document.getElementById('confirm-completion-btn');
         const oppId = btn.dataset.oppId;
-        const contractId = btn.dataset.contractId;
+        const dId = btn.dataset.dealId;
         await dataService.updateOpportunity(oppId, { status: 'completed' });
-        if (contractId) await dataService.updateContract(contractId, { status: 'completed' });
+        if (dId) await dataService.updateDeal(dId, { status: (window.CONFIG && window.CONFIG.DEAL_STATUS && window.CONFIG.DEAL_STATUS.COMPLETED) || 'completed', completedAt: new Date().toISOString() });
         const user = authService.getCurrentUser();
         if (user) {
             await dataService.createAuditLog({
@@ -443,20 +462,21 @@ async function loadAndRenderContract(opportunity) {
                 action: 'completion_confirmed',
                 entityType: 'opportunity',
                 entityId: oppId,
-                details: { contractId: contractId || '' }
+                details: { dealId: dId || '' }
             });
         }
-        const contract = contractId ? await dataService.getContractById(contractId) : null;
-        if (contract && contract.contractorId) {
-            const opp = await dataService.getOpportunityById(oppId);
-            const title = opp?.title || 'the opportunity';
-            await dataService.createNotification({
-                userId: contract.contractorId,
-                type: 'opportunity_completed',
-                title: 'Engagement completed',
-                message: `"${title}" has been marked as completed by the opportunity owner.`,
-                link: `/opportunities/${oppId}`
-            });
+        if (dId) {
+            const dealObj = await dataService.getDealById(dId);
+            const otherIds = (dealObj.participants || []).filter(p => p.userId !== user.id).map(p => p.userId);
+            for (const uid of otherIds) {
+                await dataService.createNotification({
+                    userId: uid,
+                    type: 'opportunity_completed',
+                    title: 'Engagement completed',
+                    message: `"${opportunity.title}" has been marked as completed.`,
+                    link: `/opportunities/${oppId}`
+                });
+            }
         }
         await loadOpportunity(oppId);
     });
@@ -479,69 +499,72 @@ async function loadAndRenderContract(opportunity) {
         const btn = document.getElementById('terminate-contract-btn');
         if (!btn) return;
         const oppId = btn.dataset.oppId;
-        const cId = btn.dataset.contractId;
-        if (!confirm('Are you sure you want to terminate this contract? The opportunity will be marked as cancelled.')) return;
+        const dId = btn.dataset.dealId;
+        if (!confirm('Are you sure you want to terminate this deal? The opportunity will be marked as cancelled.')) return;
         const reason = prompt('Reason for termination (optional):') || '';
         try {
-            await dataService.updateContract(cId, { status: 'terminated' });
+            if (dId) await dataService.updateDeal(dId, { status: (window.CONFIG && window.CONFIG.DEAL_STATUS && window.CONFIG.DEAL_STATUS.CLOSED) || 'closed', closedAt: new Date().toISOString() });
+            const contract = dId ? await dataService.getContractByDealId(dId) : null;
+            if (contract) await dataService.updateContract(contract.id, { status: 'terminated' });
             await dataService.updateOpportunity(oppId, { status: 'cancelled' });
             const user = authService.getCurrentUser();
             if (user) {
                 await dataService.createAuditLog({
                     userId: user.id,
-                    action: 'contract_terminated',
-                    entityType: 'contract',
-                    entityId: cId,
+                    action: 'deal_terminated',
+                    entityType: 'deal',
+                    entityId: dId || '',
                     details: { opportunityId: oppId, reason }
                 });
             }
-            const contract = await dataService.getContractById(cId);
-            if (contract && contract.contractorId) {
-                const opp = await dataService.getOpportunityById(oppId);
-                const title = opp?.title || 'the opportunity';
-                await dataService.createNotification({
-                    userId: contract.contractorId,
-                    type: 'contract_terminated',
-                    title: 'Contract terminated',
-                    message: `The contract for "${title}" has been terminated by the opportunity owner.${reason ? ' Reason: ' + reason : ''}`,
-                    link: `/opportunities/${oppId}`
-                });
+            if (dId && user) {
+                const dealObj = await dataService.getDealById(dId);
+                const otherIds = (dealObj.participants || []).filter(p => p.userId !== user.id).map(p => p.userId);
+                for (const uid of otherIds) {
+                    await dataService.createNotification({
+                        userId: uid,
+                        type: 'contract_terminated',
+                        title: 'Deal terminated',
+                        message: `The deal has been terminated by the opportunity owner.${reason ? ' Reason: ' + reason : ''}`,
+                        link: `/opportunities/${oppId}`
+                    });
+                }
             }
             await loadOpportunity(oppId);
         } catch (err) {
-            console.error('Error terminating contract:', err);
-            alert('Failed to terminate contract.');
+            console.error('Error terminating deal:', err);
+            alert('Failed to terminate deal.');
         }
     });
 }
 
-async function markMilestoneComplete(contractId, index) {
-    const contract = await dataService.getContractById(contractId);
-    if (!contract || !contract.milestones || !contract.milestones[index]) return;
-    const milestone = contract.milestones[index];
-    const milestones = [...contract.milestones];
-    milestones[index] = { ...milestone, status: 'completed', completedAt: new Date().toISOString() };
-    await dataService.updateContract(contractId, { milestones });
+async function markDealMilestoneComplete(dealId, milestoneId) {
     const user = authService.getCurrentUser();
+    await dataService.updateDealMilestone(dealId, milestoneId, { status: 'approved', approvedAt: new Date().toISOString(), approvedBy: user && user.id });
     if (user) {
-        await dataService.createAuditLog({
-            userId: user.id,
-            action: 'milestone_completed',
-            entityType: 'contract',
-            entityId: contractId,
-            details: { milestoneIndex: index, milestoneTitle: milestone.title, opportunityId: currentOpportunity?.id }
-        });
-    }
-    if (contract.contractorId) {
-        const opp = currentOpportunity || await dataService.getOpportunityById(contract.opportunityId);
-        const title = opp?.title || 'the opportunity';
-        await dataService.createNotification({
-            userId: contract.contractorId,
-            type: 'milestone_completed',
-            title: 'Milestone completed',
-            message: `Milestone "${milestone.title}" was marked complete for "${title}".`,
-            link: `/opportunities/${contract.opportunityId}`
-        });
+        const deal = await dataService.getDealById(dealId);
+        const m = (deal.milestones || []).find(x => x.id === milestoneId);
+        if (m) {
+            await dataService.createAuditLog({
+                userId: user.id,
+                action: 'milestone_completed',
+                entityType: 'deal',
+                entityId: dealId,
+                details: { milestoneId, milestoneTitle: m.title, opportunityId: deal.opportunityId }
+            });
+        }
+        const otherIds = (deal.participants || []).filter(p => p.userId !== user.id).map(p => p.userId);
+        const opp = currentOpportunity || (deal.opportunityId && await dataService.getOpportunityById(deal.opportunityId));
+        const title = (opp && opp.title) || 'the opportunity';
+        for (const uid of otherIds) {
+            await dataService.createNotification({
+                userId: uid,
+                type: 'milestone_completed',
+                title: 'Milestone completed',
+                message: `Milestone was marked complete for "${title}".`,
+                link: `/deals/${dealId}`
+            });
+        }
     }
     await loadAndRenderContract(currentOpportunity);
 }
@@ -617,24 +640,55 @@ async function submitMilestoneForm(contractId, title, dueDate) {
     }
 }
 
+/**
+ * Normalize exchange display: primary mode and accepted payment methods.
+ * Legacy: when paymentModes is missing, treat as single mode = primary.
+ * @param {Object} opportunity
+ * @returns {{ primaryMode: string|null, acceptedPaymentModes: string[] }}
+ */
+function getExchangeDisplayState(opportunity) {
+    const exchangeData = opportunity.exchangeData || opportunity;
+    const primaryMode = opportunity.exchangeMode ?? exchangeData.exchangeMode ?? null;
+    const raw = opportunity.paymentModes;
+    const acceptedPaymentModes = Array.isArray(raw) && raw.length > 0
+        ? raw
+        : (primaryMode ? [primaryMode] : []);
+    // Canonical order for display: cash, equity, profit_sharing, barter, hybrid
+    const order = ['cash', 'equity', 'profit_sharing', 'barter', 'hybrid'];
+    const sorted = [...acceptedPaymentModes].filter(m => order.includes(m));
+    const rest = acceptedPaymentModes.filter(m => !order.includes(m));
+    return { primaryMode, acceptedPaymentModes: [...sorted, ...rest] };
+}
+
 function renderExchangeDetails(opportunity) {
     const container = document.getElementById('exchange-details');
     const exchangeData = opportunity.exchangeData || opportunity;
+    const { primaryMode, acceptedPaymentModes } = getExchangeDisplayState(opportunity);
+    const showAcceptedPaymentMethodsRow = acceptedPaymentModes.length > 1;
     let html = '<div class="detail-grid">';
 
-    // Payment methods (when multiple accepted)
-    const paymentModes = opportunity.paymentModes || (exchangeData.exchangeMode ? [exchangeData.exchangeMode] : []);
-    if (Array.isArray(paymentModes) && paymentModes.length > 0) {
-        const modeLabels = paymentModes.map(m => formatExchangeMode(m));
+    // 1. Exchange Mode (always first when present)
+    if (primaryMode) {
         html += `
             <div class="detail-item">
-                <div class="detail-label">Payment methods</div>
+                <div class="detail-label">Exchange Mode</div>
+                <div class="detail-value">${formatExchangeMode(primaryMode)}</div>
+            </div>
+        `;
+    }
+
+    // 2. Accepted Payment Methods (only when multiple)
+    if (showAcceptedPaymentMethodsRow) {
+        const modeLabels = acceptedPaymentModes.map(m => formatExchangeMode(m));
+        html += `
+            <div class="detail-item accepted-payment-methods">
+                <div class="detail-label">Accepted Payment Methods</div>
                 <div class="detail-value">${escapeHtml(modeLabels.join(', '))}</div>
             </div>
         `;
     }
-    
-    // Budget Range (now part of exchange data)
+
+    // 3. Budget Range (now part of exchange data)
     if (exchangeData.budgetRange) {
         const budget = exchangeData.budgetRange;
         const currency = budget.currency || exchangeData.currency || 'SAR';
@@ -644,15 +698,6 @@ function renderExchangeDetails(opportunity) {
                 <div class="detail-value budget-value">
                     ${budget.min?.toLocaleString() || 0} - ${budget.max?.toLocaleString() || 0} ${currency}
                 </div>
-            </div>
-        `;
-    }
-    
-    if (exchangeData.exchangeMode) {
-        html += `
-            <div class="detail-item">
-                <div class="detail-label">Exchange Mode</div>
-                <div class="detail-value">${formatExchangeMode(exchangeData.exchangeMode)}</div>
             </div>
         `;
     }
@@ -809,23 +854,19 @@ function formatModelDetailValue(value, key) {
     return String(value);
 }
 
-function startApplicationWizard() {
+async function startApplicationWizard() {
     currentWizardStep = 1;
     
-    // Show wizard steps and navigation
     document.getElementById('wizard-steps').style.display = 'flex';
     document.getElementById('wizard-nav').style.display = 'flex';
     
-    // Generate form fields
     generateDetailedResponses(currentOpportunity, currentApplication);
     generateTaskBidding(currentOpportunity, currentApplication);
     
-    // Populate if editing
     if (isEditMode && currentApplication) {
-        populateApplicationForm(currentApplication);
+        await populateApplicationForm(currentApplication);
     }
     
-    // Go to step 2 (proposal)
     goToWizardStep(2);
 }
 
@@ -1107,8 +1148,13 @@ async function submitApplication() {
     }
     
     const proposal = document.getElementById('application-proposal').value.trim();
+    const deliverablesRaw = (document.getElementById('application-deliverables')?.value || '').trim();
+    const deliverablesList = deliverablesRaw ? deliverablesRaw.split(/\n/).map(s => s.trim()).filter(Boolean) : [];
+    const availabilityDateVal = (document.getElementById('application-availability-date')?.value || '').trim() || null;
     const detailedResponses = collectDetailedResponses();
     const taskBids = collectTaskBids();
+    const estimatedDurationVal = document.getElementById('application-estimated-duration')?.value;
+    const estimatedDurationDays = estimatedDurationVal ? parseInt(estimatedDurationVal, 10) : (taskBids?.taskBidDuration != null ? taskBids.taskBidDuration : null);
     const paymentPreference = document.getElementById('application-payment-preference')?.value || '';
     const paymentComments = (document.getElementById('application-payment-comments')?.value || '').trim();
     const paymentResponses = { paymentPreference, paymentComments };
@@ -1131,10 +1177,19 @@ async function submitApplication() {
         application_value.value_gap = compat.value_gap;
         application_value.lowValueMatch = compat.lowValueMatch;
     }
+
+    const durationDays = estimatedDurationDays != null && !isNaN(estimatedDurationDays) ? estimatedDurationDays : taskBids?.taskBidDuration;
+    const oppEnd = currentOpportunity?.attributes?.endDate || currentOpportunity?.exchangeData?.endDate;
+    let deadlineCompatibility = null;
+    if (availabilityDateVal && durationDays && oppEnd) {
+        const start = new Date(availabilityDateVal);
+        const end = new Date(start.getTime() + durationDays * 24 * 60 * 60 * 1000);
+        const oppEndDate = new Date(oppEnd);
+        deadlineCompatibility = end <= oppEndDate ? 'full' : (start <= oppEndDate ? 'partial' : 'no');
+    }
     
     try {
         if (isEditMode && currentApplication) {
-            // Update existing application
             const updateData = {
                 proposal,
                 responses: {
@@ -1143,12 +1198,16 @@ async function submitApplication() {
                     ...taskBids,
                     ...paymentResponses
                 },
-                application_value
+                application_value,
+                availabilityDate: availabilityDateVal,
+                estimatedDurationDays: durationDays || undefined,
+                deadlineCompatibility: deadlineCompatibility || undefined
             };
             
             await dataService.updateApplication(currentApplication.id, updateData);
+            await dataService.replaceApplicationDeliverables(currentApplication.id, deliverablesList);
+            await dataService.computeAndSaveRequirementsMatch(currentApplication.id);
             
-            // Notify opportunity creator
             await dataService.createNotification({
                 userId: currentOpportunity.creatorId,
                 type: 'application_updated',
@@ -1158,7 +1217,6 @@ async function submitApplication() {
             
             alert('Application updated successfully!');
         } else {
-            // Create new application
             const applicationData = {
                 opportunityId: currentOpportunity.id,
                 applicantId: user.id,
@@ -1168,10 +1226,38 @@ async function submitApplication() {
                     ...taskBids,
                     ...paymentResponses
                 },
-                application_value
+                application_value,
+                availabilityDate: availabilityDateVal || undefined,
+                estimatedDurationDays: durationDays || undefined,
+                deadlineCompatibility: deadlineCompatibility || undefined
             };
             
-            await dataService.createApplication(applicationData);
+            const newApp = await dataService.createApplication(applicationData);
+            if (deliverablesList.length > 0 && newApp && newApp.id) {
+                await dataService.replaceApplicationDeliverables(newApp.id, deliverablesList);
+            }
+            if (newApp && newApp.id) {
+                const matches = await dataService.getMatches();
+                const match = matches.find(m => m.opportunityId === currentOpportunity.id && (m.candidateId === user.id || m.userId === user.id));
+                if (match) {
+                    const updates = {};
+                    if (match.model) updates.matchType = match.model;
+                    else if (match.matchType) updates.matchType = match.matchType;
+                    if (match.matchScore != null) updates.matchScore = match.matchScore;
+                    if (match.criteria && typeof match.criteria === 'object') {
+                        const c = match.criteria;
+                        updates.matchBreakdown = {
+                            skillMatch: c.skillMatch ?? c.attributeOverlap ?? null,
+                            budgetFit: c.budgetFit ?? null,
+                            timelineFit: c.timelineFit ?? null,
+                            locationFit: c.locationFit ?? null,
+                            reputation: c.reputation ?? null
+                        };
+                    }
+                    if (Object.keys(updates).length) await dataService.updateApplication(newApp.id, updates);
+                }
+                await dataService.computeAndSaveRequirementsMatch(newApp.id);
+            }
             
             // First proposal: move opportunity to In Negotiation
             const allApps = await dataService.getApplications();
@@ -1220,8 +1306,11 @@ function fillDemoData() {
     const proposalField = document.getElementById('application-proposal');
     if (proposalField) {
         proposalField.value = demoData.proposal;
-        // Trigger input event for any listeners
         proposalField.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    const deliverablesField = document.getElementById('application-deliverables');
+    if (deliverablesField && demoData.deliverables) {
+        deliverablesField.value = Array.isArray(demoData.deliverables) ? demoData.deliverables.join('\n') : demoData.deliverables;
     }
     
     // Fill detailed responses (Step 3)
@@ -1246,6 +1335,10 @@ function fillDemoData() {
         paymentCommentsEl.value = demoData.paymentComments;
         paymentCommentsEl.dispatchEvent(new Event('input', { bubbles: true }));
     }
+    const availabilityEl = document.getElementById('application-availability-date');
+    const durationEl = document.getElementById('application-estimated-duration');
+    if (availabilityEl && demoData.availabilityDate) availabilityEl.value = demoData.availabilityDate;
+    if (durationEl && demoData.estimatedDurationDays != null) durationEl.value = demoData.estimatedDurationDays;
     
     // Fill task bidding (Step 5)
     if (demoData.bid) {
@@ -1516,7 +1609,10 @@ I am confident this approach will deliver results that exceed expectations.`
         responses,
         bid,
         paymentPreference: 'accept',
-        paymentComments: 'The payment terms are acceptable. Open to discussing milestones if needed.'
+        paymentComments: 'The payment terms are acceptable. Open to discussing milestones if needed.',
+        deliverables: ['Scope document', 'Progress reports', 'Final deliverable as agreed'],
+        availabilityDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+        estimatedDurationDays: 14
     };
 }
 
@@ -1687,16 +1783,24 @@ function generateTaskBidding(opportunity, existingApplication = null) {
     `;
 }
 
-function populateApplicationForm(application) {
+async function populateApplicationForm(application) {
     if (!application) return;
     
-    // Populate proposal
     const proposalField = document.getElementById('application-proposal');
     if (proposalField && application.proposal) {
         proposalField.value = application.proposal;
     }
-    
-    // Populate payment preference (step 4)
+    const deliverablesEl = document.getElementById('application-deliverables');
+    if (deliverablesEl && application.id) {
+        const deliverables = await dataService.getApplicationDeliverables(application.id);
+        deliverablesEl.value = deliverables.map(d => d.title).filter(Boolean).join('\n');
+    }
+    const availabilityEl = document.getElementById('application-availability-date');
+    const durationEl = document.getElementById('application-estimated-duration');
+    if (availabilityEl && application.availabilityDate) availabilityEl.value = application.availabilityDate;
+    if (durationEl && (application.estimatedDurationDays != null || (application.responses && application.responses.taskBidDuration != null))) {
+        durationEl.value = application.estimatedDurationDays != null ? application.estimatedDurationDays : application.responses.taskBidDuration;
+    }
     const responses = application.responses || {};
     const prefEl = document.getElementById('application-payment-preference');
     const commentsEl = document.getElementById('application-payment-comments');
@@ -1797,14 +1901,23 @@ async function loadApplications(opportunityId) {
             const av = app.application_value;
             const valueScorePct = av?.value_score != null ? Math.round(av.value_score * 100) : null;
             const valueScoreHtml = valueScorePct != null ? `<span class="badge badge-info ml-1" title="Value compatibility">Value: ${valueScorePct}%</span>` : '';
+            const valueAmount = av?.requestedValue != null ? `${Number(av.requestedValue).toLocaleString()} ${(av.requestedCurrency || 'SAR')}` : (av?.offeredValue != null ? `${Number(av.offeredValue).toLocaleString()} ${(av.requestedCurrency || av.currency || 'SAR')}` : null);
+            const valueAmountHtml = valueAmount ? `<span class="text-sm text-gray-600 ml-1">${valueAmount}</span>` : '';
+            const matchTypeLabel = app.matchType ? (app.matchType === 'one_way' ? 'One-way' : app.matchType === 'two_way' ? 'Two-way (barter)' : app.matchType === 'consortium' ? 'Consortium' : app.matchType === 'circular' ? 'Circular' : app.matchType) : '';
+            const matchTypeHtml = matchTypeLabel ? `<span class="badge badge-secondary ml-1" title="Match type">${escapeHtml(matchTypeLabel)}</span>` : '';
             const lowValueBadge = av?.lowValueMatch ? '<span class="badge badge-warning ml-1" title="Applicant requested value is more than 30% below opportunity expected value">Low Value Match</span>' : '';
             const breakdown = av?.value_breakdown;
-            const breakdownTip = breakdown ? `Budget ${Math.round(breakdown.budgetFit * 100)}% | Mode ${Math.round(breakdown.exchangeModeFit * 100)}% | Scope ${Math.round(breakdown.scopeFit * 100)}%` : '';
+            const budgetPct = breakdown && (breakdown.budgetFit != null || breakdown.budget != null) ? Math.round((breakdown.budgetFit != null ? breakdown.budgetFit : breakdown.budget) * 100) : null;
+            const modePct = breakdown && (breakdown.exchangeModeFit != null || breakdown.mode != null) ? Math.round((breakdown.exchangeModeFit != null ? breakdown.exchangeModeFit : breakdown.mode) * 100) : null;
+            const scopePct = breakdown && (breakdown.scopeFit != null || breakdown.scope != null) ? Math.round((breakdown.scopeFit != null ? breakdown.scopeFit : breakdown.scope) * 100) : null;
+            const breakdownTip = [budgetPct, modePct, scopePct].some(x => x != null) ? `Budget ${budgetPct != null ? budgetPct : '—'}% | Mode ${modePct != null ? modePct : '—'}% | Scope ${scopePct != null ? scopePct : '—'}%` : '';
             return `
             <div class="application-card" data-application-id="${escapeHtml(app.id)}">
                 <div class="application-header">
                     <strong>${escapeHtml(app.applicant?.profile?.name || app.applicant?.email || 'Unknown')}</strong>${verificationBadge}
                     ${valueScoreHtml}
+                    ${valueAmountHtml}
+                    ${matchTypeHtml}
                     ${lowValueBadge}
                     <span class="badge badge-${getApplicationStatusBadgeClass(app.status)}">${escapeHtml(getApplicationStatusLabel(app.status))}</span>
                 </div>
@@ -1918,11 +2031,7 @@ async function loadMatchingSection(opportunityId) {
     const opportunity = currentOpportunity || await dataService.getOpportunityById(opportunityId);
     const creatorId = opportunity?.creatorId;
 
-    const getMatchesByOpportunityId = dataService.getMatchesByOpportunityId || (async (id) => {
-        const matches = await dataService.getMatches();
-        return matches.filter(m => m.opportunityId === id);
-    });
-    const matches = await getMatchesByOpportunityId(opportunityId);
+    const matches = await dataService.getMatchesByOpportunityId(opportunityId);
     const professionalMatches = matches.filter(m => (m.candidateId || m.userId || '').startsWith('user-pro-'));
     const companyMatches = matches.filter(m => (m.candidateId || m.userId || '').startsWith('user-company-'));
 
@@ -2036,47 +2145,37 @@ async function loadMatchingSection(opportunityId) {
 
 async function showApplicationDetailModal(applicationId) {
     try {
-        const application = await dataService.getApplicationById(applicationId);
-        if (!application) return;
-        const applicant = await dataService.getUserById(application.applicantId) || await dataService.getCompanyById(application.applicantId);
+        const currentUser = authService.getCurrentUser();
+        const detail = await dataService.getApplicationDetail(applicationId, currentUser ? { ownerId: currentUser.id } : {});
+        if (!detail || !detail.application) return;
+        const { application, applicant, opportunity, requirementsMatch, paymentTerms, deliverables, files, matchScore, matchBreakdown, matchType } = detail;
         const applicantName = applicant?.profile?.name || applicant?.email || application.applicantId;
         const proposalText = application.coverLetter || application.proposal || 'No proposal or cover letter provided.';
-        const responses = application.responses || {};
-        const responsesEntries = Object.entries(responses).filter(([, v]) => v != null && String(v).trim() !== '');
-        let responsesHtml = '';
-        if (responsesEntries.length > 0) {
-            responsesHtml = '<div class="mt-4"><h4 class="text-sm font-semibold text-gray-700 mb-2">Responses</h4><dl class="space-y-2">' +
-                responsesEntries.map(([key, value]) => `<div><dt class="text-xs text-gray-500">${escapeHtml(formatLabel(key))}</dt><dd class="text-sm text-gray-900">${escapeHtml(String(value))}</dd></div>`).join('') +
-                '</dl></div>';
-        }
-        const av = application.application_value;
-        const valueScorePct = av?.value_score != null ? Math.round(av.value_score * 100) : null;
-        const valueSection = valueScorePct != null ? `
-            <div class="mb-3 p-3 bg-gray-50 rounded-lg">
-                <h4 class="text-sm font-semibold text-gray-700 mb-1">Value compatibility</h4>
-                <p class="text-sm text-gray-900"><strong>${valueScorePct}%</strong>${av?.lowValueMatch ? ' <span class="badge badge-warning">Low Value Match</span>' : ''}</p>
-                ${av?.value_breakdown ? `<p class="text-xs text-gray-500 mt-1">Budget ${Math.round(av.value_breakdown.budgetFit * 100)}% · Mode ${Math.round(av.value_breakdown.exchangeModeFit * 100)}% · Scope ${Math.round(av.value_breakdown.scopeFit * 100)}%</p>` : ''}
-                ${av?.offered_value ? `<p class="text-xs mt-1"><strong>Offers:</strong> ${escapeHtml(typeof av.offered_value === 'string' ? av.offered_value : av.offered_value?.description || '')}</p>` : ''}
-                ${av?.requested_value != null ? `<p class="text-xs"><strong>Requested:</strong> ${typeof av.requested_value === 'number' ? av.requested_value.toLocaleString() : escapeHtml(String(av.requested_value))} ${escapeHtml(av.currency || 'SAR')}</p>` : ''}
-            </div>
-        ` : '';
-        const contentHTML = `
-            <div class="application-detail-modal">
-                <div class="mb-3">
-                    <strong>${escapeHtml(applicantName)}</strong>
-                    <span class="badge badge-${getApplicationStatusBadgeClass(application.status)} ml-2">${escapeHtml(getApplicationStatusLabel(application.status))}</span>
-                </div>
-                <div class="text-sm text-gray-500 mb-3">Applied: ${new Date(application.createdAt).toLocaleDateString()}</div>
-                ${valueSection}
-                <div class="mb-3">
-                    <h4 class="text-sm font-semibold text-gray-700 mb-1">Cover letter / Proposal</h4>
-                    <p class="text-sm text-gray-900 whitespace-pre-wrap">${escapeHtml(proposalText)}</p>
-                </div>
-                ${responsesHtml}
-            </div>
-        `;
+
+        const contentHTML = buildApplicationDetailContent({
+            application,
+            applicant,
+            opportunity,
+            requirementsMatch: requirementsMatch || [],
+            paymentTerms: paymentTerms || [],
+            deliverables: deliverables || [],
+            files: files || [],
+            matchScore,
+            matchBreakdown,
+            matchType,
+            applicantName,
+            proposalText
+        });
+
         if (typeof modalService !== 'undefined') {
-            await modalService.showCustom(contentHTML, 'Application details', { confirmText: 'Close' });
+            modalService.showCustom(contentHTML, 'Application details', { confirmText: 'Close' }).then(() => {});
+            const modalEl = document.getElementById('modal-container');
+            if (modalEl) {
+                const body = modalEl.querySelector('.modal-body-custom');
+                if (body) {
+                    setupApplicationDetailActions(body, applicationId, application.applicantId, application.status);
+                }
+            }
         } else {
             alert('Application: ' + applicantName + '\nStatus: ' + application.status + '\n\n' + proposalText);
         }
@@ -2084,6 +2183,244 @@ async function showApplicationDetailModal(applicationId) {
         console.error('Error showing application detail:', error);
         alert('Failed to load application details.');
     }
+}
+
+function buildApplicationDetailContent(data) {
+    const {
+        application,
+        applicant,
+        opportunity,
+        requirementsMatch,
+        paymentTerms,
+        deliverables,
+        files,
+        matchScore,
+        matchBreakdown,
+        applicantName,
+        proposalText
+    } = data;
+    const profile = applicant?.profile || {};
+    const userTypeLabel = applicant?.role === 'company_owner' || applicant?.profile?.type === 'company' ? 'Company' : (applicant?.role === 'consultant' ? 'Consultant' : 'Professional');
+    const reputationStr = profile.reputationScore != null ? String(profile.reputationScore) : 'N/A';
+    const portfolioHtml = profile.portfolioUrl
+        ? `<a href="${escapeHtml(profile.portfolioUrl)}" target="_blank" rel="noopener" class="text-primary">${escapeHtml(profile.portfolioUrl)}</a>`
+        : '—';
+
+    const matchTypeLabel = data.matchType ? (data.matchType === 'one_way' ? 'One-way' : data.matchType === 'two_way' ? 'Two-way (barter)' : data.matchType === 'consortium' ? 'Consortium' : data.matchType === 'circular' ? 'Circular' : data.matchType) : '';
+    const matchScorePct = matchScore != null ? Math.round(matchScore * 100) : null;
+    const breakdown = matchBreakdown || {};
+    const skillPct = breakdown.skillMatch != null ? Math.round(Number(breakdown.skillMatch) * 100) : null;
+    const budgetPct = breakdown.budgetFit != null ? Math.round(Number(breakdown.budgetFit) * 100) : null;
+    const timelinePct = breakdown.timelineFit != null ? Math.round(Number(breakdown.timelineFit) * 100) : null;
+    const locationPct = breakdown.locationFit != null ? Math.round(Number(breakdown.locationFit) * 100) : null;
+    const reputationPct = breakdown.reputation != null ? Math.round(Number(breakdown.reputation) * 100) : null;
+
+    const av = application.application_value || {};
+    const valueScorePct = av.value_score != null ? Math.round(av.value_score * 100) : null;
+    const requestedVal = av.requestedValue != null ? av.requestedValue : av.requested_value;
+    const requestedStr = requestedVal != null ? `${typeof requestedVal === 'number' ? requestedVal.toLocaleString() : String(requestedVal)} ${escapeHtml(av.requestedCurrency || av.currency || 'SAR')}` : null;
+    const budgetRange = opportunity?.exchangeData?.budgetRange;
+    const budgetRangeStr = budgetRange && (budgetRange.min != null || budgetRange.max != null)
+        ? `${budgetRange.min != null ? Number(budgetRange.min).toLocaleString() : '—'}–${budgetRange.max != null ? Number(budgetRange.max).toLocaleString() : '—'} ${escapeHtml(budgetRange.currency || 'SAR')}`
+        : '—';
+    const exchangeModeLabel = (opportunity?.exchangeMode || av.exchange_mode || 'cash').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+    const reqMatchIcon = (m) => m === 'match' ? '✔' : m === 'partial' ? '◐' : '✗';
+    const reqMatchLabel = (m) => m === 'match' ? 'Match' : m === 'partial' ? 'Partial match' : 'Missing';
+    const requirementsHtml = requirementsMatch.length > 0
+        ? '<ul class="space-y-2">' + requirementsMatch.map(r => `
+            <li class="flex items-center gap-2">
+                <span class="font-medium">${escapeHtml(r.requiredValue)}</span>
+                <span class="badge badge-${r.applicantMatch === 'match' ? 'success' : r.applicantMatch === 'partial' ? 'warning' : 'danger'}">${reqMatchIcon(r.applicantMatch)} ${reqMatchLabel(r.applicantMatch)}</span>
+                ${r.applicantResponse ? `<span class="text-sm text-gray-600">${escapeHtml(r.applicantResponse)}</span>` : ''}
+            </li>
+        `).join('') + '</ul>'
+        : '<p class="text-sm text-gray-500">No requirements data.</p>';
+
+    let paymentTermsHtml = '';
+    if (paymentTerms.length > 0) {
+        paymentTermsHtml = paymentTerms.map(pt => {
+            if (pt.type === 'milestone' && pt.details && Array.isArray(pt.details.milestones)) {
+                return pt.details.milestones.map((m, i) => `<div class="text-sm">Milestone ${i + 1} — ${escapeHtml(m.title || '')}</div>`).join('');
+            }
+            if (pt.type === 'equity' && pt.details && pt.details.equityPercent != null) return `<div class="text-sm">Equity: ${pt.details.equityPercent}%</div>`;
+            if (pt.type === 'profit_share' && pt.details && pt.details.profitSharePercent != null) return `<div class="text-sm">Profit share: ${pt.details.profitSharePercent}%</div>`;
+            return `<div class="text-sm">${escapeHtml(pt.type)}</div>`;
+        }).join('');
+    } else {
+        const pref = application.responses?.paymentPreference;
+        paymentTermsHtml = pref ? `<div class="text-sm">${escapeHtml(pref === 'accept' ? 'Accept as stated' : pref === 'discuss' ? 'Prefer to discuss' : 'Custom terms')}</div>` : '<p class="text-sm text-gray-500">No payment terms specified.</p>';
+    }
+
+    const availabilityDate = application.availabilityDate ? new Date(application.availabilityDate).toLocaleDateString() : '—';
+    const durationStr = application.estimatedDurationDays != null ? `${application.estimatedDurationDays} days` : (application.responses?.taskBidDuration != null ? `${application.responses.taskBidDuration} days` : '—');
+    const deadlineLabel = application.deadlineCompatibility === 'full' ? 'Full' : application.deadlineCompatibility === 'partial' ? 'Partial' : application.deadlineCompatibility === 'no' ? 'No' : '—';
+
+    const deliverablesHtml = deliverables.length > 0
+        ? '<ul class="list-disc list-inside space-y-1">' + deliverables.map(d => `<li>${escapeHtml(d.title)}${d.description ? ' — ' + escapeHtml(d.description) : ''}</li>`).join('') + '</ul>'
+        : '<p class="text-sm text-gray-500">No deliverables listed.</p>';
+
+    const fileTypeLabel = (t) => ({ portfolio: 'Portfolio', certificate: 'Certificates', case_study: 'Case studies', report: 'Reports', other: 'Other' })[t] || t;
+    const filesHtml = files.length > 0
+        ? '<ul class="space-y-2">' + files.map(f => `
+            <li class="flex items-center gap-2">
+                <span class="badge badge-secondary">${escapeHtml(fileTypeLabel(f.fileType))}</span>
+                <a href="${escapeHtml(f.fileUrl || '#')}" target="_blank" rel="noopener" class="text-primary text-sm">${escapeHtml(f.fileName || '')}</a>
+            </li>
+        `).join('') + '</ul>'
+        : '<p class="text-sm text-gray-500">No attachments.</p>';
+
+    const collabModels = profile.preferredCollaborationModels || [];
+    const collabHtml = collabModels.length > 0
+        ? '<ul class="list-disc list-inside">' + collabModels.map(c => `<li>${escapeHtml(String(c).replace(/_/g, ' '))}</li>`).join('') + '</ul>'
+        : '<p class="text-sm text-gray-500">Not specified.</p>';
+
+    const skillsList = [].concat(profile.skills || [], profile.specializations || []).filter(Boolean);
+    const skillsStr = skillsList.length > 0 ? skillsList.map(s => escapeHtml(String(s))).join(', ') : '—';
+    const sectorsList = Array.isArray(profile.sectors) ? profile.sectors : (profile.industry ? (Array.isArray(profile.industry) ? profile.industry : [profile.industry]) : []);
+    const sectorsStr = sectorsList.length > 0 ? sectorsList.map(s => escapeHtml(String(s))).join(', ') : '—';
+
+    return `
+        <div class="application-details-view" data-application-id="${escapeHtml(application.id)}" data-applicant-id="${escapeHtml(application.applicantId || '')}" data-application-status="${escapeHtml(application.status)}">
+            <div class="application-details-body space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+                <section class="app-detail-section" id="section-applicant-summary">
+                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Applicant summary</h2>
+                    <dl class="summary-grid grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                        <dt class="text-gray-500">Name</dt><dd class="font-medium">${escapeHtml(applicantName)}</dd>
+                        <dt class="text-gray-500">User type</dt><dd>${escapeHtml(userTypeLabel)}</dd>
+                        <dt class="text-gray-500">Experience</dt><dd>${profile.yearsExperience != null ? escapeHtml(profile.yearsExperience + ' years') : '—'}</dd>
+                        <dt class="text-gray-500">Industry</dt><dd>${escapeHtml(profile.primaryDomain || '—')}</dd>
+                        <dt class="text-gray-500">Skills</dt><dd>${skillsStr}</dd>
+                        <dt class="text-gray-500">Sectors</dt><dd>${sectorsStr}</dd>
+                        <dt class="text-gray-500">Location</dt><dd>${escapeHtml(profile.location || '—')}</dd>
+                        <dt class="text-gray-500">Portfolio</dt><dd>${portfolioHtml}</dd>
+                        <dt class="text-gray-500">Reputation</dt><dd>${escapeHtml(reputationStr)}</dd>
+                        <dt class="text-gray-500">Application date</dt><dd>${new Date(application.createdAt).toLocaleDateString()}</dd>
+                        <dt class="text-gray-500">Status</dt><dd><span class="badge badge-${getApplicationStatusBadgeClass(application.status)}">${escapeHtml(getApplicationStatusLabel(application.status))}</span></dd>
+                    </dl>
+                </section>
+                <section class="app-detail-section" id="section-ai-match">
+                    <h2 class="text-sm font-semibold text-gray-700 mb-2">AI match summary</h2>
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        ${matchTypeLabel ? `<p class="text-xs text-gray-600"><strong>Match type:</strong> ${escapeHtml(matchTypeLabel)}</p>` : ''}
+                        ${matchScorePct != null ? `<p class="text-sm font-medium mt-1">Match score: ${matchScorePct}%</p>` : ''}
+                        <ul class="mt-2 space-y-1 text-xs text-gray-600">
+                            ${skillPct != null ? `<li>Skill match: ${skillPct}%</li>` : ''}
+                            ${budgetPct != null ? `<li>Budget: ${budgetPct}%</li>` : ''}
+                            ${timelinePct != null ? `<li>Timeline fit: ${timelinePct}%</li>` : ''}
+                            ${locationPct != null ? `<li>Location: ${locationPct}%</li>` : ''}
+                            ${reputationPct != null ? `<li>Reputation: ${reputationPct}%</li>` : ''}
+                        </ul>
+                    </div>
+                </section>
+                <section class="app-detail-section" id="section-proposal">
+                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Proposal overview</h2>
+                    <p class="text-sm text-gray-900 whitespace-pre-wrap">${escapeHtml(proposalText)}</p>
+                </section>
+                <section class="app-detail-section" id="section-requirements-match">
+                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Requirements match</h2>
+                    ${requirementsHtml}
+                </section>
+                <section class="app-detail-section" id="section-value-bidding">
+                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Value &amp; bidding</h2>
+                    <div class="p-3 bg-gray-50 rounded-lg text-sm">
+                        <p><strong>Exchange mode:</strong> ${escapeHtml(exchangeModeLabel)}</p>
+                        ${requestedStr ? `<p class="mt-1"><strong>Requested:</strong> ${requestedStr}</p>` : ''}
+                        <p class="mt-1"><strong>Budget range:</strong> ${budgetRangeStr}</p>
+                        ${valueScorePct != null ? `<p class="mt-1"><strong>Value compatibility:</strong> ${valueScorePct}%</p>` : ''}
+                    </div>
+                </section>
+                <section class="app-detail-section" id="section-payment-terms">
+                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Payment terms</h2>
+                    <div class="text-sm">${paymentTermsHtml}</div>
+                </section>
+                <section class="app-detail-section" id="section-timeline">
+                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Timeline</h2>
+                    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                        <dt class="text-gray-500">Availability</dt><dd>${escapeHtml(availabilityDate)}</dd>
+                        <dt class="text-gray-500">Estimated duration</dt><dd>${escapeHtml(durationStr)}</dd>
+                        <dt class="text-gray-500">Deadline fit</dt><dd>${escapeHtml(deadlineLabel)}</dd>
+                    </dl>
+                </section>
+                <section class="app-detail-section" id="section-deliverables">
+                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Deliverables</h2>
+                    ${deliverablesHtml}
+                </section>
+                <section class="app-detail-section" id="section-attachments">
+                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Attachments</h2>
+                    ${filesHtml}
+                </section>
+                <section class="app-detail-section" id="section-collaboration-preferences">
+                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Collaboration preferences</h2>
+                    ${collabHtml}
+                </section>
+            </div>
+            <footer class="application-details-footer mt-4 pt-4 border-t border-gray-200">
+                <div class="owner-actions flex flex-wrap gap-2 mb-3">
+                    <button type="button" class="btn btn-secondary btn-sm" data-action="shortlist" data-application-id="${escapeHtml(application.id)}" data-applicant-id="${escapeHtml(application.applicantId || '')}">Shortlist</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-action="invite-negotiation" data-application-id="${escapeHtml(application.id)}" data-applicant-id="${escapeHtml(application.applicantId || '')}">Invite to negotiation</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-action="send-message" data-applicant-id="${escapeHtml(application.applicantId || '')}">Send message</button>
+                    <button type="button" class="btn btn-outline btn-sm" data-action="view-profile" data-applicant-id="${escapeHtml(application.applicantId || '')}">View profile</button>
+                    <button type="button" class="btn btn-danger btn-sm" data-action="reject" data-application-id="${escapeHtml(application.id)}" data-applicant-id="${escapeHtml(application.applicantId || '')}">Reject application</button>
+                </div>
+            </footer>
+        </div>
+    `;
+}
+
+function setupApplicationDetailActions(container, applicationId, applicantId, currentStatus) {
+    const actionable = ['pending', 'reviewing', 'shortlisted', 'in_negotiation'].includes(currentStatus);
+    container.querySelectorAll('[data-action]').forEach(btn => {
+        const action = btn.dataset.action;
+        const appId = btn.dataset.applicationId;
+        const appApplicantId = btn.dataset.applicantId;
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (action === 'shortlist' && actionable && appId) {
+                try {
+                    await dataService.updateApplication(appId, { status: 'shortlisted' });
+                    await dataService.createNotification({ userId: appApplicantId, type: 'application_status_changed', title: 'Shortlisted', message: 'Your application has been shortlisted.' });
+                    if (currentOpportunity) await loadApplications(currentOpportunity.id);
+                    if (typeof modalService !== 'undefined') modalService.close();
+                } catch (err) {
+                    console.error(err);
+                    alert('Failed to update status.');
+                }
+            } else if (action === 'invite-negotiation' && actionable && appId) {
+                try {
+                    await dataService.updateApplication(appId, { status: 'in_negotiation' });
+                    if (currentOpportunity) await loadApplications(currentOpportunity.id);
+                    if (appApplicantId) await ensureConnectionAndOpenChat(appApplicantId);
+                    if (typeof modalService !== 'undefined') modalService.close();
+                } catch (err) {
+                    console.error(err);
+                    alert('Failed to update status.');
+                }
+            } else if (action === 'send-message' && appApplicantId) {
+                try {
+                    await ensureConnectionAndOpenChat(appApplicantId);
+                    if (typeof modalService !== 'undefined') modalService.close();
+                } catch (err) {
+                    console.error(err);
+                    alert('Could not open chat.');
+                }
+            } else if (action === 'view-profile' && appApplicantId) {
+                if (typeof modalService !== 'undefined') modalService.close();
+                if (typeof router !== 'undefined' && router.navigate) router.navigate('/people/' + appApplicantId);
+            } else if (action === 'reject' && actionable && appId) {
+                if (!confirm('Reject this application? The applicant will be notified.')) return;
+                try {
+                    await dataService.updateApplication(appId, { status: 'rejected' });
+                    await dataService.createNotification({ userId: appApplicantId, type: 'application_status_changed', title: 'Application Rejected', message: 'Your application has been rejected.' });
+                    if (currentOpportunity) await loadApplications(currentOpportunity.id);
+                    if (typeof modalService !== 'undefined') modalService.close();
+                } catch (err) {
+                    console.error(err);
+                    alert('Failed to reject application.');
+                }
+            }
+        });
+    });
 }
 
 // Utility functions
@@ -2211,33 +2548,34 @@ async function updateApplicationStatus(applicationId, status) {
             const opp = await dataService.getOpportunityById(currentOpportunity.id);
             const creatorId = opp.creatorId;
             const contractorId = application.applicantId;
-            const ed = opp.exchangeData || {};
-            const paymentSchedule = ed.cashMilestones || (opp.value_exchange && opp.value_exchange.value_offered && opp.value_exchange.value_offered.paymentTerms) || '';
-            const equityVesting = ed.equityVesting ? { period: ed.equityVesting, percentage: ed.equityPercentage } : null;
-            const profitShare = (ed.profitSplit || ed.profitSharePercentage != null) ? { percentage: ed.profitSharePercentage != null ? ed.profitSharePercentage : null, split: ed.profitSplit, basis: ed.profitBasis, distribution: ed.profitDistribution } : null;
-            const newContract = await dataService.createContract({
+            const participants = [
+                { userId: creatorId, role: 'creator', approvalStatus: 'pending', signedAt: null },
+                { userId: contractorId, role: 'contractor', approvalStatus: 'pending', signedAt: null }
+            ];
+            const newDeal = await dataService.createDeal({
                 opportunityId: currentOpportunity.id,
                 applicationId: application.id,
-                creatorId,
-                contractorId,
+                participants,
+                title: 'Deal – ' + (opp.title || application.id),
+                status: window.CONFIG?.DEAL_STATUS?.DRAFT || 'draft',
                 scope: opp.title || '',
-                paymentMode: opp.exchangeMode || opp.paymentModes?.[0] || 'cash',
-                duration: '',
-                status: window.CONFIG?.CONTRACT_STATUS?.PENDING || 'pending',
-                paymentSchedule: paymentSchedule || undefined,
-                equityVesting: equityVesting || undefined,
-                profitShare: profitShare || undefined
+                exchangeMode: opp.exchangeMode || opp.paymentModes?.[0] || 'cash',
+                valueTerms: { agreedValue: null, paymentSchedule: '' },
+                timeline: { start: null, end: null }
             });
             await dataService.updateOpportunity(currentOpportunity.id, { status: 'contracted' });
             const user = authService.getCurrentUser();
             if (user) {
                 await dataService.createAuditLog({
                     userId: user.id,
-                    action: 'contract_created',
-                    entityType: 'contract',
-                    entityId: newContract.id,
+                    action: 'deal_created',
+                    entityType: 'deal',
+                    entityId: newDeal.id,
                     details: { opportunityId: currentOpportunity.id, applicationId: application.id }
                 });
+            }
+            if (window.router && newDeal.id) {
+                window.router.navigate('/deals/' + newDeal.id);
             }
         }
         

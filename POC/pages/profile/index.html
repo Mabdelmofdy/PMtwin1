@@ -7,21 +7,6 @@
     </div>
     <div class="page-body">
     
-    <!-- Profile completeness (company/professional only) -->
-    <div id="profile-completeness-card" class="card mb-4" style="display: none;">
-        <div class="card-body">
-            <div class="flex items-center justify-between gap-4 flex-wrap">
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-semibold text-gray-900 mb-1">Profile completeness</h3>
-                    <p id="profile-completeness-text" class="text-sm text-gray-600">Complete your profile to improve match recommendations.</p>
-                    <div class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden max-w-xs">
-                        <div id="profile-completeness-bar" class="h-full bg-primary rounded-full transition-all" style="width: 0%;"></div>
-                    </div>
-                </div>
-                <span id="profile-completeness-percent" class="text-2xl font-bold text-primary">0%</span>
-            </div>
-        </div>
-    </div>
     
     <div id="profile-clarification-banner" class="card border-warning mb-4" style="display: none;">
         <div class="card-body">
@@ -44,39 +29,202 @@
     
     <div class="profile-content">
         <div class="profile-main">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Account Information</h2>
-                </div>
+            <!-- Profile Header (LinkedIn/Upwork style) -->
+            <div class="card profile-header-card mb-4">
                 <div class="card-body">
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" id="profile-email" class="form-input" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Role</label>
-                        <input type="text" id="profile-role" class="form-input" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Status</label>
-                        <input type="text" id="profile-status" class="form-input" readonly>
-                    </div>
-                    <div id="profile-verification-group" class="form-group" style="display: none;">
-                        <label class="form-label">Verification</label>
-                        <div id="profile-verification-badge" class="mt-1"></div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Social media</label>
-                        <div id="view-account-socialMedia" class="space-y-1"></div>
-                        <p class="text-sm text-gray-500 mt-1">Edit your Company or Professional profile below to add or change links.</p>
+                    <div class="flex flex-wrap gap-6 items-start">
+                        <div class="profile-photo-placeholder w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary flex-shrink-0" id="profile-photo-placeholder"></div>
+                        <div class="flex-1 min-w-0">
+                            <h2 class="text-xl font-bold text-gray-900 mb-1" id="profile-header-name">—</h2>
+                            <p class="text-gray-600 mb-1" id="profile-header-role">—</p>
+                            <p class="text-sm text-gray-500 mb-2" id="profile-header-location">—</p>
+                            <div class="flex flex-wrap gap-3 text-sm mb-3">
+                                <span id="profile-header-availability" class="text-gray-600">—</span>
+                                <span id="profile-header-hourly" class="text-gray-600">—</span>
+                            </div>
+                            <div class="flex flex-wrap gap-2 items-center">
+                                <div class="flex-1 min-w-[140px] max-w-xs">
+                                    <div class="text-xs text-gray-500 mb-0.5">Profile completion</div>
+                                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div id="profile-completeness-bar" class="h-full bg-primary rounded-full transition-all" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                                <span id="profile-completeness-percent" class="text-lg font-bold text-primary">0%</span>
+                                <button type="button" class="btn btn-primary btn-sm" id="profile-header-edit-btn">Edit Profile</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="card" id="company-profile-card" style="display: none;">
+
+            <!-- Tab navigation -->
+            <div class="border-b border-gray-200 mb-4">
+                <nav class="profile-tabs flex gap-1" role="tablist">
+                    <button type="button" class="profile-tab px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20" data-tab="profile" role="tab">Profile</button>
+                    <button type="button" class="profile-tab px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20" data-tab="portfolio" role="tab">Portfolio</button>
+                    <button type="button" class="profile-tab px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20" data-tab="experience" role="tab">Experience</button>
+                    <button type="button" class="profile-tab px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20" data-tab="settings" role="tab">Settings</button>
+                </nav>
+            </div>
+
+            <!-- Tab 1: Profile (About, Skills, Languages, Collaboration, Certifications) -->
+            <div id="profile-tab-profile" class="profile-tab-panel" role="tabpanel">
+                <div class="card mb-4">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="profile-section-title">About</h3>
+                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="basic" id="profile-edit-basic-btn" style="display: none;">Edit</button>
+                    </div>
+                    <div class="card-body">
+                        <p id="view-prof-bio" class="text-gray-700 whitespace-pre-wrap">—</p>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="profile-section-title">Skills</h3>
+                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="skills" id="profile-edit-skills-btn">Edit</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="view-skills" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="profile-section-title">Languages</h3>
+                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="basic">Edit</button>
+                    </div>
+                    <div class="card-body">
+                        <span id="view-prof-languages">—</span>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="profile-section-title">Collaboration preferences</h3>
+                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="professional" id="profile-edit-professional-btn">Edit</button>
+                    </div>
+                    <div class="card-body">
+                        <span id="view-prof-workMode">—</span>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="profile-section-title">Certifications</h3>
+                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="certifications" id="profile-edit-certifications-btn">Edit</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="view-certifications" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Portfolio (project cards) -->
+            <div id="profile-tab-portfolio" class="profile-tab-panel hidden" role="tabpanel">
+                <div class="card mb-4">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="profile-section-title">Projects & case studies</h3>
+                        <button type="button" class="btn btn-primary btn-sm profile-edit-section-btn" data-section="portfolio" id="profile-edit-portfolio-btn">Add Project</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="profile-portfolio-cards" class="space-y-4"></div>
+                        <div id="view-prof-caseStudies" class="space-y-2 mb-4 hidden"></div>
+                        <div id="view-prof-portfolio" class="space-y-2 hidden"></div>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="profile-section-title">References &amp; testimonials</h3>
+                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="references" id="profile-edit-references-btn">Edit</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="view-prof-references" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Experience (work, education, certifications) -->
+            <div id="profile-tab-experience" class="profile-tab-panel hidden" role="tabpanel">
+                <div class="card mb-4">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="profile-section-title">Work experience</h3>
+                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="experience" id="profile-edit-experience-btn">Edit</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="view-experience-entries" class="space-y-4"></div>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="profile-section-title">Education</h3>
+                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="professional">Edit</button>
+                    </div>
+                    <div class="card-body">
+                        <span id="view-prof-education">—</span>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="profile-section-title">Certifications</h3>
+                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="certifications">Edit</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="view-experience-certifications" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Settings (account, security, notifications, social) -->
+            <div id="profile-tab-settings" class="profile-tab-panel hidden" role="tabpanel">
+                <div class="card mb-4" id="profile-section-account">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="profile-section-title">Account information</h3>
+                        <button type="button" class="btn btn-secondary btn-sm" id="profile-edit-account-btn">Edit</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="profile-view-item"><span class="text-gray-600">Email</span><div class="flex items-center gap-2 flex-wrap"><input type="email" id="profile-email" class="form-input flex-1 min-w-0" readonly><span id="profile-email-verification-hint" class="text-sm text-amber-600 hidden" aria-live="polite">Verify your account to improve trust.</span></div></div>
+                            <div class="profile-view-item"><span class="text-gray-600">Role</span><input type="text" id="profile-role" class="form-input" readonly></div>
+                            <div class="profile-view-item"><span class="text-gray-600">Account status</span><input type="text" id="profile-status" class="form-input" readonly></div>
+                            <div class="profile-view-item"><span class="text-gray-600">Phone</span><span id="view-prof-phone">—</span></div>
+                            <div id="profile-verification-group" class="profile-view-item sm:col-span-2" style="display: none;"><span class="text-gray-600">Verification</span><div id="profile-verification-badge" class="mt-1"></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header"><h3 class="profile-section-title">Security</h3></div>
+                    <div class="card-body space-y-2">
+                        <a href="#" id="profile-action-change-password" class="btn btn-secondary btn-sm">Change Password</a>
+                        <p class="text-sm text-gray-500">Two Factor Authentication — Coming soon.</p>
+                        <button type="button" id="profile-action-delete-account" class="btn btn-ghost btn-sm text-red-600 hover:text-red-700 mt-2" title="Contact support to delete account">Delete Account</button>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header"><h3 class="profile-section-title">Notifications</h3></div>
+                    <div class="card-body">
+                        <p class="text-sm text-gray-600">Email and system notification preferences can be managed in Settings.</p>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="profile-section-title">Social links</h3>
+                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="basic">Edit</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="view-prof-socialMedia" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legacy section IDs for JS that still references them (hidden, content lives in tabs) -->
+            <div id="profile-section-basic" data-section="basic" class="hidden" aria-hidden="true"></div>
+            <div id="profile-section-skills" data-section="skills" class="hidden" aria-hidden="true"></div>
+            <div id="profile-section-certifications" data-section="certifications" class="hidden" aria-hidden="true"></div>
+            <div id="profile-section-experience" data-section="experience" class="hidden" aria-hidden="true"></div>
+            <div id="profile-section-professional" data-section="professional" class="hidden" aria-hidden="true"></div>
+
+            <!-- 4. Company Profile (Company users only) -->
+            <div class="card profile-section" id="company-profile-card" style="display: none;">
                 <div class="card-header flex items-center justify-between">
-                    <h2>Company Profile</h2>
-                    <button type="button" id="company-profile-edit-btn" class="btn btn-secondary btn-sm">Edit</button>
+                    <h2 class="profile-section-title">Company Profile</h2>
+                    <button type="button" id="company-profile-edit-btn" class="btn btn-secondary btn-sm">Edit Company Profile</button>
                     <button type="button" id="company-profile-cancel-btn" class="btn btn-ghost btn-sm" style="display: none;">Cancel</button>
                 </div>
                 <div class="card-body">
@@ -188,67 +336,19 @@
                     </form>
                 </div>
             </div>
-            
-            <div class="card" id="professional-profile-card" style="display: none;">
-                <div class="card-header flex items-center justify-between">
-                    <h2>Professional Profile</h2>
-                    <button type="button" id="professional-profile-edit-btn" class="btn btn-secondary btn-sm">Edit</button>
-                    <button type="button" id="professional-profile-cancel-btn" class="btn btn-ghost btn-sm" style="display: none;">Cancel</button>
+
+            <!-- Legacy IDs for JS (content in tabs) -->
+            <div id="profile-section-portfolio" data-section="portfolio" class="hidden" aria-hidden="true"></div>
+            <div id="profile-section-references" data-section="references" class="hidden" aria-hidden="true"></div>
+            <div id="profile-section-matching" class="hidden" aria-hidden="true"></div>
+            <div id="profile-section-security" class="hidden" aria-hidden="true"></div>
+
+            <!-- Hidden: professional profile form (used by Edit Basic / Edit Professional / Edit Portfolio / Edit References) -->
+            <div id="professional-profile-card" style="display: none;">
+                <div id="prof-company-affiliation" class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg" style="display:none;">
+                    <span class="text-sm text-blue-800">Affiliated with <strong id="prof-company-name-link"></strong></span>
                 </div>
-                <div class="card-body">
-                    <div id="professional-profile-view" class="profile-view">
-                        <div id="prof-company-affiliation" class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg" style="display:none;">
-                            <span class="text-sm text-blue-800">Affiliated with <strong id="prof-company-name-link"></strong></span>
-                        </div>
-                        <h4 class="font-medium text-gray-700 mb-2">Basic info</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                            <div class="profile-view-item"><span class="text-gray-600">Full Name</span><span id="view-full-name">—</span></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Headline</span><span id="view-prof-headline">—</span></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Title</span><span id="view-prof-title">—</span></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Phone</span><span id="view-prof-phone">—</span></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Location</span><span id="view-prof-location">—</span></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Experience Level</span><span id="view-prof-experienceLevel">—</span></div>
-                            <div class="profile-view-item sm:col-span-2"><span class="text-gray-600">Bio</span><span id="view-prof-bio">—</span></div>
-                        </div>
-                        <h4 class="font-medium text-gray-700 mb-2">Social media</h4>
-                        <div id="view-prof-socialMedia" class="space-y-1 mb-4"></div>
-                        <h4 class="font-medium text-gray-700 mb-2">Experience & skills</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                            <div class="profile-view-item"><span class="text-gray-600">Specializations</span><span id="view-specializations">—</span></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Skills</span><div id="view-skills" class="flex flex-wrap gap-1 mt-1">—</div></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Sectors / Industry</span><span id="view-prof-sectors">—</span></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Education</span><span id="view-prof-education">—</span></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Certifications</span><span id="view-certifications">—</span></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Years of Experience</span><span id="view-years-experience">—</span></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Services Offered</span><span id="view-prof-services">—</span></div>
-                            <div class="profile-view-item sm:col-span-2"><span class="text-gray-600">Interests</span><span id="view-prof-interests">—</span></div>
-                        </div>
-                        <h4 class="font-medium text-gray-700 mb-2">Preferences</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="profile-view-item"><span class="text-gray-600">Availability</span><span id="view-prof-availability" class="inline-flex items-center">—</span></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Preferred Work Mode</span><span id="view-prof-workMode">—</span></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Preferred Payment Modes</span><span id="view-prof-paymentModes">—</span></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Hourly Rate</span><span id="view-prof-hourlyRate">—</span></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Languages</span><span id="view-prof-languages">—</span></div>
-                            <div class="profile-view-item sm:col-span-2"><span class="text-gray-600">Preferred Collaboration Models</span><span id="view-prof-preferredModels">—</span></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Primary domain</span><span id="view-prof-primaryDomain">—</span></div>
-                            <div class="profile-view-item sm:col-span-2"><span class="text-gray-600">Expertise areas</span><span id="view-prof-expertiseAreas">—</span></div>
-                            <div class="profile-view-item sm:col-span-2"><span class="text-gray-600">Professional fields</span><span id="view-prof-professionalFields">—</span></div>
-                        </div>
-                        <h4 class="font-medium text-gray-700 mb-2 mt-4">Portfolio / case studies</h4>
-                        <div id="view-prof-caseStudies" class="space-y-2 mb-4"></div>
-                        <h4 class="font-medium text-gray-700 mb-2 mt-4">Portfolio</h4>
-                        <div id="view-prof-portfolio" class="space-y-2 mb-4">—</div>
-                        <h4 class="font-medium text-gray-700 mb-2 mt-4">References & testimonials</h4>
-                        <div id="view-prof-references" class="space-y-2 mb-4"></div>
-                        <h4 class="font-medium text-gray-700 mb-2 mt-4">Vetting steps</h4>
-                        <div class="space-y-2 mb-4">
-                            <p class="text-sm text-gray-600"><strong>Certifications:</strong> <span id="view-prof-certifications-vetting">—</span></p>
-                            <p class="text-sm text-gray-600"><strong>Case study (vetting):</strong> <span id="view-prof-vettingCaseStudy">—</span></p>
-                            <p class="text-sm text-gray-600"><strong>Interview:</strong> <span id="view-prof-interview">—</span></p>
-                        </div>
-                    </div>
-                    <form id="professional-profile-form" style="display: none;">
+                <form id="professional-profile-form" style="display: none;">
                         <h4 class="font-medium text-gray-700 mb-2">Basic info</h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                             <div class="form-group"><label for="full-name" class="form-label">Full Name</label><input type="text" id="full-name" name="name" class="form-input"></div>
@@ -284,6 +384,12 @@
                             <div class="form-group"><label for="years-experience" class="form-label">Years of Experience</label><input type="number" id="years-experience" name="yearsExperience" class="form-input" min="0"></div>
                             <div class="form-group"><label for="prof-services" class="form-label">Services</label><input type="text" id="prof-services" name="services" class="form-input" placeholder="Comma-separated"></div>
                             <div class="form-group sm:col-span-2"><label for="prof-interests" class="form-label">Interests</label><input type="text" id="prof-interests" name="interests" class="form-input" placeholder="Comma-separated"></div>
+                            <div class="form-group sm:col-span-2" id="prof-experience-entries-block">
+                                <label class="form-label">Experience (role, company, period)</label>
+                                <p class="text-sm text-gray-600 mb-2">Add job or role entries, e.g. Senior Project Manager, ABC Construction, 2019 – Present.</p>
+                                <div id="prof-experience-entries-list" class="space-y-3 mb-2"></div>
+                                <button type="button" id="prof-add-experience-entry" class="btn btn-secondary btn-sm">Add Experience</button>
+                            </div>
                         </div>
                         <h4 class="font-medium text-gray-700 mb-2">Preferences</h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
@@ -339,10 +445,12 @@
                                 <button type="button" id="prof-add-vettingCaseStudy-doc" class="btn btn-secondary btn-sm">Add file</button>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <div class="flex gap-2 mt-4">
+                            <button type="button" id="professional-profile-cancel-btn" class="btn btn-ghost">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
                     </form>
                 </div>
-            </div>
             
             <div class="card" id="profile-other-card" style="display: none;">
                 <div class="card-header"><h2>Profile</h2></div>
@@ -355,26 +463,26 @@
         </div>
         
         <div class="profile-sidebar">
-            <div class="card">
+            <div class="card" id="quick-stats-card" style="display: none;">
                 <div class="card-header">
                     <h3>Quick Stats</h3>
                 </div>
                 <div class="card-body">
                     <div class="stat-item">
                         <strong>Opportunities Created</strong>
-                        <span id="stat-opps-created">0</span>
+                        <span id="stat-opps-created" class="stat-value">0</span>
                     </div>
                     <div class="stat-item">
                         <strong>Applications Submitted</strong>
-                        <span id="stat-apps-submitted">0</span>
+                        <span id="stat-apps-submitted" class="stat-value">0</span>
                     </div>
                     <div class="stat-item">
                         <strong>Matches Received</strong>
-                        <span id="stat-matches-received">0</span>
+                        <span id="stat-matches-received" class="stat-value">0</span>
                     </div>
                     <div class="stat-item">
                         <strong>Completed Collaborations</strong>
-                        <span id="stat-collaborations">0</span>
+                        <span id="stat-collaborations" class="stat-value">0</span>
                     </div>
                 </div>
             </div>
@@ -398,12 +506,16 @@
                     <h3>Matching preferences</h3>
                 </div>
                 <div class="card-body">
+                    <p id="matching-preferences-summary" class="text-sm text-gray-700 mb-3">Only candidates with <strong id="matching-min-score-value">75</strong>% or above match score will be shown.</p>
                     <div class="form-group">
                         <label for="matching-min-score" class="block text-sm font-medium text-gray-700 mb-1">Minimum match score (%)</label>
                         <input type="number" id="matching-min-score" class="form-input w-20" min="70" max="100" value="70" placeholder="70">
                         <p class="text-xs text-gray-500 mt-1">Only show recommendations at or above this score (70–100).</p>
                     </div>
-                    <button type="button" id="matching-preferences-save" class="btn btn-primary btn-sm">Save preferences</button>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <button type="button" id="matching-preferences-review" class="btn btn-secondary btn-sm">Review preferences</button>
+                        <button type="button" id="matching-preferences-save" class="btn btn-primary btn-sm">Save preferences</button>
+                    </div>
                 </div>
             </div>
             <div class="card" id="reviews-received-card">
@@ -433,6 +545,16 @@
 .profile-page {
     /* Page specific styles */
 }
+.profile-header-card .card-body { padding: 1.5rem; }
+.profile-tab.active { border-bottom-color: var(--primary-color, #2563eb); color: var(--primary-color, #2563eb); }
+.profile-tab-panel.hidden { display: none !important; }
+.profile-tab-panel { display: block; }
+.profile-portfolio-card { border: 1px solid var(--border-color, #e5e7eb); border-radius: 0.5rem; padding: 1rem; }
+
+.profile-add-prompt {
+    display: inline-block;
+    margin-top: 0.125rem;
+}
 
 .profile-content {
     display: grid;
@@ -452,6 +574,12 @@
     gap: var(--spacing-lg);
 }
 
+.profile-preview.profile-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 2rem;
+}
+
 .stat-item {
     margin-bottom: var(--spacing-md);
     padding-bottom: var(--spacing-md);
@@ -463,6 +591,66 @@
     margin-bottom: 0;
 }
 
+.profile-preview-h3 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.profile-preview-h3::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: #6b7280;
+    border-radius: 2px;
+}
+
+.profile-preview .skill-tag,
+.profile-preview .skill-tag-alt {
+    display: inline-flex;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.profile-preview .skill-tag { background: var(--primary-color); color: #fff; }
+.profile-preview .skill-tag-alt { background: #93c5fd; color: #1e3a8a; }
+.profile-preview .service-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #93c5fd;
+    border-radius: var(--radius-lg);
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+.profile-preview .interest-tag,
+.profile-preview .language-tag,
+.cert-tag {
+    display: inline-flex;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-lg);
+    font-size: 0.875rem;
+    background: #f3f4f6;
+    border: 1px solid var(--border-color);
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.profile-preview .cert-tag {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
 .stat-item strong {
     display: block;
     margin-bottom: var(--spacing-xs);
@@ -470,12 +658,49 @@
     font-size: var(--font-size-sm);
 }
 
+.stat-item span.stat-value,
 .stat-item span {
     font-size: var(--font-size-xl);
     font-weight: 700;
     color: var(--primary-color);
 }
 
+.profile-view-section {
+    background: rgba(249, 250, 251, 0.8);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+}
+.profile-view-section:last-child {
+    margin-bottom: 0;
+}
+.profile-view-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary, #111827);
+    cursor: pointer;
+    list-style: none;
+    padding: 0.25rem 0;
+    margin: -0.25rem 0 0.75rem 0;
+}
+.profile-view-section-title::-webkit-details-marker {
+    display: none;
+}
+.profile-view-section-title::before {
+    content: '';
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    margin-right: 0.5rem;
+    transition: transform 0.2s;
+}
+.profile-view-section[open] .profile-view-section-title::before {
+    transform: rotate(-135deg);
+}
 .profile-view-item {
     display: flex;
     flex-direction: column;
@@ -548,6 +773,11 @@
 .availability-badge.unavailable { background: #fee2e2; color: #991b1b; }
 @media (max-width: 968px) {
     .profile-content {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 768px) {
+    .profile-preview.profile-layout {
         grid-template-columns: 1fr;
     }
 }

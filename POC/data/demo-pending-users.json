@@ -1,0 +1,39 @@
+{
+  "domain": "users",
+  "version": "1.0",
+  "dataset": "demo40",
+  "description": "Pending and clarification_requested users for vetting flow testing",
+  "data": [
+    {
+      "id": "demo-pending-01",
+      "email": "pending01@demo.test",
+      "passwordHash": "ZGVtbzEyMw==",
+      "role": "professional",
+      "status": "pending",
+      "profile": {
+        "name": "Khalid Al-Mutairi",
+        "location": "Riyadh",
+        "skills": ["Construction"]
+      },
+      "createdAt": "2026-03-07T08:00:00.000Z",
+      "updatedAt": "2026-03-07T08:00:00.000Z"
+    },
+    {
+      "id": "demo-pending-02",
+      "email": "pending02@demo.test",
+      "passwordHash": "ZGVtbzEyMw==",
+      "role": "company_owner",
+      "status": "clarification_requested",
+      "profile": {
+        "name": "Jeddah Contracting Co",
+        "type": "company",
+        "companyType": "Contractor",
+        "location": "Jeddah",
+        "description": "Awaiting clarification on registration documents.",
+        "sectors": ["Construction"]
+      },
+      "createdAt": "2026-03-06T14:00:00.000Z",
+      "updatedAt": "2026-03-07T09:00:00.000Z"
+    }
+  ]
+}

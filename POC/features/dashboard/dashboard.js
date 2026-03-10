@@ -21,6 +21,17 @@ async function initDashboard(params) {
 
     await loadDashboardData(user.id);
 
+    // Profile completeness (show when < 100%)
+    const completenessEl = document.getElementById('dashboard-profile-completeness');
+    const completenessBar = document.getElementById('dashboard-completeness-bar');
+    const completenessPercent = document.getElementById('dashboard-completeness-percent');
+    if (typeof profileCompletion !== 'undefined' && completenessEl && completenessBar && completenessPercent) {
+        const result = profileCompletion.getProfileCompletion(user);
+        completenessBar.style.width = result.percent + '%';
+        completenessPercent.textContent = result.percent + '%';
+        completenessEl.style.display = result.percent < 100 ? 'flex' : 'none';
+    }
+
     // Show verification reminder for unverified professionals/consultants
     const unverifiedReminder = document.getElementById('dashboard-unverified-reminder');
     if (unverifiedReminder) {
@@ -30,6 +41,8 @@ async function initDashboard(params) {
         const showReminder = isIndividual && (verificationStatus === CONFIG.VERIFICATION_STATUS.UNVERIFIED || (vettingSkipped && !verificationStatus));
         unverifiedReminder.style.display = showReminder ? 'block' : 'none';
     }
+
+    loadYourMatches(user.id);
 
     const isCompany = authService.isCompanyUser && authService.isCompanyUser();
     if (isCompany) {
@@ -62,10 +75,13 @@ async function loadDashboardData(userId) {
         const userApplications = allApplications.filter(a => a.applicantId === userId);
         document.getElementById('stat-applications').textContent = userApplications.length;
         
-        // Load matches
+        // Load matches (legacy + post matches)
         const allMatches = await dataService.getMatches();
         const userMatches = allMatches.filter(m => (m.candidateId || m.userId) === userId);
-        document.getElementById('stat-matches').textContent = userMatches.length;
+        const postMatchesForUser = dataService.getPostMatchesForUser ? await dataService.getPostMatchesForUser(userId) : [];
+        const pendingPostMatches = postMatchesForUser.filter(pm => (pm.status || '') !== 'declined');
+        const statMatchesEl = document.getElementById('stat-matches');
+        if (statMatchesEl) statMatchesEl.textContent = userMatches.length + pendingPostMatches.length;
         
         // Load notifications
         const notifications = await dataService.getNotifications(userId);
@@ -178,10 +194,14 @@ async function displayRecentApplications(applications) {
     
     // Render each application
     const html = appsWithOpps.map(app => {
+        const av = app.application_value;
+        const valueScorePct = av?.value_score != null ? Math.round(av.value_score * 100) : null;
         const data = {
             ...app,
             statusBadgeClass: getStatusBadgeClass(app.status),
-            createdDate: new Date(app.createdAt).toLocaleDateString()
+            createdDate: new Date(app.createdAt).toLocaleDateString(),
+            valueScorePct: valueScorePct != null ? valueScorePct : '',
+            valueScoreLabel: valueScorePct != null ? `Value match: ${valueScorePct}%` : ''
         };
         return templateRenderer.render(template, data);
     }).join('');
@@ -346,6 +366,218 @@ async function loadCompanyRecommendations(companyId) {
         console.error('Error loading company recommendations:', e);
         if (emptyEl) emptyEl.style.display = 'block';
     }
+}
+
+/**
+ * Get viewer role for a one_way post-match (from participants).
+ */
+function getOneWayViewerRole(postMatch, currentUserId) {
+    const participants = postMatch.participants || [];
+    const needOwner = participants.find(p => p.role === 'need_owner');
+    const offerProvider = participants.find(p => p.role === 'offer_provider');
+    const needOwnerId = needOwner?.userId || null;
+    const offerOwnerId = offerProvider?.userId || null;
+    return {
+        isNeedOwner: needOwnerId === currentUserId,
+        isOfferOwner: offerOwnerId === currentUserId
+    };
+}
+
+/**
+ * Build view model for a post-match card (resolves opportunity titles and names).
+ * For one_way, includes role-based title, section labels, and actions per viewer.
+ */
+async function buildPostMatchViewModel(postMatch, currentUserId) {
+    const ds = dataService;
+    const scorePct = Math.round((postMatch.matchScore || 0) * 100);
+    const base = {
+        id: postMatch.id,
+        matchType: postMatch.matchType,
+        matchScore: postMatch.matchScore,
+        matchScorePercent: scorePct,
+        status: postMatch.status,
+        tierLabel: postMatch.matchScore >= 0.85 ? 'Top match' : postMatch.matchScore >= 0.70 ? 'Good match' : 'Possible match'
+    };
+    const payload = postMatch.payload || {};
+
+    if (postMatch.matchType === 'one_way') {
+        const needOpp = await ds.getOpportunityById(payload.needOpportunityId);
+        const offerOpp = await ds.getOpportunityById(payload.offerOpportunityId);
+        const needTitle = needOpp?.title || 'Need';
+        const offerTitle = offerOpp?.title || 'Offer';
+        const otherPart = (postMatch.participants || []).find(p => p.userId !== currentUserId);
+        const otherUserId = otherPart?.userId || '';
+        const needOpportunityId = payload.needOpportunityId || '';
+        const offerOpportunityId = payload.offerOpportunityId || '';
+        const { isNeedOwner } = getOneWayViewerRole(postMatch, currentUserId);
+        const cardTitle = isNeedOwner ? 'Recommended Provider Found' : 'Recommended Opportunity Found';
+        const section1Label = isNeedOwner ? 'Your Need' : 'Opportunity Need';
+        const section2Label = isNeedOwner ? 'Provider Offer' : 'Your Offer';
+        let primaryActionLabel, primaryActionRoute, secondaryActionLabel, secondaryActionRoute, tertiaryActionLabel, tertiaryActionRoute;
+        if (isNeedOwner) {
+            primaryActionLabel = 'View Provider';
+            primaryActionRoute = '/opportunities/' + offerOpportunityId;
+            secondaryActionLabel = 'Invite to Apply';
+            secondaryActionRoute = '/opportunities/' + offerOpportunityId;
+            tertiaryActionLabel = 'Message Provider';
+            tertiaryActionRoute = '/messages/' + otherUserId;
+        } else {
+            primaryActionLabel = 'View Opportunity';
+            primaryActionRoute = '/opportunities/' + needOpportunityId;
+            secondaryActionLabel = 'Apply to Opportunity';
+            secondaryActionRoute = '/opportunities/' + needOpportunityId;
+            tertiaryActionLabel = 'Message Owner';
+            tertiaryActionRoute = '/messages/' + otherUserId;
+        }
+        return {
+            ...base,
+            needTitle,
+            offerTitle,
+            needOpportunityId,
+            offerOpportunityId,
+            otherUserId,
+            cardTitle,
+            section1Label,
+            section2Label,
+            primaryActionLabel,
+            primaryActionRoute,
+            secondaryActionLabel,
+            secondaryActionRoute,
+            tertiaryActionLabel,
+            tertiaryActionRoute
+        };
+    }
+
+    if (postMatch.matchType === 'two_way') {
+        const sideA = payload.sideA || {};
+        const sideB = payload.sideB || {};
+        const isA = sideA.userId === currentUserId;
+        const myNeedId = isA ? sideA.needId : sideB.needId;
+        const myOfferId = isA ? sideA.offerId : sideB.offerId;
+        const theirNeedId = isA ? sideB.needId : sideA.needId;
+        const theirOfferId = isA ? sideB.offerId : sideA.offerId;
+        const myNeed = myNeedId ? await ds.getOpportunityById(myNeedId) : null;
+        const myOffer = myOfferId ? await ds.getOpportunityById(myOfferId) : null;
+        const theirNeed = theirNeedId ? await ds.getOpportunityById(theirNeedId) : null;
+        const theirOffer = theirOfferId ? await ds.getOpportunityById(theirOfferId) : null;
+        const otherUserId = isA ? (sideB.userId || '') : (sideA.userId || '');
+        return {
+            ...base,
+            yourNeedTitle: myNeed?.title || 'Your need',
+            yourOfferTitle: myOffer?.title || 'Your offer',
+            theirNeedTitle: theirNeed?.title || 'Their need',
+            theirOfferTitle: theirOffer?.title || 'Their offer',
+            valueEquivalence: payload.valueEquivalence || '',
+            otherUserId
+        };
+    }
+
+    if (postMatch.matchType === 'consortium') {
+        const leadOpp = await ds.getOpportunityById(payload.leadNeedId);
+        const projectTitle = leadOpp?.title || 'Project';
+        const roles = (payload.roles || []).map(async (r) => {
+            const user = await ds.getUserOrCompanyById(r.userId);
+            return { role: r.role || 'Partner', partnerName: user?.profile?.name || r.userId };
+        });
+        const rolesResolved = await Promise.all(roles);
+        return {
+            ...base,
+            projectTitle,
+            roles: rolesResolved
+        };
+    }
+
+    if (postMatch.matchType === 'circular') {
+        const cycle = payload.cycle || [];
+        const links = payload.links || [];
+        const myIdx = cycle.indexOf(currentUserId);
+        const youGiveLink = links.find(l => (l.fromCreatorId || l.from) === currentUserId);
+        const youReceiveLink = links.find(l => (l.toCreatorId || l.to) === currentUserId);
+        const youGiveOpp = youGiveLink?.offerId ? await ds.getOpportunityById(youGiveLink.offerId) : null;
+        const youReceiveNeedOpp = youReceiveLink?.needId ? await ds.getOpportunityById(youReceiveLink.needId) : null;
+        const names = await Promise.all(cycle.map(uid => ds.getUserOrCompanyById(uid).then(u => u?.profile?.name || uid)));
+        const cycleLabel = cycle.map((uid, i) => (uid === currentUserId ? 'You' : (names[i] || uid))).join(' → ') + ' → You';
+        return {
+            ...base,
+            cycleLabel,
+            youGiveTitle: youGiveOpp?.title || 'Your offer',
+            youReceiveTitle: youReceiveNeedOpp ? `Need: ${youReceiveNeedOpp.title}` : 'Their need'
+        };
+    }
+
+    return base;
+}
+
+async function loadYourMatches(userId) {
+    const section = document.getElementById('your-matches-section');
+    const list = document.getElementById('your-matches-list');
+    if (!section || !list) return;
+
+    if (!dataService.getPostMatchesForUser) {
+        section.style.display = 'none';
+        return;
+    }
+
+    try {
+        const postMatches = await dataService.getPostMatchesForUser(userId);
+        const pending = postMatches.filter(pm => (pm.status || '') !== 'declined' && (pm.status || '') !== 'expired');
+        const sorted = pending.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+
+        if (sorted.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+        let category = 'all';
+        const tabEls = document.querySelectorAll('#match-category-tabs .match-tab');
+        tabEls.forEach(btn => {
+            btn.addEventListener('click', function () {
+                tabEls.forEach(b => { b.classList.remove('active', 'bg-primary', 'text-white'); b.classList.add('bg-gray-100', 'text-gray-700'); });
+                this.classList.add('active', 'bg-primary', 'text-white');
+                this.classList.remove('bg-gray-100', 'text-gray-700');
+                category = this.getAttribute('data-category') || 'all';
+                renderYourMatchesList(list, userId, sorted, category);
+            });
+        });
+        list.addEventListener('click', (e) => {
+            const accept = e.target.closest('.btn-accept-match');
+            const decline = e.target.closest('.btn-decline-match');
+            if ((accept || decline) && e.target.tagName !== 'A') {
+                e.preventDefault();
+                const matchId = (accept || decline).getAttribute('data-match-id');
+                if (matchId && window.router && typeof window.router.navigate === 'function') {
+                    window.router.navigate('/matches/' + matchId);
+                }
+            }
+        });
+
+        await renderYourMatchesList(list, userId, sorted, category);
+    } catch (e) {
+        console.error('Error loading your matches:', e);
+        section.style.display = 'none';
+    }
+}
+
+async function renderYourMatchesList(container, userId, postMatches, category) {
+    const filtered = category === 'all' ? postMatches : postMatches.filter(pm => pm.matchType === category);
+    const top = filtered.slice(0, 5);
+
+    const templateNames = {
+        one_way: 'match-card-one-way',
+        two_way: 'match-card-two-way',
+        consortium: 'match-card-consortium',
+        circular: 'match-card-circular'
+    };
+
+    const htmlParts = [];
+    for (const pm of top) {
+        const viewModel = await buildPostMatchViewModel(pm, userId);
+        const name = templateNames[pm.matchType] || 'match-card';
+        const template = await templateLoader.load(name);
+        htmlParts.push(templateRenderer.render(template, viewModel));
+    }
+    container.innerHTML = htmlParts.join('');
 }
 
 async function loadApplicationsReceived(userId) {

@@ -1,6 +1,6 @@
 /**
- * Contract Detail – full view of a contract between creator and contractor.
- * Shows parties, scope, payment, duration, milestones, dates, and link to opportunity.
+ * Contract Detail – legal agreement only (multi-party).
+ * Shows parties, scope, payment, duration, dates. Execution is on the linked Deal.
  */
 
 function escapeHtml(str) {
@@ -78,7 +78,8 @@ async function initContractDetail(params) {
             return;
         }
 
-        const isParty = contract.creatorId === user.id || contract.contractorId === user.id;
+        const parties = dataService.getContractParties(contract);
+        const isParty = parties.some(p => p.userId === user.id);
         if (!isParty) {
             loadingEl.style.display = 'none';
             errorEl.style.display = 'block';
@@ -87,18 +88,10 @@ async function initContractDetail(params) {
             return;
         }
 
-        const [creator, contractor, opportunity] = await Promise.all([
-            dataService.getUserOrCompanyById(contract.creatorId),
-            dataService.getUserOrCompanyById(contract.contractorId),
-            dataService.getOpportunityById(contract.opportunityId)
-        ]);
-
-        const creatorName = creator?.profile?.name || creator?.email || contract.creatorId;
-        const creatorEmail = creator?.email || '—';
-        const contractorName = contractor?.profile?.name || contractor?.email || contract.contractorId;
-        const contractorEmail = contractor?.email || '—';
-
-        const myRole = contract.creatorId === user.id ? 'Creator' : 'Contractor';
+        const opportunity = await dataService.getOpportunityById(contract.opportunityId);
+        const partyUsers = await Promise.all(parties.map(p => dataService.getUserOrCompanyById(p.userId)));
+        const myParty = parties.find(p => p.userId === user.id);
+        const myRole = (myParty && myParty.role) ? (myParty.role.charAt(0).toUpperCase() + myParty.role.slice(1)) : 'Participant';
         const scopeDisplay = contract.scope || (opportunity && opportunity.title) || '—';
 
         loadingEl.style.display = 'none';
@@ -110,10 +103,15 @@ async function initContractDetail(params) {
         document.getElementById('contract-status-badge').className = 'badge badge-' + getContractStatusBadgeClass(contract.status);
         document.getElementById('contract-role-badge').textContent = 'Your role: ' + myRole;
 
-        document.getElementById('contract-parties').innerHTML = `
-            <p><strong>Creator</strong><br/>${escapeHtml(creatorName)}<br/><span class="text-muted">${escapeHtml(creatorEmail)}</span></p>
-            <p><strong>Contractor</strong><br/>${escapeHtml(contractorName)}<br/><span class="text-muted">${escapeHtml(contractorEmail)}</span></p>
-        `;
+        const partiesHtml = parties.map((p, i) => {
+            const u = partyUsers[i];
+            const name = u?.profile?.name || u?.email || p.userId;
+            const email = u?.email || '—';
+            const roleLabel = (p.role || 'participant').charAt(0).toUpperCase() + (p.role || 'participant').slice(1);
+            const signed = p.signedAt ? formatDate(p.signedAt) : 'Pending';
+            return `<p><strong>${escapeHtml(roleLabel)}</strong><br/>${escapeHtml(name)}<br/><span class="text-muted">${escapeHtml(email)}</span><br/><span class="text-muted small">Signed: ${signed}</span></p>`;
+        }).join('');
+        document.getElementById('contract-parties').innerHTML = partiesHtml;
 
         const paymentMode = contract.paymentMode || (opportunity && opportunity.exchangeMode) || '—';
         const duration = contract.duration || '—';
@@ -141,16 +139,12 @@ async function initContractDetail(params) {
         }
         document.getElementById('contract-scope-terms').innerHTML = termsHtml;
 
-        const milestones = contract.milestones || [];
-        const milestonesHtml = milestones.length
-            ? `<ul class="list-none p-0 m-0">${milestones.map((m) => `
-                <li class="milestone-item">
-                    <span>${escapeHtml(m.title)}${m.dueDate ? ' <span class="text-muted">(' + escapeHtml(m.dueDate) + ')</span>' : ''}</span>
-                    <span class="badge badge-${m.status === 'completed' ? 'success' : 'secondary'}">${m.status === 'completed' ? 'Completed' : 'Pending'}${m.completedAt ? ' ' + formatDate(m.completedAt) : ''}</span>
-                </li>
-            `).join('')}</ul>`
-            : '<p class="text-muted">No milestones defined.</p>';
-        document.getElementById('contract-milestones').innerHTML = milestonesHtml;
+        const dealId = contract.dealId;
+        const executionHtml = dealId
+            ? `<p class="text-muted">Execution (milestones, delivery) is managed by the linked Deal.</p><a href="#" data-route="/deals/${escapeHtml(dealId)}" class="btn btn-primary btn-sm">View Deal</a>`
+            : '<p class="text-muted">Execution is managed by the linked Deal. No deal linked.</p>';
+        const milestonesEl = document.getElementById('contract-milestones');
+        if (milestonesEl) milestonesEl.innerHTML = executionHtml;
 
         document.getElementById('contract-dates').innerHTML = `
             <p><strong>Created</strong><br/>${formatDate(contract.createdAt)}</p>
@@ -160,18 +154,19 @@ async function initContractDetail(params) {
 
         const oppTitle = (opportunity && opportunity.title) || scopeDisplay;
         const oppId = contract.opportunityId;
-        document.getElementById('contract-opportunity-link').innerHTML = `
-            <p><a href="#" data-route="/opportunities/${escapeHtml(oppId)}" class="contract-opportunity-link text-primary font-medium">${escapeHtml(oppTitle)}</a></p>
-            <a href="#" data-route="/opportunities/${escapeHtml(oppId)}" class="btn btn-primary btn-sm">View opportunity</a>
-        `;
+        let opportunityLinkHtml = '';
+        if (dealId) {
+            opportunityLinkHtml += `<p><a href="#" data-route="/deals/${escapeHtml(dealId)}" class="text-primary font-medium">View Deal (execution)</a></p>`;
+        }
+        if (oppId) {
+            opportunityLinkHtml += `<p><a href="#" data-route="/opportunities/${escapeHtml(oppId)}" class="contract-opportunity-link text-primary font-medium">${escapeHtml(oppTitle)}</a></p><a href="#" data-route="/opportunities/${escapeHtml(oppId)}" class="btn btn-primary btn-sm">View opportunity</a>`;
+        }
+        document.getElementById('contract-opportunity-link').innerHTML = opportunityLinkHtml || '<p class="text-muted">—</p>';
 
-        const isCreator = contract.creatorId === user.id;
-        const canEditContract = isCreator && (contract.status === 'pending' || contract.status === 'active');
+        const isLead = parties.length > 0 && parties[0].userId === user.id;
+        const canEditContract = isLead && (contract.status === 'pending' || contract.status === 'active');
+        const canCloseContract = isLead && contract.status === 'active';
         const oppStatus = opportunity ? opportunity.status : '';
-        const showManageExecution = ['contracted', 'in_execution', 'completed'].indexOf(oppStatus) !== -1;
-        const milestones = contract.milestones || [];
-        const allMilestonesDone = milestones.length === 0 || milestones.every(m => m.status === 'completed');
-        const canCloseContract = isCreator && contract.status === 'active' && allMilestonesDone;
         const actionsEl = document.getElementById('contract-detail-actions');
         if (actionsEl) {
             let actionsHtml = '';
@@ -181,8 +176,8 @@ async function initContractDetail(params) {
             if (canCloseContract) {
                 actionsHtml += `<button type="button" id="contract-close-btn" class="btn btn-primary no-print">Close contract</button>`;
             }
-            if (showManageExecution && oppId) {
-                actionsHtml += `<a href="#" data-route="/opportunities/${escapeHtml(oppId)}" class="btn btn-primary">Manage execution</a>`;
+            if (dealId) {
+                actionsHtml += `<a href="#" data-route="/deals/${escapeHtml(dealId)}" class="btn btn-primary">Manage execution</a>`;
             }
             actionsHtml += `<button type="button" id="contract-print-btn" class="btn btn-secondary">Print contract</button>`;
             actionsEl.innerHTML = actionsHtml;
@@ -223,8 +218,10 @@ async function initContractDetail(params) {
                 }));
                 reviewsListEl.innerHTML = reviewRows.length ? reviewRows.join('') : '<p class="text-muted">No reviews yet.</p>';
 
-                const otherPartyId = contract.creatorId === user.id ? contract.contractorId : contract.creatorId;
-                const otherPartyName = contract.creatorId === user.id ? contractorName : creatorName;
+                const otherParties = parties.filter(p => p.userId !== user.id);
+                const otherPartyId = otherParties.length > 0 ? otherParties[0].userId : null;
+                const otherPartyIndex = otherPartyId ? parties.findIndex(p => p.userId === otherPartyId) : -1;
+                const otherPartyName = otherPartyIndex >= 0 && partyUsers[otherPartyIndex] ? (partyUsers[otherPartyIndex]?.profile?.name || partyUsers[otherPartyIndex]?.email || otherPartyId) : (otherPartyId || '');
                 const myReview = await dataService.getReviewByContractAndReviewer(contractId, user.id);
                 if (contractCompleted && otherPartyId && !myReview) {
                     leaveReviewEl.style.display = 'block';

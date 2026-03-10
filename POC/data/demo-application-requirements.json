@@ -1,0 +1,37 @@
+{
+  "domain": "application_requirements",
+  "version": "1.0",
+  "description": "Requirements match for Application Details View (Section 4)",
+  "data": [
+    {
+      "id": "demo-app-req-01",
+      "applicationId": "demo-app-01",
+      "requirementKey": "skill_Structural_Engineering",
+      "requirementLabel": "Required skill",
+      "requiredValue": "Structural Engineering",
+      "applicantMatch": "match",
+      "applicantResponse": null,
+      "sortOrder": 0
+    },
+    {
+      "id": "demo-app-req-02",
+      "applicationId": "demo-app-01",
+      "requirementKey": "skill_Structural_Review",
+      "requirementLabel": "Required skill",
+      "requiredValue": "Structural Review",
+      "applicantMatch": "match",
+      "applicantResponse": null,
+      "sortOrder": 1
+    },
+    {
+      "id": "demo-app-req-03",
+      "applicationId": "demo-app-01",
+      "requirementKey": "experience",
+      "requirementLabel": "Experience required",
+      "requiredValue": "5+ years",
+      "applicantMatch": "match",
+      "applicantResponse": "10 years",
+      "sortOrder": 2
+    }
+  ]
+}

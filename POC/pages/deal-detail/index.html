@@ -1,0 +1,35 @@
+<div class="page-container deal-detail-page">
+    <div id="deal-loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading deal...</p>
+    </div>
+    <div id="deal-error" class="error-state" style="display: none;">
+        <h2>Deal not found</h2>
+        <p>This deal does not exist or you do not have access.</p>
+        <a href="#" data-route="/deals" class="btn btn-primary">Back to Deals</a>
+    </div>
+    <div id="deal-content" style="display: none;">
+        <a href="#" data-route="/deals" class="back-link"><i class="ph-duotone ph-arrow-left"></i> Back to Deals</a>
+        <div class="deal-header bg-white border border-gray-200 rounded-lg p-6 mb-6">
+            <h1 id="deal-title" class="page-title text-2xl font-bold text-gray-900 mb-2">Deal</h1>
+            <div class="flex flex-wrap gap-3 items-center">
+                <span id="deal-status-badge" class="badge">—</span>
+                <span id="deal-type-label" class="text-sm text-gray-600">—</span>
+                <span id="deal-match-link" class="text-sm"></span>
+            </div>
+        </div>
+        <div id="deal-stage-content" class="deal-stage-content">
+            <!-- Rendered by deal-detail.js based on deal.status -->
+        </div>
+    </div>
+</div>
+
+<style>
+.deal-detail-page .loading-state,
+.deal-detail-page .error-state { text-align: center; padding: 2rem; }
+.deal-detail-page .back-link { display: inline-block; margin-bottom: 1rem; color: var(--primary-color); text-decoration: none; }
+.deal-detail-page .back-link:hover { text-decoration: underline; }
+.deal-stage-content { max-width: 900px; }
+.deal-section { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem; }
+.deal-section h2 { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem; }
+</style>

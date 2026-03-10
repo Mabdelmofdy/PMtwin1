@@ -109,6 +109,7 @@ class LayoutService {
         navHTML += `<div class="nav-brand"><a href="#" data-route="${CONFIG.ROUTES.HOME}" class="text-xl font-bold text-primary no-underline hover:text-primary-dark transition-colors">${CONFIG.APP_NAME}</a></div>`;
         navHTML += '<ul class="flex list-none gap-6 items-center m-0 p-0">';
         navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.FIND}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors">Find</a></li>`;
+        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.WORKFLOW}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors">How it works</a></li>`;
         navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.KNOWLEDGE_BASE}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors">Knowledge Base</a></li>`;
         navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.LOGIN}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors">Login</a></li>`;
         navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.REGISTER}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors">Register</a></li>`;
@@ -169,6 +170,7 @@ class LayoutService {
             { route: CONFIG.ROUTES.OPPORTUNITIES, label: 'Opportunities', icon: 'ph-duotone ph-briefcase' },
             { route: '/pipeline', label: 'Pipeline', icon: 'ph-duotone ph-git-branch' },
             { route: CONFIG.ROUTES.CONTRACTS, label: 'Contracts', icon: 'ph-duotone ph-file-text' },
+            { route: CONFIG.ROUTES.DEALS, label: 'Deals', icon: 'ph-duotone ph-handshake' },
             { route: '/people', label: 'People', icon: 'ph-duotone ph-users' },
             { route: CONFIG.ROUTES.MESSAGES, label: 'Messages', icon: 'ph-duotone ph-chat-circle' },
             { route: CONFIG.ROUTES.NOTIFICATIONS, label: 'Notifications', icon: 'ph-duotone ph-bell' },

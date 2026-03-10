@@ -17,7 +17,8 @@ class AuthGuard {
             CONFIG.ROUTES.HOME,
             CONFIG.ROUTES.LOGIN,
             CONFIG.ROUTES.REGISTER,
-            CONFIG.ROUTES.FIND
+            CONFIG.ROUTES.FIND,
+            CONFIG.ROUTES.WORKFLOW
         ];
         return !publicRoutes.includes(route);
     }

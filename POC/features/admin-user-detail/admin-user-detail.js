@@ -74,8 +74,14 @@ async function loadUserDetail(userId) {
     const supportingFilesHtml = supportingFiles.length > 0
         ? '<div class="detail-item">Case study supporting files: ' + supportingFiles.map(f => f.name || 'File').join(', ') + '</div>'
         : '';
+    const phoneVerified = person.profile?.phoneVerified === true || person.profile?.mobileVerified === true;
+    const idVerified = person.profile?.idVerified === true;
+    const verificationTier = person.profile?.verificationTier || '';
     vettingEl.innerHTML = `
         <div class="detail-item"><strong>Requirements</strong> <span class="badge badge-secondary">${type === 'consultant' ? 'Consultant' : 'Professional'}</span></div>
+        <div class="detail-item">Phone verified ${phoneVerified ? '✓' : '✗'}</div>
+        <div class="detail-item">ID verified ${idVerified ? '✓' : '✗'}</div>
+        ${verificationTier === 'top_expert' ? '<div class="detail-item"><span class="badge badge-primary">Top Expert</span></div>' : ''}
         <div class="detail-item">Certifications ${req.certifications === 'required' ? (certOk ? '✓' : '✗') : '—'} ${docs.length === 0 ? 'None' : docs.map(d => d.label || d.type || 'Document').join(', ')}</div>
         <div class="detail-item">Case study ${req.caseStudy ? (caseStudyOk ? '✓' : '✗') : '—'} ${vc && (vc.title || vc.url || vc.description) ? (vc.title || '') + (vc.url ? ' · ' + vc.url : '') + (vc.description ? ' · ' + vc.description : '') : (caseStudies.length ? 'Portfolio provided' : '—')}</div>
         ${supportingFilesHtml}
@@ -95,10 +101,13 @@ async function loadUserDetail(userId) {
         ].join('');
         verificationSelect.value = person.profile?.verificationStatus || 'unverified';
     }
+    const tierSelect = document.getElementById('admin-verification-tier');
+    if (tierSelect) tierSelect.value = person.profile?.verificationTier || '';
     if (showVerificationEdit) {
         document.getElementById('admin-save-verification').onclick = async () => {
             const status = document.getElementById('admin-verification-status').value;
-            const updatedProfile = { ...(person.profile || {}), verificationStatus: status };
+            const tier = document.getElementById('admin-verification-tier')?.value || '';
+            const updatedProfile = { ...(person.profile || {}), verificationStatus: status, verificationTier: tier || null };
             try {
                 if (isCompany) await dataService.updateCompany(userId, { profile: updatedProfile });
                 else await dataService.updateUser(userId, { profile: updatedProfile });

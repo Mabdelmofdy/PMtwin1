@@ -1,16 +1,25 @@
 <div class="card">
     <div class="card-header">
-        <h3>{{opportunity.title}}</h3>
+        <h3>{{cardTitle}}</h3>
         <span class="badge badge-success">{{matchScorePercent}}% Match</span>
     </div>
     <div class="card-body">
-        <p>{{opportunity.description}}</p>
+        <div>
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{section1Label}}</p>
+            <p class="text-gray-900 font-medium">{{section1Content}}</p>
+        </div>
+        <div style="margin-top: var(--spacing-md);">
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{section2Label}}</p>
+            <p class="text-gray-900 font-medium">{{section2Content}}</p>
+        </div>
         <p class="text-muted" style="font-size: var(--font-size-sm); margin-top: var(--spacing-md);">
-            Model: {{opportunity.modelType}} | 
+            Model: {{opportunity.modelType}} |
             Status: {{opportunity.status}}
         </p>
     </div>
-    <div class="card-footer">
-        <a href="#" data-route="/opportunities/{{opportunity.id}}" class="btn btn-primary btn-sm">View & Apply</a>
+    <div class="card-footer flex flex-wrap gap-2">
+        <a href="#" data-route="{{primaryActionRoute}}" class="btn btn-primary btn-sm">{{primaryActionLabel}}</a>
+        <a href="#" data-route="{{secondaryActionRoute}}" class="btn btn-outline btn-sm">{{secondaryActionLabel}}</a>
+        <a href="#" data-route="{{tertiaryActionRoute}}" class="btn btn-outline btn-sm">{{tertiaryActionLabel}}</a>
     </div>
 </div>

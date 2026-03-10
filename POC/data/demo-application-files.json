@@ -1,0 +1,31 @@
+{
+  "domain": "application_files",
+  "version": "1.0",
+  "description": "Attachments uploaded with application (Section 9)",
+  "data": [
+    {
+      "id": "demo-app-file-01",
+      "applicationId": "demo-app-01",
+      "fileType": "portfolio",
+      "fileName": "Structural_Projects_Portfolio.pdf",
+      "fileUrl": "#",
+      "uploadedAt": "2026-03-07T10:00:00.000Z"
+    },
+    {
+      "id": "demo-app-file-02",
+      "applicationId": "demo-app-01",
+      "fileType": "certificate",
+      "fileName": "PE_License.pdf",
+      "fileUrl": "#",
+      "uploadedAt": "2026-03-07T10:00:00.000Z"
+    },
+    {
+      "id": "demo-app-file-03",
+      "applicationId": "demo-app-01",
+      "fileType": "case_study",
+      "fileName": "Highway_Structure_Case_Study.pdf",
+      "fileUrl": "#",
+      "uploadedAt": "2026-03-07T10:00:00.000Z"
+    }
+  ]
+}

@@ -84,8 +84,19 @@
         
         <!-- Matches Pipeline -->
         <div id="tab-matches" class="tab-content" style="display: none;">
-            <div id="matches-list" class="matches-container">
-                <div class="spinner"></div>
+            <div class="matches-subtabs" id="matches-subtabs">
+                <button type="button" class="matches-subtab active" data-subtab="recommended" id="matches-subtab-recommended">Recommended Matches</button>
+                <button type="button" class="matches-subtab" data-subtab="opportunity" id="matches-subtab-opportunity">Opportunity Matches</button>
+            </div>
+            <div id="matches-recommended" class="matches-panel active">
+                <div id="matches-recommended-list" class="matches-container">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+            <div id="matches-opportunity" class="matches-panel">
+                <div id="matches-opportunity-list" class="matches-container">
+                    <div class="spinner"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -204,6 +215,43 @@
     display: flex;
     gap: var(--spacing-xs);
     flex-wrap: wrap;
+}
+
+.matches-subtabs {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.matches-subtab {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.matches-subtab:hover {
+    color: var(--primary-color);
+}
+
+.matches-subtab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.matches-panel {
+    display: none;
+}
+
+.matches-panel.active {
+    display: block;
 }
 
 .matches-container {

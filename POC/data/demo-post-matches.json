@@ -1,0 +1,114 @@
+{
+  "domain": "post_matches",
+  "version": "1.0",
+  "description": "Demo post-to-post matches for all four models: one-way, two-way barter, consortium, circular exchange",
+  "data": [
+    {
+      "id": "demo-pm-oneway-01",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "participants": [
+        { "userId": "demo-c01", "opportunityId": "demo-oneway-need-01", "role": "need_owner", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u06", "opportunityId": "demo-oneway-offer-01", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }
+      ],
+      "payload": {
+        "needOpportunityId": "demo-oneway-need-01",
+        "offerOpportunityId": "demo-oneway-offer-01",
+        "breakdown": { "skills": 0.95, "budget": 0.85, "timeline": 0.9, "location": 1 },
+        "valueAnalysis": { "fit": "good", "budgetInRange": true }
+      },
+      "createdAt": "2026-03-08T10:00:00.000Z",
+      "updatedAt": "2026-03-08T10:00:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-oneway-02",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.82,
+      "participants": [
+        { "userId": "demo-c02", "opportunityId": "demo-oneway-need-02", "role": "need_owner", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u07", "opportunityId": "demo-oneway-offer-02", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }
+      ],
+      "payload": {
+        "needOpportunityId": "demo-oneway-need-02",
+        "offerOpportunityId": "demo-oneway-offer-02",
+        "breakdown": { "skills": 0.9, "budget": 0.88, "timeline": 0.85, "location": 0.9 },
+        "valueAnalysis": { "fit": "good", "budgetInRange": true }
+      },
+      "createdAt": "2026-03-08T10:05:00.000Z",
+      "updatedAt": "2026-03-08T10:05:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-twoway-01",
+      "matchType": "two_way",
+      "status": "pending",
+      "matchScore": 0.92,
+      "participants": [
+        { "userId": "demo-u11", "opportunityId": "demo-barter-na-11", "role": "need_owner", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u11", "opportunityId": "demo-barter-oa-11", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u12", "opportunityId": "demo-barter-nb-12", "role": "need_owner", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u12", "opportunityId": "demo-barter-ob-12", "role": "offer_provider", "participantStatus": "pending", "respondedAt": null }
+      ],
+      "payload": {
+        "sideA": { "userId": "demo-u11", "needId": "demo-barter-na-11", "offerId": "demo-barter-oa-11" },
+        "sideB": { "userId": "demo-u12", "needId": "demo-barter-nb-12", "offerId": "demo-barter-ob-12" },
+        "scoreAtoB": 0.91,
+        "scoreBtoA": 0.93,
+        "valueEquivalence": "~1.1 × (Office space ↔ Engineering consulting)"
+      },
+      "createdAt": "2026-03-08T10:10:00.000Z",
+      "updatedAt": "2026-03-08T10:10:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-consortium-01",
+      "matchType": "consortium",
+      "status": "pending",
+      "matchScore": 0.85,
+      "participants": [
+        { "userId": "demo-c05", "opportunityId": "demo-group-lead-01", "role": "consortium_lead", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u23", "opportunityId": "demo-group-offer-01", "role": "consortium_member", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u24", "opportunityId": "demo-group-offer-02", "role": "consortium_member", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u25", "opportunityId": "demo-group-offer-03", "role": "consortium_member", "participantStatus": "pending", "respondedAt": null }
+      ],
+      "payload": {
+        "leadNeedId": "demo-group-lead-01",
+        "roles": [
+          { "role": "Investor", "opportunityId": "demo-group-offer-01", "userId": "demo-u23", "score": 0.88 },
+          { "role": "Contractor", "opportunityId": "demo-group-offer-02", "userId": "demo-u24", "score": 0.84 },
+          { "role": "Equipment supplier", "opportunityId": "demo-group-offer-03", "userId": "demo-u25", "score": 0.83 }
+        ],
+        "valueBalance": { "consortiumBalanceScore": 0.82, "viable": true }
+      },
+      "createdAt": "2026-03-08T10:15:00.000Z",
+      "updatedAt": "2026-03-08T10:15:00.000Z",
+      "expiresAt": null
+    },
+    {
+      "id": "demo-pm-circular-01",
+      "matchType": "circular",
+      "status": "pending",
+      "matchScore": 0.87,
+      "participants": [
+        { "userId": "demo-u31", "opportunityId": "demo-circ-o31", "role": "chain_participant", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u32", "opportunityId": "demo-circ-o32", "role": "chain_participant", "participantStatus": "pending", "respondedAt": null },
+        { "userId": "demo-u33", "opportunityId": "demo-circ-o33", "role": "chain_participant", "participantStatus": "pending", "respondedAt": null }
+      ],
+      "payload": {
+        "cycle": ["demo-u31", "demo-u32", "demo-u33"],
+        "links": [
+          { "fromCreatorId": "demo-u31", "toCreatorId": "demo-u32", "offerId": "demo-circ-o31", "needId": "demo-circ-n32", "score": 0.89 },
+          { "fromCreatorId": "demo-u32", "toCreatorId": "demo-u33", "offerId": "demo-circ-o32", "needId": "demo-circ-n33", "score": 0.86 },
+          { "fromCreatorId": "demo-u33", "toCreatorId": "demo-u31", "offerId": "demo-circ-o33", "needId": "demo-circ-n31", "score": 0.86 }
+        ],
+        "chainBalance": { "chainBalanceScore": 0.85, "viable": true }
+      },
+      "createdAt": "2026-03-08T10:20:00.000Z",
+      "updatedAt": "2026-03-08T10:20:00.000Z",
+      "expiresAt": null
+    }
+  ]
+}

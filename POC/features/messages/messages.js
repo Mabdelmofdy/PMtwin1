@@ -16,22 +16,35 @@ async function initMessages(params) {
     const partnerId = params?.id;
 
     if (partnerId) {
-        const connected = await dataService.getConnectionStatus(currentUser.id, partnerId) === 'accepted';
-        if (!connected) {
-            if (typeof showNotification === 'function') {
-                showNotification('You must be connected to message this person.', 'warning');
-            } else {
-                alert('You must be connected to message this person.');
-            }
-            router.navigate('/messages');
-            return;
-        }
+        const connectionStatus = await dataService.getConnectionStatus(currentUser.id, partnerId);
+        const connected = connectionStatus === 'accepted';
         currentPartnerId = partnerId;
         threadEmpty.style.display = 'none';
         threadView.style.display = 'flex';
+        setupThreadBack();
+
+        if (!connected) {
+            const partner = await dataService.getUserOrCompanyById(partnerId);
+            const partnerName = partner?.profile?.name || partner?.profile?.companyName || partner?.email || 'this person';
+            const threadMessages = document.getElementById('thread-messages');
+            const messageForm = document.getElementById('message-form');
+            const threadHeaderName = document.getElementById('thread-partner-name');
+            if (threadHeaderName) threadHeaderName.textContent = partnerName;
+            if (threadMessages) {
+                threadMessages.innerHTML = '<div class="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-900"><p class="font-medium">Connect to message</p><p class="text-sm mt-1">You must be connected with ' + escapeHtml(partnerName) + ' to send messages.</p><a href="#" data-route="/people/' + (partnerId || '').replace(/"/g, '&quot;') + '" class="inline-block mt-3 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-dark no-underline">View profile &amp; send connection request</a></div>';
+            }
+            if (messageForm) messageForm.style.display = 'none';
+            await renderConversationsList(partnerId);
+            return;
+        }
+
+        const threadHeaderName = document.getElementById('thread-partner-name');
+        if (threadHeaderName) {
+            const partner = await dataService.getUserOrCompanyById(partnerId);
+            threadHeaderName.textContent = partner?.profile?.name || partner?.profile?.companyName || partner?.email || 'Unknown';
+        }
         await loadThread(partnerId);
         setupMessageForm(partnerId);
-        setupThreadBack();
     } else {
         currentPartnerId = null;
         threadEmpty.style.display = 'flex';

@@ -9,7 +9,7 @@ class DataService {
         this.storage = window.storageService || storageService;
         this.initialized = false;
         this.SEED_DATA_VERSION_KEY = 'pmtwin_seed_version';
-        this.CURRENT_SEED_VERSION = '1.18.0'; // Production data cleanup: opportunities/contacts cleared; admin-only user seed
+        this.CURRENT_SEED_VERSION = '1.21.0'; // Deal vs Contract lifecycle: contract legal-only, milestones on deal, migration
     }
     
     /**
@@ -32,6 +32,7 @@ class DataService {
             
             if (!needsSeed) {
                 console.log('Data already initialized, skipping seed');
+                await this.mergeDemoData();
                 this.initialized = true;
                 return;
             }
@@ -70,6 +71,12 @@ class DataService {
                 }
             }
             
+            // Merge demo40 users, companies, and opportunities so demo logins work (demo01@demo.test / demo123, etc.)
+            await this.mergeDemoData();
+            
+            // Migrate legacy contracts to Deal/Contract lifecycle (synthetic deals for contracts without dealId)
+            this.migrateContractsToDealContractLifecycle();
+            
             // Migrate opportunities to unified workflow (intent, collaborationModel, paymentModes)
             this.migrateOpportunitiesToUnifiedWorkflow();
             
@@ -84,6 +91,149 @@ class DataService {
             console.log('Data initialization complete');
         } catch (error) {
             console.error('Error initializing from JSON:', error);
+        }
+    }
+    
+    /**
+     * Merge demo-users.json, demo-companies.json, and demo-40-opportunities.json into stored data
+     * so Demo40 accounts (demo01@demo.test / demo123, company01@demo.test / demo123) can log in.
+     */
+    async mergeDemoData() {
+        const base = this.jsonDataPath;
+        const mergeById = (existing, incoming) => {
+            const byId = new Map((existing || []).map((x) => [x.id, x]));
+            (incoming || []).forEach((r) => byId.set(r.id, r));
+            return Array.from(byId.values());
+        };
+        try {
+            const demoUsersRes = await fetch(`${base}demo-users.json`);
+            if (demoUsersRes.ok) {
+                const json = await demoUsersRes.json();
+                if (json.data && json.data.length) {
+                    const users = this.storage.get(CONFIG.STORAGE_KEYS.USERS) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.USERS, mergeById(users, json.data));
+                    console.log(`Merged ${json.data.length} demo users`);
+                }
+            }
+            const demoPendingRes = await fetch(`${base}demo-pending-users.json`);
+            if (demoPendingRes.ok) {
+                const json = await demoPendingRes.json();
+                if (json.data && json.data.length) {
+                    const users = this.storage.get(CONFIG.STORAGE_KEYS.USERS) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.USERS, mergeById(users, json.data));
+                    console.log(`Merged ${json.data.length} demo pending users`);
+                }
+            }
+            const demoCompaniesRes = await fetch(`${base}demo-companies.json`);
+            if (demoCompaniesRes.ok) {
+                const json = await demoCompaniesRes.json();
+                if (json.data && json.data.length) {
+                    const companies = this.storage.get(CONFIG.STORAGE_KEYS.COMPANIES) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.COMPANIES, mergeById(companies, json.data));
+                    console.log(`Merged ${json.data.length} demo companies`);
+                }
+            }
+            const demoOppsRes = await fetch(`${base}demo-40-opportunities.json`);
+            if (demoOppsRes.ok) {
+                const json = await demoOppsRes.json();
+                if (json.data && json.data.length) {
+                    const opportunities = this.storage.get(CONFIG.STORAGE_KEYS.OPPORTUNITIES) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.OPPORTUNITIES, mergeById(opportunities, json.data));
+                    console.log(`Merged ${json.data.length} demo opportunities`);
+                }
+            }
+            const demoAppsRes = await fetch(`${base}demo-applications.json`);
+            if (demoAppsRes.ok) {
+                const json = await demoAppsRes.json();
+                if (json.data && json.data.length) {
+                    const applications = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATIONS) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.APPLICATIONS, mergeById(applications, json.data));
+                    console.log(`Merged ${json.data.length} demo applications`);
+                }
+            }
+            const demoDealsRes = await fetch(`${base}demo-deals.json`);
+            if (demoDealsRes.ok) {
+                const json = await demoDealsRes.json();
+                if (json.data && json.data.length) {
+                    const deals = this.storage.get(CONFIG.STORAGE_KEYS.DEALS) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.DEALS, mergeById(deals, json.data));
+                    console.log(`Merged ${json.data.length} demo deals`);
+                }
+            }
+            const demoContractsRes = await fetch(`${base}demo-contracts.json`);
+            if (demoContractsRes.ok) {
+                const json = await demoContractsRes.json();
+                if (json.data && json.data.length) {
+                    const contracts = this.storage.get(CONFIG.STORAGE_KEYS.CONTRACTS) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.CONTRACTS, mergeById(contracts, json.data));
+                    console.log(`Merged ${json.data.length} demo contracts`);
+                }
+            }
+            const demoMatchesRes = await fetch(`${base}demo-matches.json`);
+            if (demoMatchesRes.ok) {
+                const json = await demoMatchesRes.json();
+                if (json.data && json.data.length) {
+                    const matches = this.storage.get(CONFIG.STORAGE_KEYS.MATCHES) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.MATCHES, mergeById(matches, json.data));
+                    console.log(`Merged ${json.data.length} demo matches`);
+                }
+            }
+            const demoNotificationsRes = await fetch(`${base}demo-notifications.json`);
+            if (demoNotificationsRes.ok) {
+                const json = await demoNotificationsRes.json();
+                if (json.data && json.data.length) {
+                    const notifications = this.storage.get(CONFIG.STORAGE_KEYS.NOTIFICATIONS) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.NOTIFICATIONS, mergeById(notifications, json.data));
+                    console.log(`Merged ${json.data.length} demo notifications`);
+                }
+            }
+            const demoPostMatchesRes = await fetch(`${base}demo-post-matches.json`);
+            if (demoPostMatchesRes.ok) {
+                const json = await demoPostMatchesRes.json();
+                if (json.data && json.data.length) {
+                    const postMatches = this.storage.get(CONFIG.STORAGE_KEYS.POST_MATCHES) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.POST_MATCHES, mergeById(postMatches, json.data));
+                    console.log(`Merged ${json.data.length} demo post matches`);
+                }
+            }
+            const demoAppReqsRes = await fetch(`${base}demo-application-requirements.json`);
+            if (demoAppReqsRes.ok) {
+                const json = await demoAppReqsRes.json();
+                if (json.data && json.data.length) {
+                    const list = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATION_REQUIREMENTS) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.APPLICATION_REQUIREMENTS, mergeById(list, json.data));
+                    console.log(`Merged ${json.data.length} application requirements`);
+                }
+            }
+            const demoAppDelsRes = await fetch(`${base}demo-application-deliverables.json`);
+            if (demoAppDelsRes.ok) {
+                const json = await demoAppDelsRes.json();
+                if (json.data && json.data.length) {
+                    const list = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATION_DELIVERABLES) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.APPLICATION_DELIVERABLES, mergeById(list, json.data));
+                    console.log(`Merged ${json.data.length} application deliverables`);
+                }
+            }
+            const demoAppFilesRes = await fetch(`${base}demo-application-files.json`);
+            if (demoAppFilesRes.ok) {
+                const json = await demoAppFilesRes.json();
+                if (json.data && json.data.length) {
+                    const list = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATION_FILES) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.APPLICATION_FILES, mergeById(list, json.data));
+                    console.log(`Merged ${json.data.length} application files`);
+                }
+            }
+            const demoAppPayRes = await fetch(`${base}demo-application-payment-terms.json`);
+            if (demoAppPayRes.ok) {
+                const json = await demoAppPayRes.json();
+                if (json.data && json.data.length) {
+                    const list = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATION_PAYMENT_TERMS) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.APPLICATION_PAYMENT_TERMS, mergeById(list, json.data));
+                    console.log(`Merged ${json.data.length} application payment terms`);
+                }
+            }
+        } catch (e) {
+            console.warn('Merge demo data failed (demo files may be missing):', e);
         }
     }
     
@@ -165,6 +315,75 @@ class DataService {
             this.storage.set(CONFIG.STORAGE_KEYS.OPPORTUNITIES, opportunities);
             console.log('Migrated opportunities to unified workflow');
         }
+    }
+
+    /**
+     * Migrate legacy contracts (no dealId) to Deal/Contract lifecycle: create synthetic deal,
+     * move milestones to deal, set contract.dealId and contract.parties, remove contract.milestones.
+     */
+    migrateContractsToDealContractLifecycle() {
+        const contracts = this.storage.get(CONFIG.STORAGE_KEYS.CONTRACTS) || [];
+        const deals = this.storage.get(CONFIG.STORAGE_KEYS.DEALS) || [];
+        let contractsChanged = false;
+        let dealsChanged = false;
+        const now = new Date().toISOString();
+        for (const c of contracts) {
+            if (c.dealId) continue;
+            const parties = this.getContractParties(c);
+            const signedAt = c.signedAt || null;
+            const participants = parties.map(p => ({
+                userId: p.userId,
+                role: p.role || 'participant',
+                approvalStatus: signedAt ? 'approved' : 'pending',
+                signedAt: signedAt
+            }));
+            const legacyMilestones = c.milestones || [];
+            const milestones = legacyMilestones.map(m => this.normalizeMilestone(m));
+            const dealStatus = c.status === CONFIG.CONTRACT_STATUS.ACTIVE
+                ? (milestones.length > 0 ? CONFIG.DEAL_STATUS.EXECUTION : CONFIG.DEAL_STATUS.ACTIVE)
+                : c.status === CONFIG.CONTRACT_STATUS.COMPLETED || c.status === CONFIG.CONTRACT_STATUS.TERMINATED
+                    ? CONFIG.DEAL_STATUS.CLOSED
+                    : CONFIG.DEAL_STATUS.ACTIVE;
+            const newDeal = {
+                id: this.generateId(),
+                matchId: null,
+                applicationId: c.applicationId || null,
+                opportunityId: c.opportunityId || null,
+                matchType: 'one_way',
+                status: dealStatus,
+                title: (c.scope && c.scope.substring(0, 80)) || 'Deal',
+                participants,
+                opportunityIds: c.opportunityId ? [c.opportunityId] : [],
+                scope: c.scope || '',
+                timeline: { start: null, end: null },
+                exchangeMode: c.paymentMode || 'cash',
+                valueTerms: { agreedValue: c.agreedValue || null, paymentSchedule: c.paymentSchedule || '' },
+                deliverables: '',
+                milestones,
+                negotiationId: null,
+                contractId: c.id,
+                createdAt: c.createdAt || now,
+                updatedAt: now,
+                completedAt: dealStatus === CONFIG.DEAL_STATUS.CLOSED ? now : null,
+                closedAt: dealStatus === CONFIG.DEAL_STATUS.CLOSED ? now : null
+            };
+            deals.push(newDeal);
+            dealsChanged = true;
+            const contractParties = parties.map(p => ({ userId: p.userId, role: p.role || 'participant', signedAt: signedAt }));
+            const idx = contracts.indexOf(c);
+            contracts[idx] = {
+                ...c,
+                dealId: newDeal.id,
+                parties: contractParties,
+                milestones: undefined,
+                updatedAt: now
+            };
+            delete contracts[idx].milestones;
+            contractsChanged = true;
+        }
+        if (dealsChanged) this.storage.set(CONFIG.STORAGE_KEYS.DEALS, deals);
+        if (contractsChanged) this.storage.set(CONFIG.STORAGE_KEYS.CONTRACTS, contracts);
+        if (contractsChanged || dealsChanged) console.log('Migrated contracts to Deal/Contract lifecycle');
     }
 
     /**
@@ -272,7 +491,12 @@ class DataService {
             'companies': CONFIG.STORAGE_KEYS.COMPANIES,
             'opportunities': CONFIG.STORAGE_KEYS.OPPORTUNITIES,
             'applications': CONFIG.STORAGE_KEYS.APPLICATIONS,
+            'application_requirements': CONFIG.STORAGE_KEYS.APPLICATION_REQUIREMENTS,
+            'application_deliverables': CONFIG.STORAGE_KEYS.APPLICATION_DELIVERABLES,
+            'application_files': CONFIG.STORAGE_KEYS.APPLICATION_FILES,
+            'application_payment_terms': CONFIG.STORAGE_KEYS.APPLICATION_PAYMENT_TERMS,
             'matches': CONFIG.STORAGE_KEYS.MATCHES,
+            'post_matches': CONFIG.STORAGE_KEYS.POST_MATCHES,
             'notifications': CONFIG.STORAGE_KEYS.NOTIFICATIONS,
             'connections': CONFIG.STORAGE_KEYS.CONNECTIONS,
             'messages': CONFIG.STORAGE_KEYS.MESSAGES,
@@ -494,7 +718,12 @@ class DataService {
     
     async getOpportunityById(id) {
         const opportunities = await this.getOpportunities();
-        return opportunities.find(o => o.id === id) || null;
+        let opportunity = opportunities.find(o => o.id === id) || null;
+        if (!opportunity && id && id.startsWith('demo-circ-0')) {
+            const canonicalId = id.replace(/^demo-circ-0/, 'demo-circ-n');
+            opportunity = opportunities.find(o => o.id === canonicalId) || null;
+        }
+        return opportunity;
     }
     
     async createOpportunity(opportunityData) {
@@ -528,6 +757,9 @@ class DataService {
             const ms = window.matchingService || (typeof matchingService !== 'undefined' ? matchingService : null);
             if (ms && typeof ms.findMatchesForOpportunity === 'function') {
                 ms.findMatchesForOpportunity(id).catch(err => console.warn('Matching after publish:', err));
+            }
+            if (ms && typeof ms.persistPostMatches === 'function') {
+                ms.persistPostMatches(id).catch(err => console.warn('Post-match persistence after publish:', err));
             }
         }
         return updated;
@@ -588,7 +820,237 @@ class DataService {
         return applications.length;
     }
 
-    // Contract Operations
+    // Application Requirements (Section 4 — Requirements Match)
+    async getApplicationRequirements(applicationId) {
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATION_REQUIREMENTS) || [];
+        return list.filter(r => r.applicationId === applicationId).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    }
+
+    async createApplicationRequirement(data) {
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATION_REQUIREMENTS) || [];
+        const record = { id: this.generateId(), ...data, applicationId: data.applicationId };
+        list.push(record);
+        this.storage.set(CONFIG.STORAGE_KEYS.APPLICATION_REQUIREMENTS, list);
+        return record;
+    }
+
+    async replaceApplicationRequirements(applicationId, items) {
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATION_REQUIREMENTS) || [];
+        const filtered = list.filter(r => r.applicationId !== applicationId);
+        const newItems = (items || []).map((item, i) => ({
+            id: this.generateId(),
+            applicationId,
+            requirementKey: item.requirementKey || ('req_' + i),
+            requirementLabel: item.requirementLabel || 'Requirement',
+            requiredValue: item.requiredValue,
+            applicantMatch: item.applicantMatch || 'missing',
+            applicantResponse: item.applicantResponse || null,
+            sortOrder: i
+        }));
+        this.storage.set(CONFIG.STORAGE_KEYS.APPLICATION_REQUIREMENTS, filtered.concat(newItems));
+        return newItems;
+    }
+
+    async computeAndSaveRequirementsMatch(applicationId) {
+        const application = await this.getApplicationById(applicationId);
+        if (!application) return;
+        const opportunity = await this.getOpportunityById(application.opportunityId);
+        const applicant = await this.getUserById(application.applicantId) || await this.getCompanyById(application.applicantId);
+        if (!opportunity || !applicant) return;
+        const computed = this._computeRequirementsMatch(opportunity, applicant, application);
+        if (computed.length) await this.replaceApplicationRequirements(applicationId, computed);
+    }
+
+    // Application Deliverables (Section 8)
+    async getApplicationDeliverables(applicationId) {
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATION_DELIVERABLES) || [];
+        return list.filter(d => d.applicationId === applicationId).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    }
+
+    async createApplicationDeliverable(data) {
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATION_DELIVERABLES) || [];
+        const record = { id: this.generateId(), ...data, applicationId: data.applicationId };
+        list.push(record);
+        this.storage.set(CONFIG.STORAGE_KEYS.APPLICATION_DELIVERABLES, list);
+        return record;
+    }
+
+    async replaceApplicationDeliverables(applicationId, items) {
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATION_DELIVERABLES) || [];
+        const filtered = list.filter(d => d.applicationId !== applicationId);
+        const newItems = (items || []).map((item, i) => ({
+            id: this.generateId(),
+            applicationId,
+            title: typeof item === 'string' ? item : (item.title || ''),
+            description: typeof item === 'string' ? null : (item.description || null),
+            sortOrder: i
+        }));
+        this.storage.set(CONFIG.STORAGE_KEYS.APPLICATION_DELIVERABLES, filtered.concat(newItems));
+        return newItems;
+    }
+
+    // Application Files (Section 9)
+    async getApplicationFiles(applicationId) {
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATION_FILES) || [];
+        return list.filter(f => f.applicationId === applicationId);
+    }
+
+    async createApplicationFile(data) {
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATION_FILES) || [];
+        const record = { id: this.generateId(), ...data, applicationId: data.applicationId, uploadedAt: new Date().toISOString() };
+        list.push(record);
+        this.storage.set(CONFIG.STORAGE_KEYS.APPLICATION_FILES, list);
+        return record;
+    }
+
+    // Application Payment Terms (Section 6)
+    async getApplicationPaymentTerms(applicationId) {
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATION_PAYMENT_TERMS) || [];
+        return list.filter(p => p.applicationId === applicationId).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    }
+
+    async createApplicationPaymentTerm(data) {
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATION_PAYMENT_TERMS) || [];
+        const record = { id: this.generateId(), ...data, applicationId: data.applicationId };
+        list.push(record);
+        this.storage.set(CONFIG.STORAGE_KEYS.APPLICATION_PAYMENT_TERMS, list);
+        return record;
+    }
+
+    /**
+     * Get enriched application detail for the full Application Details View.
+     * Returns application, applicant, opportunity, requirementsMatch, paymentTerms, deliverables, files, and match info.
+     * @param {string} applicationId
+     * @param {Object} [options] - { ownerId } to enforce owner check (optional)
+     * @returns {Promise<Object|null>}
+     */
+    async getApplicationDetail(applicationId, options = {}) {
+        const application = await this.getApplicationById(applicationId);
+        if (!application) return null;
+
+        const opportunity = await this.getOpportunityById(application.opportunityId);
+        if (options.ownerId && opportunity && opportunity.creatorId !== options.ownerId) return null;
+
+        const applicant = await this.getUserById(application.applicantId) || await this.getCompanyById(application.applicantId);
+        const requirementsMatch = await this.getApplicationRequirements(applicationId);
+        const paymentTerms = await this.getApplicationPaymentTerms(applicationId);
+        const deliverables = await this.getApplicationDeliverables(applicationId);
+        const files = await this.getApplicationFiles(applicationId);
+
+        // Match record for AI breakdown (Section 2)
+        const matches = await this.getMatches();
+        const candidateId = application.applicantId;
+        const match = matches.find(m => m.opportunityId === application.opportunityId && (m.candidateId === candidateId || m.userId === candidateId));
+        let matchScore = application.matchScore != null ? application.matchScore : (match && match.matchScore != null ? match.matchScore : null);
+        let matchBreakdown = application.matchBreakdown || null;
+        if (!matchBreakdown && match && match.criteria) {
+            const c = match.criteria;
+            if (typeof c === 'object' && !Array.isArray(c)) {
+                matchBreakdown = {
+                    skillMatch: c.skillMatch ?? c.attributeOverlap ?? null,
+                    budgetFit: c.budgetFit ?? (c.budget != null ? c.budget : null),
+                    timelineFit: c.timelineFit ?? null,
+                    locationFit: c.locationFit ?? null,
+                    reputation: c.reputation ?? null
+                };
+            }
+        }
+        if (matchScore != null && matchBreakdown && typeof matchBreakdown.skillMatch !== 'number' && match && match.criteria && typeof match.criteria === 'object') {
+            const cr = match.criteria;
+            if (cr.skillMatch != null || cr.budgetFit != null || cr.timelineFit != null || cr.locationFit != null || cr.reputation != null) {
+                matchBreakdown = {
+                    skillMatch: cr.skillMatch ?? matchBreakdown.skillMatch,
+                    budgetFit: cr.budgetFit ?? matchBreakdown.budgetFit,
+                    timelineFit: cr.timelineFit ?? matchBreakdown.timelineFit,
+                    locationFit: cr.locationFit ?? matchBreakdown.locationFit,
+                    reputation: cr.reputation ?? matchBreakdown.reputation
+                };
+            }
+        }
+
+        // Prefer computed requirements match when we have opportunity + applicant so industry/sectors match correctly
+        let requirementsMatchList = requirementsMatch;
+        if (opportunity && applicant) {
+            requirementsMatchList = await this._computeRequirementsMatch(opportunity, applicant, application);
+        }
+
+        return {
+            application,
+            applicant: applicant || null,
+            opportunity: opportunity || null,
+            requirementsMatch: requirementsMatchList,
+            paymentTerms: paymentTerms.map(p => ({ type: p.type, details: p.details })),
+            deliverables: deliverables.map(d => ({ id: d.id, title: d.title, description: d.description })),
+            files: files.map(f => ({ id: f.id, fileType: f.fileType, fileName: f.fileName, fileUrl: f.fileUrl })),
+            matchScore,
+            matchBreakdown,
+            matchType: application.matchType || (match && match.model) || null
+        };
+    }
+
+    async _computeRequirementsMatch(opportunity, applicant, application) {
+        const profile = applicant.profile || {};
+        const scope = opportunity.scope || {};
+        const attrs = opportunity.attributes || {};
+        const requiredSkills = scope.requiredSkills || scope.offeredSkills || [];
+        // Requirement match uses profile fields. Professionals: typically skills, specializations; may have primaryDomain, sectors.
+        // Companies: sectors, primaryDomain, industry, plus skills/specializations if present. Aligned with matching-service skill list.
+        const applicantSources = [].concat(
+            profile.skills || [],
+            profile.specializations || [],
+            profile.primaryDomain ? [profile.primaryDomain] : [],
+            profile.sectors || [],
+            Array.isArray(profile.industry) ? profile.industry : (profile.industry ? [profile.industry] : [])
+        ).filter(Boolean);
+        const result = [];
+        let sortOrder = 0;
+        const svc = window.skillService || (typeof skillService !== 'undefined' ? skillService : null);
+        let matchedByIndex = [];
+        if (svc && requiredSkills.length > 0) {
+            const normRequired = await svc.normalizeSkills(requiredSkills);
+            const normApplicant = await svc.normalizeSkills(applicantSources);
+            const candidateSet = new Set(normApplicant.map(s => String(s).toLowerCase()));
+            matchedByIndex = normRequired.map(nr => candidateSet.has(String(nr).toLowerCase()));
+        } else {
+            const norm = (s) => String(s).toLowerCase().trim();
+            const matchesRequirement = (required, sources) => {
+                const r = norm(required);
+                return sources.some(src => {
+                    const s = norm(src);
+                    return s === r || s.includes(r) || r.includes(s);
+                });
+            };
+            matchedByIndex = requiredSkills.map(skill => matchesRequirement(skill, applicantSources));
+        }
+        requiredSkills.forEach((skill, i) => {
+            const matched = matchedByIndex[i] === true;
+            result.push({
+                requirementKey: 'skill_' + String(skill).replace(/\s/g, '_'),
+                requirementLabel: 'Required skill',
+                requiredValue: skill,
+                applicantMatch: matched ? 'match' : 'missing',
+                applicantResponse: null,
+                sortOrder: sortOrder++
+            });
+        });
+        const expRequired = attrs.yearsExperience || attrs.experienceLevel || scope.experienceRequired;
+        if (expRequired != null && String(expRequired).trim() !== '') {
+            const years = profile.yearsExperience != null ? Number(profile.yearsExperience) : null;
+            const expNum = typeof expRequired === 'number' ? expRequired : parseInt(String(expRequired).replace(/\D/g, ''), 10);
+            const match = years != null && !isNaN(expNum) ? (years >= expNum ? 'match' : (years >= Math.floor(expNum * 0.5) ? 'partial' : 'missing')) : 'missing';
+            result.push({
+                requirementKey: 'experience',
+                requirementLabel: 'Experience required',
+                requiredValue: String(expRequired),
+                applicantMatch: match,
+                applicantResponse: years != null ? `${years} years` : null,
+                sortOrder: sortOrder++
+            });
+        }
+        return result;
+    }
+
+    // Contract Operations (legal agreement only; no milestones)
     async getContracts() {
         return this.storage.get(CONFIG.STORAGE_KEYS.CONTRACTS) || [];
     }
@@ -603,43 +1065,61 @@ class DataService {
         return contracts.find(c => c.opportunityId === opportunityId) || null;
     }
 
+    async getContractByDealId(dealId) {
+        const contracts = await this.getContracts();
+        return contracts.find(c => c.dealId === dealId) || null;
+    }
+
+    /**
+     * Returns normalized parties array for a contract (multi-party or legacy two-party).
+     * Each party has { userId, role, signedAt }.
+     */
+    getContractParties(contract) {
+        if (!contract) return [];
+        if (contract.parties && Array.isArray(contract.parties) && contract.parties.length > 0) {
+            return contract.parties.map(p => ({
+                userId: p.userId,
+                role: p.role || 'participant',
+                signedAt: p.signedAt || null
+            }));
+        }
+        const legacy = [];
+        if (contract.creatorId) legacy.push({ userId: contract.creatorId, role: 'creator', signedAt: contract.signedAt || null });
+        if (contract.contractorId) legacy.push({ userId: contract.contractorId, role: 'contractor', signedAt: contract.signedAt || null });
+        return legacy;
+    }
+
     async getContractsByUserId(userId) {
         const contracts = await this.getContracts();
-        return contracts.filter(c => c.creatorId === userId || c.contractorId === userId);
+        return contracts.filter(c => this.getContractParties(c).some(p => p.userId === userId));
     }
 
     async createContract(contractData) {
         const contracts = await this.getContracts();
-        const parties = contractData.parties || (contractData.creatorId && contractData.contractorId
-            ? [{ userId: contractData.creatorId, role: 'creator', companyId: contractData.creatorCompanyId || null }, { userId: contractData.contractorId, role: 'contractor', companyId: contractData.contractorCompanyId || null }]
-            : []);
-        const agreedValue = contractData.agreedValue || null;
-        const milestones = (contractData.milestones || []).map(m => ({
-            id: m.id || this.generateId(),
-            title: m.title,
-            deliverables: m.deliverables,
-            dueDate: m.dueDate,
-            valueRelease: m.valueRelease || { cash: 0, equityVested: 0, barterDelivered: '' },
-            status: m.status || 'pending'
+        const partiesInput = contractData.parties;
+        if (!partiesInput || !Array.isArray(partiesInput) || partiesInput.length === 0) {
+            throw new Error('createContract requires a non-empty parties array');
+        }
+        const parties = partiesInput.map(p => ({
+            userId: p.userId,
+            role: p.role || 'participant',
+            signedAt: p.signedAt || null
         }));
         const newContract = {
             id: this.generateId(),
-            opportunityId: contractData.opportunityId,
-            applicationId: contractData.applicationId,
-            negotiationId: contractData.negotiationId || null,
-            creatorId: contractData.creatorId,
-            contractorId: contractData.contractorId,
-            scope: contractData.scope,
-            paymentMode: contractData.paymentMode,
-            duration: contractData.duration,
+            dealId: contractData.dealId || null,
+            opportunityId: contractData.opportunityId || null,
+            applicationId: contractData.applicationId || null,
             parties,
-            agreedValue,
-            milestones,
-            status: contractData.status || CONFIG.CONTRACT_STATUS.PENDING,
-            signedAt: contractData.signedAt || null,
-            paymentSchedule: contractData.paymentSchedule,
+            scope: contractData.scope || '',
+            paymentMode: contractData.paymentMode || 'cash',
+            agreedValue: contractData.agreedValue || null,
+            duration: contractData.duration || '',
+            paymentSchedule: contractData.paymentSchedule || null,
             equityVesting: contractData.equityVesting || null,
             profitShare: contractData.profitShare || null,
+            status: contractData.status || CONFIG.CONTRACT_STATUS.PENDING,
+            signedAt: contractData.signedAt || null,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
@@ -661,6 +1141,132 @@ class DataService {
         return contracts[index];
     }
 
+    // Deal Operations (post-matching collaboration workflow)
+    async getDeals() {
+        return this.storage.get(CONFIG.STORAGE_KEYS.DEALS) || [];
+    }
+
+    async getDealById(id) {
+        const deals = await this.getDeals();
+        return deals.find(d => d.id === id) || null;
+    }
+
+    async getDealByMatchId(matchId) {
+        const deals = await this.getDeals();
+        return deals.find(d => d.matchId === matchId) || null;
+    }
+
+    async getDealByApplicationId(applicationId) {
+        const deals = await this.getDeals();
+        return deals.find(d => d.applicationId === applicationId) || null;
+    }
+
+    async getDealByOpportunityId(opportunityId) {
+        const deals = await this.getDeals();
+        return deals.find(d => d.opportunityId === opportunityId || (d.opportunityIds && d.opportunityIds.includes(opportunityId))) || null;
+    }
+
+    async getDealsByUserId(userId) {
+        const deals = await this.getDeals();
+        return deals.filter(d => (d.participants || []).some(p => p.userId === userId));
+    }
+
+    normalizeMilestone(m) {
+        const now = new Date().toISOString();
+        const status = m.status === 'completed' ? 'approved' : (m.status || 'pending');
+        return {
+            id: m.id || this.generateId(),
+            title: m.title || '',
+            description: m.description || '',
+            dueDate: m.dueDate || null,
+            status: ['pending', 'in_progress', 'submitted', 'approved', 'rejected'].includes(status) ? status : 'pending',
+            deliverables: m.deliverables || '',
+            createdAt: m.createdAt || now,
+            updatedAt: m.updatedAt || now,
+            submittedAt: m.submittedAt || null,
+            approvedAt: m.approvedAt || null,
+            approvedBy: m.approvedBy || null
+        };
+    }
+
+    async createDeal(dealData) {
+        const deals = await this.getDeals();
+        const participants = (dealData.participants || []).map(p => ({
+            userId: p.userId,
+            role: p.role || 'participant',
+            approvalStatus: p.approvalStatus || 'pending',
+            signedAt: p.signedAt || null
+        }));
+        const milestones = (dealData.milestones || []).map(m => this.normalizeMilestone(m));
+        const newDeal = {
+            id: this.generateId(),
+            matchId: dealData.matchId || null,
+            applicationId: dealData.applicationId || null,
+            opportunityId: dealData.opportunityId || (dealData.opportunityIds && dealData.opportunityIds[0]) || null,
+            matchType: dealData.matchType || 'one_way',
+            status: dealData.status || CONFIG.DEAL_STATUS.NEGOTIATING,
+            title: dealData.title || 'Deal',
+            participants,
+            opportunityIds: dealData.opportunityIds || [],
+            payload: dealData.payload != null ? dealData.payload : null,
+            roleSlots: dealData.roleSlots != null ? dealData.roleSlots : null,
+            scope: dealData.scope || '',
+            timeline: dealData.timeline || { start: null, end: null },
+            exchangeMode: dealData.exchangeMode || 'cash',
+            valueTerms: dealData.valueTerms || { agreedValue: null, paymentSchedule: '' },
+            deliverables: dealData.deliverables || '',
+            milestones,
+            negotiationId: dealData.negotiationId || null,
+            contractId: dealData.contractId || null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            completedAt: dealData.completedAt || null,
+            closedAt: dealData.closedAt || null
+        };
+        deals.push(newDeal);
+        this.storage.set(CONFIG.STORAGE_KEYS.DEALS, deals);
+        return newDeal;
+    }
+
+    async updateDeal(id, updates) {
+        const deals = await this.getDeals();
+        const index = deals.findIndex(d => d.id === id);
+        if (index === -1) return null;
+        if (updates.milestones && Array.isArray(updates.milestones)) {
+            updates.milestones = updates.milestones.map(m => this.normalizeMilestone(m));
+        }
+        deals[index] = {
+            ...deals[index],
+            ...updates,
+            updatedAt: new Date().toISOString()
+        };
+        this.storage.set(CONFIG.STORAGE_KEYS.DEALS, deals);
+        return deals[index];
+    }
+
+    async addDealMilestone(dealId, milestoneData) {
+        const deal = await this.getDealById(dealId);
+        if (!deal) return null;
+        const now = new Date().toISOString();
+        const milestone = this.normalizeMilestone({
+            ...milestoneData,
+            createdAt: now,
+            updatedAt: now
+        });
+        const milestones = [...(deal.milestones || []), milestone];
+        return this.updateDeal(dealId, { milestones });
+    }
+
+    async updateDealMilestone(dealId, milestoneId, updates) {
+        const deal = await this.getDealById(dealId);
+        if (!deal || !deal.milestones) return null;
+        const index = deal.milestones.findIndex(m => m.id === milestoneId);
+        if (index === -1) return null;
+        const milestones = [...deal.milestones];
+        milestones[index] = this.normalizeMilestone({ ...milestones[index], ...updates, updatedAt: new Date().toISOString() });
+        return this.updateDeal(dealId, { milestones });
+    }
+
     // Negotiation Operations (value exchange negotiation phase)
     async getNegotiations() {
         return this.storage.get(CONFIG.STORAGE_KEYS.NEGOTIATIONS) || [];
@@ -679,6 +1285,11 @@ class DataService {
     async getNegotiationsByApplicationId(applicationId) {
         const list = await this.getNegotiations();
         return list.filter(n => n.applicationId === applicationId);
+    }
+
+    async getNegotiationsByMatchId(matchId) {
+        const list = await this.getNegotiations();
+        return list.filter(n => n.matchId === matchId);
     }
 
     async createNegotiation(negotiationData) {
@@ -781,7 +1392,301 @@ class DataService {
         this.storage.set(CONFIG.STORAGE_KEYS.MATCHES, matches);
         return newMatch;
     }
-    
+
+    // PostMatch Operations (user-facing post-to-post match discovery)
+    async getPostMatches() {
+        return this.storage.get(CONFIG.STORAGE_KEYS.POST_MATCHES) || [];
+    }
+
+    async getPostMatchById(matchId) {
+        const list = await this.getPostMatches();
+        return list.find(m => m.id === matchId) || null;
+    }
+
+    async getPostMatchesForUser(userId) {
+        const list = await this.getPostMatches();
+        return list.filter(m =>
+            (m.participants || []).some(p => p.userId === userId)
+        );
+    }
+
+    async getPostMatchesByType(userId, matchType) {
+        const list = await this.getPostMatchesForUser(userId);
+        return list.filter(m => m.matchType === matchType);
+    }
+
+    _postMatchSignature(record) {
+        const type = record.matchType || '';
+        const parts = (record.participants || []).map(p => `${p.userId}:${p.opportunityId || ''}`).sort();
+        const payloadKeys = record.payload ? Object.keys(record.payload).sort() : [];
+        const oppIds = payloadKeys
+            .filter(k => k.endsWith('Id') || k === 'cycle' || k === 'roles' || k === 'links')
+            .map(k => (record.payload[k] && typeof record.payload[k] === 'object' && !Array.isArray(record.payload[k]))
+                ? JSON.stringify(record.payload[k])
+                : (record.payload[k] || ''));
+        return `${type}:${parts.join('|')}:${oppIds.join(',')}`;
+    }
+
+    async createPostMatch(data) {
+        const list = await this.getPostMatches();
+        const isReplacement = !!data.isReplacement;
+        const newRecord = {
+            id: this.generateId(),
+            matchType: data.matchType || 'one_way',
+            status: data.status || CONFIG.POST_MATCH_STATUS.PENDING,
+            matchScore: data.matchScore != null ? data.matchScore : 0,
+            participants: Array.isArray(data.participants) ? data.participants : [],
+            payload: data.payload != null ? data.payload : {},
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            expiresAt: data.expiresAt || null,
+            isReplacement: isReplacement || false,
+            replacementDealId: data.replacementDealId || null,
+            replacementRole: data.replacementRole || null,
+            replacementPayload: data.replacementPayload || null
+        };
+        if (!isReplacement) {
+            const sig = this._postMatchSignature(newRecord);
+            const duplicate = list.some(m => !m.isReplacement && this._postMatchSignature(m) === sig);
+            if (duplicate) return null;
+        } else {
+            const dup = list.some(m => m.isReplacement && m.replacementDealId === newRecord.replacementDealId &&
+                (m.participants || []).some(p => p.userId === (newRecord.participants && newRecord.participants[0] && newRecord.participants[0].userId)));
+            if (dup) return null;
+        }
+        list.push(newRecord);
+        this.storage.set(CONFIG.STORAGE_KEYS.POST_MATCHES, list);
+        return newRecord;
+    }
+
+    async updatePostMatch(matchId, updates) {
+        const list = await this.getPostMatches();
+        const index = list.findIndex(m => m.id === matchId);
+        if (index === -1) return null;
+        list[index] = {
+            ...list[index],
+            ...updates,
+            updatedAt: new Date().toISOString()
+        };
+        this.storage.set(CONFIG.STORAGE_KEYS.POST_MATCHES, list);
+        return list[index];
+    }
+
+    async updatePostMatchStatus(matchId, userId, newStatus) {
+        const match = await this.getPostMatchById(matchId);
+        if (!match || !match.participants) return null;
+        const participants = match.participants.map(p =>
+            p.userId === userId
+                ? { ...p, participantStatus: newStatus, respondedAt: new Date().toISOString() }
+                : { ...p }
+        );
+        const allAccepted = participants.every(p => (p.participantStatus || '').toLowerCase() === 'accepted');
+        const anyDeclined = participants.some(p => (p.participantStatus || '').toLowerCase() === 'declined');
+        const status = anyDeclined
+            ? CONFIG.POST_MATCH_STATUS.DECLINED
+            : (allAccepted ? CONFIG.POST_MATCH_STATUS.CONFIRMED : CONFIG.POST_MATCH_STATUS.PENDING);
+        const updated = await this.updatePostMatch(matchId, { participants, status });
+        return updated;
+    }
+
+    async declinePostMatch(matchId, userId) {
+        return this.updatePostMatchStatus(matchId, userId, CONFIG.POST_MATCH_PARTICIPANT_STATUS.DECLINED);
+    }
+
+    getPostMatchesByReplacementDealId(dealId) {
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.POST_MATCHES) || [];
+        return list.filter(m => m.isReplacement && m.replacementDealId === dealId);
+    }
+
+    /**
+     * Get missing role for a dropped participant from deal.roleSlots or deal.payload.roles.
+     */
+    getMissingRoleFromDeal(deal, droppedUserId) {
+        if (deal.roleSlots && typeof deal.roleSlots === 'object') {
+            if (deal.roleSlots[droppedUserId]) return deal.roleSlots[droppedUserId];
+            const arr = Array.isArray(deal.roleSlots) ? deal.roleSlots : Object.entries(deal.roleSlots).map(([uid, role]) => ({ userId: uid, role }));
+            const entry = arr.find(e => e.userId === droppedUserId);
+            if (entry && entry.role) return entry.role;
+        }
+        const roles = (deal.payload && deal.payload.roles) || [];
+        const r = roles.find(x => x.userId === droppedUserId);
+        return (r && r.role) || null;
+    }
+
+    /**
+     * Check if consortium deal is viable for replacement (lead present, min participants, stage allowed).
+     */
+    isConsortiumDealViable(deal) {
+        if ((deal.matchType || '') !== 'consortium') return false;
+        const allowed = CONFIG.MATCHING.CONSORTIUM_REPLACEMENT_ALLOWED_STAGES;
+        if (Array.isArray(allowed) && !allowed.includes(deal.status)) return false;
+        const participants = deal.participants || [];
+        const active = participants.filter(p => (p.status || 'active') !== 'dropped');
+        const hasLead = active.some(p => (p.role || '') === 'consortium_lead');
+        if (!hasLead) return false;
+        const min = CONFIG.MATCHING.CONSORTIUM_MIN_PARTICIPANTS != null ? CONFIG.MATCHING.CONSORTIUM_MIN_PARTICIPANTS : 2;
+        return active.length >= min;
+    }
+
+    /**
+     * Mark a participant as dropped and return deal, missing role, and viability.
+     */
+    async markDealParticipantDropped(dealId, userId) {
+        const deal = await this.getDealById(dealId);
+        if (!deal || !deal.participants) return { deal: null, missingRole: null, viable: false };
+        const participants = deal.participants.map(p =>
+            p.userId === userId
+                ? { ...p, status: 'dropped', droppedAt: new Date().toISOString() }
+                : { ...p }
+        );
+        await this.updateDeal(dealId, { participants });
+        const updated = await this.getDealById(dealId);
+        const missingRole = this.getMissingRoleFromDeal(updated, userId);
+        const viable = this.isConsortiumDealViable(updated);
+        return { deal: updated, missingRole: missingRole || 'General', viable };
+    }
+
+    /**
+     * Add a new party to an existing contract (amendment for replacement); new party has signedAt: null.
+     */
+    async amendContractAddParty(contractId, party) {
+        const contracts = await this.getContracts();
+        const index = contracts.findIndex(c => c.id === contractId);
+        if (index === -1) return null;
+        const contract = contracts[index];
+        const parties = [...(contract.parties || []), { userId: party.userId, role: party.role || 'consortium_member', signedAt: null }];
+        contracts[index] = { ...contract, parties, updatedAt: new Date().toISOString() };
+        this.storage.set(CONFIG.STORAGE_KEYS.CONTRACTS, contracts);
+        return contracts[index];
+    }
+
+    /**
+     * Accept a replacement PostMatch: add user to deal, set replacedByUserId on dropped participant, amend contract if present, log.
+     */
+    async acceptReplacementPostMatch(matchId, userId) {
+        const match = await this.getPostMatchById(matchId);
+        if (!match || !match.isReplacement || !match.replacementDealId) return null;
+        const deal = await this.getDealById(match.replacementDealId);
+        if (!deal) return null;
+        const replacementParticipant = (match.participants || []).find(p => p.userId === userId);
+        if (!replacementParticipant) return null;
+        const participants = (deal.participants || []).map(p =>
+            p.status === 'dropped' && !p.replacedByUserId
+                ? { ...p, replacedByUserId: userId }
+                : p
+        );
+        const newParticipant = {
+            userId: replacementParticipant.userId,
+            role: replacementParticipant.role || 'consortium_member',
+            opportunityId: replacementParticipant.opportunityId || null,
+            approvalStatus: 'pending',
+            signedAt: null
+        };
+        if (participants.some(p => p.userId === userId)) return deal;
+        participants.push(newParticipant);
+        await this.updateDeal(deal.id, { participants });
+        if (deal.contractId) {
+            await this.amendContractAddParty(deal.contractId, { userId: newParticipant.userId, role: newParticipant.role });
+        }
+        const dropped = (deal.participants || []).find(p => p.status === 'dropped');
+        await this.createAuditLog({
+            userId,
+            action: 'replacement_accepted',
+            entityType: 'deal',
+            entityId: deal.id,
+            details: { matchId, replacementRole: match.replacementRole, droppedUserId: dropped && dropped.userId }
+        });
+        return await this.getDealById(deal.id);
+    }
+
+    /**
+     * Create a replacement PostMatch for the given candidate and deal (after a participant was dropped).
+     */
+    async createReplacementPostMatch(dealId, candidate, missingRole, droppedUserId) {
+        const leadNeedId = (await this.getDealById(dealId)).opportunityId || ((await this.getDealById(dealId)).opportunityIds && (await this.getDealById(dealId)).opportunityIds[0]);
+        const participants = [{
+            userId: candidate.userId,
+            opportunityId: candidate.opportunityId || null,
+            role: 'consortium_member',
+            participantStatus: 'pending',
+            respondedAt: null
+        }];
+        const payload = {
+            leadNeedId: leadNeedId || null,
+            roles: [{ role: missingRole, opportunityId: candidate.opportunityId, userId: candidate.userId, score: candidate.matchScore }]
+        };
+        const postMatch = await this.createPostMatch({
+            matchType: 'consortium',
+            status: CONFIG.POST_MATCH_STATUS.PENDING,
+            matchScore: candidate.matchScore != null ? candidate.matchScore : 0,
+            participants,
+            payload,
+            isReplacement: true,
+            replacementDealId: dealId,
+            replacementRole: missingRole,
+            replacementPayload: { droppedUserId, droppedAt: new Date().toISOString() }
+        });
+        if (postMatch) {
+            await this.createAuditLog({
+                userId: droppedUserId,
+                action: 'replacement_invited',
+                entityType: 'deal',
+                entityId: dealId,
+                details: { matchId: postMatch.id, invitedUserId: candidate.userId, replacementRole: missingRole }
+            });
+        }
+        return postMatch;
+    }
+
+    /**
+     * Invite next replacement candidate after a decline. Returns new PostMatch or null if no more candidates or max attempts reached.
+     * @param {string} matchId - Declined replacement match id
+     * @param {string} [declinedByUserId] - User who declined (for audit log)
+     */
+    async inviteNextReplacementCandidate(matchId, declinedByUserId) {
+        const match = await this.getPostMatchById(matchId);
+        if (!match || !match.isReplacement || !match.replacementDealId) return null;
+        const dealId = match.replacementDealId;
+        const deal = await this.getDealById(dealId);
+        if (!deal) return null;
+        const replacementMatches = this.getPostMatchesByReplacementDealId(dealId);
+        const maxAttempts = CONFIG.MATCHING.MAX_REPLACEMENT_ATTEMPTS != null ? CONFIG.MATCHING.MAX_REPLACEMENT_ATTEMPTS : 5;
+        if (replacementMatches.length >= maxAttempts) return null;
+        const missingRole = match.replacementRole || 'General';
+        const droppedParticipant = (deal.participants || []).find(p => p.status === 'dropped' && !p.replacedByUserId);
+        const droppedUserId = droppedParticipant ? droppedParticipant.userId : null;
+        const excludeUserIds = (deal.participants || []).map(p => p.userId);
+        const matchingService = window.matchingService || (typeof matchingService !== 'undefined' ? matchingService : null);
+        if (!matchingService || typeof matchingService.findReplacementCandidatesForRole !== 'function') return null;
+        const leadNeedId = deal.opportunityId || (deal.opportunityIds && deal.opportunityIds[0]);
+        if (!leadNeedId) return null;
+        const { candidates } = await matchingService.findReplacementCandidatesForRole(leadNeedId, missingRole, { excludeUserIds, topN: maxAttempts });
+        const alreadyInvited = new Set((replacementMatches || []).flatMap(m => (m.participants || []).map(p => p.userId)));
+        const next = (candidates || []).find(c => !alreadyInvited.has(c.userId));
+        if (!next) return null;
+        await this.createAuditLog({
+            userId: declinedByUserId || droppedUserId || '',
+            action: 'replacement_declined',
+            entityType: 'deal',
+            entityId: dealId,
+            details: { matchId }
+        });
+        return await this.createReplacementPostMatch(dealId, next, missingRole, droppedUserId);
+    }
+
+    /**
+     * Log participant drop (call after markDealParticipantDropped when initiating replacement flow).
+     */
+    async logParticipantDropped(dealId, userId, reason) {
+        return this.createAuditLog({
+            userId,
+            action: 'participant_dropped',
+            entityType: 'deal',
+            entityId: dealId,
+            details: { droppedUserId: userId, reason: reason || 'dropped' }
+        });
+    }
+
     // Notification Operations
     async getNotifications(userId) {
         const notifications = this.storage.get(CONFIG.STORAGE_KEYS.NOTIFICATIONS) || [];

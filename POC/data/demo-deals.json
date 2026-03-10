@@ -1,0 +1,735 @@
+{
+  "domain": "deals",
+  "version": "1.0",
+  "dataset": "demo40",
+  "description": "Demo deals: draft, execution, completed, closed; barter and consortium.",
+  "data": [
+    {
+      "id": "demo-deal-01",
+      "matchId": null,
+      "applicationId": "demo-app-01",
+      "opportunityId": "demo-oneway-need-01",
+      "matchType": "one_way",
+      "status": "execution",
+      "title": "Need: Structural engineer for shop drawing review",
+      "participants": [
+        {
+          "userId": "demo-c01",
+          "role": "creator",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-07T12:30:00.000Z"
+        },
+        {
+          "userId": "demo-u06",
+          "role": "contractor",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-07T12:30:00.000Z"
+        }
+      ],
+      "opportunityIds": [
+        "demo-oneway-need-01"
+      ],
+      "scope": "Need: Structural engineer for shop drawing review",
+      "timeline": {
+        "start": null,
+        "end": null
+      },
+      "exchangeMode": "cash",
+      "valueTerms": {
+        "agreedValue": {
+          "cash": 10000,
+          "currency": "SAR"
+        },
+        "paymentSchedule": "50% on start, 50% on completion"
+      },
+      "deliverables": "",
+      "milestones": [
+        {
+          "id": "m1",
+          "title": "Kick-off and scope agreement",
+          "description": "",
+          "dueDate": "2026-04-15",
+          "status": "approved",
+          "deliverables": "Signed scope",
+          "createdAt": "2026-03-07T12:30:00.000Z",
+          "updatedAt": "2026-03-07T12:30:00.000Z",
+          "submittedAt": null,
+          "approvedAt": "2026-03-07T12:30:00.000Z",
+          "approvedBy": "demo-c01"
+        },
+        {
+          "id": "m2",
+          "title": "Shop drawing review completion",
+          "description": "",
+          "dueDate": "2026-06-30",
+          "status": "pending",
+          "deliverables": "Reviewed drawings report",
+          "createdAt": "2026-03-07T12:30:00.000Z",
+          "updatedAt": "2026-03-07T12:30:00.000Z",
+          "submittedAt": null,
+          "approvedAt": null,
+          "approvedBy": null
+        }
+      ],
+      "negotiationId": null,
+      "contractId": "demo-contract-01",
+      "createdAt": "2026-03-07T12:30:00.000Z",
+      "updatedAt": "2026-03-07T12:30:00.000Z",
+      "completedAt": null,
+      "closedAt": null
+    },
+    {
+      "id": "demo-deal-02",
+      "matchId": null,
+      "applicationId": "demo-app-05",
+      "opportunityId": "demo-oneway-need-04",
+      "matchType": "one_way",
+      "status": "draft",
+      "title": "Need: Quantity surveyor for tender preparation",
+      "participants": [
+        {
+          "userId": "demo-u04",
+          "role": "creator",
+          "approvalStatus": "pending",
+          "signedAt": null
+        },
+        {
+          "userId": "demo-u09",
+          "role": "contractor",
+          "approvalStatus": "pending",
+          "signedAt": null
+        }
+      ],
+      "opportunityIds": [
+        "demo-oneway-need-04"
+      ],
+      "scope": "Need: Quantity surveyor for tender preparation",
+      "timeline": {
+        "start": null,
+        "end": null
+      },
+      "exchangeMode": "cash",
+      "valueTerms": {
+        "agreedValue": {
+          "cash": 25000,
+          "currency": "SAR"
+        },
+        "paymentSchedule": "Milestone-based"
+      },
+      "deliverables": "",
+      "milestones": [],
+      "negotiationId": null,
+      "contractId": "demo-contract-02",
+      "createdAt": "2026-03-07T15:00:00.000Z",
+      "updatedAt": "2026-03-07T15:00:00.000Z",
+      "completedAt": null,
+      "closedAt": null
+    },
+    {
+      "id": "demo-deal-03",
+      "matchId": null,
+      "applicationId": "demo-app-50",
+      "opportunityId": "demo-need-41",
+      "matchType": "one_way",
+      "status": "execution",
+      "title": "Need: Site supervision for residential compound",
+      "participants": [
+        {
+          "userId": "demo-c02",
+          "role": "creator",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-u21",
+          "role": "contractor",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        }
+      ],
+      "opportunityIds": [
+        "demo-need-41"
+      ],
+      "scope": "Need: Site supervision for residential compound",
+      "timeline": {
+        "start": "2026-04-01",
+        "end": "2026-09-30"
+      },
+      "exchangeMode": "cash",
+      "valueTerms": {
+        "agreedValue": {
+          "cash": 130000,
+          "currency": "SAR"
+        },
+        "paymentSchedule": "50% on start, 50% on completion"
+      },
+      "deliverables": "",
+      "milestones": [
+        {
+          "id": "m1",
+          "title": "Mobilization",
+          "description": "",
+          "dueDate": "2026-06-15",
+          "status": "approved",
+          "deliverables": "Signed scope",
+          "createdAt": "2026-03-10T14:00:00.000Z",
+          "updatedAt": "2026-03-10T14:00:00.000Z",
+          "submittedAt": "2026-03-10T14:00:00.000Z",
+          "approvedAt": "2026-03-10T14:00:00.000Z",
+          "approvedBy": "demo-c02"
+        },
+        {
+          "id": "m2",
+          "title": "Supervision period",
+          "description": "",
+          "dueDate": "2026-09-30",
+          "status": "pending",
+          "deliverables": "Reports",
+          "createdAt": "2026-03-10T14:00:00.000Z",
+          "updatedAt": "2026-03-10T14:00:00.000Z",
+          "submittedAt": null,
+          "approvedAt": null,
+          "approvedBy": null
+        }
+      ],
+      "negotiationId": null,
+      "contractId": "demo-contract-03",
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z",
+      "completedAt": null,
+      "closedAt": null
+    },
+    {
+      "id": "demo-deal-04",
+      "matchId": null,
+      "applicationId": "demo-app-52",
+      "opportunityId": "demo-need-43",
+      "matchType": "one_way",
+      "status": "draft",
+      "title": "Need: Cost estimation for hospital project",
+      "participants": [
+        {
+          "userId": "demo-c01",
+          "role": "creator",
+          "approvalStatus": "pending",
+          "signedAt": null
+        },
+        {
+          "userId": "demo-u09",
+          "role": "contractor",
+          "approvalStatus": "pending",
+          "signedAt": null
+        }
+      ],
+      "opportunityIds": [
+        "demo-need-43"
+      ],
+      "scope": "Need: Cost estimation for hospital project",
+      "timeline": {
+        "start": null,
+        "end": null
+      },
+      "exchangeMode": "cash",
+      "valueTerms": {
+        "agreedValue": {
+          "cash": 50000,
+          "currency": "SAR"
+        },
+        "paymentSchedule": "Milestone-based"
+      },
+      "deliverables": "",
+      "milestones": [],
+      "negotiationId": null,
+      "contractId": "demo-contract-04",
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z",
+      "completedAt": null,
+      "closedAt": null
+    },
+    {
+      "id": "demo-deal-05",
+      "matchId": null,
+      "applicationId": "demo-app-55",
+      "opportunityId": "demo-barter-41",
+      "matchType": "two_way",
+      "status": "execution",
+      "title": "Need: Training space for 2-day workshop",
+      "participants": [
+        {
+          "userId": "demo-u14",
+          "role": "creator",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-u33",
+          "role": "contractor",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        }
+      ],
+      "opportunityIds": [
+        "demo-barter-41"
+      ],
+      "scope": "Need: Training space for 2-day workshop",
+      "timeline": {
+        "start": "2026-04-01",
+        "end": "2026-09-30"
+      },
+      "exchangeMode": "barter",
+      "valueTerms": {
+        "barterDescription": "Workshop facilitation in exchange for training space",
+        "paymentSchedule": "Barter: workshop for space"
+      },
+      "deliverables": "",
+      "milestones": [
+        {
+          "id": "m1",
+          "title": "Agreement and access",
+          "description": "",
+          "dueDate": "2026-06-01",
+          "status": "approved",
+          "deliverables": "Access",
+          "createdAt": "2026-03-10T14:00:00.000Z",
+          "updatedAt": "2026-03-10T14:00:00.000Z",
+          "submittedAt": "2026-03-10T14:00:00.000Z",
+          "approvedAt": "2026-03-10T14:00:00.000Z",
+          "approvedBy": "demo-u14"
+        },
+        {
+          "id": "m2",
+          "title": "Period of use",
+          "description": "",
+          "dueDate": "2026-07-15",
+          "status": "pending",
+          "deliverables": "Workshop delivered",
+          "createdAt": "2026-03-10T14:00:00.000Z",
+          "updatedAt": "2026-03-10T14:00:00.000Z",
+          "submittedAt": null,
+          "approvedAt": null,
+          "approvedBy": null
+        }
+      ],
+      "negotiationId": null,
+      "contractId": "demo-contract-05",
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z",
+      "completedAt": null,
+      "closedAt": null
+    },
+    {
+      "id": "demo-deal-06",
+      "matchId": null,
+      "applicationId": "demo-app-56",
+      "opportunityId": "demo-consortium-41",
+      "matchType": "consortium",
+      "status": "execution",
+      "title": "Need: Solar plant EPC — equity, EPC, and O&M partners",
+      "participants": [
+        {
+          "userId": "demo-c05",
+          "role": "creator",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-c04",
+          "role": "contractor",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-u24",
+          "role": "contractor",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-c03",
+          "role": "contractor",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        }
+      ],
+      "opportunityIds": [
+        "demo-consortium-41"
+      ],
+      "scope": "Need: Solar plant EPC — equity, EPC, and O&M partners",
+      "timeline": {
+        "start": "2026-04-01",
+        "end": "2026-09-30"
+      },
+      "exchangeMode": "cash",
+      "valueTerms": {
+        "agreedValue": {
+          "cash": 12000000,
+          "currency": "SAR"
+        },
+        "paymentSchedule": "Milestone-based"
+      },
+      "deliverables": "",
+      "milestones": [
+        {
+          "id": "m1",
+          "title": "Consortium formation",
+          "description": "",
+          "dueDate": "2026-09-01",
+          "status": "approved",
+          "deliverables": "JVA signed",
+          "createdAt": "2026-03-10T14:00:00.000Z",
+          "updatedAt": "2026-03-10T14:00:00.000Z",
+          "submittedAt": "2026-03-10T14:00:00.000Z",
+          "approvedAt": "2026-03-10T14:00:00.000Z",
+          "approvedBy": "demo-c05"
+        },
+        {
+          "id": "m2",
+          "title": "Design and permits",
+          "description": "",
+          "dueDate": "2027-03-31",
+          "status": "pending",
+          "deliverables": "Permits",
+          "createdAt": "2026-03-10T14:00:00.000Z",
+          "updatedAt": "2026-03-10T14:00:00.000Z",
+          "submittedAt": null,
+          "approvedAt": null,
+          "approvedBy": null
+        },
+        {
+          "id": "m3",
+          "title": "Construction",
+          "description": "",
+          "dueDate": "2028-06-30",
+          "status": "pending",
+          "deliverables": "Construction",
+          "createdAt": "2026-03-10T14:00:00.000Z",
+          "updatedAt": "2026-03-10T14:00:00.000Z",
+          "submittedAt": null,
+          "approvedAt": null,
+          "approvedBy": null
+        }
+      ],
+      "negotiationId": null,
+      "contractId": "demo-contract-06",
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z",
+      "completedAt": null,
+      "closedAt": null
+    },
+    {
+      "id": "demo-deal-07",
+      "matchId": null,
+      "applicationId": "demo-app-53",
+      "opportunityId": "demo-need-44",
+      "matchType": "one_way",
+      "status": "completed",
+      "title": "Need: Sustainability and LEED advisory",
+      "participants": [
+        {
+          "userId": "demo-c02",
+          "role": "creator",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-u32",
+          "role": "contractor",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        }
+      ],
+      "opportunityIds": [
+        "demo-need-44"
+      ],
+      "scope": "Need: Sustainability and LEED advisory",
+      "timeline": {
+        "start": "2026-04-01",
+        "end": "2026-09-30"
+      },
+      "exchangeMode": "cash",
+      "valueTerms": {
+        "agreedValue": {
+          "cash": 38000,
+          "currency": "SAR"
+        },
+        "paymentSchedule": "Milestone-based"
+      },
+      "deliverables": "",
+      "milestones": [
+        {
+          "id": "m1",
+          "title": "Assessment",
+          "description": "",
+          "dueDate": "2026-07-01",
+          "status": "approved",
+          "deliverables": "Report",
+          "createdAt": "2026-03-10T14:00:00.000Z",
+          "updatedAt": "2026-03-10T14:00:00.000Z",
+          "submittedAt": "2026-03-10T14:00:00.000Z",
+          "approvedAt": "2026-03-10T14:00:00.000Z",
+          "approvedBy": "demo-c02"
+        },
+        {
+          "id": "m2",
+          "title": "Design support",
+          "description": "",
+          "dueDate": "2026-09-01",
+          "status": "approved",
+          "deliverables": "Design",
+          "createdAt": "2026-03-10T14:00:00.000Z",
+          "updatedAt": "2026-03-10T14:00:00.000Z",
+          "submittedAt": "2026-03-10T14:00:00.000Z",
+          "approvedAt": "2026-03-10T14:00:00.000Z",
+          "approvedBy": "demo-c02"
+        },
+        {
+          "id": "m3",
+          "title": "Submission and certification",
+          "description": "",
+          "dueDate": "2026-11-30",
+          "status": "approved",
+          "deliverables": "LEED",
+          "createdAt": "2026-03-10T14:00:00.000Z",
+          "updatedAt": "2026-03-10T14:00:00.000Z",
+          "submittedAt": "2026-03-10T14:00:00.000Z",
+          "approvedAt": "2026-03-10T14:00:00.000Z",
+          "approvedBy": "demo-c02"
+        }
+      ],
+      "negotiationId": null,
+      "contractId": "demo-contract-07",
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z",
+      "completedAt": "2026-03-10T14:00:00.000Z",
+      "closedAt": null
+    },
+    {
+      "id": "demo-deal-08",
+      "matchId": null,
+      "applicationId": "demo-app-54",
+      "opportunityId": "demo-need-45",
+      "matchType": "one_way",
+      "status": "closed",
+      "title": "Need: Claims and dispute support",
+      "participants": [
+        {
+          "userId": "demo-c01",
+          "role": "creator",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-u16",
+          "role": "contractor",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        }
+      ],
+      "opportunityIds": [
+        "demo-need-45"
+      ],
+      "scope": "Need: Claims and dispute support",
+      "timeline": {
+        "start": "2026-04-01",
+        "end": "2026-09-30"
+      },
+      "exchangeMode": "cash",
+      "valueTerms": {
+        "agreedValue": {
+          "cash": 60000,
+          "currency": "SAR"
+        },
+        "paymentSchedule": "Upon completion"
+      },
+      "deliverables": "",
+      "milestones": [],
+      "negotiationId": null,
+      "contractId": "demo-contract-08",
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z",
+      "completedAt": null,
+      "closedAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-deal-09",
+      "matchId": null,
+      "applicationId": "demo-app-51",
+      "opportunityId": "demo-need-42",
+      "matchType": "one_way",
+      "status": "execution",
+      "title": "Need: BIM coordination for mixed-use tower",
+      "participants": [
+        {
+          "userId": "demo-c06",
+          "role": "creator",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        },
+        {
+          "userId": "demo-u08",
+          "role": "contractor",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-10T14:00:00.000Z"
+        }
+      ],
+      "opportunityIds": [
+        "demo-need-42"
+      ],
+      "scope": "Need: BIM coordination for mixed-use tower",
+      "timeline": {
+        "start": "2026-04-01",
+        "end": "2026-09-30"
+      },
+      "exchangeMode": "cash",
+      "valueTerms": {
+        "agreedValue": {
+          "cash": 85000,
+          "currency": "SAR"
+        },
+        "paymentSchedule": "33% per milestone"
+      },
+      "deliverables": "",
+      "milestones": [
+        {
+          "id": "m1",
+          "title": "Model setup",
+          "description": "",
+          "dueDate": "2026-07-15",
+          "status": "approved",
+          "deliverables": "Federated model",
+          "createdAt": "2026-03-10T14:00:00.000Z",
+          "updatedAt": "2026-03-10T14:00:00.000Z",
+          "submittedAt": "2026-03-10T14:00:00.000Z",
+          "approvedAt": "2026-03-10T14:00:00.000Z",
+          "approvedBy": "demo-c06"
+        },
+        {
+          "id": "m2",
+          "title": "Coordination phase",
+          "description": "",
+          "dueDate": "2026-10-31",
+          "status": "approved",
+          "deliverables": "Clash report",
+          "createdAt": "2026-03-10T14:00:00.000Z",
+          "updatedAt": "2026-03-10T14:00:00.000Z",
+          "submittedAt": "2026-03-10T14:00:00.000Z",
+          "approvedAt": "2026-03-10T14:00:00.000Z",
+          "approvedBy": "demo-c06"
+        },
+        {
+          "id": "m3",
+          "title": "Sign-off and as-built",
+          "description": "",
+          "dueDate": "2026-12-31",
+          "status": "approved",
+          "deliverables": "As-built",
+          "createdAt": "2026-03-10T14:00:00.000Z",
+          "updatedAt": "2026-03-10T14:00:00.000Z",
+          "submittedAt": "2026-03-10T14:00:00.000Z",
+          "approvedAt": "2026-03-10T14:00:00.000Z",
+          "approvedBy": "demo-c06"
+        }
+      ],
+      "negotiationId": null,
+      "contractId": "demo-contract-09",
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z",
+      "completedAt": null,
+      "closedAt": null
+    },
+    {
+      "id": "demo-deal-10",
+      "matchId": null,
+      "applicationId": "demo-app-57",
+      "opportunityId": "demo-need-46",
+      "matchType": "one_way",
+      "status": "draft",
+      "title": "Need: Geotechnical investigation",
+      "participants": [
+        {
+          "userId": "demo-c05",
+          "role": "creator",
+          "approvalStatus": "pending",
+          "signedAt": null
+        },
+        {
+          "userId": "demo-u17",
+          "role": "contractor",
+          "approvalStatus": "pending",
+          "signedAt": null
+        }
+      ],
+      "opportunityIds": [
+        "demo-need-46"
+      ],
+      "scope": "Need: Geotechnical investigation",
+      "timeline": {
+        "start": null,
+        "end": null
+      },
+      "exchangeMode": "cash",
+      "valueTerms": {
+        "agreedValue": {
+          "cash": 90000,
+          "currency": "SAR"
+        },
+        "paymentSchedule": "50% on report"
+      },
+      "deliverables": "",
+      "milestones": [],
+      "negotiationId": null,
+      "contractId": "demo-contract-10",
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z",
+      "completedAt": null,
+      "closedAt": null
+    },
+    {
+      "id": "demo-deal-11",
+      "matchId": null,
+      "applicationId": "demo-app-58",
+      "opportunityId": "demo-need-47",
+      "matchType": "one_way",
+      "status": "draft",
+      "title": "Need: Interior design and FF&E",
+      "participants": [
+        {
+          "userId": "demo-c06",
+          "role": "creator",
+          "approvalStatus": "pending",
+          "signedAt": null
+        },
+        {
+          "userId": "demo-u24",
+          "role": "contractor",
+          "approvalStatus": "pending",
+          "signedAt": null
+        }
+      ],
+      "opportunityIds": [
+        "demo-need-47"
+      ],
+      "scope": "Need: Interior design and FF&E",
+      "timeline": {
+        "start": null,
+        "end": null
+      },
+      "exchangeMode": "cash",
+      "valueTerms": {
+        "agreedValue": {
+          "cash": 120000,
+          "currency": "SAR"
+        },
+        "paymentSchedule": "Milestone-based"
+      },
+      "deliverables": "",
+      "milestones": [],
+      "negotiationId": null,
+      "contractId": "demo-contract-11",
+      "createdAt": "2026-03-10T14:00:00.000Z",
+      "updatedAt": "2026-03-10T14:00:00.000Z",
+      "completedAt": null,
+      "closedAt": null
+    }
+  ]
+}

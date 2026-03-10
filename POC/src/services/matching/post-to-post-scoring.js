@@ -1,14 +1,18 @@
 /**
  * Post-to-Post Scoring
  * Weighted match score between a Need post and an Offer post.
- * Weights: Skill Match 25%, Exchange Compatibility 20%, Value Compatibility 20%,
+ * Weights (default): Skill Match 25%, Exchange Compatibility 20%, Value Compatibility 20%,
  * Budget Fit 10%, Timeline 10%, Location 10%, Reputation 5%.
+ * Design variant (product-spec): Attribute Overlap 40%, Budget 30%, Timeline 15%, Location 10%, Reputation 5%.
+ * To use design variant: set CONFIG.MATCHING.WEIGHTS_DESIGN and have this module prefer it over WEIGHTS
+ * (and merge exchange/value logic into budget factor). See docs/modules/full-system-workflow-design.md.
  * Labels: Match / Partial / No Match per factor.
  */
 
 (function (global) {
     const CONFIG = global.CONFIG || {};
-    const W = CONFIG.MATCHING?.WEIGHTS || {
+    const WEIGHTS_SOURCE = CONFIG.MATCHING?.WEIGHTS_DESIGN || CONFIG.MATCHING?.WEIGHTS;
+    const W = WEIGHTS_SOURCE || {
         SKILL_MATCH: 0.25,
         EXCHANGE_COMPATIBILITY: 0.20,
         VALUE_COMPATIBILITY: 0.20,

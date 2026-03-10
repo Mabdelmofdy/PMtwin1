@@ -1,0 +1,25 @@
+<div class="card border border-gray-200 rounded-lg overflow-hidden match-card match-card-one-way" data-match-id="{{id}}" data-match-type="one_way">
+    <div class="card-header bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-wrap gap-2">
+        <h3 class="text-lg font-semibold text-gray-900">{{cardTitle}}</h3>
+        <span class="badge badge-success">{{matchScorePercent}}% Match</span>
+    </div>
+    <div class="card-body p-4 space-y-3">
+        <div>
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{section1Label}}</p>
+            <p class="text-gray-900 font-medium">{{needTitle}}</p>
+        </div>
+        <div>
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{section2Label}}</p>
+            <p class="text-gray-900 font-medium">{{offerTitle}}</p>
+        </div>
+        {{#if tierLabel}}
+        <p class="text-sm text-gray-600"><span class="badge badge-outline">{{tierLabel}}</span></p>
+        {{/if}}
+    </div>
+    <div class="card-footer bg-gray-50 px-4 py-3 flex flex-wrap gap-2">
+        <a href="#" data-route="/matches/{{id}}" class="btn btn-primary btn-sm">View Match Details</a>
+        <a href="#" data-route="{{primaryActionRoute}}" class="btn btn-outline btn-sm">{{primaryActionLabel}}</a>
+        <a href="#" data-route="{{secondaryActionRoute}}" class="btn btn-outline btn-sm">{{secondaryActionLabel}}</a>
+        <a href="#" data-route="{{tertiaryActionRoute}}" class="btn btn-outline btn-sm">{{tertiaryActionLabel}}</a>
+    </div>
+</div>

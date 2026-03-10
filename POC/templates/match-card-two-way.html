@@ -1,0 +1,31 @@
+<div class="card border border-gray-200 rounded-lg overflow-hidden match-card match-card-two-way" data-match-id="{{id}}" data-match-type="two_way">
+    <div class="card-header bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-wrap gap-2">
+        <h3 class="text-lg font-semibold text-gray-900">Barter Match Found</h3>
+        <span class="badge badge-success">{{matchScorePercent}}% Match</span>
+    </div>
+    <div class="card-body p-4 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="p-3 bg-teal-50 rounded-lg border border-teal-100">
+                <p class="text-xs font-medium text-teal-800 uppercase tracking-wide mb-1">Your Offer</p>
+                <p class="text-gray-900 font-medium">{{yourOfferTitle}}</p>
+                <p class="text-xs font-medium text-teal-800 uppercase tracking-wide mt-2 mb-1">Their Need</p>
+                <p class="text-gray-700">{{theirNeedTitle}}</p>
+            </div>
+            <div class="p-3 bg-teal-50 rounded-lg border border-teal-100">
+                <p class="text-xs font-medium text-teal-800 uppercase tracking-wide mb-1">Their Offer</p>
+                <p class="text-gray-900 font-medium">{{theirOfferTitle}}</p>
+                <p class="text-xs font-medium text-teal-800 uppercase tracking-wide mt-2 mb-1">Your Need</p>
+                <p class="text-gray-700">{{yourNeedTitle}}</p>
+            </div>
+        </div>
+        {{#if valueEquivalence}}
+        <p class="text-sm text-gray-600">Value: {{valueEquivalence}}</p>
+        {{/if}}
+    </div>
+    <div class="card-footer bg-gray-50 px-4 py-3 flex flex-wrap gap-2">
+        <button type="button" class="btn btn-primary btn-sm btn-accept-match" data-match-id="{{id}}">Accept match</button>
+        <a href="#" data-route="/messages/{{otherUserId}}" class="btn btn-outline btn-sm">Negotiate exchange</a>
+        <a href="#" data-route="/matches/{{id}}" class="btn btn-outline btn-sm">Send message</a>
+        <button type="button" class="btn btn-outline btn-sm text-gray-600 btn-decline-match" data-match-id="{{id}}">Decline</button>
+    </div>
+</div>

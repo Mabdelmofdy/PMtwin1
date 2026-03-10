@@ -1,56 +1,65 @@
-<div class="page-container register-page min-h-[calc(100vh-16rem)] flex items-center justify-center p-8">
+<div class="page-container register-page min-h-[calc(100vh-16rem)] flex items-center justify-center p-4 sm:p-8 bg-gray-50">
     <div class="w-full max-w-2xl">
-        <div class="bg-white rounded-lg p-8 shadow-lg">
-            <h1 class="text-2xl font-bold text-center text-gray-900 mb-2">Join PMTwin</h1>
-            <p class="text-center text-gray-600 mb-6">Create your account to start collaborating</p>
-            
-            <!-- Step progress (shown after account type selected) -->
-            <div id="reg-wizard-progress" class="mb-6 hidden">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-700" id="reg-step-label">Step 1 of 4</span>
+        <div class="reg-main-card bg-white rounded-xl p-6 sm:p-8 shadow-lg border border-gray-100">
+            <!-- Header: title, subtitle, auth actions -->
+            <header class="reg-header mb-8">
+                <h1 class="reg-header-title">Join PMTwin</h1>
+                <p class="reg-header-subtitle">Create your account to start collaborating</p>
+                <div class="reg-header-actions">
+                    <span class="reg-header-login">
+                        Already have an account? <a href="#" data-route="/login" class="reg-header-login-link">Login here</a>
+                    </span>
+                    <button type="button" id="reg-fill-demo" class="reg-btn-demo">Try Demo Data</button>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div id="reg-progress-bar" class="bg-primary h-2 rounded-full transition-all" style="width: 25%"></div>
-                </div>
+            </header>
+
+            <!-- Step navigation (horizontal bar) -->
+            <div id="reg-wizard-progress" class="reg-step-nav-wrap mb-8" aria-hidden="false">
+                <p id="reg-step-label" class="sr-only" aria-live="polite">Step 1 of 6</p>
+                <nav class="reg-step-nav" aria-label="Signup progress">
+                    <ol class="reg-step-nav-list" id="reg-step-nav-list">
+                        <li class="reg-step-nav-item" data-step-index="0"><span class="reg-step-nav-icon"></span><span class="reg-step-nav-label">Account Type</span></li>
+                        <li class="reg-step-nav-item" data-step-index="1"><span class="reg-step-nav-icon"></span><span class="reg-step-nav-label">Role</span></li>
+                        <li class="reg-step-nav-item" data-step-index="2"><span class="reg-step-nav-icon"></span><span class="reg-step-nav-label">Profile Info</span></li>
+                        <li class="reg-step-nav-item" data-step-index="3"><span class="reg-step-nav-icon"></span><span class="reg-step-nav-label">Documents</span></li>
+                        <li class="reg-step-nav-item" data-step-index="4"><span class="reg-step-nav-icon"></span><span class="reg-step-nav-label">Review</span></li>
+                        <li class="reg-step-nav-item" data-step-index="5"><span class="reg-step-nav-icon"></span><span class="reg-step-nav-label">Verification</span></li>
+                    </ol>
+                </nav>
             </div>
             
-            <div id="register-error" class="alert alert-error mb-4" style="display: none;"></div>
-            <div id="register-success" class="alert alert-success mb-4" style="display: none;"></div>
+            <div id="register-error" class="reg-error-message mb-4" style="display: none;" role="alert"></div>
+            <div id="register-success" class="reg-success-message mb-4" style="display: none;" role="status"></div>
             
-            <!-- Step 0: Account type selection -->
-            <div id="reg-step-0" class="reg-step-content">
-                <p class="block mb-4 font-medium text-gray-900">Select your account type so we can guide you through the right verification process:</p>
-                <div class="space-y-3">
-                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-colors has-[:checked]:border-primary has-[:checked]:bg-blue-50">
-                        <input type="radio" name="accountType" value="professional" class="mr-3 mt-1 w-4 h-4 text-primary">
-                        <div>
-                            <span class="font-medium text-gray-900">Professional</span>
-                            <p class="text-sm text-gray-600 mt-1">Hands-on delivery: design, engineering, project execution. Verification: CV, experience, skills.</p>
-                        </div>
+            <!-- Step 0: Account type (Company or Individual only) -->
+            <div id="reg-step-0" class="reg-step-content reg-step-card" role="region" aria-labelledby="reg-step-0-title">
+                <h2 id="reg-step-0-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-1">Select account type</h2>
+                <p class="text-gray-600 mb-6">Choose whether you are registering as a business or an individual.</p>
+                <div class="reg-account-type-grid grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <label class="reg-account-card flex flex-col relative p-6 border-2 border-gray-200 rounded-xl cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:shadow-md hover:border-primary/70 hover:shadow-lg">
+                        <span class="reg-account-card-check absolute top-4 right-4 hidden has-[:checked]:inline-flex text-primary" aria-hidden="true"><i class="ph-fill ph-check-circle text-xl"></i></span>
+                        <input type="radio" name="accountType" value="company" class="sr-only">
+                        <span class="reg-account-icon flex items-center justify-center w-14 h-14 rounded-xl bg-primary/10 text-primary mb-4" aria-hidden="true"><i class="ph-duotone ph-buildings text-3xl"></i></span>
+                        <span class="font-semibold text-gray-900 mb-1">Company</span>
+                        <p class="text-sm text-gray-600">For businesses looking for collaborations and partnerships.</p>
                     </label>
-                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-colors has-[:checked]:border-primary has-[:checked]:bg-blue-50">
-                        <input type="radio" name="accountType" value="consultant" class="mr-3 mt-1 w-4 h-4 text-primary">
-                        <div>
-                            <span class="font-medium text-gray-900">Consultant</span>
-                            <p class="text-sm text-gray-600 mt-1">Advisory and strategic input: expertise review, advice, case-based validation. Verification: certificates, case studies, interview.</p>
-                        </div>
-                    </label>
-                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-colors has-[:checked]:border-primary has-[:checked]:bg-blue-50">
-                        <input type="radio" name="accountType" value="company" class="mr-3 mt-1 w-4 h-4 text-primary">
-                        <div>
-                            <span class="font-medium text-gray-900">Company</span>
-                            <p class="text-sm text-gray-600 mt-1">Organization or entity. Verification: commercial registration, tax ID, company license.</p>
-                        </div>
+                    <label class="reg-account-card flex flex-col relative p-6 border-2 border-gray-200 rounded-xl cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:shadow-md hover:border-primary/70 hover:shadow-lg">
+                        <span class="reg-account-card-check absolute top-4 right-4 hidden has-[:checked]:inline-flex text-primary" aria-hidden="true"><i class="ph-fill ph-check-circle text-xl"></i></span>
+                        <input type="radio" name="accountType" value="individual" class="sr-only">
+                        <span class="reg-account-icon flex items-center justify-center w-14 h-14 rounded-xl bg-primary/10 text-primary mb-4" aria-hidden="true"><i class="ph-duotone ph-user text-3xl"></i></span>
+                        <span class="font-semibold text-gray-900 mb-1">Individual</span>
+                        <p class="text-sm text-gray-600">For professionals and consultants joining on their own.</p>
                     </label>
                 </div>
-                <div class="mt-6 flex justify-end">
-                    <button type="button" id="reg-btn-continue" class="px-6 py-2 bg-primary text-white font-medium rounded-md hover:bg-primary-dark transition-all" disabled>Continue</button>
+                <div class="mt-8 flex flex-col items-end gap-1">
+                    <p id="reg-continue-hint" class="text-sm text-gray-500 w-full text-right">Select an option to continue.</p>
+                    <button type="button" id="reg-btn-continue" class="reg-btn-primary px-6 py-3 rounded-lg font-medium bg-primary text-white hover:bg-primary-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>Continue</button>
                 </div>
             </div>
             
             <!-- Company path: A1 Role -->
-            <div id="reg-step-a1" class="reg-step-content hidden">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Company role</h2>
+            <div id="reg-step-a1" class="reg-step-content reg-step-card hidden" role="region" aria-labelledby="reg-step-a1-title">
+                <h2 id="reg-step-a1-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-4">Company role</h2>
                 <div class="mb-4">
                     <label for="reg-company-role" class="block mb-2 font-medium text-gray-900">Company role <span class="text-red-600">*</span></label>
                     <select id="reg-company-role" name="companyRole" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
@@ -70,67 +79,134 @@
             </div>
             
             <!-- Company path: A2 Details + OTP -->
-            <div id="reg-step-a2" class="reg-step-content hidden">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Company details & verification</h2>
-                <div class="mb-4">
-                    <label for="reg-company-name" class="block mb-2 font-medium text-gray-900">Company / Organization name <span class="text-red-600">*</span></label>
-                    <input type="text" id="reg-company-name" name="companyName" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Your company name">
-                </div>
-                <div class="mb-4">
-                    <label for="reg-company-website" class="block mb-2 font-medium text-gray-900">Website</label>
-                    <input type="url" id="reg-company-website" name="website" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="https://...">
-                </div>
-                <div class="mb-4">
-                    <label for="reg-email" class="block mb-2 font-medium text-gray-900">Email <span class="text-red-600">*</span></label>
-                    <div class="flex gap-2">
-                        <input type="email" id="reg-email" name="email" class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="your@email.com">
-                        <button type="button" id="reg-otp-email-send" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 whitespace-nowrap">Send OTP</button>
-                    </div>
-                    <div id="reg-otp-email-verify-wrap" class="mt-2 hidden">
-                        <div class="flex gap-2 items-center">
-                            <input type="text" id="reg-otp-email-code" class="w-32 px-4 py-2 border border-gray-300 rounded-md" placeholder="6-digit code" maxlength="6">
-                            <span id="reg-otp-email-display" class="text-sm text-gray-500"></span>
-                            <button type="button" id="reg-otp-email-verify" class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">Verify</button>
+            <div id="reg-step-a2" class="reg-step-content reg-step-card hidden" role="region" aria-labelledby="reg-step-a2-title">
+                <h2 id="reg-step-a2-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-4">Company details & verification</h2>
+                <div class="reg-form-section space-y-4 mb-6">
+                    <h3 class="reg-section-title">Basic information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="reg-company-name" class="block mb-2 font-medium text-gray-900">Company / Organization name <span class="text-red-600">*</span></label>
+                            <input type="text" id="reg-company-name" name="companyName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Your company name" aria-required="true">
+                            <span id="reg-error-reg-company-name" class="reg-inline-error text-sm text-red-600 mt-1 hidden" aria-live="polite"></span>
                         </div>
-                        <span id="reg-email-verified-badge" class="text-sm text-green-600 font-medium hidden">Email verified</span>
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <label for="reg-mobile" class="block mb-2 font-medium text-gray-900">Mobile <span class="text-red-600">*</span></label>
-                    <div class="flex gap-2">
-                        <input type="tel" id="reg-mobile" name="mobile" class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="+966 5x xxx xxxx">
-                        <button type="button" id="reg-otp-mobile-send" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 whitespace-nowrap">Send OTP</button>
-                    </div>
-                    <div id="reg-otp-mobile-verify-wrap" class="mt-2 hidden">
-                        <div class="flex gap-2 items-center">
-                            <input type="text" id="reg-otp-mobile-code" class="w-32 px-4 py-2 border border-gray-300 rounded-md" placeholder="6-digit code" maxlength="6">
-                            <span id="reg-otp-mobile-display" class="text-sm text-gray-500"></span>
-                            <button type="button" id="reg-otp-mobile-verify" class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">Verify</button>
+                        <div>
+                            <label for="reg-company-website" class="block mb-2 font-medium text-gray-900">Website</label>
+                            <input type="url" id="reg-company-website" name="website" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="https://...">
                         </div>
-                        <span id="reg-mobile-verified-badge" class="text-sm text-green-600 font-medium hidden">Mobile verified</span>
                     </div>
                 </div>
-                <div class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label for="reg-address-country" class="block mb-2 font-medium text-gray-900">Country <span class="text-red-600">*</span></label>
-                        <select id="reg-address-country" name="addressCountry" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"></select>
+                <div class="reg-form-section space-y-4 mb-6">
+                    <h3 class="reg-section-title">Contact information</h3>
+                    <div class="mb-4">
+                        <label for="reg-email" class="block mb-2 font-medium text-gray-900">Email <span class="text-red-600">*</span></label>
+                        <p class="reg-field-hint text-sm text-gray-500 mb-1">Used for account verification</p>
+                        <div class="reg-otp-row flex flex-col sm:flex-row gap-2">
+                            <input type="email" id="reg-email" name="email" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary min-w-0" placeholder="your@email.com" aria-required="true">
+                            <button type="button" id="reg-otp-email-send" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap">Send OTP</button>
+                        </div>
+                        <span id="reg-error-reg-email" class="reg-inline-error text-sm text-red-600 mt-1 hidden" aria-live="polite"></span>
+                        <div id="reg-otp-email-verify-wrap" class="mt-2 hidden">
+                            <div class="reg-otp-row flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                                <input type="text" id="reg-otp-email-code" class="w-full sm:w-32 px-4 py-2 border border-gray-300 rounded-lg" placeholder="6-digit code" maxlength="6">
+                                <span id="reg-otp-email-display" class="text-sm text-gray-500"></span>
+                                <button type="button" id="reg-otp-email-verify" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Verify</button>
+                            </div>
+                            <span id="reg-email-verified-badge" class="text-sm text-green-600 font-medium hidden">Email verified</span>
+                        </div>
                     </div>
-                    <div>
-                        <label for="reg-address-region" class="block mb-2 font-medium text-gray-900">Region</label>
-                        <select id="reg-address-region" name="addressRegion" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"></select>
-                    </div>
-                    <div>
-                        <label for="reg-address-city" class="block mb-2 font-medium text-gray-900">City</label>
-                        <select id="reg-address-city" name="addressCity" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"></select>
+                    <div class="mb-4">
+                        <label for="reg-mobile" class="block mb-2 font-medium text-gray-900">Mobile <span class="text-red-600">*</span></label>
+                        <p class="reg-field-hint text-sm text-gray-500 mb-1">Used for account verification</p>
+                        <div class="reg-otp-row flex flex-col sm:flex-row gap-2">
+                            <input type="tel" id="reg-mobile" name="mobile" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary min-w-0" placeholder="+966 5x xxx xxxx" aria-required="true">
+                            <button type="button" id="reg-otp-mobile-send" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap">Send OTP</button>
+                        </div>
+                        <span id="reg-error-reg-mobile" class="reg-inline-error text-sm text-red-600 mt-1 hidden" aria-live="polite"></span>
+                        <div id="reg-otp-mobile-verify-wrap" class="mt-2 hidden">
+                            <div class="reg-otp-row flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                                <input type="text" id="reg-otp-mobile-code" class="w-full sm:w-32 px-4 py-2 border border-gray-300 rounded-lg" placeholder="6-digit code" maxlength="6">
+                                <span id="reg-otp-mobile-display" class="text-sm text-gray-500"></span>
+                                <button type="button" id="reg-otp-mobile-verify" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Verify</button>
+                            </div>
+                            <span id="reg-mobile-verified-badge" class="text-sm text-green-600 font-medium hidden">Mobile verified</span>
+                        </div>
                     </div>
                 </div>
-                <div class="mb-4">
-                    <label for="reg-password" class="block mb-2 font-medium text-gray-900">Password <span class="text-red-600">*</span></label>
-                    <input type="password" id="reg-password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Minimum 6 characters" minlength="6">
+                <div class="reg-form-section space-y-4 mb-6">
+                    <h3 class="reg-section-title">Address</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="reg-address-country" class="block mb-2 font-medium text-gray-900">Country <span class="text-red-600">*</span></label>
+                            <select id="reg-address-country" name="addressCountry" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" aria-required="true"></select>
+                            <span id="reg-error-reg-address-country" class="reg-inline-error text-sm text-red-600 mt-1 hidden" aria-live="polite"></span>
+                        </div>
+                        <div>
+                            <label for="reg-address-region" class="block mb-2 font-medium text-gray-900">Region</label>
+                            <select id="reg-address-region" name="addressRegion" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"></select>
+                        </div>
+                        <div>
+                            <label for="reg-address-city" class="block mb-2 font-medium text-gray-900">City</label>
+                            <select id="reg-address-city" name="addressCity" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"></select>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-4">
-                    <label for="reg-confirm-password" class="block mb-2 font-medium text-gray-900">Confirm password <span class="text-red-600">*</span></label>
-                    <input type="password" id="reg-confirm-password" name="confirmPassword" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Re-enter password">
+                <div class="reg-form-section space-y-4 mb-6">
+                    <h3 class="reg-section-title">Company information</h3>
+                    <div class="mb-4">
+                        <label for="reg-company-industry" class="block mb-2 font-medium text-gray-900">Industry</label>
+                        <select id="reg-company-industry" name="industry" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="">Select industry</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="reg-company-size" class="block mb-2 font-medium text-gray-900">Company size</label>
+                        <select id="reg-company-size" name="companySize" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="">Select size</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="reg-company-description" class="block mb-2 font-medium text-gray-900">Company description</label>
+                        <textarea id="reg-company-description" name="companyDescription" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" rows="3" placeholder="Brief description of your company and services"></textarea>
+                    </div>
+                </div>
+                <div class="reg-form-section space-y-4 mb-6">
+                    <h3 class="reg-section-title text-gray-600">Legal (optional)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="reg-company-cr" class="block mb-2 font-medium text-gray-900">CR number (optional)</label>
+                            <input type="text" id="reg-company-cr" name="crNumber" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="CR number">
+                        </div>
+                        <div>
+                            <label for="reg-company-tax-id" class="block mb-2 font-medium text-gray-900">Tax ID (optional)</label>
+                            <input type="text" id="reg-company-tax-id" name="taxId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="VAT / Tax ID">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="reg-company-auth-rep-name" class="block mb-2 font-medium text-gray-900">Auth. representative name</label>
+                            <input type="text" id="reg-company-auth-rep-name" name="authRepName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Full name">
+                        </div>
+                        <div>
+                            <label for="reg-company-auth-rep-role" class="block mb-2 font-medium text-gray-900">Auth. representative role</label>
+                            <input type="text" id="reg-company-auth-rep-role" name="authRepRole" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Director, CEO">
+                        </div>
+                    </div>
+                </div>
+                <div class="reg-form-section space-y-4 mb-6">
+                    <h3 class="reg-section-title">Account security</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="reg-password" class="block mb-2 font-medium text-gray-900">Password <span class="text-red-600">*</span></label>
+                            <p class="reg-field-hint text-sm text-gray-500 mb-1">Minimum 6 characters</p>
+                            <input type="password" id="reg-password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Minimum 6 characters" minlength="6" aria-required="true">
+                            <span id="reg-error-reg-password" class="reg-inline-error text-sm text-red-600 mt-1 hidden" aria-live="polite"></span>
+                        </div>
+                        <div>
+                            <label for="reg-confirm-password" class="block mb-2 font-medium text-gray-900">Confirm password <span class="text-red-600">*</span></label>
+                            <input type="password" id="reg-confirm-password" name="confirmPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Re-enter password" aria-required="true">
+                            <span id="reg-error-reg-confirm-password" class="reg-inline-error text-sm text-red-600 mt-1 hidden" aria-live="polite"></span>
+                        </div>
+                    </div>
                 </div>
                 <div class="mt-6 flex justify-between">
                     <button type="button" id="reg-btn-back-a2" class="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50">Back</button>
@@ -139,13 +215,13 @@
             </div>
             
             <!-- Company path: A3 Documents + terms -->
-            <div id="reg-step-a3" class="reg-step-content hidden">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Documents & terms</h2>
+            <div id="reg-step-a3" class="reg-step-content reg-step-card hidden" role="region" aria-labelledby="reg-step-a3-title">
+                <h2 id="reg-step-a3-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-4">Documents & terms</h2>
                 <div id="reg-company-documents" class="mb-6 space-y-4"></div>
                 <div class="mb-4">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="reg-terms-company" name="termsAccepted" class="w-4 h-4 text-primary rounded">
-                        <span>I accept the <a href="#" class="text-primary underline">Terms & Conditions</a></span>
+                        <input type="checkbox" id="reg-terms-company" name="termsAccepted" class="w-4 h-4 text-primary rounded" aria-required="true">
+                        <span>I accept the <a href="#" id="reg-terms-link-company" class="text-primary underline">Terms & Conditions</a></span>
                     </label>
                 </div>
                 <div class="mt-6 flex justify-between">
@@ -155,11 +231,17 @@
             </div>
             
             <!-- Company path: A4 Review -->
-            <div id="reg-step-a4" class="reg-step-content hidden">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Review & submit</h2>
+            <div id="reg-step-a4" class="reg-step-content reg-step-card hidden" role="region" aria-labelledby="reg-step-a4-title">
+                <h2 id="reg-step-a4-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-4">Review & submit</h2>
+                <div id="reg-profile-completion-company" class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <p class="text-sm font-medium text-gray-700 mb-2">Profile completion: <span id="reg-completion-pct-company">0%</span></p>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-3"><div id="reg-completion-bar-company" class="bg-primary h-2 rounded-full transition-all" style="width: 0%"></div></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm"><div id="reg-completion-done-company" class="text-green-700"></div><div id="reg-completion-missing-company" class="text-amber-700"></div></div>
+                </div>
                 <div id="reg-review-company" class="space-y-3 text-gray-700 mb-6"></div>
-                <div class="mb-4">
-                    <label class="block mb-2 font-medium text-gray-900">Preferred collaboration models (optional)</label>
+                <div class="reg-form-section space-y-4 mb-6">
+                    <h3 class="reg-section-title">Collaboration preferences</h3>
+                    <p class="text-sm text-gray-600 mb-2">Select how you prefer to collaborate with others (optional).</p>
                     <div id="reg-company-preferred-models" class="flex flex-wrap gap-2"></div>
                 </div>
                 <div class="mt-6 flex justify-between">
@@ -169,17 +251,21 @@
             </div>
             
             <!-- Company path: A5 Vetting (optional) -->
-            <div id="reg-step-a5" class="reg-step-content hidden">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Vetting</h2>
-                <p class="text-gray-600 mb-4">You can complete vetting now to get full access to opportunities, or skip and complete it later from your profile.</p>
-                <div class="mb-4 space-y-2">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="reg-vetting-choice" value="skip" class="w-4 h-4 text-primary">
-                        <span>Skip and complete later</span>
+            <div id="reg-step-a5" class="reg-step-content reg-step-card hidden" role="region" aria-labelledby="reg-step-a5-title">
+                <h2 id="reg-step-a5-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-4">Vetting</h2>
+                <p class="text-gray-600 mb-5">You can complete vetting now to get full access to opportunities, or skip and complete it later from your profile.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <label class="reg-account-card flex flex-col p-5 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-primary hover:shadow-md transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                        <input type="radio" name="reg-vetting-choice" value="skip" class="sr-only">
+                        <span class="reg-account-icon flex items-center justify-center w-12 h-12 rounded-lg bg-gray-100 text-gray-600 mb-3" aria-hidden="true"><i class="ph-duotone ph-clock-counter-clockwise text-2xl"></i></span>
+                        <span class="font-semibold text-gray-900 mb-1">Skip and complete later</span>
+                        <p class="text-sm text-gray-600">Complete vetting from your profile when you are ready.</p>
                     </label>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="reg-vetting-choice" value="complete" class="w-4 h-4 text-primary">
-                        <span>Complete vetting now</span>
+                    <label class="reg-account-card flex flex-col p-5 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-primary hover:shadow-md transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                        <input type="radio" name="reg-vetting-choice" value="complete" class="sr-only">
+                        <span class="reg-account-icon flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 text-primary mb-3" aria-hidden="true"><i class="ph-duotone ph-check-circle text-2xl"></i></span>
+                        <span class="font-semibold text-gray-900 mb-1">Complete vetting now</span>
+                        <p class="text-sm text-gray-600">Add your domains and expertise to get full access.</p>
                     </label>
                 </div>
                 <div id="reg-vetting-form-company" class="mb-6 hidden">
@@ -201,98 +287,155 @@
                 </div>
             </div>
             
-            <!-- Individual path: B1 Type -->
-            <div id="reg-step-b1" class="reg-step-content hidden">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Individual type</h2>
-                <p class="text-gray-600 mb-4">Choose how you will use the platform. You can change this later in Settings.</p>
-                <div class="space-y-3">
-                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-blue-50">
-                        <input type="radio" name="individualType" value="professional" class="mr-3 mt-1 w-4 h-4 text-primary">
-                        <div>
-                            <span class="font-medium text-gray-900">Professional</span>
-                            <p class="text-sm text-gray-600 mt-1">Hands-on delivery: design, engineering, project execution, and technical work.</p>
-                        </div>
+            <!-- Individual path: B1 Choose role (Professional or Consultant) -->
+            <div id="reg-step-b1" class="reg-step-content reg-step-card hidden" role="region" aria-labelledby="reg-step-b1-title">
+                <h2 id="reg-step-b1-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-1">Choose role</h2>
+                <p class="text-gray-600 mb-6">Select how you will use the platform. You can change this later in Settings.</p>
+                <div class="reg-account-type-grid grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <label class="reg-account-card flex flex-col relative p-6 border-2 border-gray-200 rounded-xl cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:shadow-md hover:border-primary/70 hover:shadow-lg">
+                        <span class="reg-account-card-check absolute top-4 right-4 hidden has-[:checked]:inline-flex text-primary" aria-hidden="true"><i class="ph-fill ph-check-circle text-xl"></i></span>
+                        <input type="radio" name="individualType" value="professional" class="sr-only">
+                        <span class="reg-account-icon flex items-center justify-center w-14 h-14 rounded-xl bg-primary/10 text-primary mb-4" aria-hidden="true"><i class="ph-duotone ph-briefcase text-3xl"></i></span>
+                        <span class="font-semibold text-gray-900 mb-1">Professional</span>
+                        <p class="text-sm text-gray-600">Hands-on delivery: design, engineering, project execution, and technical work.</p>
                     </label>
-                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-blue-50">
-                        <input type="radio" name="individualType" value="consultant" class="mr-3 mt-1 w-4 h-4 text-primary">
-                        <div>
-                            <span class="font-medium text-gray-900">Consultant</span>
-                            <p class="text-sm text-gray-600 mt-1">Advisory and strategic input: expertise review, advice, and case-based validation.</p>
-                        </div>
+                    <label class="reg-account-card flex flex-col relative p-6 border-2 border-gray-200 rounded-xl cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:shadow-md hover:border-primary/70 hover:shadow-lg">
+                        <span class="reg-account-card-check absolute top-4 right-4 hidden has-[:checked]:inline-flex text-primary" aria-hidden="true"><i class="ph-fill ph-check-circle text-xl"></i></span>
+                        <input type="radio" name="individualType" value="consultant" class="sr-only">
+                        <span class="reg-account-icon flex items-center justify-center w-14 h-14 rounded-xl bg-primary/10 text-primary mb-4" aria-hidden="true"><i class="ph-duotone ph-identification-badge text-3xl"></i></span>
+                        <span class="font-semibold text-gray-900 mb-1">Consultant</span>
+                        <p class="text-sm text-gray-600">Advisory and strategic input: expertise review, advice, and case-based validation.</p>
                     </label>
                 </div>
-                <div class="mt-6 flex justify-between">
-                    <button type="button" id="reg-btn-back-b1" class="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50">Back</button>
-                    <button type="button" id="reg-btn-next-b1" class="px-6 py-2 bg-primary text-white font-medium rounded-md hover:bg-primary-dark">Next</button>
+                <div class="mt-8 flex flex-col items-end gap-1">
+                    <p id="reg-b1-continue-hint" class="text-sm text-gray-500 w-full text-right">Select an option to continue.</p>
+                    <div class="flex justify-between w-full">
+                        <button type="button" id="reg-btn-back-b1" class="reg-btn-back px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50">Back</button>
+                        <button type="button" id="reg-btn-next-b1" class="reg-btn-next px-6 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed" disabled>Next</button>
+                    </div>
                 </div>
             </div>
             
             <!-- Individual path: B2 Details + OTP -->
-            <div id="reg-step-b2" class="reg-step-content hidden">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Personal details & verification</h2>
-                <div class="mb-4">
-                    <label for="reg-full-name" class="block mb-2 font-medium text-gray-900">Full name <span class="text-red-600">*</span></label>
-                    <input type="text" id="reg-full-name" name="fullName" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Your full name">
-                </div>
-                <div class="mb-4">
-                    <label for="reg-ind-email" class="block mb-2 font-medium text-gray-900">Email <span class="text-red-600">*</span></label>
-                    <div class="flex gap-2">
-                        <input type="email" id="reg-ind-email" name="email" class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="your@email.com">
-                        <button type="button" id="reg-otp-ind-email-send" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 whitespace-nowrap">Send OTP</button>
+            <div id="reg-step-b2" class="reg-step-content reg-step-card hidden" role="region" aria-labelledby="reg-step-b2-title">
+                <h2 id="reg-step-b2-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-4">Personal details & verification</h2>
+                <div class="reg-form-section space-y-4 mb-6">
+                    <h3 class="reg-section-title">Basic information</h3>
+                    <div>
+                        <label for="reg-full-name" class="block mb-2 font-medium text-gray-900">Full name <span class="text-red-600">*</span></label>
+                        <input type="text" id="reg-full-name" name="fullName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Your full name" aria-required="true">
+                        <span id="reg-error-reg-full-name" class="reg-inline-error text-sm text-red-600 mt-1 hidden" aria-live="polite"></span>
                     </div>
-                    <div id="reg-otp-ind-email-verify-wrap" class="mt-2 hidden">
-                        <div class="flex gap-2 items-center">
-                            <input type="text" id="reg-otp-ind-email-code" class="w-32 px-4 py-2 border border-gray-300 rounded-md" placeholder="6-digit code" maxlength="6">
-                            <span id="reg-otp-ind-email-display" class="text-sm text-gray-500"></span>
-                            <button type="button" id="reg-otp-ind-email-verify" class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">Verify</button>
+                </div>
+                <div class="reg-form-section space-y-4 mb-6">
+                    <h3 class="reg-section-title">Contact information</h3>
+                    <div class="mb-4">
+                        <label for="reg-ind-email" class="block mb-2 font-medium text-gray-900">Email <span class="text-red-600">*</span></label>
+                        <p class="reg-field-hint text-sm text-gray-500 mb-1">Used for account verification</p>
+                        <div class="reg-otp-row flex flex-col sm:flex-row gap-2">
+                            <input type="email" id="reg-ind-email" name="email" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary min-w-0" placeholder="your@email.com" aria-required="true">
+                            <button type="button" id="reg-otp-ind-email-send" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap">Send OTP</button>
                         </div>
-                        <span id="reg-ind-email-verified-badge" class="text-sm text-green-600 font-medium hidden">Email verified</span>
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <label for="reg-ind-mobile" class="block mb-2 font-medium text-gray-900">Mobile <span class="text-red-600">*</span></label>
-                    <div class="flex gap-2">
-                        <input type="tel" id="reg-ind-mobile" name="mobile" class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="+966 5x xxx xxxx">
-                        <button type="button" id="reg-otp-ind-mobile-send" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 whitespace-nowrap">Send OTP</button>
-                    </div>
-                    <div id="reg-otp-ind-mobile-verify-wrap" class="mt-2 hidden">
-                        <div class="flex gap-2 items-center">
-                            <input type="text" id="reg-otp-ind-mobile-code" class="w-32 px-4 py-2 border border-gray-300 rounded-md" placeholder="6-digit code" maxlength="6">
-                            <span id="reg-otp-ind-mobile-display" class="text-sm text-gray-500"></span>
-                            <button type="button" id="reg-otp-ind-mobile-verify" class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">Verify</button>
+                        <span id="reg-error-reg-ind-email" class="reg-inline-error text-sm text-red-600 mt-1 hidden" aria-live="polite"></span>
+                        <div id="reg-otp-ind-email-verify-wrap" class="mt-2 hidden">
+                            <div class="reg-otp-row flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                                <input type="text" id="reg-otp-ind-email-code" class="w-full sm:w-32 px-4 py-2 border border-gray-300 rounded-lg" placeholder="6-digit code" maxlength="6">
+                                <span id="reg-otp-ind-email-display" class="text-sm text-gray-500"></span>
+                                <button type="button" id="reg-otp-ind-email-verify" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Verify</button>
+                            </div>
+                            <span id="reg-ind-email-verified-badge" class="text-sm text-green-600 font-medium hidden">Email verified</span>
                         </div>
-                        <span id="reg-ind-mobile-verified-badge" class="text-sm text-green-600 font-medium hidden">Mobile verified</span>
+                    </div>
+                    <div class="mb-4">
+                        <label for="reg-ind-mobile" class="block mb-2 font-medium text-gray-900">Mobile <span class="text-red-600">*</span></label>
+                        <p class="reg-field-hint text-sm text-gray-500 mb-1">Used for account verification</p>
+                        <div class="reg-otp-row flex flex-col sm:flex-row gap-2">
+                            <input type="tel" id="reg-ind-mobile" name="mobile" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary min-w-0" placeholder="+966 5x xxx xxxx" aria-required="true">
+                            <button type="button" id="reg-otp-ind-mobile-send" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap">Send OTP</button>
+                        </div>
+                        <span id="reg-error-reg-ind-mobile" class="reg-inline-error text-sm text-red-600 mt-1 hidden" aria-live="polite"></span>
+                        <div id="reg-otp-ind-mobile-verify-wrap" class="mt-2 hidden">
+                            <div class="reg-otp-row flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                                <input type="text" id="reg-otp-ind-mobile-code" class="w-full sm:w-32 px-4 py-2 border border-gray-300 rounded-lg" placeholder="6-digit code" maxlength="6">
+                                <span id="reg-otp-ind-mobile-display" class="text-sm text-gray-500"></span>
+                                <button type="button" id="reg-otp-ind-mobile-verify" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Verify</button>
+                            </div>
+                            <span id="reg-ind-mobile-verified-badge" class="text-sm text-green-600 font-medium hidden">Mobile verified</span>
+                        </div>
                     </div>
                 </div>
-                <div class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label for="reg-ind-address-country" class="block mb-2 font-medium text-gray-900">Country <span class="text-red-600">*</span></label>
-                        <select id="reg-ind-address-country" name="addressCountry" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"></select>
+                <div class="reg-form-section space-y-4 mb-6">
+                    <h3 class="reg-section-title">Address</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="reg-ind-address-country" class="block mb-2 font-medium text-gray-900">Country <span class="text-red-600">*</span></label>
+                            <select id="reg-ind-address-country" name="addressCountry" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" aria-required="true"></select>
+                            <span id="reg-error-reg-ind-address-country" class="reg-inline-error text-sm text-red-600 mt-1 hidden" aria-live="polite"></span>
+                        </div>
+                        <div>
+                            <label for="reg-ind-address-region" class="block mb-2 font-medium text-gray-900">Region</label>
+                            <select id="reg-ind-address-region" name="addressRegion" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"></select>
+                        </div>
+                        <div>
+                            <label for="reg-ind-address-city" class="block mb-2 font-medium text-gray-900">City</label>
+                            <select id="reg-ind-address-city" name="addressCity" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"></select>
+                        </div>
                     </div>
-                    <div>
-                        <label for="reg-ind-address-region" class="block mb-2 font-medium text-gray-900">Region</label>
-                        <select id="reg-ind-address-region" name="addressRegion" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"></select>
+                </div>
+                <div class="reg-form-section space-y-4 mb-6">
+                    <h3 class="reg-section-title text-gray-600">Professional details (optional)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="reg-ind-current-role" class="block mb-2 font-medium text-gray-900">Current role / title</label>
+                            <input type="text" id="reg-ind-current-role" name="currentRole" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Senior Project Manager">
+                        </div>
+                        <div>
+                            <label for="reg-ind-years-experience" class="block mb-2 font-medium text-gray-900">Years of experience</label>
+                            <input type="number" id="reg-ind-years-experience" name="yearsExperience" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. 8" min="0" max="50">
+                        </div>
                     </div>
-                    <div>
-                        <label for="reg-ind-address-city" class="block mb-2 font-medium text-gray-900">City</label>
-                        <select id="reg-ind-address-city" name="addressCity" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"></select>
+                    <div class="mb-4">
+                        <label for="reg-ind-skills" class="block mb-2 font-medium text-gray-900">Skills</label>
+                        <input type="text" id="reg-ind-skills" name="skills" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. PMP, Structural Design, BIM (comma-separated)">
+                    </div>
+                    <div class="mb-4">
+                        <label for="reg-ind-languages" class="block mb-2 font-medium text-gray-900">Languages</label>
+                        <input type="text" id="reg-ind-languages" name="languages" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Arabic, English">
+                    </div>
+                    <div class="mb-4">
+                        <label for="reg-ind-linkedin" class="block mb-2 font-medium text-gray-900">LinkedIn profile URL</label>
+                        <p class="reg-field-hint text-sm text-gray-500 mb-1">Optional but recommended</p>
+                        <input type="url" id="reg-ind-linkedin" name="linkedin" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="https://linkedin.com/in/...">
                     </div>
                 </div>
-                <div class="mb-4">
-                    <label for="reg-ind-password" class="block mb-2 font-medium text-gray-900">Password <span class="text-red-600">*</span></label>
-                    <input type="password" id="reg-ind-password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Minimum 6 characters" minlength="6">
+                <div class="reg-form-section space-y-4 mb-6">
+                    <h3 class="reg-section-title">Account security</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="reg-ind-password" class="block mb-2 font-medium text-gray-900">Password <span class="text-red-600">*</span></label>
+                            <p class="reg-field-hint text-sm text-gray-500 mb-1">Minimum 6 characters</p>
+                            <input type="password" id="reg-ind-password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Minimum 6 characters" minlength="6" aria-required="true">
+                            <span id="reg-error-reg-ind-password" class="reg-inline-error text-sm text-red-600 mt-1 hidden" aria-live="polite"></span>
+                        </div>
+                        <div>
+                            <label for="reg-ind-confirm-password" class="block mb-2 font-medium text-gray-900">Confirm password <span class="text-red-600">*</span></label>
+                            <input type="password" id="reg-ind-confirm-password" name="confirmPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Re-enter password" aria-required="true">
+                            <span id="reg-error-reg-ind-confirm-password" class="reg-inline-error text-sm text-red-600 mt-1 hidden" aria-live="polite"></span>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-4">
-                    <label for="reg-ind-confirm-password" class="block mb-2 font-medium text-gray-900">Confirm password <span class="text-red-600">*</span></label>
-                    <input type="password" id="reg-ind-confirm-password" name="confirmPassword" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Re-enter password">
-                </div>
-                <div id="reg-specialty-wrap" class="mb-4">
-                    <label for="reg-specialty" class="block mb-2 font-medium text-gray-900">Discipline / Specialty <span class="text-red-600">*</span></label>
-                    <input type="text" id="reg-specialty" name="specialty" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Civil Engineering">
-                </div>
-                <div id="reg-expertise-wrap" class="mb-4 hidden">
-                    <label for="reg-expertise" class="block mb-2 font-medium text-gray-900">Expertise area <span class="text-red-600">*</span></label>
-                    <input type="text" id="reg-expertise" name="expertise" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Project Management Consulting">
+                <div class="reg-form-section space-y-4 mb-6">
+                    <h3 class="reg-section-title">Discipline</h3>
+                    <div id="reg-specialty-wrap" class="mb-4">
+                        <label for="reg-specialty" class="block mb-2 font-medium text-gray-900">Discipline / Specialty <span class="text-red-600">*</span></label>
+                        <input type="text" id="reg-specialty" name="specialty" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Civil Engineering" aria-required="true">
+                        <span id="reg-error-reg-specialty" class="reg-inline-error text-sm text-red-600 mt-1 hidden" aria-live="polite"></span>
+                    </div>
+                    <div id="reg-expertise-wrap" class="mb-4 hidden">
+                        <label for="reg-expertise" class="block mb-2 font-medium text-gray-900">Expertise area <span class="text-red-600">*</span></label>
+                        <input type="text" id="reg-expertise" name="expertise" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Project Management Consulting" aria-required="true">
+                        <span id="reg-error-reg-expertise" class="reg-inline-error text-sm text-red-600 mt-1 hidden" aria-live="polite"></span>
+                    </div>
                 </div>
                 <div class="mt-6 flex justify-between">
                     <button type="button" id="reg-btn-back-b2" class="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50">Back</button>
@@ -301,13 +444,13 @@
             </div>
             
             <!-- Individual path: B3 Documents + terms -->
-            <div id="reg-step-b3" class="reg-step-content hidden">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Documents & terms</h2>
+            <div id="reg-step-b3" class="reg-step-content reg-step-card hidden" role="region" aria-labelledby="reg-step-b3-title">
+                <h2 id="reg-step-b3-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-4">Documents & terms</h2>
                 <div id="reg-individual-documents" class="mb-6 space-y-4"></div>
                 <div class="mb-4">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="reg-terms-individual" name="termsAccepted" class="w-4 h-4 text-primary rounded">
-                        <span>I accept the <a href="#" class="text-primary underline">Terms & Conditions</a></span>
+                        <input type="checkbox" id="reg-terms-individual" name="termsAccepted" class="w-4 h-4 text-primary rounded" aria-required="true">
+                        <span>I accept the <a href="#" id="reg-terms-link-individual" class="text-primary underline">Terms & Conditions</a></span>
                     </label>
                 </div>
                 <div class="mt-6 flex justify-between">
@@ -317,11 +460,17 @@
             </div>
             
             <!-- Individual path: B4 Review -->
-            <div id="reg-step-b4" class="reg-step-content hidden">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Review & submit</h2>
+            <div id="reg-step-b4" class="reg-step-content reg-step-card hidden" role="region" aria-labelledby="reg-step-b4-title">
+                <h2 id="reg-step-b4-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-4">Review & submit</h2>
+                <div id="reg-profile-completion-individual" class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <p class="text-sm font-medium text-gray-700 mb-2">Profile completion: <span id="reg-completion-pct-individual">0%</span></p>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-3"><div id="reg-completion-bar-individual" class="bg-primary h-2 rounded-full transition-all" style="width: 0%"></div></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm"><div id="reg-completion-done-individual" class="text-green-700"></div><div id="reg-completion-missing-individual" class="text-amber-700"></div></div>
+                </div>
                 <div id="reg-review-individual" class="space-y-3 text-gray-700 mb-6"></div>
-                <div class="mb-4">
-                    <label class="block mb-2 font-medium text-gray-900">Preferred collaboration models (optional)</label>
+                <div class="reg-form-section space-y-4 mb-6">
+                    <h3 class="reg-section-title">Collaboration preferences</h3>
+                    <p class="text-sm text-gray-600 mb-2">Select how you prefer to collaborate with others (optional).</p>
                     <div id="reg-individual-preferred-models" class="flex flex-wrap gap-2"></div>
                 </div>
                 <div class="mt-6 flex justify-between">
@@ -331,17 +480,21 @@
             </div>
             
             <!-- Individual path: B5 Verification (optional) -->
-            <div id="reg-step-b5" class="reg-step-content hidden">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Verification</h2>
-                <p class="text-gray-600 mb-4">You can start verification now to get full access to opportunity details, or skip for now. You can return to verification later from the Profile page.</p>
-                <div class="mb-4 space-y-2">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="reg-vetting-choice-ind" value="complete" class="w-4 h-4 text-primary">
-                        <span>Start verification</span>
+            <div id="reg-step-b5" class="reg-step-content reg-step-card hidden" role="region" aria-labelledby="reg-step-b5-title">
+                <h2 id="reg-step-b5-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-4">Verification</h2>
+                <p class="text-gray-600 mb-5">You can start verification now to get full access to opportunity details, or skip for now. You can return to verification later from the Profile page.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <label class="reg-account-card flex flex-col p-5 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-primary hover:shadow-md transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                        <input type="radio" name="reg-vetting-choice-ind" value="complete" class="sr-only">
+                        <span class="reg-account-icon flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 text-primary mb-3" aria-hidden="true"><i class="ph-duotone ph-check-circle text-2xl"></i></span>
+                        <span class="font-semibold text-gray-900 mb-1">Start verification</span>
+                        <p class="text-sm text-gray-600">Add your domains and expertise for full access.</p>
                     </label>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="reg-vetting-choice-ind" value="skip" class="w-4 h-4 text-primary">
-                        <span>Skip for now</span>
+                    <label class="reg-account-card flex flex-col p-5 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-primary hover:shadow-md transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                        <input type="radio" name="reg-vetting-choice-ind" value="skip" class="sr-only">
+                        <span class="reg-account-icon flex items-center justify-center w-12 h-12 rounded-lg bg-gray-100 text-gray-600 mb-3" aria-hidden="true"><i class="ph-duotone ph-clock-counter-clockwise text-2xl"></i></span>
+                        <span class="font-semibold text-gray-900 mb-1">Skip for now</span>
+                        <p class="text-sm text-gray-600">You can verify later from your Profile.</p>
                     </label>
                 </div>
                 <div id="reg-vetting-form-individual" class="mb-6 hidden">
@@ -363,9 +516,23 @@
                 </div>
             </div>
             
-            <p class="text-center mt-6 text-gray-600">
-                Already have an account? <a href="#" data-route="/login" class="text-primary no-underline font-medium hover:underline">Login here</a>
-            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Terms & Conditions modal -->
+<div id="reg-terms-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/50" aria-modal="true" role="dialog" aria-labelledby="reg-terms-modal-title">
+    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] flex flex-col">
+        <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+            <h2 id="reg-terms-modal-title" class="text-lg font-semibold text-gray-900">Terms & Conditions</h2>
+            <button type="button" id="reg-terms-modal-close" class="p-2 rounded-lg hover:bg-gray-100 text-gray-600" aria-label="Close">×</button>
+        </div>
+        <div class="p-4 overflow-y-auto text-sm text-gray-700">
+            <p>By creating an account on PMTwin you agree to use the platform in accordance with our terms of service and privacy policy. You are responsible for the accuracy of the information you provide and for maintaining the confidentiality of your account credentials.</p>
+            <p class="mt-3">We may update these terms from time to time; continued use of the service after changes constitutes acceptance.</p>
+        </div>
+        <div class="p-4 border-t border-gray-200">
+            <button type="button" id="reg-terms-modal-close-btn" class="w-full px-4 py-2 rounded-lg bg-primary text-white font-medium hover:bg-primary-dark">Close</button>
         </div>
     </div>
 </div>

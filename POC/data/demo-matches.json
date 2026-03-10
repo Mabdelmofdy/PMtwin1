@@ -1,0 +1,1405 @@
+{
+  "domain": "matches",
+  "version": "1.0",
+  "dataset": "demo40",
+  "description": "Demo match records including new opportunities; supports dashboard and matching.",
+  "data": [
+    {
+      "id": "demo-match-01",
+      "opportunityId": "demo-oneway-need-01",
+      "candidateId": "demo-u06",
+      "matchScore": 0.92,
+      "criteria": {
+        "details": "budgetFit 1, exchangeModeFit 1, scopeFit 0.95"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T10:00:00.000Z"
+    },
+    {
+      "id": "demo-match-02",
+      "opportunityId": "demo-oneway-need-02",
+      "candidateId": "demo-u07",
+      "matchScore": 0.85,
+      "criteria": {
+        "details": "budgetFit 0.9, exchangeModeFit 1, scopeFit 0.8"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T10:15:00.000Z"
+    },
+    {
+      "id": "demo-match-03",
+      "opportunityId": "demo-oneway-need-02",
+      "candidateId": "demo-u08",
+      "matchScore": 0.78,
+      "criteria": {
+        "details": "budgetFit 0.85, exchangeModeFit 1, scopeFit 0.7"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T11:00:00.000Z"
+    },
+    {
+      "id": "demo-match-04",
+      "opportunityId": "demo-oneway-need-03",
+      "candidateId": "demo-u08",
+      "matchScore": 0.88,
+      "criteria": {
+        "details": "budgetFit 0.95, exchangeModeFit 1, scopeFit 0.9"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-05",
+      "opportunityId": "demo-oneway-need-04",
+      "candidateId": "demo-u09",
+      "matchScore": 0.9,
+      "criteria": {
+        "details": "budgetFit 0.95, exchangeModeFit 1, scopeFit 0.9"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T09:30:00.000Z"
+    },
+    {
+      "id": "demo-match-06",
+      "opportunityId": "demo-oneway-need-01",
+      "candidateId": "demo-u04",
+      "matchScore": 0.88,
+      "criteria": {
+        "details": "budgetFit 0.95, exchangeModeFit 1, scopeFit 0.82"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T11:30:00.000Z"
+    },
+    {
+      "id": "demo-match-07",
+      "opportunityId": "demo-oneway-need-02",
+      "candidateId": "demo-u04",
+      "matchScore": 0.82,
+      "criteria": {
+        "details": "budgetFit 0.9, exchangeModeFit 1, scopeFit 0.75"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-08",
+      "opportunityId": "demo-oneway-offer-01",
+      "candidateId": "demo-u04",
+      "matchScore": 0.9,
+      "criteria": {
+        "details": "budgetFit 1, exchangeModeFit 1, scopeFit 0.88"
+      },
+      "notified": false,
+      "createdAt": "2026-03-07T13:30:00.000Z"
+    },
+    {
+      "id": "demo-match-09",
+      "opportunityId": "demo-oneway-offer-02",
+      "candidateId": "demo-u01",
+      "matchScore": 0.8,
+      "criteria": {
+        "details": "budgetFit 0.85, exchangeModeFit 1, scopeFit 0.78"
+      },
+      "notified": false,
+      "createdAt": "2026-03-07T12:30:00.000Z"
+    },
+    {
+      "id": "demo-match-10",
+      "opportunityId": "demo-oneway-need-03",
+      "candidateId": "demo-u07",
+      "matchScore": 0.72,
+      "criteria": {
+        "details": "budgetFit 0.75, exchangeModeFit 1, scopeFit 0.65"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T12:00:00.000Z"
+    },
+    {
+      "id": "demo-match-11",
+      "opportunityId": "demo-group-lead-01",
+      "candidateId": "demo-u23",
+      "matchScore": 0.88,
+      "criteria": {
+        "details": "budgetFit 0.9, exchangeModeFit 1, scopeFit 0.9"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T08:00:00.000Z"
+    },
+    {
+      "id": "demo-match-12",
+      "opportunityId": "demo-group-lead-01",
+      "candidateId": "demo-u24",
+      "matchScore": 0.82,
+      "criteria": {
+        "details": "budgetFit 0.85, exchangeModeFit 1, scopeFit 0.85"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T09:00:00.000Z"
+    },
+    {
+      "id": "demo-match-13",
+      "opportunityId": "demo-group-lead-01",
+      "candidateId": "demo-c03",
+      "matchScore": 0.9,
+      "criteria": {
+        "details": "budgetFit 0.95, exchangeModeFit 1, scopeFit 0.9"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T08:30:00.000Z"
+    },
+    {
+      "id": "demo-match-14",
+      "opportunityId": "demo-group-lead-02",
+      "candidateId": "demo-u08",
+      "matchScore": 0.86,
+      "criteria": {
+        "details": "budgetFit 0.88, exchangeModeFit 1, scopeFit 0.88"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T10:00:00.000Z"
+    },
+    {
+      "id": "demo-match-15",
+      "opportunityId": "demo-group-lead-02",
+      "candidateId": "demo-u07",
+      "matchScore": 0.84,
+      "criteria": {
+        "details": "budgetFit 0.9, exchangeModeFit 1, scopeFit 0.82"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T11:00:00.000Z"
+    },
+    {
+      "id": "demo-match-16",
+      "opportunityId": "demo-oneway-offer-03",
+      "candidateId": "demo-u02",
+      "matchScore": 0.84,
+      "criteria": {
+        "details": "budgetFit 0.9, exchangeModeFit 1, scopeFit 0.82"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T10:30:00.000Z"
+    },
+    {
+      "id": "demo-match-17",
+      "opportunityId": "demo-oneway-need-02",
+      "candidateId": "demo-u03",
+      "matchScore": 0.83,
+      "criteria": {
+        "details": "budgetFit 0.9, exchangeModeFit 1, scopeFit 0.8"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T10:45:00.000Z"
+    },
+    {
+      "id": "demo-match-18",
+      "opportunityId": "demo-oneway-need-01",
+      "candidateId": "demo-u05",
+      "matchScore": 0.8,
+      "criteria": {
+        "details": "budgetFit 0.95, exchangeModeFit 1, scopeFit 0.75"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T11:00:00.000Z"
+    },
+    {
+      "id": "demo-match-19",
+      "opportunityId": "demo-oneway-offer-04",
+      "candidateId": "demo-u10",
+      "matchScore": 0.86,
+      "criteria": {
+        "details": "budgetFit 0.9, exchangeModeFit 1, scopeFit 0.85"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T12:00:00.000Z"
+    },
+    {
+      "id": "demo-match-20",
+      "opportunityId": "demo-barter-na-11",
+      "candidateId": "demo-u15",
+      "matchScore": 0.81,
+      "criteria": {
+        "details": "budgetFit 0.88, exchangeModeFit 1, scopeFit 0.78"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T11:15:00.000Z"
+    },
+    {
+      "id": "demo-match-21",
+      "opportunityId": "demo-oneway-need-03",
+      "candidateId": "demo-u18",
+      "matchScore": 0.85,
+      "criteria": {
+        "details": "budgetFit 0.92, exchangeModeFit 1, scopeFit 0.82"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T13:00:00.000Z"
+    },
+    {
+      "id": "demo-match-22",
+      "opportunityId": "demo-oneway-offer-01",
+      "candidateId": "demo-u19",
+      "matchScore": 0.9,
+      "criteria": {
+        "details": "budgetFit 1, exchangeModeFit 1, scopeFit 0.88"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T13:15:00.000Z"
+    },
+    {
+      "id": "demo-match-23",
+      "opportunityId": "demo-group-lead-01",
+      "candidateId": "demo-u20",
+      "matchScore": 0.82,
+      "criteria": {
+        "details": "budgetFit 0.85, exchangeModeFit 1, scopeFit 0.8"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T09:30:00.000Z"
+    },
+    {
+      "id": "demo-match-24",
+      "opportunityId": "demo-oneway-need-05",
+      "candidateId": "demo-u21",
+      "matchScore": 0.88,
+      "criteria": {
+        "details": "budgetFit 0.92, exchangeModeFit 1, scopeFit 0.85"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-25",
+      "opportunityId": "demo-oneway-need-01",
+      "candidateId": "demo-u22",
+      "matchScore": 0.87,
+      "criteria": {
+        "details": "budgetFit 0.95, exchangeModeFit 1, scopeFit 0.82"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T11:45:00.000Z"
+    },
+    {
+      "id": "demo-match-26",
+      "opportunityId": "demo-oneway-need-02",
+      "candidateId": "demo-u25",
+      "matchScore": 0.81,
+      "criteria": {
+        "details": "budgetFit 0.88, exchangeModeFit 1, scopeFit 0.78"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T12:45:00.000Z"
+    },
+    {
+      "id": "demo-match-27",
+      "opportunityId": "demo-oneway-need-03",
+      "candidateId": "demo-u26",
+      "matchScore": 0.83,
+      "criteria": {
+        "details": "budgetFit 0.9, exchangeModeFit 1, scopeFit 0.8"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T13:30:00.000Z"
+    },
+    {
+      "id": "demo-match-28",
+      "opportunityId": "demo-circ-n31",
+      "candidateId": "demo-u32",
+      "matchScore": 0.79,
+      "criteria": {
+        "details": "budgetFit 0.85, exchangeModeFit 1, scopeFit 0.76"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T12:10:00.000Z"
+    },
+    {
+      "id": "demo-match-29",
+      "opportunityId": "demo-circ-n32",
+      "candidateId": "demo-u33",
+      "matchScore": 0.8,
+      "criteria": {
+        "details": "budgetFit 0.88, exchangeModeFit 1, scopeFit 0.76"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T12:20:00.000Z"
+    },
+    {
+      "id": "demo-match-30",
+      "opportunityId": "demo-circ-n33",
+      "candidateId": "demo-u34",
+      "matchScore": 0.77,
+      "criteria": {
+        "details": "budgetFit 0.84, exchangeModeFit 1, scopeFit 0.74"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T12:35:00.000Z"
+    },
+    {
+      "id": "demo-match-31",
+      "opportunityId": "demo-circ-n34",
+      "candidateId": "demo-u35",
+      "matchScore": 0.82,
+      "criteria": {
+        "details": "budgetFit 0.9, exchangeModeFit 1, scopeFit 0.78"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T12:50:00.000Z"
+    },
+    {
+      "id": "demo-match-32",
+      "opportunityId": "demo-oneway-need-02",
+      "candidateId": "demo-c01",
+      "matchScore": 0.84,
+      "criteria": {
+        "details": "budgetFit 0.92, exchangeModeFit 1, scopeFit 0.82"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T10:20:00.000Z"
+    },
+    {
+      "id": "demo-match-33",
+      "opportunityId": "demo-oneway-need-03",
+      "candidateId": "demo-c02",
+      "matchScore": 0.86,
+      "criteria": {
+        "details": "budgetFit 0.92, exchangeModeFit 1, scopeFit 0.84"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T11:20:00.000Z"
+    },
+    {
+      "id": "demo-match-34",
+      "opportunityId": "demo-group-lead-01",
+      "candidateId": "demo-c04",
+      "matchScore": 0.85,
+      "criteria": {
+        "details": "budgetFit 0.88, exchangeModeFit 1, scopeFit 0.85"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T08:45:00.000Z"
+    },
+    {
+      "id": "demo-match-35",
+      "opportunityId": "demo-oneway-offer-01",
+      "candidateId": "demo-c05",
+      "matchScore": 0.88,
+      "criteria": {
+        "details": "budgetFit 0.95, exchangeModeFit 1, scopeFit 0.85"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T09:15:00.000Z"
+    },
+    {
+      "id": "demo-match-36",
+      "opportunityId": "demo-oneway-need-01",
+      "candidateId": "demo-c06",
+      "matchScore": 0.89,
+      "criteria": {
+        "details": "budgetFit 0.98, exchangeModeFit 1, scopeFit 0.84"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T10:00:00.000Z"
+    },
+    {
+      "id": "demo-match-37",
+      "opportunityId": "demo-barter-nb-12",
+      "candidateId": "demo-u11",
+      "matchScore": 0.88,
+      "criteria": {
+        "details": "budgetFit 0.95, exchangeModeFit 1, scopeFit 0.85"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T10:30:00.000Z"
+    },
+    {
+      "id": "demo-match-38",
+      "opportunityId": "demo-barter-nd-14",
+      "candidateId": "demo-u13",
+      "matchScore": 0.8,
+      "criteria": {
+        "details": "budgetFit 0.85, exchangeModeFit 1, scopeFit 0.75"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T09:00:00.000Z"
+    },
+    {
+      "id": "demo-match-38b",
+      "opportunityId": "demo-barter-od-14",
+      "candidateId": "demo-u12",
+      "matchScore": 0.88,
+      "criteria": {
+        "details": "budgetFit 0.95, exchangeModeFit 1, scopeFit 0.85"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T10:30:00.000Z"
+    },
+    {
+      "id": "demo-match-39",
+      "opportunityId": "demo-barter-nc-13",
+      "candidateId": "demo-u14",
+      "matchScore": 0.85,
+      "criteria": {
+        "details": "budgetFit 0.9, exchangeModeFit 1, scopeFit 0.8"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T13:00:00.000Z"
+    },
+    {
+      "id": "demo-match-40",
+      "opportunityId": "demo-barter-ne-15",
+      "candidateId": "demo-u16",
+      "matchScore": 0.75,
+      "criteria": {
+        "details": "budgetFit 0.85, exchangeModeFit 1, scopeFit 0.7"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T14:30:00.000Z"
+    },
+    {
+      "id": "demo-match-41",
+      "opportunityId": "demo-circ-n31",
+      "candidateId": "demo-u27",
+      "matchScore": 0.78,
+      "criteria": {
+        "details": "budgetFit 0.85, exchangeModeFit 1, scopeFit 0.75"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T12:00:00.000Z"
+    },
+    {
+      "id": "demo-match-42",
+      "opportunityId": "demo-circ-n32",
+      "candidateId": "demo-u28",
+      "matchScore": 0.8,
+      "criteria": {
+        "details": "budgetFit 0.88, exchangeModeFit 1, scopeFit 0.78"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T12:15:00.000Z"
+    },
+    {
+      "id": "demo-match-43",
+      "opportunityId": "demo-circ-n33",
+      "candidateId": "demo-u29",
+      "matchScore": 0.76,
+      "criteria": {
+        "details": "budgetFit 0.82, exchangeModeFit 1, scopeFit 0.72"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T12:30:00.000Z"
+    },
+    {
+      "id": "demo-match-44",
+      "opportunityId": "demo-circ-n34",
+      "candidateId": "demo-u30",
+      "matchScore": 0.82,
+      "criteria": {
+        "details": "budgetFit 0.9, exchangeModeFit 1, scopeFit 0.8"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T12:45:00.000Z"
+    },
+    {
+      "id": "demo-match-45",
+      "opportunityId": "demo-circ-n35",
+      "candidateId": "demo-u31",
+      "matchScore": 0.79,
+      "criteria": {
+        "details": "budgetFit 0.86, exchangeModeFit 1, scopeFit 0.76"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T13:00:00.000Z"
+    },
+    {
+      "id": "demo-match-46",
+      "opportunityId": "demo-barter-oa-11",
+      "candidateId": "demo-u17",
+      "matchScore": 0.83,
+      "criteria": {
+        "details": "budgetFit 0.9, exchangeModeFit 1, scopeFit 0.8"
+      },
+      "notified": true,
+      "createdAt": "2026-03-07T11:30:00.000Z"
+    },
+    {
+      "id": "demo-match-48",
+      "opportunityId": "demo-need-41",
+      "candidateId": "demo-u07",
+      "matchScore": 0.94,
+      "criteria": {
+        "details": "budgetFit 0.89, exchangeModeFit 1, scopeFit 0.84"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-49",
+      "opportunityId": "demo-need-41",
+      "candidateId": "demo-c02",
+      "matchScore": 0.75,
+      "criteria": {
+        "details": "budgetFit 0.72, exchangeModeFit 1, scopeFit 0.68"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-50",
+      "opportunityId": "demo-need-42",
+      "candidateId": "demo-u34",
+      "matchScore": 0.84,
+      "criteria": {
+        "details": "budgetFit 0.80, exchangeModeFit 1, scopeFit 0.76"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-51",
+      "opportunityId": "demo-need-42",
+      "candidateId": "demo-c01",
+      "matchScore": 0.74,
+      "criteria": {
+        "details": "budgetFit 0.70, exchangeModeFit 1, scopeFit 0.66"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-52",
+      "opportunityId": "demo-need-43",
+      "candidateId": "demo-u12",
+      "matchScore": 0.84,
+      "criteria": {
+        "details": "budgetFit 0.80, exchangeModeFit 1, scopeFit 0.76"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-53",
+      "opportunityId": "demo-need-43",
+      "candidateId": "demo-u11",
+      "matchScore": 0.85,
+      "criteria": {
+        "details": "budgetFit 0.81, exchangeModeFit 1, scopeFit 0.76"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-54",
+      "opportunityId": "demo-need-44",
+      "candidateId": "demo-u10",
+      "matchScore": 0.85,
+      "criteria": {
+        "details": "budgetFit 0.80, exchangeModeFit 1, scopeFit 0.76"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-55",
+      "opportunityId": "demo-need-44",
+      "candidateId": "demo-u09",
+      "matchScore": 0.86,
+      "criteria": {
+        "details": "budgetFit 0.82, exchangeModeFit 1, scopeFit 0.77"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-56",
+      "opportunityId": "demo-need-45",
+      "candidateId": "demo-u05",
+      "matchScore": 0.79,
+      "criteria": {
+        "details": "budgetFit 0.75, exchangeModeFit 1, scopeFit 0.71"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-57",
+      "opportunityId": "demo-need-45",
+      "candidateId": "demo-c05",
+      "matchScore": 0.72,
+      "criteria": {
+        "details": "budgetFit 0.68, exchangeModeFit 1, scopeFit 0.65"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-58",
+      "opportunityId": "demo-need-46",
+      "candidateId": "demo-u06",
+      "matchScore": 0.84,
+      "criteria": {
+        "details": "budgetFit 0.80, exchangeModeFit 1, scopeFit 0.76"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-59",
+      "opportunityId": "demo-need-46",
+      "candidateId": "demo-u18",
+      "matchScore": 0.75,
+      "criteria": {
+        "details": "budgetFit 0.71, exchangeModeFit 1, scopeFit 0.68"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-60",
+      "opportunityId": "demo-need-47",
+      "candidateId": "demo-u35",
+      "matchScore": 0.87,
+      "criteria": {
+        "details": "budgetFit 0.83, exchangeModeFit 1, scopeFit 0.78"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-61",
+      "opportunityId": "demo-need-47",
+      "candidateId": "demo-u04",
+      "matchScore": 0.78,
+      "criteria": {
+        "details": "budgetFit 0.74, exchangeModeFit 1, scopeFit 0.70"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-62",
+      "opportunityId": "demo-need-48",
+      "candidateId": "demo-u13",
+      "matchScore": 0.77,
+      "criteria": {
+        "details": "budgetFit 0.74, exchangeModeFit 1, scopeFit 0.70"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-63",
+      "opportunityId": "demo-need-48",
+      "candidateId": "demo-u02",
+      "matchScore": 0.83,
+      "criteria": {
+        "details": "budgetFit 0.79, exchangeModeFit 1, scopeFit 0.75"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-64",
+      "opportunityId": "demo-need-49",
+      "candidateId": "demo-u31",
+      "matchScore": 0.92,
+      "criteria": {
+        "details": "budgetFit 0.87, exchangeModeFit 1, scopeFit 0.82"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-65",
+      "opportunityId": "demo-need-49",
+      "candidateId": "demo-u33",
+      "matchScore": 0.88,
+      "criteria": {
+        "details": "budgetFit 0.83, exchangeModeFit 1, scopeFit 0.79"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-66",
+      "opportunityId": "demo-need-50",
+      "candidateId": "demo-u28",
+      "matchScore": 0.92,
+      "criteria": {
+        "details": "budgetFit 0.87, exchangeModeFit 1, scopeFit 0.83"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-67",
+      "opportunityId": "demo-need-50",
+      "candidateId": "demo-u33",
+      "matchScore": 0.79,
+      "criteria": {
+        "details": "budgetFit 0.75, exchangeModeFit 1, scopeFit 0.71"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-68",
+      "opportunityId": "demo-offer-41",
+      "candidateId": "demo-c04",
+      "matchScore": 0.96,
+      "criteria": {
+        "details": "budgetFit 0.91, exchangeModeFit 1, scopeFit 0.86"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-69",
+      "opportunityId": "demo-offer-41",
+      "candidateId": "demo-u24",
+      "matchScore": 0.81,
+      "criteria": {
+        "details": "budgetFit 0.77, exchangeModeFit 1, scopeFit 0.73"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-70",
+      "opportunityId": "demo-offer-42",
+      "candidateId": "demo-u14",
+      "matchScore": 0.87,
+      "criteria": {
+        "details": "budgetFit 0.83, exchangeModeFit 1, scopeFit 0.78"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-71",
+      "opportunityId": "demo-offer-42",
+      "candidateId": "demo-u31",
+      "matchScore": 0.77,
+      "criteria": {
+        "details": "budgetFit 0.73, exchangeModeFit 1, scopeFit 0.69"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-72",
+      "opportunityId": "demo-offer-43",
+      "candidateId": "demo-u24",
+      "matchScore": 0.83,
+      "criteria": {
+        "details": "budgetFit 0.79, exchangeModeFit 1, scopeFit 0.75"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-73",
+      "opportunityId": "demo-offer-43",
+      "candidateId": "demo-u14",
+      "matchScore": 0.9,
+      "criteria": {
+        "details": "budgetFit 0.86, exchangeModeFit 1, scopeFit 0.81"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-74",
+      "opportunityId": "demo-offer-44",
+      "candidateId": "demo-c04",
+      "matchScore": 0.89,
+      "criteria": {
+        "details": "budgetFit 0.84, exchangeModeFit 1, scopeFit 0.80"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-75",
+      "opportunityId": "demo-offer-44",
+      "candidateId": "demo-c06",
+      "matchScore": 0.8,
+      "criteria": {
+        "details": "budgetFit 0.76, exchangeModeFit 1, scopeFit 0.72"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-76",
+      "opportunityId": "demo-offer-45",
+      "candidateId": "demo-u12",
+      "matchScore": 0.8,
+      "criteria": {
+        "details": "budgetFit 0.76, exchangeModeFit 1, scopeFit 0.72"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-77",
+      "opportunityId": "demo-offer-45",
+      "candidateId": "demo-u07",
+      "matchScore": 0.85,
+      "criteria": {
+        "details": "budgetFit 0.81, exchangeModeFit 1, scopeFit 0.77"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-78",
+      "opportunityId": "demo-offer-46",
+      "candidateId": "demo-u06",
+      "matchScore": 0.95,
+      "criteria": {
+        "details": "budgetFit 0.90, exchangeModeFit 1, scopeFit 0.86"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-79",
+      "opportunityId": "demo-offer-46",
+      "candidateId": "demo-u02",
+      "matchScore": 0.96,
+      "criteria": {
+        "details": "budgetFit 0.91, exchangeModeFit 1, scopeFit 0.86"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-80",
+      "opportunityId": "demo-offer-47",
+      "candidateId": "demo-u09",
+      "matchScore": 0.94,
+      "criteria": {
+        "details": "budgetFit 0.90, exchangeModeFit 1, scopeFit 0.85"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-81",
+      "opportunityId": "demo-offer-47",
+      "candidateId": "demo-c04",
+      "matchScore": 0.84,
+      "criteria": {
+        "details": "budgetFit 0.80, exchangeModeFit 1, scopeFit 0.76"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-82",
+      "opportunityId": "demo-offer-48",
+      "candidateId": "demo-u30",
+      "matchScore": 0.91,
+      "criteria": {
+        "details": "budgetFit 0.87, exchangeModeFit 1, scopeFit 0.82"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-83",
+      "opportunityId": "demo-offer-48",
+      "candidateId": "demo-u15",
+      "matchScore": 0.84,
+      "criteria": {
+        "details": "budgetFit 0.80, exchangeModeFit 1, scopeFit 0.76"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-84",
+      "opportunityId": "demo-offer-49",
+      "candidateId": "demo-u03",
+      "matchScore": 0.93,
+      "criteria": {
+        "details": "budgetFit 0.89, exchangeModeFit 1, scopeFit 0.84"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-85",
+      "opportunityId": "demo-offer-49",
+      "candidateId": "demo-u18",
+      "matchScore": 0.8,
+      "criteria": {
+        "details": "budgetFit 0.76, exchangeModeFit 1, scopeFit 0.72"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-86",
+      "opportunityId": "demo-offer-50",
+      "candidateId": "demo-c05",
+      "matchScore": 0.9,
+      "criteria": {
+        "details": "budgetFit 0.86, exchangeModeFit 1, scopeFit 0.81"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-87",
+      "opportunityId": "demo-offer-50",
+      "candidateId": "demo-u25",
+      "matchScore": 0.91,
+      "criteria": {
+        "details": "budgetFit 0.86, exchangeModeFit 1, scopeFit 0.82"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-88",
+      "opportunityId": "demo-barter-41",
+      "candidateId": "demo-u01",
+      "matchScore": 0.86,
+      "criteria": {
+        "details": "budgetFit 0.82, exchangeModeFit 1, scopeFit 0.77"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-89",
+      "opportunityId": "demo-barter-41",
+      "candidateId": "demo-u25",
+      "matchScore": 0.88,
+      "criteria": {
+        "details": "budgetFit 0.83, exchangeModeFit 1, scopeFit 0.79"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-90",
+      "opportunityId": "demo-barter-42",
+      "candidateId": "demo-u09",
+      "matchScore": 0.96,
+      "criteria": {
+        "details": "budgetFit 0.91, exchangeModeFit 1, scopeFit 0.86"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-91",
+      "opportunityId": "demo-barter-42",
+      "candidateId": "demo-u06",
+      "matchScore": 0.73,
+      "criteria": {
+        "details": "budgetFit 0.69, exchangeModeFit 1, scopeFit 0.65"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-92",
+      "opportunityId": "demo-barter-43",
+      "candidateId": "demo-c03",
+      "matchScore": 0.87,
+      "criteria": {
+        "details": "budgetFit 0.83, exchangeModeFit 1, scopeFit 0.78"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-93",
+      "opportunityId": "demo-barter-43",
+      "candidateId": "demo-u03",
+      "matchScore": 0.95,
+      "criteria": {
+        "details": "budgetFit 0.91, exchangeModeFit 1, scopeFit 0.86"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-94",
+      "opportunityId": "demo-barter-44",
+      "candidateId": "demo-u14",
+      "matchScore": 0.75,
+      "criteria": {
+        "details": "budgetFit 0.72, exchangeModeFit 1, scopeFit 0.68"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-95",
+      "opportunityId": "demo-barter-44",
+      "candidateId": "demo-u10",
+      "matchScore": 0.92,
+      "criteria": {
+        "details": "budgetFit 0.88, exchangeModeFit 1, scopeFit 0.83"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-96",
+      "opportunityId": "demo-barter-45",
+      "candidateId": "demo-u27",
+      "matchScore": 0.76,
+      "criteria": {
+        "details": "budgetFit 0.72, exchangeModeFit 1, scopeFit 0.69"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-97",
+      "opportunityId": "demo-barter-45",
+      "candidateId": "demo-u01",
+      "matchScore": 0.77,
+      "criteria": {
+        "details": "budgetFit 0.73, exchangeModeFit 1, scopeFit 0.69"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-98",
+      "opportunityId": "demo-barter-46",
+      "candidateId": "demo-c06",
+      "matchScore": 0.83,
+      "criteria": {
+        "details": "budgetFit 0.79, exchangeModeFit 1, scopeFit 0.75"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-99",
+      "opportunityId": "demo-barter-46",
+      "candidateId": "demo-u35",
+      "matchScore": 0.94,
+      "criteria": {
+        "details": "budgetFit 0.90, exchangeModeFit 1, scopeFit 0.85"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-100",
+      "opportunityId": "demo-barter-47",
+      "candidateId": "demo-u07",
+      "matchScore": 0.79,
+      "criteria": {
+        "details": "budgetFit 0.75, exchangeModeFit 1, scopeFit 0.71"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-101",
+      "opportunityId": "demo-barter-47",
+      "candidateId": "demo-u29",
+      "matchScore": 0.84,
+      "criteria": {
+        "details": "budgetFit 0.80, exchangeModeFit 1, scopeFit 0.76"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-102",
+      "opportunityId": "demo-barter-48",
+      "candidateId": "demo-c01",
+      "matchScore": 0.73,
+      "criteria": {
+        "details": "budgetFit 0.70, exchangeModeFit 1, scopeFit 0.66"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-103",
+      "opportunityId": "demo-barter-48",
+      "candidateId": "demo-u12",
+      "matchScore": 0.9,
+      "criteria": {
+        "details": "budgetFit 0.85, exchangeModeFit 1, scopeFit 0.81"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-104",
+      "opportunityId": "demo-barter-49",
+      "candidateId": "demo-u25",
+      "matchScore": 0.73,
+      "criteria": {
+        "details": "budgetFit 0.69, exchangeModeFit 1, scopeFit 0.66"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-105",
+      "opportunityId": "demo-barter-49",
+      "candidateId": "demo-u10",
+      "matchScore": 0.75,
+      "criteria": {
+        "details": "budgetFit 0.71, exchangeModeFit 1, scopeFit 0.67"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-106",
+      "opportunityId": "demo-barter-50",
+      "candidateId": "demo-u21",
+      "matchScore": 0.85,
+      "criteria": {
+        "details": "budgetFit 0.81, exchangeModeFit 1, scopeFit 0.77"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-107",
+      "opportunityId": "demo-barter-50",
+      "candidateId": "demo-c05",
+      "matchScore": 0.93,
+      "criteria": {
+        "details": "budgetFit 0.88, exchangeModeFit 1, scopeFit 0.84"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-108",
+      "opportunityId": "demo-consortium-41",
+      "candidateId": "demo-u07",
+      "matchScore": 0.92,
+      "criteria": {
+        "details": "budgetFit 0.88, exchangeModeFit 1, scopeFit 0.83"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-109",
+      "opportunityId": "demo-consortium-41",
+      "candidateId": "demo-u33",
+      "matchScore": 0.96,
+      "criteria": {
+        "details": "budgetFit 0.91, exchangeModeFit 1, scopeFit 0.86"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-110",
+      "opportunityId": "demo-consortium-42",
+      "candidateId": "demo-u28",
+      "matchScore": 0.85,
+      "criteria": {
+        "details": "budgetFit 0.81, exchangeModeFit 1, scopeFit 0.76"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-111",
+      "opportunityId": "demo-consortium-42",
+      "candidateId": "demo-u12",
+      "matchScore": 0.83,
+      "criteria": {
+        "details": "budgetFit 0.78, exchangeModeFit 1, scopeFit 0.74"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-112",
+      "opportunityId": "demo-consortium-43",
+      "candidateId": "demo-u08",
+      "matchScore": 0.73,
+      "criteria": {
+        "details": "budgetFit 0.70, exchangeModeFit 1, scopeFit 0.66"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-113",
+      "opportunityId": "demo-consortium-43",
+      "candidateId": "demo-c05",
+      "matchScore": 0.93,
+      "criteria": {
+        "details": "budgetFit 0.89, exchangeModeFit 1, scopeFit 0.84"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-114",
+      "opportunityId": "demo-consortium-44",
+      "candidateId": "demo-u18",
+      "matchScore": 0.83,
+      "criteria": {
+        "details": "budgetFit 0.79, exchangeModeFit 1, scopeFit 0.75"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-115",
+      "opportunityId": "demo-consortium-44",
+      "candidateId": "demo-u05",
+      "matchScore": 0.87,
+      "criteria": {
+        "details": "budgetFit 0.83, exchangeModeFit 1, scopeFit 0.78"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-116",
+      "opportunityId": "demo-consortium-45",
+      "candidateId": "demo-u13",
+      "matchScore": 0.73,
+      "criteria": {
+        "details": "budgetFit 0.69, exchangeModeFit 1, scopeFit 0.66"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-117",
+      "opportunityId": "demo-consortium-45",
+      "candidateId": "demo-c03",
+      "matchScore": 0.92,
+      "criteria": {
+        "details": "budgetFit 0.87, exchangeModeFit 1, scopeFit 0.82"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-118",
+      "opportunityId": "demo-consortium-46",
+      "candidateId": "demo-c02",
+      "matchScore": 0.8,
+      "criteria": {
+        "details": "budgetFit 0.76, exchangeModeFit 1, scopeFit 0.72"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-119",
+      "opportunityId": "demo-consortium-46",
+      "candidateId": "demo-u33",
+      "matchScore": 0.89,
+      "criteria": {
+        "details": "budgetFit 0.84, exchangeModeFit 1, scopeFit 0.80"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-120",
+      "opportunityId": "demo-consortium-47",
+      "candidateId": "demo-c01",
+      "matchScore": 0.85,
+      "criteria": {
+        "details": "budgetFit 0.80, exchangeModeFit 1, scopeFit 0.76"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-121",
+      "opportunityId": "demo-consortium-47",
+      "candidateId": "demo-u35",
+      "matchScore": 0.85,
+      "criteria": {
+        "details": "budgetFit 0.81, exchangeModeFit 1, scopeFit 0.77"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-122",
+      "opportunityId": "demo-consortium-48",
+      "candidateId": "demo-u06",
+      "matchScore": 0.78,
+      "criteria": {
+        "details": "budgetFit 0.74, exchangeModeFit 1, scopeFit 0.70"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-123",
+      "opportunityId": "demo-consortium-48",
+      "candidateId": "demo-c02",
+      "matchScore": 0.87,
+      "criteria": {
+        "details": "budgetFit 0.83, exchangeModeFit 1, scopeFit 0.79"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-124",
+      "opportunityId": "demo-consortium-49",
+      "candidateId": "demo-u24",
+      "matchScore": 0.79,
+      "criteria": {
+        "details": "budgetFit 0.75, exchangeModeFit 1, scopeFit 0.71"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-125",
+      "opportunityId": "demo-consortium-49",
+      "candidateId": "demo-c01",
+      "matchScore": 0.92,
+      "criteria": {
+        "details": "budgetFit 0.87, exchangeModeFit 1, scopeFit 0.83"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-126",
+      "opportunityId": "demo-consortium-50",
+      "candidateId": "demo-u32",
+      "matchScore": 0.74,
+      "criteria": {
+        "details": "budgetFit 0.70, exchangeModeFit 1, scopeFit 0.66"
+      },
+      "notified": true,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    },
+    {
+      "id": "demo-match-127",
+      "opportunityId": "demo-consortium-50",
+      "candidateId": "demo-u25",
+      "matchScore": 0.73,
+      "criteria": {
+        "details": "budgetFit 0.70, exchangeModeFit 1, scopeFit 0.66"
+      },
+      "notified": false,
+      "createdAt": "2026-03-10T14:00:00.000Z"
+    }
+  ]
+}

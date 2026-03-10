@@ -1,0 +1,4391 @@
+{
+  "domain": "opportunities",
+  "version": "1.1",
+  "dataset": "demo40",
+  "description": "Demo dataset of 80 opportunities: original 40 plus 10 NEEDs, 10 OFFERs, 10 BARTER, 10 CONSORTIUM; full scope and milestones.",
+  "data": [
+    {
+      "id": "demo-oneway-need-01",
+      "title": "Need: Structural engineer for shop drawing review",
+      "description": "We need a structural engineer for shop drawing review. Budget: 10K SAR.",
+      "creatorId": "demo-c01",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Structural Engineering",
+          "Structural Review"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Shop drawing review for structural package; sign-off and as-built documentation.",
+        "milestones": [
+          "Scope and deliverables agreed",
+          "Design/review or BOQ phase",
+          "Sign-off and handover"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 10000,
+          "max": 10000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-04-01",
+        "endDate": "2026-06-30",
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-oneway-need-02",
+      "title": "Need: Project management for 6-month construction project",
+      "description": "Need experienced PM for construction project. Budget 80K–100K SAR.",
+      "creatorId": "demo-c02",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Project Management",
+          "PMP",
+          "Construction"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Full project management and PMO for construction phase; planning, risk, stakeholder and handover.",
+        "milestones": [
+          "Kick-off and planning",
+          "Execution phase",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 80000,
+          "max": 100000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-05-01",
+        "endDate": "2026-10-31",
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-oneway-need-03",
+      "title": "Need: MEP design for commercial building",
+      "description": "MEP design services needed. Budget 50K SAR.",
+      "creatorId": "demo-u03",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Dammam, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "eastern",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "MEP Design",
+          "HVAC Design",
+          "Electrical Systems"
+        ],
+        "sectors": [
+          "Energy"
+        ],
+        "scopeOfWork": "MEP design for commercial building; HVAC, electrical, and BIM coordination.",
+        "milestones": [
+          "Scope and deliverables agreed",
+          "Design/review or BOQ phase",
+          "Sign-off and handover"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 45000,
+          "max": 55000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-06-01",
+        "endDate": "2026-09-30",
+        "locationRequirement": "Remote"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Energy"
+    },
+    {
+      "id": "demo-oneway-need-04",
+      "title": "Need: Quantity surveyor for tender preparation",
+      "description": "Quantity surveyor for BOQ and tender. Budget 25K SAR.",
+      "creatorId": "demo-u04",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Cost Estimation",
+          "Bill of Quantities",
+          "Tendering"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "BOQ preparation and tender documentation; cost estimation and contract support.",
+        "milestones": [
+          "Scope and deliverables agreed",
+          "Design/review or BOQ phase",
+          "Sign-off and handover"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 20000,
+          "max": 30000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-04-15",
+        "endDate": "2026-07-15",
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-oneway-need-05",
+      "title": "Need: Heavy equipment for earthworks",
+      "description": "Excavators and bulldozers for 3 months. Budget 200K SAR.",
+      "creatorId": "demo-u05",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Eastern Province, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "eastern",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Heavy Equipment",
+          "Equipment Supply",
+          "Earthworks"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Heavy equipment supply and operation for earthworks; excavators, bulldozers, and site logistics.",
+        "milestones": [
+          "Kick-off and planning",
+          "Execution phase",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 180000,
+          "max": 220000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-05-01",
+        "endDate": "2026-07-31",
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-oneway-offer-01",
+      "title": "Offer: Structural engineering services",
+      "description": "Structural engineering and shop drawing review. Rate 8K–12K SAR.",
+      "creatorId": "demo-u06",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Structural Engineering",
+          "Structural Design",
+          "Structural Review"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Structural engineering and shop drawing review; design and as-built support.",
+        "milestones": [
+          "Scope and deliverables agreed",
+          "Design/review or BOQ phase",
+          "Sign-off and handover"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 8000,
+          "max": 12000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-12-31"
+        },
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-oneway-offer-02",
+      "title": "Offer: Project management and PMO",
+      "description": "Experienced PM for construction. Rate 70K–100K SAR per project.",
+      "creatorId": "demo-u07",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Project Management",
+          "PMP",
+          "Planning",
+          "Risk Management"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Project management and PMO; planning, risk, and delivery coordination.",
+        "milestones": [
+          "Kick-off and planning",
+          "Execution phase",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 70000,
+          "max": 100000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        },
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-oneway-offer-03",
+      "title": "Offer: MEP design and BIM",
+      "description": "MEP design, HVAC, electrical. Rate 40K–60K SAR.",
+      "creatorId": "demo-u08",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Dammam, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "eastern",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "MEP Design",
+          "HVAC Design",
+          "Electrical Systems",
+          "BIM"
+        ],
+        "sectors": [
+          "Energy"
+        ],
+        "scopeOfWork": "MEP design and BIM; HVAC, electrical, and coordination.",
+        "milestones": [
+          "Scope and deliverables agreed",
+          "Design/review or BOQ phase",
+          "Sign-off and handover"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 40000,
+          "max": 60000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-05-01",
+          "end": "2026-11-30"
+        },
+        "locationRequirement": "Remote"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Energy"
+    },
+    {
+      "id": "demo-oneway-offer-04",
+      "title": "Offer: Quantity surveying and BOQ",
+      "description": "BOQ, cost estimation, tendering. Rate 22K–28K SAR.",
+      "creatorId": "demo-u09",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Cost Estimation",
+          "Bill of Quantities",
+          "Tendering",
+          "Value Engineering"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Quantity surveying, BOQ, cost estimation, and tendering.",
+        "milestones": [
+          "Scope and deliverables agreed",
+          "Design/review or BOQ phase",
+          "Sign-off and handover"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 22000,
+          "max": 28000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-08-31"
+        },
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-oneway-offer-05",
+      "title": "Offer: Heavy equipment rental",
+      "description": "Excavators, bulldozers, cranes. Rate 180K–250K SAR for 3 months.",
+      "creatorId": "demo-c03",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Eastern Province, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "eastern",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Heavy Equipment",
+          "Equipment Supply",
+          "Heavy Equipment Operation"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Heavy equipment rental and operation; excavators, cranes, bulldozers as required.",
+        "milestones": [
+          "Kick-off and planning",
+          "Execution phase",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 180000,
+          "max": 250000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        },
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-barter-na-11",
+      "title": "Need: Engineering consulting",
+      "description": "Need engineering consulting for design review. Barter preferred.",
+      "creatorId": "demo-u11",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "requiredSkills": [
+          "Engineering Consulting",
+          "Design Review"
+        ],
+        "sectors": [
+          "Engineering Consulting"
+        ],
+        "scopeOfWork": "Engineering consulting and design review; technical sign-off and recommendations.",
+        "milestones": [
+          "Planning phase",
+          "Execution phase",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 15000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 15000
+      },
+      "attributes": {
+        "startDate": "2026-05-01",
+        "endDate": "2026-08-31"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Engineering Consulting"
+    },
+    {
+      "id": "demo-barter-oa-11",
+      "title": "Offer: Office space in Riyadh",
+      "description": "Offer co-working office space. Barter for services.",
+      "creatorId": "demo-u11",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "resource_pooling",
+      "subModelType": "resource_sharing",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "offeredSkills": [
+          "Facility Management",
+          "Facility Management"
+        ],
+        "sectors": [
+          "Real Estate"
+        ],
+        "scopeOfWork": "Office or co-working space; flexible terms.",
+        "milestones": [
+          "Agreement and access",
+          "Period of use",
+          "Exit and handback"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 14000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 14000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Real Estate"
+    },
+    {
+      "id": "demo-barter-nb-12",
+      "title": "Need: Office space for 6 months",
+      "description": "Need office or co-working space in Riyadh. Barter with services.",
+      "creatorId": "demo-u12",
+      "intent": "request",
+      "status": "published",
+      "modelType": "resource_pooling",
+      "subModelType": "resource_sharing",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "requiredSkills": [
+          "Facility Management",
+          "Facility Management"
+        ],
+        "sectors": [
+          "Real Estate"
+        ],
+        "scopeOfWork": "Office or co-working space for agreed period; utilities and basic amenities included.",
+        "milestones": [
+          "Agreement and access",
+          "Period of use",
+          "Exit and handback"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 12000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 12000
+      },
+      "attributes": {
+        "startDate": "2026-05-01",
+        "endDate": "2026-10-31"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Real Estate"
+    },
+    {
+      "id": "demo-barter-ob-12",
+      "title": "Offer: Engineering consulting and design review",
+      "description": "Offer engineering consulting. Barter for office space.",
+      "creatorId": "demo-u12",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "offeredSkills": [
+          "Engineering Consulting",
+          "Design Review",
+          "Technical Consulting"
+        ],
+        "sectors": [
+          "Engineering Consulting"
+        ],
+        "scopeOfWork": "Engineering consulting and design review across disciplines.",
+        "milestones": [
+          "Scope and deliverables agreed",
+          "Design/review or BOQ phase",
+          "Sign-off and handover"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 15000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 15000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Engineering Consulting"
+    },
+    {
+      "id": "demo-barter-nc-13",
+      "title": "Need: Accounting and bookkeeping",
+      "description": "Need accounting services. Barter with construction materials.",
+      "creatorId": "demo-u13",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "barter",
+      "scope": {
+        "requiredSkills": [
+          "Accounting",
+          "Financial Reporting"
+        ],
+        "sectors": [
+          "Financial"
+        ],
+        "scopeOfWork": "Accounting, bookkeeping, and financial reporting for agreed period.",
+        "milestones": [
+          "Engagement start",
+          "Service period",
+          "Deliverables and close-out"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 20000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 20000
+      },
+      "attributes": {
+        "startDate": "2026-04-01",
+        "endDate": "2026-09-30"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Financial"
+    },
+    {
+      "id": "demo-barter-oc-13",
+      "title": "Offer: Construction materials supply",
+      "description": "Supply of rebar, cement, formwork. Barter for services.",
+      "creatorId": "demo-u13",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "barter",
+      "scope": {
+        "offeredSkills": [
+          "Construction Materials",
+          "Rebar",
+          "Procurement"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Supply of construction materials; rebar, formwork, procurement.",
+        "milestones": [
+          "Order and specification",
+          "Supply and delivery",
+          "Acceptance"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 22000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 22000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-barter-nd-14",
+      "title": "Need: Construction materials for residential project",
+      "description": "Need rebar and cement. Barter with accounting.",
+      "creatorId": "demo-u14",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "barter",
+      "scope": {
+        "requiredSkills": [
+          "Construction Materials",
+          "Rebar",
+          "Procurement"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Supply of construction materials (rebar, formwork, cement) per specification.",
+        "milestones": [
+          "Order and specification",
+          "Supply and delivery",
+          "Acceptance"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 25000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 25000
+      },
+      "attributes": {
+        "startDate": "2026-05-01",
+        "endDate": "2026-08-31"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-barter-od-14",
+      "title": "Offer: Accounting and financial reporting",
+      "description": "Accounting, bookkeeping, tax. Barter for materials or space.",
+      "creatorId": "demo-u14",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "barter",
+      "scope": {
+        "offeredSkills": [
+          "Accounting",
+          "Financial Reporting",
+          "Contract Negotiation"
+        ],
+        "sectors": [
+          "Financial"
+        ],
+        "scopeOfWork": "Accounting, bookkeeping, and financial reporting.",
+        "milestones": [
+          "Engagement start",
+          "Service period",
+          "Deliverables and close-out"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 20000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 20000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Financial"
+    },
+    {
+      "id": "demo-barter-ne-15",
+      "title": "Need: Legal consulting for contract review",
+      "description": "Legal review of construction contract. Barter with design services.",
+      "creatorId": "demo-u15",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "requiredSkills": [
+          "Construction Law",
+          "Contract Drafting",
+          "Construction Law"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Legal review of construction contract; contract drafting and negotiation support.",
+        "milestones": [
+          "Engagement start",
+          "Service period",
+          "Deliverables and close-out"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 18000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 18000
+      },
+      "attributes": {
+        "startDate": "2026-05-01",
+        "endDate": "2026-07-31"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-barter-oe-15",
+      "title": "Offer: Architectural design services",
+      "description": "Architectural design and 3D. Barter for legal or other services.",
+      "creatorId": "demo-u15",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "offeredSkills": [
+          "Architectural Design",
+          "3D Visualization",
+          "Interior Design"
+        ],
+        "sectors": [
+          "Architecture"
+        ],
+        "scopeOfWork": "Architectural design, 3D visualization, and BIM.",
+        "milestones": [
+          "Planning phase",
+          "Execution phase",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 20000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 20000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Architecture"
+    },
+    {
+      "id": "demo-group-lead-01",
+      "title": "Need: Highway project — financial, construction, equipment partners",
+      "description": "Large highway project requiring financial partner, construction partner, and equipment provider.",
+      "creatorId": "demo-c05",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "consortium",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Infrastructure Development",
+          "Road Construction",
+          "Road Construction"
+        ],
+        "sectors": [
+          "Infrastructure"
+        ],
+        "scopeOfWork": "Highway project delivery: financial partner, construction partner, and equipment provider.",
+        "milestones": [
+          "Mobilization and contract",
+          "Design and permits",
+          "Construction phase",
+          "Testing and commissioning",
+          "Final delivery and handover"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 5000000,
+          "max": 15000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "memberRoles": [
+          {
+            "role": "Financial partner",
+            "scope": "Equity or debt financing"
+          },
+          {
+            "role": "Construction partner",
+            "scope": "Civil works execution"
+          },
+          {
+            "role": "Equipment provider",
+            "scope": "Heavy equipment supply"
+          }
+        ],
+        "startDate": "2026-06-01",
+        "endDate": "2028-12-31"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Infrastructure"
+    },
+    {
+      "id": "demo-group-lead-02",
+      "title": "Need: Mixed-use development — design, MEP, PM",
+      "description": "Mixed-use tower needing design lead, MEP contractor, and project manager.",
+      "creatorId": "demo-c06",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "consortium",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Architectural Design",
+          "MEP Design",
+          "Project Management"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Mixed-use development: design lead, MEP contractor, and project manager.",
+        "milestones": [
+          "Mobilization and contract",
+          "Design and permits",
+          "Construction phase",
+          "Testing and commissioning",
+          "Final delivery and handover"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 2000000,
+          "max": 6000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "memberRoles": [
+          {
+            "role": "Design lead",
+            "scope": "Architecture and BIM"
+          },
+          {
+            "role": "MEP contractor",
+            "scope": "MEP design and installation"
+          },
+          {
+            "role": "Project manager",
+            "scope": "PM and coordination"
+          }
+        ],
+        "startDate": "2026-07-01",
+        "endDate": "2027-12-31"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-group-offer-01",
+      "title": "Offer: Financial investment for infrastructure",
+      "description": "Equity and debt for infrastructure projects.",
+      "creatorId": "demo-u23",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Project Management",
+          "Project Management"
+        ],
+        "sectors": [
+          "Infrastructure"
+        ],
+        "scopeOfWork": "Equity and debt financing for infrastructure projects.",
+        "milestones": [
+          "Planning phase",
+          "Execution phase",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 1000000,
+          "max": 5000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-01-01",
+          "end": "2028-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Infrastructure"
+    },
+    {
+      "id": "demo-group-offer-02",
+      "title": "Offer: General contracting and civil works",
+      "description": "Civil works and construction execution for infrastructure.",
+      "creatorId": "demo-u24",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "General Contracting",
+          "General Contracting",
+          "Road Construction"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "scopeOfWork": "Civil works and construction execution for infrastructure.",
+        "milestones": [
+          "Planning phase",
+          "Execution phase",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 2000000,
+          "max": 8000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-06-01",
+          "end": "2028-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-group-offer-03",
+      "title": "Offer: Heavy equipment for infrastructure",
+      "description": "Excavators, cranes, and heavy equipment for large projects.",
+      "creatorId": "demo-u25",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Eastern Province, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "eastern",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Heavy Equipment",
+          "Equipment Supply",
+          "Heavy Equipment Operation"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Heavy equipment rental and operation; excavators, cranes, bulldozers as required.",
+        "milestones": [
+          "Kick-off and planning",
+          "Execution phase",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 500000,
+          "max": 3000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2028-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-group-offer-04",
+      "title": "Offer: Architectural design and BIM",
+      "description": "Full design and BIM for buildings.",
+      "creatorId": "demo-u26",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Architectural Design",
+          "BIM",
+          "3D Visualization"
+        ],
+        "sectors": [
+          "Architecture"
+        ],
+        "scopeOfWork": "Architectural design, 3D visualization, and BIM.",
+        "milestones": [
+          "Planning phase",
+          "Execution phase",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 300000,
+          "max": 1500000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-05-01",
+          "end": "2027-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Architecture"
+    },
+    {
+      "id": "demo-group-offer-05",
+      "title": "Offer: MEP design and installation",
+      "description": "MEP design and contractor services.",
+      "creatorId": "demo-u27",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "MEP Design",
+          "MEP Services",
+          "HVAC Design"
+        ],
+        "sectors": [
+          "Energy"
+        ],
+        "scopeOfWork": "MEP design and BIM; HVAC, electrical, and coordination.",
+        "milestones": [
+          "Scope and deliverables agreed",
+          "Design/review or BOQ phase",
+          "Sign-off and handover"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 400000,
+          "max": 2000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-06-01",
+          "end": "2027-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Energy"
+    },
+    {
+      "id": "demo-group-offer-06",
+      "title": "Offer: Project management for construction",
+      "description": "Dedicated PM and PMO for large projects.",
+      "creatorId": "demo-u28",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Project Management",
+          "PMP",
+          "Stakeholder Management"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Project management and PMO; planning, risk, and delivery coordination.",
+        "milestones": [
+          "Kick-off and planning",
+          "Execution phase",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 200000,
+          "max": 800000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-05-01",
+          "end": "2027-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-group-offer-07",
+      "title": "Offer: Road construction and earthworks",
+      "description": "Earthworks and road construction for infrastructure.",
+      "creatorId": "demo-u29",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Road Construction",
+          "Earthworks",
+          "General Contracting"
+        ],
+        "sectors": [
+          "Infrastructure"
+        ],
+        "scopeOfWork": "Road construction, earthworks, and civil package.",
+        "milestones": [
+          "Kick-off and planning",
+          "Execution phase",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 1000000,
+          "max": 5000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-06-01",
+          "end": "2028-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Infrastructure"
+    },
+    {
+      "id": "demo-group-offer-08",
+      "title": "Offer: Tower cranes and lifting equipment",
+      "description": "Crane rental and lifting for construction.",
+      "creatorId": "demo-u30",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Eastern Province, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "eastern",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Tower Crane Operation",
+          "Crane Operation",
+          "Equipment Supply"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Heavy equipment rental and operation; excavators, cranes, bulldozers as required.",
+        "milestones": [
+          "Planning phase",
+          "Execution phase",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 300000,
+          "max": 1500000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2028-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-circ-n31",
+      "title": "Need: Excavator for 2 months",
+      "description": "Need excavator for site work. Part of circular exchange.",
+      "creatorId": "demo-u31",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "requiredSkills": [
+          "Heavy Equipment",
+          "Heavy Equipment"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Heavy equipment supply and operation for earthworks; excavators, bulldozers, and site logistics.",
+        "milestones": [
+          "Kick-off and planning",
+          "Execution phase",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 40000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 40000
+      },
+      "attributes": {
+        "startDate": "2026-05-01",
+        "endDate": "2026-06-30"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-circ-o31",
+      "title": "Offer: Office space (Riyadh)",
+      "description": "Office space for 3 months. Circular exchange.",
+      "creatorId": "demo-u31",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "resource_pooling",
+      "subModelType": "resource_sharing",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "offeredSkills": [
+          "Facility Management"
+        ],
+        "sectors": [
+          "Real Estate"
+        ],
+        "scopeOfWork": "Office or co-working space; flexible terms.",
+        "milestones": [
+          "Agreement and access",
+          "Period of use",
+          "Exit and handback"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 35000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 35000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Real Estate"
+    },
+    {
+      "id": "demo-circ-n32",
+      "title": "Need: Accounting services",
+      "description": "Need accounting for 2 months. Circular exchange.",
+      "creatorId": "demo-u32",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "requiredSkills": [
+          "Accounting",
+          "Financial Reporting"
+        ],
+        "sectors": [
+          "Financial"
+        ],
+        "scopeOfWork": "Accounting, bookkeeping, and financial reporting for agreed period.",
+        "milestones": [
+          "Engagement start",
+          "Service period",
+          "Deliverables and close-out"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 25000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 25000
+      },
+      "attributes": {
+        "startDate": "2026-05-01",
+        "endDate": "2026-06-30"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Financial"
+    },
+    {
+      "id": "demo-circ-o32",
+      "title": "Offer: Excavator rental",
+      "description": "Excavator for 2 months. Circular exchange.",
+      "creatorId": "demo-u32",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "offeredSkills": [
+          "Heavy Equipment",
+          "Heavy Equipment",
+          "Equipment Supply"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Heavy equipment rental and operation; excavators, cranes, bulldozers as required.",
+        "milestones": [
+          "Kick-off and planning",
+          "Execution phase",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 40000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 40000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-circ-n33",
+      "title": "Need: Office space (Riyadh)",
+      "description": "Need office for 3 months. Circular exchange.",
+      "creatorId": "demo-u33",
+      "intent": "request",
+      "status": "published",
+      "modelType": "resource_pooling",
+      "subModelType": "resource_sharing",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "requiredSkills": [
+          "Facility Management"
+        ],
+        "sectors": [
+          "Real Estate"
+        ],
+        "scopeOfWork": "Office or co-working space for agreed period; utilities and basic amenities included.",
+        "milestones": [
+          "Agreement and access",
+          "Period of use",
+          "Exit and handback"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 30000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 30000
+      },
+      "attributes": {
+        "startDate": "2026-05-01",
+        "endDate": "2026-07-31"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Real Estate"
+    },
+    {
+      "id": "demo-circ-o33",
+      "title": "Offer: Accounting and bookkeeping",
+      "description": "Accounting services. Circular exchange.",
+      "creatorId": "demo-u33",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "offeredSkills": [
+          "Accounting",
+          "Financial Reporting",
+          "Contract Negotiation"
+        ],
+        "sectors": [
+          "Financial"
+        ],
+        "scopeOfWork": "Accounting, bookkeeping, and financial reporting.",
+        "milestones": [
+          "Engagement start",
+          "Service period",
+          "Deliverables and close-out"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 25000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 25000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Financial"
+    },
+    {
+      "id": "demo-circ-n34",
+      "title": "Need: Design review (structural)",
+      "description": "Need structural design review. Circular exchange.",
+      "creatorId": "demo-u34",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "requiredSkills": [
+          "Structural Review",
+          "Design Review"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Engineering consulting and design review; technical sign-off and recommendations.",
+        "milestones": [
+          "Scope and deliverables agreed",
+          "Design/review or BOQ phase",
+          "Sign-off and handover"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 20000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 20000
+      },
+      "attributes": {
+        "startDate": "2026-05-01",
+        "endDate": "2026-07-31"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-circ-o34",
+      "title": "Offer: Structural design review",
+      "description": "Structural review services. Circular exchange.",
+      "creatorId": "demo-u34",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "offeredSkills": [
+          "Structural Review",
+          "Structural Engineering",
+          "Design Review"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Structural engineering and shop drawing review; design and as-built support.",
+        "milestones": [
+          "Scope and deliverables agreed",
+          "Design/review or BOQ phase",
+          "Sign-off and handover"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 20000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 20000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-circ-n35",
+      "title": "Need: Co-working space",
+      "description": "Need co-working space. Circular exchange.",
+      "creatorId": "demo-u35",
+      "intent": "request",
+      "status": "published",
+      "modelType": "resource_pooling",
+      "subModelType": "resource_sharing",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "requiredSkills": [
+          "Facility Management",
+          "Facility Management"
+        ],
+        "sectors": [
+          "Real Estate"
+        ],
+        "scopeOfWork": "Office or co-working space for agreed period; utilities and basic amenities included.",
+        "milestones": [
+          "Agreement and access",
+          "Period of use",
+          "Exit and handback"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 28000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 28000
+      },
+      "attributes": {
+        "startDate": "2026-05-01",
+        "endDate": "2026-08-31"
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Real Estate"
+    },
+    {
+      "id": "demo-circ-o35",
+      "title": "Offer: Design review (any discipline)",
+      "description": "Design review for construction. Circular exchange.",
+      "creatorId": "demo-u35",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "offeredSkills": [
+          "Design Review",
+          "Structural Review",
+          "Technical Consulting"
+        ],
+        "sectors": [
+          "Engineering Consulting"
+        ],
+        "scopeOfWork": "Engineering consulting and design review across disciplines.",
+        "milestones": [
+          "Scope and deliverables agreed",
+          "Design/review or BOQ phase",
+          "Sign-off and handover"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 22000
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 22000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:47:46.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Engineering Consulting"
+    },
+    {
+      "id": "demo-need-41",
+      "title": "Need: Site supervision for residential compound",
+      "description": "Seeking site supervision and quality control for 120-unit residential compound in Riyadh. Cash payment.",
+      "creatorId": "demo-c02",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Construction Site Management",
+          "Quality Control",
+          "Stakeholder Management"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Site supervision and quality control for residential compound; daily reporting and handover.",
+        "milestones": [
+          "Mobilization",
+          "Supervision period",
+          "Snagging and handover"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 120000,
+          "max": 150000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-06-01",
+        "endDate": "2027-03-31",
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-need-42",
+      "title": "Need: BIM coordination for mixed-use tower",
+      "description": "BIM coordination and clash detection for 25-storey mixed-use. Budget 80K SAR.",
+      "creatorId": "demo-c06",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "BIM",
+          "Clash Detection",
+          "Navisworks",
+          "3D Modeling"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "BIM coordination and clash detection; federated model and resolution reports.",
+        "milestones": [
+          "Model setup",
+          "Coordination phase",
+          "Sign-off and as-built"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 70000,
+          "max": 90000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-07-01",
+        "endDate": "2026-12-31",
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-need-43",
+      "title": "Need: Cost estimation for hospital project",
+      "description": "Cost estimation and BOQ for 200-bed hospital. Cash.",
+      "creatorId": "demo-c01",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Cost Estimation",
+          "Bill of Quantities",
+          "Value Engineering"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Cost estimation and BOQ for hospital project; value engineering input.",
+        "milestones": [
+          "Scope and data",
+          "Estimation phase",
+          "Report and BOQ delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 45000,
+          "max": 60000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-05-01",
+        "endDate": "2026-08-31",
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-need-44",
+      "title": "Need: Sustainability and LEED advisory",
+      "description": "LEED and sustainability advisory for Grade A office building. Budget 35K SAR.",
+      "creatorId": "demo-c02",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "LEED Certification",
+          "Energy Modeling",
+          "Sustainable Design"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "LEED certification and sustainability advisory; energy modeling and documentation.",
+        "milestones": [
+          "Assessment",
+          "Design support",
+          "Submission and certification"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 30000,
+          "max": 40000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-06-01",
+        "endDate": "2026-11-30",
+        "locationRequirement": "Remote"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-need-45",
+      "title": "Need: Claims and dispute support",
+      "description": "Claims analysis and dispute resolution support for ongoing project. Cash.",
+      "creatorId": "demo-c01",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Claims Management",
+          "Claims Analysis",
+          "Dispute Resolution",
+          "FIDIC Contracts"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Claims analysis and dispute resolution; FIDIC-based support.",
+        "milestones": [
+          "Review and strategy",
+          "Analysis and documentation",
+          "Settlement support"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 55000,
+          "max": 75000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-04-01",
+        "endDate": "2026-09-30",
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-need-46",
+      "title": "Need: Geotechnical investigation",
+      "description": "Geotechnical investigation and report for infrastructure project. Budget 90K SAR.",
+      "creatorId": "demo-c05",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Structural Engineering",
+          "Technical Consulting",
+          "Documentation"
+        ],
+        "sectors": [
+          "Infrastructure"
+        ],
+        "scopeOfWork": "Geotechnical investigation and report; recommendations for foundation design.",
+        "milestones": [
+          "Site investigation",
+          "Lab and analysis",
+          "Report delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 80000,
+          "max": 100000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-05-15",
+        "endDate": "2026-08-15",
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Infrastructure"
+    },
+    {
+      "id": "demo-need-47",
+      "title": "Need: Interior design and FF&E",
+      "description": "Interior design and FF&E specification for hotel. Cash.",
+      "creatorId": "demo-c06",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Interior Design",
+          "FF&E Specification",
+          "Space Planning",
+          "Material Selection"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Interior design and FF&E specification for hotel; coordination with MEP.",
+        "milestones": [
+          "Concept and schematic",
+          "Design development",
+          "FF&E spec and tender support"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 110000,
+          "max": 140000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-07-01",
+        "endDate": "2027-02-28",
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-need-48",
+      "title": "Need: Primavera P6 scheduling",
+      "description": "Scheduling and progress control using Primavera P6 for highway package. Budget 65K SAR.",
+      "creatorId": "demo-c05",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Eastern Province, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "eastern",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Primavera P6",
+          "Scheduling",
+          "Planning",
+          "Stakeholder Management"
+        ],
+        "sectors": [
+          "Infrastructure"
+        ],
+        "scopeOfWork": "Schedule development and progress control; Primavera P6 and reporting.",
+        "milestones": [
+          "Baseline schedule",
+          "Progress updates",
+          "Forecast and close-out"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 55000,
+          "max": 75000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-06-01",
+        "endDate": "2026-12-31",
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Infrastructure"
+    },
+    {
+      "id": "demo-need-49",
+      "title": "Need: Fire protection design",
+      "description": "Fire protection and life-safety design for commercial building. Cash.",
+      "creatorId": "demo-u03",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Dammam, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "eastern",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Fire Protection",
+          "MEP Design",
+          "BIM"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Fire protection and life-safety design; coordination with MEP and authority submissions.",
+        "milestones": [
+          "Design development",
+          "Coordination",
+          "Submission and approval"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 38000,
+          "max": 50000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-05-01",
+        "endDate": "2026-09-30",
+        "locationRequirement": "Remote"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-need-50",
+      "title": "Need: Urban planning and masterplan review",
+      "description": "Urban planning and masterplan review for mixed-use district. Budget 95K SAR.",
+      "creatorId": "demo-c04",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Urban Planning",
+          "Architectural Design",
+          "Sustainable Design"
+        ],
+        "sectors": [
+          "Real Estate"
+        ],
+        "scopeOfWork": "Urban planning and masterplan review; zoning and phasing recommendations.",
+        "milestones": [
+          "Data and baseline",
+          "Review and options",
+          "Report and recommendations"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 85000,
+          "max": 110000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-06-01",
+        "endDate": "2026-11-30",
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Real Estate"
+    },
+    {
+      "id": "demo-offer-41",
+      "title": "Offer: Site supervision and quality control",
+      "description": "Experienced site supervision and QC for building projects. Rate 12K–15K SAR/month.",
+      "creatorId": "demo-u21",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Construction Site Management",
+          "Quality Control",
+          "Stakeholder Management",
+          "Documentation"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Site supervision and quality control; daily reports and handover.",
+        "milestones": [
+          "Mobilization",
+          "Supervision period",
+          "Snagging and handover"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 12000,
+          "max": 15000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2027-06-30"
+        },
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-offer-42",
+      "title": "Offer: BIM coordination and clash detection",
+      "description": "BIM coordination and clash detection using Navisworks. Rate 75K–95K SAR per project.",
+      "creatorId": "demo-u08",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Dammam, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "eastern",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "BIM",
+          "Clash Detection",
+          "Navisworks",
+          "3D Modeling",
+          "Revit MEP"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "BIM coordination and clash detection; federated model and resolution.",
+        "milestones": [
+          "Model setup",
+          "Coordination phase",
+          "Sign-off and as-built"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 75000,
+          "max": 95000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-05-01",
+          "end": "2027-03-31"
+        },
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-offer-43",
+      "title": "Offer: Cost estimation and BOQ",
+      "description": "Cost estimation and BOQ for building and infrastructure. Rate 40K–65K SAR.",
+      "creatorId": "demo-u09",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Cost Estimation",
+          "Bill of Quantities",
+          "Value Engineering",
+          "Tendering"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Cost estimation and BOQ; value engineering and tender support.",
+        "milestones": [
+          "Scope and data",
+          "Estimation phase",
+          "Report and BOQ delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 40000,
+          "max": 65000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        },
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-offer-44",
+      "title": "Offer: LEED and sustainability advisory",
+      "description": "LEED certification and sustainability advisory. Rate 30K–45K SAR.",
+      "creatorId": "demo-u32",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "LEED Certification",
+          "Energy Modeling",
+          "Sustainable Design",
+          "Environmental Assessment"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "LEED and sustainability advisory; energy modeling and certification support.",
+        "milestones": [
+          "Assessment",
+          "Design support",
+          "Submission and certification"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 30000,
+          "max": 45000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-05-01",
+          "end": "2027-01-31"
+        },
+        "locationRequirement": "Remote"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-offer-45",
+      "title": "Offer: Claims and dispute resolution",
+      "description": "Claims analysis and dispute resolution; FIDIC experience. Rate 50K–80K SAR.",
+      "creatorId": "demo-u16",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Claims Management",
+          "Claims Analysis",
+          "Dispute Resolution",
+          "FIDIC Contracts",
+          "Contract Administration"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Claims analysis and dispute resolution; FIDIC-based support.",
+        "milestones": [
+          "Review and strategy",
+          "Analysis and documentation",
+          "Settlement support"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 50000,
+          "max": 80000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        },
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-offer-46",
+      "title": "Offer: Geotechnical and foundation advisory",
+      "description": "Geotechnical investigation and foundation advisory. Rate 85K–110K SAR.",
+      "creatorId": "demo-u17",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Structural Engineering",
+          "Technical Consulting",
+          "Documentation"
+        ],
+        "sectors": [
+          "Infrastructure"
+        ],
+        "scopeOfWork": "Geotechnical investigation and foundation advisory; report and recommendations.",
+        "milestones": [
+          "Site investigation",
+          "Lab and analysis",
+          "Report delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 85000,
+          "max": 110000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-05-01",
+          "end": "2026-12-31"
+        },
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Infrastructure"
+    },
+    {
+      "id": "demo-offer-47",
+      "title": "Offer: Interior design and FF&E",
+      "description": "Interior design and FF&E specification for hospitality and commercial. Rate 100K–130K SAR.",
+      "creatorId": "demo-u24",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Interior Design",
+          "FF&E Specification",
+          "Space Planning",
+          "Material Selection",
+          "3D Visualization"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Interior design and FF&E; concept through tender support.",
+        "milestones": [
+          "Concept and schematic",
+          "Design development",
+          "FF&E spec and tender support"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 100000,
+          "max": 130000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-06-01",
+          "end": "2027-06-30"
+        },
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-offer-48",
+      "title": "Offer: Primavera P6 and scheduling",
+      "description": "Scheduling and progress control with Primavera P6. Rate 60K–80K SAR per project.",
+      "creatorId": "demo-u28",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Primavera P6",
+          "Scheduling",
+          "Planning",
+          "MS Project",
+          "Stakeholder Management"
+        ],
+        "sectors": [
+          "Infrastructure"
+        ],
+        "scopeOfWork": "Schedule development and progress control; P6 and reporting.",
+        "milestones": [
+          "Baseline schedule",
+          "Progress updates",
+          "Forecast and close-out"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 60000,
+          "max": 80000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-05-01",
+          "end": "2027-06-30"
+        },
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Infrastructure"
+    },
+    {
+      "id": "demo-offer-49",
+      "title": "Offer: Fire protection and life-safety design",
+      "description": "Fire protection and life-safety design for buildings. Rate 35K–52K SAR.",
+      "creatorId": "demo-u31",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Fire Protection",
+          "MEP Design",
+          "BIM",
+          "Electrical Systems"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Fire protection and life-safety design; authority submissions.",
+        "milestones": [
+          "Design development",
+          "Coordination",
+          "Submission and approval"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 35000,
+          "max": 52000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-05-01",
+          "end": "2026-12-31"
+        },
+        "locationRequirement": "Remote"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-offer-50",
+      "title": "Offer: Urban planning and masterplan review",
+      "description": "Urban planning and masterplan review for developments. Rate 90K–120K SAR.",
+      "creatorId": "demo-u20",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Eastern Province, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "eastern",
+      "exchangeMode": "cash",
+      "scope": {
+        "offeredSkills": [
+          "Urban Planning",
+          "Architectural Design",
+          "Sustainable Design",
+          "Technical Consulting"
+        ],
+        "sectors": [
+          "Real Estate"
+        ],
+        "scopeOfWork": "Urban planning and masterplan review; zoning and phasing.",
+        "milestones": [
+          "Data and baseline",
+          "Review and options",
+          "Report and recommendations"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 120000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-06-01",
+          "end": "2027-03-31"
+        },
+        "locationRequirement": "Hybrid"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Real Estate"
+    },
+    {
+      "id": "demo-barter-41",
+      "title": "Need: Training space for 2-day workshop",
+      "description": "Need training/meeting space for 2-day workshop. Barter with consulting or design services.",
+      "creatorId": "demo-u14",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "barter",
+      "scope": {
+        "requiredSkills": [
+          "Facility Management",
+          "Space Planning"
+        ],
+        "sectors": [
+          "Real Estate"
+        ],
+        "scopeOfWork": "Training or meeting space for 2 days; capacity 20–30; AV and catering optional.",
+        "milestones": [
+          "Booking confirmed",
+          "Event days",
+          "Close-out"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 8000
+      },
+      "attributes": {
+        "startDate": "2026-06-01",
+        "endDate": "2026-08-31"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Real Estate",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 8000
+      }
+    },
+    {
+      "id": "demo-barter-42",
+      "title": "Offer: 2-day workshop facilitation",
+      "description": "Offer 2-day project management or technical workshop. Barter for space or services.",
+      "creatorId": "demo-u33",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "offeredSkills": [
+          "Project Management",
+          "Technical Training",
+          "Stakeholder Management"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "2-day workshop facilitation; materials and certificates included.",
+        "milestones": [
+          "Agenda and materials",
+          "Workshop delivery",
+          "Feedback and certificates"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 12000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-05-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 12000
+      }
+    },
+    {
+      "id": "demo-barter-43",
+      "title": "Need: Translation and documentation review",
+      "description": "Need Arabic–English translation and documentation review for tender. Barter with design or PM support.",
+      "creatorId": "demo-u04",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "requiredSkills": [
+          "Technical Writing",
+          "Documentation"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Translation and documentation review for tender package.",
+        "milestones": [
+          "Scope agreed",
+          "Draft and review",
+          "Final delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 9000
+      },
+      "attributes": {
+        "startDate": "2026-05-15",
+        "endDate": "2026-07-15"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 9000
+      }
+    },
+    {
+      "id": "demo-barter-44",
+      "title": "Offer: Marketing and branding for consultancy",
+      "description": "Offer marketing and branding support for consultancy. Barter for technical or office services.",
+      "creatorId": "demo-u18",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "barter",
+      "scope": {
+        "offeredSkills": [
+          "Technical Consulting",
+          "Communication"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Marketing and branding support; website or collateral.",
+        "milestones": [
+          "Brief and concept",
+          "Production",
+          "Delivery"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 15000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 15000
+      }
+    },
+    {
+      "id": "demo-barter-45",
+      "title": "Need: Legal review of JV agreement",
+      "description": "Need legal review of JV/consortium agreement. Barter with engineering or cost services.",
+      "creatorId": "demo-u25",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Dammam, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "eastern",
+      "exchangeMode": "barter",
+      "scope": {
+        "requiredSkills": [
+          "Construction Law",
+          "Contract Drafting",
+          "Negotiation"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Legal review of JV or consortium agreement; mark-up and negotiation support.",
+        "milestones": [
+          "Document review",
+          "Mark-up and advice",
+          "Negotiation support"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 18000
+      },
+      "attributes": {
+        "startDate": "2026-05-01",
+        "endDate": "2026-07-31"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 18000
+      }
+    },
+    {
+      "id": "demo-barter-46",
+      "title": "Offer: Value engineering study",
+      "description": "Value engineering study for building or infrastructure. Barter for office space or legal.",
+      "creatorId": "demo-u09",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "offeredSkills": [
+          "Value Engineering",
+          "Cost Estimation",
+          "Technical Consulting"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Value engineering study; options and cost impact.",
+        "milestones": [
+          "Data and baseline",
+          "Options development",
+          "Report and presentation"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 16000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-11-30"
+        }
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 16000
+      }
+    },
+    {
+      "id": "demo-barter-47",
+      "title": "Need: CAD and drawing production support",
+      "description": "Need CAD and drawing production for 2–3 weeks. Barter with quantity surveying or site support.",
+      "creatorId": "demo-u22",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "requiredSkills": [
+          "AutoCAD",
+          "3D Modeling",
+          "Documentation"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "CAD and drawing production; as per scope list.",
+        "milestones": [
+          "Scope and templates",
+          "Production",
+          "Issue and archive"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 11000
+      },
+      "attributes": {
+        "startDate": "2026-06-01",
+        "endDate": "2026-07-15"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 11000
+      }
+    },
+    {
+      "id": "demo-barter-48",
+      "title": "Offer: Health and safety audit",
+      "description": "Health and safety audit and report for site. Barter for materials or equipment access.",
+      "creatorId": "demo-u26",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "offeredSkills": [
+          "Technical Consulting",
+          "Risk Assessment",
+          "Documentation"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Health and safety audit; report and recommendations.",
+        "milestones": [
+          "Site visit",
+          "Report draft",
+          "Final and presentation"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 10000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-05-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 10000
+      }
+    },
+    {
+      "id": "demo-barter-49",
+      "title": "Need: Mentoring for junior PM",
+      "description": "Need 4-session mentoring for junior project manager. Barter with design or admin support.",
+      "creatorId": "demo-u15",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "scope": {
+        "requiredSkills": [
+          "Mentoring",
+          "Project Management",
+          "Professional Development"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "4 mentoring sessions; PM and delivery focus.",
+        "milestones": [
+          "Kick-off",
+          "Sessions 2–4",
+          "Summary and follow-up"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 7000
+      },
+      "attributes": {
+        "startDate": "2026-05-01",
+        "endDate": "2026-06-30"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 7000
+      }
+    },
+    {
+      "id": "demo-barter-50",
+      "title": "Offer: Mentoring and PM coaching",
+      "description": "Offer mentoring and PM coaching (4 sessions). Barter for workspace or consulting.",
+      "creatorId": "demo-u07",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "barter",
+      "scope": {
+        "offeredSkills": [
+          "Mentoring",
+          "Project Management",
+          "PMP",
+          "Professional Development"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Mentoring and PM coaching; 4 sessions.",
+        "milestones": [
+          "Kick-off",
+          "Sessions 2–4",
+          "Summary and follow-up"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "barterValue": 8000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-04-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "barter"
+      ],
+      "industry": "Construction",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": 8000
+      }
+    },
+    {
+      "id": "demo-consortium-41",
+      "title": "Need: Solar plant EPC — equity, EPC, and O&M partners",
+      "description": "Large solar plant project seeking equity partner, EPC contractor, and O&M provider for consortium.",
+      "creatorId": "demo-c05",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "consortium",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Infrastructure Development",
+          "Project Management",
+          "MEP Services",
+          "Energy Efficiency"
+        ],
+        "sectors": [
+          "Energy"
+        ],
+        "scopeOfWork": "Solar plant EPC; consortium of equity, EPC, and O&M partners.",
+        "milestones": [
+          "Consortium formation",
+          "Design and permits",
+          "Construction",
+          "Commissioning",
+          "O&M handover"
+        ],
+        "memberRoles": [
+          {
+            "role": "Equity partner",
+            "scope": "Equity or debt financing"
+          },
+          {
+            "role": "EPC contractor",
+            "scope": "Design, procurement, construction"
+          },
+          {
+            "role": "O&M provider",
+            "scope": "Long-term operation and maintenance"
+          }
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 8000000,
+          "max": 25000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-09-01",
+        "endDate": "2028-12-31",
+        "memberRoles": [
+          {
+            "role": "Equity partner",
+            "scope": "Financing"
+          },
+          {
+            "role": "EPC contractor",
+            "scope": "EPC"
+          },
+          {
+            "role": "O&M provider",
+            "scope": "O&M"
+          }
+        ],
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Energy"
+    },
+    {
+      "id": "demo-consortium-42",
+      "title": "Need: Airport expansion — design, construction, and systems partners",
+      "description": "Airport expansion package seeking design lead, construction partner, and systems integrator.",
+      "creatorId": "demo-c04",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "consortium",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Architectural Design",
+          "General Contracting",
+          "Systems Integration",
+          "Project Management"
+        ],
+        "sectors": [
+          "Infrastructure"
+        ],
+        "scopeOfWork": "Airport expansion; design, construction, and systems consortium.",
+        "milestones": [
+          "Consortium formation",
+          "Design and authority",
+          "Construction",
+          "Systems and commissioning",
+          "Handover"
+        ],
+        "memberRoles": [
+          {
+            "role": "Design lead",
+            "scope": "Architecture and engineering"
+          },
+          {
+            "role": "Construction partner",
+            "scope": "Civil and building works"
+          },
+          {
+            "role": "Systems integrator",
+            "scope": "BMS, IT, and MEP systems"
+          }
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 15000000,
+          "max": 40000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-10-01",
+        "endDate": "2029-06-30",
+        "memberRoles": [
+          {
+            "role": "Design lead",
+            "scope": "Design"
+          },
+          {
+            "role": "Construction partner",
+            "scope": "Construction"
+          },
+          {
+            "role": "Systems integrator",
+            "scope": "Systems"
+          }
+        ],
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Infrastructure"
+    },
+    {
+      "id": "demo-consortium-43",
+      "title": "Need: Desalination plant — financial, EPC, and technology partners",
+      "description": "Desalination plant project seeking financial partner, EPC lead, and technology provider.",
+      "creatorId": "demo-c05",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "consortium",
+      "location": "Eastern Province, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "eastern",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Infrastructure Development",
+          "MEP Services",
+          "Project Management",
+          "Utilities Engineering"
+        ],
+        "sectors": [
+          "Energy"
+        ],
+        "scopeOfWork": "Desalination plant; financial, EPC, and technology consortium.",
+        "milestones": [
+          "Consortium formation",
+          "FEED and permits",
+          "Construction",
+          "Commissioning",
+          "Handover"
+        ],
+        "memberRoles": [
+          {
+            "role": "Financial partner",
+            "scope": "Equity or project finance"
+          },
+          {
+            "role": "EPC lead",
+            "scope": "EPC delivery"
+          },
+          {
+            "role": "Technology provider",
+            "scope": "Process and technology"
+          }
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 20000000,
+          "max": 60000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-11-01",
+        "endDate": "2029-12-31",
+        "memberRoles": [
+          {
+            "role": "Financial partner",
+            "scope": "Finance"
+          },
+          {
+            "role": "EPC lead",
+            "scope": "EPC"
+          },
+          {
+            "role": "Technology provider",
+            "scope": "Technology"
+          }
+        ],
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Energy"
+    },
+    {
+      "id": "demo-consortium-44",
+      "title": "Need: District cooling — developer, EPC, and operator partners",
+      "description": "District cooling scheme seeking developer lead, EPC contractor, and long-term operator.",
+      "creatorId": "demo-c06",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "consortium",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "MEP Design",
+          "HVAC Design",
+          "Project Management",
+          "Facility Management"
+        ],
+        "sectors": [
+          "Energy"
+        ],
+        "scopeOfWork": "District cooling; developer, EPC, and operator consortium.",
+        "milestones": [
+          "Consortium formation",
+          "Design and permits",
+          "Construction",
+          "Commissioning",
+          "Operation"
+        ],
+        "memberRoles": [
+          {
+            "role": "Developer lead",
+            "scope": "Development and offtake"
+          },
+          {
+            "role": "EPC contractor",
+            "scope": "Plant and network EPC"
+          },
+          {
+            "role": "Operator",
+            "scope": "Long-term operation"
+          }
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 12000000,
+          "max": 35000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-09-01",
+        "endDate": "2028-06-30",
+        "memberRoles": [
+          {
+            "role": "Developer lead",
+            "scope": "Development"
+          },
+          {
+            "role": "EPC contractor",
+            "scope": "EPC"
+          },
+          {
+            "role": "Operator",
+            "scope": "O&M"
+          }
+        ],
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Energy"
+    },
+    {
+      "id": "demo-consortium-45",
+      "title": "Need: Rail depot — civil, MEP, and rolling stock partners",
+      "description": "Rail depot project seeking civil works partner, MEP partner, and rolling stock/maintenance provider.",
+      "creatorId": "demo-c05",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "consortium",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Infrastructure Development",
+          "General Contracting",
+          "MEP Services",
+          "Project Management"
+        ],
+        "sectors": [
+          "Infrastructure"
+        ],
+        "scopeOfWork": "Rail depot; civil, MEP, and rolling stock consortium.",
+        "milestones": [
+          "Consortium formation",
+          "Design",
+          "Civil and MEP construction",
+          "Systems and commissioning",
+          "Handover"
+        ],
+        "memberRoles": [
+          {
+            "role": "Civil partner",
+            "scope": "Civil and structures"
+          },
+          {
+            "role": "MEP partner",
+            "scope": "MEP and systems"
+          },
+          {
+            "role": "Rolling stock / maintenance",
+            "scope": "Rolling stock and depot O&M"
+          }
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 25000000,
+          "max": 70000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-12-01",
+        "endDate": "2029-12-31",
+        "memberRoles": [
+          {
+            "role": "Civil partner",
+            "scope": "Civil"
+          },
+          {
+            "role": "MEP partner",
+            "scope": "MEP"
+          },
+          {
+            "role": "Rolling stock",
+            "scope": "Rolling stock"
+          }
+        ],
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Infrastructure"
+    },
+    {
+      "id": "demo-consortium-46",
+      "title": "Need: Healthcare campus — design, construction, and medical equipment partners",
+      "description": "Healthcare campus seeking design lead, construction partner, and medical equipment/systems provider.",
+      "creatorId": "demo-c02",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "consortium",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Architectural Design",
+          "General Contracting",
+          "MEP Design",
+          "Project Management"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Healthcare campus; design, construction, and medical equipment consortium.",
+        "milestones": [
+          "Consortium formation",
+          "Design and authority",
+          "Construction",
+          "Fit-out and equipment",
+          "Handover"
+        ],
+        "memberRoles": [
+          {
+            "role": "Design lead",
+            "scope": "Architecture and MEP design"
+          },
+          {
+            "role": "Construction partner",
+            "scope": "Building and fit-out"
+          },
+          {
+            "role": "Medical equipment provider",
+            "scope": "Equipment and systems"
+          }
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 18000000,
+          "max": 50000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-10-01",
+        "endDate": "2029-03-31",
+        "memberRoles": [
+          {
+            "role": "Design lead",
+            "scope": "Design"
+          },
+          {
+            "role": "Construction partner",
+            "scope": "Construction"
+          },
+          {
+            "role": "Medical equipment",
+            "scope": "Equipment"
+          }
+        ],
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-consortium-47",
+      "title": "Need: Data center — developer, MEP, and IT partners",
+      "description": "Data center project seeking developer, MEP/cooling contractor, and IT/security partner.",
+      "creatorId": "demo-c04",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "consortium",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Data Center Design",
+          "MEP Design",
+          "Project Management",
+          "BIM"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "Data center; developer, MEP, and IT consortium.",
+        "milestones": [
+          "Consortium formation",
+          "Design and permits",
+          "Construction",
+          "MEP and IT fit-out",
+          "Commissioning"
+        ],
+        "memberRoles": [
+          {
+            "role": "Developer",
+            "scope": "Development and offtake"
+          },
+          {
+            "role": "MEP contractor",
+            "scope": "Cooling and power"
+          },
+          {
+            "role": "IT / security partner",
+            "scope": "IT and security systems"
+          }
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 22000000,
+          "max": 55000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-11-01",
+        "endDate": "2029-06-30",
+        "memberRoles": [
+          {
+            "role": "Developer",
+            "scope": "Development"
+          },
+          {
+            "role": "MEP contractor",
+            "scope": "MEP"
+          },
+          {
+            "role": "IT partner",
+            "scope": "IT"
+          }
+        ],
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-consortium-48",
+      "title": "Need: Logistics hub — land, construction, and operator partners",
+      "description": "Logistics hub seeking land/developer partner, construction partner, and operator.",
+      "creatorId": "demo-c02",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "consortium",
+      "location": "Eastern Province, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "eastern",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Infrastructure Development",
+          "General Contracting",
+          "Logistics",
+          "Project Management"
+        ],
+        "sectors": [
+          "Infrastructure"
+        ],
+        "scopeOfWork": "Logistics hub; land, construction, and operator consortium.",
+        "milestones": [
+          "Consortium formation",
+          "Design and permits",
+          "Construction",
+          "Fit-out",
+          "Operation"
+        ],
+        "memberRoles": [
+          {
+            "role": "Land / developer",
+            "scope": "Land and development"
+          },
+          {
+            "role": "Construction partner",
+            "scope": "Buildings and yard"
+          },
+          {
+            "role": "Operator",
+            "scope": "Logistics operation"
+          }
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 14000000,
+          "max": 38000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-09-01",
+        "endDate": "2028-12-31",
+        "memberRoles": [
+          {
+            "role": "Land/developer",
+            "scope": "Land"
+          },
+          {
+            "role": "Construction partner",
+            "scope": "Construction"
+          },
+          {
+            "role": "Operator",
+            "scope": "Operation"
+          }
+        ],
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Infrastructure"
+    },
+    {
+      "id": "demo-consortium-49",
+      "title": "Need: University campus — design, construction, and FM partners",
+      "description": "University campus expansion seeking design lead, construction partner, and FM provider.",
+      "creatorId": "demo-c06",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "consortium",
+      "location": "Jeddah, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "makkah",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Architectural Design",
+          "General Contracting",
+          "Facility Management",
+          "Project Management"
+        ],
+        "sectors": [
+          "Construction"
+        ],
+        "scopeOfWork": "University campus; design, construction, and FM consortium.",
+        "milestones": [
+          "Consortium formation",
+          "Design and authority",
+          "Construction",
+          "Commissioning",
+          "FM handover"
+        ],
+        "memberRoles": [
+          {
+            "role": "Design lead",
+            "scope": "Architecture and engineering"
+          },
+          {
+            "role": "Construction partner",
+            "scope": "Construction delivery"
+          },
+          {
+            "role": "FM provider",
+            "scope": "Long-term facility management"
+          }
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 30000000,
+          "max": 80000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-10-01",
+        "endDate": "2030-06-30",
+        "memberRoles": [
+          {
+            "role": "Design lead",
+            "scope": "Design"
+          },
+          {
+            "role": "Construction partner",
+            "scope": "Construction"
+          },
+          {
+            "role": "FM provider",
+            "scope": "FM"
+          }
+        ],
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Construction"
+    },
+    {
+      "id": "demo-consortium-50",
+      "title": "Need: Industrial park — master developer, utilities, and construction partners",
+      "description": "Industrial park seeking master developer, utilities partner, and construction partners.",
+      "creatorId": "demo-c04",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "consortium",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "scope": {
+        "requiredSkills": [
+          "Urban Planning",
+          "Infrastructure Development",
+          "Utilities Engineering",
+          "Project Management"
+        ],
+        "sectors": [
+          "Infrastructure"
+        ],
+        "scopeOfWork": "Industrial park; master developer, utilities, and construction consortium.",
+        "milestones": [
+          "Consortium formation",
+          "Masterplan and permits",
+          "Infrastructure",
+          "Plot development",
+          "Handover"
+        ],
+        "memberRoles": [
+          {
+            "role": "Master developer",
+            "scope": "Masterplan and development"
+          },
+          {
+            "role": "Utilities partner",
+            "scope": "Power, water, telecom"
+          },
+          {
+            "role": "Construction partners",
+            "scope": "Plot and building construction"
+          }
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 35000000,
+          "max": 90000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-12-01",
+        "endDate": "2030-12-31",
+        "memberRoles": [
+          {
+            "role": "Master developer",
+            "scope": "Development"
+          },
+          {
+            "role": "Utilities partner",
+            "scope": "Utilities"
+          },
+          {
+            "role": "Construction partners",
+            "scope": "Construction"
+          }
+        ],
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-03-10T00:51:39.000Z",
+      "updatedAt": "2026-03-10T00:51:39.000Z",
+      "paymentModes": [
+        "cash"
+      ],
+      "industry": "Infrastructure"
+    }
+  ]
+}

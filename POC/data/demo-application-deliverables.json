@@ -1,0 +1,28 @@
+{
+  "domain": "application_deliverables",
+  "version": "1.0",
+  "description": "Deliverables promised by applicant (Section 8)",
+  "data": [
+    {
+      "id": "demo-app-del-01",
+      "applicationId": "demo-app-01",
+      "title": "Shop drawing review",
+      "description": "Full review and mark-up of structural shop drawings",
+      "sortOrder": 0
+    },
+    {
+      "id": "demo-app-del-02",
+      "applicationId": "demo-app-01",
+      "title": "Quantity take-off",
+      "description": null,
+      "sortOrder": 1
+    },
+    {
+      "id": "demo-app-del-03",
+      "applicationId": "demo-app-01",
+      "title": "Structural review documentation",
+      "description": null,
+      "sortOrder": 2
+    }
+  ]
+}

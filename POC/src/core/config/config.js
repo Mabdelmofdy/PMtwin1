@@ -6,7 +6,7 @@
 const CONFIG = {
     // Application Info
     APP_NAME: 'PMTwin',
-    APP_VERSION: '1.0.0',
+    APP_VERSION: '1.2.0',
     APP_DESCRIPTION: 'Construction Collaboration Platform',
     
     // Base path for loading resources
@@ -25,12 +25,18 @@ const CONFIG = {
         SESSIONS: 'pmtwin_sessions',
         OPPORTUNITIES: 'pmtwin_opportunities',
         APPLICATIONS: 'pmtwin_applications',
+        APPLICATION_REQUIREMENTS: 'pmtwin_application_requirements',
+        APPLICATION_DELIVERABLES: 'pmtwin_application_deliverables',
+        APPLICATION_FILES: 'pmtwin_application_files',
+        APPLICATION_PAYMENT_TERMS: 'pmtwin_application_payment_terms',
         MATCHES: 'pmtwin_matches',
+        POST_MATCHES: 'pmtwin_post_matches',
         AUDIT: 'pmtwin_audit',
         NOTIFICATIONS: 'pmtwin_notifications',
         CONNECTIONS: 'pmtwin_connections',
         MESSAGES: 'pmtwin_messages',
         CONTRACTS: 'pmtwin_contracts',
+        DEALS: 'pmtwin_deals',
         NEGOTIATIONS: 'pmtwin_negotiations',
         REVIEWS: 'pmtwin_reviews',
         SYSTEM_SETTINGS: 'pmtwin_system_settings',
@@ -147,6 +153,49 @@ const CONFIG = {
         TERMINATED: 'terminated'
     },
 
+    // Deal status (post-matching collaboration workflow)
+    DEAL_STATUS: {
+        NEGOTIATING: 'negotiating',
+        DRAFT: 'draft',
+        REVIEW: 'review',
+        SIGNING: 'signing',
+        ACTIVE: 'active',
+        EXECUTION: 'execution',
+        DELIVERY: 'delivery',
+        COMPLETED: 'completed',
+        CLOSED: 'closed'
+    },
+
+    // PostMatch status (user-facing match discovery)
+    POST_MATCH_STATUS: {
+        PENDING: 'pending',
+        ACCEPTED: 'accepted',
+        DECLINED: 'declined',
+        CONFIRMED: 'confirmed',
+        EXPIRED: 'expired'
+    },
+
+    POST_MATCH_PARTICIPANT_STATUS: {
+        PENDING: 'pending',
+        ACCEPTED: 'accepted',
+        DECLINED: 'declined'
+    },
+
+    POST_MATCH_TYPE: {
+        ONE_WAY: 'one_way',
+        TWO_WAY: 'two_way',
+        CONSORTIUM: 'consortium',
+        CIRCULAR: 'circular'
+    },
+
+    POST_MATCH_ROLE: {
+        NEED_OWNER: 'need_owner',
+        OFFER_PROVIDER: 'offer_provider',
+        CONSORTIUM_LEAD: 'consortium_lead',
+        CONSORTIUM_MEMBER: 'consortium_member',
+        CHAIN_PARTICIPANT: 'chain_participant'
+    },
+
     // Review rating scale (1-5)
     REVIEW_RATING_MIN: 1,
     REVIEW_RATING_MAX: 5,
@@ -186,6 +235,12 @@ const CONFIG = {
         COMPANY_VERIFIED: 'company_verified'
     },
 
+    // Optional verification tier for display (e.g. Top Expert)
+    VERIFICATION_TIER: {
+        NONE: '',
+        TOP_EXPERT: 'top_expert'
+    },
+
     // Matching
     MATCHING: {
         MIN_THRESHOLD: 0.70, // 70% minimum match score
@@ -205,6 +260,9 @@ const CONFIG = {
             ATTRIBUTE_OVERLAP: 0.25,
             BUDGET_FIT_LEGACY: 0.10
         },
+        // Optional product-spec weight profile (Skills 40%, Budget 30%, Timeline 15%, Location 10%, Reputation 5%).
+        // To use: uncomment WEIGHTS_DESIGN below. Exchange/value set to 0 so total = 1.0.
+        // WEIGHTS_DESIGN: { ATTRIBUTE_OVERLAP: 0.40, BUDGET_FIT: 0.30, TIMELINE: 0.15, LOCATION: 0.10, REPUTATION: 0.05, EXCHANGE_COMPATIBILITY: 0, VALUE_COMPATIBILITY: 0 },
         // Value normalization risk factors (used by value-normalizer)
         VALUE_RISK_FACTORS: {
             cash: 1.0,
@@ -225,7 +283,11 @@ const CONFIG = {
         },
         // Opportunity–candidate matching: extra weight for value compatibility (budget + exchange mode)
         VALUE_COMPATIBILITY_MAX_POINTS: 15,
-        LABEL_THRESHOLDS: { MATCH: 1, PARTIAL: 0.25 }
+        LABEL_THRESHOLDS: { MATCH: 1, PARTIAL: 0.25 },
+        // Consortium participant replacement
+        CONSORTIUM_MIN_PARTICIPANTS: 2,
+        CONSORTIUM_REPLACEMENT_ALLOWED_STAGES: ['negotiating', 'draft', 'review', 'signing', 'active', 'execution'],
+        MAX_REPLACEMENT_ATTEMPTS: 5
     },
     
     // Routes
@@ -260,10 +322,14 @@ const CONFIG = {
         ADMIN_COLLABORATION_MODELS: '/admin/collaboration-models',
         ADMIN_SKILLS: '/admin/skills',
         NOTIFICATIONS: '/notifications',
+        MATCH_DETAIL: '/matches/:id',
+        DEALS: '/deals',
+        DEAL_DETAIL: '/deals/:id',
         COLLABORATION_WIZARD: '/collaboration-wizard',
         KNOWLEDGE_BASE: '/knowledge-base',
         COLLABORATION_MODELS: '/collaboration-models',
         FIND: '/find',
+        WORKFLOW: '/workflow',
         CONTRACT_DETAIL: '/contracts/:id'
     },
     

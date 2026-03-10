@@ -197,58 +197,308 @@ async function loadApplicationsPipeline() {
     }
 }
 
+/**
+ * Get viewer role for a one_way post-match (from participants).
+ * @returns {{ isNeedOwner: boolean, isOfferOwner: boolean }}
+ */
+function getOneWayViewerRole(postMatch, currentUserId) {
+    const participants = postMatch.participants || [];
+    const needOwner = participants.find(p => p.role === 'need_owner');
+    const offerProvider = participants.find(p => p.role === 'offer_provider');
+    const needOwnerId = needOwner?.userId || null;
+    const offerOwnerId = offerProvider?.userId || null;
+    return {
+        isNeedOwner: needOwnerId === currentUserId,
+        isOfferOwner: offerOwnerId === currentUserId
+    };
+}
+
+async function buildPostMatchViewModelPipeline(postMatch, currentUserId) {
+    const ds = dataService;
+    const scorePct = Math.round((postMatch.matchScore || 0) * 100);
+    const base = {
+        id: postMatch.id,
+        matchType: postMatch.matchType,
+        matchScore: postMatch.matchScore,
+        matchScorePercent: scorePct,
+        status: postMatch.status,
+        tierLabel: postMatch.matchScore >= 0.85 ? 'Top match' : postMatch.matchScore >= 0.70 ? 'Good match' : 'Possible match'
+    };
+    const payload = postMatch.payload || {};
+    if (postMatch.matchType === 'one_way') {
+        const needOpp = await ds.getOpportunityById(payload.needOpportunityId);
+        const offerOpp = await ds.getOpportunityById(payload.offerOpportunityId);
+        const otherPart = (postMatch.participants || []).find(p => p.userId !== currentUserId);
+        const { isNeedOwner } = getOneWayViewerRole(postMatch, currentUserId);
+        const cardTitle = isNeedOwner ? 'Recommended Provider Found' : 'Recommended Opportunity Found';
+        const section1Label = isNeedOwner ? 'Your Need' : 'Opportunity Need';
+        const section2Label = isNeedOwner ? 'Provider Offer' : 'Your Offer';
+        const needTitle = needOpp?.title || 'Need';
+        const offerTitle = offerOpp?.title || 'Offer';
+        const otherUserId = otherPart?.userId || '';
+        const needOpportunityId = payload.needOpportunityId || '';
+        const offerOpportunityId = payload.offerOpportunityId || '';
+        let primaryActionLabel, primaryActionRoute, secondaryActionLabel, secondaryActionRoute, tertiaryActionLabel, tertiaryActionRoute;
+        if (isNeedOwner) {
+            primaryActionLabel = 'View Provider';
+            primaryActionRoute = '/opportunities/' + offerOpportunityId;
+            secondaryActionLabel = 'Invite to Apply';
+            secondaryActionRoute = '/opportunities/' + offerOpportunityId;
+            tertiaryActionLabel = 'Message Provider';
+            tertiaryActionRoute = '/messages/' + otherUserId;
+        } else {
+            primaryActionLabel = 'View Opportunity';
+            primaryActionRoute = '/opportunities/' + needOpportunityId;
+            secondaryActionLabel = 'Apply to Opportunity';
+            secondaryActionRoute = '/opportunities/' + needOpportunityId;
+            tertiaryActionLabel = 'Message Owner';
+            tertiaryActionRoute = '/messages/' + otherUserId;
+        }
+        return {
+            ...base,
+            needTitle,
+            offerTitle,
+            needOpportunityId,
+            offerOpportunityId,
+            otherUserId,
+            cardTitle,
+            section1Label,
+            section2Label,
+            primaryActionLabel,
+            primaryActionRoute,
+            secondaryActionLabel,
+            secondaryActionRoute,
+            tertiaryActionLabel,
+            tertiaryActionRoute
+        };
+    }
+    if (postMatch.matchType === 'two_way') {
+        const sideA = payload.sideA || {}, sideB = payload.sideB || {};
+        const isA = sideA.userId === currentUserId;
+        const myNeedId = isA ? sideA.needId : sideB.needId, myOfferId = isA ? sideA.offerId : sideB.offerId, theirNeedId = isA ? sideB.needId : sideA.needId, theirOfferId = isA ? sideB.offerId : sideA.offerId;
+        const myNeed = myNeedId ? await ds.getOpportunityById(myNeedId) : null, myOffer = myOfferId ? await ds.getOpportunityById(myOfferId) : null, theirNeed = theirNeedId ? await ds.getOpportunityById(theirNeedId) : null, theirOffer = theirOfferId ? await ds.getOpportunityById(theirOfferId) : null;
+        return { ...base, yourNeedTitle: myNeed?.title || 'Your need', yourOfferTitle: myOffer?.title || 'Your offer', theirNeedTitle: theirNeed?.title || 'Their need', theirOfferTitle: theirOffer?.title || 'Their offer', valueEquivalence: payload.valueEquivalence || '', otherUserId: isA ? (sideB.userId || '') : (sideA.userId || '') };
+    }
+    if (postMatch.matchType === 'consortium') {
+        const leadOpp = await ds.getOpportunityById(payload.leadNeedId);
+        const roles = await Promise.all((payload.roles || []).map(async (r) => { const u = await ds.getUserOrCompanyById(r.userId); return { role: r.role || 'Partner', partnerName: u?.profile?.name || r.userId }; }));
+        return { ...base, projectTitle: leadOpp?.title || 'Project', roles };
+    }
+    if (postMatch.matchType === 'circular') {
+        const cycle = payload.cycle || [], links = payload.links || [];
+        const youGiveLink = links.find(l => (l.fromCreatorId || l.from) === currentUserId), youReceiveLink = links.find(l => (l.toCreatorId || l.to) === currentUserId);
+        const youGiveOpp = youGiveLink?.offerId ? await ds.getOpportunityById(youGiveLink.offerId) : null;
+        const youReceiveNeedOpp = youReceiveLink?.needId ? await ds.getOpportunityById(youReceiveLink.needId) : null;
+        const names = await Promise.all(cycle.map(uid => ds.getUserOrCompanyById(uid).then(u => u?.profile?.name || uid)));
+        const cycleLabel = cycle.map((uid, i) => (uid === currentUserId ? 'You' : (names[i] || uid))).join(' → ') + ' → You';
+        return { ...base, cycleLabel, youGiveTitle: youGiveOpp?.title || 'Your offer', youReceiveTitle: youReceiveNeedOpp ? 'Need: ' + youReceiveNeedOpp.title : 'Their need' };
+    }
+    return base;
+}
+
+const POST_MATCH_TEMPLATES = { one_way: 'match-card-one-way', two_way: 'match-card-two-way', consortium: 'match-card-consortium', circular: 'match-card-circular' };
+const MATCH_TYPE_LABELS = { one_way: 'Recommended Matches', two_way: 'Barter Matches', consortium: 'Consortium Invitations', circular: 'Circular Exchange Opportunities' };
+
+function setupMatchesSubTabs() {
+    const tabMatches = document.getElementById('tab-matches');
+    const btnRecommended = document.getElementById('matches-subtab-recommended');
+    const btnOpportunity = document.getElementById('matches-subtab-opportunity');
+    const panelRecommended = document.getElementById('matches-recommended');
+    const panelOpportunity = document.getElementById('matches-opportunity');
+    if (!tabMatches || !btnRecommended || !btnOpportunity || !panelRecommended || !panelOpportunity) return;
+    function showRecommended() {
+        btnRecommended.classList.add('active');
+        btnOpportunity.classList.remove('active');
+        panelRecommended.classList.add('active');
+        panelOpportunity.classList.remove('active');
+    }
+    function showOpportunity() {
+        btnOpportunity.classList.add('active');
+        btnRecommended.classList.remove('active');
+        panelOpportunity.classList.add('active');
+        panelRecommended.classList.remove('active');
+    }
+    btnRecommended.addEventListener('click', showRecommended);
+    btnOpportunity.addEventListener('click', showOpportunity);
+}
+
 async function loadMatchesPipeline() {
     const user = authService.getCurrentUser();
     if (!user) return;
-    
-    const container = document.getElementById('matches-list');
-    if (!container) return;
-    
-    container.innerHTML = '<div class="spinner"></div>';
-    
+
+    const recommendedContainer = document.getElementById('matches-recommended-list');
+    const opportunityContainer = document.getElementById('matches-opportunity-list');
+    if (!recommendedContainer || !opportunityContainer) return;
+
+    recommendedContainer.innerHTML = '<div class="spinner"></div>';
+    opportunityContainer.innerHTML = '<div class="spinner"></div>';
+    setupMatchesSubTabs();
+
     try {
-        // Use stored matches (same source as dashboard count) so the list matches the dashboard
-        const allMatches = await dataService.getMatches();
-        const userMatches = allMatches.filter(m => (m.candidateId || m.userId) === user.id);
-        
-        if (userMatches.length === 0) {
-            container.innerHTML = '<div class="empty-state">No matches found. Keep your profile updated to receive matches! <a href="#" data-route="' + CONFIG.ROUTES.PROFILE + '" class="text-primary font-medium">Update your profile</a></div>';
+        const legacyMatches = await dataService.getMatches();
+        const candidateMatches = legacyMatches.filter(m => (m.candidateId || m.userId) === user.id);
+        const allOpportunities = await dataService.getOpportunities();
+        const needOwnerOppIds = new Set((allOpportunities.filter(o => o.creatorId === user.id)).map(o => o.id));
+        const needOwnerMatches = legacyMatches.filter(m => needOwnerOppIds.has(m.opportunityId));
+        const userLegacyMatches = [...candidateMatches, ...needOwnerMatches.filter(m => !candidateMatches.some(c => c.id === m.id))];
+        const postMatches = dataService.getPostMatchesForUser ? await dataService.getPostMatchesForUser(user.id) : [];
+        const pendingPostMatches = postMatches.filter(pm => (pm.status || '') !== 'declined' && (pm.status || '') !== 'expired');
+
+        const hasLegacy = userLegacyMatches.length > 0;
+        const hasPost = pendingPostMatches.length > 0;
+
+        const emptyStateProfile = 'No matches found. Keep your profile updated to receive matches! <a href="#" data-route="' + CONFIG.ROUTES.PROFILE + '" class="text-primary font-medium">Update your profile</a>';
+        const emptyStateRecommended = 'No recommended matches. <a href="#" data-route="' + CONFIG.ROUTES.PROFILE + '" class="text-primary font-medium">Update your profile</a> or explore opportunities to get matches.';
+        const emptyStateOpportunity = 'No opportunity matches.';
+
+        if (!hasLegacy && !hasPost) {
+            recommendedContainer.innerHTML = '<div class="empty-state">' + emptyStateProfile + '</div>';
+            opportunityContainer.innerHTML = '<div class="empty-state">' + emptyStateProfile + '</div>';
+            document.getElementById('matches-recommended')?.classList.add('active');
+            document.getElementById('matches-opportunity')?.classList.remove('active');
+            document.getElementById('matches-subtab-recommended')?.classList.add('active');
+            document.getElementById('matches-subtab-opportunity')?.classList.remove('active');
             return;
         }
-        
-        // Load opportunity for each match
-        const matchesWithOpps = await Promise.all(
-            userMatches.map(async (m) => {
-                const opportunity = await dataService.getOpportunityById(m.opportunityId);
-                return {
-                    opportunity: opportunity || { id: m.opportunityId, title: 'Unknown', description: 'No description', modelType: '—', status: '—' },
-                    matchScore: m.matchScore != null ? m.matchScore : 0,
-                    criteria: m.criteria || m.matchReasons
-                };
-            })
-        );
-        
-        // Sort by match score descending
-        matchesWithOpps.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
-        
-        const template = await templateLoader.load('match-card');
-        const html = matchesWithOpps.map(match => {
-            const data = {
-                ...match,
-                opportunity: {
-                    ...match.opportunity,
-                    description: match.opportunity.description || 'No description'
-                },
-                matchScorePercent: Math.round((match.matchScore || 0) * 100)
-            };
-            return templateRenderer.render(template, data);
-        }).join('');
-        
-        container.innerHTML = html;
-        
+
+        if (hasPost) {
+            const byType = {};
+            pendingPostMatches.forEach(pm => {
+                const t = pm.matchType || 'one_way';
+                if (!byType[t]) byType[t] = [];
+                byType[t].push(pm);
+            });
+            const recommendedParts = [];
+            ['one_way', 'two_way', 'consortium', 'circular'].forEach(matchType => {
+                const list = (byType[matchType] || []).sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+                if (list.length === 0) return;
+                const label = MATCH_TYPE_LABELS[matchType];
+                recommendedParts.push('<div class="mb-6"><h3 class="text-lg font-semibold text-gray-900 mb-3">' + label + '</h3><div class="space-y-3 post-match-cards-' + matchType + '"></div></div>');
+            });
+            recommendedContainer.innerHTML = recommendedParts.join('');
+            for (const matchType of ['one_way', 'two_way', 'consortium', 'circular']) {
+                const list = (byType[matchType] || []).sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+                if (list.length === 0) continue;
+                const subContainer = recommendedContainer.querySelector('.post-match-cards-' + matchType);
+                if (!subContainer) continue;
+                const templateName = POST_MATCH_TEMPLATES[matchType];
+                const template = await templateLoader.load(templateName);
+                const htmlParts = [];
+                for (const pm of list) {
+                    const viewModel = await buildPostMatchViewModelPipeline(pm, user.id);
+                    htmlParts.push(templateRenderer.render(template, viewModel));
+                }
+                subContainer.innerHTML = htmlParts.join('');
+            }
+        } else {
+            recommendedContainer.innerHTML = '<div class="empty-state">' + emptyStateRecommended + '</div>';
+        }
+
+        if (hasLegacy) {
+            opportunityContainer.innerHTML = '<div class="mb-6"><h3 class="text-lg font-semibold text-gray-900 mb-3">Opportunity Matches</h3><div class="space-y-3 legacy-match-cards"></div></div>';
+            const legacyContainer = opportunityContainer.querySelector('.legacy-match-cards');
+            if (legacyContainer) {
+                const matchesWithOpps = await Promise.all(
+                    userLegacyMatches.map(async (m) => {
+                        const opportunity = await dataService.getOpportunityById(m.opportunityId);
+                        const opp = opportunity || { id: m.opportunityId, title: 'Unknown', description: 'No description', modelType: '—', status: '—', creatorId: null };
+                        const isNeedOwner = opp.creatorId === user.id;
+                        const providerId = m.candidateId || m.userId;
+                        let providerName = '';
+                        if (isNeedOwner && providerId) {
+                            const provider = await dataService.getUserOrCompanyById(providerId);
+                            providerName = provider?.profile?.name || provider?.profile?.companyName || providerId;
+                        }
+                        const needOwnerId = opp.creatorId || '';
+                        const cardTitle = isNeedOwner ? 'Recommended Provider Found' : 'Recommended Opportunity Found';
+                        const section1Label = isNeedOwner ? 'Your Need' : 'Opportunity Need';
+                        const section2Label = isNeedOwner ? 'Provider Offer' : 'Your Offer';
+                        const section1Content = opp.title + (opp.description ? ': ' + opp.description : '');
+                        const section2Content = isNeedOwner ? providerName || 'Provider' : 'Your application / offer';
+                        let primaryActionLabel, primaryActionRoute, secondaryActionLabel, secondaryActionRoute, tertiaryActionLabel, tertiaryActionRoute;
+                        if (isNeedOwner) {
+                            primaryActionLabel = 'View Provider';
+                            primaryActionRoute = '/people/' + providerId;
+                            secondaryActionLabel = 'Invite to Apply';
+                            secondaryActionRoute = '/opportunities/' + opp.id;
+                            tertiaryActionLabel = 'Message Provider';
+                            tertiaryActionRoute = '/messages/' + providerId;
+                        } else {
+                            primaryActionLabel = 'View Opportunity';
+                            primaryActionRoute = '/opportunities/' + opp.id;
+                            secondaryActionLabel = 'Apply to Opportunity';
+                            secondaryActionRoute = '/opportunities/' + opp.id;
+                            tertiaryActionLabel = 'Message Owner';
+                            tertiaryActionRoute = '/messages/' + needOwnerId;
+                        }
+                        return {
+                            id: m.id,
+                            opportunity: { ...opp, description: opp.description || 'No description' },
+                            matchScore: m.matchScore != null ? m.matchScore : 0,
+                            criteria: m.criteria || m.matchReasons,
+                            cardTitle,
+                            section1Label,
+                            section2Label,
+                            section1Content,
+                            section2Content,
+                            primaryActionLabel,
+                            primaryActionRoute,
+                            secondaryActionLabel,
+                            secondaryActionRoute,
+                            tertiaryActionLabel,
+                            tertiaryActionRoute
+                        };
+                    })
+                );
+                matchesWithOpps.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+                const template = await templateLoader.load('match-card');
+                legacyContainer.innerHTML = matchesWithOpps.map(match => {
+                    const data = {
+                        ...match,
+                        opportunity: { ...match.opportunity, description: match.opportunity.description || 'No description' },
+                        matchScorePercent: Math.round((match.matchScore || 0) * 100)
+                    };
+                    return templateRenderer.render(template, data);
+                }).join('');
+            }
+        } else {
+            opportunityContainer.innerHTML = '<div class="empty-state">' + emptyStateOpportunity + '</div>';
+        }
+
+        if (!document.getElementById('tab-matches')?.dataset.matchActionsBound) {
+            document.getElementById('tab-matches').dataset.matchActionsBound = '1';
+            document.getElementById('tab-matches').addEventListener('click', (e) => {
+                const accept = e.target.closest('.btn-accept-match');
+                const decline = e.target.closest('.btn-decline-match');
+                if ((accept || decline) && e.target.tagName !== 'A') {
+                    e.preventDefault();
+                    const matchId = (accept || decline).getAttribute('data-match-id');
+                    if (matchId && window.router && typeof window.router.navigate === 'function') {
+                        window.router.navigate('/matches/' + matchId);
+                    }
+                }
+            });
+        }
+
+        const panelRecommendedEl = document.getElementById('matches-recommended');
+        const panelOpportunityEl = document.getElementById('matches-opportunity');
+        const btnRec = document.getElementById('matches-subtab-recommended');
+        const btnOpp = document.getElementById('matches-subtab-opportunity');
+        if (hasPost) {
+            panelRecommendedEl?.classList.add('active');
+            panelOpportunityEl?.classList.remove('active');
+            btnRec?.classList.add('active');
+            btnOpp?.classList.remove('active');
+        } else {
+            panelOpportunityEl?.classList.add('active');
+            panelRecommendedEl?.classList.remove('active');
+            btnOpp?.classList.add('active');
+            btnRec?.classList.remove('active');
+        }
     } catch (error) {
         console.error('Error loading matches:', error);
-        container.innerHTML = '<div class="empty-state">Error loading matches. Please try again.</div>';
+        recommendedContainer.innerHTML = '<div class="empty-state">Error loading matches. Please try again.</div>';
+        opportunityContainer.innerHTML = '<div class="empty-state">Error loading matches. Please try again.</div>';
     }
 }
 

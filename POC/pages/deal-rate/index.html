@@ -1,0 +1,37 @@
+<div class="page-container deal-rate-page">
+    <div id="deal-rate-loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+    <div id="deal-rate-error" style="display: none;" class="error-state">
+        <p>Deal not found or you cannot rate this deal.</p>
+        <a href="#" data-route="/deals" class="btn btn-primary">Back to Deals</a>
+    </div>
+    <div id="deal-rate-form" style="display: none;">
+        <a href="#" data-route="/deals" class="back-link"><i class="ph-duotone ph-arrow-left"></i> Back to Deals</a>
+        <div class="deal-section mt-4">
+            <h1 class="text-xl font-bold mb-2">Rate & Review</h1>
+            <p class="text-gray-600 mb-4">Rate the other participant(s) for this deal. Criteria: Communication, Quality, Professionalism, Timeliness (1–5).</p>
+            <form id="rating-form">
+                <input type="hidden" id="deal-id" />
+                <input type="hidden" id="contract-id" />
+                <div id="rate-reviewees"></div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Comment (optional)</label>
+                    <textarea id="rating-comment" class="w-full border border-gray-300 rounded-md p-2" rows="3" placeholder="Overall feedback..."></textarea>
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">Submit review</button>
+                    <a href="#" data-route="/deals" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.deal-rate-page .loading-state, .deal-rate-page .error-state { text-align: center; padding: 2rem; }
+.deal-rate-page .back-link { display: inline-block; margin-bottom: 1rem; color: var(--primary-color); text-decoration: none; }
+.deal-rate-page .rate-criteria { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 0.5rem; }
+.deal-rate-page .rate-criteria label { font-size: 0.875rem; }
+</style>
