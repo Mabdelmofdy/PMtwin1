@@ -169,7 +169,7 @@ class LayoutService {
         ];
         const opportunitiesLinks = [
             { route: CONFIG.ROUTES.OPPORTUNITIES, label: 'Opportunities', icon: 'ph-duotone ph-briefcase' },
-            { route: '/pipeline/matches', label: 'Matches', icon: 'ph-duotone ph-heart' },
+            { route: CONFIG.ROUTES.MATCHES, label: 'Matches', icon: 'ph-duotone ph-heart' },
         ];
         const collaborationLinks = [
             { route: CONFIG.ROUTES.DEALS, label: 'Deals', icon: 'ph-duotone ph-handshake' },
@@ -246,35 +246,55 @@ class LayoutService {
         html += '</div>';
         html += '</div>';
 
-        html += '<p class="portal-sidebar-section">ADMIN</p>';
-        html += '<nav class="portal-sidebar-nav">';
+        const renderAdminGroup = (sectionTitle, links) => {
+            if (links.length === 0) return;
+            html += `<p class="portal-sidebar-section">${sectionTitle}</p>`;
+            html += '<nav class="portal-sidebar-nav">';
+            links.forEach(({ route, label, icon }) => {
+                const active = isActive(route);
+                html += `<a href="#" data-route="${route}" class="portal-nav-link ${active ? 'portal-nav-active' : ''}" title="${label.replace(/"/g, '&quot;')}"><i class="${icon}"></i><span class="portal-nav-link-text">${label}</span></a>`;
+            });
+            html += '</nav>';
+        };
 
-        const adminLinks = [];
+        const overviewLinks = [];
+        if (!isAuditor) overviewLinks.push({ route: CONFIG.ROUTES.ADMIN, label: 'Dashboard', icon: 'ph-duotone ph-house' });
+        renderAdminGroup('OVERVIEW', overviewLinks);
+
+        const usersLinks = [];
         if (!isAuditor) {
-            adminLinks.push({ route: CONFIG.ROUTES.ADMIN, label: 'Dashboard', icon: 'ph-duotone ph-house' });
-            adminLinks.push({ route: CONFIG.ROUTES.ADMIN_VETTING, label: 'User Vetting', icon: 'ph-duotone ph-user-check' });
-            adminLinks.push({ route: CONFIG.ROUTES.ADMIN_PEOPLE, label: 'People', icon: 'ph-duotone ph-users' });
-            adminLinks.push({ route: CONFIG.ROUTES.ADMIN_OPPORTUNITIES, label: 'Opportunities', icon: 'ph-duotone ph-briefcase' });
+            usersLinks.push({ route: CONFIG.ROUTES.ADMIN_VETTING, label: 'User Vetting', icon: 'ph-duotone ph-user-check' });
+            usersLinks.push({ route: CONFIG.ROUTES.ADMIN_PEOPLE, label: 'People', icon: 'ph-duotone ph-users' });
         }
-        adminLinks.push({ route: CONFIG.ROUTES.ADMIN_AUDIT, label: 'Audit Trail', icon: 'ph-duotone ph-list-checks' });
-        adminLinks.push({ route: CONFIG.ROUTES.ADMIN_REPORTS, label: 'Reports', icon: 'ph-duotone ph-chart-bar' });
-        adminLinks.push({ route: CONFIG.ROUTES.ADMIN_MATCHING, label: 'Matching', icon: 'ph-duotone ph-graph' });
-        adminLinks.push({ route: CONFIG.ROUTES.ADMIN_DEALS, label: 'Deals', icon: 'ph-duotone ph-handshake' });
-        adminLinks.push({ route: CONFIG.ROUTES.ADMIN_CONTRACTS, label: 'Contracts', icon: 'ph-duotone ph-file-text' });
-        adminLinks.push({ route: CONFIG.ROUTES.ADMIN_CONSORTIUM, label: 'Consortium', icon: 'ph-duotone ph-users-three' });
-        adminLinks.push({ route: CONFIG.ROUTES.ADMIN_HEALTH, label: 'System Health', icon: 'ph-duotone ph-heartbeat' });
-        if (isFullAdmin) {
-            adminLinks.push({ route: CONFIG.ROUTES.ADMIN_SKILLS, label: 'Skills & Categories', icon: 'ph-duotone ph-tag' });
-            adminLinks.push({ route: CONFIG.ROUTES.ADMIN_SETTINGS, label: 'Settings', icon: 'ph-duotone ph-gear' });
-            adminLinks.push({ route: CONFIG.ROUTES.ADMIN_SUBSCRIPTIONS, label: 'Subscriptions', icon: 'ph-duotone ph-credit-card' });
-            adminLinks.push({ route: CONFIG.ROUTES.ADMIN_COLLABORATION_MODELS, label: 'Collaboration Models', icon: 'ph-duotone ph-stack' });
-        }
+        renderAdminGroup('USERS', usersLinks);
 
-        adminLinks.forEach(({ route, label, icon }) => {
-            const active = isActive(route);
-            html += `<a href="#" data-route="${route}" class="portal-nav-link ${active ? 'portal-nav-active' : ''}" title="${label.replace(/"/g, '&quot;')}"><i class="${icon}"></i><span class="portal-nav-link-text">${label}</span></a>`;
-        });
-        html += '</nav>';
+        const marketplaceLinks = [];
+        if (!isAuditor) marketplaceLinks.push({ route: CONFIG.ROUTES.ADMIN_OPPORTUNITIES, label: 'Opportunities', icon: 'ph-duotone ph-briefcase' });
+        marketplaceLinks.push({ route: CONFIG.ROUTES.ADMIN_MATCHING, label: 'Matching', icon: 'ph-duotone ph-graph' });
+        marketplaceLinks.push({ route: CONFIG.ROUTES.ADMIN_CONSORTIUM, label: 'Consortium', icon: 'ph-duotone ph-users-three' });
+        renderAdminGroup('MARKETPLACE', marketplaceLinks);
+
+        const transactionsLinks = [
+            { route: CONFIG.ROUTES.ADMIN_DEALS, label: 'Deals', icon: 'ph-duotone ph-handshake' },
+            { route: CONFIG.ROUTES.ADMIN_CONTRACTS, label: 'Contracts', icon: 'ph-duotone ph-file-text' },
+        ];
+        renderAdminGroup('TRANSACTIONS', transactionsLinks);
+
+        const monitoringLinks = [
+            { route: CONFIG.ROUTES.ADMIN_AUDIT, label: 'Audit Trail', icon: 'ph-duotone ph-list-checks' },
+            { route: CONFIG.ROUTES.ADMIN_REPORTS, label: 'Reports', icon: 'ph-duotone ph-chart-bar' },
+            { route: CONFIG.ROUTES.ADMIN_HEALTH, label: 'System Health', icon: 'ph-duotone ph-heartbeat' },
+        ];
+        renderAdminGroup('MONITORING', monitoringLinks);
+
+        const configLinks = [];
+        if (isFullAdmin) {
+            configLinks.push({ route: CONFIG.ROUTES.ADMIN_SKILLS, label: 'Skills & Categories', icon: 'ph-duotone ph-tag' });
+            configLinks.push({ route: CONFIG.ROUTES.ADMIN_SETTINGS, label: 'Settings', icon: 'ph-duotone ph-gear' });
+            configLinks.push({ route: CONFIG.ROUTES.ADMIN_SUBSCRIPTIONS, label: 'Subscriptions', icon: 'ph-duotone ph-credit-card' });
+            configLinks.push({ route: CONFIG.ROUTES.ADMIN_COLLABORATION_MODELS, label: 'Collaboration Models', icon: 'ph-duotone ph-stack' });
+        }
+        renderAdminGroup('CONFIGURATION', configLinks);
         html += `<div class="portal-sidebar-footer"><button type="button" class="portal-logout-btn" onclick="layoutService.handleLogout()"><i class="ph-duotone ph-sign-out"></i><span>Logout</span></button></div>`;
         html += '</div>';
         sidebarEl.innerHTML = html;

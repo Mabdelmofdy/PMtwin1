@@ -7,166 +7,303 @@
     </div>
     <div class="page-body">
 
-    <!-- Key Performance Indicators -->
-    <section class="dashboard-section kpi-section">
-        <h2 class="section-title visually-hidden">Key metrics</h2>
-        <div class="kpi-grid" id="kpi-grid">
-            <div class="stat-card"><div class="stat-value" id="stat-total-users">0</div><div class="stat-label">Total Users</div></div>
-            <div class="stat-card"><div class="stat-value" id="stat-pending-vetting">0</div><div class="stat-label">Pending Vetting</div></div>
-            <div class="stat-card"><div class="stat-value" id="stat-total-projects">0</div><div class="stat-label">Total Projects</div></div>
-            <div class="stat-card"><div class="stat-value" id="stat-active-projects">0</div><div class="stat-label">Active Projects</div></div>
-            <div class="stat-card"><div class="stat-value" id="stat-total-proposals">0</div><div class="stat-label">Total Proposals</div></div>
-            <div class="stat-card"><div class="stat-value" id="stat-total-offers">0</div><div class="stat-label">Total Offers</div></div>
-            <div class="stat-card"><div class="stat-value" id="stat-collab-opportunities">0</div><div class="stat-label">Collaboration Opportunities</div></div>
-            <div class="stat-card"><div class="stat-value" id="stat-pending-collab">0</div><div class="stat-label">Pending Collaborations</div></div>
-            <div class="stat-card"><div class="stat-value" id="stat-active-collab">0</div><div class="stat-label">Active Collaborations</div></div>
-        </div>
-    </section>
-
-    <!-- System Health Indicators -->
-    <section class="dashboard-section health-section">
-        <h2 class="section-title">System Health Indicators</h2>
-        <div class="health-cards" id="health-cards">
-            <div class="health-card"><div class="health-value" id="health-user-pct">0%</div><div class="health-detail" id="health-user-detail">0 active / 0 total users</div><div class="health-bar"><div class="health-bar-fill" id="health-user-bar"></div></div></div>
-            <div class="health-card"><div class="health-value" id="health-sessions">0</div><div class="health-detail">Currently active user sessions</div></div>
-            <div class="health-card"><div class="health-value" id="health-project-pct">0%</div><div class="health-detail" id="health-project-detail">0 active / 0 total projects</div><div class="health-bar"><div class="health-bar-fill" id="health-project-bar"></div></div></div>
-            <div class="health-card"><div class="health-value" id="health-collab-pct">0%</div><div class="health-detail" id="health-collab-detail">0 active / 0 total opportunities</div><div class="health-bar"><div class="health-bar-fill" id="health-collab-bar"></div></div></div>
-            <div class="health-card health-card-activity" id="health-activity-card"><div class="health-activity-status" id="health-activity-status">OK</div><div class="health-detail" id="health-activity-detail">0 recent in last hour</div><div class="health-detail" id="health-notifications-detail">0 unread notifications</div></div>
-        </div>
-    </section>
-
-    <!-- Offers by top sites -->
-    <section class="dashboard-section offers-by-site-section">
-        <h2 class="section-title">Offers by top sites</h2>
-        <div class="offers-by-site-widget" id="offers-by-site-widget"><p class="text-muted">Loading...</p></div>
-        <a href="#" data-route="/admin/reports" class="btn btn-secondary btn-sm">View full reports</a>
-    </section>
-
-    <!-- Analytics Summary -->
-    <section class="dashboard-section analytics-summary-section">
-        <h2 class="section-title">Analytics Summary</h2>
-        <div class="analytics-summary-grid">
-            <div class="analytics-card">
-                <h3 class="analytics-card-title">Opportunities by model</h3>
-                <div id="analytics-by-model" class="analytics-by-model"><p class="text-muted">Loading…</p></div>
+        <!-- Platform Overview -->
+        <section class="dashboard-section metrics-section" aria-labelledby="platform-overview-title">
+            <h2 id="platform-overview-title" class="section-title">Platform Overview</h2>
+            <div class="metrics-grid" id="kpi-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Total Users</div>
+                    <div class="metric-value" id="stat-total-users">0</div>
+                    <div class="metric-trend" id="stat-total-users-trend" aria-hidden="true">+0 this week</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Pending Vetting</div>
+                    <div class="metric-value" id="stat-pending-vetting">0</div>
+                    <div class="metric-trend" id="stat-pending-vetting-trend" aria-hidden="true">—</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Active Projects</div>
+                    <div class="metric-value" id="stat-active-projects">0</div>
+                    <div class="metric-trend" id="stat-active-projects-trend" aria-hidden="true">+0 this week</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Offers</div>
+                    <div class="metric-value" id="stat-total-offers">0</div>
+                    <div class="metric-trend" id="stat-total-offers-trend" aria-hidden="true">+0 this week</div>
+                </div>
             </div>
-            <div class="analytics-card">
-                <h3 class="analytics-card-title">Top opportunities by applications</h3>
-                <div id="analytics-top-opps" class="analytics-top-opps"><p class="text-muted">Loading…</p></div>
+        </section>
+
+        <!-- Marketplace Activity -->
+        <section class="dashboard-section metrics-section" aria-labelledby="marketplace-activity-title">
+            <h2 id="marketplace-activity-title" class="section-title">Marketplace Activity</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Total Proposals</div>
+                    <div class="metric-value" id="stat-total-proposals">0</div>
+                    <div class="metric-trend" id="stat-total-proposals-trend" aria-hidden="true">+0 this week</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Collaboration Opportunities</div>
+                    <div class="metric-value" id="stat-collab-opportunities">0</div>
+                    <div class="metric-trend" aria-hidden="true">—</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Active Collaborations</div>
+                    <div class="metric-value" id="stat-active-collab">0</div>
+                    <div class="metric-trend" id="stat-active-collab-trend" aria-hidden="true">—</div>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Quick Actions -->
-    <section class="dashboard-section quick-actions-section">
-        <h2 class="section-title">Quick Actions</h2>
-        <div class="quick-actions-grid" id="quick-actions-grid">
-            <a href="#" data-route="/admin/vetting" class="quick-action-btn"><span class="quick-action-label">User Vetting</span><span class="quick-action-badge" id="badge-vetting">0</span></a>
-            <a href="#" data-route="/admin/opportunities" class="quick-action-btn"><span class="quick-action-label">Project Moderation</span></a>
-            <a href="#" data-route="/admin/collaboration-models" class="quick-action-btn"><span class="quick-action-label">Models Management</span><span class="quick-action-badge" id="badge-models">0</span></a>
-            <a href="#" data-route="/admin/audit" class="quick-action-btn"><span class="quick-action-label">Audit Trail</span></a>
-            <a href="#" data-route="/admin/reports" class="quick-action-btn"><span class="quick-action-label">Reports</span></a>
-            <a href="#" data-route="/admin/matching" class="quick-action-btn"><span class="quick-action-label">Matching Workflow</span></a>
-            <a href="#" data-route="/admin/settings" class="quick-action-btn"><span class="quick-action-label">Settings</span></a>
-            <a href="#" data-route="/admin/people" class="quick-action-btn"><span class="quick-action-label">People</span></a>
-        </div>
-    </section>
-
-    <!-- Collaboration Models Activity -->
-    <section class="dashboard-section collab-models-section">
-        <h2 class="section-title">Collaboration Models Activity</h2>
-        <div class="collab-models-summary" id="collab-models-summary">Total: 0 Active: 0 Pending: 0</div>
-        <div class="collab-models-cards" id="collab-models-cards"><div class="spinner"></div></div>
-        <div class="collab-models-actions">
-            <a href="#" data-route="/admin/collaboration-models" class="btn btn-primary">Manage All Models</a>
-            <a href="#" data-route="/admin/opportunities" class="btn btn-secondary" id="link-view-active">View Active</a>
-            <a href="#" data-route="/admin/opportunities" class="btn btn-secondary" id="link-view-pending">View Pending</a>
-        </div>
-    </section>
-
-    <!-- Pending Approvals Queue -->
-    <section class="dashboard-section pending-queue-section">
-        <h2 class="section-title">Pending Approvals Queue</h2>
-        <div class="pending-queue" id="pending-queue">
-            <div class="pending-queue-card">
-                <h3>Users Pending Review</h3>
-                <p class="pending-queue-count" id="pending-users-count">0 user(s) awaiting vetting</p>
-                <a href="#" data-route="/admin/vetting" class="btn btn-primary">Review Users</a>
+        <!-- System Health -->
+        <section class="dashboard-section metrics-section" aria-labelledby="system-health-title">
+            <h2 id="system-health-title" class="section-title">System Health</h2>
+            <div class="metrics-grid health-cards" id="health-cards">
+                <div class="metric-card health-card">
+                    <div class="metric-label">Active Users</div>
+                    <div class="metric-value" id="health-active-users">0</div>
+                    <div class="metric-detail" id="health-user-detail">0 active / 0 total users</div>
+                    <div class="health-bar"><div class="health-bar-fill" id="health-user-bar"></div></div>
+                </div>
+                <div class="metric-card health-card">
+                    <div class="metric-label">Active Sessions</div>
+                    <div class="metric-value" id="health-sessions">0</div>
+                    <div class="metric-detail">Currently active user sessions</div>
+                </div>
+                <div class="metric-card health-card">
+                    <div class="metric-label">Notifications</div>
+                    <div class="metric-value" id="health-notifications-count">0</div>
+                    <div class="metric-detail" id="health-notifications-detail">0 unread notifications</div>
+                </div>
+                <div class="metric-card health-card health-card-status" id="health-activity-card">
+                    <div class="metric-label">System Status</div>
+                    <div class="metric-value health-activity-status" id="health-activity-status">OK</div>
+                    <div class="metric-detail" id="health-activity-detail">0 recent in last hour</div>
+                </div>
             </div>
-            <div class="pending-queue-card">
-                <h3>Collaboration Opportunities</h3>
-                <p class="pending-queue-count" id="pending-opps-count">0 opportunity/ies pending approval</p>
-                <a href="#" data-route="/admin/opportunities" class="btn btn-primary">Review Opportunities</a>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Recent Activity Feed -->
-    <section class="dashboard-section activity-feed-section">
-        <div class="activity-feed-header">
-            <h2 class="section-title">Recent Activity Feed</h2>
-            <a href="#" data-route="/admin/audit" class="btn btn-secondary btn-sm">View All</a>
-        </div>
-        <div class="activity-feed" id="recent-activity"><div class="spinner"></div></div>
-    </section>
+        <!-- Quick Actions -->
+        <section class="dashboard-section quick-actions-section" aria-labelledby="quick-actions-title">
+            <h2 id="quick-actions-title" class="section-title">Quick Actions</h2>
+            <div class="quick-actions-row">
+                <a href="#" data-route="/admin/vetting" class="quick-action-btn primary">
+                    <span class="quick-action-icon" aria-hidden="true"><i class="ph-duotone ph-user-check"></i></span>
+                    <span class="quick-action-label">Review Pending Vetting</span>
+                    <span class="quick-action-badge js-badge-vetting" id="badge-vetting">0</span>
+                </a>
+                <a href="#" data-route="/admin/vetting" class="quick-action-btn primary">
+                    <span class="quick-action-icon" aria-hidden="true"><i class="ph-duotone ph-check-circle"></i></span>
+                    <span class="quick-action-label">Approve Users</span>
+                </a>
+                <a href="#" data-route="/admin/opportunities" class="quick-action-btn primary">
+                    <span class="quick-action-icon" aria-hidden="true"><i class="ph-duotone ph-briefcase"></i></span>
+                    <span class="quick-action-label">Review Opportunities</span>
+                </a>
+            </div>
+            <div class="quick-actions-grid" id="quick-actions-grid">
+                <a href="#" data-route="/admin/vetting" class="quick-action-btn"><span class="quick-action-label">User Vetting</span><span class="quick-action-badge js-badge-vetting" id="badge-vetting-secondary">0</span></a>
+                <a href="#" data-route="/admin/opportunities" class="quick-action-btn"><span class="quick-action-label">Project Moderation</span></a>
+                <a href="#" data-route="/admin/collaboration-models" class="quick-action-btn"><span class="quick-action-label">Models Management</span><span class="quick-action-badge" id="badge-models">0</span></a>
+                <a href="#" data-route="/admin/audit" class="quick-action-btn"><span class="quick-action-label">Audit Trail</span></a>
+                <a href="#" data-route="/admin/reports" class="quick-action-btn"><span class="quick-action-label">Reports</span></a>
+                <a href="#" data-route="/admin/matching" class="quick-action-btn"><span class="quick-action-label">Matching Workflow</span></a>
+                <a href="#" data-route="/admin/settings" class="quick-action-btn"><span class="quick-action-label">Settings</span></a>
+                <a href="#" data-route="/admin/people" class="quick-action-btn"><span class="quick-action-label">People</span></a>
+            </div>
+        </section>
+
+        <!-- Offers by top sites -->
+        <section class="dashboard-section offers-by-site-section" aria-labelledby="offers-by-site-title">
+            <h2 id="offers-by-site-title" class="section-title">Offers by top sites</h2>
+            <div class="offers-by-site-widget" id="offers-by-site-widget"><p class="text-muted">Loading...</p></div>
+            <a href="#" data-route="/admin/reports" class="btn btn-secondary btn-sm">View full reports</a>
+        </section>
+
+        <!-- Analytics Summary -->
+        <section class="dashboard-section analytics-summary-section" aria-labelledby="analytics-summary-title">
+            <h2 id="analytics-summary-title" class="section-title">Analytics Summary</h2>
+            <div class="analytics-summary-grid">
+                <div class="analytics-card">
+                    <h3 class="analytics-card-title">Opportunities by model</h3>
+                    <div id="analytics-by-model" class="analytics-by-model"><p class="text-muted">Loading…</p></div>
+                </div>
+                <div class="analytics-card">
+                    <h3 class="analytics-card-title">Top opportunities by applications</h3>
+                    <div id="analytics-top-opps" class="analytics-top-opps"><p class="text-muted">Loading…</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Collaboration Models Activity -->
+        <section class="dashboard-section collab-models-section" aria-labelledby="collab-models-title">
+            <h2 id="collab-models-title" class="section-title">Collaboration Models Activity</h2>
+            <div class="collab-models-summary" id="collab-models-summary">Total: 0 Active: 0 Pending: 0</div>
+            <div class="collab-models-cards" id="collab-models-cards"><div class="spinner"></div></div>
+            <div class="collab-models-actions">
+                <a href="#" data-route="/admin/collaboration-models" class="btn btn-primary">Manage All Models</a>
+                <a href="#" data-route="/admin/opportunities" class="btn btn-secondary" id="link-view-active">View Active</a>
+                <a href="#" data-route="/admin/opportunities" class="btn btn-secondary" id="link-view-pending">View Pending</a>
+            </div>
+        </section>
+
+        <!-- Pending Approvals Queue -->
+        <section class="dashboard-section pending-queue-section" aria-labelledby="pending-queue-title">
+            <h2 id="pending-queue-title" class="section-title">Pending Approvals Queue</h2>
+            <div class="pending-queue" id="pending-queue">
+                <div class="pending-queue-card">
+                    <h3>Users Pending Review</h3>
+                    <p class="pending-queue-count" id="pending-users-count">0 user(s) awaiting vetting</p>
+                    <a href="#" data-route="/admin/vetting" class="btn btn-primary">Review Users</a>
+                </div>
+                <div class="pending-queue-card">
+                    <h3>Collaboration Opportunities</h3>
+                    <p class="pending-queue-count" id="pending-opps-count">0 opportunity/ies pending approval</p>
+                    <a href="#" data-route="/admin/opportunities" class="btn btn-primary">Review Opportunities</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Activity Feed -->
+        <section class="dashboard-section activity-feed-section" aria-labelledby="activity-feed-title">
+            <div class="activity-feed-header">
+                <h2 id="activity-feed-title" class="section-title">Recent Activity Feed</h2>
+                <a href="#" data-route="/admin/audit" class="btn btn-secondary btn-sm">View All</a>
+            </div>
+            <div class="activity-feed" id="recent-activity"><div class="spinner"></div></div>
+        </section>
 
     </div>
 </div>
 
 <style>
 .admin-dashboard-page { /* Page specific */ }
-.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
 
 .dashboard-section { margin-bottom: var(--spacing-2xl); }
-.section-title { font-size: var(--font-size-xl); margin-bottom: var(--spacing-lg); }
-
-.analytics-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--spacing-lg); }
-.analytics-card { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--spacing-lg); }
-.analytics-card-title { font-size: var(--font-size-base); font-weight: 600; margin-bottom: var(--spacing-md); }
-.analytics-row { display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-xs) 0; border-bottom: 1px solid var(--border-color); font-size: var(--font-size-sm); }
-.analytics-row:last-child { border-bottom: none; }
-.analytics-row a { text-decoration: none; }
-
-/* KPIs */
-.kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: var(--spacing-lg);
+.section-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 1rem 0;
+    letter-spacing: -0.01em;
 }
-.kpi-section .stat-card {
+
+/* Metrics grid: responsive, professional spacing */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+}
+
+.metrics-section { margin-bottom: 2.5rem; }
+
+.metric-card {
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    text-align: center;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
 }
-.kpi-section .stat-value { font-size: var(--font-size-2xl); font-weight: 700; color: var(--primary-color); }
-.kpi-section .stat-label { font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: var(--spacing-xs); }
+.metric-card:hover {
+    border-color: var(--primary-color, #0d9488);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
 
-/* Health */
-.health-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: var(--spacing-lg);
+.metric-label {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: none;
+    letter-spacing: 0;
 }
-.health-card {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
+
+.metric-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
 }
-.health-value { font-size: var(--font-size-xl); font-weight: 700; }
-.health-detail { font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: var(--spacing-xs); }
-.health-bar { height: 6px; background: var(--border-color); border-radius: 3px; margin-top: var(--spacing-sm); overflow: hidden; }
-.health-bar-fill { height: 100%; background: var(--primary-color); border-radius: 3px; width: 0%; transition: width 0.2s; }
-.health-card-activity .health-activity-status { font-weight: 700; color: var(--success); }
-.health-card-activity.health-high .health-activity-status { color: var(--warning); }
+
+.metric-trend {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+.metric-trend.positive { color: var(--success, #059669); }
+.metric-trend.negative { color: var(--danger, #dc2626); }
+
+.metric-detail {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+/* Health cards (system health section) */
+.health-card .health-bar {
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 3px;
+    margin-top: 0.75rem;
+    overflow: hidden;
+}
+.health-card .health-bar-fill {
+    height: 100%;
+    background: var(--primary-color);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.2s;
+}
+.health-card-status .health-activity-status { font-weight: 700; color: var(--success, #059669); }
+.health-card-status.health-high .health-activity-status { color: var(--warning, #d97706); }
 
 /* Quick Actions */
+.quick-actions-section .section-title { margin-bottom: 1rem; }
+
+.quick-actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.quick-actions-row .quick-action-btn {
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    transition: background 0.15s, transform 0.1s;
+}
+.quick-actions-row .quick-action-btn:hover {
+    background: var(--primary-dark, #0f766e);
+    color: #fff;
+    transform: translateY(-1px);
+}
+.quick-actions-row .quick-action-icon { font-size: 1.25rem; }
+.quick-actions-row .quick-action-badge {
+    background: rgba(255,255,255,0.3);
+    color: #fff;
+    font-size: var(--font-size-xs);
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    min-width: 1.5rem;
+    text-align: center;
+}
+.quick-actions-row .quick-action-badge:empty { display: none; }
+
 .quick-actions-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: var(--spacing-md);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
 }
 .quick-action-btn {
     display: flex;
@@ -194,6 +331,23 @@
 }
 .quick-action-badge:empty { display: none; }
 
+/* Analytics */
+.analytics-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+}
+.analytics-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+}
+.analytics-card-title { font-size: var(--font-size-base); font-weight: 600; margin-bottom: var(--spacing-md); }
+.analytics-row { display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-xs) 0; border-bottom: 1px solid var(--border-color); font-size: var(--font-size-sm); }
+.analytics-row:last-child { border-bottom: none; }
+.analytics-row a { text-decoration: none; }
+
 /* Collaboration Models Activity */
 .collab-models-summary { margin-bottom: var(--spacing-md); font-weight: 500; }
 .collab-models-summary .active-count { color: var(--success); }
@@ -201,7 +355,7 @@
 .collab-models-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-lg);
+    gap: 24px;
     margin-bottom: var(--spacing-lg);
 }
 .model-card {
@@ -220,7 +374,11 @@
 .collab-models-actions { display: flex; gap: var(--spacing-md); flex-wrap: wrap; }
 
 /* Pending Queue */
-.pending-queue { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-lg); }
+.pending-queue {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
 .pending-queue-card {
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
@@ -251,7 +409,13 @@
 .activity-feed-desc { font-size: var(--font-size-sm); color: var(--text-secondary); margin-bottom: 0.25rem; }
 .activity-feed-meta { display: flex; align-items: center; gap: var(--spacing-sm); font-size: var(--font-size-xs); color: var(--text-muted); }
 
-.offers-by-site-section .offers-by-site-widget { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-md); }
+.offers-by-site-section .offers-by-site-widget {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+}
 .offers-by-site-widget .site-row { display: flex; justify-content: space-between; padding: var(--spacing-sm) 0; border-bottom: 1px solid var(--border-color); }
 .offers-by-site-widget .site-row:last-child { border-bottom: none; }
 </style>

@@ -202,7 +202,7 @@ async function loadHealth() {
         const totalUsers = allPeople.length;
         const activeUsers = allPeople.filter(u => u.status === 'active').length;
         const userPct = totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 1000) / 10 : 0;
-        setEl('health-user-pct', userPct + '%');
+        setEl('health-active-users', activeUsers);
         setEl('health-user-detail', `${activeUsers} active / ${totalUsers} total users`);
         const userBar = document.getElementById('health-user-bar');
         if (userBar) userBar.style.width = userPct + '%';
@@ -230,6 +230,7 @@ async function loadHealth() {
         const unreadCount = notifications.filter(n => !n.read).length;
 
         setEl('health-activity-detail', `${recentCount} recent in last hour`);
+        setEl('health-notifications-count', unreadCount);
         setEl('health-notifications-detail', `${unreadCount} unread notifications`);
 
         const activityCard = document.getElementById('health-activity-card');
@@ -251,12 +252,11 @@ function updateQuickActionBadges() {
             const pendingVetting = allPeople.filter(u => u.status === 'pending' || u.status === 'clarification_requested').length;
             const pendingOpps = opportunities.filter(o => o.status === PENDING_OPPORTUNITY_STATUS).length;
 
-            const vettingBadge = document.getElementById('badge-vetting');
+            document.querySelectorAll('.js-badge-vetting, #badge-vetting, #badge-vetting-secondary').forEach(el => {
+                el.textContent = pendingVetting;
+                el.style.display = pendingVetting > 0 ? '' : 'none';
+            });
             const modelsBadge = document.getElementById('badge-models');
-            if (vettingBadge) {
-                vettingBadge.textContent = pendingVetting;
-                vettingBadge.style.display = pendingVetting > 0 ? '' : 'none';
-            }
             if (modelsBadge) {
                 modelsBadge.textContent = pendingOpps;
                 modelsBadge.style.display = pendingOpps > 0 ? '' : 'none';

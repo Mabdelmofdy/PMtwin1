@@ -9,7 +9,6 @@
     <div class="pipeline-tabs">
         <button class="tab-btn active" data-tab="opportunities">My Opportunities</button>
         <button class="tab-btn" data-tab="applications">My Applications</button>
-        <button class="tab-btn" data-tab="matches">Matches</button>
     </div>
     
     <div class="pipeline-content">
@@ -81,29 +80,6 @@
             </div>
         </div>
         
-        <!-- Matches Pipeline -->
-        <div id="tab-matches" class="tab-content" style="display: none;">
-            <div class="matches-subtabs" id="matches-subtabs" role="tablist">
-                <button type="button" class="matches-subtab active" role="tab" data-subtab="recommended" id="matches-subtab-recommended" aria-selected="true">Recommended</button>
-                <button type="button" class="matches-subtab" role="tab" data-subtab="opportunity" id="matches-subtab-opportunity" aria-selected="false">Opportunity Matches</button>
-                <button type="button" class="matches-subtab" role="tab" data-subtab="consortium" id="matches-subtab-consortium" aria-selected="false">Consortium Invitations</button>
-            </div>
-            <div id="matches-recommended" class="matches-panel active" role="tabpanel">
-                <div id="matches-recommended-list" class="matches-container">
-                    <div class="spinner"></div>
-                </div>
-            </div>
-            <div id="matches-opportunity" class="matches-panel" role="tabpanel">
-                <div id="matches-opportunity-list" class="matches-container">
-                    <div class="spinner"></div>
-                </div>
-            </div>
-            <div id="matches-consortium" class="matches-panel" role="tabpanel">
-                <div id="matches-consortium-list" class="matches-container">
-                    <div class="spinner"></div>
-                </div>
-            </div>
-        </div>
     </div>
     </div>
 </div>
@@ -233,115 +209,4 @@
     flex-wrap: wrap;
 }
 
-/* Matches sub-tabs - clearer hierarchy */
-.matches-subtabs {
-    display: flex;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-xl);
-    border-bottom: 2px solid var(--border-color);
-}
-
-.matches-subtab {
-    padding: var(--spacing-md) var(--spacing-lg);
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
-    cursor: pointer;
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    color: var(--text-secondary);
-    transition: color 0.2s, border-color 0.2s, background 0.2s;
-}
-
-.matches-subtab:hover {
-    color: var(--primary-color);
-}
-
-.matches-subtab.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
-}
-
-.matches-panel {
-    display: none;
-}
-
-.matches-panel.active {
-    display: block;
-}
-
-/* Outer container should not be grid; inner card wrapper owns layout */
-.matches-container {
-    display: block;
-    width: 100%;
-}
-
-/* Card grid: responsive [Card][Card][Card] / [Card][Card] / [Card] */
-.match-cards-grid {
-    display: grid;
-    gap: 20px;
-    align-items: stretch;
-    grid-template-columns: 1fr;
-}
-
-/* Medium: 2 columns */
-@media (min-width: 481px) {
-    .match-cards-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* Large: 3 columns */
-@media (min-width: 1025px) {
-    .match-cards-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-/* Vertical cards (e.g. recommended/consortium) – horizontal cards use their own flex */
-.match-cards-grid .card:not(.match-card-horizontal) {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    min-width: 0;
-}
-
-.match-cards-grid .card:not(.match-card-horizontal) .card-body {
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-}
-
-.match-cards-grid .card:not(.match-card-horizontal) .card-body .match-card-title {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.match-cards-grid .card:not(.match-card-horizontal) .card-body p.text-gray-900:not(.match-card-title) {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.match-cards-grid .card:not(.match-card-horizontal) .card-footer {
-    flex-shrink: 0;
-}
-
-.matches-section {
-    margin-bottom: var(--spacing-2xl);
-    width: 100%;
-}
-.matches-section:last-child {
-    margin-bottom: 0;
-}
-.matches-section-title {
-    font-size: var(--font-size-lg);
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0 0 var(--spacing-lg) 0;
-}
 </style>

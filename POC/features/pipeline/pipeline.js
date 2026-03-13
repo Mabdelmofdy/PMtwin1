@@ -23,7 +23,7 @@ async function initPipeline(params = {}) {
     setupApplicationsIntentFilter();
     setupDropZones();
     const tab = params.tab;
-    if (tab === 'matches' || tab === 'applications' || tab === 'opportunities') {
+    if (tab === 'applications' || tab === 'opportunities') {
         const tabBtn = document.querySelector('.tab-btn[data-tab="' + tab + '"]');
         if (tabBtn) tabBtn.click();
     } else {
@@ -119,8 +119,6 @@ function setupTabs() {
                 loadOpportunitiesPipeline();
             } else if (tabName === 'applications') {
                 loadApplicationsPipeline();
-            } else if (tabName === 'matches') {
-                loadMatchesPipeline();
             }
         });
     });

@@ -358,12 +358,12 @@ function setupMatchDetailActions(matchId, userId) {
                         if (window.router && window.router.navigate) window.router.navigate('/matches/' + nextMatch.id);
                         else window.location.hash = '#/matches/' + nextMatch.id;
                     } else {
-                        if (router && router.navigate) router.navigate('/pipeline/matches');
-                        else window.location.hash = '#/pipeline/matches';
+                        if (router && router.navigate) router.navigate(CONFIG.ROUTES.MATCHES);
+                        else window.location.hash = '#/matches';
                     }
                 } else {
-                    if (router && router.navigate) router.navigate('/pipeline/matches');
-                    else window.location.hash = '#/pipeline/matches';
+                    if (router && router.navigate) router.navigate(CONFIG.ROUTES.MATCHES);
+                    else window.location.hash = '#/matches';
                 }
             } catch (err) {
                 console.error('Decline match error:', err);

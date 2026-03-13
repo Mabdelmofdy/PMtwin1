@@ -327,6 +327,7 @@ const CONFIG = {
         ADMIN_CONSORTIUM: '/admin/consortium',
         ADMIN_HEALTH: '/admin/health',
         NOTIFICATIONS: '/notifications',
+        MATCHES: '/matches',
         MATCH_DETAIL: '/matches/:id',
         DEALS: '/deals',
         DEAL_DETAIL: '/deals/:id',

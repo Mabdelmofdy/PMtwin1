@@ -358,6 +358,11 @@ function initializeRoutes() {
     router.register('/pipeline', authGuard.protect(async () => {
         await loadPage('pipeline');
     }));
+
+    // Matches list route (standalone page)
+    router.register(CONFIG.ROUTES.MATCHES, authGuard.protect(async () => {
+        await loadPage('matches');
+    }));
     
     // Contracts route (protected)
     router.register(CONFIG.ROUTES.CONTRACTS, authGuard.protect(async () => {
