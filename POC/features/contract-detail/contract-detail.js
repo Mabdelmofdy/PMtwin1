@@ -80,7 +80,8 @@ async function initContractDetail(params) {
 
         const parties = dataService.getContractParties(contract);
         const isParty = parties.some(p => p.userId === user.id);
-        if (!isParty) {
+        const isAdminView = authService.canAccessAdmin && authService.canAccessAdmin();
+        if (!isParty && !isAdminView) {
             loadingEl.style.display = 'none';
             errorEl.style.display = 'block';
             contentEl.style.display = 'none';
@@ -91,7 +92,7 @@ async function initContractDetail(params) {
         const opportunity = await dataService.getOpportunityById(contract.opportunityId);
         const partyUsers = await Promise.all(parties.map(p => dataService.getUserOrCompanyById(p.userId)));
         const myParty = parties.find(p => p.userId === user.id);
-        const myRole = (myParty && myParty.role) ? (myParty.role.charAt(0).toUpperCase() + myParty.role.slice(1)) : 'Participant';
+        const myRole = (myParty && myParty.role) ? (myParty.role.charAt(0).toUpperCase() + myParty.role.slice(1)) : (isAdminView ? 'Admin (view only)' : 'Participant');
         const scopeDisplay = contract.scope || (opportunity && opportunity.title) || '—';
 
         loadingEl.style.display = 'none';

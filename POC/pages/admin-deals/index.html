@@ -1,0 +1,48 @@
+<div class="page-container admin-deals-page">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Deals</h1>
+            <p class="page-subtitle">View and monitor all platform deals and lifecycle stages</p>
+        </div>
+    </div>
+    <div class="page-body">
+        <div class="filters-section">
+            <div class="filters">
+                <select id="filter-status" class="form-select">
+                    <option value="">All statuses</option>
+                    <option value="negotiating">Negotiating</option>
+                    <option value="draft">Draft</option>
+                    <option value="review">Review</option>
+                    <option value="signing">Signing</option>
+                    <option value="active">Active</option>
+                    <option value="execution">Execution</option>
+                    <option value="delivery">Delivery</option>
+                    <option value="completed">Completed</option>
+                    <option value="closed">Closed</option>
+                </select>
+                <select id="filter-deal-type" class="form-select">
+                    <option value="">All types</option>
+                    <option value="one_way">One Way</option>
+                    <option value="two_way">Barter</option>
+                    <option value="consortium">Consortium</option>
+                    <option value="circular">Circular</option>
+                </select>
+                <button id="apply-filters" class="btn btn-secondary">Apply</button>
+            </div>
+        </div>
+        <div id="admin-deals-list" class="admin-deals-list">
+            <div class="spinner"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-deals-page .filters-section { margin-bottom: var(--spacing-lg); }
+.admin-deals-page .filters { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; }
+.admin-deals-list { display: flex; flex-direction: column; gap: var(--spacing-md); }
+.admin-deals-table { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
+.admin-deals-table th, .admin-deals-table td { padding: var(--spacing-sm) var(--spacing-md); text-align: left; border-bottom: 1px solid var(--border-color); }
+.admin-deals-table th { font-weight: 600; background: var(--bg-secondary, #f9fafb); }
+.admin-deals-table a { color: var(--primary-color); text-decoration: none; }
+.admin-deals-table a:hover { text-decoration: underline; }
+</style>

@@ -259,6 +259,10 @@ class LayoutService {
         adminLinks.push({ route: CONFIG.ROUTES.ADMIN_AUDIT, label: 'Audit Trail', icon: 'ph-duotone ph-list-checks' });
         adminLinks.push({ route: CONFIG.ROUTES.ADMIN_REPORTS, label: 'Reports', icon: 'ph-duotone ph-chart-bar' });
         adminLinks.push({ route: CONFIG.ROUTES.ADMIN_MATCHING, label: 'Matching', icon: 'ph-duotone ph-graph' });
+        adminLinks.push({ route: CONFIG.ROUTES.ADMIN_DEALS, label: 'Deals', icon: 'ph-duotone ph-handshake' });
+        adminLinks.push({ route: CONFIG.ROUTES.ADMIN_CONTRACTS, label: 'Contracts', icon: 'ph-duotone ph-file-text' });
+        adminLinks.push({ route: CONFIG.ROUTES.ADMIN_CONSORTIUM, label: 'Consortium', icon: 'ph-duotone ph-users-three' });
+        adminLinks.push({ route: CONFIG.ROUTES.ADMIN_HEALTH, label: 'System Health', icon: 'ph-duotone ph-heartbeat' });
         if (isFullAdmin) {
             adminLinks.push({ route: CONFIG.ROUTES.ADMIN_SKILLS, label: 'Skills & Categories', icon: 'ph-duotone ph-tag' });
             adminLinks.push({ route: CONFIG.ROUTES.ADMIN_SETTINGS, label: 'Settings', icon: 'ph-duotone ph-gear' });

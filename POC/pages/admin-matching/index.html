@@ -13,7 +13,7 @@
             <div class="workflow-cards">
                 <div class="workflow-card">
                     <h3 class="workflow-card-title">One-way</h3>
-                    <p class="workflow-card-desc">For a Need post (request), the system finds Offer posts that match (skills, budget, timeline, location). Default when viewing a request.</p>
+                    <p class="workflow-card-desc">For a Need post, the system finds Offer posts that match (skills, budget, timeline, location). Default when viewing a Need.</p>
                 </div>
                 <div class="workflow-card">
                     <h3 class="workflow-card-title">Two-way (barter)</h3>
@@ -39,23 +39,25 @@
                 <div id="matching-report-block" class="report-block matching-report-block" hidden>
                     <h3 class="report-block-title">Report</h3>
                     <div class="stats-grid" id="matching-stats-grid"></div>
+                    <h4 class="matching-type-section-title">Matches summary</h4>
+                    <div id="matching-summary-table" class="matching-summary-table-wrap"></div>
                     <div class="matching-type-section">
-                        <h4 class="matching-type-section-title">One-way Matching</h4>
+                        <h4 class="matching-type-section-title"><span class="matching-match-type-badge">One Way</span> One-way Matching</h4>
                         <h5 class="matching-subsection-title">Need → Offers</h5>
                         <div id="matching-one-way-need-to-offers" class="matching-type-content"></div>
                         <h5 class="matching-subsection-title">Offer → Needs</h5>
                         <div id="matching-one-way-offer-to-needs" class="matching-type-content"></div>
                     </div>
                     <div class="matching-type-section">
-                        <h4 class="matching-type-section-title">Two-way Matching (Barter)</h4>
+                        <h4 class="matching-type-section-title"><span class="matching-match-type-badge">Barter</span> Two-way Matching</h4>
                         <div id="matching-two-way" class="matching-type-content"></div>
                     </div>
                     <div class="matching-type-section">
-                        <h4 class="matching-type-section-title">Consortium (Group Formation)</h4>
+                        <h4 class="matching-type-section-title"><span class="matching-match-type-badge">Consortium</span> Consortium (Group Formation)</h4>
                         <div id="matching-consortium" class="matching-type-content"></div>
                     </div>
                     <div class="matching-type-section">
-                        <h4 class="matching-type-section-title">Circular Exchange</h4>
+                        <h4 class="matching-type-section-title"><span class="matching-match-type-badge">Circular</span> Circular Exchange</h4>
                         <div id="matching-circular" class="matching-type-content"></div>
                     </div>
                 </div>
@@ -117,7 +119,9 @@
 .matching-consortium-roles { padding-left: var(--spacing-md); }
 .matching-consortium-role { margin-bottom: var(--spacing-xs); font-size: var(--font-size-sm); }
 .matching-circular-cycle { margin-bottom: var(--spacing-lg); padding: var(--spacing-md); background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
-.matching-circular-sequence { font-weight: 600; margin-bottom: var(--spacing-xs); }
+.matching-circular-label { font-size: var(--font-size-sm); font-weight: 600; color: var(--text-secondary); margin-bottom: var(--spacing-xs); }
+.matching-circular-sequence { font-weight: 600; margin-bottom: var(--spacing-sm); }
+.matching-circular-opprefs { font-size: var(--font-size-sm); color: var(--text-secondary); margin-bottom: var(--spacing-xs); }
 .matching-circular-links { font-size: var(--font-size-sm); color: var(--text-secondary); }
 .matching-loading .spinner { width: 1rem; height: 1rem; border: 2px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -128,6 +132,11 @@
 .matching-report-block .stat-card { padding: var(--spacing-md); background: var(--bg-primary); border-radius: var(--radius-md); border: 1px solid var(--border-color); }
 .matching-report-block .stat-value { font-size: var(--font-size-xl); font-weight: 700; color: var(--primary-color); }
 .matching-report-block .stat-label { font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: var(--spacing-xs); }
+.matching-match-type-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-right: 8px; background: var(--primary-color); color: #fff; }
+.matching-summary-table-wrap { overflow-x: auto; margin-bottom: var(--spacing-lg); }
+.matching-summary-table { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
+.matching-summary-table th, .matching-summary-table td { padding: var(--spacing-sm) var(--spacing-md); text-align: left; border-bottom: 1px solid var(--border-color); }
+.matching-summary-table th { font-weight: 600; background: var(--bg-secondary, #f9fafb); }
 .matching-details { font-size: var(--font-size-sm); color: var(--text-secondary); }
 .matching-error { color: var(--danger-color, #dc2626); margin-top: var(--spacing-sm); font-size: var(--font-size-sm); }
 .matching-unavailable { color: var(--text-secondary); margin-top: var(--spacing-sm); font-size: var(--font-size-sm); }

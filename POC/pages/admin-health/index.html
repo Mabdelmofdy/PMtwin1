@@ -1,0 +1,33 @@
+<div class="page-container admin-health-page">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">System Health</h1>
+            <p class="page-subtitle">Platform metrics and service availability</p>
+        </div>
+    </div>
+    <div class="page-body">
+        <section class="dashboard-section">
+            <h2 class="section-title">Overview</h2>
+            <div id="health-stats-grid" class="stats-grid health-stats-grid"></div>
+        </section>
+        <section class="dashboard-section">
+            <h2 class="section-title">Services</h2>
+            <div id="health-services" class="health-services"></div>
+        </section>
+    </div>
+</div>
+
+<style>
+.admin-health-page .dashboard-section { margin-bottom: var(--spacing-2xl); }
+.admin-health-page .section-title { font-size: var(--font-size-xl); margin-bottom: var(--spacing-lg); }
+.health-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--spacing-md); }
+.health-stat-card { padding: var(--spacing-lg); background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); text-align: center; }
+.health-stat-value { font-size: var(--font-size-2xl); font-weight: 700; color: var(--primary-color); }
+.health-stat-label { font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: var(--spacing-xs); }
+.health-services { display: flex; flex-direction: column; gap: var(--spacing-sm); }
+.health-service-row { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md); background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+.health-service-name { font-weight: 500; }
+.health-service-status { font-size: var(--font-size-sm); }
+.health-service-ok { color: var(--success-color, #16a34a); }
+.health-service-unavailable { color: var(--text-secondary); }
+</style>

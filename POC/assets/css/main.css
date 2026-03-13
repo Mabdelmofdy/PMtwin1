@@ -1781,6 +1781,52 @@ body {
     /* Page content container */
 }
 
+/* Match Detail page: modern, responsive, no horizontal scroll */
+.match-detail-page,
+.match-detail-content {
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+.match-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--spacing-lg);
+}
+
+@media (min-width: 1024px) {
+    .match-detail-grid {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    }
+}
+
+.match-detail-grid > *,
+.match-detail-page .bg-white.rounded-lg {
+    min-width: 0;
+}
+
+.match-exchange-diagram,
+.match-exchange-diagram * {
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+#match-detail-participants li,
+.match-detail-participant-content {
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+@media (max-width: 768px) {
+    .match-detail-page .match-detail-header,
+    .match-detail-page .bg-white.rounded-lg {
+        padding: var(--spacing-md);
+    }
+}
+
 /* Page header variants */
 .page-header-centered {
     justify-content: center;

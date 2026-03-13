@@ -1466,6 +1466,16 @@ class DataService {
         }
         list.push(newRecord);
         this.storage.set(CONFIG.STORAGE_KEYS.POST_MATCHES, list);
+        const flatOppIds = [newRecord.payload && newRecord.payload.leadNeedId, newRecord.payload && newRecord.payload.needOpportunityId, newRecord.payload && newRecord.payload.offerOpportunityId].concat((newRecord.payload && newRecord.payload.roles) ? newRecord.payload.roles.map(r => r.opportunityId) : []).filter(Boolean);
+        try {
+            await this.createAuditLog({
+                userId: (newRecord.participants && newRecord.participants[0] && newRecord.participants[0].userId) || 'system',
+                action: 'match_created',
+                entityType: 'match',
+                entityId: newRecord.id,
+                details: { matchType: newRecord.matchType, opportunityIds: flatOppIds.length ? flatOppIds : undefined }
+            });
+        } catch (e) { /* non-fatal */ }
         return newRecord;
     }
 

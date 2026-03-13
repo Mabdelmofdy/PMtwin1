@@ -1,0 +1,26 @@
+<div class="page-container admin-consortium-page">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Consortium Deals</h1>
+            <p class="page-subtitle">Monitor consortium deals: lead, members, roles, dropped and replacement participants</p>
+        </div>
+    </div>
+    <div class="page-body">
+        <div id="admin-consortium-list" class="admin-consortium-list">
+            <div class="spinner"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-consortium-list { display: flex; flex-direction: column; gap: var(--spacing-lg); }
+.admin-consortium-card { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--spacing-lg); }
+.admin-consortium-card h3 { margin: 0 0 var(--spacing-md); font-size: var(--font-size-base); }
+.admin-consortium-card .consortium-meta { font-size: var(--font-size-sm); color: var(--text-secondary); margin-bottom: var(--spacing-md); }
+.admin-consortium-card ul { margin: 0; padding-left: var(--spacing-lg); }
+.admin-consortium-card .role-row { margin-bottom: var(--spacing-xs); }
+.admin-consortium-card .badge-dropped { background: var(--danger-color, #dc2626); color: #fff; }
+.admin-consortium-card .badge-replacement { background: var(--success-color, #16a34a); color: #fff; }
+.admin-consortium-card a { color: var(--primary-color); text-decoration: none; }
+.admin-consortium-card a:hover { text-decoration: underline; }
+</style>

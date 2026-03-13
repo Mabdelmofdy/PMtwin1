@@ -4,12 +4,23 @@
     <div class="card-header">
         <h3>{{title}}</h3>
         <div>
+            <span class="badge badge-primary">{{opportunityType}}</span>
+            <span class="badge badge-secondary">{{exchangeModeDisplay}}</span>
             <span class="badge badge-primary">{{modelType}}</span>
             <span class="badge badge-{{statusBadgeClass}}">{{status}}</span>
         </div>
     </div>
     <div class="card-body">
         <p>{{description}}</p>
+        {{#if paymentModesDisplay}}
+        <p class="text-muted" style="font-size: var(--font-size-sm); margin-top: var(--spacing-sm);"><strong>Payment modes:</strong> {{paymentModesDisplay}}</p>
+        {{/if}}
+        {{#if requiredSkillsDisplay}}
+        <p class="text-muted" style="font-size: var(--font-size-sm);"><strong>Required skills:</strong> {{requiredSkillsDisplay}}</p>
+        {{/if}}
+        {{#if milestonesDisplay}}
+        <p class="text-muted" style="font-size: var(--font-size-sm);"><strong>Milestones:</strong> {{milestonesDisplay}}</p>
+        {{/if}}
         <p class="text-muted" style="font-size: var(--font-size-sm); margin-top: var(--spacing-md);">
             Created by: {{creator.email}} |
             {{createdDate}}

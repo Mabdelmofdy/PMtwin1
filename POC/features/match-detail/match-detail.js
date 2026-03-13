@@ -102,24 +102,24 @@ async function renderMatchDetail(postMatch, currentUserId) {
         if (matchType === 'one_way') {
             const needOpp = await ds.getOpportunityById(payload.needOpportunityId);
             const offerOpp = await ds.getOpportunityById(payload.offerOpportunityId);
-            exchangeFlowEl.innerHTML = '<div class="flex flex-wrap items-center gap-2"><span class="px-3 py-2 bg-amber-50 border border-amber-200 rounded">Need</span><span class="text-gray-400">' + escapeHtml(needOpp?.title || '—') + '</span><span class="text-gray-500">→</span><span class="px-3 py-2 bg-teal-50 border border-teal-200 rounded">Offer</span><span class="text-gray-400">' + escapeHtml(offerOpp?.title || '—') + '</span></div>';
+            exchangeFlowEl.innerHTML = '<div class="flex flex-wrap items-center gap-2 min-w-0"><span class="px-3 py-2 bg-amber-50 border border-amber-200 rounded shrink-0">Need</span><span class="text-gray-400 min-w-0 break-words">' + escapeHtml(needOpp?.title || '—') + '</span><span class="text-gray-500 shrink-0">→</span><span class="px-3 py-2 bg-teal-50 border border-teal-200 rounded shrink-0">Offer</span><span class="text-gray-400 min-w-0 break-words">' + escapeHtml(offerOpp?.title || '—') + '</span></div>';
         } else if (matchType === 'two_way') {
             const sideA = payload.sideA || {}, sideB = payload.sideB || {};
             const nameA = await ds.getUserOrCompanyById(sideA.userId).then(u => u?.profile?.name || sideA.userId);
             const nameB = await ds.getUserOrCompanyById(sideB.userId).then(u => u?.profile?.name || sideB.userId);
             const labelA = sideA.userId === currentUserId ? 'You (A)' : escapeHtml(nameA) + ' (A)';
             const labelB = sideB.userId === currentUserId ? 'You (B)' : escapeHtml(nameB) + ' (B)';
-            exchangeFlowEl.innerHTML = '<div class="flex flex-wrap items-center gap-2"><span class="px-3 py-2 bg-teal-50 border border-teal-200 rounded">' + labelA + '</span><span class="text-gray-500">↔</span><span class="px-3 py-2 bg-teal-50 border border-teal-200 rounded">' + labelB + '</span></div>';
+            exchangeFlowEl.innerHTML = '<div class="flex flex-wrap items-center gap-2 min-w-0"><span class="px-3 py-2 bg-teal-50 border border-teal-200 rounded min-w-0 break-words">' + labelA + '</span><span class="text-gray-500 shrink-0">↔</span><span class="px-3 py-2 bg-teal-50 border border-teal-200 rounded min-w-0 break-words">' + labelB + '</span></div>';
         } else if (matchType === 'consortium') {
             const leadOpp = await ds.getOpportunityById(payload.leadNeedId);
             const roles = payload.roles || [];
             const offerLabels = await Promise.all(roles.map(r => ds.getOpportunityById(r.opportunityId).then(o => o?.title || r.role)));
-            exchangeFlowEl.innerHTML = '<div class="space-y-2"><div class="flex flex-wrap items-center gap-2"><span class="px-3 py-2 bg-amber-50 border border-amber-200 rounded">Need</span><span class="text-gray-400">' + escapeHtml(leadOpp?.title || '—') + '</span></div><div class="text-gray-500 text-sm">↓</div><div class="flex flex-wrap gap-2"><span class="text-sm font-medium text-gray-600">Multiple Offers:</span>' + offerLabels.map(t => '<span class="px-2 py-1 bg-teal-50 border border-teal-200 rounded text-sm">' + escapeHtml(t) + '</span>').join('') + '</div></div>';
+            exchangeFlowEl.innerHTML = '<div class="space-y-2 min-w-0"><div class="flex flex-wrap items-center gap-2 min-w-0"><span class="px-3 py-2 bg-amber-50 border border-amber-200 rounded shrink-0">Need</span><span class="text-gray-400 min-w-0 break-words">' + escapeHtml(leadOpp?.title || '—') + '</span></div><div class="text-gray-500 text-sm">↓</div><div class="flex flex-wrap gap-2 min-w-0"><span class="text-sm font-medium text-gray-600 shrink-0">Multiple Offers:</span>' + offerLabels.map(t => '<span class="px-2 py-1 bg-teal-50 border border-teal-200 rounded text-sm min-w-0 break-words">' + escapeHtml(t) + '</span>').join('') + '</div></div>';
         } else if (matchType === 'circular') {
             const cycle = payload.cycle || [];
             const names = await Promise.all(cycle.map(uid => ds.getUserOrCompanyById(uid).then(u => u?.profile?.name || uid)));
             const labels = cycle.map((uid, i) => (uid === currentUserId ? 'You' : (names[i] || uid)));
-            exchangeFlowEl.innerHTML = '<div class="flex flex-wrap items-center gap-1">' + labels.map((l, i) => '<span class="px-2 py-1 bg-teal-50 border border-teal-200 rounded text-sm">' + escapeHtml(l) + '</span>' + (i < labels.length - 1 ? '<span class="text-gray-400">→</span>' : '')).join('') + '<span class="text-gray-400">→</span><span class="px-2 py-1 bg-teal-50 border border-teal-200 rounded text-sm">' + (labels[0] || '') + '</span></div>';
+            exchangeFlowEl.innerHTML = '<div class="flex flex-wrap items-center gap-1 min-w-0">' + labels.map((l, i) => '<span class="px-2 py-1 bg-teal-50 border border-teal-200 rounded text-sm min-w-0 break-words">' + escapeHtml(l) + '</span>' + (i < labels.length - 1 ? '<span class="text-gray-400 shrink-0">→</span>' : '')).join('') + '<span class="text-gray-400 shrink-0">→</span><span class="px-2 py-1 bg-teal-50 border border-teal-200 rounded text-sm min-w-0 break-words">' + (labels[0] || '') + '</span></div>';
         } else {
             exchangeFlowEl.innerHTML = '<p class="text-gray-500">No flow available.</p>';
         }
@@ -235,7 +235,7 @@ async function buildParticipantsList(ds, matchType, payload, participants, uniqu
             offer = offerOpp?.title || '—';
             need = needOpp?.title || '—';
         }
-        partHtml.push('<li class="p-4 border border-gray-200 rounded-lg ' + (isYou ? 'bg-primary/5 border-primary/30' : '') + '"><div class="font-medium text-gray-900">' + escapeHtml(name) + (isYou ? ' <span class="text-gray-500">(You)</span>' : '') + '</div><div class="text-sm mt-1"><span class="text-gray-600">Offer:</span> ' + escapeHtml(offer) + '</div><div class="text-sm"><span class="text-gray-600">Need:</span> ' + escapeHtml(need) + '</div><div class="mt-2"><span class="badge badge-' + getStatusBadgeClass(status) + '">' + escapeHtml(formatStatusLabel(status)) + '</span></div></li>');
+        partHtml.push('<li class="match-detail-participant-content p-4 border border-gray-200 rounded-lg ' + (isYou ? 'bg-primary/5 border-primary/30' : '') + '"><div class="font-medium text-gray-900">' + escapeHtml(name) + (isYou ? ' <span class="text-gray-500">(You)</span>' : '') + '</div><div class="text-sm mt-1 break-words"><span class="text-gray-600">Offer:</span> ' + escapeHtml(offer) + '</div><div class="text-sm break-words"><span class="text-gray-600">Need:</span> ' + escapeHtml(need) + '</div><div class="mt-2"><span class="badge badge-' + getStatusBadgeClass(status) + '">' + escapeHtml(formatStatusLabel(status)) + '</span></div></li>');
     }
     return partHtml;
 }
@@ -321,6 +321,18 @@ function setupMatchDetailActions(matchId, userId) {
                             deliverables: '',
                             milestones: []
                         });
+                        if (deal && dataService.createAuditLog) {
+                            const user = authService.getCurrentUser();
+                            if (user) {
+                                dataService.createAuditLog({
+                                    userId: user.id,
+                                    action: 'deal_created',
+                                    entityType: 'deal',
+                                    entityId: deal.id,
+                                    details: { matchId, opportunityIds: oppIds }
+                                }).catch(() => {});
+                            }
+                        }
                     }
                     await renderMatchDetail(updated, userId);
                     if (deal && window.router && typeof window.router.navigate === 'function') {

@@ -1,8 +1,8 @@
 <div class="page-container match-detail-page">
     <div id="match-detail-loading" class="spinner"></div>
-    <div id="match-detail-content" class="page-body" style="display: none;">
+    <div id="match-detail-content" class="page-body match-detail-content" style="display: none;">
         <!-- Header -->
-        <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6" id="match-detail-header">
+        <div class="match-detail-header bg-white border border-gray-200 rounded-lg p-6 mb-6" id="match-detail-header">
             <h1 class="page-title text-2xl font-bold text-gray-900 mb-2" id="match-detail-title">Match Details</h1>
             <div class="flex flex-wrap gap-3 items-center text-sm">
                 <span class="text-gray-600">Type: <strong id="match-detail-type"></strong></span>
@@ -11,8 +11,8 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 space-y-6">
+        <div class="match-detail-grid grid gap-6">
+            <div class="match-detail-main space-y-6">
                 <!-- Exchange Flow -->
                 <div class="bg-white border border-gray-200 rounded-lg p-6" id="match-detail-exchange-flow">
                     <h2 class="text-lg font-semibold text-gray-900 mb-3">Exchange Flow</h2>

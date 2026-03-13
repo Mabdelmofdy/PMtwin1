@@ -501,6 +501,46 @@ function initializeRoutes() {
         }
         await loadPage('admin-matching');
     }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
+
+    router.register(CONFIG.ROUTES.ADMIN_DEALS, authGuard.protect(async () => {
+        if (!authService.canAccessAdmin()) {
+            router.navigate(CONFIG.ROUTES.DASHBOARD);
+            return;
+        }
+        await loadPage('admin-deals');
+    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
+
+    router.register('/admin/deals/:id', authGuard.protect(async (params) => {
+        if (!authService.canAccessAdmin()) {
+            router.navigate(CONFIG.ROUTES.DASHBOARD);
+            return;
+        }
+        await loadPage('deal-detail', params);
+    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
+
+    router.register(CONFIG.ROUTES.ADMIN_CONTRACTS, authGuard.protect(async () => {
+        if (!authService.canAccessAdmin()) {
+            router.navigate(CONFIG.ROUTES.DASHBOARD);
+            return;
+        }
+        await loadPage('admin-contracts');
+    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
+
+    router.register(CONFIG.ROUTES.ADMIN_CONSORTIUM, authGuard.protect(async () => {
+        if (!authService.canAccessAdmin()) {
+            router.navigate(CONFIG.ROUTES.DASHBOARD);
+            return;
+        }
+        await loadPage('admin-consortium');
+    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
+
+    router.register(CONFIG.ROUTES.ADMIN_HEALTH, authGuard.protect(async () => {
+        if (!authService.canAccessAdmin()) {
+            router.navigate(CONFIG.ROUTES.DASHBOARD);
+            return;
+        }
+        await loadPage('admin-health');
+    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
     
     router.register('/admin/users/:id', authGuard.protect(async (params) => {
         if (!authService.isAdmin()) {

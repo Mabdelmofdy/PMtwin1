@@ -40,8 +40,14 @@ function getDealStatusBadgeClass(s) {
 }
 
 function getMilestoneStatusBadgeClass(status) {
-    const map = { pending: 'secondary', in_progress: 'warning', submitted: 'info', approved: 'success', rejected: 'danger' };
+    const map = { pending: 'secondary', in_progress: 'warning', submitted: 'info', approved: 'success', completed: 'success', rejected: 'danger' };
     return map[status] || 'secondary';
+}
+
+function getMilestoneStatusDisplayLabel(status) {
+    const s = status || 'pending';
+    if (s === 'approved') return 'completed';
+    return s;
 }
 
 function getMatchTypeLabel(matchType) {
@@ -80,7 +86,8 @@ async function initDealDetail(params) {
         }
 
         const isParticipant = (deal.participants || []).some(p => p.userId === user.id);
-        if (!isParticipant) {
+        const isAdminView = authService.canAccessAdmin && authService.canAccessAdmin();
+        if (!isParticipant && !isAdminView) {
             if (loadingEl) loadingEl.style.display = 'none';
             if (errorEl) errorEl.style.display = 'block';
             if (contentEl) contentEl.style.display = 'none';
@@ -90,6 +97,12 @@ async function initDealDetail(params) {
         if (loadingEl) loadingEl.style.display = 'none';
         if (errorEl) errorEl.style.display = 'none';
         if (contentEl) contentEl.style.display = 'block';
+
+        const backLink = contentEl.querySelector('.back-link');
+        if (backLink && isAdminView && typeof router !== 'undefined' && router.getCurrentPath && router.getCurrentPath().startsWith('/admin/deals')) {
+            backLink.setAttribute('data-route', (window.CONFIG && window.CONFIG.ROUTES && window.CONFIG.ROUTES.ADMIN_DEALS) ? window.CONFIG.ROUTES.ADMIN_DEALS : '/admin/deals');
+            backLink.textContent = '\u2190 Back to Deals';
+        }
 
         document.getElementById('deal-title').textContent = deal.title || 'Deal';
         const statusBadge = document.getElementById('deal-status-badge');
@@ -183,18 +196,21 @@ async function renderStageContent(deal, currentUserId) {
     if (status === 'execution') {
         const milestones = deal.milestones || [];
         const msStatus = (m) => m.status || 'pending';
+        const completedCount = milestones.filter(m => (msStatus(m) === 'approved' || msStatus(m) === 'completed')).length;
+        const progressText = milestones.length ? 'Completion: ' + completedCount + '/' + milestones.length : '';
         const msList = milestones.length ? milestones.map(m => {
-            const badge = getMilestoneStatusBadgeClass(msStatus(m));
-            const label = (msStatus(m)).replace('_', ' ');
+            const raw = msStatus(m);
+            const badge = getMilestoneStatusBadgeClass(raw);
+            const label = getMilestoneStatusDisplayLabel(raw).replace('_', ' ');
             let actions = '';
-            if (msStatus(m) === 'pending') actions = '<button type="button" class="btn btn-outline btn-xs deal-milestone-start" data-milestone-id="' + escapeHtml(m.id) + '">Start</button>';
-            else if (msStatus(m) === 'in_progress') actions = '<button type="button" class="btn btn-outline btn-xs deal-milestone-submit" data-milestone-id="' + escapeHtml(m.id) + '">Submit deliverable</button>';
-            else if (msStatus(m) === 'submitted') actions = '<button type="button" class="btn btn-primary btn-xs deal-milestone-approve" data-milestone-id="' + escapeHtml(m.id) + '">Approve</button><button type="button" class="btn btn-outline btn-xs deal-milestone-reject" data-milestone-id="' + escapeHtml(m.id) + '">Request revision</button>';
-            return '<li class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0"><span>' + escapeHtml(m.title) + (m.dueDate ? ' <span class="text-muted">(' + escapeHtml(m.dueDate) + ')</span>' : '') + '</span><span class="flex items-center gap-2"><span class="badge badge-' + badge + '">' + label + '</span>' + actions + '</span></li>';
+            if (raw === 'pending') actions = '<button type="button" class="btn btn-outline btn-xs deal-milestone-start" data-milestone-id="' + escapeHtml(m.id) + '">Start</button>';
+            else if (raw === 'in_progress') actions = '<button type="button" class="btn btn-outline btn-xs deal-milestone-submit" data-milestone-id="' + escapeHtml(m.id) + '">Submit deliverable</button>';
+            else if (raw === 'submitted') actions = '<button type="button" class="btn btn-primary btn-xs deal-milestone-approve" data-milestone-id="' + escapeHtml(m.id) + '">Approve</button><button type="button" class="btn btn-outline btn-xs deal-milestone-reject" data-milestone-id="' + escapeHtml(m.id) + '">Request revision</button>';
+            return '<li class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0"><span><strong>' + escapeHtml(m.title || m.name || 'Milestone') + '</strong>' + (m.dueDate ? ' <span class="text-muted">(' + escapeHtml(m.dueDate) + ')</span>' : '') + '</span><span class="flex items-center gap-2"><span class="badge badge-' + badge + '">' + label + '</span>' + actions + '</span></li>';
         }).join('') : '<li class="text-gray-500">No milestones yet.</li>';
-        const allApproved = milestones.length > 0 && milestones.every(m => (m.status || 'pending') === 'approved');
+        const allApproved = milestones.length > 0 && milestones.every(m => (msStatus(m) === 'approved' || msStatus(m) === 'completed'));
         const readyBtn = allApproved || milestones.length === 0 ? '<button type="button" class="btn btn-primary btn-sm" id="deal-btn-ready-for-delivery">Ready for delivery</button>' : '';
-        return consortiumBlock + '<div class="deal-section"><h2>Execution Workspace</h2><p class="text-gray-600 mb-3"><a href="#" data-route="' + messageRoute + '" class="text-primary hover:underline">Message participants</a></p><h3 class="text-sm font-semibold text-gray-700 mt-4 mb-2">Milestones</h3><ul class="space-y-0">' + msList + '</ul><div class="flex flex-wrap gap-2 mt-4"><button type="button" class="btn btn-outline btn-sm" id="deal-btn-add-milestone">Add Milestone</button>' + readyBtn + '</div></div>';
+        return consortiumBlock + '<div class="deal-section"><h2>Execution Workspace</h2><p class="text-gray-600 mb-3"><a href="#" data-route="' + messageRoute + '" class="text-primary hover:underline">Message participants</a></p><h3 class="text-sm font-semibold text-gray-700 mt-4 mb-2">Milestones</h3>' + (progressText ? '<p class="text-sm text-gray-600 mb-2">' + progressText + '</p>' : '') + '<ul class="space-y-0">' + msList + '</ul><div class="flex flex-wrap gap-2 mt-4"><button type="button" class="btn btn-outline btn-sm" id="deal-btn-add-milestone">Add Milestone</button>' + readyBtn + '</div></div>';
     }
 
     if (status === 'delivery') {
@@ -266,6 +282,9 @@ function bindDealActions(dealId, status, userId) {
             if (!confirm('Cancel this deal? This cannot be undone.')) return;
             try {
                 await dataService.updateDeal(dealId, { status: CONFIG.DEAL_STATUS.CLOSED, closedAt: new Date().toISOString() });
+                if (dataService.createAuditLog && userId) {
+                    dataService.createAuditLog({ userId, action: 'deal_terminated', entityType: 'deal', entityId: dealId, details: {} }).catch(() => {});
+                }
                 if (window.router) window.router.navigate('/deals');
             } catch (err) { console.error(err); }
             return;
@@ -316,6 +335,9 @@ function bindDealActions(dealId, status, userId) {
             if (!confirm('Reject this deal? It will be closed.')) return;
             try {
                 await dataService.updateDeal(dealId, { status: CONFIG.DEAL_STATUS.CLOSED, closedAt: new Date().toISOString() });
+                if (dataService.createAuditLog && userId) {
+                    dataService.createAuditLog({ userId, action: 'deal_terminated', entityType: 'deal', entityId: dealId, details: {} }).catch(() => {});
+                }
                 if (window.router) window.router.navigate('/deals');
             } catch (err) { console.error(err); }
             return;
@@ -350,6 +372,15 @@ function bindDealActions(dealId, status, userId) {
                         signedAt: new Date().toISOString()
                     });
                     contractId = contract.id;
+                    if (dataService.createAuditLog && userId) {
+                        dataService.createAuditLog({
+                            userId,
+                            action: 'contract_signed',
+                            entityType: 'contract',
+                            entityId: contractId,
+                            details: { dealId }
+                        }).catch(() => {});
+                    }
                 }
                 await dataService.updateDeal(dealId, { participants, contractId, status: allSigned ? CONFIG.DEAL_STATUS.ACTIVE : deal.status });
                 const updated = await dataService.getDealById(dealId);
@@ -412,6 +443,9 @@ function bindDealActions(dealId, status, userId) {
             e.preventDefault();
             try {
                 await dataService.updateDeal(dealId, { status: CONFIG.DEAL_STATUS.CLOSED, closedAt: new Date().toISOString() });
+                if (dataService.createAuditLog && userId) {
+                    dataService.createAuditLog({ userId, action: 'deal_terminated', entityType: 'deal', entityId: dealId, details: {} }).catch(() => {});
+                }
                 const deal = await dataService.getDealById(dealId);
                 document.getElementById('deal-status-badge').textContent = getDealStatusLabel(deal.status);
                 document.getElementById('deal-status-badge').className = 'badge badge-' + getDealStatusBadgeClass(deal.status);

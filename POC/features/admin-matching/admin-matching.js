@@ -235,6 +235,55 @@ function getOpportunityRoute(id) {
     return routeBase && routeBase.endsWith('/') ? routeBase + id : '/opportunities/' + id;
 }
 
+function buildMatchesSummaryRows(report) {
+    const creatorNames = report.creatorNames || {};
+    const getName = (id) => creatorNames[id] || id || '';
+    const rows = [];
+    (report.oneWayNeedToOffers || []).forEach(item => {
+        (item.matches || []).forEach(m => {
+            const partId = (m.matchedOpportunity && m.matchedOpportunity.creatorId) || (m.suggestedPartners && m.suggestedPartners[0] && m.suggestedPartners[0].creatorId);
+            const participants = [getName(item.creatorId), getName(partId)].filter(Boolean).join(', ') || '—';
+            const oppRefs = [item.opportunityId, (m.matchedOpportunity && m.matchedOpportunity.id) || (m.suggestedPartners && m.suggestedPartners[0] && m.suggestedPartners[0].opportunityId)].filter(Boolean).join(' ↔ ') || '—';
+            const score = (m.matchScore != null) ? Math.round(m.matchScore * 100) + '%' : '—';
+            rows.push({ matchType: 'One Way', participants, opportunityRefs: oppRefs, matchScore: score, status: 'Suggested' });
+        });
+    });
+    (report.oneWayOfferToNeeds || []).forEach(item => {
+        (item.matches || []).forEach(m => {
+            const partId = (m.matchedOpportunity && m.matchedOpportunity.creatorId) || (m.suggestedPartners && m.suggestedPartners[0] && m.suggestedPartners[0].creatorId);
+            const participants = [getName(item.creatorId), getName(partId)].filter(Boolean).join(', ') || '—';
+            const oppRefs = [item.opportunityId, (m.matchedOpportunity && m.matchedOpportunity.id) || (m.suggestedPartners && m.suggestedPartners[0] && m.suggestedPartners[0].opportunityId)].filter(Boolean).join(' ↔ ') || '—';
+            const score = (m.matchScore != null) ? Math.round(m.matchScore * 100) + '%' : '—';
+            rows.push({ matchType: 'One Way', participants, opportunityRefs: oppRefs, matchScore: score, status: 'Suggested' });
+        });
+    });
+    (report.twoWayPairs || []).forEach(p => {
+        const nameA = getName(p.needA && p.needA.creatorId);
+        const nameB = getName(p.matchedNeed && p.matchedNeed.creatorId);
+        const participants = [nameA, nameB].filter(Boolean).join(', ') || '—';
+        const oppRefs = [(p.needA && p.needA.id), (p.matchedNeed && p.matchedNeed.id)].filter(Boolean).join(' ↔ ') || '—';
+        const score = (p.breakdown && (p.breakdown.scoreAtoB != null || p.breakdown.scoreBtoA != null)) ? (Math.round((p.breakdown.scoreAtoB + p.breakdown.scoreBtoA) / 2 * 100) + '%') : '—';
+        rows.push({ matchType: 'Barter', participants, opportunityRefs: oppRefs, matchScore: score, status: 'Suggested' });
+    });
+    (report.consortiumLeads || []).forEach(lead => {
+        const match = (lead.matches && lead.matches[0]) ? lead.matches[0] : null;
+        const partners = (match && match.suggestedPartners) ? match.suggestedPartners : [];
+        const participantNames = [getName(lead.creatorId)].concat(partners.map(sp => getName(sp.creatorId))).filter(Boolean);
+        const participants = participantNames.length ? participantNames.join(', ') : '—';
+        const oppRefs = lead.opportunityId + (partners.length ? ' (+' + partners.length + ' roles)' : '');
+        const score = (match && match.matchScore != null) ? Math.round(match.matchScore * 100) + '%' : '—';
+        rows.push({ matchType: 'Consortium', participants, opportunityRefs: oppRefs, matchScore: score, status: 'Suggested' });
+    });
+    (report.circularCycles || []).forEach(c => {
+        const cycleIds = c.cycle || [];
+        const participants = cycleIds.map(id => getName(id)).join(' → ') + (cycleIds.length ? ' → ' + getName(cycleIds[0]) : '');
+        const oppRefs = (c.opportunityIds && c.opportunityIds.length) ? c.opportunityIds.join(' → ') : (cycleIds.join(' → ') || '—');
+        const score = (c.matchScore != null) ? Math.round(c.matchScore * 100) + '%' : '—';
+        rows.push({ matchType: 'Circular', participants, opportunityRefs: oppRefs, matchScore: score, status: 'Suggested' });
+    });
+    return rows;
+}
+
 function renderReport(gridEl, detailsEl, report) {
     if (!gridEl) return;
     gridEl.innerHTML = ''
@@ -244,6 +293,21 @@ function renderReport(gridEl, detailsEl, report) {
         + '<div class="stat-card"><div class="stat-value">' + report.twoWayMatches + '</div><div class="stat-label">Two-way (barter)</div></div>'
         + '<div class="stat-card"><div class="stat-value">' + report.groupFormations + '</div><div class="stat-label">Group (consortium)</div></div>'
         + '<div class="stat-card"><div class="stat-value">' + report.circularExchanges + '</div><div class="stat-label">Circular</div></div>';
+
+    const summaryEl = document.getElementById('matching-summary-table');
+    if (summaryEl) {
+        const rows = buildMatchesSummaryRows(report);
+        if (rows.length === 0) {
+            summaryEl.innerHTML = '<p class="matching-details">No matches in this run.</p>';
+        } else {
+            let table = '<table class="matching-summary-table"><thead><tr><th>Match type</th><th>Participants</th><th>Opportunity references</th><th>Match score</th><th>Status</th></tr></thead><tbody>';
+            rows.forEach(r => {
+                table += '<tr><td>' + escapeHtml(r.matchType) + '</td><td>' + escapeHtml(r.participants) + '</td><td>' + escapeHtml(r.opportunityRefs) + '</td><td>' + escapeHtml(r.matchScore) + '</td><td>' + escapeHtml(r.status) + '</td></tr>';
+            });
+            table += '</tbody></table>';
+            summaryEl.innerHTML = table;
+        }
+    }
 
     const creatorNames = report.creatorNames || {};
     const getMatchCreatorId = (m) => (m.matchedOpportunity && m.matchedOpportunity.creatorId) || (m.suggestedPartners && m.suggestedPartners[0] && m.suggestedPartners[0].creatorId);
@@ -392,7 +456,11 @@ function renderReport(gridEl, detailsEl, report) {
             for (const c of cycles) {
                 const cycleIds = c.cycle || [];
                 const cycleNames = cycleIds.map(id => escapeHtml(creatorNames[id] || id));
-                const sequence = cycleNames.length > 0 ? cycleNames.join(' &rarr; ') + ' &rarr; ' + cycleNames[0] : (cycleIds.join(' &rarr; ') + ' &rarr; ' + (cycleIds[0] || ''));
+                const participantChain = cycleNames.length > 0 ? cycleNames.join(' &rarr; ') + ' &rarr; ' + cycleNames[0] : (cycleIds.join(' &rarr; ') + ' &rarr; ' + (cycleIds[0] || ''));
+                const oppIds = c.opportunityIds || (c.links && c.links.map(l => l.opportunityId).filter(Boolean)) || [];
+                const oppRefsDisplay = Array.isArray(oppIds) && oppIds.length > 0
+                    ? oppIds.map(oid => escapeHtml(oid)).join(' &rarr; ') + (oppIds.length > 1 ? ' &rarr; ' + escapeHtml(oppIds[0]) : '')
+                    : (c.linkScores && c.linkScores.some(l => l.opportunityId) ? c.linkScores.map(l => escapeHtml(l.opportunityId || '')).join(' &rarr; ') : '');
                 const linkScores = c.linkScores || [];
                 const linkStr = linkScores.length > 0 ? linkScores.map(l => {
                     const fromName = escapeHtml(creatorNames[l.fromCreatorId] || l.fromCreatorId || '');
@@ -403,9 +471,15 @@ function renderReport(gridEl, detailsEl, report) {
                 const chainBal = (c.valueAnalysis && c.valueAnalysis.chainBalance) ? c.valueAnalysis.chainBalance : null;
                 const chainScore = chainBal && chainBal.chainBalanceScore != null ? (chainBal.chainBalanceScore * 100).toFixed(0) + '%' : '';
                 const chainViable = chainBal && chainBal.viable != null ? (chainBal.viable ? '; Viable' : '; Review balance') : '';
-                html += '<div class="matching-circular-cycle"><div class="matching-circular-sequence">' + sequence + '</div>'
-                    + (linkStr ? '<div class="matching-circular-links">Link scores: ' + linkStr + (overall ? '; overall ' + overall : '') + (chainScore ? '; chain balance ' + chainScore + chainViable : '') + '</div>' : '')
-                    + '</div>';
+                html += '<div class="matching-circular-cycle">';
+                html += '<div class="matching-circular-label">Participant chain:</div>';
+                html += '<div class="matching-circular-sequence">' + participantChain + '</div>';
+                if (oppRefsDisplay) {
+                    html += '<div class="matching-circular-label">Opportunity references:</div>';
+                    html += '<div class="matching-circular-opprefs">' + oppRefsDisplay + '</div>';
+                }
+                html += (linkStr ? '<div class="matching-circular-links">Link scores: ' + linkStr + (overall ? '; overall ' + overall : '') + (chainScore ? '; chain balance ' + chainScore + chainViable : '') + '</div>' : '');
+                html += '</div>';
             }
             circularEl.innerHTML = html;
         }

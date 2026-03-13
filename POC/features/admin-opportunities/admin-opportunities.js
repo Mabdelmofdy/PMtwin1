@@ -24,17 +24,19 @@ async function loadOpportunities() {
         
         // Apply filters
         const statusFilter = document.getElementById('filter-status')?.value;
+        const typeFilter = document.getElementById('filter-type')?.value;
         const modelFilter = document.getElementById('filter-model')?.value;
         const searchFilter = document.getElementById('filter-search')?.value.toLowerCase();
         
         if (statusFilter) {
             opportunities = opportunities.filter(o => o.status === statusFilter);
         }
-        
+        if (typeFilter) {
+            opportunities = opportunities.filter(o => (o.intent || 'request') === typeFilter);
+        }
         if (modelFilter) {
             opportunities = opportunities.filter(o => o.modelType === modelFilter);
         }
-        
         if (searchFilter) {
             opportunities = opportunities.filter(o => 
                 o.title?.toLowerCase().includes(searchFilter) ||
@@ -64,11 +66,25 @@ async function loadOpportunities() {
         // Load template
         const template = await templateLoader.load('admin-opportunity-card');
         
-        // Render opportunities
+        const paymentModeLabels = window.CONFIG?.PAYMENT_MODES ? { cash: 'cash', barter: 'barter', equity: 'equity', profit_sharing: 'profit sharing', hybrid: 'hybrid' } : {};
+        const getExchangeLabel = (v) => (v && paymentModeLabels[v]) ? paymentModeLabels[v] : (v || '—');
+        const getOpportunityType = (intent) => { const i = intent || 'request'; return i === 'offer' ? 'Offer' : i === 'hybrid' ? 'Hybrid' : 'Need'; };
+        const skills = (opp) => (opp.attributes && Array.isArray(opp.attributes.requiredSkills)) ? opp.attributes.requiredSkills : (Array.isArray(opp.requiredSkills) ? opp.requiredSkills : []);
+        const milestones = (opp) => (opp.attributes && Array.isArray(opp.attributes.milestones)) ? opp.attributes.milestones : (Array.isArray(opp.milestones) ? opp.milestones : []);
+        const paymentModesArr = (opp) => Array.isArray(opp.paymentModes) ? opp.paymentModes : (opp.exchangeMode ? [opp.exchangeMode] : []);
+
         const html = oppsWithCreatorsAndCounts.map(opp => {
+            const pmArr = paymentModesArr(opp);
+            const skillsArr = skills(opp);
+            const msArr = milestones(opp);
             const data = {
                 ...opp,
-                intentLabel: opp.intent === 'offer' ? 'OFFER' : 'NEED',
+                opportunityType: getOpportunityType(opp.intent),
+                intentLabel: opp.intent === 'offer' ? 'OFFER' : (opp.intent === 'hybrid' ? 'HYBRID' : 'NEED'),
+                exchangeModeDisplay: getExchangeLabel(opp.exchangeMode || (pmArr[0])),
+                paymentModesDisplay: pmArr.length ? pmArr.map(getExchangeLabel).join(', ') : '',
+                requiredSkillsDisplay: skillsArr.length ? skillsArr.join(', ') : '',
+                milestonesDisplay: msArr.length ? (msArr.length + ' milestone(s)' + (msArr[0] && msArr[0].title ? ': ' + msArr.slice(0, 2).map(m => m.title || m.name).join(', ') + (msArr.length > 2 ? '…' : '') : '')) : '',
                 title: opp.title || 'Untitled',
                 modelType: opp.modelType || opp.collaborationModel || 'N/A',
                 status: opp.status || 'draft',
