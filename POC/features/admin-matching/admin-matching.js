@@ -235,6 +235,73 @@ function getOpportunityRoute(id) {
     return routeBase && routeBase.endsWith('/') ? routeBase + id : '/opportunities/' + id;
 }
 
+/**
+ * Build per-opportunity performance rows for the admin table.
+ * Each row: opportunityId, title, matchCount, bestScorePct, avgScorePct, status, sectionId (for View matches scroll).
+ */
+function buildPerOpportunityRows(report) {
+    const rows = [];
+    const add = (opportunityId, title, matches, sectionId) => {
+        const count = matches ? matches.length : 0;
+        let bestScorePct = null;
+        let avgScorePct = null;
+        if (count > 0) {
+            const scores = matches.map(m => (m.matchScore != null ? m.matchScore : null)).filter(s => s != null);
+            if (scores.length > 0) {
+                bestScorePct = Math.round(Math.max(...scores) * 100);
+                avgScorePct = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length * 100);
+            }
+        }
+        rows.push({
+            opportunityId,
+            title: title || opportunityId,
+            matchCount: count,
+            bestScorePct: bestScorePct != null ? bestScorePct + '%' : '—',
+            avgScorePct: avgScorePct != null ? avgScorePct + '%' : '—',
+            status: 'Published',
+            sectionId
+        });
+    };
+    (report.oneWayNeedToOffers || []).forEach(item => {
+        add(item.opportunityId, item.title, item.matches || [], 'matching-one-way-need-to-offers');
+    });
+    (report.oneWayOfferToNeeds || []).forEach(item => {
+        add(item.opportunityId, item.title, item.matches || [], 'matching-one-way-offer-to-needs');
+    });
+    (report.consortiumLeads || []).forEach(lead => {
+        const matches = lead.matches || [];
+        add(lead.opportunityId, lead.title, matches, 'matching-consortium');
+    });
+    const twoWayByNeed = new Map();
+    (report.twoWayPairs || []).forEach(p => {
+        const need = p.needA;
+        if (!need || !need.id) return;
+        const score = (p.breakdown && (p.breakdown.scoreAtoB != null || p.breakdown.scoreBtoA != null))
+            ? ((p.breakdown.scoreAtoB ?? 0) + (p.breakdown.scoreBtoA ?? 0)) / 2
+            : null;
+        if (!twoWayByNeed.has(need.id)) {
+            twoWayByNeed.set(need.id, { title: need.title || need.id, scores: [] });
+        }
+        const entry = twoWayByNeed.get(need.id);
+        if (score != null) entry.scores.push(score);
+    });
+    twoWayByNeed.forEach((entry, opportunityId) => {
+        const count = entry.scores.length;
+        const bestScorePct = count > 0 ? Math.round(Math.max(...entry.scores) * 100) + '%' : '—';
+        const avgScorePct = count > 0 ? Math.round(entry.scores.reduce((a, b) => a + b, 0) / count * 100) + '%' : '—';
+        rows.push({
+            opportunityId,
+            title: entry.title || opportunityId,
+            matchCount: count,
+            bestScorePct,
+            avgScorePct,
+            status: 'Published',
+            sectionId: 'matching-two-way'
+        });
+    });
+    return rows;
+}
+
 function buildMatchesSummaryRows(report) {
     const creatorNames = report.creatorNames || {};
     const getName = (id) => creatorNames[id] || id || '';
@@ -294,6 +361,23 @@ function renderReport(gridEl, detailsEl, report) {
         + '<div class="stat-card"><div class="stat-value">' + report.groupFormations + '</div><div class="stat-label">Group (consortium)</div></div>'
         + '<div class="stat-card"><div class="stat-value">' + report.circularExchanges + '</div><div class="stat-label">Circular</div></div>';
 
+    const perOppEl = document.getElementById('matching-per-opportunity-table');
+    if (perOppEl) {
+        const perOppRows = buildPerOpportunityRows(report);
+        if (perOppRows.length === 0) {
+            perOppEl.innerHTML = '<p class="matching-details">No opportunities analyzed in this run.</p>';
+        } else {
+            let table = '<table class="matching-summary-table matching-per-opp-table"><thead><tr><th>Opportunity title</th><th>Number of matches</th><th>Best match score</th><th>Average match score</th><th>Status</th><th></th></tr></thead><tbody>';
+            perOppRows.forEach(r => {
+                const viewHref = r.sectionId === 'matching-two-way' ? '#matching-two-way' : '#matching-opp-' + escapeHtml(r.opportunityId);
+                const viewMatchesLink = '<a href="' + viewHref + '" class="matching-view-matches-link" data-section="' + escapeHtml(r.sectionId) + '" data-opp-id="' + escapeHtml(r.opportunityId) + '">View matches</a>';
+                table += '<tr><td>' + escapeHtml(r.title) + '</td><td>' + r.matchCount + '</td><td>' + escapeHtml(String(r.bestScorePct)) + '</td><td>' + escapeHtml(String(r.avgScorePct)) + '</td><td>' + escapeHtml(r.status) + '</td><td>' + viewMatchesLink + '</td></tr>';
+            });
+            table += '</tbody></table>';
+            perOppEl.innerHTML = table;
+        }
+    }
+
     const summaryEl = document.getElementById('matching-summary-table');
     if (summaryEl) {
         const rows = buildMatchesSummaryRows(report);
@@ -324,7 +408,7 @@ function renderReport(gridEl, detailsEl, report) {
                 const route = getOpportunityRoute(item.opportunityId);
                 const title = escapeHtml(item.title || item.opportunityId);
                 const oppCreatorName = escapeHtml(creatorNames[item.creatorId] || item.creatorId || '');
-                html += '<div class="matching-opp-card"><div class="matching-opp-card-title"><a href="#" class="matching-opp-link" data-route="' + escapeHtml(route) + '">' + title + '</a>' + (oppCreatorName ? ' <span class="matching-creator-name">(' + oppCreatorName + ')</span>' : '') + '</div>';
+                html += '<div class="matching-opp-card" id="matching-opp-' + escapeHtml(item.opportunityId) + '"><div class="matching-opp-card-title"><a href="#" class="matching-opp-link" data-route="' + escapeHtml(route) + '">' + title + '</a>' + (oppCreatorName ? ' <span class="matching-creator-name">(' + oppCreatorName + ')</span>' : '') + '</div>';
                 if (item.matches && item.matches.length > 0) {
                     html += '<ul class="matching-match-list">';
                     for (const m of item.matches) {
@@ -361,7 +445,7 @@ function renderReport(gridEl, detailsEl, report) {
                 const route = getOpportunityRoute(item.opportunityId);
                 const title = escapeHtml(item.title || item.opportunityId);
                 const oppCreatorName = escapeHtml(creatorNames[item.creatorId] || item.creatorId || '');
-                html += '<div class="matching-opp-card"><div class="matching-opp-card-title"><a href="#" class="matching-opp-link" data-route="' + escapeHtml(route) + '">' + title + '</a>' + (oppCreatorName ? ' <span class="matching-creator-name">(' + oppCreatorName + ')</span>' : '') + '</div>';
+                html += '<div class="matching-opp-card" id="matching-opp-' + escapeHtml(item.opportunityId) + '"><div class="matching-opp-card-title"><a href="#" class="matching-opp-link" data-route="' + escapeHtml(route) + '">' + title + '</a>' + (oppCreatorName ? ' <span class="matching-creator-name">(' + oppCreatorName + ')</span>' : '') + '</div>';
                 if (item.matches && item.matches.length > 0) {
                     html += '<ul class="matching-match-list">';
                     for (const m of item.matches) {
@@ -425,7 +509,7 @@ function renderReport(gridEl, detailsEl, report) {
                 const route = getOpportunityRoute(lead.opportunityId);
                 const title = escapeHtml(lead.title || lead.opportunityId);
                 const leadCreatorName = escapeHtml(creatorNames[lead.creatorId] || lead.creatorId || '');
-                html += '<div class="matching-opp-card"><div class="matching-consortium-lead"><a href="#" class="matching-opp-link" data-route="' + escapeHtml(route) + '">' + title + '</a>' + (leadCreatorName ? ' <span class="matching-creator-name">(' + leadCreatorName + ')</span>' : '') + '</div><div class="matching-consortium-roles">';
+                html += '<div class="matching-opp-card" id="matching-opp-' + escapeHtml(lead.opportunityId) + '"><div class="matching-consortium-lead"><a href="#" class="matching-opp-link" data-route="' + escapeHtml(route) + '">' + title + '</a>' + (leadCreatorName ? ' <span class="matching-creator-name">(' + leadCreatorName + ')</span>' : '') + '</div><div class="matching-consortium-roles">';
                 const match = (lead.matches && lead.matches[0]) ? lead.matches[0] : null;
                 const partners = (match && match.suggestedPartners) ? match.suggestedPartners : [];
                 const balance = (match && match.valueAnalysis && match.valueAnalysis.consortiumBalance) ? match.valueAnalysis.consortiumBalance : null;
@@ -485,14 +569,22 @@ function renderReport(gridEl, detailsEl, report) {
         }
     }
 
-    const mainContent = document.getElementById('main-content');
-    if (mainContent) {
-        mainContent.querySelectorAll('.matching-opp-link').forEach(link => {
-            link.addEventListener('click', function (e) {
-                e.preventDefault();
-                const route = this.getAttribute('data-route');
-                if (route && typeof router !== 'undefined' && router.navigate) router.navigate(route);
-            });
+    const container = document.getElementById('main-content') || document.body;
+    container.querySelectorAll('.matching-opp-link').forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const route = this.getAttribute('data-route');
+            if (route && typeof router !== 'undefined' && router.navigate) router.navigate(route);
         });
-    }
+    });
+    container.querySelectorAll('.matching-view-matches-link').forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                const target = document.getElementById(href.slice(1));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
 }

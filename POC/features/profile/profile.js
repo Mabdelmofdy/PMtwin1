@@ -803,6 +803,8 @@ async function loadReputation(userId) {
         if (labelEl) labelEl.textContent = count > 0
             ? `Based on ${count} review${count !== 1 ? 's' : ''}`
             : 'No reviews yet';
+        const repCheckEl = document.getElementById('check-reputation');
+        if (repCheckEl) repCheckEl.classList.toggle('done', count > 0);
     } catch (e) { /* ignore */ }
 }
 
@@ -1241,6 +1243,58 @@ function renderCompleteness(profile, isCompany) {
     const pct = typeof result.percent === 'number' ? result.percent : (result.percent != null ? result.percent : 0);
     barEl.style.width = pct + '%';
     if (percentEl) percentEl.textContent = pct + '%';
+    renderProfileStrengthChecklist(profile, isCompany);
+}
+
+/** Checklist: Basic info, Skills, Experience, Portfolio, Certifications, Reputation. Reputation is updated separately when reviews load. */
+function renderProfileStrengthChecklist(profile, isCompany) {
+    const ids = ['check-basic', 'check-skills', 'check-experience', 'check-portfolio', 'check-certifications', 'check-reputation'];
+    if (isCompany) {
+        const hasBasic = !!(profile?.name && (profile?.crNumber || profile?.registrationNumber));
+        const hasSkills = (Array.isArray(profile?.sectors) ? profile.sectors.length : parseArray(profile?.sectors).length) > 0 || (Array.isArray(profile?.classifications) ? profile.classifications.length : 0) > 0;
+        const hasExp = (profile?.financialCapacity != null && profile?.financialCapacity !== '') || !!(profile?.companyRole);
+        const hasPortfolio = (Array.isArray(profile?.caseStudies) ? profile.caseStudies.length : 0) > 0;
+        const hasCerts = (Array.isArray(profile?.certifications) ? profile.certifications.length : 0) > 0;
+        [hasBasic, hasSkills, hasExp, hasPortfolio, hasCerts].forEach((done, i) => {
+            const el = document.getElementById(ids[i]);
+            if (el) el.classList.toggle('done', !!done);
+        });
+        const repEl = document.getElementById('check-reputation');
+        if (repEl) repEl.classList.toggle('done', false);
+        return;
+    }
+    const hasBasic = !!(profile?.name && (profile?.headline || profile?.title) && (profile?.location || profile?.bio));
+    const hasSkills = Array.isArray(profile?.skills) ? profile.skills.length > 0 : !!(profile?.skills && String(profile.skills).trim());
+    const hasExperience = (Array.isArray(profile?.experienceEntries) && profile.experienceEntries.length > 0) || (profile?.yearsExperience != null && profile.yearsExperience !== '') || (profile?.experience != null && profile.experience !== '');
+    const hasPortfolio = (Array.isArray(profile?.caseStudies) && profile.caseStudies.length > 0) || (Array.isArray(profile?.portfolio) && profile.portfolio.length > 0);
+    const hasCertifications = Array.isArray(profile?.certifications) ? profile.certifications.length > 0 : !!(profile?.certifications && String(profile.certifications).trim());
+    [hasBasic, hasSkills, hasExperience, hasPortfolio, hasCertifications].forEach((done, i) => {
+        const el = document.getElementById(ids[i]);
+        if (el) el.classList.toggle('done', !!done);
+    });
+    const repEl = document.getElementById('check-reputation');
+    if (repEl) repEl.classList.toggle('done', false);
+}
+
+function renderRecommendedActions(profile, isCompany) {
+    const listEl = document.getElementById('profile-recommended-actions-list');
+    const emptyEl = document.getElementById('profile-recommended-actions-empty');
+    if (!listEl) return;
+    const steps = getCompletenessNextSteps(profile, isCompany);
+    if (steps.length === 0) {
+        listEl.innerHTML = '';
+        if (emptyEl) { emptyEl.style.display = 'block'; emptyEl.textContent = 'Your profile looks good.'; }
+        return;
+    }
+    if (emptyEl) emptyEl.style.display = 'none';
+    listEl.innerHTML = steps.slice(0, 5).map(s => `<li><a href="${escapeHtml(s.hash || '#')}" class="text-primary hover:underline">${escapeHtml(s.label)}</a></li>`).join('');
+    listEl.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', (e) => {
+            e.preventDefault();
+            const id = (a.getAttribute('href') || '').replace('#', '');
+            if (id) document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
 }
 
 function setupProfileTabs() {
@@ -1270,21 +1324,26 @@ function renderProfileHeader(user, profile, isCompany) {
     const nameEl = document.getElementById('profile-header-name');
     const roleEl = document.getElementById('profile-header-role');
     const locationEl = document.getElementById('profile-header-location');
-    const availabilityEl = document.getElementById('profile-header-availability');
-    const hourlyEl = document.getElementById('profile-header-hourly');
+    const skillsPreviewEl = document.getElementById('profile-header-skills-preview');
     const editBtn = document.getElementById('profile-header-edit-btn');
+    const addPortfolioBtn = document.getElementById('profile-header-add-portfolio-btn');
     if (!nameEl) return;
     const name = isCompany ? (profile?.name || 'Company') : (profile?.name || '—');
+    const professionalTitle = profile?.headline || profile?.title || '';
     const role = getRoleDisplayLabel(user?.role) || (user?.role || '—');
-    const title = profile?.headline || profile?.title || '';
     nameEl.textContent = name;
-    roleEl.textContent = title ? role + ' · ' + title : role;
-    if (locationEl) locationEl.textContent = profile?.location || profile?.address || '—';
-    if (availabilityEl) availabilityEl.textContent = profile?.availability ? 'Availability: ' + profile.availability : '—';
-    if (hourlyEl) {
-        const rate = profile?.hourlyRate;
-        const currency = profile?.currency || 'SAR';
-        hourlyEl.textContent = (rate != null && rate !== '') ? 'Hourly rate: ' + rate + ' ' + currency : '—';
+    roleEl.textContent = professionalTitle ? professionalTitle : role;
+    if (locationEl) {
+        locationEl.textContent = profile?.location || profile?.address || '—';
+    }
+    if (skillsPreviewEl) {
+        const skills = Array.isArray(profile?.skills) ? profile.skills : [];
+        const preview = skills.slice(0, 5);
+        if (preview.length === 0) {
+            skillsPreviewEl.innerHTML = '<span class="text-gray-400 text-sm">Add skills in your profile</span>';
+        } else {
+            skillsPreviewEl.innerHTML = preview.map(s => `<span class="skill-tag">${escapeHtml(s)}</span>`).join('');
+        }
     }
     if (editBtn) {
         editBtn.onclick = () => {
@@ -1292,10 +1351,17 @@ function renderProfileHeader(user, profile, isCompany) {
                 document.getElementById('company-profile-card')?.scrollIntoView({ behavior: 'smooth' });
                 showCompanyEdit();
             } else {
-                showProfessionalEdit();
-                document.getElementById('professional-profile-card')?.scrollIntoView({ behavior: 'smooth' });
+                const profileTab = document.querySelector('.profile-tab[data-tab="profile"]');
+                if (profileTab) profileTab.click();
+                setTimeout(() => openSectionEdit('basic', user.id), 50);
             }
         };
+    }
+    if (addPortfolioBtn) {
+        addPortfolioBtn.onclick = () => {
+            if (user?.id) openSectionEdit('portfolio', user.id);
+        };
+        if (isCompany) addPortfolioBtn.style.display = 'none';
     }
 }
 
@@ -1310,24 +1376,22 @@ function renderProfilePortfolioCards(profile) {
         return;
     }
     container.innerHTML = items.map((item, i) => {
-        const title = item.title || 'Untitled';
+        const title = item.title || item.projectTitle || 'Untitled';
         const role = item.role || '';
+        const industry = item.industry || (Array.isArray(item.sectors) ? item.sectors[0] : item.sectors) || '';
         const client = item.client || '';
         const year = item.year || '';
         const problem = item.problem || '';
         const solution = item.solution || item.description || '';
-        const impact = item.impact || '';
+        const impact = item.impact || item.results || '';
         return `
             <div class="profile-portfolio-card" data-index="${i}">
-                <div class="flex items-start justify-between gap-2">
-                    <div>
-                        <h4 class="font-semibold text-gray-900">${escapeHtml(title)}</h4>
-                        ${role || client || year ? `<p class="text-sm text-gray-600 mt-0.5">${[role, client, year].filter(Boolean).join(' · ')}</p>` : ''}
-                    </div>
-                </div>
-                ${problem ? `<p class="text-sm text-gray-700 mt-2"><strong>Problem:</strong> ${escapeHtml(problem)}</p>` : ''}
-                ${solution ? `<p class="text-sm text-gray-700 mt-1"><strong>Solution:</strong> ${escapeHtml(solution)}</p>` : ''}
-                ${impact ? `<p class="text-sm text-gray-700 mt-1"><strong>Impact:</strong> ${escapeHtml(impact)}</p>` : ''}
+                ${industry ? `<div class="portfolio-industry">${escapeHtml(industry)}</div>` : ''}
+                <h4 class="font-semibold text-gray-900">${escapeHtml(title)}</h4>
+                ${role || client || year ? `<p class="text-sm text-gray-600 mt-0.5">${[role, client, year].filter(Boolean).join(' · ')}</p>` : ''}
+                ${problem ? `<p class="text-sm text-gray-700 mt-2"><strong>Problem</strong> ${escapeHtml(problem)}</p>` : ''}
+                ${solution ? `<p class="text-sm text-gray-700 mt-1"><strong>Solution</strong> ${escapeHtml(solution)}</p>` : ''}
+                ${impact ? `<p class="text-sm text-gray-700 mt-1"><strong>Impact</strong> ${escapeHtml(impact)}</p>` : ''}
                 ${item.url ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener" class="text-primary text-sm mt-2 inline-block">View</a>` : ''}
             </div>
         `;
@@ -1707,14 +1771,14 @@ function setProfessionalViewMode(profile) {
         if (entries.length === 0) {
             experienceEntriesEl.innerHTML = getEmptySectionHtml('No experience entries yet', 'Add Experience', 'experience');
         } else {
-            experienceEntriesEl.innerHTML = entries.map(e => {
+            experienceEntriesEl.innerHTML = '<div class="profile-experience-timeline">' + entries.map(e => {
                 const role = escapeHtml(e.role || 'Role');
                 const company = escapeHtml(e.company || 'Company');
                 const start = escapeHtml(e.startDate || '');
                 const end = (e.endDate === 'Present' || e.endDate === 'present' || !e.endDate) ? 'Present' : escapeHtml(e.endDate);
                 const period = start && end ? `${start} – ${end}` : (start || end || '');
-                return `<div class="border border-gray-200 rounded p-3 mb-2"><div class="font-medium">${role}</div><div class="text-sm text-gray-600">${company}</div>${period ? `<div class="text-sm text-gray-500">${period}</div>` : ''}</div>`;
-            }).join('');
+                return `<div class="profile-experience-timeline-item"><div class="profile-experience-timeline-card"><div class="exp-role">${role}</div><div class="exp-company">${company}</div>${period ? `<div class="exp-period">${period}</div>` : ''}</div></div>`;
+            }).join('') + '</div>';
         }
     }
     const caseEl = document.getElementById('view-prof-caseStudies');
@@ -2309,6 +2373,7 @@ async function loadProfile(user) {
             }
         }
         renderCompleteness(profile, true);
+        renderRecommendedActions(profile, true);
         showCompanyView();
         setupCompanyForm(user.id);
     } else if (isPro) {
@@ -2336,6 +2401,7 @@ async function loadProfile(user) {
         renderProfileHeader(user, profile, false);
         renderProfilePortfolioCards(profile);
         renderCompleteness(profile, false);
+        renderRecommendedActions(profile, false);
         showProfessionalView();
         populateProfilePreview(user);
         try {
@@ -2464,6 +2530,309 @@ function showProfessionalEdit() {
     setupSkillAutocomplete();
 }
 
+/**
+ * Inline section editing: each section has its own edit panel with Save/Cancel.
+ * Only the clicked section switches to edit mode; others stay in view mode.
+ */
+function setupInlineSectionEditing(userId) {
+    const main = document.querySelector('.profile-main') || document.querySelector('.profile-content');
+    if (main) {
+        main.addEventListener('click', (e) => {
+            const editBtn = e.target.closest('.profile-edit-section-btn');
+            const saveBtn = e.target.closest('.section-save-btn');
+            const cancelBtn = e.target.closest('.section-cancel-btn');
+            if (editBtn) {
+                e.preventDefault();
+                const section = editBtn.getAttribute('data-section');
+                if (section) openSectionEdit(section, userId);
+            } else if (saveBtn) {
+                e.preventDefault();
+                const section = saveBtn.getAttribute('data-section');
+                if (section) saveSection(section, userId);
+            } else if (cancelBtn) {
+                e.preventDefault();
+                const section = cancelBtn.getAttribute('data-section');
+                if (section) closeSectionEdit(section);
+            }
+        });
+    }
+    setupInlineListButtons();
+}
+
+function openSectionEdit(section, userId) {
+    const tabSectionMap = { basic: 'profile', skills: 'profile', languages: 'profile', professional: 'profile', certifications: 'profile', experience: 'experience', education: 'experience', portfolio: 'portfolio', references: 'portfolio', social: 'settings' };
+    const tabName = tabSectionMap[section];
+    if (tabName) {
+        const tabBtn = document.querySelector('.profile-tab[data-tab="' + tabName + '"]');
+        if (tabBtn) tabBtn.click();
+    }
+    const card = document.querySelector('.profile-section-card[data-section="' + section + '"]');
+    if (!card) return;
+    const view = card.querySelector('.profile-section-view');
+    const edit = card.querySelector('.profile-section-edit');
+    if (!view || !edit) return;
+    const user = authService.getCurrentUser();
+    const profile = user?.profile || {};
+    view.style.display = 'none';
+    edit.style.display = 'block';
+
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val != null ? val : ''; };
+    if (section === 'basic') {
+        setVal('inline-basic-name', profile.name);
+        setVal('inline-basic-headline', profile.headline);
+        setVal('inline-basic-title', profile.title);
+        setVal('inline-basic-phone', profile.phone);
+        setVal('inline-basic-location', profile.location);
+        setVal('inline-basic-bio', profile.bio);
+    } else if (section === 'skills') {
+        setVal('inline-skills', Array.isArray(profile.skills) ? profile.skills.join(', ') : (profile.skills || ''));
+    } else if (section === 'languages') {
+        setVal('inline-languages', Array.isArray(profile.languages) ? profile.languages.join(', ') : (profile.languages || ''));
+    } else if (section === 'professional') {
+        populateInlinePreferencesFields(profile);
+    } else if (section === 'certifications') {
+        renderCertificationsList('inline-certifications-list', profile.certifications || []);
+        setupCertificationsAddButton('inline-add-certification', 'inline-certifications-list');
+    } else if (section === 'experience') {
+        renderExperienceEntriesList('inline-experience-entries-list', profile.experienceEntries || []);
+        setupExperienceAddButton('inline-add-experience-entry', 'inline-experience-entries-list');
+    } else if (section === 'education') {
+        setVal('inline-education', profile.education);
+    } else if (section === 'portfolio') {
+        renderCaseStudiesList('inline-caseStudies-list', profile.caseStudies || []);
+        setupCaseStudyAddButton('inline-add-caseStudy', 'inline-caseStudies-list');
+        renderPortfolioList('inline-portfolio-list', profile.portfolio || []);
+        setupPortfolioAddButton('inline-add-portfolio', 'inline-portfolio-list');
+    } else if (section === 'references') {
+        renderReferencesList('inline-references-list', profile.references || []);
+        setupReferenceAddButton('inline-add-reference', 'inline-references-list');
+    } else if (section === 'social') {
+        const sm = profile.socialMediaLinks || {};
+        setVal('inline-linkedin', sm.linkedin);
+        setVal('inline-twitter', sm.twitter);
+        setVal('inline-facebook', sm.facebook);
+        setVal('inline-instagram', sm.instagram);
+    }
+}
+
+function closeSectionEdit(section) {
+    const card = document.querySelector('.profile-section-card[data-section="' + section + '"]');
+    if (!card) return;
+    const view = card.querySelector('.profile-section-view');
+    const edit = card.querySelector('.profile-section-edit');
+    if (view) view.style.display = '';
+    if (edit) edit.style.display = 'none';
+}
+
+function populateInlinePreferencesFields(profile) {
+    const container = document.getElementById('inline-preferences-fields');
+    if (!container) return;
+    container.innerHTML = '';
+    fillProfessionalLookups();
+    const lookups = profileLookups || {};
+    const workModes = lookups.workModes || [];
+    const workSelect = document.createElement('select');
+    workSelect.id = 'inline-workMode';
+    workSelect.className = 'form-input';
+    workSelect.innerHTML = '<option value="">Select work mode</option>';
+    workModes.forEach(m => { workSelect.innerHTML += '<option value="' + escapeHtml(m) + '">' + escapeHtml(m) + '</option>'; });
+    workSelect.value = profile.preferredWorkMode || '';
+    const workGroup = document.createElement('div');
+    workGroup.className = 'form-group';
+    workGroup.innerHTML = '<label class="form-label">Preferred work mode</label>';
+    workGroup.appendChild(workSelect);
+    container.appendChild(workGroup);
+
+    const paySelect = document.createElement('select');
+    paySelect.id = 'inline-paymentModes';
+    paySelect.className = 'form-input';
+    paySelect.multiple = true;
+    (lookups.paymentModes || []).forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.label;
+        if ((profile.preferredPaymentModes || []).indexOf(p.id) !== -1) opt.selected = true;
+        paySelect.appendChild(opt);
+    });
+    const payGroup = document.createElement('div');
+    payGroup.className = 'form-group';
+    payGroup.innerHTML = '<label class="form-label">Preferred payment modes</label><small class="form-help block">Hold Ctrl/Cmd to select multiple</small>';
+    payGroup.appendChild(paySelect);
+    container.appendChild(payGroup);
+
+    const prefWrap = document.createElement('div');
+    prefWrap.className = 'form-group';
+    prefWrap.innerHTML = '<label class="form-label">Preferred collaboration models</label>';
+    const prefBox = document.createElement('div');
+    prefBox.className = 'flex flex-wrap gap-2';
+    getPreferredCollaborationModelsList().forEach(m => {
+        const label = document.createElement('label');
+        label.className = 'inline-flex items-center gap-1 cursor-pointer';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.name = 'inlinePreferredModels';
+        cb.value = m.id;
+        if ((profile.preferredCollaborationModels || []).indexOf(m.id) !== -1) cb.checked = true;
+        label.appendChild(cb);
+        label.appendChild(document.createTextNode(m.label));
+        prefBox.appendChild(label);
+    });
+    prefWrap.appendChild(prefBox);
+    container.appendChild(prefWrap);
+}
+
+async function collectSectionData(section) {
+    const profile = {};
+    if (section === 'basic') {
+        const el = (id) => document.getElementById(id)?.value?.trim();
+        profile.name = el('inline-basic-name') || null;
+        profile.headline = el('inline-basic-headline') || null;
+        profile.title = el('inline-basic-title') || null;
+        profile.phone = el('inline-basic-phone') || null;
+        profile.location = el('inline-basic-location') || null;
+        profile.bio = el('inline-basic-bio') || null;
+    } else if (section === 'skills') {
+        const raw = document.getElementById('inline-skills')?.value?.trim();
+        profile.skills = raw ? parseArray(raw) : [];
+    } else if (section === 'languages') {
+        const raw = document.getElementById('inline-languages')?.value?.trim();
+        profile.languages = raw ? parseArray(raw) : [];
+    } else if (section === 'professional') {
+        const workEl = document.getElementById('inline-workMode');
+        profile.preferredWorkMode = workEl?.value?.trim() || null;
+        const payEl = document.getElementById('inline-paymentModes');
+        profile.preferredPaymentModes = payEl ? Array.from(payEl.selectedOptions).map(o => o.value) : [];
+        profile.preferredCollaborationModels = Array.from(document.querySelectorAll('input[name="inlinePreferredModels"]:checked')).map(cb => cb.value);
+    } else if (section === 'certifications') {
+        profile.certifications = await collectCertificationsFromList('inline-certifications-list');
+    } else if (section === 'experience') {
+        profile.experienceEntries = collectExperienceFromList('inline-experience-entries-list');
+    } else if (section === 'education') {
+        profile.education = document.getElementById('inline-education')?.value?.trim() || null;
+    } else if (section === 'portfolio') {
+        profile.caseStudies = collectCaseStudiesFromList('inline-caseStudies-list');
+        profile.portfolio = collectPortfolioFromList('inline-portfolio-list');
+    } else if (section === 'references') {
+        profile.references = collectReferencesFromList('inline-references-list');
+    } else if (section === 'social') {
+        const el = (id) => document.getElementById(id)?.value?.trim();
+        profile.socialMediaLinks = {
+            linkedin: el('inline-linkedin') || null,
+            twitter: el('inline-twitter') || null,
+            facebook: el('inline-facebook') || null,
+            instagram: el('inline-instagram') || null
+        };
+    }
+    return profile;
+}
+
+async function saveSection(section, userId) {
+    if (authService.isPendingApproval && authService.isPendingApproval()) {
+        alert('Action disabled until your account is approved.');
+        return;
+    }
+    const user = authService.getCurrentUser();
+    if (!user) return;
+    try {
+        const partial = await collectSectionData(section);
+        const merged = { ...(user.profile || {}), ...partial };
+        if (user.profile?.type) merged.type = user.profile.type;
+        if (user.profile?.interview) merged.interview = user.profile.interview;
+        await dataService.updateUser(userId, { profile: merged });
+        authService.currentUser = { ...user, profile: merged };
+        setProfessionalViewMode(merged);
+        renderProfileHeader(user, merged, false);
+        renderCompleteness(merged, false);
+        renderRecommendedActions(merged, false);
+        if (section === 'skills') {
+            const skillsView = document.getElementById('view-skills');
+            if (skillsView) {
+                const skills = merged.skills || [];
+                if (skills.length === 0) skillsView.innerHTML = getEmptySectionHtml('No skills added yet', 'Add Skills', 'skills');
+                else skillsView.innerHTML = skills.map(s => `<span class="skill-tag">${escapeHtml(s)}</span>`).join('');
+            }
+        }
+        if (section === 'portfolio') renderProfilePortfolioCards(merged);
+        if (section === 'experience') {
+            const experienceEntriesEl = document.getElementById('view-experience-entries');
+            if (experienceEntriesEl) {
+                const entries = merged.experienceEntries || [];
+                if (entries.length === 0) experienceEntriesEl.innerHTML = getEmptySectionHtml('No experience entries yet', 'Add Experience', 'experience');
+                else {
+                    experienceEntriesEl.innerHTML = '<div class="profile-experience-timeline">' + entries.map(e => {
+                        const role = escapeHtml(e.role || 'Role');
+                        const company = escapeHtml(e.company || 'Company');
+                        const start = escapeHtml(e.startDate || '');
+                        const end = (e.endDate === 'Present' || e.endDate === 'present' || !e.endDate) ? 'Present' : escapeHtml(e.endDate);
+                        const period = start && end ? `${start} – ${end}` : (start || end || '');
+                        return `<div class="profile-experience-timeline-item"><div class="profile-experience-timeline-card"><div class="exp-role">${role}</div><div class="exp-company">${company}</div>${period ? `<div class="exp-period">${period}</div>` : ''}</div></div>`;
+                    }).join('') + '</div>';
+                }
+            }
+        }
+        closeSectionEdit(section);
+        const ms = window.matchingService;
+        if (ms && typeof ms.findOpportunitiesForCandidate === 'function') ms.findOpportunitiesForCandidate(userId).catch(() => {});
+        showProfileSuccess('Section updated successfully.');
+    } catch (err) {
+        console.error('Error saving section:', err);
+        alert('Failed to save. Please try again.');
+    }
+}
+
+function setupInlineListButtons() {
+    const addCert = document.getElementById('inline-add-certification');
+    const addExp = document.getElementById('inline-add-experience-entry');
+    const addCase = document.getElementById('inline-add-caseStudy');
+    const addPort = document.getElementById('inline-add-portfolio');
+    const addRef = document.getElementById('inline-add-reference');
+    if (addCert) addCert.addEventListener('click', () => {
+        const list = document.getElementById('inline-certifications-list');
+        if (!list) return;
+        const row = document.createElement('div');
+        row.className = 'flex flex-wrap gap-2 items-center border border-gray-200 rounded p-2 certification-row';
+        row.innerHTML = '<select class="cert-type form-input min-w-[110px]"><option value="">Type</option><option value="certificate">Certificate</option><option value="degree">Degree</option><option value="license">License</option></select><input type="text" class="cert-name form-input flex-1 min-w-[120px]" placeholder="Name"><input type="url" class="cert-url form-input flex-1 min-w-[140px]" placeholder="URL (optional)"><input type="file" class="cert-file form-input min-w-[120px]" accept=".pdf,.jpg,.jpeg,.png"><button type="button" class="cert-remove btn btn-ghost btn-sm">Remove</button>';
+        row.querySelector('.cert-remove').addEventListener('click', () => row.remove());
+        list.appendChild(row);
+    });
+    if (addExp) addExp.addEventListener('click', () => {
+        const list = document.getElementById('inline-experience-entries-list');
+        if (!list) return;
+        const row = document.createElement('div');
+        row.className = 'flex flex-wrap gap-2 items-start border border-gray-200 rounded p-2 experience-entry-row';
+        row.innerHTML = '<input type="text" class="exp-role form-input flex-1 min-w-[140px]" placeholder="Role / title"><input type="text" class="exp-company form-input flex-1 min-w-[140px]" placeholder="Company"><input type="text" class="exp-start form-input w-24" placeholder="Start (e.g. 2019)"><input type="text" class="exp-end form-input w-24" placeholder="End or Present"><button type="button" class="exp-remove btn btn-ghost btn-sm">Remove</button>';
+        row.querySelector('.exp-remove').addEventListener('click', () => row.remove());
+        list.appendChild(row);
+    });
+    if (addCase) addCase.addEventListener('click', () => {
+        const list = document.getElementById('inline-caseStudies-list');
+        if (!list) return;
+        const row = document.createElement('div');
+        row.className = 'flex flex-wrap gap-2 items-start border border-gray-200 rounded p-2 case-study-row';
+        row.innerHTML = '<input type="text" class="case-study-title form-input flex-1 min-w-[120px]" placeholder="Title"><input type="url" class="case-study-url form-input flex-1 min-w-[120px]" placeholder="URL"><textarea class="case-study-desc form-input flex-1 min-w-[180px]" rows="1" placeholder="Description"></textarea><button type="button" class="case-study-remove btn btn-ghost btn-sm">Remove</button>';
+        row.querySelector('.case-study-remove').addEventListener('click', () => row.remove());
+        list.appendChild(row);
+    });
+    if (addPort) addPort.addEventListener('click', () => {
+        const list = document.getElementById('inline-portfolio-list');
+        if (!list) return;
+        const row = document.createElement('div');
+        row.className = 'border border-gray-200 rounded p-3 portfolio-row';
+        row.innerHTML = '<input type="text" class="portfolio-title form-input w-full mb-2" placeholder="Project title"><textarea class="portfolio-description form-input w-full mb-2" rows="2" placeholder="Description"></textarea><input type="text" class="portfolio-role form-input w-full mb-2" placeholder="Your role"><textarea class="portfolio-results form-input w-full mb-2" rows="1" placeholder="Results"></textarea><input type="url" class="portfolio-link form-input w-full mb-2" placeholder="Media/link URL (optional)"><button type="button" class="portfolio-remove btn btn-ghost btn-sm">Remove</button>';
+        row.querySelector('.portfolio-remove').addEventListener('click', () => row.remove());
+        list.appendChild(row);
+    });
+    if (addRef) addRef.addEventListener('click', () => {
+        const list = document.getElementById('inline-references-list');
+        if (!list) return;
+        const row = document.createElement('div');
+        row.className = 'flex flex-wrap gap-2 items-start border border-gray-200 rounded p-2 reference-row';
+        row.innerHTML = '<input type="text" class="ref-name form-input flex-1 min-w-[100px]" placeholder="Reference name"><input type="text" class="ref-company form-input flex-1 min-w-[100px]" placeholder="Company"><input type="text" class="ref-relationship form-input flex-1 min-w-[100px]" placeholder="Relationship"><input type="text" class="ref-contact form-input flex-1 min-w-[120px]" placeholder="Contact (optional)"><textarea class="ref-text form-input flex-1 min-w-[180px]" rows="2" placeholder="Testimonial"></textarea><button type="button" class="ref-remove btn btn-ghost btn-sm">Remove</button>';
+        row.querySelector('.ref-remove').addEventListener('click', () => row.remove());
+        list.appendChild(row);
+    });
+}
+
 function setupCompanyForm(userId) {
     const form = document.getElementById('company-profile-form');
     const editBtn = document.getElementById('company-profile-edit-btn');
@@ -2555,22 +2924,8 @@ function setupProfessionalForm(userId) {
     const cancelBtn = document.getElementById('professional-profile-cancel-btn');
     if (!form) return;
 
-    // All "Edit [Section]" buttons open the professional form and scroll to it
-    const openEditAndScroll = () => {
-        showProfessionalEdit();
-        document.getElementById('professional-profile-card')?.scrollIntoView({ behavior: 'smooth' });
-    };
-    document.querySelectorAll('.profile-edit-section-btn').forEach(btn => {
-        btn.addEventListener('click', openEditAndScroll);
-    });
-    const editProBtn = document.getElementById('profile-edit-professional-btn');
-    if (editProBtn) editProBtn.addEventListener('click', openEditAndScroll);
-    const editBasicBtn = document.getElementById('profile-edit-basic-btn');
-    if (editBasicBtn) editBasicBtn.addEventListener('click', openEditAndScroll);
-    const editPortfolioBtn = document.getElementById('profile-edit-portfolio-btn');
-    if (editPortfolioBtn) editPortfolioBtn.addEventListener('click', openEditAndScroll);
-    const editRefsBtn = document.getElementById('profile-edit-references-btn');
-    if (editRefsBtn) editRefsBtn.addEventListener('click', openEditAndScroll);
+    // Inline section editing: Edit opens only that section's edit panel
+    setupInlineSectionEditing(userId);
     if (cancelBtn) cancelBtn.addEventListener('click', () => showProfessionalView());
 
     form.addEventListener('submit', async (e) => {

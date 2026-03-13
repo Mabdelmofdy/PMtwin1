@@ -39,6 +39,9 @@
                 <div id="matching-report-block" class="report-block matching-report-block" hidden>
                     <h3 class="report-block-title">Report</h3>
                     <div class="stats-grid" id="matching-stats-grid"></div>
+                    <h4 class="matching-type-section-title">Matching performance per opportunity</h4>
+                    <p class="section-desc">Each row shows one opportunity and its matching results. Use "View matches" to jump to the detailed match list for that opportunity.</p>
+                    <div id="matching-per-opportunity-table" class="matching-summary-table-wrap"></div>
                     <h4 class="matching-type-section-title">Matches summary</h4>
                     <div id="matching-summary-table" class="matching-summary-table-wrap"></div>
                     <div class="matching-type-section">
@@ -137,6 +140,9 @@
 .matching-summary-table { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
 .matching-summary-table th, .matching-summary-table td { padding: var(--spacing-sm) var(--spacing-md); text-align: left; border-bottom: 1px solid var(--border-color); }
 .matching-summary-table th { font-weight: 600; background: var(--bg-secondary, #f9fafb); }
+.matching-per-opp-table td:first-child { font-weight: 500; }
+.matching-view-matches-link { font-size: var(--font-size-sm); color: var(--primary-color); text-decoration: none; white-space: nowrap; }
+.matching-view-matches-link:hover { text-decoration: underline; }
 .matching-details { font-size: var(--font-size-sm); color: var(--text-secondary); }
 .matching-error { color: var(--danger-color, #dc2626); margin-top: var(--spacing-sm); font-size: var(--font-size-sm); }
 .matching-unavailable { color: var(--text-secondary); margin-top: var(--spacing-sm); font-size: var(--font-size-sm); }

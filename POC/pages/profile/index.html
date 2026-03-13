@@ -28,34 +28,38 @@
     </div>
     
     <div class="profile-content">
-        <div class="profile-main">
-            <!-- Profile Header (LinkedIn/Upwork style) -->
-            <div class="card profile-header-card mb-4">
-                <div class="card-body">
-                    <div class="flex flex-wrap gap-6 items-start">
-                        <div class="profile-photo-placeholder w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary flex-shrink-0" id="profile-photo-placeholder"></div>
-                        <div class="flex-1 min-w-0">
-                            <h2 class="text-xl font-bold text-gray-900 mb-1" id="profile-header-name">—</h2>
-                            <p class="text-gray-600 mb-1" id="profile-header-role">—</p>
-                            <p class="text-sm text-gray-500 mb-2" id="profile-header-location">—</p>
-                            <div class="flex flex-wrap gap-3 text-sm mb-3">
-                                <span id="profile-header-availability" class="text-gray-600">—</span>
-                                <span id="profile-header-hourly" class="text-gray-600">—</span>
-                            </div>
-                            <div class="flex flex-wrap gap-2 items-center">
-                                <div class="flex-1 min-w-[140px] max-w-xs">
-                                    <div class="text-xs text-gray-500 mb-0.5">Profile completion</div>
+        <!-- Profile Header (SaaS / LinkedIn style) -->
+        <div class="profile-header-card card mb-4">
+            <div class="card-body profile-header-body">
+                <div class="profile-header-top">
+                    <div class="profile-photo-placeholder w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary/10 flex items-center justify-center text-xl sm:text-2xl font-bold text-primary flex-shrink-0" id="profile-photo-placeholder"></div>
+                    <div class="profile-header-info">
+                        <h2 class="profile-header-name" id="profile-header-name">—</h2>
+                        <p class="profile-header-title text-gray-600 mb-0.5" id="profile-header-role">—</p>
+                        <p class="profile-header-location text-sm text-gray-500 flex items-center gap-1" id="profile-header-location">—</p>
+                        <div id="profile-header-skills-preview" class="profile-header-skills-preview flex flex-wrap gap-1.5 mt-2"></div>
+                        <div class="profile-header-actions flex flex-wrap items-center gap-3 mt-3">
+                            <div class="profile-completion-wrap flex items-center gap-2 flex-1 min-w-0">
+                                <div class="flex-1 min-w-[100px] max-w-[180px]">
+                                    <div class="text-xs text-gray-500 mb-0.5">Profile strength</div>
                                     <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
                                         <div id="profile-completeness-bar" class="h-full bg-primary rounded-full transition-all" style="width: 0%;"></div>
                                     </div>
                                 </div>
-                                <span id="profile-completeness-percent" class="text-lg font-bold text-primary">0%</span>
-                                <button type="button" class="btn btn-primary btn-sm" id="profile-header-edit-btn">Edit Profile</button>
+                                <span id="profile-completeness-percent" class="text-base font-bold text-primary">0%</span>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-primary btn-sm" id="profile-header-edit-btn">Edit profile</button>
+                                <button type="button" class="btn btn-outline btn-sm" id="profile-header-add-portfolio-btn">Add portfolio</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="profile-two-col">
+        <div class="profile-main">
 
             <!-- Tab navigation -->
             <div class="border-b border-gray-200 mb-4">
@@ -67,97 +71,166 @@
                 </nav>
             </div>
 
-            <!-- Tab 1: Profile (About, Skills, Languages, Collaboration, Certifications) -->
+            <!-- Tab 1: Profile (About, Skills, Languages, Collaboration, Certifications) - inline section editing -->
             <div id="profile-tab-profile" class="profile-tab-panel" role="tabpanel">
-                <div class="card mb-4">
+                <div class="card mb-4 profile-section-card" data-section="basic">
                     <div class="card-header flex items-center justify-between">
-                        <h3 class="profile-section-title">About</h3>
+                        <h3 class="profile-section-title">Basic Info</h3>
                         <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="basic" id="profile-edit-basic-btn" style="display: none;">Edit</button>
                     </div>
                     <div class="card-body">
-                        <p id="view-prof-bio" class="text-gray-700 whitespace-pre-wrap">—</p>
+                        <div class="profile-section-view">
+                            <p id="view-prof-bio" class="text-gray-700 whitespace-pre-wrap">—</p>
+                        </div>
+                        <div class="profile-section-edit" id="section-edit-basic" style="display: none;">
+                            <div class="space-y-3">
+                                <div class="form-group"><label class="form-label">Full name</label><input type="text" id="inline-basic-name" class="form-input" placeholder="Your name"></div>
+                                <div class="form-group"><label class="form-label">Headline</label><input type="text" id="inline-basic-headline" class="form-input" placeholder="Short professional tagline"></div>
+                                <div class="form-group"><label class="form-label">Title</label><input type="text" id="inline-basic-title" class="form-input" placeholder="Job title"></div>
+                                <div class="form-group"><label class="form-label">Phone</label><input type="text" id="inline-basic-phone" class="form-input" placeholder="Phone number"></div>
+                                <div class="form-group"><label class="form-label">Location</label><input type="text" id="inline-basic-location" class="form-input" placeholder="City, Country"></div>
+                                <div class="form-group"><label class="form-label">Bio</label><textarea id="inline-basic-bio" class="form-input" rows="3" placeholder="Short summary about you"></textarea></div>
+                            </div>
+                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="basic">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="basic">Cancel</button></div>
+                        </div>
                     </div>
                 </div>
-                <div class="card mb-4">
+                <div class="card mb-4 profile-section-card" data-section="skills">
                     <div class="card-header flex items-center justify-between">
-                        <h3 class="profile-section-title">Skills</h3>
+                        <h3 class="profile-section-title">Expertise</h3>
                         <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="skills" id="profile-edit-skills-btn">Edit</button>
                     </div>
                     <div class="card-body">
-                        <div id="view-skills" class="flex flex-wrap gap-2"></div>
+                        <div class="profile-section-view">
+                            <div id="view-skills" class="flex flex-wrap gap-2"></div>
+                        </div>
+                        <div class="profile-section-edit" id="section-edit-skills" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-label">Skills</label>
+                                <input type="text" id="inline-skills" class="form-input" placeholder="Comma-separated (e.g. Project Management, BIM)">
+                            </div>
+                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="skills">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="skills">Cancel</button></div>
+                        </div>
                     </div>
                 </div>
-                <div class="card mb-4">
+                <div class="card mb-4 profile-section-card" data-section="languages">
                     <div class="card-header flex items-center justify-between">
                         <h3 class="profile-section-title">Languages</h3>
-                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="basic">Edit</button>
+                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="languages">Edit</button>
                     </div>
                     <div class="card-body">
-                        <span id="view-prof-languages">—</span>
+                        <div class="profile-section-view">
+                            <span id="view-prof-languages">—</span>
+                        </div>
+                        <div class="profile-section-edit" id="section-edit-languages" style="display: none;">
+                            <div class="form-group"><label class="form-label">Languages</label><input type="text" id="inline-languages" class="form-input" placeholder="e.g. Arabic, English"></div>
+                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="languages">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="languages">Cancel</button></div>
+                        </div>
                     </div>
                 </div>
-                <div class="card mb-4">
+                <div class="card mb-4 profile-section-card" data-section="professional">
                     <div class="card-header flex items-center justify-between">
                         <h3 class="profile-section-title">Collaboration preferences</h3>
                         <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="professional" id="profile-edit-professional-btn">Edit</button>
                     </div>
                     <div class="card-body">
-                        <span id="view-prof-workMode">—</span>
+                        <div class="profile-section-view">
+                            <span id="view-prof-workMode">—</span>
+                        </div>
+                        <div class="profile-section-edit" id="section-edit-professional" style="display: none;">
+                            <div class="space-y-3" id="inline-preferences-fields"></div>
+                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="professional">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="professional">Cancel</button></div>
+                        </div>
                     </div>
                 </div>
-                <div class="card mb-4">
+                <div class="card mb-4 profile-section-card" data-section="certifications">
                     <div class="card-header flex items-center justify-between">
                         <h3 class="profile-section-title">Certifications</h3>
                         <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="certifications" id="profile-edit-certifications-btn">Edit</button>
                     </div>
                     <div class="card-body">
-                        <div id="view-certifications" class="flex flex-wrap gap-2"></div>
+                        <div class="profile-section-view">
+                            <div id="view-certifications" class="flex flex-wrap gap-2"></div>
+                        </div>
+                        <div class="profile-section-edit" id="section-edit-certifications" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-label">Certifications</label>
+                                <div id="inline-certifications-list" class="space-y-2 mb-2"></div>
+                                <button type="button" id="inline-add-certification" class="btn btn-secondary btn-sm">Add certification</button>
+                            </div>
+                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="certifications">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="certifications">Cancel</button></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 2: Portfolio (project cards) -->
+            <!-- Tab 2: Portfolio (project cards) - inline section editing -->
             <div id="profile-tab-portfolio" class="profile-tab-panel hidden" role="tabpanel">
-                <div class="card mb-4">
+                <div class="card mb-4 profile-section-card" data-section="portfolio">
                     <div class="card-header flex items-center justify-between">
                         <h3 class="profile-section-title">Projects & case studies</h3>
                         <button type="button" class="btn btn-primary btn-sm profile-edit-section-btn" data-section="portfolio" id="profile-edit-portfolio-btn">Add Project</button>
                     </div>
                     <div class="card-body">
-                        <div id="profile-portfolio-cards" class="space-y-4"></div>
-                        <div id="view-prof-caseStudies" class="space-y-2 mb-4 hidden"></div>
-                        <div id="view-prof-portfolio" class="space-y-2 hidden"></div>
+                        <div class="profile-section-view">
+                            <div id="profile-portfolio-cards" class="space-y-4"></div>
+                            <div id="view-prof-caseStudies" class="space-y-2 mb-4 hidden"></div>
+                            <div id="view-prof-portfolio" class="space-y-2 hidden"></div>
+                        </div>
+                        <div class="profile-section-edit" id="section-edit-portfolio" style="display: none;">
+                            <div class="form-group mb-3"><label class="form-label">Case studies</label><div id="inline-caseStudies-list" class="space-y-3 mb-2"></div><button type="button" id="inline-add-caseStudy" class="btn btn-secondary btn-sm">Add case study</button></div>
+                            <div class="form-group"><label class="form-label">Portfolio items</label><div id="inline-portfolio-list" class="space-y-3 mb-2"></div><button type="button" id="inline-add-portfolio" class="btn btn-secondary btn-sm">Add portfolio item</button></div>
+                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="portfolio">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="portfolio">Cancel</button></div>
+                        </div>
                     </div>
                 </div>
-                <div class="card mb-4">
+                <div class="card mb-4 profile-section-card" data-section="references">
                     <div class="card-header flex items-center justify-between">
                         <h3 class="profile-section-title">References &amp; testimonials</h3>
                         <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="references" id="profile-edit-references-btn">Edit</button>
                     </div>
                     <div class="card-body">
-                        <div id="view-prof-references" class="space-y-2"></div>
+                        <div class="profile-section-view">
+                            <div id="view-prof-references" class="space-y-2"></div>
+                        </div>
+                        <div class="profile-section-edit" id="section-edit-references" style="display: none;">
+                            <div class="form-group"><label class="form-label">References</label><div id="inline-references-list" class="space-y-3 mb-2"></div><button type="button" id="inline-add-reference" class="btn btn-secondary btn-sm">Add reference</button></div>
+                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="references">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="references">Cancel</button></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 3: Experience (work, education, certifications) -->
+            <!-- Tab 3: Experience - inline section editing -->
             <div id="profile-tab-experience" class="profile-tab-panel hidden" role="tabpanel">
-                <div class="card mb-4">
+                <div class="card mb-4 profile-section-card" data-section="experience">
                     <div class="card-header flex items-center justify-between">
                         <h3 class="profile-section-title">Work experience</h3>
                         <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="experience" id="profile-edit-experience-btn">Edit</button>
                     </div>
                     <div class="card-body">
-                        <div id="view-experience-entries" class="space-y-4"></div>
+                        <div class="profile-section-view">
+                            <div id="view-experience-entries" class="space-y-4"></div>
+                        </div>
+                        <div class="profile-section-edit" id="section-edit-experience" style="display: none;">
+                            <div class="form-group"><label class="form-label">Experience (role, company, period)</label><div id="inline-experience-entries-list" class="space-y-3 mb-2"></div><button type="button" id="inline-add-experience-entry" class="btn btn-secondary btn-sm">Add experience</button></div>
+                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="experience">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="experience">Cancel</button></div>
+                        </div>
                     </div>
                 </div>
-                <div class="card mb-4">
+                <div class="card mb-4 profile-section-card" data-section="education">
                     <div class="card-header flex items-center justify-between">
                         <h3 class="profile-section-title">Education</h3>
-                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="professional">Edit</button>
+                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="education">Edit</button>
                     </div>
                     <div class="card-body">
-                        <span id="view-prof-education">—</span>
+                        <div class="profile-section-view">
+                            <span id="view-prof-education">—</span>
+                        </div>
+                        <div class="profile-section-edit" id="section-edit-education" style="display: none;">
+                            <div class="form-group"><label class="form-label">Education</label><input type="text" id="inline-education" class="form-input" placeholder="e.g. B.Sc. Civil Engineering"></div>
+                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="education">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="education">Cancel</button></div>
+                        </div>
                     </div>
                 </div>
                 <div class="card mb-4">
@@ -202,13 +275,24 @@
                         <p class="text-sm text-gray-600">Email and system notification preferences can be managed in Settings.</p>
                     </div>
                 </div>
-                <div class="card mb-4">
+                <div class="card mb-4 profile-section-card" data-section="social">
                     <div class="card-header flex items-center justify-between">
                         <h3 class="profile-section-title">Social links</h3>
-                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="basic">Edit</button>
+                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="social">Edit</button>
                     </div>
                     <div class="card-body">
-                        <div id="view-prof-socialMedia" class="flex flex-wrap gap-2"></div>
+                        <div class="profile-section-view">
+                            <div id="view-prof-socialMedia" class="flex flex-wrap gap-2"></div>
+                        </div>
+                        <div class="profile-section-edit" id="section-edit-social" style="display: none;">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="form-group"><label class="form-label">LinkedIn</label><input type="url" id="inline-linkedin" class="form-input" placeholder="https://linkedin.com/in/..."></div>
+                                <div class="form-group"><label class="form-label">Twitter</label><input type="url" id="inline-twitter" class="form-input" placeholder="https://twitter.com/..."></div>
+                                <div class="form-group"><label class="form-label">Facebook</label><input type="url" id="inline-facebook" class="form-input" placeholder="https://facebook.com/..."></div>
+                                <div class="form-group"><label class="form-label">Instagram</label><input type="url" id="inline-instagram" class="form-input" placeholder="https://instagram.com/..."></div>
+                            </div>
+                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="social">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="social">Cancel</button></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -461,8 +545,8 @@
             
             <div id="profile-success-message" class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800"></div>
         </div>
-        
-        <div class="profile-sidebar">
+
+        <aside class="profile-sidebar">
             <div class="card" id="quick-stats-card" style="display: none;">
                 <div class="card-header">
                     <h3>Quick Stats</h3>
@@ -488,7 +572,7 @@
             </div>
             <div class="card" id="reputation-card">
                 <div class="card-header">
-                    <h3>Reputation</h3>
+                    <h3 class="profile-section-title">Reputation</h3>
                 </div>
                 <div class="card-body">
                     <div class="flex items-center gap-3 mb-3">
@@ -501,9 +585,34 @@
                     <p id="reputation-label" class="text-xs text-gray-500 mt-1">Based on completed collaborations</p>
                 </div>
             </div>
+            <div class="card" id="profile-strength-card">
+                <div class="card-header">
+                    <h3 class="profile-section-title">Profile strength</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-xs text-gray-600 mb-3">Complete your profile to improve <strong>matching visibility</strong>. Higher completion helps you appear in more recommendations.</p>
+                    <ul id="profile-completion-checklist" class="profile-completion-checklist space-y-2 text-sm">
+                        <li id="check-basic" class="check-item"><span class="check-icon"></span><span>Basic info</span></li>
+                        <li id="check-skills" class="check-item"><span class="check-icon"></span><span>Skills</span></li>
+                        <li id="check-experience" class="check-item"><span class="check-icon"></span><span>Experience</span></li>
+                        <li id="check-portfolio" class="check-item"><span class="check-icon"></span><span>Portfolio</span></li>
+                        <li id="check-certifications" class="check-item"><span class="check-icon"></span><span>Certifications</span></li>
+                        <li id="check-reputation" class="check-item"><span class="check-icon"></span><span>Reputation</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card" id="recommended-actions-card">
+                <div class="card-header">
+                    <h3 class="profile-section-title">Recommended actions</h3>
+                </div>
+                <div class="card-body">
+                    <ul id="profile-recommended-actions-list" class="space-y-2 text-sm text-gray-700"></ul>
+                    <p id="profile-recommended-actions-empty" class="text-gray-500 text-sm" style="display: none;">Your profile looks good.</p>
+                </div>
+            </div>
             <div class="card" id="matching-preferences-card">
                 <div class="card-header">
-                    <h3>Matching preferences</h3>
+                    <h3 class="profile-section-title">Matching preferences</h3>
                 </div>
                 <div class="card-body">
                     <p id="matching-preferences-summary" class="text-sm text-gray-700 mb-3">Only candidates with <strong id="matching-min-score-value">75</strong>% or above match score will be shown.</p>
@@ -520,7 +629,7 @@
             </div>
             <div class="card" id="reviews-received-card">
                 <div class="card-header">
-                    <h3>Reviews received</h3>
+                    <h3 class="profile-section-title">Reviews received</h3>
                 </div>
                 <div class="card-body">
                     <div id="reviews-received-list" class="space-y-2 text-sm"></div>
@@ -536,7 +645,9 @@
                     <div id="team-members-list" class="space-y-2"></div>
                 </div>
             </div>
+        </aside>
         </div>
+        <!-- end profile-two-col -->
     </div>
     </div>
 </div>
@@ -557,22 +668,59 @@
 }
 
 .profile-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.profile-two-col {
     display: grid;
-    grid-template-columns: 1fr 300px;
+    grid-template-columns: 1fr 320px;
     gap: var(--spacing-xl);
+    align-items: start;
 }
 
 .profile-main {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
+    min-width: 0;
 }
 
 .profile-sidebar {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
+    position: sticky;
+    top: var(--spacing-lg);
 }
+
+.profile-header-card .profile-header-body { padding: 1.5rem; }
+.profile-header-top { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: flex-start; }
+.profile-header-info { flex: 1; min-width: 0; }
+.profile-header-name { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.25rem 0; }
+.profile-header-title { font-size: 1rem; margin: 0; }
+.profile-header-skills-preview .skill-tag { font-size: 0.75rem; padding: 0.125rem 0.5rem; }
+.profile-completion-wrap { display: flex; align-items: center; gap: 0.5rem; }
+
+.profile-completion-checklist { list-style: none; padding: 0; margin: 0; }
+.profile-completion-checklist .check-item { display: flex; align-items: center; gap: 0.5rem; }
+.profile-completion-checklist .check-icon { display: inline-flex; align-items: center; justify-content: center; width: 1.125rem; height: 1.125rem; border-radius: 50%; border: 2px solid var(--border-color); flex-shrink: 0; }
+.profile-completion-checklist .check-item.done .check-icon { background: var(--primary-color); border-color: var(--primary-color); color: #fff; font-size: 0.65rem; }
+.profile-completion-checklist .check-item.done .check-icon::after { content: '\2713'; font-weight: bold; }
+
+.profile-portfolio-card { border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+.profile-portfolio-card:last-child { margin-bottom: 0; }
+.profile-portfolio-card .portfolio-industry { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.25rem; }
+.profile-experience-timeline { position: relative; padding-left: 1.5rem; }
+.profile-experience-timeline::before { content: ''; position: absolute; left: 0.35rem; top: 0.5rem; bottom: 0.5rem; width: 2px; background: var(--border-color); border-radius: 1px; }
+.profile-experience-timeline-item { position: relative; padding-bottom: 1.25rem; }
+.profile-experience-timeline-item:last-child { padding-bottom: 0; }
+.profile-experience-timeline-item::before { content: ''; position: absolute; left: -1.5rem; top: 0.4rem; width: 10px; height: 10px; border-radius: 50%; background: var(--primary-color); border: 2px solid #fff; box-shadow: 0 0 0 1px var(--border-color); }
+.profile-experience-timeline-card { background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; }
+.profile-experience-timeline-card .exp-role { font-weight: 600; color: var(--text-primary); }
+.profile-experience-timeline-card .exp-company { font-size: 0.875rem; color: var(--text-secondary); }
+.profile-experience-timeline-card .exp-period { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
 
 .profile-preview.profile-layout {
     display: grid;
@@ -772,8 +920,11 @@
 .availability-badge.limited { background: #fef9c3; color: #854d0e; }
 .availability-badge.unavailable { background: #fee2e2; color: #991b1b; }
 @media (max-width: 968px) {
-    .profile-content {
+    .profile-two-col {
         grid-template-columns: 1fr;
+    }
+    .profile-sidebar {
+        position: static;
     }
 }
 @media (max-width: 768px) {
