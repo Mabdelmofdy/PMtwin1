@@ -2,8 +2,6 @@
  * Admin Skills & Categories – view and edit skills and categories (stored in lookups override).
  */
 
-const BASE_PATH = (window.CONFIG && window.CONFIG.BASE_PATH) || '';
-
 function escapeHtml(str) {
     if (str == null) return '';
     const div = document.createElement('div');
@@ -18,7 +16,8 @@ async function loadLookups() {
         const override = storage.get(overrideKey);
         if (override && typeof override === 'object') return override;
     }
-    const res = await fetch(BASE_PATH + 'data/lookups.json');
+    const basePath = (window.CONFIG && window.CONFIG.BASE_PATH) || '';
+    const res = await fetch(basePath + 'data/lookups.json');
     return res.ok ? await res.json() : { skills: [], skillCategories: [] };
 }
 

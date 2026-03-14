@@ -176,4 +176,67 @@
     color: var(--text-secondary);
     margin-bottom: var(--spacing-lg);
 }
+
+/* Mobile: 768px and below */
+@media (max-width: 768px) {
+    .hero {
+        padding: var(--spacing-xl) 1rem;
+    }
+    .hero-content {
+        padding-inline: 0;
+    }
+    .hero h1 {
+        font-size: var(--font-size-2xl);
+    }
+    .hero-subtitle {
+        font-size: var(--font-size-lg);
+    }
+    .hero-description {
+        font-size: var(--font-size-base);
+        line-height: 1.6;
+    }
+    .hero-actions {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        align-items: stretch;
+    }
+    .hero-actions .btn {
+        width: 100%;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .features,
+    .models {
+        padding: var(--spacing-xl) 1rem;
+    }
+    .cta {
+        padding: var(--spacing-xl) 1rem;
+    }
+    .section-title {
+        font-size: var(--font-size-xl);
+    }
+    .container {
+        padding-inline: 0;
+    }
+    .home-page .card {
+        padding: var(--spacing-lg);
+    }
+    .cta h2 {
+        font-size: var(--font-size-xl);
+    }
+    .cta p {
+        font-size: var(--font-size-base);
+    }
+    .cta .btn {
+        min-height: 44px;
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
 </style>

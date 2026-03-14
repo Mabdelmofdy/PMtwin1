@@ -354,11 +354,10 @@ function buildMatchesSummaryRows(report) {
 function renderReport(gridEl, detailsEl, report) {
     if (!gridEl) return;
     gridEl.innerHTML = ''
-        + '<div class="stat-card"><div class="stat-value">' + report.totalPostsAnalyzed + '</div><div class="stat-label">Total posts analyzed</div></div>'
         + '<div class="stat-card"><div class="stat-value">' + report.totalMatchesFound + '</div><div class="stat-label">Total matches</div></div>'
         + '<div class="stat-card"><div class="stat-value">' + report.oneWayMatches + '</div><div class="stat-label">One-way</div></div>'
-        + '<div class="stat-card"><div class="stat-value">' + report.twoWayMatches + '</div><div class="stat-label">Two-way (barter)</div></div>'
-        + '<div class="stat-card"><div class="stat-value">' + report.groupFormations + '</div><div class="stat-label">Group (consortium)</div></div>'
+        + '<div class="stat-card"><div class="stat-value">' + report.twoWayMatches + '</div><div class="stat-label">Two-way</div></div>'
+        + '<div class="stat-card"><div class="stat-value">' + report.groupFormations + '</div><div class="stat-label">Consortium</div></div>'
         + '<div class="stat-card"><div class="stat-value">' + report.circularExchanges + '</div><div class="stat-label">Circular</div></div>';
 
     const perOppEl = document.getElementById('matching-per-opportunity-table');
@@ -367,29 +366,79 @@ function renderReport(gridEl, detailsEl, report) {
         if (perOppRows.length === 0) {
             perOppEl.innerHTML = '<p class="matching-details">No opportunities analyzed in this run.</p>';
         } else {
-            let table = '<table class="matching-summary-table matching-per-opp-table"><thead><tr><th>Opportunity title</th><th>Number of matches</th><th>Best match score</th><th>Average match score</th><th>Status</th><th></th></tr></thead><tbody>';
+            let table = '<table class="matching-summary-table matching-per-opp-table"><thead><tr><th>Opportunity title</th><th>Number of matches</th><th>Best match score</th><th>Average match score</th><th>Action</th></tr></thead><tbody>';
             perOppRows.forEach(r => {
                 const viewHref = r.sectionId === 'matching-two-way' ? '#matching-two-way' : '#matching-opp-' + escapeHtml(r.opportunityId);
                 const viewMatchesLink = '<a href="' + viewHref + '" class="matching-view-matches-link" data-section="' + escapeHtml(r.sectionId) + '" data-opp-id="' + escapeHtml(r.opportunityId) + '">View matches</a>';
-                table += '<tr><td>' + escapeHtml(r.title) + '</td><td>' + r.matchCount + '</td><td>' + escapeHtml(String(r.bestScorePct)) + '</td><td>' + escapeHtml(String(r.avgScorePct)) + '</td><td>' + escapeHtml(r.status) + '</td><td>' + viewMatchesLink + '</td></tr>';
+                table += '<tr><td>' + escapeHtml(r.title) + '</td><td>' + r.matchCount + '</td><td>' + escapeHtml(String(r.bestScorePct)) + '</td><td>' + escapeHtml(String(r.avgScorePct)) + '</td><td>' + viewMatchesLink + '</td></tr>';
             });
             table += '</tbody></table>';
             perOppEl.innerHTML = table;
         }
     }
 
+    const summaryTabsEl = document.getElementById('matching-summary-tabs');
     const summaryEl = document.getElementById('matching-summary-table');
+    const MATCH_TYPE_FILTER_KEYS = { 'One Way': 'one-way', 'Barter': 'two-way', 'Consortium': 'consortium', 'Circular': 'circular' };
     if (summaryEl) {
         const rows = buildMatchesSummaryRows(report);
         if (rows.length === 0) {
+            if (summaryTabsEl) summaryTabsEl.innerHTML = '';
             summaryEl.innerHTML = '<p class="matching-details">No matches in this run.</p>';
         } else {
+            const counts = { 'one-way': 0, 'two-way': 0, 'consortium': 0, 'circular': 0 };
+            rows.forEach(r => {
+                const key = MATCH_TYPE_FILTER_KEYS[r.matchType];
+                if (key) counts[key]++;
+            });
+            if (summaryTabsEl) {
+                const tabs = [
+                    { id: 'all', label: 'All', count: rows.length },
+                    { id: 'one-way', label: 'One-way', count: counts['one-way'] },
+                    { id: 'two-way', label: 'Two-way', count: counts['two-way'] },
+                    { id: 'consortium', label: 'Consortium', count: counts['consortium'] },
+                    { id: 'circular', label: 'Circular', count: counts['circular'] }
+                ];
+                summaryTabsEl.innerHTML = tabs.map((t, i) =>
+                    '<button type="button" class="matching-match-type-tab' + (i === 0 ? ' is-active' : '') + '" role="tab" data-filter="' + escapeHtml(t.id) + '" aria-selected="' + (i === 0 ? 'true' : 'false') + '">' + escapeHtml(t.label) + ' <span class="tab-count">(' + t.count + ')</span></button>'
+                ).join('');
+            }
             let table = '<table class="matching-summary-table"><thead><tr><th>Match type</th><th>Participants</th><th>Opportunity references</th><th>Match score</th><th>Status</th></tr></thead><tbody>';
             rows.forEach(r => {
-                table += '<tr><td>' + escapeHtml(r.matchType) + '</td><td>' + escapeHtml(r.participants) + '</td><td>' + escapeHtml(r.opportunityRefs) + '</td><td>' + escapeHtml(r.matchScore) + '</td><td>' + escapeHtml(r.status) + '</td></tr>';
+                const filterKey = MATCH_TYPE_FILTER_KEYS[r.matchType] || '';
+                table += '<tr data-match-type="' + escapeHtml(filterKey) + '"><td>' + escapeHtml(r.matchType) + '</td><td>' + escapeHtml(r.participants) + '</td><td>' + escapeHtml(r.opportunityRefs) + '</td><td>' + escapeHtml(r.matchScore) + '</td><td>' + escapeHtml(r.status) + '</td></tr>';
             });
             table += '</tbody></table>';
             summaryEl.innerHTML = table;
+            if (summaryTabsEl) {
+                const detailSections = document.querySelectorAll('.matching-detail-section[data-match-type]');
+                const applyFilter = (filter) => {
+                    const tbody = summaryEl.querySelector('tbody');
+                    if (tbody) {
+                        tbody.querySelectorAll('tr[data-match-type]').forEach(tr => {
+                            const rowType = tr.getAttribute('data-match-type');
+                            const show = filter === 'all' || rowType === filter;
+                            tr.classList.toggle('is-hidden', !show);
+                        });
+                    }
+                    detailSections.forEach(section => {
+                        const sectionType = section.getAttribute('data-match-type');
+                        const showSection = filter === 'all' || sectionType === filter;
+                        section.hidden = !showSection;
+                    });
+                };
+                applyFilter('all');
+                summaryTabsEl.querySelectorAll('.matching-match-type-tab').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const filter = this.getAttribute('data-filter');
+                        summaryTabsEl.querySelectorAll('.matching-match-type-tab').forEach(b => b.classList.remove('is-active'));
+                        this.classList.add('is-active');
+                        this.setAttribute('aria-selected', 'true');
+                        summaryTabsEl.querySelectorAll('.matching-match-type-tab').forEach(b => { if (b !== this) b.setAttribute('aria-selected', 'false'); });
+                        applyFilter(filter);
+                    });
+                });
+            }
         }
     }
 
@@ -577,9 +626,33 @@ function renderReport(gridEl, detailsEl, report) {
             if (route && typeof router !== 'undefined' && router.navigate) router.navigate(route);
         });
     });
+    const sectionIdToFilter = { 'matching-one-way-need-to-offers': 'one-way', 'matching-one-way-offer-to-needs': 'one-way', 'matching-two-way': 'two-way', 'matching-consortium': 'consortium', 'matching-circular': 'circular' };
     container.querySelectorAll('.matching-view-matches-link').forEach(link => {
         link.addEventListener('click', function (e) {
             e.preventDefault();
+            const sectionId = this.getAttribute('data-section');
+            const filter = sectionId ? (sectionIdToFilter[sectionId] || 'all') : 'all';
+            const summaryTabs = document.getElementById('matching-summary-tabs');
+            if (summaryTabs && filter !== 'all') {
+                const tabBtn = summaryTabs.querySelector('.matching-match-type-tab[data-filter="' + filter + '"]');
+                if (tabBtn) {
+                    summaryTabs.querySelectorAll('.matching-match-type-tab').forEach(b => b.classList.remove('is-active'));
+                    tabBtn.classList.add('is-active');
+                    tabBtn.setAttribute('aria-selected', 'true');
+                    summaryTabs.querySelectorAll('.matching-match-type-tab').forEach(b => { if (b !== tabBtn) b.setAttribute('aria-selected', 'false'); });
+                    const detailSections = document.querySelectorAll('.matching-detail-section[data-match-type]');
+                    const tbody = document.querySelector('#matching-summary-table tbody');
+                    if (tbody) {
+                        tbody.querySelectorAll('tr[data-match-type]').forEach(tr => {
+                            const rowType = tr.getAttribute('data-match-type');
+                            tr.classList.toggle('is-hidden', rowType !== filter);
+                        });
+                    }
+                    detailSections.forEach(section => {
+                        section.hidden = section.getAttribute('data-match-type') !== filter;
+                    });
+                }
+            }
             const href = this.getAttribute('href');
             if (href && href.startsWith('#')) {
                 const target = document.getElementById(href.slice(1));

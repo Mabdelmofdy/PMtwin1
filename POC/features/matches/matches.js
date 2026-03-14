@@ -4,13 +4,6 @@
 
 async function initMatches() {
     try {
-        // Ensure pipeline script (and loadMatchesPipeline) is loaded
-        if (typeof loadMatchesPipeline !== 'function') {
-            if (typeof loadScript === 'function') {
-                await loadScript('features/pipeline/pipeline.js');
-            }
-        }
-
         if (typeof loadMatchesPipeline === 'function') {
             await loadMatchesPipeline();
         } else {

@@ -100,20 +100,23 @@ class LayoutService {
     /**
      * Render public (top) nav – used when not authenticated.
      * Collaboration Models is intentionally not shown in public view.
+     * Mobile: hamburger toggles .nav-open; menu is in a drawer below header.
      */
     async renderPublicNav() {
         const navElement = document.getElementById('main-nav');
         if (!navElement) return;
 
-        let navHTML = '<nav class="bg-white border-b border-gray-200 h-16 sticky top-0 z-50 shadow-sm"><div class="max-w-container mx-auto px-6 h-full flex items-center justify-between">';
+        let navHTML = '<nav class="public-nav bg-white border-b border-gray-200 h-16 sticky top-0 z-50 shadow-sm"><div class="max-w-container mx-auto px-4 sm:px-6 h-full flex items-center justify-between relative">';
         navHTML += `<div class="nav-brand"><a href="#" data-route="${CONFIG.ROUTES.HOME}" class="text-xl font-bold text-primary no-underline hover:text-primary-dark transition-colors">${CONFIG.APP_NAME}</a></div>`;
-        navHTML += '<ul class="flex list-none gap-6 items-center m-0 p-0">';
-        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.FIND}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors">Find</a></li>`;
-        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.WORKFLOW}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors">How it works</a></li>`;
-        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.KNOWLEDGE_BASE}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors">Knowledge Base</a></li>`;
-        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.LOGIN}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors">Login</a></li>`;
-        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.REGISTER}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors">Register</a></li>`;
-        navHTML += '</ul></div></nav>';
+        navHTML += '<button type="button" class="public-nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="public-nav-menu"><i class="ph-duotone ph-list" style="font-size: 1.5rem;"></i></button>';
+        navHTML += '<div id="public-nav-menu" class="public-nav-menu" role="navigation" aria-label="Main">';
+        navHTML += '<ul class="flex list-none gap-6 items-center m-0 p-0 public-nav-list">';
+        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.FIND}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link">Find</a></li>`;
+        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.WORKFLOW}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link">How it works</a></li>`;
+        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.KNOWLEDGE_BASE}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link">Knowledge Base</a></li>`;
+        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.LOGIN}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link">Login</a></li>`;
+        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.REGISTER}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link">Register</a></li>`;
+        navHTML += '</ul></div></div></nav>';
         navElement.innerHTML = navHTML;
     }
 
@@ -407,17 +410,32 @@ class LayoutService {
     }
 
     /**
-     * Attach click handlers for public nav links
+     * Attach click handlers for public nav links and hamburger toggle
      */
     attachNavigationHandlers() {
         const navElement = document.getElementById('main-nav');
         if (!navElement) return;
+        const nav = navElement.querySelector('.public-nav');
+        const toggle = navElement.querySelector('.public-nav-toggle');
+        const menu = navElement.querySelector('#public-nav-menu');
+
+        if (toggle && menu) {
+            toggle.addEventListener('click', () => {
+                const isOpen = nav.classList.toggle('nav-open');
+                toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
+        }
+
         navElement.addEventListener('click', (e) => {
             const link = e.target.closest('a[data-route]');
             if (link) {
                 e.preventDefault();
                 const route = link.getAttribute('data-route');
-                if (route) this.router.navigate(route);
+                if (route) {
+                    this.router.navigate(route);
+                    if (nav) nav.classList.remove('nav-open');
+                    if (toggle) toggle.setAttribute('aria-expanded', 'false');
+                }
             }
         });
     }
@@ -430,7 +448,7 @@ class LayoutService {
         if (!footerElement) return;
         footerElement.innerHTML = `
             <footer class="bg-white border-t border-gray-200 py-6 mt-auto">
-                <div class="max-w-container mx-auto text-center text-gray-600 text-sm">
+                <div class="max-w-container mx-auto px-4 text-center text-gray-600 text-sm">
                     <p class="mb-1">&copy; ${new Date().getFullYear()} ${CONFIG.APP_NAME}. All rights reserved.</p>
                     <p>Construction Collaboration Platform for Saudi Arabia & GCC</p>
                 </div>

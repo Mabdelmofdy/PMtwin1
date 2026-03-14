@@ -30,49 +30,49 @@
             </div>
         </section>
 
-        <!-- Step 2: Matching report -->
+        <!-- Matching report -->
         <section class="dashboard-section run-section">
             <h2 class="section-title">Matching report</h2>
-            <div class="matching-action-card">
-                <p class="section-desc">Uses the same opportunities, users, and companies as the rest of the platform (Admin Dashboard). When an opportunity is published, matching runs automatically; opportunity owners see matches on the opportunity detail page.</p>
-                <div id="matching-run-loading" class="matching-loading" hidden><span class="spinner"></span> Running matching…</div>
-                <div id="matching-report-block" class="report-block matching-report-block" hidden>
-                    <h3 class="report-block-title">Report</h3>
-                    <div class="stats-grid" id="matching-stats-grid"></div>
-                    <h4 class="matching-type-section-title">Matching performance per opportunity</h4>
-                    <p class="section-desc">Each row shows one opportunity and its matching results. Use "View matches" to jump to the detailed match list for that opportunity.</p>
-                    <div id="matching-per-opportunity-table" class="matching-summary-table-wrap"></div>
-                    <h4 class="matching-type-section-title">Matches summary</h4>
-                    <div id="matching-summary-table" class="matching-summary-table-wrap"></div>
-                    <div class="matching-type-section">
-                        <h4 class="matching-type-section-title"><span class="matching-match-type-badge">One Way</span> One-way Matching</h4>
-                        <h5 class="matching-subsection-title">Need → Offers</h5>
-                        <div id="matching-one-way-need-to-offers" class="matching-type-content"></div>
-                        <h5 class="matching-subsection-title">Offer → Needs</h5>
-                        <div id="matching-one-way-offer-to-needs" class="matching-type-content"></div>
-                    </div>
-                    <div class="matching-type-section">
-                        <h4 class="matching-type-section-title"><span class="matching-match-type-badge">Barter</span> Two-way Matching</h4>
-                        <div id="matching-two-way" class="matching-type-content"></div>
-                    </div>
-                    <div class="matching-type-section">
-                        <h4 class="matching-type-section-title"><span class="matching-match-type-badge">Consortium</span> Consortium (Group Formation)</h4>
-                        <div id="matching-consortium" class="matching-type-content"></div>
-                    </div>
-                    <div class="matching-type-section">
-                        <h4 class="matching-type-section-title"><span class="matching-match-type-badge">Circular</span> Circular Exchange</h4>
-                        <div id="matching-circular" class="matching-type-content"></div>
-                    </div>
+            <p class="section-desc">Uses the same opportunities, users, and companies as the rest of the platform. When an opportunity is published, matching runs automatically.</p>
+            <div id="matching-run-loading" class="matching-loading" hidden><span class="spinner"></span> Running matching…</div>
+            <div id="matching-run-error" class="matching-error" hidden></div>
+            <div id="matching-report-block" class="report-block matching-report-block" hidden>
+                <h3 class="matching-overview-title">Matching Overview</h3>
+                <div class="stats-grid matching-overview-grid" id="matching-stats-grid"></div>
+
+                <h3 class="matching-section-title">Opportunity Matching Performance</h3>
+                <p class="section-desc">Per-opportunity match counts and scores. Use "View matches" to jump to the detailed list for that opportunity.</p>
+                <div id="matching-per-opportunity-table" class="matching-summary-table-wrap"></div>
+
+                <h3 class="matching-section-title">Matches</h3>
+                <div id="matching-summary-tabs" class="matching-match-type-tabs" role="tablist"></div>
+                <div id="matching-summary-table" class="matching-summary-table-wrap"></div>
+
+                <div class="matching-detail-section" data-match-type="one-way" id="matching-detail-one-way" hidden>
+                    <h4 class="matching-type-section-title"><span class="matching-match-type-badge">One Way</span> One-way Matching</h4>
+                    <h5 class="matching-subsection-title">Need → Offers</h5>
+                    <div id="matching-one-way-need-to-offers" class="matching-type-content"></div>
+                    <h5 class="matching-subsection-title">Offer → Needs</h5>
+                    <div id="matching-one-way-offer-to-needs" class="matching-type-content"></div>
                 </div>
-                <div id="matching-run-error" class="matching-error" hidden></div>
+                <div class="matching-detail-section" data-match-type="two-way" id="matching-detail-two-way" hidden>
+                    <h4 class="matching-type-section-title"><span class="matching-match-type-badge">Barter</span> Two-way Matching</h4>
+                    <div id="matching-two-way" class="matching-type-content"></div>
+                </div>
+                <div class="matching-detail-section" data-match-type="consortium" id="matching-detail-consortium" hidden>
+                    <h4 class="matching-type-section-title"><span class="matching-match-type-badge">Consortium</span> Consortium (Group Formation)</h4>
+                    <div id="matching-consortium" class="matching-type-content"></div>
+                </div>
+                <div class="matching-detail-section" data-match-type="circular" id="matching-detail-circular" hidden>
+                    <h4 class="matching-type-section-title"><span class="matching-match-type-badge">Circular</span> Circular Exchange</h4>
+                    <div id="matching-circular" class="matching-type-content"></div>
+                </div>
             </div>
         </section>
     </div>
 </div>
 
 <style>
-.admin-matching-page { }
-
 .dashboard-section { margin-bottom: var(--spacing-2xl); }
 .section-title { font-size: var(--font-size-xl); margin-bottom: var(--spacing-lg); }
 
@@ -130,16 +130,25 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .report-block { background: var(--bg-secondary, #f9fafb); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: var(--spacing-lg); margin-top: var(--spacing-lg); }
-.report-block-title { font-size: var(--font-size-base); margin-bottom: var(--spacing-md); font-weight: 600; }
-.matching-report-block .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--spacing-md); margin-bottom: var(--spacing-md); }
-.matching-report-block .stat-card { padding: var(--spacing-md); background: var(--bg-primary); border-radius: var(--radius-md); border: 1px solid var(--border-color); }
-.matching-report-block .stat-value { font-size: var(--font-size-xl); font-weight: 700; color: var(--primary-color); }
-.matching-report-block .stat-label { font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: var(--spacing-xs); }
+.matching-overview-title { font-size: var(--font-size-lg); font-weight: 600; margin: 0 0 var(--spacing-md); }
+.matching-section-title { font-size: var(--font-size-lg); font-weight: 600; margin: var(--spacing-xl) 0 var(--spacing-md); }
+.matching-overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+.matching-overview-grid .stat-card { padding: var(--spacing-md); background: var(--bg-primary); border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+.matching-overview-grid .stat-value { font-size: var(--font-size-xl); font-weight: 700; color: var(--primary-color); }
+.matching-overview-grid .stat-label { font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: var(--spacing-xs); }
+.matching-detail-section { margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 1px solid var(--border-color); }
+.matching-detail-section.is-hidden { display: none !important; }
 .matching-match-type-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-right: 8px; background: var(--primary-color); color: #fff; }
 .matching-summary-table-wrap { overflow-x: auto; margin-bottom: var(--spacing-lg); }
 .matching-summary-table { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
 .matching-summary-table th, .matching-summary-table td { padding: var(--spacing-sm) var(--spacing-md); text-align: left; border-bottom: 1px solid var(--border-color); }
 .matching-summary-table th { font-weight: 600; background: var(--bg-secondary, #f9fafb); }
+.matching-match-type-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); margin-bottom: var(--spacing-md); border-bottom: 1px solid var(--border-color); padding-bottom: var(--spacing-sm); }
+.matching-match-type-tab { padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-size-sm); font-weight: 500; color: var(--text-secondary); background: var(--bg-secondary, #f9fafb); border: 1px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer; text-decoration: none; }
+.matching-match-type-tab:hover { color: var(--primary-color); border-color: var(--primary-color); }
+.matching-match-type-tab.is-active { color: var(--primary-color); background: var(--bg-primary); border-color: var(--primary-color); }
+.matching-match-type-tab .tab-count { margin-left: 4px; font-weight: 600; }
+.matching-summary-table-wrap .matching-summary-table tbody tr[data-match-type].is-hidden { display: none; }
 .matching-per-opp-table td:first-child { font-weight: 500; }
 .matching-view-matches-link { font-size: var(--font-size-sm); color: var(--primary-color); text-decoration: none; white-space: nowrap; }
 .matching-view-matches-link:hover { text-decoration: underline; }

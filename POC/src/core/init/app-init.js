@@ -630,6 +630,9 @@ async function loadPage(pageName, params = {}) {
         
         const scriptPath = `features/${pageName}/${pageName}.js`;
         try {
+            if (pageName === 'matches') {
+                await loadScript('features/pipeline/pipeline.js');
+            }
             await loadScript(scriptPath);
             const functionName = pageName.split('-').map((word, index) => 
                 index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)

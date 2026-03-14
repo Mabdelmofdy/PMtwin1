@@ -39,49 +39,12 @@
         </div>
         
         <div class="profile-layout">
-            <!-- Left Column -->
+            <!-- Left Column: About, Services/Skills, Experience, Certifications -->
             <div class="profile-main">
-                <!-- Certifications Section -->
-                <section class="profile-section" id="certifications-section">
-                    <h2>Certifications</h2>
-                    <div id="profile-certifications" class="certifications-list">-</div>
-                </section>
-                
-                <!-- Experience Section (for professionals) -->
-                <section class="profile-section" id="experience-section">
-                    <h2>Experience & Education</h2>
-                    <div class="experience-grid">
-                        <div class="experience-item">
-                            <div class="experience-icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <strong>Years of Experience</strong>
-                                <p id="profile-experience">-</p>
-                            </div>
-                        </div>
-                        <div class="experience-item">
-                            <div class="experience-icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-                                    <path d="M6 12v5c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2v-5"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <strong>Education</strong>
-                                <p id="profile-education">-</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                
-                <!-- Skills Section -->
-                <section class="profile-section" id="skills-section">
-                    <h2>Skills</h2>
-                    <div id="profile-skills" class="skills-list">-</div>
+                <!-- About Section -->
+                <section class="profile-section" id="about-section">
+                    <h2>About</h2>
+                    <div id="profile-bio" class="profile-bio">-</div>
                 </section>
                 
                 <!-- Services Section -->
@@ -90,10 +53,23 @@
                     <div id="profile-services" class="services-grid">-</div>
                 </section>
                 
-                <!-- About Section -->
-                <section class="profile-section">
-                    <h2>About</h2>
-                    <div id="profile-bio" class="profile-bio">-</div>
+                <!-- Skills Section -->
+                <section class="profile-section" id="skills-section">
+                    <h2>Skills</h2>
+                    <div id="profile-skills" class="skills-list">-</div>
+                </section>
+                
+                <!-- Experience Section: timeline for individuals, Key Projects for companies -->
+                <section class="profile-section" id="experience-section">
+                    <h2 id="experience-section-title">Experience</h2>
+                    <div id="profile-experience-timeline" class="profile-experience-timeline" style="display: none;"></div>
+                    <div id="profile-key-projects" class="key-projects-list" style="display: none;"></div>
+                </section>
+                
+                <!-- Certifications Section -->
+                <section class="profile-section" id="certifications-section">
+                    <h2>Certifications</h2>
+                    <div id="profile-certifications" class="certifications-list">-</div>
                 </section>
                 
                 <!-- Company Info Section (for companies) -->
@@ -141,10 +117,10 @@
                     </div>
                 </div>
                 
-                <!-- Social media -->
+                <!-- Social Media -->
                 <div class="sidebar-card" id="social-media-card">
-                    <h3>Social media</h3>
-                    <div id="profile-social-links" class="contact-list"></div>
+                    <h3>Social Media</h3>
+                    <div id="profile-social-links" class="social-links-list"></div>
                 </div>
                 
                 <!-- Availability Card (for professionals) -->
@@ -456,53 +432,130 @@
     box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
 }
 
-/* Enhanced Experience Grid */
-.experience-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--spacing-lg);
+/* Experience Timeline (Individual profiles) */
+.profile-experience-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    padding-left: var(--spacing-lg);
+    border-left: 3px solid var(--primary-color);
+    margin-left: var(--spacing-sm);
 }
 
-.experience-item {
-    display: flex;
-    gap: var(--spacing-lg);
-    align-items: flex-start;
-    padding: var(--spacing-lg);
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+.profile-experience-timeline-item {
+    position: relative;
+    padding-bottom: var(--spacing-xl);
+}
+
+.profile-experience-timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.profile-experience-timeline-item::before {
+    content: '';
+    position: absolute;
+    left: calc(-1 * (var(--spacing-lg) + 7px));
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    border: 3px solid white;
+    box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+.exp-timeline-card {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    border: 1px solid #fcd34d;
     transition: all 0.2s ease;
 }
 
-.experience-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+.exp-timeline-card:hover {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
 }
 
-.experience-icon {
-    padding: var(--spacing-md);
-    background: white;
-    border-radius: var(--radius-lg);
-    color: var(--warning-color);
-    flex-shrink: 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.experience-item strong {
-    display: block;
-    margin-bottom: var(--spacing-xs);
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+.exp-timeline-role {
     font-weight: 700;
+    font-size: var(--font-size-base);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
 }
 
-.experience-item p {
-    color: var(--text-primary);
-    font-size: var(--font-size-lg);
+.exp-timeline-company {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.exp-timeline-period {
+    font-size: var(--font-size-xs);
+    color: var(--primary-color);
     font-weight: 600;
-    margin: 0;
+}
+
+/* Key Projects (Company profiles) */
+.key-projects-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.key-project-card {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 1px solid #86efac;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.key-project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+/* Social links in sidebar */
+.social-links-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+.social-links-list .social-icon-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: var(--spacing-sm);
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.social-links-list .social-icon-link:hover {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
+}
+
+.social-links-list .social-icon-link svg {
+    width: 22px;
+    height: 22px;
 }
 
 /* Enhanced Certifications */
@@ -844,10 +897,6 @@
     }
     
     .services-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .experience-grid {
         grid-template-columns: 1fr;
     }
 }
