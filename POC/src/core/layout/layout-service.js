@@ -90,6 +90,7 @@ class LayoutService {
             }
             this.renderMaintenanceBanner();
             this.renderPendingApprovalBanner();
+            this.renderPortalMobileHeader();
             this.attachSidebarHandlers();
         } else {
             await this.renderPublicNav(user);
@@ -140,6 +141,7 @@ class LayoutService {
         const settingsRoute = CONFIG.ROUTES.SETTINGS;
 
         let html = '<div class="portal-sidebar-inner">';
+        html += '<button type="button" class="portal-sidebar-close" aria-label="Close menu"><i class="ph-duotone ph-x" aria-hidden="true"></i></button>';
         html += `<div class="portal-sidebar-brand"><i class="ph-duotone ph-lightning"></i><span>${CONFIG.APP_NAME}</span></div>`;
         html += '<div class="portal-lang-selector"><button type="button" class="portal-lang-btn" data-lang="ar">AR</button><button type="button" class="portal-lang-btn portal-lang-btn-active" data-lang="en">EN</button></div>';
 
@@ -229,6 +231,7 @@ class LayoutService {
         const isFullAdmin = user?.role === CONFIG.ROLES.ADMIN;
 
         let html = '<div class="portal-sidebar-inner">';
+        html += '<button type="button" class="portal-sidebar-close" aria-label="Close menu"><i class="ph-duotone ph-x" aria-hidden="true"></i></button>';
         html += `<div class="portal-sidebar-brand"><i class="ph-duotone ph-shield-check"></i><span>${CONFIG.APP_NAME} Admin</span></div>`;
         html += '<div class="portal-user-dropdown">';
         html += '<div class="portal-sidebar-user-card portal-user-dropdown-trigger" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">';
@@ -357,17 +360,83 @@ class LayoutService {
     }
 
     /**
-     * Attach sidebar nav link handlers
+     * Render mobile header for portal (hamburger + brand) and backdrop for sidebar overlay
+     */
+    renderPortalMobileHeader() {
+        const appMain = document.getElementById('app-main');
+        if (!appMain) return;
+        let header = document.getElementById('portal-mobile-header');
+        let backdrop = document.getElementById('portal-sidebar-backdrop');
+        if (!header) {
+            header = document.createElement('div');
+            header.id = 'portal-mobile-header';
+            header.className = 'portal-mobile-header';
+            header.innerHTML = `
+                <button type="button" class="portal-mobile-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="app-sidebar">
+                    <i class="ph-duotone ph-list" aria-hidden="true"></i>
+                </button>
+                <span class="portal-mobile-brand">${CONFIG.APP_NAME}</span>
+            `;
+            appMain.insertBefore(header, appMain.firstChild);
+        }
+        if (!backdrop) {
+            backdrop = document.createElement('div');
+            backdrop.id = 'portal-sidebar-backdrop';
+            backdrop.className = 'portal-sidebar-backdrop';
+            backdrop.setAttribute('aria-hidden', 'true');
+            appMain.insertBefore(backdrop, appMain.firstChild.nextSibling);
+        }
+    }
+
+    /**
+     * Attach sidebar nav link handlers and mobile hamburger/backdrop
      */
     attachSidebarHandlers() {
         const sidebar = document.getElementById('app-sidebar');
         if (!sidebar) return;
+
+        const menuBtn = document.querySelector('.portal-mobile-menu-btn');
+        const backdrop = document.getElementById('portal-sidebar-backdrop');
+
+        const closeSidebar = () => {
+            sidebar.classList.remove('open');
+            if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+            document.body.classList.remove('portal-sidebar-open');
+        };
+        const openSidebar = () => {
+            sidebar.classList.add('open');
+            if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
+            document.body.classList.add('portal-sidebar-open');
+        };
+        const toggleSidebar = () => {
+            if (sidebar.classList.contains('open')) closeSidebar();
+            else openSidebar();
+        };
+
+        if (menuBtn) {
+            menuBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleSidebar();
+            });
+        }
+        if (backdrop) {
+            backdrop.addEventListener('click', closeSidebar);
+        }
+        sidebar.addEventListener('click', (e) => {
+            if (e.target.closest('.portal-sidebar-close')) {
+                e.preventDefault();
+                closeSidebar();
+            }
+        });
         sidebar.addEventListener('click', (e) => {
             const link = e.target.closest('a[data-route]');
             if (link) {
                 e.preventDefault();
                 const route = link.getAttribute('data-route');
-                if (route) this.router.navigate(route);
+                if (route) {
+                    this.router.navigate(route);
+                    closeSidebar();
+                }
             }
         });
         const langBtns = sidebar.querySelectorAll('.portal-lang-btn');
