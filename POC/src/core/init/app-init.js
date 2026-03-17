@@ -54,7 +54,7 @@ console.log('PMTwin App base path:', APP_BASE_PATH);
  * Load script dynamically with base path.
  * Uses cache-busting query param (?v=APP_VERSION) so updated scripts are fetched after deploys.
  */
-function loadScript(relativeSrc) {
+function loadScript(relativeSrc, options = {}) {
     const fullSrc = APP_BASE_PATH + relativeSrc;
     const bustSrc = fullSrc + '?v=' + (window.CONFIG?.APP_VERSION || Date.now());
 
@@ -72,6 +72,9 @@ function loadScript(relativeSrc) {
 
         const script = document.createElement('script');
         script.src = bustSrc;
+        if (options && options.type) {
+            script.type = options.type;
+        }
         script.onload = resolve;
         script.onerror = () => {
             document.head.removeChild(script);
@@ -90,7 +93,7 @@ loadScript('src/core/config/config.js').then(async () => {
     
     // Load core services
     await loadScript('src/core/storage/storage-service.js');
-    await loadScript('src/core/data/data-service.js');
+    await loadScript('src/core/data/data-service.js', { type: 'module' });
     await loadScript('src/core/auth/auth-service.js');
     await loadScript('src/core/router/router.js');
     await loadScript('src/core/router/auth-guard.js');

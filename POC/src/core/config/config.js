@@ -31,6 +31,7 @@ const CONFIG = {
         APPLICATION_PAYMENT_TERMS: 'pmtwin_application_payment_terms',
         MATCHES: 'pmtwin_matches',
         POST_MATCHES: 'pmtwin_post_matches',
+        MATCHING_RUNS: 'pmtwin_matching_runs',
         AUDIT: 'pmtwin_audit',
         NOTIFICATIONS: 'pmtwin_notifications',
         CONNECTIONS: 'pmtwin_connections',

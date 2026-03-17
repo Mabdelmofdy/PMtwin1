@@ -1,3 +1,5 @@
+import { enforceTransition } from "/core/workflow/workflow-engine.js";
+
 /**
  * Data Service
  * High-level data access layer for all entities
@@ -506,6 +508,7 @@ class DataService {
             'application_payment_terms': CONFIG.STORAGE_KEYS.APPLICATION_PAYMENT_TERMS,
             'matches': CONFIG.STORAGE_KEYS.MATCHES,
             'post_matches': CONFIG.STORAGE_KEYS.POST_MATCHES,
+            'matching_runs': CONFIG.STORAGE_KEYS.MATCHING_RUNS,
             'notifications': CONFIG.STORAGE_KEYS.NOTIFICATIONS,
             'connections': CONFIG.STORAGE_KEYS.CONNECTIONS,
             'messages': CONFIG.STORAGE_KEYS.MESSAGES,
@@ -752,6 +755,10 @@ class DataService {
         const opportunities = await this.getOpportunities();
         const index = opportunities.findIndex(o => o.id === id);
         if (index === -1) return null;
+
+        if (updates && updates.status != null && updates.status !== opportunities[index].status) {
+            enforceTransition('opportunity', opportunities[index], updates.status);
+        }
         
         opportunities[index] = {
             ...opportunities[index],
@@ -1142,6 +1149,11 @@ class DataService {
         const contracts = await this.getContracts();
         const index = contracts.findIndex(c => c.id === id);
         if (index === -1) return null;
+
+        if (updates && updates.status != null && updates.status !== contracts[index].status) {
+            enforceTransition('contract', contracts[index], updates.status);
+        }
+
         contracts[index] = {
             ...contracts[index],
             ...updates,
@@ -1242,6 +1254,11 @@ class DataService {
         const deals = await this.getDeals();
         const index = deals.findIndex(d => d.id === id);
         if (index === -1) return null;
+
+        if (updates && updates.status != null && updates.status !== deals[index].status) {
+            enforceTransition('deal', deals[index], updates.status);
+        }
+
         if (updates.milestones && Array.isArray(updates.milestones)) {
             updates.milestones = updates.milestones.map(m => this.normalizeMilestone(m));
         }
@@ -1425,6 +1442,29 @@ class DataService {
         return list.filter(m => m.matchType === matchType);
     }
 
+    // Matching run tracking (lightweight history)
+    async getMatchingRuns() {
+        return this.storage.get(CONFIG.STORAGE_KEYS.MATCHING_RUNS) || [];
+    }
+
+    async getMatchingRunsForOpportunity(opportunityId) {
+        const list = await this.getMatchingRuns();
+        return list.filter(r => r.opportunityId === opportunityId);
+    }
+
+    async createMatchingRun(data) {
+        const list = await this.getMatchingRuns();
+        const record = {
+            id: this.generateId(),
+            opportunityId: data && data.opportunityId ? data.opportunityId : null,
+            model: data && data.model ? data.model : null,
+            createdAt: new Date().toISOString()
+        };
+        list.push(record);
+        this.storage.set(CONFIG.STORAGE_KEYS.MATCHING_RUNS, list);
+        return record;
+    }
+
     _postMatchSignature(record) {
         const type = record.matchType || '';
         const parts = (record.participants || []).map(p => `${p.userId}:${p.opportunityId || ''}`).sort();
@@ -1435,6 +1475,58 @@ class DataService {
                 ? JSON.stringify(record.payload[k])
                 : (record.payload[k] || ''));
         return `${type}:${parts.join('|')}:${oppIds.join(',')}`;
+    }
+
+    _postMatchStrongKey(record) {
+        if (!record || !record.matchType) return null;
+        const type = record.matchType;
+        const payload = record.payload || {};
+
+        if (type === 'one_way') {
+            const needId = payload.needOpportunityId;
+            const offerId = payload.offerOpportunityId;
+            if (!needId || !offerId) return null;
+            return `one_way:${needId}:${offerId}`;
+        }
+
+        if (type === 'two_way') {
+            const a = payload.sideA || {};
+            const b = payload.sideB || {};
+            const side = (s) => ({
+                needId: s.needId || '',
+                offerId: s.offerId || ''
+            });
+            const sa = side(a);
+            const sb = side(b);
+            const keyA = `${sa.needId}:${sa.offerId}`;
+            const keyB = `${sb.needId}:${sb.offerId}`;
+            const ordered = [keyA, keyB].sort();
+            // Even if some ids are missing, this still improves dedupe vs signature-only.
+            return `two_way:${ordered[0]}|${ordered[1]}`;
+        }
+
+        if (type === 'consortium') {
+            const leadNeedId = payload.leadNeedId;
+            const roles = Array.isArray(payload.roles) ? payload.roles : [];
+            if (!leadNeedId || !roles.length) return null;
+            const assignments = roles
+                .map(r => `${r.role || ''}:${r.userId || ''}:${r.opportunityId || ''}`)
+                .sort();
+            return `consortium:${leadNeedId}:${assignments.join('|')}`;
+        }
+
+        if (type === 'circular') {
+            const cycle = Array.isArray(payload.cycle) ? payload.cycle : [];
+            if (!cycle.length) return null;
+            const participants = [...new Set(cycle.filter(Boolean))].sort();
+            const links = Array.isArray(payload.links) ? payload.links : [];
+            const linkKeys = links
+                .map(l => `${l.fromCreatorId || l.from || ''}:${l.toCreatorId || l.to || ''}:${l.offerId || ''}:${l.needId || ''}`)
+                .sort();
+            return `circular:${participants.join(',')}:${linkKeys.join('|')}`;
+        }
+
+        return null;
     }
 
     async createPostMatch(data) {
@@ -1456,9 +1548,14 @@ class DataService {
             replacementPayload: data.replacementPayload || null
         };
         if (!isReplacement) {
+            const strongKey = this._postMatchStrongKey(newRecord);
+            if (strongKey) {
+                const duplicateStrong = list.some(m => !m.isReplacement && this._postMatchStrongKey(m) === strongKey);
+                if (duplicateStrong) return null;
+            }
             const sig = this._postMatchSignature(newRecord);
-            const duplicate = list.some(m => !m.isReplacement && this._postMatchSignature(m) === sig);
-            if (duplicate) return null;
+            const duplicateSig = list.some(m => !m.isReplacement && this._postMatchSignature(m) === sig);
+            if (duplicateSig) return null;
         } else {
             const dup = list.some(m => m.isReplacement && m.replacementDealId === newRecord.replacementDealId &&
                 (m.participants || []).some(p => p.userId === (newRecord.participants && newRecord.participants[0] && newRecord.participants[0].userId)));
@@ -1495,6 +1592,7 @@ class DataService {
     async updatePostMatchStatus(matchId, userId, newStatus) {
         const match = await this.getPostMatchById(matchId);
         if (!match || !match.participants) return null;
+
         const participants = match.participants.map(p =>
             p.userId === userId
                 ? { ...p, participantStatus: newStatus, respondedAt: new Date().toISOString() }
@@ -1505,6 +1603,11 @@ class DataService {
         const status = anyDeclined
             ? CONFIG.POST_MATCH_STATUS.DECLINED
             : (allAccepted ? CONFIG.POST_MATCH_STATUS.CONFIRMED : CONFIG.POST_MATCH_STATUS.PENDING);
+
+        if (status !== match.status) {
+            enforceTransition('post_match', match, status);
+        }
+
         const updated = await this.updatePostMatch(matchId, { participants, status });
         return updated;
     }

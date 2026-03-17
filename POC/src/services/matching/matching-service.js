@@ -746,6 +746,13 @@ class MatchingService {
         const model = result.model || 'one_way';
         const matches = result.matches || [];
 
+        // Track this matching run (lightweight history record)
+        try {
+            if (ds && typeof ds.createMatchingRun === 'function') {
+                await ds.createMatchingRun({ opportunityId, model });
+            }
+        } catch (e) { /* non-fatal */ }
+
         if (model === 'one_way' || (result.direction === 'offer_to_needs')) {
             for (const m of matches) {
                 if ((m.matchScore || 0) < threshold) continue;
