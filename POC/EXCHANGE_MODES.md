@@ -1,6 +1,17 @@
-# Exchange Modes Implementation
+# Exchange modes implementation
+
+### What this page is
+
+Field-level reference for **exchange modes** (cash, barter, equity, and so on) in the opportunity flow.
+
+### What happens next
+
+See config and opportunity models in code for the source of truth.
+
+---
 
 ## Overview
+
 PMTwin supports **5 exchange modes** beyond traditional cash payments, enabling flexible value exchange in construction collaborations.
 
 ## Exchange Modes

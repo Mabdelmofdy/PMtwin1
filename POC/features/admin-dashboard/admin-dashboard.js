@@ -387,6 +387,7 @@ async function loadRecentActivity() {
 
 // Keep approve/reject/clarify for use from User Vetting page; no inline list on dashboard
 async function approveUser(userId, isCompany = false) {
+    authService.assertAdminCapability('admin.vetting');
     if (!confirm(`Approve this ${isCompany ? 'company' : 'user'}?`)) return;
     try {
         if (isCompany) await dataService.updateCompany(userId, { status: 'active' });
@@ -405,6 +406,7 @@ async function approveUser(userId, isCompany = false) {
 }
 
 async function rejectUser(userId, isCompany = false) {
+    authService.assertAdminCapability('admin.vetting');
     if (!confirm(`Reject this ${isCompany ? 'company' : 'user'}? They will be notified.`)) return;
     const reason = prompt('Rejection reason (optional):');
     try {
@@ -424,6 +426,7 @@ async function rejectUser(userId, isCompany = false) {
 }
 
 async function requestClarification(userId, isCompany = false) {
+    authService.assertAdminCapability('admin.vetting');
     const reason = prompt('Reason or missing items (optional):');
     if (reason === null) return;
     try {

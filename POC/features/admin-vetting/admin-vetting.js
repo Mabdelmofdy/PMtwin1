@@ -4,7 +4,7 @@
  */
 
 async function initAdminVetting() {
-    if (!authService.isAdmin()) {
+    if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.vetting')) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }
@@ -125,6 +125,7 @@ async function loadVettingList() {
 }
 
 async function approveUser(userId, isCompany = false) {
+    authService.assertAdminCapability('admin.vetting');
     if (!confirm(`Approve this ${isCompany ? 'company' : 'user'}?`)) return;
 
     try {
@@ -164,6 +165,7 @@ async function approveUser(userId, isCompany = false) {
 }
 
 async function rejectUser(userId, isCompany = false) {
+    authService.assertAdminCapability('admin.vetting');
     if (!confirm(`Reject this ${isCompany ? 'company' : 'user'}? They will be notified.`)) return;
 
     const reason = prompt('Rejection reason (optional):');
@@ -204,6 +206,7 @@ function getSelectedVettingItems() {
 }
 
 async function bulkApprove() {
+    authService.assertAdminCapability('admin.vetting');
     const selected = getSelectedVettingItems();
     if (selected.length === 0) {
         alert('Select one or more items first.');
@@ -216,6 +219,7 @@ async function bulkApprove() {
 }
 
 async function bulkReject() {
+    authService.assertAdminCapability('admin.vetting');
     const selected = getSelectedVettingItems();
     if (selected.length === 0) {
         alert('Select one or more items first.');
@@ -256,6 +260,7 @@ async function rejectUserWithReason(userId, isCompany, reason) {
 }
 
 async function requestClarification(userId, isCompany = false) {
+    authService.assertAdminCapability('admin.vetting');
     const reason = prompt('Reason or missing items (optional):');
     if (reason === null) return;
 

@@ -1,143 +1,177 @@
-# User Workflow
+# User workflow
 
-Step-by-step flows for individual users (professionals and consultants): registration, login, profile, and discovery.
+### What this page is
+
+Step-by-step flows for **individual** users (professionals and consultants): register, log in, profile, discovery, and password reset.
+
+### Why it matters
+
+These screens are the first touchpoints before opportunities and matches.
+
+### What you can do here
+
+- Follow the registration diagram end to end.
+- See how login checks both **users** and **companies** by email.
+- Trace profile and Find flows for QA.
+
+### Step-by-step actions
+
+1. Read **Registration** if you test onboarding.
+2. Read **Login** and **Profile** for everyday use.
+3. Use **Discovery** when testing Apply vs Match entry points.
+
+### What happens next
+
+After login, users typically open **Dashboard**, then **Opportunities** or **Matches** ([opportunity-workflow.md](opportunity-workflow.md), [matching-workflow.md](matching-workflow.md)).
+
+### Tips
+
+- Password handling in the POC is for demonstration; use real security patterns in production.
 
 ---
 
-## 1. Registration Flow
+## 1. Registration flow
 
 ```mermaid
 flowchart TD
-  Start([Start]) --> SelectType[Select Account Type: Individual / Company]
-  SelectType --> FillForm[Fill registration form: email, password, account-specific fields, terms]
+  Start([Start]) --> SelectType[Select account type: Individual / Company]
+  SelectType --> FillForm[Fill form: email, password, fields, terms]
   FillForm --> Submit[Submit]
-  Submit --> Created[Account created, status: pending]
+  Submit --> Created[Account created — status pending]
   Created --> NotifyAdmin[Admin notified]
-  NotifyAdmin --> Wait[User waits for approval]
+  NotifyAdmin --> Wait[Wait for approval]
   Wait --> AdminDecision{Admin decision}
-  AdminDecision -->|Approve| Active[Status: active]
-  AdminDecision -->|Reject| Rejected[Status: rejected, notification sent]
-  Active --> FullAccess[Full access granted]
-  Rejected --> End([End - can re-register])
+  AdminDecision -->|Approve| Active[Status active]
+  AdminDecision -->|Reject| Rejected[Status rejected — notification sent]
+  Active --> FullAccess[Full access]
+  Rejected --> End([End — may register again])
   FullAccess --> End2([End])
 ```
 
 **Steps (implemented):**
 
-1. User opens **Register** (`/register`).
-2. Chooses account type (individual or company); form fields depend on type.
-3. Submits: `auth-service.register()` (or company equivalent) → `data-service.createUser()` / company creation.
-4. Account stored with `status: 'pending'`.
-5. Admin sees user in **Admin → Users** or **Vetting**; can approve or reject.
-6. On approve: `data-service.updateUser(id, { status: 'active' })`; notification (e.g. `account_approved`) created.
-7. On reject: status `rejected`; notification `account_rejected`.
+1. Open **Register** (register route).
+2. Choose individual or company; fields follow the type.
+3. Submit through auth and data services to create the record.
+4. Account is stored with status **`pending`**.
+5. Admin sees the account under **Admin → Users** or **Vetting** and approves or rejects.
+6. On approve: status becomes **`active`**; approval notification is created.
+7. On reject: status **`rejected`**; rejection notification is created.
 
-**Inputs:** Email, password, profile fields (name, specializations, etc.).  
-**Outputs:** User record; optional notification to admin; later, notification to user on approve/reject.
+**Inputs:** Email, password, profile fields.  
+**Outputs:** New account row; notifications on decision.
 
 **Edge cases:**
 
-- Duplicate email: handled in register flow (e.g. getUserByEmail check).
-- Clarification requested: status `clarification_requested`; user may need to resubmit (flow partially specified in BRD).
+- Duplicate email: blocked when an account already exists.
+- Clarification: status may become **`clarification_requested`**; resubmit per product rules.
+
+### What happens next
+
+When **active**, the user can use the full portal (subject to role).
 
 ---
 
-## 2. Login Flow
+## 2. Login flow
 
 ```mermaid
 sequenceDiagram
-  User->>Page: Enter email + password
+  User->>Page: Enter email and password
   Page->>Auth: login(email, password)
   Auth->>Data: getUserOrCompanyByEmail(email)
   Data-->>Auth: user or company
   Auth->>Auth: Verify password (POC encode)
   Auth->>Session: Store session (sessionStorage)
   Auth-->>Page: success
-  Page->>Router: navigate to dashboard or intended route
+  Page->>Router: Go to dashboard or return URL
 ```
 
 **Steps:**
 
-1. User opens **Login** (`/login`), enters email and password.
-2. `auth-service.login(email, password)` → `getUserOrCompanyByEmail(email)` (checks both users and companies).
-3. Password verified (POC: encode comparison; no real hash).
-4. Session stored in sessionStorage (token, userId, expiry).
-5. Redirect to dashboard or previously requested route (auth-guard).
-
-**Inputs:** Email, password.  
-**Outputs:** Session; redirect.
+1. Open **Login**; enter email and password.
+2. Auth looks up **user or company** by email.
+3. Password is checked (POC encoding—not production hashing).
+4. Session is stored (token, user id, expiry).
+5. Redirect to dashboard or the route you tried to open.
 
 **Edge cases:**
 
-- Invalid credentials: show error; no session.
-- Pending/rejected/suspended: login may succeed in POC; admin/vetting flow controls status; production may block login for non-active.
+- Wrong password: error, no session.
+- Non-active accounts: POC may still allow login; production should block as needed.
+
+### What happens next
+
+You land on the **Dashboard** (or deep link) with a live session until logout.
 
 ---
 
-## 3. Profile View & Edit
+## 3. Profile view and edit
 
 **Steps:**
 
-1. User opens **Profile** (`/profile`) or **Settings** (`/settings`).
-2. Page loads current user via `auth-service.getCurrentUser()` (from session) and/or `data-service.getUserById(currentUserId)`.
-3. Profile displayed; edit form allows updating name, specializations, certifications, sectors, skills, etc.
-4. On save: `data-service.updateUser(id, updates)`.
-
-**Inputs:** Updated profile fields.  
-**Outputs:** Updated user record; optionally normalized for matching (e.g. `normalizeUsersForMatching` on init/merge, not necessarily on every save).
+1. Open **Profile** or **Settings**.
+2. Load the current user from session and storage.
+3. Edit fields (name, specializations, certifications, sectors, skills, and so on).
+4. Save → profile updates persist.
 
 **Edge cases:**
 
-- Company vs individual: different profile shapes; UI may show different sections.
-- Verification status: display-only unless admin changes it.
+- Company vs individual: different sections.
+- Verification badges: usually admin-controlled.
+
+### What happens next
+
+Matching and discovery use updated profile data on the next load or merge.
 
 ---
 
-## 4. Discovery (Find) Flow
+## 4. Discovery (Find) flow
 
 **Steps:**
 
-1. User opens **Find** (`/find`).
-2. Page loads published opportunities: `data-service.getOpportunities()` filtered by `status === 'published'`.
-3. User can filter/search; click opportunity → **Opportunity detail** (`/opportunities/:id`).
-4. From detail, user can **Apply** (application workflow) or, if they have a match, see match and go to **Matches**.
+1. Open **Find**.
+2. Load **published** opportunities.
+3. Filter or search; open **Opportunity detail**.
+4. From detail: **Apply** (applications) or jump to **Matches** if a match already exists.
 
-**Inputs:** None (or filters).  
-**Outputs:** List of opportunities; navigation to detail and application.
+### What happens next
 
----
-
-## 5. Password Reset (Forgot / Reset)
-
-**Forgot password:**
-
-1. User opens **Forgot password** (`/forgot-password`), enters email.
-2. System looks up user/company by email; creates reset token (stored in `pmtwin_reset_tokens` or similar).
-3. In POC, “send email” is simulated; user is told to check email (or given reset link with token for demo).
-4. User opens **Reset password** (`/reset-password?token=...`), enters new password.
-5. Token validated; password updated; token invalidated; redirect to login.
-
-**Inputs:** Email (forgot); token + new password (reset).  
-**Outputs:** Reset token (forgot); updated password (reset).
+Applications follow the pipeline workflow; matches follow [matching-workflow.md](matching-workflow.md).
 
 ---
 
-## State Changes Summary
+## 5. Password reset (forgot / reset)
+
+**Forgot password**
+
+1. Open **Forgot password**; enter email.
+2. Look up account; create a reset token (stored locally in POC).
+3. Email send is simulated; demo may show a link with token.
+4. Open **Reset password** with token; set a new password.
+5. Invalidate token; redirect to login.
+
+### What happens next
+
+You sign in with the new password.
+
+---
+
+## State changes summary
 
 | Action | Entity | State change |
 |--------|--------|--------------|
-| Register | User/Company | Created with status `pending` |
-| Admin approve | User/Company | status → `active` |
-| Admin reject | User/Company | status → `rejected` |
-| Login | Session | Session created in sessionStorage |
-| Logout | Session | Session cleared |
-| Update profile | User/Company | profile + updatedAt updated |
+| Register | User/company | Created **`pending`** |
+| Admin approve | User/company | → **`active`** |
+| Admin reject | User/company | → **`rejected`** |
+| Login | Session | Created in sessionStorage |
+| Logout | Session | Cleared |
+| Update profile | User/company | Profile and **`updatedAt`** |
 
 ---
 
-## Related Documentation
+## Related documentation
 
-- [Actors](actors.md)
-- [Opportunity Workflow](opportunity-workflow.md)
-- [Matching Workflow](matching-workflow.md)
-- [Deal Workflow](deal-workflow.md)
+- [Actors](../actors.md)
+- [Opportunity workflow](opportunity-workflow.md)
+- [Matching workflow](matching-workflow.md)
+- [Deal workflow](deal-workflow.md)

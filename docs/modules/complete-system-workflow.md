@@ -1,4 +1,32 @@
-# Complete System Workflow — PMTwin Collaboration Marketplace
+# Complete system workflow — PMTwin collaboration marketplace
+
+### What this page is
+
+End-to-end **architecture + workflow** narrative: Need–Offer model, matching, value exchange, user and admin paths, and pointers into the POC.
+
+### Why it matters
+
+It is the “single long read” for architects onboarding to PMTwin.
+
+### What you can do here
+
+- Use the table of contents to jump.
+- Cross-link to [full-workflows.md](full-workflows.md) for route-level journeys.
+
+### Step-by-step actions
+
+1. Read **Platform overview**.
+2. Deep dive the section that matches your initiative (matching, admin, data).
+
+### What happens next
+
+Implement against [implementation-status.md](../implementation-status.md) and track gaps in [gaps-and-missing.md](../gaps-and-missing.md).
+
+### Tips
+
+- Keep diagrams in sync when algorithms change.
+
+---
 
 This document describes the complete system workflow for the PMTwin collaboration marketplace: a bidirectional semantic marketplace that connects companies, professionals, and consultants through a Need–Offer collaboration model. It consolidates opportunity creation, matching engine, value exchange logic, user workflows, admin workflows, database design, and matching algorithms with references to the existing POC implementation.
 

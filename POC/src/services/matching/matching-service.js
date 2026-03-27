@@ -747,9 +747,11 @@ class MatchingService {
         const matches = result.matches || [];
 
         // Track this matching run (lightweight history record)
+        let runId = null;
         try {
             if (ds && typeof ds.createMatchingRun === 'function') {
-                await ds.createMatchingRun({ opportunityId, model });
+                const run = await ds.createMatchingRun({ opportunityId, model });
+                runId = run?.id || null;
             }
         } catch (e) { /* non-fatal */ }
 
@@ -776,6 +778,7 @@ class MatchingService {
                     matchType: 'one_way',
                     status: CONFIG.POST_MATCH_STATUS.PENDING,
                     matchScore: m.matchScore,
+                    runId,
                     participants,
                     payload
                 });
@@ -810,6 +813,7 @@ class MatchingService {
                     matchType: 'two_way',
                     status: CONFIG.POST_MATCH_STATUS.PENDING,
                     matchScore: m.matchScore,
+                    runId,
                     participants,
                     payload
                 });
@@ -844,6 +848,7 @@ class MatchingService {
                     matchType: 'consortium',
                     status: CONFIG.POST_MATCH_STATUS.PENDING,
                     matchScore: m.matchScore,
+                    runId,
                     participants,
                     payload
                 });
@@ -858,6 +863,13 @@ class MatchingService {
         try {
             const circularResult = await this.findMatchesForPost(opportunityId, { model: 'circular' });
             const cycles = circularResult.matches || [];
+            let circularRunId = null;
+            try {
+                if (ds && typeof ds.createMatchingRun === 'function') {
+                    const run = await ds.createMatchingRun({ opportunityId, model: 'circular' });
+                    circularRunId = run?.id || null;
+                }
+            } catch (e) { /* non-fatal */ }
             for (const m of cycles) {
                 if ((m.matchScore || 0) < threshold) continue;
                 const cycle = m.cycle || [];
@@ -893,6 +905,7 @@ class MatchingService {
                     matchType: 'circular',
                     status: CONFIG.POST_MATCH_STATUS.PENDING,
                     matchScore: m.matchScore,
+                    runId: circularRunId,
                     participants,
                     payload
                 });

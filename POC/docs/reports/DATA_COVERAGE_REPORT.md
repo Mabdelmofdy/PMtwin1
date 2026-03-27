@@ -1,4 +1,14 @@
-# Data Coverage Report
+# Data coverage report
+
+### What this page is
+
+Internal report: **coverage** of entities and fields in demo/seed data.
+
+### What happens next
+
+Close gaps or document as accepted limitations.
+
+---
 
 Generated: 2026-03-06T12:50:46.835Z
 

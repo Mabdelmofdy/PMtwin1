@@ -1,10 +1,35 @@
-# Admin Portal
+# Admin portal
 
-Documentation of the admin area: access control, pages, features, and what admins can see and do. Based on existing code and BRD only.
+### What this page is
+
+Reference for the **admin area**: who can enter, which **routes** exist, and what each screen is for.
+
+### Why it matters
+
+Operators and engineers use one table to find the right page and script name.
+
+### What you can do here
+
+- Confirm route protection before testing a role.
+- Map a URL to its feature script.
+
+### Step-by-step actions
+
+1. Read **Access control**.
+2. Use the **routes** table to jump to a section.
+3. Pair with [admin-user-journey.md](admin-user-journey.md) for procedures.
+
+### What happens next
+
+Day-to-day tasks (approve user, run matching) are narrated in the admin journey doc.
+
+### Tips
+
+- Permission differences between admin, moderator, and auditor may not be fully enforced in every button—see [implementation-status.md](implementation-status.md).
 
 ---
 
-## 1. Access Control
+## 1. Access control
 
 ```mermaid
 flowchart LR

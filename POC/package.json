@@ -5,9 +5,14 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "build:css": "tailwindcss -i ./src/input.css -o ./assets/css/tailwind.css --minify"
+    "build:css": "tailwindcss -i ./src/input.css -o ./assets/css/tailwind.css --minify",
+    "manual:capture": "node scripts/capture-manual-screenshots.mjs",
+    "manual:pdf": "node scripts/render-manual-pdf.mjs pmtwin-user-training-manual.html PMTwin-User-Training-Manual-A4.pdf",
+    "manual:pdf:admin": "node scripts/render-manual-pdf.mjs pmtwin-admin-training-manual.html PMTwin-Admin-Training-Manual-A4.pdf",
+    "manual:pdf:all": "npm run manual:pdf && npm run manual:pdf:admin"
   },
   "devDependencies": {
+    "playwright": "^1.58.2",
     "tailwindcss": "^3.4.0",
     "vitest": "^3.0.0"
   }

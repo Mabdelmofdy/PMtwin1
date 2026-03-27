@@ -1,10 +1,36 @@
-# Matching Engine
+# Matching engine
 
-Detailed documentation of the PMTwin matching engine: models, scoring, ranking, and components. All logic is implemented in the POC; no invented features.
+### What this page is
+
+Deep dive into **models**, **scoring**, **ranking**, and **components** in the matching layer. Matches what the POC implements.
+
+### Why it matters
+
+Engineers debugging scores or tiers start here, with [matching-workflow.md](workflow/matching-workflow.md) for user-visible flow.
+
+### What you can do here
+
+- Read the architecture diagram.
+- Look up weight keys and thresholds in config.
+- Compare one-way vs barter vs consortium vs circular sections.
+
+### Step-by-step actions
+
+1. Skim **Architecture overview**.
+2. Open the model section you are changing.
+3. Verify against `matching-service` / `matching-models` in code.
+
+### What happens next
+
+When you change weights, update user-facing docs ([diagrams/matching-flow.md](diagrams/matching-flow.md)) if percentages shift.
+
+### Tips
+
+- “Top / good / possible” tiers are UI-facing labels—keep them aligned with `rankMatches`.
 
 ---
 
-## Architecture Overview
+## Architecture overview
 
 ```mermaid
 flowchart TB

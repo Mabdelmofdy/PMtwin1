@@ -1,4 +1,32 @@
-# Full Workflows
+# Full workflows
+
+### What this page is
+
+End-to-end workflows across **user and admin** modules—readable for business, with routes and services for delivery and QA.
+
+### Why it matters
+
+One place to see how journeys connect before you split tickets by team.
+
+### What you can do here
+
+- Scan **Actors** then your role’s path.
+- Search for a route name you see in the browser.
+
+### Step-by-step actions
+
+1. Read **Overview**.
+2. Jump to portal vs admin sections.
+
+### What happens next
+
+Drill into [workflow/](../workflow/) files for tighter step lists.
+
+### Tips
+
+- When a route changes, update both this doc and `app-init` route tables.
+
+---
 
 ## Overview
 

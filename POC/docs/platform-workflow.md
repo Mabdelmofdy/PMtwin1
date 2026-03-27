@@ -1,4 +1,23 @@
-# Platform Workflow
+# Platform workflow
+
+### What this page is
+
+POC-oriented **end-to-end story**: registration → opportunity → matching → applications → negotiation → deal → contract → execution.
+
+### Why it matters
+
+Developers working only in `/POC` get context without opening the full `/docs` set first.
+
+### What you can do here
+
+- Read the numbered list in **Overview**.
+- Jump to [docs/full-user-journey.md](../../docs/full-user-journey.md) for implementation markers.
+
+### What happens next
+
+Deep dives: [docs/workflow/](../../docs/workflow/).
+
+---
 
 This document describes the end-to-end workflow of the PMTwin B2B collaboration marketplace, from user registration through opportunity creation, matching, negotiation, deal formation, contracting, and execution.
 

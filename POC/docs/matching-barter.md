@@ -1,4 +1,14 @@
-# Barter (Two-Way) Matching
+# Barter (two-way) matching
+
+### What this page is
+
+POC note on **two-way / barter** matching and when both directions must score well.
+
+### What happens next
+
+See [matching-workflow.md](../../docs/workflow/matching-workflow.md) and `findBarterMatches` in code.
+
+---
 
 Barter matching pairs two parties who each have both a **need** and an **offer**, so they can exchange value without cash (or with hybrid terms).
 

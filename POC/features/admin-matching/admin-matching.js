@@ -27,6 +27,7 @@ async function runAndShowReport() {
     try {
         const report = await runMatchingOnCurrentData();
         renderReport(reportGrid, reportDetails || null, report);
+        await renderAdminAnalytics(window.dataService);
         if (reportBlock) reportBlock.hidden = false;
     } catch (e) {
         if (runError) {
@@ -35,6 +36,52 @@ async function runAndShowReport() {
         }
     } finally {
         if (runLoading) runLoading.hidden = true;
+    }
+}
+
+async function renderAdminAnalytics(dataService) {
+    const el = document.getElementById('matching-admin-analytics');
+    if (!el) return;
+    const stats = await getAdminMatchingAnalytics(dataService);
+    el.innerHTML = ''
+        + '<div class="stat-card"><div class="stat-value">' + stats.totalPostMatches + '</div><div class="stat-label">Total post_matches</div></div>'
+        + '<div class="stat-card"><div class="stat-value">' + stats.confirmedPostMatches + '</div><div class="stat-label">Confirmed post_matches</div></div>'
+        + '<div class="stat-card"><div class="stat-value">' + stats.totalDeals + '</div><div class="stat-label">Total deals</div></div>'
+        + '<div class="stat-card"><div class="stat-value">' + stats.dealsFromMatches + '</div><div class="stat-label">Deals from matches</div></div>'
+        + '<div class="stat-card"><div class="stat-value">' + escapeHtml(stats.conversionRate) + '</div><div class="stat-label">Conversion (confirmed → deals)</div></div>';
+}
+
+/**
+ * Persist post_matches for one opportunity using matchingService.persistPostMatches.
+ * Shows message in matching-run-error area.
+ */
+async function persistForOpportunity(opportunityId) {
+    authService.assertAdminCapability('admin.matching.persist');
+    const runError = document.getElementById('matching-run-error');
+    const clearError = () => { if (runError) { runError.hidden = true; runError.textContent = ''; } };
+    if (!window.matchingService || !window.dataService) {
+        if (runError) { runError.hidden = false; runError.textContent = 'Matching service not available.'; }
+        return;
+    }
+    const opp = await window.dataService.getOpportunityById(opportunityId);
+    if (!opp || (opp.status || '') !== 'published') {
+        if (runError) { runError.hidden = false; runError.textContent = 'Opportunity not found or not published. Only published opportunities can be persisted.'; }
+        return;
+    }
+    clearError();
+    try {
+        const created = await window.matchingService.persistPostMatches(opportunityId);
+        if (runError) {
+            runError.hidden = false;
+            runError.style.color = '';
+            runError.textContent = 'Persisted ' + (created && created.length ? created.length : 0) + ' match(es) for this opportunity.';
+        }
+        await renderAdminAnalytics(window.dataService);
+    } catch (e) {
+        if (runError) {
+            runError.hidden = false;
+            runError.textContent = (e && e.message) ? e.message : 'Persist failed.';
+        }
     }
 }
 
@@ -228,6 +275,26 @@ async function buildCreatorNamesMap(dataService, report) {
     return creatorNames;
 }
 
+/**
+ * Compute admin analytics from data-service getters (post_matches, deals).
+ * @param {object} dataService - window.dataService
+ * @returns {Promise<{ totalPostMatches: number, confirmedPostMatches: number, totalDeals: number, dealsFromMatches: number, conversionRate: string }>}
+ */
+async function getAdminMatchingAnalytics(dataService) {
+    if (!dataService) return { totalPostMatches: 0, confirmedPostMatches: 0, totalDeals: 0, dealsFromMatches: 0, conversionRate: '—' };
+    const postMatches = await dataService.getPostMatches();
+    const deals = await dataService.getDeals();
+    const totalPostMatches = postMatches.length;
+    const confirmedStatus = (typeof CONFIG !== 'undefined' && CONFIG.POST_MATCH_STATUS && CONFIG.POST_MATCH_STATUS.CONFIRMED) ? CONFIG.POST_MATCH_STATUS.CONFIRMED : 'confirmed';
+    const confirmedPostMatches = postMatches.filter(m => (m.status || '') === confirmedStatus).length;
+    const totalDeals = deals.length;
+    const dealsFromMatches = deals.filter(d => d.matchId).length;
+    const conversionRate = confirmedPostMatches > 0
+        ? (Math.round((dealsFromMatches / confirmedPostMatches) * 100) + '%')
+        : '—';
+    return { totalPostMatches, confirmedPostMatches, totalDeals, dealsFromMatches, conversionRate };
+}
+
 function getOpportunityRoute(id) {
     const routeBase = (window.CONFIG && window.CONFIG.ROUTES && window.CONFIG.ROUTES.OPPORTUNITY_DETAIL)
         ? window.CONFIG.ROUTES.OPPORTUNITY_DETAIL.replace(':id', '')
@@ -367,10 +434,12 @@ function renderReport(gridEl, detailsEl, report) {
             perOppEl.innerHTML = '<p class="matching-details">No opportunities analyzed in this run.</p>';
         } else {
             let table = '<table class="matching-summary-table matching-per-opp-table"><thead><tr><th>Opportunity title</th><th>Number of matches</th><th>Best match score</th><th>Average match score</th><th>Action</th></tr></thead><tbody>';
+            const canPersist = typeof authService !== 'undefined' && authService.hasAdminCapability && authService.hasAdminCapability('admin.matching.persist');
             perOppRows.forEach(r => {
                 const viewHref = r.sectionId === 'matching-two-way' ? '#matching-two-way' : '#matching-opp-' + escapeHtml(r.opportunityId);
                 const viewMatchesLink = '<a href="' + viewHref + '" class="matching-view-matches-link" data-section="' + escapeHtml(r.sectionId) + '" data-opp-id="' + escapeHtml(r.opportunityId) + '">View matches</a>';
-                table += '<tr><td>' + escapeHtml(r.title) + '</td><td>' + r.matchCount + '</td><td>' + escapeHtml(String(r.bestScorePct)) + '</td><td>' + escapeHtml(String(r.avgScorePct)) + '</td><td>' + viewMatchesLink + '</td></tr>';
+                const persistBtn = canPersist ? ('<button type="button" class="matching-persist-btn" data-opp-id="' + escapeHtml(r.opportunityId) + '">Persist matches</button>') : '';
+                table += '<tr><td>' + escapeHtml(r.title) + '</td><td>' + r.matchCount + '</td><td>' + escapeHtml(String(r.bestScorePct)) + '</td><td>' + escapeHtml(String(r.avgScorePct)) + '</td><td>' + viewMatchesLink + (persistBtn ? ' ' + persistBtn : '') + '</td></tr>';
             });
             table += '</tbody></table>';
             perOppEl.innerHTML = table;
@@ -624,6 +693,12 @@ function renderReport(gridEl, detailsEl, report) {
             e.preventDefault();
             const route = this.getAttribute('data-route');
             if (route && typeof router !== 'undefined' && router.navigate) router.navigate(route);
+        });
+    });
+    container.querySelectorAll('.matching-persist-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const oppId = this.getAttribute('data-opp-id');
+            if (oppId) persistForOpportunity(oppId);
         });
     });
     const sectionIdToFilter = { 'matching-one-way-need-to-offers': 'one-way', 'matching-one-way-offer-to-needs': 'one-way', 'matching-two-way': 'two-way', 'matching-consortium': 'consortium', 'matching-circular': 'circular' };

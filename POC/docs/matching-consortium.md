@@ -1,4 +1,14 @@
-# Consortium Matching
+# Consortium matching
+
+### What this page is
+
+POC note on **consortium** matching: lead need, role slots, and member offers.
+
+### What happens next
+
+Admin replacement flows: [consortium-replacement.md](consortium-replacement.md).
+
+---
 
 Consortium matching forms a group around one **lead** need that requires multiple roles (e.g. investor, contractor, equipment supplier). The lead has one opportunity; members contribute with their offers mapped to role slots.
 

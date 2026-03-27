@@ -1,10 +1,35 @@
-# Implementation Status
+# Implementation status
 
-Per-module status: ✅ Implemented, ⚠️ Partial, ❌ Missing. Based only on existing codebase; no invented features.
+### What this page is
+
+Module-by-module checklist: **done**, **partial**, or **missing**. Sourced from the codebase only.
+
+### Why it matters
+
+Product and engineering use it for roadmaps and release notes—without rereading every file.
+
+### What you can do here
+
+- Scan a module (Auth, Opportunities, Matching, and so on).
+- Jump to [gaps-and-missing.md](gaps-and-missing.md) for narrative severity.
+
+### Step-by-step actions
+
+1. Find the module you care about.
+2. Read the table rows and Notes.
+3. Confirm behavior in the app when a row is ⚠️.
+
+### What happens next
+
+Prioritize ⚠️ and ❌ items against your release goals.
+
+### Tips
+
+- Status can change with any PR—treat this as a snapshot to refresh periodically.
 
 ---
 
-## 1. Authentication & Authorization
+## 1. Authentication & authorization
 
 | Item | Status | Notes |
 |------|--------|-------|

@@ -1,6 +1,25 @@
-# PMTwin Ecosystem Overview
+# PMTwin ecosystem overview
 
-## Platform Architecture
+### What this page is
+
+High-level **portals**, actors, and how they connect in the PMTwin ecosystem.
+
+### Why it matters
+
+Readers see where public, user, and admin experiences sit before reading detailed specs.
+
+### What you can do here
+
+- Map **portal structure** to your role.
+- Cross-check with [docs/overview.md](../docs/overview.md).
+
+### What happens next
+
+Open [03_Portal_Specifications.md](03_Portal_Specifications.md) for screen-level detail.
+
+---
+
+## Platform architecture
 
 PMTwin operates as a multi-portal platform serving different user segments:
 

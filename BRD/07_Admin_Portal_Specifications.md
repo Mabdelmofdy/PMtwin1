@@ -1,8 +1,27 @@
-# Admin Portal Specifications
+# Admin portal specifications
+
+### What this page is
+
+BRD for the **admin portal**: governance, moderation, analytics, and access rules.
+
+### Why it matters
+
+Admin UX and permissions should match business intent before build.
+
+### What you can do here
+
+- Read **Overview** then each functional area.
+- Pair with [docs/admin-user-journey.md](../docs/admin-user-journey.md).
+
+### What happens next
+
+Route-level detail: [docs/admin-portal.md](../docs/admin-portal.md).
+
+---
 
 ## Overview
 
-The Admin Portal provides comprehensive governance, moderation, and analytics tools for platform administrators, moderators, and auditors.
+The admin portal provides governance, moderation, and analytics tools for platform administrators, moderators, and auditors.
 
 ## Access Control
 

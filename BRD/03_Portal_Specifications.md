@@ -1,4 +1,23 @@
-# Portal Specifications
+# Portal specifications
+
+### What this page is
+
+BRD-level description of **portal** behavior and requirements (public, user, admin).
+
+### Why it matters
+
+UX and engineering align on scope before component design.
+
+### What you can do here
+
+- Trace each portal’s responsibilities.
+- Link features back to business goals.
+
+### What happens next
+
+Use [04_User_Flows.md](04_User_Flows.md) for journey detail.
+
+---
 
 ## Portal 1: Public Portal
 

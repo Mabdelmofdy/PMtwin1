@@ -1,6 +1,27 @@
-# Demo User Credentials List
+# Demo user credentials list
 
-This document lists all demo users and demo companies for testing the PMTwin POC with the demo-40-opportunities dataset. **For demo/testing only** — do not use in production.
+### What this page is
+
+List of **demo accounts** and passwords for testing the POC with seeded data.
+
+### Why it matters
+
+QA and trainers need logins without reading JSON files.
+
+### What you can do here
+
+- Copy an email/password pair for a scenario.
+- Understand how demo data merges on first load.
+
+### What happens next
+
+Sign in through the normal **Login** page (demo picker when available).
+
+### Tips
+
+**For demo and testing only** — never use these passwords in production.
+
+---
 
 **Passwords:**
 - **Admin:** `admin123`

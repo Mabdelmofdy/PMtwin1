@@ -1,6 +1,32 @@
-=== File: authentication.md ===
-
 # Authentication
+
+### What this page is
+
+Module guide: **login**, **logout**, **sessions**, and **role checks** for portal and admin.
+
+### Why it matters
+
+Every protected page depends on the same auth layer.
+
+### What you can do here
+
+- Trace session lifecycle.
+- List roles and guards.
+
+### Step-by-step actions
+
+1. Read **Overview** then flows for login/logout.
+2. Pair with [workflow/user-workflow.md](../workflow/user-workflow.md).
+
+### What happens next
+
+After login, routing sends users to dashboard or requested deep links.
+
+### Tips
+
+- POC password handling is not production-safe—see [gaps-and-missing.md](../gaps-and-missing.md).
+
+---
 
 ## Overview
 

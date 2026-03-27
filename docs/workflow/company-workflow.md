@@ -1,10 +1,36 @@
-# Company Workflow
+# Company workflow
 
-Workflows specific to **companies** (organizations). Companies are stored in `pmtwin_companies` and can log in with their own email/password.
+### What this page is
+
+How **company accounts** register, sign in, create opportunities, and show up on dashboards—compared side by side with individual users.
+
+### Why it matters
+
+Companies and people share most screens, but the stored **creator** id and session context differ.
+
+### What you can do here
+
+- Walk company registration and login.
+- See how **creator id** scopes opportunities and matches.
+- Preview future company-role ideas from the BRD.
+
+### Step-by-step actions
+
+1. Register as a company and wait for approval.
+2. Log in with the company email.
+3. Create opportunities the same way as individuals.
+
+### What happens next
+
+Published opportunities follow [opportunity-workflow.md](opportunity-workflow.md) and matching behaves the same, with company ids in participant lists.
+
+### Tips
+
+- Member invite flows may be limited in the POC—check [implementation-status.md](../implementation-status.md).
 
 ---
 
-## 1. Company Registration
+## 1. Company registration
 
 Same high-level flow as user registration, with company-specific fields:
 

@@ -3,7 +3,7 @@
  */
 
 async function initAdminSettings() {
-    if (!authService.isAdmin()) {
+    if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.settings.read')) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }
@@ -42,10 +42,19 @@ async function loadSystemInfo() {
 function setupSettingsForm() {
     const form = document.getElementById('settings-form');
     if (!form) return;
-    
+    const saveBtn = form.querySelector('button[type="submit"]');
+    if (saveBtn && typeof authService !== 'undefined' && authService.hasAdminCapability && !authService.hasAdminCapability('admin.settings.write')) {
+        saveBtn.disabled = true;
+        saveBtn.title = 'You do not have permission to change settings.';
+    }
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+        try {
+            authService.assertAdminCapability('admin.settings.write');
+        } catch (err) {
+            alert(err && err.message ? err.message : 'You do not have permission to change settings.');
+            return;
+        }
         const formData = new FormData(form);
         const settings = {
             platformName: formData.get('platformName')?.toString().trim() || CONFIG.APP_NAME,

@@ -1,4 +1,14 @@
-# Consortium Participant Replacement
+# Consortium participant replacement
+
+### What this page is
+
+Describes **replacement** when a consortium member leaves mid-deal and a new candidate is needed.
+
+### What happens next
+
+Confirm stage gates in config and [deal-workflow.md](../../docs/workflow/deal-workflow.md).
+
+---
 
 When a consortium deal is in progress and one participant **drops out**, the platform supports **replacement**: inviting a new candidate for the same role without dissolving the deal.
 

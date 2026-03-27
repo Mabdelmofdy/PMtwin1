@@ -1,10 +1,34 @@
-# Database Schema (Storage / Future DB)
+# Database schema (storage / future DB)
 
-The POC uses **localStorage** with string keys. There is no SQL or NoSQL database. This document lists storage keys, the shape of stored data, and notes for a future database migration.
+### What this page is
+
+**Storage keys**, what each holds, and notes for a future **real database** migration.
+
+### Why it matters
+
+Ops and backend devs need one list of keys before exporting or ETL.
+
+### What you can do here
+
+- Look up a **key** name.
+- Read migration notes at the end.
+
+### Step-by-step actions
+
+1. Find your collection in the storage key table.
+2. Compare object shapes with [data-model.md](data-model.md).
+
+### What happens next
+
+Design SQL tables to mirror entities and relationships when you leave localStorage.
+
+### Tips
+
+- Sessions in POC also use **sessionStorage** for the active login—see notes in the tables.
 
 ---
 
-## 1. Storage Keys (CONFIG.STORAGE_KEYS)
+## 1. Storage keys (CONFIG.STORAGE_KEYS)
 
 | Key | Domain (for seed) | Contents |
 |-----|-------------------|----------|

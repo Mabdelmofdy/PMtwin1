@@ -1,4 +1,14 @@
-# Circular Exchange Matching
+# Circular exchange matching
+
+### What this page is
+
+POC note on **circular** cycles (3+ parties) and how edges are scored.
+
+### What happens next
+
+See [matching-workflow.md](../../docs/workflow/matching-workflow.md) § circular.
+
+---
 
 Circular exchange matching forms a **cycle** of three or more parties where value flows in a circle: A provides to B, B to C, C to A (and so on). No single payer; each party gives and receives.
 

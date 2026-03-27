@@ -1,6 +1,32 @@
-=== File: registration.md ===
-
 # Registration
+
+### What this page is
+
+Module guide: **sign-up** for individuals and companies—wizards, vetting, and status changes.
+
+### Why it matters
+
+Everything downstream assumes a trusted, **active** account.
+
+### What you can do here
+
+- Follow each wizard path.
+- Map admin vetting outcomes.
+
+### Step-by-step actions
+
+1. Pick company vs individual path.
+2. Align fields with [workflow/user-workflow.md](../workflow/user-workflow.md).
+
+### What happens next
+
+Pending accounts wait for **Admin vetting** ([admin-user-journey.md](../admin-user-journey.md)).
+
+### Tips
+
+- OTP depth may vary by environment—treat POC as demonstrative.
+
+---
 
 ## Overview
 

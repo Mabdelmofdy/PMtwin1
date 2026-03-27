@@ -1,4 +1,14 @@
-# Data Audit Summary
+# Data audit summary
+
+### What this page is
+
+Internal **data audit** notes for the POC dataset (coverage, gaps, follow-ups).
+
+### What happens next
+
+Use with [DATA_CLEANUP_CHANGELOG.md](DATA_CLEANUP_CHANGELOG.md) when fixing seed data.
+
+---
 
 Generated: 2026-03-05T13:32:03.799Z
 

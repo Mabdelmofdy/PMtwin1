@@ -16,7 +16,7 @@ async function loadAdminDetailLookups() {
 }
 
 async function initAdminUserDetail(params) {
-    if (!authService.isAdmin()) {
+    if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.users.read')) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }
@@ -88,8 +88,9 @@ async function loadUserDetail(userId) {
         <div class="detail-item">Interview ${req.interview === 'required' ? (interviewOk ? '✓' : '✗') : '—'} ${inv?.link ? '<a href="' + inv.link + '" target="_blank">Link</a>' : '—'} ${inv?.scheduledAt ? ' · ' + new Date(inv.scheduledAt).toLocaleString() : ''} ${inv?.result ? ' · Result: ' + inv.result : ''}</div>
     `;
     const isIndividual = !isCompany && (person.role === 'professional' || person.role === 'consultant');
+    const canWriteUsers = typeof authService !== 'undefined' && authService.hasAdminCapability && authService.hasAdminCapability('admin.users.write');
     const verificationEditWrap = document.getElementById('user-detail-verification-edit');
-    const showVerificationEdit = isIndividual || isCompany;
+    const showVerificationEdit = (isIndividual || isCompany) && canWriteUsers;
     if (verificationEditWrap) verificationEditWrap.style.display = showVerificationEdit ? 'block' : 'none';
     const verificationSelect = document.getElementById('admin-verification-status');
     if (verificationSelect) {
@@ -105,6 +106,7 @@ async function loadUserDetail(userId) {
     if (tierSelect) tierSelect.value = person.profile?.verificationTier || '';
     if (showVerificationEdit) {
         document.getElementById('admin-save-verification').onclick = async () => {
+            try { authService.assertAdminCapability('admin.users.write'); } catch (err) { alert(err && err.message ? err.message : 'You do not have permission.'); return; }
             const status = document.getElementById('admin-verification-status').value;
             const tier = document.getElementById('admin-verification-tier')?.value || '';
             const updatedProfile = { ...(person.profile || {}), verificationStatus: status, verificationTier: tier || null };
@@ -119,12 +121,13 @@ async function loadUserDetail(userId) {
         };
     }
     const interviewEditWrap = document.getElementById('user-detail-interview-edit');
-    if (interviewEditWrap) interviewEditWrap.style.display = 'block';
+    if (interviewEditWrap) interviewEditWrap.style.display = canWriteUsers ? 'block' : 'none';
     document.getElementById('admin-interview-link').value = inv?.link || '';
     document.getElementById('admin-interview-scheduledAt').value = inv?.scheduledAt ? new Date(inv.scheduledAt).toISOString().slice(0, 16) : '';
     const resultSelect = document.getElementById('admin-interview-result');
     if (resultSelect) resultSelect.value = inv?.result || 'pending';
     document.getElementById('admin-save-interview').onclick = async () => {
+        try { authService.assertAdminCapability('admin.users.write'); } catch (err) { alert(err && err.message ? err.message : 'You do not have permission.'); return; }
         const link = document.getElementById('admin-interview-link').value.trim();
         const scheduledAt = document.getElementById('admin-interview-scheduledAt').value;
         const result = document.getElementById('admin-interview-result')?.value || 'pending';

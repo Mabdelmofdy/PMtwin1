@@ -1,6 +1,32 @@
 # Matching Workflow
 
-How the matching engine runs, how post_matches are created, and how users see and respond to matches.
+### What this page is
+
+Technical walkthrough of **when matching runs**, how **match records** are built for each model, and how users **accept or decline** on the Matches screens.
+
+### Why it matters
+
+Engineers and support use this file alongside [matching-engine.md](../matching-engine.md) to debug scores and thresholds.
+
+### What you can do here
+
+- Trace the publish trigger through to notifications.
+- Compare one-way, two-way, consortium, and circular paths.
+- Read the state-change table at the end.
+
+### Step-by-step actions
+
+1. Start with **When matching runs**.
+2. Open the model section you investigate (sections 3–6).
+3. Finish with **User-side: view and respond** for UX behavior.
+
+### What happens next
+
+After a match is **confirmed**, continue with [deal-workflow.md](deal-workflow.md).
+
+### Tips
+
+- Admin “run matching” may behave like preview; publish is the main persistence path in the POC.
 
 ---
 

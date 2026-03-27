@@ -3,7 +3,7 @@
  */
 
 async function initAdminOpportunities() {
-    if (!authService.isAdmin()) {
+    if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.opportunities.read')) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }
@@ -73,6 +73,7 @@ async function loadOpportunities() {
         const milestones = (opp) => (opp.attributes && Array.isArray(opp.attributes.milestones)) ? opp.attributes.milestones : (Array.isArray(opp.milestones) ? opp.milestones : []);
         const paymentModesArr = (opp) => Array.isArray(opp.paymentModes) ? opp.paymentModes : (opp.exchangeMode ? [opp.exchangeMode] : []);
 
+        const canWrite = typeof authService !== 'undefined' && authService.hasAdminCapability && authService.hasAdminCapability('admin.opportunities.write');
         const html = oppsWithCreatorsAndCounts.map(opp => {
             const pmArr = paymentModesArr(opp);
             const skillsArr = skills(opp);
@@ -95,7 +96,8 @@ async function loadOpportunities() {
                     email: opp.creator?.email || 'Unknown'
                 },
                 applicationCount: opp.applicationCount,
-                showClose: opp.status === 'published' || opp.status === 'in_negotiation'
+                showClose: canWrite && (opp.status === 'published' || opp.status === 'in_negotiation'),
+                showDelete: canWrite
             };
             return templateRenderer.render(template, data);
         }).join('');
@@ -112,7 +114,7 @@ async function loadOpportunities() {
         });
 
         const bulkEl = document.getElementById('admin-opp-bulk-actions');
-        if (bulkEl) bulkEl.style.display = 'block';
+        if (bulkEl) bulkEl.style.display = canWrite ? 'block' : 'none';
         
     } catch (error) {
         console.error('Error loading opportunities:', error);
@@ -166,6 +168,7 @@ async function handleOpportunityAction(action, opportunityId) {
 }
 
 async function closeOpportunity(opportunityId) {
+    authService.assertAdminCapability('admin.opportunities.write');
     if (!confirm('Close this opportunity?')) return;
     
     try {
@@ -190,6 +193,7 @@ async function closeOpportunity(opportunityId) {
 }
 
 async function deleteOpportunity(opportunityId) {
+    authService.assertAdminCapability('admin.opportunities.write');
     if (!confirm('Delete this opportunity? This action cannot be undone.')) return;
     
     try {
@@ -219,6 +223,7 @@ function getSelectedOpportunityIds() {
 }
 
 async function bulkStatusChange() {
+    authService.assertAdminCapability('admin.opportunities.write');
     const ids = getSelectedOpportunityIds();
     const status = document.getElementById('admin-opp-bulk-status')?.value;
     if (!ids.length) {

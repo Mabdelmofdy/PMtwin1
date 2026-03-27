@@ -1,4 +1,14 @@
-# Matching Readiness Report
+# Matching readiness report
+
+### What this page is
+
+Internal report: readiness of **matching** for demos and QA.
+
+### What happens next
+
+Update when matching config or demo posts change.
+
+---
 
 Generated: 2026-03-06T12:50:46.835Z
 

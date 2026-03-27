@@ -3,19 +3,22 @@
  */
 
 async function initAdminSubscriptions() {
-    if (!authService.hasRole(CONFIG.ROLES.ADMIN)) {
+    if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.subscriptions.read')) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }
-    await loadPlans();
-    await loadAssignments();
+    const canWrite = authService.hasAdminCapability('admin.subscriptions.write');
+    await loadPlans(canWrite);
+    await loadAssignments(canWrite);
     setupPlanModal();
     setupAssignModal();
-    document.getElementById('btn-add-plan')?.addEventListener('click', () => openPlanModal());
-    document.getElementById('btn-assign')?.addEventListener('click', () => openAssignModal());
+    const addPlanBtn = document.getElementById('btn-add-plan');
+    const assignBtn = document.getElementById('btn-assign');
+    if (addPlanBtn) { addPlanBtn.style.display = canWrite ? '' : 'none'; addPlanBtn.addEventListener('click', () => openPlanModal()); }
+    if (assignBtn) { assignBtn.style.display = canWrite ? '' : 'none'; assignBtn.addEventListener('click', () => openAssignModal()); }
 }
 
-async function loadPlans() {
+async function loadPlans(canWrite = true) {
     const container = document.getElementById('plans-list');
     if (!container) return;
     try {
@@ -33,7 +36,7 @@ async function loadPlans() {
                     ${p.isActive === false ? '<span class="badge badge-danger">Inactive</span>' : ''}
                 </div>
                 <div class="plan-actions">
-                    <button type="button" class="btn btn-secondary btn-sm" data-edit-plan="${p.id}">Edit</button>
+                    ${canWrite ? `<button type="button" class="btn btn-secondary btn-sm" data-edit-plan="${p.id}">Edit</button>` : ''}
                 </div>
             </div>
         `).join('');
@@ -46,7 +49,7 @@ async function loadPlans() {
     }
 }
 
-async function loadAssignments() {
+async function loadAssignments(canWrite = true) {
     const container = document.getElementById('assignments-list');
     if (!container) return;
     try {
@@ -76,12 +79,13 @@ async function loadAssignments() {
                     <span class="text-muted">${s.startsAt ? new Date(s.startsAt).toLocaleDateString() : ''}</span>
                 </div>
                 <div class="assign-item-actions">
-                    <button type="button" class="btn btn-danger btn-sm" data-remove-sub="${s.id}">Remove</button>
+                    ${canWrite ? `<button type="button" class="btn btn-danger btn-sm" data-remove-sub="${s.id}">Remove</button>` : ''}
                 </div>
             </div>
         `).join('');
         container.querySelectorAll('[data-remove-sub]').forEach(btn => {
             btn.addEventListener('click', async () => {
+                try { authService.assertAdminCapability('admin.subscriptions.write'); } catch (err) { alert(err && err.message ? err.message : 'You do not have permission.'); return; }
                 if (!confirm('Remove this assignment?')) return;
                 await dataService.removeSubscription(btn.dataset.removeSub);
                 await loadAssignments();
@@ -106,6 +110,12 @@ function setupPlanModal() {
     });
     form?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        try {
+            authService.assertAdminCapability('admin.subscriptions.write');
+        } catch (err) {
+            alert(err && err.message ? err.message : 'You do not have permission to manage plans.');
+            return;
+        }
         const id = document.getElementById('plan-id').value;
         const name = document.getElementById('plan-name').value.trim();
         const tier = document.getElementById('plan-tier').value.trim() || 'basic';
@@ -165,6 +175,12 @@ function setupAssignModal() {
     });
     form?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        try {
+            authService.assertAdminCapability('admin.subscriptions.write');
+        } catch (err) {
+            alert(err && err.message ? err.message : 'You do not have permission to assign subscriptions.');
+            return;
+        }
         const entityId = document.getElementById('assign-entity').value;
         const planId = document.getElementById('assign-plan').value;
         const status = document.getElementById('assign-status').value;

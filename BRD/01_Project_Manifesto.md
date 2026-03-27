@@ -1,6 +1,25 @@
-# PMTwin MVP - Project Manifesto
+# PMTwin MVP — project manifesto
 
-## Vision Statement
+### What this page is
+
+Vision, mission, values, and market context for the PMTwin program.
+
+### Why it matters
+
+Teams align product decisions to this charter before writing detailed specs.
+
+### What you can do here
+
+- Share the **vision** and **mission** with stakeholders.
+- Use **core values** in prioritization discussions.
+
+### What happens next
+
+Detailed requirements live in the other `BRD/` files and in `/docs`.
+
+---
+
+## Vision statement
 
 PMTwin is a digital collaboration platform designed to revolutionize how construction companies, professionals, and stakeholders connect, partner, and grow together in the Saudi Arabian and GCC construction industry.
 

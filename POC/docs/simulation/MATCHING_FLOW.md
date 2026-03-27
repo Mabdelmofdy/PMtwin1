@@ -1,8 +1,22 @@
-# Matching Flow (Simulation Reference)
+# Matching flow (simulation reference)
+
+### What this page is
+
+Technical **routing order** and dependencies for `findMatchesForPost`—for simulation and parity checks.
+
+### Why it matters
+
+Keeps test harnesses aligned with `matching-service.js`.
+
+### What happens next
+
+Compare with [matching-engine.md](../../../docs/matching-engine.md) and unit tests.
+
+---
 
 This document describes the current matching system so the simulation environment stays aligned with production behavior.
 
-## Entry Point and Routing
+## Entry point and routing
 
 - **Entry:** `matchingService.findMatchesForPost(opportunityId, options)` in `POC/src/services/matching/matching-service.js` (lines 16–44).
 - **Routing order:**

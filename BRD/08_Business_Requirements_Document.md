@@ -1,8 +1,27 @@
-# Business Requirements Document (BRD)
+# Business requirements document (BRD)
 
 **Last updated:** 2025-03-07
 
-## 1. Executive Summary
+### What this page is
+
+Master BRD: objectives, scope, requirements, and acceptance themes for a production-ready baseline.
+
+### Why it matters
+
+Single executive-facing requirements entry point for the program.
+
+### What you can do here
+
+- Read **Executive summary** and **Business objectives** first.
+- Deep link other BRD files from cross-references inside.
+
+### What happens next
+
+Track delivery with [docs/implementation-status.md](../docs/implementation-status.md).
+
+---
+
+## 1. Executive summary
 
 PMTwin is a collaboration platform for construction and related industries that connects companies, professionals, and consultants across opportunity creation, intelligent matching, application management, contracting, and execution governance.  
 This BRD defines business objectives, scope, requirements, and acceptance criteria for a production-ready baseline aligned with current platform modules and workflows.

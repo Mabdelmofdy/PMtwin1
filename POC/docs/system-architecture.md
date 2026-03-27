@@ -1,4 +1,23 @@
-# System Architecture
+# System architecture
+
+### What this page is
+
+POC **architecture**: UI, services, local storage, and how data flows—no server.
+
+### Why it matters
+
+Onboarding engineers understand where state lives before debugging.
+
+### What you can do here
+
+- Skim the diagram.
+- Follow bullets to `data-service` and `matching-service`.
+
+### What happens next
+
+See [docs/overview.md](../../docs/overview.md) for the wider platform picture.
+
+---
 
 This document describes the high-level architecture of the PMTwin POC: storage, config, services, and data flow.
 

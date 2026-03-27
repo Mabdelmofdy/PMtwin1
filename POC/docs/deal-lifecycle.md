@@ -1,8 +1,27 @@
-# Deal Lifecycle
+# Deal lifecycle
+
+### What this page is
+
+Deal **statuses** and transitions in the POC, with short descriptions.
+
+### Why it matters
+
+Same labels appear on deal detail, admin deals, and reports.
+
+### What you can do here
+
+- Read the status table.
+- Compare with [docs/workflow/deal-workflow.md](../../docs/workflow/deal-workflow.md).
+
+### What happens next
+
+Contract steps: [docs/workflow/contract-workflow.md](../../docs/workflow/contract-workflow.md).
+
+---
 
 Deals are the central collaboration object after matching and negotiation. This document describes the deal lifecycle stages and transitions.
 
-## Deal Statuses
+## Deal statuses
 
 The platform uses the following deal statuses (see `CONFIG.DEAL_STATUS` in config):
 

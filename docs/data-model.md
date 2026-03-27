@@ -1,10 +1,34 @@
-# Data Model
+# Data model
 
-This document describes all entities, their attributes, and relationships. The POC uses **localStorage** with keys from `CONFIG.STORAGE_KEYS`; no SQL database.
+### What this page is
+
+Entities, **fields**, and **relationships** for PMTwin. Storage is **localStorage** keys from `CONFIG.STORAGE_KEYS` in the POC (not SQL).
+
+### Why it matters
+
+Engineers and integrators use it as the single schema reference.
+
+### What you can do here
+
+- Start from the ER diagram.
+- Drill into each entity section for field lists.
+
+### Step-by-step actions
+
+1. Find the entity you are changing (User, Opportunity, PostMatch, Deal, Contract, and so on).
+2. Check relationships before adding foreign-key-like ids.
+
+### What happens next
+
+Map keys to future tables using [database-schema.md](database-schema.md).
+
+### Tips
+
+- Legacy `pmtwin_matches` may still appear in older paths; prefer **post match** for new work.
 
 ---
 
-## Entity Relationship Overview
+## Entity relationship overview
 
 ```mermaid
 erDiagram

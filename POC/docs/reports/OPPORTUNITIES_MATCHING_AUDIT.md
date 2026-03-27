@@ -1,5 +1,15 @@
 # Opportunities matching alignment audit
 
+### What this page is
+
+Internal audit: alignment between **opportunities** data and **matching** behavior.
+
+### What happens next
+
+Resolve mismatches in seed data or matching rules.
+
+---
+
 Generated: 2026-03-06T12:50:36.784Z
 Total opportunities: 50
 With issues: 5

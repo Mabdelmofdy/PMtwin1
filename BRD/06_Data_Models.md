@@ -1,6 +1,25 @@
-# Data Models
+# Data models
 
-## User Model
+### What this page is
+
+BRD **entity shapes** (user, company, opportunity, and more) at the specification level.
+
+### Why it matters
+
+Aligns business language with `/docs/data-model.md` implementation reference.
+
+### What you can do here
+
+- Copy field names into API or UI tickets.
+- Diff against live `data-model` when requirements change.
+
+### What happens next
+
+Engineers map BRD fields to storage or SQL tables.
+
+---
+
+## User model
 
 ### Base User
 ```javascript

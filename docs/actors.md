@@ -1,110 +1,156 @@
 # Actors
 
-This document describes all actors in the PMTwin platform: users, companies, admin roles, and system automation.
+### What this page is
+
+This page lists everyone who uses or affects PMTwin: individual users, companies, admins, and automatic system actions.
+
+### Why it matters
+
+Knowing who can do what helps you read workflows, permissions, and admin screens without guessing.
+
+### What you can do here
+
+- Compare **individual** vs **company** accounts.
+- See **admin** role boundaries.
+- Understand what the **system** does automatically (for example after you publish an opportunity).
+
+### Step-by-step actions
+
+1. Read **Users** and **Companies** if you build or test end-user flows.
+2. Read **Admin roles** if you work on governance or the admin portal.
+3. Read **System** for matching and notifications behavior.
+
+### What happens next
+
+Use this with [user-workflow.md](workflow/user-workflow.md) for journeys, or [admin-portal.md](admin-portal.md) for operator tasks.
+
+### Tips
+
+- Technical column names (for example config keys) are accurate for developers; you can skim them if you only need the story.
 
 ---
 
-## 1. Users (Individuals)
+## 1. Users (individuals)
 
-Users are individuals who register and use the platform. They can have **professional** or **consultant** roles.
+People register as individuals. They are usually **professionals** or **consultants**.
 
-| Attribute | Description |
-|-----------|-------------|
-| **Entity** | Stored in `pmtwin_users`; identified by `id`, `email`. |
-| **Roles** | `CONFIG.ROLES.PROFESSIONAL`, `CONFIG.ROLES.CONSULTANT`. |
-| **Status** | `pending`, `active`, `suspended`, `rejected`, `clarification_requested` (CONFIG.USER_STATUS). |
-| **Verification** | `unverified`, `professional_verified`, `consultant_verified` (CONFIG.VERIFICATION_STATUS). |
-| **Profile** | Type `professional` or similar; name, specializations, certifications, yearsExperience, sectors, skills, preferredPaymentModes, etc. |
+| Topic | Details |
+|-------|---------|
+| **Stored as** | User records with id and email. |
+| **Roles** | Professional or consultant (see app config). |
+| **Account status** | Pending until approved, then active; can be suspended, rejected, or asked for clarification. |
+| **Verification** | Levels such as unverified vs professionally verified (see config). |
+| **Profile** | Name, specializations, certifications, years of experience, sectors, skills, payment preferences, and similar fields. |
 
-**Capabilities:**
+**What they can do**
 
-- Register, login, manage profile, change password (forgot/reset).
-- Create and manage opportunities (request/offer/hybrid).
-- View matches (post_matches), accept/decline.
-- Create deals from confirmed matches; participate in negotiations; manage milestones.
+- Register, log in, manage profile, reset password.
+- Create and manage opportunities (need, offer, or hybrid).
+- View matches, accept or decline.
+- Join deals from confirmed matches, negotiate, track milestones.
 - View and sign contracts linked to deals.
-- Use pipeline (opportunities, applications, matches), find page, dashboard, messages, notifications.
-- Cannot access admin routes unless they also have an admin role.
+- Use pipeline, dashboard, notifications, and discovery pages.
+- Cannot open admin areas unless their account also has an admin-type role.
+
+### What happens next
+
+After registration, many accounts stay **pending** until an admin approves them in vetting.
 
 ---
 
 ## 2. Companies
 
-Companies are organizations that register and use the platform. They are stored in **`pmtwin_companies`** (separate from users). Company **accounts** may be linked to a user with role `company_owner` (e.g. same email used for login).
+Organizations register as **companies**. They live in a separate company store but behave like users for most product features.
 
-| Attribute | Description |
-|-----------|-------------|
-| **Entity** | Stored in `pmtwin_companies`; identified by `id`, `email`. |
-| **Roles (for linked user)** | `CONFIG.ROLES.COMPANY_OWNER`, `COMPANY_ADMIN`, `COMPANY_MEMBER`. |
-| **Status** | Same lifecycle as user (pending, active, suspended, rejected). |
-| **Profile** | Type `company`; name, crNumber, classifications, financialCapacity, experience, etc. |
+| Topic | Details |
+|-------|---------|
+| **Stored as** | Company records with id and email. |
+| **Linked login** | Often a user with a company-owner-style role uses the same email to sign in. |
+| **Status** | Same broad lifecycle as users (pending → active, and so on). |
+| **Profile** | Company name, registration details, classifications, experience, capacity, and related fields. |
 
-**Capabilities:**
+**What they can do**
 
-- Same as users from a feature perspective: opportunities, matches, deals, contracts, pipeline.
-- Login can be by user (email/password) or company (email/password); auth checks both `users` and `companies` by email.
-- Matching normalizes both users and companies (e.g. `normalizeUsersForMatching`, `normalizeCompaniesForMatching`) so they can be candidates for opportunities.
+- Same core features as individuals: opportunities, matches, deals, contracts, pipeline.
+- Sign-in checks both user and company records for the email you enter.
+- Matching treats normalized users and companies as possible partners for opportunities.
 
----
+### What happens next
 
-## 3. Admin Roles
-
-Admin roles are assigned to **users** (in `user.role`). Only users with these roles can access admin routes (enforced by auth-guard and `authService.canAccessAdmin()`).
-
-| Role | Config Key | Description |
-|------|------------|-------------|
-| **Platform Admin** | `CONFIG.ROLES.ADMIN` | Full system access: dashboard, users, vetting, opportunities, matching, deals, contracts, consortium, health, audit, reports, settings, skills, subscriptions, collaboration models. |
-| **Moderator** | `CONFIG.ROLES.MODERATOR` | User management, content moderation, limited settings (as per BRD). |
-| **Auditor** | `CONFIG.ROLES.AUDITOR` | Read-only access to audit trails and reports. |
-
-**Default admin (POC):** If no admin exists at init, app-init creates a default user: `admin@pmtwin.com` / `admin123`, then sets status to active.
-
-**Capabilities (Admin):**
-
-- Approve/reject/suspend/activate users (vetting).
-- View and moderate opportunities; close/delete.
-- Run and inspect matching (admin-matching); view matches and post_matches.
-- View/manage deals and contracts; consortium replacement flows.
-- View health, audit log, reports; manage system settings, subscription plans, skills, collaboration models.
+Once active, a company can publish opportunities and receive matches like any other party.
 
 ---
 
-## 4. System (Automation & Matching Engine)
+## 3. Admin roles
 
-The **system** acts as an automated actor. It does not have a user account; it performs actions based on rules and triggers.
+Admins are **users** with special roles. Route guards only allow these users into admin screens.
 
-| Component | Responsibility |
-|-----------|----------------|
-| **Matching engine** | When an opportunity is set to `published`, `matching-service.persistPostMatches(opportunityId)` runs. It detects model (one_way, two_way, consortium, circular), calls matching-models (findOffersForNeed, findBarterMatches, findConsortiumCandidates, findCircularExchanges), creates **post_match** records, and calls `notifyPostMatch()` for each. |
-| **Notifications** | System creates notifications (e.g. `match_found`, `account_approved`, `account_rejected`) via `data-service.createNotification()`. |
-| **Audit** | Important actions (e.g. match_created, user status changes) create audit log entries via `data-service.createAuditLog()`. |
-| **Data init** | On first load or seed version change, data-service loads JSON seed, merges demo data, runs migrations, normalizes users/companies. |
+| Role | Typical scope |
+|------|----------------|
+| **Platform admin** | Full access: dashboard, users, vetting, opportunities, matching, deals, contracts, consortium tools, health, audit, reports, settings, skills, subscriptions, collaboration models. |
+| **Moderator** | User and content work, limited settings (per product rules). |
+| **Auditor** | Read-focused: audit trails and reports. |
 
-No scheduled jobs or background workers exist in the POC; all automation is trigger-based (e.g. on publish or on explicit admin “Run matching”).
+**POC default:** If no admin exists at first load, a demo admin user may be created so you can test (see project setup notes).
+
+**What they can do**
+
+- Approve, reject, suspend, or activate accounts in vetting.
+- Review and moderate opportunities.
+- Run or inspect matching from admin tools; review match records.
+- Open deals and contracts for support.
+- Use health, audit, reports, and configuration where allowed.
+
+### What happens next
+
+Admin actions usually create notifications and audit entries so you can trace what changed.
 
 ---
 
-## Actor Interaction Overview
+## 4. System (automation)
+
+The **system** is not a person. It runs rules when something happens—for example when an opportunity is published.
+
+| Area | What happens |
+|------|----------------|
+| **Matching** | After publish, matching runs for that opportunity, scores candidates, creates **match** records, and can notify participants. |
+| **Notifications** | In-app messages for matches, account decisions, and other events. |
+| **Audit** | Important actions can write audit log lines. |
+| **First load** | Seed data loads, demo data merges, light migrations run so stored data stays consistent. |
+
+There are no background schedulers in the POC: work runs when you trigger it (publish, admin tools, and similar).
+
+### What happens next
+
+After publish, users see new items on the **Matches** screen and may get alerts.
+
+### Tips
+
+- Admin “run matching” can behave differently from publish-triggered matching (see admin and implementation docs).
+
+---
+
+## Actor interaction overview
 
 ```mermaid
 flowchart LR
   User[User / Professional / Consultant]
   Company[Company]
   Admin[Admin / Moderator / Auditor]
-  System[System / Matching]
+  System[System automation]
 
   User --> | creates | Opp[Opportunities]
   Company --> | creates | Opp
-  User --> | receives | Match[Post Matches]
+  User --> | receives | Match[Matches]
   Company --> | receives | Match
-  User --> | accepts/declines | Match
-  Company --> | accepts/declines | Match
-  User --> | participates in | Deal[Deals]
-  Company --> | participates in | Deal
-  Admin --> | approves/rejects | User
-  Admin --> | approves/rejects | Company
+  User --> | accepts or declines | Match
+  Company --> | accepts or declines | Match
+  User --> | works in | Deal[Deals]
+  Company --> | works in | Deal
+  Admin --> | approves or rejects | User
+  Admin --> | approves or rejects | Company
   Admin --> | moderates | Opp
-  Admin --> | runs/views | Matching[Matching]
+  Admin --> | runs or reviews | Matching[Matching]
   System --> | on publish | Matching
   System --> | creates | Match
   System --> | sends | Notif[Notifications]
@@ -112,8 +158,8 @@ flowchart LR
 
 ---
 
-## Related Documentation
+## Related documentation
 
-- [Data Model](data-model.md) — User/Company/Opportunity/Match/Deal/Contract structures.
-- [User Workflow](workflow/user-workflow.md) — Registration, login, profile, opportunities.
-- [Admin Portal](admin-portal.md) — Admin features and controls.
+- [Data model](data-model.md) — Shapes of user, company, opportunity, match, deal, and contract.
+- [User workflow](workflow/user-workflow.md) — Registration through opportunities.
+- [Admin portal](admin-portal.md) — Admin features and screens.

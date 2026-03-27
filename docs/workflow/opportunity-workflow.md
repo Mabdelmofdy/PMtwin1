@@ -1,10 +1,36 @@
 # Opportunity Workflow
 
-End-to-end flow for creating, editing, publishing, and closing opportunities. Applies to both users and companies as creators.
+### What this page is
+
+Step-by-step reference for **creating**, **editing**, **publishing**, and **closing** opportunities—whether you are an individual or a company.
+
+### Why it matters
+
+Publishing is the trigger for matching; status names appear across Pipeline, detail pages, and reports.
+
+### What you can do here
+
+- Read the **lifecycle** diagram.
+- Follow **create → publish → close** sections in order.
+- Use the state summary table before building automation.
+
+### Step-by-step actions
+
+1. Skim lifecycle states.
+2. Create a draft, then publish when ready.
+3. Close or cancel when the business case ends.
+
+### What happens next
+
+On **publish**, matching runs (see [matching-workflow.md](matching-workflow.md)). When a deal exists, opportunity status may advance with the deal (see [deal-workflow.md](deal-workflow.md)).
+
+### Tips
+
+- Editing a published opportunity does not always re-run matching unless you publish again—behavior is documented in edge cases below.
 
 ---
 
-## 1. Opportunity Lifecycle (States)
+## 1. Opportunity lifecycle (states)
 
 ```mermaid
 stateDiagram-v2

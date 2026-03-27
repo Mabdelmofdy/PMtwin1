@@ -1,4 +1,14 @@
-# Signup / Onboarding UI — Gap Analysis
+# Signup / onboarding UI — gap analysis
+
+### What this page is
+
+UX **gap analysis** for registration and onboarding flows.
+
+### What happens next
+
+Prioritize fixes against [docs/gaps-and-missing.md](../../docs/gaps-and-missing.md).
+
+---
 
 This document lists **UI/UX issues** in the current register page (`POC/pages/register/index.html`) and related logic (`POC/features/register/register.js`). Use it to prioritize improvements before applying changes.
 

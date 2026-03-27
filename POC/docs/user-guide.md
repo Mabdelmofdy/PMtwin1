@@ -1,4 +1,31 @@
-# User Guide
+# User guide
+
+### What this page is
+
+Quick **how-to** for professionals, companies, and admins using the POC app.
+
+### Why it matters
+
+It is shorter than `/docs/manuals` HTML guides and lives next to the code.
+
+### What you can do here
+
+- See roles and the main flows (create opportunity, apply, match, deal).
+
+### Step-by-step actions
+
+1. Skim **Roles**.
+2. Follow the numbered lists for your task.
+
+### What happens next
+
+For print-ready training, use [docs/manuals/pmtwin-user-training-manual.html](../../docs/manuals/pmtwin-user-training-manual.html).
+
+### Tips
+
+- Behavior matches the POC branch you have checked out—verify critical steps in the UI.
+
+---
 
 This guide explains how to use the PMTwin platform as a professional, company, or administrator.
 

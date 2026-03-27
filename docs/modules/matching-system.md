@@ -1,6 +1,28 @@
-# Matching System
+# Matching system
 
-This document describes the PM-Twin matching system: its two layers, all matching types, scoring, and **one example per type** so readers can see inputs and expected behavior.
+### What this page is
+
+Explains **both** matching layers, every **match type**, scoring, and **one example per type** with inputs and expected behavior.
+
+### Why it matters
+
+It bridges product language and the matching service entry points.
+
+### What you can do here
+
+- Compare post-to-post vs legacy layers in the overview table.
+- Walk examples before reading source.
+
+### Step-by-step actions
+
+1. Read **Overview**.
+2. Open the model section you tune (one-way, barter, and so on).
+
+### What happens next
+
+Use [matching-engine.md](../matching-engine.md) for function-level detail and [matching-workflow.md](../workflow/matching-workflow.md) for persistence.
+
+### Tips
 
 **Related docs:** [MATCHING_FLOW.md](../../POC/docs/simulation/MATCHING_FLOW.md) (simulation reference), [MATCHING_READINESS_REPORT.md](../../POC/docs/reports/MATCHING_READINESS_REPORT.md).
 

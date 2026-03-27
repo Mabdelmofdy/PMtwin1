@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PMTwin — Administrator Guide</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof mermaid !== 'undefined') {
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral', securityLevel: 'loose', fontFamily: 'Segoe UI, system-ui, sans-serif' });
+      }
+    });
+  </script>
+  <style>
+    @page { size: A4; margin: 14mm 12mm 16mm 12mm; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.45;
+      color: #1a1a1a;
+      max-width: 190mm;
+      margin: 0 auto;
+      padding: 8mm 0 18mm;
+    }
+    h1 { font-size: 22pt; page-break-after: avoid; border-bottom: 2px solid #0d9488; padding-bottom: 6px; margin-top: 0; }
+    h2 { font-size: 14pt; color: #0f766e; page-break-after: avoid; margin-top: 1.2em; }
+    h3 { font-size: 11.5pt; page-break-after: avoid; margin-top: 1em; }
+    h4 { font-size: 10.5pt; color: #374151; margin-top: 0.8em; margin-bottom: 0.35em; }
+    section { margin-bottom: 24px; }
+    section h4::before {
+      content: "• ";
+      color: #0d9488;
+      font-weight: bold;
+    }
+    p { margin: 0.6em 0; }
+    .muted { color: #4b5563; font-size: 9.5pt; }
+    .cover { text-align: center; padding: 28mm 10mm 32mm; page-break-after: always; }
+    .cover .logo-placeholder {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 14mm;
+      border: 1px dashed #d1d5db;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+      font-size: 9pt;
+    }
+    .cover h1 { border: none; font-size: 26pt; margin-top: 4mm; }
+    .cover .subtitle { font-size: 12pt; color: #374151; margin-top: 10mm; }
+    .meta { margin-top: 18mm; font-size: 10pt; }
+    .page-break { page-break-before: always; }
+    .avoid-break { page-break-inside: avoid; }
+    table { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 8px 0 12px; page-break-inside: avoid; }
+    th, td { border: 1px solid #d1d5db; padding: 6px 8px; text-align: left; vertical-align: top; }
+    th { background: #f3f4f6; font-weight: 600; }
+    figure { margin: 10px 0; page-break-inside: avoid; }
+    figcaption { font-size: 9pt; color: #4b5563; margin-top: 6px; font-style: italic; }
+    figure img { max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 4px; }
+    .screenshot-placeholder {
+      min-height: 120px;
+      border: 1px dashed #d1d5db;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+      font-size: 10pt;
+      background: #fafafa;
+    }
+    .toc a { color: #0d9488; text-decoration: none; }
+    .toc li { margin: 4px 0; }
+    .tag { display: inline-block; background: #ecfdf5; color: #047857; padding: 2px 8px; border-radius: 4px; font-size: 8.5pt; font-weight: 600; }
+    ul, ol { margin: 0.6em 0; padding-left: 1.2em; }
+    .mermaid { text-align: center; margin: 16px 0; page-break-inside: avoid; }
+    .action-box {
+      border-left: 4px solid #0d9488;
+      padding: 8px 12px;
+      margin: 10px 0;
+      background: #f0fdfa;
+      page-break-inside: avoid;
+    }
+    .action-box strong { color: #0f766e; display: block; margin-bottom: 4px; }
+    .action-box ol { margin: 0.35em 0 0; padding-left: 1.25em; }
+    .action-box ol li { margin: 0.3em 0; }
+    .note-box {
+      border-left: 4px solid #f59e0b;
+      background: #fffbeb;
+      padding: 10px;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+    .note-box strong { display: block; margin-bottom: 4px; }
+    .note-box p { margin-top: 0.35em; }
+    .footer {
+      position: fixed;
+      bottom: 10px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 9pt;
+      color: #6b7280;
+    }
+    @media print {
+      a[href^="http"]::after { content: ''; }
+      body { padding-bottom: 18mm; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cover">
+    <div class="tag">Administrator guide</div>
+    <div class="logo-placeholder" aria-hidden="true">Logo</div>
+    <h1>PMTwin</h1>
+    <p class="subtitle">Your step-by-step guide<br /><strong>For platform administrators</strong></p>
+    <div class="meta muted">
+      Welcome · A4 print &amp; PDF · March 2026
+    </div>
+  </div>
+
+  <nav class="toc page-break avoid-break" aria-label="Table of contents">
+    <h2>Table of contents</h2>
+    <ol>
+      <li><a href="#admin-1">Admin overview</a></li>
+      <li><a href="#admin-2">Admin dashboard</a></li>
+      <li><a href="#admin-3">User management</a></li>
+      <li><a href="#admin-4">Opportunities management</a></li>
+      <li><a href="#admin-5">Matching (admin view)</a></li>
+      <li><a href="#admin-6">Matches monitoring</a></li>
+      <li><a href="#admin-7">Deals monitoring</a></li>
+      <li><a href="#admin-8">Contracts monitoring</a></li>
+      <li><a href="#admin-9">Notifications &amp; activity</a></li>
+      <li><a href="#admin-10">Admin workflow</a></li>
+    </ol>
+  </nav>
+
+  <section id="admin-1" class="page-break">
+    <h1>1. Admin overview</h1>
+    <h4>What this page is about</h4>
+    <p>This section explains what an <strong>administrator</strong> does on PMTwin. Admins help keep the platform organized, safe, and easy for members to use.</p>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>Understand how your role fits into day-to-day operations.</li>
+      <li>See which areas you will manage most often (people, posts, and follow-up).</li>
+    </ul>
+    <h4>👉 Admin Actions</h4>
+    <div class="action-box avoid-break"><strong>👉 Admin Actions</strong>
+      <ol>
+        <li>Sign in with your administrator account.</li>
+        <li>Open the <strong>Admin</strong> area from the main navigation.</li>
+        <li>Skim the menu so you know where users, opportunities, matching, deals, and contracts live.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>You are ready to work through the admin screens in order, or jump to any topic from the table of contents.</p>
+    <div class="note-box avoid-break">
+      <strong>Remember:</strong>
+      <p>Admins manage users, opportunities, and platform activity. You review and guide what appears on the platform—without doing the work of a normal member account unless your organization asks you to.</p>
+    </div>
+  </section>
+
+  <section id="admin-2" class="page-break">
+    <h1>2. Admin dashboard</h1>
+    <figure class="avoid-break">
+      <img src="assets/admin/dashboard.png" alt="Admin dashboard with summary metrics and navigation to admin tools" width="1100" />
+      <figcaption>Figure 1 — Admin dashboard showing system activity and key metrics</figcaption>
+    </figure>
+    <h4>What you are seeing</h4>
+    <ul>
+      <li>The main admin home: summary cards and overview of platform activity.</li>
+      <li>Quick paths in the layout or menu to Users, Opportunities, Matching, Deals, and Contracts.</li>
+      <li>Headline numbers you can scan at the start of a review session.</li>
+    </ul>
+    <h4>What this page is about</h4>
+    <p>The <strong>dashboard</strong> is your first stop after you open the Admin area. It gives a simple picture of what is happening on the platform.</p>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>View headline numbers and activity.</li>
+      <li>Spot items that may need attention.</li>
+      <li>Move quickly to other admin pages from the menu.</li>
+    </ul>
+    <h4>👉 Admin Actions</h4>
+    <div class="action-box avoid-break"><strong>👉 Admin Actions</strong>
+      <ol>
+        <li>Open <strong>Admin</strong>, then <strong>Dashboard</strong> (or the home admin page your menu shows).</li>
+        <li>Review the key numbers at a glance.</li>
+        <li>Use the menu to go to <strong>Users</strong>, <strong>Opportunities</strong>, <strong>Matching</strong>, <strong>Matches</strong>, <strong>Deals</strong>, or <strong>Contracts</strong> when you need detail.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>You get a quick understanding of platform activity and can drill down wherever you need to.</p>
+    <h4>Tips</h4>
+    <ul>
+      <li>Visit the dashboard at the start of your shift to set priorities.</li>
+    </ul>
+  </section>
+
+  <section id="admin-3" class="page-break">
+    <h1>3. User management</h1>
+    <figure class="avoid-break">
+      <img src="assets/admin/users.png" alt="Admin users list with search and user rows" width="1100" />
+      <figcaption>Figure 2 — User list for searching, opening profiles, and updating account status</figcaption>
+    </figure>
+    <h4>What you are seeing</h4>
+    <ul>
+      <li>The searchable list of people and companies on the platform.</li>
+      <li>Row actions or links to open a user and review details.</li>
+      <li>Status or columns that help you find who needs approval or follow-up.</li>
+    </ul>
+    <h4>What this page is about</h4>
+    <p>Here you see <strong>people and companies</strong> who use the platform. You can review new sign-ups, check profiles, and update account status when your process allows it.</p>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>View and search users.</li>
+      <li>Approve or reject accounts that are waiting for review.</li>
+      <li>Open a user to read or edit details.</li>
+      <li>Use a <strong>pending review</strong> or <strong>vetting</strong> view, if your menu includes it, to work through the queue faster.</li>
+    </ul>
+    <h4>👉 Admin Actions</h4>
+    <div class="action-box avoid-break"><strong>👉 Admin Actions</strong>
+      <ol>
+        <li>Open <strong>Users</strong> (or <strong>User management</strong>) from the Admin menu.</li>
+        <li>Find the person or company you need, or open the pending list if available.</li>
+        <li>Select a user to open the detail view.</li>
+        <li>Choose <strong>Approve</strong>, <strong>Reject</strong>, or <strong>Edit</strong>, following your organization’s rules.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>The user’s status updates and their access changes right away, in line with your choice.</p>
+    <h4>Tips</h4>
+    <ul>
+      <li>Approve only profiles that look complete and trustworthy.</li>
+      <li>If something is unclear, use your internal process before you approve.</li>
+    </ul>
+  </section>
+
+  <section id="admin-4" class="page-break">
+    <h1>4. Opportunities management</h1>
+    <figure class="avoid-break">
+      <img src="assets/admin/opportunities.png" alt="Admin opportunities list with filters and opportunity rows" width="1100" />
+      <figcaption>Figure 3 — Opportunities overview for reviewing and moderating member posts</figcaption>
+    </figure>
+    <h4>What you are seeing</h4>
+    <ul>
+      <li>All member opportunities in one table or list, often with filters.</li>
+      <li>Ways to open a post and read the full description and details.</li>
+      <li>Actions to edit or remove content when it does not meet your guidelines.</li>
+    </ul>
+    <h4>What this page is about</h4>
+    <p><strong>Opportunities</strong> are posts where members describe what they need or what they offer. Admins make sure content stays clear, fair, and appropriate.</p>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>View all opportunities.</li>
+      <li>Open a post to read the full text.</li>
+      <li>Edit or remove content that does not meet your guidelines.</li>
+    </ul>
+    <h4>👉 Admin Actions</h4>
+    <div class="action-box avoid-break"><strong>👉 Admin Actions</strong>
+      <ol>
+        <li>Open <strong>Opportunities</strong> from the Admin menu.</li>
+        <li>Select an opportunity to review.</li>
+        <li>Read the title, description, and any attached details.</li>
+        <li>If needed, edit the post or remove it using the actions on screen.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>The opportunity is updated or taken off the platform, and members see what your rules allow.</p>
+    <h4>Tips</h4>
+    <ul>
+      <li>Focus on clarity, respect, and policy—small fixes often help more than removals.</li>
+    </ul>
+  </section>
+
+  <section id="admin-5" class="page-break">
+    <h1>5. Matching (admin view)</h1>
+    <figure class="avoid-break">
+      <img src="assets/admin/matching.png" alt="Admin matching screen with opportunity selector and match results" width="1100" />
+      <figcaption>Figure 4 — Matching tools for reviewing suggestions and running matching when available</figcaption>
+    </figure>
+    <h4>What you are seeing</h4>
+    <ul>
+      <li>The opportunity you are inspecting and the suggested pairings or scores.</li>
+      <li>Controls to refresh or run matching again, when your screen shows them.</li>
+      <li>Enough detail to judge whether suggestions look fair and useful for members.</li>
+    </ul>
+    <h4>What this page is about</h4>
+    <p>This area helps you <strong>see how suggestions are built</strong> for an opportunity. The platform suggests matches on its own; you use this screen to review and, when your role allows, refresh or run matching from here.</p>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>View matching results tied to an opportunity.</li>
+      <li>Run matching again if your screen shows a <strong>Run</strong> or similar action.</li>
+    </ul>
+    <h4>👉 Admin Actions</h4>
+    <div class="action-box avoid-break"><strong>👉 Admin Actions</strong>
+      <ol>
+        <li>Open <strong>Matching</strong> (or the admin matching page) from the menu.</li>
+        <li>Choose the opportunity you want to inspect.</li>
+        <li>Review the suggested pairings or list the screen shows.</li>
+        <li>If you see a control to run matching again, use it only when your process says so.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>You see suggested matches and can confirm they look reasonable for members. The platform suggests matches automatically; your job is to review when needed.</p>
+    <h4>Tips</h4>
+    <ul>
+      <li>Clear, complete opportunities usually lead to clearer suggestions for everyone.</li>
+    </ul>
+  </section>
+
+  <section id="admin-6" class="page-break">
+    <h1>6. Matches monitoring</h1>
+    <figure class="avoid-break">
+      <img src="assets/admin/matches.png" alt="Matches list showing collaboration suggestions and status" width="1100" />
+      <figcaption>Figure 5 — Matches list for tracking suggested collaborations and their status</figcaption>
+    </figure>
+    <h4>What you are seeing</h4>
+    <ul>
+      <li>A list of match rows with parties, scores or fit labels, and status.</li>
+      <li>A way to open one match to see participants and progress in full.</li>
+      <li>Filters or sorting, when shown, to focus on new or stuck items.</li>
+    </ul>
+    <h4>What this page is about</h4>
+    <p>A <strong>match</strong> is a suggested collaboration between members. This page is for <strong>watching progress</strong> across many matches, not for running the matching tool itself.</p>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>View the list of matches.</li>
+      <li>See status and who is involved.</li>
+      <li>Open a match for more detail when you need to support someone.</li>
+    </ul>
+    <h4>👉 Admin Actions</h4>
+    <div class="action-box avoid-break"><strong>👉 Admin Actions</strong>
+      <ol>
+        <li>Open <strong>Matches</strong> from the Admin menu.</li>
+        <li>Scan the list for names, dates, or status words your team cares about.</li>
+        <li>Click a match to open the full view.</li>
+        <li>Review participants and where the match stands.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>You understand how matches are moving and can answer questions or step in through your normal support channels.</p>
+    <h4>Tips</h4>
+    <ul>
+      <li>Use this list together with the dashboard when you track busy periods.</li>
+    </ul>
+  </section>
+
+  <section id="admin-7" class="page-break">
+    <h1>7. Deals monitoring</h1>
+    <figure class="avoid-break">
+      <img src="assets/admin/deals.png" alt="Admin deals list with stages and participant information" width="1100" />
+      <figcaption>Figure 6 — Deals overview for monitoring active collaborations and stages</figcaption>
+    </figure>
+    <h4>What you are seeing</h4>
+    <ul>
+      <li>Deals listed with title, parties, and stage or status.</li>
+      <li>Links or buttons to open a deal and read scope and next steps.</li>
+      <li>Signals that help you spot deals that need a gentle nudge or support.</li>
+    </ul>
+    <h4>What this page is about</h4>
+    <p>A <strong>deal</strong> is where members move from a match into real planning and delivery. Admins use this view to <strong>follow progress</strong> and help when something stalls.</p>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>View deals in one place.</li>
+      <li>See stage or status for each deal.</li>
+      <li>Open a deal to read scope, parties, and next steps.</li>
+    </ul>
+    <h4>👉 Admin Actions</h4>
+    <div class="action-box avoid-break"><strong>👉 Admin Actions</strong>
+      <ol>
+        <li>Open <strong>Deals</strong> from the Admin menu.</li>
+        <li>Select a deal from the list.</li>
+        <li>Review the status and the people involved.</li>
+        <li>Use the information to support members or escalate through your team if needed.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>You can track deal progress and help keep work moving smoothly.</p>
+    <h4>Tips</h4>
+    <ul>
+      <li>Pair this view with contracts when you check whether signing is complete.</li>
+    </ul>
+  </section>
+
+  <section id="admin-8" class="page-break">
+    <h1>8. Contracts monitoring</h1>
+    <figure class="avoid-break">
+      <img src="assets/admin/contracts.png" alt="Admin contracts list with signing status and linked deals" width="1100" />
+      <figcaption>Figure 7 — Contracts list for checking agreements and signing progress</figcaption>
+    </figure>
+    <h4>What you are seeing</h4>
+    <ul>
+      <li>Contracts with titles, parties, and current status.</li>
+      <li>Which step signing is on, when the screen shows it.</li>
+      <li>Paths to open a contract for the full text and history.</li>
+    </ul>
+    <h4>What this page is about</h4>
+    <p><strong>Contracts</strong> record the formal agreement between parties. Admins check that documents move through signing in an orderly way.</p>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>View contracts and their status.</li>
+      <li>See who still needs to sign, when the screen shows it.</li>
+    </ul>
+    <h4>👉 Admin Actions</h4>
+    <div class="action-box avoid-break"><strong>👉 Admin Actions</strong>
+      <ol>
+        <li>Open <strong>Contracts</strong> from the Admin menu.</li>
+        <li>Select a contract.</li>
+        <li>Review the status and any signing steps shown.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>You know whether agreements are finished or still in progress, and you can guide members if your role includes that.</p>
+    <h4>Tips</h4>
+    <ul>
+      <li>Always follow your organization’s legal and compliance rules when you discuss contracts with users.</li>
+    </ul>
+  </section>
+
+  <section id="admin-9" class="page-break">
+    <h1>9. Notifications &amp; activity</h1>
+    <figure class="avoid-break">
+      <img src="assets/admin/notifications.png" alt="Notifications panel listing recent alerts and updates" width="1100" />
+      <figcaption>Figure 8 — Notifications and recent updates relevant to your work</figcaption>
+    </figure>
+    <h4>What you are seeing</h4>
+    <ul>
+      <li>A chronological list of alerts, mentions, or system messages.</li>
+      <li>Short summaries and links to the related user, opportunity, deal, or contract.</li>
+      <li>Filters or tabs, when available, to focus on unread or recent items.</li>
+    </ul>
+    <h4>What this page is about</h4>
+    <p>Here you stay aware of <strong>what changed recently</strong>: alerts, messages, and a simple history of important events when your product includes it.</p>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>Read notifications meant for administrators.</li>
+      <li>Scan recent activity or an activity list, if your menu shows one.</li>
+      <li>Use filters or dates when the page offers them.</li>
+    </ul>
+    <h4>👉 Admin Actions</h4>
+    <div class="action-box avoid-break"><strong>👉 Admin Actions</strong>
+      <ol>
+        <li>Open <strong>Notifications</strong> or <strong>Activity</strong> from the Admin menu (names may vary slightly).</li>
+        <li>Read new items first.</li>
+        <li>Follow any link on screen to the user, opportunity, deal, or contract it refers to.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>You catch up on changes without checking every screen by hand.</p>
+    <h4>Tips</h4>
+    <ul>
+      <li>Make a short daily habit: dashboard, then notifications or activity, then deeper pages as needed.</li>
+    </ul>
+  </section>
+
+  <section id="admin-10" class="page-break">
+    <h1>10. Admin workflow</h1>
+    <figure class="avoid-break">
+      <div class="mermaid avoid-break">
+flowchart LR
+  adm[Admin] --> users[Users]
+  users --> opps[Opportunities]
+  opps --> matches[Matches]
+  matches --> deals[Deals]
+  deals --> contracts[Contracts]
+      </div>
+      <figcaption>Figure 9 — Admin workflow: Users, Opportunities, Matches, Deals, and Contracts</figcaption>
+    </figure>
+    <h4>What you are seeing</h4>
+    <ul>
+      <li>A simple left-to-right map of where admin work fits: starting from <strong>Admin</strong>, then <strong>Users</strong>, <strong>Opportunities</strong>, <strong>Matches</strong>, <strong>Deals</strong>, and <strong>Contracts</strong>.</li>
+      <li>Each box matches a main area in the admin menu when you need to drill in.</li>
+      <li>Use this picture when you explain the journey to others or plan your own reviews.</li>
+    </ul>
+    <h4>What this page is about</h4>
+    <p>This section ties the admin journey together. On PMTwin, work usually flows from <strong>people and their posts</strong> to <strong>suggestions</strong>, then to <strong>deals</strong> and <strong>contracts</strong>. As an admin, you often follow the same order when you review or support members.</p>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>See the big picture: users → opportunities → matches → deals → contracts.</li>
+      <li>Use the diagram at the top of this section as a map when you train others or explain your day.</li>
+    </ul>
+    <h4>👉 Admin Actions</h4>
+    <div class="action-box avoid-break"><strong>👉 Admin Actions</strong>
+      <ol>
+        <li>Start with <strong>Users</strong> when accounts or trust are the issue.</li>
+        <li>Move to <strong>Opportunities</strong> when the question is about a post.</li>
+        <li>Check <strong>Matching</strong> and <strong>Matches</strong> when suggestions are in doubt.</li>
+        <li>Open <strong>Deals</strong> and <strong>Contracts</strong> when work or signing needs attention.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>You handle most admin tasks in a clear order, without jumping around unless the situation calls for it.</p>
+    <h4>Tips</h4>
+    <ul>
+      <li>Keep this flow in mind: fixing an account issue early often prevents confusion later in deals and contracts.</li>
+    </ul>
+  </section>
+
+  <p class="muted page-break" style="margin-top: 12mm;">End of guide — PMTwin Administrator Guide</p>
+
+</body>
+</html>

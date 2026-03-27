@@ -1,10 +1,34 @@
-# Gaps and Missing
+# Gaps and missing
 
-Everything not implemented, partially implemented, or weak in the current codebase. Treated as a production system audit; no invented items.
+### What this page is
+
+Audit-style list of **gaps**: security, backend, matching, UX, admin, and data—nothing invented.
+
+### Why it matters
+
+Stakeholders use it to see **risk** and **severity** in one place.
+
+### What you can do here
+
+- Triage by **severity** column.
+- Cross-link to [implementation-status.md](implementation-status.md) for “what exists.”
+
+### Step-by-step actions
+
+1. Read **Security & auth** and **Backend & persistence** first.
+2. Drill into matching or admin sections for your team.
+
+### What happens next
+
+Turn rows into tickets; owners estimate fix vs accept.
+
+### Tips
+
+- POC limits (local storage, no real email) are expected—call them out in client communications.
 
 ---
 
-## 1. Security & Auth
+## 1. Security & auth
 
 | Gap | Severity | Description |
 |-----|----------|-------------|

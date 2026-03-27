@@ -1,10 +1,35 @@
 # Scenarios
 
-Real-world style scenarios: successful matches, failed matches, barter, consortium, circular, and edge cases. Based on implemented behavior; marked when a scenario hits a gap.
+### What this page is
+
+Story-style examples: **successful** and **failed** matches, barter, consortium, circular flows, and edge cases. Wording follows **implemented** behavior; gaps are called out inline.
+
+### Why it matters
+
+QA and sales use these stories to explain “what should happen” without reading code.
+
+### What you can do here
+
+- Walk one-way examples before consortium or circular.
+- Compare “no match” vs “declined match” outcomes.
+
+### Step-by-step actions
+
+1. Pick a subsection (One-way, Two-way, and so on).
+2. Read setup → system → result → outcome.
+3. Cross-check with [matching-workflow.md](workflow/matching-workflow.md) if behavior seems unclear.
+
+### What happens next
+
+Use [full-user-journey.md](full-user-journey.md) for the full lifecycle outside matching.
+
+### Tips
+
+- Threshold and ranking numbers mirror POC defaults; config may change them.
 
 ---
 
-## One-Way (Need ↔ Offer)
+## One-way (need ↔ offer)
 
 ### 1. Successful one-way match (need finds offer)
 

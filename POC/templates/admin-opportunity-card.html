@@ -35,7 +35,9 @@
         {{#if showClose}}
             <button data-action="close" data-opportunity-id="{{id}}" class="btn btn-warning btn-sm">Close</button>
         {{/if}}
+        {{#if showDelete}}
         <button data-action="delete" data-opportunity-id="{{id}}" class="btn btn-danger btn-sm">Delete</button>
+        {{/if}}
     </div>
     </div>
 </div>

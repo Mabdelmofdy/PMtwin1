@@ -1,6 +1,17 @@
-# Opportunity Creation Wizard Flow
+# Opportunity creation wizard flow
+
+### What this page is
+
+Developer notes on the **create opportunity** wizard steps and UX (may differ slightly from live `docs`—verify in UI).
+
+### What happens next
+
+Align with [docs/modules/opportunity-creation.md](../docs/modules/opportunity-creation.md).
+
+---
 
 ## Overview
+
 The opportunity creation form has been converted to a **4-step wizard flow** with improved UX, mandatory location selection, and a payment step.
 
 ## Wizard Steps

@@ -48,11 +48,11 @@ function renderCategoriesList(container, categories, onRemove) {
 }
 
 async function initAdminSkills() {
-    const user = authService.getCurrentUser();
-    if (!user || !authService.hasRole(CONFIG.ROLES.ADMIN)) {
+    if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.skills.read')) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }
+    const user = authService.getCurrentUser();
 
     const loadingEl = document.getElementById('admin-skills-loading');
     const contentEl = document.getElementById('admin-skills-content');
@@ -105,6 +105,7 @@ async function initAdminSkills() {
     });
 
     document.getElementById('admin-skills-save')?.addEventListener('click', () => {
+        try { authService.assertAdminCapability('admin.skills.write'); } catch (err) { alert(err && err.message ? err.message : 'You do not have permission.'); return; }
         const storage = window.storageService || (typeof storageService !== 'undefined' ? storageService : null);
         if (!storage || !CONFIG.STORAGE_KEYS.LOOKUPS_OVERRIDE) {
             alert('Storage not available.');

@@ -1,6 +1,25 @@
-# User Flows
+# User flows
 
-## Flow 1: User Registration & Onboarding
+### What this page is
+
+BRD **flow diagrams** for registration, opportunities, matching, deals, and admin—at business level.
+
+### Why it matters
+
+QA and product use the same diagrams for test plans and demos.
+
+### What you can do here
+
+- Walk flows top to bottom.
+- Compare with [docs/journeys/user-journey.md](../docs/journeys/user-journey.md).
+
+### What happens next
+
+Implement against [docs/implementation-status.md](../docs/implementation-status.md).
+
+---
+
+## Flow 1: User registration and onboarding
 
 ```
 Start

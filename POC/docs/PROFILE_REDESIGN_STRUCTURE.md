@@ -1,4 +1,14 @@
-# Profile Page Redesign – Structure & Data Model
+# Profile page redesign — structure and data model
+
+### What this page is
+
+Design notes for **profile** layout and fields (redesign track).
+
+### What happens next
+
+Align implemented UI with [docs/data-model.md](../../docs/data-model.md).
+
+---
 
 ## Design principles
 - **No duplicated data**: Each field appears in exactly one section.

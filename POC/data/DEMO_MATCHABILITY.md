@@ -1,4 +1,14 @@
-# Demo 40 Opportunities — Matchability (Need–Offer Pairs)
+# Demo 40 opportunities — matchability (need–offer pairs)
+
+### What this page is
+
+Seed-data note: which **demo** needs and offers should pair well for testing matching.
+
+### What happens next
+
+Update when you change `demo-*` opportunity JSON.
+
+---
 
 This document lists example **need–offer** pairs that the matching engine should score highly. Skills and sectors use canonical values so that needs and offers align.
 

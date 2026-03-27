@@ -1,6 +1,32 @@
-=== File: contract-and-execution.md ===
+# Contract and execution
 
-# Contract and Execution
+### What this page is
+
+Module guide: **after acceptance**—contracts, milestones, execution, and closing work.
+
+### Why it matters
+
+This is where promises turn into delivered outcomes.
+
+### What you can do here
+
+- Follow contract creation triggers.
+- See milestone and completion patterns.
+
+### Step-by-step actions
+
+1. Read **Overview** and actors.
+2. Cross-check [contract-workflow.md](../workflow/contract-workflow.md) and [deal-workflow.md](../workflow/deal-workflow.md).
+
+### What happens next
+
+Completed deals may feed reviews and future matching reputation.
+
+### Tips
+
+- “Automatic contract on application accept” must match your branch—confirm in feature code.
+
+---
 
 ## Overview
 

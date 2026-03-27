@@ -1,4 +1,14 @@
-# Data Cleanup Changelog
+# Data cleanup changelog
+
+### What this page is
+
+Change log for **seed data** and cleanup passes in the POC.
+
+### What happens next
+
+Bump seed version when you change JSON under `POC/data/`.
+
+---
 
 ## Version 1.13.0 – Database Audit and Unification
 

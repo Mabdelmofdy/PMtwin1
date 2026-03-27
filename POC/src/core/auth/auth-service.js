@@ -3,6 +3,87 @@
  * Handles user authentication and authorization
  */
 
+/** Admin capability names (for hasAdminCapability / assertAdminCapability) */
+const ADMIN_CAPABILITIES = {
+    DASHBOARD: 'admin.dashboard',
+    USERS_READ: 'admin.users.read',
+    USERS_WRITE: 'admin.users.write',
+    VETTING: 'admin.vetting',
+    OPPORTUNITIES_READ: 'admin.opportunities.read',
+    OPPORTUNITIES_WRITE: 'admin.opportunities.write',
+    MATCHING_READ: 'admin.matching.read',
+    MATCHING_PERSIST: 'admin.matching.persist',
+    DEALS_READ: 'admin.deals.read',
+    DEALS_WRITE: 'admin.deals.write',
+    CONTRACTS_READ: 'admin.contracts.read',
+    CONTRACTS_WRITE: 'admin.contracts.write',
+    AUDIT_READ: 'admin.audit.read',
+    REPORTS_READ: 'admin.reports.read',
+    SETTINGS_READ: 'admin.settings.read',
+    SETTINGS_WRITE: 'admin.settings.write',
+    SKILLS_READ: 'admin.skills.read',
+    SKILLS_WRITE: 'admin.skills.write',
+    SUBSCRIPTIONS_READ: 'admin.subscriptions.read',
+    SUBSCRIPTIONS_WRITE: 'admin.subscriptions.write'
+};
+
+/**
+ * Role -> set of allowed admin capabilities.
+ * ADMIN: full access. MODERATOR: users, vetting, opportunities, matching read, deals/contracts, audit, reports, settings read, skills; no matching.persist, no settings.write, no subscriptions.write.
+ * AUDITOR: read-only audit, reports, deals, contracts, opportunities, matching.read; no write, no vetting, no settings, no subscriptions write.
+ */
+function _buildAdminRoleCapabilities() {
+    const R = (typeof CONFIG !== 'undefined' && CONFIG.ROLES) ? CONFIG.ROLES : { ADMIN: 'admin', MODERATOR: 'moderator', AUDITOR: 'auditor' };
+    return {
+        [R.ADMIN]: null,
+        [R.MODERATOR]: [
+            ADMIN_CAPABILITIES.DASHBOARD, ADMIN_CAPABILITIES.USERS_READ, ADMIN_CAPABILITIES.USERS_WRITE,
+            ADMIN_CAPABILITIES.VETTING, ADMIN_CAPABILITIES.OPPORTUNITIES_READ, ADMIN_CAPABILITIES.OPPORTUNITIES_WRITE,
+            ADMIN_CAPABILITIES.MATCHING_READ, ADMIN_CAPABILITIES.DEALS_READ, ADMIN_CAPABILITIES.DEALS_WRITE,
+            ADMIN_CAPABILITIES.CONTRACTS_READ, ADMIN_CAPABILITIES.CONTRACTS_WRITE, ADMIN_CAPABILITIES.AUDIT_READ,
+            ADMIN_CAPABILITIES.REPORTS_READ, ADMIN_CAPABILITIES.SETTINGS_READ, ADMIN_CAPABILITIES.SKILLS_READ, ADMIN_CAPABILITIES.SKILLS_WRITE,
+            ADMIN_CAPABILITIES.SUBSCRIPTIONS_READ
+        ],
+        [R.AUDITOR]: [
+            ADMIN_CAPABILITIES.DASHBOARD, ADMIN_CAPABILITIES.USERS_READ, ADMIN_CAPABILITIES.OPPORTUNITIES_READ,
+            ADMIN_CAPABILITIES.MATCHING_READ, ADMIN_CAPABILITIES.DEALS_READ, ADMIN_CAPABILITIES.CONTRACTS_READ,
+            ADMIN_CAPABILITIES.AUDIT_READ, ADMIN_CAPABILITIES.REPORTS_READ
+        ]
+    };
+}
+let ADMIN_ROLE_CAPABILITIES = _buildAdminRoleCapabilities();
+
+function _getRoleCapabilities(role) {
+    if (!role) return [];
+    if (!ADMIN_ROLE_CAPABILITIES[role] && typeof CONFIG !== 'undefined' && CONFIG.ROLES) {
+        ADMIN_ROLE_CAPABILITIES = _buildAdminRoleCapabilities();
+    }
+    const caps = ADMIN_ROLE_CAPABILITIES[role];
+    if (caps === undefined) return [];
+    return caps === null ? Object.values(ADMIN_CAPABILITIES) : caps;
+}
+
+/**
+ * @param {string} role - User role (admin, moderator, auditor)
+ * @param {string} capability - e.g. admin.matching.persist, admin.users.write
+ * @returns {boolean}
+ */
+function hasAdminCapability(role, capability) {
+    const caps = _getRoleCapabilities(role);
+    return caps.indexOf(capability) !== -1;
+}
+
+/**
+ * Throws if the role does not have the capability.
+ * @param {string} role
+ * @param {string} capability
+ */
+function assertAdminCapability(role, capability) {
+    if (!hasAdminCapability(role, capability)) {
+        throw new Error('You do not have permission to perform this action.');
+    }
+}
+
 class AuthService {
     constructor() {
         this.dataService = window.dataService || dataService;
@@ -280,6 +361,25 @@ class AuthService {
     canAccessAdmin() {
         return this.hasAnyRole([CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]);
     }
+
+    /**
+     * Check if current user has an admin capability.
+     * @param {string} capability - e.g. admin.matching.persist, admin.users.write
+     * @returns {boolean}
+     */
+    hasAdminCapability(capability) {
+        const role = this.currentUser ? this.currentUser.role : '';
+        return hasAdminCapability(role, capability);
+    }
+
+    /**
+     * Throws if current user does not have the capability.
+     * @param {string} capability
+     */
+    assertAdminCapability(capability) {
+        const role = this.currentUser ? this.currentUser.role : '';
+        assertAdminCapability(role, capability);
+    }
     
     /**
      * Check if user is company user
@@ -368,6 +468,7 @@ class AuthService {
 
 // Create singleton instance
 const authService = new AuthService();
+authService.ADMIN_CAPABILITIES = ADMIN_CAPABILITIES;
 
 // Export
 if (typeof module !== 'undefined' && module.exports) {

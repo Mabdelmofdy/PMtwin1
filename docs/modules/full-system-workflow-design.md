@@ -1,4 +1,32 @@
-# Full System Workflow Design — Need/Offer Collaboration Marketplace
+# Full system workflow design — Need/Offer collaboration marketplace
+
+### What this page is
+
+Design-level document: platform workflow, **matching architecture**, weights, value exchange, admin flow, examples, and validation notes.
+
+### Why it matters
+
+Product and engineering align on one “blueprint” before slicing work.
+
+### What you can do here
+
+- Compare with [complete-system-workflow.md](complete-system-workflow.md).
+- Pull example structures into test data.
+
+### Step-by-step actions
+
+1. Skim the table of contents.
+2. Deep dive the chapter that matches your spike.
+
+### What happens next
+
+File gaps under [gaps-and-missing.md](../gaps-and-missing.md) when design outpaces code.
+
+### Tips
+
+- BRD links are normative for business intent; this doc ties intent to POC reality.
+
+---
 
 This document implements the complete product architecture and operational workflow for the PMTwin-style Need/Offer collaboration marketplace. It covers full platform workflow, matching engine architecture, matching algorithm (including weight variants), value exchange logic, admin workflow, example opportunity structures, database design, and test flow validation.
 

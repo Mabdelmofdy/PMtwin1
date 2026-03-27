@@ -1,10 +1,35 @@
-# API Structure
+# API structure
 
-The POC has **no backend server**. All “API” behavior is implemented client-side via an abstraction layer that currently delegates to the data-service. This document describes that structure and the intended endpoint map for future backend integration.
+### What this page is
+
+How **`api-service`** wraps **`data-service`** today, and how **REST-style endpoints** map for a future real API.
+
+### Why it matters
+
+Feature code can keep calling `apiService.request()` when you swap in `fetch` later.
+
+### What you can do here
+
+- See the current **wiring** diagram.
+- Scan the endpoint table for method and handler names.
+
+### Step-by-step actions
+
+1. Read **Current architecture**.
+2. Find your entity in the endpoint map.
+3. Implement the server route to match shape when you add a backend.
+
+### What happens next
+
+Point integration tests at the same paths under `CONFIG.API`.
+
+### Tips
+
+- Today there is **no network**—all handlers resolve locally.
 
 ---
 
-## 1. Current Architecture
+## 1. Current architecture
 
 ```mermaid
 flowchart LR

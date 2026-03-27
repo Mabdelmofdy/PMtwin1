@@ -1,6 +1,25 @@
-# Technical Requirements
+# Technical requirements
 
-## Technology Stack (POC Phase)
+### What this page is
+
+BRD **stack**, non-functional expectations, and POC constraints for PMTwin.
+
+### Why it matters
+
+Engineering and security reviewers sign off against this section.
+
+### What you can do here
+
+- Confirm frontend, storage, and integration assumptions.
+- Track POC vs production gaps.
+
+### What happens next
+
+See [docs/gaps-and-missing.md](../docs/gaps-and-missing.md) for current code reality.
+
+---
+
+## Technology stack (POC phase)
 
 ### Frontend
 - **HTML5**: Semantic markup, form validation, accessibility

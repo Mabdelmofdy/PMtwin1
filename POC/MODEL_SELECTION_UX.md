@@ -1,6 +1,17 @@
-# Model Selection UX Improvement
+# Model selection UX improvement
+
+### What this page is
+
+UX decision log for **collaboration model** selection (searchable list vs nested dropdown).
+
+### What happens next
+
+Validate against the live opportunity create page.
+
+---
 
 ## Overview
+
 The Model Type and Sub-Model selection experience has been improved from a nested dropdown approach to a flat, searchable interface that allows users to find and select collaboration models directly.
 
 ## Problems with Previous Approach

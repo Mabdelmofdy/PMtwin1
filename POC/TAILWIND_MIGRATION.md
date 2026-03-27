@@ -1,6 +1,17 @@
-# Tailwind CSS Migration Guide
+# Tailwind CSS migration guide
+
+### What this page is
+
+Notes on the **Tailwind** setup and migration for the POC front end.
+
+### What happens next
+
+Run `npm run build:css` or your usual Tailwind pipeline when styles change.
+
+---
 
 ## Overview
+
 The PMTwin POC has been successfully migrated to use Tailwind CSS for better consistency and maintainability. This document outlines the migration approach and provides guidelines for continued development.
 
 ## Implementation Approach

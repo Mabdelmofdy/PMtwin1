@@ -1,6 +1,24 @@
-# Full Workflows
+# Full workflows
 
 **Last updated:** 2025-03-07
+
+### What this page is
+
+BRD copy of **end-to-end workflows** (user + admin) with routes and services for delivery and QA.
+
+### Why it matters
+
+Stakeholders who do not read `/docs` still get a complete journey map.
+
+### What you can do here
+
+- Align with [docs/modules/full-workflows.md](../docs/modules/full-workflows.md) (technical twin).
+
+### What happens next
+
+File gaps when BRD and POC diverge.
+
+---
 
 ## Overview
 

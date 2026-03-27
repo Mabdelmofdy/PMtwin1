@@ -1,10 +1,36 @@
-# Deal Workflow
+# Deal workflow
 
-Deals are the central collaboration object after matching. This document describes deal creation, status flow, milestones, and link to contracts.
+### What this page is
+
+How **deals** are created after a match or application, how **status** moves from negotiation to closure, and how **milestones** and **contracts** connect.
+
+### Why it matters
+
+Deals are where day-to-day collaboration lives after the match screen.
+
+### What you can do here
+
+- Follow deal states in order.
+- See how signing creates or links a contract.
+- Read consortium replacement and rating notes.
+
+### Step-by-step actions
+
+1. Open **Create deal** paths (match vs application).
+2. Track status transitions while negotiating.
+3. Move into signing when the contract is ready.
+
+### What happens next
+
+When the contract is **active**, execution milestones apply ([contract-workflow.md](contract-workflow.md)).
+
+### Tips
+
+- The deal holds **live** milestones; the contract holds a **snapshot** at signing.
 
 ---
 
-## 1. Deal Status Lifecycle
+## 1. Deal status lifecycle
 
 ```mermaid
 stateDiagram-v2

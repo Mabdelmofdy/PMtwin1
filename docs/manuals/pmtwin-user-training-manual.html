@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PMTwin — User Guide</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof mermaid !== 'undefined') {
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral', securityLevel: 'loose', fontFamily: 'Segoe UI, system-ui, sans-serif' });
+      }
+    });
+  </script>
+  <style>
+    @page { size: A4; margin: 14mm 12mm 16mm 12mm; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.45;
+      color: #1a1a1a;
+      max-width: 190mm;
+      margin: 0 auto;
+      padding: 8mm 0 18mm;
+    }
+    h1 { font-size: 22pt; page-break-after: avoid; border-bottom: 2px solid #0d9488; padding-bottom: 6px; margin-top: 0; }
+    h2 { font-size: 14pt; color: #0f766e; page-break-after: avoid; margin-top: 1.2em; }
+    h3 { font-size: 11.5pt; page-break-after: avoid; margin-top: 1em; }
+    h4 { font-size: 10.5pt; color: #374151; margin-top: 0.8em; margin-bottom: 0.35em; }
+    section { margin-bottom: 24px; }
+    section h4::before {
+      content: "• ";
+      color: #0d9488;
+      font-weight: bold;
+    }
+    p { margin: 0.6em 0; }
+    .muted { color: #4b5563; font-size: 9.5pt; }
+    .cover { text-align: center; padding: 28mm 10mm 32mm; page-break-after: always; }
+    .cover .logo-placeholder {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 14mm;
+      border: 1px dashed #d1d5db;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+      font-size: 9pt;
+    }
+    .cover h1 { border: none; font-size: 26pt; margin-top: 4mm; }
+    .cover .subtitle { font-size: 12pt; color: #374151; margin-top: 10mm; }
+    .meta { margin-top: 18mm; font-size: 10pt; }
+    .page-break { page-break-before: always; }
+    .avoid-break { page-break-inside: avoid; }
+    table { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 8px 0 12px; page-break-inside: avoid; }
+    th, td { border: 1px solid #d1d5db; padding: 6px 8px; text-align: left; vertical-align: top; }
+    th { background: #f3f4f6; font-weight: 600; }
+    figure { margin: 10px 0; page-break-inside: avoid; }
+    figcaption { font-size: 9pt; color: #4b5563; margin-top: 6px; font-style: italic; }
+    figure img { max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 4px; }
+    .toc a { color: #0d9488; text-decoration: none; }
+    .toc li { margin: 4px 0; }
+    .tag { display: inline-block; background: #ecfdf5; color: #047857; padding: 2px 8px; border-radius: 4px; font-size: 8.5pt; font-weight: 600; }
+    ul, ol { margin: 0.6em 0; padding-left: 1.2em; }
+    .mermaid { text-align: center; margin: 16px 0; page-break-inside: avoid; }
+    .action-box {
+      border-left: 4px solid #0d9488;
+      padding: 8px 12px;
+      margin: 10px 0;
+      background: #f0fdfa;
+      page-break-inside: avoid;
+    }
+    .action-box strong { color: #0f766e; display: block; margin-bottom: 4px; }
+    .action-box ol { margin: 0.35em 0 0; padding-left: 1.25em; }
+    .action-box ol li { margin: 0.3em 0; }
+    .note-box {
+      border-left: 4px solid #f59e0b;
+      background: #fffbeb;
+      padding: 10px;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+    .note-box strong { display: block; margin-bottom: 4px; }
+    .note-box p { margin-top: 0.35em; }
+    .footer {
+      position: fixed;
+      bottom: 10px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 9pt;
+      color: #6b7280;
+    }
+    .quick ol { font-weight: 500; }
+    @media print {
+      a[href^="http"]::after { content: ''; }
+      body { padding-bottom: 18mm; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cover">
+    <div class="tag">User guide</div>
+    <div class="logo-placeholder" aria-hidden="true">Logo</div>
+    <h1>PMTwin</h1>
+    <p class="subtitle">Your step-by-step guide<br /><strong>For professionals and companies</strong></p>
+    <div class="meta muted">
+      Welcome · A4 print &amp; PDF · March 2026
+    </div>
+  </div>
+
+  <nav class="toc page-break avoid-break" aria-label="Table of contents">
+    <h2>Table of contents</h2>
+    <ol>
+      <li><a href="#quick">Quick start (5 minutes)</a></li>
+      <li><a href="#s1">Platform overview</a> · <a href="#s1-roles">Who uses PMTwin</a></li>
+      <li><a href="#s2">Account &amp; sign in</a></li>
+      <li><a href="#s3">Profile</a></li>
+      <li><a href="#s4">Home (Dashboard)</a></li>
+      <li><a href="#s5">Opportunities</a> · <a href="#s5-wizard">Create step by step</a></li>
+      <li><a href="#s6">Matches</a></li>
+      <li><a href="#s7">Match details</a></li>
+      <li><a href="#s8">Applications</a></li>
+      <li><a href="#s9">From match to deal</a></li>
+      <li><a href="#s10">Deals</a></li>
+      <li><a href="#s11">Milestones</a></li>
+      <li><a href="#s12">Contracts</a></li>
+      <li><a href="#s13">Notifications</a></li>
+      <li><a href="#s14">Pipeline</a></li>
+      <li><a href="#s15">Your journey from start to finish</a></li>
+      <li><a href="#s16">Tips for success</a></li>
+      <li><a href="#s17">Common mix-ups</a></li>
+      <li><a href="#s18">When something looks unclear</a></li>
+      <li><a href="#s19">Words you might see</a></li>
+    </ol>
+  </nav>
+
+  <section id="quick" class="page-break quick">
+    <h2>Quick start (5 minutes)</h2>
+    <ol>
+      <li>Create your account.</li>
+      <li>Complete your profile.</li>
+      <li>Create your first opportunity.</li>
+      <li>Publish it.</li>
+      <li>Review your matches.</li>
+      <li>Accept a match to start working together.</li>
+    </ol>
+    <p class="muted">The sections below walk through each screen in plain language.</p>
+  </section>
+
+  <section id="s1" class="page-break">
+    <h1>1. Platform overview</h1>
+    <h4>What this page is about</h4>
+    <p>PMTwin helps professionals and companies find each other, agree on work, and track delivery—starting from an <strong>opportunity</strong> (what you need or offer), through <strong>suggested matches</strong>, then a <strong>deal</strong> and <strong>contract</strong> when you are ready.</p>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>Post what you need or what you offer.</li>
+      <li>See suggestions that fit your post.</li>
+      <li>Agree with others and manage the work in one place.</li>
+    </ul>
+    <h4>Step-by-step actions</h4>
+    <p>Use this guide in order, or jump from the table of contents to any topic.</p>
+    <h4>What happens next</h4>
+    <p>Continue to the next section in order, or open any topic from the table of contents. The diagram below shows the typical path from sign-up to completion.</p>
+    <h4>Tips</h4>
+    <ul>
+      <li>A complete profile helps others trust you.</li>
+      <li>A clear opportunity gets better suggestions.</li>
+    </ul>
+    <div class="mermaid avoid-break">
+flowchart LR
+  register[Sign up] --> profile[Profile]
+  profile --> opp[Opportunity]
+  opp --> publish[Publish]
+  publish --> suggestions[Matches]
+  suggestions --> deal[Deal]
+  deal --> contract[Contract]
+  contract --> finish[Completion]
+    </div>
+
+    <h2 id="s1-roles">1.1 Who uses PMTwin</h2>
+    <h4>What this page is about</h4>
+    <p>People join as a <strong>company</strong> or as an <strong>individual</strong>. Individuals often choose <strong>Professional</strong> or <strong>Consultant</strong> depending on how they work.</p>
+    <h4>What you can do here</h4>
+    <ul>
+      <li><strong>Company:</strong> Represent your organization; post needs or offers on behalf of the business.</li>
+      <li><strong>Professional:</strong> Offer your skills and respond to opportunities.</li>
+      <li><strong>Consultant:</strong> Same idea, with a focus on advisory or expert services.</li>
+    </ul>
+    <h4>Step-by-step actions</h4>
+    <div class="action-box avoid-break"><strong>👉 What to do</strong>
+      <ol>
+        <li>After you sign in, open <strong>Profile</strong>.</li>
+        <li>Make sure your details match how you work (company vs individual).</li>
+        <li>Save if you changed anything.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>Others will see your role type when you connect. You can update <strong>Profile</strong> later if your situation changes.</p>
+    <h4>Tips</h4>
+    <p class="muted">If your organization reviews new accounts, you may need approval before everything is available.</p>
+  </section>
+
+  <section id="s2" class="page-break">
+    <h1>2. Account &amp; sign in</h1>
+    <h2>2.1 Registration</h2>
+    <h4>What this page is about</h4>
+    <p>The sign-up screens walk you through creating an account. You choose whether you are a <strong>business</strong> or an <strong>individual</strong>, then fill in the questions step by step.</p>
+    <figure class="avoid-break">
+      <img src="assets/01-register.png" alt="Registration" width="1100" />
+      <figcaption>Figure 1 — Registration.</figcaption>
+    </figure>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>Enter your email and a secure password.</li>
+      <li>Add your name or company name and the details the form asks for.</li>
+      <li>Accept the terms when asked.</li>
+    </ul>
+    <h4>Step-by-step actions</h4>
+    <div class="action-box avoid-break"><strong>👉 What to do</strong>
+      <ol>
+        <li>Open <strong>Register</strong> from the welcome screen.</li>
+        <li>Choose company or individual and complete each step.</li>
+        <li>Click submit. If your organization reviews new accounts, wait for confirmation before everything is unlocked.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>You can sign in once your account is active; watch your email or in-app messages for approval if your organization requires it.</p>
+    <h4>Tips</h4>
+    <ul>
+      <li>Use an email you check often.</li>
+      <li>Keep your password private.</li>
+    </ul>
+
+    <h2>2.2 Login</h2>
+    <h4>What this page is about</h4>
+    <p>The login page is where you enter your email and password to open PMTwin.</p>
+    <figure class="avoid-break">
+      <img src="assets/02-login.png" alt="Login" width="900" />
+      <figcaption>Figure 2 — Login.</figcaption>
+    </figure>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>Sign in with your email and password.</li>
+      <li>Use <strong>Forgot password</strong> if you need to reset.</li>
+    </ul>
+    <h4>Step-by-step actions</h4>
+    <div class="action-box avoid-break"><strong>👉 What to do</strong>
+      <ol>
+        <li>Open <strong>Login</strong>.</li>
+        <li>Enter your email and password.</li>
+        <li>Click <strong>Login</strong>.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>You are redirected to your dashboard, where you can access Opportunities, Matches, and your Pipeline.</p>
+    <div class="mermaid avoid-break">
+sequenceDiagram
+  participant You
+  participant PMTwin
+  You->>PMTwin: Email and password
+  PMTwin-->>You: Open your home page
+    </div>
+  </section>
+
+  <section id="s3" class="page-break">
+    <h1>3. Profile</h1>
+    <h4>What this page is about</h4>
+    <p>Your profile is your public-facing introduction. It helps others understand <strong>who you are</strong> and <strong>what you do</strong> before they connect with you.</p>
+    <figure class="avoid-break">
+      <img src="assets/04-profile.png" alt="Profile" width="1100" />
+      <figcaption>Figure 3 — Profile.</figcaption>
+    </figure>
+    <h4>Why it matters</h4>
+    <p>A strong profile leads to clearer conversations and better suggestions when people compare your skills to their needs.</p>
+    <h4>Example (strong profile)</h4>
+    <div class="action-box avoid-break">
+      <strong>Example</strong>
+      <p><b>Skills:</b> Structural Engineering, AutoCAD, Revit</p>
+      <p><b>Experience:</b> 8 years in construction projects</p>
+      <p><b>Certifications:</b> PMP, PE License</p>
+    </div>
+    <h4>What you can do here</h4>
+    <ul>
+      <li><strong>Skills</strong> — what you actually deliver (be specific).</li>
+      <li><strong>Experience</strong> — years and roles that support your skills.</li>
+      <li><strong>Certifications</strong> — licenses or certificates that matter in your field.</li>
+      <li><strong>Languages</strong> — how you communicate.</li>
+      <li><strong>Social links</strong> — for example LinkedIn or a portfolio site.</li>
+    </ul>
+    <h4>Step-by-step actions</h4>
+    <div class="action-box avoid-break"><strong>👉 What to do</strong>
+      <ol>
+        <li>From the side menu, open <strong>Profile</strong>.</li>
+        <li>Fill in or update the fields.</li>
+        <li>Save before you leave the page.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>Your profile becomes visible to others and helps improve your matches.</p>
+    <h4>Tips</h4>
+    <ul>
+      <li>Add 10–15 clear skills instead of one long vague list.</li>
+      <li>Update your profile when your focus changes.</li>
+    </ul>
+    <h4>Common mistakes</h4>
+    <ul>
+      <li>Adding too few skills</li>
+      <li>Using generic titles like "Engineer"</li>
+      <li>Leaving the profile incomplete</li>
+    </ul>
+  </section>
+
+  <section id="s4" class="page-break">
+    <h1>4. Home (Dashboard)</h1>
+    <h4>What this page is about</h4>
+    <p>The home page is your starting point after login. It shows useful counts and shortcuts.</p>
+    <figure class="avoid-break">
+      <img src="assets/03-dashboard.png" alt="Dashboard" width="1100" />
+      <figcaption>Figure 4 — Home dashboard.</figcaption>
+    </figure>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>See summaries of your opportunities, matches, applications, and alerts.</li>
+      <li>Jump to common tasks from cards or the side menu.</li>
+    </ul>
+    <h4>Step-by-step actions</h4>
+    <div class="action-box avoid-break"><strong>👉 What to do</strong>
+      <ol>
+        <li>Use the <strong>left menu</strong> to go to Pipeline, Opportunities, Matches, Deals, Contracts, Notifications, or Profile.</li>
+        <li>Or tap a summary card on the home page if it takes you where you want to go.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>You move to the screen you chose; counts on the dashboard refresh when you return to Home.</p>
+  </section>
+
+  <section id="s5" class="page-break">
+    <h1>5. Opportunities</h1>
+    <h4>What this page is about</h4>
+    <p>An <strong>opportunity</strong> is your post: what you are looking for, what you offer, or both. When you <strong>publish</strong>, others can discover it and the system can suggest good fits.</p>
+    <p><strong>Matching depends on clarity:</strong> clear skills, realistic budget, and timeline help you get better matches.</p>
+    <figure class="avoid-break">
+      <img src="assets/05-opportunity-create.png" alt="Create opportunity" width="1100" />
+      <figcaption>Figure 5 — Create opportunity.</figcaption>
+    </figure>
+
+    <h4>Example (good opportunity)</h4>
+    <div class="action-box avoid-break">
+      <strong>Example</strong>
+      <p><b>Title:</b> Need structural engineer for shop drawing review</p>
+      <p><b>Skills:</b> Structural Engineering, AutoCAD</p>
+      <p><b>Budget:</b> 5,000 – 10,000 SAR</p>
+      <p><b>Timeline:</b> 2 months</p>
+    </div>
+
+    <h4>Common mistakes</h4>
+    <ul>
+      <li>Using vague titles like "Need help"</li>
+      <li>Not adding enough skills</li>
+      <li>Unrealistic budget or missing timeline</li>
+    </ul>
+
+    <h2 id="s5-wizard">5.1 Create opportunity — step by step</h2>
+    <p>The form is a <strong>wizard</strong>: follow the steps at the top and use <strong>Next</strong> and <strong>Back</strong>. Fields marked with * are required.</p>
+
+    <h3>Step 1 — Project type</h3>
+    <h4>What you select</h4>
+    <p>Single project (one clear piece of work) or Multi project (ongoing program or several related collaborations).</p>
+    <h4>What it means</h4>
+    <p>It sets the tone—short engagement vs longer-term partnership.</p>
+
+    <h3>Step 2 — Basic information</h3>
+    <p><strong>Title</strong> — Short, clear headline. <strong>Description</strong> — Enough detail that someone understands scope and expectations.</p>
+    <p><strong>Location &amp; how you work</strong> — Where work happens and whether it is on-site, remote, or hybrid. <strong>Dates</strong> (if shown) — Start, deadline, or end dates help others see timing.</p>
+    <p><strong>Example</strong></p>
+    <table class="avoid-break">
+      <thead><tr><th>Field</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td>Title</td><td>Need structural engineer for shop drawing review</td></tr>
+        <tr><td>Skills (later step)</td><td>Structural Engineering, AutoCAD</td></tr>
+        <tr><td>Budget (later step)</td><td>5,000 – 10,000 SAR</td></tr>
+        <tr><td>Timeline</td><td>About 2 months</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Tips:</strong> Use a clear title. Add real skills. Set a realistic budget and timeline.</p>
+
+    <h3>Step 3 — Intent</h3>
+    <p><strong>Need</strong> — You are looking for something. <strong>Offer</strong> — You provide something. <strong>Need + Offer</strong> — Both apply (for example exchange-style setups).</p>
+    <p><strong>What it means:</strong> It helps steer who should see your post and how suggestions are found.</p>
+
+    <h3>Step 4 — Scope</h3>
+    <p><strong>Skills and tags</strong> — List what matters for delivery. Skills are important because they describe the work in words others search for.</p>
+    <p><strong>Sectors and interests</strong> — Extra context so the right people notice your post.</p>
+
+    <h3>Step 5 — Collaboration model</h3>
+    <p>Choose the type of collaboration (for example project-style, partnership, hiring, or competition-style). Follow the questions and fill any extra fields that appear.</p>
+    <p><strong>What it means:</strong> Different setups ask different follow-up questions so the form matches your situation.</p>
+
+    <h3>Step 6 — Payment &amp; value</h3>
+    <p>Set your <strong>budget range</strong> and how value is exchanged (cash, equity, profit-sharing, barter, or a mix). This helps others see if the opportunity fits them.</p>
+
+    <h3>Step 7 — Review &amp; publish</h3>
+    <p>Check everything. Then either <strong>save as draft</strong> (only you can see it) or <strong>publish</strong> (others can find it and suggestions can appear).</p>
+    <h4>Step-by-step actions</h4>
+    <div class="action-box avoid-break"><strong>👉 What to do</strong>
+      <ol>
+        <li>Open <strong>Opportunities</strong> → <strong>Create</strong>.</li>
+        <li>Complete each wizard step.</li>
+        <li>On the last step, choose <strong>Publish</strong> when you are ready, or <strong>save as draft</strong> to keep working privately.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>A published post can be discovered and matched; a draft stays visible only to you until you publish.</p>
+    <div class="note-box">
+      <strong>Note:</strong>
+      <p>After publishing, the system automatically generates matches. Check the Matches page within a few minutes.</p>
+    </div>
+    <div class="mermaid avoid-break">
+flowchart LR
+  Draft[Draft] --> Publish[Publish]
+  Publish --> Suggestions[Suggestions appear]
+  Suggestions --> Alerts[You may get alerts]
+    </div>
+
+    <h2>5.2 Draft vs publish (short)</h2>
+    <ul>
+      <li><strong>Draft</strong> — Work in private; nothing is visible for matching.</li>
+      <li><strong>Publish</strong> — Your post is live; others can discover it and you can receive suggestions.</li>
+    </ul>
+    <h4>Common mistakes (draft vs publish)</h4>
+    <ul>
+      <li>Choosing the wrong intent (need vs offer) for what you actually want.</li>
+      <li>Leaving the opportunity in draft and expecting matches to appear.</li>
+    </ul>
+  </section>
+
+  <section id="s6" class="page-break">
+    <h1>6. Matches</h1>
+    <h4>What this page is about</h4>
+    <p>A <strong>match</strong> is a <strong>suggested collaboration</strong> based on your opportunity and another party’s opportunity. It is a starting point—not a final agreement.</p>
+    <p><strong>Flow:</strong> Opportunity → Match → Deal → Contract</p>
+    <figure class="avoid-break">
+      <img src="assets/06-matches-list.png" alt="Matches list" width="1100" />
+      <figcaption>Figure 6 — Matches.</figcaption>
+    </figure>
+    <h4>What you see</h4>
+    <ul>
+      <li>A <strong>match score</strong> — how closely the suggestion fits (higher usually means a better fit).</li>
+      <li>The <strong>other party</strong> and short context.</li>
+      <li>The <strong>type</strong> of match (for example simple pairing, barter-style, group, or chain-style).</li>
+    </ul>
+    <h4>What affects the score (plain language)</h4>
+    <p>Mainly: how well skills line up, whether budgets and timing make sense together, location and work mode, and trust signals when available. Small changes in your post can change the score.</p>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>Open a match to read details.</li>
+      <li>Accept or decline.</li>
+    </ul>
+    <h4>Step-by-step actions</h4>
+    <div class="action-box avoid-break"><strong>👉 What to do</strong>
+      <ol>
+        <li>Open <strong>Matches</strong> from the menu.</li>
+        <li>Click a row to open the full match details.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>You see the match detail screen where you can read the summary, compare scores, and choose your next action. If you accept and all participants accept, a deal is created automatically.</p>
+    <h4>Tips</h4>
+    <ul>
+      <li>If you see few or no suggestions, widen skills slightly or adjust budget and dates, then publish again.</li>
+    </ul>
+    <h4>Common mistakes</h4>
+    <ul>
+      <li>Ignoring the match score and context before accepting or declining.</li>
+      <li>Declining without reading whether the fit is barter, chain, or simple pairing.</li>
+      <li>Expecting new suggestions without adjusting a vague opportunity or unpublished post.</li>
+    </ul>
+  </section>
+
+  <section id="s7" class="page-break">
+    <h1>7. Match details</h1>
+    <h4>What this page is about</h4>
+    <p>This screen explains one suggestion: who is involved, what is being exchanged, and your choices.</p>
+    <figure class="avoid-break">
+      <img src="assets/07-match-detail.png" alt="Match detail" width="1100" />
+      <figcaption>Figure 7 — Match details.</figcaption>
+    </figure>
+    <h4>What you can do here</h4>
+    <ul>
+      <li><strong>Accept Match</strong> — You agree to move forward with this suggestion.</li>
+      <li><strong>Decline</strong> — You close this suggestion.</li>
+      <li><strong>Message</strong> or <strong>Start negotiation</strong> — When shown, use these to talk things through.</li>
+    </ul>
+    <h4>Step-by-step actions</h4>
+    <div class="action-box avoid-break"><strong>👉 What to do</strong>
+      <ol>
+        <li>From <strong>Matches</strong>, open a match.</li>
+        <li>Read the summary.</li>
+        <li>Click <strong>Accept Match</strong> or <strong>Decline</strong>.</li>
+        <li>Remember: everyone involved must accept before the next step.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>If you declined, the suggestion closes. If you accepted, the match stays open until all parties respond; when all accept, a deal is created.</p>
+    <div class="note-box">
+      <strong>Important:</strong>
+      <p>A deal is only created when <strong>all participants</strong> accept the match.</p>
+    </div>
+    <div class="mermaid avoid-break">
+flowchart LR
+  Accept[Accept] --> AllIn[Everyone accepts]
+  AllIn --> Deal[Deal created]
+  Decline[Decline] --> Closed[Suggestion closed]
+    </div>
+  </section>
+
+  <section id="s8" class="page-break">
+    <h1>8. Applications</h1>
+    <h4>What this page is about</h4>
+    <p>Some opportunities let people <strong>apply</strong> instead of only receiving automatic suggestions. Applications are <strong>requests you send or receive</strong> to join or bid on an opportunity.</p>
+    <h4>Matches vs applications (simple)</h4>
+    <table class="avoid-break">
+      <thead><tr><th></th><th>Who starts it</th><th>When to use it</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Suggestions (Matches)</strong></td><td>The service suggests pairs for you</td><td>You want ideas based on your published post</td></tr>
+        <tr><td><strong>Applications</strong></td><td>A person applies to your post (or you apply to theirs)</td><td>You want formal inbound interest or you want to apply</td></tr>
+      </tbody>
+    </table>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>Track applications on the Pipeline <strong>Applications</strong> tab.</li>
+      <li>Move cards between columns when the page allows, to reflect review stages.</li>
+    </ul>
+    <h4>Step-by-step actions</h4>
+    <div class="action-box avoid-break"><strong>👉 What to do</strong>
+      <ol>
+        <li>Open <strong>Pipeline</strong> → <strong>Applications</strong> tab.</li>
+        <li>Move cards between columns when permitted.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>Card positions reflect review stages; open a card or related opportunity when you need more detail.</p>
+  </section>
+
+  <section id="s9" class="page-break">
+    <h1>9. From match to deal</h1>
+    <h4>What this page is about</h4>
+    <p>After everyone accepts a match, you move from “we might work together” to “let’s manage this in a deal.”</p>
+    <h4>What happens</h4>
+    <p>When the last person accepts, <strong>a deal is created automatically</strong> for the group. Open it from <strong>Deals</strong> if you are not taken there directly.</p>
+    <h4>Step-by-step actions</h4>
+    <div class="action-box avoid-break"><strong>👉 What to do</strong>
+      <ol>
+        <li>Complete acceptance on the match screen.</li>
+        <li>Open <strong>Deals</strong>.</li>
+        <li>Continue planning scope, timing, and next steps there.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>A new deal appears for your group; you work there until milestones and contracts pick up the detail.</p>
+  </section>
+
+  <section id="s10" class="page-break">
+    <h1>10. Deals</h1>
+    <h4>What this page is about</h4>
+    <p>The <strong>deal</strong> is where you manage the agreement: scope, timing, value, and progress. Think of it as your shared workspace for the collaboration.</p>
+    <figure class="avoid-break">
+      <img src="assets/08-deals-list.png" alt="Deals list" width="1100" />
+      <figcaption>Figure 8 — Deals list.</figcaption>
+    </figure>
+    <figure class="avoid-break">
+      <img src="assets/09-deal-detail-execution.png" alt="Deal detail" width="1100" />
+      <figcaption>Figure 9 — Deal detail.</figcaption>
+    </figure>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>See who is involved and what was agreed in principle.</li>
+      <li>Move through stages from discussion to signing and execution.</li>
+      <li>Track deliverables and milestones (see next section).</li>
+    </ul>
+    <h4>Stages (simple words)</h4>
+    <ul>
+      <li><strong>Discussion</strong> — Align on needs and terms.</li>
+      <li><strong>Agreement</strong> — Shape scope, value, and timeline.</li>
+      <li><strong>Execution</strong> — Do the work and track milestones.</li>
+      <li><strong>Completion</strong> — Close out when work is done.</li>
+    </ul>
+    <h4>Step-by-step actions</h4>
+    <div class="action-box avoid-break"><strong>👉 What to do</strong>
+      <ol>
+        <li>Open <strong>Deals</strong> and choose your deal.</li>
+        <li>Use the buttons and sections on the page to advance and update information.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>The deal moves through discussion, agreement, signing, and execution as your group completes each stage. When ready, you move to the contract stage for signatures and proceed to the contract for signing.</p>
+    <div class="mermaid avoid-break">
+stateDiagram-v2
+  [*] --> discuss[Discussion]
+  discuss --> agree[Agreement]
+  agree --> sign[Signing]
+  sign --> work[Execution]
+  work --> finish[Completion]
+    </div>
+  </section>
+
+  <section id="s11" class="page-break">
+    <h1>11. Milestones</h1>
+    <h4>What this page is about</h4>
+    <p>Milestones break the work into steps with dates and deliverables. You manage them <strong>inside the deal</strong>—there is no separate milestones home page.</p>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>Add or review milestones (title, date, what must be delivered).</li>
+      <li>Submit work for review when ready.</li>
+      <li>Approve or ask for changes, depending on your role.</li>
+    </ul>
+    <h4>Step-by-step actions</h4>
+    <div class="action-box avoid-break"><strong>👉 What to do</strong>
+      <ol>
+        <li>Open your deal.</li>
+        <li>Find the milestones section.</li>
+        <li>Update or submit as guided on screen.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>Statuses update as work moves from not started to submitted and approved (or sent back for changes).</p>
+    <h4>Status words you may see</h4>
+    <ul>
+      <li>Not started → In progress → Submitted → Approved (or sent back for changes).</li>
+    </ul>
+  </section>
+
+  <section id="s12" class="page-break">
+    <h1>12. Contracts</h1>
+    <h4>What this page is about</h4>
+    <p>The <strong>contract</strong> is the official agreement between all parties. It records scope, payment, and timeline in one place.</p>
+    <figure class="avoid-break">
+      <img src="assets/10-contracts-list.png" alt="Contracts list" width="1100" />
+      <figcaption>Figure 10 — Contracts.</figcaption>
+    </figure>
+    <figure class="avoid-break">
+      <img src="assets/11-contract-detail.png" alt="Contract detail" width="1100" />
+      <figcaption>Figure 11 — Contract detail.</figcaption>
+    </figure>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>Read parties, scope, value, and dates.</li>
+      <li>Complete signing steps when it is your turn.</li>
+    </ul>
+    <h4>Step-by-step actions</h4>
+    <div class="action-box avoid-break"><strong>👉 What to do</strong>
+      <ol>
+        <li>Open <strong>Contracts</strong>.</li>
+        <li>Select your contract.</li>
+        <li>Follow the signing prompts for your role.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>Once signed, work continues under the deal. Once signed, the contract activates the deal execution.</p>
+    <div class="mermaid avoid-break">
+stateDiagram-v2
+  [*] --> waiting[Waiting for signatures]
+  waiting --> active[Active]
+  active --> done[Completed]
+    </div>
+  </section>
+
+  <section id="s13" class="page-break">
+    <h1>13. Notifications</h1>
+    <h4>What this page is about</h4>
+    <p>Notifications keep you updated about matches, deals, contracts, and account messages—so you do not miss important steps.</p>
+    <figure class="avoid-break">
+      <img src="assets/12-notifications.png" alt="Notifications" width="1100" />
+      <figcaption>Figure 12 — Notifications.</figcaption>
+    </figure>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>Read new updates.</li>
+      <li>Open the related page from a notification when a link is provided.</li>
+    </ul>
+    <h4>Step-by-step actions</h4>
+    <div class="action-box avoid-break"><strong>👉 What to do</strong>
+      <ol>
+        <li>Open <strong>Notifications</strong> from the menu.</li>
+        <li>Tap an item to go to the related screen.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>You land on the page tied to that notification (match, deal, contract, or message).</p>
+  </section>
+
+  <section id="s14" class="page-break">
+    <h1>14. Pipeline</h1>
+    <h4>What this page is about</h4>
+    <p>The pipeline helps you <strong>track your opportunities and applications</strong> on boards. You can see what is draft, live, in progress, or closed at a glance.</p>
+    <figure class="avoid-break">
+      <img src="assets/13-pipeline-opportunities.png" alt="Pipeline opportunities" width="1100" />
+      <figcaption>Figure 13 — Opportunities board.</figcaption>
+    </figure>
+    <figure class="avoid-break">
+      <img src="assets/14-pipeline-applications.png" alt="Pipeline applications" width="1100" />
+      <figcaption>Figure 14 — Applications board.</figcaption>
+    </figure>
+    <h4>Opportunities columns (simple)</h4>
+    <ul>
+      <li><strong>Draft</strong> — Not published yet.</li>
+      <li><strong>Published</strong> — Live for others to find.</li>
+      <li><strong>In progress</strong> — Active discussion or negotiation.</li>
+      <li><strong>Closed</strong> — Finished on this board.</li>
+    </ul>
+    <h4>Applications columns (simple)</h4>
+    <p>Columns follow the review journey—for example pending, reviewing, shortlisted, in discussion, accepted, or not selected. Labels may vary slightly by screen.</p>
+    <h4>What you can do here</h4>
+    <ul>
+      <li>Drag a card to another column when the page allows, to update its stage.</li>
+      <li>Use this view together with <strong>Matches</strong> for suggestions (matches are not managed on this board).</li>
+    </ul>
+    <h4>Step-by-step actions</h4>
+    <div class="action-box avoid-break"><strong>👉 What to do</strong>
+      <ol>
+        <li>Open <strong>Pipeline</strong>.</li>
+        <li>Switch between <strong>Opportunities</strong> and <strong>Applications</strong> tabs.</li>
+        <li>Drag cards only when you intend to change the stage shown.</li>
+      </ol>
+    </div>
+    <h4>What happens next</h4>
+    <p>Column labels update to reflect each item’s stage; use <strong>Matches</strong> for suggestions (they are not managed on this board).</p>
+  </section>
+
+  <section id="s15" class="page-break">
+    <h1>15. Your journey from start to finish</h1>
+    <h4>What this page is about</h4>
+    <p>A single checklist of the full path from signup to finishing work.</p>
+    <h4>What you can do here</h4>
+    <p>Use it as a reminder or training checklist in order.</p>
+    <h4>Step-by-step actions</h4>
+    <ol>
+      <li>Create your account.</li>
+      <li>Fill in your profile.</li>
+      <li>Create an opportunity and save a draft if you need time.</li>
+      <li>Publish when you are ready.</li>
+      <li>Review matches and talk to others if needed.</li>
+      <li>Accept when everyone agrees.</li>
+      <li>Work in the deal and sign the contract when offered.</li>
+      <li>Complete milestones and close out.</li>
+    </ol>
+    <h4>What happens next</h4>
+    <p>Use this list as a checklist; revisit earlier steps whenever your situation changes (for example updating your profile or republishing an opportunity).</p>
+    <h4>Tips</h4>
+    <p class="muted">You can return to any earlier step if your situation changes (for example updating your profile or republishing an opportunity).</p>
+  </section>
+
+  <section id="s16" class="page-break">
+    <h1>16. Tips for success</h1>
+    <h4>What this page is about</h4>
+    <p>Short habits that improve results on PMTwin.</p>
+    <h4>What you can do here</h4>
+    <p>Apply these before you publish and while you collaborate.</p>
+    <h4>Step-by-step actions</h4>
+    <ul>
+      <li>Use clear titles and real skills.</li>
+      <li>Set budgets and dates you can stand behind.</li>
+      <li>Reply to matches and messages promptly.</li>
+      <li>Keep your profile up to date.</li>
+    </ul>
+    <h4>What happens next</h4>
+    <p>Apply these habits before each publish and during collaboration; you should see clearer matches and fewer misunderstandings over time.</p>
+    <h4>Tips</h4>
+    <p class="muted">Re-read your opportunity title and skills in the review step every time before you publish.</p>
+  </section>
+
+  <section id="s17" class="page-break">
+    <h1>17. Common mix-ups</h1>
+    <h4>What this page is about</h4>
+    <p>Typical pitfalls and how to read them.</p>
+    <h4>What you can do here</h4>
+    <p>Use this list when results feel off—often the fix starts with profile or opportunity wording.</p>
+    <h4>Step-by-step actions</h4>
+    <ul>
+      <li>Empty profile — harder for others to trust or suggest good fits.</li>
+      <li>Wrong “need” vs “offer” — you may see less relevant suggestions.</li>
+      <li>Leaving everything in draft — nothing is visible to match.</li>
+      <li>Ignoring notifications — you may miss a time-sensitive step.</li>
+    </ul>
+    <h4>What happens next</h4>
+    <p>When something feels off, work through profile wording, then opportunity intent and skills, then republish—most issues improve in that order.</p>
+    <h4>Tips</h4>
+    <p class="muted">If suggestions seem wrong, fix your profile first, then intent and skills on the opportunity, then publish again.</p>
+  </section>
+
+  <section id="s18" class="page-break">
+    <h1>18. When something looks unclear</h1>
+    <h4>What this page is about</h4>
+    <p>Plain answers when a screen or outcome is confusing.</p>
+    <h4>What you can do here</h4>
+    <p>Match your situation to one of the notes below and follow the implied next step.</p>
+    <h4>Step-by-step actions</h4>
+    <ul>
+      <li><strong>Only some people accepted</strong> — The suggestion stays open until everyone accepts, or someone declines.</li>
+      <li><strong>No suggestions yet</strong> — Adjust skills or timing, make sure you published, and check again later.</li>
+      <li><strong>You declined</strong> — That suggestion closes; you can focus on other posts or publish an updated opportunity.</li>
+      <li><strong>Deal feels stuck</strong> — Return to scope and dates in the deal, and message the other party.</li>
+      <li><strong>Contract not moving</strong> — Make sure each party has completed their signing steps.</li>
+    </ul>
+    <h4>What happens next</h4>
+    <p>Follow the implied next step for your situation (refresh, adjust and republish, or complete signing in order).</p>
+    <h4>Tips</h4>
+    <p class="muted">Refresh the page or open the list view again if a screen did not update after you took an action.</p>
+  </section>
+
+  <section id="s19" class="page-break">
+    <h1>19. Words you might see</h1>
+    <h4>What this page is about</h4>
+    <p>Short explanations in everyday language—no need to memorize anything.</p>
+    <h4>What you can do here</h4>
+    <p>Refer back when a label on screen is unfamiliar.</p>
+    <h4>Step-by-step actions</h4>
+    <ul>
+      <li><strong>Draft</strong> — Saved but not live for others yet.</li>
+      <li><strong>Published</strong> — Your opportunity is visible so people can find it.</li>
+      <li><strong>Match / suggestion</strong> — A recommended pairing based on your post and someone else’s.</li>
+      <li><strong>Deal</strong> — Where you manage the work after people agree to collaborate.</li>
+      <li><strong>Contract</strong> — The signed agreement that captures scope, payment, and timing.</li>
+    </ul>
+    <h4>What happens next</h4>
+    <p>When a label on screen is unclear, match it to these meanings and continue with the task you were doing.</p>
+    <h4>Tips</h4>
+    <p class="muted">The app may use slightly different wording in places; focus on whether something is saved, published, or signed.</p>
+  </section>
+
+  <p class="muted page-break" style="margin-top: 12mm;">End of guide — PMTwin</p>
+
+  <footer class="footer">PMTwin — User Guide</footer>
+
+</body>
+</html>

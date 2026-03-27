@@ -277,62 +277,7 @@ function setupMatchDetailActions(matchId, userId) {
                     }
                     let deal = await dataService.getDealByMatchId(matchId);
                     if (!deal) {
-                        const parties = (updated.participants || []).map(p => ({ userId: p.userId, role: p.role || 'participant' }));
-                        const negotiation = await dataService.createNegotiation({
-                            matchId,
-                            applicationId: null,
-                            opportunityId: (updated.payload && (updated.payload.needOpportunityId || updated.payload.leadNeedId)) || null,
-                            parties,
-                            status: 'open',
-                            initialTerms: null,
-                            rounds: [],
-                            agreedTerms: null
-                        });
-                        const dealParticipants = (updated.participants || []).map(p => ({
-                            userId: p.userId,
-                            role: p.role || 'participant',
-                            approvalStatus: 'pending',
-                            signedAt: null
-                        }));
-                        const oppIds = [];
-                        if (updated.payload) {
-                            if (updated.payload.needOpportunityId) oppIds.push(updated.payload.needOpportunityId);
-                            if (updated.payload.offerOpportunityId) oppIds.push(updated.payload.offerOpportunityId);
-                            if (updated.payload.leadNeedId) oppIds.push(updated.payload.leadNeedId);
-                            (updated.payload.roles || []).forEach(r => { if (r.opportunityId) oppIds.push(r.opportunityId); });
-                        }
-                        const payload = updated.payload || {};
-                        const roleSlots = (payload.roles || []).reduce((acc, r) => { if (r.userId) acc[r.userId] = r.role || 'consortium_member'; return acc; }, {});
-                        deal = await dataService.createDeal({
-                            matchId,
-                            matchType: updated.matchType || 'one_way',
-                            status: CONFIG.DEAL_STATUS.NEGOTIATING,
-                            title: 'Deal – ' + (updated.id || matchId),
-                            participants: dealParticipants,
-                            opportunityIds: [...new Set(oppIds)],
-                            opportunityId: payload.leadNeedId || oppIds[0] || null,
-                            payload: updated.matchType === 'consortium' ? payload : null,
-                            roleSlots: updated.matchType === 'consortium' && Object.keys(roleSlots).length ? roleSlots : null,
-                            negotiationId: negotiation.id,
-                            scope: '',
-                            timeline: { start: null, end: null },
-                            exchangeMode: 'cash',
-                            valueTerms: { agreedValue: null, paymentSchedule: '' },
-                            deliverables: '',
-                            milestones: []
-                        });
-                        if (deal && dataService.createAuditLog) {
-                            const user = authService.getCurrentUser();
-                            if (user) {
-                                dataService.createAuditLog({
-                                    userId: user.id,
-                                    action: 'deal_created',
-                                    entityType: 'deal',
-                                    entityId: deal.id,
-                                    details: { matchId, opportunityIds: oppIds }
-                                }).catch(() => {});
-                            }
-                        }
+                        deal = await dataService.createDealFromMatch(updated);
                     }
                     await renderMatchDetail(updated, userId);
                     if (deal && window.router && typeof window.router.navigate === 'function') {

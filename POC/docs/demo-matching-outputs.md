@@ -1,4 +1,14 @@
-# Demo Matching Outputs — Expected Results by Model
+# Demo matching outputs — expected results by model
+
+### What this page is
+
+Expected **matching outputs** for demo scenarios, by model type.
+
+### What happens next
+
+Re-run after changing matching weights or demo opportunities.
+
+---
 
 This document describes the **expected system outputs** when the matching engine runs against the [demo-40-opportunities dataset](../data/demo-40-opportunities.json). Use it to validate test flows (see [full-system-workflow-design.md](../../docs/modules/full-system-workflow-design.md) Section 8).
 

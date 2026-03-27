@@ -1,4 +1,18 @@
-# One-Way Matching
+# One-way matching
+
+### What this page is
+
+POC note on **one-way** matches: need ↔ offer, fields involved, and diagram links.
+
+### Why it matters
+
+Quick reference when debugging `findOffersForNeed` / `findNeedsForOffer`.
+
+### What happens next
+
+See [matching-workflow.md](../../docs/workflow/matching-workflow.md) for full persistence flow.
+
+---
 
 One-way matching connects a **need** (request) with an **offer** (capacity to provide). One party has a need; another has a matching offer.
 

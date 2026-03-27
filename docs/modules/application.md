@@ -1,6 +1,32 @@
-=== File: application.md ===
-
 # Application
+
+### What this page is
+
+Module guide: **applications** to opportunities—wizard steps, scoring, pipeline, and what happens when an owner **accepts**.
+
+### Why it matters
+
+Applications are the manual path next to automatic **matching**; owners need a clear review flow.
+
+### What you can do here
+
+- Walk the six-step wizard outline.
+- See actor roles and status transitions.
+
+### Step-by-step actions
+
+1. Read **Overview** and **Actors**.
+2. Jump to the wizard step you are building or testing.
+
+### What happens next
+
+Accepted applications may create contracts per module rules—see **Contract and Execution** and [deal-workflow.md](../workflow/deal-workflow.md).
+
+### Tips
+
+- Automatic contract creation depends on implementation path—verify in code for your branch.
+
+---
 
 ## Overview
 

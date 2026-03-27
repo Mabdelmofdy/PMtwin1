@@ -1,4 +1,14 @@
-# Data Audit and Unification Scripts
+# Data audit and unification scripts
+
+### What this page is
+
+How to run **data audit / consolidate / validate** scripts for seed JSON.
+
+### What happens next
+
+See output under `POC/docs/` and `POC/data/backup/` after runs.
+
+---
 
 Run all scripts from the **repository root**: `node POC/scripts/<script>.js`
 

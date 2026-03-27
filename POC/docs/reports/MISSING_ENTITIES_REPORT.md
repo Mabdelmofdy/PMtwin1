@@ -1,4 +1,14 @@
-# Missing Entities Report
+# Missing entities report
+
+### What this page is
+
+Internal report: entities or relationships **missing** from data or UI.
+
+### What happens next
+
+File tickets or merge into [gaps-and-missing.md](../../../docs/gaps-and-missing.md).
+
+---
 
 Generated: 2026-03-06T12:50:46.835Z
 

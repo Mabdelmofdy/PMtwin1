@@ -1,4 +1,5 @@
 import { enforceTransition } from "/core/workflow/workflow-engine.js";
+import { createDealFromMatch as buildDealPayloadFromMatch } from "../../utils/deals.js";
 
 /**
  * Data Service
@@ -596,6 +597,25 @@ class DataService {
         this.storage.set(CONFIG.STORAGE_KEYS.USERS, users);
         return users[index];
     }
+
+    async deleteUser(id) {
+        const refs = await this.findActorReferences(id);
+        if (this.hasReferences(refs)) {
+            const parts = [];
+            if (refs.opportunities) parts.push('opportunities');
+            if (refs.applications) parts.push('applications');
+            if (refs.postMatches) parts.push('post_matches');
+            if (refs.deals) parts.push('deals');
+            if (refs.contracts) parts.push('contracts');
+            if (refs.notifications) parts.push('notifications');
+            if (refs.audit) parts.push('audit');
+            throw new Error(`Cannot delete user "${id}" because they are still referenced by ${parts.join(', ')}. Remove or reassign those references first.`);
+        }
+        const users = await this.getUsers();
+        const filtered = users.filter(u => u.id !== id);
+        this.storage.set(CONFIG.STORAGE_KEYS.USERS, filtered);
+        return true;
+    }
     
     // Company Operations
     async getCompanies() {
@@ -651,6 +671,18 @@ class DataService {
     }
     
     async deleteCompany(id) {
+        const refs = await this.findActorReferences(id);
+        if (this.hasReferences(refs)) {
+            const parts = [];
+            if (refs.opportunities) parts.push('opportunities');
+            if (refs.applications) parts.push('applications');
+            if (refs.postMatches) parts.push('post_matches');
+            if (refs.deals) parts.push('deals');
+            if (refs.contracts) parts.push('contracts');
+            if (refs.notifications) parts.push('notifications');
+            if (refs.audit) parts.push('audit');
+            throw new Error(`Cannot delete company "${id}" because it is still referenced by ${parts.join(', ')}. Remove or reassign those references first.`);
+        }
         const companies = await this.getCompanies();
         const filtered = companies.filter(c => c.id !== id);
         this.storage.set(CONFIG.STORAGE_KEYS.COMPANIES, filtered);
@@ -781,7 +813,86 @@ class DataService {
         return updated;
     }
     
+    /**
+     * Returns true if any reference count in refs is > 0.
+     * @param {{ [key: string]: number }} refs - e.g. { applications: 2, deals: 1 }
+     */
+    hasReferences(refs) {
+        if (!refs || typeof refs !== 'object') return false;
+        return Object.values(refs).some(n => typeof n === 'number' && n > 0);
+    }
+
+    /**
+     * Find all entities that reference the given opportunity (for safe-delete checks).
+     * @param {string} opportunityId
+     * @returns {Promise<{ applications: number, postMatches: number, deals: number, contracts: number }>}
+     */
+    async findOpportunityReferences(opportunityId) {
+        const id = opportunityId;
+        const applications = await this.getApplications();
+        const appCount = applications.filter(a => a.opportunityId === id).length;
+
+        const postMatches = await this.getPostMatches();
+        const postMatchCount = postMatches.filter(m => {
+            if (!m) return false;
+            const participants = m.participants || [];
+            if (participants.some(p => p.opportunityId === id)) return true;
+            const payload = m.payload || {};
+            if (payload.needOpportunityId === id || payload.offerOpportunityId === id || payload.leadNeedId === id) return true;
+            const roles = payload.roles || [];
+            if (roles.some(r => r.opportunityId === id)) return true;
+            const links = payload.links || [];
+            if (links.some(l => (l.needId === id || l.offerId === id))) return true;
+            return false;
+        }).length;
+
+        const deals = await this.getDeals();
+        const dealCount = deals.filter(d => d.opportunityId === id || (Array.isArray(d.opportunityIds) && d.opportunityIds.includes(id))).length;
+
+        const contracts = await this.getContracts();
+        const contractCount = contracts.filter(c => c.opportunityId === id).length;
+
+        return { applications: appCount, postMatches: postMatchCount, deals: dealCount, contracts: contractCount };
+    }
+
+    /**
+     * Find all entities that reference the given user/company id (actor id).
+     * @param {string} userId - user id or company id (both used as "actor" in participants, creatorId, etc.)
+     * @returns {Promise<{ opportunities: number, applications: number, postMatches: number, deals: number, contracts: number, notifications: number, audit: number }>}
+     */
+    async findActorReferences(userId) {
+        const opportunities = await this.getOpportunities();
+        const oppCount = opportunities.filter(o => o.creatorId === userId).length;
+
+        const applications = await this.getApplications();
+        const appCount = applications.filter(a => a.applicantId === userId).length;
+
+        const postMatches = await this.getPostMatches();
+        const postMatchCount = postMatches.filter(m => (m.participants || []).some(p => p.userId === userId)).length;
+
+        const deals = await this.getDeals();
+        const dealCount = deals.filter(d => (d.participants || []).some(p => p.userId === userId)).length;
+
+        const contracts = await this.getContracts();
+        const contractCount = contracts.filter(c => this.getContractParties(c).some(p => p.userId === userId)).length;
+
+        const notificationCount = (await this.getNotifications(userId)).length;
+        const auditLogs = await this.getAuditLogs({ userId });
+        const auditCount = auditLogs.length;
+
+        return { opportunities: oppCount, applications: appCount, postMatches: postMatchCount, deals: dealCount, contracts: contractCount, notifications: notificationCount, audit: auditCount };
+    }
+
     async deleteOpportunity(id) {
+        const refs = await this.findOpportunityReferences(id);
+        if (this.hasReferences(refs)) {
+            const parts = [];
+            if (refs.applications) parts.push('applications');
+            if (refs.postMatches) parts.push('post_matches');
+            if (refs.deals) parts.push('deals');
+            if (refs.contracts) parts.push('contracts');
+            throw new Error(`Cannot delete opportunity "${id}" because it is still referenced by ${parts.join(', ')}. Remove or reassign those references first.`);
+        }
         const opportunities = await this.getOpportunities();
         const filtered = opportunities.filter(o => o.id !== id);
         this.storage.set(CONFIG.STORAGE_KEYS.OPPORTUNITIES, filtered);
@@ -1105,6 +1216,12 @@ class DataService {
         return legacy;
     }
 
+    allContractPartiesSigned(contract) {
+        const parties = this.getContractParties(contract);
+        if (!parties.length) return false;
+        return parties.every(p => !!p && !!p.userId && !!p.signedAt);
+    }
+
     async getContractsByUserId(userId) {
         const contracts = await this.getContracts();
         return contracts.filter(c => this.getContractParties(c).some(p => p.userId === userId));
@@ -1150,17 +1267,39 @@ class DataService {
         const index = contracts.findIndex(c => c.id === id);
         if (index === -1) return null;
 
-        if (updates && updates.status != null && updates.status !== contracts[index].status) {
-            enforceTransition('contract', contracts[index], updates.status);
+        const current = contracts[index];
+
+        if (updates && updates.status != null && updates.status !== current.status) {
+            enforceTransition('contract', current, updates.status);
         }
 
-        contracts[index] = {
-            ...contracts[index],
+        let updated = {
+            ...current,
             ...updates,
             updatedAt: new Date().toISOString()
         };
+        contracts[index] = updated;
         this.storage.set(CONFIG.STORAGE_KEYS.CONTRACTS, contracts);
-        return contracts[index];
+
+        // Auto-activate contract and linked deal when all parties have signed.
+        if (this.allContractPartiesSigned(updated)) {
+            if (updated.status !== CONFIG.CONTRACT_STATUS.ACTIVE) {
+                enforceTransition('contract', current, CONFIG.CONTRACT_STATUS.ACTIVE);
+                const activated = {
+                    ...updated,
+                    status: CONFIG.CONTRACT_STATUS.ACTIVE,
+                    updatedAt: new Date().toISOString()
+                };
+                contracts[index] = activated;
+                updated = activated;
+                this.storage.set(CONFIG.STORAGE_KEYS.CONTRACTS, contracts);
+            }
+            if (updated.dealId) {
+                await this.updateDeal(updated.dealId, { status: CONFIG.DEAL_STATUS.ACTIVE });
+            }
+        }
+
+        return updated;
     }
 
     // Deal Operations (post-matching collaboration workflow)
@@ -1176,6 +1315,64 @@ class DataService {
     async getDealByMatchId(matchId) {
         const deals = await this.getDeals();
         return deals.find(d => d.matchId === matchId) || null;
+    }
+
+    async createDealFromMatch(postMatch) {
+        const payload = buildDealPayloadFromMatch(postMatch, CONFIG.POST_MATCH_STATUS.CONFIRMED);
+
+        const { matchId, matchType, participants, opportunityIds, primaryOpportunityId, payload: consortiumPayload, roleSlots } = payload;
+        const existing = await this.getDealByMatchId(matchId);
+        if (existing) return existing;
+
+        const parties = participants.map(p => ({ userId: p.userId, role: p.role || 'participant' }));
+        const negotiation = await this.createNegotiation({
+            matchId,
+            applicationId: null,
+            opportunityId: primaryOpportunityId,
+            parties,
+            status: 'open',
+            initialTerms: null,
+            rounds: [],
+            agreedTerms: null
+        });
+
+        const dealParticipants = participants.map(p => ({
+            userId: p.userId,
+            role: p.role || 'participant',
+            approvalStatus: 'pending',
+            signedAt: null
+        }));
+
+        const deal = await this.createDeal({
+            matchId,
+            matchType,
+            status: CONFIG.DEAL_STATUS.NEGOTIATING,
+            title: 'Deal – ' + matchId,
+            participants: dealParticipants,
+            opportunityIds,
+            opportunityId: primaryOpportunityId,
+            payload: consortiumPayload,
+            roleSlots,
+            negotiationId: negotiation ? negotiation.id : null,
+            scope: '',
+            timeline: { start: null, end: null },
+            exchangeMode: 'cash',
+            valueTerms: { agreedValue: null, paymentSchedule: '' },
+            deliverables: '',
+            milestones: []
+        });
+
+        try {
+            await this.createAuditLog({
+                userId: (participants[0] && participants[0].userId) || 'system',
+                action: 'deal_created',
+                entityType: 'deal',
+                entityId: deal.id,
+                details: { matchId, opportunityIds }
+            });
+        } catch (e) { /* non-fatal */ }
+
+        return deal;
     }
 
     async getDealByApplicationId(applicationId) {
@@ -1422,12 +1619,36 @@ class DataService {
 
     // PostMatch Operations (user-facing post-to-post match discovery)
     async getPostMatches() {
-        return this.storage.get(CONFIG.STORAGE_KEYS.POST_MATCHES) || [];
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.POST_MATCHES) || [];
+        let changed = false;
+        const now = Date.now();
+        for (let i = 0; i < list.length; i++) {
+            const m = list[i];
+            if (!m || (m.status || '') !== CONFIG.POST_MATCH_STATUS.PENDING) continue;
+            // Fast path: if no expiresAt, nothing to do.
+            if (!m.expiresAt) continue;
+            const t = new Date(m.expiresAt).getTime();
+            if (Number.isNaN(t) || t >= now) continue;
+            // PENDING and past expiresAt -> transition to EXPIRED and persist.
+            enforceTransition('post_match', m, CONFIG.POST_MATCH_STATUS.EXPIRED);
+            list[i] = {
+                ...m,
+                status: CONFIG.POST_MATCH_STATUS.EXPIRED,
+                updatedAt: new Date().toISOString()
+            };
+            changed = true;
+        }
+        if (changed) {
+            this.storage.set(CONFIG.STORAGE_KEYS.POST_MATCHES, list);
+        }
+        return list;
     }
 
     async getPostMatchById(matchId) {
         const list = await this.getPostMatches();
-        return list.find(m => m.id === matchId) || null;
+        const match = list.find(m => m.id === matchId) || null;
+        if (!match) return null;
+        return this.expirePostMatchIfNeeded(match);
     }
 
     async getPostMatchesForUser(userId) {
@@ -1440,6 +1661,49 @@ class DataService {
     async getPostMatchesByType(userId, matchType) {
         const list = await this.getPostMatchesForUser(userId);
         return list.filter(m => m.matchType === matchType);
+    }
+
+    /**
+     * If a post_match is expired, enforce a transition to EXPIRED and persist it.
+     * Rules:
+     * - Missing postMatch -> returned unchanged
+     * - Not expired by status/time -> returned unchanged
+     * - Already EXPIRED -> returned unchanged
+     * - PENDING + expired -> enforceTransition + updatePostMatch to EXPIRED
+     * - Other statuses + expired -> returned unchanged (no implicit state change)
+     * @param {object} postMatch
+     * @returns {Promise<object|null>} updated postMatch (or original if no change / not found)
+     */
+    async expirePostMatchIfNeeded(postMatch) {
+        if (!postMatch || !postMatch.id) return postMatch || null;
+        if (!this.isExpired(postMatch)) return postMatch;
+
+        const currentStatus = (postMatch.status || '');
+        if (currentStatus === CONFIG.POST_MATCH_STATUS.EXPIRED) return postMatch;
+
+        if (currentStatus === CONFIG.POST_MATCH_STATUS.PENDING) {
+            enforceTransition('post_match', postMatch, CONFIG.POST_MATCH_STATUS.EXPIRED);
+            return this.updatePostMatch(postMatch.id, { status: CONFIG.POST_MATCH_STATUS.EXPIRED });
+        }
+
+        // For non-pending matches that happen to be past expiresAt, leave as-is.
+        return postMatch;
+    }
+
+    /**
+     * Returns true if the entity is considered expired (status === expired or expiresAt in the past).
+     * Used so expired post_matches do not behave like active pending matches.
+     * @param {object} entity - e.g. a post_match with status and/or expiresAt
+     * @returns {boolean}
+     */
+    isExpired(entity) {
+        if (entity == null) return false;
+        if ((entity.status || '') === CONFIG.POST_MATCH_STATUS.EXPIRED) return true;
+        if (entity.expiresAt) {
+            const t = new Date(entity.expiresAt).getTime();
+            if (!Number.isNaN(t) && t < Date.now()) return true;
+        }
+        return false;
     }
 
     // Matching run tracking (lightweight history)
@@ -1537,6 +1801,7 @@ class DataService {
             matchType: data.matchType || 'one_way',
             status: data.status || CONFIG.POST_MATCH_STATUS.PENDING,
             matchScore: data.matchScore != null ? data.matchScore : 0,
+            runId: data.runId || null,
             participants: Array.isArray(data.participants) ? data.participants : [],
             payload: data.payload != null ? data.payload : {},
             createdAt: new Date().toISOString(),

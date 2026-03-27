@@ -1,10 +1,36 @@
-# Contract Workflow
+# Contract workflow
 
-Contracts represent the **legal layer** of a collaboration: parties, scope, payment terms, and (optionally) a snapshot of milestones at signing. They are linked to **deals** when the deal enters the signing phase.
+### What this page is
+
+How **contracts** are created at signing, how **signatures** are recorded, and how contracts differ from **deals** during execution.
+
+### Why it matters
+
+Finance and legal reviewers need to know what is fixed at signing vs what can change in the deal.
+
+### What you can do here
+
+- Read lifecycle states.
+- Follow creation, signing, and viewing flows.
+- Compare the deal vs contract table.
+
+### Step-by-step actions
+
+1. Move the deal to **signing**.
+2. Create or open the contract from the deal.
+3. Have each party sign; confirm **active** when complete.
+
+### What happens next
+
+Work continues under the deal’s milestones while the contract stays the legal reference.
+
+### Tips
+
+- POC may run a one-time migration so older records link deals and contracts—see migration note at the end.
 
 ---
 
-## 1. Contract Lifecycle
+## 1. Contract lifecycle
 
 ```mermaid
 stateDiagram-v2

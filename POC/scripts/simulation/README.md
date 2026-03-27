@@ -1,4 +1,18 @@
-# Matching Simulation
+# Matching simulation
+
+### What this page is
+
+How to run **matching simulations** with isolated data under `POC/data/simulation/`.
+
+### Why it matters
+
+You can stress-test matching without touching demo users in the main app.
+
+### What happens next
+
+Read reports in the simulation output folder and compare with [MATCHING_FLOW.md](../../docs/simulation/MATCHING_FLOW.md).
+
+---
 
 Tools to validate the matching system under realistic conditions without changing the core architecture.
 

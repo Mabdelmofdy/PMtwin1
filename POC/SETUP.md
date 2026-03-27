@@ -1,6 +1,16 @@
-# PMTwin MVP - Setup Guide
+# PMTwin MVP — setup guide
 
-## Quick Start
+### What this page is
+
+How to **run the POC** locally: open the app, demo accounts, optional tooling.
+
+### What happens next
+
+Use [docs/overview.md](../docs/overview.md) for architecture and [POC/docs/DEMO_CREDENTIALS.md](docs/DEMO_CREDENTIALS.md) for full credential list.
+
+---
+
+## Quick start
 
 1. **Open the Application**
    - Open `POC/index.html` in your browser (via Live Server or directly)

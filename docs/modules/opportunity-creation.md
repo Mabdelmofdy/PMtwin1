@@ -1,6 +1,32 @@
-=== File: opportunity-creation.md ===
+# Opportunity creation
 
-# Opportunity Creation
+### What this page is
+
+Module guide: the **create opportunity** wizard—models, sub-models, exchange modes, location, and **publish** triggering matching.
+
+### Why it matters
+
+This is the main input to the whole marketplace.
+
+### What you can do here
+
+- See all collaboration models and fields in one place.
+- Trace publish → matching.
+
+### Step-by-step actions
+
+1. Read **Overview** and wizard steps.
+2. Compare with [opportunity-workflow.md](../workflow/opportunity-workflow.md) for status names.
+
+### What happens next
+
+On **publish**, matching runs ([matching-workflow.md](../workflow/matching-workflow.md)).
+
+### Tips
+
+- Sub-model field sets come from opportunity model config—keep this doc in sync when you add models.
+
+---
 
 ## Overview
 
