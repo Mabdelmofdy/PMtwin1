@@ -3,6 +3,50 @@
  */
 
 let userApplications = [];
+let opportunitiesSearchTimer = null;
+
+function scheduleOpportunitiesSearch() {
+    clearTimeout(opportunitiesSearchTimer);
+    opportunitiesSearchTimer = setTimeout(() => loadOpportunities(), 320);
+}
+
+function syncOppQuickButtons() {
+    const sel = document.getElementById('filter-category');
+    const cat = sel ? sel.value : '';
+    document.querySelectorAll('[data-opp-cat]').forEach((btn) => {
+        const v = btn.getAttribute('data-opp-cat');
+        const match = v === 'all' ? cat === '' : v === cat;
+        btn.classList.toggle('is-active', match);
+    });
+}
+
+function navigateOpportunity(route) {
+    const r = window.router || (typeof router !== 'undefined' ? router : null);
+    if (r && typeof r.navigate === 'function') {
+        r.navigate(route);
+    }
+}
+
+function escapeHtml(str) {
+    if (str == null || str === '') return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function formatOpportunityStatus(status) {
+    const m = {
+        draft: 'Draft',
+        published: 'Published',
+        in_negotiation: 'In negotiation',
+        contracted: 'Contracted',
+        in_execution: 'In execution',
+        completed: 'Completed',
+        closed: 'Closed',
+        cancelled: 'Cancelled'
+    };
+    return m[status] || status;
+}
 
 async function initOpportunities() {
     const headerMount = document.getElementById('page-context-header-mount');
@@ -17,32 +61,32 @@ async function initOpportunities() {
             const st = document.getElementById('filter-status');
             if (cat) cat.value = 'mine';
             if (st) st.value = 'draft';
-            document.getElementById('apply-filters')?.click();
-            document.getElementById('opportunities-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            syncOppQuickButtons();
+            loadOpportunities();
+            document.getElementById('opportunities-panel-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     }
 
-    // Pre-load user's applications for categorization
     const user = authService.getCurrentUser();
     if (user) {
         const allApplications = await dataService.getApplications();
-        userApplications = allApplications.filter(app => app.applicantId === user.id);
+        userApplications = allApplications.filter((app) => app.applicantId === user.id);
     }
-    
-    await loadOpportunities();
-    
-    // Setup filters
-    const applyFiltersBtn = document.getElementById('apply-filters');
-    const clearFiltersBtn = document.getElementById('clear-filters');
-    const categoryFilter = document.getElementById('filter-category');
-    
-    if (applyFiltersBtn) {
-        applyFiltersBtn.addEventListener('click', () => {
+
+    document.querySelectorAll('[data-opp-cat]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const v = btn.getAttribute('data-opp-cat');
+            const sel = document.getElementById('filter-category');
+            if (sel) sel.value = v === 'all' ? '' : v;
+            syncOppQuickButtons();
             loadOpportunities();
         });
-    }
-    
-        if (clearFiltersBtn) {
+    });
+
+    const clearFiltersBtn = document.getElementById('clear-filters');
+    const categoryFilter = document.getElementById('filter-category');
+
+    if (clearFiltersBtn) {
         clearFiltersBtn.addEventListener('click', () => {
             document.getElementById('filter-model').value = '';
             document.getElementById('filter-status').value = '';
@@ -50,61 +94,90 @@ async function initOpportunities() {
             const intentFilter = document.getElementById('filter-intent');
             if (intentFilter) intentFilter.value = '';
             if (categoryFilter) categoryFilter.value = '';
+            syncOppQuickButtons();
             loadOpportunities();
-        });
-    }
-    
-    // Category filter change
-    if (categoryFilter) {
-        categoryFilter.addEventListener('change', () => {
-            loadOpportunities();
-        });
-    }
-    
-    // Search on enter
-    const searchInput = document.getElementById('filter-search');
-    if (searchInput) {
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                loadOpportunities();
-            }
         });
     }
 
-    // Read-only demo: disable Create Opportunity for pending users
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', () => {
+            syncOppQuickButtons();
+            loadOpportunities();
+        });
+    }
+
+    ['filter-model', 'filter-status', 'filter-intent'].forEach((id) => {
+        document.getElementById(id)?.addEventListener('change', () => loadOpportunities());
+    });
+
+    const searchInput = document.getElementById('filter-search');
+    if (searchInput) {
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(opportunitiesSearchTimer);
+                loadOpportunities();
+            }
+        });
+        searchInput.addEventListener('input', () => scheduleOpportunitiesSearch());
+    }
+
     if (authService.isPendingApproval && authService.isPendingApproval()) {
-        document.querySelectorAll('a[data-route="/opportunities/create"]').forEach(link => {
+        document.querySelectorAll('a[data-route="/opportunities/create"]').forEach((link) => {
             link.removeAttribute('data-route');
             link.href = '#';
             link.setAttribute('title', 'Action disabled until your account is approved.');
             link.classList.add('opacity-75', 'cursor-not-allowed', 'pointer-events-none');
         });
     }
+
+    await loadOpportunities();
+}
+
+function renderOppEmpty(opts) {
+    const iconClass = opts.iconClass || 'ph-duotone ph-briefcase';
+    return (
+        '<div class="opp-empty" role="status">' +
+        '<span class="opp-empty__icon" aria-hidden="true"><i class="' +
+        escapeHtml(iconClass) +
+        '"></i></span>' +
+        '<p class="opp-empty__title">' +
+        escapeHtml(opts.title || '') +
+        '</p>' +
+        '<p class="opp-empty__text">' +
+        opts.bodyHtml +
+        '</p>' +
+        (opts.actionsHtml ? '<div class="opp-empty__actions">' + opts.actionsHtml + '</div>' : '') +
+        '</div>'
+    );
 }
 
 async function loadOpportunities() {
     const container = document.getElementById('opportunities-list');
+    const summaryEl = document.getElementById('opportunities-summary');
     if (!container) return;
-    
+
     container.innerHTML = '<div class="spinner"></div>';
-    
+    if (summaryEl) summaryEl.textContent = 'Loading…';
+
+    syncOppQuickButtons();
+
     try {
-        let opportunities = await dataService.getOpportunities();
+        const raw = await dataService.getOpportunities();
         const user = authService.getCurrentUser();
-        
-        // Categorize each opportunity
-        opportunities = opportunities.map(opp => {
+
+        const allCategorized = raw.map((opp) => {
             const isOwner = user && opp.creatorId === user.id;
-            const application = userApplications.find(app => app.opportunityId === opp.id);
+            const application = userApplications.find((app) => app.opportunityId === opp.id);
             const hasApplied = !!application;
-            
+
             let category = 'available';
             if (isOwner) {
                 category = 'mine';
             } else if (hasApplied) {
                 category = 'applied';
             }
-            
+
             return {
                 ...opp,
                 category,
@@ -114,63 +187,92 @@ async function loadOpportunities() {
                 applicationId: application?.id || null
             };
         });
-        
-        // Apply filters
+
+        const counts = {
+            mine: allCategorized.filter((o) => o.category === 'mine').length,
+            applied: allCategorized.filter((o) => o.category === 'applied').length,
+            available: allCategorized.filter((o) => o.category === 'available').length
+        };
+        updateCategoryCounts(counts);
+
+        const total = allCategorized.length;
+
         const modelFilter = document.getElementById('filter-model')?.value;
         const statusFilter = document.getElementById('filter-status')?.value;
-        const searchFilter = document.getElementById('filter-search')?.value.toLowerCase();
+        const searchRaw = document.getElementById('filter-search')?.value || '';
+        const searchFilter = searchRaw.toLowerCase().trim();
         const categoryFilterVal = document.getElementById('filter-category')?.value;
         const intentFilter = document.getElementById('filter-intent')?.value;
-        
+
+        let list = allCategorized;
+
         if (modelFilter) {
-            opportunities = opportunities.filter(o => o.subModelType === modelFilter);
+            list = list.filter((o) => o.subModelType === modelFilter);
         }
-        
         if (statusFilter) {
-            opportunities = opportunities.filter(o => o.status === statusFilter);
+            list = list.filter((o) => o.status === statusFilter);
         }
-        
         if (intentFilter) {
-            opportunities = opportunities.filter(o => (o.intent || 'request') === intentFilter);
+            list = list.filter((o) => (o.intent || 'request') === intentFilter);
         }
-        
         if (searchFilter) {
-            opportunities = opportunities.filter(o => 
-                o.title?.toLowerCase().includes(searchFilter) ||
-                o.description?.toLowerCase().includes(searchFilter)
+            list = list.filter(
+                (o) =>
+                    (o.title && o.title.toLowerCase().includes(searchFilter)) ||
+                    (o.description && o.description.toLowerCase().includes(searchFilter))
             );
         }
-        
         if (categoryFilterVal) {
-            opportunities = opportunities.filter(o => o.category === categoryFilterVal);
+            list = list.filter((o) => o.category === categoryFilterVal);
         }
-        
-        // Sort: mine first, then applied, then available, each group by date
-        opportunities.sort((a, b) => {
-            const categoryOrder = { 'mine': 0, 'applied': 1, 'available': 2 };
+
+        list.sort((a, b) => {
+            const categoryOrder = { mine: 0, applied: 1, available: 2 };
             const catDiff = categoryOrder[a.category] - categoryOrder[b.category];
             if (catDiff !== 0) return catDiff;
             return new Date(b.createdAt) - new Date(a.createdAt);
         });
-        
-        // Count by category for summary
-        const counts = {
-            mine: opportunities.filter(o => o.category === 'mine').length,
-            applied: opportunities.filter(o => o.category === 'applied').length,
-            available: opportunities.filter(o => o.category === 'available').length
-        };
-        
-        // Update category counts in UI
-        updateCategoryCounts(counts);
-        
-        // Calculate match scores for each opportunity against the current user
+
+        const hasFilter = !!(
+            modelFilter ||
+            statusFilter ||
+            searchFilter ||
+            categoryFilterVal ||
+            intentFilter
+        );
+        if (summaryEl) {
+            if (total === 0) {
+                summaryEl.textContent = '';
+            } else if (hasFilter) {
+                summaryEl.textContent =
+                    'Showing ' + list.length + ' of ' + total + ' opportunit' + (total === 1 ? 'y' : 'ies');
+            } else {
+                summaryEl.textContent = total + ' opportunit' + (total === 1 ? 'y' : 'ies');
+            }
+        }
+
+        if (list.length === 0) {
+            const filtered = hasFilter;
+            const body = filtered
+                ? 'Nothing matches the current filters. Use <strong>Reset filters</strong> or pick another category.'
+                : 'Create the first opportunity to invite providers and partners.';
+            const actions = filtered
+                ? ''
+                : '<a href="#" data-route="/opportunities/create" class="btn btn-primary btn-sm">Create opportunity</a>';
+            container.innerHTML = renderOppEmpty({
+                title: filtered ? 'No matching opportunities' : 'No opportunities yet',
+                bodyHtml: body,
+                actionsHtml: actions,
+                iconClass: filtered ? 'ph-duotone ph-magnifying-glass' : 'ph-duotone ph-briefcase'
+            });
+            return;
+        }
+
         if (user) {
-            // Fetch full user data for profile-based matching
-            const fullUser = await dataService.getUserById(user.id) || await dataService.getCompanyById(user.id) || user;
-            
-            for (const opp of opportunities) {
+            const fullUser = (await dataService.getUserById(user.id)) || (await dataService.getCompanyById(user.id)) || user;
+
+            for (const opp of list) {
                 if (opp.creatorId === user.id) {
-                    // Owner's own opportunities: match score not applicable
                     opp.matchScore = null;
                     opp.matchScorePercent = null;
                 } else {
@@ -180,74 +282,71 @@ async function loadOpportunities() {
                 }
             }
         }
-        
-        if (opportunities.length === 0) {
-            const opportunityIcon = IconHelper ? IconHelper.render('briefcase', { size: 40, weight: 'duotone', color: 'currentColor' }) : '';
-            const plusIcon = IconHelper ? IconHelper.render('plus', { size: 20, weight: 'duotone', color: 'currentColor', className: 'mr-2' }) : '';
-            
-            container.innerHTML = `
-                <div class="col-span-full flex flex-col items-center justify-center py-12 px-8 text-center min-h-[300px]">
-                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary/90 to-primary-light flex items-center justify-center mb-6 text-white opacity-90">
-                        ${opportunityIcon}
-                    </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">No opportunities found</h3>
-                    <p class="text-base text-gray-600 max-w-md mb-8 leading-relaxed">${searchFilter || modelFilter || statusFilter || categoryFilterVal || intentFilter ? 'Try adjusting your filters to see more results.' : 'Be the first to create an opportunity and start building connections.'}</p>
-                    <a href="#" data-route="/opportunities/create" class="inline-flex items-center justify-center px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-primary-dark transition-all shadow-md hover:-translate-y-0.5 hover:shadow-lg no-underline">
-                        ${plusIcon}
-                        Create Opportunity
-                    </a>
-                </div>
-            `;
-            return;
-        }
-        
-        // Load template
+
         const template = await templateLoader.load('opportunity-card');
-        
-        // Render opportunities
-        const html = opportunities.map(opp => {
-            const canApply = user && !opp.isOwner && (opp.status === 'published' || opp.status === 'in_negotiation') && !opp.hasApplied;
-            
-            const data = {
-                ...opp,
-                intentLabel: opp.intent === 'offer' ? 'OFFER' : 'NEED',
-                intentBadgeClass: typeof getIntentBadgeClass === 'function' ? getIntentBadgeClass(opp.intent, opp.modelType) : 'badge-intent-request-default',
-                title: opp.title || 'Untitled Opportunity',
-                modelType: formatModelType(opp.modelType) || (opp.collaborationModel || 'N/A'),
-                subModelType: formatSubModelType(opp.subModelType) || '',
-                status: opp.status || 'draft',
-                statusBadgeClass: getStatusBadgeClass(opp.status),
-                description: opp.description || 'No description available',
-                createdDate: new Date(opp.createdAt).toLocaleDateString(),
-                canApply,
-                // Category-specific data
-                categoryClass: getCategoryClass(opp.category),
-                categoryLabel: getCategoryLabel(opp.category),
-                categoryIcon: getCategoryIcon(opp.category),
-                showCategoryBadge: opp.category !== 'available',
-                applicationStatusLabel: opp.hasApplied ? formatApplicationStatus(opp.applicationStatus) : '',
-                applicationStatusClass: opp.hasApplied ? getApplicationStatusClass(opp.applicationStatus) : '',
-                // Match score data
-                matchScorePercent: opp.matchScorePercent
-            };
-            return templateRenderer.render(template, data);
-        }).join('');
-        
+
+        const html = list
+            .map((opp) => {
+                const canApply =
+                    user && !opp.isOwner && (opp.status === 'published' || opp.status === 'in_negotiation') && !opp.hasApplied;
+
+                const sb = window.statusBadgeSystem;
+                const data = {
+                    ...opp,
+                    intentLabel: opp.intent === 'offer' ? 'OFFER' : 'NEED',
+                    intentBadgeClass:
+                        typeof getIntentBadgeClass === 'function'
+                            ? getIntentBadgeClass(opp.intent, opp.modelType)
+                            : 'badge-intent-request-default',
+                    title: opp.title || 'Untitled opportunity',
+                    modelType: formatModelType(opp.modelType) || opp.collaborationModel || 'N/A',
+                    modelTypeLabel: formatModelType(opp.modelType) || opp.collaborationModel || 'N/A',
+                    modelTypeBadgeClass: sb ? sb.getModelTypeBadgeClass(opp.modelType, opp.subModelType) : 'badge--info',
+                    subModelType: opp.subModelType || '',
+                    subModelTypeLabel: opp.subModelType ? formatSubModelType(opp.subModelType) : '',
+                    subModelBadgeClass: sb ? sb.getModelTypeBadgeClass(opp.modelType, opp.subModelType) : 'badge--neutral',
+                    status: opp.status || 'draft',
+                    statusLabel: sb ? sb.getStatusLabel(opp.status || 'draft', 'opportunity') : formatOpportunityStatus(opp.status || 'draft'),
+                    statusBadgeClass: sb ? sb.getStatusBadgeClass(opp.status || 'draft', 'opportunity') : 'badge--neutral',
+                    description: opp.description || 'No description available',
+                    createdDate: new Date(opp.createdAt).toLocaleDateString(),
+                    canApply,
+                    categoryClass: getCategoryClass(opp.category),
+                    categoryLabel: getCategoryLabel(opp.category),
+                    categoryIcon: getCategoryIcon(opp.category),
+                    showCategoryBadge: opp.category !== 'available',
+                    applicationStatusLabel: opp.hasApplied
+                        ? sb
+                            ? sb.getStatusLabel(opp.applicationStatus, 'application')
+                            : formatApplicationStatus(opp.applicationStatus)
+                        : '',
+                    applicationStatusClass: opp.hasApplied ? getApplicationStatusClass(opp.applicationStatus) : '',
+                    matchScorePercent: opp.matchScorePercent
+                };
+                return templateRenderer.render(template, data);
+            })
+            .join('');
+
         container.innerHTML = html;
-        
-        // Attach click handlers
-        container.querySelectorAll('.opportunity-card').forEach(card => {
+
+        container.querySelectorAll('.opportunity-card').forEach((card) => {
             card.addEventListener('click', (e) => {
                 const id = card.dataset.id;
                 if (id && !e.target.closest('.btn')) {
-                    router.navigate(`/opportunities/${id}`);
+                    navigateOpportunity('/opportunities/' + id);
                 }
             });
         });
-        
     } catch (error) {
         console.error('Error loading opportunities:', error);
-        container.innerHTML = '<div class="empty-state">Error loading opportunities. Please try again.</div>';
+        if (summaryEl) summaryEl.textContent = '';
+        container.innerHTML = renderOppEmpty({
+            title: 'Could not load opportunities',
+            bodyHtml: 'Something went wrong. Check your connection and try again.',
+            iconClass: 'ph-duotone ph-warning-circle',
+            actionsHtml: '<button type="button" class="btn btn-secondary btn-sm" id="opp-retry-btn">Try again</button>'
+        });
+        document.getElementById('opp-retry-btn')?.addEventListener('click', () => loadOpportunities());
     }
 }
 
@@ -255,114 +354,100 @@ function updateCategoryCounts(counts) {
     const mineCount = document.getElementById('count-mine');
     const appliedCount = document.getElementById('count-applied');
     const availableCount = document.getElementById('count-available');
-    
+
     if (mineCount) mineCount.textContent = counts.mine;
     if (appliedCount) appliedCount.textContent = counts.applied;
     if (availableCount) availableCount.textContent = counts.available;
 }
 
-function getStatusBadgeClass(status) {
-    const statusMap = {
-        'draft': 'secondary',
-        'published': 'success',
-        'in_negotiation': 'warning',
-        'contracted': 'primary',
-        'in_execution': 'primary',
-        'completed': 'success',
-        'closed': 'danger',
-        'cancelled': 'danger'
-    };
-    return statusMap[status] || 'secondary';
-}
-
 function getCategoryClass(category) {
     const classMap = {
-        'mine': 'category-mine',
-        'applied': 'category-applied',
-        'available': 'category-available'
+        mine: 'category-mine',
+        applied: 'category-applied',
+        available: 'category-available'
     };
     return classMap[category] || '';
 }
 
 function getCategoryLabel(category) {
     const labelMap = {
-        'mine': 'My Opportunity',
-        'applied': 'Applied',
-        'available': ''
+        mine: 'My opportunity',
+        applied: 'Applied',
+        available: ''
     };
     return labelMap[category] || '';
 }
 
 function getCategoryIcon(category) {
     const iconMap = {
-        'mine': 'ph-duotone ph-user-circle',
-        'applied': 'ph-duotone ph-paper-plane-tilt',
-        'available': ''
+        mine: 'ph-duotone ph-user-circle',
+        applied: 'ph-duotone ph-paper-plane-tilt',
+        available: ''
     };
     return iconMap[category] || '';
 }
 
 function formatModelType(modelType) {
     const types = {
-        'project_based': 'Project-Based',
-        'strategic_partnership': 'Strategic Partnership',
-        'resource_pooling': 'Resource Pooling',
-        'hiring': 'Hiring',
-        'competition': 'Competition'
+        project_based: 'Project-based',
+        strategic_partnership: 'Strategic partnership',
+        resource_pooling: 'Resource pooling',
+        hiring: 'Hiring',
+        competition: 'Competition'
     };
     return types[modelType] || modelType;
 }
 
 function formatSubModelType(subModelType) {
     const types = {
-        'task_based': 'Task-Based',
-        'milestone_based': 'Milestone-Based',
-        'retainer': 'Retainer',
-        'joint_venture': 'Joint Venture',
-        'consortium': 'Consortium',
-        'strategic_alliance': 'Strategic Alliance',
-        'equipment_sharing': 'Equipment Sharing',
-        'facility_sharing': 'Facility Sharing',
-        'talent_pooling': 'Talent Pooling',
-        'full_time': 'Full-Time',
-        'part_time': 'Part-Time',
-        'contract': 'Contract',
-        'innovation_challenge': 'Innovation Challenge',
-        'hackathon': 'Hackathon',
-        'pitch_competition': 'Pitch Competition',
-        'professional_hiring': 'Professional Hiring',
-        'consultant_hiring': 'Consultant Hiring',
-        'competition_rfp': 'Competition/RFP',
-        'bulk_purchasing': 'Bulk Purchasing',
-        'resource_sharing': 'Resource Sharing',
-        'strategic_jv': 'Strategic JV',
-        'project_jv': 'Project JV',
-        'spv': 'SPV',
-        'mentorship': 'Mentorship'
+        task_based: 'Task-based',
+        milestone_based: 'Milestone-based',
+        retainer: 'Retainer',
+        joint_venture: 'Joint venture',
+        consortium: 'Consortium',
+        strategic_alliance: 'Strategic alliance',
+        equipment_sharing: 'Equipment sharing',
+        facility_sharing: 'Facility sharing',
+        talent_pooling: 'Talent pooling',
+        full_time: 'Full-time',
+        part_time: 'Part-time',
+        contract: 'Contract',
+        innovation_challenge: 'Innovation challenge',
+        hackathon: 'Hackathon',
+        pitch_competition: 'Pitch competition',
+        professional_hiring: 'Professional hiring',
+        consultant_hiring: 'Consultant hiring',
+        competition_rfp: 'Competition / RFP',
+        bulk_purchasing: 'Bulk purchasing',
+        resource_sharing: 'Resource sharing',
+        strategic_jv: 'Strategic JV',
+        project_jv: 'Project JV',
+        spv: 'SPV',
+        mentorship: 'Mentorship'
     };
     return types[subModelType] || subModelType;
 }
 
 function formatApplicationStatus(status) {
     const statusMap = {
-        'pending': 'Pending Review',
-        'reviewing': 'Under Review',
-        'shortlisted': 'Shortlisted',
-        'accepted': 'Accepted',
-        'rejected': 'Rejected',
-        'withdrawn': 'Withdrawn'
+        pending: 'Pending review',
+        reviewing: 'Under review',
+        shortlisted: 'Shortlisted',
+        accepted: 'Accepted',
+        rejected: 'Rejected',
+        withdrawn: 'Withdrawn'
     };
     return statusMap[status] || status;
 }
 
 function getApplicationStatusClass(status) {
     const classMap = {
-        'pending': 'status-pending',
-        'reviewing': 'status-reviewing',
-        'shortlisted': 'status-shortlisted',
-        'accepted': 'status-accepted',
-        'rejected': 'status-rejected',
-        'withdrawn': 'status-withdrawn'
+        pending: 'status-pending',
+        reviewing: 'status-reviewing',
+        shortlisted: 'status-shortlisted',
+        accepted: 'status-accepted',
+        rejected: 'status-rejected',
+        withdrawn: 'status-withdrawn'
     };
     return classMap[status] || '';
 }

@@ -37,6 +37,43 @@ class Router {
         }
         return path || '/';
     }
+
+    /**
+     * Split a hash fragment into path (for matching) and query string (including leading `?`).
+     * @param {string} path — raw hash after `#` or any path string
+     * @returns {{ normalizedPath: string, query: string }}
+     */
+    parseHashPathAndQuery(path) {
+        let p = path;
+        if (p.includes('#')) {
+            p = p.split('#')[1] || '';
+        }
+        if (p.startsWith('#')) {
+            p = p.substring(1);
+        }
+        let query = '';
+        if (p.includes('?')) {
+            const qIdx = p.indexOf('?');
+            query = p.substring(qIdx);
+            p = p.substring(0, qIdx);
+        }
+        if (!p.startsWith('/')) {
+            p = '/' + p;
+        }
+        if (p.length > 1 && p.endsWith('/')) {
+            p = p.substring(0, p.length - 1);
+        }
+        const normalizedPath = p || '/';
+        return { normalizedPath, query };
+    }
+
+    /** Query portion of current hash (e.g. `?a=1`), or empty string. */
+    getHashQueryString() {
+        if (!this.useHash) return '';
+        const h = window.location.hash.substring(1);
+        const i = h.indexOf('?');
+        return i >= 0 ? h.substring(i) : '';
+    }
     
     /**
      * Register a route
@@ -49,12 +86,11 @@ class Router {
      * Navigate to a route
      */
     async navigate(path) {
-        // Normalize the path
-        const normalizedPath = this.normalizePath(path);
+        const { normalizedPath, query } = this.parseHashPathAndQuery(path);
         
         // Update URL using hash
         if (this.useHash) {
-            const newHash = normalizedPath === '/' ? '' : normalizedPath;
+            const newHash = normalizedPath === '/' && !query ? '' : normalizedPath + query;
             const currentHash = window.location.hash.substring(1); // Remove leading #
             
             // Only update hash if it's different
@@ -182,7 +218,7 @@ class Router {
         this.currentRoute = route;
 
         // Execute route handler (skip if already handling this path to avoid duplicate load storms)
-        const routeKey = normalizedPath + JSON.stringify(route.params || {});
+        const routeKey = normalizedPath + this.getHashQueryString() + JSON.stringify(route.params || {});
         if (this._handlingRouteKey === routeKey) {
             return true;
         }

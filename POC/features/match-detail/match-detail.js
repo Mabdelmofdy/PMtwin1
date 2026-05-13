@@ -63,13 +63,11 @@ function getUnifiedMatchTitle(matchType) {
 var CRITERION_LABELS = { skills: 'Skill compatibility', budget: 'Budget compatibility', timeline: 'Timeline alignment', location: 'Location compatibility' };
 
 function getStatusBadgeClass(status) {
-    const map = { pending: 'warning', accepted: 'primary', declined: 'danger', confirmed: 'success', expired: 'secondary' };
-    return map[status] || 'secondary';
+    return window.statusBadgeSystem ? window.statusBadgeSystem.getStatusBadgeClass(status, 'match') : 'badge--neutral';
 }
 
 function formatStatusLabel(status) {
-    if (!status) return 'Pending';
-    return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+    return window.statusBadgeSystem ? window.statusBadgeSystem.getStatusLabel(status, 'match') : (status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : 'Pending');
 }
 
 function getOneWayViewerRole(postMatch, currentUserId) {
@@ -93,8 +91,10 @@ async function renderMatchDetail(postMatch, currentUserId) {
     document.getElementById('match-detail-type').textContent = getMatchTypeLabel(matchType);
     document.getElementById('match-detail-score').textContent = scorePct + '%';
     const statusEl = document.getElementById('match-detail-status');
-    statusEl.textContent = formatStatusLabel(postMatch.status || 'pending');
-    statusEl.className = 'badge badge-' + getStatusBadgeClass(postMatch.status);
+    const sb = window.statusBadgeSystem;
+    const st = postMatch.status || 'pending';
+    statusEl.textContent = sb ? sb.getStatusLabel(st, 'match') : formatStatusLabel(st);
+    statusEl.className = 'badge ' + (sb ? sb.getStatusBadgeClass(st, 'match') : 'badge--neutral');
 
     // —— Exchange Flow ——
     const exchangeFlowEl = document.getElementById('match-detail-exchange-flow-body');
@@ -235,7 +235,7 @@ async function buildParticipantsList(ds, matchType, payload, participants, uniqu
             offer = offerOpp?.title || '—';
             need = needOpp?.title || '—';
         }
-        partHtml.push('<li class="match-detail-participant-content p-4 border border-gray-200 rounded-lg ' + (isYou ? 'bg-primary/5 border-primary/30' : '') + '"><div class="font-medium text-gray-900">' + escapeHtml(name) + (isYou ? ' <span class="text-gray-500">(You)</span>' : '') + '</div><div class="text-sm mt-1 break-words"><span class="text-gray-600">Offer:</span> ' + escapeHtml(offer) + '</div><div class="text-sm break-words"><span class="text-gray-600">Need:</span> ' + escapeHtml(need) + '</div><div class="mt-2"><span class="badge badge-' + getStatusBadgeClass(status) + '">' + escapeHtml(formatStatusLabel(status)) + '</span></div></li>');
+        partHtml.push('<li class="match-detail-participant-content p-4 border border-gray-200 rounded-lg ' + (isYou ? 'bg-primary/5 border-primary/30' : '') + '"><div class="font-medium text-gray-900">' + escapeHtml(name) + (isYou ? ' <span class="text-gray-500">(You)</span>' : '') + '</div><div class="text-sm mt-1 break-words"><span class="text-gray-600">Offer:</span> ' + escapeHtml(offer) + '</div><div class="text-sm break-words"><span class="text-gray-600">Need:</span> ' + escapeHtml(need) + '</div><div class="mt-2"><span class="badge ' + (window.statusBadgeSystem ? window.statusBadgeSystem.getStatusBadgeClass(status, 'match') : 'badge--neutral') + '">' + escapeHtml(window.statusBadgeSystem ? window.statusBadgeSystem.getStatusLabel(status, 'match') : formatStatusLabel(status)) + '</span></div></li>');
     }
     return partHtml;
 }
@@ -281,6 +281,17 @@ function setupMatchDetailActions(matchId, userId) {
                     }
                     await renderMatchDetail(updated, userId);
                     if (deal && window.router && typeof window.router.navigate === 'function') {
+                        try {
+                            sessionStorage.setItem(
+                                'pmtwin_deal_flash',
+                                JSON.stringify({
+                                    message: 'Your Deal Workspace is ready. Continue in the draft stage.',
+                                    tone: 'success'
+                                })
+                            );
+                        } catch (e) {
+                            void e;
+                        }
                         window.router.navigate('/deals/' + deal.id);
                     }
                 }
@@ -332,7 +343,7 @@ async function notifyAllParticipantsConfirmed(postMatch) {
             userId: p.userId,
             type: 'match',
             title: 'Match confirmed',
-            message: 'All participants have accepted. You can proceed to negotiate terms.',
+            message: 'All participants accepted. A draft Deal Workspace has been created—open it to continue.',
             link: '/matches/' + postMatch.id,
             read: false
         });

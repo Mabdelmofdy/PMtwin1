@@ -1,36 +1,610 @@
-<div class="page-container admin-contracts-page">
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1 class="page-title">Contracts</h1>
-            <p class="page-subtitle">View all platform contracts (multi-party)</p>
-        </div>
-    </div>
-    <div class="page-body">
-        <div class="filters-section">
-            <div class="filters">
-                <select id="filter-status" class="form-select">
-                    <option value="">All statuses</option>
-                    <option value="pending">Pending</option>
-                    <option value="active">Active</option>
-                    <option value="completed">Completed</option>
-                    <option value="terminated">Terminated</option>
-                </select>
-                <button id="apply-filters" class="btn btn-secondary">Apply</button>
+<div class="page-container ao-page">
+    <div id="page-context-header-mount"></div>
+    <div class="page-body ao-body">
+
+        <section class="ao-hero" aria-label="Contract overview">
+            <div class="ao-hero-main">
+                <span class="ao-hero-eyebrow">Platform total</span>
+                <span class="ao-hero-value" id="ac-stat-total">0</span>
+                <span class="ao-hero-caption">contracts on the platform</span>
             </div>
-        </div>
-        <div id="admin-contracts-list" class="admin-contracts-list">
-            <div class="spinner"></div>
-        </div>
+            <div class="ao-hero-stats">
+                <button type="button" class="ao-pill ao-pill--draft" data-ac-jump="pending">
+                    <span class="ao-pill-dot"></span>
+                    <span class="ao-pill-value" id="ac-stat-pending">0</span>
+                    <span class="ao-pill-label">Pending</span>
+                </button>
+                <button type="button" class="ao-pill ao-pill--live" data-ac-jump="active">
+                    <span class="ao-pill-dot"></span>
+                    <span class="ao-pill-value" id="ac-stat-active">0</span>
+                    <span class="ao-pill-label">Active</span>
+                </button>
+                <button type="button" class="ao-pill ao-pill--progress" data-ac-jump="completed">
+                    <span class="ao-pill-dot"></span>
+                    <span class="ao-pill-value" id="ac-stat-completed">0</span>
+                    <span class="ao-pill-label">Completed</span>
+                </button>
+                <button type="button" class="ao-pill ao-pill--closed" data-ac-jump="terminated">
+                    <span class="ao-pill-dot"></span>
+                    <span class="ao-pill-value" id="ac-stat-terminated">0</span>
+                    <span class="ao-pill-label">Terminated</span>
+                </button>
+            </div>
+        </section>
+
+        <section class="ao-toolbar" aria-label="Filters">
+            <div class="ao-tabs" role="tablist" aria-label="Contract status filter">
+                <button type="button" class="ao-tab is-active" data-ac-status="" role="tab" aria-selected="true">
+                    All
+                    <span class="ao-tab-count" id="ac-chip-all">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-ac-status="pending" role="tab" aria-selected="false">
+                    Pending
+                    <span class="ao-tab-count" id="ac-chip-pending">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-ac-status="active" role="tab" aria-selected="false">
+                    Active
+                    <span class="ao-tab-count" id="ac-chip-active">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-ac-status="completed" role="tab" aria-selected="false">
+                    Completed
+                    <span class="ao-tab-count" id="ac-chip-completed">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-ac-status="terminated" role="tab" aria-selected="false">
+                    Terminated
+                    <span class="ao-tab-count" id="ac-chip-terminated">0</span>
+                </button>
+            </div>
+
+            <div class="ao-controls">
+                <div class="ao-search">
+                    <i class="ph-duotone ph-magnifying-glass" aria-hidden="true"></i>
+                    <input
+                        type="text"
+                        id="ac-filter-search"
+                        class="ao-search-input"
+                        placeholder="Search title, scope, or linked deal"
+                        aria-label="Search contracts"
+                    >
+                </div>
+                <select id="ac-filter-sort" class="ao-select" aria-label="Sort">
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="title">Title A–Z</option>
+                </select>
+            </div>
+        </section>
+
+        <section class="ao-listing" aria-labelledby="ac-list-title">
+            <header class="ao-listing-head">
+                <div>
+                    <h2 id="ac-list-title" class="ao-listing-title">All contracts</h2>
+                    <p id="ac-list-meta" class="ao-listing-meta">Loading…</p>
+                </div>
+            </header>
+            <div id="ac-list" class="ao-list">
+                <div class="spinner"></div>
+            </div>
+        </section>
+
     </div>
 </div>
 
 <style>
-.admin-contracts-page .filters-section { margin-bottom: var(--spacing-lg); }
-.admin-contracts-page .filters { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; }
-.admin-contracts-list { display: flex; flex-direction: column; gap: var(--spacing-md); }
-.admin-contracts-table { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
-.admin-contracts-table th, .admin-contracts-table td { padding: var(--spacing-sm) var(--spacing-md); text-align: left; border-bottom: 1px solid var(--border-color); }
-.admin-contracts-table th { font-weight: 600; background: var(--bg-secondary, #f9fafb); }
-.admin-contracts-table a { color: var(--primary-color); text-decoration: none; }
-.admin-contracts-table a:hover { text-decoration: underline; }
+.ao-page {
+    max-width: 1200px;
+    margin-inline: auto;
+    --ao-surface: #ffffff;
+    --ao-surface-soft: #f8fafc;
+    --ao-border: #e5e7eb;
+    --ao-border-strong: #d1d5db;
+    --ao-text: #0f172a;
+    --ao-text-muted: #64748b;
+    --ao-text-faint: #94a3b8;
+    --ao-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --ao-shadow-md: 0 4px 14px rgba(15, 23, 42, 0.06);
+    --ao-radius: 14px;
+    --ao-radius-sm: 10px;
+}
+
+.ao-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.ao-hero {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 1.5rem 1.75rem;
+    background:
+        radial-gradient(120% 140% at 0% 0%, rgba(13, 148, 136, 0.08) 0%, transparent 55%),
+        radial-gradient(120% 140% at 100% 100%, rgba(59, 130, 246, 0.06) 0%, transparent 55%),
+        var(--ao-surface);
+    border: 1px solid var(--ao-border);
+    border-radius: var(--ao-radius);
+    box-shadow: var(--ao-shadow-sm);
+}
+
+.ao-hero-main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.ao-hero-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ao-text-muted);
+}
+
+.ao-hero-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    color: var(--ao-text);
+    line-height: 1;
+}
+
+.ao-hero-caption {
+    font-size: 0.85rem;
+    color: var(--ao-text-muted);
+    margin-top: 0.15rem;
+}
+
+.ao-hero-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.ao-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.85rem;
+    background: var(--ao-surface);
+    border: 1px solid var(--ao-border);
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--ao-text);
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.ao-pill:hover {
+    border-color: var(--ao-border-strong);
+    box-shadow: var(--ao-shadow-sm);
+    transform: translateY(-1px);
+}
+
+.ao-pill-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.85;
+}
+
+.ao-pill-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.ao-pill-label {
+    font-size: 0.8rem;
+    color: var(--ao-text-muted);
+    font-weight: 500;
+}
+
+.ao-pill--live { color: #059669; }
+.ao-pill--progress { color: #2563eb; }
+.ao-pill--draft { color: #64748b; }
+.ao-pill--closed { color: #dc2626; }
+
+.ao-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.9rem 1rem;
+    justify-content: space-between;
+}
+
+.ao-tabs {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.3rem;
+    background: #f1f5f9;
+    border-radius: 12px;
+    flex-wrap: wrap;
+}
+
+.ao-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 0.85rem;
+    background: transparent;
+    border: none;
+    border-radius: 9px;
+    color: var(--ao-text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ao-tab:hover { color: var(--ao-text); }
+
+.ao-tab.is-active {
+    background: #ffffff;
+    color: var(--ao-text);
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.ao-tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.3rem;
+    padding: 0 0.35rem;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.06);
+    color: var(--ao-text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.ao-tab.is-active .ao-tab-count {
+    background: var(--primary-color);
+    color: #ffffff;
+}
+
+.ao-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.ao-search {
+    position: relative;
+    min-width: 260px;
+    flex: 1 1 260px;
+    max-width: 360px;
+}
+
+.ao-search i {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ao-text-faint);
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.ao-search-input {
+    width: 100%;
+    height: 2.4rem;
+    padding: 0 0.9rem 0 2.3rem;
+    background: var(--ao-surface);
+    border: 1px solid var(--ao-border);
+    border-radius: var(--ao-radius-sm);
+    font-size: 0.875rem;
+    color: var(--ao-text);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ao-search-input::placeholder { color: var(--ao-text-faint); }
+
+.ao-search-input:hover { border-color: var(--ao-border-strong); }
+
+.ao-search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.ao-select {
+    height: 2.4rem;
+    padding: 0 2.2rem 0 0.85rem;
+    background-color: var(--ao-surface);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none' stroke='%2364748b' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='4 6 8 10 12 6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 1rem;
+    border: 1px solid var(--ao-border);
+    border-radius: var(--ao-radius-sm);
+    color: var(--ao-text);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ao-select:hover { border-color: var(--ao-border-strong); }
+
+.ao-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.ao-listing-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.65rem;
+    padding: 0 0.15rem;
+}
+
+.ao-listing-title {
+    margin: 0 0 0.15rem 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--ao-text);
+    letter-spacing: -0.01em;
+}
+
+.ao-listing-meta {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--ao-text-muted);
+}
+
+.ao-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.ao-card {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    gap: 0.9rem;
+    padding: 1rem 1.15rem;
+    background: var(--ao-surface);
+    border: 1px solid var(--ao-border);
+    border-radius: var(--ao-radius);
+    box-shadow: var(--ao-shadow-sm);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.ao-card:hover {
+    border-color: var(--ao-border-strong);
+    box-shadow: var(--ao-shadow-md);
+    transform: translateY(-1px);
+}
+
+.ao-card-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ao-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.ao-card-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ao-text);
+    line-height: 1.3;
+    letter-spacing: -0.005em;
+}
+
+.ao-card-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: var(--ao-surface-soft);
+    border: 1px solid var(--ao-border);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ao-text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.ao-card-status-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.ao-card-status--live { color: #059669; background: #ecfdf5; border-color: #a7f3d0; }
+.ao-card-status--negotiation { color: #b45309; background: #fffbeb; border-color: #fde68a; }
+.ao-card-status--progress { color: #2563eb; background: #eff6ff; border-color: #bfdbfe; }
+.ao-card-status--completed { color: #047857; background: #f0fdf4; border-color: #bbf7d0; }
+.ao-card-status--draft { color: #475569; background: #f1f5f9; border-color: #e2e8f0; }
+.ao-card-status--closed { color: #b91c1c; background: #fef2f2; border-color: #fecaca; }
+
+.ao-card-desc {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--ao-text-muted);
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ao-card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+    padding-top: 0.15rem;
+}
+
+.ao-card-meta {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.7rem;
+    font-size: 0.78rem;
+    color: var(--ao-text-muted);
+    min-width: 0;
+}
+
+.ao-meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.18rem 0.5rem;
+    border-radius: 6px;
+    background: var(--ao-surface-soft);
+    border: 1px solid var(--ao-border);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ao-text);
+    line-height: 1.3;
+}
+
+.ao-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--ao-text-muted);
+    white-space: nowrap;
+}
+
+.ao-meta-item i { font-size: 0.95rem; color: var(--ao-text-faint); }
+
+.ao-meta-item strong {
+    color: var(--ao-text);
+    font-weight: 600;
+}
+
+.ao-card-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.ao-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.4rem 0.7rem;
+    background: var(--ao-surface);
+    border: 1px solid var(--ao-border);
+    border-radius: 8px;
+    color: var(--ao-text);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.ao-action:hover {
+    border-color: var(--ao-border-strong);
+    background: var(--ao-surface-soft);
+}
+
+.ao-action i { font-size: 0.95rem; }
+
+.ao-action--primary {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #ffffff;
+}
+
+.ao-action--primary:hover {
+    filter: brightness(0.96);
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: #ffffff;
+}
+
+.ao-empty {
+    padding: 3rem 1.5rem;
+    border: 1px dashed var(--ao-border);
+    border-radius: var(--ao-radius);
+    background: var(--ao-surface);
+    text-align: center;
+}
+
+.ao-empty-icon {
+    width: 3rem;
+    height: 3rem;
+    margin: 0 auto 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--ao-surface-soft);
+    color: var(--ao-text-faint);
+    font-size: 1.4rem;
+}
+
+.ao-empty-title {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ao-text);
+}
+
+.ao-empty-desc {
+    margin: 0 auto;
+    max-width: 30rem;
+    font-size: 0.85rem;
+    color: var(--ao-text-muted);
+    line-height: 1.5;
+}
+
+@media (max-width: 960px) {
+    .ao-hero {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.25rem;
+    }
+    .ao-hero-stats { justify-content: flex-start; }
+    .ao-toolbar { flex-direction: column; align-items: stretch; }
+    .ao-controls { flex-wrap: wrap; }
+    .ao-search { max-width: none; }
+}
+
+@media (max-width: 640px) {
+    .ao-hero-value { font-size: 1.85rem; }
+    .ao-card-foot {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .ao-card-actions { justify-content: flex-end; }
+    .ao-controls .ao-select { flex: 1 1 calc(50% - 0.5rem); min-width: 0; }
+}
 </style>

@@ -149,20 +149,20 @@
 
     const PRESETS = {
         opportunities: {
-            label: 'Opportunities',
-            title: 'Manage Opportunities',
+            label: 'Marketplace',
+            title: 'Opportunities',
             description:
-                'Create, edit, publish, and track your project opportunities in one place.',
-            primaryAction: { label: 'Create Opportunity', route: R.OPPORTUNITY_CREATE || '/opportunities/create' },
-            secondaryAction: { label: 'View Drafts', id: 'page-cta-opportunities-drafts', type: 'button' }
+                'Browse needs and offers, filter by intent and model, or jump to the map. Your drafts and applications are one shortcut away.',
+            primaryAction: { label: 'Create opportunity', route: R.OPPORTUNITY_CREATE || '/opportunities/create' },
+            secondaryAction: { label: 'My drafts', id: 'page-cta-opportunities-drafts', type: 'button' }
         },
         matches: {
-            label: 'Matching Engine',
-            title: 'Your Matches',
+            label: 'Matching',
+            title: 'Your matches',
             description:
-                'Discover recommended providers, collaboration opportunities, and high-value matches for your projects.',
-            primaryAction: { label: 'View Top Matches', id: 'page-cta-matches-top', type: 'button' },
-            secondaryAction: { label: 'Adjust Filters', id: 'page-cta-matches-filters', type: 'button' }
+                'Review suggestions from the engine, opportunity-based matches, and consortium invites in one place.',
+            primaryAction: { label: 'Jump to suggestions', id: 'page-cta-matches-top', type: 'button' },
+            secondaryAction: { label: 'Focus tabs', id: 'page-cta-matches-filters', type: 'button' }
         },
         people: {
             label: 'Talent Network',
@@ -189,19 +189,21 @@
         deals: {
             label: 'Collaboration',
             title: 'Deals',
-            description: 'Track active collaboration deals, proposals, and agreement progress.',
+            description:
+                'Open a deal to manage milestones and status. Filter the list to show only work that is still moving.',
             primaryAction: {
-                label: 'Create Deal',
+                label: 'Start a deal',
                 route: global.CONFIG?.ROUTES?.COLLABORATION_WIZARD || '/collaboration-wizard'
             },
-            secondaryAction: { label: 'View Active Deals', id: 'page-cta-deals-active', type: 'button' }
+            secondaryAction: { label: 'In progress only', id: 'page-cta-deals-active', type: 'button' }
         },
         contracts: {
-            label: 'Legal & Agreements',
+            label: 'Legal & agreements',
             title: 'Contracts',
-            description: 'Manage project contracts, agreements, and collaboration documents.',
-            primaryAction: { label: 'Upload Contract', id: 'page-cta-contracts-upload', type: 'button' },
-            secondaryAction: { label: 'View Templates', route: R.KNOWLEDGE_BASE || '/knowledge-base' }
+            description:
+                'Review agreements linked to opportunities and deals. Open a contract for signatures, terms, and snapshots.',
+            primaryAction: { label: 'Start collaboration', id: 'page-cta-contracts-upload', type: 'button' },
+            secondaryAction: { label: 'Knowledge base', route: R.KNOWLEDGE_BASE || '/knowledge-base' }
         },
         pipelineOpportunities: {
             label: 'Opportunities',
@@ -218,6 +220,69 @@
                 'Review provider applications, track statuses, and manage applicant decisions.',
             primaryAction: { label: 'Review Applications', id: 'pipeline-cta-review-apps', type: 'button' },
             secondaryAction: { label: 'Export List', id: 'pipeline-cta-export-apps', type: 'button' }
+        },
+        adminDashboard: {
+            label: 'Admin Workspace',
+            title: 'Admin Dashboard',
+            description:
+                'Monitor platform health, review approvals, and manage marketplace activity.',
+            primaryAction: { label: 'Review Pending', route: R.ADMIN_VETTING || '/admin/vetting' },
+            secondaryAction: { label: 'View Reports', route: R.ADMIN_REPORTS || '/admin/reports' }
+        },
+        adminVetting: {
+            label: 'Admin Workspace',
+            title: 'User Vetting',
+            description:
+                'Approve, reject, or request updates on new account registrations.',
+            primaryAction: { label: 'Approve Selected', id: 'page-cta-vetting-approve', type: 'button' },
+            secondaryAction: { label: 'View Audit Trail', route: R.ADMIN_AUDIT || '/admin/audit' }
+        },
+        adminUserManagement: {
+            label: 'Admin Workspace',
+            title: 'User Management',
+            description:
+                'Manage accounts that have completed vetting. Accounts still under review are handled in User Vetting.',
+            primaryAction: { label: 'User Vetting Queue', route: R.ADMIN_VETTING || '/admin/vetting' },
+            secondaryAction: { label: 'View audit trail', route: R.ADMIN_AUDIT || '/admin/audit' }
+        },
+        adminOpportunities: {
+            label: 'Admin Workspace',
+            title: 'Opportunity Moderation',
+            description:
+                'Review platform opportunities, monitor activity, and close or remove anything that should not be live.',
+            primaryAction: { label: 'View audit trail', route: R.ADMIN_AUDIT || '/admin/audit' },
+            secondaryAction: { label: 'User Vetting Queue', route: R.ADMIN_VETTING || '/admin/vetting' }
+        },
+        adminDeals: {
+            label: 'Admin Workspace',
+            title: 'Deal oversight',
+            description:
+                'Monitor every deal on the platform: lifecycle stage, linked opportunities, contracts, and audit trails.',
+            primaryAction: { label: 'View audit trail', route: R.ADMIN_AUDIT || '/admin/audit' },
+            secondaryAction: { label: 'Opportunities', route: R.ADMIN_OPPORTUNITIES || '/admin/opportunities' }
+        },
+        adminContracts: {
+            label: 'Admin Workspace',
+            title: 'Contract registry',
+            description:
+                'Browse all multi-party agreements, signature progress, linked deals, and jump into detail or audit history.',
+            primaryAction: { label: 'View audit trail', route: R.ADMIN_AUDIT || '/admin/audit' },
+            secondaryAction: { label: 'Deals', route: R.ADMIN_DEALS || '/admin/deals' }
+        },
+        adminConsortium: {
+            label: 'Admin Workspace',
+            title: 'Consortium oversight',
+            description:
+                'Track consortium deals: consortium lead, member roles, dropped participants, and replacements in one moderated view.',
+            primaryAction: { label: 'All deals', route: R.ADMIN_DEALS || '/admin/deals' },
+            secondaryAction: { label: 'View audit trail', route: R.ADMIN_AUDIT || '/admin/audit' }
+        },
+        adminUserDetail: {
+            label: 'Admin Workspace',
+            title: 'Account review',
+            description: 'Review submitted information, documents, and history before deciding on access.',
+            primaryAction: { label: 'Approve', id: 'page-cta-userdetail-approve', type: 'button' },
+            secondaryAction: { label: 'Back to vetting', route: R.ADMIN_VETTING || '/admin/vetting' }
         }
     };
 

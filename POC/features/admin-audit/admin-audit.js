@@ -10,6 +10,30 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
+/** Read entityType / entityId from hash query, e.g. #/admin/audit?entityType=deal&entityId=abc */
+function readAuditQueryFromHash() {
+    const h = window.location.hash.substring(1);
+    const qIdx = h.indexOf('?');
+    if (qIdx === -1) return { entityType: '', entityId: '' };
+    try {
+        const sp = new URLSearchParams(h.substring(qIdx + 1));
+        return {
+            entityType: (sp.get('entityType') || '').trim(),
+            entityId: (sp.get('entityId') || '').trim()
+        };
+    } catch {
+        return { entityType: '', entityId: '' };
+    }
+}
+
+function applyAuditFiltersFromUrl() {
+    const { entityType, entityId } = readAuditQueryFromHash();
+    const et = document.getElementById('filter-entity-type');
+    if (et && entityType) et.value = entityType;
+    const eid = document.getElementById('filter-entity-id');
+    if (eid && entityId) eid.value = entityId;
+}
+
 async function initAdminAudit() {
     if (!authService.canAccessAdmin()) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
@@ -17,6 +41,7 @@ async function initAdminAudit() {
     }
 
     await loadUsersForFilter();
+    applyAuditFiltersFromUrl();
     await loadAuditLogs();
     setupFilters();
     setupViewSwitcher();
@@ -103,7 +128,19 @@ async function loadDocumentsView() {
             const isCompany = entity.entityType === 'company';
             const name = entity.profile?.name || entity.email || entity.id;
             const docs = Array.isArray(entity.profile?.documents) ? entity.profile.documents : [];
-            const statusLabel = entity.status || '—';
+            const sb = window.statusBadgeSystem;
+            const statusLabel =
+                sb && typeof sb.getStatusLabel === 'function'
+                    ? sb.getStatusLabel(entity.status, 'user')
+                    : entity.status || '—';
+            const statusCls =
+                sb && typeof sb.getStatusBadgeClass === 'function'
+                    ? sb.getStatusBadgeClass(entity.status, 'user')
+                    : entity.status === 'active'
+                      ? 'badge--success'
+                      : entity.status === 'pending'
+                        ? 'badge--warning'
+                        : 'badge--neutral';
             const typeLabel = isCompany ? 'Company' : 'User';
 
             const docsRows = docs.length === 0
@@ -122,8 +159,12 @@ async function loadDocumentsView() {
                 <div class="audit-doc-card" data-entity-id="${escapeHtml(entity.id)}">
                     <div class="audit-doc-card-header">
                         <h3 class="audit-doc-card-title">${escapeHtml(name)}</h3>
-                        <span class="badge badge-secondary">${escapeHtml(typeLabel)}</span>
-                        <span class="badge badge-${entity.status === 'active' ? 'success' : entity.status === 'pending' ? 'warning' : 'secondary'}">${escapeHtml(statusLabel)}</span>
+                        ${
+                            sb && typeof sb.renderBadge === 'function'
+                                ? sb.renderBadge(typeLabel, isCompany ? 'teal' : 'neutral')
+                                : `<span class="badge badge--neutral">${escapeHtml(typeLabel)}</span>`
+                        }
+                        <span class="badge ${statusCls}">${escapeHtml(statusLabel)}</span>
                         <span class="audit-doc-card-meta">${escapeHtml(entity.email)}</span>
                         <a href="#" data-route="/admin/users/${escapeHtml(entity.id)}" class="btn btn-secondary btn-sm">View detail</a>
                     </div>
@@ -168,6 +209,7 @@ async function loadAuditLogs() {
         const filters = {
             userId: document.getElementById('filter-user')?.value || undefined,
             entityType: document.getElementById('filter-entity-type')?.value || undefined,
+            entityId: document.getElementById('filter-entity-id')?.value || undefined,
             startDate: document.getElementById('filter-start-date')?.value || undefined,
             endDate: document.getElementById('filter-end-date')?.value || undefined
         };

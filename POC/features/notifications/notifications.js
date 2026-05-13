@@ -227,13 +227,21 @@ async function loadNotifications() {
                 const cardRouteAttr = n.link ? ` data-route="${escapeHtml(n.link)}"` : '';
                 const msg = escapeHtml(n.message || '');
                 const iconMod = escapeHtml(pres.mod);
+                const notifVariant =
+                    ({ match: 'purple', application: 'info', message: 'info', deal: 'warning', connection: 'teal', account: 'neutral', default: 'neutral' }[
+                        pres.mod
+                    ] || 'neutral');
+                const typeBadgeHtml =
+                    typeof window.renderBadge === 'function'
+                        ? window.renderBadge(pres.label, notifVariant)
+                        : `<span class="notification-type-badge">${escapeHtml(pres.label)}</span>`;
                 return `
                 <article class="notification-item${readClass}" data-id="${escapeHtml(n.id)}"${cardRouteAttr} role="listitem">
                     <div class="notification-item-inner">
                         <div class="notification-icon notification-icon--${iconMod}" aria-hidden="true"><i class="ph-duotone ${pres.icon}"></i></div>
                         <div class="notification-body">
                             <div class="notification-top">
-                                <span class="notification-type-badge">${escapeHtml(pres.label)}</span>
+                                ${typeBadgeHtml}
                                 ${timeHtml}
                             </div>
                             <div class="notification-title">${linkWrap}</div>

@@ -164,7 +164,8 @@ const CONFIG = {
         EXECUTION: 'execution',
         DELIVERY: 'delivery',
         COMPLETED: 'completed',
-        CLOSED: 'closed'
+        CLOSED: 'closed',
+        CANCELLED: 'cancelled'
     },
 
     // PostMatch status (user-facing match discovery)

@@ -1,87 +1,1036 @@
 <div class="page-container admin-user-detail-page">
-    <div class="page-header">
-        <div class="page-header-content">
-            <a href="#" data-route="/admin/people" class="back-link">← Back to People</a>
-            <h1 class="page-title" id="user-detail-name">User / Company</h1>
-            <p class="page-subtitle" id="user-detail-email">-</p>
-            <div id="user-detail-badges" class="badges"></div>
-        </div>
-    </div>
-    <div class="page-body">
+    <div id="page-context-header-mount"></div>
+    <div class="page-body admin-user-detail-body">
 
-    <div class="detail-grid">
-        <section class="card">
-            <div class="card-header"><h2>Profile</h2></div>
-            <div class="card-body" id="user-detail-profile"></div>
-        </section>
-
-        <section class="card">
-            <div class="card-header"><h2>Vetting</h2></div>
-            <div class="card-body">
-                <div id="user-detail-vetting"></div>
-                <div id="user-detail-verification-edit" class="mt-4" style="display: none;">
-                    <h4 class="font-medium mb-2">Verification status</h4>
-                    <div class="form-group">
-                        <label class="form-label">Status</label>
-                        <select id="admin-verification-status" class="form-input">
-                            <option value="unverified">Unverified</option>
-                            <option value="professional_verified">Verified Professional</option>
-                            <option value="consultant_verified">Verified Consultant</option>
-                            <option value="company_verified">Verified Company</option>
-                        </select>
+        <!-- Account summary + decision strip -->
+        <section class="user-detail-summary" aria-labelledby="user-detail-name">
+            <div class="user-detail-summary-card">
+                <div class="user-detail-summary-info">
+                    <div class="user-detail-identity">
+                        <span class="user-detail-avatar" id="user-detail-avatar" aria-hidden="true">U</span>
+                        <div class="user-detail-identity-text">
+                            <h2 id="user-detail-name" class="user-detail-name">Account</h2>
+                            <p id="user-detail-email" class="user-detail-email">—</p>
+                        </div>
                     </div>
-                    <div class="form-group mt-2">
-                        <label class="form-label">Verification tier</label>
-                        <select id="admin-verification-tier" class="form-input">
-                            <option value="">None</option>
-                            <option value="top_expert">Top Expert</option>
-                        </select>
-                    </div>
-                    <button type="button" id="admin-save-verification" class="btn btn-primary btn-sm mt-2">Save verification status</button>
+                    <div id="user-detail-badges" class="user-detail-badges"></div>
                 </div>
-                <div id="user-detail-interview-edit" class="mt-4" style="display: none;">
-                    <h4 class="font-medium mb-2">Set interview</h4>
-                    <div class="form-group"><label class="form-label">Interview link (e.g. Zoom)</label><input type="url" id="admin-interview-link" class="form-input" placeholder="https://"></div>
-                    <div class="form-group"><label class="form-label">Scheduled at</label><input type="datetime-local" id="admin-interview-scheduledAt" class="form-input"></div>
-                    <div class="form-group">
-                        <label class="form-label">Interview result</label>
-                        <select id="admin-interview-result" class="form-input">
-                            <option value="pending">Pending</option>
-                            <option value="pass">Pass</option>
-                            <option value="fail">Fail</option>
-                        </select>
-                    </div>
-                    <button type="button" id="admin-save-interview" class="btn btn-primary btn-sm">Save interview details</button>
+                <div class="user-detail-summary-actions" id="user-detail-decision-actions">
+                    <!-- Filled in by JS based on status & capabilities -->
                 </div>
             </div>
         </section>
 
-        <section class="card">
-            <div class="card-header"><h2>Opportunities created</h2></div>
-            <div class="card-body" id="user-opportunities"></div>
+        <!-- Tabs -->
+        <nav class="user-detail-tabs" role="tablist" aria-label="Account sections">
+            <button type="button" class="user-detail-tab is-active" role="tab" data-tab="overview" aria-selected="true">
+                <i class="ph-duotone ph-user-circle" aria-hidden="true"></i>
+                <span>Overview</span>
+            </button>
+            <button type="button" class="user-detail-tab" role="tab" data-tab="documents" aria-selected="false">
+                <i class="ph-duotone ph-folders" aria-hidden="true"></i>
+                <span>Documents</span>
+                <span class="user-detail-tab-count" id="tab-count-documents" hidden>0</span>
+            </button>
+            <button type="button" class="user-detail-tab" role="tab" data-tab="activity" aria-selected="false">
+                <i class="ph-duotone ph-list-checks" aria-hidden="true"></i>
+                <span>Activity</span>
+            </button>
+        </nav>
+
+        <!-- Overview tab -->
+        <section class="user-detail-tabpanel is-active" data-tabpanel="overview" role="tabpanel">
+            <div class="user-detail-overview-grid">
+                <article class="user-detail-card">
+                    <header class="user-detail-card-head">
+                        <h3 class="user-detail-card-title">Profile</h3>
+                    </header>
+                    <div class="user-detail-card-body" id="user-detail-profile"></div>
+                </article>
+
+                <article class="user-detail-card">
+                    <header class="user-detail-card-head">
+                        <h3 class="user-detail-card-title">Vetting checklist</h3>
+                        <p class="user-detail-card-desc" id="user-detail-vetting-progress">—</p>
+                    </header>
+                    <div class="user-detail-card-body">
+                        <ul class="user-detail-checklist" id="user-detail-vetting"></ul>
+                    </div>
+                </article>
+
+                <article class="user-detail-card" id="user-detail-admin-vetting-card">
+                    <header class="user-detail-card-head">
+                        <h3 class="user-detail-card-title">Vetting status</h3>
+                        <p class="user-detail-card-desc">Current queue context and last requests.</p>
+                    </header>
+                    <div class="user-detail-card-body user-detail-vetting-panel" id="user-detail-admin-vetting-body">—</div>
+                </article>
+
+                <article class="user-detail-card" id="user-detail-vetting-timeline-card">
+                    <header class="user-detail-card-head">
+                        <h3 class="user-detail-card-title">Vetting timeline</h3>
+                        <p class="user-detail-card-desc">Key registration and vetting events from the audit log.</p>
+                    </header>
+                    <div class="user-detail-card-body" id="user-detail-vetting-timeline-body">—</div>
+                </article>
+
+                <article class="user-detail-card" id="user-detail-verification-edit" hidden>
+                    <header class="user-detail-card-head">
+                        <h3 class="user-detail-card-title">Verification</h3>
+                        <p class="user-detail-card-desc">Set the verification status and tier admins see across the platform.</p>
+                    </header>
+                    <div class="user-detail-card-body">
+                        <div class="user-detail-form-row">
+                            <label class="form-label" for="admin-verification-status">Status</label>
+                            <select id="admin-verification-status" class="form-input">
+                                <option value="unverified">Unverified</option>
+                                <option value="professional_verified">Verified Professional</option>
+                                <option value="consultant_verified">Verified Consultant</option>
+                                <option value="company_verified">Verified Company</option>
+                            </select>
+                        </div>
+                        <div class="user-detail-form-row">
+                            <label class="form-label" for="admin-verification-tier">Verification tier</label>
+                            <select id="admin-verification-tier" class="form-input">
+                                <option value="">None</option>
+                                <option value="top_expert">Top Expert</option>
+                            </select>
+                        </div>
+                        <div class="user-detail-form-actions">
+                            <button type="button" id="admin-save-verification" class="btn btn-primary btn-sm">Save verification</button>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="user-detail-card" id="user-detail-interview-edit" hidden>
+                    <header class="user-detail-card-head">
+                        <h3 class="user-detail-card-title">Interview</h3>
+                        <p class="user-detail-card-desc">Schedule or record the outcome of an interview round.</p>
+                    </header>
+                    <div class="user-detail-card-body">
+                        <div class="user-detail-form-row">
+                            <label class="form-label" for="admin-interview-link">Interview link</label>
+                            <input type="url" id="admin-interview-link" class="form-input" placeholder="https://" />
+                        </div>
+                        <div class="user-detail-form-row">
+                            <label class="form-label" for="admin-interview-scheduledAt">Scheduled at</label>
+                            <input type="datetime-local" id="admin-interview-scheduledAt" class="form-input" />
+                        </div>
+                        <div class="user-detail-form-row">
+                            <label class="form-label" for="admin-interview-result">Result</label>
+                            <select id="admin-interview-result" class="form-input">
+                                <option value="pending">Pending</option>
+                                <option value="pass">Pass</option>
+                                <option value="fail">Fail</option>
+                            </select>
+                        </div>
+                        <div class="user-detail-form-actions">
+                            <button type="button" id="admin-save-interview" class="btn btn-primary btn-sm">Save interview</button>
+                        </div>
+                    </div>
+                </article>
+            </div>
         </section>
 
-        <section class="card">
-            <div class="card-header"><h2>Applications submitted</h2></div>
-            <div class="card-body" id="user-applications"></div>
+        <!-- Documents tab -->
+        <section class="user-detail-tabpanel" data-tabpanel="documents" role="tabpanel" hidden>
+            <article class="user-detail-card">
+                <header class="user-detail-card-head user-detail-card-head--row">
+                    <div>
+                        <h3 class="user-detail-card-title">Submitted documents</h3>
+                        <p class="user-detail-card-desc" id="documents-summary">Loading…</p>
+                    </div>
+                    <div class="user-detail-card-head-actions">
+                        <button type="button" class="btn btn-secondary btn-sm" id="documents-download-all" hidden>
+                            <i class="ph-duotone ph-download-simple" aria-hidden="true"></i>
+                            <span>Open all</span>
+                        </button>
+                    </div>
+                </header>
+                <div class="user-detail-card-body">
+                    <div class="documents-required" id="documents-required" hidden>
+                        <h4 class="user-detail-subtitle">Required documents</h4>
+                        <div class="documents-required-list" id="documents-required-list"></div>
+                    </div>
+
+                    <div class="documents-extra" id="documents-extra" hidden>
+                        <h4 class="user-detail-subtitle">All files</h4>
+                        <div class="documents-grid" id="documents-extra-list"></div>
+                    </div>
+
+                    <div class="documents-case-study" id="documents-case-study" hidden>
+                        <h4 class="user-detail-subtitle">Case study</h4>
+                        <div class="documents-case-study-card" id="documents-case-study-card"></div>
+                    </div>
+
+                    <div class="documents-empty" id="documents-empty" hidden>
+                        <p class="documents-empty-title">No documents submitted yet</p>
+                        <p class="documents-empty-desc">This account hasn’t uploaded vetting documents. You can request updates to ask the applicant to attach the missing files.</p>
+                    </div>
+                </div>
+            </article>
         </section>
 
-        <section class="card full-width">
-            <div class="card-header"><h2>Related audit logs</h2></div>
-            <div class="card-body" id="user-audit"></div>
+        <!-- Activity tab -->
+        <section class="user-detail-tabpanel" data-tabpanel="activity" role="tabpanel" hidden>
+            <div class="user-detail-activity-grid">
+                <article class="user-detail-card">
+                    <header class="user-detail-card-head">
+                        <h3 class="user-detail-card-title">Opportunities created</h3>
+                    </header>
+                    <div class="user-detail-card-body" id="user-opportunities"></div>
+                </article>
+                <article class="user-detail-card">
+                    <header class="user-detail-card-head">
+                        <h3 class="user-detail-card-title">Applications submitted</h3>
+                    </header>
+                    <div class="user-detail-card-body" id="user-applications"></div>
+                </article>
+                <article class="user-detail-card user-detail-card--wide">
+                    <header class="user-detail-card-head">
+                        <h3 class="user-detail-card-title">Related audit log</h3>
+                        <p class="user-detail-card-desc">Latest 30 events involving this account.</p>
+                    </header>
+                    <div class="user-detail-card-body user-detail-card-body--audit" id="user-audit"></div>
+                </article>
+            </div>
         </section>
-    </div>
+
     </div>
 </div>
 
 <style>
-.admin-user-detail-page { /* Page specific styles */ }
-.badges { display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-sm); flex-wrap: wrap; }
-.detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--spacing-lg); }
-.detail-grid .full-width { grid-column: 1 / -1; }
-.detail-item { padding: var(--spacing-sm) 0; border-bottom: 1px solid var(--border-color); }
-.detail-item:last-child { border-bottom: none; }
-.audit-item { padding: var(--spacing-sm) 0; border-bottom: 1px solid var(--border-color); font-size: var(--font-size-sm); }
-.audit-item:last-child { border-bottom: none; }
-.empty-section { color: var(--text-muted); }
+.admin-user-detail-page {
+    max-width: 1200px;
+    margin-inline: auto;
+}
+
+.admin-user-detail-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* Summary card */
+.user-detail-summary-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem 1.5rem;
+    align-items: center;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.user-detail-summary-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.user-detail-identity {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-width: 0;
+}
+
+.user-detail-avatar {
+    width: 3rem;
+    height: 3rem;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color, #0ea5e9));
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-detail-identity-text {
+    min-width: 0;
+}
+
+.user-detail-name {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.user-detail-email {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.user-detail-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.user-detail-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    line-height: 1.5;
+    border: 1px solid transparent;
+}
+
+.user-detail-pill--pending {
+    background: #fffbeb;
+    color: #b45309;
+    border-color: #fde68a;
+}
+
+.user-detail-pill--clarif {
+    background: #fef2f2;
+    color: #b91c1c;
+    border-color: #fecaca;
+}
+
+.user-detail-pill--active {
+    background: #ecfdf5;
+    color: #047857;
+    border-color: #a7f3d0;
+}
+
+.user-detail-pill--rejected {
+    background: #f1f5f9;
+    color: #475569;
+    border-color: #e2e8f0;
+}
+
+.user-detail-pill--neutral {
+    background: #f1f5f9;
+    color: #475569;
+    border-color: #e2e8f0;
+}
+
+.user-detail-pill--verified {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}
+
+.user-detail-pill--age.is-warn {
+    background: #fffbeb;
+    color: #b45309;
+    border-color: #fcd34d;
+}
+
+.user-detail-pill--age.is-crit {
+    background: #fef2f2;
+    color: #b91c1c;
+    border-color: #fca5a5;
+}
+
+.user-detail-pill--age {
+    background: rgba(13, 148, 136, 0.1);
+    color: var(--primary-dark, #0f766e);
+    border-color: rgba(13, 148, 136, 0.25);
+}
+
+.user-detail-summary-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.user-detail-summary-actions .btn {
+    min-height: 2.5rem;
+    padding: 0.45rem 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* Tabs */
+.user-detail-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.35rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.user-detail-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 0.95rem;
+    min-height: 2.5rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.user-detail-tab i {
+    font-size: 1.05rem;
+}
+
+.user-detail-tab:hover {
+    color: var(--text-primary);
+    background: rgba(13, 148, 136, 0.06);
+}
+
+.user-detail-tab.is-active {
+    background: rgba(13, 148, 136, 0.12);
+    color: var(--primary-dark, #0f766e);
+    border-color: rgba(13, 148, 136, 0.3);
+}
+
+.user-detail-tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.4rem;
+    padding: 0 0.4rem;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.08);
+    color: var(--text-primary);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+}
+
+.user-detail-tab.is-active .user-detail-tab-count {
+    background: rgba(13, 148, 136, 0.2);
+    color: var(--primary-dark, #0f766e);
+}
+
+.user-detail-tabpanel {
+    display: none;
+}
+
+.user-detail-tabpanel.is-active {
+    display: block;
+}
+
+/* Cards */
+.user-detail-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    overflow: hidden;
+}
+
+.user-detail-card-head {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    background: #fafbfc;
+}
+
+.user-detail-card-head--row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.user-detail-card-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.user-detail-card-desc {
+    margin: 0.2rem 0 0 0;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+.user-detail-card-body {
+    padding: 1.1rem 1.25rem;
+}
+
+.user-detail-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.user-detail-activity-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.user-detail-card--wide {
+    grid-column: 1 / -1;
+}
+
+/* Profile detail rows */
+.user-detail-data-row {
+    display: grid;
+    grid-template-columns: 8.5rem 1fr;
+    gap: 0.75rem;
+    padding: 0.55rem 0;
+    font-size: var(--font-size-sm);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.user-detail-data-row:last-child {
+    border-bottom: none;
+}
+
+.user-detail-data-label {
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.user-detail-data-value {
+    color: var(--text-primary);
+    word-break: break-word;
+}
+
+/* Checklist */
+.user-detail-checklist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.user-detail-checklist-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.6rem 0.75rem;
+    align-items: start;
+    padding: 0.55rem 0.75rem;
+    background: #f9fafb;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+.user-detail-checklist-item.is-ok {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.user-detail-checklist-item.is-missing {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.user-detail-checklist-item.is-optional {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+.user-detail-checklist-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.user-detail-checklist-icon.is-ok {
+    background: #16a34a;
+    color: #fff;
+}
+
+.user-detail-checklist-icon.is-missing {
+    background: #dc2626;
+    color: #fff;
+}
+
+.user-detail-checklist-icon.is-optional {
+    background: #cbd5e1;
+    color: #1e293b;
+}
+
+.user-detail-checklist-body {
+    min-width: 0;
+}
+
+.user-detail-checklist-label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.user-detail-checklist-note {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin-top: 0.15rem;
+    word-break: break-word;
+}
+
+.user-detail-checklist-action {
+    align-self: center;
+    font-size: var(--font-size-xs);
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.user-detail-checklist-action:hover {
+    text-decoration: underline;
+}
+
+/* Forms */
+.user-detail-form-row {
+    margin-bottom: 0.75rem;
+}
+
+.user-detail-form-actions {
+    margin-top: 0.5rem;
+}
+
+/* Documents */
+.user-detail-subtitle {
+    margin: 0 0 0.65rem 0;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+}
+
+.documents-required {
+    margin-bottom: 1.25rem;
+}
+
+.documents-required-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.document-required-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.6rem 0.75rem;
+    padding: 0.7rem 0.85rem;
+    background: #f9fafb;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    align-items: center;
+}
+
+.document-required-row.is-submitted {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.document-required-row.is-missing {
+    background: #fffbeb;
+    border-color: #fde68a;
+}
+
+.document-required-row.is-missing.is-required-strict {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.document-required-row-state {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+.document-required-row-state.is-ok {
+    background: #16a34a;
+}
+
+.document-required-row-state.is-missing {
+    background: #f59e0b;
+}
+
+.document-required-row-state.is-strict-missing {
+    background: #dc2626;
+}
+
+.document-required-row-body {
+    min-width: 0;
+}
+
+.document-required-row-label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.document-required-row-note {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin-top: 0.15rem;
+}
+
+.document-required-row-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--primary-color);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius-md);
+    background: rgba(13, 148, 136, 0.08);
+    cursor: pointer;
+    border: none;
+}
+
+.document-required-row-action:hover {
+    background: rgba(13, 148, 136, 0.18);
+}
+
+/* Document grid */
+.documents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.85rem;
+}
+
+.documents-extra {
+    margin-bottom: 1.25rem;
+}
+
+.document-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    overflow: hidden;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.document-card:hover {
+    border-color: rgba(13, 148, 136, 0.45);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+.document-card-preview {
+    background: #f1f5f9;
+    aspect-ratio: 4 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    position: relative;
+    overflow: hidden;
+}
+
+.document-card-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.document-card-preview-icon {
+    font-size: 2.5rem;
+    color: #94a3b8;
+}
+
+.document-card-preview-badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(15, 23, 42, 0.7);
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.document-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.7rem 0.85rem 0.4rem;
+    min-width: 0;
+}
+
+.document-card-label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.document-card-meta {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.document-card-meta span:not(:last-child)::after {
+    content: '·';
+    margin-left: 0.4rem;
+    color: var(--border-color);
+}
+
+.document-card-actions {
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.3rem 0.85rem 0.85rem;
+    flex-wrap: wrap;
+}
+
+.document-card-actions .btn {
+    min-height: 2.25rem;
+    padding: 0.35rem 0.7rem;
+    font-size: var(--font-size-xs);
+    flex: 1 1 0;
+    justify-content: center;
+}
+
+/* Case study */
+.documents-case-study-card {
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.15rem;
+}
+
+.documents-case-study-title {
+    margin: 0 0 0.4rem 0;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.documents-case-study-desc {
+    margin: 0 0 0.5rem 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.documents-case-study-url {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: var(--font-size-xs);
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.documents-case-study-url:hover {
+    text-decoration: underline;
+}
+
+.documents-case-study-files {
+    margin-top: 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.6rem;
+}
+
+.documents-empty {
+    padding: 2rem 1.5rem;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    background: #f9fafb;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.documents-empty-title {
+    margin: 0 0 0.35rem 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.documents-empty-desc {
+    margin: 0 auto;
+    max-width: 30rem;
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+}
+
+/* Activity */
+.user-detail-link-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: var(--font-size-sm);
+}
+
+.user-detail-link-row:last-child {
+    border-bottom: none;
+}
+
+.user-detail-link-row a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.user-detail-link-row a:hover {
+    text-decoration: underline;
+}
+
+.user-detail-audit-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.5rem 0.75rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: var(--font-size-sm);
+    align-items: center;
+}
+
+.user-detail-audit-row:last-child {
+    border-bottom: none;
+}
+
+.user-detail-audit-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border-color);
+}
+
+.user-detail-audit-dot.is-approval {
+    background: var(--primary-color);
+}
+
+.user-detail-audit-dot.is-error {
+    background: #dc2626;
+}
+
+.user-detail-audit-dot.is-login {
+    background: #0ea5e9;
+}
+
+.user-detail-audit-action {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.user-detail-audit-entity {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin-left: 0.4rem;
+}
+
+.user-detail-audit-time {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.user-detail-empty-section {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    margin: 0;
+}
+
+/* Document preview modal */
+.document-preview-frame {
+    width: 100%;
+    height: 70vh;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: #fff;
+}
+
+.document-preview-image {
+    max-width: 100%;
+    max-height: 70vh;
+    margin: 0 auto;
+    display: block;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.1);
+}
+
+.document-preview-fallback {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-secondary);
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .user-detail-summary-card {
+        grid-template-columns: 1fr;
+    }
+    .user-detail-summary-actions {
+        justify-content: flex-start;
+    }
+    .user-detail-overview-grid,
+    .user-detail-activity-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .user-detail-data-row {
+        grid-template-columns: 1fr;
+    }
+    .user-detail-data-label {
+        font-size: var(--font-size-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .user-detail-summary-actions .btn {
+        flex: 1 1 calc(50% - 0.25rem);
+        justify-content: center;
+    }
+    .user-detail-tab {
+        flex: 1 1 0;
+        justify-content: center;
+    }
+    .user-detail-tab span:not(.user-detail-tab-count) {
+        display: none;
+    }
+    .user-detail-tab i {
+        font-size: 1.2rem;
+    }
+    .document-card-actions .btn {
+        flex: 1 1 100%;
+    }
+}
 </style>

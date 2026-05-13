@@ -4,6 +4,8 @@
 
 let currentStep = 1;
 const TOTAL_STEPS = 7;
+/** When set, submit updates this opportunity instead of creating a new one (loaded from /opportunities/:id/edit). */
+let wizardEditOpportunityId = null;
 let allLocations = [];
 /** Index of last used demo scenario so each fill prefers a different one when possible. */
 let lastDemoDatasetIndex = -1;
@@ -446,7 +448,178 @@ function getCityCoords(cityId) {
     return null;
 }
 
-async function initOpportunityCreate() {
+function asTagArray(v) {
+    if (v == null) return [];
+    if (Array.isArray(v)) return v.map(String).filter(Boolean);
+    const s = String(v).trim();
+    return s ? [s] : [];
+}
+
+/**
+ * Build a fillDemoData-shaped object from a stored opportunity (edit / hydrate wizard).
+ */
+function opportunityToEditWizardDataset(opp) {
+    const attrs = opp.attributes || {};
+    const scope = opp.scope || {};
+    const intent = opp.intent || 'request';
+    const skills =
+        intent === 'offer'
+            ? asTagArray(scope.offeredSkills || attrs.offeredSkills || opp.offeredSkills)
+            : asTagArray(scope.requiredSkills || attrs.requiredSkills || opp.requiredSkills);
+
+    const modelFieldSource = { ...attrs };
+    if (opp.modelData && typeof opp.modelData === 'object') {
+        Object.assign(modelFieldSource, opp.modelData);
+    }
+    const skipScopeKeys = new Set([
+        'requiredSkills',
+        'offeredSkills',
+        'sectors',
+        'interests',
+        'certifications',
+        'milestones',
+        'scopeOfWork'
+    ]);
+    Object.keys(scope).forEach((k) => {
+        if (skipScopeKeys.has(k)) return;
+        modelFieldSource[k] = scope[k];
+    });
+
+    const ex = opp.exchangeData || {};
+    const mode = opp.exchangeMode || ex.exchangeMode || 'cash';
+    const modeFields = {};
+    if (mode === 'cash') {
+        if (ex.cashAmount != null) modeFields['cash-amount'] = ex.cashAmount;
+        if (ex.cashPaymentTerms) modeFields['cash-payment-terms'] = ex.cashPaymentTerms;
+        if (ex.cashMilestones) modeFields['cash-milestones'] = ex.cashMilestones;
+    } else if (mode === 'equity') {
+        if (ex.equityPercentage != null) modeFields['equity-percentage'] = ex.equityPercentage;
+        if (ex.equityVesting) modeFields['equity-vesting'] = ex.equityVesting;
+        if (ex.equityContribution) modeFields['equity-contribution'] = ex.equityContribution;
+    } else if (mode === 'profit_sharing') {
+        if (ex.profitSplit) modeFields['profit-split'] = ex.profitSplit;
+        if (ex.profitBasis) modeFields['profit-basis'] = ex.profitBasis;
+        if (ex.profitDuration) modeFields['profit-duration'] = ex.profitDuration;
+        if (ex.profitDistribution) modeFields['profit-distribution'] = ex.profitDistribution;
+    } else if (mode === 'barter') {
+        if (ex.barterOffer) modeFields['barter-offer'] = ex.barterOffer;
+        if (ex.barterNeed) modeFields['barter-need'] = ex.barterNeed;
+        if (ex.barterValue) modeFields['barter-value'] = ex.barterValue;
+    } else if (mode === 'hybrid') {
+        if (ex.hybridCash != null) modeFields['hybrid-cash'] = ex.hybridCash;
+        if (ex.hybridEquity != null) modeFields['hybrid-equity'] = ex.hybridEquity;
+        if (ex.hybridBarter != null) modeFields['hybrid-barter'] = ex.hybridBarter;
+        if (ex.hybridCashDetails) modeFields['hybrid-cash-details'] = ex.hybridCashDetails;
+        if (ex.hybridEquityDetails) modeFields['hybrid-equity-details'] = ex.hybridEquityDetails;
+        if (ex.hybridBarterDetails) modeFields['hybrid-barter-details'] = ex.hybridBarterDetails;
+    }
+    if (ex.exchangeTermsSummary) modeFields['exchange-terms-summary'] = ex.exchangeTermsSummary;
+
+    const br = ex.budgetRange || {};
+    const step5 = {
+        budgetMin: br.min != null ? String(br.min) : '',
+        budgetMax: br.max != null ? String(br.max) : '',
+        exchangeMode: mode,
+        currency: ex.currency || br.currency || 'SAR',
+        modeFields,
+        agreement: true
+    };
+
+    let step4MultiTasks;
+    if (Array.isArray(opp.projectTasks) && opp.projectTasks.length > 0) {
+        step4MultiTasks = opp.projectTasks.map((t) => ({
+            title: t.title || '',
+            duration: t.duration != null ? String(t.duration) : '',
+            notes: t.notes || t.description || ''
+        }));
+    }
+
+    return {
+        skipLocation: true,
+        editHydrate: true,
+        projectType: opp.projectType || (step4MultiTasks && step4MultiTasks.length > 1 ? 'multi' : 'single'),
+        step1: {
+            title: opp.title || '',
+            description: opp.description || ''
+        },
+        step2: { intent },
+        step3: {
+            skills,
+            sectors: asTagArray(scope.sectors || attrs.sectors || opp.sectors),
+            interests: asTagArray(scope.interests || attrs.interests || opp.interests),
+            certifications: asTagArray(scope.certifications || attrs.certifications || opp.certifications)
+        },
+        step4: {
+            category: opp.modelType || 'project_based',
+            subModel: opp.subModelType || 'task_based',
+            modelFields: modelFieldSource
+        },
+        step4MultiTasks,
+        step5,
+        step6: { status: opp.status || 'draft' }
+    };
+}
+
+function wizardApplyLocationQuick(opp) {
+    const loc = document.getElementById('location');
+    if (loc) loc.value = opp.location || '';
+    const pairs = [
+        ['location-country', opp.locationCountry],
+        ['location-region', opp.locationRegion],
+        ['location-city', opp.locationCity],
+        ['location-district', opp.locationDistrict]
+    ];
+    pairs.forEach(([id, v]) => {
+        const el = document.getElementById(id);
+        if (el && v) el.value = v;
+    });
+}
+
+function applyEditModeHero() {
+    const titleEl = document.getElementById('occ-create-title');
+    if (titleEl) titleEl.textContent = 'Edit opportunity';
+    const sub = document.querySelector('.occ-hero-sub');
+    if (sub) {
+        sub.textContent =
+            'Same 7 steps as create: your posting is pre-filled. Review each step, then save.';
+    }
+    const pill = document.querySelector('.occ-hero-pill');
+    if (pill) pill.textContent = 'Editing';
+    const panel = document.querySelector('.occ-hero-panel');
+    if (panel) panel.style.display = 'none';
+    const submit = document.getElementById('submit-form');
+    if (submit) submit.textContent = 'Save changes';
+}
+
+async function hydrateWizardForEdit(opportunityId) {
+    const user = authService.getCurrentUser();
+    const opp = await dataService.getOpportunityById(opportunityId);
+    if (!opp) {
+        showError('Opportunity not found.');
+        wizardEditOpportunityId = null;
+        return;
+    }
+    if (!user || (opp.creatorId !== user.id && !authService.isAdmin())) {
+        showError('You can only edit opportunities you created.');
+        wizardEditOpportunityId = null;
+        return;
+    }
+    applyEditModeHero();
+    const dataset = opportunityToEditWizardDataset(opp);
+    await fillDemoData(dataset);
+    await new Promise((r) => setTimeout(r, 850));
+    wizardApplyLocationQuick(opp);
+    const latEl = document.getElementById('latitude');
+    const lngEl = document.getElementById('longitude');
+    if (latEl && opp.latitude != null && !Number.isNaN(Number(opp.latitude))) latEl.value = String(opp.latitude);
+    if (lngEl && opp.longitude != null && !Number.isNaN(Number(opp.longitude))) lngEl.value = String(opp.longitude);
+    updateScopeLabels();
+    const successDiv = document.getElementById('form-success');
+    if (successDiv) successDiv.classList.add('hidden');
+}
+
+async function initOpportunityCreate(params = {}) {
+    wizardEditOpportunityId = null;
     // Read-only demo: pending users can view but not submit
     if (authService.isPendingApproval && authService.isPendingApproval()) {
         const form = document.getElementById('opportunity-form');
@@ -492,6 +665,17 @@ async function initOpportunityCreate() {
             window.RichTextEditor.initAll();
         }
     }, 200);
+
+    if (params && params.id) {
+        wizardEditOpportunityId = params.id;
+        try {
+            await hydrateWizardForEdit(params.id);
+        } catch (err) {
+            console.error('Edit hydrate:', err);
+            showError(err.message || 'Could not load this opportunity into the wizard.');
+            wizardEditOpportunityId = null;
+        }
+    }
 }
 
 async function loadDataFiles() {
@@ -2419,55 +2603,62 @@ function buildAlternateOpenPanelHtml(mode) {
     if (mode === 'cash') {
         return `<div class="occ-s6-alt-panel" data-alt-mode="cash">${head}
             <p class="occ-s6-help mb-3">Outline a cash structure you could accept if the partner prefers it (e.g. milestones, retainage).</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div class="form-group md:col-span-2">
+            <div class="occ-alt-model-stack flex flex-col gap-5">
+                <div class="form-group occ-rtx-field mb-0">
                     <label for="alt-cash-summary" class="occ-s6-field-label">Summary <span class="text-red-600">*</span></label>
+                    <p class="text-sm text-slate-500 mt-0 mb-2">When this fallback cash model would work for you.</p>
                     <textarea id="alt-cash-summary" name="altCashSummary" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" rows="3" placeholder="e.g. 40% on mobilization, 60% on milestones…" data-rich-text="true"></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="alt-cash-amount" class="occ-s6-field-label">Indicative amount (SAR)</label>
-                    <input type="number" id="alt-cash-amount" name="altCashAmount" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Optional" min="0" step="0.01">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                    <div class="form-group mb-0">
+                        <label for="alt-cash-amount" class="occ-s6-field-label">Indicative amount (SAR)</label>
+                        <input type="number" id="alt-cash-amount" name="altCashAmount" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Optional" min="0" step="0.01">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="alt-cash-terms" class="occ-s6-field-label">Payment cadence</label>
+                        <select id="alt-cash-terms" name="altCashTerms" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                            <option value="">Not specified</option>
+                            <option value="upfront">Upfront</option>
+                            <option value="milestone_based">Milestone-based</option>
+                            <option value="upon_completion">Upon completion</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="installments">Installments</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="alt-cash-terms" class="occ-s6-field-label">Payment cadence</label>
-                    <select id="alt-cash-terms" name="altCashTerms" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-                        <option value="">Select (optional)</option>
-                        <option value="upfront">Upfront</option>
-                        <option value="milestone_based">Milestone-based</option>
-                        <option value="upon_completion">Upon completion</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="installments">Installments</option>
-                    </select>
+                <div class="form-group mb-0">
+                    <label for="alt-cash-milestones" class="occ-s6-field-label">Milestone notes <span class="text-slate-400 font-normal">(optional)</span></label>
+                    <p class="text-sm text-slate-500 mt-0 mb-2">Optional timing detail if you chose milestones or installments.</p>
+                    <textarea id="alt-cash-milestones" name="altCashMilestones" class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="2" placeholder="Optional detail on timing" data-rich-text="true"></textarea>
                 </div>
-            </div>
-            <div class="form-group mb-0">
-                <label for="alt-cash-milestones" class="occ-s6-field-label">Milestone notes</label>
-                <textarea id="alt-cash-milestones" name="altCashMilestones" class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="2" placeholder="Optional detail on timing" data-rich-text="true"></textarea>
             </div>
         </div>`;
     }
     if (mode === 'equity') {
         return `<div class="occ-s6-alt-panel" data-alt-mode="equity">${head}
             <p class="occ-s6-help mb-3">Describe an equity arrangement you could consider alongside your primary model.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="form-group md:col-span-2">
+            <div class="occ-alt-model-stack flex flex-col gap-5">
+                <div class="form-group occ-rtx-field mb-0">
                     <label for="alt-equity-summary" class="occ-s6-field-label">Summary <span class="text-red-600">*</span></label>
+                    <p class="text-sm text-slate-500 mt-0 mb-2">Stake range, governance, and what each side would contribute.</p>
                     <textarea id="alt-equity-summary" name="altEquitySummary" class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="3" placeholder="Stake, governance, contribution expectations…" data-rich-text="true"></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="alt-equity-pct" class="occ-s6-field-label">Indicative % (optional)</label>
-                    <input type="number" id="alt-equity-pct" name="altEquityPct" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="e.g. 25" min="0" max="100" step="0.1">
-                </div>
-                <div class="form-group">
-                    <label for="alt-equity-vesting" class="occ-s6-field-label">Vesting (optional)</label>
-                    <select id="alt-equity-vesting" name="altEquityVesting" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-                        <option value="">Select</option>
-                        <option value="immediate">Immediate</option>
-                        <option value="1_year">1 year</option>
-                        <option value="2_years">2 years</option>
-                        <option value="3_years">3 years</option>
-                        <option value="custom">Custom</option>
-                    </select>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                    <div class="form-group mb-0">
+                        <label for="alt-equity-pct" class="occ-s6-field-label">Indicative % <span class="text-slate-400 font-normal">(optional)</span></label>
+                        <input type="number" id="alt-equity-pct" name="altEquityPct" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="e.g. 25" min="0" max="100" step="0.1">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="alt-equity-vesting" class="occ-s6-field-label">Vesting <span class="text-slate-400 font-normal">(optional)</span></label>
+                        <select id="alt-equity-vesting" name="altEquityVesting" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                            <option value="">Not specified</option>
+                            <option value="immediate">Immediate</option>
+                            <option value="1_year">1 year</option>
+                            <option value="2_years">2 years</option>
+                            <option value="3_years">3 years</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>`;
@@ -2495,7 +2686,7 @@ function buildAlternateOpenPanelHtml(mode) {
                 <div class="form-group">
                     <label for="alt-ps-duration" class="occ-s6-field-label">Duration</label>
                     <select id="alt-ps-duration" name="altPsDuration" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-                        <option value="">Select</option>
+                        <option value="">Not specified</option>
                         <option value="project">Project length</option>
                         <option value="1y">1 year</option>
                         <option value="2y">2 years</option>
@@ -3594,7 +3785,9 @@ async function fillDemoData(dataset) {
                 setTimeout(() => window.RichTextEditor.setContent('description', descriptionContent), 200);
             }
         }
-        fillDemoLocation(d.step1 && d.step1.locationKey);
+        if (!d.skipLocation) {
+            fillDemoLocation(d.step1 && d.step1.locationKey);
+        }
         
         // Step 2: Intent
         const intent = (d.step2 && d.step2.intent) || 'request';
@@ -3678,15 +3871,17 @@ async function fillDemoData(dataset) {
         
         updateScopeLabels();
         
-        const successDiv = document.getElementById('form-success');
-        if (successDiv) {
-            const rawTitle = (d.step1 && d.step1.title) ? String(d.step1.title).trim() : '';
-            const titleSnippet = rawTitle.length > 72 ? `${rawTitle.slice(0, 69)}…` : rawTitle;
-            successDiv.textContent = titleSnippet
-                ? `Demo loaded: “${titleSnippet}”. Step through the wizard to review and submit.`
-                : 'Demo data filled. Move through steps to review and submit.';
-            successDiv.classList.remove('hidden');
-            setTimeout(() => successDiv.classList.add('hidden'), 5000);
+        if (!d.editHydrate) {
+            const successDiv = document.getElementById('form-success');
+            if (successDiv) {
+                const rawTitle = (d.step1 && d.step1.title) ? String(d.step1.title).trim() : '';
+                const titleSnippet = rawTitle.length > 72 ? `${rawTitle.slice(0, 69)}…` : rawTitle;
+                successDiv.textContent = titleSnippet
+                    ? `Demo loaded: “${titleSnippet}”. Step through the wizard to review and submit.`
+                    : 'Demo data filled. Move through steps to review and submit.';
+                successDiv.classList.remove('hidden');
+                setTimeout(() => successDiv.classList.add('hidden'), 5000);
+            }
         }
     } catch (error) {
         console.error('Error filling demo data:', error);
@@ -4138,6 +4333,8 @@ function setupFormHandlers() {
             });
             const accepted_modes = paymentModesArr.slice();
             const description = document.getElementById('description')?.value?.trim() || '';
+            const title = (document.getElementById('title')?.value || '').trim();
+            if (!title) throw new Error('Please enter a title');
             const location = document.getElementById('location')?.value || '';
             const locationCountry = document.getElementById('location-country')?.value || '';
             const locationRegion = document.getElementById('location-region')?.value || '';
@@ -4306,23 +4503,51 @@ function setupFormHandlers() {
             }
             if (value_exchange) oppPayload.value_exchange = value_exchange;
 
-            const oppService = window.opportunityService;
-            const opportunity = await oppService.createOpportunity(oppPayload);
-            
-            await dataService.createAuditLog({
-                userId: user.id,
-                action: 'opportunity_created',
-                entityType: 'opportunity',
-                entityId: opportunity.id,
-                details: { title: opportunity.title, modelType: opportunity.modelType }
-            });
-            
-            successDiv.textContent = 'Opportunity created successfully!';
-            successDiv.classList.remove('hidden');
-            
-            setTimeout(() => {
-                router.navigate('/opportunities/map');
-            }, 1500);
+            const oppService = window.opportunityService || (typeof opportunityService !== 'undefined' ? opportunityService : null);
+
+            if (wizardEditOpportunityId) {
+                await dataService.updateOpportunity(wizardEditOpportunityId, oppPayload);
+                const fresh = await dataService.getOpportunityById(wizardEditOpportunityId);
+                if (oppService && typeof oppService._ensureNormalized === 'function') {
+                    await oppService._ensureNormalized(fresh);
+                }
+                await dataService.createAuditLog({
+                    userId: user.id,
+                    action: 'opportunity_updated',
+                    entityType: 'opportunity',
+                    entityId: wizardEditOpportunityId,
+                    details: { title, modelType: oppPayload.modelType }
+                });
+                successDiv.textContent = 'Opportunity updated successfully!';
+                successDiv.classList.remove('hidden');
+                const r = window.router || (typeof router !== 'undefined' ? router : null);
+                setTimeout(() => {
+                    if (r && typeof r.navigate === 'function') {
+                        r.navigate('/opportunities/' + wizardEditOpportunityId);
+                    }
+                }, 1200);
+            } else {
+                if (!oppService) throw new Error('Opportunity service is not available');
+                const opportunity = await oppService.createOpportunity(oppPayload);
+
+                await dataService.createAuditLog({
+                    userId: user.id,
+                    action: 'opportunity_created',
+                    entityType: 'opportunity',
+                    entityId: opportunity.id,
+                    details: { title: opportunity.title, modelType: opportunity.modelType }
+                });
+
+                successDiv.textContent = 'Opportunity created successfully!';
+                successDiv.classList.remove('hidden');
+
+                setTimeout(() => {
+                    const r = window.router || (typeof router !== 'undefined' ? router : null);
+                    if (r && typeof r.navigate === 'function') {
+                        r.navigate('/opportunities/map');
+                    }
+                }, 1500);
+            }
             
         } catch (error) {
             console.error('Error creating opportunity:', error);

@@ -305,16 +305,22 @@ function getMapCityName(cityId) {
 }
 
 function getMapStatusBadge(status) {
+    const sb = window.statusBadgeSystem;
+    if (sb && typeof sb.renderBadge === 'function') {
+        const label = sb.getStatusLabel(status, 'opportunity');
+        const variant = sb.resolveVariant(status, 'opportunity');
+        return sb.renderBadge(label, variant);
+    }
     const map = {
-        'published': { label: 'Published', cls: 'bg-green-50 text-green-700' },
-        'draft': { label: 'Draft', cls: 'bg-gray-100 text-gray-600' },
-        'in_execution': { label: 'In Execution', cls: 'bg-yellow-50 text-yellow-700' },
-        'contracted': { label: 'Contracted', cls: 'bg-purple-50 text-purple-700' },
-        'completed': { label: 'Completed', cls: 'bg-teal-50 text-teal-700' },
-        'cancelled': { label: 'Cancelled', cls: 'bg-red-50 text-red-700' }
+        published: { label: 'Published', cls: 'badge--success' },
+        draft: { label: 'Draft', cls: 'badge--neutral' },
+        in_execution: { label: 'In execution', cls: 'badge--warning' },
+        contracted: { label: 'Contracted', cls: 'badge--success' },
+        completed: { label: 'Completed', cls: 'badge--success' },
+        cancelled: { label: 'Cancelled', cls: 'badge--danger' }
     };
-    const info = map[status] || { label: status || 'Unknown', cls: 'bg-gray-100 text-gray-600' };
-    return `<span class="badge ${info.cls}" style="font-size:0.65rem;padding:1px 5px;border-radius:4px;">${info.label}</span>`;
+    const info = map[status] || { label: status || 'Unknown', cls: 'badge--neutral' };
+    return `<span class="badge ${info.cls}">${escapeMapHtml(info.label)}</span>`;
 }
 
 function getMapModelLabel(modelType) {

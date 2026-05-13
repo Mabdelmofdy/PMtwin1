@@ -1,72 +1,681 @@
 <div class="page-container admin-vetting-page">
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1 class="page-title">User Vetting</h1>
-            <p class="page-subtitle">Review and approve pending registrations and clarification requests</p>
-            <p class="text-sm text-gray-500 mt-1">Demo: use accounts with status Pending to see this queue (e.g. Professional (pending) in demo credentials).</p>
-        </div>
-    </div>
-    <div class="page-body">
+    <div id="page-context-header-mount"></div>
+    <div class="page-body admin-vetting-body">
 
-    <div class="filters-section">
-        <div class="filters">
-            <select id="filter-status" class="form-select">
-                <option value="">All (Pending + Clarification)</option>
-                <option value="pending">Pending</option>
-                <option value="clarification_requested">Clarification Requested</option>
-            </select>
+        <!-- Summary strip -->
+        <section class="vetting-summary" aria-labelledby="vetting-summary-title">
+            <h2 id="vetting-summary-title" class="sr-only">Queue summary</h2>
+            <div class="vetting-summary-grid">
+                <div class="vetting-summary-card">
+                    <span class="vetting-summary-label">In queue</span>
+                    <span class="vetting-summary-value" id="vetting-stat-total">0</span>
+                    <span class="vetting-summary-hint">Pending review + waiting for updates</span>
+                </div>
+                <div class="vetting-summary-card">
+                    <span class="vetting-summary-label">Pending review</span>
+                    <span class="vetting-summary-value" id="vetting-stat-pending">0</span>
+                    <span class="vetting-summary-hint">Awaiting first decision</span>
+                </div>
+                <div class="vetting-summary-card">
+                    <span class="vetting-summary-label">Waiting for updates</span>
+                    <span class="vetting-summary-value" id="vetting-stat-clarif">0</span>
+                    <span class="vetting-summary-hint">Applicant must update and resubmit</span>
+                </div>
+                <div class="vetting-summary-card">
+                    <span class="vetting-summary-label">Oldest waiting</span>
+                    <span class="vetting-summary-value" id="vetting-stat-oldest">—</span>
+                    <span class="vetting-summary-hint" id="vetting-stat-oldest-hint">Time in queue</span>
+                </div>
+            </div>
+        </section>
 
-            <input
-                type="text"
-                id="filter-search"
-                class="form-input"
-                placeholder="Search by email or name..."
-            >
+        <!-- Filters & search -->
+        <section class="vetting-toolbar" aria-labelledby="vetting-filters-title">
+            <h2 id="vetting-filters-title" class="sr-only">Filters</h2>
 
-            <button id="apply-filters" class="btn btn-secondary">Apply Filters</button>
-        </div>
-    </div>
+            <div class="vetting-segmented" role="tablist" aria-label="Status filter">
+                <button type="button" class="vetting-seg is-active" data-status-filter="" role="tab" aria-selected="true">
+                    <span class="vetting-seg-label">All</span>
+                    <span class="vetting-seg-count" id="chip-count-all">0</span>
+                </button>
+                <button type="button" class="vetting-seg" data-status-filter="pending" role="tab" aria-selected="false">
+                    <span class="vetting-seg-label">Pending</span>
+                    <span class="vetting-seg-count" id="chip-count-pending">0</span>
+                </button>
+                <button type="button" class="vetting-seg" data-status-filter="clarification_requested" role="tab" aria-selected="false">
+                    <span class="vetting-seg-label">Waiting for updates</span>
+                    <span class="vetting-seg-count" id="chip-count-clarif">0</span>
+                </button>
+            </div>
 
-    <div id="vetting-bulk-actions" class="vetting-bulk-actions mb-3" style="display: none;">
-        <button type="button" id="vetting-approve-selected" class="btn btn-success btn-sm">Approve selected</button>
-        <button type="button" id="vetting-reject-selected" class="btn btn-danger btn-sm">Reject selected</button>
-    </div>
-    <div id="vetting-list" class="vetting-list">
-        <div class="spinner"></div>
-    </div>
+            <div class="vetting-toolbar-row">
+                <div class="vetting-search">
+                    <i class="ph-duotone ph-magnifying-glass" aria-hidden="true"></i>
+                    <input
+                        type="text"
+                        id="filter-search"
+                        class="vetting-search-input"
+                        placeholder="Search by name or email"
+                        aria-label="Search by name or email"
+                    >
+                </div>
+                <select id="filter-type" class="vetting-select" aria-label="Account type">
+                    <option value="">All accounts</option>
+                    <option value="individual">Individuals</option>
+                    <option value="company">Companies</option>
+                </select>
+                <select id="filter-sort" class="vetting-select" aria-label="Sort order">
+                    <option value="oldest">Oldest waiting first</option>
+                    <option value="newest">Newest first</option>
+                    <option value="updated_desc">Last updated (newest)</option>
+                    <option value="updated_asc">Last updated (oldest)</option>
+                    <option value="type">Account type</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Bulk action bar -->
+        <section class="vetting-bulk-bar" id="vetting-bulk-actions" hidden aria-live="polite">
+            <div class="vetting-bulk-bar-info">
+                <label class="vetting-bulk-bar-select-label">
+                    <input type="checkbox" id="vetting-select-all" />
+                    <span><strong id="vetting-bulk-count">0</strong> selected</span>
+                </label>
+            </div>
+            <div class="vetting-bulk-bar-actions">
+                <button type="button" id="vetting-approve-selected" class="btn btn-success btn-sm-touch">
+                    <i class="ph-duotone ph-check-circle" aria-hidden="true"></i>
+                    <span>Approve</span>
+                </button>
+                <button type="button" id="vetting-clarify-selected" class="btn btn-warning btn-sm-touch">
+                    <i class="ph-duotone ph-info" aria-hidden="true"></i>
+                    <span>Request updates</span>
+                </button>
+                <button type="button" id="vetting-reject-selected" class="btn btn-danger btn-sm-touch">
+                    <i class="ph-duotone ph-x-circle" aria-hidden="true"></i>
+                    <span>Reject</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Queue -->
+        <section class="vetting-queue" aria-labelledby="vetting-queue-title">
+            <div class="vetting-queue-head">
+                <h2 id="vetting-queue-title" class="vetting-queue-title">Review queue</h2>
+                <p class="vetting-queue-meta" id="vetting-queue-meta">Loading queue…</p>
+            </div>
+            <div id="vetting-list" class="vetting-list">
+                <div class="spinner"></div>
+            </div>
+        </section>
+
     </div>
 </div>
 
 <style>
-.admin-vetting-page { /* Page specific styles */ }
+.admin-vetting-page {
+    max-width: 1200px;
+    margin-inline: auto;
+}
+
+.admin-vetting-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Summary cards */
+.vetting-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.vetting-summary-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem 1.15rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.vetting-summary-label {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.vetting-summary-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    line-height: 1.1;
+}
+
+.vetting-summary-hint {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+/* Toolbar */
+.vetting-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Segmented control (status filter) */
+.vetting-segmented {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.25rem;
+    background: #f1f5f9;
+    border-radius: 0.65rem;
+    width: fit-content;
+    max-width: 100%;
+}
+
+.vetting-seg {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.95rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: #475569;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.vetting-seg:hover {
+    color: var(--text-primary);
+}
+
+.vetting-seg.is-active {
+    background: #ffffff;
+    color: var(--text-primary);
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(15, 23, 42, 0.04);
+}
+
+.vetting-seg-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.35rem;
+    padding: 0 0.4rem;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.08);
+    color: #475569;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+}
+
+.vetting-seg.is-active .vetting-seg-count {
+    background: var(--primary-color);
+    color: #ffffff;
+}
+
+/* Toolbar row */
+.vetting-toolbar-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.vetting-search {
+    position: relative;
+    flex: 1 1 320px;
+    min-width: 240px;
+}
+
+.vetting-search i {
+    position: absolute;
+    top: 50%;
+    left: 0.85rem;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 1.05rem;
+    pointer-events: none;
+}
+
+.vetting-search-input {
+    width: 100%;
+    height: 2.5rem;
+    padding: 0 0.95rem 0 2.4rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.55rem;
+    background: var(--bg-primary);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.vetting-search-input::placeholder {
+    color: #94a3b8;
+}
+
+.vetting-search-input:hover {
+    border-color: #cbd5e1;
+}
+
+.vetting-search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.vetting-select {
+    height: 2.5rem;
+    padding: 0 2.25rem 0 0.9rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.55rem;
+    background-color: var(--bg-primary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none' stroke='%2364748b' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='4 6 8 10 12 6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 1rem;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    min-width: 11rem;
+}
+
+.vetting-select::-ms-expand {
+    display: none;
+}
+
+.vetting-select:hover {
+    border-color: #cbd5e1;
+}
+
+.vetting-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+/* Bulk bar */
+.vetting-bulk-bar {
+    position: sticky;
+    top: 0.5rem;
+    z-index: 5;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 1rem;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.7rem 1rem;
+    background: #ecfeff;
+    border: 1px solid #67e8f9;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 14px rgba(8, 145, 178, 0.12);
+}
+
+.vetting-bulk-bar-select-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.vetting-bulk-bar-actions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.btn-sm-touch {
+    min-height: 2.5rem;
+    padding: 0.4rem 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* Queue */
+.vetting-queue-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+}
+
+.vetting-queue-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.vetting-queue-meta {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
 
 .vetting-list {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: 0.85rem;
 }
 
+/* Card */
 .vetting-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem 1rem;
+    padding: 1rem 1.15rem;
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.vetting-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: var(--spacing-md);
+.vetting-card:hover {
+    border-color: rgba(13, 148, 136, 0.4);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
 }
 
-.vetting-card-body p { margin: var(--spacing-xs) 0; }
-.vetting-card-footer {
+.vetting-card.is-selected {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.12);
+}
+
+.vetting-card-select {
+    grid-row: 1 / span 3;
+    align-self: flex-start;
+    margin-top: 0.6rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.vetting-card-checkbox {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.vetting-card-head {
     display: flex;
-    gap: var(--spacing-sm);
+    align-items: center;
+    gap: 0.75rem;
     flex-wrap: wrap;
-    margin-top: var(--spacing-md);
-    padding-top: var(--spacing-md);
-    border-top: 1px solid var(--border-color);
+}
+
+.vetting-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color, #0ea5e9));
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vetting-card-titles {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.vetting-card-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vetting-card-email {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vetting-card-badges {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-left: auto;
+}
+
+.vetting-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    line-height: 1.5;
+    border: 1px solid transparent;
+}
+
+.vetting-pill--pending {
+    background: #fffbeb;
+    color: #b45309;
+    border-color: #fde68a;
+}
+
+.vetting-pill--clarif {
+    background: #fef2f2;
+    color: #b91c1c;
+    border-color: #fecaca;
+}
+
+.vetting-pill--type {
+    background: #f1f5f9;
+    color: #475569;
+    border-color: #e2e8f0;
+}
+
+.vetting-pill--age {
+    background: rgba(13, 148, 136, 0.1);
+    color: var(--primary-dark, #0f766e);
+    border-color: rgba(13, 148, 136, 0.25);
+}
+
+.vetting-pill--age.is-warn {
+    background: #fffbeb;
+    color: #b45309;
+    border-color: #fcd34d;
+}
+
+.vetting-pill--age.is-crit {
+    background: #fef2f2;
+    color: #b91c1c;
+    border-color: #fca5a5;
+}
+
+.vetting-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 1rem;
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.vetting-card-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.vetting-card-meta-item i {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.vetting-card-meta-item.is-missing {
+    color: #b91c1c;
+}
+
+.vetting-card-meta-item.is-missing i {
+    color: #b91c1c;
+}
+
+.vetting-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    margin-top: 0.25rem;
+}
+
+.vetting-card-actions .btn {
+    min-height: 2.4rem;
+    padding: 0.4rem 0.8rem;
+    font-size: var(--font-size-sm);
+}
+
+.vetting-card-detail-link {
+    margin-left: auto;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.vetting-card-detail-link:hover {
+    text-decoration: underline;
+}
+
+/* Empty state */
+.vetting-empty {
+    padding: 2.5rem 1.5rem;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-primary);
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.vetting-empty-title {
+    margin: 0 0 0.35rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.vetting-empty-desc {
+    margin: 0 auto;
+    max-width: 32rem;
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .vetting-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .vetting-toolbar-row {
+        flex-wrap: wrap;
+    }
+    .vetting-search {
+        flex: 1 1 100%;
+    }
+    .vetting-select {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+    .vetting-card-badges {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .vetting-summary-grid {
+        grid-template-columns: 1fr;
+    }
+    .vetting-segmented {
+        width: 100%;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        scrollbar-width: thin;
+    }
+    .vetting-seg {
+        flex: 1 1 0;
+        justify-content: center;
+        white-space: nowrap;
+    }
+    .vetting-select {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+    .vetting-card {
+        grid-template-columns: 1fr;
+    }
+    .vetting-card-select {
+        grid-row: auto;
+        margin-top: 0;
+    }
+    .vetting-card-head {
+        flex-direction: row;
+    }
+    .vetting-bulk-bar {
+        position: sticky;
+        top: 0.25rem;
+    }
+    .vetting-bulk-bar-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+    .vetting-bulk-bar-actions .btn {
+        flex: 1 1 0;
+        justify-content: center;
+    }
+    .vetting-card-actions .btn {
+        flex: 1 1 calc(50% - 0.2rem);
+        justify-content: center;
+    }
+    .vetting-card-detail-link {
+        margin-left: 0;
+    }
 }
 </style>

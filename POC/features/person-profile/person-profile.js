@@ -133,9 +133,20 @@ function populateProfile(person) {
     const verificationBadgeEl = document.getElementById('profile-verification-badge');
     if (verificationBadgeEl && !isCompany) {
         const status = person.profile?.verificationStatus;
-        if (status === 'professional_verified') verificationBadgeEl.innerHTML = '<span class="badge badge-success verification-badge">Verified Professional</span>';
-        else if (status === 'consultant_verified') verificationBadgeEl.innerHTML = '<span class="badge badge-success verification-badge">Verified Consultant</span>';
-        else if (status === 'company_verified') verificationBadgeEl.innerHTML = '<span class="badge badge-success verification-badge">Verified Company</span>';
+        const rb = typeof window.renderBadge === 'function' ? window.renderBadge : null;
+        if (status === 'professional_verified') {
+            verificationBadgeEl.innerHTML = rb
+                ? rb('Verified Professional', 'success', { extraClass: 'verification-badge' })
+                : '<span class="badge badge-success verification-badge">Verified Professional</span>';
+        } else if (status === 'consultant_verified') {
+            verificationBadgeEl.innerHTML = rb
+                ? rb('Verified Consultant', 'success', { extraClass: 'verification-badge' })
+                : '<span class="badge badge-success verification-badge">Verified Consultant</span>';
+        } else if (status === 'company_verified') {
+            verificationBadgeEl.innerHTML = rb
+                ? rb('Verified Company', 'success', { extraClass: 'verification-badge' })
+                : '<span class="badge badge-success verification-badge">Verified Company</span>';
+        }
         else verificationBadgeEl.innerHTML = '';
     } else if (verificationBadgeEl) verificationBadgeEl.innerHTML = '';
     

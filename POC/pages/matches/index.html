@@ -1,109 +1,264 @@
 <div class="page-container matches-page">
     <div id="page-context-header-mount"></div>
     <div class="page-body matches-page-body">
-        <div id="tab-matches" class="matches-tab-root">
-            <div class="matches-subtabs" id="matches-subtabs" role="tablist">
-                <button type="button" class="matches-subtab active" role="tab" data-subtab="recommended" id="matches-subtab-recommended" aria-selected="true">Recommended</button>
-                <button type="button" class="matches-subtab" role="tab" data-subtab="opportunity" id="matches-subtab-opportunity" aria-selected="false">Opportunity Matches</button>
-                <button type="button" class="matches-subtab" role="tab" data-subtab="consortium" id="matches-subtab-consortium" aria-selected="false">Consortium Invitations</button>
-            </div>
-            <div id="matches-recommended" class="matches-panel active" role="tabpanel">
-                <div id="matches-recommended-list" class="matches-container">
-                    <div class="spinner"></div>
+        <section class="matches-browser" aria-labelledby="matches-browser-heading">
+            <div id="matches-toolbar" class="matches-toolbar">
+                <div class="matches-toolbar__intro">
+                    <h2 id="matches-browser-heading" class="matches-toolbar__title">Review your matches</h2>
+                    <p class="matches-toolbar__lead">
+                        Suggestions from the matching engine, your opportunity list, and consortium invites live in separate tabs so you can focus on one type at a time.
+                    </p>
+                </div>
+                <div class="matches-segmented" id="matches-subtabs" role="tablist" aria-label="Match categories">
+                    <button type="button" class="matches-segment active" role="tab" data-subtab="recommended" id="matches-subtab-recommended" aria-selected="true" aria-controls="matches-recommended">
+                        <span class="matches-segment__inner">
+                            <i class="ph-duotone ph-sparkle matches-segment__icon" aria-hidden="true"></i>
+                            <span class="matches-segment__label">For you</span>
+                            <span class="matches-segment__count" id="matches-count-recommended" hidden></span>
+                        </span>
+                    </button>
+                    <button type="button" class="matches-segment" role="tab" data-subtab="opportunity" id="matches-subtab-opportunity" aria-selected="false" aria-controls="matches-opportunity">
+                        <span class="matches-segment__inner">
+                            <i class="ph-duotone ph-briefcase matches-segment__icon" aria-hidden="true"></i>
+                            <span class="matches-segment__label">Opportunities</span>
+                            <span class="matches-segment__count" id="matches-count-opportunity" hidden></span>
+                        </span>
+                    </button>
+                    <button type="button" class="matches-segment" role="tab" data-subtab="consortium" id="matches-subtab-consortium" aria-selected="false" aria-controls="matches-consortium">
+                        <span class="matches-segment__inner">
+                            <i class="ph-duotone ph-users-three matches-segment__icon" aria-hidden="true"></i>
+                            <span class="matches-segment__label">Consortium</span>
+                            <span class="matches-segment__count" id="matches-count-consortium" hidden></span>
+                        </span>
+                    </button>
                 </div>
             </div>
-            <div id="matches-opportunity" class="matches-panel" role="tabpanel">
-                <div id="matches-opportunity-list" class="matches-container">
-                    <div class="spinner"></div>
+
+            <div id="matches-panel-wrap" class="matches-panel-wrap">
+                <div id="tab-matches" class="matches-tab-root">
+                    <div id="matches-recommended" class="matches-panel active" role="tabpanel" aria-labelledby="matches-subtab-recommended">
+                        <div id="matches-recommended-list" class="matches-container">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                    <div id="matches-opportunity" class="matches-panel" role="tabpanel" aria-labelledby="matches-subtab-opportunity">
+                        <div id="matches-opportunity-list" class="matches-container">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                    <div id="matches-consortium" class="matches-panel" role="tabpanel" aria-labelledby="matches-subtab-consortium">
+                        <div id="matches-consortium-list" class="matches-container">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div id="matches-consortium" class="matches-panel" role="tabpanel">
-                <div id="matches-consortium-list" class="matches-container">
-                    <div class="spinner"></div>
-                </div>
-            </div>
-        </div>
+        </section>
     </div>
 </div>
 
 <style>
 .matches-page-body {
-    max-width: none;
+    max-width: 1200px;
     margin: 0 auto;
     width: 100%;
 }
 
-.matches-tab-root {
-    margin-top: var(--spacing-md);
-}
-
-/* Matches sub-tabs */
-.matches-subtabs {
+.matches-browser {
     display: flex;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-xl);
-    border-bottom: 2px solid var(--border-color);
+    flex-direction: column;
+    gap: 1.25rem;
 }
 
-.matches-subtab {
-    padding: var(--spacing-md) var(--spacing-lg);
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
-    cursor: pointer;
-    font-size: var(--font-size-sm);
-    font-weight: 600;
+.matches-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+@media (min-width: 900px) {
+    .matches-toolbar {
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 2rem;
+    }
+    .matches-toolbar__intro {
+        max-width: 32rem;
+    }
+}
+
+.matches-toolbar__title {
+    margin: 0 0 0.35rem 0;
+    font-size: var(--font-size-xl, 1.25rem);
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.matches-toolbar__lead {
+    margin: 0;
+    font-size: var(--font-size-sm, 0.875rem);
+    line-height: 1.55;
     color: var(--text-secondary);
-    transition: color 0.2s, border-color 0.2s, background 0.2s;
 }
 
-.matches-subtab:hover {
-    color: var(--primary-color);
+/* Segmented tabs */
+.matches-segmented {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    padding: 0.35rem;
+    background: var(--bg-primary, #fff);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.04));
+    flex-shrink: 0;
 }
 
-.matches-subtab.active {
+@media (min-width: 900px) {
+    .matches-segmented {
+        flex-wrap: nowrap;
+    }
+}
+
+.matches-segment {
+    flex: 1 1 auto;
+    min-width: min(100%, 7.5rem);
+    margin: 0;
+    padding: 0.55rem 0.75rem;
+    border: none;
+    border-radius: var(--radius-md, 8px);
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: var(--font-size-sm, 0.8125rem);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    text-align: center;
+}
+
+.matches-segment:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary, #f4f4f5);
+}
+
+.matches-segment:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.matches-segment.active {
     color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
+    background: var(--bg-primary, #fff);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.08));
+}
+
+.matches-segment__inner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.matches-segment__icon {
+    font-size: 1.1rem;
+    opacity: 0.85;
+}
+
+.matches-segment.active .matches-segment__icon {
+    opacity: 1;
+}
+
+.matches-segment__label {
+    white-space: nowrap;
+}
+
+.matches-segment__count:empty {
+    display: none;
+}
+
+.matches-segment__count:not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    padding: 0 0.35rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    border-radius: 999px;
+    background: var(--bg-secondary, #e4e4e7);
+    color: var(--text-secondary);
+}
+
+.matches-segment.active .matches-segment__count:not([hidden]) {
+    background: rgba(13, 148, 136, 0.14);
+    color: var(--primary-dark, var(--primary-color));
+}
+
+/* Content card */
+.matches-panel-wrap {
+    background: var(--bg-primary, #fff);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.04));
+    padding: var(--spacing-lg, 1.25rem) var(--spacing-xl, 1.5rem);
+    min-height: 12rem;
+}
+
+.matches-tab-root {
+    margin: 0;
 }
 
 .matches-panel {
     display: none;
+    animation: matches-panel-in 0.2s ease;
 }
 
 .matches-panel.active {
     display: block;
 }
 
-/* Outer container should not be grid; inner card wrapper owns layout */
+@keyframes matches-panel-in {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
 .matches-container {
     display: block;
     width: 100%;
 }
 
-/* Card grid: responsive [Card][Card][Card] / [Card][Card] / [Card] */
 .match-cards-grid {
     display: grid;
-    gap: 20px;
+    gap: 1.25rem;
     align-items: stretch;
     grid-template-columns: 1fr;
 }
 
-/* Medium: 2 columns */
-@media (min-width: 481px) {
+@media (min-width: 560px) {
     .match-cards-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
-/* Large: 3 columns */
-@media (min-width: 1025px) {
+@media (min-width: 1024px) {
     .match-cards-grid {
         grid-template-columns: repeat(3, 1fr);
     }
 }
 
-/* Vertical cards (e.g. recommended/consortium) – horizontal cards use their own flex */
 .match-cards-grid .card:not(.match-card-horizontal) {
     display: flex;
     flex-direction: column;
@@ -136,17 +291,41 @@
 }
 
 .matches-section {
-    margin-bottom: var(--spacing-2xl);
+    margin-bottom: var(--spacing-2xl, 2rem);
     width: 100%;
 }
+
 .matches-section:last-child {
     margin-bottom: 0;
 }
+
 .matches-section-title {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-base, 1rem);
     font-weight: 600;
     color: var(--text-primary);
-    margin: 0 0 var(--spacing-lg) 0;
+    margin: 0 0 var(--spacing-md, 0.75rem) 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Empty states inside matches */
+.matches-page .empty-state {
+    min-height: 14rem;
+    margin: 0;
+    padding: var(--spacing-2xl, 2rem) var(--spacing-lg, 1rem);
+    border-radius: var(--radius-md, 8px);
+    background: var(--bg-secondary, #fafafa);
+    border: 1px dashed var(--border-color);
+}
+
+.matches-page .empty-state,
+.matches-page .empty-state p {
+    font-size: var(--font-size-sm, 0.875rem);
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.matches-page .empty-state a {
+    font-weight: 600;
 }
 </style>
-

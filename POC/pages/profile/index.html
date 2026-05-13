@@ -5,13 +5,25 @@
     
     <div id="profile-clarification-banner" class="profile-banner profile-banner--warning" style="display: none;">
         <div class="profile-banner-body">
-            <p class="profile-banner-lead"><strong>Your registration needs clarification.</strong> You can upload additional documents below, then click "Submit for review again" to resubmit for admin review.</p>
+            <p class="profile-banner-lead"><strong>Your registration needs updates.</strong> Review the items below, update your profile or documents, then submit for review again.</p>
+            <div id="profile-needs-updates-reasons-wrap" class="profile-banner-extra" style="display: none;">
+                <h4 class="profile-banner-title">Requested updates</h4>
+                <ul id="profile-needs-updates-reasons" class="profile-needs-updates-list"></ul>
+            </div>
+            <div id="profile-needs-updates-note-wrap" class="profile-banner-extra" style="display: none;">
+                <h4 class="profile-banner-title">Message from reviewer</h4>
+                <p id="profile-needs-updates-note" class="profile-banner-text"></p>
+            </div>
             <div id="profile-clarification-documents-wrap" class="profile-banner-extra" style="display: none;">
                 <h4 class="profile-banner-title">Verification documents</h4>
                 <p class="profile-banner-text">Add or replace documents to support your verification.</p>
                 <div id="profile-clarification-documents" class="profile-doc-stack"></div>
             </div>
-            <button type="button" id="profile-submit-review-again" class="btn btn-primary">Submit for review again</button>
+            <div class="profile-needs-updates-actions">
+                <button type="button" id="profile-needs-updates-edit-profile" class="btn btn-secondary btn-sm">Update profile</button>
+                <button type="button" id="profile-needs-updates-upload-docs" class="btn btn-secondary btn-sm">Upload documents</button>
+            </div>
+            <button type="button" id="profile-submit-review-again" class="btn btn-primary mt-3">Submit for Review Again</button>
         </div>
     </div>
     

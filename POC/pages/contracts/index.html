@@ -1,76 +1,387 @@
 <div class="page-container contracts-page">
     <div id="page-context-header-mount"></div>
-    <div class="page-body">
-        <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                    <select id="filter-status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                        <option value="">All statuses</option>
-                        <option value="pending">Pending</option>
-                        <option value="active">Active</option>
-                        <option value="completed">Completed</option>
-                        <option value="terminated">Terminated</option>
-                    </select>
+    <div class="page-body contracts-page-body">
+        <section class="contracts-browser" aria-labelledby="contracts-browser-heading">
+            <div id="contracts-toolbar" class="contracts-toolbar">
+                <div class="contracts-toolbar__intro">
+                    <h2 id="contracts-browser-heading" class="contracts-toolbar__title">Contracts</h2>
+                    <p class="contracts-toolbar__lead">
+                        Agreements tied to opportunities and deals. Filter by status or how you participate, then open a contract for the full record.
+                    </p>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">My role</label>
-                    <select id="filter-role" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                        <option value="">All</option>
-                        <option value="creator">As creator</option>
-                        <option value="contractor">As contractor</option>
-                    </select>
-                </div>
-                <div class="flex items-end">
-                    <button type="button" id="apply-filters" class="btn btn-primary">Apply filters</button>
-                </div>
-                <div class="flex items-end">
-                    <button type="button" id="clear-filters" class="btn btn-secondary">Clear</button>
+                <div class="contracts-filters" role="search" aria-label="Filter contracts">
+                    <div class="contracts-filters__grid">
+                        <div class="contracts-field">
+                            <label class="contracts-field__label" for="filter-status">Status</label>
+                            <select id="filter-status" class="contracts-select">
+                                <option value="">All contracts</option>
+                                <option value="pending">Pending signature</option>
+                                <option value="active">Active</option>
+                                <option value="completed">Completed</option>
+                                <option value="terminated">Terminated</option>
+                            </select>
+                        </div>
+                        <div class="contracts-field">
+                            <label class="contracts-field__label" for="filter-role">Your role</label>
+                            <select id="filter-role" class="contracts-select">
+                                <option value="">All roles</option>
+                                <option value="creator">Need side (creator)</option>
+                                <option value="contractor">Offer side (contractor)</option>
+                            </select>
+                        </div>
+                        <div class="contracts-filters__reset">
+                            <button type="button" id="clear-filters" class="btn btn-secondary btn-sm">Reset filters</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div id="contracts-list" class="contracts-list">
-            <div class="spinner"></div>
-        </div>
+
+            <p id="contracts-summary" class="contracts-summary" aria-live="polite"></p>
+
+            <div id="contracts-panel-wrap" class="contracts-panel-wrap">
+                <div id="contracts-list" class="contracts-list" role="list">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </section>
     </div>
 </div>
 
 <style>
-.contracts-page .contracts-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: var(--spacing-lg);
+.contracts-page-body {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
 }
-.contract-card {
-    background: var(--bg-primary);
+
+.contracts-browser {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.contracts-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+@media (min-width: 900px) {
+    .contracts-toolbar {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 2rem;
+    }
+    .contracts-toolbar__intro {
+        max-width: 34rem;
+    }
+    .contracts-filters {
+        flex: 0 0 auto;
+        min-width: min(100%, 22rem);
+    }
+}
+
+.contracts-toolbar__title {
+    margin: 0 0 0.35rem 0;
+    font-size: var(--font-size-xl, 1.25rem);
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.contracts-toolbar__lead {
+    margin: 0;
+    font-size: var(--font-size-sm, 0.875rem);
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+.contracts-filters {
+    background: var(--bg-primary, #fff);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    min-height: 220px;
-    transition: box-shadow 0.2s;
+    border-radius: var(--radius-lg, 12px);
+    padding: 1rem 1.1rem;
+    box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.04));
 }
-.contract-card:hover {
-    box-shadow: var(--shadow-md);
+
+.contracts-filters__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
 }
-.contract-card-title {
+
+@media (min-width: 520px) {
+    .contracts-filters__grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.85rem 1rem;
+        align-items: end;
+    }
+    .contracts-filters__reset {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (min-width: 900px) {
+    .contracts-filters__grid {
+        grid-template-columns: 1fr 1fr auto;
+        align-items: end;
+    }
+    .contracts-filters__reset {
+        grid-column: auto;
+        justify-self: end;
+        padding-bottom: 0.15rem;
+    }
+}
+
+.contracts-field__label {
+    display: block;
+    font-size: 0.75rem;
     font-weight: 600;
-    font-size: var(--font-size-lg);
-    margin-bottom: var(--spacing-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+}
+
+.contracts-select {
+    width: 100%;
+    padding: 0.5rem 0.65rem;
+    font-size: var(--font-size-sm, 0.875rem);
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-secondary, #fafafa);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md, 8px);
+    cursor: pointer;
+}
+
+.contracts-select:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
+}
+
+.contracts-summary {
+    margin: 0;
+    font-size: var(--font-size-sm, 0.8125rem);
+    color: var(--text-secondary);
+    min-height: 1.25rem;
+}
+
+.contracts-panel-wrap {
+    background: var(--bg-primary, #fff);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.04));
+    padding: var(--spacing-lg, 1.25rem) var(--spacing-xl, 1.5rem);
+    min-height: 10rem;
+}
+
+.contracts-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 640px) {
+    .contracts-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1100px) {
+    .contracts-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.contract-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+    background: var(--bg-secondary, #fafafa);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg, 12px);
+    padding: 1.1rem 1.15rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.contract-card:hover {
+    border-color: rgba(13, 148, 136, 0.35);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.06));
+}
+
+.contract-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.5rem;
+    margin-bottom: 0.6rem;
+}
+
+.contracts-role-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.contracts-role-pill--need {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.contracts-role-pill--offer {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.contracts-role-pill--neutral {
+    background: var(--bg-primary, #e5e5e5);
+    color: var(--text-secondary);
+}
+
+.contract-card__title {
+    margin: 0 0 0.45rem 0;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--text-primary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.contract-card__party {
+    margin: 0 0 0.65rem 0;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.contract-card__party strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.contract-card__details {
+    flex: 1;
+    margin: 0 0 0.85rem 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.contract-card__details li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin-bottom: 0.35rem;
+}
+
+.contract-card__details li:last-child {
+    margin-bottom: 0;
+}
+
+.contract-card__details .ph-duotone {
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+    opacity: 0.75;
+}
+
+.contract-card__details a {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.contract-card__details a:hover {
+    text-decoration: underline;
+}
+
+.contract-card__hint {
+    margin: 0 0 0.35rem 0;
+    font-size: 0.8125rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.contract-card__updated {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.contract-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.25rem;
+}
+
+.contract-card__actions .btn {
+    flex: 1 1 auto;
+    min-width: 6.5rem;
+    justify-content: center;
+}
+
+.contracts-page .contracts-empty {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 14rem;
+    margin: 0;
+    padding: var(--spacing-2xl, 2rem) var(--spacing-lg, 1rem);
+    border-radius: var(--radius-md, 8px);
+    background: var(--bg-secondary, #fafafa);
+    border: 1px dashed var(--border-color);
+}
+
+.contracts-page .contracts-empty__icon {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary, #fff);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.contracts-page .contracts-empty__title {
+    margin: 0 0 0.5rem 0;
+    font-size: var(--font-size-lg, 1.0625rem);
+    font-weight: 600;
     color: var(--text-primary);
 }
-.contract-card-meta {
-    font-size: var(--font-size-sm);
+
+.contracts-page .contracts-empty__text {
+    margin: 0;
+    max-width: 26rem;
+    font-size: var(--font-size-sm, 0.875rem);
+    line-height: 1.6;
     color: var(--text-secondary);
-    margin-bottom: var(--spacing-md);
 }
-.contract-card-role {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: var(--radius-sm);
-    font-size: var(--font-size-xs);
-    font-weight: 500;
-    margin-bottom: var(--spacing-sm);
+
+.contracts-page .contracts-empty__actions {
+    margin-top: 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
 }
-.contract-card-role.creator { background: #dbeafe; color: #1e40af; }
-.contract-card-role.contractor { background: #d1fae5; color: #047857; }
 </style>

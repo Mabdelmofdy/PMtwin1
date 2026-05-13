@@ -39,6 +39,16 @@
             </section>
 
             <section class="detail-section">
+                <h2><i class="ph-duotone ph-handshake"></i> Linked Deal Workspace</h2>
+                <div id="contract-linked-deal" class="detail-content"></div>
+            </section>
+
+            <section class="detail-section" id="contract-audit-section" style="display: none;">
+                <h2><i class="ph-duotone ph-scroll"></i> Activity</h2>
+                <div id="contract-audit-log" class="detail-content"></div>
+            </section>
+
+            <section class="detail-section">
                 <h2><i class="ph-duotone ph-calendar"></i> Dates</h2>
                 <div id="contract-dates" class="detail-content"></div>
             </section>
@@ -130,6 +140,12 @@
 }
 .contract-detail-page .review-item:last-child {
     border-bottom: none;
+}
+
+.contract-detail-page .contract-audit-row {
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--border-color, #eee);
+    font-size: 0.875rem;
 }
 
 @media print {

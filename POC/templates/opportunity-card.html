@@ -12,11 +12,11 @@
                 {{#if intentLabel}}
                 <span class="badge {{intentBadgeClass}}">{{intentLabel}}</span>
                 {{/if}}
-                <span class="badge badge-primary">{{#if modelTypeLabel}}{{modelTypeLabel}}{{else}}{{modelType}}{{/if}}</span>
+                <span class="badge {{modelTypeBadgeClass}}">{{#if modelTypeLabel}}{{modelTypeLabel}}{{else}}{{modelType}}{{/if}}</span>
                 {{#if subModelType}}
-                <span class="badge badge-outline">{{#if subModelTypeLabel}}{{subModelTypeLabel}}{{else}}{{subModelType}}{{/if}}</span>
+                <span class="badge {{subModelBadgeClass}}">{{#if subModelTypeLabel}}{{subModelTypeLabel}}{{else}}{{subModelType}}{{/if}}</span>
                 {{/if}}
-                <span class="badge badge-{{statusBadgeClass}}">{{#if statusLabel}}{{statusLabel}}{{else}}{{status}}{{/if}}</span>
+                <span class="badge {{statusBadgeClass}}">{{#if statusLabel}}{{statusLabel}}{{else}}{{status}}{{/if}}</span>
                 {{#if matchScorePercent}}
                 <span class="badge badge-match">{{matchScorePercent}}% Match</span>
                 {{/if}}

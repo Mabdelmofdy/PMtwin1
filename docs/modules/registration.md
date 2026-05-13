@@ -581,24 +581,25 @@ After registration, accounts have `status: pending`. Admin users (with `admin` o
    - `action`: `user_rejected` or `company_rejected`
    - `details`: `{ reason }`
 
-### Action: Request Clarification
+### Action: Request Updates (UI: “Request Missing Information”)
 
 **System Actions:**
-1. Admin prompted for reason/missing items (optional).
-2. Update user/company status to `clarification_requested`.
-3. Send notification to user:
+1. Admin selects one or more required update reasons (and optional note) in the vetting modal.
+2. Update user/company status to `clarification_requested` (unchanged internal status key).
+3. Persist `profile.vetting.requestedReasonIds`, `requestedReasonLabels`, `adminNote`, and `updateRequestAt`.
+4. Send notification to user:
    - `type`: `account_clarification_requested`
-   - `title`: "Registration needs clarification"
-   - `message`: "Your registration needs clarification: [reason]. Please update your profile or documents and submit for review again."
-4. Create audit log:
+   - `title`: "Registration needs updates"
+   - `message`: Built from selected reason labels and optional reviewer note.
+5. Create audit log:
    - `action`: `user_clarification_requested` or `company_clarification_requested`
-   - `details`: `{ reason }`
+   - `details`: `{ reasons, reasonLabels, note, previousStatus, newStatus }`
 
-### Clarification Resubmission
+### Applicant resubmission
+
 - Users with `clarification_requested` status can log in (authentication module allows this status).
-- On their profile page, a banner is displayed informing them that clarification is needed.
-- A "Submit for review again" button is available.
-- On resubmission, the status is changed back to `pending` for admin review.
+- On their profile page, a banner explains that updates are needed, lists requested reasons and the admin note when present, and offers **Update profile**, **Upload documents**, and **Submit for Review Again**.
+- Submit validates document sizes (5MB max); on success the status returns to `pending`, admins/moderators receive `account_resubmitted_for_review`, and an audit entry `user_vetting_resubmitted` / `company_vetting_resubmitted` is created.
 
 ---
 
@@ -610,7 +611,7 @@ After registration, accounts have `status: pending`. Admin users (with `admin` o
 | User submits registration     | (new record)               | `pending`                  |
 | Admin approves                | `pending` / `clarification_requested` | `active`          |
 | Admin rejects                 | `pending` / `clarification_requested` | `rejected`        |
-| Admin requests clarification  | `pending`                  | `clarification_requested`  |
+| Admin requests updates        | `pending` (or as applicable) | `clarification_requested`  |
 | User resubmits from profile   | `clarification_requested`  | `pending`                  |
 
 ---

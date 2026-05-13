@@ -95,6 +95,7 @@ loadScript('src/core/config/config.js').then(async () => {
     await loadScript('src/core/storage/storage-service.js');
     await loadScript('src/core/data/data-service.js', { type: 'module' });
     await loadScript('src/core/auth/auth-service.js');
+    await loadScript('src/core/vetting/vetting-actions.js');
     await loadScript('src/core/router/router.js');
     await loadScript('src/core/router/auth-guard.js');
     await loadScript('src/core/layout/layout-service.js');
@@ -106,10 +107,12 @@ loadScript('src/core/config/config.js').then(async () => {
     await loadScript('src/utils/template-renderer.js');
     await loadScript('src/utils/modal.js');
     await loadScript('src/utils/badge-helpers.js');
+    await loadScript('src/utils/status-badge-system.js');
     await loadScript('src/utils/decimal-helper.js');
     await loadScript('src/utils/profile-completion.js');
     await loadScript('src/utils/profile-search-text.js');
     await loadScript('src/utils/page-context-header.js');
+    await loadScript('src/utils/deal-contract-flow.js');
     
     // Load business logic
     await loadScript('src/business-logic/models/opportunity-models.js');
@@ -341,9 +344,9 @@ function initializeRoutes() {
         await loadPage('opportunity-detail', params);
     }));
     
-    // Edit route
+    // Edit route — same 7-step wizard as create, pre-filled from existing opportunity
     router.register('/opportunities/:id/edit', authGuard.protect(async (params) => {
-        await loadPage('opportunity-edit', params);
+        await loadPage('opportunity-create', params);
     }));
     
     // Profile route (protected)
@@ -429,20 +432,20 @@ function initializeRoutes() {
     }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
     
     router.register(CONFIG.ROUTES.ADMIN_USERS, authGuard.protect(async () => {
-        if (!authService.isAdmin()) {
+        if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.users.read')) {
             router.navigate(CONFIG.ROUTES.DASHBOARD);
             return;
         }
         await loadPage('admin-users');
-    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR]));
+    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
 
     router.register(CONFIG.ROUTES.ADMIN_PEOPLE, authGuard.protect(async () => {
-        if (!authService.isAdmin()) {
+        if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.users.read')) {
             router.navigate(CONFIG.ROUTES.DASHBOARD);
             return;
         }
         await loadPage('admin-users');
-    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR]));
+    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
 
     router.register(CONFIG.ROUTES.ADMIN_VETTING, authGuard.protect(async () => {
         if (!authService.isAdmin()) {

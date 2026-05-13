@@ -1254,6 +1254,149 @@ class DataService {
         return parties.every(p => !!p && !!p.userId && !!p.signedAt);
     }
 
+    /**
+     * Build payload for a pending contract from an in-flight deal (signing or repair).
+     */
+    _buildPendingContractPayloadFromDeal(deal) {
+        const activeParts = (deal.participants || []).filter(p => (p.status || 'active') !== 'dropped');
+        const parties = activeParts.map(p => ({
+            userId: p.userId,
+            role: p.role || 'participant',
+            signedAt: p.signedAt || null
+        }));
+        const oppId = deal.opportunityId || (deal.opportunityIds && deal.opportunityIds[0]) || null;
+        const duration =
+            deal.timeline && (deal.timeline.start || deal.timeline.end)
+                ? (deal.timeline.start || '') + ' to ' + (deal.timeline.end || '')
+                : '';
+        let milestonesSnapshot = null;
+        if (Array.isArray(deal.milestones) && deal.milestones.length) {
+            try {
+                milestonesSnapshot = JSON.parse(JSON.stringify(deal.milestones));
+            } catch {
+                milestonesSnapshot = deal.milestones;
+            }
+        }
+        return {
+            dealId: deal.id,
+            opportunityId: oppId,
+            applicationId: deal.applicationId || null,
+            parties,
+            scope: deal.scope || '',
+            paymentMode: deal.exchangeMode || 'cash',
+            agreedValue: deal.valueTerms && deal.valueTerms.agreedValue != null ? deal.valueTerms.agreedValue : null,
+            duration,
+            paymentSchedule: deal.valueTerms && deal.valueTerms.paymentSchedule != null ? deal.valueTerms.paymentSchedule : null,
+            milestonesSnapshot,
+            status: CONFIG.CONTRACT_STATUS.PENDING,
+            signedAt: null
+        };
+    }
+
+    async createPendingContractFromDeal(deal) {
+        return this.createContract(this._buildPendingContractPayloadFromDeal(deal));
+    }
+
+    /**
+     * Legacy repair: deal already in signing without contractId (pre–pending-contract behavior).
+     */
+    async repairSigningDealMissingContract(dealId) {
+        const deal = await this.getDealById(dealId);
+        if (!deal || deal.status !== CONFIG.DEAL_STATUS.SIGNING || deal.contractId) return deal;
+        const contract = await this.createPendingContractFromDeal(deal);
+        await this.updateDeal(dealId, { contractId: contract.id });
+        try {
+            await this.createAuditLog({
+                userId: 'system',
+                action: 'contract_created',
+                entityType: 'contract',
+                entityId: contract.id,
+                details: { dealId, repairSigningGap: true }
+            });
+        } catch (e) {
+            void e;
+        }
+        const parts = (deal.participants || []).filter(p => (p.status || 'active') !== 'dropped');
+        for (const p of parts) {
+            if (!p.userId) continue;
+            try {
+                await this.createNotification({
+                    userId: p.userId,
+                    type: 'contract_ready_for_signature',
+                    title: 'Contract ready for signature',
+                    message: 'A Contract Agreement is now attached to your deal. Please review and sign.',
+                    link: '/deals/' + dealId,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+        return this.getDealById(dealId);
+    }
+
+    /**
+     * After all participants approved in review: move to signing and attach a pending contract.
+     */
+    async transitionDealToSigningWithContract(dealId, actorUserId) {
+        let deal = await this.getDealById(dealId);
+        if (!deal) return null;
+        const activeParts = (deal.participants || []).filter(p => (p.status || 'active') !== 'dropped');
+        const allApproved = activeParts.length > 0 && activeParts.every(p => p.approvalStatus === 'approved');
+        if (!allApproved) return deal;
+
+        let contract = null;
+        if (deal.contractId) {
+            contract = await this.getContractById(deal.contractId);
+        }
+        const createdNew = !contract;
+        if (!contract) {
+            contract = await this.createPendingContractFromDeal(deal);
+        }
+        await this.updateDeal(dealId, { status: CONFIG.DEAL_STATUS.SIGNING, contractId: contract.id });
+        const actor = actorUserId || 'system';
+        if (createdNew) {
+            try {
+                await this.createAuditLog({
+                    userId: actor,
+                    action: 'contract_created',
+                    entityType: 'contract',
+                    entityId: contract.id,
+                    details: { dealId }
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+        try {
+            await this.createAuditLog({
+                userId: actor,
+                action: 'deal_approved_for_signing',
+                entityType: 'deal',
+                entityId: dealId,
+                details: { contractId: contract.id }
+            });
+        } catch (e) {
+            void e;
+        }
+        for (const p of activeParts) {
+            if (!p.userId) continue;
+            try {
+                await this.createNotification({
+                    userId: p.userId,
+                    type: 'contract_ready_for_signature',
+                    title: 'Contract ready for signature',
+                    message: 'Review the Contract Agreement and sign when you are ready.',
+                    link: '/deals/' + dealId,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+        return this.getDealById(dealId);
+    }
+
     async getContractsByUserId(userId) {
         const contracts = await this.getContracts();
         return contracts.filter(c => this.getContractParties(c).some(p => p.userId === userId));
@@ -1313,25 +1456,134 @@ class DataService {
         contracts[index] = updated;
         this.storage.set(CONFIG.STORAGE_KEYS.CONTRACTS, contracts);
 
-        // Auto-activate contract and linked deal when all parties have signed.
-        if (this.allContractPartiesSigned(updated)) {
-            if (updated.status !== CONFIG.CONTRACT_STATUS.ACTIVE) {
-                enforceTransition('contract', current, CONFIG.CONTRACT_STATUS.ACTIVE);
-                const activated = {
-                    ...updated,
-                    status: CONFIG.CONTRACT_STATUS.ACTIVE,
-                    updatedAt: new Date().toISOString()
-                };
-                contracts[index] = activated;
-                updated = activated;
-                this.storage.set(CONFIG.STORAGE_KEYS.CONTRACTS, contracts);
+        // When all parties have signed while contract is still pending, activate contract + deal together.
+        const nowFullySigned = this.allContractPartiesSigned(updated);
+        if (nowFullySigned && updated.status === CONFIG.CONTRACT_STATUS.PENDING) {
+            const activationTime = new Date().toISOString();
+            enforceTransition('contract', current, CONFIG.CONTRACT_STATUS.ACTIVE);
+            const activated = {
+                ...updated,
+                status: CONFIG.CONTRACT_STATUS.ACTIVE,
+                signedAt: updated.signedAt || activationTime,
+                updatedAt: activationTime
+            };
+            contracts[index] = activated;
+            updated = activated;
+            this.storage.set(CONFIG.STORAGE_KEYS.CONTRACTS, contracts);
+
+            if (updated.dealId) {
+                const deal = await this.getDealById(updated.dealId);
+                if (deal) {
+                    const parties = this.getContractParties(updated);
+                    const mergedParticipants = (deal.participants || []).map(dp => {
+                        const cp = parties.find(p => p.userId === dp.userId);
+                        if (cp && cp.signedAt) return { ...dp, signedAt: cp.signedAt };
+                        return dp;
+                    });
+                    await this.updateDeal(updated.dealId, {
+                        status: CONFIG.DEAL_STATUS.ACTIVE,
+                        participants: mergedParticipants
+                    });
+                }
+            }
+            try {
+                await this.createAuditLog({
+                    userId: 'system',
+                    action: 'contract_activated',
+                    entityType: 'contract',
+                    entityId: id,
+                    details: { dealId: updated.dealId }
+                });
+            } catch (e) {
+                void e;
             }
             if (updated.dealId) {
-                await this.updateDeal(updated.dealId, { status: CONFIG.DEAL_STATUS.ACTIVE });
+                try {
+                    await this.createAuditLog({
+                        userId: 'system',
+                        action: 'deal_activated',
+                        entityType: 'deal',
+                        entityId: updated.dealId,
+                        details: { contractId: id }
+                    });
+                } catch (e) {
+                    void e;
+                }
+                const d2 = await this.getDealById(updated.dealId);
+                const notifyParts = (d2 && d2.participants) || [];
+                for (const p of notifyParts) {
+                    if (!p.userId) continue;
+                    try {
+                        await this.createNotification({
+                            userId: p.userId,
+                            type: 'contract_fully_signed',
+                            title: 'Contract fully signed',
+                            message: 'All required parties signed the Contract Agreement. Your deal is now active.',
+                            link: '/deals/' + updated.dealId,
+                            read: false
+                        });
+                    } catch (e) {
+                        void e;
+                    }
+                }
             }
         }
 
         return updated;
+    }
+
+    /**
+     * When a deal is cancelled or rejected, terminate the linked contract (pending or active).
+     * Skips completed/terminated contracts. Writes audit `contract_terminated` and notifies other parties.
+     * @param {string} dealId
+     * @param {string} contractId
+     * @param {string} [actorUserId]
+     * @param {string} [reason] — e.g. 'deal_cancelled' | 'deal_rejected'
+     */
+    async terminateLinkedContractForCancelledDeal(dealId, contractId, actorUserId, reason) {
+        if (!contractId) return;
+        const contract = await this.getContractById(contractId);
+        if (!contract) return;
+        const st = contract.status;
+        if (st === CONFIG.CONTRACT_STATUS.TERMINATED || st === CONFIG.CONTRACT_STATUS.COMPLETED) return;
+        if (st !== CONFIG.CONTRACT_STATUS.PENDING && st !== CONFIG.CONTRACT_STATUS.ACTIVE) return;
+
+        await this.updateContract(contractId, { status: CONFIG.CONTRACT_STATUS.TERMINATED });
+
+        const uid = actorUserId || 'system';
+        try {
+            await this.createAuditLog({
+                userId: uid,
+                action: 'contract_terminated',
+                entityType: 'contract',
+                entityId: contractId,
+                details: { dealId, reason: reason || 'deal_cancelled' }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        const after = await this.getContractById(contractId);
+        const parties = after ? this.getContractParties(after) : [];
+        const msg =
+            reason === 'deal_rejected'
+                ? 'The Contract Agreement was terminated because the deal was rejected.'
+                : 'The Contract Agreement was terminated because the deal was cancelled.';
+        for (const p of parties) {
+            if (!p.userId || p.userId === actorUserId) continue;
+            try {
+                await this.createNotification({
+                    userId: p.userId,
+                    type: 'contract_terminated',
+                    title: 'Contract terminated',
+                    message: msg,
+                    link: '/contracts/' + contractId,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
     }
 
     // Deal Operations (post-matching collaboration workflow)
@@ -1356,18 +1608,6 @@ class DataService {
         const existing = await this.getDealByMatchId(matchId);
         if (existing) return existing;
 
-        const parties = participants.map(p => ({ userId: p.userId, role: p.role || 'participant' }));
-        const negotiation = await this.createNegotiation({
-            matchId,
-            applicationId: null,
-            opportunityId: primaryOpportunityId,
-            parties,
-            status: 'open',
-            initialTerms: null,
-            rounds: [],
-            agreedTerms: null
-        });
-
         const dealParticipants = participants.map(p => ({
             userId: p.userId,
             role: p.role || 'participant',
@@ -1378,14 +1618,14 @@ class DataService {
         const deal = await this.createDeal({
             matchId,
             matchType,
-            status: CONFIG.DEAL_STATUS.NEGOTIATING,
+            status: CONFIG.DEAL_STATUS.DRAFT,
             title: 'Deal – ' + matchId,
             participants: dealParticipants,
             opportunityIds,
             opportunityId: primaryOpportunityId,
             payload: consortiumPayload,
             roleSlots,
-            negotiationId: negotiation ? negotiation.id : null,
+            negotiationId: null,
             scope: '',
             timeline: { start: null, end: null },
             exchangeMode: 'cash',
@@ -1402,7 +1642,27 @@ class DataService {
                 entityId: deal.id,
                 details: { matchId, opportunityIds }
             });
-        } catch (e) { /* non-fatal */ }
+        } catch (e) {
+            void e;
+        }
+
+        const seen = new Set();
+        for (const p of participants) {
+            if (!p.userId || seen.has(p.userId)) continue;
+            seen.add(p.userId);
+            try {
+                await this.createNotification({
+                    userId: p.userId,
+                    type: 'deal_created',
+                    title: 'Deal workspace created',
+                    message: 'A draft Deal Workspace is ready from your confirmed match.',
+                    link: '/deals/' + deal.id,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
 
         return deal;
     }
@@ -2409,6 +2669,9 @@ class DataService {
         }
         if (filters.entityType) {
             logs = logs.filter(l => l.entityType === filters.entityType);
+        }
+        if (filters.entityId) {
+            logs = logs.filter(l => l.entityId === filters.entityId);
         }
         if (filters.startDate) {
             logs = logs.filter(l => new Date(l.timestamp) >= new Date(filters.startDate));

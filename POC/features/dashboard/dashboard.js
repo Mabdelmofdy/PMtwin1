@@ -198,14 +198,17 @@ async function displayRecentOpportunities(opportunities) {
     
     // Render each opportunity
     const html = opportunities.map(opp => {
+        const sb = window.statusBadgeSystem;
         const data = {
             ...opp,
             intentLabel: opp.intent === 'offer' ? 'Offer' : 'Need',
             intentBadgeClass: typeof getIntentBadgeClass === 'function' ? getIntentBadgeClass(opp.intent, opp.modelType) : 'badge-intent-request-default',
-            statusBadgeClass: getStatusBadgeClass(opp.status),
+            statusBadgeClass: sb ? sb.getStatusBadgeClass(opp.status, 'opportunity') : 'badge--neutral',
             createdDate: formatDashboardDate(opp.createdAt),
+            modelTypeBadgeClass: sb ? sb.getModelTypeBadgeClass(opp.modelType, opp.subModelType) : 'badge--info',
+            subModelBadgeClass: sb ? sb.getModelTypeBadgeClass(opp.modelType, opp.subModelType) : 'badge--neutral',
             modelTypeLabel: humanizeUnderscores(opp.modelType),
-            statusLabel: humanizeUnderscores(opp.status),
+            statusLabel: sb ? sb.getStatusLabel(opp.status, 'opportunity') : humanizeUnderscores(opp.status),
             subModelTypeLabel: opp.subModelType ? humanizeUnderscores(opp.subModelType) : '',
             description: opp.description || 'No description',
             isOwner: true,
@@ -244,8 +247,9 @@ async function displayRecentApplications(applications) {
         const av = app.application_value;
         const valueScorePct = av?.value_score != null ? Math.round(av.value_score * 100) : null;
         const status = normalizeApplicationStatus(app.status);
-        const statusClass = getApplicationStatusClass(status);
-        const statusText = formatApplicationStatus(status);
+        const sb = window.statusBadgeSystem;
+        const statusBadgeClass = sb ? sb.getStatusBadgeClass(status, 'application') : 'badge--neutral';
+        const statusText = sb ? sb.getStatusLabel(status, 'application') : formatApplicationStatus(status);
         const dateStr = formatDashboardDate(app.createdAt);
         const oppTitle = app.opportunity?.title || 'Opportunity';
         const matchHtml = valueScorePct != null
@@ -255,7 +259,7 @@ async function displayRecentApplications(applications) {
             <div class="dash-recent-app-main">
                 <h3 class="dash-recent-app-title">${escDash(oppTitle)}</h3>
                 <div class="dash-recent-app-pills">
-                    <span class="company-status-pill ${statusClass}">${escDash(statusText)}</span>
+                    <span class="badge ${statusBadgeClass}">${escDash(statusText)}</span>
                     ${matchHtml}
                 </div>
                 <div class="dash-recent-app-meta">${escDash(dateStr)}</div>
@@ -267,26 +271,6 @@ async function displayRecentApplications(applications) {
     }).join('');
 
     container.innerHTML = html;
-}
-
-function getStatusBadgeClass(status) {
-    const statusMap = {
-        'draft': 'secondary',
-        'published': 'success',
-        'in_negotiation': 'warning',
-        'contracted': 'primary',
-        'in_execution': 'primary',
-        'completed': 'success',
-        'closed': 'danger',
-        'cancelled': 'danger',
-        'pending': 'warning',
-        'reviewing': 'primary',
-        'shortlisted': 'primary',
-        'accepted': 'success',
-        'rejected': 'danger',
-        'withdrawn': 'secondary'
-    };
-    return statusMap[status] || 'secondary';
 }
 
 function escDash(str) {
@@ -951,14 +935,16 @@ async function loadApplicationsReceived(userId) {
 
             list.innerHTML = visible.map(app => {
                 const status = normalizeApplicationStatus(app.status);
-                const statusClass = getApplicationStatusClass(status);
+                const sb = window.statusBadgeSystem;
+                const statusBadgeClass = sb ? sb.getStatusBadgeClass(status, 'application') : 'badge--neutral';
+                const statusText = sb ? sb.getStatusLabel(status, 'application') : formatApplicationStatus(status);
                 const formattedDate = formatDashboardDate(app.createdAt);
                 return `<div class="company-compact-item applications-item">
                     <div class="company-avatar company-avatar--soft">${escDash((app.applicantName || '?')[0])}</div>
                     <div class="company-compact-main">
                         <div class="company-compact-topline">
                             <div class="company-compact-title">${escDash(app.applicantName)}</div>
-                            <span class="company-status-pill ${statusClass}">${escDash(formatApplicationStatus(status))}</span>
+                            <span class="badge ${statusBadgeClass}">${escDash(statusText)}</span>
                         </div>
                         <div class="company-project-label">Project need</div>
                         <div class="company-compact-meta company-project-title">${escDash(app.opportunityTitle)}</div>
@@ -980,18 +966,6 @@ async function loadApplicationsReceived(userId) {
 
 function normalizeApplicationStatus(status) {
     return String(status || 'pending').toLowerCase();
-}
-
-function getApplicationStatusClass(status) {
-    const statusMap = {
-        accepted: 'is-success',
-        reviewing: 'is-info',
-        shortlisted: 'is-strong',
-        pending: 'is-warning',
-        rejected: 'is-danger',
-        withdrawn: 'is-muted'
-    };
-    return statusMap[status] || 'is-muted';
 }
 
 function formatApplicationStatus(status) {

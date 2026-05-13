@@ -211,8 +211,13 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply) 
         intentEl.className = 'badge ' + (typeof getIntentBadgeClass === 'function' ? getIntentBadgeClass(intent, opportunity.modelType) : (intent === 'offer' ? 'badge-info' : 'badge-primary'));
     }
     document.getElementById('opportunity-model').textContent = formatModelType(opportunity.modelType) || (opportunity.collaborationModel || 'N/A');
-    document.getElementById('opportunity-status').textContent = formatOpportunityStatus(opportunity.status);
-    document.getElementById('opportunity-status').className = `badge badge-${getStatusBadgeClass(opportunity.status)}`;
+    const sb = window.statusBadgeSystem;
+    document.getElementById('opportunity-status').textContent = sb
+        ? sb.getStatusLabel(opportunity.status, 'opportunity')
+        : formatOpportunityStatus(opportunity.status);
+    document.getElementById('opportunity-status').className = sb
+        ? `badge ${sb.getStatusBadgeClass(opportunity.status, 'opportunity')}`
+        : `badge ${getStatusBadgeClass(opportunity.status)}`;
     
     // Quick info bar
     document.getElementById('info-created').textContent = new Date(opportunity.createdAt).toLocaleDateString();
@@ -270,19 +275,33 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply) 
     if (isOwner) {
         const oppService = window.opportunityService;
         const canCancel = oppService && oppService.canCancelOpportunity(opportunity);
-        const canEdit = opportunity.status === 'draft';
-        let btns = '';
-        if (canEdit) {
-            btns += `<a href="#" data-route="/opportunities/${opportunity.id}/edit" class="btn btn-secondary"><i class="ph-duotone ph-pencil"></i> Edit</a>`;
-        }
+        const editRoute = '/opportunities/' + opportunity.id + '/edit';
+        let btns =
+            '<a href="#" data-route="' +
+            editRoute +
+            '" class="btn btn-primary" title="Open the editor for this posting">' +
+            '<i class="ph-duotone ph-pencil-simple"></i> Edit</a>';
         if (canCancel) {
-            btns += `<button type="button" id="btn-cancel-opportunity" class="btn btn-danger" data-opp-id="${opportunity.id}"><i class="ph-duotone ph-x-circle"></i> Cancel</button>`;
+            btns +=
+                '<button type="button" id="btn-cancel-opportunity" class="btn btn-secondary" data-opp-id="' +
+                opportunity.id +
+                '"><i class="ph-duotone ph-x-circle"></i> Cancel posting</button>';
         }
-        btns += `<button onclick="deleteOpportunity('${opportunity.id}')" class="btn btn-danger"><i class="ph-duotone ph-trash"></i> Delete</button>`;
+        btns +=
+            '<button type="button" class="btn btn-danger btn-sm" data-opp-delete="' +
+            opportunity.id +
+            '"><i class="ph-duotone ph-trash"></i> Delete</button>';
         actionsDiv.innerHTML = btns;
         const cancelBtn = document.getElementById('btn-cancel-opportunity');
         if (cancelBtn) {
             cancelBtn.addEventListener('click', () => cancelOpportunity(cancelBtn.dataset.oppId));
+        }
+        const delBtn = actionsDiv.querySelector('[data-opp-delete]');
+        if (delBtn) {
+            delBtn.addEventListener('click', () => {
+                const oid = delBtn.getAttribute('data-opp-delete');
+                if (oid) deleteOpportunity(oid);
+            });
         }
     } else {
         actionsDiv.innerHTML = '';
@@ -300,7 +319,7 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply) 
                 new Date(currentApplication.createdAt).toLocaleDateString();
             document.getElementById('applied-status').textContent = currentApplication.status;
             document.getElementById('applied-status').className = 
-                `badge badge-${getApplicationStatusBadgeClass(currentApplication.status)}`;
+                `badge ${getApplicationStatusBadgeClass(currentApplication.status)}`;
             
             // Setup edit button
             document.getElementById('btn-edit-application').addEventListener('click', () => {
@@ -1901,7 +1920,7 @@ async function loadApplications(opportunityId) {
                 actionsHtml += `<button type="button" class="btn btn-secondary btn-sm btn-start-negotiation" data-application-id="${escapeHtml(app.id)}" data-applicant-id="${escapeHtml(app.applicantId || '')}">Start negotiation</button>`;
             }
             if (showActions) {
-                actionsHtml += `<button type="button" class="btn btn-success btn-sm btn-accept-application" data-application-id="${escapeHtml(app.id)}">Accept</button>`;
+                actionsHtml += `<button type="button" class="btn btn-success btn-sm btn-accept-application" data-application-id="${escapeHtml(app.id)}">Accept & Create Deal</button>`;
                 actionsHtml += `<button type="button" class="btn btn-danger btn-sm btn-reject-application" data-application-id="${escapeHtml(app.id)}">Reject</button>`;
             }
             actionsHtml += '</div>';
@@ -1929,7 +1948,7 @@ async function loadApplications(opportunityId) {
                     ${valueAmountHtml}
                     ${matchTypeHtml}
                     ${lowValueBadge}
-                    <span class="badge badge-${getApplicationStatusBadgeClass(app.status)}">${escapeHtml(getApplicationStatusLabel(app.status))}</span>
+                    <span class="badge ${getApplicationStatusBadgeClass(app.status)}">${escapeHtml(getApplicationStatusLabel(app.status))}</span>
                 </div>
                 <p class="application-proposal">${escapeHtml((app.coverLetter || app.proposal) || 'No proposal')}</p>
                 ${valueScorePct != null && breakdownTip ? `<p class="text-xs text-gray-500 mt-1" title="${escapeHtml(breakdownTip)}">${escapeHtml(breakdownTip)}</p>` : ''}
@@ -2306,7 +2325,7 @@ function buildApplicationDetailContent(data) {
                         <dt class="text-gray-500">Portfolio</dt><dd>${portfolioHtml}</dd>
                         <dt class="text-gray-500">Reputation</dt><dd>${escapeHtml(reputationStr)}</dd>
                         <dt class="text-gray-500">Application date</dt><dd>${new Date(application.createdAt).toLocaleDateString()}</dd>
-                        <dt class="text-gray-500">Status</dt><dd><span class="badge badge-${getApplicationStatusBadgeClass(application.status)}">${escapeHtml(getApplicationStatusLabel(application.status))}</span></dd>
+                        <dt class="text-gray-500">Status</dt><dd><span class="badge ${getApplicationStatusBadgeClass(application.status)}">${escapeHtml(getApplicationStatusLabel(application.status))}</span></dd>
                     </dl>
                 </section>
                 <section class="app-detail-section" id="section-ai-match">
@@ -2472,57 +2491,27 @@ function formatExchangeMode(mode) {
 }
 
 function formatOpportunityStatus(status) {
-    const labels = {
-        draft: 'Draft',
-        published: 'Published',
-        in_negotiation: 'In Negotiation',
-        contracted: 'Contracted',
-        in_execution: 'In Execution',
-        completed: 'Completed',
-        closed: 'Closed',
-        cancelled: 'Cancelled'
-    };
-    return labels[status] || status || 'Draft';
+    return window.statusBadgeSystem
+        ? window.statusBadgeSystem.getStatusLabel(status, 'opportunity')
+        : String(status || '');
 }
 
 function getStatusBadgeClass(status) {
-    const statusMap = {
-        'draft': 'secondary',
-        'published': 'success',
-        'in_negotiation': 'warning',
-        'contracted': 'primary',
-        'in_execution': 'primary',
-        'completed': 'success',
-        'closed': 'danger',
-        'cancelled': 'danger'
-    };
-    return statusMap[status] || 'secondary';
+    return window.statusBadgeSystem
+        ? window.statusBadgeSystem.getStatusBadgeClass(status, 'opportunity')
+        : 'badge--neutral';
 }
 
 function getApplicationStatusBadgeClass(status) {
-    const statusMap = {
-        'pending': 'warning',
-        'reviewing': 'primary',
-        'shortlisted': 'primary',
-        'in_negotiation': 'info',
-        'accepted': 'success',
-        'rejected': 'danger',
-        'withdrawn': 'secondary'
-    };
-    return statusMap[status] || 'secondary';
+    return window.statusBadgeSystem
+        ? window.statusBadgeSystem.getStatusBadgeClass(status, 'application')
+        : 'badge--neutral';
 }
 
 function getApplicationStatusLabel(status) {
-    const labelMap = {
-        'pending': 'Pending',
-        'reviewing': 'Reviewing',
-        'shortlisted': 'Shortlisted',
-        'in_negotiation': 'In negotiation',
-        'accepted': 'Accepted',
-        'rejected': 'Rejected',
-        'withdrawn': 'Withdrawn'
-    };
-    return labelMap[status] || status;
+    return window.statusBadgeSystem
+        ? window.statusBadgeSystem.getStatusLabel(status, 'application')
+        : String(status || '');
 }
 
 function getModelDefinition(modelType, subModelType) {
@@ -2548,7 +2537,11 @@ async function ensureConnectionAndOpenChat(applicantId) {
 }
 
 async function updateApplicationStatus(applicationId, status) {
-    if (!confirm(`Are you sure you want to ${status} this application?`)) return;
+    const confirmMsg =
+        status === 'accepted'
+            ? 'Accept this application and create a draft Deal Workspace for this collaboration?'
+            : `Are you sure you want to ${status} this application?`;
+    if (!confirm(confirmMsg)) return;
     
     try {
         await dataService.updateApplication(applicationId, { status });
@@ -2583,6 +2576,29 @@ async function updateApplicationStatus(applicationId, status) {
                     entityId: newDeal.id,
                     details: { opportunityId: currentOpportunity.id, applicationId: application.id }
                 });
+            }
+            try {
+                await dataService.createNotification({
+                    userId: application.applicantId,
+                    type: 'deal_created',
+                    title: 'Deal workspace created',
+                    message: 'A draft Deal Workspace was created for your accepted application.',
+                    link: '/deals/' + newDeal.id,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+            try {
+                sessionStorage.setItem(
+                    'pmtwin_deal_flash',
+                    JSON.stringify({
+                        message: 'A draft deal has been created for this collaboration.',
+                        tone: 'success'
+                    })
+                );
+            } catch (e) {
+                void e;
             }
             if (window.router && newDeal.id) {
                 window.router.navigate('/deals/' + newDeal.id);

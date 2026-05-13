@@ -1,7 +1,13 @@
 <div class="page-container opportunity-detail-page">
     <div id="loading" class="spinner"></div>
-    <div id="content" class="page-body" style="display: none;">
-        
+    <div id="content" class="page-body opportunity-detail-body" style="display: none;">
+        <nav class="opp-detail-topbar" aria-label="Opportunity navigation">
+            <a href="#" data-route="/opportunities" class="opp-detail-back">
+                <i class="ph-duotone ph-arrow-left" aria-hidden="true"></i>
+                <span>All opportunities</span>
+            </a>
+        </nav>
+
         <!-- Wizard Steps Indicator -->
         <div id="wizard-steps" class="wizard-steps" style="display: none;">
             <div class="wizard-step active" data-step="1">
@@ -32,19 +38,20 @@
 
         <!-- Step 1: Comprehensive View -->
         <div id="step-1" class="wizard-step-content">
-            <div class="opportunity-header">
-                <div>
-                    <h1 id="opportunity-title"></h1>
+            <div class="opp-detail-panel">
+            <header class="opportunity-header">
+                <div class="opportunity-header__main">
+                    <h1 id="opportunity-title" class="opportunity-title-heading"></h1>
                     <div class="opportunity-meta">
                         <span id="opportunity-intent" class="badge badge-info" style="display: none;"></span>
                         <span id="opportunity-model" class="badge badge-primary"></span>
                         <span id="opportunity-status" class="badge"></span>
                     </div>
                 </div>
-                <div class="opportunity-actions" id="opportunity-actions">
+                <div class="opportunity-actions" id="opportunity-actions" aria-label="Opportunity actions">
                     <!-- Actions will be populated by JS -->
                 </div>
-            </div>
+            </header>
             
             <div class="opportunity-full-view">
                 <!-- Quick Info Bar -->
@@ -169,6 +176,7 @@
                         </button>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
 
@@ -341,9 +349,52 @@
 
 <style>
 .opportunity-detail-page {
-    max-width: var(--portal-page-max-width);
+    max-width: min(1180px, 100%);
     width: 100%;
     margin: 0 auto;
+}
+
+.opportunity-detail-body {
+    max-width: min(1180px, 100%);
+    margin: 0 auto;
+    padding-bottom: var(--spacing-2xl, 2rem);
+}
+
+.opp-detail-topbar {
+    margin-bottom: var(--spacing-md, 0.75rem);
+}
+
+.opp-detail-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--font-size-sm, 0.875rem);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 0.35rem 0.15rem;
+    border-radius: var(--radius-md, 8px);
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.opp-detail-back:hover {
+    color: var(--primary-color);
+    background: var(--bg-secondary, #f4f4f5);
+    text-decoration: none;
+}
+
+.opp-detail-back .ph-duotone {
+    font-size: 1.1rem;
+    opacity: 0.85;
+}
+
+.opp-detail-panel {
+    background: var(--bg-primary, #fff);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.04));
+    padding: var(--spacing-lg, 1.25rem) var(--spacing-xl, 1.5rem);
+    margin-bottom: var(--spacing-lg, 1rem);
 }
 
 /* Wizard Steps Indicator */
@@ -517,27 +568,47 @@
 /* Opportunity Header */
 .opportunity-header {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
-    align-items: start;
+    align-items: flex-start;
+    gap: var(--spacing-md, 1rem);
     margin-bottom: var(--spacing-lg);
     padding-bottom: var(--spacing-lg);
-    border-bottom: 2px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
 }
 
-.opportunity-header h1 {
-    font-size: var(--font-size-2xl);
-    margin-bottom: var(--spacing-sm);
+.opportunity-header__main {
+    flex: 1 1 min(0, 28rem);
+    min-width: 0;
+}
+
+.opportunity-title-heading {
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--text-primary);
 }
 
 .opportunity-meta {
     display: flex;
-    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    gap: var(--spacing-xs, 0.35rem);
     align-items: center;
 }
 
 .opportunity-actions {
     display: flex;
-    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    gap: var(--spacing-sm, 0.5rem);
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+.opportunity-actions .btn {
+    white-space: nowrap;
 }
 
 /* Quick Info Bar */
@@ -572,11 +643,11 @@
 }
 
 /* Detail Sections */
-.detail-section {
-    margin-bottom: var(--spacing-xl);
+.opportunity-full-view .detail-section {
+    margin-bottom: var(--spacing-lg);
     padding: var(--spacing-lg);
-    background: var(--bg-primary);
-    border-radius: var(--radius-lg);
+    background: var(--bg-secondary, #fafafa);
+    border-radius: var(--radius-lg, 12px);
     border: 1px solid var(--border-color);
 }
 

@@ -15,8 +15,8 @@ async function initMatches() {
         });
         document.getElementById('page-cta-matches-filters')?.addEventListener('click', (e) => {
             e.preventDefault();
-            document.getElementById('matches-subtabs')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            const active = document.querySelector('.matches-subtab.active');
+            document.getElementById('matches-toolbar')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const active = document.querySelector('.matches-segment.active');
             active?.focus();
         });
         if (typeof loadMatchesPipeline === 'function') {

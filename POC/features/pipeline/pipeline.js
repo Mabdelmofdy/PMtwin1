@@ -218,7 +218,14 @@ async function renderApplicationCardsInto(container, items) {
                 title: titleFull
             },
             titleFull,
-            statusLabel: APP_PIPELINE_STATUS_LABELS[item.status] || item.status || '',
+            statusLabel:
+                window.statusBadgeSystem && typeof window.statusBadgeSystem.getStatusLabel === 'function'
+                    ? window.statusBadgeSystem.getStatusLabel(item.status, 'application')
+                    : APP_PIPELINE_STATUS_LABELS[item.status] || item.status || '',
+            applicationStatusBadgeClass:
+                window.statusBadgeSystem && typeof window.statusBadgeSystem.getStatusBadgeClass === 'function'
+                    ? window.statusBadgeSystem.getStatusBadgeClass(item.status, 'application')
+                    : 'badge--neutral',
             opportunityLocation: loc,
             opportunityModelLabel: mtLabel,
             showLocation: Boolean(loc),
@@ -812,6 +819,27 @@ async function buildPostMatchViewModelPipeline(postMatch, currentUserId) {
 const POST_MATCH_TEMPLATES = { one_way: 'match-card-one-way', two_way: 'match-card-two-way', consortium: 'match-card-consortium', circular: 'match-card-circular' };
 const MATCH_TYPE_LABELS = { one_way: 'Recommended Matches', two_way: 'Barter Matches', consortium: 'Consortium Invitations', circular: 'Circular Exchange Opportunities' };
 
+/** Tab count badges on the standalone /matches page (elements may be absent on pipeline tab). */
+function updateMatchesPageTabCounts(recommendedCount, opportunityCount, consortiumCount) {
+    const rows = [
+        ['matches-count-recommended', recommendedCount],
+        ['matches-count-opportunity', opportunityCount],
+        ['matches-count-consortium', consortiumCount]
+    ];
+    for (const [id, raw] of rows) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const n = typeof raw === 'number' && raw > 0 ? Math.floor(raw) : 0;
+        if (n > 0) {
+            el.textContent = String(n);
+            el.removeAttribute('hidden');
+        } else {
+            el.textContent = '';
+            el.setAttribute('hidden', 'hidden');
+        }
+    }
+}
+
 function setupMatchesSubTabs() {
     const tabMatches = document.getElementById('tab-matches');
     const btnRecommended = document.getElementById('matches-subtab-recommended');
@@ -865,6 +893,7 @@ async function loadMatchesPipeline() {
         const emptyStateOpportunity = 'No opportunity matches.';
 
         if (!hasLegacy && !hasPost) {
+            updateMatchesPageTabCounts(0, 0, 0);
             recommendedContainer.innerHTML = '<div class="empty-state">' + emptyStateProfile + '</div>';
             opportunityContainer.innerHTML = '<div class="empty-state">' + emptyStateProfile + '</div>';
             if (consortiumContainer) consortiumContainer.innerHTML = '<div class="empty-state">' + emptyStateProfile + '</div>';
@@ -1019,6 +1048,21 @@ async function loadMatchesPipeline() {
             });
         }
 
+        let recCount = 0;
+        let consCount = 0;
+        if (hasPost) {
+            const bt = {};
+            pendingPostMatches.forEach(pm => {
+                const t = pm.matchType || 'one_way';
+                if (!bt[t]) bt[t] = [];
+                bt[t].push(pm);
+            });
+            recCount = ['one_way', 'two_way', 'circular'].reduce((sum, t) => sum + (bt[t] || []).length, 0);
+            consCount = (bt.consortium || []).length;
+        }
+        const oppCount = hasLegacy ? userLegacyMatches.length : 0;
+        updateMatchesPageTabCounts(recCount, oppCount, consCount);
+
         const panelRecommendedEl = document.getElementById('matches-recommended');
         const panelOpportunityEl = document.getElementById('matches-opportunity');
         const panelConsortiumEl = document.getElementById('matches-consortium');
@@ -1042,6 +1086,7 @@ async function loadMatchesPipeline() {
         }
     } catch (error) {
         console.error('Error loading matches:', error);
+        updateMatchesPageTabCounts(0, 0, 0);
         recommendedContainer.innerHTML = '<div class="empty-state">Error loading matches. Please try again.</div>';
         opportunityContainer.innerHTML = '<div class="empty-state">Error loading matches. Please try again.</div>';
         if (consortiumContainer) consortiumContainer.innerHTML = '<div class="empty-state">Error loading matches. Please try again.</div>';

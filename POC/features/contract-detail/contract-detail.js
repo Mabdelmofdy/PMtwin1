@@ -11,19 +11,15 @@ function escapeHtml(str) {
 }
 
 function getContractStatusBadgeClass(status) {
-    const map = {
-        pending: 'secondary',
-        active: 'primary',
-        completed: 'success',
-        terminated: 'danger'
-    };
-    return map[status] || 'secondary';
+    return window.statusBadgeSystem ? window.statusBadgeSystem.getStatusBadgeClass(status, 'contract') : 'badge--neutral';
 }
 
 function getContractStatusLabel(status) {
+    const ui = window.DealContractFlowUi;
+    if (ui && typeof ui.getContractStatusDisplayLabel === 'function') return ui.getContractStatusDisplayLabel(status);
     const map = {
-        pending: 'Pending',
-        active: 'Active',
+        pending: 'Pending Signature',
+        active: 'Active Contract',
         completed: 'Completed',
         terminated: 'Terminated'
     };
@@ -101,7 +97,7 @@ async function initContractDetail(params) {
 
         document.getElementById('contract-title').textContent = scopeDisplay;
         document.getElementById('contract-status-badge').textContent = getContractStatusLabel(contract.status);
-        document.getElementById('contract-status-badge').className = 'badge badge-' + getContractStatusBadgeClass(contract.status);
+        document.getElementById('contract-status-badge').className = 'badge ' + getContractStatusBadgeClass(contract.status);
         document.getElementById('contract-role-badge').textContent = 'Your role: ' + myRole;
 
         const partiesHtml = parties.map((p, i) => {
@@ -124,6 +120,10 @@ async function initContractDetail(params) {
             <p><strong>Payment mode</strong><br/>${escapeHtml(paymentMode)}</p>
             <p><strong>Duration</strong><br/>${escapeHtml(duration)}</p>
         `;
+        if (contract.agreedValue != null) {
+            const av = typeof contract.agreedValue === 'object' ? JSON.stringify(contract.agreedValue) : String(contract.agreedValue);
+            termsHtml += `<p><strong>Agreed value</strong><br/>${escapeHtml(av)}</p>`;
+        }
         if (paymentSchedule) {
             termsHtml += `<p><strong>Payment schedule</strong><br/>${escapeHtml(typeof paymentSchedule === 'string' ? paymentSchedule : JSON.stringify(paymentSchedule))}</p>`;
         }
@@ -141,24 +141,55 @@ async function initContractDetail(params) {
         document.getElementById('contract-scope-terms').innerHTML = termsHtml;
 
         const dealId = contract.dealId;
+        const dealRecord = dealId ? await dataService.getDealById(dealId) : null;
         const executionHtml = dealId
-            ? `<p class="text-muted">Execution (milestones, delivery) is managed by the linked Deal.</p><a href="#" data-route="/deals/${escapeHtml(dealId)}" class="btn btn-primary btn-sm">View Deal</a>`
-            : '<p class="text-muted">Execution is managed by the linked Deal. No deal linked.</p>';
+            ? `<p class="text-muted">Milestones and delivery run in the Deal Workspace.</p><a href="#" data-route="/deals/${escapeHtml(dealId)}" class="btn btn-primary btn-sm">View Deal Workspace</a>`
+            : '<p class="text-muted">No Deal Workspace is linked to this contract.</p>';
         const milestonesEl = document.getElementById('contract-milestones');
         if (milestonesEl) milestonesEl.innerHTML = executionHtml;
 
         document.getElementById('contract-dates').innerHTML = `
             <p><strong>Created</strong><br/>${formatDate(contract.createdAt)}</p>
             <p><strong>Last updated</strong><br/>${formatDate(contract.updatedAt)}</p>
-            ${contract.signedAt ? '<p><strong>Signed</strong><br/>' + formatDate(contract.signedAt) + '</p>' : ''}
+            ${contract.signedAt ? '<p><strong>Fully signed</strong><br/>' + formatDate(contract.signedAt) + '</p>' : ''}
         `;
+
+        const linkedDealMount = document.getElementById('contract-linked-deal');
+        if (linkedDealMount) {
+            linkedDealMount.innerHTML = dealId
+                ? '<p class="text-muted mb-2">' +
+                  escapeHtml((dealRecord && dealRecord.title) || dealId) +
+                  '</p><a href="#" data-route="/deals/' +
+                  escapeHtml(dealId) +
+                  '" class="btn btn-outline btn-sm">View Deal Workspace</a>'
+                : '<p class="text-muted">—</p>';
+        }
+
+        const auditSection = document.getElementById('contract-audit-section');
+        const auditLogEl = document.getElementById('contract-audit-log');
+        if (auditLogEl && typeof dataService.getAuditLogs === 'function') {
+            const logs = await dataService.getAuditLogs({ entityType: 'contract', entityId: contractId });
+            const slice = logs.slice(0, 40);
+            if (slice.length && auditSection) {
+                auditSection.style.display = 'block';
+                auditLogEl.innerHTML = slice
+                    .map(
+                        (l) =>
+                            '<div class="contract-audit-row"><span class="text-muted small">' +
+                            escapeHtml(formatDate(l.timestamp)) +
+                            '</span> · <strong>' +
+                            escapeHtml((l.action || 'event').replace(/_/g, ' ')) +
+                            '</strong></div>'
+                    )
+                    .join('');
+            } else if (auditSection) {
+                auditSection.style.display = 'none';
+            }
+        }
 
         const oppTitle = (opportunity && opportunity.title) || scopeDisplay;
         const oppId = contract.opportunityId;
         let opportunityLinkHtml = '';
-        if (dealId) {
-            opportunityLinkHtml += `<p><a href="#" data-route="/deals/${escapeHtml(dealId)}" class="text-primary font-medium">View Deal (execution)</a></p>`;
-        }
         if (oppId) {
             opportunityLinkHtml += `<p><a href="#" data-route="/opportunities/${escapeHtml(oppId)}" class="contract-opportunity-link text-primary font-medium">${escapeHtml(oppTitle)}</a></p><a href="#" data-route="/opportunities/${escapeHtml(oppId)}" class="btn btn-primary btn-sm">View opportunity</a>`;
         }
@@ -168,9 +199,15 @@ async function initContractDetail(params) {
         const canEditContract = isLead && (contract.status === 'pending' || contract.status === 'active');
         const canCloseContract = isLead && contract.status === 'active';
         const oppStatus = opportunity ? opportunity.status : '';
+        const mySigned = myParty && myParty.signedAt;
         const actionsEl = document.getElementById('contract-detail-actions');
         if (actionsEl) {
             let actionsHtml = '';
+            if (contract.status === 'pending' && isParty && !mySigned) {
+                actionsHtml += `<button type="button" id="contract-sign-btn" class="btn btn-primary no-print">Sign Agreement</button>`;
+            } else if (contract.status === 'pending' && isParty && mySigned) {
+                actionsHtml += `<p class="text-muted no-print mb-0" id="contract-signed-note">You have signed this agreement.</p>`;
+            }
             if (canEditContract) {
                 actionsHtml += `<button type="button" id="contract-edit-btn" class="btn btn-secondary no-print" data-contract-id="${escapeHtml(contract.id)}">Edit contract</button>`;
             }
@@ -178,11 +215,61 @@ async function initContractDetail(params) {
                 actionsHtml += `<button type="button" id="contract-close-btn" class="btn btn-primary no-print">Close contract</button>`;
             }
             if (dealId) {
-                actionsHtml += `<a href="#" data-route="/deals/${escapeHtml(dealId)}" class="btn btn-primary">Manage execution</a>`;
+                actionsHtml += `<a href="#" data-route="/deals/${escapeHtml(dealId)}" class="btn btn-outline">Deal Workspace</a>`;
             }
             actionsHtml += `<button type="button" id="contract-print-btn" class="btn btn-secondary">Print contract</button>`;
             actionsEl.innerHTML = actionsHtml;
         }
+
+        document.getElementById('contract-sign-btn')?.addEventListener('click', async () => {
+            try {
+                const fresh = await dataService.getContractById(contractId);
+                if (!fresh) return;
+                const plist = dataService.getContractParties(fresh);
+                const partiesSigned = plist.map((p) =>
+                    p.userId === user.id ? { ...p, signedAt: new Date().toISOString() } : p
+                );
+                await dataService.updateContract(contractId, { parties: partiesSigned });
+                if (dealId) {
+                    const d = await dataService.getDealById(dealId);
+                    if (d && d.participants) {
+                        const merged = d.participants.map((p) =>
+                            p.userId === user.id ? { ...p, signedAt: new Date().toISOString() } : p
+                        );
+                        await dataService.updateDeal(dealId, { participants: merged });
+                    }
+                }
+                if (dataService.createAuditLog) {
+                    await dataService
+                        .createAuditLog({
+                            userId: user.id,
+                            action: 'contract_signed',
+                            entityType: 'contract',
+                            entityId: contractId,
+                            details: { dealId }
+                        })
+                        .catch(() => {});
+                }
+                const others = plist.filter((p) => p.userId !== user.id);
+                for (const o of others) {
+                    if (!o.userId) continue;
+                    await dataService
+                        .createNotification({
+                            userId: o.userId,
+                            type: 'contract_signed_by_party',
+                            title: 'A party signed the contract',
+                            message: 'Another participant signed the Contract Agreement.',
+                            link: '/contracts/' + contractId,
+                            read: false
+                        })
+                        .catch(() => {});
+                }
+                await initContractDetail({ id: contractId });
+            } catch (err) {
+                console.error(err);
+                alert('Could not sign. Try again.');
+            }
+        });
 
         document.getElementById('contract-close-btn')?.addEventListener('click', () => closeContract(contractId, contract.opportunityId, oppStatus));
 

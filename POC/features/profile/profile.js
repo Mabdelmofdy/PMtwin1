@@ -712,20 +712,41 @@ function getPreferredModelsLabel(ids) {
 
 /** Return HTML for verification badge (Verified Professional / Consultant / Company) or empty string. */
 function getVerificationBadgeHtml(verificationStatus) {
+    const rb = typeof window.renderBadge === 'function' ? window.renderBadge : null;
     if (!verificationStatus || verificationStatus === CONFIG.VERIFICATION_STATUS.UNVERIFIED) return '';
-    if (verificationStatus === CONFIG.VERIFICATION_STATUS.PROFESSIONAL_VERIFIED) return '<span class="badge badge-success verification-badge">Verified Professional</span>';
-    if (verificationStatus === CONFIG.VERIFICATION_STATUS.CONSULTANT_VERIFIED) return '<span class="badge badge-success verification-badge">Verified Consultant</span>';
-    if (verificationStatus === CONFIG.VERIFICATION_STATUS.COMPANY_VERIFIED) return '<span class="badge badge-success verification-badge">Verified Company</span>';
+    if (verificationStatus === CONFIG.VERIFICATION_STATUS.PROFESSIONAL_VERIFIED) {
+        return rb ? rb('Verified Professional', 'success', { extraClass: 'verification-badge' }) : '<span class="badge badge-success verification-badge">Verified Professional</span>';
+    }
+    if (verificationStatus === CONFIG.VERIFICATION_STATUS.CONSULTANT_VERIFIED) {
+        return rb ? rb('Verified Consultant', 'success', { extraClass: 'verification-badge' }) : '<span class="badge badge-success verification-badge">Verified Consultant</span>';
+    }
+    if (verificationStatus === CONFIG.VERIFICATION_STATUS.COMPANY_VERIFIED) {
+        return rb ? rb('Verified Company', 'success', { extraClass: 'verification-badge' }) : '<span class="badge badge-success verification-badge">Verified Company</span>';
+    }
     return '';
 }
 
 /** Return HTML for verification badges including status, phone verified, ID verified, and tier (e.g. Top Expert). */
 function getVerificationBadgesFullHtml(profile) {
+    const rb = typeof window.renderBadge === 'function' ? window.renderBadge : null;
     const status = profile?.verificationStatus;
-    let html = getVerificationBadgeHtml(status) || '<span class="badge badge-secondary verification-badge">Unverified</span>';
-    if (profile?.phoneVerified === true || profile?.mobileVerified === true) html += ' <span class="badge badge-info verification-badge">Phone verified</span>';
-    if (profile?.idVerified === true) html += ' <span class="badge badge-info verification-badge">ID verified</span>';
-    if (profile?.verificationTier === 'top_expert') html += ' <span class="badge badge-primary verification-badge">Top Expert</span>';
+    let html =
+        getVerificationBadgeHtml(status) ||
+        (rb ? rb('Unverified', 'neutral', { extraClass: 'verification-badge' }) : '<span class="badge badge-secondary verification-badge">Unverified</span>');
+    if (profile?.phoneVerified === true || profile?.mobileVerified === true) {
+        html +=
+            ' ' +
+            (rb ? rb('Phone verified', 'info', { extraClass: 'verification-badge' }) : '<span class="badge badge-info verification-badge">Phone verified</span>');
+    }
+    if (profile?.idVerified === true) {
+        html +=
+            ' ' + (rb ? rb('ID verified', 'info', { extraClass: 'verification-badge' }) : '<span class="badge badge-info verification-badge">ID verified</span>');
+    }
+    if (profile?.verificationTier === 'top_expert') {
+        html +=
+            ' ' +
+            (rb ? rb('Top Expert', 'purple', { extraClass: 'verification-badge' }) : '<span class="badge badge-primary verification-badge">Top Expert</span>');
+    }
     return html;
 }
 
@@ -2094,17 +2115,21 @@ function renderProfileClarificationDocuments(user, lookups) {
 async function collectProfileClarificationDocuments() {
     const container = document.getElementById('profile-clarification-documents');
     const user = authService.getCurrentUser();
-    if (!container || !user) return user?.profile?.documents || [];
+    if (!container || !user) return { ok: true, documents: user?.profile?.documents || [] };
     const existingDocs = user.profile?.documents || [];
     const inputs = container.querySelectorAll('.profile-clarification-doc-input');
+    if (!inputs.length) return { ok: true, documents: [...existingDocs] };
     const result = [];
+    const maxBytes = window.vettingActions?.MAX_CLARIFICATION_FILE_BYTES || 5 * 1024 * 1024;
     for (const input of inputs) {
         const type = input.dataset.docType;
         const label = input.dataset.docLabel;
         if (input.files && input.files[0]) {
             const file = input.files[0];
-            if (file.size > 5 * 1024 * 1024) continue;
-            const data = await new Promise((resolve) => {
+            if (file.size > maxBytes) {
+                return { ok: false, error: 'This file is too large. Maximum file size is 5MB.', documents: null };
+            }
+            const data = await new Promise(resolve => {
                 const r = new FileReader();
                 r.onload = () => resolve(r.result);
                 r.readAsDataURL(file);
@@ -2115,7 +2140,7 @@ async function collectProfileClarificationDocuments() {
             if (existing) result.push(existing);
         }
     }
-    return result;
+    return { ok: true, documents: result };
 }
 
 /** Returns HTML for an "Add X" prompt. If sectionForButton is set, returns a button that opens edit; else a link. No em-dash. */
@@ -2289,8 +2314,18 @@ async function loadProfile(user) {
         roleEl.textContent = roleText;
     }
     if (statusEl) {
-        const st = (user.status != null && String(user.status).trim() !== '') ? String(user.status) : placeholder;
-        statusEl.textContent = st;
+        const rawSt = user.status != null && String(user.status).trim() !== '' ? String(user.status) : '';
+        const sb = window.statusBadgeSystem;
+        if (!rawSt) {
+            statusEl.textContent = placeholder;
+        } else if (sb && typeof sb.renderStatusBadge === 'function') {
+            statusEl.innerHTML = sb.renderStatusBadge(rawSt, 'profile');
+        } else {
+            statusEl.textContent =
+                window.vettingActions && typeof window.vettingActions.formatApplicantAccountStatus === 'function'
+                    ? window.vettingActions.formatApplicantAccountStatus(rawSt)
+                    : rawSt;
+        }
     }
     // Verification badge (for professional/consultant only)
     const verificationGroup = document.getElementById('profile-verification-group');
@@ -2334,15 +2369,63 @@ async function loadProfile(user) {
         const cta = document.getElementById('profile-vetting-cta');
         if (cta) cta.href = user.profile?.type === 'company' ? '#company-profile-card' : '#profile-section-professional';
     }
-    // Show clarification banner and "Submit for review again" when status is clarification_requested
+    // Show clarification / needs-updates banner when status is clarification_requested
     const clarificationBanner = document.getElementById('profile-clarification-banner');
     const clarificationDocsWrap = document.getElementById('profile-clarification-documents-wrap');
     const submitReviewBtn = document.getElementById('profile-submit-review-again');
+    const reasonsWrap = document.getElementById('profile-needs-updates-reasons-wrap');
+    const reasonsList = document.getElementById('profile-needs-updates-reasons');
+    const noteWrap = document.getElementById('profile-needs-updates-note-wrap');
+    const noteEl = document.getElementById('profile-needs-updates-note');
+    const btnEditProfile = document.getElementById('profile-needs-updates-edit-profile');
+    const btnUploadDocs = document.getElementById('profile-needs-updates-upload-docs');
+
     if (clarificationBanner) {
         clarificationBanner.style.display = user.status === 'clarification_requested' ? 'block' : 'none';
     }
     if (clarificationDocsWrap) {
         clarificationDocsWrap.style.display = user.status === 'clarification_requested' ? 'block' : 'none';
+    }
+    const vt = user.profile?.vetting || {};
+    const reasonLabels = Array.isArray(vt.requestedReasonLabels) ? vt.requestedReasonLabels : [];
+    const adminNote = vt.adminNote ? String(vt.adminNote).trim() : '';
+    if (reasonsWrap && reasonsList) {
+        if (user.status === 'clarification_requested' && reasonLabels.length) {
+            reasonsWrap.style.display = 'block';
+            reasonsList.innerHTML = reasonLabels.map(l => `<li>${escapeHtml(l)}</li>`).join('');
+        } else {
+            reasonsWrap.style.display = 'none';
+            reasonsList.innerHTML = '';
+        }
+    }
+    if (noteWrap && noteEl) {
+        if (user.status === 'clarification_requested' && adminNote) {
+            noteWrap.style.display = 'block';
+            noteEl.textContent = adminNote;
+        } else {
+            noteWrap.style.display = 'none';
+            noteEl.textContent = '';
+        }
+    }
+    if (btnEditProfile) {
+        btnEditProfile.onclick = null;
+        if (user.status === 'clarification_requested') {
+            btnEditProfile.onclick = () => {
+                const isCo = user.profile?.type === 'company';
+                const target = document.getElementById(isCo ? 'company-profile-card' : 'profile-section-basic');
+                target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+        }
+    }
+    if (btnUploadDocs) {
+        btnUploadDocs.onclick = null;
+        if (user.status === 'clarification_requested') {
+            btnUploadDocs.onclick = () => {
+                clarificationDocsWrap?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const firstInput = document.querySelector('#profile-clarification-documents .profile-clarification-doc-input');
+                firstInput?.focus();
+            };
+        }
     }
     if (user.status === 'clarification_requested') {
         const lookups = await loadProfileLookups();
@@ -2353,19 +2436,34 @@ async function loadProfile(user) {
         if (user.status === 'clarification_requested') {
             submitReviewBtn.onclick = async () => {
                 try {
-                    const documents = await collectProfileClarificationDocuments();
-                    const isCompany = user.profile?.type === 'company';
-                    const updatedProfile = { ...(user.profile || {}), documents };
-                    if (isCompany) {
-                        await dataService.updateCompany(user.id, { status: 'pending', profile: updatedProfile });
-                    } else {
-                        await dataService.updateUser(user.id, { status: 'pending', profile: updatedProfile });
+                    const collected = await collectProfileClarificationDocuments();
+                    if (!collected.ok) {
+                        await (window.modalService?.error?.(collected.error, 'File too large') ?? alert(collected.error));
+                        return;
                     }
-                    alert('Your account has been resubmitted for review. You will be notified once an admin reviews it.');
+                    const isCompany = user.profile?.type === 'company';
+                    if (!window.vettingActions) {
+                        await (window.modalService?.error?.('Vetting module not loaded. Refresh the page.') ?? Promise.resolve());
+                        return;
+                    }
+                    await window.vettingActions.resubmitAccountForReview(user.id, isCompany, { documents: collected.documents });
+                    const fresh = await dataService.getUserOrCompanyById(user.id);
+                    if (fresh && authService.currentUser) {
+                        authService.currentUser = fresh;
+                        try {
+                            [sessionStorage, localStorage].forEach(store => {
+                                if (store.getItem('pmtwin_user')) store.setItem('pmtwin_user', JSON.stringify(fresh));
+                            });
+                        } catch (_) {}
+                    }
+                    await (window.modalService?.success?.(
+                        'Your account has been submitted for review again.',
+                        'Submitted'
+                    ) ?? alert('Your account has been submitted for review again.'));
                     location.reload();
                 } catch (err) {
                     console.error('Error resubmitting for review:', err);
-                    alert('Failed to resubmit. Please try again.');
+                    await (window.modalService?.error?.(err?.message || 'Failed to resubmit. Please try again.') ?? Promise.resolve());
                 }
             };
         }
