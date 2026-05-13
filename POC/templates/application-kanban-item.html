@@ -1,16 +1,45 @@
-<div class="kanban-item" data-id="{{id}}">
-    <div class="kanban-item-title">
-        {{#if intentLabel}}
-        <span class="badge {{intentBadgeClass}} mr-2" style="font-size: 0.7rem;">{{intentLabel}}</span>
-        {{/if}}
-        {{opportunity.title}}
+<div class="kanban-item kanban-item--application" data-id="{{id}}" title="{{titleFull}}">
+    <div class="kanban-item-card">
+        <div class="kanban-item-rail" aria-hidden="true"><i class="ph-duotone ph-dots-six-vertical kanban-item-grip-icon"></i></div>
+        <div class="kanban-item-body kanban-item-body--stack">
+            <div class="kanban-item-block kanban-item-block--head">
+                <div class="kanban-item-top">
+                    {{#if intentLabel}}
+                    <span class="badge {{intentBadgeClass}} kanban-item-badge">{{intentLabel}}</span>
+                    {{/if}}
+                    <span class="kanban-item-stage">{{statusLabel}}</span>
+                </div>
+                <div class="kanban-item-title">{{opportunity.title}}</div>
+            </div>
+            <div class="kanban-item-block kanban-item-block--meta">
+                <div class="kanban-item-meta-grid">
+                    {{#if showModel}}
+                    <div class="kanban-item-meta-cell">
+                        <span class="kanban-item-meta-pill kanban-item-meta-pill--fill"><i class="ph-duotone ph-calendar-blank" aria-hidden="true"></i><span class="kanban-item-meta-pill__text">Applied {{createdDate}}</span></span>
+                    </div>
+                    <div class="kanban-item-meta-cell">
+                        <span class="kanban-item-meta-pill kanban-item-meta-pill--fill" title="Model"><i class="ph-duotone ph-squares-four" aria-hidden="true"></i><span class="kanban-item-meta-pill__text">{{opportunityModelLabel}}</span></span>
+                    </div>
+                    {{else}}
+                    <div class="kanban-item-meta-cell kanban-item-meta-cell--full">
+                        <span class="kanban-item-meta-pill kanban-item-meta-pill--fill"><i class="ph-duotone ph-calendar-blank" aria-hidden="true"></i><span class="kanban-item-meta-pill__text">Applied {{createdDate}}</span></span>
+                    </div>
+                    {{/if}}
+                    {{#if showLocation}}
+                    <div class="kanban-item-meta-cell kanban-item-meta-cell--full">
+                        <span class="kanban-item-meta-pill kanban-item-meta-pill--fill kanban-item-meta-pill--truncate"><i class="ph-duotone ph-map-pin" aria-hidden="true"></i><span class="kanban-item-meta-pill__text">{{opportunityLocation}}</span></span>
+                    </div>
+                    {{/if}}
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="kanban-item-meta">
-        Applied: {{createdDate}}
+    <div class="kanban-item-footer">
+        <span class="kanban-item-footer-hint"><i class="ph-duotone ph-arrow-square-out" aria-hidden="true"></i><span>Open listing</span></span>
+        <div class="kanban-item-footer-actions">
+            {{#if showWithdraw}}
+            <button type="button" class="kanban-btn-withdraw kanban-item-action" data-id="{{id}}">Withdraw</button>
+            {{/if}}
+        </div>
     </div>
-    {{#if showWithdraw}}
-    <div class="kanban-item-actions kanban-item-action">
-        <button type="button" class="btn btn-warning btn-sm kanban-btn-withdraw" data-id="{{id}}">Withdraw</button>
-    </div>
-    {{/if}}
 </div>

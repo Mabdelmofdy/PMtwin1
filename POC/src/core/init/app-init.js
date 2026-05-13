@@ -108,6 +108,8 @@ loadScript('src/core/config/config.js').then(async () => {
     await loadScript('src/utils/badge-helpers.js');
     await loadScript('src/utils/decimal-helper.js');
     await loadScript('src/utils/profile-completion.js');
+    await loadScript('src/utils/profile-search-text.js');
+    await loadScript('src/utils/page-context-header.js');
     
     // Load business logic
     await loadScript('src/business-logic/models/opportunity-models.js');
@@ -308,8 +310,12 @@ function initializeRoutes() {
         await loadPage('workflow');
     });
     
-    // Dashboard route (protected)
+    // Dashboard route (protected); company accounts use /company-dashboard as canonical URL
     router.register(CONFIG.ROUTES.DASHBOARD, authGuard.protect(async () => {
+        if (authService.isCompanyUser && authService.isCompanyUser()) {
+            await router.navigate(CONFIG.ROUTES.COMPANY_DASHBOARD);
+            return;
+        }
         await loadPage('dashboard');
     }));
 

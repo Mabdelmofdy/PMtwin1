@@ -1,76 +1,97 @@
 <div class="page-container opportunity-create-page">
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1 class="page-title">Create Opportunity</h1>
-            <p class="page-subtitle">Post a new collaboration opportunity</p>
+    <header class="occ-hero" aria-labelledby="occ-create-title">
+        <div class="occ-hero-bg" aria-hidden="true"></div>
+        <div class="occ-hero-inner">
+            <div class="occ-hero-copy">
+                <div class="occ-hero-topline">
+                    <span class="occ-hero-eyebrow"><i class="ph-duotone ph-path" aria-hidden="true"></i> Collaboration wizard</span>
+                    <span class="occ-hero-pill">7 steps</span>
+                </div>
+                <h1 id="occ-create-title" class="occ-hero-heading">Create opportunity</h1>
+                <p class="occ-hero-sub">Walk through type, basics, intent, scope, value model, budget, and publish—so the record is complete for matching and proposals.</p>
+            </div>
+            <aside class="occ-hero-panel" aria-label="Demo sample">
+                <div class="occ-hero-panel-head">
+                    <span class="occ-hero-panel-icon" aria-hidden="true"><i class="ph-duotone ph-magic-wand"></i></span>
+                    <div>
+                        <p class="occ-hero-panel-title">Try a full sample</p>
+                        <p class="occ-hero-panel-desc">Each fill loads a different demo scenario (engineering, JV, consortium, barter, and more).</p>
+                    </div>
+                </div>
+                <button type="button" id="fill-demo-data" class="btn btn-secondary occ-hero-demo-btn">
+                    <i class="ph-duotone ph-magic-wand" style="font-size: 18px;" aria-hidden="true"></i>
+                    Fill demo data
+                </button>
+            </aside>
         </div>
-        <div class="page-actions">
-            <button type="button" id="fill-demo-data" class="btn btn-secondary">
-                <i class="ph-duotone ph-magic-wand" style="font-size: 18px;" aria-hidden="true"></i>
-                Fill Demo Data
-            </button>
-        </div>
-    </div>
-    <div class="page-body">
+    </header>
+    <div class="page-body occ-body">
     
-    <!-- Wizard Progress (7 steps) -->
-    <div class="wizard-progress mb-8">
-        <div class="flex items-center justify-between">
+    <!-- Wizard progress -->
+    <div class="wizard-progress-wrap occ-wizard-wrap" aria-label="Create opportunity steps">
+    <div class="wizard-progress occ-wizard-progress">
+        <div class="occ-wizard-track flex items-center justify-between">
             <div class="wizard-step" data-step="1">
                 <div class="wizard-step-number">1</div>
-                <div class="wizard-step-label">Project Type</div>
+                <div class="wizard-step-label">Type</div>
             </div>
-            <div class="wizard-step-line"></div>
+            <div class="wizard-step-line" aria-hidden="true"></div>
             <div class="wizard-step" data-step="2">
                 <div class="wizard-step-number">2</div>
-                <div class="wizard-step-label">Basic Info</div>
+                <div class="wizard-step-label">Basics</div>
             </div>
-            <div class="wizard-step-line"></div>
+            <div class="wizard-step-line" aria-hidden="true"></div>
             <div class="wizard-step" data-step="3">
                 <div class="wizard-step-number">3</div>
                 <div class="wizard-step-label">Intent</div>
             </div>
-            <div class="wizard-step-line"></div>
+            <div class="wizard-step-line" aria-hidden="true"></div>
             <div class="wizard-step" data-step="4">
                 <div class="wizard-step-number">4</div>
                 <div class="wizard-step-label">Scope</div>
             </div>
-            <div class="wizard-step-line"></div>
+            <div class="wizard-step-line" aria-hidden="true"></div>
             <div class="wizard-step" data-step="5">
                 <div class="wizard-step-number">5</div>
-                <div class="wizard-step-label">Collaboration</div>
+                <div class="wizard-step-label">Model</div>
             </div>
-            <div class="wizard-step-line"></div>
+            <div class="wizard-step-line" aria-hidden="true"></div>
             <div class="wizard-step" data-step="6">
                 <div class="wizard-step-number">6</div>
-                <div class="wizard-step-label">Payment</div>
+                <div class="wizard-step-label">Budget</div>
             </div>
-            <div class="wizard-step-line"></div>
+            <div class="wizard-step-line" aria-hidden="true"></div>
             <div class="wizard-step" data-step="7">
                 <div class="wizard-step-number">7</div>
                 <div class="wizard-step-label">Publish</div>
             </div>
         </div>
     </div>
+    </div>
     
-    <form id="opportunity-form" class="opportunity-form">
+    <form id="opportunity-form" class="opportunity-form occ-form-card">
         <!-- Step 1: Project Type -->
-        <div class="wizard-step-content" id="step-1" data-step="1">
-            <div class="form-section">
-                <h2>Step 1: Project Type</h2>
-                <p class="text-gray-600 mb-6">Choose whether this opportunity is for a single project or multiple / long-term collaborations.</p>
+        <div class="wizard-step-content occ-step-shell" id="step-1" data-step="1">
+            <div class="form-section occ-step-section">
+                <div class="occ-step-head">
+                    <p class="occ-step-eyebrow">Step 1 of 7</p>
+                    <h2 class="occ-step-title">How is this opportunity structured?</h2>
+                    <p class="occ-step-lead">Single is one delivery. Multi is programs, rollouts, consortia, or several workstreams under one record.</p>
+                </div>
                 <div class="form-group">
-                    <label class="form-label">Project Type <span class="text-red-600">*</span></label>
-                    <div class="flex gap-6">
-                        <label class="intent-option flex-1 p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-all has-[:checked]:border-primary has-[:checked]:bg-blue-50">
+                    <span class="form-label">Project type <span class="text-red-600">*</span></span>
+                    <div class="occ-project-type-grid">
+                        <label class="occ-project-type-card intent-option">
                             <input type="radio" name="projectType" value="single" class="sr-only" required>
-                            <span class="block font-semibold text-lg text-gray-900">Single Project</span>
-                            <span class="block text-sm text-gray-600 mt-1">Standard one-time collaboration</span>
+                            <span class="occ-pt-icon" aria-hidden="true"><i class="ph-duotone ph-cube"></i></span>
+                            <span class="occ-pt-title">Single project</span>
+                            <span class="occ-pt-desc">One scope, one timeline — typical engagement or hire.</span>
                         </label>
-                        <label class="intent-option flex-1 p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-all has-[:checked]:border-primary has-[:checked]:bg-blue-50">
+                        <label class="occ-project-type-card intent-option">
                             <input type="radio" name="projectType" value="multi" class="sr-only">
-                            <span class="block font-semibold text-lg text-gray-900">Multi Project</span>
-                            <span class="block text-sm text-gray-600 mt-1">Long-term or multiple collaborations (consortium, resource pooling)</span>
+                            <span class="occ-pt-icon occ-pt-icon-multi" aria-hidden="true"><i class="ph-duotone ph-stack"></i></span>
+                            <span class="occ-pt-title">Multi project</span>
+                            <span class="occ-pt-desc">Several packages or sites; add work packages in the next step.</span>
                         </label>
                     </div>
                 </div>
@@ -78,9 +99,14 @@
         </div>
         
         <!-- Step 2: Basic Information -->
-        <div class="wizard-step-content hidden" id="step-2" data-step="2">
-            <div class="form-section">
-                <h2>Step 2: Basic Information</h2>
+        <div class="wizard-step-content occ-step-shell hidden" id="step-2" data-step="2">
+            <div class="form-section occ-step2-grid">
+                <div class="occ-step2-main">
+                <div class="occ-step-head">
+                    <p class="occ-step-eyebrow">Step 2 of 7</p>
+                    <h2 class="occ-step-title">Project details</h2>
+                    <p class="occ-step-lead">Name the opportunity, describe it, and pin where it happens. For <strong>Multi project</strong>, list work packages here.</p>
+                </div>
                 
                 <div class="form-group">
                     <label for="title" class="form-label">Title <span class="text-red-600">*</span></label>
@@ -105,7 +131,23 @@
                         rows="4"
                         placeholder="Brief description of the opportunity"
                         data-rich-text="true"
+                        data-rich-text-toolbar="full"
                     ></textarea>
+                </div>
+
+                <div id="multi-project-tasks-wrap" class="hidden occ-work-packages-card form-group">
+                    <div class="occ-wp-header">
+                        <span class="occ-wp-icon" aria-hidden="true"><i class="ph-duotone ph-stack"></i></span>
+                        <div>
+                            <h3 class="occ-wp-title">Work packages</h3>
+                            <p class="occ-wp-sub">Shown when <strong>Multi project</strong> is selected. Add each task or stream; you can refine in the collaboration step if you pick <em>Task-based engagement</em> (then at least two titled packages are required).</p>
+                        </div>
+                    </div>
+                    <div id="multi-project-tasks-list" class="occ-wp-list mb-4"></div>
+                    <button type="button" id="add-project-task-btn" class="occ-wp-add-btn inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-indigo-200 text-indigo-700 bg-white hover:bg-indigo-50 transition-colors">
+                        <i class="ph-duotone ph-plus-circle" style="font-size: 18px;" aria-hidden="true"></i>
+                        Add work package
+                    </button>
                 </div>
                 
                 <div class="form-group">
@@ -213,30 +255,40 @@
                     <input type="hidden" id="location" name="location">
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Pin Location on Map</label>
-                    <p class="text-sm text-gray-500 mb-3">Click on the map to set the exact location, or enter an address below. The map auto-centers when you select a city above.</p>
-                    <div class="flex gap-2 mb-3">
-                        <input 
-                            type="text" 
-                            id="address-search-input" 
-                            class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="Enter an address to locate on map..."
-                        >
-                        <button type="button" id="address-search-btn" class="px-4 py-2 bg-primary text-white font-medium rounded-md hover:bg-primary-dark transition-all inline-flex items-center gap-2">
-                            <i class="ph-duotone ph-magnifying-glass" style="font-size: 16px;" aria-hidden="true"></i>
-                            Locate
-                        </button>
-                    </div>
-                    <div id="location-map" class="map-container map-container-md"></div>
-                    <div id="map-coordinates-display" class="mt-2 text-sm text-gray-500 hidden">
-                        <i class="ph-duotone ph-crosshair" style="font-size: 14px;"></i>
-                        Coordinates: <span id="map-lat-display"></span>, <span id="map-lng-display"></span>
-                    </div>
-                    <input type="hidden" id="latitude" name="latitude">
-                    <input type="hidden" id="longitude" name="longitude">
                 </div>
 
+                <aside class="occ-map-panel" aria-label="Map location">
+                    <div class="occ-map-panel-inner">
+                        <h3 class="occ-map-heading">
+                            <i class="ph-duotone ph-map-pin" style="font-size: 20px;" aria-hidden="true"></i>
+                            Pin on map
+                        </h3>
+                        <p class="occ-map-lead">Click the map to drop a pin, or search an address. The map refreshes when you open this step and follows your selected city.</p>
+                        <div class="flex gap-2 mb-3">
+                            <input 
+                                type="text" 
+                                id="address-search-input" 
+                                class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="Search address or landmark..."
+                            >
+                            <button type="button" id="address-search-btn" class="px-4 py-2 bg-primary text-white font-medium rounded-md hover:bg-primary-dark transition-all inline-flex items-center gap-2 shrink-0">
+                                <i class="ph-duotone ph-magnifying-glass" style="font-size: 16px;" aria-hidden="true"></i>
+                                Locate
+                            </button>
+                        </div>
+                        <div id="location-map" class="map-container map-container-lg occ-map-frame"></div>
+                        <div id="map-coordinates-display" class="mt-3 text-sm text-gray-600 hidden occ-coords">
+                            <i class="ph-duotone ph-crosshair" style="font-size: 14px;"></i>
+                            <span class="font-medium">Pinned:</span>
+                            <span id="map-lat-display"></span>, <span id="map-lng-display"></span>
+                        </div>
+                        <input type="hidden" id="latitude" name="latitude">
+                        <input type="hidden" id="longitude" name="longitude">
+                    </div>
+                </aside>
+            </div>
+
+            <div class="form-section occ-step2-follow">
                 <div class="form-group">
                     <label for="location-requirement" class="form-label">Location requirement</label>
                     <select id="location-requirement" name="locationRequirement" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
@@ -271,11 +323,14 @@
         </div>
         
         <!-- Step 3: Intent Label -->
-        <div class="wizard-step-content hidden" id="step-3" data-step="3">
-            <div class="form-section">
-                <h2>Step 3: Intent Label</h2>
-                <p class="text-gray-600 mb-6">Choose whether you are seeking work/service or offering work/service. This label is visible everywhere and cannot be changed later.</p>
-                <p class="text-sm text-gray-500 mb-4">Choose <strong>NEED</strong> if you need something (e.g. hiring, seeking partners). Choose <strong>OFFER</strong> if you are providing something (e.g. offering services, selling or bartering resources).</p>
+        <div class="wizard-step-content occ-step-shell hidden" id="step-3" data-step="3">
+            <div class="form-section occ-step-section">
+                <div class="occ-step-head">
+                    <p class="occ-step-eyebrow">Step 3 of 7</p>
+                    <h2 class="occ-step-title">Intent</h2>
+                    <p class="occ-step-lead">This label is visible everywhere and cannot be changed later.</p>
+                </div>
+                <p class="occ-muted-block mb-6">Choose <strong>NEED</strong> if you need something (e.g. hiring, seeking partners). Choose <strong>OFFER</strong> if you are providing something.</p>
                 <div class="form-group">
                     <label class="form-label">Intent <span class="text-red-600">*</span></label>
                     <div class="flex gap-4 flex-wrap">
@@ -300,10 +355,13 @@
         </div>
         
         <!-- Step 4: Scope & Capabilities -->
-        <div class="wizard-step-content hidden" id="step-4" data-step="4">
-            <div class="form-section">
-                <h2>Step 4: Scope & Capabilities</h2>
-                <p class="text-gray-600 mb-6" id="scope-intro">Add required or offered services/skills, sectors, and interests. Used for matching.</p>
+        <div class="wizard-step-content occ-step-shell hidden" id="step-4" data-step="4">
+            <div class="form-section occ-step-section occ-scope-card">
+                <div class="occ-step-head">
+                    <p class="occ-step-eyebrow">Step 4 of 7</p>
+                    <h2 class="occ-step-title">Scope &amp; capabilities</h2>
+                    <p class="occ-step-lead" id="scope-intro">Add required or offered services/skills, sectors, and interests. Used for matching.</p>
+                </div>
                 <div class="form-group">
                     <label for="scope-skills" class="form-label" id="scope-skills-label">Required services / skills <span class="text-red-600">*</span></label>
                     <input type="text" id="scope-skills" name="scopeSkills" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g. Structural Engineering, Project Management (comma-separated or press Enter)" data-tags="true">
@@ -325,10 +383,13 @@
         </div>
         
         <!-- Step 5: Category + Sub-Model -->
-        <div class="wizard-step-content hidden" id="step-5" data-step="5">
-            <div class="form-section">
-                <h2>Step 5: Category + Sub-Model</h2>
-                <p class="text-gray-600 mb-4">Select a category, then choose the sub-model that best fits this opportunity. This defines proposal structure, contract type, and execution style.</p>
+        <div class="wizard-step-content occ-step-shell hidden" id="step-5" data-step="5">
+            <div class="form-section occ-step-section">
+                <div class="occ-step-head">
+                    <p class="occ-step-eyebrow">Step 5 of 7</p>
+                    <h2 class="occ-step-title">Collaboration model</h2>
+                    <p class="occ-step-lead">Category and sub-model define proposals, contract style, and execution.</p>
+                </div>
 
                 <!-- Inline AI Advisor -->
                 <div class="inline-advisor-trigger mb-6">
@@ -410,198 +471,206 @@
                         <!-- Populated by JS when category is selected -->
                     </div>
                 </div>
-                <div id="model-details-section" class="form-section mt-8 border-t border-gray-200 pt-6" style="display: none;">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Model-Specific Details</h3>
-                    <p class="text-gray-600 mb-4">Complete the fields below for the selected collaboration type.</p>
-                    <div id="dynamic-fields" class="space-y-6">
+                <div id="model-details-section" class="form-section mt-8 border-t border-gray-200 pt-6 occ-model-details-wrap" style="display: none;">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Model-specific details</h3>
+                    <p class="text-gray-600 mb-4">Complete the fields for the collaboration type you selected.</p>
+                    <div id="dynamic-fields" class="space-y-6 occ-dynamic-fields">
                         <!-- Populated by JS when sub-model is selected -->
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Step 6: Exchange Mode & Financial Terms -->
-        <div class="wizard-step-content hidden" id="step-6" data-step="6">
-            <div class="form-section">
-                <h2>Step 6: Exchange Mode &amp; Financial Terms</h2>
-                <p class="text-gray-600 mb-6">This step defines how value is exchanged between parties.</p>
-                
-                <!-- 4.1 Budget Range (required) -->
-                <div class="form-group mb-6" id="budget-range-section">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Budget Range <span class="text-red-600">*</span></label>
-                    <p class="text-sm text-gray-500 mb-3">Specify the expected budget range for this opportunity (used for matching; not a final contract value).</p>
-                    <div class="budget-range-inputs">
-                        <div class="budget-input-group">
-                            <label for="budgetRange_min" class="text-sm text-gray-600">Minimum</label>
-                            <div class="input-with-prefix">
-                                <span class="input-prefix">SAR</span>
-                                <input type="number" id="budgetRange_min" name="budgetRange_min" class="budget-input" placeholder="50,000" min="0" step="0.01" required>
+        <!-- Step 6: Budget & Collaboration Value -->
+        <div class="wizard-step-content occ-step-shell occ-step6 hidden" id="step-6" data-step="6">
+            <div class="form-section occ-step-section occ-step6-inner">
+                <div class="occ-step-head">
+                    <p class="occ-step-eyebrow">Step 6 of 7</p>
+                    <h2 class="occ-step-title">Budget &amp; Collaboration Value</h2>
+                    <p class="occ-step-lead">Define the budget range, exchange model, and payment terms for this opportunity. Complete the required fields, then review the summary before continuing.</p>
+                </div>
+
+                <!-- 1. Budget -->
+                <section class="occ-s6-card occ-s6-card--budget" id="budget-range-section" aria-labelledby="occ-s6-budget-title">
+                    <div class="occ-s6-card-head">
+                        <h3 id="occ-s6-budget-title" class="occ-s6-card-title">Budget range</h3>
+                        <p class="occ-s6-card-desc">Total expected envelope for this collaboration (SAR). Used for matching — not a final contract amount.</p>
+                    </div>
+                    <div class="occ-s6-budget-row budget-range-inputs">
+                        <div class="budget-input-group occ-s6-budget-field">
+                            <label for="budgetRange_min" class="occ-s6-field-label">Minimum (SAR) <span class="text-red-600">*</span></label>
+                            <div class="input-with-prefix occ-vx-budget-prefix">
+                                <span class="input-prefix" aria-hidden="true">SAR</span>
+                                <input type="number" id="budgetRange_min" name="budgetRange_min" class="budget-input" placeholder="e.g. 50000" min="0" step="0.01" required>
                             </div>
                         </div>
-                        <div class="budget-separator"><span>to</span></div>
-                        <div class="budget-input-group">
-                            <label for="budgetRange_max" class="text-sm text-gray-600">Maximum</label>
-                            <div class="input-with-prefix">
-                                <span class="input-prefix">SAR</span>
-                                <input type="number" id="budgetRange_max" name="budgetRange_max" class="budget-input" placeholder="100,000" min="0" step="0.01" required>
+                        <div class="budget-separator occ-s6-budget-sep" aria-hidden="true"><span>to</span></div>
+                        <div class="budget-input-group occ-s6-budget-field">
+                            <label for="budgetRange_max" class="occ-s6-field-label">Maximum (SAR) <span class="text-red-600">*</span></label>
+                            <div class="input-with-prefix occ-vx-budget-prefix">
+                                <span class="input-prefix" aria-hidden="true">SAR</span>
+                                <input type="number" id="budgetRange_max" name="budgetRange_max" class="budget-input" placeholder="e.g. 150000" min="0" step="0.01" required>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- 4.2 Exchange Mode (required) - single select cards -->
-                <div class="form-group mb-6">
-                    <label for="exchange-mode" class="block text-sm font-medium text-gray-700 mb-4">Exchange Mode <span class="text-red-600">*</span></label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div class="exchange-mode-card" data-mode="cash">
-                            <div class="exchange-mode-icon"><i class="ph-duotone ph-currency-dollar" style="font-size: 32px;" aria-hidden="true"></i></div>
-                            <div class="exchange-mode-title">Cash</div>
-                            <div class="exchange-mode-description">Standard payments with milestones</div>
-                        </div>
-                        <div class="exchange-mode-card" data-mode="equity">
-                            <div class="exchange-mode-icon"><i class="ph-duotone ph-chart-bar" style="font-size: 32px;" aria-hidden="true"></i></div>
-                            <div class="exchange-mode-title">Equity</div>
-                            <div class="exchange-mode-description">Ownership stake with possible vesting</div>
-                        </div>
-                        <div class="exchange-mode-card" data-mode="profit_sharing">
-                            <div class="exchange-mode-icon"><i class="ph-duotone ph-percent" style="font-size: 32px;" aria-hidden="true"></i></div>
-                            <div class="exchange-mode-title">Profit-Sharing</div>
-                            <div class="exchange-mode-description">Revenue or profit sharing, no ownership</div>
-                        </div>
-                        <div class="exchange-mode-card" data-mode="barter">
-                            <div class="exchange-mode-icon"><i class="ph-duotone ph-arrows-clockwise" style="font-size: 32px;" aria-hidden="true"></i></div>
-                            <div class="exchange-mode-title">Barter</div>
-                            <div class="exchange-mode-description">Direct exchange of resources/services</div>
-                        </div>
-                        <div class="exchange-mode-card" data-mode="hybrid">
-                            <div class="exchange-mode-icon"><i class="ph-duotone ph-link" style="font-size: 32px;" aria-hidden="true"></i></div>
-                            <div class="exchange-mode-title">Hybrid</div>
-                            <div class="exchange-mode-description">Combination of cash, equity, and/or barter</div>
-                        </div>
+                </section>
+
+                <!-- 2. Exchange model -->
+                <section class="occ-s6-card occ-s6-card--modes" aria-labelledby="occ-s6-mode-title">
+                    <div class="occ-s6-card-head">
+                        <h3 id="occ-s6-mode-title" class="occ-s6-card-title">How will value be exchanged? <span class="text-red-600">*</span></h3>
+                        <p class="occ-s6-card-desc">Choose the primary model. Only the fields for this choice appear below.</p>
+                    </div>
+                    <div class="occ-s6-mode-grid">
+                        <button type="button" class="exchange-mode-card occ-s6-mode-card" data-mode="cash" aria-pressed="false">
+                            <span class="occ-s6-mode-ic" aria-hidden="true"><i class="ph-duotone ph-currency-dollar"></i></span>
+                            <span class="occ-s6-mode-name">Cash</span>
+                            <span class="occ-s6-mode-hint">Fees &amp; milestones</span>
+                        </button>
+                        <button type="button" class="exchange-mode-card occ-s6-mode-card" data-mode="equity" aria-pressed="false">
+                            <span class="occ-s6-mode-ic" aria-hidden="true"><i class="ph-duotone ph-chart-line-up"></i></span>
+                            <span class="occ-s6-mode-name">Equity</span>
+                            <span class="occ-s6-mode-hint">Ownership stake</span>
+                        </button>
+                        <button type="button" class="exchange-mode-card occ-s6-mode-card" data-mode="profit_sharing" aria-pressed="false">
+                            <span class="occ-s6-mode-ic" aria-hidden="true"><i class="ph-duotone ph-chart-pie-slice"></i></span>
+                            <span class="occ-s6-mode-name">Profit sharing</span>
+                            <span class="occ-s6-mode-hint">Share of returns</span>
+                        </button>
+                        <button type="button" class="exchange-mode-card occ-s6-mode-card" data-mode="barter" aria-pressed="false">
+                            <span class="occ-s6-mode-ic" aria-hidden="true"><i class="ph-duotone ph-arrows-left-right"></i></span>
+                            <span class="occ-s6-mode-name">Barter</span>
+                            <span class="occ-s6-mode-hint">Swap services / assets</span>
+                        </button>
+                        <button type="button" class="exchange-mode-card occ-s6-mode-card" data-mode="hybrid" aria-pressed="false">
+                            <span class="occ-s6-mode-ic" aria-hidden="true"><i class="ph-duotone ph-stack"></i></span>
+                            <span class="occ-s6-mode-name">Hybrid</span>
+                            <span class="occ-s6-mode-hint">Mix of models</span>
+                        </button>
                     </div>
                     <input type="hidden" id="exchange-mode" name="exchangeMode" required>
-                    <div id="selected-exchange-display" class="selected-exchange-display hidden mt-4">
-                        <div class="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-md">
-                            <div>
-                                <div class="text-sm text-gray-600 mb-1">Selected Exchange Mode:</div>
-                                <div class="font-semibold text-gray-900" id="selected-exchange-name"></div>
-                            </div>
-                            <button type="button" id="clear-exchange-selection" class="text-red-600 hover:text-red-800 font-medium">Change</button>
-                        </div>
+                    <div id="selected-exchange-display" class="selected-exchange-display occ-s6-selected hidden">
+                        <span class="occ-s6-selected-label">Selected</span>
+                        <strong id="selected-exchange-name" class="occ-s6-selected-value"></strong>
+                        <button type="button" id="clear-exchange-selection" class="occ-s6-change-btn">Change</button>
                     </div>
-                </div>
+                </section>
 
-                <!-- Accepted payment methods (optional multi-select) -->
-                <div class="form-group mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Accepted payment methods</label>
-                    <p class="text-sm text-gray-500 mb-3">Select all payment methods you accept. The selected exchange mode above is the primary (used for main terms).</p>
-                    <div class="flex flex-wrap gap-4">
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="paymentMethod" value="cash" class="payment-method-cb rounded border-gray-300">
-                            <span class="ml-2 text-sm text-gray-700">Cash</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="paymentMethod" value="barter" class="payment-method-cb rounded border-gray-300">
-                            <span class="ml-2 text-sm text-gray-700">Barter</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="paymentMethod" value="equity" class="payment-method-cb rounded border-gray-300">
-                            <span class="ml-2 text-sm text-gray-700">Equity</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="paymentMethod" value="hybrid" class="payment-method-cb rounded border-gray-300">
-                            <span class="ml-2 text-sm text-gray-700">Hybrid</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="paymentMethod" value="profit_sharing" class="payment-method-cb rounded border-gray-300">
-                            <span class="ml-2 text-sm text-gray-700">Profit-Sharing</span>
-                        </label>
+                <!-- 3. Dynamic terms -->
+                <section class="occ-s6-card occ-s6-card--terms" id="exchange-detail-panel" aria-labelledby="occ-s6-terms-title">
+                    <div class="occ-s6-card-head">
+                        <h3 id="occ-s6-terms-title" class="occ-s6-card-title">Terms for your selection</h3>
+                        <p class="occ-s6-card-desc">Required fields for the primary model you chose above.</p>
                     </div>
-                </div>
-                
-                <!-- 4.3 Mode-Specific Details (dynamic) - Value Offered -->
-                <div id="exchange-mode-fields" class="exchange-mode-fields mb-6">
-                    <p class="text-gray-500 italic">Please select an exchange mode to see specific fields.</p>
-                </div>
-
-                <!-- Accepted exchange modes (for matching: which types you are open to) -->
-                <div class="form-group mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Also accept these exchange types</label>
-                    <p class="text-sm text-gray-500 mb-3">Select all exchange types you are open to. Improves matching with partners who prefer different modes.</p>
-                    <div class="flex flex-wrap gap-4" id="accepted-modes-wrap">
-                        <label class="inline-flex items-center"><input type="checkbox" name="acceptedMode" value="cash" class="accepted-mode-cb rounded border-gray-300"><span class="ml-2 text-sm text-gray-700">Cash</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" name="acceptedMode" value="equity" class="accepted-mode-cb rounded border-gray-300"><span class="ml-2 text-sm text-gray-700">Equity</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" name="acceptedMode" value="profit_sharing" class="accepted-mode-cb rounded border-gray-300"><span class="ml-2 text-sm text-gray-700">Profit-Sharing</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" name="acceptedMode" value="barter" class="accepted-mode-cb rounded border-gray-300"><span class="ml-2 text-sm text-gray-700">Barter</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" name="acceptedMode" value="hybrid" class="accepted-mode-cb rounded border-gray-300"><span class="ml-2 text-sm text-gray-700">Hybrid</span></label>
+                    <div id="exchange-mode-fields" class="exchange-mode-fields occ-s6-dynamic">
+                        <p class="occ-vx-empty">Select how value will be exchanged to see the relevant fields.</p>
                     </div>
-                </div>
+                </section>
 
-                <!-- Value items (optional itemized value) -->
-                <div class="form-group mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Value items (optional)</label>
-                    <p class="text-sm text-gray-500 mb-3">Break down value into categories for better matching. Leave empty to use the main exchange fields above.</p>
-                    <div id="value-items-container" class="space-y-3"></div>
-                    <button type="button" id="add-value-item" class="mt-2 btn btn-secondary btn-sm">+ Add value item</button>
-                </div>
-
-                <!-- Flexibility (negotiation range) -->
-                <div class="form-group mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Flexibility</label>
-                    <p class="text-sm text-gray-500 mb-3">Define your negotiation range. Used for value compatibility in matching.</p>
-                    <label class="flex items-center mb-3">
-                        <input type="checkbox" id="flexibility-negotiable" name="flexibilityNegotiable" class="rounded border-gray-300">
-                        <span class="ml-2 text-sm text-gray-700">Terms are negotiable</span>
-                    </label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="flexibility-min" class="block text-sm text-gray-600 mb-1">Min. acceptable value (SAR)</label>
-                            <input type="number" id="flexibility-min" name="flexibilityMin" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="0" min="0" step="0.01">
-                        </div>
-                        <div>
-                            <label for="flexibility-max" class="block text-sm text-gray-600 mb-1">Max. offer value (SAR)</label>
-                            <input type="number" id="flexibility-max" name="flexibilityMax" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="0" min="0" step="0.01">
-                        </div>
+                <!-- 4. Also open to -->
+                <section class="occ-s6-card occ-s6-card--also" aria-labelledby="occ-s6-also-title">
+                    <div class="occ-s6-card-head">
+                        <h3 id="occ-s6-also-title" class="occ-s6-card-title">Also open to another payment model <span class="occ-s6-optional">Optional</span></h3>
+                        <p class="occ-s6-card-desc">Select any additional structures you would consider. A detail section opens for each selection so partners see what you mean.</p>
                     </div>
-                </div>
+                    <div class="occ-s6-chip-row" id="accepted-modes-wrap" role="group" aria-label="Also open to alternative exchange models">
+                        <label class="occ-s6-chip"><input type="checkbox" name="acceptedMode" value="cash" class="accepted-mode-cb sr-only"><span>Cash</span></label>
+                        <label class="occ-s6-chip"><input type="checkbox" name="acceptedMode" value="equity" class="accepted-mode-cb sr-only"><span>Equity</span></label>
+                        <label class="occ-s6-chip"><input type="checkbox" name="acceptedMode" value="profit_sharing" class="accepted-mode-cb sr-only"><span>Profit sharing</span></label>
+                        <label class="occ-s6-chip"><input type="checkbox" name="acceptedMode" value="barter" class="accepted-mode-cb sr-only"><span>Barter</span></label>
+                        <label class="occ-s6-chip"><input type="checkbox" name="acceptedMode" value="hybrid" class="accepted-mode-cb sr-only"><span>Hybrid</span></label>
+                    </div>
+                </section>
 
-                <!-- Value Expected: What do you expect from partners? -->
-                <div class="form-group mb-6">
-                    <label for="value-expected-tags" class="block text-sm font-medium text-gray-700 mb-2">What do you expect from partners?</label>
-                    <p class="text-sm text-gray-500 mb-2">e.g. Consulting, Engineering, Construction, Investment capital. Used for matching applicant offers to your needs.</p>
-                    <input type="text" id="value-expected-tags" name="valueExpected" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Consulting, Expert advice, Engineering design, Construction execution, Investment capital">
-                    <div id="value-expected-list" class="mt-2 flex flex-wrap gap-2 hidden"></div>
-                </div>
+                <!-- 4b. Details for each selected alternate (injected by JS) -->
+                <section id="occ-alternate-details-wrap" class="occ-s6-card occ-s6-card--alt-details hidden" aria-labelledby="occ-s6-alt-details-title" hidden>
+                    <div class="occ-s6-card-head">
+                        <h3 id="occ-s6-alt-details-title" class="occ-s6-card-title">Details for additional models</h3>
+                        <p class="occ-s6-card-desc">Describe what you would accept for each extra model. These fields appear only for the options you tick above.</p>
+                    </div>
+                    <div id="occ-alternate-details-host" class="occ-s6-alt-host"></div>
+                </section>
 
-                <!-- Estimated Value (read-only, computed) -->
-                <div id="estimated-value-section" class="form-group mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg hidden">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Estimated Value</label>
-                    <p id="estimated-value-display" class="text-lg font-semibold text-gray-900">—</p>
-                    <p class="text-sm text-gray-500 mt-1">Calculated from your value offered (cash amount, equity %, profit share, or barter value).</p>
-                </div>
-                
-                <!-- 4.4 Currency (conditional - Cash & Hybrid) -->
-                <div id="currency-group" class="form-group hidden mb-6">
-                    <label for="currency" class="block text-sm font-medium text-gray-700 mb-2">Currency <span class="text-red-600">*</span></label>
-                    <select id="currency" name="currency" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                <div id="currency-group" class="occ-s6-card occ-s6-card--currency form-group hidden mb-0" aria-live="polite">
+                    <label for="currency" class="occ-s6-field-label">Currency <span class="text-red-600">*</span></label>
+                    <select id="currency" name="currency" class="occ-s6-select w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
                         <option value="SAR">SAR (Saudi Riyal)</option>
                         <option value="USD">USD (US Dollar)</option>
                         <option value="EUR">EUR (Euro)</option>
                         <option value="AED">AED (UAE Dirham)</option>
                         <option value="KWD">KWD (Kuwaiti Dinar)</option>
                     </select>
+                    <p class="occ-s6-help">Required when cash is part of your primary or hybrid model.</p>
                 </div>
-                
-                <!-- 4.5 Additional Terms (optional) -->
-                <div class="form-group mb-6">
-                    <label for="exchange-terms-summary" class="block text-sm font-medium text-gray-700 mb-2">Additional Terms &amp; Notes</label>
-                    <textarea id="exchange-terms-summary" name="exchangeTermsSummary" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" rows="3" placeholder="Clarifications, special conditions..." data-rich-text="true"></textarea>
+
+                <!-- 5. Summary -->
+                <section id="occ-vx-summary-card" class="occ-s6-card occ-s6-card--summary" aria-labelledby="occ-s6-sum-title" hidden>
+                    <div class="occ-s6-card-head">
+                        <h3 id="occ-s6-sum-title" class="occ-s6-card-title">Your value snapshot</h3>
+                        <p class="occ-s6-card-desc">Quick check before you continue — updates as you edit.</p>
+                    </div>
+                    <dl class="occ-s6-sum-grid">
+                        <div class="occ-s6-sum-item"><dt>Primary model</dt><dd id="occ-vx-sum-model">—</dd></div>
+                        <div class="occ-s6-sum-item"><dt>Budget range</dt><dd id="occ-vx-sum-budget">—</dd></div>
+                        <div class="occ-s6-sum-item"><dt>Estimated value</dt><dd id="occ-vx-sum-estimated">—</dd></div>
+                        <div class="occ-s6-sum-item occ-s6-sum-item--wide"><dt>Key terms</dt><dd id="occ-vx-sum-terms">—</dd></div>
+                        <div class="occ-s6-sum-item occ-s6-sum-item--wide"><dt>Also open to</dt><dd id="occ-vx-sum-also">—</dd></div>
+                        <div class="occ-s6-sum-item occ-s6-sum-item--wide"><dt>Alternate model details</dt><dd id="occ-vx-sum-alt-details">—</dd></div>
+                    </dl>
+                </section>
+
+                <!-- 6. Advanced (collapsed) -->
+                <details class="occ-s6-advanced" id="occ-vx-advanced">
+                    <summary class="occ-s6-advanced-summary">
+                        <span class="occ-s6-advanced-title">Advanced value settings</span>
+                        <span class="occ-s6-optional">Optional</span>
+                    </summary>
+                    <div class="occ-s6-advanced-body">
+                        <div class="form-group mb-4">
+                            <label class="occ-s6-field-label">Value items</label>
+                            <p class="occ-s6-help mb-2">Break down value into categories for matching (optional).</p>
+                            <div id="value-items-container" class="space-y-3"></div>
+                            <button type="button" id="add-value-item" class="mt-2 btn btn-secondary btn-sm">+ Add value item</button>
+                        </div>
+                        <div class="form-group mb-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                            <label class="occ-s6-field-label">Negotiation flexibility</label>
+                            <p class="occ-s6-help mb-3">Optional range for compatibility scoring.</p>
+                            <label class="flex items-center mb-3">
+                                <input type="checkbox" id="flexibility-negotiable" name="flexibilityNegotiable" class="rounded border-gray-300">
+                                <span class="ml-2 text-sm text-gray-700">Terms are negotiable</span>
+                            </label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="flexibility-min" class="block text-sm text-gray-600 mb-1">Min. acceptable (SAR)</label>
+                                    <input type="number" id="flexibility-min" name="flexibilityMin" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="0" min="0" step="0.01">
+                                </div>
+                                <div>
+                                    <label for="flexibility-max" class="block text-sm text-gray-600 mb-1">Max. offer (SAR)</label>
+                                    <input type="number" id="flexibility-max" name="flexibilityMax" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="0" min="0" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="value-expected-tags" class="occ-s6-field-label">Partner expectations</label>
+                            <p class="occ-s6-help mb-2">What you expect from partners (e.g. engineering, capital) — optional.</p>
+                            <input type="text" id="value-expected-tags" name="valueExpected" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Design, construction supervision, investment">
+                            <div id="value-expected-list" class="mt-2 flex flex-wrap gap-2 hidden"></div>
+                        </div>
+                        <div class="form-group mb-0">
+                            <label for="exchange-terms-summary" class="occ-s6-field-label">Additional terms &amp; notes</label>
+                            <textarea id="exchange-terms-summary" name="exchangeTermsSummary" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" rows="3" placeholder="Clarifications, special conditions…" data-rich-text="true"></textarea>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Legacy estimated block: hidden; values mirrored into summary card -->
+                <div id="estimated-value-section" class="hidden" aria-hidden="true">
+                    <p id="estimated-value-display">—</p>
                 </div>
-                
-                <!-- 4.6 Agreement (required) -->
-                <div class="form-group">
-                    <label class="flex items-center">
-                        <input type="checkbox" id="exchange-agreement" name="exchangeAgreement" class="mr-2" required>
+
+                <div class="form-group occ-s6-agree">
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <input type="checkbox" id="exchange-agreement" name="exchangeAgreement" class="mt-1 rounded border-gray-300" required>
                         <span class="text-sm text-gray-700">I agree to the exchange terms and understand that details will be finalized during the collaboration agreement phase.</span>
                     </label>
                 </div>
@@ -609,11 +678,14 @@
         </div>
         
         <!-- Step 7: Review & Publish -->
-        <div class="wizard-step-content hidden" id="step-7" data-step="7">
-            <div class="form-section">
-                <h2>Step 7: Review & Publish</h2>
-                <p class="text-gray-600 mb-6">Review your opportunity and choose to save as draft or publish.</p>
-                <div id="review-summary" class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg space-y-2 text-sm"></div>
+        <div class="wizard-step-content occ-step-shell hidden" id="step-7" data-step="7">
+            <div class="form-section occ-step-section">
+                <div class="occ-step-head">
+                    <p class="occ-step-eyebrow">Step 7 of 7</p>
+                    <h2 class="occ-step-title">Review &amp; publish</h2>
+                    <p class="occ-step-lead">Confirm details, then save as draft or publish.</p>
+                </div>
+                <div id="review-summary" class="occ-review-summary-wrap mb-6"></div>
                 <div class="form-group">
                     <label for="status" class="form-label">Action <span class="text-red-600">*</span></label>
                     <select 
@@ -653,7 +725,7 @@
                         <h3 class="text-xl font-semibold text-gray-900">Fill Demo Data?</h3>
                     </div>
                     <p class="text-gray-600 mb-6">
-                        This will fill all form fields with demo data. Any existing data will be replaced. Do you want to continue?
+                        This replaces the form with a <strong>randomly chosen</strong> full demo scenario (a different one each time). Your current entries will be cleared. Continue?
                     </p>
                     <div class="flex justify-end gap-3">
                         <button 
@@ -676,21 +748,24 @@
         </div>
         
         <!-- Wizard Navigation -->
-        <div class="form-actions flex justify-between items-center">
-            <button type="button" id="prev-step" class="px-6 py-2 bg-gray-100 text-gray-900 font-medium rounded-md hover:bg-gray-200 transition-all hidden inline-flex items-center gap-2">
-                <i class="ph-duotone ph-arrow-left" style="font-size: 18px;" aria-hidden="true"></i>
+        <div class="form-actions occ-form-actions occ-wizard-nav flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+            <button type="button" id="prev-step" class="occ-nav-btn occ-nav-btn--secondary px-6 py-3 min-h-[44px] bg-gray-100 text-gray-900 font-medium rounded-lg hover:bg-gray-200 transition-all hidden inline-flex items-center justify-center gap-2">
+                <i class="ph-duotone ph-arrow-left text-lg" aria-hidden="true"></i>
                 Previous
             </button>
-            <div class="flex gap-4 ml-auto">
-                <button type="button" id="next-step" class="px-6 py-2 bg-primary text-white font-medium rounded-md hover:bg-primary-dark transition-all shadow-md inline-flex items-center gap-2">
+            <div class="flex flex-col gap-2 w-full sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-3">
+                <button type="button" id="save-draft-wizard" class="occ-nav-btn occ-nav-btn--secondary px-6 py-3 min-h-[44px] border border-slate-200 bg-white text-slate-800 font-semibold rounded-lg hover:bg-slate-50 transition-all shadow-sm hidden w-full sm:w-auto">
+                    Save draft
+                </button>
+                <button type="button" id="next-step" class="occ-nav-btn occ-nav-btn--primary px-6 py-3 min-h-[44px] bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-all shadow-md inline-flex items-center justify-center gap-2 w-full sm:w-auto">
                     Next
-                    <i class="ph-duotone ph-arrow-right" style="font-size: 18px;" aria-hidden="true"></i>
+                    <i class="ph-duotone ph-arrow-right text-lg" aria-hidden="true"></i>
                 </button>
-                <button type="submit" id="submit-form" class="px-6 py-2 bg-success text-white font-medium rounded-md hover:bg-green-600 transition-all shadow-md hidden">
-                    Create Opportunity
-                </button>
-                <button type="button" class="px-6 py-2 bg-gray-100 text-gray-900 font-medium rounded-md hover:bg-gray-200 transition-all" onclick="router.navigate('/opportunities')">
+                <button type="button" id="wizard-cancel" class="occ-nav-btn occ-nav-btn--ghost px-4 py-3 min-h-[44px] text-sm text-slate-600 font-medium rounded-lg hover:bg-slate-100 transition-all w-full sm:w-auto">
                     Cancel
+                </button>
+                <button type="submit" id="submit-form" class="occ-nav-btn occ-nav-btn--success px-6 py-3 min-h-[44px] bg-success text-white font-semibold rounded-lg hover:bg-green-600 transition-all shadow-md hidden w-full sm:w-auto">
+                    Create Opportunity
                 </button>
             </div>
         </div>
@@ -700,15 +775,393 @@
 
 <style>
 .opportunity-create-page {
-    max-width: 900px;
+    max-width: var(--portal-page-max-width);
+    width: 100%;
     margin: 0 auto;
 }
 
-.wizard-progress {
-    background: white;
+.occ-hero {
+    position: relative;
+    margin-bottom: 1.75rem;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.06);
+}
+.occ-hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 90% 55% at 100% -30%, rgba(99, 102, 241, 0.16), transparent 58%),
+        radial-gradient(ellipse 70% 45% at 0% 110%, rgba(16, 185, 129, 0.1), transparent 52%),
+        linear-gradient(165deg, #fafbff 0%, #ffffff 42%);
+    pointer-events: none;
+}
+.occ-hero-inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem 1.25rem;
+    align-items: stretch;
+}
+@media (min-width: 768px) {
+    .occ-hero-inner {
+        grid-template-columns: 1fr minmax(240px, 300px);
+        gap: 2rem;
+        padding: 2rem 2.25rem;
+        align-items: center;
+    }
+}
+.occ-hero-copy {
+    min-width: 0;
+}
+.occ-hero-topline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin-bottom: 0.75rem;
+}
+.occ-hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: #4f46e5;
+}
+.occ-hero-eyebrow i {
+    font-size: 1rem;
+    opacity: 0.85;
+}
+.occ-hero-pill {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #475569;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+}
+.occ-hero-heading {
+    font-size: clamp(1.5rem, 2.5vw + 0.5rem, 2.125rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    color: #0f172a;
+    margin: 0 0 0.65rem 0;
+}
+.occ-hero-sub {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: #64748b;
+    margin: 0;
+    max-width: 40rem;
+}
+.occ-hero-panel {
+    border-radius: 1rem;
+    padding: 1.15rem 1.2rem;
+    background: linear-gradient(145deg, #eef2ff 0%, #f8fafc 55%, #ffffff 100%);
+    border: 1px solid #c7d2fe;
+    box-shadow: 0 4px 24px rgba(67, 56, 202, 0.08);
+}
+.occ-hero-panel-head {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+.occ-hero-panel-icon {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.65rem;
+    background: #6366f1;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+}
+.occ-hero-panel-title {
+    margin: 0 0 0.35rem 0;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #1e1b4b;
+}
+.occ-hero-panel-desc {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: #475569;
+}
+.occ-hero-demo-btn {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.65rem;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+.occ-body {
+    padding-bottom: 2rem;
+}
+
+/* Wizard track (redesigned) */
+.occ-wizard-wrap {
+    margin-bottom: 1.25rem;
+}
+.occ-wizard-progress {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 0.875rem;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+}
+.occ-wizard-track {
+    gap: 0.25rem;
+}
+
+/* Step shells */
+.occ-step-shell .form-section {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+.occ-step-section {
+    padding: 0.25rem 0 1rem;
+}
+.occ-step-head {
+    margin-bottom: 1.5rem;
+}
+.occ-step-eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6366f1;
+    margin: 0 0 0.35rem 0;
+}
+.occ-step-title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.25;
+}
+.occ-step-lead {
+    font-size: 0.9375rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.55;
+    max-width: 52rem;
+}
+.occ-muted-block {
+    font-size: 0.875rem;
+    color: #64748b;
+    line-height: 1.55;
+}
+
+/* Step 1 project type cards */
+.occ-project-type-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+@media (min-width: 640px) {
+    .occ-project-type-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+    }
+}
+.occ-project-type-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1.25rem 1.35rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.875rem;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.occ-project-type-card:hover {
+    border-color: #93c5fd;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+}
+.occ-project-type-card:has(:checked) {
+    border-color: #2563eb;
+    background: linear-gradient(145deg, #eff6ff 0%, #ffffff 55%);
+    box-shadow: 0 8px 28px rgba(37, 99, 235, 0.12);
+}
+.occ-pt-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.625rem;
+    background: #e0e7ff;
+    color: #4338ca;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+}
+.occ-pt-icon-multi {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+.occ-pt-title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+.occ-pt-desc {
+    font-size: 0.8125rem;
+    color: #64748b;
+    line-height: 1.45;
+}
+
+/* Work packages (step 2, multi project) */
+.occ-work-packages-card {
+    padding: 1.25rem 1.35rem;
+    border-radius: 0.875rem;
+    border: 1px solid #c7d2fe;
+    background: linear-gradient(160deg, #eef2ff 0%, #ffffff 42%);
+    box-shadow: 0 6px 22px rgba(67, 56, 202, 0.06);
+}
+.occ-wp-header {
+    display: flex;
+    gap: 0.875rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+.occ-wp-icon {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.625rem;
+    background: #6366f1;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+.occ-wp-title {
+    margin: 0 0 0.35rem 0;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: #1e1b4b;
+}
+.occ-wp-sub {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #475569;
+    line-height: 1.5;
+}
+.occ-wp-list .occ-wp-row:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* Scope step card */
+.occ-scope-card {
+    background: #fafafa;
     border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
+    border-radius: 0.875rem;
+    padding: 1.5rem 1.35rem 1.25rem;
+}
+
+/* Sticky form actions */
+.occ-form-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    padding-bottom: 0.25rem;
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #fff 18%);
+}
+.occ-nav-btn--ghost {
+    box-shadow: none !important;
+}
+
+.wizard-progress-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 0.5rem;
+}
+.wizard-progress-wrap .wizard-progress {
+    min-width: 640px;
+}
+
+.occ-form-card {
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+    border-radius: 1rem;
+    border: 1px solid #e5e7eb;
+    padding: 2rem;
+}
+
+.occ-step2-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+    align-items: start;
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+@media (min-width: 1024px) {
+    .occ-step2-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+        gap: 2rem;
+    }
+}
+.occ-map-panel {
+    position: relative;
+}
+@media (min-width: 1024px) {
+    .occ-map-panel {
+        position: sticky;
+        top: 1rem;
+    }
+}
+.occ-map-panel-inner {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+}
+.occ-map-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 0.35rem 0;
+}
+.occ-map-lead {
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+}
+.occ-map-frame {
+    min-height: 420px;
+}
+.occ-coords {
+    padding: 0.5rem 0.75rem;
+    background: #f1f5f9;
+    border-radius: 0.375rem;
+    border: 1px solid #e2e8f0;
 }
 
 .wizard-step {
@@ -772,9 +1225,9 @@
 
 .opportunity-form {
     background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    padding: 2rem;
+    border: none;
+    border-radius: 1rem;
+    padding: 0;
 }
 
 .wizard-step-content {
@@ -946,29 +1399,930 @@ input:disabled {
     margin-bottom: 1.5rem;
 }
 
+/* —— Value exchange step (Step 6) —— */
+#step-6 .occ-vx-card {
+    background: linear-gradient(165deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    padding: 1.35rem 1.5rem;
+    box-shadow: 0 4px 22px rgba(15, 23, 42, 0.04);
+}
+#step-6 .occ-vx-card--budget .occ-vx-card-head {
+    margin-bottom: 1.1rem;
+}
+#step-6 .occ-vx-card-head {
+    margin-bottom: 1rem;
+}
+#step-6 .occ-vx-card-title {
+    margin: 0 0 0.35rem 0;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+}
+#step-6 .occ-vx-card-desc {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #64748b;
+    line-height: 1.5;
+    max-width: 40rem;
+}
+#step-6 .occ-vx-budget-prefix .input-prefix {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    border-radius: 0.625rem 0 0 0.625rem;
+}
+#step-6 .occ-vx-budget-prefix .budget-input {
+    border-radius: 0 0.625rem 0.625rem 0;
+    border-color: #cbd5e1;
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+}
+
+/* Step 6 — Budget & collaboration value (occ-s6) */
+#step-6 .occ-step6-inner {
+    max-width: 52rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+#step-6 .occ-s6-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    padding: 1.25rem 1.35rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.05);
+}
+#step-6 .occ-s6-card-head {
+    margin-bottom: 1rem;
+}
+#step-6 .occ-s6-card-title {
+    margin: 0 0 0.35rem 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+}
+#step-6 .occ-s6-card-desc {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #64748b;
+    line-height: 1.55;
+    max-width: 42rem;
+}
+#step-6 .occ-s6-optional {
+    display: inline-block;
+    margin-left: 0.35rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+    vertical-align: middle;
+}
+#step-6 .occ-s6-field-label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.35rem;
+}
+#step-6 .occ-s6-help {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 0.25rem 0 0 0;
+    line-height: 1.45;
+}
+#step-6 .occ-s6-budget-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    align-items: end;
+}
+@media (min-width: 768px) {
+    #step-6 .occ-s6-budget-row {
+        grid-template-columns: 1fr auto 1fr;
+        gap: 0.75rem 1rem;
+    }
+    #step-6 .occ-s6-budget-sep {
+        padding-bottom: 1.75rem;
+        text-align: center;
+    }
+}
+#step-6 .occ-s6-budget-sep span {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #94a3b8;
+}
+#step-6 .occ-s6-mode-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+}
+@media (min-width: 480px) {
+    #step-6 .occ-s6-mode-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (min-width: 900px) {
+    #step-6 .occ-s6-mode-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+#step-6 button.exchange-mode-card.occ-s6-mode-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+    min-height: 88px;
+    padding: 0.85rem 0.9rem;
+    border-radius: 0.875rem;
+    border: 1.5px solid #e2e8f0;
+    background: #fafafa;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s, transform 0.12s;
+    font: inherit;
+    color: inherit;
+}
+#step-6 button.exchange-mode-card.occ-s6-mode-card:hover {
+    border-color: #93c5fd;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.08);
+    transform: translateY(-1px);
+}
+#step-6 button.exchange-mode-card.occ-s6-mode-card.selected,
+#step-6 button.exchange-mode-card.occ-s6-mode-card[aria-pressed="true"] {
+    border-color: #2563eb;
+    background: linear-gradient(165deg, #eff6ff 0%, #ffffff 75%);
+    box-shadow: 0 6px 22px rgba(37, 99, 235, 0.14);
+}
+#step-6 .occ-s6-mode-ic {
+    font-size: 1.5rem;
+    color: #3b82f6;
+    margin-bottom: 0.35rem;
+    line-height: 1;
+}
+#step-6 .occ-s6-mode-name {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+#step-6 .occ-s6-mode-hint {
+    font-size: 0.6875rem;
+    color: #64748b;
+    margin-top: 0.15rem;
+    line-height: 1.35;
+}
+#step-6 .occ-s6-selected {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid #c7d2fe;
+    background: linear-gradient(120deg, #eef2ff 0%, #fafafa 100%);
+}
+#step-6 .occ-s6-selected-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6366f1;
+}
+#step-6 .occ-s6-selected-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e1b4b;
+}
+#step-6 .occ-s6-change-btn {
+    margin-left: auto;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #4f46e5;
+    background: #fff;
+    border: 1px solid #c7d2fe;
+    padding: 0.45rem 0.85rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    min-height: 40px;
+}
+#step-6 .occ-s6-change-btn:hover {
+    background: #eef2ff;
+}
+#step-6 .occ-s6-dynamic.exchange-mode-fields {
+    margin-bottom: 0;
+}
+#step-6 .occ-s6-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+#step-6 .occ-s6-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 1rem;
+    min-height: 44px;
+    border-radius: 9999px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+#step-6 .occ-s6-chip:hover:not(.occ-s6-chip--primary-lock) {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+}
+#step-6 .occ-s6-chip:has(input:checked) {
+    border-color: #6366f1;
+    background: #eef2ff;
+    color: #3730a3;
+    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.22);
+}
+#step-6 .occ-s6-chip--primary-lock {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+#step-6 .occ-s6-card--currency {
+    padding: 1rem 1.25rem;
+}
+#step-6 .occ-s6-card--summary {
+    border-color: #bfdbfe;
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+#step-6 .occ-s6-sum-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem 1.25rem;
+    margin: 0;
+}
+@media (min-width: 640px) {
+    #step-6 .occ-s6-sum-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+#step-6 .occ-s6-sum-item {
+    margin: 0;
+}
+#step-6 .occ-s6-sum-item dt {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin: 0 0 0.2rem 0;
+}
+#step-6 .occ-s6-sum-item dd {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.45;
+}
+#step-6 .occ-s6-sum-item--wide {
+    grid-column: 1 / -1;
+}
+#step-6 .occ-s6-advanced {
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    background: #fff;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 1px 8px rgba(15, 23, 42, 0.04);
+}
+#step-6 .occ-s6-advanced-summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 1rem 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 48px;
+}
+#step-6 .occ-s6-advanced-summary::-webkit-details-marker {
+    display: none;
+}
+#step-6 .occ-s6-advanced-body {
+    padding: 0 1.25rem 1.25rem;
+    border-top: 1px solid #f1f5f9;
+}
+#step-6 .occ-s6-agree {
+    margin-top: 0.5rem;
+}
+
+#step-6 .occ-s6-card--alt-details {
+    border-color: #e0e7ff;
+    background: linear-gradient(180deg, #fafbff 0%, #ffffff 100%);
+}
+#step-6 .occ-s6-alt-host {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+#step-6 .occ-s6-alt-panel {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.875rem;
+    padding: 1.1rem 1.2rem;
+    background: #fff;
+    box-shadow: 0 1px 6px rgba(15, 23, 42, 0.04);
+}
+#step-6 .occ-s6-alt-panel-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin-bottom: 0.75rem;
+}
+#step-6 .occ-s6-alt-badge {
+    font-size: 0.625rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #4338ca;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    padding: 0.2rem 0.5rem;
+    border-radius: 9999px;
+}
+#step-6 .occ-s6-alt-panel-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+#step-6 .occ-s6-alt-panel .form-label,
+#step-6 .occ-s6-alt-panel .occ-s6-field-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #334155;
+}
+#step-6 .occ-s6-alt-panel .grid {
+    gap: 1rem;
+}
+#step-6 .occ-s6-alt-hybrid-total {
+    margin-top: 0.5rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: 0.5rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+#step-6 .occ-vx-mode-grid {
+    margin-bottom: 0.25rem;
+}
+#step-6 .occ-vx-mode-card.exchange-mode-card {
+    border-radius: 0.875rem;
+    border-width: 1.5px;
+    border-color: #e2e8f0;
+    padding: 1.15rem 1rem;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset;
+}
+#step-6 .occ-vx-mode-card.exchange-mode-card:hover {
+    transform: translateY(-1px);
+    border-color: #93c5fd;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.1);
+}
+#step-6 .occ-vx-mode-card.exchange-mode-card.selected {
+    border-color: #2563eb;
+    background: linear-gradient(160deg, #eff6ff 0%, #ffffff 70%);
+    box-shadow: 0 8px 28px rgba(37, 99, 235, 0.15);
+}
+
+#step-6 .occ-vx-selection {
+    margin-top: 1.1rem;
+}
+#step-6 .occ-vx-selection-inner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.15rem;
+    border-radius: 0.875rem;
+    border: 1px solid #c7d2fe;
+    background: linear-gradient(120deg, #eef2ff 0%, #f5f3ff 55%, #ffffff 100%);
+    box-shadow: 0 4px 16px rgba(79, 70, 229, 0.08);
+}
+#step-6 .occ-vx-selection-badge {
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    background: linear-gradient(145deg, #6366f1, #4f46e5);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+}
+#step-6 .occ-vx-selection-body {
+    flex: 1;
+    min-width: 0;
+}
+#step-6 .occ-vx-selection-label {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6366f1;
+    margin-bottom: 0.2rem;
+}
+#step-6 .occ-vx-selection-value {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e1b4b;
+    line-height: 1.2;
+}
+#step-6 .occ-vx-selection-change {
+    flex-shrink: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #4f46e5;
+    background: #fff;
+    border: 1px solid #c7d2fe;
+    padding: 0.45rem 0.9rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+#step-6 .occ-vx-selection-change:hover {
+    background: #eef2ff;
+    border-color: #818cf8;
+}
+
+#step-6 .occ-vx-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #e2e8f0 15%, #e2e8f0 85%, transparent);
+    margin: 1.35rem 0 1.15rem;
+}
+#step-6 .occ-vx-subhead {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin-bottom: 0.85rem;
+}
+@media (min-width: 640px) {
+    #step-6 .occ-vx-subhead {
+        flex-direction: row;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+}
+#step-6 .occ-vx-subhead-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #334155;
+}
+#step-6 .occ-vx-subhead-hint {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+#step-6 .occ-vx-chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+#step-6 .occ-vx-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.15s, background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+#step-6 .occ-vx-chip:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+}
+#step-6 .occ-vx-chip:has(input:checked) {
+    border-color: #6366f1;
+    background: #eef2ff;
+    color: #3730a3;
+    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.25);
+}
+#step-6 .occ-vx-chip:focus-within {
+    outline: 2px solid #818cf8;
+    outline-offset: 2px;
+}
+#step-6 .occ-vx-chip--ghost {
+    background: #fafafa;
+    font-weight: 500;
+}
+#step-6 .occ-vx-chip-group--muted .occ-vx-chip--ghost:has(input:checked) {
+    border-color: #94a3b8;
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+#step-6 .occ-vx-card--detail {
+    border-color: #e0e7ff;
+    background: linear-gradient(180deg, #fafaff 0%, #ffffff 55%);
+}
+#step-6 .occ-vx-field-stack.exchange-mode-fields {
+    margin-bottom: 0;
+}
+#step-6 .occ-vx-empty {
+    margin: 0;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: #64748b;
+    line-height: 1.55;
+    border: 1px dashed #cbd5e1;
+    border-radius: 0.75rem;
+    background: #f8fafc;
+}
+
+#step-6 #exchange-mode-fields .form-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.4rem;
+}
+#step-6 #exchange-mode-fields .occ-vx-control,
+#step-6 #exchange-mode-fields .occ-vx-mode-fields-inner input,
+#step-6 #exchange-mode-fields .occ-vx-mode-fields-inner select,
+#step-6 #exchange-mode-fields .occ-vx-mode-fields-inner textarea {
+    border-radius: 0.625rem !important;
+}
+#step-6 #exchange-mode-fields .occ-vx-control:focus {
+    outline: none;
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+#step-6 .occ-vx-hybrid-meter {
+    transition: background 0.2s, border-color 0.2s;
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border-width: 1px;
+    border-style: solid;
+    background: #f8fafc;
+    border-color: #e2e8f0 !important;
+}
+#step-6 .occ-vx-hybrid-meter--pending {
+    background: #f8fafc;
+    border-color: #e2e8f0 !important;
+}
+#step-6 .occ-vx-hybrid-meter--ok {
+    background: linear-gradient(120deg, #ecfdf5 0%, #f0fdf4 100%) !important;
+    border-color: #6ee7b7 !important;
+}
+
+#step-6 .occ-vx-card--alt {
+    background: #fafafa;
+    border-style: dashed;
+}
+
+/* Step 5 — dynamic model fields (multi-select chips, switches, arrays) */
+.occ-model-details-wrap {
+    background: linear-gradient(180deg, #fafbff 0%, #ffffff 40%);
+    border: 1px solid #e2e8f0;
+    border-radius: 0.875rem;
+    padding: 1.25rem 1.35rem;
+    margin-top: 1.5rem;
+}
+.occ-dynamic-fields .occ-model-field {
+    padding: 1rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+.occ-dynamic-fields .occ-model-field:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.occ-dynamic-fields .occ-model-field-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 0.65rem;
+}
+
+.occ-dynamic-fields .occ-ms-chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.occ-dynamic-fields .occ-ms-chip {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+.occ-dynamic-fields .occ-ms-chip input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.occ-dynamic-fields .occ-ms-chip span {
+    display: inline-block;
+    padding: 0.45rem 0.85rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.occ-dynamic-fields .occ-ms-chip:hover span {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+}
+.occ-dynamic-fields .occ-ms-chip input:checked + span {
+    border-color: #6366f1;
+    background: #eef2ff;
+    color: #312e81;
+    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2);
+}
+.occ-dynamic-fields .occ-ms-chip input:focus-visible + span {
+    outline: 2px solid #818cf8;
+    outline-offset: 2px;
+}
+.occ-dynamic-fields .occ-ms-hint {
+    margin: 0.65rem 0 0 0;
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.occ-dynamic-fields .occ-bool-field {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.occ-dynamic-fields .occ-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+.occ-dynamic-fields .occ-switch-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.occ-dynamic-fields .occ-switch-track {
+    width: 2.75rem;
+    height: 1.5rem;
+    border-radius: 9999px;
+    background: #e2e8f0;
+    transition: background 0.2s;
+    position: relative;
+}
+.occ-dynamic-fields .occ-switch-track::after {
+    content: '';
+    position: absolute;
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 50%;
+    background: #fff;
+    top: 0.175rem;
+    left: 0.2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+}
+.occ-dynamic-fields .occ-switch-input:checked + .occ-switch-track {
+    background: linear-gradient(90deg, #6366f1, #4f46e5);
+}
+.occ-dynamic-fields .occ-switch-input:checked + .occ-switch-track::after {
+    transform: translateX(1.2rem);
+}
+.occ-dynamic-fields .occ-switch-input:focus-visible + .occ-switch-track {
+    outline: 2px solid #818cf8;
+    outline-offset: 2px;
+}
+.occ-dynamic-fields .occ-bool-state {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #64748b;
+    min-width: 2rem;
+}
+
+.occ-dynamic-fields .occ-array-container {
+    border: 1px dashed #cbd5e1;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    background: #fafafa;
+    margin-bottom: 0.75rem;
+}
+.occ-dynamic-fields .occ-array-empty {
+    text-align: center;
+    padding: 1.25rem 0.5rem;
+}
+.occ-dynamic-fields .occ-array-empty-title {
+    margin: 0 0 0.35rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #64748b;
+}
+.occ-dynamic-fields .occ-array-empty-hint {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #94a3b8;
+    line-height: 1.45;
+}
+.occ-dynamic-fields .occ-array-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 0.65rem;
+    align-items: center;
+    margin-bottom: 0.65rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.occ-dynamic-fields .occ-array-row:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+@media (max-width: 640px) {
+    .occ-dynamic-fields .occ-array-row {
+        grid-template-columns: 1fr;
+    }
+}
+.occ-dynamic-fields .occ-array-input {
+    border-radius: 0.5rem;
+    border-color: #e2e8f0;
+}
+.occ-dynamic-fields .occ-array-add-btn {
+    border-radius: 0.5rem;
+}
+
+/* Step 7 — review summary */
+#step-7 .occ-review-summary-wrap {
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+#step-7 .occ-review-summary {
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 6px 28px rgba(15, 23, 42, 0.06);
+}
+#step-7 .occ-review-grid {
+    padding: 1.1rem 1.25rem;
+    display: grid;
+    gap: 0.65rem 1.5rem;
+}
+@media (min-width: 640px) {
+    #step-7 .occ-review-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+#step-7 .occ-review-row {
+    display: grid;
+    grid-template-columns: minmax(0, 7.5rem) 1fr;
+    gap: 0.35rem 0.75rem;
+    align-items: baseline;
+    font-size: 0.875rem;
+}
+#step-7 .occ-review-row--tasks {
+    grid-column: 1 / -1;
+    display: block;
+}
+#step-7 .occ-review-key {
+    font-weight: 700;
+    color: #64748b;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+#step-7 .occ-review-val {
+    color: #0f172a;
+    font-weight: 500;
+    word-break: break-word;
+}
+#step-7 .occ-review-tasklist {
+    margin: 0.5rem 0 0 0;
+    padding-left: 1.25rem;
+    color: #334155;
+    font-size: 0.875rem;
+}
+#step-7 .occ-review-tasklist li {
+    margin-bottom: 0.25rem;
+}
+#step-7 .occ-review-desc {
+    border-top: 1px solid #f1f5f9;
+    padding: 1rem 1.25rem 1.15rem;
+    background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
+}
+#step-7 .occ-review-desc-label {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 0.4rem;
+}
+#step-7 .occ-review-desc-text {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: #334155;
+    white-space: pre-wrap;
+}
+
 /* Rich Text Editor Styles */
+/* Rich text: grid-safe width + clearer compact editors (step 6 / alternates) */
+#step-6 .exchange-mode-fields .form-group,
+#step-6 #mode-specific-fields .form-group,
+#step-6 .occ-s6-alt-panel .form-group,
+#step-6 .occ-s6-advanced-body .form-group {
+    min-width: 0;
+}
+.occ-rtx-field {
+    padding: 0.75rem 0.85rem;
+    border-radius: 0.65rem;
+    border: 1px solid #e2e8f0;
+    background: #fafbfc;
+}
+.occ-rtx-field .form-label,
+.occ-rtx-field .occ-s6-field-label {
+    margin-bottom: 0;
+}
+
+.rich-text-editor-container {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    background: #fff;
+    box-sizing: border-box;
+}
+.rich-text-editor-container .ql-toolbar.ql-snow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 4px;
+    padding: 8px 10px;
+    border-color: #e2e8f0;
+    background: #f8fafc;
+}
+.rich-text-editor-container .ql-toolbar.ql-snow .ql-formats {
+    margin-right: 6px;
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+}
+.rich-text-editor-container--compact .ql-toolbar.ql-snow {
+    padding: 6px 8px;
+}
+.rich-text-editor-container .ql-container.ql-snow {
+    border-top: none;
+    border-color: #e2e8f0;
+}
 .rich-text-editor-container .ql-container {
     font-family: inherit;
     font-size: 0.875rem;
     border-bottom-left-radius: 0.375rem;
     border-bottom-right-radius: 0.375rem;
-    border-color: #d1d5db;
-}
-
-.rich-text-editor-container .ql-toolbar {
-    border-top-left-radius: 0.375rem;
-    border-top-right-radius: 0.375rem;
-    border-color: #d1d5db;
-    background: #f9fafb;
+    border-color: #e2e8f0;
 }
 
 .rich-text-editor-container .ql-editor {
-    min-height: 120px;
+    min-height: 100px;
+}
+.rich-text-editor-container--compact .ql-editor {
+    min-height: 88px;
+    font-size: 0.9375rem;
+    line-height: 1.55;
 }
 
 .rich-text-editor-container .ql-editor.ql-blank::before {
-    color: #9ca3af;
+    color: #64748b;
     font-style: normal;
+    opacity: 0.95;
+    left: 15px;
 }
 
 .rich-text-editor-container .ql-snow .ql-stroke {

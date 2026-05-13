@@ -5,10 +5,25 @@
 let currentStep = 1;
 const TOTAL_STEPS = 7;
 let allLocations = [];
-let demoDataIndex = 0;
+/** Index of last used demo scenario so each fill prefers a different one when possible. */
+let lastDemoDatasetIndex = -1;
 
 /**
- * Demo datasets for "Fill Demo Data" – each click rotates to the next scenario.
+ * Picks a random demo scenario (never the same as the previous fill when multiple exist).
+ */
+function pickRandomDemoDataset() {
+    const n = DEMO_DATASETS.length;
+    if (n <= 1) return DEMO_DATASETS[0];
+    let idx;
+    do {
+        idx = Math.floor(Math.random() * n);
+    } while (idx === lastDemoDatasetIndex);
+    lastDemoDatasetIndex = idx;
+    return DEMO_DATASETS[idx];
+}
+
+/**
+ * Demo datasets for "Fill Demo Data" – each use loads a random scenario from this list.
  * step1: title, description, locationKey ('riyadh' | 'jeddah' | 'remote').
  * step2: intent ('request' | 'offer').
  * step3: skills, sectors, interests (arrays).
@@ -56,6 +71,54 @@ const DEMO_DATASETS = [
                 cashPaymentTerms: 'milestone_based',
                 cashMilestones: '30% upon contract signing, 40% at design completion, 30% upon final delivery.',
                 exchangeTermsSummary: 'Payment in SAR. Invoicing monthly. 5% retention released 30 days after project completion.'
+            },
+            agreement: true
+        },
+        step6: { status: 'draft' }
+    },
+    {
+        projectType: 'multi',
+        step1: {
+            title: 'Regional Rollout — Multi-Site Deployment Program',
+            description: 'Program-wide engagement covering multiple sites under one umbrella contract. Work packages may be staffed independently while sharing governance and reporting.',
+            locationKey: 'riyadh'
+        },
+        step2: { intent: 'request' },
+        step3: {
+            skills: ['Program Management', 'Construction Supervision', 'Quality Assurance'],
+            sectors: ['Construction', 'Infrastructure'],
+            interests: ['Multi-site', 'Rollout'],
+            certifications: ['PMP']
+        },
+        step4: {
+            category: 'project_based',
+            subModel: 'task_based',
+            modelFields: {
+                taskTitle: 'Phase A — Design integration & permits',
+                taskType: 'Program',
+                detailedScope: 'Overall program scope spans multiple work packages listed separately. Each package has clear deliverables under the same opportunity record.',
+                duration: '180',
+                requiredSkills: 'Program Management, Construction Supervision',
+                experienceLevel: 'Senior',
+                locationRequirement: 'Hybrid',
+                startDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                deliverableFormat: 'Reports, site logs, sign-off packs per package'
+            }
+        },
+        step4MultiTasks: [
+            { title: 'Phase A — Design integration & permits', duration: '60', notes: 'Consolidated design alignment across sites; permit submissions.' },
+            { title: 'Phase B — Field execution & handover', duration: '120', notes: 'Construction oversight, commissioning, and close-out.' }
+        ],
+        step5: {
+            budgetMin: '800000',
+            budgetMax: '1200000',
+            exchangeMode: 'cash',
+            currency: 'SAR',
+            modeFields: {
+                cashAmount: '1000000',
+                cashPaymentTerms: 'milestone_based',
+                cashMilestones: 'Per work package milestones aligned to program gates.',
+                exchangeTermsSummary: 'SAR. Milestones tied to each work package completion.'
             },
             agreement: true
         },
@@ -172,9 +235,12 @@ const DEMO_DATASETS = [
             exchangeMode: 'profit_sharing',
             currency: null,
             modeFields: {
-                profitSplit: '60-40',
-                profitBasis: 'profit',
-                profitDistribution: '60-40 profit split after costs, distributed quarterly.',
+                'profit-share-percentage': '15',
+                'profit-basis': 'profit',
+                'profit-duration': 'project',
+                'profit-split': '60-40',
+                'expected-profit': '500000',
+                'profit-distribution': '60-40 profit split after costs, distributed quarterly.',
                 exchangeTermsSummary: 'Profit share calculated after project costs. Quarterly distributions.'
             },
             agreement: true
@@ -462,12 +528,12 @@ function flattenLocations() {
 
 async function initializeForm() {
     setupLocationSearch();
-    setupMapPicker();
     setupIntentLabels();
     setupScopeTags();
     setupCategoryAndSubModel();
     setupInlineAdvisor();
     setupExchangeModeSelection();
+    setupMultiProjectTasks();
     setupReviewSummary();
 }
 
@@ -688,6 +754,7 @@ function renderSubModelOptions(categoryKey, clearSubModel) {
                 subModelTypeInput.value = subKey;
                 if (modelDetailsSection) modelDetailsSection.style.display = 'block';
                 renderDynamicFields(categoryKey, subKey);
+                updateMultiProjectTasksUI();
             });
         } else {
             label.className = 'submodel-option submodel-disabled p-4 border-2 border-gray-100 rounded-lg opacity-50 cursor-not-allowed relative';
@@ -840,8 +907,29 @@ function setupWizardNavigation() {
     const nextBtn = document.getElementById('next-step');
     const prevBtn = document.getElementById('prev-step');
     const submitBtn = document.getElementById('submit-form');
+    const saveDraftBtn = document.getElementById('save-draft-wizard');
+    const cancelBtn = document.getElementById('wizard-cancel');
+    const form = document.getElementById('opportunity-form');
     if (!nextBtn || !prevBtn) return;
-    
+
+    if (saveDraftBtn && form) {
+        saveDraftBtn.addEventListener('click', () => {
+            const statusField = document.getElementById('status');
+            if (statusField) statusField.value = 'draft';
+            if (!validateStepsRange(1, 7)) return;
+            form.requestSubmit();
+        });
+    }
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            if (typeof router !== 'undefined' && router.navigate) {
+                router.navigate('/opportunities');
+            } else {
+                window.location.hash = '#/opportunities';
+            }
+        });
+    }
+
     nextBtn.addEventListener('click', () => {
         if (validateCurrentStep()) {
             if (currentStep === 4) persistScopeTags();
@@ -874,12 +962,6 @@ function persistScopeTags() {
     });
 }
 
-function syncPaymentModesToPrimary() {
-    const checked = Array.from(document.querySelectorAll('.payment-mode-cb:checked')).map(c => c.value);
-    const primary = document.getElementById('exchange-mode');
-    if (primary) primary.value = checked[0] || '';
-}
-
 function fillReviewSummary() {
     const summary = document.getElementById('review-summary');
     if (!summary) return;
@@ -887,7 +969,9 @@ function fillReviewSummary() {
     const projectTypeEl = document.querySelector('input[name="projectType"]:checked');
     const projectTypeLabel = projectTypeEl ? (projectTypeEl.value === 'single' ? 'Single Project' : 'Multi Project') : '—';
     const title = document.getElementById('title')?.value || '—';
-    const desc = document.getElementById('description')?.value || '—';
+    const descRaw = document.getElementById('description')?.value || '—';
+    const descPlain = plainTextFromHtml(descRaw);
+    const descPreview = descPlain.length > 280 ? descPlain.slice(0, 280) + '…' : descPlain;
     const intentEl = document.querySelector('input[name="intent"]:checked');
     const intentLabel = intentEl ? (intentEl.value === 'request' ? 'NEED' : intentEl.value === 'hybrid' ? 'NEED + OFFER' : 'OFFER') : '—';
     const intent = intentLabel;
@@ -903,7 +987,7 @@ function fillReviewSummary() {
         }
     }
     const exchangeMode = document.getElementById('exchange-mode')?.value;
-    const modeNames = { cash: 'Cash', equity: 'Equity', profit_sharing: 'Profit-Sharing', barter: 'Barter', hybrid: 'Hybrid' };
+    const modeNames = { cash: 'Cash', equity: 'Equity', profit_sharing: 'Profit sharing', barter: 'Barter', hybrid: 'Hybrid' };
     const modeLabel = exchangeMode ? (modeNames[exchangeMode] || exchangeMode) : '—';
     const budgetMin = document.getElementById('budgetRange_min')?.value;
     const budgetMax = document.getElementById('budgetRange_max')?.value;
@@ -912,9 +996,38 @@ function fillReviewSummary() {
     const attrStart = document.getElementById('attr-startDate')?.value?.trim();
     const attrDeadline = document.getElementById('attr-applicationDeadline')?.value?.trim();
     const attrEnd = document.getElementById('attr-endDate')?.value?.trim();
-    const paymentCbs = document.querySelectorAll('.payment-method-cb:checked');
-    const paymentMethodsLabel = paymentCbs.length > 0 ? Array.from(paymentCbs).map(c => modeNames[c.value] || c.value).join(', ') : modeLabel;
+    const alsoLabels = Array.from(document.querySelectorAll('.accepted-mode-cb:checked'))
+        .map(c => modeNames[c.value] || c.value)
+        .filter(label => label && label !== modeLabel);
+    const alsoOpenLine = alsoLabels.length ? alsoLabels.join(', ') : '';
+    const altRows = collectAlternateExchangeDetailsFromForm();
+    let alternateDetailsBlock = '';
+    if (altRows.length) {
+        alternateDetailsBlock = altRows.map(r => {
+            const lab = ALT_MODE_LABELS[r.mode] || r.mode;
+            let txt = '';
+            if (r.mode === 'barter') {
+                txt = [plainTextFromHtml(r.offer || ''), plainTextFromHtml(r.terms || '')].filter(Boolean).join(' — ');
+            } else {
+                txt = plainTextFromHtml(r.summary || '');
+            }
+            const short = txt.length > 200 ? txt.slice(0, 200) + '…' : txt;
+            return `<div class="occ-review-row"><span class="occ-review-key">${escapeHtml(lab)} (alternate)</span><span class="occ-review-val">${escapeHtml(short || '—')}</span></div>`;
+        }).join('');
+    }
     const skills = getScopeTagsFromInput('scope-skills');
+    let projectTasksBlock = '';
+    if (isMultiProjectSelected()) {
+        const pt = collectProjectTasksFromUI().filter(t => t.title);
+        if (pt.length) {
+            const items = pt.map(t => `<li>${escapeHtml(t.title)}</li>`).join('');
+            projectTasksBlock = `
+                <div class="occ-review-row occ-review-row--tasks">
+                    <span class="occ-review-key">Work packages</span>
+                    <ul class="occ-review-tasklist">${items}</ul>
+                </div>`;
+        }
+    }
     let modelDetailsLine = '—';
     if (modelType && subModelType && window.opportunityFormService) {
         const attrs = window.opportunityFormService.getAttributes(modelType, subModelType);
@@ -929,20 +1042,29 @@ function fillReviewSummary() {
         if (keyLabels.length) modelDetailsLine = keyLabels.join('; ');
     }
     summary.innerHTML = `
-        <p><strong>Project Type:</strong> ${escapeHtml(projectTypeLabel)}</p>
-        <p><strong>Title:</strong> ${escapeHtml(title)}</p>
-        <p><strong>Intent:</strong> ${escapeHtml(intent)}</p>
-        <p><strong>Location:</strong> ${escapeHtml(location)}</p>
-        ${locationReq ? `<p><strong>Location requirement:</strong> ${escapeHtml(locationReq)}</p>` : ''}
-        ${(attrStart || attrDeadline || attrEnd) ? `<p><strong>Key dates:</strong> Start ${attrStart || '—'}, Deadline ${attrDeadline || '—'}, End ${attrEnd || '—'}</p>` : ''}
-        <p><strong>Category:</strong> ${escapeHtml(categoryLabel)}</p>
-        <p><strong>Sub-Model:</strong> ${escapeHtml(subModelLabel)}</p>
-        <p><strong>Exchange mode:</strong> ${escapeHtml(modeLabel)}</p>
-        ${paymentCbs.length > 1 ? `<p><strong>Payment methods:</strong> ${escapeHtml(paymentMethodsLabel)}</p>` : ''}
-        <p><strong>Budget range:</strong> ${escapeHtml(budgetLabel)}</p>
-        <p><strong>Skills:</strong> ${skills.length ? escapeHtml(skills.join(', ')) : '—'}</p>
-        <p><strong>Model details:</strong> ${escapeHtml(modelDetailsLine)}</p>
-        <p class="text-gray-600 mt-2">${escapeHtml(desc.slice(0, 200))}${desc.length > 200 ? '...' : ''}</p>
+        <div class="occ-review-summary">
+            <div class="occ-review-grid">
+                <div class="occ-review-row"><span class="occ-review-key">Project type</span><span class="occ-review-val">${escapeHtml(projectTypeLabel)}</span></div>
+                <div class="occ-review-row"><span class="occ-review-key">Title</span><span class="occ-review-val">${escapeHtml(title)}</span></div>
+                <div class="occ-review-row"><span class="occ-review-key">Intent</span><span class="occ-review-val">${escapeHtml(intent)}</span></div>
+                <div class="occ-review-row"><span class="occ-review-key">Location</span><span class="occ-review-val">${escapeHtml(location)}</span></div>
+                ${locationReq ? `<div class="occ-review-row"><span class="occ-review-key">Location requirement</span><span class="occ-review-val">${escapeHtml(locationReq)}</span></div>` : ''}
+                ${(attrStart || attrDeadline || attrEnd) ? `<div class="occ-review-row"><span class="occ-review-key">Key dates</span><span class="occ-review-val">Start ${escapeHtml(attrStart || '—')} · Deadline ${escapeHtml(attrDeadline || '—')} · End ${escapeHtml(attrEnd || '—')}</span></div>` : ''}
+                <div class="occ-review-row"><span class="occ-review-key">Category</span><span class="occ-review-val">${escapeHtml(categoryLabel)}</span></div>
+                <div class="occ-review-row"><span class="occ-review-key">Sub-model</span><span class="occ-review-val">${escapeHtml(subModelLabel)}</span></div>
+                <div class="occ-review-row"><span class="occ-review-key">Exchange mode</span><span class="occ-review-val">${escapeHtml(modeLabel)}</span></div>
+                ${alsoOpenLine ? `<div class="occ-review-row"><span class="occ-review-key">Also open to</span><span class="occ-review-val">${escapeHtml(alsoOpenLine)}</span></div>` : ''}
+                ${alternateDetailsBlock}
+                <div class="occ-review-row"><span class="occ-review-key">Budget range</span><span class="occ-review-val">${escapeHtml(budgetLabel)}</span></div>
+                <div class="occ-review-row"><span class="occ-review-key">Skills</span><span class="occ-review-val">${skills.length ? escapeHtml(skills.join(', ')) : '—'}</span></div>
+                ${projectTasksBlock}
+                <div class="occ-review-row"><span class="occ-review-key">Model details</span><span class="occ-review-val">${escapeHtml(modelDetailsLine)}</span></div>
+            </div>
+            <div class="occ-review-desc">
+                <span class="occ-review-desc-label">Description</span>
+                <p class="occ-review-desc-text">${escapeHtml(descPreview || '—')}</p>
+            </div>
+        </div>
     `;
 }
 
@@ -951,6 +1073,14 @@ function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+}
+
+/** Strip tags for review / summaries (e.g. rich-text description). */
+function plainTextFromHtml(html) {
+    if (html == null || html === '') return '';
+    const d = document.createElement('div');
+    d.innerHTML = String(html);
+    return (d.textContent || d.innerText || '').replace(/\s+/g, ' ').trim();
 }
 
 function validateCurrentStep() {
@@ -1009,6 +1139,7 @@ function validateCurrentStep() {
             break;
         }
         case 5: {
+            syncMultiTaskTitleFromRows();
             const modelType = document.getElementById('model-type')?.value;
             const subModelType = document.getElementById('submodel-type')?.value;
             if (!modelType) {
@@ -1041,6 +1172,13 @@ function validateCurrentStep() {
                             showError(`Model details: ${attr.label || attr.key} is required`);
                             return false;
                         }
+                    } else if (attr.type === 'multi-select') {
+                        const wrap = document.querySelector(`.occ-ms-field[data-field-key="${attr.key}"]`);
+                        const n = wrap ? wrap.querySelectorAll('.occ-ms-option:checked').length : 0;
+                        if (n === 0) {
+                            showError(`Model details: select at least one option for ${attr.label || attr.key}`);
+                            return false;
+                        }
                     } else {
                         const el = document.getElementById(attr.key) || document.querySelector(`[name="${attr.key}"]`);
                         if (!el) continue;
@@ -1052,6 +1190,18 @@ function validateCurrentStep() {
                             return false;
                         }
                     }
+                }
+            }
+            if (multiProjectWorkPackagesRequired()) {
+                const pTasks = collectProjectTasksFromUI();
+                if (pTasks.length < 2) {
+                    showError('Multi-project task-based opportunities need at least two work packages. Add packages in Basic Information or use Single Project for one workstream.');
+                    return false;
+                }
+                const missingTitle = pTasks.some(t => !t.title || !t.title.trim());
+                if (missingTitle) {
+                    showError('Each work package must have a task title.');
+                    return false;
                 }
             }
             break;
@@ -1084,13 +1234,23 @@ function validateCurrentStep() {
                 const equityPct = document.getElementById('equity-percentage')?.value?.trim();
                 if (!equityPct || isNaN(parseFloat(equityPct))) { showError('Equity percentage is required'); return false; }
             } else if (exchangeMode === 'profit_sharing') {
-                const profitSplit = document.getElementById('profit-split')?.value?.trim();
-                if (!profitSplit) { showError('Profit split is required'); return false; }
+                const profitPct = document.getElementById('profit-share-percentage')?.value?.trim();
+                if (!profitPct || isNaN(parseFloat(profitPct))) {
+                    showError('Profit share percentage is required');
+                    return false;
+                }
+                const profitDur = document.getElementById('profit-duration')?.value?.trim();
+                if (!profitDur) {
+                    showError('Duration is required for profit sharing');
+                    return false;
+                }
             } else if (exchangeMode === 'barter') {
-                const barterOffer = document.getElementById('barter-offer')?.value?.trim();
-                const barterNeed = document.getElementById('barter-need')?.value?.trim();
-                if (!barterOffer) { showError('What you offer is required for Barter'); return false; }
-                if (!barterNeed) { showError('What you need is required for Barter'); return false; }
+                const offerRaw = document.getElementById('barter-offer')?.value || '';
+                const termsRaw = document.getElementById('barter-need')?.value || '';
+                const barterOffer = plainTextFromHtml(offerRaw).trim();
+                const barterTerms = plainTextFromHtml(termsRaw).trim();
+                if (!barterOffer) { showError('Offered services or resources are required for barter'); return false; }
+                if (!barterTerms) { showError('Barter terms are required'); return false; }
             } else if (exchangeMode === 'hybrid') {
                 const hCash = parseFloat(document.getElementById('hybrid-cash')?.value || 0);
                 const hEquity = parseFloat(document.getElementById('hybrid-equity')?.value || 0);
@@ -1109,6 +1269,9 @@ function validateCurrentStep() {
                 }
             }
             const agreement = document.getElementById('exchange-agreement')?.checked;
+            if (!validateAlternateExchangePanels()) {
+                return false;
+            }
             if (!agreement) {
                 showError('You must agree to the exchange terms to proceed');
                 return false;
@@ -1128,6 +1291,21 @@ function validateCurrentStep() {
     return true;
 }
 
+/** Validate steps fromStep through toStep (inclusive); on failure, navigates to first failing step. */
+function validateStepsRange(fromStep, toStep) {
+    const saved = currentStep;
+    for (let s = fromStep; s <= toStep; s++) {
+        currentStep = s;
+        if (!validateCurrentStep()) {
+            currentStep = saved;
+            goToStep(s);
+            return false;
+        }
+    }
+    currentStep = saved;
+    return true;
+}
+
 function goToStep(step) {
     if (step < 1 || step > TOTAL_STEPS) return;
     
@@ -1137,6 +1315,20 @@ function goToStep(step) {
     currentStep = step;
     const nextStepEl = document.getElementById(`step-${currentStep}`);
     if (nextStepEl) nextStepEl.classList.remove('hidden');
+    
+    if (currentStep === 2) {
+        updateMultiProjectTasksUI();
+        requestAnimationFrame(() => {
+            const inst = ensureMapPicker();
+            if (inst) {
+                inst.invalidateSize();
+                setTimeout(() => {
+                    inst.invalidateSize();
+                    applyPendingMapCenter();
+                }, 50);
+            }
+        });
+    }
     
     updateWizardUI();
     
@@ -1185,9 +1377,13 @@ function updateWizardUI() {
     });
     
     // Update buttons
-    prevBtn.classList.toggle('hidden', currentStep === 1);
-    nextBtn.classList.toggle('hidden', currentStep === TOTAL_STEPS);
-    submitBtn.classList.toggle('hidden', currentStep !== TOTAL_STEPS);
+    if (prevBtn) prevBtn.classList.toggle('hidden', currentStep === 1);
+    if (nextBtn) nextBtn.classList.toggle('hidden', currentStep === TOTAL_STEPS);
+    if (submitBtn) submitBtn.classList.toggle('hidden', currentStep !== TOTAL_STEPS);
+    const saveDraftBtn = document.getElementById('save-draft-wizard');
+    if (saveDraftBtn) {
+        saveDraftBtn.classList.toggle('hidden', currentStep < 2);
+    }
 }
 
 function setupSearchableModelSelector() {
@@ -1322,6 +1518,159 @@ function setupSearchableModelSelector() {
             dropdown.classList.add('hidden');
         }
     });
+}
+
+function normalizeLocStr(s) {
+    if (s == null || s === '') return '';
+    return String(s).toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+function nominatimCityTokens(addr) {
+    if (!addr || typeof addr !== 'object') return [];
+    const keys = ['city', 'town', 'village', 'municipality', 'city_district', 'suburb', 'neighbourhood', 'quarter', 'hamlet', 'county'];
+    const out = [];
+    keys.forEach(k => {
+        const v = addr[k];
+        if (v && typeof v === 'string') out.push(v);
+    });
+    return out;
+}
+
+function nominatimStateToken(addr) {
+    if (!addr || typeof addr !== 'object') return '';
+    return addr.state || addr.region || addr.province || addr.state_district || '';
+}
+
+/**
+ * Match Nominatim address + coords to locations.json hierarchy.
+ * @returns {{ countryId: string, regionId: string, cityId: string, districtName?: string } | null}
+ */
+function resolveLocationMatchFromAddress(lat, lng, addr, locations) {
+    if (!locations || !locations.countries || !addr) return null;
+
+    const ccRaw = (addr.country_code || '').toUpperCase();
+    let country = locations.countries.find(c => (c.code || '').toUpperCase() === ccRaw);
+    if (!country && addr.country) {
+        const cn = normalizeLocStr(addr.country);
+        country = locations.countries.find(c => normalizeLocStr(c.name) === cn || cn.includes(normalizeLocStr(c.name)) || normalizeLocStr(c.name).includes(cn));
+    }
+    if (!country) {
+        return findNearestCityMatch(lat, lng, locations, null);
+    }
+
+    const stateTok = normalizeLocStr(nominatimStateToken(addr));
+    const cityToks = nominatimCityTokens(addr).map(normalizeLocStr).filter(Boolean);
+
+    let bestRegion = null;
+    let bestCity = null;
+
+    for (const region of country.regions || []) {
+        const rn = normalizeLocStr(region.name);
+        if (stateTok && (stateTok.includes(rn) || rn.includes(stateTok) || stateTok.includes(rn.replace(/\s+region$/, '').replace(/\s+province$/, '')))) {
+            bestRegion = region;
+            break;
+        }
+    }
+
+    const regionsToSearch = bestRegion ? [bestRegion] : (country.regions || []);
+
+    for (const region of regionsToSearch) {
+        for (const city of region.cities || []) {
+            const cn = normalizeLocStr(city.name);
+            for (const ct of cityToks) {
+                if (!ct || !cn) continue;
+                if (cn === ct || ct.includes(cn) || cn.includes(ct)) {
+                    return {
+                        countryId: country.id,
+                        regionId: region.id,
+                        cityId: city.id,
+                        districtName: matchDistrictFromAddress(city, addr)
+                    };
+                }
+            }
+        }
+    }
+
+    if (cityToks.length > 0) {
+        for (const region of country.regions || []) {
+            for (const city of region.cities || []) {
+                const cn = normalizeLocStr(city.name);
+                for (const ct of cityToks) {
+                    const shortCity = cn.replace(/\s+city$/, '');
+                    if (ct.startsWith(shortCity) || shortCity.startsWith(ct)) {
+                        return {
+                            countryId: country.id,
+                            regionId: region.id,
+                            cityId: city.id,
+                            districtName: matchDistrictFromAddress(city, addr)
+                        };
+                    }
+                }
+            }
+        }
+    }
+
+    let near = findNearestCityMatch(lat, lng, locations, country.id, 180);
+    if (near) {
+        const c = locations.countries.find(x => x.id === near.countryId);
+        const r = c && (c.regions || []).find(x => x.id === near.regionId);
+        const ci = r && (r.cities || []).find(x => x.id === near.cityId);
+        return {
+            countryId: near.countryId,
+            regionId: near.regionId,
+            cityId: near.cityId,
+            districtName: ci ? matchDistrictFromAddress(ci, addr) : undefined
+        };
+    }
+    return null;
+}
+
+function matchDistrictFromAddress(cityObj, addr) {
+    const districts = cityObj.districts;
+    if (!Array.isArray(districts) || districts.length === 0) return undefined;
+    const candidates = [addr.suburb, addr.neighbourhood, addr.quarter, addr.city_district].filter(Boolean).map(normalizeLocStr);
+    for (const d of districts) {
+        const dn = normalizeLocStr(d);
+        for (const c of candidates) {
+            if (!c) continue;
+            if (dn === c || c.includes(dn) || dn.includes(c)) return d;
+        }
+    }
+    return undefined;
+}
+
+function findNearestCityMatch(lat, lng, locations, countryIdFilter, maxKm = 120) {
+    if (typeof mapService === 'undefined' || !mapService.getDistanceKm) return null;
+    let best = null;
+    let bestKm = Infinity;
+    for (const country of locations.countries) {
+        if (countryIdFilter && country.id !== countryIdFilter) continue;
+        if (country.id === 'remote') continue;
+        for (const region of country.regions || []) {
+            for (const city of region.cities || []) {
+                if (city.lat == null || city.lng == null) continue;
+                const d = mapService.getDistanceKm(lat, lng, city.lat, city.lng);
+                if (d < bestKm) {
+                    bestKm = d;
+                    best = { countryId: country.id, regionId: region.id, cityId: city.id, km: d };
+                }
+            }
+        }
+    }
+    if (best && best.km <= maxKm) {
+        return { countryId: best.countryId, regionId: best.regionId, cityId: best.cityId };
+    }
+    return null;
+}
+
+function formatNominatimAddressLine(addr) {
+    if (!addr || typeof addr !== 'object') return '';
+    const parts = [];
+    const order = ['road', 'suburb', 'neighbourhood', 'city_district', 'city', 'town', 'village', 'municipality', 'state', 'postcode', 'country'];
+    order.forEach(k => {
+        if (addr[k]) parts.push(addr[k]);
+    });
+    return parts.length ? parts.join(', ') : '';
 }
 
 function setupLocationSearch() {
@@ -1700,12 +2049,126 @@ function setupLocationSearch() {
         
         locationInput.value = parts.join(' > ');
     }
+
+    function applyResolvedLocation(match) {
+        if (!match || !match.countryId || !match.regionId || !match.cityId) return;
+        const locations = getLocationsData();
+        if (!locations || !locations.countries) return;
+        const countryObj = locations.countries.find(c => c.id === match.countryId);
+        if (!countryObj) return;
+        const regionObj = (countryObj.regions || []).find(r => r.id === match.regionId);
+        if (!regionObj) return;
+        const cityObj = (regionObj.cities || []).find(c => c.id === match.cityId);
+        if (!cityObj) return;
+
+        selectedCountry = { id: countryObj.id, name: countryObj.name };
+        countryInput.value = countryObj.id;
+        countrySearch.value = '';
+        countrySearch.disabled = true;
+        const countryNameEl = countryDisplay.querySelector('#location-country-name');
+        if (countryNameEl) countryNameEl.textContent = countryObj.name;
+        countryDisplay.classList.remove('hidden');
+
+        if (countryObj.id === 'remote') {
+            selectedRegion = { id: 'remote', name: 'Remote' };
+            regionInput.value = 'remote';
+            regionSearch.value = 'Remote';
+            regionSearch.disabled = true;
+            const rn = regionDisplay.querySelector('#location-region-name');
+            if (rn) rn.textContent = 'Remote';
+            regionDisplay.classList.remove('hidden');
+            updateLocationString();
+            return;
+        }
+
+        selectedRegion = { id: regionObj.id, name: regionObj.name };
+        regionInput.value = regionObj.id;
+        regionSearch.value = '';
+        regionSearch.disabled = true;
+        regionSearch.classList.remove('bg-gray-50');
+        const regNameEl = regionDisplay.querySelector('#location-region-name');
+        if (regNameEl) regNameEl.textContent = regionObj.name;
+        regionDisplay.classList.remove('hidden');
+        regionSearch.dataset.items = JSON.stringify((countryObj.regions || []).map(r => ({ id: r.id, name: r.name })));
+
+        selectedCity = { id: cityObj.id, name: cityObj.name };
+        cityInput.value = cityObj.id;
+        citySearch.value = '';
+        citySearch.disabled = true;
+        citySearch.classList.remove('bg-gray-50');
+        const cityNameEl = cityDisplay.querySelector('#location-city-name');
+        if (cityNameEl) cityNameEl.textContent = cityObj.name;
+        cityDisplay.classList.remove('hidden');
+        citySearch.dataset.items = JSON.stringify((regionObj.cities || []).map(c => ({ id: c.id, name: c.name })));
+
+        selectedDistrict = null;
+        districtInput.value = '';
+        districtSearch.value = '';
+        districtDisplay.classList.add('hidden');
+        districtSearch.dataset.initialized = 'false';
+
+        const districts = cityObj.districts;
+        let districtMatched = false;
+        if (match.districtName && Array.isArray(districts) && districts.length > 0) {
+            const want = normalizeLocStr(match.districtName);
+            const hit = districts.find(d => want && (normalizeLocStr(d) === want || want.includes(normalizeLocStr(d)) || normalizeLocStr(d).includes(want)));
+            if (hit) {
+                selectedDistrict = { name: hit };
+                districtInput.value = hit;
+                districtSearch.disabled = true;
+                districtSearch.classList.remove('bg-gray-50');
+                const dn = districtDisplay.querySelector('#location-district-name');
+                if (dn) dn.textContent = hit;
+                districtDisplay.classList.remove('hidden');
+                districtMatched = true;
+            }
+        }
+        if (!districtMatched && Array.isArray(districts) && districts.length > 0) {
+            enableDistrictSearch();
+        } else if (!districts || districts.length === 0) {
+            districtSearch.disabled = true;
+            districtSearch.classList.add('bg-gray-50');
+            districtSearch.placeholder = 'No districts available';
+        }
+
+        updateLocationString();
+    }
+
+    window.__applyResolvedOpportunityLocation = applyResolvedLocation;
+
+    window.applyLocationFieldsFromAddress = function(lat, lng, addr) {
+        if (!addr) return;
+        const locations = getLocationsData();
+        const m = resolveLocationMatchFromAddress(lat, lng, addr, locations);
+        if (m) applyResolvedLocation(m);
+        const line = formatNominatimAddressLine(addr);
+        const addrEl = document.getElementById('address-search-input');
+        if (addrEl && line) addrEl.value = line;
+    };
+
+    window.applyOpportunityPinLocation = async function(lat, lng) {
+        if (typeof mapService === 'undefined' || !mapService.reverseGeocode) return;
+        try {
+            const res = await mapService.reverseGeocode(lat, lng);
+            if (!res || !res.address) return;
+            window.applyLocationFieldsFromAddress(lat, lng, res.address);
+            const addrEl = document.getElementById('address-search-input');
+            if (addrEl && res.displayName && !String(addrEl.value || '').trim()) {
+                addrEl.value = res.displayName;
+            }
+        } catch (e) {
+            console.warn('Pin location lookup:', e);
+        }
+    };
 }
 
 let createMapInstance = null;
+/** City coords to apply when the map is first created (step 2 may load after location pick). */
+let pendingMapCenter = null;
 
 function setupMapPicker() {
     if (typeof mapService === 'undefined') return;
+    if (createMapInstance) return;
 
     const latInput = document.getElementById('latitude');
     const lngInput = document.getElementById('longitude');
@@ -1723,16 +2186,34 @@ function setupMapPicker() {
         if (coordsDisplay) coordsDisplay.classList.remove('hidden');
     }
 
+    let pinReverseTimer = null;
+    function scheduleLocationFillFromPin(lat, lng) {
+        clearTimeout(pinReverseTimer);
+        pinReverseTimer = setTimeout(() => {
+            if (typeof window.applyOpportunityPinLocation === 'function') {
+                window.applyOpportunityPinLocation(lat, lng);
+            }
+        }, 450);
+    }
+
     createMapInstance = mapService.initMapPicker('location-map', {
         center: mapService.DEFAULT_CENTER,
         zoom: mapService.DEFAULT_ZOOM,
         draggableMarker: true,
-        onClick: (lat, lng) => updateCoords(lat, lng),
-        onMarkerMove: (lat, lng) => updateCoords(lat, lng)
+        onClick: (lat, lng) => {
+            updateCoords(lat, lng);
+            scheduleLocationFillFromPin(lat, lng);
+        },
+        onMarkerMove: (lat, lng) => {
+            updateCoords(lat, lng);
+            scheduleLocationFillFromPin(lat, lng);
+        }
     });
 
     if (addressBtn && addressInput) {
         const doGeocode = async () => {
+            ensureMapPicker();
+            if (!createMapInstance) return;
             const query = addressInput.value.trim();
             if (!query) return;
             addressBtn.disabled = true;
@@ -1743,6 +2224,11 @@ function setupMapPicker() {
             if (result) {
                 createMapInstance.setMarker(result.lat, result.lng);
                 updateCoords(result.lat, result.lng);
+                if (result.address && Object.keys(result.address).length > 0 && typeof window.applyLocationFieldsFromAddress === 'function') {
+                    window.applyLocationFieldsFromAddress(result.lat, result.lng, result.address);
+                } else if (typeof window.applyOpportunityPinLocation === 'function') {
+                    window.applyOpportunityPinLocation(result.lat, result.lng);
+                }
             } else {
                 alert('Address not found. Try a different search term.');
             }
@@ -1754,8 +2240,42 @@ function setupMapPicker() {
     }
 }
 
+/**
+ * Create the Leaflet map only after Step 2 is visible; avoids broken tiles when the container had display:none.
+ */
+function ensureMapPicker() {
+    if (createMapInstance) return createMapInstance;
+    setupMapPicker();
+    return createMapInstance;
+}
+
+function isStep2Visible() {
+    const el = document.getElementById('step-2');
+    return el && !el.classList.contains('hidden');
+}
+
+function updateMapPinInputs(lat, lng) {
+    const latInput = document.getElementById('latitude');
+    const lngInput = document.getElementById('longitude');
+    const coordsDisplay = document.getElementById('map-coordinates-display');
+    const latDisplay = document.getElementById('map-lat-display');
+    const lngDisplay = document.getElementById('map-lng-display');
+    if (latInput) latInput.value = lat.toFixed(6);
+    if (lngInput) lngInput.value = lng.toFixed(6);
+    if (latDisplay) latDisplay.textContent = lat.toFixed(6);
+    if (lngDisplay) lngDisplay.textContent = lng.toFixed(6);
+    if (coordsDisplay) coordsDisplay.classList.remove('hidden');
+}
+
+function applyPendingMapCenter() {
+    if (!pendingMapCenter || !createMapInstance) return;
+    const { lat, lng } = pendingMapCenter;
+    createMapInstance.setMarker(lat, lng);
+    updateMapPinInputs(lat, lng);
+    pendingMapCenter = null;
+}
+
 function centerMapOnCity(cityId) {
-    if (!createMapInstance) return;
     const locations = getLocationsData();
     if (!locations || !locations.countries) return;
 
@@ -1763,12 +2283,391 @@ function centerMapOnCity(cityId) {
         for (const region of (country.regions || [])) {
             for (const city of (region.cities || [])) {
                 if (city.id === cityId && city.lat && city.lng) {
-                    createMapInstance.setMarker(city.lat, city.lng);
+                    pendingMapCenter = { lat: city.lat, lng: city.lng };
+                    if (isStep2Visible()) {
+                        ensureMapPicker();
+                        applyPendingMapCenter();
+                    }
                     return;
                 }
             }
         }
     }
+}
+
+/** Multi project selected in step 1 — drives work-package UI in Basic Info. */
+function isMultiProjectSelected() {
+    return document.querySelector('input[name="projectType"]:checked')?.value === 'multi';
+}
+
+/** Task-based sub-model under multi project — enforces ≥2 work packages and payload sync. */
+function multiProjectWorkPackagesRequired() {
+    return isMultiProjectSelected() && document.getElementById('submodel-type')?.value === 'task_based';
+}
+
+function collectProjectTasksFromUI() {
+    const list = document.getElementById('multi-project-tasks-list');
+    if (!list) return [];
+    const rows = list.querySelectorAll('[data-project-task-row]');
+    const out = [];
+    rows.forEach(row => {
+        const title = row.querySelector('[data-task-title]')?.value?.trim() || '';
+        const notes = row.querySelector('[data-task-notes]')?.value?.trim() || '';
+        const duration = row.querySelector('[data-task-duration]')?.value?.trim() || '';
+        out.push({ title, notes, duration });
+    });
+    return out;
+}
+
+function ensureMultiTaskRows(minRows) {
+    const list = document.getElementById('multi-project-tasks-list');
+    if (!list) return;
+    while (list.querySelectorAll('[data-project-task-row]').length < minRows) {
+        addMultiProjectTaskRow();
+    }
+}
+
+function addMultiProjectTaskRow(prefill = {}) {
+    const list = document.getElementById('multi-project-tasks-list');
+    if (!list) return;
+    const n = list.querySelectorAll('[data-project-task-row]').length + 1;
+    const wrap = document.createElement('div');
+    wrap.className = 'multi-task-row occ-wp-row rounded-xl border border-slate-200 bg-white p-4 mb-3 shadow-sm';
+    wrap.setAttribute('data-project-task-row', '');
+    wrap.innerHTML = `
+        <div class="flex justify-between items-start gap-2 mb-3">
+            <span class="text-sm font-semibold text-gray-800">Work package <span data-task-index>${n}</span></span>
+            <button type="button" class="text-sm text-red-600 hover:text-red-800 font-medium multi-task-remove">Remove</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Task title <span class="text-red-600">*</span></label>
+                <input type="text" data-task-title class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="e.g. Structural analysis package">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Duration (days)</label>
+                <input type="number" data-task-duration min="1" step="1" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Optional">
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-xs font-medium text-gray-600 mb-1">Scope notes</label>
+                <textarea data-task-notes rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Brief scope for this package"></textarea>
+            </div>
+        </div>
+    `;
+    list.appendChild(wrap);
+    const titleEl = wrap.querySelector('[data-task-title]');
+    const durEl = wrap.querySelector('[data-task-duration]');
+    const notesEl = wrap.querySelector('[data-task-notes]');
+    if (titleEl && prefill.title) titleEl.value = prefill.title;
+    if (durEl && prefill.duration) durEl.value = prefill.duration;
+    if (notesEl && prefill.notes) notesEl.value = prefill.notes;
+    const rm = wrap.querySelector('.multi-task-remove');
+    if (rm) {
+        rm.addEventListener('click', () => {
+            const rows = list.querySelectorAll('[data-project-task-row]');
+            if (multiProjectWorkPackagesRequired() && rows.length <= 2) return;
+            wrap.remove();
+            list.querySelectorAll('[data-project-task-row]').forEach((r, i) => {
+                const idx = r.querySelector('[data-task-index]');
+                if (idx) idx.textContent = String(i + 1);
+            });
+            updateMultiProjectTasksUI();
+        });
+    }
+}
+
+function updateMultiProjectTasksUI() {
+    const wrap = document.getElementById('multi-project-tasks-wrap');
+    if (!wrap) return;
+    const show = isMultiProjectSelected();
+    wrap.classList.toggle('hidden', !show);
+    if (!show) return;
+    const list = document.getElementById('multi-project-tasks-list');
+    if (!list) return;
+    if (multiProjectWorkPackagesRequired()) {
+        if (list.querySelectorAll('[data-project-task-row]').length === 0) {
+            addMultiProjectTaskRow({ title: 'Work package 1 — discovery & design' });
+            addMultiProjectTaskRow({ title: 'Work package 2 — execution & handover' });
+        }
+        ensureMultiTaskRows(2);
+    }
+}
+
+function syncMultiTaskTitleFromRows() {
+    if (!multiProjectWorkPackagesRequired()) return;
+    const tasks = collectProjectTasksFromUI();
+    const tt = document.getElementById('taskTitle');
+    if (tt && tasks[0]?.title) tt.value = tasks[0].title;
+}
+
+function setupMultiProjectTasks() {
+    document.querySelectorAll('input[name="projectType"]').forEach(r => {
+        r.addEventListener('change', () => updateMultiProjectTasksUI());
+    });
+    const addBtn = document.getElementById('add-project-task-btn');
+    if (addBtn) {
+        addBtn.addEventListener('click', () => addMultiProjectTaskRow());
+    }
+    updateMultiProjectTasksUI();
+}
+
+const ALT_MODE_LABELS = { cash: 'Cash', equity: 'Equity', profit_sharing: 'Profit sharing', barter: 'Barter', hybrid: 'Hybrid' };
+
+function buildAlternateOpenPanelHtml(mode) {
+    const label = ALT_MODE_LABELS[mode] || mode;
+    const head = `<div class="occ-s6-alt-panel-head"><span class="occ-s6-alt-badge">Also open to</span><h4 class="occ-s6-alt-panel-title">${label}</h4></div>`;
+    if (mode === 'cash') {
+        return `<div class="occ-s6-alt-panel" data-alt-mode="cash">${head}
+            <p class="occ-s6-help mb-3">Outline a cash structure you could accept if the partner prefers it (e.g. milestones, retainage).</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="form-group md:col-span-2">
+                    <label for="alt-cash-summary" class="occ-s6-field-label">Summary <span class="text-red-600">*</span></label>
+                    <textarea id="alt-cash-summary" name="altCashSummary" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" rows="3" placeholder="e.g. 40% on mobilization, 60% on milestones…" data-rich-text="true"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="alt-cash-amount" class="occ-s6-field-label">Indicative amount (SAR)</label>
+                    <input type="number" id="alt-cash-amount" name="altCashAmount" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Optional" min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="alt-cash-terms" class="occ-s6-field-label">Payment cadence</label>
+                    <select id="alt-cash-terms" name="altCashTerms" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        <option value="">Select (optional)</option>
+                        <option value="upfront">Upfront</option>
+                        <option value="milestone_based">Milestone-based</option>
+                        <option value="upon_completion">Upon completion</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="installments">Installments</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group mb-0">
+                <label for="alt-cash-milestones" class="occ-s6-field-label">Milestone notes</label>
+                <textarea id="alt-cash-milestones" name="altCashMilestones" class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="2" placeholder="Optional detail on timing" data-rich-text="true"></textarea>
+            </div>
+        </div>`;
+    }
+    if (mode === 'equity') {
+        return `<div class="occ-s6-alt-panel" data-alt-mode="equity">${head}
+            <p class="occ-s6-help mb-3">Describe an equity arrangement you could consider alongside your primary model.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-group md:col-span-2">
+                    <label for="alt-equity-summary" class="occ-s6-field-label">Summary <span class="text-red-600">*</span></label>
+                    <textarea id="alt-equity-summary" name="altEquitySummary" class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="3" placeholder="Stake, governance, contribution expectations…" data-rich-text="true"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="alt-equity-pct" class="occ-s6-field-label">Indicative % (optional)</label>
+                    <input type="number" id="alt-equity-pct" name="altEquityPct" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="e.g. 25" min="0" max="100" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="alt-equity-vesting" class="occ-s6-field-label">Vesting (optional)</label>
+                    <select id="alt-equity-vesting" name="altEquityVesting" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        <option value="">Select</option>
+                        <option value="immediate">Immediate</option>
+                        <option value="1_year">1 year</option>
+                        <option value="2_years">2 years</option>
+                        <option value="3_years">3 years</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+            </div>
+        </div>`;
+    }
+    if (mode === 'profit_sharing') {
+        return `<div class="occ-s6-alt-panel" data-alt-mode="profit_sharing">${head}
+            <p class="occ-s6-help mb-3">Explain a profit- or revenue-share you would entertain as a fallback.</p>
+            <div class="form-group mb-4">
+                <label for="alt-ps-summary" class="occ-s6-field-label">Summary <span class="text-red-600">*</span></label>
+                <textarea id="alt-ps-summary" name="altPsSummary" class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="3" placeholder="Basis, split idea, reconciliation…" data-rich-text="true"></textarea>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="form-group">
+                    <label for="alt-ps-pct" class="occ-s6-field-label">Share % (optional)</label>
+                    <input type="number" id="alt-ps-pct" name="altPsPct" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="e.g. 12" min="0" max="100" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="alt-ps-basis" class="occ-s6-field-label">Revenue basis</label>
+                    <select id="alt-ps-basis" name="altPsBasis" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        <option value="revenue">Gross revenue</option>
+                        <option value="profit">Net profit</option>
+                        <option value="gross_profit">Gross profit</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="alt-ps-duration" class="occ-s6-field-label">Duration</label>
+                    <select id="alt-ps-duration" name="altPsDuration" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        <option value="">Select</option>
+                        <option value="project">Project length</option>
+                        <option value="1y">1 year</option>
+                        <option value="2y">2 years</option>
+                        <option value="3y">3+ years</option>
+                        <option value="ongoing">Ongoing</option>
+                    </select>
+                </div>
+            </div>
+        </div>`;
+    }
+    if (mode === 'barter') {
+        return `<div class="occ-s6-alt-panel" data-alt-mode="barter">${head}
+            <p class="occ-s6-help mb-3">What you could trade and what you would want back if the collaboration shifted to barter.</p>
+            <div class="occ-rtx-stack flex flex-col gap-5">
+                <div class="form-group mb-0">
+                    <label for="alt-barter-offer" class="occ-s6-field-label">What you offer <span class="text-red-600">*</span></label>
+                    <p class="text-sm text-slate-500 mt-0 mb-2">Resources or services you would contribute.</p>
+                    <textarea id="alt-barter-offer" name="altBarterOffer" class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="3" placeholder="Example: plant, labour, design support…" data-rich-text="true"></textarea>
+                </div>
+                <div class="form-group mb-0">
+                    <label for="alt-barter-terms" class="occ-s6-field-label">What you want in return <span class="text-red-600">*</span></label>
+                    <p class="text-sm text-slate-500 mt-0 mb-2">Return, timing, and quality expectations.</p>
+                    <textarea id="alt-barter-terms" name="altBarterTerms" class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="3" placeholder="Example: space, licences, materials by milestone…" data-rich-text="true"></textarea>
+                </div>
+                <div class="form-group mb-0 max-w-xl">
+                    <label for="alt-barter-value" class="occ-s6-field-label">Expected exchange value (optional)</label>
+                    <p class="text-sm text-slate-500 mt-0 mb-2">Optional SAR equivalent for comparison.</p>
+                    <input type="text" id="alt-barter-value" name="altBarterValue" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="e.g. Equivalent to 50K SAR">
+                </div>
+            </div>
+        </div>`;
+    }
+    if (mode === 'hybrid') {
+        return `<div class="occ-s6-alt-panel" data-alt-mode="hybrid">${head}
+            <p class="occ-s6-help mb-3">Describe another cash / equity / barter mix you would consider (percentages should total 100% if all three are filled).</p>
+            <div class="form-group mb-4">
+                <label for="alt-hybrid-summary" class="occ-s6-field-label">Overview <span class="text-red-600">*</span></label>
+                <textarea id="alt-hybrid-summary" name="altHybridSummary" class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="3" placeholder="When a hybrid fallback makes sense for you…" data-rich-text="true"></textarea>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-2">
+                <div class="form-group">
+                    <label for="alt-hybrid-cash" class="occ-s6-field-label">Cash %</label>
+                    <input type="number" id="alt-hybrid-cash" name="altHybridCash" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="e.g. 30" min="0" max="100" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="alt-hybrid-equity" class="occ-s6-field-label">Equity %</label>
+                    <input type="number" id="alt-hybrid-equity" name="altHybridEquity" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="e.g. 50" min="0" max="100" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="alt-hybrid-barter" class="occ-s6-field-label">Barter %</label>
+                    <input type="number" id="alt-hybrid-barter" name="altHybridBarter" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="e.g. 20" min="0" max="100" step="0.1">
+                </div>
+            </div>
+            <p class="occ-s6-alt-hybrid-total mb-4" aria-live="polite"><span class="text-slate-500 font-medium">Total: </span><span id="alt-hybrid-total-pct">0%</span></p>
+            <div class="occ-rtx-stack flex flex-col gap-5">
+                <div class="form-group mb-0">
+                    <label for="alt-hybrid-cash-details" class="occ-s6-field-label">Cash details</label>
+                    <p class="text-sm text-slate-500 mt-0 mb-2">Payment cadence for the cash slice of this fallback mix.</p>
+                    <textarea id="alt-hybrid-cash-details" name="altHybridCashDetails" class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="3" placeholder="Example: milestones, retainage, currency…" data-rich-text="true"></textarea>
+                </div>
+                <div class="form-group mb-0">
+                    <label for="alt-hybrid-equity-details" class="occ-s6-field-label">Equity details</label>
+                    <p class="text-sm text-slate-500 mt-0 mb-2">Stake, vesting, or governance for the equity slice.</p>
+                    <textarea id="alt-hybrid-equity-details" name="altHybridEquityDetails" class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="3" placeholder="Example: % range, board, cliff…" data-rich-text="true"></textarea>
+                </div>
+                <div class="form-group mb-0">
+                    <label for="alt-hybrid-barter-details" class="occ-s6-field-label">Barter details</label>
+                    <p class="text-sm text-slate-500 mt-0 mb-2">In-kind items or services for the barter slice.</p>
+                    <textarea id="alt-hybrid-barter-details" name="altHybridBarterDetails" class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="3" placeholder="Example: deliverables counted as barter…" data-rich-text="true"></textarea>
+                </div>
+            </div>
+        </div>`;
+    }
+    return '';
+}
+
+function collectAlternateExchangeDetailsFromForm() {
+    const host = document.getElementById('occ-alternate-details-host');
+    if (!host) return [];
+    const out = [];
+    host.querySelectorAll('.occ-s6-alt-panel[data-alt-mode]').forEach(panel => {
+        const mode = panel.dataset.altMode;
+        const row = { mode };
+        if (mode === 'cash') {
+            row.summary = (document.getElementById('alt-cash-summary')?.value || '').trim();
+            const amt = document.getElementById('alt-cash-amount')?.value;
+            row.indicativeAmount = amt != null && amt !== '' ? parseFloat(amt) : null;
+            row.paymentTerms = document.getElementById('alt-cash-terms')?.value || '';
+            row.milestoneNotes = (document.getElementById('alt-cash-milestones')?.value || '').trim();
+        } else if (mode === 'equity') {
+            row.summary = (document.getElementById('alt-equity-summary')?.value || '').trim();
+            const p = document.getElementById('alt-equity-pct')?.value;
+            row.indicativePercentage = p != null && p !== '' ? parseFloat(p) : null;
+            row.vesting = document.getElementById('alt-equity-vesting')?.value || '';
+        } else if (mode === 'profit_sharing') {
+            row.summary = (document.getElementById('alt-ps-summary')?.value || '').trim();
+            const p = document.getElementById('alt-ps-pct')?.value;
+            row.sharePercentage = p != null && p !== '' ? parseFloat(p) : null;
+            row.basis = document.getElementById('alt-ps-basis')?.value || '';
+            row.duration = document.getElementById('alt-ps-duration')?.value || '';
+        } else if (mode === 'barter') {
+            row.offer = (document.getElementById('alt-barter-offer')?.value || '').trim();
+            row.terms = (document.getElementById('alt-barter-terms')?.value || '').trim();
+            row.expectedValue = (document.getElementById('alt-barter-value')?.value || '').trim();
+        } else if (mode === 'hybrid') {
+            row.summary = (document.getElementById('alt-hybrid-summary')?.value || '').trim();
+            row.cashPct = parseFloat(document.getElementById('alt-hybrid-cash')?.value || '') || null;
+            row.equityPct = parseFloat(document.getElementById('alt-hybrid-equity')?.value || '') || null;
+            row.barterPct = parseFloat(document.getElementById('alt-hybrid-barter')?.value || '') || null;
+            row.cashDetails = (document.getElementById('alt-hybrid-cash-details')?.value || '').trim();
+            row.equityDetails = (document.getElementById('alt-hybrid-equity-details')?.value || '').trim();
+            row.barterDetails = (document.getElementById('alt-hybrid-barter-details')?.value || '').trim();
+        }
+        out.push(row);
+    });
+    return out;
+}
+
+function validateAlternateExchangePanels() {
+    const panels = document.querySelectorAll('#occ-alternate-details-host .occ-s6-alt-panel[data-alt-mode]');
+    for (let i = 0; i < panels.length; i++) {
+        const panel = panels[i];
+        const mode = panel.dataset.altMode;
+        const name = ALT_MODE_LABELS[mode] || mode;
+        if (mode === 'barter') {
+            const o = plainTextFromHtml(document.getElementById('alt-barter-offer')?.value || '');
+            const t = plainTextFromHtml(document.getElementById('alt-barter-terms')?.value || '');
+            if (!o) {
+                showError(`“Also open to ${name}”: add what you would offer.`);
+                return false;
+            }
+            if (!t) {
+                showError(`“Also open to ${name}”: add barter terms.`);
+                return false;
+            }
+        } else {
+            let elId = 'alt-cash-summary';
+            if (mode === 'equity') elId = 'alt-equity-summary';
+            else if (mode === 'profit_sharing') elId = 'alt-ps-summary';
+            else if (mode === 'hybrid') elId = 'alt-hybrid-summary';
+            const s = plainTextFromHtml(document.getElementById(elId)?.value || '');
+            if (!s) {
+                showError(`“Also open to ${name}”: add a short description of what you would consider.`);
+                return false;
+            }
+        }
+        if (mode === 'hybrid') {
+            const c = parseFloat(document.getElementById('alt-hybrid-cash')?.value || 0) || 0;
+            const e = parseFloat(document.getElementById('alt-hybrid-equity')?.value || 0) || 0;
+            const b = parseFloat(document.getElementById('alt-hybrid-barter')?.value || 0) || 0;
+            const filled = [c, e, b].filter(x => x > 0).length;
+            if (filled === 3 && Math.abs(c + e + b - 100) > 0.02) {
+                showError('“Also open to Hybrid”: the three percentages should total 100% when all are filled.');
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function wireAltHybridTotalListeners() {
+    const cash = document.getElementById('alt-hybrid-cash');
+    const equity = document.getElementById('alt-hybrid-equity');
+    const barter = document.getElementById('alt-hybrid-barter');
+    const totalEl = document.getElementById('alt-hybrid-total-pct');
+    if (!cash || !equity || !barter || !totalEl) return;
+    function upd() {
+        const t = (parseFloat(cash.value) || 0) + (parseFloat(equity.value) || 0) + (parseFloat(barter.value) || 0);
+        totalEl.textContent = `${t.toFixed(1)}%`;
+    }
+    [cash, equity, barter].forEach(el => el.addEventListener('input', upd));
+    upd();
 }
 
 function setupExchangeModeSelection() {
@@ -1788,33 +2687,200 @@ function setupExchangeModeSelection() {
             selectExchangeMode(mode);
         });
     });
+
+    const modesWrap = document.getElementById('accepted-modes-wrap');
+    if (modesWrap) {
+        modesWrap.addEventListener('change', () => renderAlternateExchangePanels());
+    }
     
+    function syncPrimaryToAlsoOpen(mode) {
+        document.querySelectorAll('.accepted-mode-cb').forEach(cb => {
+            const isPrimary = cb.value === mode;
+            cb.checked = false;
+            cb.disabled = !!isPrimary;
+            const wrap = cb.closest('.occ-s6-chip');
+            if (wrap) wrap.classList.toggle('occ-s6-chip--primary-lock', isPrimary);
+        });
+        renderAlternateExchangePanels();
+    }
+
+    function renderAlternateExchangePanels() {
+        const host = document.getElementById('occ-alternate-details-host');
+        const wrap = document.getElementById('occ-alternate-details-wrap');
+        if (!host || !wrap) return;
+        const checked = Array.from(document.querySelectorAll('.accepted-mode-cb:checked')).filter(cb => !cb.disabled).map(cb => cb.value);
+        const want = new Set(checked.filter(m => ALT_MODE_LABELS[m]));
+        Array.from(host.querySelectorAll('.occ-s6-alt-panel[data-alt-mode]')).forEach(panel => {
+            const m = panel.dataset.altMode;
+            if (!want.has(m)) {
+                if (window.RichTextEditor && typeof window.RichTextEditor.destroy === 'function') {
+                    panel.querySelectorAll('textarea[data-rich-text="true"]').forEach(ta => {
+                        if (ta.id) window.RichTextEditor.destroy(ta.id);
+                    });
+                }
+                panel.remove();
+            }
+        });
+        want.forEach(mode => {
+            if (!host.querySelector(`.occ-s6-alt-panel[data-alt-mode="${mode}"]`)) {
+                const html = buildAlternateOpenPanelHtml(mode);
+                if (!html) return;
+                const t = document.createElement('template');
+                t.innerHTML = html.trim();
+                const node = t.content.firstElementChild;
+                if (node) host.appendChild(node);
+            }
+        });
+        if (want.size === 0) {
+            if (window.RichTextEditor && typeof window.RichTextEditor.destroy === 'function') {
+                host.querySelectorAll('textarea[data-rich-text="true"]').forEach(ta => {
+                    if (ta.id) window.RichTextEditor.destroy(ta.id);
+                });
+            }
+            host.innerHTML = '';
+            wrap.classList.add('hidden');
+            wrap.setAttribute('hidden', '');
+        } else {
+            wrap.classList.remove('hidden');
+            wrap.removeAttribute('hidden');
+            requestAnimationFrame(() => {
+                try {
+                    wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } catch (e) {}
+            });
+        }
+        setTimeout(() => {
+            if (window.RichTextEditor && typeof window.RichTextEditor.initAll === 'function') {
+                window.RichTextEditor.initAll();
+            }
+            if (want.has('hybrid')) wireAltHybridTotalListeners();
+            if (typeof refreshEstimatedValueDisplay === 'function') refreshEstimatedValueDisplay();
+        }, 120);
+    }
+
+    function refreshStep6ValueSummary() {
+        const card = document.getElementById('occ-vx-summary-card');
+        const mode = document.getElementById('exchange-mode')?.value;
+        const modeNames = {
+            cash: 'Cash',
+            equity: 'Equity',
+            profit_sharing: 'Profit sharing',
+            barter: 'Barter',
+            hybrid: 'Hybrid'
+        };
+        if (!card) return;
+        if (!mode) {
+            card.setAttribute('hidden', '');
+            return;
+        }
+        card.removeAttribute('hidden');
+        const elModel = document.getElementById('occ-vx-sum-model');
+        const elBudget = document.getElementById('occ-vx-sum-budget');
+        const elEst = document.getElementById('occ-vx-sum-estimated');
+        const elTerms = document.getElementById('occ-vx-sum-terms');
+        const elAlso = document.getElementById('occ-vx-sum-also');
+        if (elModel) elModel.textContent = modeNames[mode] || mode;
+        const bmin = document.getElementById('budgetRange_min')?.value;
+        const bmax = document.getElementById('budgetRange_max')?.value;
+        if (elBudget) {
+            if (bmin !== '' && bmax !== '' && bmin != null && bmax != null) {
+                elBudget.textContent = `${Number(bmin).toLocaleString()} – ${Number(bmax).toLocaleString()} SAR`;
+            } else elBudget.textContent = '—';
+        }
+        if (elEst) elEst.textContent = (document.getElementById('estimated-value-display')?.textContent || '—').trim() || '—';
+        let terms = '—';
+        if (mode === 'cash') {
+            const amt = document.getElementById('cash-amount')?.value?.trim();
+            const pt = document.getElementById('cash-payment-terms');
+            const ptLabel = pt?.selectedOptions?.[0]?.text?.trim() || pt?.value;
+            const parts = [];
+            if (amt) parts.push(`Cash: ${Number(amt).toLocaleString()} SAR`);
+            if (pt?.value) parts.push(`Terms: ${ptLabel}`);
+            const ms = document.getElementById('cash-milestones')?.value?.replace(/<[^>]+>/g, ' ')?.trim();
+            if (ms) parts.push(`Milestones: ${ms.slice(0, 120)}${ms.length > 120 ? '…' : ''}`);
+            if (parts.length) terms = parts.join(' · ');
+        } else if (mode === 'equity') {
+            const pct = document.getElementById('equity-percentage')?.value?.trim();
+            const vest = document.getElementById('equity-vesting');
+            const vestLabel = vest?.selectedOptions?.[0]?.text?.trim() || vest?.value;
+            const parts = [];
+            if (pct) parts.push(`${pct}% equity`);
+            if (vest?.value) parts.push(`Vesting: ${vestLabel}`);
+            if (parts.length) terms = parts.join(' · ');
+        } else if (mode === 'profit_sharing') {
+            const pct = document.getElementById('profit-share-percentage')?.value?.trim();
+            const basis = document.getElementById('profit-basis');
+            const basisLabel = basis?.selectedOptions?.[0]?.text?.trim() || basis?.value;
+            const dur = document.getElementById('profit-duration');
+            const durLabel = dur?.selectedOptions?.[0]?.text?.trim() || dur?.value;
+            const parts = [];
+            if (pct) parts.push(`Share: ${pct}%`);
+            if (basis?.value) parts.push(`Basis: ${basisLabel}`);
+            if (dur?.value) parts.push(`Duration: ${durLabel}`);
+            if (parts.length) terms = parts.join(' · ');
+        } else if (mode === 'barter') {
+            const parts = [];
+            const off = document.getElementById('barter-offer')?.value?.replace(/<[^>]+>/g, ' ')?.trim();
+            const val = document.getElementById('barter-value')?.value?.trim();
+            if (off) parts.push(off.slice(0, 100) + (off.length > 100 ? '…' : ''));
+            if (val) parts.push(`Est. value: ${val}`);
+            if (parts.length) terms = parts.join(' · ');
+        } else if (mode === 'hybrid') {
+            const c = document.getElementById('hybrid-cash')?.value;
+            const e = document.getElementById('hybrid-equity')?.value;
+            const b = document.getElementById('hybrid-barter')?.value;
+            const parts = [];
+            if (c) parts.push(`Cash ${c}%`);
+            if (e) parts.push(`Equity ${e}%`);
+            if (b) parts.push(`Barter ${b}%`);
+            if (parts.length) terms = parts.join(', ');
+        }
+        if (elTerms) elTerms.textContent = terms;
+        const primaryLabel = modeNames[mode] || mode;
+        const also = Array.from(document.querySelectorAll('.accepted-mode-cb:checked'))
+            .map(c => modeNames[c.value] || c.value)
+            .filter(l => l && l !== primaryLabel);
+        if (elAlso) elAlso.textContent = also.length ? also.join(', ') : '—';
+        const elAltDet = document.getElementById('occ-vx-sum-alt-details');
+        if (elAltDet) {
+            const alts = collectAlternateExchangeDetailsFromForm();
+            if (!alts.length) {
+                elAltDet.textContent = '—';
+            } else {
+                elAltDet.textContent = alts.map(r => {
+                    const lab = ALT_MODE_LABELS[r.mode] || r.mode;
+                    let snippet = '';
+                    if (r.mode === 'barter') snippet = plainTextFromHtml(r.offer || '').slice(0, 72);
+                    else snippet = plainTextFromHtml(r.summary || '').slice(0, 72);
+                    const tail = snippet.length >= 72 ? '…' : '';
+                    return `${lab}: ${snippet}${tail}`;
+                }).join(' · ');
+            }
+        }
+    }
+
     function selectExchangeMode(mode) {
         selectedMode = mode;
         exchangeModeInput.value = mode;
-        
-        // Update card selection
+
         exchangeModeCards.forEach(c => {
-            c.classList.remove('selected');
-            if (c.dataset.mode === mode) {
-                c.classList.add('selected');
-            }
+            const on = c.dataset.mode === mode;
+            c.classList.toggle('selected', on);
+            if (typeof c.setAttribute === 'function') c.setAttribute('aria-pressed', on ? 'true' : 'false');
         });
-        
-        // Update display
+
         const modeNames = {
-            'cash': 'Cash',
-            'equity': 'Equity',
-            'profit_sharing': 'Profit-Sharing',
-            'barter': 'Barter',
-            'hybrid': 'Hybrid'
+            cash: 'Cash',
+            equity: 'Equity',
+            profit_sharing: 'Profit sharing',
+            barter: 'Barter',
+            hybrid: 'Hybrid'
         };
-        
-        document.getElementById('selected-exchange-name').textContent = modeNames[mode];
+
+        const nameEl = document.getElementById('selected-exchange-name');
+        if (nameEl) nameEl.textContent = modeNames[mode] || mode;
         selectedDisplay.classList.remove('hidden');
-        const primaryCb = document.querySelector(`.payment-method-cb[value="${mode}"]`);
-        if (primaryCb && !primaryCb.checked) primaryCb.checked = true;
-        // Render mode-specific fields
+        syncPrimaryToAlsoOpen(mode);
         renderExchangeModeFields(mode);
         setTimeout(refreshEstimatedValueDisplay, 100);
     }
@@ -1822,12 +2888,14 @@ function setupExchangeModeSelection() {
     function refreshEstimatedValueDisplay() {
         const section = document.getElementById('estimated-value-section');
         const display = document.getElementById('estimated-value-display');
-        if (!section || !display) return;
+        if (!display) return;
         const estimator = window.valueEstimator;
         const modeInput = document.getElementById('exchange-mode');
         const mode = modeInput?.value;
         if (!estimator || !mode) {
-            section.classList.add('hidden');
+            display.textContent = '—';
+            if (section) section.classList.add('hidden');
+            refreshStep6ValueSummary();
             return;
         }
         const currency = document.getElementById('currency')?.value || 'SAR';
@@ -1859,11 +2927,11 @@ function setupExchangeModeSelection() {
         const result = estimator.estimateFromExchangeData(exchangeData, mode);
         if (result.estimated_value != null && !isNaN(result.estimated_value)) {
             display.textContent = (result.estimated_value.toLocaleString()) + ' ' + (result.currency || 'SAR');
-            section.classList.remove('hidden');
         } else {
             display.textContent = '—';
-            section.classList.remove('hidden');
         }
+        if (section) section.classList.add('hidden');
+        refreshStep6ValueSummary();
     }
     window.refreshEstimatedValueDisplay = refreshEstimatedValueDisplay;
 
@@ -1914,8 +2982,6 @@ function setupExchangeModeSelection() {
 
     const addValueItemBtn = document.getElementById('add-value-item');
     if (addValueItemBtn) addValueItemBtn.addEventListener('click', () => addValueItemRow());
-    const valueItemsContainer = document.getElementById('value-items-container');
-    if (valueItemsContainer && valueItemsContainer.children.length === 0) addValueItemRow();
     
     function renderExchangeModeFields(mode) {
         let html = '';
@@ -1973,39 +3039,41 @@ function setupExchangeModeSelection() {
             case 'equity':
                 if (currencyGroup) currencyGroup.classList.add('hidden');
                 html = `
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div class="form-group">
-                            <label for="equity-percentage" class="form-label">Equity Percentage <span class="text-red-600">*</span></label>
-                            <input 
-                                type="number" 
-                                id="equity-percentage" 
-                                name="equityPercentage" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="e.g., 40"
-                                min="0"
-                                max="100"
-                                step="0.1"
-                                required
-                            >
-                            <p class="text-sm text-gray-500 mt-1">Percentage of ownership stake</p>
+                    <div class="occ-vx-mode-fields-inner">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                            <div class="form-group mb-0">
+                                <label for="equity-percentage" class="form-label">Equity percentage <span class="text-red-600">*</span></label>
+                                <input 
+                                    type="number" 
+                                    id="equity-percentage" 
+                                    name="equityPercentage" 
+                                    class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white"
+                                    placeholder="e.g. 40"
+                                    min="0"
+                                    max="100"
+                                    step="0.1"
+                                    required
+                                >
+                                <p class="text-sm text-slate-500 mt-1.5">Ownership stake you are offering or seeking (%).</p>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label for="equity-company-valuation" class="form-label">Company valuation (SAR)</label>
+                                <input 
+                                    type="text" 
+                                    id="equity-company-valuation" 
+                                    name="companyValuation" 
+                                    class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white"
+                                    placeholder="e.g. 5000000"
+                                >
+                                <p class="text-sm text-slate-500 mt-1.5">Used with % to estimate value (e.g. 5M = 5,000,000 SAR).</p>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="equity-company-valuation" class="form-label">Company Valuation (SAR)</label>
-                            <input 
-                                type="text" 
-                                id="equity-company-valuation" 
-                                name="companyValuation" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="e.g., 5000000"
-                            >
-                            <p class="text-sm text-gray-500 mt-1">Used to calculate estimated value (e.g. 5M = 5,000,000 SAR)</p>
-                        </div>
-                        <div class="form-group">
-                            <label for="equity-vesting" class="form-label">Vesting Period</label>
+                        <div class="form-group mb-5 md:max-w-md">
+                            <label for="equity-vesting" class="form-label">Vesting terms</label>
                             <select 
                                 id="equity-vesting" 
                                 name="equityVesting" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white"
                             >
                                 <option value="">Select vesting period</option>
                                 <option value="immediate">Immediate</option>
@@ -2016,18 +3084,18 @@ function setupExchangeModeSelection() {
                                 <option value="custom">Custom</option>
                             </select>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="equity-contribution" class="form-label">Contribution Description</label>
-                        <textarea 
-                            id="equity-contribution" 
-                            name="equityContribution" 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            rows="3"
-                            placeholder="e.g., Join our JV: 40% equity for expertise + equipment"
-                            data-rich-text="true"
-                        ></textarea>
-                        <p class="text-sm text-gray-500 mt-1">Describe what contribution earns this equity stake</p>
+                        <div class="form-group mb-0">
+                            <label for="equity-contribution" class="form-label">Ownership notes</label>
+                            <textarea 
+                                id="equity-contribution" 
+                                name="equityContribution" 
+                                class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white min-h-[120px]"
+                                rows="4"
+                                placeholder="e.g. Join our JV: 40% equity for expertise + equipment"
+                                data-rich-text="true"
+                            ></textarea>
+                            <p class="text-sm text-slate-500 mt-1.5">What contribution or role earns this stake.</p>
+                        </div>
                     </div>
                 `;
                 break;
@@ -2037,66 +3105,83 @@ function setupExchangeModeSelection() {
                 html = `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div class="form-group">
-                            <label for="profit-split" class="form-label">Profit Split (e.g. 60-40) <span class="text-red-600">*</span></label>
-                            <input 
-                                type="text" 
-                                id="profit-split" 
-                                name="profitSplit" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="e.g., 60-40 or 50-30-20"
-                                required
-                            >
-                            <p class="text-sm text-gray-500 mt-1">Enter profit split (e.g., 60-40 for 60% partner, 40% partner)</p>
-                        </div>
-                        <div class="form-group">
-                            <label for="profit-share-percentage" class="form-label">Partner Share % (for value estimate)</label>
+                            <label for="profit-share-percentage" class="form-label">Profit share percentage <span class="text-red-600">*</span></label>
                             <input 
                                 type="number" 
                                 id="profit-share-percentage" 
                                 name="profitSharePercentage" 
                                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="e.g., 10"
+                                placeholder="e.g. 15"
                                 min="0"
                                 max="100"
                                 step="0.1"
+                                required
                             >
-                            <p class="text-sm text-gray-500 mt-1">Percentage of profit for partner (used to calculate estimated value)</p>
+                            <p class="text-sm text-gray-500 mt-1">Your share of profit or revenue (%).</p>
                         </div>
                         <div class="form-group">
-                            <label for="expected-profit" class="form-label">Expected Profit (SAR)</label>
+                            <label for="profit-basis" class="form-label">Revenue basis <span class="text-red-600">*</span></label>
+                            <select 
+                                id="profit-basis" 
+                                name="profitBasis" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                required
+                            >
+                                <option value="revenue">Gross revenue</option>
+                                <option value="profit">Net profit (after costs)</option>
+                                <option value="gross_profit">Gross profit</option>
+                            </select>
+                        </div>
+                        <div class="form-group md:col-span-2">
+                            <label for="profit-duration" class="form-label">Duration <span class="text-red-600">*</span></label>
+                            <select 
+                                id="profit-duration" 
+                                name="profitDuration" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                required
+                            >
+                                <option value="">Select duration</option>
+                                <option value="project">Project length only</option>
+                                <option value="1y">1 year</option>
+                                <option value="2y">2 years</option>
+                                <option value="3y">3+ years</option>
+                                <option value="ongoing">Ongoing / open-ended</option>
+                                <option value="custom">Custom (describe below)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="form-group">
+                            <label for="profit-split" class="form-label">Split structure <span class="text-gray-500 font-normal">(optional)</span></label>
+                            <input 
+                                type="text" 
+                                id="profit-split" 
+                                name="profitSplit" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="e.g. 60-40 partner split"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="expected-profit" class="form-label">Expected profit (SAR) <span class="text-gray-500 font-normal">(optional)</span></label>
                             <input 
                                 type="text" 
                                 id="expected-profit" 
                                 name="expectedProfit" 
                                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="e.g., 2000000"
+                                placeholder="e.g. 2000000"
                             >
-                            <p class="text-sm text-gray-500 mt-1">Expected profit for the project (e.g. 2M = 2,000,000 SAR)</p>
-                        </div>
-                        <div class="form-group">
-                            <label for="profit-basis" class="form-label">Profit Basis</label>
-                            <select 
-                                id="profit-basis" 
-                                name="profitBasis" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            >
-                                <option value="revenue">Revenue Share</option>
-                                <option value="profit">Profit Share (After Costs)</option>
-                                <option value="gross_profit">Gross Profit Share</option>
-                            </select>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="profit-distribution" class="form-label">Distribution Schedule</label>
+                        <label for="profit-distribution" class="form-label">Distribution &amp; cadence notes <span class="text-gray-500 font-normal">(optional)</span></label>
                         <textarea 
                             id="profit-distribution" 
                             name="profitDistribution" 
                             class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                             rows="3"
-                            placeholder="e.g., Consortium: 60-40 profit split after costs, distributed quarterly"
+                            placeholder="e.g. Quarterly reconciliation after audited costs"
                             data-rich-text="true"
                         ></textarea>
-                        <p class="text-sm text-gray-500 mt-1">Describe how and when profits will be distributed</p>
                     </div>
                 `;
                 break;
@@ -2104,44 +3189,44 @@ function setupExchangeModeSelection() {
             case 'barter':
                 if (currencyGroup) currencyGroup.classList.add('hidden');
                 html = `
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div class="form-group">
-                            <label for="barter-offer" class="form-label">What You Offer <span class="text-red-600">*</span></label>
+                    <div class="occ-rtx-stack flex flex-col gap-6 mb-6">
+                        <div class="form-group occ-rtx-field mb-0">
+                            <label for="barter-offer" class="form-label">What you offer <span class="text-red-600">*</span></label>
+                            <p class="text-sm text-slate-500 mt-0 mb-2">Services, assets, or resources you would contribute to a barter arrangement.</p>
                             <textarea 
                                 id="barter-offer" 
                                 name="barterOffer" 
                                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                                 rows="3"
-                                placeholder="e.g., Office space, equipment, services..."
+                                placeholder="Example: design support, equipment loan, training days…"
                                 required
                                 data-rich-text="true"
                             ></textarea>
-                            <p class="text-sm text-gray-500 mt-2 form-help">Describe what you're offering in exchange</p>
                         </div>
-                        <div class="form-group">
-                            <label for="barter-need" class="form-label">What You Need <span class="text-red-600">*</span></label>
+                        <div class="form-group occ-rtx-field mb-0">
+                            <label for="barter-need" class="form-label">What you want in return <span class="text-red-600">*</span></label>
+                            <p class="text-sm text-slate-500 mt-0 mb-2">Return value, timing, quality, and handover expectations.</p>
                             <textarea 
                                 id="barter-need" 
                                 name="barterNeed" 
                                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                                 rows="3"
-                                placeholder="e.g., Structural engineering services..."
+                                placeholder="Example: office space, licences, materials by date…"
                                 required
                                 data-rich-text="true"
                             ></textarea>
-                            <p class="text-sm text-gray-500 mt-2 form-help">Describe what you need in return</p>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="barter-value" class="form-label">Estimated Value (Optional)</label>
-                        <input 
-                            type="text" 
-                            id="barter-value" 
-                            name="barterValue" 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="e.g., Equivalent to 50K SAR"
-                        >
-                        <p class="text-sm text-gray-500 mt-2 form-help">Optional: Estimated equivalent value</p>
+                        <div class="form-group occ-rtx-field mb-0 max-w-xl">
+                            <label for="barter-value" class="form-label">Expected exchange value <span class="text-gray-500 font-normal">(optional)</span></label>
+                            <p class="text-sm text-slate-500 mt-0 mb-2">Rough SAR equivalent helps others compare options.</p>
+                            <input 
+                                type="text" 
+                                id="barter-value" 
+                                name="barterValue" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="e.g. Equivalent to 50K SAR"
+                            >
+                        </div>
                     </div>
                 `;
                 break;
@@ -2195,47 +3280,50 @@ function setupExchangeModeSelection() {
                                 <p class="text-sm text-gray-500 mt-1">%</p>
                             </div>
                         </div>
-                        <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                        <div class="occ-vx-hybrid-meter occ-vx-hybrid-meter--pending">
                             <p class="text-sm text-gray-700">
                                 <span class="font-semibold">Total: </span>
                                 <span id="hybrid-total">0%</span>
                             </p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div class="form-group">
-                            <label for="hybrid-cash-details" class="form-label">Cash Details</label>
+                    <div class="occ-rtx-stack flex flex-col gap-6 mb-2">
+                        <div class="form-group occ-rtx-field mb-0">
+                            <label for="hybrid-cash-details" class="form-label">Cash details</label>
+                            <p class="text-sm text-slate-500 mt-0 mb-2">How the cash portion is paid (timing, milestones, currency notes).</p>
                             <textarea 
                                 id="hybrid-cash-details" 
                                 name="hybridCashDetails" 
                                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                rows="2"
-                                placeholder="e.g., 30% cash upfront"
+                                rows="3"
+                                placeholder="Example: 30% on signature, 70% on delivery…"
                                 data-rich-text="true"
                             ></textarea>
                         </div>
-                        <div class="form-group">
-                            <label for="hybrid-equity-details" class="form-label">Equity Details</label>
+                        <div class="form-group occ-rtx-field mb-0">
+                            <label for="hybrid-equity-details" class="form-label">Equity details</label>
+                            <p class="text-sm text-slate-500 mt-0 mb-2">Stake size, vesting, governance, or valuation context.</p>
                             <textarea 
                                 id="hybrid-equity-details" 
                                 name="hybridEquityDetails" 
                                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                rows="2"
-                                placeholder="e.g., 50% equity stake"
+                                rows="3"
+                                placeholder="Example: board seat, cliff, contribution in kind…"
                                 data-rich-text="true"
                             ></textarea>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="hybrid-barter-details" class="form-label">Barter Details</label>
-                        <textarea 
-                            id="hybrid-barter-details" 
-                            name="hybridBarterDetails" 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            rows="2"
-                            placeholder="e.g., 20% in-kind services"
-                            data-rich-text="true"
-                        ></textarea>
+                        <div class="form-group occ-rtx-field mb-0">
+                            <label for="hybrid-barter-details" class="form-label">Barter details</label>
+                            <p class="text-sm text-slate-500 mt-0 mb-2">What would be exchanged in-kind and how it maps to the barter share.</p>
+                            <textarea 
+                                id="hybrid-barter-details" 
+                                name="hybridBarterDetails" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                rows="3"
+                                placeholder="Example: labour, materials, or services counted toward the barter %…"
+                                data-rich-text="true"
+                            ></textarea>
+                        </div>
                     </div>
                 `;
                 
@@ -2254,11 +3342,11 @@ function setupExchangeModeSelection() {
                         if (totalDisplay) {
                             totalDisplay.textContent = `${total.toFixed(1)}%`;
                             if (total === 100) {
-                                totalDisplay.parentElement.classList.remove('bg-blue-50', 'border-blue-200');
-                                totalDisplay.parentElement.classList.add('bg-green-50', 'border-green-200');
+                                totalDisplay.parentElement.classList.remove('occ-vx-hybrid-meter--pending');
+                                totalDisplay.parentElement.classList.add('occ-vx-hybrid-meter--ok');
                             } else {
-                                totalDisplay.parentElement.classList.remove('bg-green-50', 'border-green-200');
-                                totalDisplay.parentElement.classList.add('bg-blue-50', 'border-blue-200');
+                                totalDisplay.parentElement.classList.remove('occ-vx-hybrid-meter--ok');
+                                totalDisplay.parentElement.classList.add('occ-vx-hybrid-meter--pending');
                             }
                         }
                     }
@@ -2270,8 +3358,16 @@ function setupExchangeModeSelection() {
                 break;
         }
         
+        if (window.RichTextEditor && typeof window.RichTextEditor.destroy === 'function') {
+            fieldsContainer.querySelectorAll('textarea[data-rich-text="true"]').forEach(ta => {
+                if (ta.id) window.RichTextEditor.destroy(ta.id);
+            });
+        }
         fieldsContainer.innerHTML = html;
-        
+        fieldsContainer.querySelectorAll('input:not([type="checkbox"]):not([type="hidden"]), select, textarea').forEach(el => {
+            el.classList.add('occ-vx-control');
+        });
+
         // Initialize rich text editors for newly rendered exchange mode fields
         setTimeout(() => {
             if (window.RichTextEditor) {
@@ -2283,11 +3379,22 @@ function setupExchangeModeSelection() {
     clearButton.addEventListener('click', () => {
         selectedMode = null;
         exchangeModeInput.value = '';
-        exchangeModeCards.forEach(c => c.classList.remove('selected'));
+        exchangeModeCards.forEach(c => {
+            c.classList.remove('selected');
+            if (typeof c.setAttribute === 'function') c.setAttribute('aria-pressed', 'false');
+        });
         selectedDisplay.classList.add('hidden');
-        fieldsContainer.innerHTML = '<p class="text-gray-500 italic">Please select an exchange mode to see specific fields.</p>';
+        fieldsContainer.innerHTML = '<p class="occ-vx-empty">Select how value will be exchanged to see the relevant fields.</p>';
         if (currencyGroup) currencyGroup.classList.add('hidden');
+        document.querySelectorAll('.accepted-mode-cb').forEach(cb => {
+            cb.disabled = false;
+            const wrap = cb.closest('.occ-s6-chip');
+            if (wrap) wrap.classList.remove('occ-s6-chip--primary-lock');
+        });
+        renderAlternateExchangePanels();
+        refreshEstimatedValueDisplay();
     });
+    renderAlternateExchangePanels();
 }
 
 function setupDemoDataFiller() {
@@ -2313,16 +3420,14 @@ function setupDemoDataFiller() {
                 modal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
             } else {
-                demoDataIndex = (demoDataIndex + 1) % DEMO_DATASETS.length;
-                fillDemoData(DEMO_DATASETS[demoDataIndex]);
+                fillDemoData(pickRandomDemoDataset());
             }
             return;
         }
         if (e.target.id === 'demo-modal-confirm') {
             e.preventDefault();
             closeModal();
-            demoDataIndex = (demoDataIndex + 1) % DEMO_DATASETS.length;
-            fillDemoData(DEMO_DATASETS[demoDataIndex]);
+            fillDemoData(pickRandomDemoDataset());
             return;
         }
         if (e.target.id === 'demo-modal-cancel') {
@@ -2384,6 +3489,13 @@ function fillDemoModelSpecificFields(modelType, subModelType, modelFields) {
             return;
         }
         if (type === 'multi-select' && Array.isArray(value)) {
+            const wrap = document.querySelector(`.occ-ms-field[data-field-key="${key}"]`);
+            if (wrap) {
+                wrap.querySelectorAll('.occ-ms-option').forEach(cb => {
+                    cb.checked = value.includes(cb.value);
+                });
+                return;
+            }
             const selectEl = document.getElementById(key) || document.querySelector(`[name="${key}"]`);
             if (selectEl && selectEl.multiple) {
                 Array.from(selectEl.options).forEach(opt => {
@@ -2436,8 +3548,8 @@ function fillDemoModelSpecificFields(modelType, subModelType, modelFields) {
 }
 
 /**
- * Fills Step 5 mode-specific fields from dataset.step5.modeFields.
- * Field keys in modeFields match input name (e.g. cashAmount, equityPercentage).
+ * Fills Step 6 mode-specific fields from dataset.step5.modeFields (demo payload key).
+ * Field keys in modeFields match input id (e.g. cash-amount, profit-share-percentage).
  */
 function fillDemoStep5ModeFields(modeFields, currency, agreement) {
     if (!modeFields || typeof modeFields !== 'object') return;
@@ -2469,6 +3581,7 @@ async function fillDemoData(dataset) {
         const projectType = (d.projectType != null ? d.projectType : 'single');
         const projectTypeRadio = document.querySelector(`input[name="projectType"][value="${projectType}"]`);
         if (projectTypeRadio) projectTypeRadio.checked = true;
+        updateMultiProjectTasksUI();
 
         // Step 2: Basic info
         const titleInput = document.getElementById('title');
@@ -2529,13 +3642,21 @@ async function fillDemoData(dataset) {
                         renderDynamicFields(categoryKey, subModelKey);
                         setTimeout(() => {
                             fillDemoModelSpecificFields(categoryKey, subModelKey, step4.modelFields);
+                            if (d.step4MultiTasks && Array.isArray(d.step4MultiTasks)) {
+                                const list = document.getElementById('multi-project-tasks-list');
+                                if (list) {
+                                    list.innerHTML = '';
+                                    d.step4MultiTasks.forEach(t => addMultiProjectTaskRow(t));
+                                }
+                                updateMultiProjectTasksUI();
+                            }
                         }, 500);
                     }
                 }, 50);
             }
         }
         
-        // Step 5: Exchange Mode & Financial Terms
+        // Step 6: Budget range, exchange mode & financial terms
         const step5 = d.step5 || {};
         const budgetMinEl = document.getElementById('budgetRange_min');
         const budgetMaxEl = document.getElementById('budgetRange_max');
@@ -2559,7 +3680,11 @@ async function fillDemoData(dataset) {
         
         const successDiv = document.getElementById('form-success');
         if (successDiv) {
-            successDiv.textContent = 'Demo data filled. Move through steps to review and submit.';
+            const rawTitle = (d.step1 && d.step1.title) ? String(d.step1.title).trim() : '';
+            const titleSnippet = rawTitle.length > 72 ? `${rawTitle.slice(0, 69)}…` : rawTitle;
+            successDiv.textContent = titleSnippet
+                ? `Demo loaded: “${titleSnippet}”. Step through the wizard to review and submit.`
+                : 'Demo data filled. Move through steps to review and submit.';
             successDiv.classList.remove('hidden');
             setTimeout(() => successDiv.classList.add('hidden'), 5000);
         }
@@ -2924,7 +4049,9 @@ function renderDynamicFields(modelKey, subModelKey, preserveValues = false) {
     
     const form = document.getElementById('opportunity-form');
     formService.setupConditionalFields(form);
-    
+    updateMultiProjectTasksUI();
+    formService.wireDynamicBehaviours(form);
+
     // Initialize rich text editors for newly rendered fields (use container's step, e.g. step-4)
     const stepEl = container ? container.closest('.wizard-step-content') : null;
     const isStepVisible = stepEl && !stepEl.classList.contains('hidden');
@@ -2975,7 +4102,7 @@ function setupFormHandlers() {
             }
         });
         
-        if (!validateCurrentStep()) {
+        if (!validateStepsRange(1, 7)) {
             // Restore required attributes if validation fails
             hiddenFields.forEach(field => field.setAttribute('required', 'required'));
             return;
@@ -3003,13 +4130,13 @@ function setupFormHandlers() {
             const exchangeMode = document.getElementById('exchange-mode')?.value;
             if (!exchangeMode) throw new Error('Please select an exchange mode');
             const validModes = ['cash', 'equity', 'profit_sharing', 'barter', 'hybrid'];
-            const paymentMethodCheckboxes = document.querySelectorAll('.payment-method-cb:checked');
-            let paymentModesArr = paymentMethodCheckboxes.length > 0
-                ? Array.from(paymentMethodCheckboxes).map(cb => cb.value).filter(m => validModes.includes(m))
-                : [exchangeMode];
-            if (!paymentModesArr.includes(exchangeMode)) paymentModesArr = [exchangeMode, ...paymentModesArr];
-            
-            const title = document.getElementById('title')?.value?.trim();
+            const acceptedModesEls = document.querySelectorAll('.accepted-mode-cb:checked');
+            const altModes = Array.from(acceptedModesEls).map(cb => cb.value).filter(m => validModes.includes(m));
+            const paymentModesArr = [exchangeMode];
+            altModes.forEach(m => {
+                if (!paymentModesArr.includes(m)) paymentModesArr.push(m);
+            });
+            const accepted_modes = paymentModesArr.slice();
             const description = document.getElementById('description')?.value?.trim() || '';
             const location = document.getElementById('location')?.value || '';
             const locationCountry = document.getElementById('location-country')?.value || '';
@@ -3034,8 +4161,6 @@ function setupFormHandlers() {
                 certifications
             };
             
-            const acceptedModesEls = document.querySelectorAll('.accepted-mode-cb:checked');
-            const accepted_modes = acceptedModesEls.length > 0 ? Array.from(acceptedModesEls).map(cb => cb.value) : [exchangeMode];
             const valueItemsRows = document.querySelectorAll('#value-items-container .value-item-row');
             const valueItems = [];
             valueItemsRows.forEach(row => {
@@ -3077,6 +4202,7 @@ function setupFormHandlers() {
             } else if (exchangeMode === 'profit_sharing') {
                 exchangeData.profitSplit = document.getElementById('profit-split')?.value || '';
                 exchangeData.profitBasis = document.getElementById('profit-basis')?.value || 'profit';
+                exchangeData.profitDuration = document.getElementById('profit-duration')?.value || '';
                 exchangeData.profitDistribution = (document.getElementById('profit-distribution')?.value || '').trim();
                 const sharePctEl = document.getElementById('profit-share-percentage');
                 const expectedProfitEl = document.getElementById('expected-profit');
@@ -3093,6 +4219,11 @@ function setupFormHandlers() {
                 exchangeData.hybridCashDetails = (document.getElementById('hybrid-cash-details')?.value || '').trim();
                 exchangeData.hybridEquityDetails = (document.getElementById('hybrid-equity-details')?.value || '').trim();
                 exchangeData.hybridBarterDetails = (document.getElementById('hybrid-barter-details')?.value || '').trim();
+            }
+
+            const alternateExchangeDetails = collectAlternateExchangeDetailsFromForm();
+            if (alternateExchangeDetails.length > 0) {
+                exchangeData.alternateExchangeDetails = alternateExchangeDetails;
             }
 
             const valueExpected = collectValueExpectedFromForm();
@@ -3116,6 +4247,7 @@ function setupFormHandlers() {
             }
             
             let modelData = {};
+            syncMultiTaskTitleFromRows();
             const formService = window.opportunityFormService;
             if (formService && form) {
                 const allData = formService.collectFormData(form);
@@ -3168,6 +4300,10 @@ function setupFormHandlers() {
                 attributes: attributesPayload,
                 modelData
             };
+            if (multiProjectWorkPackagesRequired()) {
+                const pt = collectProjectTasksFromUI();
+                if (pt.length) oppPayload.projectTasks = pt;
+            }
             if (value_exchange) oppPayload.value_exchange = value_exchange;
 
             const oppService = window.opportunityService;

@@ -260,14 +260,19 @@ const mapService = (() => {
                 addressdetails: '1'
             });
             const response = await fetch(`${NOMINATIM_URL}/search?${params}`, {
-                headers: { 'Accept-Language': 'en' }
+                headers: {
+                    'Accept-Language': 'en',
+                    'User-Agent': 'PMTwin-POC/1.0'
+                }
             });
             const results = await response.json();
             if (results.length === 0) return null;
+            const hit = results[0];
             return {
-                lat: parseFloat(results[0].lat),
-                lng: parseFloat(results[0].lon),
-                displayName: results[0].display_name
+                lat: parseFloat(hit.lat),
+                lng: parseFloat(hit.lon),
+                displayName: hit.display_name,
+                address: hit.address || {}
             };
         } catch (error) {
             console.error('Geocoding error:', error);
@@ -276,7 +281,7 @@ const mapService = (() => {
     }
 
     /**
-     * Reverse geocode: coordinates -> address string
+     * Reverse geocode: coordinates -> display line + structured address (for form auto-fill).
      */
     async function reverseGeocode(lat, lng) {
         try {
@@ -287,10 +292,19 @@ const mapService = (() => {
                 addressdetails: '1'
             });
             const response = await fetch(`${NOMINATIM_URL}/reverse?${params}`, {
-                headers: { 'Accept-Language': 'en' }
+                headers: {
+                    'Accept-Language': 'en',
+                    'User-Agent': 'PMTwin-POC/1.0'
+                }
             });
             const result = await response.json();
-            return result.display_name || null;
+            if (result.error) return null;
+            return {
+                displayName: result.display_name || '',
+                address: result.address || {},
+                lat,
+                lng
+            };
         } catch (error) {
             console.error('Reverse geocoding error:', error);
             return null;

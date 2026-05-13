@@ -1,17 +1,5 @@
 <div class="page-container">
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1 class="page-title">Opportunities</h1>
-            <p class="page-subtitle">Browse and manage collaboration opportunities</p>
-        </div>
-        <div class="page-actions" style="display:flex;gap:0.5rem;">
-            <a href="#" data-route="/opportunities/map" class="btn btn-secondary" style="display:inline-flex;align-items:center;gap:0.375rem;">
-                <i class="ph-duotone ph-map-trifold" style="font-size:18px;" aria-hidden="true"></i>
-                Map View
-            </a>
-            <a href="#" data-route="/opportunities/create" class="btn btn-primary">Create Opportunity</a>
-        </div>
-    </div>
+    <div id="page-context-header-mount"></div>
     <div class="page-body">
     
     <!-- Category Summary Cards -->
@@ -52,6 +40,13 @@
             </div>
         </button>
     </div>
+
+    <p class="mb-4">
+        <a href="#" data-route="/opportunities/map" class="text-primary font-medium no-underline hover:underline inline-flex items-center gap-1.5 text-sm">
+            <i class="ph-duotone ph-map-trifold text-lg" aria-hidden="true"></i>
+            Map view
+        </a>
+    </p>
     
     <div class="bg-white border border-gray-200 rounded-lg p-6 mb-8">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">

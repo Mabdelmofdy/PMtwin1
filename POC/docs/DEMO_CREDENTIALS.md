@@ -27,7 +27,7 @@ Sign in through the normal **Login** page (demo picker when available).
 - **Admin:** `admin123`
 - **All other accounts (Demo40 and Pending):** `demo123`
 
-Data is loaded automatically on first launch: the app merges demo users, demo companies, demo opportunities, demo applications, demo contracts, demo matches, demo notifications, and pending users from the JSON files under `POC/data/`.
+Data is loaded automatically on first launch: the app merges demo users, demo companies, demo opportunities, demo applications, demo contracts, demo matches, demo notifications, **demo connections** (pre-accepted pairs for People and Messages), and pending users from the JSON files under `POC/data/`.
 
 **Profile page data source:** Profile data (skills, certificates, experience, etc.) does not come from the JSON files directly. The data service (`POC/src/core/data/data-service.js`) loads `users.json` and `companies.json`, then merges `demo-users.json`, `demo-companies.json`, and other demo files via `mergeDemoData()` into localStorage. The profile page reads the current user via `dataService.getUserOrCompanyById(user.id)` (with fallback to `getUsers()` / `getCompanies()` when needed) after login.
 
@@ -49,6 +49,25 @@ Data is loaded automatically on first launch: the app merges demo users, demo co
 | Consultant | demo06@demo.test | demo123 | Structural engineer; **full profile** (skills, certs, experience entries); has accepted application / contract |
 | Consultant | demo07@demo.test | demo123 | **Full profile** (skills, certifications, experience entries); project management / PMO |
 | Company (construction) | company01@demo.test | demo123 | Owns Need: Structural engineer; has applications and contract |
+
+---
+
+## Pre-seeded connections (Demo40)
+
+These rows are merged from [demo-connections.json](../data/demo-connections.json) on every app load (by stable `id`). All are **accepted** so **Find / People** and **Messages** show partners without sending requests first. Log in as any participant in a row to see the other side in your network.
+
+| From | To | Scenario |
+|------|-----|----------|
+| Al-Riyadh Construction (`demo-c01`) | Ahmed Hassan (`demo-u01`) | Company ↔ professional |
+| Al-Riyadh Construction (`demo-c01`) | Sara Al-Mutairi (`demo-u04`) | Company ↔ applicant-style contact |
+| Al-Riyadh Construction (`demo-c01`) | Layla Al-Qahtani (`demo-u06`) | Contractor ↔ structural consultant |
+| Gulf Development Co (`demo-c02`) | Sara Al-Mutairi (`demo-u04`) | Developer ↔ professional |
+| Gulf Development Co (`demo-c02`) | Mohammed Al-Saud (`demo-u07`) | Developer ↔ PM consultant |
+| Ahmed Hassan (`demo-u01`) | Fatima Al-Rashid (`demo-u02`) | Professional ↔ professional |
+| Ahmed Hassan (`demo-u01`) | Sara Al-Mutairi (`demo-u04`) | Professional ↔ professional |
+| Fatima Al-Rashid (`demo-u02`) | Omar Khalid (`demo-u03`) | Professional ↔ professional |
+| Sara Al-Mutairi (`demo-u04`) | Layla Al-Qahtani (`demo-u06`) | QS ↔ structural consultant |
+| Sara Al-Mutairi (`demo-u04`) | Mohammed Al-Saud (`demo-u07`) | Professional ↔ consultant |
 
 ---
 
@@ -136,6 +155,7 @@ Use these to test the **registration → vetting → activation** flow. Both can
 - **Contracts:** [POC/data/demo-contracts.json](../data/demo-contracts.json)
 - **Matches:** [POC/data/demo-matches.json](../data/demo-matches.json)
 - **Notifications:** [POC/data/demo-notifications.json](../data/demo-notifications.json)
+- **Connections (pre-accepted demo pairs):** [POC/data/demo-connections.json](../data/demo-connections.json)
 
 ---
 
@@ -143,4 +163,4 @@ Use these to test the **registration → vetting → activation** flow. Both can
 
 To see the platform workflow (Register → Vetting → Dashboard → Opportunity → Matching → Application → Negotiation → Contract → Execution), open **How it works** from the public navigation, or go to `/workflow`.
 
-**Demo data for dashboard counts:** Every demo user and demo company has at least one application, one match, and one notification aligned with opportunities. Log in as any demo user (e.g. **demo04@demo.test**, **demo01@demo.test**, **company01@demo.test**) to see Applications, Matches, and Notifications non-zero. Demo matches and notifications are merged from `demo-matches.json` and `demo-notifications.json` on each load.
+**Demo data for dashboard counts:** Every demo user and demo company has at least one application, one match, and one notification aligned with opportunities. Log in as any demo user (e.g. **demo04@demo.test**, **demo01@demo.test**, **company01@demo.test**) to see Applications, Matches, and Notifications non-zero. Demo matches and notifications are merged from `demo-matches.json` and `demo-notifications.json` on each load. Pre-accepted **connections** merge from `demo-connections.json` so **Find / People** and **Messages** have partners without creating requests first.

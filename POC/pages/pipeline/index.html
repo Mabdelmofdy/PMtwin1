@@ -1,139 +1,394 @@
 <div class="page-container pipeline-page">
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1 class="page-title">Pipeline Management</h1>
-            <p class="page-subtitle">Track your opportunities and applications</p>
+    <div id="page-context-header-mount"></div>
+
+    <div class="page-body pipeline-body">
+        <div class="pipeline-workspace">
+            <nav class="pipeline-board-tabs" role="tablist" aria-label="Pipeline views">
+                <button type="button" class="tab-btn pipeline-board-tab active" data-tab="opportunities" id="pipeline-tab-opportunities" role="tab" aria-controls="tab-opportunities" aria-selected="true">
+                    <span class="pipeline-board-tab__inner">
+                        <i class="ph-duotone ph-briefcase pipeline-board-tab__icon" aria-hidden="true"></i>
+                        <span class="pipeline-board-tab__label">Opportunities</span>
+                    </span>
+                </button>
+                <button type="button" class="tab-btn pipeline-board-tab" data-tab="applications" id="pipeline-tab-applications" role="tab" aria-controls="tab-applications" aria-selected="false">
+                    <span class="pipeline-board-tab__inner">
+                        <i class="ph-duotone ph-paper-plane-tilt pipeline-board-tab__icon" aria-hidden="true"></i>
+                        <span class="pipeline-board-tab__label">Applications</span>
+                    </span>
+                </button>
+            </nav>
+
+            <div class="pipeline-board-inner">
+                <div id="tab-opportunities" class="tab-content tab-panel active" role="tabpanel" aria-labelledby="pipeline-tab-opportunities" data-intent-filter="">
+                    <div class="pipeline-stats" aria-live="polite" aria-label="Opportunity summary">
+                        <div class="pipeline-stat">
+                            <span class="pipeline-stat__value" id="pipeline-stat-opp-total">0</span>
+                            <span class="pipeline-stat__label">In view</span>
+                        </div>
+                        <div class="pipeline-stat">
+                            <span class="pipeline-stat__value" id="pipeline-stat-opp-active">0</span>
+                            <span class="pipeline-stat__label">Published &amp; in progress</span>
+                        </div>
+                        <div class="pipeline-stat">
+                            <span class="pipeline-stat__value" id="pipeline-stat-opp-closed">0</span>
+                            <span class="pipeline-stat__label">Closed</span>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-toolbar">
+                        <div class="pipeline-toolbar__text">
+                            <h2 class="pipeline-board-heading">Opportunity board</h2>
+                            <p class="pipeline-board-lead">Pick a stage in the sidebar to view your postings. Drag a card onto a stage to update status.</p>
+                        </div>
+                        <div class="pipeline-toolbar__controls">
+                            <span class="pipeline-label" id="pipeline-label-opp-intent">Intent</span>
+                            <div class="pipeline-type-segment" role="group" aria-labelledby="pipeline-label-opp-intent">
+                                <button type="button" class="pipeline-type-btn is-active" data-intent-segment="all" aria-pressed="true">All</button>
+                                <button type="button" class="pipeline-type-btn" data-intent-segment="request" aria-pressed="false">Need</button>
+                                <button type="button" class="pipeline-type-btn" data-intent-segment="offer" aria-pressed="false">Offer</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-app-layout">
+                        <aside class="pipeline-status-sidebar" aria-label="Opportunity stages">
+                            <p class="pipeline-status-sidebar__label">Status</p>
+                            <nav class="pipeline-status-nav" role="tablist" aria-label="Filter by opportunity stage">
+                                <button type="button" class="pipeline-status-nav__btn is-active" role="tab" data-opp-stage="draft" aria-selected="true" title="Work in progress—not visible until you publish.">
+                                    <i class="ph-duotone ph-pencil-simple pipeline-status-nav__icon" aria-hidden="true"></i>
+                                    <span class="pipeline-status-nav__text">Draft</span>
+                                    <span class="pipeline-status-nav__count" id="sidebar-opp-count-draft">0</span>
+                                </button>
+                                <button type="button" class="pipeline-status-nav__btn" role="tab" data-opp-stage="published" aria-selected="false" title="Visible to others; candidates can discover and apply.">
+                                    <i class="ph-duotone ph-megaphone-simple pipeline-status-nav__icon" aria-hidden="true"></i>
+                                    <span class="pipeline-status-nav__text">Published</span>
+                                    <span class="pipeline-status-nav__count" id="sidebar-opp-count-published">0</span>
+                                </button>
+                                <button type="button" class="pipeline-status-nav__btn" role="tab" data-opp-stage="in_progress" aria-selected="false" title="Negotiation, contract, or execution.">
+                                    <i class="ph-duotone ph-flow-arrow pipeline-status-nav__icon" aria-hidden="true"></i>
+                                    <span class="pipeline-status-nav__text">In progress</span>
+                                    <span class="pipeline-status-nav__count" id="sidebar-opp-count-in_progress">0</span>
+                                </button>
+                                <button type="button" class="pipeline-status-nav__btn" role="tab" data-opp-stage="closed" aria-selected="false" title="Completed, cancelled, or finished.">
+                                    <i class="ph-duotone ph-check-circle pipeline-status-nav__icon" aria-hidden="true"></i>
+                                    <span class="pipeline-status-nav__text">Closed</span>
+                                    <span class="pipeline-status-nav__count" id="sidebar-opp-count-closed">0</span>
+                                </button>
+                            </nav>
+                        </aside>
+                        <div class="pipeline-app-main" id="pipeline-opp-main-panel">
+                            <header class="pipeline-app-main__head">
+                                <h3 class="pipeline-app-main__title" id="pipeline-opp-stage-title">Draft</h3>
+                                <p class="pipeline-app-main__hint" id="pipeline-opp-stage-hint">Work in progress—not visible to the network until you publish.</p>
+                            </header>
+                            <div id="kanban-opp-active" class="kanban-items pipeline-app-cards"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-applications" class="tab-content tab-panel" style="display: none;" role="tabpanel" aria-labelledby="pipeline-tab-applications" data-intent-filter="">
+                    <div class="pipeline-stats" aria-live="polite" aria-label="Application summary">
+                        <div class="pipeline-stat">
+                            <span class="pipeline-stat__value" id="pipeline-stat-app-total">0</span>
+                            <span class="pipeline-stat__label">In view</span>
+                        </div>
+                        <div class="pipeline-stat">
+                            <span class="pipeline-stat__value" id="pipeline-stat-app-open">0</span>
+                            <span class="pipeline-stat__label">With owner</span>
+                        </div>
+                        <div class="pipeline-stat">
+                            <span class="pipeline-stat__value" id="pipeline-stat-app-terminal">0</span>
+                            <span class="pipeline-stat__label">Accepted or closed</span>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-toolbar">
+                        <div class="pipeline-toolbar__text">
+                            <h2 class="pipeline-board-heading">Application board</h2>
+                            <p class="pipeline-board-lead">Pick a stage in the sidebar to view applications. Drag a card onto a stage to change its status.</p>
+                        </div>
+                        <div class="pipeline-toolbar__controls">
+                            <span class="pipeline-label" id="pipeline-label-app-intent">Opportunity intent</span>
+                            <div class="pipeline-type-segment" role="group" aria-labelledby="pipeline-label-app-intent">
+                                <button type="button" class="pipeline-type-btn is-active" data-intent-segment="all" aria-pressed="true">All</button>
+                                <button type="button" class="pipeline-type-btn" data-intent-segment="request" aria-pressed="false">Need</button>
+                                <button type="button" class="pipeline-type-btn" data-intent-segment="offer" aria-pressed="false">Offer</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-app-layout">
+                        <aside class="pipeline-status-sidebar" aria-label="Application stages">
+                            <p class="pipeline-status-sidebar__label">Status</p>
+                            <nav class="pipeline-status-nav" role="tablist" aria-label="Filter by application stage">
+                                <button type="button" class="pipeline-status-nav__btn is-active" role="tab" data-app-stage="pending" id="nav-app-pending" aria-selected="true" title="Submitted; awaiting the owner&#39;s first action.">
+                                    <i class="ph-duotone ph-clock pipeline-status-nav__icon" aria-hidden="true"></i>
+                                    <span class="pipeline-status-nav__text">Pending</span>
+                                    <span class="pipeline-status-nav__count" id="sidebar-app-count-pending">0</span>
+                                </button>
+                                <button type="button" class="pipeline-status-nav__btn" role="tab" data-app-stage="reviewing" aria-selected="false" title="Owner is evaluating your fit.">
+                                    <i class="ph-duotone ph-eye pipeline-status-nav__icon" aria-hidden="true"></i>
+                                    <span class="pipeline-status-nav__text">Reviewing</span>
+                                    <span class="pipeline-status-nav__count" id="sidebar-app-count-reviewing">0</span>
+                                </button>
+                                <button type="button" class="pipeline-status-nav__btn" role="tab" data-app-stage="shortlisted" aria-selected="false" title="Shortlisted for next steps.">
+                                    <i class="ph-duotone ph-star pipeline-status-nav__icon" aria-hidden="true"></i>
+                                    <span class="pipeline-status-nav__text">Shortlisted</span>
+                                    <span class="pipeline-status-nav__count" id="sidebar-app-count-shortlisted">0</span>
+                                </button>
+                                <button type="button" class="pipeline-status-nav__btn" role="tab" data-app-stage="in_negotiation" aria-selected="false" title="Terms or scope under discussion.">
+                                    <i class="ph-duotone ph-chats-circle pipeline-status-nav__icon" aria-hidden="true"></i>
+                                    <span class="pipeline-status-nav__text">In negotiation</span>
+                                    <span class="pipeline-status-nav__count" id="sidebar-app-count-in_negotiation">0</span>
+                                </button>
+                                <button type="button" class="pipeline-status-nav__btn" role="tab" data-app-stage="accepted" aria-selected="false" title="Owner accepted your application.">
+                                    <i class="ph-duotone ph-seal-check pipeline-status-nav__icon" aria-hidden="true"></i>
+                                    <span class="pipeline-status-nav__text">Accepted</span>
+                                    <span class="pipeline-status-nav__count" id="sidebar-app-count-accepted">0</span>
+                                </button>
+                                <button type="button" class="pipeline-status-nav__btn" role="tab" data-app-stage="rejected" aria-selected="false" title="Rejected by owner or withdrawn by you.">
+                                    <i class="ph-duotone ph-x-circle pipeline-status-nav__icon" aria-hidden="true"></i>
+                                    <span class="pipeline-status-nav__text">Rejected / withdrawn</span>
+                                    <span class="pipeline-status-nav__count" id="sidebar-app-count-rejected">0</span>
+                                </button>
+                            </nav>
+                        </aside>
+                        <div class="pipeline-app-main" id="pipeline-app-main-panel">
+                            <header class="pipeline-app-main__head">
+                                <h3 class="pipeline-app-main__title" id="pipeline-app-stage-title">Pending</h3>
+                                <p class="pipeline-app-main__hint" id="pipeline-app-stage-hint">Submitted; awaiting the owner&#39;s first action.</p>
+                            </header>
+                            <div id="kanban-app-active" class="kanban-items pipeline-app-cards"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="page-body pipeline-page-body">
-    <div class="pipeline-tabs">
-        <button class="tab-btn active" data-tab="opportunities">My Opportunities</button>
-        <button class="tab-btn" data-tab="applications">My Applications</button>
-    </div>
-    
-    <div class="pipeline-content">
-        <!-- Opportunities Pipeline -->
-        <div id="tab-opportunities" class="tab-content active">
-            <div class="pipeline-opportunities-filters">
-                <label class="text-sm font-medium text-gray-700 mr-2">Intent:</label>
-                <select id="filter-opportunities-intent" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    <option value="">All (Need &amp; Offer)</option>
-                    <option value="request">NEED</option>
-                    <option value="offer">OFFER</option>
-                </select>
-            </div>
-            <div class="kanban-board">
-                <div class="kanban-column" data-column-title="Draft">
-                    <h3 class="kanban-column-header">Draft <span class="column-count">(0)</span></h3>
-                    <div id="kanban-draft" class="kanban-items"></div>
-                </div>
-                <div class="kanban-column" data-column-title="Published">
-                    <h3 class="kanban-column-header">Published <span class="column-count">(0)</span></h3>
-                    <div id="kanban-published" class="kanban-items"></div>
-                </div>
-                <div class="kanban-column" data-column-title="In Progress">
-                    <h3 class="kanban-column-header">In Progress <span class="column-count">(0)</span></h3>
-                    <div id="kanban-in-progress" class="kanban-items"></div>
-                </div>
-                <div class="kanban-column" data-column-title="Closed">
-                    <h3 class="kanban-column-header">Closed <span class="column-count">(0)</span></h3>
-                    <div id="kanban-closed" class="kanban-items"></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Applications Pipeline -->
-        <div id="tab-applications" class="tab-content" style="display: none;">
-            <div class="pipeline-applications-filters">
-                <label class="text-sm font-medium text-gray-700 mr-2">Intent:</label>
-                <select id="filter-applications-intent" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    <option value="">All (Need &amp; Offer)</option>
-                    <option value="request">NEED</option>
-                    <option value="offer">OFFER</option>
-                </select>
-            </div>
-            <div class="kanban-board">
-                <div class="kanban-column" data-column-title="Pending">
-                    <h3 class="kanban-column-header">Pending <span class="column-count">(0)</span></h3>
-                    <div id="kanban-app-pending" class="kanban-items"></div>
-                </div>
-                <div class="kanban-column" data-column-title="Reviewing">
-                    <h3 class="kanban-column-header">Reviewing <span class="column-count">(0)</span></h3>
-                    <div id="kanban-app-reviewing" class="kanban-items"></div>
-                </div>
-                <div class="kanban-column" data-column-title="Shortlisted">
-                    <h3 class="kanban-column-header">Shortlisted <span class="column-count">(0)</span></h3>
-                    <div id="kanban-app-shortlisted" class="kanban-items"></div>
-                </div>
-                <div class="kanban-column" data-column-title="In negotiation">
-                    <h3 class="kanban-column-header">In negotiation <span class="column-count">(0)</span></h3>
-                    <div id="kanban-app-in-negotiation" class="kanban-items"></div>
-                </div>
-                <div class="kanban-column" data-column-title="Accepted">
-                    <h3 class="kanban-column-header">Accepted <span class="column-count">(0)</span></h3>
-                    <div id="kanban-app-accepted" class="kanban-items"></div>
-                </div>
-                <div class="kanban-column" data-column-title="Rejected / Withdrawn">
-                    <h3 class="kanban-column-header">Rejected / Withdrawn <span class="column-count">(0)</span></h3>
-                    <div id="kanban-app-rejected" class="kanban-items"></div>
-                </div>
-            </div>
-        </div>
-        
-    </div>
     </div>
 </div>
 
 <style>
-.pipeline-page {
-    /* Page specific styles */
+.pipeline-body {
+    display: flex;
+    justify-content: center;
 }
 
-/* Centered content area - max width 1200px */
-.pipeline-page-body {
-    max-width: 1200px;
-    margin: 0 auto;
+.pipeline-workspace {
     width: 100%;
-}
-.pipeline-content {
-    margin-top: var(--spacing-lg);
+    max-width: 1180px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    min-height: 420px;
 }
 
-.pipeline-applications-filters,
-.pipeline-opportunities-filters {
+.pipeline-board-tabs {
     display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-xl);
+    gap: 0;
+    padding: 0 var(--spacing-md);
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid var(--border-color);
 }
 
-.pipeline-tabs {
-    display: flex;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-xl);
-    border-bottom: 2px solid var(--border-color);
-}
-
-.tab-btn {
-    padding: var(--spacing-md) var(--spacing-lg);
-    background: none;
+.pipeline-board-tab.tab-btn {
+    flex: 1;
+    max-width: 50%;
+    position: relative;
+    padding: 14px 18px;
+    margin: 0;
     border: none;
     border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
+    margin-bottom: -1px;
+    background: none;
     cursor: pointer;
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text-secondary);
-    transition: color 0.2s, border-color 0.2s;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
 
-.tab-btn:hover {
-    color: var(--primary-color);
+.pipeline-board-tab__inner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
-.tab-btn.active {
-    color: var(--primary-color);
+.pipeline-board-tab__icon {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    transition: color 0.15s ease;
+}
+
+.pipeline-board-tab.tab-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.45);
+}
+
+.pipeline-board-tab.tab-btn:hover .pipeline-board-tab__icon {
+    color: var(--primary-dark);
+}
+
+.pipeline-board-tab.tab-btn.active {
+    color: var(--primary-dark);
     border-bottom-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.55);
+}
+
+.pipeline-board-tab.tab-btn.active .pipeline-board-tab__icon {
+    color: var(--primary-color);
+}
+
+.pipeline-board-tab.tab-btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: -2px;
+}
+
+.pipeline-board-inner {
+    padding: var(--spacing-lg) var(--spacing-xl) var(--spacing-xl);
+    background: var(--bg-secondary);
+}
+
+.pipeline-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.pipeline-stat {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+}
+
+.pipeline-stat__value {
+    display: block;
+    font-size: var(--font-size-2xl);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+
+.pipeline-stat__label {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    line-height: 1.35;
+}
+
+.pipeline-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+}
+
+.pipeline-toolbar__text {
+    flex: 1;
+    min-width: 200px;
+}
+
+.pipeline-board-heading {
+    margin: 0 0 4px;
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+}
+
+.pipeline-board-lead {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    line-height: 1.45;
+    max-width: 32rem;
+}
+
+.pipeline-toolbar__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-sm) var(--spacing-md);
+}
+
+.pipeline-label {
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+}
+
+.pipeline-type-segment {
+    display: flex;
+    padding: 3px;
+    border-radius: 10px;
+    background: #e2e8f0;
+    gap: 3px;
+}
+
+.pipeline-type-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text-secondary);
+    background: transparent;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pipeline-type-btn:hover {
+    color: var(--text-primary);
+}
+
+.pipeline-type-btn.is-active {
+    background: var(--bg-primary);
+    color: var(--primary-dark);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.pipeline-type-btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.pipeline-kanban-scroll {
+    margin: 0 -4px;
+    padding: 8px 4px 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 116, 139, 0.45) transparent;
+}
+
+.pipeline-kanban-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.pipeline-kanban-scroll::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.35);
+    border-radius: 99px;
 }
 
 .tab-content {
@@ -144,69 +399,600 @@
     display: block;
 }
 
+.pipeline-app-layout {
+    display: flex;
+    align-items: stretch;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-xs);
+}
+
+.pipeline-status-sidebar {
+    flex: 0 0 240px;
+    padding: var(--spacing-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.pipeline-status-sidebar__label {
+    margin: 0 0 var(--spacing-sm);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.pipeline-status-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pipeline-status-nav__btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: var(--bg-primary);
+    cursor: pointer;
+    text-align: left;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.pipeline-status-nav__btn:hover {
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.pipeline-status-nav__btn.is-active {
+    color: var(--primary-dark);
+    border-color: rgba(13, 148, 136, 0.35);
+    background: rgba(13, 148, 136, 0.08);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.pipeline-status-nav__btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.pipeline-status-nav__btn--drop {
+    outline: 2px dashed var(--primary-color);
+    outline-offset: 2px;
+    background: rgba(13, 148, 136, 0.06);
+}
+
+.pipeline-status-nav__icon {
+    font-size: 1.15rem;
+    color: var(--primary-dark);
+    opacity: 0.85;
+    flex-shrink: 0;
+}
+
+.pipeline-status-nav__text {
+    flex: 1;
+    min-width: 0;
+    line-height: 1.3;
+}
+
+.pipeline-status-nav__count {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary-dark);
+    background: rgba(13, 148, 136, 0.12);
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+.pipeline-app-main {
+    flex: 1;
+    min-width: 0;
+    padding: var(--spacing-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.pipeline-app-main__head {
+    margin-bottom: var(--spacing-md);
+}
+
+.pipeline-app-main__title {
+    margin: 0 0 6px;
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+}
+
+.pipeline-app-main__hint {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    line-height: 1.45;
+    max-width: 40rem;
+}
+
+.pipeline-app-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    align-content: start;
+}
+
+.pipeline-app-empty {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--spacing-xl);
+    border-radius: 12px;
+    border: 1px dashed var(--border-color);
+    background: var(--bg-primary);
+    min-height: 200px;
+}
+
+.pipeline-app-empty__icon {
+    width: 44px;
+    height: 44px;
+    margin-bottom: var(--spacing-sm);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+}
+
+.pipeline-app-empty__text {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    max-width: 16rem;
+    line-height: 1.45;
+}
+
 .kanban-board {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--spacing-xl);
-    margin-top: var(--spacing-xl);
+    gap: var(--spacing-md);
 }
 
 .kanban-column {
-    background: var(--bg-tertiary);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    min-height: 380px;
+    padding: var(--spacing-md);
+    border-radius: 14px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
 }
 
-.kanban-column h3 {
-    font-size: var(--font-size-lg);
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-md);
-    border-bottom: 2px solid var(--border-color);
-    text-align: center;
+.kanban-column-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+    margin: 0 0 var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.kanban-column-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+}
+
+.kanban-column-icon {
+    font-size: 1.1rem;
+    color: var(--primary-dark);
+    flex-shrink: 0;
+    opacity: 0.85;
+    margin-top: 1px;
+}
+
+.kanban-column-title {
+    color: var(--text-primary);
+    letter-spacing: 0.03em;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+    hyphens: auto;
+}
+
+.kanban-column .column-count {
+    flex-shrink: 0;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+    color: var(--primary-dark);
+    background: rgba(13, 148, 136, 0.1);
+    padding: 3px 9px;
+    border-radius: 999px;
+    letter-spacing: 0;
 }
 
 .kanban-column-drag-over {
     outline: 2px dashed var(--primary-color);
-    outline-offset: 2px;
+    outline-offset: 3px;
+    background: rgba(13, 148, 136, 0.05);
 }
 
 .kanban-items {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: 10px;
+    flex: 1;
+    min-height: 120px;
 }
 
-.kanban-item {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-md);
-    cursor: move;
-    transition: transform 0.2s, box-shadow 0.2s;
+.pipeline-page .kanban-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 0;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    cursor: grab;
+    overflow: hidden;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
-.kanban-item:hover {
+.pipeline-page .kanban-item-card {
+    display: flex;
+    gap: 0;
+    min-width: 0;
+    padding: 10px 12px 0 8px;
+}
+
+.pipeline-page .kanban-item-rail {
+    flex: 0 0 18px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 2px;
+    color: var(--text-muted);
+    opacity: 0.45;
+    pointer-events: none;
+    user-select: none;
+}
+
+.pipeline-page .kanban-item-grip-icon {
+    font-size: 1.05rem;
+}
+
+.pipeline-page .kanban-item-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.pipeline-page .kanban-item-body--stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pipeline-page .kanban-item-block--head .kanban-item-top {
+    margin-bottom: 4px;
+}
+
+.pipeline-page .kanban-item-block--head .kanban-item-title {
+    margin-bottom: 0;
+}
+
+.pipeline-page .kanban-item-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+    min-height: 24px;
+}
+
+.pipeline-page .kanban-item-stage {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 4px 9px;
+    border-radius: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.pipeline-page .kanban-item:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    border-color: rgba(13, 148, 136, 0.38);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
-.kanban-item-title {
+@media (hover: none) {
+    .pipeline-page .kanban-item:hover {
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pipeline-page .kanban-item {
+        transition: none;
+    }
+
+    .pipeline-page .kanban-item:hover {
+        transform: none;
+    }
+}
+
+.pipeline-page .kanban-item:active {
+    cursor: grabbing;
+}
+
+.pipeline-page .kanban-item-head {
+    margin-bottom: 0;
+}
+
+.pipeline-page .kanban-item-badge {
+    font-size: 10px !important;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 3px 8px !important;
+    border-radius: 6px !important;
+    flex-shrink: 0;
+}
+
+.pipeline-page .kanban-item-title {
     font-weight: 600;
-    margin-bottom: var(--spacing-xs);
-    font-size: var(--font-size-sm);
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
 }
 
-.kanban-item-meta {
-    font-size: var(--font-size-xs);
+.pipeline-page .kanban-item-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 8px;
+    width: 100%;
+}
+
+.pipeline-page .kanban-item-meta-cell {
+    min-width: 0;
+}
+
+.pipeline-page .kanban-item-meta-cell--full {
+    grid-column: 1 / -1;
+}
+
+.pipeline-page .kanban-item-meta-pill {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    padding: 4px 9px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 100%;
+    line-height: 1.2;
+    min-width: 0;
+}
+
+.pipeline-page .kanban-item-meta-pill--fill {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.pipeline-page .kanban-item-meta-pill i {
+    font-size: 12px;
+    opacity: 0.8;
+    flex-shrink: 0;
+}
+
+.pipeline-page .kanban-item-meta-pill--fill .kanban-item-meta-pill__text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pipeline-page .kanban-item-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.pipeline-page .kanban-item-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 0;
+    padding: 10px 14px 12px 14px;
+    border-top: 1px solid #eef2f7;
+    background: rgba(248, 250, 252, 0.85);
+    min-height: 40px;
+}
+
+.pipeline-page .kanban-item-footer-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--text-muted);
 }
 
-.kanban-item-actions {
-    margin-top: var(--spacing-sm);
-    display: flex;
-    gap: var(--spacing-xs);
-    flex-wrap: wrap;
+.pipeline-page .kanban-item-footer-hint i {
+    font-size: 14px;
+    color: var(--primary-dark);
+    opacity: 0.85;
 }
 
+.pipeline-page .kanban-item-footer-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.pipeline-page .kanban-btn-withdraw {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #64748b;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.pipeline-page .kanban-btn-withdraw:hover {
+    color: #9a3412;
+    border-color: rgba(154, 52, 18, 0.45);
+    background: #fff7ed;
+}
+
+.pipeline-page .kanban-btn-withdraw:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pipeline-page .kanban-btn-withdraw:disabled:hover {
+    color: #64748b;
+    border-color: #cbd5e1;
+    background: #fff;
+}
+
+.pipeline-page .kanban-item-footer-actions .btn-sm {
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+.kanban-column-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--spacing-lg);
+    border-radius: 12px;
+    border: 1px dashed var(--border-color);
+    background: var(--bg-secondary);
+    min-height: 120px;
+}
+
+.kanban-column-empty__icon {
+    width: 44px;
+    height: 44px;
+    margin-bottom: var(--spacing-sm);
+    border-radius: 12px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+}
+
+.kanban-column-empty__text {
+    margin: 0 0 var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    line-height: 1.45;
+    max-width: 14rem;
+}
+
+@media (max-width: 900px) {
+    .pipeline-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .pipeline-app-layout {
+        flex-direction: column;
+    }
+
+    .pipeline-status-sidebar {
+        flex: none;
+        width: 100%;
+    }
+
+    .pipeline-status-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .pipeline-status-nav__btn {
+        flex: 1 1 calc(50% - 6px);
+        min-width: 140px;
+    }
+}
+
+@media (max-width: 640px) {
+    .pipeline-board-inner {
+        padding: var(--spacing-md);
+    }
+
+    .pipeline-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .pipeline-toolbar__controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .pipeline-type-segment {
+        width: 100%;
+    }
+
+    .pipeline-type-btn {
+        flex: 1;
+        text-align: center;
+    }
+}
 </style>

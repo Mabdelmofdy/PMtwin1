@@ -131,6 +131,11 @@ class LayoutService {
         const currentPath = this.getCurrentPath();
         const isActive = (route) => {
             if (route === '/' || route === CONFIG.ROUTES.HOME) return currentPath === '/' || currentPath === '';
+            const dash = CONFIG.ROUTES.DASHBOARD;
+            const companyDash = CONFIG.ROUTES.COMPANY_DASHBOARD;
+            if (route === dash || route === companyDash) {
+                return currentPath === dash || currentPath === companyDash;
+            }
             return currentPath === route || currentPath.startsWith(route + '/');
         };
 
@@ -166,11 +171,39 @@ class LayoutService {
         html += '</div>';
         html += '</div>';
 
+        let unreadNotificationCount = 0;
+        let unreadMessagesTotal = 0;
+        try {
+            const ds = typeof window !== 'undefined' ? window.dataService : null;
+            if (ds && user?.id && typeof ds.getNotifications === 'function') {
+                const notifs = await ds.getNotifications(user.id);
+                unreadNotificationCount = (notifs || []).filter(n => n && n.read !== true).length;
+            }
+            if (ds && user?.id && typeof ds.getConversationsForUser === 'function') {
+                const convs = await ds.getConversationsForUser(user.id);
+                unreadMessagesTotal = (convs || []).reduce((sum, c) => sum + (Number(c.unread) || 0), 0);
+            }
+        } catch (e) {
+            console.warn('Sidebar notification count failed:', e);
+        }
+
+        const messagesBadge =
+            unreadMessagesTotal > 0
+                ? `<span class="portal-nav-badge portal-nav-badge--unread" aria-label="${unreadMessagesTotal} unread message${unreadMessagesTotal === 1 ? '' : 's'}">${unreadMessagesTotal > 99 ? '99+' : String(unreadMessagesTotal)}</span>`
+                : '';
+
+        const notificationBadge =
+            unreadNotificationCount > 0
+                ? `<span class="portal-nav-badge portal-nav-badge--unread" aria-label="${unreadNotificationCount} unread notification${unreadNotificationCount === 1 ? '' : 's'}">${unreadNotificationCount > 99 ? '99+' : String(unreadNotificationCount)}</span>`
+                : '';
+
         const workspaceLinks = [
-            { route: CONFIG.ROUTES.DASHBOARD, label: 'Dashboard', icon: 'ph-duotone ph-house' },
-            ...(this.authService.isCompanyUser && this.authService.isCompanyUser() ? [{ route: CONFIG.ROUTES.COMPANY_DASHBOARD, label: 'Company dashboard', icon: 'ph-duotone ph-buildings' }] : []),
+            ...(this.authService.isCompanyUser && this.authService.isCompanyUser()
+                ? [{ route: CONFIG.ROUTES.COMPANY_DASHBOARD, label: 'Company Dashboard', icon: 'ph-duotone ph-buildings' }]
+                : [{ route: CONFIG.ROUTES.DASHBOARD, label: 'Dashboard', icon: 'ph-duotone ph-house' }]
+            ),
             { route: '/pipeline', label: 'Pipeline', icon: 'ph-duotone ph-git-branch' },
-            { route: '/people', label: 'People', icon: 'ph-duotone ph-users' },
+            { route: '/people', label: 'Find', icon: 'ph-duotone ph-users' },
         ];
         const opportunitiesLinks = [
             { route: CONFIG.ROUTES.OPPORTUNITIES, label: 'Opportunities', icon: 'ph-duotone ph-briefcase' },
@@ -181,24 +214,30 @@ class LayoutService {
             { route: CONFIG.ROUTES.CONTRACTS, label: 'Contracts', icon: 'ph-duotone ph-file-text' },
         ];
         const communicationLinks = [
-            { route: CONFIG.ROUTES.MESSAGES, label: 'Messages', icon: 'ph-duotone ph-chat-circle' },
-            { route: CONFIG.ROUTES.NOTIFICATIONS, label: 'Notifications', icon: 'ph-duotone ph-bell' },
+            { route: CONFIG.ROUTES.MESSAGES, label: 'Messages', icon: 'ph-duotone ph-chat-circle', badge: messagesBadge },
+            {
+                route: CONFIG.ROUTES.NOTIFICATIONS,
+                label: 'Notifications',
+                icon: 'ph-duotone ph-bell',
+                badge: notificationBadge
+            }
         ];
         const renderGroup = (title, links) => {
             html += `<p class="portal-sidebar-section">${title}</p>`;
             html += '<nav class="portal-sidebar-nav">';
-            links.forEach(({ route, label, icon }) => {
+            links.forEach(link => {
+                const { route, label, icon, badge = '' } = link;
                 const active = isActive(route);
-                html += `<a href="#" data-route="${route}" class="portal-nav-link ${active ? 'portal-nav-active' : ''}" title="${label.replace(/"/g, '&quot;')}"><i class="${icon}"></i><span class="portal-nav-link-text">${label}</span></a>`;
+                html += `<a href="#" data-route="${route}" class="portal-nav-link ${active ? 'portal-nav-active' : ''}" title="${label.replace(/"/g, '&quot;')}"><i class="${icon}"></i><span class="portal-nav-link-text">${label}</span>${badge}</a>`;
             });
             html += '</nav>';
         };
-        renderGroup('WORKSPACE', workspaceLinks);
-        renderGroup('OPPORTUNITIES', opportunitiesLinks);
-        renderGroup('COLLABORATION', collaborationLinks);
-        renderGroup('COMMUNICATION', communicationLinks);
+        renderGroup('Workspace', workspaceLinks);
+        renderGroup('Opportunities', opportunitiesLinks);
+        renderGroup('Collaboration', collaborationLinks);
+        renderGroup('Communication', communicationLinks);
         if (this.authService.canAccessAdmin()) {
-            html += '<p class="portal-sidebar-section">ADMIN</p>';
+            html += '<p class="portal-sidebar-section">Admin</p>';
             html += '<nav class="portal-sidebar-nav">';
             html += `<a href="#" data-route="${CONFIG.ROUTES.ADMIN}" class="portal-nav-link ${isActive(CONFIG.ROUTES.ADMIN) ? 'portal-nav-active' : ''}" title="Admin"><i class="ph-duotone ph-shield-check"></i><span class="portal-nav-link-text">Admin</span></a>`;
             html += `<a href="#" data-route="${CONFIG.ROUTES.ADMIN_REPORTS}" class="portal-nav-link ${isActive(CONFIG.ROUTES.ADMIN_REPORTS) ? 'portal-nav-active' : ''}" title="Reports"><i class="ph-duotone ph-chart-bar"></i><span class="portal-nav-link-text">Reports</span></a>`;

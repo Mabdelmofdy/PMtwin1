@@ -1,54 +1,50 @@
-<div class="page-container profile-page">
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1 class="page-title">My Profile</h1>
-            <p class="page-subtitle">View and edit your account and profile information</p>
-        </div>
-    </div>
+<div class="page-container profile-page profile-page--modern">
+    <div id="page-context-header-mount"></div>
     <div class="page-body">
     
     
-    <div id="profile-clarification-banner" class="card border-warning mb-4" style="display: none;">
-        <div class="card-body">
-            <p class="mb-2"><strong>Your registration needs clarification.</strong> You can upload additional documents below, then click "Submit for review again" to resubmit for admin review.</p>
-            <div id="profile-clarification-documents-wrap" class="mb-4" style="display: none;">
-                <h4 class="font-medium text-gray-700 mb-2">Verification documents</h4>
-                <p class="text-sm text-gray-600 mb-2">Add or replace documents to support your verification.</p>
-                <div id="profile-clarification-documents" class="space-y-3"></div>
+    <div id="profile-clarification-banner" class="profile-banner profile-banner--warning" style="display: none;">
+        <div class="profile-banner-body">
+            <p class="profile-banner-lead"><strong>Your registration needs clarification.</strong> You can upload additional documents below, then click "Submit for review again" to resubmit for admin review.</p>
+            <div id="profile-clarification-documents-wrap" class="profile-banner-extra" style="display: none;">
+                <h4 class="profile-banner-title">Verification documents</h4>
+                <p class="profile-banner-text">Add or replace documents to support your verification.</p>
+                <div id="profile-clarification-documents" class="profile-doc-stack"></div>
             </div>
             <button type="button" id="profile-submit-review-again" class="btn btn-primary">Submit for review again</button>
         </div>
     </div>
     
-    <div id="profile-vetting-banner" class="card border-primary mb-4" style="display: none;">
-        <div class="card-body">
-            <p class="mb-2"><strong>Complete vetting to get full access.</strong> Finish your vetting to view full opportunity details and apply. You can add your primary domain and expertise areas below.</p>
+    <div id="profile-vetting-banner" class="profile-banner profile-banner--info" style="display: none;">
+        <div class="profile-banner-body">
+            <p class="profile-banner-lead"><strong>Complete vetting to get full access.</strong> Finish your vetting to view full opportunity details and apply. You can add your primary domain and expertise areas below.</p>
             <a href="#company-profile-card" id="profile-vetting-cta" class="btn btn-primary btn-sm">Complete your vetting</a>
         </div>
     </div>
     
     <div class="profile-content">
-        <!-- Profile Header (SaaS / LinkedIn style) -->
-        <div class="profile-header-card card mb-4">
+        <!-- Profile Header -->
+        <div class="profile-header-card profile-hero-card card mb-4">
+            <div class="profile-hero-cover" aria-hidden="true"></div>
             <div class="card-body profile-header-body">
                 <div class="profile-header-top">
-                    <div class="profile-photo-placeholder w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary/10 flex items-center justify-center text-xl sm:text-2xl font-bold text-primary flex-shrink-0" id="profile-photo-placeholder"></div>
+                    <div class="profile-photo-placeholder profile-hero-avatar" id="profile-photo-placeholder"></div>
                     <div class="profile-header-info">
                         <h2 class="profile-header-name" id="profile-header-name">—</h2>
-                        <p class="profile-header-title text-gray-600 mb-0.5" id="profile-header-role">—</p>
-                        <p class="profile-header-location text-sm text-gray-500 flex items-center gap-1" id="profile-header-location">—</p>
-                        <div id="profile-header-skills-preview" class="profile-header-skills-preview flex flex-wrap gap-1.5 mt-2"></div>
-                        <div class="profile-header-actions flex flex-wrap items-center gap-3 mt-3">
-                            <div class="profile-completion-wrap flex items-center gap-2 flex-1 min-w-0">
-                                <div class="flex-1 min-w-[100px] max-w-[180px]">
-                                    <div class="text-xs text-gray-500 mb-0.5">Profile strength</div>
-                                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                        <div id="profile-completeness-bar" class="h-full bg-primary rounded-full transition-all" style="width: 0%;"></div>
+                        <p class="profile-header-title" id="profile-header-role">—</p>
+                        <p class="profile-header-location" id="profile-header-location">—</p>
+                        <div id="profile-header-skills-preview" class="profile-header-skills-preview"></div>
+                        <div class="profile-header-actions">
+                            <div class="profile-completion-wrap">
+                                <div class="profile-strength">
+                                    <span class="profile-strength-label">Profile strength</span>
+                                    <div class="profile-strength-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Profile strength">
+                                        <div id="profile-completeness-bar" class="profile-strength-fill" style="width: 0%;"></div>
                                     </div>
                                 </div>
-                                <span id="profile-completeness-percent" class="text-base font-bold text-primary">0%</span>
+                                <span id="profile-completeness-percent" class="profile-strength-percent">0%</span>
                             </div>
-                            <div class="flex flex-wrap gap-2">
+                            <div class="profile-header-buttons">
                                 <button type="button" class="btn btn-primary btn-sm" id="profile-header-edit-btn">Edit profile</button>
                                 <button type="button" class="btn btn-outline btn-sm" id="profile-header-add-portfolio-btn">Add portfolio</button>
                             </div>
@@ -58,16 +54,17 @@
             </div>
         </div>
 
+        <div class="profile-shell">
         <div class="profile-two-col">
         <div class="profile-main">
 
             <!-- Tab navigation -->
-            <div class="border-b border-gray-200 mb-4">
-                <nav class="profile-tabs flex gap-1" role="tablist">
-                    <button type="button" class="profile-tab px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20" data-tab="profile" role="tab">Profile</button>
-                    <button type="button" class="profile-tab px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20" data-tab="portfolio" role="tab">Portfolio</button>
-                    <button type="button" class="profile-tab px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20" data-tab="experience" role="tab">Experience</button>
-                    <button type="button" class="profile-tab px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20" data-tab="settings" role="tab">Settings</button>
+            <div class="profile-tabs-wrap">
+                <nav class="profile-tabs" role="tablist" aria-label="Profile sections">
+                    <button type="button" class="profile-tab" data-tab="profile" role="tab">Profile</button>
+                    <button type="button" class="profile-tab" data-tab="portfolio" role="tab">Portfolio</button>
+                    <button type="button" class="profile-tab" data-tab="experience" role="tab">Experience</button>
+                    <button type="button" class="profile-tab" data-tab="settings" role="tab">Settings</button>
                 </nav>
             </div>
 
@@ -80,10 +77,19 @@
                     </div>
                     <div class="card-body">
                         <div class="profile-section-view">
-                            <p id="view-prof-bio" class="text-gray-700 whitespace-pre-wrap">—</p>
+                            <p id="view-prof-bio" class="profile-prose">—</p>
                         </div>
                         <div class="profile-section-edit" id="section-edit-basic" style="display: none;">
-                            <div class="space-y-3">
+                            <div class="profile-photo-edit">
+                                <div id="inline-basic-photo-preview" class="profile-inline-photo-preview" aria-live="polite"></div>
+                                <div class="form-group">
+                                    <label class="form-label" for="inline-basic-photo">Profile photo</label>
+                                    <input type="file" id="inline-basic-photo" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif">
+                                    <p class="profile-field-hint">JPG, PNG, WebP, or GIF · max 2.5 MB · stored in your browser for this POC.</p>
+                                    <button type="button" id="inline-basic-photo-remove" class="btn btn-ghost btn-sm" style="display: none;">Remove photo</button>
+                                </div>
+                            </div>
+                            <div class="profile-form-stack">
                                 <div class="form-group"><label class="form-label">Full name</label><input type="text" id="inline-basic-name" class="form-input" placeholder="Your name"></div>
                                 <div class="form-group"><label class="form-label">Headline</label><input type="text" id="inline-basic-headline" class="form-input" placeholder="Short professional tagline"></div>
                                 <div class="form-group"><label class="form-label">Title</label><input type="text" id="inline-basic-title" class="form-input" placeholder="Job title"></div>
@@ -91,7 +97,7 @@
                                 <div class="form-group"><label class="form-label">Location</label><input type="text" id="inline-basic-location" class="form-input" placeholder="City, Country"></div>
                                 <div class="form-group"><label class="form-label">Bio</label><textarea id="inline-basic-bio" class="form-input" rows="3" placeholder="Short summary about you"></textarea></div>
                             </div>
-                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="basic">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="basic">Cancel</button></div>
+                            <div class="profile-section-actions"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="basic">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="basic">Cancel</button></div>
                         </div>
                     </div>
                 </div>
@@ -102,14 +108,14 @@
                     </div>
                     <div class="card-body">
                         <div class="profile-section-view">
-                            <div id="view-skills" class="flex flex-wrap gap-2"></div>
+                            <div id="view-skills" class="profile-chip-row"></div>
                         </div>
                         <div class="profile-section-edit" id="section-edit-skills" style="display: none;">
                             <div class="form-group">
                                 <label class="form-label">Skills</label>
                                 <input type="text" id="inline-skills" class="form-input" placeholder="Comma-separated (e.g. Project Management, BIM)">
                             </div>
-                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="skills">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="skills">Cancel</button></div>
+                            <div class="profile-section-actions"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="skills">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="skills">Cancel</button></div>
                         </div>
                     </div>
                 </div>
@@ -124,7 +130,7 @@
                         </div>
                         <div class="profile-section-edit" id="section-edit-languages" style="display: none;">
                             <div class="form-group"><label class="form-label">Languages</label><input type="text" id="inline-languages" class="form-input" placeholder="e.g. Arabic, English"></div>
-                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="languages">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="languages">Cancel</button></div>
+                            <div class="profile-section-actions"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="languages">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="languages">Cancel</button></div>
                         </div>
                     </div>
                 </div>
@@ -138,8 +144,8 @@
                             <span id="view-prof-workMode">—</span>
                         </div>
                         <div class="profile-section-edit" id="section-edit-professional" style="display: none;">
-                            <div class="space-y-3" id="inline-preferences-fields"></div>
-                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="professional">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="professional">Cancel</button></div>
+                            <div id="inline-preferences-fields" class="profile-prefs-form"></div>
+                            <div class="profile-section-actions"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="professional">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="professional">Cancel</button></div>
                         </div>
                     </div>
                 </div>
@@ -150,7 +156,7 @@
                     </div>
                     <div class="card-body">
                         <div class="profile-section-view">
-                            <div id="view-certifications" class="flex flex-wrap gap-2"></div>
+                            <div id="view-certifications" class="profile-chip-row"></div>
                         </div>
                         <div class="profile-section-edit" id="section-edit-certifications" style="display: none;">
                             <div class="form-group">
@@ -158,7 +164,29 @@
                                 <div id="inline-certifications-list" class="space-y-2 mb-2"></div>
                                 <button type="button" id="inline-add-certification" class="btn btn-secondary btn-sm">Add certification</button>
                             </div>
-                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="certifications">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="certifications">Cancel</button></div>
+                            <div class="profile-section-actions"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="certifications">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="certifications">Cancel</button></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-4 profile-section-card" data-section="social">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="profile-section-title">Social &amp; web</h3>
+                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="social" id="profile-edit-social-btn">Edit</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="profile-section-view">
+                            <p class="profile-field-hint profile-field-hint--spaced mb-2">Links shown on your public profile.</p>
+                            <div id="view-prof-socialMedia" class="profile-chip-row"></div>
+                        </div>
+                        <div class="profile-section-edit" id="section-edit-social" style="display: none;">
+                            <div class="profile-form-grid-2">
+                                <div class="form-group"><label class="form-label">LinkedIn</label><input type="url" id="inline-linkedin" class="form-input" placeholder="https://linkedin.com/in/..."></div>
+                                <div class="form-group"><label class="form-label">Twitter / X</label><input type="url" id="inline-twitter" class="form-input" placeholder="https://x.com/..."></div>
+                                <div class="form-group"><label class="form-label">Facebook</label><input type="url" id="inline-facebook" class="form-input" placeholder="https://facebook.com/..."></div>
+                                <div class="form-group"><label class="form-label">Instagram</label><input type="url" id="inline-instagram" class="form-input" placeholder="https://instagram.com/..."></div>
+                                <div class="form-group sm:col-span-2"><label class="form-label">Website</label><input type="url" id="inline-website" class="form-input" placeholder="https://your-site.com"></div>
+                            </div>
+                            <div class="profile-section-actions"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="social">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="social">Cancel</button></div>
                         </div>
                     </div>
                 </div>
@@ -180,7 +208,7 @@
                         <div class="profile-section-edit" id="section-edit-portfolio" style="display: none;">
                             <div class="form-group mb-3"><label class="form-label">Case studies</label><div id="inline-caseStudies-list" class="space-y-3 mb-2"></div><button type="button" id="inline-add-caseStudy" class="btn btn-secondary btn-sm">Add case study</button></div>
                             <div class="form-group"><label class="form-label">Portfolio items</label><div id="inline-portfolio-list" class="space-y-3 mb-2"></div><button type="button" id="inline-add-portfolio" class="btn btn-secondary btn-sm">Add portfolio item</button></div>
-                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="portfolio">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="portfolio">Cancel</button></div>
+                            <div class="profile-section-actions"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="portfolio">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="portfolio">Cancel</button></div>
                         </div>
                     </div>
                 </div>
@@ -194,8 +222,12 @@
                             <div id="view-prof-references" class="space-y-2"></div>
                         </div>
                         <div class="profile-section-edit" id="section-edit-references" style="display: none;">
-                            <div class="form-group"><label class="form-label">References</label><div id="inline-references-list" class="space-y-3 mb-2"></div><button type="button" id="inline-add-reference" class="btn btn-secondary btn-sm">Add reference</button></div>
-                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="references">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="references">Cancel</button></div>
+                            <div class="profile-refs-block">
+                                <p class="profile-ref-intro">Optional endorsements. Each block is one person; testimonial can be a short quote.</p>
+                                <div id="inline-references-list" class="profile-ref-list"></div>
+                                <button type="button" id="inline-add-reference" class="btn btn-secondary btn-sm profile-ref-add-btn">Add reference</button>
+                            </div>
+                            <div class="profile-section-actions"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="references">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="references">Cancel</button></div>
                         </div>
                     </div>
                 </div>
@@ -214,7 +246,7 @@
                         </div>
                         <div class="profile-section-edit" id="section-edit-experience" style="display: none;">
                             <div class="form-group"><label class="form-label">Experience (role, company, period)</label><div id="inline-experience-entries-list" class="space-y-3 mb-2"></div><button type="button" id="inline-add-experience-entry" class="btn btn-secondary btn-sm">Add experience</button></div>
-                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="experience">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="experience">Cancel</button></div>
+                            <div class="profile-section-actions"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="experience">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="experience">Cancel</button></div>
                         </div>
                     </div>
                 </div>
@@ -229,70 +261,62 @@
                         </div>
                         <div class="profile-section-edit" id="section-edit-education" style="display: none;">
                             <div class="form-group"><label class="form-label">Education</label><input type="text" id="inline-education" class="form-input" placeholder="e.g. B.Sc. Civil Engineering"></div>
-                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="education">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="education">Cancel</button></div>
+                            <div class="profile-section-actions"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="education">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="education">Cancel</button></div>
                         </div>
                     </div>
                 </div>
-                <div class="card mb-4">
-                    <div class="card-header flex items-center justify-between">
+                <div class="card mb-4 profile-section-card profile-card--readonly">
+                    <div class="card-header">
                         <h3 class="profile-section-title">Certifications</h3>
-                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="certifications">Edit</button>
                     </div>
                     <div class="card-body">
-                        <div id="view-experience-certifications" class="flex flex-wrap gap-2"></div>
+                        <p class="profile-field-hint profile-field-hint--spaced">Same list as in <strong>Profile</strong> → Certifications. Edit there to update.</p>
+                        <div id="view-experience-certifications" class="profile-chip-row"></div>
                     </div>
                 </div>
             </div>
 
             <!-- Tab 4: Settings (account, security, notifications, social) -->
             <div id="profile-tab-settings" class="profile-tab-panel hidden" role="tabpanel">
-                <div class="card mb-4" id="profile-section-account">
+                <div class="card mb-4 profile-section-card" id="profile-section-account">
                     <div class="card-header flex items-center justify-between">
                         <h3 class="profile-section-title">Account information</h3>
-                        <button type="button" class="btn btn-secondary btn-sm" id="profile-edit-account-btn">Edit</button>
+                        <button type="button" class="btn btn-secondary btn-sm" id="profile-edit-account-btn" title="Jump to password and security">Password &amp; security</button>
                     </div>
                     <div class="card-body">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="profile-view-item"><span class="text-gray-600">Email</span><div class="flex items-center gap-2 flex-wrap"><input type="email" id="profile-email" class="form-input flex-1 min-w-0" readonly><span id="profile-email-verification-hint" class="text-sm text-amber-600 hidden" aria-live="polite">Verify your account to improve trust.</span></div></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Role</span><input type="text" id="profile-role" class="form-input" readonly></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Account status</span><input type="text" id="profile-status" class="form-input" readonly></div>
-                            <div class="profile-view-item"><span class="text-gray-600">Phone</span><span id="view-prof-phone">—</span></div>
-                            <div id="profile-verification-group" class="profile-view-item sm:col-span-2" style="display: none;"><span class="text-gray-600">Verification</span><div id="profile-verification-badge" class="mt-1"></div></div>
+                        <div class="profile-account-grid">
+                            <div class="profile-view-item"><span class="profile-kv-label">Email</span><div class="profile-kv-value"><input type="email" id="profile-email" class="form-input" readonly autocomplete="username"><span id="profile-email-verification-hint" class="profile-hint profile-hint--warn hidden" aria-live="polite">Verify your account to improve trust.</span></div></div>
+                            <div class="profile-view-item profile-view-item--locked">
+                                <span class="profile-kv-label">Role</span>
+                                <div class="profile-kv-value">
+                                    <span id="profile-role" class="profile-kv-text">—</span>
+                                    <span class="profile-field-lock-hint">Only an administrator can change your role.</span>
+                                </div>
+                            </div>
+                            <div class="profile-view-item profile-view-item--locked">
+                                <span class="profile-kv-label">Account status</span>
+                                <div class="profile-kv-value">
+                                    <span id="profile-status" class="profile-kv-text">—</span>
+                                    <span class="profile-field-lock-hint">Only an administrator can change account status.</span>
+                                </div>
+                            </div>
+                            <div class="profile-view-item"><span class="profile-kv-label">Phone</span><span id="view-prof-phone" class="profile-kv-text">—</span></div>
+                            <div id="profile-verification-group" class="profile-view-item profile-view-item--full" style="display: none;"><span class="profile-kv-label">Verification</span><div id="profile-verification-badge" class="mt-1"></div></div>
                         </div>
                     </div>
                 </div>
-                <div class="card mb-4">
+                <div class="card mb-4 profile-section-card">
                     <div class="card-header"><h3 class="profile-section-title">Security</h3></div>
-                    <div class="card-body space-y-2">
+                    <div class="card-body profile-settings-stack">
                         <a href="#" id="profile-action-change-password" class="btn btn-secondary btn-sm">Change Password</a>
-                        <p class="text-sm text-gray-500">Two Factor Authentication — Coming soon.</p>
-                        <button type="button" id="profile-action-delete-account" class="btn btn-ghost btn-sm text-red-600 hover:text-red-700 mt-2" title="Contact support to delete account">Delete Account</button>
+                        <p class="profile-muted">Two Factor Authentication — Coming soon.</p>
+                        <button type="button" id="profile-action-delete-account" class="btn btn-ghost btn-sm profile-btn-danger" title="Contact support to delete account">Delete Account</button>
                     </div>
                 </div>
-                <div class="card mb-4">
+                <div class="card mb-4 profile-section-card">
                     <div class="card-header"><h3 class="profile-section-title">Notifications</h3></div>
                     <div class="card-body">
-                        <p class="text-sm text-gray-600">Email and system notification preferences can be managed in Settings.</p>
-                    </div>
-                </div>
-                <div class="card mb-4 profile-section-card" data-section="social">
-                    <div class="card-header flex items-center justify-between">
-                        <h3 class="profile-section-title">Social links</h3>
-                        <button type="button" class="btn btn-secondary btn-sm profile-edit-section-btn" data-section="social">Edit</button>
-                    </div>
-                    <div class="card-body">
-                        <div class="profile-section-view">
-                            <div id="view-prof-socialMedia" class="flex flex-wrap gap-2"></div>
-                        </div>
-                        <div class="profile-section-edit" id="section-edit-social" style="display: none;">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div class="form-group"><label class="form-label">LinkedIn</label><input type="url" id="inline-linkedin" class="form-input" placeholder="https://linkedin.com/in/..."></div>
-                                <div class="form-group"><label class="form-label">Twitter</label><input type="url" id="inline-twitter" class="form-input" placeholder="https://twitter.com/..."></div>
-                                <div class="form-group"><label class="form-label">Facebook</label><input type="url" id="inline-facebook" class="form-input" placeholder="https://facebook.com/..."></div>
-                                <div class="form-group"><label class="form-label">Instagram</label><input type="url" id="inline-instagram" class="form-input" placeholder="https://instagram.com/..."></div>
-                            </div>
-                            <div class="flex gap-2 mt-3"><button type="button" class="btn btn-primary btn-sm section-save-btn" data-section="social">Save</button><button type="button" class="btn btn-ghost btn-sm section-cancel-btn" data-section="social">Cancel</button></div>
-                        </div>
+                        <p class="profile-muted">Email and system notification preferences can be managed in Settings.</p>
                     </div>
                 </div>
             </div>
@@ -303,6 +327,7 @@
             <div id="profile-section-certifications" data-section="certifications" class="hidden" aria-hidden="true"></div>
             <div id="profile-section-experience" data-section="experience" class="hidden" aria-hidden="true"></div>
             <div id="profile-section-professional" data-section="professional" class="hidden" aria-hidden="true"></div>
+            <div id="profile-section-social" data-section="social" class="hidden" aria-hidden="true"></div>
 
             <!-- 4. Company Profile (Company users only) -->
             <div class="card profile-section" id="company-profile-card" style="display: none;">
@@ -429,8 +454,8 @@
 
             <!-- Hidden: professional profile form (used by Edit Basic / Edit Professional / Edit Portfolio / Edit References) -->
             <div id="professional-profile-card" style="display: none;">
-                <div id="prof-company-affiliation" class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg" style="display:none;">
-                    <span class="text-sm text-blue-800">Affiliated with <strong id="prof-company-name-link"></strong></span>
+                <div id="prof-company-affiliation" class="profile-callout" style="display:none;">
+                    <span class="profile-callout-text">Affiliated with <strong id="prof-company-name-link"></strong></span>
                 </div>
                 <form id="professional-profile-form" style="display: none;">
                         <h4 class="font-medium text-gray-700 mb-2">Basic info</h4>
@@ -529,7 +554,7 @@
                                 <button type="button" id="prof-add-vettingCaseStudy-doc" class="btn btn-secondary btn-sm">Add file</button>
                             </div>
                         </div>
-                        <div class="flex gap-2 mt-4">
+                        <div class="profile-section-actions">
                             <button type="button" id="professional-profile-cancel-btn" class="btn btn-ghost">Cancel</button>
                             <button type="submit" class="btn btn-primary">Save Changes</button>
                         </div>
@@ -543,7 +568,7 @@
                 </div>
             </div>
             
-            <div id="profile-success-message" class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800"></div>
+            <div id="profile-success-message" class="profile-toast profile-toast--success hidden" role="status"></div>
         </div>
 
         <aside class="profile-sidebar">
@@ -575,14 +600,14 @@
                     <h3 class="profile-section-title">Reputation</h3>
                 </div>
                 <div class="card-body">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span id="reputation-score" class="text-3xl font-bold text-primary">—</span>
-                        <span class="text-sm text-gray-500">/ 5.0</span>
+                    <div class="profile-sidebar-metric">
+                        <span id="reputation-score" class="profile-sidebar-score">—</span>
+                        <span class="profile-sidebar-suffix">/ 5.0</span>
                     </div>
-                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div id="reputation-bar" class="h-full bg-primary rounded-full transition-all" style="width: 0%;"></div>
+                    <div class="profile-mini-bar" role="presentation">
+                        <div id="reputation-bar" class="profile-mini-bar-fill" style="width: 0%;"></div>
                     </div>
-                    <p id="reputation-label" class="text-xs text-gray-500 mt-1">Based on completed collaborations</p>
+                    <p id="reputation-label" class="profile-sidebar-note">Based on completed collaborations</p>
                 </div>
             </div>
             <div class="card" id="profile-strength-card">
@@ -590,8 +615,8 @@
                     <h3 class="profile-section-title">Profile strength</h3>
                 </div>
                 <div class="card-body">
-                    <p class="text-xs text-gray-600 mb-3">Complete your profile to improve <strong>matching visibility</strong>. Higher completion helps you appear in more recommendations.</p>
-                    <ul id="profile-completion-checklist" class="profile-completion-checklist space-y-2 text-sm">
+                    <p class="profile-sidebar-intro">Complete your profile to improve <strong>matching visibility</strong>. Higher completion helps you appear in more recommendations.</p>
+                    <ul id="profile-completion-checklist" class="profile-completion-checklist">
                         <li id="check-basic" class="check-item"><span class="check-icon"></span><span>Basic info</span></li>
                         <li id="check-skills" class="check-item"><span class="check-icon"></span><span>Skills</span></li>
                         <li id="check-experience" class="check-item"><span class="check-icon"></span><span>Experience</span></li>
@@ -606,8 +631,8 @@
                     <h3 class="profile-section-title">Recommended actions</h3>
                 </div>
                 <div class="card-body">
-                    <ul id="profile-recommended-actions-list" class="space-y-2 text-sm text-gray-700"></ul>
-                    <p id="profile-recommended-actions-empty" class="text-gray-500 text-sm" style="display: none;">Your profile looks good.</p>
+                    <ul id="profile-recommended-actions-list" class="profile-reco-list"></ul>
+                    <p id="profile-recommended-actions-empty" class="profile-muted" style="display: none;">Your profile looks good.</p>
                 </div>
             </div>
             <div class="card" id="matching-preferences-card">
@@ -615,13 +640,13 @@
                     <h3 class="profile-section-title">Matching preferences</h3>
                 </div>
                 <div class="card-body">
-                    <p id="matching-preferences-summary" class="text-sm text-gray-700 mb-3">Only candidates with <strong id="matching-min-score-value">75</strong>% or above match score will be shown.</p>
-                    <div class="form-group">
-                        <label for="matching-min-score" class="block text-sm font-medium text-gray-700 mb-1">Minimum match score (%)</label>
-                        <input type="number" id="matching-min-score" class="form-input w-20" min="70" max="100" value="70" placeholder="70">
-                        <p class="text-xs text-gray-500 mt-1">Only show recommendations at or above this score (70–100).</p>
+                    <p id="matching-preferences-summary" class="profile-muted">Only candidates with <strong id="matching-min-score-value">75</strong>% or above match score will be shown.</p>
+                    <div class="form-group profile-form-tight">
+                        <label for="matching-min-score" class="form-label">Minimum match score (%)</label>
+                        <input type="number" id="matching-min-score" class="form-input profile-input-narrow" min="70" max="100" value="70" placeholder="70">
+                        <p class="profile-field-hint">Only show recommendations at or above this score (70–100).</p>
                     </div>
-                    <div class="flex flex-wrap gap-2 mt-2">
+                    <div class="profile-section-actions profile-section-actions--borderless">
                         <button type="button" id="matching-preferences-review" class="btn btn-secondary btn-sm">Review preferences</button>
                         <button type="button" id="matching-preferences-save" class="btn btn-primary btn-sm">Save preferences</button>
                     </div>
@@ -632,8 +657,8 @@
                     <h3 class="profile-section-title">Reviews received</h3>
                 </div>
                 <div class="card-body">
-                    <div id="reviews-received-list" class="space-y-2 text-sm"></div>
-                    <p id="reviews-received-empty" class="text-gray-500 text-sm" style="display: none;">No reviews yet.</p>
+                    <div id="reviews-received-list" class="profile-review-stack"></div>
+                    <p id="reviews-received-empty" class="profile-muted" style="display: none;">No reviews yet.</p>
                 </div>
             </div>
             <div class="card" id="team-members-card" style="display:none;">
@@ -648,19 +673,401 @@
         </aside>
         </div>
         <!-- end profile-two-col -->
+        </div>
+        <!-- end profile-shell -->
     </div>
     </div>
 </div>
 
 <style>
-.profile-page {
-    /* Page specific styles */
+/* —— My Profile: layout aligned with app tokens (teal / slate) —— */
+.profile-page--modern .profile-page-eyebrow {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--primary-color);
+    margin: 0 0 var(--spacing-xs) 0;
 }
-.profile-header-card .card-body { padding: 1.5rem; }
-.profile-tab.active { border-bottom-color: var(--primary-color, #2563eb); color: var(--primary-color, #2563eb); }
+.profile-page--modern .page-title {
+    letter-spacing: -0.02em;
+}
+
+.profile-page-header {
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.profile-banner {
+    margin-bottom: var(--spacing-lg);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+.profile-banner-body {
+    padding: var(--spacing-lg);
+}
+.profile-banner-lead {
+    margin: 0 0 var(--spacing-sm);
+    color: var(--text-primary);
+    line-height: 1.55;
+}
+.profile-banner-title {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs);
+}
+.profile-banner-text {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin: 0 0 var(--spacing-sm);
+}
+.profile-banner-extra {
+    margin-top: var(--spacing-md);
+}
+.profile-doc-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+.profile-banner--warning {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-color: rgba(217, 119, 6, 0.35);
+}
+.profile-banner--info {
+    background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+    border-color: rgba(13, 148, 136, 0.35);
+}
+
+.profile-hero-card.card {
+    padding: 0;
+    overflow: hidden;
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-color);
+}
+.profile-hero-cover {
+    height: 5.5rem;
+    background: linear-gradient(115deg, var(--primary-dark) 0%, var(--primary-color) 42%, var(--primary-light) 72%, var(--secondary-color) 100%);
+    opacity: 0.97;
+}
+.profile-header-card .profile-header-body {
+    padding: 0 var(--spacing-xl) var(--spacing-xl);
+}
+/* Avatar centered on the banner seam; identity block stacked below */
+.profile-header-top {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0;
+    margin-top: -2.75rem;
+}
+.profile-hero-avatar {
+    width: 5.5rem;
+    height: 5.5rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--primary-dark);
+    background: color-mix(in srgb, var(--primary-color) 14%, var(--bg-primary));
+    flex-shrink: 0;
+    border: 4px solid var(--bg-primary);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    z-index: 1;
+}
+@media (min-width: 640px) {
+    .profile-hero-avatar {
+        width: 6rem;
+        height: 6rem;
+        font-size: var(--font-size-2xl);
+    }
+}
+
+.profile-photo-placeholder .profile-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+}
+
+.profile-photo-edit {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+.profile-inline-photo-preview {
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: var(--spacing-md);
+    border: 3px solid var(--border-color);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.profile-inline-photo-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.profile-inline-photo-placeholder {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+.profile-form-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+.profile-form-stack .form-group {
+    margin-bottom: 0;
+}
+.profile-helper-text {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+}
+.profile-field-hint--spaced {
+    margin-bottom: var(--spacing-md);
+}
+.profile-shell input[type="file"].form-input {
+    padding: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+}
+
+/* Workspace shell — same family as People / Find */
+.profile-shell {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+.profile-shell .profile-two-col {
+    gap: 0;
+    align-items: stretch;
+}
+.profile-shell .profile-main {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    gap: var(--spacing-md);
+}
+.profile-shell .profile-sidebar {
+    margin: 0;
+    padding: var(--spacing-lg);
+    gap: var(--spacing-md);
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border-left: 1px solid var(--border-color);
+}
+.profile-shell .card {
+    padding: 0;
+    overflow: hidden;
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+}
+.profile-shell .card:last-child {
+    margin-bottom: 0;
+}
+.profile-shell .card .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin: 0;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+}
+.profile-shell .card .card-body {
+    padding: var(--spacing-lg);
+    color: var(--text-secondary);
+}
+
+.profile-tabs-wrap {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 4px;
+    margin-bottom: var(--spacing-lg);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+.profile-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: nowrap;
+    min-width: min-content;
+}
+.profile-tab {
+    appearance: none;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-lg);
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+}
+.profile-tab:hover {
+    color: var(--primary-dark);
+    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+}
+.profile-tab:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+.profile-tab.active {
+    color: var(--primary-dark);
+    font-weight: 600;
+    background: var(--bg-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-section-card.card:hover {
+    box-shadow: var(--shadow-card-hover);
+}
+.profile-section-card .profile-section-title {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.profile-sidebar > .card:hover {
+    box-shadow: var(--shadow-card-hover);
+}
+.profile-sidebar .card-header h3 {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
 .profile-tab-panel.hidden { display: none !important; }
 .profile-tab-panel { display: block; }
-.profile-portfolio-card { border: 1px solid var(--border-color, #e5e7eb); border-radius: 0.5rem; padding: 1rem; }
+
+/* Collaboration preferences (inline professional edit) */
+.profile-prefs-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+.profile-pref-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+.profile-pref-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+.profile-pref-label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.profile-pref-hint {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+.profile-pref-select {
+    max-width: 24rem;
+}
+.profile-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+    gap: 0.5rem;
+}
+.profile-choice-grid--collab {
+    grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+}
+.profile-choice-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.75rem;
+    margin: 0;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-primary);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+.profile-choice-card:hover {
+    border-color: color-mix(in srgb, var(--primary-color) 35%, var(--border-color));
+    background: color-mix(in srgb, var(--primary-color) 5%, var(--bg-primary));
+}
+.profile-choice-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+.profile-choice-ui {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.35;
+    padding-left: 1.5rem;
+    position: relative;
+}
+.profile-choice-ui::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-primary);
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.profile-choice-card:has(.profile-choice-input:checked) {
+    border-color: var(--primary-color);
+    background: color-mix(in srgb, var(--primary-color) 8%, var(--bg-primary));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 25%, transparent);
+}
+.profile-choice-card:has(.profile-choice-input:checked) .profile-choice-ui {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+.profile-choice-card:has(.profile-choice-input:checked) .profile-choice-ui::before {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    box-shadow: inset 0 0 0 2px var(--bg-primary);
+}
+.profile-choice-card:has(.profile-choice-input:focus-visible) {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
 
 .profile-add-prompt {
     display: inline-block;
@@ -675,7 +1082,7 @@
 
 .profile-two-col {
     display: grid;
-    grid-template-columns: 1fr 320px;
+    grid-template-columns: 1fr minmax(260px, 320px);
     gap: var(--spacing-xl);
     align-items: start;
 }
@@ -695,13 +1102,178 @@
     top: var(--spacing-lg);
 }
 
-.profile-header-card .profile-header-body { padding: 1.5rem; }
-.profile-header-top { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: flex-start; }
-.profile-header-info { flex: 1; min-width: 0; }
-.profile-header-name { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.25rem 0; }
-.profile-header-title { font-size: 1rem; margin: 0; }
+.profile-header-info {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    max-width: 40rem;
+    margin: 0 auto;
+    padding-top: var(--spacing-md);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.profile-header-name { font-size: clamp(1.25rem, 2vw, 1.75rem); font-weight: 700; color: var(--text-primary); margin: 0 0 0.25rem 0; letter-spacing: -0.02em; }
+.profile-header-title { font-size: var(--font-size-base); margin: 0; color: var(--text-secondary); }
+.profile-header-location { font-size: var(--font-size-sm); margin: 0.25rem 0 0; color: var(--text-muted); }
+.profile-header-skills-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-top: var(--spacing-sm);
+    justify-content: center;
+}
 .profile-header-skills-preview .skill-tag { font-size: 0.75rem; padding: 0.125rem 0.5rem; }
-.profile-completion-wrap { display: flex; align-items: center; gap: 0.5rem; }
+
+.profile-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: center;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-md);
+    width: 100%;
+}
+.profile-completion-wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex: 0 1 auto;
+    min-width: min(100%, 280px);
+    justify-content: center;
+}
+.profile-strength {
+    flex: 1;
+    min-width: 120px;
+    max-width: 240px;
+}
+.profile-strength-label {
+    display: block;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+}
+.profile-strength-track {
+    height: 0.5rem;
+    background: var(--bg-tertiary);
+    border-radius: 9999px;
+    overflow: hidden;
+}
+.profile-strength-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+    border-radius: 9999px;
+    transition: width 0.35s ease;
+}
+.profile-strength-percent {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--primary-dark);
+    flex-shrink: 0;
+    min-width: 3ch;
+    text-align: right;
+}
+.profile-header-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    justify-content: center;
+}
+.profile-page .btn-outline {
+    background: transparent;
+    color: var(--primary-dark);
+    border: 1px solid var(--primary-color);
+}
+.profile-page .btn-outline:hover {
+    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+}
+
+.profile-section-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+    justify-content: flex-end;
+}
+
+.profile-account-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+}
+@media (min-width: 640px) {
+    .profile-account-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+.profile-kv-label {
+    display: block;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-xs);
+}
+.profile-kv-value {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+.profile-view-item--locked .profile-kv-value {
+    gap: 0.25rem;
+}
+.profile-field-lock-hint {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    line-height: 1.35;
+    margin: 0;
+}
+.profile-kv-text {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+.profile-view-item--full {
+    grid-column: 1 / -1;
+}
+.profile-muted {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.55;
+}
+.profile-muted + .form-group {
+    margin-top: var(--spacing-md);
+}
+.profile-review-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+}
+.profile-hint--warn {
+    font-size: var(--font-size-sm);
+    color: var(--warning-color);
+}
+.profile-page--modern .hidden {
+    display: none !important;
+}
+
+#view-prof-bio.profile-prose,
+.profile-section-view #view-prof-bio {
+    font-size: var(--font-size-base);
+    line-height: 1.65;
+    color: var(--text-primary);
+    max-width: 52rem;
+    white-space: pre-wrap;
+}
 
 .profile-completion-checklist { list-style: none; padding: 0; margin: 0; }
 .profile-completion-checklist .check-item { display: flex; align-items: center; gap: 0.5rem; }
@@ -770,7 +1342,10 @@
     margin-bottom: 0.5rem;
 }
 .profile-preview .skill-tag { background: var(--primary-color); color: #fff; }
-.profile-preview .skill-tag-alt { background: #93c5fd; color: #1e3a8a; }
+.profile-preview .skill-tag-alt {
+    background: color-mix(in srgb, var(--primary-light) 28%, var(--bg-tertiary));
+    color: var(--primary-dark);
+}
 .profile-preview .service-item {
     display: inline-flex;
     align-items: center;
@@ -879,7 +1454,7 @@
 }
 .skill-suggestions .skill-suggestion-item:hover,
 .skill-suggestions .skill-suggestion-item.active {
-    background: var(--primary-color, #2563eb);
+    background: var(--primary-color);
     color: #fff;
 }
 .skill-suggestions .skill-suggestion-category {
@@ -896,7 +1471,7 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.25rem 0.5rem;
-    background: var(--primary-color, #2563eb);
+    background: var(--primary-color);
     color: #fff;
     border-radius: 9999px;
     font-size: 0.75rem;
@@ -919,12 +1494,265 @@
 .availability-badge.available { background: #dcfce7; color: #166534; }
 .availability-badge.limited { background: #fef9c3; color: #854d0e; }
 .availability-badge.unavailable { background: #fee2e2; color: #991b1b; }
+
+.profile-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.profile-sidebar-metric {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+.profile-sidebar-score {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1;
+}
+.profile-sidebar-suffix {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+}
+.profile-mini-bar {
+    height: 0.5rem;
+    background: var(--bg-tertiary);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-bottom: var(--spacing-sm);
+}
+.profile-mini-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+    border-radius: 9999px;
+    transition: width 0.35s ease;
+}
+.profile-sidebar-note {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.profile-sidebar-intro {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin: 0 0 var(--spacing-md);
+}
+
+.profile-reco-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+.profile-reco-action {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    padding: 0.5rem 0.625rem;
+    margin: 0;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    color: var(--primary-color);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    line-height: 1.35;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+.profile-reco-action:hover {
+    border-color: color-mix(in srgb, var(--primary-color) 35%, var(--border-color));
+    background: color-mix(in srgb, var(--primary-color) 6%, var(--bg-primary));
+}
+.profile-reco-action:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.profile-refs-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+.profile-ref-intro {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    line-height: 1.45;
+}
+.profile-ref-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+.profile-ref-card {
+    margin: 0;
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--bg-tertiary) 55%, var(--bg-primary));
+}
+.profile-ref-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+}
+.profile-ref-card-badge {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+.profile-ref-remove {
+    flex-shrink: 0;
+}
+.profile-ref-fields {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+}
+@media (min-width: 640px) {
+    .profile-ref-fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+.profile-ref-field {
+    margin: 0;
+}
+.profile-ref-testimonial-wrap {
+    margin-top: var(--spacing-md);
+    margin-bottom: 0;
+}
+.profile-ref-textarea {
+    width: 100%;
+    min-height: 5rem;
+    resize: vertical;
+    border-radius: var(--radius-md);
+    line-height: 1.45;
+}
+.profile-ref-add-btn {
+    align-self: flex-start;
+}
+
+.profile-form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+}
+@media (min-width: 640px) {
+    .profile-form-grid-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.profile-settings-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+}
+.profile-btn-danger {
+    color: var(--danger-color) !important;
+}
+.profile-btn-danger:hover {
+    color: #b91c1c !important;
+}
+
+.profile-toast {
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+.profile-toast--success {
+    background: #ecfdf5;
+    border: 1px solid var(--success-color);
+    color: #065f46;
+}
+
+.profile-section-actions--borderless {
+    border-top: none;
+    padding-top: 0;
+    margin-top: var(--spacing-sm);
+    justify-content: flex-start;
+}
+
+.profile-callout {
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    border: 1px solid color-mix(in srgb, var(--primary-color) 35%, var(--border-color));
+    background: color-mix(in srgb, var(--primary-color) 8%, var(--bg-primary));
+}
+.profile-callout-text {
+    font-size: var(--font-size-sm);
+    color: var(--primary-dark);
+}
+
+.profile-form-tight .form-group:last-child {
+    margin-bottom: 0;
+}
+.profile-input-narrow {
+    max-width: 8rem;
+}
+.profile-field-hint {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin: var(--spacing-xs) 0 0;
+}
+
+.profile-completion-checklist .check-item + .check-item {
+    margin-top: var(--spacing-xs);
+}
+
+.profile-view .profile-view-item > span:first-child {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+    .profile-header-top {
+        margin-top: -2.25rem;
+    }
+    .profile-completion-wrap {
+        flex-direction: column;
+        width: 100%;
+    }
+}
+
 @media (max-width: 968px) {
     .profile-two-col {
         grid-template-columns: 1fr;
     }
     .profile-sidebar {
         position: static;
+    }
+    .profile-shell .profile-sidebar {
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+    }
+    .profile-shell .profile-main {
+        padding: var(--spacing-md);
     }
 }
 @media (max-width: 768px) {

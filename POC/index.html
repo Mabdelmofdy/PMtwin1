@@ -31,7 +31,7 @@
     <style>
         body { margin: 0; padding: 0; background-color: var(--bg-secondary); }
         #app { min-height: 100vh; display: flex; flex-direction: column; background-color: var(--bg-secondary); }
-        #main-content { flex: 1; max-width: 1200px; width: 100%; margin: 0 auto; padding: 2rem 1.5rem; }
+        #main-content { flex: 1; max-width: var(--portal-page-max-width, 1180px); width: 100%; margin: 0 auto; padding: 2rem 1.5rem; box-sizing: border-box; }
         .app-portal-layout { display: none; }
         .app-portal-layout.portal-visible { display: flex; flex: 1; min-height: 0; }
         .app-public-layout { display: flex; flex-direction: column; flex: 1; }

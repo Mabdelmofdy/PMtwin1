@@ -1,0 +1,44 @@
+{
+  "domain": "reviews",
+  "version": "1.0",
+  "dataset": "demo40",
+  "description": "Sample post-collaboration peer reviews for People profile ratings. Merged by id on each load.",
+  "data": [
+    {
+      "id": "demo-review-u01-1",
+      "contractId": null,
+      "dealId": null,
+      "reviewerId": "demo-u02",
+      "revieweeId": "demo-u01",
+      "comment": "Clear communication and strong delivery on site coordination.",
+      "criteria": { "communication": 5, "quality": 5, "professionalism": 5, "timeliness": 4 },
+      "overallScore": 4.75,
+      "createdAt": "2026-03-12T14:00:00.000Z",
+      "updatedAt": "2026-03-12T14:00:00.000Z"
+    },
+    {
+      "id": "demo-review-u01-2",
+      "contractId": null,
+      "dealId": null,
+      "reviewerId": "demo-c01",
+      "revieweeId": "demo-u01",
+      "comment": "Reliable PM; kept stakeholders aligned through a difficult phase.",
+      "criteria": { "communication": 4, "quality": 5, "professionalism": 5, "timeliness": 5 },
+      "overallScore": 4.75,
+      "createdAt": "2026-03-18T09:30:00.000Z",
+      "updatedAt": "2026-03-18T09:30:00.000Z"
+    },
+    {
+      "id": "demo-review-u01-3",
+      "contractId": null,
+      "dealId": null,
+      "reviewerId": "demo-u04",
+      "revieweeId": "demo-u01",
+      "comment": "Professional and detail-oriented on cost and schedule.",
+      "criteria": { "communication": 5, "quality": 4, "professionalism": 5, "timeliness": 5 },
+      "overallScore": 4.75,
+      "createdAt": "2026-04-02T11:15:00.000Z",
+      "updatedAt": "2026-04-02T11:15:00.000Z"
+    }
+  ]
+}

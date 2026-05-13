@@ -15,7 +15,21 @@ class OpportunityFormService {
     setLookups(lookups) {
         this.lookups = lookups;
     }
-    
+
+    escapeHtml(str) {
+        if (str == null) return '';
+        const d = document.createElement('div');
+        d.textContent = String(str);
+        return d.innerHTML;
+    }
+
+    escapeAttr(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;');
+    }
+
     /**
      * Get options for a field, checking lookups first
      */
@@ -277,40 +291,52 @@ class OpportunityFormService {
                 `;
                 break;
                 
-            case 'multi-select':
+            case 'multi-select': {
                 const multiSelectOptions = this.getOptions(attribute);
-                const multiOptionsHTML = multiSelectOptions.map(opt => {
-                    const selected = Array.isArray(value) && value.includes(opt) ? 'selected' : '';
-                    return `<option value="${opt}" ${selected}>${opt}</option>`;
+                const selectedVals = Array.isArray(value)
+                    ? value
+                    : (typeof value === 'string' && value.trim()
+                        ? value.split(',').map(s => s.trim()).filter(Boolean)
+                        : []);
+                const chips = multiSelectOptions.map(opt => {
+                    const esc = this.escapeHtml(opt);
+                    const attrV = this.escapeAttr(opt);
+                    const checked = selectedVals.includes(opt) ? 'checked' : '';
+                    return `
+                        <label class="occ-ms-chip">
+                            <input type="checkbox" class="occ-ms-option" value="${attrV}" ${checked}>
+                            <span>${esc}</span>
+                        </label>`;
                 }).join('');
                 fieldHTML = `
-                    <select 
-                        id="${key}" 
-                        name="${key}" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
-                        multiple
-                        ${requiredAttr}
-                    >
-                        ${multiOptionsHTML}
-                    </select>
-                    <small class="text-sm text-gray-500 mt-1 block">Hold Ctrl/Cmd to select multiple</small>
-                `;
-                break;
-                
-            case 'boolean':
-                fieldHTML = `
-                    <div class="form-checkbox">
-                        <input 
-                            type="checkbox" 
-                            id="${key}" 
-                            name="${key}" 
-                            ${value ? 'checked' : ''}
-                            ${requiredAttr}
-                        >
-                        <label for="${key}">${label}</label>
+                    <div class="occ-ms-field" data-field-key="${this.escapeAttr(key)}" id="${this.escapeAttr(key)}-multi" role="group">
+                        <div class="occ-ms-chip-grid">${chips}</div>
+                        <p class="occ-ms-hint">Tap to toggle each option — no keyboard shortcut needed.</p>
                     </div>
                 `;
                 break;
+            }
+
+            case 'boolean': {
+                const on = value === true || value === 'true' || value === 1 || value === '1';
+                fieldHTML = `
+                    <div class="occ-bool-field">
+                        <label class="occ-switch" for="${this.escapeAttr(key)}">
+                            <input 
+                                type="checkbox" 
+                                id="${this.escapeAttr(key)}" 
+                                name="${this.escapeAttr(key)}" 
+                                class="occ-switch-input"
+                                ${on ? 'checked' : ''}
+                                ${requiredAttr}
+                            >
+                            <span class="occ-switch-track" aria-hidden="true"></span>
+                        </label>
+                        <span class="occ-bool-state" data-for="${this.escapeAttr(key)}">${on ? 'Yes' : 'No'}</span>
+                    </div>
+                `;
+                break;
+            }
                 
             case 'tags':
                 const tagsValue = Array.isArray(value) ? value.join(', ') : value || '';
@@ -346,11 +372,11 @@ class OpportunityFormService {
                 
             case 'array-objects':
                 fieldHTML = `
-                    <div id="${key}_container" class="array-objects-container">
+                    <div id="${key}_container" class="array-objects-container occ-array-container">
                         ${this.renderArrayObjectsField(key, value || [])}
                     </div>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="opportunityFormService.addArrayObject('${key}')">
-                        Add Item
+                    <button type="button" class="btn btn-secondary btn-sm occ-array-add-btn" onclick="opportunityFormService.addArrayObject('${key}')">
+                        + Add item
                     </button>
                 `;
                 break;
@@ -365,12 +391,14 @@ class OpportunityFormService {
             conditionalAttr = `data-conditional-field="${conditional.field}" data-conditional-value="${conditional.value.join(',')}"`;
         }
         
+        const labelText = this.escapeHtml(label);
+        const labelBlock = (type === 'boolean' || type === 'multi-select' || type === 'array-objects')
+            ? `<div class="form-label occ-model-field-label">${labelText}${required ? '<span class="text-red-600">*</span>' : ''}</div>`
+            : `<label for="${this.escapeAttr(key)}" class="form-label">${labelText}${required ? '<span class="text-red-600">*</span>' : ''}</label>`;
+
         return `
-            <div class="form-group" ${conditionalAttr} ${conditional ? 'style="display: none;"' : ''}>
-                <label for="${key}" class="form-label">
-                    ${label}
-                    ${required ? '<span class="text-red-600">*</span>' : ''}
-                </label>
+            <div class="form-group occ-model-field occ-model-field--${this.escapeAttr(type)}" ${conditionalAttr} ${conditional ? 'style="display: none;"' : ''}>
+                ${labelBlock}
                 ${fieldHTML}
             </div>
         `;
@@ -381,14 +409,18 @@ class OpportunityFormService {
      */
     renderArrayObjectsField(key, values) {
         if (!values || values.length === 0) {
-            return '<p class="text-muted">No items added yet</p>';
+            return `
+                <div class="occ-array-empty">
+                    <p class="occ-array-empty-title">No items yet</p>
+                    <p class="occ-array-empty-hint">Use <strong>Add item</strong> to add partner requirements, contributions, or roles.</p>
+                </div>`;
         }
-        
+
         return values.map((item, index) => `
-            <div class="array-object-item" data-index="${index}">
-                <input type="text" name="${key}[${index}][label]" value="${item.label || ''}" placeholder="Label" class="form-input">
-                <input type="text" name="${key}[${index}][value]" value="${item.value || ''}" placeholder="Value" class="form-input">
-                <button type="button" class="btn btn-danger btn-sm" onclick="opportunityFormService.removeArrayObject('${key}', ${index})">Remove</button>
+            <div class="array-object-item occ-array-row" data-index="${index}">
+                <input type="text" name="${key}[${index}][label]" value="${this.escapeAttr(item.label || '')}" placeholder="Label (e.g. Minimum turnover)" class="form-input occ-array-input">
+                <input type="text" name="${key}[${index}][value]" value="${this.escapeAttr(item.value || '')}" placeholder="Value / detail" class="form-input occ-array-input">
+                <button type="button" class="btn btn-secondary btn-sm occ-array-remove" onclick="opportunityFormService.removeArrayObject('${key}', ${index})" aria-label="Remove row">Remove</button>
             </div>
         `).join('');
     }
@@ -399,13 +431,16 @@ class OpportunityFormService {
     addArrayObject(key) {
         const container = document.getElementById(`${key}_container`);
         if (!container) return;
-        
+
+        const empty = container.querySelector('.occ-array-empty');
+        if (empty) empty.remove();
+
         const index = container.querySelectorAll('.array-object-item').length;
         const itemHTML = `
-            <div class="array-object-item" data-index="${index}">
-                <input type="text" name="${key}[${index}][label]" placeholder="Label" class="form-input">
-                <input type="text" name="${key}[${index}][value]" placeholder="Value" class="form-input">
-                <button type="button" class="btn btn-danger btn-sm" onclick="opportunityFormService.removeArrayObject('${key}', ${index})">Remove</button>
+            <div class="array-object-item occ-array-row" data-index="${index}">
+                <input type="text" name="${key}[${index}][label]" placeholder="Label (e.g. Minimum turnover)" class="form-input occ-array-input">
+                <input type="text" name="${key}[${index}][value]" placeholder="Value / detail" class="form-input occ-array-input">
+                <button type="button" class="btn btn-secondary btn-sm occ-array-remove" onclick="opportunityFormService.removeArrayObject('${key}', ${index})" aria-label="Remove row">Remove</button>
             </div>
         `;
         container.insertAdjacentHTML('beforeend', itemHTML);
@@ -417,21 +452,41 @@ class OpportunityFormService {
     removeArrayObject(key, index) {
         const container = document.getElementById(`${key}_container`);
         if (!container) return;
-        
+
         const item = container.querySelector(`[data-index="${index}"]`);
         if (item) {
             item.remove();
-            // Reindex remaining items
             container.querySelectorAll('.array-object-item').forEach((el, i) => {
                 el.dataset.index = i;
                 el.querySelectorAll('input').forEach(input => {
                     const name = input.name.replace(/\[\d+\]/, `[${i}]`);
                     input.name = name;
                 });
+                const btn = el.querySelector('.occ-array-remove');
+                if (btn) btn.setAttribute('onclick', `opportunityFormService.removeArrayObject('${key}', ${i})`);
             });
+        }
+        if (container.querySelectorAll('.array-object-item').length === 0) {
+            container.innerHTML = this.renderArrayObjectsField(key, []);
         }
     }
     
+    /**
+     * Toggle labels for boolean switch fields after dynamic render
+     */
+    wireDynamicBehaviours(root = document) {
+        root.querySelectorAll('.occ-switch-input').forEach(cb => {
+            const span = root.querySelector(`.occ-bool-state[data-for="${cb.id}"]`);
+            const sync = () => {
+                if (span) span.textContent = cb.checked ? 'Yes' : 'No';
+            };
+            sync();
+            if (cb._occBoolSync) cb.removeEventListener('change', cb._occBoolSync);
+            cb._occBoolSync = sync;
+            cb.addEventListener('change', sync);
+        });
+    }
+
     /**
      * Handle conditional fields
      */
@@ -518,20 +573,30 @@ class OpportunityFormService {
                 }
             }
             
-            // Multi-select
+            // Legacy native <select multiple> (if any)
             const selectElement = formElement.querySelector(`[name="${key}"][multiple]`);
             if (selectElement) {
                 const selected = Array.from(selectElement.selectedOptions).map(opt => opt.value);
                 data[key] = selected;
             }
-            
-            // Boolean/checkbox
-            const checkboxElement = formElement.querySelector(`[name="${key}"][type="checkbox"]`);
+
+            // Boolean/checkbox (single named checkbox)
+            const checkboxElement = formElement.querySelector(`[name="${key}"][type="checkbox"]:not(.occ-ms-option)`);
             if (checkboxElement) {
                 data[key] = checkboxElement.checked;
             }
         });
-        
+
+        formElement.querySelectorAll('.occ-ms-field[data-field-key]').forEach(ms => {
+            const k = ms.getAttribute('data-field-key');
+            if (!k) return;
+            data[k] = Array.from(ms.querySelectorAll('.occ-ms-option:checked')).map(c => c.value);
+        });
+
+        formElement.querySelectorAll('input.occ-switch-input[type="checkbox"]').forEach(cb => {
+            if (cb.name) data[cb.name] = cb.checked;
+        });
+
         return data;
     }
 }

@@ -1,149 +1,1541 @@
-<div class="page-container">
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1 class="page-title">Dashboard</h1>
-            <p class="page-subtitle">Welcome back, <span id="user-name"></span></p>
-        </div>
-    </div>
-    <div class="page-body">
+<div class="page-container dashboard-page">
+    <div id="page-context-header-mount"></div>
 
-    <div id="dashboard-unverified-reminder" class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg" style="display: none;">
-        <p class="font-medium text-amber-900">Complete verification to unlock full opportunity details</p>
-        <p class="text-sm text-amber-800 mt-1">As an unverified user you can browse opportunities but cannot see company name, full scope, budget, or contact details. You can complete verification or return to it later from the Profile page.</p>
-        <a href="#" data-route="/profile" id="dashboard-unverified-link" class="inline-block mt-3 px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-md hover:bg-amber-700 no-underline">Complete verification</a>
+    <div class="page-body dash-body">
+
+    <div id="dashboard-unverified-reminder" class="dash-banner dash-banner--amber" style="display: none;">
+        <p class="dash-banner-title">Complete verification to unlock full opportunity details</p>
+        <p class="dash-banner-text">As an unverified user you can browse opportunities but cannot see company name, full scope, budget, or contact details. You can complete verification or return to it later from the Profile page.</p>
+        <a href="#" data-route="/profile" id="dashboard-unverified-link" class="dash-banner-link">Complete verification</a>
     </div>
 
-    <div id="dashboard-profile-completeness" class="mb-6 p-4 bg-white border border-gray-200 rounded-lg flex items-center justify-between flex-wrap gap-3" style="display: none;">
-        <div class="flex-1 min-w-0">
-            <h3 class="font-semibold text-gray-900 mb-1">Profile completeness</h3>
-            <p class="text-sm text-gray-600">Complete your profile to improve match recommendations.</p>
-            <div class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden max-w-xs">
-                <div id="dashboard-completeness-bar" class="h-full bg-primary rounded-full transition-all" style="width: 0%;"></div>
+    <section id="dashboard-profile-completeness" class="dash-profile-card" style="display: none;" aria-labelledby="dash-profile-heading">
+        <div class="dash-profile-icon" aria-hidden="true"><i class="ph-duotone ph-user-circle"></i></div>
+        <div class="dash-profile-body">
+            <h2 class="dash-profile-heading" id="dash-profile-heading">Profile completeness</h2>
+            <p class="dash-profile-hint">A complete profile improves matches and trust with partners.</p>
+            <div class="dash-profile-bar-wrap">
+                <div class="dash-profile-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="dashboard-completeness-bar-aria">
+                    <div id="dashboard-completeness-bar" class="dash-profile-bar-fill" style="width: 0%;"></div>
+                </div>
             </div>
         </div>
-        <div class="flex items-center gap-3">
-            <span id="dashboard-completeness-percent" class="text-2xl font-bold text-primary">0%</span>
-            <a href="#" data-route="/profile" class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-dark no-underline">Complete profile</a>
+        <div class="dash-profile-aside">
+            <span id="dashboard-completeness-percent" class="dash-profile-percent">0%</span>
+            <a href="#" data-route="/profile" class="btn btn-primary btn-sm dash-profile-cta">Complete profile</a>
         </div>
-    </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <a href="#" data-route="/pipeline" class="stat-card-link bg-white border border-gray-200 rounded-lg p-6 text-center no-underline block hover:border-primary hover:shadow-md transition-all cursor-pointer">
-            <div class="text-3xl font-bold text-primary mb-2" id="stat-opportunities">0</div>
-            <div class="text-gray-600 text-sm">My Opportunities</div>
-        </a>
-        <a href="#" data-route="/pipeline/applications" class="stat-card-link bg-white border border-gray-200 rounded-lg p-6 text-center no-underline block hover:border-primary hover:shadow-md transition-all cursor-pointer">
-            <div class="text-3xl font-bold text-primary mb-2" id="stat-applications">0</div>
-            <div class="text-gray-600 text-sm">Applications</div>
-        </a>
-        <a href="#" data-route="/matches" class="stat-card-link bg-white border border-gray-200 rounded-lg p-6 text-center no-underline block hover:border-primary hover:shadow-md transition-all cursor-pointer">
-            <div class="text-3xl font-bold text-primary mb-2" id="stat-matches">0</div>
-            <div class="text-gray-600 text-sm">Matches</div>
-        </a>
-        <a href="#" data-route="/notifications" class="stat-card-link bg-white border border-gray-200 rounded-lg p-6 text-center no-underline block hover:border-primary hover:shadow-md transition-all cursor-pointer">
-            <div class="text-3xl font-bold text-primary mb-2" id="stat-notifications">0</div>
-            <div class="text-gray-600 text-sm">Notifications</div>
-        </a>
-    </div>
-    
-    <div class="flex gap-4 mb-8">
-        <a href="#" data-route="/opportunities/create" class="inline-block px-6 py-2 bg-primary text-white font-medium rounded-md hover:bg-primary-dark transition-all shadow-md no-underline">Create Opportunity</a>
-        <a href="#" data-route="/opportunities" class="inline-block px-6 py-2 bg-gray-100 text-gray-900 font-medium rounded-md hover:bg-gray-200 transition-all no-underline">Browse Opportunities</a>
-    </div>
+    </section>
 
-    <div id="your-matches-section" class="bg-white border border-gray-200 rounded-lg p-6 mb-8" style="display: none;">
-        <div class="flex items-center justify-between mb-4">
+    <section class="dash-stats" aria-label="Key metrics">
+        <a href="#" data-route="/pipeline" class="dash-stat-card stat-card-link">
+            <span class="dash-stat-icon" aria-hidden="true"><i class="ph-duotone ph-briefcase"></i></span>
+            <div class="dash-stat-main">
+                <span class="dash-stat-value" id="stat-opportunities">0</span>
+                <span class="dash-stat-label" id="stat-opportunities-label">My opportunities</span>
+                <span class="dash-stat-hint">Posted &amp; pipeline</span>
+            </div>
+        </a>
+        <a href="#" data-route="/pipeline/applications" class="dash-stat-card stat-card-link">
+            <span class="dash-stat-icon" aria-hidden="true"><i class="ph-duotone ph-paper-plane-tilt"></i></span>
+            <div class="dash-stat-main">
+                <span class="dash-stat-value" id="stat-applications">0</span>
+                <span class="dash-stat-label" id="stat-applications-label">Applications</span>
+                <span class="dash-stat-hint">Track submissions</span>
+            </div>
+        </a>
+        <a href="#" data-route="/matches" class="dash-stat-card stat-card-link">
+            <span class="dash-stat-icon" aria-hidden="true"><i class="ph-duotone ph-handshake"></i></span>
+            <div class="dash-stat-main">
+                <span class="dash-stat-value" id="stat-matches">0</span>
+                <span class="dash-stat-label">Matches</span>
+                <span class="dash-stat-hint">Collaboration fits</span>
+            </div>
+        </a>
+        <a href="#" data-route="/notifications" class="dash-stat-card stat-card-link">
+            <span class="dash-stat-icon" aria-hidden="true"><i class="ph-duotone ph-bell"></i></span>
+            <div class="dash-stat-main">
+                <span class="dash-stat-value" id="stat-notifications">0</span>
+                <span class="dash-stat-label">Notifications</span>
+                <span class="dash-stat-hint">Unread count</span>
+            </div>
+        </a>
+    </section>
+
+    <div class="dashboard-actions" style="display: none;" aria-hidden="true"></div>
+
+    <section id="your-matches-section" class="dash-panel dash-panel--matches" style="display: none;" aria-labelledby="your-matches-heading">
+        <div class="dash-panel-head dashboard-matches-header">
             <div>
-                <h2 class="text-xl font-semibold">Your Matches</h2>
-                <p class="text-sm text-gray-500">Collaboration opportunities found by the matching engine</p>
+                <h2 class="dash-panel-title" id="your-matches-heading">Your matches</h2>
+                <p class="dash-panel-sub">Curated collaboration fits from the matching engine</p>
             </div>
-            <a href="#" data-route="/matches" class="text-primary text-sm font-medium no-underline hover:underline">View all</a>
+            <div class="dashboard-matches-header-actions">
+                <button type="button" class="matches-filter-toggle" id="matches-filter-toggle"><i class="ph-duotone ph-faders"></i> Filters</button>
+                <a href="#" data-route="/matches" class="dash-link-btn company-insight-link company-insight-button">View all</a>
+            </div>
         </div>
-        <div class="flex gap-2 mb-4 flex-wrap" id="match-category-tabs">
-            <button type="button" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 match-tab active" data-category="all">All</button>
-            <button type="button" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 match-tab" data-category="one_way">Recommended</button>
-            <button type="button" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 match-tab" data-category="two_way">Barter</button>
-            <button type="button" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 match-tab" data-category="consortium">Consortium</button>
-            <button type="button" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 match-tab" data-category="circular">Circular</button>
-        </div>
-        <div id="your-matches-list" class="space-y-3"></div>
-    </div>
-    
-    <div id="recommended-opportunities-section" class="bg-white border border-gray-200 rounded-lg p-6 mb-8" style="display: none;">
-        <h2 class="text-xl font-semibold mb-2">Recommended Opportunities</h2>
-        <p class="text-sm text-gray-500 mb-4">Based on your skills and profile</p>
-        <div id="recommended-opportunities-list" class="space-y-3"></div>
-        <div id="recommended-loading" class="text-center py-4 text-gray-400 text-sm" style="display:none;">Finding matches...</div>
-        <div id="recommended-empty" class="text-center py-4 text-gray-400 text-sm" style="display:none;">No recommended opportunities found. Complete your profile and add skills to improve matches.</div>
-    </div>
-
-    <div id="company-recommendations-section" class="bg-white border border-gray-200 rounded-lg p-6 mb-8" style="display: none;">
-        <h2 class="text-xl font-semibold mb-2">Recommended Professionals</h2>
-        <p class="text-sm text-gray-500 mb-4">Matching candidates for your opportunities</p>
-        <div id="company-recommendations-list" class="space-y-3"></div>
-        <div id="company-recommendations-empty" class="text-center py-4 text-gray-400 text-sm" style="display:none;">No matching professionals found yet. Post opportunities to see recommendations.</div>
-    </div>
-
-    <div id="applications-received-section" class="bg-white border border-gray-200 rounded-lg p-6 mb-8" style="display: none;">
-        <h2 class="text-xl font-semibold mb-2">Applications Received</h2>
-        <p class="text-sm text-gray-500 mb-4">Recent applications on your opportunities</p>
-        <div id="applications-received-list" class="space-y-3"></div>
-        <div id="applications-received-empty" class="text-center py-4 text-gray-400 text-sm" style="display:none;">No applications received yet.</div>
-    </div>
-
-    <div id="sample-opportunities-dashboard" class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8" style="display: none;">
-        <h3 class="text-lg font-semibold text-amber-900 mb-2">Sample opportunities to explore</h3>
-        <p class="text-sm text-amber-800 mb-3">Get started by browsing these sample opportunities.</p>
-        <div id="sample-opportunities-dashboard-list" class="flex flex-wrap gap-2"></div>
-    </div>
-    
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div class="bg-white border border-gray-200 rounded-lg p-6">
-            <h2 class="text-xl font-semibold mb-6 pb-4 border-b border-gray-200">Recent Opportunities</h2>
-            <div id="recent-opportunities" class="min-h-[300px]">
-                <div class="flex flex-col items-center justify-center py-12 px-8 text-center min-h-[300px]">
-                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary/90 to-primary-light flex items-center justify-center mb-6 text-white opacity-90">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                            <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
-                        </svg>
+        <div class="matches-layout">
+            <aside class="matches-filter-sidebar" id="matches-filter-sidebar" aria-label="Match filters">
+                <div class="matches-filter-panel">
+                    <div class="matches-filter-mobile-head">
+                        <strong>Filters</strong>
+                        <button type="button" class="matches-filter-close" id="matches-filter-close" aria-label="Close filters">Close</button>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">No opportunities yet</h3>
-                    <p class="text-base text-gray-600 max-w-md mb-8 leading-relaxed">Start building your network by creating your first opportunity. Share projects, find partners, and grow together.</p>
-                    <a href="#" data-route="/opportunities/create" class="inline-flex items-center justify-center px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-primary-dark transition-all shadow-md hover:-translate-y-0.5 hover:shadow-lg no-underline">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        Create Your First Opportunity
-                    </a>
+                    <label class="matches-search">
+                        <span>Search</span>
+                        <input type="search" id="matches-search-input" placeholder="Title, type, skill…" autocomplete="off">
+                    </label>
+                    <div class="matches-filter-group">
+                        <div class="matches-filter-title">Match type</div>
+                        <div class="matches-filter-options" id="matches-type-filters">
+                            <button type="button" class="matches-filter-option active" data-match-type="all">All <span data-count="all">0</span></button>
+                            <button type="button" class="matches-filter-option" data-match-type="one_way">Recommended <span data-count="one_way">0</span></button>
+                            <button type="button" class="matches-filter-option" data-match-type="two_way">Barter <span data-count="two_way">0</span></button>
+                            <button type="button" class="matches-filter-option" data-match-type="consortium">Consortium <span data-count="consortium">0</span></button>
+                            <button type="button" class="matches-filter-option" data-match-type="circular">Circular <span data-count="circular">0</span></button>
+                        </div>
+                    </div>
+                    <div class="matches-filter-group">
+                        <div class="matches-filter-title">Match quality</div>
+                        <div class="matches-filter-options" id="matches-quality-filters">
+                            <button type="button" class="matches-filter-option" data-quality="top">Top match</button>
+                            <button type="button" class="matches-filter-option" data-quality="high">High match</button>
+                            <button type="button" class="matches-filter-option" data-quality="new">New match</button>
+                        </div>
+                    </div>
+                    <div class="matches-filter-group">
+                        <div class="matches-filter-title">Skills</div>
+                        <div class="matches-skill-list" id="matches-skill-filters"></div>
+                    </div>
+                    <button type="button" class="matches-clear-filters" id="matches-clear-filters">Clear filters</button>
+                </div>
+            </aside>
+            <div class="matches-filter-backdrop" id="matches-filter-backdrop"></div>
+            <div class="matches-results">
+                <div class="matches-results-summary" id="matches-results-summary">Showing matches</div>
+                <div id="your-matches-list" class="matches-card-list"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="recommended-opportunities-section" class="dash-panel" style="display: none;" aria-labelledby="rec-opp-heading">
+        <h2 class="dash-panel-title" id="rec-opp-heading">Recommended opportunities</h2>
+        <p class="dash-panel-sub">Based on your skills and profile</p>
+        <div id="recommended-opportunities-list" class="dash-stack"></div>
+        <div id="recommended-loading" class="dash-muted-center" style="display:none;">Finding matches…</div>
+        <div id="recommended-empty" class="dash-muted-center" style="display:none;">No recommended opportunities yet. Add skills to improve suggestions.</div>
+    </section>
+
+    <div class="company-insights-grid">
+        <section id="company-recommendations-section" class="dash-panel company-insight-card" style="display: none;" aria-labelledby="rec-pro-heading">
+            <div class="company-insight-header">
+                <div>
+                    <h2 class="dash-panel-title" id="rec-pro-heading">Recommended professionals</h2>
+                    <p class="dash-panel-sub">Strong fits for your published needs</p>
+                </div>
+                <a href="#" data-route="/people" class="dash-link-btn company-insight-link">Browse talent</a>
+            </div>
+            <div id="company-recommendations-list" class="company-compact-list"></div>
+            <div id="company-recommendations-empty" class="dash-empty-pro" style="display:none;"></div>
+        </section>
+
+        <section id="applications-received-section" class="dash-panel company-insight-card" style="display: none;" aria-labelledby="app-rec-heading">
+            <div class="company-insight-header">
+                <div>
+                    <h2 class="dash-panel-title" id="app-rec-heading">Applications received</h2>
+                    <p class="dash-panel-sub">Newest submissions across your opportunities</p>
+                </div>
+                <a href="#" data-route="/pipeline" class="dash-link-btn company-insight-link company-insight-button">Review all</a>
+            </div>
+            <div class="applications-toolbar">
+                <label class="applications-control">
+                    <span>Sort</span>
+                    <select id="applications-sort">
+                        <option value="newest">Newest</option>
+                        <option value="status">Status</option>
+                        <option value="priority">Priority</option>
+                    </select>
+                </label>
+                <label class="applications-control">
+                    <span>Status</span>
+                    <select id="applications-status-filter">
+                        <option value="all">All</option>
+                        <option value="pending">Pending</option>
+                        <option value="reviewing">Reviewing</option>
+                        <option value="shortlisted">Shortlisted</option>
+                        <option value="accepted">Accepted</option>
+                    </select>
+                </label>
+            </div>
+            <div id="applications-received-list" class="company-compact-list"></div>
+            <div id="applications-received-empty" class="dashboard-compact-empty" style="display:none;">No applications received yet.</div>
+        </section>
+    </div>
+
+    <div id="sample-opportunities-dashboard" class="dash-banner dash-banner--sample" style="display: none;">
+        <h3 class="dash-banner-title">Sample opportunities</h3>
+        <p class="dash-banner-text">Explore curated examples to learn how postings work.</p>
+        <div id="sample-opportunities-dashboard-list" class="dash-sample-chips"></div>
+    </div>
+
+    <div class="dash-bottom-grid">
+        <section class="dash-panel dash-panel--tight" aria-labelledby="recent-opp-heading">
+            <div class="dash-panel-head dash-panel-head--inline">
+                <h2 class="dash-panel-title" id="recent-opp-heading">Recent opportunities</h2>
+            </div>
+            <div id="recent-opportunities" class="dash-recent-list">
+                <div class="dash-empty-inline">
+                    <div class="dash-empty-icon" aria-hidden="true"></div>
+                    <h3 class="dash-empty-title">No opportunities yet</h3>
+                    <p class="dash-empty-text">Create a posting to attract partners for BIM, design, or field work.</p>
+                    <a href="#" data-route="/opportunities/create" class="btn btn-primary btn-sm">Post opportunity</a>
                 </div>
             </div>
-        </div>
-        
-        <div class="bg-white border border-gray-200 rounded-lg p-6">
-            <h2 class="text-xl font-semibold mb-6 pb-4 border-b border-gray-200">Recent Applications</h2>
-            <div id="recent-applications" class="min-h-[300px]">
-                <div class="flex flex-col items-center justify-center py-12 px-8 text-center min-h-[300px]">
-                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary/90 to-primary-light flex items-center justify-center mb-6 text-white opacity-90">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">No applications yet</h3>
-                    <p class="text-base text-gray-600 max-w-md mb-8 leading-relaxed">When you apply to opportunities, they'll appear here. Start exploring available opportunities to get started.</p>
-                    <a href="#" data-route="/opportunities" class="inline-flex items-center justify-center px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-primary-dark transition-all shadow-md hover:-translate-y-0.5 hover:shadow-lg no-underline">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <path d="m21 21-4.35-4.35"></path>
-                        </svg>
-                        Browse Opportunities
-                    </a>
+        </section>
+
+        <section class="dash-panel dash-panel--tight" aria-labelledby="recent-app-heading">
+            <div class="dash-panel-head dash-panel-head--inline">
+                <h2 class="dash-panel-title" id="recent-app-heading">Recent applications</h2>
+            </div>
+            <div id="recent-applications" class="dash-recent-list">
+                <div class="dash-empty-inline">
+                    <div class="dash-empty-icon dash-empty-icon--users" aria-hidden="true"></div>
+                    <h3 class="dash-empty-title">No applications yet</h3>
+                    <p class="dash-empty-text">When you apply to roles, they will appear here with status and fit scores.</p>
+                    <a href="#" data-route="/opportunities" class="btn btn-primary btn-sm">Browse opportunities</a>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
     </div>
 </div>
+
+<style>
+/* ——— Company / individual dashboard ——— */
+.dashboard-page {
+    --dash-ink: #0f172a;
+    --dash-muted: #64748b;
+    --dash-line: #e2e8f0;
+    --dash-line-strong: #cbd5e1;
+    --dash-surface: #f8fafc;
+    --dash-card: #ffffff;
+    --dash-primary-soft: #ecfeff;
+    --dash-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --dash-shadow-hover: 0 12px 32px rgba(15, 23, 42, 0.1);
+    --dash-radius: 14px;
+    --dash-radius-lg: 18px;
+    color: var(--dash-ink);
+}
+
+.dash-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* Banners */
+.dash-banner {
+    padding: 1rem 1.15rem;
+    border-radius: var(--dash-radius);
+    border: 1px solid var(--dash-line);
+}
+
+.dash-banner--amber {
+    background: #fffbeb;
+    border-color: #fde68a;
+}
+
+.dash-banner--sample {
+    background: #fffbeb;
+    border-color: #fcd34d;
+}
+
+.dash-banner-title {
+    margin: 0 0 0.35rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #78350f;
+}
+
+.dash-banner--sample .dash-banner-title {
+    color: #92400e;
+}
+
+.dash-banner-text {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #a16207;
+}
+
+.dash-banner-link {
+    display: inline-flex;
+    margin-top: 0.75rem;
+    padding: 0.45rem 1rem;
+    border-radius: 8px;
+    background: #d97706;
+    color: #fff !important;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.dash-banner-link:hover {
+    background: #b45309;
+}
+
+.dash-sample-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.65rem;
+}
+
+/* Profile completeness */
+.dash-profile-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.25rem;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--dash-line);
+    border-radius: var(--dash-radius);
+    background: var(--dash-card);
+    box-shadow: var(--dash-shadow);
+}
+
+.dash-profile-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 12px;
+    background: var(--dash-primary-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color, #0d9488);
+    font-size: 1.75rem;
+}
+
+.dash-profile-body {
+    flex: 1;
+    min-width: 200px;
+}
+
+.dash-profile-heading {
+    margin: 0 0 0.2rem;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.dash-profile-hint {
+    margin: 0 0 0.55rem;
+    font-size: 0.82rem;
+    color: var(--dash-muted);
+    line-height: 1.4;
+}
+
+.dash-profile-bar-wrap {
+    max-width: 22rem;
+}
+
+.dash-profile-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    overflow: hidden;
+}
+
+.dash-profile-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--primary-color, #14b8a6);
+    transition: width 0.35s ease;
+}
+
+.dash-profile-aside {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: auto;
+}
+
+.dash-profile-percent {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--primary-dark, #0f766e);
+    line-height: 1;
+}
+
+/* Stats */
+.dash-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+.dash-stat-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 1rem 1.05rem;
+    min-height: 118px;
+    border: 1px solid var(--dash-line);
+    border-radius: var(--dash-radius);
+    background: var(--dash-card);
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--dash-shadow);
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.dash-stat-card:hover {
+    border-color: rgba(13, 148, 136, 0.35);
+    box-shadow: var(--dash-shadow-hover);
+    transform: translateY(-1px);
+}
+
+.dash-stat-icon {
+    width: 2.65rem;
+    height: 2.65rem;
+    border-radius: 11px;
+    background: var(--dash-primary-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color, #0d9488);
+    font-size: 1.35rem;
+    flex-shrink: 0;
+}
+
+.dash-stat-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.dash-stat-value {
+    font-size: 1.85rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--dash-ink);
+}
+
+.dash-stat-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--dash-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.dash-stat-hint {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin-top: 0.1rem;
+}
+
+/* Panels */
+.dash-panel {
+    padding: 1.15rem 1.2rem;
+    border: 1px solid var(--dash-line);
+    border-radius: var(--dash-radius);
+    background: var(--dash-card);
+    box-shadow: var(--dash-shadow);
+}
+
+.dash-panel--tight {
+    padding: 1rem 1.1rem;
+}
+
+.dash-panel-title {
+    margin: 0 0 0.25rem;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--dash-ink);
+}
+
+.dash-panel-sub {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--dash-muted);
+    line-height: 1.45;
+}
+
+.dash-panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.dash-panel-head--inline {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid var(--dash-line);
+}
+
+.dash-link-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0.35rem 0.85rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--primary-color, #0d9488);
+    border: 1px solid rgba(13, 148, 136, 0.25);
+    background: #fff;
+}
+
+.dash-link-btn:hover {
+    background: var(--dash-primary-soft);
+    color: var(--primary-dark, #0f766e);
+}
+
+.dash-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.dash-muted-center {
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.88rem;
+    color: var(--dash-muted);
+}
+
+.dash-bottom-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.dash-recent-list {
+    min-height: 200px;
+}
+
+.dash-empty-inline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem 1rem;
+    gap: 0.5rem;
+}
+
+.dash-empty-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 12px;
+    background: var(--dash-primary-soft);
+    position: relative;
+}
+
+.dash-empty-icon::after {
+    content: "";
+    position: absolute;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 3px;
+    background: var(--primary-color, #14b8a6);
+    opacity: 0.85;
+}
+
+.dash-empty-title {
+    margin: 0.25rem 0 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.dash-empty-text {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    color: var(--dash-muted);
+    max-width: 22rem;
+    line-height: 1.45;
+}
+
+/* Recommended professionals empty */
+.dash-empty-pro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.65rem;
+    padding: 1.5rem 1.25rem;
+    border: 1px dashed var(--dash-line-strong);
+    border-radius: var(--dash-radius);
+    background: linear-gradient(180deg, #fafbfc 0%, #fff 100%);
+}
+
+.dash-empty-pro-icon {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 14px;
+    background: var(--dash-primary-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--primary-color, #0d9488);
+}
+
+.dash-empty-pro h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.dash-empty-pro p {
+    margin: 0;
+    font-size: 0.86rem;
+    color: var(--dash-muted);
+    max-width: 22rem;
+    line-height: 1.5;
+}
+
+.dash-empty-pro .btn {
+    margin-top: 0.25rem;
+    min-height: 44px;
+}
+
+/* Matches */
+.dashboard-matches-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.dashboard-matches-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.matches-filter-toggle {
+    display: none;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 42px;
+    padding: 0 0.85rem;
+    border: 1px solid var(--dash-line);
+    border-radius: 10px;
+    background: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--dash-ink);
+    cursor: pointer;
+}
+
+.matches-filter-toggle i {
+    font-size: 1.1rem;
+    opacity: 0.85;
+}
+
+.matches-layout {
+    display: grid;
+    grid-template-columns: minmax(200px, 240px) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.matches-filter-panel {
+    position: sticky;
+    top: 0.75rem;
+    padding: 0.85rem;
+    border: 1px solid var(--dash-line);
+    border-radius: var(--dash-radius);
+    background: var(--dash-surface);
+}
+
+.matches-filter-mobile-head {
+    display: none;
+}
+
+.matches-search {
+    display: grid;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+}
+
+.matches-search span,
+.matches-filter-title {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dash-muted);
+}
+
+.matches-search input {
+    width: 100%;
+    min-height: 42px;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid var(--dash-line);
+    border-radius: 10px;
+    background: #fff;
+    font-size: 0.88rem;
+}
+
+.matches-search input:focus {
+    outline: none;
+    border-color: rgba(13, 148, 136, 0.45);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+}
+
+.matches-filter-group {
+    padding: 0.65rem 0;
+    border-top: 1px solid var(--dash-line);
+}
+
+.matches-filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.matches-filter-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 40px;
+    padding: 0.4rem 0.55rem;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: #334155;
+    font-size: 0.84rem;
+    font-weight: 650;
+    text-align: left;
+    cursor: pointer;
+}
+
+.matches-filter-option span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.45rem;
+    height: 1.35rem;
+    padding: 0 0.35rem;
+    border-radius: 999px;
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.matches-filter-option:hover,
+.matches-filter-option.active {
+    border-color: rgba(13, 148, 136, 0.22);
+    background: #f0fdfa;
+    color: var(--primary-dark, #0f766e);
+}
+
+.matches-filter-option.active span {
+    background: var(--primary-color, #14b8a6);
+    color: #fff;
+}
+
+.matches-skill-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    max-height: 13rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.matches-skill-choice {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.5rem;
+    align-items: center;
+    width: 100%;
+    min-height: 38px;
+    padding: 0.32rem 0.45rem;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    text-align: left;
+    cursor: pointer;
+}
+
+.matches-skill-choice:hover,
+.matches-skill-choice.active {
+    border-color: rgba(13, 148, 136, 0.2);
+    background: #f0fdfa;
+    color: var(--primary-dark, #0f766e);
+}
+
+.matches-skill-circle {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #cbd5e1;
+    border-radius: 999px;
+    background: #fff;
+}
+
+.matches-skill-choice.active .matches-skill-circle {
+    border-color: var(--primary-color, #14b8a6);
+    background: var(--primary-color, #14b8a6);
+    box-shadow: inset 0 0 0 2px #fff;
+}
+
+.matches-skill-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.matches-filter-empty {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.matches-clear-filters {
+    width: 100%;
+    min-height: 42px;
+    margin-top: 0.45rem;
+    border: 1px solid var(--dash-line);
+    border-radius: 10px;
+    background: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+}
+
+.matches-clear-filters:hover {
+    background: #f1f5f9;
+    color: var(--primary-dark, #0f766e);
+}
+
+.matches-results-summary {
+    margin-bottom: 0.55rem;
+    font-size: 0.8rem;
+    font-weight: 650;
+    color: var(--dash-muted);
+}
+
+.matches-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+/* Match result cards */
+.dashboard-match-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.85rem 1rem;
+    align-items: center;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--dash-line);
+    border-radius: var(--dash-radius);
+    background: #fafbfc;
+}
+
+.dashboard-match-main {
+    min-width: 0;
+}
+
+.dashboard-match-topline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 0.35rem;
+}
+
+.dashboard-match-type {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dash-muted);
+}
+
+.dashboard-match-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.dashboard-match-badge.is-top {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.dashboard-match-badge.is-high {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.dashboard-match-badge.is-new {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.dashboard-match-title {
+    margin: 0 0 0.35rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.25;
+    color: var(--dash-ink);
+}
+
+.dashboard-match-pair {
+    display: grid;
+    gap: 0.35rem;
+    margin-bottom: 0.35rem;
+}
+
+.dashboard-match-row {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 0.5rem;
+    align-items: baseline;
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
+.dashboard-match-row-label {
+    font-weight: 800;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--dash-muted);
+}
+
+.dashboard-match-row-value {
+    color: #334155;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dashboard-match-description {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: #475569;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+.dashboard-match-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.45rem;
+}
+
+.dashboard-match-skills span {
+    max-width: 9rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #166534;
+    font-size: 0.68rem;
+    font-weight: 750;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dashboard-match-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    align-items: stretch;
+}
+
+.dashboard-match-actions .btn {
+    min-height: 40px;
+    white-space: nowrap;
+    justify-content: center;
+    border-radius: 10px;
+    font-weight: 650;
+}
+
+.matches-empty-state {
+    padding: 1.75rem 1rem;
+    border: 1px dashed var(--dash-line-strong);
+    border-radius: var(--dash-radius);
+    text-align: center;
+    font-size: 0.88rem;
+    color: var(--dash-muted);
+    background: #fafbfc;
+}
+
+.matches-filter-backdrop {
+    display: none;
+}
+
+/* Company insights */
+.company-insights-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.dashboard-page--individual .company-insights-grid {
+    display: none;
+}
+
+.company-insights-grid .company-insight-card {
+    margin: 0;
+}
+
+.company-insight-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.85rem;
+}
+
+.applications-toolbar {
+    display: flex;
+    gap: 0.65rem;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0.55rem;
+    border: 1px solid var(--dash-line);
+    border-radius: 10px;
+    background: var(--dash-surface);
+}
+
+.applications-control {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: 0.2rem;
+}
+
+.applications-control span {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--dash-muted);
+}
+
+.applications-control select {
+    width: 100%;
+    min-height: 42px;
+    padding: 0.35rem 0.55rem;
+    border: 1px solid var(--dash-line);
+    border-radius: 9px;
+    background: #fff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--dash-ink);
+}
+
+.company-compact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.company-compact-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid var(--dash-line);
+    border-radius: 12px;
+    background: #fafbfc;
+}
+
+.applications-item {
+    align-items: start;
+}
+
+.company-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 10px;
+    background: #ccfbf1;
+    color: var(--primary-dark, #0f766e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.9rem;
+}
+
+.company-avatar--soft {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.company-compact-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.company-compact-topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.company-compact-title {
+    font-size: 0.9rem;
+    font-weight: 750;
+    color: var(--dash-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.company-project-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--dash-muted);
+}
+
+.company-compact-meta,
+.company-compact-date {
+    font-size: 0.78rem;
+    color: #64748b;
+    line-height: 1.35;
+}
+
+.company-project-title {
+    font-weight: 650;
+    color: #334155;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+.company-score-pill,
+.company-status-pill {
+    flex-shrink: 0;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 800;
+}
+
+.company-score-pill {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.company-status-pill.is-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.company-status-pill.is-success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.company-status-pill.is-info {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.company-status-pill.is-strong {
+    background: #ede9fe;
+    color: #5b21b6;
+}
+
+.company-status-pill.is-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.company-status-pill.is-muted {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.company-review-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0.35rem 0.85rem;
+    border-radius: 10px;
+    background: var(--primary-color, #14b8a6);
+    color: #fff !important;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.22);
+}
+
+.company-review-link:hover {
+    background: var(--primary-dark, #0f766e);
+    color: #fff !important;
+}
+
+.company-skill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.25rem;
+}
+
+.company-skill-chip,
+.company-skill-more {
+    padding: 0.12rem 0.4rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    max-width: 7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.company-skill-chip {
+    background: #ecfdf5;
+    color: #166534;
+}
+
+.company-skill-more {
+    background: #eef2ff;
+    color: #4338ca;
+}
+
+.dashboard-compact-empty {
+    padding: 0.85rem;
+    border: 1px dashed var(--dash-line);
+    border-radius: 10px;
+    text-align: center;
+    font-size: 0.84rem;
+    color: var(--dash-muted);
+}
+
+/* Recent opportunity cards on dashboard */
+.dashboard-page .portal-content-slot .opportunity-card,
+.dashboard-page #recent-opportunities .opportunity-card {
+    padding: 0.75rem 0.85rem !important;
+    margin-bottom: 0.5rem !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--dash-line) !important;
+    background: #fafbfc !important;
+    box-shadow: none !important;
+}
+
+.dashboard-page #recent-opportunities .opportunity-header .opportunity-title {
+    font-size: 0.92rem !important;
+    margin-bottom: 0.35rem !important;
+}
+
+.dashboard-page #recent-opportunities .opportunity-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem !important;
+}
+
+.dashboard-page #recent-opportunities .opportunity-meta .badge {
+    font-size: 0.65rem !important;
+    font-weight: 800 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    border-radius: 6px !important;
+    padding: 0.15rem 0.45rem !important;
+}
+
+.dashboard-page #recent-opportunities .opportunity-description {
+    display: none !important;
+}
+
+.dashboard-page #recent-opportunities .opportunity-footer {
+    margin-top: 0.5rem !important;
+    padding-top: 0.45rem !important;
+    border-top: 1px solid var(--dash-line) !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between !important;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+/* Recent application compact cards */
+.dash-recent-app {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.65rem;
+    align-items: center;
+    padding: 0.75rem 0.85rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--dash-line);
+    border-radius: 12px;
+    background: #fafbfc;
+}
+
+.dash-recent-app-main {
+    min-width: 0;
+}
+
+.dash-recent-app-title {
+    margin: 0 0 0.2rem;
+    font-size: 0.88rem;
+    font-weight: 750;
+    color: var(--dash-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dash-recent-app-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.76rem;
+    color: var(--dash-muted);
+}
+
+.dash-recent-app-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+.dash-recent-app-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    align-items: stretch;
+}
+
+.dash-recent-app-actions .btn {
+    min-height: 40px;
+    border-radius: 10px;
+    font-weight: 650;
+    font-size: 0.78rem;
+}
+
+.dash-match-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.12rem 0.4rem;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #166534;
+    font-size: 0.65rem;
+    font-weight: 800;
+}
+
+.dashboard-page--company #recommended-opportunities-section {
+    display: none !important;
+}
+
+.dashboard-actions {
+    display: none !important;
+}
+
+.dash-sub-lead {
+    display: block;
+    margin: 0;
+    max-width: 42rem;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--dash-muted);
+}
+
+.dash-inline-link {
+    display: inline-block;
+    margin-top: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--primary-color, #0d9488);
+    text-decoration: none;
+}
+
+.dash-inline-link:hover {
+    text-decoration: underline;
+    color: var(--primary-dark, #0f766e);
+}
+
+.dash-sample-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid #fcd34d;
+    background: #fff;
+    color: #92400e;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    max-width: 100%;
+}
+
+.dash-sample-chip:hover {
+    background: #fffbeb;
+    border-color: #f59e0b;
+}
+
+/* Tablet */
+@media (max-width: 1100px) {
+    .dash-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1024px) {
+    .matches-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .matches-filter-toggle {
+        display: inline-flex;
+    }
+
+    .matches-filter-sidebar {
+        position: fixed;
+        inset: auto 0 0;
+        z-index: 80;
+        padding: 0.65rem;
+        transform: translateY(110%);
+        transition: transform 0.2s ease;
+    }
+
+    .matches-filter-sidebar.is-open {
+        transform: translateY(0);
+    }
+
+    .matches-filter-panel {
+        position: relative;
+        max-height: min(75vh, 620px);
+        overflow: auto;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -16px 40px rgba(15, 23, 42, 0.18);
+    }
+
+    .matches-filter-mobile-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.65rem;
+    }
+
+    .matches-filter-close {
+        min-height: 40px;
+        padding: 0.25rem 0.65rem;
+        border: 1px solid var(--dash-line);
+        border-radius: 9px;
+        background: #fff;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .matches-filter-backdrop.is-open {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 70;
+        background: rgba(15, 23, 42, 0.36);
+    }
+
+    body.matches-filter-open {
+        overflow: hidden;
+    }
+
+    .dashboard-match-card {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-match-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .dashboard-match-actions .btn {
+        flex: 1;
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 768px) {
+    .dash-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .dash-profile-aside {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .dash-bottom-grid,
+    .company-insights-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-matches-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dashboard-matches-header-actions > * {
+        flex: 1;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .company-compact-item {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .company-review-link {
+        grid-column: 2;
+        justify-self: start;
+    }
+
+    .applications-toolbar {
+        flex-direction: column;
+    }
+
+    .dash-recent-app {
+        grid-template-columns: 1fr;
+    }
+
+    .dash-recent-app-actions {
+        flex-direction: row;
+    }
+
+    .dash-recent-app-actions .btn {
+        flex: 1;
+    }
+}
+</style>

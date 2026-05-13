@@ -1,4 +1,4 @@
-<div class="person-card" data-id="{{id}}">
+<div class="person-card" data-id="{{id}}" role="listitem">
     <div class="person-avatar">
         {{#if avatarInitials}}
             <div class="avatar-placeholder">{{avatarInitials}}</div>
@@ -12,20 +12,30 @@
             {{#if isCompany}}
                 <span class="badge badge-primary">Company</span>
             {{else}}
-                <span class="badge badge-secondary">{{availability}}</span>
+                {{#if availability}}
+                    <span class="badge badge-secondary">{{availability}}</span>
+                {{/if}}
             {{/if}}
         </div>
         <p class="person-headline">{{headline}}</p>
         <p class="person-location">{{location}}</p>
+        {{#if isCompany}}
         <div class="person-meta">
-            {{#if isCompany}}
-                <span class="meta-item">{{employeeCount}} employees</span>
-                <span class="meta-item">Est. {{yearEstablished}}</span>
-            {{else}}
-                <span class="meta-item">{{experience}} years exp.</span>
-                <span class="meta-item">{{connectionCount}} connections</span>
+            <span class="meta-item">{{employeeCount}} employees</span>
+            <span class="meta-item">Est. {{yearEstablished}}</span>
+        </div>
+        {{else}}
+        {{#if showPersonMeta}}
+        <div class="person-meta">
+            {{#if showExperience}}
+            <span class="meta-item">{{experience}} years exp.</span>
+            {{/if}}
+            {{#if showConnections}}
+            <span class="meta-item">{{connectionCount}} connections</span>
             {{/if}}
         </div>
+        {{/if}}
+        {{/if}}
         {{#if skills}}
             <div class="person-skills">
                 {{{skillsHtml}}}

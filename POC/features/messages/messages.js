@@ -11,47 +11,68 @@ async function initMessages(params) {
         return;
     }
 
-    const threadEmpty = document.getElementById('thread-empty');
-    const threadView = document.getElementById('thread-view');
-    const partnerId = params?.id;
-
-    if (partnerId) {
-        const connectionStatus = await dataService.getConnectionStatus(currentUser.id, partnerId);
-        const connected = connectionStatus === 'accepted';
-        currentPartnerId = partnerId;
-        threadEmpty.style.display = 'none';
-        threadView.style.display = 'flex';
-        setupThreadBack();
-
-        if (!connected) {
-            const partner = await dataService.getUserOrCompanyById(partnerId);
-            const partnerName = partner?.profile?.name || partner?.profile?.companyName || partner?.email || 'this person';
-            const threadMessages = document.getElementById('thread-messages');
-            const messageForm = document.getElementById('message-form');
-            const threadHeaderName = document.getElementById('thread-partner-name');
-            if (threadHeaderName) threadHeaderName.textContent = partnerName;
-            if (threadMessages) {
-                threadMessages.innerHTML = '<div class="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-900"><p class="font-medium">Connect to message</p><p class="text-sm mt-1">You must be connected with ' + escapeHtml(partnerName) + ' to send messages.</p><a href="#" data-route="/people/' + (partnerId || '').replace(/"/g, '&quot;') + '" class="inline-block mt-3 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-dark no-underline">View profile &amp; send connection request</a></div>';
+    try {
+        const headerMount = document.getElementById('page-context-header-mount');
+        if (headerMount && window.pageContextHeader && window.pageContextHeader.PRESETS) {
+            window.pageContextHeader.mount(headerMount, window.pageContextHeader.PRESETS.messages);
+        }
+        document.getElementById('page-cta-messages-unread')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            const firstUnread = document.querySelector('.conversation-item .conversation-unread')?.closest('.conversation-item');
+            if (firstUnread) {
+                firstUnread.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                firstUnread.click();
+            } else {
+                document.getElementById('conversations-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-            if (messageForm) messageForm.style.display = 'none';
-            await renderConversationsList(partnerId);
-            return;
+        });
+
+        const threadEmpty = document.getElementById('thread-empty');
+        const threadView = document.getElementById('thread-view');
+        const partnerId = params?.id;
+
+        if (partnerId) {
+            const connectionStatus = await dataService.getConnectionStatus(currentUser.id, partnerId);
+            const connected = connectionStatus === 'accepted';
+            currentPartnerId = partnerId;
+            threadEmpty.style.display = 'none';
+            threadView.style.display = 'flex';
+            setupThreadBack();
+
+            if (!connected) {
+                const partner = await dataService.getUserOrCompanyById(partnerId);
+                const partnerName = partner?.profile?.name || partner?.profile?.companyName || partner?.email || 'this person';
+                const threadMessages = document.getElementById('thread-messages');
+                const messageForm = document.getElementById('message-form');
+                const threadHeaderName = document.getElementById('thread-partner-name');
+                if (threadHeaderName) threadHeaderName.textContent = partnerName;
+                if (threadMessages) {
+                    threadMessages.innerHTML = '<div class="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-900"><p class="font-medium">Connect to message</p><p class="text-sm mt-1">You must be connected with ' + escapeHtml(partnerName) + ' to send messages.</p><a href="#" data-route="/people/' + (partnerId || '').replace(/"/g, '&quot;') + '" class="inline-block mt-3 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-dark no-underline">View profile &amp; send connection request</a></div>';
+                }
+                if (messageForm) messageForm.style.display = 'none';
+                await renderConversationsList(partnerId);
+                return;
+            }
+
+            const threadHeaderName = document.getElementById('thread-partner-name');
+            if (threadHeaderName) {
+                const partner = await dataService.getUserOrCompanyById(partnerId);
+                threadHeaderName.textContent = partner?.profile?.name || partner?.profile?.companyName || partner?.email || 'Unknown';
+            }
+            await loadThread(partnerId);
+            setupMessageForm(partnerId);
+        } else {
+            currentPartnerId = null;
+            threadEmpty.style.display = 'flex';
+            threadView.style.display = 'none';
         }
 
-        const threadHeaderName = document.getElementById('thread-partner-name');
-        if (threadHeaderName) {
-            const partner = await dataService.getUserOrCompanyById(partnerId);
-            threadHeaderName.textContent = partner?.profile?.name || partner?.profile?.companyName || partner?.email || 'Unknown';
+        await renderConversationsList(partnerId);
+    } finally {
+        if (typeof layoutService !== 'undefined' && typeof layoutService.updateNavigation === 'function') {
+            void layoutService.updateNavigation();
         }
-        await loadThread(partnerId);
-        setupMessageForm(partnerId);
-    } else {
-        currentPartnerId = null;
-        threadEmpty.style.display = 'flex';
-        threadView.style.display = 'none';
     }
-
-    await renderConversationsList(partnerId);
 }
 
 function setupThreadBack() {
@@ -127,6 +148,7 @@ async function loadThread(partnerId) {
 
     const messages = await dataService.getMessagesBetween(currentUser.id, partnerId);
     await dataService.markMessagesAsRead(partnerId, currentUser.id);
+    await dataService.markMessageNotificationsReadForPartner(currentUser.id, partnerId);
 
     const container = document.getElementById('thread-messages');
     if (!container) return;
@@ -196,6 +218,9 @@ function setupMessageForm(partnerId) {
             if (submitBtn) submitBtn.disabled = false;
             await loadThread(partnerId);
             await renderConversationsList(partnerId);
+            if (typeof layoutService !== 'undefined' && typeof layoutService.updateNavigation === 'function') {
+                void layoutService.updateNavigation();
+            }
             newInput.focus();
         } catch (err) {
             console.error('Send message error:', err);

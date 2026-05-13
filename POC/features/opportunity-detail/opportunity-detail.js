@@ -1724,6 +1724,15 @@ function generateTaskBidding(opportunity, existingApplication = null) {
     
     const taskTitle = modelSpecificData.taskTitle || 'Main Task';
     const taskScope = modelSpecificData.detailedScope || '';
+    const packages = Array.isArray(opportunity.projectTasks) ? opportunity.projectTasks.filter(p => p && p.title) : [];
+    const packagesHtml = packages.length
+        ? `<div class="mb-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+            <div class="text-sm font-semibold text-slate-800 mb-2">Work packages (same opportunity)</div>
+            <ul class="list-disc pl-5 space-y-2 text-sm text-slate-700">
+                ${packages.map(p => `<li><strong>${escapeHtml(p.title)}</strong>${p.duration ? ` · ${escapeHtml(p.duration)} days` : ''}${p.notes ? `<div class="text-slate-600 mt-0.5">${escapeHtml(p.notes)}</div>` : ''}</li>`).join('')}
+            </ul>
+           </div>`
+        : '';
     // Budget range is now in exchangeData, fall back to modelSpecificData for backwards compatibility
     const budgetRange = opportunity.exchangeData?.budgetRange || modelSpecificData.budgetRange;
     const budgetMin = budgetRange?.min || 0;
@@ -1734,6 +1743,7 @@ function generateTaskBidding(opportunity, existingApplication = null) {
     const existingBidComments = existingApplication?.responses?.taskBidComments || '';
     
     container.innerHTML = `
+        ${packagesHtml}
         <div class="task-bid-item">
             <div class="task-header">
                 <div class="task-title">${escapeHtml(taskTitle)}</div>

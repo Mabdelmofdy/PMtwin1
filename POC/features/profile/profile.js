@@ -54,22 +54,61 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
+/** While editing Basic: null = keep existing photo, string = new data URL, false = remove */
+let pendingProfilePhotoDataUrl = null;
+let profilePhotoControlsAttached = false;
+
+function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = () => reject(new Error('read failed'));
+        r.readAsDataURL(file);
+    });
+}
+
+/** Hero avatar — keeps classes aligned with profile page layout (.profile-photo-placeholder.profile-hero-avatar) */
+function updateProfilePhotoElement(photoEl, profile) {
+    if (!photoEl) return;
+    const raw = profile?.photoUrl;
+    const url = raw != null && String(raw).trim();
+    const name = profile?.name || '';
+    const initials = name.split(/\s+/).filter(Boolean).map(s => s[0]).slice(0, 2).join('').toUpperCase() || '?';
+    photoEl.replaceChildren();
+    if (url) {
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = name ? `Photo of ${name}` : 'Profile photo';
+        img.className = 'profile-avatar-img';
+        img.loading = 'lazy';
+        photoEl.appendChild(img);
+    } else {
+        photoEl.textContent = initials;
+    }
+    photoEl.className = 'profile-photo-placeholder profile-hero-avatar';
+}
+
 /** Social media icon SVGs (24x24, currentColor). */
 const SOCIAL_ICONS = {
     linkedin: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>',
     twitter: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
     facebook: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>',
-    instagram: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.441 1.441 1.441 1.441-.646 1.441-1.441-.645-1.44-1.441-1.44z"/></svg>'
+    instagram: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.441 1.441 1.441 1.441-.646 1.441-1.441-.645-1.44-1.441-1.44z"/></svg>',
+    website: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>'
 };
-const SOCIAL_LABELS = { linkedin: 'LinkedIn', twitter: 'Twitter', facebook: 'Facebook', instagram: 'Instagram' };
+const SOCIAL_LABELS = { linkedin: 'LinkedIn', twitter: 'Twitter', facebook: 'Facebook', instagram: 'Instagram', website: 'Website' };
 
-function getSocialIconsHtml(sm) {
-    if (!sm) return '';
+/** @param {object} [sm] */
+/** @param {string} [profileWebsite] — main site URL when not stored under socialMediaLinks */
+function getSocialIconsHtml(sm, profileWebsite) {
+    const websiteUrl = (sm && sm.website) || profileWebsite;
+    if (!sm && !websiteUrl) return '';
     const items = [
-        { key: 'linkedin', url: sm.linkedin },
-        { key: 'twitter', url: sm.twitter },
-        { key: 'facebook', url: sm.facebook },
-        { key: 'instagram', url: sm.instagram }
+        { key: 'linkedin', url: sm && sm.linkedin },
+        { key: 'twitter', url: sm && sm.twitter },
+        { key: 'facebook', url: sm && sm.facebook },
+        { key: 'instagram', url: sm && sm.instagram },
+        { key: 'website', url: websiteUrl }
     ].filter(x => x.url);
     if (items.length === 0) return '';
     return '<div class="social-icons flex flex-wrap gap-3 items-center">' + items.map(item =>
@@ -188,17 +227,37 @@ function renderReferencesList(containerId, refs) {
     const container = document.getElementById(containerId);
     if (!container) return;
     container.innerHTML = '';
+    container.classList.add('profile-ref-list');
     (refs || []).forEach((r, i) => {
-        const row = document.createElement('div');
-        row.className = 'flex flex-wrap gap-2 items-start border border-gray-200 rounded p-2 reference-row';
+        const row = document.createElement('article');
+        row.className = 'profile-ref-card reference-row';
         row.innerHTML = `
-            <input type="text" class="ref-name form-input flex-1 min-w-[100px]" placeholder="Reference name" value="${escapeHtml(r.name || '')}">
-            <input type="text" class="ref-company form-input flex-1 min-w-[100px]" placeholder="Company" value="${escapeHtml(r.company || '')}">
-            <input type="text" class="ref-relationship form-input flex-1 min-w-[100px]" placeholder="Relationship" value="${escapeHtml(r.relationship || r.role || '')}">
-            <input type="text" class="ref-contact form-input flex-1 min-w-[120px]" placeholder="Contact (optional)" value="${escapeHtml(r.contact || '')}">
-            <textarea class="ref-text form-input flex-1 min-w-[180px]" rows="2" placeholder="Testimonial">${escapeHtml(r.text || r.testimonial || '')}</textarea>
-            <button type="button" class="ref-remove btn btn-ghost btn-sm">Remove</button>
-        `;
+            <div class="profile-ref-card-top">
+                <span class="profile-ref-card-badge">Reference ${i + 1}</span>
+                <button type="button" class="btn btn-ghost btn-sm ref-remove profile-ref-remove">Remove</button>
+            </div>
+            <div class="profile-ref-fields">
+                <div class="form-group profile-ref-field">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="ref-name form-input" placeholder="Full name" value="${escapeHtml(r.name || '')}">
+                </div>
+                <div class="form-group profile-ref-field">
+                    <label class="form-label">Company</label>
+                    <input type="text" class="ref-company form-input" placeholder="Organization" value="${escapeHtml(r.company || '')}">
+                </div>
+                <div class="form-group profile-ref-field">
+                    <label class="form-label">Relationship</label>
+                    <input type="text" class="ref-relationship form-input" placeholder="e.g. Former manager" value="${escapeHtml(r.relationship || r.role || '')}">
+                </div>
+                <div class="form-group profile-ref-field">
+                    <label class="form-label">Contact</label>
+                    <input type="text" class="ref-contact form-input" placeholder="Email or phone (optional)" value="${escapeHtml(r.contact || '')}">
+                </div>
+            </div>
+            <div class="form-group profile-ref-testimonial-wrap">
+                <label class="form-label">Testimonial</label>
+                <textarea class="ref-text form-input profile-ref-textarea" rows="3" placeholder="Brief quote or endorsement">${escapeHtml(r.text || r.testimonial || '')}</textarea>
+            </div>`;
         row.querySelector('.ref-remove').addEventListener('click', () => row.remove());
         container.appendChild(row);
     });
@@ -209,16 +268,36 @@ function setupReferenceAddButton(btnId, listId) {
     const list = document.getElementById(listId);
     if (!btn || !list) return;
     btn.onclick = () => {
-        const row = document.createElement('div');
-        row.className = 'flex flex-wrap gap-2 items-start border border-gray-200 rounded p-2 reference-row';
+        const n = list.querySelectorAll('.reference-row').length;
+        const row = document.createElement('article');
+        row.className = 'profile-ref-card reference-row';
         row.innerHTML = `
-            <input type="text" class="ref-name form-input flex-1 min-w-[100px]" placeholder="Reference name">
-            <input type="text" class="ref-company form-input flex-1 min-w-[100px]" placeholder="Company">
-            <input type="text" class="ref-relationship form-input flex-1 min-w-[100px]" placeholder="Relationship">
-            <input type="text" class="ref-contact form-input flex-1 min-w-[120px]" placeholder="Contact (optional)">
-            <textarea class="ref-text form-input flex-1 min-w-[180px]" rows="2" placeholder="Testimonial"></textarea>
-            <button type="button" class="ref-remove btn btn-ghost btn-sm">Remove</button>
-        `;
+            <div class="profile-ref-card-top">
+                <span class="profile-ref-card-badge">Reference ${n + 1}</span>
+                <button type="button" class="btn btn-ghost btn-sm ref-remove profile-ref-remove">Remove</button>
+            </div>
+            <div class="profile-ref-fields">
+                <div class="form-group profile-ref-field">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="ref-name form-input" placeholder="Full name">
+                </div>
+                <div class="form-group profile-ref-field">
+                    <label class="form-label">Company</label>
+                    <input type="text" class="ref-company form-input" placeholder="Organization">
+                </div>
+                <div class="form-group profile-ref-field">
+                    <label class="form-label">Relationship</label>
+                    <input type="text" class="ref-relationship form-input" placeholder="e.g. Former manager">
+                </div>
+                <div class="form-group profile-ref-field">
+                    <label class="form-label">Contact</label>
+                    <input type="text" class="ref-contact form-input" placeholder="Email or phone (optional)">
+                </div>
+            </div>
+            <div class="form-group profile-ref-testimonial-wrap">
+                <label class="form-label">Testimonial</label>
+                <textarea class="ref-text form-input profile-ref-textarea" rows="3" placeholder="Brief quote or endorsement"></textarea>
+            </div>`;
         row.querySelector('.ref-remove').addEventListener('click', () => row.remove());
         list.appendChild(row);
     };
@@ -650,6 +729,31 @@ function getVerificationBadgesFullHtml(profile) {
     return html;
 }
 
+function mountProfilePageHeader(user) {
+    const mount = document.getElementById('page-context-header-mount');
+    if (!mount || !window.pageContextHeader || !user?.id) return;
+    const isCompany = typeof authService.isCompanyUser === 'function' && authService.isCompanyUser();
+    const label = isCompany ? 'Company Profile' : 'Your Profile';
+    const description = isCompany
+        ? 'Update your company information, services, skills, and profile visibility.'
+        : 'Update how you appear to others, your skills, services, and profile visibility.';
+    window.pageContextHeader.mount(mount, {
+        label,
+        title: 'Profile Settings',
+        description,
+        primaryAction: { label: 'Save Changes', id: 'page-header-profile-save', type: 'button' },
+        secondaryAction: { label: 'Preview Profile', route: '/people/' + user.id }
+    });
+    const saveBtn = document.getElementById('page-header-profile-save');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            document.getElementById('profile-shell')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const tab = document.querySelector('.profile-tab[data-tab="profile"]');
+            if (tab) tab.click();
+        });
+    }
+}
+
 /**
  * Profile page init: data comes from the data service (localStorage), not directly from JSON files.
  * The data service (data-service.js) is populated from users.json / companies.json and from demo JSON
@@ -707,6 +811,7 @@ async function initProfile() {
             await loadProfile(user);
         }
     }
+    mountProfilePageHeader(user);
     await loadProfileStats(user.id);
     await loadCompanyAffiliation(user);
     await loadReputation(user.id);
@@ -720,7 +825,7 @@ async function initProfile() {
     // Read-only demo: disable profile edits for pending users
     if (authService.isPendingApproval && authService.isPendingApproval()) {
         const msg = 'Action disabled until your account is approved.';
-        document.querySelectorAll('#matching-preferences-save, #company-profile-edit-btn, .profile-edit-section-btn, #profile-edit-professional-btn, #profile-edit-basic-btn, #profile-edit-skills-btn, #profile-edit-certifications-btn, #profile-edit-experience-btn, #profile-edit-portfolio-btn, #profile-edit-references-btn, #profile-edit-preferences-btn, #team-add-member-btn').forEach(el => {
+        document.querySelectorAll('#matching-preferences-save, #company-profile-edit-btn, #page-header-profile-save, #page-context-header-mount a.btn, .profile-edit-section-btn, #profile-edit-professional-btn, #profile-edit-basic-btn, #profile-edit-skills-btn, #profile-edit-certifications-btn, #profile-edit-experience-btn, #profile-edit-portfolio-btn, #profile-edit-references-btn, #profile-edit-preferences-btn, #team-add-member-btn').forEach(el => {
             if (el) {
                 el.disabled = true;
                 el.setAttribute('title', msg);
@@ -1159,7 +1264,8 @@ function getProfessionalCompleteness(profile) {
     const hasSpec = Array.isArray(profile?.specializations) ? profile.specializations.length > 0 : !!profile?.specializations;
     const hasSkills = Array.isArray(profile?.skills) ? profile.skills.length > 0 : !!profile?.skills;
     const hasCert = Array.isArray(profile?.certifications) ? profile.certifications.length > 0 : !!profile?.certifications;
-    const hasExp = (profile?.yearsExperience != null && profile?.yearsExperience !== '') || (profile?.experience != null && profile?.experience !== '');
+    const hasExp = (profile?.yearsExperience != null && profile?.yearsExperience !== '') || (profile?.experience != null && profile?.experience !== '') ||
+        (Array.isArray(profile?.experienceEntries) && profile.experienceEntries.length > 0);
     const hasHeadline = !!profile?.headline;
     const hasLocation = !!profile?.location;
     const hasWorkMode = !!profile?.preferredWorkMode;
@@ -1175,41 +1281,39 @@ function getProfessionalCompleteness(profile) {
 }
 
 function getCompletenessNextSteps(profile, isCompany) {
-    const hashCompany = '#company-profile-card';
-    const hashPro = '#profile-section-professional';
-    const hashBasic = '#profile-section-basic';
-    const hashPortfolio = '#profile-section-portfolio';
-    const hashRefs = '#profile-section-references';
+    const companyAction = () => ({ action: 'company' });
+    const sectionAction = section => ({ action: 'section', section });
     const steps = [];
     if (isCompany) {
-        if (!profile?.name) steps.push({ label: 'Add company name', hash: hashCompany });
-        if (!(profile?.crNumber || profile?.registrationNumber)) steps.push({ label: 'Add CR / registration number', hash: hashCompany });
+        if (!profile?.name) steps.push({ label: 'Add company name', ...companyAction() });
+        if (!(profile?.crNumber || profile?.registrationNumber)) steps.push({ label: 'Add CR / registration number', ...companyAction() });
         const hasSectors = (Array.isArray(profile?.sectors) ? profile.sectors.length : parseArray(profile?.sectors).length) > 0;
         const hasClassifications = (Array.isArray(profile?.classifications) ? profile.classifications.length : parseArray(profile?.classifications).length) > 0;
-        if (!hasSectors && !hasClassifications) steps.push({ label: 'Add sectors or classifications', hash: hashCompany });
-        if ((profile?.financialCapacity == null || profile?.financialCapacity === '') || Number(profile?.financialCapacity) < 0) steps.push({ label: 'Add financial capacity', hash: hashCompany });
-        if (!profile?.companyRole) steps.push({ label: 'Select company role', hash: hashCompany });
-        if ((Array.isArray(profile?.preferredPaymentModes) ? profile.preferredPaymentModes.length : 0) === 0) steps.push({ label: 'Add preferred payment modes', hash: hashCompany });
-        if ((Array.isArray(profile?.preferredCollaborationModels) ? profile.preferredCollaborationModels.length : 0) === 0) steps.push({ label: 'Add collaboration models', hash: hashCompany });
-        if ((Array.isArray(profile?.caseStudies) ? profile.caseStudies.length : 0) === 0) steps.push({ label: 'Add at least one case study', hash: hashCompany });
-        if ((Array.isArray(profile?.references) ? profile.references.length : 0) === 0) steps.push({ label: 'Add references', hash: hashCompany });
-        if (!profile?.primaryDomain && (!Array.isArray(profile?.expertiseAreas) || profile.expertiseAreas.length === 0)) steps.push({ label: 'Add primary domain or expertise areas', hash: hashCompany });
+        if (!hasSectors && !hasClassifications) steps.push({ label: 'Add sectors or classifications', ...companyAction() });
+        if ((profile?.financialCapacity == null || profile?.financialCapacity === '') || Number(profile?.financialCapacity) < 0) steps.push({ label: 'Add financial capacity', ...companyAction() });
+        if (!profile?.companyRole) steps.push({ label: 'Select company role', ...companyAction() });
+        if ((Array.isArray(profile?.preferredPaymentModes) ? profile.preferredPaymentModes.length : 0) === 0) steps.push({ label: 'Add preferred payment modes', ...companyAction() });
+        if ((Array.isArray(profile?.preferredCollaborationModels) ? profile.preferredCollaborationModels.length : 0) === 0) steps.push({ label: 'Add collaboration models', ...companyAction() });
+        if ((Array.isArray(profile?.caseStudies) ? profile.caseStudies.length : 0) === 0) steps.push({ label: 'Add at least one case study', ...companyAction() });
+        if ((Array.isArray(profile?.references) ? profile.references.length : 0) === 0) steps.push({ label: 'Add references', ...companyAction() });
+        if (!profile?.primaryDomain && (!Array.isArray(profile?.expertiseAreas) || profile.expertiseAreas.length === 0)) steps.push({ label: 'Add primary domain or expertise areas', ...companyAction() });
     } else {
-        if (!profile?.name) steps.push({ label: 'Add your name', hash: hashBasic });
+        if (!profile?.name) steps.push({ label: 'Add your name', ...sectionAction('basic') });
         const hasSpec = Array.isArray(profile?.specializations) ? profile.specializations.length > 0 : !!profile?.specializations;
         const hasSkills = Array.isArray(profile?.skills) ? profile.skills.length > 0 : !!profile?.skills;
-        if (!hasSpec && !hasSkills) steps.push({ label: 'Add specializations or skills', hash: hashPro });
-        if ((Array.isArray(profile?.certifications) ? profile.certifications.length : 0) === 0) steps.push({ label: 'Add certifications', hash: hashPro });
-        const hasExp = (profile?.yearsExperience != null && profile?.yearsExperience !== '') || (profile?.experience != null && profile?.experience !== '');
-        if (!hasExp) steps.push({ label: 'Add years of experience', hash: hashPro });
-        if (!profile?.headline) steps.push({ label: 'Add headline', hash: hashBasic });
-        if (!profile?.location) steps.push({ label: 'Add location', hash: hashBasic });
-        if (!profile?.preferredWorkMode) steps.push({ label: 'Select preferred work mode', hash: hashPro });
-        if ((Array.isArray(profile?.preferredPaymentModes) ? profile.preferredPaymentModes.length : 0) === 0) steps.push({ label: 'Add payment modes', hash: hashPro });
-        if ((Array.isArray(profile?.preferredCollaborationModels) ? profile.preferredCollaborationModels.length : 0) === 0) steps.push({ label: 'Add collaboration models', hash: hashPro });
-        if ((Array.isArray(profile?.caseStudies) ? profile.caseStudies.length : 0) === 0) steps.push({ label: 'Add at least one case study', hash: hashPortfolio });
-        if ((Array.isArray(profile?.references) ? profile.references.length : 0) === 0) steps.push({ label: 'Add references', hash: hashRefs });
-        if (!profile?.primaryDomain && (!Array.isArray(profile?.expertiseAreas) || profile.expertiseAreas.length === 0)) steps.push({ label: 'Add primary domain or expertise areas', hash: hashPro });
+        if (!hasSpec && !hasSkills) steps.push({ label: 'Add specializations or skills', ...sectionAction('skills') });
+        if ((Array.isArray(profile?.certifications) ? profile.certifications.length : 0) === 0) steps.push({ label: 'Add certifications', ...sectionAction('certifications') });
+        const hasExp = (profile?.yearsExperience != null && profile?.yearsExperience !== '') || (profile?.experience != null && profile?.experience !== '') ||
+            (Array.isArray(profile?.experienceEntries) && profile.experienceEntries.length > 0);
+        if (!hasExp) steps.push({ label: 'Add years of experience', ...sectionAction('experience') });
+        if (!profile?.headline) steps.push({ label: 'Add headline', ...sectionAction('basic') });
+        if (!profile?.location) steps.push({ label: 'Add location', ...sectionAction('basic') });
+        if (!profile?.preferredWorkMode) steps.push({ label: 'Select preferred work mode', ...sectionAction('professional') });
+        if ((Array.isArray(profile?.preferredPaymentModes) ? profile.preferredPaymentModes.length : 0) === 0) steps.push({ label: 'Add payment modes', ...sectionAction('professional') });
+        if ((Array.isArray(profile?.preferredCollaborationModels) ? profile.preferredCollaborationModels.length : 0) === 0) steps.push({ label: 'Add collaboration models', ...sectionAction('professional') });
+        if ((Array.isArray(profile?.caseStudies) ? profile.caseStudies.length : 0) === 0) steps.push({ label: 'Add at least one case study', ...sectionAction('portfolio') });
+        if ((Array.isArray(profile?.references) ? profile.references.length : 0) === 0) steps.push({ label: 'Add references', ...sectionAction('references') });
+        if (!profile?.primaryDomain && (!Array.isArray(profile?.expertiseAreas) || profile.expertiseAreas.length === 0)) steps.push({ label: 'Add primary domain or expertise areas', ...sectionAction('professional') });
     }
     return steps.slice(0, 5);
 }
@@ -1242,6 +1346,10 @@ function renderCompleteness(profile, isCompany) {
     const result = isCompany ? getCompanyCompleteness(profile) : (getProfileCompletionSix(profile).percent !== undefined ? getProfileCompletionSix(profile) : getProfessionalCompleteness(profile));
     const pct = typeof result.percent === 'number' ? result.percent : (result.percent != null ? result.percent : 0);
     barEl.style.width = pct + '%';
+    const trackEl = barEl.parentElement;
+    if (trackEl && trackEl.getAttribute('role') === 'progressbar') {
+        trackEl.setAttribute('aria-valuenow', String(pct));
+    }
     if (percentEl) percentEl.textContent = pct + '%';
     renderProfileStrengthChecklist(profile, isCompany);
 }
@@ -1287,12 +1395,27 @@ function renderRecommendedActions(profile, isCompany) {
         return;
     }
     if (emptyEl) emptyEl.style.display = 'none';
-    listEl.innerHTML = steps.slice(0, 5).map(s => `<li><a href="${escapeHtml(s.hash || '#')}" class="text-primary hover:underline">${escapeHtml(s.label)}</a></li>`).join('');
-    listEl.querySelectorAll('a[href^="#"]').forEach(a => {
-        a.addEventListener('click', (e) => {
-            e.preventDefault();
-            const id = (a.getAttribute('href') || '').replace('#', '');
-            if (id) document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    listEl.innerHTML = steps.slice(0, 5).map(s => {
+        if (s.action === 'company') {
+            return `<li><button type="button" class="profile-reco-action">${escapeHtml(s.label)}</button></li>`;
+        }
+        const sec = escapeHtml(s.section || '');
+        return `<li><button type="button" class="profile-reco-action" data-reco-section="${sec}">${escapeHtml(s.label)}</button></li>`;
+    }).join('');
+    listEl.querySelectorAll('button.profile-reco-action').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const uid = authService.getCurrentUser()?.id;
+            if (!uid) return;
+            const section = btn.getAttribute('data-reco-section');
+            if (!section) {
+                document.getElementById('company-profile-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                showCompanyEdit();
+                return;
+            }
+            openSectionEdit(section, uid);
+            requestAnimationFrame(() => {
+                document.querySelector('.profile-section-card[data-section="' + section + '"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
         });
     });
 }
@@ -1340,7 +1463,7 @@ function renderProfileHeader(user, profile, isCompany) {
         const skills = Array.isArray(profile?.skills) ? profile.skills : [];
         const preview = skills.slice(0, 5);
         if (preview.length === 0) {
-            skillsPreviewEl.innerHTML = '<span class="text-gray-400 text-sm">Add skills in your profile</span>';
+            skillsPreviewEl.innerHTML = '<span class="profile-helper-text">Add skills in your profile</span>';
         } else {
             skillsPreviewEl.innerHTML = preview.map(s => `<span class="skill-tag">${escapeHtml(s)}</span>`).join('');
         }
@@ -1363,6 +1486,8 @@ function renderProfileHeader(user, profile, isCompany) {
         };
         if (isCompany) addPortfolioBtn.style.display = 'none';
     }
+    const headerPhoto = document.getElementById('profile-photo-placeholder');
+    if (headerPhoto) updateProfilePhotoElement(headerPhoto, profile);
 }
 
 function renderProfilePortfolioCards(profile) {
@@ -1525,7 +1650,7 @@ function setCompanyViewMode(profile) {
     setCompanyViewFieldOrAdd('view-company-description', profile?.description, 'description');
     const socialEl = document.getElementById('view-company-socialMedia');
     if (socialEl) {
-        const socialHtml = getSocialIconsHtml(profile?.socialMediaLinks);
+        const socialHtml = getSocialIconsHtml(profile?.socialMediaLinks, profile?.website);
         socialEl.innerHTML = socialHtml || getProfileAddPromptHtml('social media', '#company-profile-card');
     }
     const sectorsVal = formatArray(profile?.sectors);
@@ -1632,17 +1757,7 @@ function setProfessionalViewMode(profile) {
 
     setViewFieldOrAdd('view-full-name', profile?.name, 'Name', 'basic');
     const photoPlaceholder = document.getElementById('profile-photo-placeholder');
-    if (photoPlaceholder) {
-        if (profile?.photoUrl) {
-            photoPlaceholder.innerHTML = `<img src="${escapeHtml(profile.photoUrl)}" alt="Profile" class="w-full h-full rounded-full object-cover">`;
-            photoPlaceholder.classList.remove('bg-primary/10', 'text-primary', 'flex', 'items-center', 'justify-center', 'text-2xl', 'font-bold');
-        } else {
-            const name = profile?.name || '';
-            const initials = name.split(/\s+/).map(s => s[0]).slice(0, 2).join('').toUpperCase() || '?';
-            photoPlaceholder.textContent = initials;
-            photoPlaceholder.className = 'profile-photo-placeholder w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary flex-shrink-0';
-        }
-    }
+    updateProfilePhotoElement(photoPlaceholder, profile);
     setViewFieldOrAdd('view-prof-headline', profile?.headline, 'Headline', 'basic');
     setViewFieldOrAdd('view-prof-title', profile?.title, 'Title', 'basic');
     setViewFieldOrAdd('view-prof-phone', profile?.phone, 'Phone', 'basic');
@@ -1663,8 +1778,8 @@ function setProfessionalViewMode(profile) {
     setViewFieldOrAdd('view-prof-bio', profile?.bio, 'Bio', 'basic');
     const profSocialEl = document.getElementById('view-prof-socialMedia');
     if (profSocialEl) {
-        const socialHtml = getSocialIconsHtml(profile?.socialMediaLinks);
-        profSocialEl.innerHTML = socialHtml || getProfileAddPromptHtml('social media', '#profile-section-basic', 'basic');
+        const socialHtml = getSocialIconsHtml(profile?.socialMediaLinks, profile?.website);
+        profSocialEl.innerHTML = socialHtml || getProfileAddPromptHtml('social links', '#profile-section-social', 'social');
     }
     setViewFieldOrAdd('view-specializations', formatArray(profile?.specializations), 'specializations', 'professional');
 
@@ -2097,10 +2212,10 @@ function populateProfilePreview(user) {
     const socialEl = document.getElementById('my-profile-preview-social');
     if (socialCard && socialEl) {
         const sm = profile.socialMediaLinks || {};
-        const hasSocial = sm.linkedin || sm.twitter || sm.facebook || sm.instagram;
+        const hasSocial = sm.linkedin || sm.twitter || sm.facebook || sm.instagram || sm.website || profile.website;
         if (hasSocial) {
             socialCard.style.display = 'block';
-            socialEl.innerHTML = getSocialIconsHtml(sm);
+            socialEl.innerHTML = getSocialIconsHtml(sm, profile.website);
         } else socialCard.style.display = 'none';
     }
 
@@ -2169,8 +2284,14 @@ async function loadProfile(user) {
     const statusEl = document.getElementById('profile-status');
     const placeholder = '\u2014'; // em dash
     if (emailEl) emailEl.value = (user.email != null && String(user.email).trim() !== '') ? String(user.email) : placeholder;
-    if (roleEl) roleEl.value = getRoleDisplayLabel(user.role) || (user.role != null ? String(user.role) : '') || placeholder;
-    if (statusEl) statusEl.value = (user.status != null && String(user.status).trim() !== '') ? String(user.status) : placeholder;
+    if (roleEl) {
+        const roleText = getRoleDisplayLabel(user.role) || (user.role != null ? String(user.role) : '') || placeholder;
+        roleEl.textContent = roleText;
+    }
+    if (statusEl) {
+        const st = (user.status != null && String(user.status).trim() !== '') ? String(user.status) : placeholder;
+        statusEl.textContent = st;
+    }
     // Verification badge (for professional/consultant only)
     const verificationGroup = document.getElementById('profile-verification-group');
     const verificationBadgeEl = document.getElementById('profile-verification-badge');
@@ -2197,7 +2318,7 @@ async function loadProfile(user) {
     }
     // Social media in Account card (always visible)
     const accountSocialEl = document.getElementById('view-account-socialMedia');
-    if (accountSocialEl) accountSocialEl.innerHTML = getSocialIconsHtml(user.profile?.socialMediaLinks);
+    if (accountSocialEl) accountSocialEl.innerHTML = getSocialIconsHtml(user.profile?.socialMediaLinks, user.profile?.website);
     // Hide success message and other card by default
     const successEl = document.getElementById('profile-success-message');
     if (successEl) successEl.classList.add('hidden');
@@ -2361,17 +2482,7 @@ async function loadProfile(user) {
         setCompanyViewMode(profile);
         renderProfileHeader(user, profile, true);
         const photoPlaceholder = document.getElementById('profile-photo-placeholder');
-        if (photoPlaceholder && profile) {
-            if (profile.photoUrl) {
-                photoPlaceholder.innerHTML = `<img src="${escapeHtml(profile.photoUrl)}" alt="Profile" class="w-full h-full rounded-full object-cover">`;
-                photoPlaceholder.classList.remove('bg-primary/10', 'text-primary', 'flex', 'items-center', 'justify-center', 'text-2xl', 'font-bold');
-            } else {
-                const name = profile.name || '';
-                const initials = name.split(/\s+/).map(s => s[0]).slice(0, 2).join('').toUpperCase() || '?';
-                photoPlaceholder.textContent = initials;
-                photoPlaceholder.className = 'profile-photo-placeholder w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary flex-shrink-0';
-            }
-        }
+        updateProfilePhotoElement(photoPlaceholder, profile);
         renderCompleteness(profile, true);
         renderRecommendedActions(profile, true);
         showCompanyView();
@@ -2560,7 +2671,7 @@ function setupInlineSectionEditing(userId) {
 }
 
 function openSectionEdit(section, userId) {
-    const tabSectionMap = { basic: 'profile', skills: 'profile', languages: 'profile', professional: 'profile', certifications: 'profile', experience: 'experience', education: 'experience', portfolio: 'portfolio', references: 'portfolio', social: 'settings' };
+    const tabSectionMap = { basic: 'profile', skills: 'profile', languages: 'profile', professional: 'profile', certifications: 'profile', social: 'profile', experience: 'experience', education: 'experience', portfolio: 'portfolio', references: 'portfolio' };
     const tabName = tabSectionMap[section];
     if (tabName) {
         const tabBtn = document.querySelector('.profile-tab[data-tab="' + tabName + '"]');
@@ -2584,6 +2695,28 @@ function openSectionEdit(section, userId) {
         setVal('inline-basic-phone', profile.phone);
         setVal('inline-basic-location', profile.location);
         setVal('inline-basic-bio', profile.bio);
+        pendingProfilePhotoDataUrl = null;
+        const fileEl = document.getElementById('inline-basic-photo');
+        if (fileEl) fileEl.value = '';
+        const prevEl = document.getElementById('inline-basic-photo-preview');
+        const rmBtn = document.getElementById('inline-basic-photo-remove');
+        const name = profile.name || '';
+        const initials = name.split(/\s+/).filter(Boolean).map(s => s[0]).slice(0, 2).join('').toUpperCase() || '?';
+        const pUrl = profile.photoUrl && String(profile.photoUrl).trim();
+            prevEl.replaceChildren();
+            if (pUrl) {
+                const img = document.createElement('img');
+                img.src = pUrl;
+                img.alt = '';
+                img.className = 'profile-inline-photo-preview-img';
+                prevEl.appendChild(img);
+            } else {
+                const span = document.createElement('span');
+                span.className = 'profile-inline-photo-placeholder';
+                span.textContent = initials;
+                prevEl.appendChild(span);
+            }
+        if (rmBtn) rmBtn.style.display = pUrl ? 'inline-block' : 'none';
     } else if (section === 'skills') {
         setVal('inline-skills', Array.isArray(profile.skills) ? profile.skills.join(', ') : (profile.skills || ''));
     } else if (section === 'languages') {
@@ -2612,7 +2745,13 @@ function openSectionEdit(section, userId) {
         setVal('inline-twitter', sm.twitter);
         setVal('inline-facebook', sm.facebook);
         setVal('inline-instagram', sm.instagram);
+        setVal('inline-website', profile.website);
     }
+    requestAnimationFrame(() => {
+        try {
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } catch (e) { /* ignore */ }
+    });
 }
 
 function closeSectionEdit(section) {
@@ -2622,63 +2761,99 @@ function closeSectionEdit(section) {
     const edit = card.querySelector('.profile-section-edit');
     if (view) view.style.display = '';
     if (edit) edit.style.display = 'none';
+    if (section === 'basic') {
+        pendingProfilePhotoDataUrl = null;
+        const fileEl = document.getElementById('inline-basic-photo');
+        if (fileEl) fileEl.value = '';
+    }
 }
 
 function populateInlinePreferencesFields(profile) {
     const container = document.getElementById('inline-preferences-fields');
     if (!container) return;
     container.innerHTML = '';
+    container.className = 'profile-prefs-form';
     fillProfessionalLookups();
     const lookups = profileLookups || {};
+    const selectedPay = profile.preferredPaymentModes || [];
+    const selModels = profile.preferredCollaborationModels || [];
+
+    const headHtml = (title, hint) => {
+        const d = document.createElement('div');
+        d.className = 'profile-pref-head';
+        d.innerHTML = '<span class="profile-pref-label">' + escapeHtml(title) + '</span><p class="profile-pref-hint">' + escapeHtml(hint) + '</p>';
+        return d;
+    };
+
+    const workWrap = document.createElement('div');
+    workWrap.className = 'profile-pref-block';
+    workWrap.appendChild(headHtml('Preferred work mode', 'How you prefer to engage on opportunities.'));
     const workModes = lookups.workModes || [];
     const workSelect = document.createElement('select');
     workSelect.id = 'inline-workMode';
-    workSelect.className = 'form-input';
+    workSelect.className = 'form-input profile-pref-select';
+    workSelect.setAttribute('aria-label', 'Preferred work mode');
     workSelect.innerHTML = '<option value="">Select work mode</option>';
-    workModes.forEach(m => { workSelect.innerHTML += '<option value="' + escapeHtml(m) + '">' + escapeHtml(m) + '</option>'; });
-    workSelect.value = profile.preferredWorkMode || '';
-    const workGroup = document.createElement('div');
-    workGroup.className = 'form-group';
-    workGroup.innerHTML = '<label class="form-label">Preferred work mode</label>';
-    workGroup.appendChild(workSelect);
-    container.appendChild(workGroup);
-
-    const paySelect = document.createElement('select');
-    paySelect.id = 'inline-paymentModes';
-    paySelect.className = 'form-input';
-    paySelect.multiple = true;
-    (lookups.paymentModes || []).forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.id;
-        opt.textContent = p.label;
-        if ((profile.preferredPaymentModes || []).indexOf(p.id) !== -1) opt.selected = true;
-        paySelect.appendChild(opt);
+    workModes.forEach(m => {
+        workSelect.innerHTML += '<option value="' + escapeHtml(m) + '">' + escapeHtml(m) + '</option>';
     });
-    const payGroup = document.createElement('div');
-    payGroup.className = 'form-group';
-    payGroup.innerHTML = '<label class="form-label">Preferred payment modes</label><small class="form-help block">Hold Ctrl/Cmd to select multiple</small>';
-    payGroup.appendChild(paySelect);
-    container.appendChild(payGroup);
+    workSelect.value = profile.preferredWorkMode || '';
+    workWrap.appendChild(workSelect);
+    container.appendChild(workWrap);
 
-    const prefWrap = document.createElement('div');
-    prefWrap.className = 'form-group';
-    prefWrap.innerHTML = '<label class="form-label">Preferred collaboration models</label>';
-    const prefBox = document.createElement('div');
-    prefBox.className = 'flex flex-wrap gap-2';
-    getPreferredCollaborationModelsList().forEach(m => {
-        const label = document.createElement('label');
-        label.className = 'inline-flex items-center gap-1 cursor-pointer';
+    const payWrap = document.createElement('div');
+    payWrap.className = 'profile-pref-block';
+    payWrap.appendChild(headHtml('Preferred payment modes', 'Tap one or more — no keyboard shortcuts needed.'));
+    const payGrid = document.createElement('div');
+    payGrid.className = 'profile-choice-grid profile-choice-grid--payments';
+    payGrid.setAttribute('role', 'group');
+    payGrid.setAttribute('aria-label', 'Payment modes');
+    (lookups.paymentModes || []).forEach((p, idx) => {
+        const lab = document.createElement('label');
+        lab.className = 'profile-choice-card';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.name = 'inlinePaymentModes';
+        cb.value = p.id;
+        cb.className = 'profile-choice-input';
+        cb.id = 'inline-pay-' + idx + '-' + String(p.id).replace(/[^a-z0-9_-]/gi, '');
+        if (selectedPay.indexOf(p.id) !== -1) cb.checked = true;
+        const ui = document.createElement('span');
+        ui.className = 'profile-choice-ui';
+        ui.textContent = p.label;
+        lab.appendChild(cb);
+        lab.appendChild(ui);
+        payGrid.appendChild(lab);
+    });
+    payWrap.appendChild(payGrid);
+    container.appendChild(payWrap);
+
+    const collabWrap = document.createElement('div');
+    collabWrap.className = 'profile-pref-block';
+    collabWrap.appendChild(headHtml('Preferred collaboration models', 'Choose every model you are open to.'));
+    const collabGrid = document.createElement('div');
+    collabGrid.className = 'profile-choice-grid profile-choice-grid--collab';
+    collabGrid.setAttribute('role', 'group');
+    collabGrid.setAttribute('aria-label', 'Collaboration models');
+    getPreferredCollaborationModelsList().forEach((m, idx) => {
+        const lab = document.createElement('label');
+        lab.className = 'profile-choice-card';
         const cb = document.createElement('input');
         cb.type = 'checkbox';
         cb.name = 'inlinePreferredModels';
         cb.value = m.id;
-        if ((profile.preferredCollaborationModels || []).indexOf(m.id) !== -1) cb.checked = true;
-        label.appendChild(cb);
-        label.appendChild(document.createTextNode(m.label));
-        prefBox.appendChild(label);
+        cb.className = 'profile-choice-input';
+        cb.id = 'inline-collab-' + idx + '-' + String(m.id).replace(/[^a-z0-9_-]/gi, '');
+        if (selModels.indexOf(m.id) !== -1) cb.checked = true;
+        const ui = document.createElement('span');
+        ui.className = 'profile-choice-ui';
+        ui.textContent = m.label;
+        lab.appendChild(cb);
+        lab.appendChild(ui);
+        collabGrid.appendChild(lab);
     });
-    prefWrap.appendChild(prefBox);
-    container.appendChild(prefWrap);
+    collabWrap.appendChild(collabGrid);
+    container.appendChild(collabWrap);
 }
 
 async function collectSectionData(section) {
@@ -2691,6 +2866,11 @@ async function collectSectionData(section) {
         profile.phone = el('inline-basic-phone') || null;
         profile.location = el('inline-basic-location') || null;
         profile.bio = el('inline-basic-bio') || null;
+        if (pendingProfilePhotoDataUrl === false) {
+            profile.photoUrl = null;
+        } else if (typeof pendingProfilePhotoDataUrl === 'string') {
+            profile.photoUrl = pendingProfilePhotoDataUrl;
+        }
     } else if (section === 'skills') {
         const raw = document.getElementById('inline-skills')?.value?.trim();
         profile.skills = raw ? parseArray(raw) : [];
@@ -2700,8 +2880,7 @@ async function collectSectionData(section) {
     } else if (section === 'professional') {
         const workEl = document.getElementById('inline-workMode');
         profile.preferredWorkMode = workEl?.value?.trim() || null;
-        const payEl = document.getElementById('inline-paymentModes');
-        profile.preferredPaymentModes = payEl ? Array.from(payEl.selectedOptions).map(o => o.value) : [];
+        profile.preferredPaymentModes = Array.from(document.querySelectorAll('input[name="inlinePaymentModes"]:checked')).map(cb => cb.value);
         profile.preferredCollaborationModels = Array.from(document.querySelectorAll('input[name="inlinePreferredModels"]:checked')).map(cb => cb.value);
     } else if (section === 'certifications') {
         profile.certifications = await collectCertificationsFromList('inline-certifications-list');
@@ -2722,6 +2901,7 @@ async function collectSectionData(section) {
             facebook: el('inline-facebook') || null,
             instagram: el('inline-instagram') || null
         };
+        profile.website = el('inline-website') || null;
     }
     return profile;
 }
@@ -2785,7 +2965,6 @@ function setupInlineListButtons() {
     const addExp = document.getElementById('inline-add-experience-entry');
     const addCase = document.getElementById('inline-add-caseStudy');
     const addPort = document.getElementById('inline-add-portfolio');
-    const addRef = document.getElementById('inline-add-reference');
     if (addCert) addCert.addEventListener('click', () => {
         const list = document.getElementById('inline-certifications-list');
         if (!list) return;
@@ -2822,15 +3001,7 @@ function setupInlineListButtons() {
         row.querySelector('.portfolio-remove').addEventListener('click', () => row.remove());
         list.appendChild(row);
     });
-    if (addRef) addRef.addEventListener('click', () => {
-        const list = document.getElementById('inline-references-list');
-        if (!list) return;
-        const row = document.createElement('div');
-        row.className = 'flex flex-wrap gap-2 items-start border border-gray-200 rounded p-2 reference-row';
-        row.innerHTML = '<input type="text" class="ref-name form-input flex-1 min-w-[100px]" placeholder="Reference name"><input type="text" class="ref-company form-input flex-1 min-w-[100px]" placeholder="Company"><input type="text" class="ref-relationship form-input flex-1 min-w-[100px]" placeholder="Relationship"><input type="text" class="ref-contact form-input flex-1 min-w-[120px]" placeholder="Contact (optional)"><textarea class="ref-text form-input flex-1 min-w-[180px]" rows="2" placeholder="Testimonial"></textarea><button type="button" class="ref-remove btn btn-ghost btn-sm">Remove</button>';
-        row.querySelector('.ref-remove').addEventListener('click', () => row.remove());
-        list.appendChild(row);
-    });
+    /* Reference rows: use setupReferenceAddButton from openSectionEdit only — avoids duplicate rows */
 }
 
 function setupCompanyForm(userId) {
@@ -2919,6 +3090,59 @@ function setupCompanyForm(userId) {
     });
 }
 
+function setupInlinePhotoControls() {
+    if (profilePhotoControlsAttached) return;
+    const fileEl = document.getElementById('inline-basic-photo');
+    const rmBtn = document.getElementById('inline-basic-photo-remove');
+    const prevEl = document.getElementById('inline-basic-photo-preview');
+    if (!fileEl || !prevEl) return;
+    fileEl.addEventListener('change', async () => {
+        const f = fileEl.files && fileEl.files[0];
+        if (!f) return;
+        if (!/^image\/(jpeg|png|webp|gif)$/i.test(f.type)) {
+            alert('Please choose a JPG, PNG, WebP, or GIF image.');
+            fileEl.value = '';
+            return;
+        }
+        if (f.size > 2.5 * 1024 * 1024) {
+            alert('Please choose an image under 2.5 MB.');
+            fileEl.value = '';
+            return;
+        }
+        try {
+            pendingProfilePhotoDataUrl = await readFileAsDataURL(f);
+            prevEl.replaceChildren();
+            const img = document.createElement('img');
+            img.src = pendingProfilePhotoDataUrl;
+            img.alt = '';
+            img.className = 'profile-inline-photo-preview-img';
+            prevEl.appendChild(img);
+            if (rmBtn) rmBtn.style.display = 'inline-block';
+        } catch (e) {
+            console.error(e);
+            alert('Could not read the image.');
+            fileEl.value = '';
+        }
+    });
+    if (rmBtn) {
+        rmBtn.addEventListener('click', () => {
+            pendingProfilePhotoDataUrl = false;
+            fileEl.value = '';
+            const user = authService.getCurrentUser();
+            const profile = user?.profile || {};
+            const name = profile?.name || '';
+            const initials = name.split(/\s+/).filter(Boolean).map(s => s[0]).slice(0, 2).join('').toUpperCase() || '?';
+            prevEl.replaceChildren();
+            const span = document.createElement('span');
+            span.className = 'profile-inline-photo-placeholder';
+            span.textContent = initials;
+            prevEl.appendChild(span);
+            rmBtn.style.display = 'none';
+        });
+    }
+    profilePhotoControlsAttached = true;
+}
+
 function setupProfessionalForm(userId) {
     const form = document.getElementById('professional-profile-form');
     const cancelBtn = document.getElementById('professional-profile-cancel-btn');
@@ -2926,6 +3150,7 @@ function setupProfessionalForm(userId) {
 
     // Inline section editing: Edit opens only that section's edit panel
     setupInlineSectionEditing(userId);
+    setupInlinePhotoControls();
     if (cancelBtn) cancelBtn.addEventListener('click', () => showProfessionalView());
 
     form.addEventListener('submit', async (e) => {

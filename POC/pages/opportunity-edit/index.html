@@ -79,6 +79,7 @@
                         maxlength="2000"
                         placeholder="Brief description of the opportunity"
                         data-rich-text="true"
+                        data-rich-text-toolbar="full"
                     ></textarea>
                 </div>
                 
@@ -254,9 +255,9 @@
         </div>
         
         <!-- Dynamic Fields -->
-        <div class="form-section border-b border-gray-200 pb-8" id="dynamic-fields-section">
+        <div class="form-section border-b border-gray-200 pb-8 occ-model-details-wrap" id="dynamic-fields-section">
             <h2 class="text-xl font-semibold mb-6 text-gray-900">Model-Specific Details</h2>
-            <div id="dynamic-fields" class="space-y-6">
+            <div id="dynamic-fields" class="space-y-6 occ-dynamic-fields">
                 <p class="text-gray-500 italic">Loading model fields...</p>
             </div>
         </div>
@@ -696,5 +697,178 @@
 
 .rich-text-editor-container .ql-snow .ql-tooltip a.ql-action::after {
     border-right: 1px solid #d1d5db;
+}
+
+/* Dynamic model fields (shared with create flow) */
+.occ-model-details-wrap {
+    background: linear-gradient(180deg, #fafbff 0%, #ffffff 40%);
+    border: 1px solid #e2e8f0;
+    border-radius: 0.875rem;
+    padding: 1.25rem 1.35rem;
+    margin-top: 0;
+}
+.occ-dynamic-fields .occ-model-field {
+    padding: 1rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+.occ-dynamic-fields .occ-model-field:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.occ-dynamic-fields .occ-model-field-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 0.65rem;
+}
+.occ-dynamic-fields .occ-ms-chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.occ-dynamic-fields .occ-ms-chip {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+.occ-dynamic-fields .occ-ms-chip input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.occ-dynamic-fields .occ-ms-chip span {
+    display: inline-block;
+    padding: 0.45rem 0.85rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.occ-dynamic-fields .occ-ms-chip:hover span {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+}
+.occ-dynamic-fields .occ-ms-chip input:checked + span {
+    border-color: #6366f1;
+    background: #eef2ff;
+    color: #312e81;
+    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2);
+}
+.occ-dynamic-fields .occ-ms-chip input:focus-visible + span {
+    outline: 2px solid #818cf8;
+    outline-offset: 2px;
+}
+.occ-dynamic-fields .occ-ms-hint {
+    margin: 0.65rem 0 0 0;
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+.occ-dynamic-fields .occ-bool-field {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.occ-dynamic-fields .occ-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+.occ-dynamic-fields .occ-switch-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.occ-dynamic-fields .occ-switch-track {
+    width: 2.75rem;
+    height: 1.5rem;
+    border-radius: 9999px;
+    background: #e2e8f0;
+    transition: background 0.2s;
+    position: relative;
+}
+.occ-dynamic-fields .occ-switch-track::after {
+    content: '';
+    position: absolute;
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 50%;
+    background: #fff;
+    top: 0.175rem;
+    left: 0.2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+}
+.occ-dynamic-fields .occ-switch-input:checked + .occ-switch-track {
+    background: linear-gradient(90deg, #6366f1, #4f46e5);
+}
+.occ-dynamic-fields .occ-switch-input:checked + .occ-switch-track::after {
+    transform: translateX(1.2rem);
+}
+.occ-dynamic-fields .occ-switch-input:focus-visible + .occ-switch-track {
+    outline: 2px solid #818cf8;
+    outline-offset: 2px;
+}
+.occ-dynamic-fields .occ-bool-state {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #64748b;
+    min-width: 2rem;
+}
+.occ-dynamic-fields .occ-array-container {
+    border: 1px dashed #cbd5e1;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    background: #fafafa;
+    margin-bottom: 0.75rem;
+}
+.occ-dynamic-fields .occ-array-empty {
+    text-align: center;
+    padding: 1.25rem 0.5rem;
+}
+.occ-dynamic-fields .occ-array-empty-title {
+    margin: 0 0 0.35rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #64748b;
+}
+.occ-dynamic-fields .occ-array-empty-hint {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #94a3b8;
+    line-height: 1.45;
+}
+.occ-dynamic-fields .occ-array-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 0.65rem;
+    align-items: center;
+    margin-bottom: 0.65rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.occ-dynamic-fields .occ-array-row:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+@media (max-width: 640px) {
+    .occ-dynamic-fields .occ-array-row {
+        grid-template-columns: 1fr;
+    }
+}
+.occ-dynamic-fields .occ-array-input {
+    border-radius: 0.5rem;
+    border-color: #e2e8f0;
+}
+.occ-dynamic-fields .occ-array-add-btn {
+    border-radius: 0.5rem;
 }
 </style>

@@ -53,7 +53,15 @@ async function loadPeople() {
             const isPublic = user.isPublic !== false;
             const isActive = user.status === 'active';
             const isNotAdmin = user.profile?.type !== 'admin';
-            const isProfessional = user.profile?.type === 'professional' || user.profile?.type === 'consultant';
+            const p = user.profile || {};
+            const pt = p.type;
+            let isProfessional = pt === 'professional' || pt === 'consultant';
+            if (!pt || (pt !== 'company' && pt !== 'professional' && pt !== 'consultant')) {
+                const role = user.role;
+                isProfessional = role === 'professional' || role === 'consultant';
+            } else if (pt === 'company') {
+                isProfessional = false;
+            }
             
             return isPublic && isActive && isNotAdmin && isProfessional;
         });
@@ -207,21 +215,20 @@ function applyFilters() {
         
         // Search filter
         if (searchTerm) {
-            const searchFields = [
-                profile.name,
-                profile.headline,
-                profile.title,
-                profile.bio,
-                ...(profile.skills || []),
-                ...(profile.services || []),
-                ...(profile.sectors || [])
-            ].filter(Boolean).join(' ').toLowerCase();
-            
-            if (!searchFields.includes(searchTerm)) {
-                return false;
-            }
+            const match = window.ProfileSearchText && typeof ProfileSearchText.profileMatchesSearch === 'function'
+                ? ProfileSearchText.profileMatchesSearch(profile, searchTerm)
+                : [
+                    profile.name,
+                    profile.headline,
+                    profile.title,
+                    profile.bio,
+                    ...(profile.skills || []),
+                    ...(profile.services || []),
+                    ...(profile.sectors || [])
+                ].filter(Boolean).join(' ').toLowerCase().includes(searchTerm);
+            if (!match) return false;
         }
-        
+
         // Location filter
         if (locationFilter) {
             const location = profile.location || '';
@@ -229,7 +236,7 @@ function applyFilters() {
                 return false;
             }
         }
-        
+
         // Sector filter
         if (sectorFilter) {
             const sectors = profile.sectors || [];
@@ -237,7 +244,7 @@ function applyFilters() {
                 return false;
             }
         }
-        
+
         return true;
     });
     
@@ -247,18 +254,17 @@ function applyFilters() {
         
         // Search filter
         if (searchTerm) {
-            const searchFields = [
-                profile.name,
-                profile.headline,
-                profile.description,
-                ...(profile.services || []),
-                ...(profile.sectors || []),
-                ...(profile.industry || [])
-            ].filter(Boolean).join(' ').toLowerCase();
-            
-            if (!searchFields.includes(searchTerm)) {
-                return false;
-            }
+            const match = window.ProfileSearchText && typeof ProfileSearchText.profileMatchesSearch === 'function'
+                ? ProfileSearchText.profileMatchesSearch(profile, searchTerm)
+                : [
+                    profile.name,
+                    profile.headline,
+                    profile.description,
+                    ...(profile.services || []),
+                    ...(profile.sectors || []),
+                    ...(profile.industry || [])
+                ].filter(Boolean).join(' ').toLowerCase().includes(searchTerm);
+            if (!match) return false;
         }
         
         // Location filter

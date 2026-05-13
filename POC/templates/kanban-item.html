@@ -1,19 +1,40 @@
-<div class="kanban-item" data-id="{{id}}">
-    <div class="kanban-item-title">
-        {{#if intentLabel}}
-        <span class="badge {{intentBadgeClass}} mr-2" style="font-size: 0.7rem;">{{intentLabel}}</span>
-        {{/if}}
-        {{title}}
+<div class="kanban-item kanban-item--opportunity" data-id="{{id}}" title="{{title}}">
+    <div class="kanban-item-card">
+        <div class="kanban-item-rail" aria-hidden="true"><i class="ph-duotone ph-dots-six-vertical kanban-item-grip-icon"></i></div>
+        <div class="kanban-item-body kanban-item-body--stack">
+            <div class="kanban-item-block kanban-item-block--head">
+                <div class="kanban-item-top">
+                    {{#if intentLabel}}
+                    <span class="badge {{intentBadgeClass}} kanban-item-badge">{{intentLabel}}</span>
+                    {{/if}}
+                </div>
+                <div class="kanban-item-title">{{title}}</div>
+            </div>
+            <div class="kanban-item-block kanban-item-block--meta">
+                <div class="kanban-item-meta-grid">
+                    <div class="kanban-item-meta-cell">
+                        <span class="kanban-item-meta-pill kanban-item-meta-pill--fill" title="Model"><i class="ph-duotone ph-squares-four" aria-hidden="true"></i><span class="kanban-item-meta-pill__text">{{modelTypeLabel}}</span></span>
+                    </div>
+                    <div class="kanban-item-meta-cell">
+                        <span class="kanban-item-meta-pill kanban-item-meta-pill--fill"><i class="ph-duotone ph-calendar-blank" aria-hidden="true"></i><span class="kanban-item-meta-pill__text">{{createdDate}}</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="kanban-item-meta">
-        {{modelType}} | {{createdDate}}
-    </div>
-    <div class="kanban-item-actions kanban-item-action">
-        {{#if showPublish}}
-        <button type="button" class="btn btn-primary btn-sm kanban-btn-publish" data-id="{{id}}">Publish</button>
-        {{/if}}
-        {{#if showClose}}
-        <button type="button" class="btn btn-secondary btn-sm kanban-btn-close" data-id="{{id}}">Close</button>
-        {{/if}}
+    <div class="kanban-item-footer">
+        <span class="kanban-item-footer-hint"><i class="ph-duotone ph-arrow-square-out" aria-hidden="true"></i><span>Open opportunity</span></span>
+        <div class="kanban-item-footer-actions">
+            {{#if showPublish}}
+            <button type="button" class="btn btn-primary btn-sm kanban-btn-publish kanban-item-action" data-id="{{id}}">Publish</button>
+            {{#if showClose}}
+            <button type="button" class="btn btn-secondary btn-sm kanban-btn-close kanban-item-action" data-id="{{id}}">Close</button>
+            {{/if}}
+            {{else}}
+            {{#if showClose}}
+            <button type="button" class="btn btn-secondary btn-sm kanban-btn-close kanban-item-action" data-id="{{id}}">Close</button>
+            {{/if}}
+            {{/if}}
+        </div>
     </div>
 </div>

@@ -1,229 +1,1141 @@
 <div class="page-container people-page">
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1 class="page-title">People</h1>
-            <p class="page-subtitle">Explore professionals and companies in your network</p>
+    <div id="page-context-header-mount"></div>
+
+    <div class="page-body people-body">
+        <div class="people-workspace">
+            <aside class="people-sidebar" aria-labelledby="people-sidebar-title">
+                <div class="people-sidebar__head">
+                    <h2 id="people-sidebar-title" class="people-sidebar__title">Quick filters</h2>
+                    <p id="people-filter-summary" class="people-sidebar__summary" aria-live="polite">No filters applied</p>
+                    <button type="button" id="toggle-filters" class="people-toggle-filters" aria-expanded="true">Hide filters</button>
+                </div>
+
+                <div class="people-sidebar__scroll">
+                    <div class="people-field">
+                        <label class="people-label" for="search-people">Search</label>
+                        <div class="people-search">
+                            <i class="ph-duotone ph-magnifying-glass people-search__icon" aria-hidden="true"></i>
+                            <input type="search" id="search-people" class="form-input people-search__input" placeholder="Name, skills, services…" autocomplete="off" enterkeyhint="search" aria-describedby="people-filter-summary">
+                        </div>
+                    </div>
+
+                    <div class="people-field">
+                        <span class="people-label" id="people-type-label">Profile type</span>
+                        <div class="people-type-segment" role="group" aria-labelledby="people-type-label">
+                            <label class="people-type-option">
+                                <input type="checkbox" name="type" value="professional">
+                                <span class="people-type-option__ui">Professionals</span>
+                            </label>
+                            <label class="people-type-option">
+                                <input type="checkbox" name="type" value="company">
+                                <span class="people-type-option__ui">Companies</span>
+                            </label>
+                        </div>
+                        <p class="people-hint">Leave both off to include everyone.</p>
+                    </div>
+
+                    <div class="people-field people-field--split">
+                        <div>
+                            <label class="people-label" for="filter-location">Location</label>
+                            <select id="filter-location" class="form-select people-control">
+                                <option value="">All</option>
+                                <option value="Riyadh">Riyadh</option>
+                                <option value="Jeddah">Jeddah</option>
+                                <option value="Dammam">Dammam</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="people-label" for="filter-availability">Availability</label>
+                            <select id="filter-availability" class="form-select people-control">
+                                <option value="">Any</option>
+                                <option value="Available">Available</option>
+                                <option value="Limited">Limited</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="people-field people-field--skills">
+                        <div class="people-skills-head">
+                            <span class="people-label people-label--plain" id="people-skills-label">Skills</span>
+                            <span id="people-skills-selected" class="people-skills-badge" hidden></span>
+                        </div>
+                        <p id="people-skills-hint" class="people-hint">Select one or more skills to filter the results.</p>
+                        <span id="people-skills-sr-hint" class="people-sr-only">Toggle with Enter or Space when a skill is focused.</span>
+                        <div class="people-skills-panel" role="region" aria-labelledby="people-skills-label" aria-describedby="people-skills-sr-hint">
+                            <input type="text" id="skills-query" class="people-skills-query" placeholder="Search skills..." autocomplete="off" enterkeyhint="search" aria-label="Filter skills by name">
+                            <div class="people-skills-scroll">
+                                <div id="skills-filter" class="skills-filter-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="people-actions">
+                    <button type="button" id="clear-skills" class="people-reset">Clear skills</button>
+                    <button type="button" id="reset-filters" class="people-reset people-reset--primary">Clear all</button>
+                </div>
+            </aside>
+
+            <section class="people-results" aria-label="Search results">
+                <header class="people-results__toolbar">
+                    <div id="results-count" class="people-count" aria-live="polite" aria-atomic="true">
+                        <span class="people-count__value">—</span>
+                        <span class="people-count__label">profiles</span>
+                    </div>
+                    <div class="people-sort">
+                        <label class="people-sort-label" for="sort-people">Sort by</label>
+                        <div class="people-sort__select">
+                            <select id="sort-people" class="form-select people-control people-control--sort">
+                                <option value="connections">Most connections</option>
+                                <option value="name">Name (A–Z)</option>
+                                <option value="experience">Experience</option>
+                                <option value="recent">Recently joined</option>
+                            </select>
+                            <i class="ph-duotone ph-caret-down people-sort__caret" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </header>
+
+                <div id="people-list" class="people-list" role="list">
+                    <div class="people-list__loading" aria-busy="true">
+                        <div class="spinner" aria-label="Loading results"></div>
+                    </div>
+                </div>
+            </section>
         </div>
-    </div>
-    <div class="page-body">
-    
-    <div class="people-layout">
-        <aside class="people-filters">
-            <div class="filter-section">
-                <h3>Search</h3>
-                <input type="text" id="search-people" class="form-input" placeholder="Search by name, skills, or services...">
-            </div>
-            
-            <div class="filter-section">
-                <h3>Profile Type</h3>
-                <div class="filter-options">
-                    <label class="filter-checkbox">
-                        <input type="checkbox" name="type" value="professional" checked>
-                        <span>Professionals</span>
-                    </label>
-                    <label class="filter-checkbox">
-                        <input type="checkbox" name="type" value="company" checked>
-                        <span>Companies</span>
-                    </label>
-                </div>
-            </div>
-            
-            <div class="filter-section">
-                <h3>Location</h3>
-                <select id="filter-location" class="form-select">
-                    <option value="">All Locations</option>
-                    <option value="Riyadh">Riyadh</option>
-                    <option value="Jeddah">Jeddah</option>
-                    <option value="Dammam">Dammam</option>
-                </select>
-            </div>
-            
-            <div class="filter-section">
-                <h3>Availability</h3>
-                <select id="filter-availability" class="form-select">
-                    <option value="">Any</option>
-                    <option value="Available">Available</option>
-                    <option value="Limited">Limited</option>
-                </select>
-            </div>
-            
-            <div class="filter-section">
-                <h3>Skills</h3>
-                <div id="skills-filter" class="skills-filter-list">
-                    <!-- Populated dynamically -->
-                </div>
-            </div>
-            
-            <div class="filter-actions">
-                <button id="apply-filters" class="btn btn-primary btn-block">Apply Filters</button>
-                <button id="clear-filters" class="btn btn-secondary btn-block">Clear All</button>
-            </div>
-        </aside>
-        
-        <main class="people-content">
-            <div class="people-header">
-                <div id="results-count" class="results-count">Loading...</div>
-                <div class="sort-options">
-                    <label>Sort by:</label>
-                    <select id="sort-people" class="form-select">
-                        <option value="connections">Most Connections</option>
-                        <option value="name">Name (A-Z)</option>
-                        <option value="experience">Experience</option>
-                        <option value="recent">Recently Joined</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div id="people-list" class="people-list">
-                <div class="spinner"></div>
-            </div>
-        </main>
-    </div>
     </div>
 </div>
 
 <style>
-.people-page {
-    /* Page specific styles */
-}
-
-.people-layout {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: var(--spacing-xl);
-}
-
-.people-filters {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    height: fit-content;
-    position: sticky;
-    top: calc(var(--header-height) + var(--spacing-lg));
-}
-
-.filter-section {
-    margin-bottom: var(--spacing-lg);
+/* —— Layout —— */
+.people-intro {
+    margin-bottom: var(--spacing-xl);
     padding-bottom: var(--spacing-lg);
     border-bottom: 1px solid var(--border-color);
 }
 
-.filter-section:last-of-type {
-    border-bottom: none;
+.people-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--primary-dark);
+    margin: 0 0 var(--spacing-xs);
 }
 
-.filter-section h3 {
+.people-intro__title {
+    font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: var(--spacing-xs);
+}
+
+.people-intro__sub {
+    max-width: 34rem;
+    line-height: 1.55;
+}
+
+.people-body {
+    display: flex;
+    justify-content: center;
+}
+
+.people-workspace {
+    width: 100%;
+    max-width: 1180px;
+    display: grid;
+    grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+    align-items: stretch;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    min-height: 420px;
+}
+
+/* —— Sidebar —— */
+.people-sidebar {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border-right: 1px solid var(--border-color);
+    min-height: 0;
+}
+
+.people-sidebar__head {
+    padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+    flex-shrink: 0;
+}
+
+.people-sidebar__title {
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+}
+
+.people-sidebar__summary {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    line-height: 1.45;
+    color: var(--text-muted);
+}
+
+.people-sidebar__summary.is-active {
+    color: var(--primary-dark);
+    font-weight: 500;
+}
+
+.people-toggle-filters {
+    margin-top: var(--spacing-sm);
+    padding: 6px 10px;
+    border: 1px solid #dbe5ef;
+    background: #fff;
+    color: var(--text-secondary);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.people-toggle-filters:hover {
+    border-color: #c7d4e2;
+    color: var(--text-primary);
+    background: #f8fafc;
+}
+
+.people-toggle-filters:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.people-sidebar__scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--spacing-lg);
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.people-sidebar.is-collapsed .people-sidebar__scroll,
+.people-sidebar.is-collapsed .people-actions {
+    display: none;
+}
+
+.people-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.people-field--split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+}
+
+.people-label {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+}
+
+.people-hint {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Search */
+.people-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.people-search__icon {
+    position: absolute;
+    left: 12px;
+    font-size: 1.125rem;
+    color: var(--text-muted);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.people-search__input {
+    width: 100%;
+    padding-left: 2.5rem !important;
+    border-radius: 10px !important;
+    border: 1px solid #e2e8f0 !important;
+    background: var(--bg-primary) !important;
+    font-size: var(--font-size-sm) !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.people-search__input:hover {
+    border-color: #cbd5e1 !important;
+}
+
+.people-search__input:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15) !important;
+    outline: none !important;
+}
+
+/* Segmented type control */
+.people-type-segment {
+    display: flex;
+    padding: 3px;
+    border-radius: 10px;
+    background: #e2e8f0;
+    gap: 3px;
+}
+
+.people-type-option {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.people-type-option input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+}
+
+.people-type-option__ui {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px 6px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    background: transparent;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.people-type-option input:hover + .people-type-option__ui {
+    color: var(--text-primary);
+}
+
+.people-type-option input:checked + .people-type-option__ui {
+    background: var(--bg-primary);
+    color: var(--primary-dark);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.people-type-option input:focus-visible + .people-type-option__ui {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Controls */
+.people-control {
+    width: 100%;
+    border-radius: 10px !important;
+    border: 1px solid #e2e8f0 !important;
+    background: var(--bg-primary) !important;
+    font-size: var(--font-size-sm) !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.people-control:hover {
+    border-color: #cbd5e1 !important;
+}
+
+.people-control:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12) !important;
+    outline: none !important;
+}
+
+.people-label--plain {
+    text-transform: none;
+    letter-spacing: -0.01em;
     font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: var(--spacing-sm);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-.filter-options {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-}
-
-.filter-checkbox {
+.people-skills-head {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: var(--spacing-sm);
-    cursor: pointer;
-    font-size: var(--font-size-sm);
+    margin-bottom: 6px;
 }
 
-.filter-checkbox input {
-    width: 16px;
-    height: 16px;
+.people-skills-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--primary-dark);
+    background: rgba(13, 148, 136, 0.1);
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.people-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.people-skills-panel {
+    border: 1px solid #e8edf3;
+    border-radius: 12px;
+    background: var(--bg-primary);
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.people-skills-query {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    background: #fafbfc;
+    border: none;
+    border-bottom: 1px solid #eef2f6;
+    transition: background 0.15s ease;
+}
+
+.people-skills-query::placeholder {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.people-skills-query:hover {
+    background: #f8fafc;
+}
+
+.people-skills-query:focus {
+    outline: none;
+    background: var(--bg-primary);
+    box-shadow: inset 0 0 0 2px rgba(13, 148, 136, 0.2);
+}
+
+.people-skills-scroll {
+    max-height: 240px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px 6px 10px 10px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 116, 139, 0.45) transparent;
+}
+
+.people-skills-scroll::-webkit-scrollbar {
+    width: 5px;
+}
+
+.people-skills-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.people-skills-scroll::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.35);
+    border-radius: 99px;
+}
+
+.people-skills-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.55);
 }
 
 .skills-filter-list {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-xs);
-    max-height: 200px;
-    overflow-y: auto;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.skill-filter-tag {
-    display: inline-flex;
+.skill-check-item {
+    display: flex;
     align-items: center;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    font-size: var(--font-size-xs);
+    gap: 8px;
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background 0.12s ease;
 }
 
-.skill-filter-tag:hover {
-    border-color: var(--primary-color);
+.skill-check-item:hover {
+    background: #f8fafc;
 }
 
-.skill-filter-tag.active {
+.skill-check-input {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: var(--primary-color);
+    flex: 0 0 auto;
+}
+
+.skill-check-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    line-height: 1.3;
+}
+
+.skill-check-item.is-active .skill-check-label {
+    color: var(--primary-dark);
+    font-weight: 600;
+}
+
+.people-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin: 10px var(--spacing-lg) var(--spacing-md);
+}
+
+.people-reset {
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid rgba(13, 148, 136, 0.22);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    flex: 1;
+}
+
+.people-reset:hover {
+    color: var(--primary-dark);
+    background: rgba(13, 148, 136, 0.06);
+    border-color: rgba(13, 148, 136, 0.35);
+}
+
+.people-reset--primary {
+    color: #fff;
     background: var(--primary-color);
-    color: white;
     border-color: var(--primary-color);
 }
 
-.filter-actions {
+.people-reset--primary:hover {
+    color: #fff;
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.people-reset:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* —— Results —— */
+.people-results {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    min-width: 0;
+    background: var(--bg-primary);
 }
 
-.people-content {
-    min-height: 400px;
-}
-
-.people-header {
+.people-results__toolbar {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-lg);
-    padding-bottom: var(--spacing-md);
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
     border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
 }
 
-.results-count {
-    color: var(--text-secondary);
+.people-count {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 0;
+}
+
+.people-count__value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.people-count__label {
     font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-muted);
 }
 
-.sort-options {
+.people-count__loading {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.people-sort {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
 }
 
-.sort-options label {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+.people-sort-label {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
 }
 
-.sort-options .form-select {
-    width: auto;
-    min-width: 160px;
+.people-sort__select {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.people-control--sort {
+    min-width: 11.5rem;
+    padding-right: 2rem !important;
+    appearance: none;
+    cursor: pointer;
+}
+
+.people-sort__caret {
+    position: absolute;
+    right: 10px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    pointer-events: none;
 }
 
 .people-list {
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    min-height: 280px;
+}
+
+.people-list__loading {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    border: 1px dashed #e2e8f0;
+}
+
+/* Empty */
+.people-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--spacing-2xl) var(--spacing-lg);
+    min-height: 220px;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    border: 1px dashed #e2e8f0;
+}
+
+.people-empty-icon {
+    width: 52px;
+    height: 52px;
+    margin-bottom: var(--spacing-md);
+    border-radius: 14px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+}
+
+.people-empty .empty-state-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs);
+}
+
+.people-empty .empty-state-description {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    max-width: 22rem;
+    margin: 0 0 var(--spacing-lg);
+    line-height: 1.55;
+}
+
+.people-empty .empty-state-description code {
+    font-size: 0.85em;
+    padding: 0.12em 0.4em;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.people-empty-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    justify-content: center;
+}
+
+/* Cards in this view */
+.people-page .person-card {
+    border-radius: 14px;
+    border: 1px solid #e8edf3;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    padding: var(--spacing-lg);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.people-page .person-card::before {
+    display: none;
+}
+
+.people-page .person-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(13, 148, 136, 0.35);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.people-page .person-card:hover .person-avatar .avatar-placeholder {
+    transform: scale(1.04);
 }
 
 @media (max-width: 900px) {
-    .people-layout {
+    .people-workspace {
+        grid-template-columns: 1fr;
+        border-radius: 12px;
+    }
+
+    .people-sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        max-height: min(70vh, 520px);
+    }
+
+    .people-field--split {
         grid-template-columns: 1fr;
     }
-    
-    .people-filters {
-        position: static;
+
+    .people-results__toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .people-sort {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .people-control--sort {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+@media (min-width: 901px) {
+    .people-sidebar {
+        position: sticky;
+        top: calc(var(--header-height) + 12px);
+        align-self: start;
+        max-height: calc(100vh - var(--header-height) - 32px);
+    }
+}
+
+/* ===== Easy UI mode: cleaner + simpler ===== */
+.people-page .people-eyebrow {
+    display: none;
+}
+
+.people-page .people-intro {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+}
+
+.people-page .people-intro__title {
+    font-size: clamp(1.5rem, 2.2vw, 1.9rem);
+    letter-spacing: -0.02em;
+}
+
+.people-page .people-intro__sub {
+    max-width: 30rem;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+}
+
+.people-page .people-workspace {
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    border-color: #e7edf5;
+}
+
+.people-page .people-sidebar {
+    background: #fbfcfe;
+    border-right-color: #e7edf5;
+}
+
+.people-page .people-sidebar__head,
+.people-page .people-results__toolbar {
+    border-bottom-color: #e7edf5;
+}
+
+.people-page .people-label {
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+.people-page .people-search__icon,
+.people-page .people-sort__caret {
+    opacity: 0.55;
+}
+
+.people-page .people-type-segment {
+    background: #eef2f7;
+    border-radius: 8px;
+}
+
+.people-page .people-type-option__ui {
+    border-radius: 6px;
+    padding: 7px 6px;
+    font-size: 12px;
+}
+
+.people-page .people-skills-panel {
+    border-radius: 10px;
+    box-shadow: none;
+    border-color: #e7edf5;
+}
+
+.people-page .people-skills-query {
+    font-size: 13px;
+    padding: 9px 12px;
+}
+
+.people-page .people-actions {
+    margin-top: 8px;
+}
+
+.people-page .people-reset {
+    font-size: 12px;
+    border-radius: 7px;
+    padding: 8px 10px;
+}
+
+.people-page .people-count__value {
+    font-size: 1.4rem;
+}
+
+.people-page .people-list {
+    padding-top: var(--spacing-md);
+}
+
+@media (max-width: 900px) {
+    .people-page .people-body {
+        padding-left: max(0px, env(safe-area-inset-left, 0px));
+        padding-right: max(0px, env(safe-area-inset-right, 0px));
+    }
+
+    .people-page .people-intro {
+        margin-bottom: var(--spacing-md);
+        padding-bottom: var(--spacing-sm);
+    }
+
+    .people-page .people-intro__title {
+        font-size: 1.35rem;
+    }
+
+    .people-page .people-intro__sub {
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .people-page .people-workspace {
+        border: none;
+        box-shadow: none;
+        border-radius: 0;
+        background: transparent;
+        gap: 10px;
+    }
+
+    .people-page .people-sidebar {
+        max-height: none;
+        background: #fff;
+        border: 1px solid #e7edf5;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    /* Collapsed: compact bar only */
+    .people-page .people-sidebar.is-collapsed {
+        align-self: stretch;
+    }
+
+    /* Expanded: cap height so results stay visible */
+    .people-page .people-sidebar:not(.is-collapsed) {
+        max-height: min(78vh, 640px);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .people-page .people-sidebar:not(.is-collapsed) .people-sidebar__scroll {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .people-page .people-sidebar__head {
+        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-shrink: 0;
+        min-height: 48px;
+    }
+
+    .people-page .people-sidebar__title {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .people-page .people-sidebar__summary {
+        display: none;
+    }
+
+    .people-page .people-toggle-filters {
+        margin: 0;
+        flex-shrink: 0;
+        min-height: 44px;
+        padding: 0 14px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 10px;
+        white-space: nowrap;
+    }
+
+    .people-page .people-sidebar__scroll {
+        padding: 12px;
+        gap: 14px;
+    }
+
+    .people-page .people-search__input {
+        min-height: 44px;
+    }
+
+    .people-page .people-control {
+        min-height: 44px;
+    }
+
+    .people-page .people-skills-scroll {
+        max-height: min(32vh, 200px);
+    }
+
+    .people-page .skill-check-item {
+        min-height: 44px;
+        padding: 8px 10px;
+    }
+
+    .people-page .people-actions {
+        margin: 0 12px 12px;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .people-page .people-reset {
+        width: 100%;
+        min-height: 44px;
+        font-size: 13px;
+    }
+
+    .people-page .people-results {
+        border: 1px solid #e7edf5;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .people-page .people-results__toolbar {
+        position: sticky;
+        top: var(--header-height);
+        z-index: 2;
+        padding: 12px;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid #eef2f6;
+    }
+
+    .people-page .people-sort-label {
+        text-transform: none;
+        letter-spacing: 0;
+        font-size: 12px;
+    }
+
+    .people-page .people-list {
+        padding: 12px;
+        gap: 10px;
+        min-height: 200px;
+    }
+
+    .people-page .people-list__loading {
+        min-height: 160px;
+        border-radius: 10px;
+    }
+
+    .people-page .people-count__value {
+        font-size: 1.25rem;
+    }
+
+    .people-page .people-empty {
+        padding: var(--spacing-xl) var(--spacing-md);
+        min-height: 180px;
+    }
+
+    /* Directory cards: force compact grid whenever workspace is single-column (scoped > main.css) */
+    .people-page .person-card {
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 10px 12px;
+        padding: 12px 14px;
+        text-align: left;
+        align-items: start;
+    }
+
+    .people-page .person-avatar {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .people-page .person-info {
+        grid-column: 2;
+        grid-row: 1;
+        min-width: 0;
+        text-align: left;
+    }
+
+    .people-page .person-actions {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+        min-width: 0;
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .people-page .person-actions .btn {
+        flex: 1 1 calc(50% - 4px);
+        min-width: 0;
+        justify-content: center;
+    }
+
+    .people-page .person-avatar .avatar-placeholder {
+        width: 48px;
+        height: 48px;
+        font-size: var(--font-size-base);
+        border-width: 2px;
+    }
+
+    .people-page .person-header {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        margin-bottom: 4px;
+        gap: var(--spacing-xs) var(--spacing-sm);
+    }
+
+    .people-page .person-name {
+        font-size: var(--font-size-lg);
+        line-height: 1.25;
+    }
+
+    .people-page .person-headline {
+        margin-bottom: 4px;
+    }
+
+    .people-page .person-location {
+        margin-bottom: 6px;
+        justify-content: flex-start;
+    }
+
+    .people-page .person-meta {
+        justify-content: flex-start;
+        gap: var(--spacing-sm) var(--spacing-md);
+        margin-bottom: 6px;
+    }
+
+    .people-page .person-skills {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: flex-start;
+        width: 100%;
+        margin-top: 4px;
+        gap: 6px;
+    }
+
+    .people-page .person-skills .skill-tag {
+        padding: 3px 8px;
+        font-size: 11px;
+    }
+
+    @media (hover: none) {
+        .people-page .person-card:hover {
+            transform: none;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        }
+
+        .people-page .person-card:hover .person-avatar .avatar-placeholder {
+            transform: none;
+        }
     }
 }
 </style>

@@ -8,6 +8,13 @@ function escapeHtml(str) {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+function escapeAttr(s) {
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;');
+}
+
 (function () {
     var SOCIAL_ICONS = {
         linkedin: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>',
@@ -38,12 +45,23 @@ var getSocialIconsHtml = window.getSocialIconsHtmlPersonProfile;
 let currentProfile = null;
 
 async function initPersonProfile(params) {
-    const personId = params?.id;
+    let personId = params?.id;
     if (!personId) {
         showProfileError();
         return;
     }
-    
+    // Common mistake: /people/profile instead of /profile — send users to account profile
+    if (personId === 'profile' || personId === 'me' || personId === 'settings') {
+        const target =
+            personId === 'settings' && typeof CONFIG !== 'undefined' && CONFIG.ROUTES
+                ? CONFIG.ROUTES.SETTINGS
+                : CONFIG.ROUTES.PROFILE;
+        if (typeof router !== 'undefined' && router.navigate && target) {
+            router.navigate(target);
+        }
+        return;
+    }
+
     await loadProfile(personId);
 }
 
@@ -55,8 +73,14 @@ async function loadProfile(personId) {
     try {
         // Get person from storage (checks both users and companies)
         const person = await dataService.getPersonById(personId);
-        
-        if (!person || person.isPublic === false) {
+        const viewer =
+            typeof authService !== 'undefined' ? authService.getCurrentUser() : window.authService?.getCurrentUser?.();
+        const isSelf =
+            viewer &&
+            person &&
+            (viewer.id === person.id || (viewer.email && person.email && viewer.email === person.email));
+
+        if (!person || (person.isPublic === false && !isSelf)) {
             showProfileError();
             return;
         }
@@ -69,6 +93,8 @@ async function loadProfile(personId) {
         
         // Populate profile data
         populateProfile(person);
+
+        await populatePersonRating(person.id);
         
         // Setup action buttons (async: needs connection status)
         await setupActions(person);
@@ -196,16 +222,29 @@ function populateProfile(person) {
         }
     }
     
-    // Certifications
+    // Certifications (always show section on public profile)
     const certificationsSection = document.getElementById('certifications-section');
     const certificationsEl = document.getElementById('profile-certifications');
-    if (certificationsEl && profile.certifications && profile.certifications.length > 0) {
-        certificationsEl.innerHTML = profile.certifications.map(cert => 
-            `<span class="certification-badge">${cert}</span>`
-        ).join('');
-        if (certificationsSection) certificationsSection.style.display = 'block';
-    } else if (certificationsSection) {
-        certificationsSection.style.display = 'none';
+    if (certificationsSection && certificationsEl) {
+        certificationsSection.style.display = 'block';
+        const raw = profile.certifications;
+        const list = Array.isArray(raw) ? raw : raw ? [raw] : [];
+        if (list.length > 0) {
+            certificationsEl.innerHTML = list.map(function (cert) {
+                if (typeof cert === 'object' && cert !== null) {
+                    const name = cert.name || cert.label || 'Certification';
+                    const typeLabel = cert.type ? ' (' + escapeHtml(cert.type) + ')' : '';
+                    const safeName = escapeHtml(name);
+                    if (cert.url) {
+                        return '<span class="certification-badge"><a href="' + escapeAttr(cert.url) + '" target="_blank" rel="noopener">' + safeName + '</a>' + typeLabel + '</span>';
+                    }
+                    return '<span class="certification-badge">' + safeName + typeLabel + '</span>';
+                }
+                return '<span class="certification-badge">' + escapeHtml(String(cert)) + '</span>';
+            }).join('');
+        } else {
+            certificationsEl.innerHTML = '<p class="pp-empty-hint" role="status">No certifications listed.</p>';
+        }
     }
     
     // Company section
@@ -265,17 +304,13 @@ function populateProfile(person) {
         }
     }
     
-    // Social Media (LinkedIn, Twitter, Website, Instagram) – icon links in sidebar
+    // Social media (always show card on public profile)
     const socialCard = document.getElementById('social-media-card');
     const socialLinksEl = document.getElementById('profile-social-links');
     if (socialCard && socialLinksEl) {
+        socialCard.style.display = 'block';
         const iconsHtml = getSocialIconsHtml(profile.socialMediaLinks, profile.website);
-        if (iconsHtml) {
-            socialCard.style.display = 'block';
-            socialLinksEl.innerHTML = iconsHtml;
-        } else {
-            socialCard.style.display = 'none';
-        }
+        socialLinksEl.innerHTML = iconsHtml || '<p class="pp-empty-hint" role="status">No social links provided.</p>';
     }
     
     // Availability (for professionals)
@@ -336,6 +371,63 @@ function populateProfile(person) {
 function setTextContent(id, text) {
     const el = document.getElementById(id);
     if (el) el.textContent = text;
+}
+
+function scoreFromReview(review) {
+    if (review == null) return null;
+    const o = review.overallScore;
+    if (typeof o === 'number' && !Number.isNaN(o)) return Math.max(1, Math.min(5, o));
+    const c = review.criteria;
+    if (c && typeof c === 'object') {
+        const keys = ['communication', 'quality', 'professionalism', 'timeliness'];
+        const vals = keys.map((k) => parseInt(c[k], 10)).filter((n) => !Number.isNaN(n));
+        if (vals.length) {
+            const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+            return Math.max(1, Math.min(5, avg));
+        }
+    }
+    return null;
+}
+
+function renderRatingStarsUnicode(avg) {
+    const a = Math.max(0, Math.min(5, avg));
+    const full = Math.round(a);
+    return '\u2605'.repeat(full) + '\u2606'.repeat(5 - full);
+}
+
+async function populatePersonRating(personId) {
+    const block = document.getElementById('profile-rating-block');
+    const starsEl = document.getElementById('profile-rating-stars');
+    const valueEl = document.getElementById('profile-rating-value');
+    const countEl = document.getElementById('profile-rating-count');
+    if (!block || !starsEl || !valueEl || !countEl) return;
+    if (!dataService || typeof dataService.getReviewsByRevieweeId !== 'function') {
+        block.style.display = 'none';
+        return;
+    }
+    let reviews = [];
+    try {
+        reviews = await dataService.getReviewsByRevieweeId(personId);
+    } catch (e) {
+        console.warn('Could not load reviews for profile:', e);
+    }
+    const scores = reviews.map(scoreFromReview).filter((s) => s != null);
+    block.classList.remove('profile-rating--empty');
+    if (scores.length === 0) {
+        starsEl.textContent = '';
+        valueEl.textContent = '';
+        countEl.textContent = 'No peer ratings yet';
+        block.classList.add('profile-rating--empty');
+        block.style.display = 'flex';
+        return;
+    }
+    const sum = scores.reduce((a, b) => a + b, 0);
+    const average = sum / scores.length;
+    starsEl.textContent = renderRatingStarsUnicode(average);
+    valueEl.textContent = average.toFixed(1) + ' / 5';
+    const n = scores.length;
+    countEl.textContent = '(' + n + ' review' + (n === 1 ? '' : 's') + ')';
+    block.style.display = 'flex';
 }
 
 async function setupActions(person) {

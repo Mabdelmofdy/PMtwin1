@@ -596,12 +596,25 @@ function editRenderDynamicFields(opportunity) {
     
     // Populate field values (for fields that need special handling after render)
     attributes.forEach(attr => {
-        const field = document.getElementById(attr.key);
-        if (!field) return;
-        
         const value = data[attr.key];
         if (value === undefined || value === null) return;
-        
+
+        if (attr.type === 'multi-select') {
+            const wrap = document.querySelector(`.occ-ms-field[data-field-key="${attr.key}"]`);
+            const vals = Array.isArray(value)
+                ? value
+                : (typeof value === 'string' ? value.split(',').map(s => s.trim()).filter(Boolean) : []);
+            if (wrap) {
+                wrap.querySelectorAll('.occ-ms-option').forEach(cb => {
+                    cb.checked = vals.includes(cb.value);
+                });
+            }
+            return;
+        }
+
+        const field = document.getElementById(attr.key);
+        if (!field) return;
+
         switch (attr.type) {
             case 'text':
             case 'number':
@@ -624,7 +637,6 @@ function editRenderDynamicFields(opportunity) {
                 field.checked = !!value;
                 break;
             case 'tags':
-            case 'multi-select':
                 if (Array.isArray(value)) {
                     field.value = value.join(', ');
                 } else {
@@ -685,6 +697,7 @@ function editRenderDynamicFields(opportunity) {
     // Setup conditional fields
     const form = document.getElementById('opportunity-edit-form');
     formService.setupConditionalFields(form);
+    formService.wireDynamicBehaviours(form);
 }
 
 function editPopulateExchangeMode(opportunity) {

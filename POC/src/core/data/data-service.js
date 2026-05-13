@@ -108,6 +108,20 @@ class DataService {
             (incoming || []).forEach((r) => byId.set(r.id, r));
             return Array.from(byId.values());
         };
+        /** Demo merge runs on every load; preserve local read flags so "mark read" survives refresh. */
+        const mergeNotificationsById = (existing, incoming) => {
+            const byId = new Map((existing || []).map((x) => [x.id, { ...x }]));
+            (incoming || []).forEach((r) => {
+                const prev = byId.get(r.id);
+                if (prev) {
+                    const read = prev.read === true || r.read === true;
+                    byId.set(r.id, { ...r, read });
+                } else {
+                    byId.set(r.id, { ...r });
+                }
+            });
+            return Array.from(byId.values());
+        };
         try {
             const demoUsersRes = await fetch(`${base}demo-users.json`);
             if (demoUsersRes.ok) {
@@ -186,8 +200,17 @@ class DataService {
                 const json = await demoNotificationsRes.json();
                 if (json.data && json.data.length) {
                     const notifications = this.storage.get(CONFIG.STORAGE_KEYS.NOTIFICATIONS) || [];
-                    this.storage.set(CONFIG.STORAGE_KEYS.NOTIFICATIONS, mergeById(notifications, json.data));
+                    this.storage.set(CONFIG.STORAGE_KEYS.NOTIFICATIONS, mergeNotificationsById(notifications, json.data));
                     console.log(`Merged ${json.data.length} demo notifications`);
+                }
+            }
+            const demoConnectionsRes = await fetch(`${base}demo-connections.json`);
+            if (demoConnectionsRes.ok) {
+                const json = await demoConnectionsRes.json();
+                if (json.data && json.data.length) {
+                    const connections = this.storage.get(CONFIG.STORAGE_KEYS.CONNECTIONS) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.CONNECTIONS, mergeById(connections, json.data));
+                    console.log(`Merged ${json.data.length} demo connections`);
                 }
             }
             const demoPostMatchesRes = await fetch(`${base}demo-post-matches.json`);
@@ -242,6 +265,15 @@ class DataService {
                     const list = this.storage.get(CONFIG.STORAGE_KEYS.APPLICATION_PAYMENT_TERMS) || [];
                     this.storage.set(CONFIG.STORAGE_KEYS.APPLICATION_PAYMENT_TERMS, mergeById(list, json.data));
                     console.log(`Merged ${json.data.length} application payment terms`);
+                }
+            }
+            const demoReviewsRes = await fetch(`${base}demo-reviews.json`);
+            if (demoReviewsRes.ok) {
+                const json = await demoReviewsRes.json();
+                if (json.data && json.data.length) {
+                    const reviews = this.storage.get(CONFIG.STORAGE_KEYS.REVIEWS) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.REVIEWS, mergeById(reviews, json.data));
+                    console.log(`Merged ${json.data.length} demo reviews`);
                 }
             }
         } catch (e) {
@@ -2110,10 +2142,19 @@ class DataService {
 
     async getConnectionBetweenUsers(userIdA, userIdB) {
         const connections = await this.getConnections();
-        return connections.find(c =>
-            (c.fromUserId === userIdA && c.toUserId === userIdB) ||
-            (c.fromUserId === userIdB && c.toUserId === userIdA)
-        ) || null;
+        const matches = connections.filter(
+            c =>
+                (c.fromUserId === userIdA && c.toUserId === userIdB) ||
+                (c.fromUserId === userIdB && c.toUserId === userIdA)
+        );
+        if (matches.length === 0) return null;
+        const sortRecent = (a, b) =>
+            new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0);
+        const accepted = matches.filter(c => c.status === CONFIG.CONNECTION_STATUS.ACCEPTED).sort(sortRecent);
+        if (accepted.length) return accepted[0];
+        const pending = matches.filter(c => c.status === CONFIG.CONNECTION_STATUS.PENDING).sort(sortRecent);
+        if (pending.length) return pending[0];
+        return matches.sort(sortRecent)[0];
     }
 
     /** Returns connection status for current user viewing another user: 'none' | 'pending_sent' | 'pending_received' | 'accepted' */
@@ -2122,6 +2163,7 @@ class DataService {
         const conn = await this.getConnectionBetweenUsers(currentUserId, otherUserId);
         if (!conn) return 'none';
         if (conn.status === CONFIG.CONNECTION_STATUS.ACCEPTED) return 'accepted';
+        if (conn.status === CONFIG.CONNECTION_STATUS.REJECTED) return 'none';
         if (conn.fromUserId === currentUserId) return 'pending_sent';
         return 'pending_received';
     }
@@ -2134,9 +2176,29 @@ class DataService {
     }
 
     async createConnection(fromUserId, toUserId) {
-        const existing = await this.getConnectionBetweenUsers(fromUserId, toUserId);
-        if (existing) return existing;
         const connections = await this.getConnections();
+        const sameDirection = connections.find(
+            c => c.fromUserId === fromUserId && c.toUserId === toUserId
+        );
+        if (sameDirection) {
+            if (
+                sameDirection.status === CONFIG.CONNECTION_STATUS.PENDING ||
+                sameDirection.status === CONFIG.CONNECTION_STATUS.ACCEPTED
+            ) {
+                return sameDirection;
+            }
+            if (sameDirection.status === CONFIG.CONNECTION_STATUS.REJECTED) {
+                return this.updateConnection(sameDirection.id, { status: CONFIG.CONNECTION_STATUS.PENDING });
+            }
+        }
+        const existing = await this.getConnectionBetweenUsers(fromUserId, toUserId);
+        if (
+            existing &&
+            (existing.status === CONFIG.CONNECTION_STATUS.PENDING ||
+                existing.status === CONFIG.CONNECTION_STATUS.ACCEPTED)
+        ) {
+            return existing;
+        }
         const newConnection = {
             id: this.generateId(),
             fromUserId,
@@ -2163,8 +2225,29 @@ class DataService {
         return connections[index];
     }
 
+    /**
+     * Accept a connection request. Also accepts any duplicate pending rows for the same
+     * from→to pair so the sender does not stay stuck on "Pending" after one row was updated.
+     */
     async acceptConnection(connectionId) {
-        return this.updateConnection(connectionId, { status: CONFIG.CONNECTION_STATUS.ACCEPTED });
+        const connections = await this.getConnections();
+        const index = connections.findIndex(c => c.id === connectionId);
+        if (index === -1) return null;
+        const anchor = connections[index];
+        const { fromUserId, toUserId } = anchor;
+        const now = new Date().toISOString();
+        const next = connections.map(c => {
+            const sameDirectedPending =
+                c.fromUserId === fromUserId &&
+                c.toUserId === toUserId &&
+                c.status === CONFIG.CONNECTION_STATUS.PENDING;
+            if (c.id === connectionId || sameDirectedPending) {
+                return { ...c, status: CONFIG.CONNECTION_STATUS.ACCEPTED, updatedAt: now };
+            }
+            return c;
+        });
+        this.storage.set(CONFIG.STORAGE_KEYS.CONNECTIONS, next);
+        return next.find(c => c.id === connectionId) || null;
     }
 
     async rejectConnection(connectionId) {
@@ -2200,17 +2283,57 @@ class DataService {
 
     async createMessage(senderId, receiverId, text) {
         const messages = await this.getMessages();
+        const trimmed = (text || '').trim();
         const newMessage = {
             id: this.generateId(),
             senderId,
             receiverId,
-            text: (text || '').trim(),
+            text: trimmed,
             read: false,
             createdAt: new Date().toISOString()
         };
         messages.push(newMessage);
         this.storage.set(CONFIG.STORAGE_KEYS.MESSAGES, messages);
+
+        try {
+            const sender = await this.getUserOrCompanyById(senderId);
+            const senderName =
+                sender?.profile?.name ||
+                sender?.profile?.companyName ||
+                sender?.email ||
+                'Someone';
+            const preview =
+                trimmed.length > 140 ? `${trimmed.slice(0, 137)}…` : trimmed || 'Sent you a message.';
+            const threadLink = `${CONFIG.ROUTES.MESSAGES}/${senderId}`;
+            await this.createNotification({
+                userId: receiverId,
+                type: 'message',
+                title: `New message from ${senderName}`,
+                message: preview,
+                link: threadLink
+            });
+        } catch (e) {
+            console.warn('createMessage: could not add in-app notification', e);
+        }
+
         return newMessage;
+    }
+
+    /** Mark in-app notifications for a message thread as read when the recipient opens the conversation. */
+    async markMessageNotificationsReadForPartner(viewerId, partnerId) {
+        if (!viewerId || !partnerId) return;
+        const notifications = this.storage.get(CONFIG.STORAGE_KEYS.NOTIFICATIONS) || [];
+        const threadLink = `${CONFIG.ROUTES.MESSAGES}/${partnerId}`;
+        let changed = false;
+        for (const n of notifications) {
+            if (n.userId === viewerId && n.type === 'message' && !n.read && n.link === threadLink) {
+                n.read = true;
+                changed = true;
+            }
+        }
+        if (changed) {
+            this.storage.set(CONFIG.STORAGE_KEYS.NOTIFICATIONS, notifications);
+        }
     }
 
     async markMessagesAsRead(senderId, receiverId) {

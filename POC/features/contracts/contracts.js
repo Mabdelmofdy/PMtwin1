@@ -71,6 +71,20 @@ function getMilestoneSummary(contract) {
 }
 
 async function initContracts() {
+    const headerMount = document.getElementById('page-context-header-mount');
+    if (headerMount && window.pageContextHeader && window.pageContextHeader.PRESETS) {
+        window.pageContextHeader.mount(headerMount, window.pageContextHeader.PRESETS.contracts);
+    }
+    document.getElementById('page-cta-contracts-upload')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const r = CONFIG.ROUTES.COLLABORATION_WIZARD || '/collaboration-wizard';
+        if (window.router && typeof window.router.navigate === 'function') {
+            window.router.navigate(r);
+        } else {
+            window.location.hash = '#' + r.replace(/^\//, '');
+        }
+    });
+
     await loadContracts();
 
     const applyBtn = document.getElementById('apply-filters');

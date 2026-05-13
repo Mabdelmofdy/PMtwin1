@@ -5,6 +5,23 @@
 let userApplications = [];
 
 async function initOpportunities() {
+    const headerMount = document.getElementById('page-context-header-mount');
+    if (headerMount && window.pageContextHeader && window.pageContextHeader.PRESETS) {
+        window.pageContextHeader.mount(headerMount, window.pageContextHeader.PRESETS.opportunities);
+    }
+    const draftsCta = document.getElementById('page-cta-opportunities-drafts');
+    if (draftsCta) {
+        draftsCta.addEventListener('click', (e) => {
+            e.preventDefault();
+            const cat = document.getElementById('filter-category');
+            const st = document.getElementById('filter-status');
+            if (cat) cat.value = 'mine';
+            if (st) st.value = 'draft';
+            document.getElementById('apply-filters')?.click();
+            document.getElementById('opportunities-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
+
     // Pre-load user's applications for categorization
     const user = authService.getCurrentUser();
     if (user) {

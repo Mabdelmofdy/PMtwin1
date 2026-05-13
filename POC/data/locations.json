@@ -492,6 +492,60 @@
       ]
     },
     {
+      "id": "eg",
+      "name": "Egypt",
+      "code": "EG",
+      "lat": 26.8206,
+      "lng": 30.8025,
+      "regions": [
+        {
+          "id": "alexandria-governorate",
+          "name": "Alexandria Governorate",
+          "lat": 31.2001,
+          "lng": 29.9187,
+          "cities": [
+            {
+              "id": "alexandria",
+              "name": "Alexandria",
+              "lat": 31.2001,
+              "lng": 29.9187,
+              "districts": []
+            }
+          ]
+        },
+        {
+          "id": "cairo-governorate",
+          "name": "Cairo Governorate",
+          "lat": 30.0444,
+          "lng": 31.2357,
+          "cities": [
+            {
+              "id": "cairo",
+              "name": "Cairo",
+              "lat": 30.0444,
+              "lng": 31.2357,
+              "districts": []
+            }
+          ]
+        },
+        {
+          "id": "giza-governorate",
+          "name": "Giza Governorate",
+          "lat": 30.0131,
+          "lng": 31.2089,
+          "cities": [
+            {
+              "id": "giza",
+              "name": "Giza",
+              "lat": 30.0131,
+              "lng": 31.2089,
+              "districts": []
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "remote",
       "name": "Remote",
       "code": "REMOTE",

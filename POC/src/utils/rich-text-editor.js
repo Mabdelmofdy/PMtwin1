@@ -5,6 +5,23 @@
 
 let quillEditors = new Map();
 
+/** Full toolbar (long-form content). */
+const TOOLBAR_FULL = [
+    [{ header: [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    [{ color: [] }, { background: [] }],
+    ['link'],
+    ['clean']
+];
+
+/** Compact toolbar for dense forms — less horizontal space, easier to scan. */
+const TOOLBAR_COMPACT = [
+    ['bold', 'italic', 'underline'],
+    [{ list: 'bullet' }, { list: 'ordered' }],
+    ['link', 'clean']
+];
+
 /**
  * Initialize Quill editor for a textarea field
  * @param {string|HTMLElement} textareaIdOrElement - Textarea ID or element
@@ -32,7 +49,14 @@ function initRichTextEditor(textareaIdOrElement, options = {}) {
     
     // Create container for Quill
     const container = document.createElement('div');
-    container.className = 'rich-text-editor-container';
+    const useFullToolbar = textarea.dataset.richTextToolbar === 'full';
+    let toolbar;
+    if (options.modules && options.modules.toolbar) {
+        toolbar = options.modules.toolbar;
+    } else {
+        toolbar = useFullToolbar ? TOOLBAR_FULL : TOOLBAR_COMPACT;
+    }
+    container.className = 'rich-text-editor-container' + (useFullToolbar ? '' : ' rich-text-editor-container--compact');
     container.style.marginTop = '0.5rem';
     
     // Hide original textarea
@@ -41,21 +65,14 @@ function initRichTextEditor(textareaIdOrElement, options = {}) {
     // Insert container after textarea
     textarea.parentNode.insertBefore(container, textarea.nextSibling);
     
-    // Default Quill options
     const defaultOptions = {
         theme: 'snow',
-        modules: {
-            toolbar: [
-                [{ 'header': [1, 2, 3, false] }],
-                ['bold', 'italic', 'underline', 'strike'],
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                [{ 'color': [] }, { 'background': [] }],
-                ['link'],
-                ['clean']
-            ]
-        },
         placeholder: textarea.placeholder || 'Start typing...',
-        ...options
+        ...options,
+        modules: {
+            ...(options.modules || {}),
+            toolbar
+        }
     };
     
     // Initialize Quill
