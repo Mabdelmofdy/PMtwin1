@@ -13,29 +13,59 @@ async function runAndShowReport() {
     const reportGrid = document.getElementById('matching-stats-grid');
     const reportDetails = document.getElementById('matching-report-details');
     const runError = document.getElementById('matching-run-error');
+    const runButton = document.getElementById('matching-run-report-btn');
+    const runState = document.querySelector('.matching-run-state');
+    const refreshStatus = document.getElementById('matching-refresh-status');
+    const lastUpdated = document.getElementById('matching-last-updated');
 
     if (!window.matchingService || !window.matchingModels || !window.dataService) {
         if (runError) {
             runError.hidden = false;
             runError.textContent = 'Matching service not available. Ensure the app has loaded matching scripts.';
         }
+        if (runState) {
+            runState.classList.remove('is-running');
+            runState.classList.add('is-error');
+        }
+        if (refreshStatus) refreshStatus.textContent = 'Matching service is unavailable';
         return;
     }
     if (runError) runError.hidden = true;
     if (reportBlock) reportBlock.hidden = true;
     if (runLoading) runLoading.hidden = false;
+    if (runButton) {
+        runButton.disabled = true;
+        runButton.classList.add('is-running');
+    }
+    if (runState) {
+        runState.classList.add('is-running');
+        runState.classList.remove('is-error');
+    }
+    if (refreshStatus) refreshStatus.textContent = 'Analyzing current opportunities';
     try {
         const report = await runMatchingOnCurrentData();
         renderReport(reportGrid, reportDetails || null, report);
         await renderAdminAnalytics(window.dataService);
+        if (runLoading) runLoading.hidden = true;
         if (reportBlock) reportBlock.hidden = false;
+        const nowLabel = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (lastUpdated) lastUpdated.textContent = nowLabel;
+        if (refreshStatus) refreshStatus.textContent = 'Live report refreshed at ' + nowLabel;
+        if (runState) runState.classList.remove('is-error');
     } catch (e) {
         if (runError) {
             runError.hidden = false;
             runError.textContent = e && e.message ? e.message : 'Run failed.';
         }
+        if (runState) runState.classList.add('is-error');
+        if (refreshStatus) refreshStatus.textContent = 'Run failed';
     } finally {
         if (runLoading) runLoading.hidden = true;
+        if (runButton) {
+            runButton.disabled = false;
+            runButton.classList.remove('is-running');
+        }
+        if (runState) runState.classList.remove('is-running');
     }
 }
 
@@ -44,11 +74,11 @@ async function renderAdminAnalytics(dataService) {
     if (!el) return;
     const stats = await getAdminMatchingAnalytics(dataService);
     el.innerHTML = ''
-        + '<div class="stat-card"><div class="stat-value">' + stats.totalPostMatches + '</div><div class="stat-label">Total post_matches</div></div>'
-        + '<div class="stat-card"><div class="stat-value">' + stats.confirmedPostMatches + '</div><div class="stat-label">Confirmed post_matches</div></div>'
-        + '<div class="stat-card"><div class="stat-value">' + stats.totalDeals + '</div><div class="stat-label">Total deals</div></div>'
-        + '<div class="stat-card"><div class="stat-value">' + stats.dealsFromMatches + '</div><div class="stat-label">Deals from matches</div></div>'
-        + '<div class="stat-card"><div class="stat-value">' + escapeHtml(stats.conversionRate) + '</div><div class="stat-label">Conversion (confirmed → deals)</div></div>';
+        + renderMetricCard(stats.totalPostMatches, 'Saved matches', 'Persisted matches')
+        + renderMetricCard(stats.confirmedPostMatches, 'Confirmed', 'Accepted by users')
+        + renderMetricCard(stats.totalDeals, 'Deals', 'All collaboration deals')
+        + renderMetricCard(stats.dealsFromMatches, 'From matches', 'Deals created from matches')
+        + renderMetricCard(escapeHtml(stats.conversionRate), 'Conversion', 'Confirmed to deal rate');
 }
 
 /**
@@ -90,6 +120,9 @@ async function initAdminMatching() {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }
+
+    const runButton = document.getElementById('matching-run-report-btn');
+    if (runButton) runButton.onclick = runAndShowReport;
 
     if (matchingRefreshIntervalId != null) {
         clearInterval(matchingRefreshIntervalId);
@@ -149,8 +182,6 @@ async function runMatchingOnCurrentData() {
             matches: matches
         });
     }
-    report.totalMatchesFound += report.oneWayMatches;
-
     const offerLimit = Math.min(20, offers.length);
     for (let i = 0; i < offerLimit; i++) {
         const offer = offers[i];
@@ -302,6 +333,59 @@ function getOpportunityRoute(id) {
     return routeBase && routeBase.endsWith('/') ? routeBase + id : '/opportunities/' + id;
 }
 
+function renderMetricCard(value, label, detail) {
+    return ''
+        + '<div class="stat-card matching-metric-card">'
+        + '<div>'
+        + '<div class="stat-value">' + escapeHtml(value) + '</div>'
+        + '<div class="stat-label">' + escapeHtml(label) + '</div>'
+        + (detail ? '<div class="stat-detail">' + escapeHtml(detail) + '</div>' : '')
+        + '</div>'
+        + '</div>';
+}
+
+function getScoreTone(scoreText) {
+    const raw = String(scoreText || '').replace('%', '').trim();
+    const score = Number.parseInt(raw, 10);
+    if (Number.isNaN(score)) return 'neutral';
+    if (score >= 80) return 'high';
+    if (score >= 60) return 'medium';
+    if (score > 0) return 'low';
+    return 'neutral';
+}
+
+function renderScoreBadge(scoreText) {
+    const text = scoreText == null || scoreText === '' ? '-' : String(scoreText);
+    return '<span class="matching-score-badge is-' + getScoreTone(text) + '">' + escapeHtml(text) + '</span>';
+}
+
+function renderStatusBadge(status) {
+    const text = status || 'Suggested';
+    const key = text.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    return '<span class="matching-status-badge matching-status-' + escapeHtml(key || 'neutral') + '">' + escapeHtml(text) + '</span>';
+}
+
+function renderMatchKindBadge(matchType, filterKey) {
+    const key = filterKey || 'neutral';
+    return '<span class="matching-kind-badge matching-kind-' + escapeHtml(key) + '">' + escapeHtml(matchType) + '</span>';
+}
+
+function renderMatchingSummary(report) {
+    const el = document.getElementById('matching-report-summary');
+    if (!el) return;
+    const activeModels = [
+        report.oneWayMatches,
+        report.twoWayMatches,
+        report.groupFormations,
+        report.circularExchanges
+    ].filter(count => Number(count || 0) > 0).length;
+    el.innerHTML = ''
+        + '<div class="matching-summary-chip"><strong>' + escapeHtml(report.totalPostsAnalyzed) + '</strong><span>Published posts</span></div>'
+        + '<div class="matching-summary-chip"><strong>' + escapeHtml(report.totalNeeds) + '</strong><span>Needs</span></div>'
+        + '<div class="matching-summary-chip"><strong>' + escapeHtml(report.totalOffers) + '</strong><span>Offers</span></div>'
+        + '<div class="matching-summary-chip"><strong>' + activeModels + '/4</strong><span>Active models</span></div>';
+}
+
 /**
  * Build per-opportunity performance rows for the admin table.
  * Each row: opportunityId, title, matchCount, bestScorePct, avgScorePct, status, sectionId (for View matches scroll).
@@ -420,12 +504,13 @@ function buildMatchesSummaryRows(report) {
 
 function renderReport(gridEl, detailsEl, report) {
     if (!gridEl) return;
+    renderMatchingSummary(report);
     gridEl.innerHTML = ''
-        + '<div class="stat-card"><div class="stat-value">' + report.totalMatchesFound + '</div><div class="stat-label">Total matches</div></div>'
-        + '<div class="stat-card"><div class="stat-value">' + report.oneWayMatches + '</div><div class="stat-label">One-way</div></div>'
-        + '<div class="stat-card"><div class="stat-value">' + report.twoWayMatches + '</div><div class="stat-label">Two-way</div></div>'
-        + '<div class="stat-card"><div class="stat-value">' + report.groupFormations + '</div><div class="stat-label">Consortium</div></div>'
-        + '<div class="stat-card"><div class="stat-value">' + report.circularExchanges + '</div><div class="stat-label">Circular</div></div>';
+        + renderMetricCard(report.totalMatchesFound, 'Total found', 'All suggested matches')
+        + renderMetricCard(report.oneWayMatches, 'Need-offer', 'Direct matches')
+        + renderMetricCard(report.twoWayMatches, 'Barter', 'Two-way exchange')
+        + renderMetricCard(report.groupFormations, 'Group', 'Multi-partner groups')
+        + renderMetricCard(report.circularExchanges, 'Cycle', 'Circular exchanges');
 
     const perOppEl = document.getElementById('matching-per-opportunity-table');
     if (perOppEl) {
@@ -433,13 +518,13 @@ function renderReport(gridEl, detailsEl, report) {
         if (perOppRows.length === 0) {
             perOppEl.innerHTML = '<p class="matching-details">No opportunities analyzed in this run.</p>';
         } else {
-            let table = '<table class="matching-summary-table matching-per-opp-table"><thead><tr><th>Opportunity title</th><th>Number of matches</th><th>Best match score</th><th>Average match score</th><th>Action</th></tr></thead><tbody>';
+            let table = '<table class="matching-summary-table matching-per-opp-table"><thead><tr><th>Opportunity title</th><th>Matches</th><th>Best score</th><th>Average score</th><th>Action</th></tr></thead><tbody>';
             const canPersist = typeof authService !== 'undefined' && authService.hasAdminCapability && authService.hasAdminCapability('admin.matching.persist');
             perOppRows.forEach(r => {
                 const viewHref = r.sectionId === 'matching-two-way' ? '#matching-two-way' : '#matching-opp-' + escapeHtml(r.opportunityId);
-                const viewMatchesLink = '<a href="' + viewHref + '" class="matching-view-matches-link" data-section="' + escapeHtml(r.sectionId) + '" data-opp-id="' + escapeHtml(r.opportunityId) + '">View matches</a>';
-                const persistBtn = canPersist ? ('<button type="button" class="matching-persist-btn" data-opp-id="' + escapeHtml(r.opportunityId) + '">Persist matches</button>') : '';
-                table += '<tr><td>' + escapeHtml(r.title) + '</td><td>' + r.matchCount + '</td><td>' + escapeHtml(String(r.bestScorePct)) + '</td><td>' + escapeHtml(String(r.avgScorePct)) + '</td><td>' + viewMatchesLink + (persistBtn ? ' ' + persistBtn : '') + '</td></tr>';
+                const viewMatchesLink = '<a href="' + viewHref + '" class="matching-view-matches-link" data-section="' + escapeHtml(r.sectionId) + '" data-opp-id="' + escapeHtml(r.opportunityId) + '">View</a>';
+                const persistBtn = canPersist ? ('<button type="button" class="matching-persist-btn" data-opp-id="' + escapeHtml(r.opportunityId) + '">Save</button>') : '';
+                table += '<tr><td>' + escapeHtml(r.title) + '</td><td>' + r.matchCount + '</td><td>' + renderScoreBadge(r.bestScorePct) + '</td><td>' + renderScoreBadge(r.avgScorePct) + '</td><td><div class="matching-action-cell">' + viewMatchesLink + persistBtn + '</div></td></tr>';
             });
             table += '</tbody></table>';
             perOppEl.innerHTML = table;
@@ -463,22 +548,26 @@ function renderReport(gridEl, detailsEl, report) {
             if (summaryTabsEl) {
                 const tabs = [
                     { id: 'all', label: 'All', count: rows.length },
-                    { id: 'one-way', label: 'One-way', count: counts['one-way'] },
-                    { id: 'two-way', label: 'Two-way', count: counts['two-way'] },
-                    { id: 'consortium', label: 'Consortium', count: counts['consortium'] },
-                    { id: 'circular', label: 'Circular', count: counts['circular'] }
+                    { id: 'one-way', label: 'Need-offer', count: counts['one-way'] },
+                    { id: 'two-way', label: 'Barter', count: counts['two-way'] },
+                    { id: 'consortium', label: 'Group', count: counts['consortium'] },
+                    { id: 'circular', label: 'Cycle', count: counts['circular'] }
                 ];
                 summaryTabsEl.innerHTML = tabs.map((t, i) =>
                     '<button type="button" class="matching-match-type-tab' + (i === 0 ? ' is-active' : '') + '" role="tab" data-filter="' + escapeHtml(t.id) + '" aria-selected="' + (i === 0 ? 'true' : 'false') + '">' + escapeHtml(t.label) + ' <span class="tab-count">(' + t.count + ')</span></button>'
                 ).join('');
             }
-            let table = '<table class="matching-summary-table"><thead><tr><th>Match type</th><th>Participants</th><th>Opportunity references</th><th>Match score</th><th>Status</th></tr></thead><tbody>';
-            rows.forEach(r => {
+            const visibleRows = rows.slice(0, 200);
+            const note = rows.length > visibleRows.length
+                ? '<p class="matching-table-note">Showing the first ' + visibleRows.length + ' matches. Use the filters above to focus the list.</p>'
+                : '';
+            let table = '<table class="matching-summary-table"><thead><tr><th>Match type</th><th>Participants</th><th>Opportunity references</th><th>Score</th><th>Status</th></tr></thead><tbody>';
+            visibleRows.forEach(r => {
                 const filterKey = MATCH_TYPE_FILTER_KEYS[r.matchType] || '';
-                table += '<tr data-match-type="' + escapeHtml(filterKey) + '"><td>' + escapeHtml(r.matchType) + '</td><td>' + escapeHtml(r.participants) + '</td><td>' + escapeHtml(r.opportunityRefs) + '</td><td>' + escapeHtml(r.matchScore) + '</td><td>' + escapeHtml(r.status) + '</td></tr>';
+                table += '<tr data-match-type="' + escapeHtml(filterKey) + '"><td>' + renderMatchKindBadge(r.matchType, filterKey) + '</td><td>' + escapeHtml(r.participants) + '</td><td>' + escapeHtml(r.opportunityRefs) + '</td><td>' + renderScoreBadge(r.matchScore) + '</td><td>' + renderStatusBadge(r.status) + '</td></tr>';
             });
             table += '</tbody></table>';
-            summaryEl.innerHTML = table;
+            summaryEl.innerHTML = note + table;
             if (summaryTabsEl) {
                 const detailSections = document.querySelectorAll('.matching-detail-section[data-match-type]');
                 const applyFilter = (filter) => {
@@ -492,7 +581,7 @@ function renderReport(gridEl, detailsEl, report) {
                     }
                     detailSections.forEach(section => {
                         const sectionType = section.getAttribute('data-match-type');
-                        const showSection = filter === 'all' || sectionType === filter;
+                        const showSection = filter !== 'all' && sectionType === filter;
                         section.hidden = !showSection;
                     });
                 };
