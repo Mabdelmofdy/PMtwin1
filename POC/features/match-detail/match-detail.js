@@ -312,14 +312,23 @@ function setupMatchDetailActions(matchId, userId) {
                     const nextMatch = await dataService.inviteNextReplacementCandidate(matchId, userId);
                     if (nextMatch) {
                         if (window.router && window.router.navigate) window.router.navigate('/matches/' + nextMatch.id);
-                        else window.location.hash = '#/matches/' + nextMatch.id;
+                        else {
+                            const bp = (typeof CONFIG !== 'undefined' && CONFIG.BASE_PATH) ? CONFIG.BASE_PATH.replace(/\/*$/, '') : '';
+                            window.location.assign(`${window.location.origin}${bp}/matches/${nextMatch.id}`);
+                        }
                     } else {
                         if (router && router.navigate) router.navigate(CONFIG.ROUTES.MATCHES);
-                        else window.location.hash = '#/matches';
+                        else {
+                            const bp = (typeof CONFIG !== 'undefined' && CONFIG.BASE_PATH) ? CONFIG.BASE_PATH.replace(/\/*$/, '') : '';
+                            window.location.assign(`${window.location.origin}${bp}/matches`);
+                        }
                     }
                 } else {
                     if (router && router.navigate) router.navigate(CONFIG.ROUTES.MATCHES);
-                    else window.location.hash = '#/matches';
+                    else {
+                        const bp = (typeof CONFIG !== 'undefined' && CONFIG.BASE_PATH) ? CONFIG.BASE_PATH.replace(/\/*$/, '') : '';
+                        window.location.assign(`${window.location.origin}${bp}/matches`);
+                    }
                 }
             } catch (err) {
                 console.error('Decline match error:', err);

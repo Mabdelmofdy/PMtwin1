@@ -271,9 +271,10 @@ function initTabRouting() {
             const tab = btn.getAttribute('data-tab');
             switchTab(tab);
             try {
-                const hash = window.location.hash || '';
-                const baseHash = hash.split('?')[0];
-                window.location.hash = `${baseHash}?tab=${tab}`;
+                const u = new URL(window.location.href);
+                u.searchParams.set('tab', tab);
+                const logicalPath = window.router && typeof window.router.getCurrentPath === 'function' ? window.router.getCurrentPath() : '';
+                window.history.replaceState({ path: logicalPath }, '', u.pathname + u.search);
             } catch (_) { /* ignore */ }
         });
     });
@@ -285,7 +286,7 @@ function initTabRouting() {
         switchTab('general');
     }
 
-    window.addEventListener('hashchange', () => {
+    window.addEventListener('popstate', () => {
         const t = getRequestedTab();
         if (t && ADMIN_SETTINGS_TABS.includes(t)) switchTab(t);
     });
@@ -293,10 +294,7 @@ function initTabRouting() {
 
 function getRequestedTab() {
     try {
-        const hash = window.location.hash || '';
-        const qIndex = hash.indexOf('?');
-        if (qIndex < 0) return null;
-        const params = new URLSearchParams(hash.substring(qIndex + 1));
+        const params = new URLSearchParams(window.location.search || '');
         return params.get('tab');
     } catch (_) {
         return null;

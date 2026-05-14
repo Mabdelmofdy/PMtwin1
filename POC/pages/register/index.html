@@ -24,18 +24,20 @@
     </section>
 
     <section class="pm-auth-form-zone" aria-label="Registration form">
-    <div class="w-full max-w-2xl pm-register-card-wrap">
+    <div class="w-full pm-register-card-wrap">
         <div class="reg-main-card bg-white rounded-xl p-6 sm:p-8 shadow-lg border border-gray-100">
             <!-- Header: title, subtitle, auth actions -->
             <header class="reg-header mb-8">
-                <h1 class="reg-header-title">Join PMTwin</h1>
-                <p class="reg-header-subtitle">Create your account to start collaborating</p>
-                <div class="reg-header-actions">
-                    <span class="reg-header-login">
-                        Already have an account? <a href="#" data-route="/login" class="reg-header-login-link">Login here</a>
-                    </span>
+                <div class="reg-header-top">
+                    <div class="reg-header-lead">
+                        <h1 class="reg-header-title">Join PMTwin</h1>
+                        <p class="reg-header-subtitle">Create your account to start collaborating</p>
+                    </div>
                     <button type="button" id="reg-fill-demo" class="reg-btn-demo">Try Demo Data</button>
                 </div>
+                <p class="reg-header-login">
+                    Already have an account? <a href="#" data-route="/login" class="reg-header-login-link">Login here</a>
+                </p>
             </header>
 
             <!-- Step navigation (horizontal bar) -->
@@ -61,15 +63,15 @@
                 <h2 id="reg-step-0-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-1">Select account type</h2>
                 <p class="text-gray-600 mb-6">Choose whether you are registering as a business or an individual.</p>
                 <div class="reg-account-type-grid grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <label class="reg-account-card flex flex-col relative p-6 border-2 border-gray-200 rounded-xl cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:shadow-md hover:border-primary/70 hover:shadow-lg">
-                        <span class="reg-account-card-check absolute top-4 right-4 hidden has-[:checked]:inline-flex text-primary" aria-hidden="true"><i class="ph-fill ph-check-circle text-xl"></i></span>
+                    <label class="reg-account-card reg-account-card-company flex flex-col relative p-6 border-2 border-gray-200 rounded-xl cursor-pointer transition-all hover:border-primary/70 hover:shadow-lg">
+                        <span class="reg-account-card-check absolute top-4 right-4 text-primary" aria-hidden="true"><i class="ph-fill ph-check-circle text-xl"></i></span>
                         <input type="radio" name="accountType" value="company" class="sr-only">
                         <span class="reg-account-icon flex items-center justify-center w-14 h-14 rounded-xl bg-primary/10 text-primary mb-4" aria-hidden="true"><i class="ph-duotone ph-buildings text-3xl"></i></span>
                         <span class="font-semibold text-gray-900 mb-1">Company</span>
                         <p class="text-sm text-gray-600">For businesses looking for collaborations and partnerships.</p>
                     </label>
-                    <label class="reg-account-card flex flex-col relative p-6 border-2 border-gray-200 rounded-xl cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:shadow-md hover:border-primary/70 hover:shadow-lg">
-                        <span class="reg-account-card-check absolute top-4 right-4 hidden has-[:checked]:inline-flex text-primary" aria-hidden="true"><i class="ph-fill ph-check-circle text-xl"></i></span>
+                    <label class="reg-account-card reg-account-card-individual flex flex-col relative p-6 border-2 border-gray-200 rounded-xl cursor-pointer transition-all hover:border-primary/70 hover:shadow-lg">
+                        <span class="reg-account-card-check absolute top-4 right-4 text-primary" aria-hidden="true"><i class="ph-fill ph-check-circle text-xl"></i></span>
                         <input type="radio" name="accountType" value="individual" class="sr-only">
                         <span class="reg-account-icon flex items-center justify-center w-14 h-14 rounded-xl bg-primary/10 text-primary mb-4" aria-hidden="true"><i class="ph-duotone ph-user text-3xl"></i></span>
                         <span class="font-semibold text-gray-900 mb-1">Individual</span>
@@ -260,14 +262,14 @@
                 <h2 id="reg-step-a4-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-4">Review & submit</h2>
                 <div id="reg-profile-completion-company" class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
                     <p class="text-sm font-medium text-gray-700 mb-2">Profile completion: <span id="reg-completion-pct-company">0%</span></p>
-                    <div class="w-full bg-gray-200 rounded-full h-2 mb-3"><div id="reg-completion-bar-company" class="bg-primary h-2 rounded-full transition-all" style="width: 0%"></div></div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-3"><div id="reg-completion-bar-company" class="reg-completion-bar-fill h-2 rounded-full transition-all" style="width: 0%"></div></div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm"><div id="reg-completion-done-company" class="text-green-700"></div><div id="reg-completion-missing-company" class="text-amber-700"></div></div>
                 </div>
-                <div id="reg-review-company" class="space-y-3 text-gray-700 mb-6"></div>
-                <div class="reg-form-section space-y-4 mb-6">
-                    <h3 class="reg-section-title">Collaboration preferences</h3>
-                    <p class="text-sm text-gray-600 mb-2">Select how you prefer to collaborate with others (optional).</p>
-                    <div id="reg-company-preferred-models" class="flex flex-wrap gap-2"></div>
+                <div id="reg-review-company" class="reg-review-summary text-gray-800 mb-6"></div>
+                <div class="reg-form-section reg-collab-prefs-panel space-y-3 mb-6 p-5 rounded-xl border border-slate-200/90 bg-slate-50/90">
+                    <h3 class="reg-section-title mb-0">Collaboration preferences</h3>
+                    <p class="text-sm text-gray-600">Select how you prefer to collaborate with others (optional).</p>
+                    <div id="reg-company-preferred-models" class="flex flex-wrap gap-x-4 gap-y-2"></div>
                 </div>
                 <div class="mt-6 flex justify-between">
                     <button type="button" id="reg-btn-back-a4" class="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50">Back</button>
@@ -312,25 +314,33 @@
                 </div>
             </div>
             
-            <!-- Individual path: B1 Choose role (Professional or Consultant) -->
+            <!-- Individual path: B1 Choose role (Professional or Consultant) + sub-type -->
             <div id="reg-step-b1" class="reg-step-content reg-step-card hidden" role="region" aria-labelledby="reg-step-b1-title">
-                <h2 id="reg-step-b1-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-1">Choose role</h2>
-                <p class="text-gray-600 mb-6">Select how you will use the platform. You can change this later in Settings.</p>
-                <div class="reg-account-type-grid grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <label class="reg-account-card flex flex-col relative p-6 border-2 border-gray-200 rounded-xl cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:shadow-md hover:border-primary/70 hover:shadow-lg">
-                        <span class="reg-account-card-check absolute top-4 right-4 hidden has-[:checked]:inline-flex text-primary" aria-hidden="true"><i class="ph-fill ph-check-circle text-xl"></i></span>
+                <h2 id="reg-step-b1-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-1">Choose your role</h2>
+                <p class="text-gray-600 mb-6">Pick the type that best describes you, then choose a sub-type below. You can update this later in Settings.</p>
+                <div class="reg-account-type-grid reg-individual-type-grid grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <label class="reg-account-card reg-individual-type-card reg-account-card-individual flex flex-col relative p-6 border-2 border-gray-200 rounded-xl cursor-pointer transition-all hover:border-primary/70 hover:shadow-lg">
+                        <span class="reg-account-card-check absolute top-4 right-4 text-primary" aria-hidden="true"><i class="ph-fill ph-check-circle text-xl"></i></span>
                         <input type="radio" name="individualType" value="professional" class="sr-only">
                         <span class="reg-account-icon flex items-center justify-center w-14 h-14 rounded-xl bg-primary/10 text-primary mb-4" aria-hidden="true"><i class="ph-duotone ph-briefcase text-3xl"></i></span>
                         <span class="font-semibold text-gray-900 mb-1">Professional</span>
                         <p class="text-sm text-gray-600">Hands-on delivery: design, engineering, project execution, and technical work.</p>
                     </label>
-                    <label class="reg-account-card flex flex-col relative p-6 border-2 border-gray-200 rounded-xl cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:shadow-md hover:border-primary/70 hover:shadow-lg">
-                        <span class="reg-account-card-check absolute top-4 right-4 hidden has-[:checked]:inline-flex text-primary" aria-hidden="true"><i class="ph-fill ph-check-circle text-xl"></i></span>
+                    <label class="reg-account-card reg-individual-type-card reg-account-card-individual flex flex-col relative p-6 border-2 border-gray-200 rounded-xl cursor-pointer transition-all hover:border-primary/70 hover:shadow-lg">
+                        <span class="reg-account-card-check absolute top-4 right-4 text-primary" aria-hidden="true"><i class="ph-fill ph-check-circle text-xl"></i></span>
                         <input type="radio" name="individualType" value="consultant" class="sr-only">
                         <span class="reg-account-icon flex items-center justify-center w-14 h-14 rounded-xl bg-primary/10 text-primary mb-4" aria-hidden="true"><i class="ph-duotone ph-identification-badge text-3xl"></i></span>
                         <span class="font-semibold text-gray-900 mb-1">Consultant</span>
                         <p class="text-sm text-gray-600">Advisory and strategic input: expertise review, advice, and case-based validation.</p>
                     </label>
+                </div>
+                <div id="reg-individual-subtype-wrap" class="mt-6 mb-2 hidden reg-individual-subtype-panel p-5 rounded-xl border border-gray-200 bg-gray-50/80">
+                    <label for="reg-individual-subtype" class="block mb-1 font-medium text-gray-900">Sub-type <span class="text-red-600">*</span></label>
+                    <p id="reg-individual-subtype-hint" class="text-sm text-gray-600 mb-3"></p>
+                    <select id="reg-individual-subtype" name="individualSubType" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="">Select sub-type</option>
+                    </select>
+                    <span id="reg-error-reg-individual-subtype" class="reg-inline-error text-sm text-red-600 mt-1 hidden" aria-live="polite"></span>
                 </div>
                 <div class="mt-8 flex flex-col items-end gap-1">
                     <p id="reg-b1-continue-hint" class="text-sm text-gray-500 w-full text-right">Select an option to continue.</p>
@@ -489,14 +499,14 @@
                 <h2 id="reg-step-b4-title" class="reg-step-title text-lg font-semibold text-gray-900 mb-4">Review & submit</h2>
                 <div id="reg-profile-completion-individual" class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
                     <p class="text-sm font-medium text-gray-700 mb-2">Profile completion: <span id="reg-completion-pct-individual">0%</span></p>
-                    <div class="w-full bg-gray-200 rounded-full h-2 mb-3"><div id="reg-completion-bar-individual" class="bg-primary h-2 rounded-full transition-all" style="width: 0%"></div></div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-3"><div id="reg-completion-bar-individual" class="reg-completion-bar-fill h-2 rounded-full transition-all" style="width: 0%"></div></div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm"><div id="reg-completion-done-individual" class="text-green-700"></div><div id="reg-completion-missing-individual" class="text-amber-700"></div></div>
                 </div>
-                <div id="reg-review-individual" class="space-y-3 text-gray-700 mb-6"></div>
-                <div class="reg-form-section space-y-4 mb-6">
-                    <h3 class="reg-section-title">Collaboration preferences</h3>
-                    <p class="text-sm text-gray-600 mb-2">Select how you prefer to collaborate with others (optional).</p>
-                    <div id="reg-individual-preferred-models" class="flex flex-wrap gap-2"></div>
+                <div id="reg-review-individual" class="reg-review-summary text-gray-800 mb-6"></div>
+                <div class="reg-form-section reg-collab-prefs-panel space-y-3 mb-6 p-5 rounded-xl border border-slate-200/90 bg-slate-50/90">
+                    <h3 class="reg-section-title mb-0">Collaboration preferences</h3>
+                    <p class="text-sm text-gray-600">Select how you prefer to collaborate with others (optional).</p>
+                    <div id="reg-individual-preferred-models" class="flex flex-wrap gap-x-4 gap-y-2"></div>
                 </div>
                 <div class="mt-6 flex justify-between">
                     <button type="button" id="reg-btn-back-b4" class="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50">Back</button>
@@ -570,18 +580,20 @@
 }
 
 .pm-register-page {
-    --auth-ink: #101820;
-    --auth-muted: #5f6b7a;
-    --auth-line: #d9e2ec;
-    --auth-teal: #0891b2;
-    --auth-teal-dark: #0e7490;
+    /* Align with global theme (main.css :root / platform refresh) */
+    --auth-ink: var(--text-primary);
+    --auth-muted: var(--text-muted);
+    --auth-line: var(--border-color);
+    --auth-teal: var(--primary-color);
+    --auth-teal-dark: var(--primary-dark);
+    --auth-primary-tint: var(--portal-sidebar-active-bg, #ecfeff);
     --auth-coral: #e85d4f;
     width: 100%;
     max-width: none;
     min-height: calc(100vh - 64px);
     display: grid;
     grid-template-columns: minmax(380px, 0.75fr) minmax(520px, 1fr);
-    background: #f7f9fb;
+    background: var(--bg-secondary);
     color: var(--auth-ink);
 }
 
@@ -595,9 +607,9 @@
     border-right: 1px solid var(--auth-line);
     background:
         linear-gradient(90deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.78) 100%),
-        linear-gradient(0deg, rgba(16,24,32,0.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(16,24,32,0.045) 1px, transparent 1px),
-        #eef3f6;
+        linear-gradient(0deg, color-mix(in srgb, var(--text-primary) 4.5%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--text-primary) 4.5%, transparent) 1px, transparent 1px),
+        var(--portal-bg, var(--bg-tertiary));
     background-size: auto, 34px 34px, 34px 34px, auto;
 }
 
@@ -605,8 +617,8 @@
     position: absolute;
     inset: 0;
     background:
-        linear-gradient(135deg, transparent 0 34%, rgba(8,145,178,0.16) 34.2% 34.6%, transparent 34.8% 100%),
-        linear-gradient(150deg, transparent 0 70%, rgba(232,93,79,0.14) 70.2% 70.6%, transparent 70.8% 100%);
+        linear-gradient(135deg, transparent 0 34%, color-mix(in srgb, var(--primary-color) 16%, transparent) 34.2% 34.6%, transparent 34.8% 100%),
+        linear-gradient(150deg, transparent 0 70%, color-mix(in srgb, var(--auth-coral) 14%, transparent) 70.2% 70.6%, transparent 70.8% 100%);
 }
 
 .pm-register-page .pm-auth-visual-content {
@@ -651,14 +663,14 @@
     position: relative;
     height: 250px;
     margin-top: 2.2rem;
-    border: 1px solid rgba(16,24,32,0.12);
+    border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
     border-radius: 8px;
     background:
-        linear-gradient(0deg, rgba(8,145,178,0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(8,145,178,0.08) 1px, transparent 1px),
-        #ffffff;
+        linear-gradient(0deg, color-mix(in srgb, var(--primary-color) 8%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--primary-color) 8%, transparent) 1px, transparent 1px),
+        var(--bg-primary);
     background-size: 24px 24px;
-    box-shadow: 0 24px 60px rgba(16,24,32,0.13);
+    box-shadow: var(--shadow-lg);
     transform: rotateX(54deg) rotateZ(-35deg);
 }
 
@@ -668,7 +680,7 @@
     width: 66px;
     height: 106px;
     background: var(--auth-teal);
-    box-shadow: 17px -17px 0 #0e7490;
+    box-shadow: 17px -17px 0 var(--primary-dark);
 }
 
 .pm-register-page .pm-auth-block-a { left: 20%; top: 26%; }
@@ -718,13 +730,14 @@
 }
 
 .pm-register-card-wrap {
-    width: min(760px, 100%);
+    width: min(1080px, 100%);
+    max-width: 100%;
 }
 
 .pm-register-page .reg-main-card {
     border: 1px solid var(--auth-line) !important;
     border-radius: 8px !important;
-    box-shadow: 0 24px 60px rgba(16,24,32,0.1) !important;
+    box-shadow: var(--shadow-lg) !important;
 }
 
 .pm-register-page .reg-header-title {
@@ -741,16 +754,21 @@
     color: var(--auth-muted);
 }
 
-.pm-register-page .reg-header-actions {
+.pm-register-page .reg-header-top {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
+    gap: 1rem 1.25rem;
     flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 1rem;
+}
+
+.pm-register-page .reg-header-lead {
+    flex: 1 1 12rem;
+    min-width: 0;
 }
 
 .pm-register-page .reg-header-login {
+    margin: 0.85rem 0 0;
     color: var(--auth-muted);
     font-size: 0.9rem;
 }
@@ -765,49 +783,125 @@
 .pm-register-page .reg-btn-demo {
     min-height: 40px;
     padding: 0.45rem 0.75rem;
-    border: 1px solid rgba(8,145,178,0.28);
+    border: 1px solid color-mix(in srgb, var(--primary-color) 30%, var(--border-color));
     border-radius: 8px;
-    background: #ecfeff;
+    background: var(--auth-primary-tint);
     cursor: pointer;
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: 0.15rem;
 }
 
 .pm-register-page .reg-step-nav-wrap {
-    overflow-x: auto;
-    padding: 0.55rem;
+    overflow: visible;
+    padding: 0.65rem 0.6rem;
     border: 1px solid var(--auth-line);
     border-radius: 8px;
-    background: #f8fafc;
+    background: var(--bg-tertiary);
+}
+
+.pm-register-page .reg-step-nav {
+    overflow: visible;
 }
 
 .pm-register-page .reg-step-nav-list {
     display: grid;
-    grid-template-columns: repeat(6, minmax(86px, 1fr));
-    gap: 0.35rem;
-    min-width: 620px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.4rem;
+    min-width: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 .pm-register-page .reg-step-nav-item {
-    min-height: 58px;
-    padding: 0.55rem;
-    border: 1px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-height: 4.25rem;
+    padding: 0.5rem 0.3rem;
+    border: 1px solid var(--auth-line);
     border-radius: 8px;
-    background: #ffffff;
+    background: var(--bg-primary);
+    text-align: center;
+    min-width: 0;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pm-register-page .reg-step-nav-item:not(:last-child)::after {
+    content: none;
 }
 
 .pm-register-page .reg-step-nav-icon {
-    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 1.45rem;
+    line-height: 1;
+    color: var(--auth-teal-dark);
+    border-radius: 8px;
+}
+
+.pm-register-page .reg-step-nav-icon.reg-step-nav-icon-done {
+    opacity: 1;
+    color: #16a34a;
+}
+
+.pm-register-page .reg-step-nav-icon.reg-step-nav-icon-muted {
+    opacity: 0.45;
+}
+
+.pm-register-page .reg-step-nav-item.reg-step-active .reg-step-nav-icon {
+    opacity: 1;
+}
+
+.pm-register-page .reg-step-nav-label {
+    display: block;
+    font-size: clamp(0.65rem, 0.9vw + 0.45rem, 0.78rem);
+    font-weight: 750;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 0.1rem;
+}
+
+.pm-register-page .reg-step-nav-item.reg-step-active .reg-step-nav-label {
+    color: var(--auth-teal-dark);
+    font-weight: 800;
+}
+
+.pm-register-page .reg-step-nav-item.reg-step-done .reg-step-nav-label {
+    color: var(--auth-muted);
+}
+
+.pm-register-page .reg-step-nav-item.reg-step-upcoming .reg-step-nav-label {
+    color: var(--auth-muted);
 }
 
 .pm-register-page .reg-step-active {
-    border-color: rgba(8,145,178,0.35);
-    background: #ecfeff;
+    border-color: var(--primary-color);
+    background: var(--auth-primary-tint);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 12%, transparent);
+}
+
+.pm-register-page .reg-step-done {
+    border-color: color-mix(in srgb, var(--primary-color) 22%, var(--border-color));
+    background: var(--bg-tertiary);
 }
 
 .pm-register-page .reg-step-card {
     border: 1px solid var(--auth-line);
     border-radius: 8px;
     padding: 1rem;
-    background: #ffffff;
+    background: var(--bg-primary);
 }
 
 .pm-register-page .reg-step-title {
@@ -819,6 +913,22 @@
     border-radius: 8px !important;
 }
 
+.pm-register-page .reg-account-card .reg-account-card-check {
+    display: none;
+}
+
+.pm-register-page .reg-account-card--selected,
+.pm-register-page .reg-account-card:has(input:checked) {
+    border-color: var(--primary-color) !important;
+    background: var(--auth-primary-tint) !important;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 35%, transparent), var(--shadow-md) !important;
+}
+
+.pm-register-page .reg-account-card--selected .reg-account-card-check,
+.pm-register-page .reg-account-card:has(input:checked) .reg-account-card-check {
+    display: inline-flex;
+}
+
 .pm-register-page .reg-account-icon {
     border-radius: 8px !important;
 }
@@ -827,7 +937,7 @@
     padding: 1rem;
     border: 1px solid var(--auth-line);
     border-radius: 8px;
-    background: #f8fafc;
+    background: var(--bg-tertiary);
 }
 
 .pm-register-page .reg-section-title {
@@ -850,7 +960,7 @@
     border-radius: 8px !important;
     background: var(--auth-ink) !important;
     border-color: var(--auth-ink) !important;
-    color: #ffffff !important;
+    color: var(--bg-primary) !important;
     font-weight: 850 !important;
 }
 
@@ -904,8 +1014,71 @@
         grid-template-columns: 1fr;
     }
 
+    .pm-register-page .reg-step-nav-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .pm-register-page .reg-step-nav-label {
+        white-space: normal;
+        font-size: 0.68rem;
+        line-height: 1.2;
+        hyphens: auto;
+        overflow: visible;
+        text-overflow: unset;
+    }
+
+    .pm-register-page .reg-step-nav-item {
+        min-height: 3.85rem;
+    }
+
     .pm-register-page .reg-step-card {
         padding: 0.85rem;
+    }
+}
+
+.pm-register-page .reg-completion-bar-fill {
+    background: #22c55e;
+}
+
+.pm-register-page .reg-review-summary-inner {
+    display: grid;
+    gap: 0;
+    border: 1px solid var(--auth-line);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--bg-primary);
+}
+
+.pm-register-page .reg-review-row {
+    display: grid;
+    grid-template-columns: minmax(7.5rem, 32%) 1fr;
+    gap: 0.75rem 1rem;
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--auth-line);
+    font-size: 0.92rem;
+    align-items: start;
+}
+
+.pm-register-page .reg-review-row:last-child {
+    border-bottom: 0;
+}
+
+.pm-register-page .reg-review-row dt {
+    margin: 0;
+    font-weight: 750;
+    color: var(--auth-ink);
+}
+
+.pm-register-page .reg-review-row dd {
+    margin: 0;
+    color: var(--auth-muted);
+    word-break: break-word;
+}
+
+@media (max-width: 520px) {
+    .pm-register-page .reg-review-row {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
     }
 }
 </style>

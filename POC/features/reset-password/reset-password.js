@@ -8,8 +8,7 @@ function initResetPassword(params) {
 
     if (!form) return;
 
-    const hash = typeof window !== 'undefined' ? (window.location.hash || '') : '';
-    const qs = hash.indexOf('?') >= 0 ? hash.substring(hash.indexOf('?')) : '';
+    const qs = typeof window !== 'undefined' ? (window.location.search || '') : '';
     const token = params?.token || new URLSearchParams(qs).get('token');
     if (!token) {
         errorEl.textContent = 'Invalid or missing reset link. Please request a new password reset.';
@@ -41,7 +40,8 @@ function initResetPassword(params) {
             if (window.router) {
                 router.navigate(CONFIG.ROUTES.LOGIN);
             } else {
-                window.location.href = window.location.pathname + '#/login';
+                const bp = (typeof CONFIG !== 'undefined' && CONFIG.BASE_PATH) ? CONFIG.BASE_PATH.replace(/\/*$/, '') : '';
+                window.location.href = `${window.location.origin}${bp}/login`;
             }
         } catch (err) {
             errorEl.textContent = err.message || 'Failed to reset password. The link may have expired.';

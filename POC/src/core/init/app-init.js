@@ -381,8 +381,7 @@ function initializeRoutes() {
     });
 
     router.register(CONFIG.ROUTES.RESET_PASSWORD, async () => {
-        const hash = window.location.hash || '';
-        const qs = hash.indexOf('?') >= 0 ? hash.substring(hash.indexOf('?')) : '';
+        const qs = window.location.search || '';
         const token = new URLSearchParams(qs).get('token');
         await loadPage('reset-password', { token });
     });
@@ -707,11 +706,13 @@ let loadPageInProgress = false;
 let pendingLoad = null;
 
 /**
- * Resolve URL for a page path relative to the current document (same origin).
- * Avoids ERR_CONNECTION_REFUSED when opened via file:// or wrong base.
+ * Resolve URL for a page path relative to the app root (same origin).
+ * Uses document.baseURI so fetches work on history URLs like /POC/admin/settings
+ * (relative to location.href would incorrectly resolve under /POC/admin/).
  */
 function resolvePageUrl(relativePath) {
-    return new URL(relativePath, window.location.href).href;
+    const base = (typeof document !== 'undefined' && document.baseURI) ? document.baseURI : window.location.href;
+    return new URL(relativePath, base).href;
 }
 
 /**

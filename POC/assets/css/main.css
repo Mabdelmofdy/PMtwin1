@@ -4614,8 +4614,8 @@ body {
     width: 1.125rem;
     flex-shrink: 0;
 }
-.register-page .reg-step-nav-icon.reg-step-nav-icon-check {
-    color: var(--success-color);
+.register-page .reg-step-nav-icon.reg-step-nav-icon-done {
+    color: var(--success-color, #16a34a);
 }
 .register-page .reg-step-nav-item.reg-step-done .reg-step-nav-label {
     color: var(--text-muted);

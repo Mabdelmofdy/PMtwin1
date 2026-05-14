@@ -34,13 +34,12 @@ function showAuditMessage(text, variant) {
     }
 }
 
-/** Read entityType / entityId from hash query, e.g. #/admin/audit?entityType=deal&entityId=abc */
+/** Read entityType / entityId from URL query, e.g. /admin/audit?entityType=deal&entityId=abc */
 function readAuditQueryFromHash() {
-    const h = window.location.hash.substring(1);
-    const qIdx = h.indexOf('?');
-    if (qIdx === -1) return { entityType: '', entityId: '' };
+    const qs = window.location.search || '';
+    if (!qs) return { entityType: '', entityId: '' };
     try {
-        const sp = new URLSearchParams(h.substring(qIdx + 1));
+        const sp = new URLSearchParams(qs.startsWith('?') ? qs.slice(1) : qs);
         return {
             entityType: (sp.get('entityType') || '').trim(),
             entityId: (sp.get('entityId') || '').trim()
@@ -87,11 +86,13 @@ async function initAdminAudit() {
 }
 
 function setupHashQuerySync() {
-    window.addEventListener('hashchange', () => {
-        if (!window.location.hash.includes('/admin/audit')) return;
+    const onUrlChange = () => {
+        const p = window.router && typeof window.router.getCurrentPath === 'function' ? window.router.getCurrentPath() : '';
+        if (p !== CONFIG.ROUTES.ADMIN_AUDIT) return;
         applyAuditFiltersFromUrl();
         loadAuditLogs();
-    });
+    };
+    window.addEventListener('popstate', onUrlChange);
 }
 
 function setupViewSwitcher() {

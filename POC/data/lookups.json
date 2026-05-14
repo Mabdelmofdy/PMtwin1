@@ -468,9 +468,16 @@
     { "id": "vendor", "label": "Vendor", "hasSubTypes": true, "mobileRequired": true },
     { "id": "skill_service_provider", "label": "Skill Service Provider", "hasSubTypes": false, "mobileRequired": true },
     { "id": "sub_contractor", "label": "Sub-Contractor", "hasSubTypes": true, "mobileRequired": true },
-    { "id": "consultant_company", "label": "Consultant (company)", "hasSubTypes": false, "mobileRequired": true }
+    { "id": "consultant_company", "label": "Consultant (company)", "hasSubTypes": true, "mobileRequired": true }
   ],
   "companyRoleSubTypes": {
+    "consultant_company": [
+      { "id": "engineering", "label": "Engineering consultancy" },
+      { "id": "project_management", "label": "Project management consultancy" },
+      { "id": "architecture_design", "label": "Architecture / design" },
+      { "id": "multidisciplinary", "label": "Multidisciplinary" },
+      { "id": "other", "label": "Other" }
+    ],
     "vendor": [
       { "id": "supplies", "label": "Supplies" },
       { "id": "equipment", "label": "Equipment" },

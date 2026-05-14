@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Redirecting…</title>
+    <meta http-equiv="refresh" content="0;url=../index.html#/register">
+    <script>
+    (function () {
+        var path = (location.pathname || '').replace(/\/$/, '');
+        var suf = '/register';
+        if (!path.endsWith(suf)) return;
+        var baseDir = path.slice(0, -suf.length);
+        baseDir = (baseDir || '') + '/';
+        location.replace(location.origin + baseDir + 'index.html#/register');
+    })();
+    </script>
+</head>
+<body>
+    <p><a href="../index.html#/register">Continue to registration</a></p>
+</body>
+</html>

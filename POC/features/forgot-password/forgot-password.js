@@ -26,7 +26,7 @@ function initForgotPassword() {
             }
             successEl.textContent = 'If an account exists, a reset link would be sent. In this POC, use the link below to reset your password:';
             successEl.style.display = 'block';
-            const resetUrl = `${window.location.origin}${window.location.pathname}#/reset-password?token=${encodeURIComponent(result.token)}`;
+            const resetUrl = `${window.location.origin}${(typeof CONFIG !== 'undefined' && CONFIG.BASE_PATH) ? CONFIG.BASE_PATH.replace(/\/?$/, '') : ''}/reset-password?token=${encodeURIComponent(result.token)}`;
             pocLinkEl.innerHTML = `<strong>Reset link (POC):</strong> <a href="${resetUrl}" class="text-primary underline">Click here to set a new password</a>`;
             pocLinkEl.style.display = 'block';
         } catch (err) {

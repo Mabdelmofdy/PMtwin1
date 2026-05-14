@@ -8,7 +8,25 @@ class Router {
         this.routes = [];
         this.currentRoute = null;
         this.params = {};
-        this.useHash = true; // Use hash-based routing for compatibility with static servers
+        /** History API (no #); use `npm run start` in POC for SPA fallback — plain Live Server cannot serve deep links. */
+        this.useHash = false;
+    }
+
+    getBasePathPrefix() {
+        const raw = (typeof CONFIG !== 'undefined' && CONFIG.BASE_PATH != null) ? String(CONFIG.BASE_PATH) : '/';
+        if (raw === '/' || raw === '') return '';
+        return raw.replace(/\/$/, '');
+    }
+
+    /**
+     * Full pathname for the browser (includes CONFIG.BASE_PATH), plus optional query (must start with ? if non-empty).
+     */
+    buildHistoryUrl(normalizedPath, query) {
+        const prefix = this.getBasePathPrefix();
+        const p = normalizedPath === '/' ? '/' : (normalizedPath.startsWith('/') ? normalizedPath : '/' + normalizedPath);
+        const pathPart = prefix ? (p === '/' ? prefix + '/' : prefix + p) : p;
+        const q = query && query.startsWith('?') ? query : (query ? '?' + query : '');
+        return pathPart + q;
     }
     
     /**
@@ -34,6 +52,10 @@ class Router {
         // Strip query string for route matching
         if (path.includes('?')) {
             path = path.split('?')[0];
+        }
+        // Live Server / explicit index: /index.html or /POC/index.html → logical /
+        if (/^\/index\.html$/i.test(path)) {
+            path = '/';
         }
         return path || '/';
     }
@@ -67,12 +89,14 @@ class Router {
         return { normalizedPath, query };
     }
 
-    /** Query portion of current hash (e.g. `?a=1`), or empty string. */
+    /** Query portion of current URL (`?a=1`), or empty string. */
     getHashQueryString() {
-        if (!this.useHash) return '';
-        const h = window.location.hash.substring(1);
-        const i = h.indexOf('?');
-        return i >= 0 ? h.substring(i) : '';
+        if (this.useHash) {
+            const h = window.location.hash.substring(1);
+            const i = h.indexOf('?');
+            return i >= 0 ? h.substring(i) : '';
+        }
+        return window.location.search || '';
     }
     
     /**
@@ -104,8 +128,11 @@ class Router {
                 return this.handleRoute(normalizedPath);
             }
         } else {
-            window.history.pushState({ path: normalizedPath }, '', normalizedPath);
-            // For non-hash routing, handle route directly
+            const target = this.buildHistoryUrl(normalizedPath, query);
+            const current = window.location.pathname + (window.location.search || '');
+            if (current !== target) {
+                window.history.pushState({ path: normalizedPath }, '', target);
+            }
             return this.handleRoute(normalizedPath);
         }
     }
@@ -159,11 +186,17 @@ class Router {
      */
     getCurrentPath() {
         if (this.useHash) {
-            // For hash-based routing, only use the hash (empty hash = root)
             const hash = window.location.hash;
             return this.normalizePath(hash || '/');
         }
-        return this.normalizePath(window.location.pathname);
+        let pathname = window.location.pathname;
+        const prefix = this.getBasePathPrefix();
+        if (prefix && pathname.startsWith(prefix + '/')) {
+            pathname = pathname.slice(prefix.length);
+        } else if (prefix && pathname === prefix) {
+            pathname = '/';
+        }
+        return this.normalizePath(pathname || '/');
     }
     
     /**
@@ -186,13 +219,17 @@ class Router {
             // Handle the route (this will work even if hash is empty)
             this.handleRoute(initialPath);
         } else {
-            // Handle browser back/forward
+            const h = window.location.hash;
+            if (h && h.length > 1 && h !== '#') {
+                const inner = h.replace(/^#/, '');
+                const { normalizedPath, query } = this.parseHashPathAndQuery(inner);
+                const newUrl = this.buildHistoryUrl(normalizedPath, query);
+                window.history.replaceState({ path: normalizedPath }, '', newUrl);
+            }
             window.addEventListener('popstate', (e) => {
-                const path = e.state?.path || this.getCurrentPath();
+                const path = e.state && e.state.path != null ? e.state.path : this.getCurrentPath();
                 this.handleRoute(path);
             });
-            
-            // Handle initial load
             const initialPath = this.getCurrentPath();
             this.handleRoute(initialPath);
         }

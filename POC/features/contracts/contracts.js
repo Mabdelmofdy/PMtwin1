@@ -128,7 +128,7 @@ async function initContracts() {
         if (nav && typeof nav.navigate === 'function') {
             nav.navigate(r);
         } else {
-            window.location.hash = '#' + r.replace(/^\//, '');
+            window.location.assign(((typeof CONFIG !== 'undefined' && CONFIG.BASE_PATH) ? CONFIG.BASE_PATH.replace(/\/*$/, '') : '') + r);
         }
     });
 

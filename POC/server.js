@@ -42,7 +42,24 @@ function serveFile(filePath, res) {
     }
 
     const mimeType = getMimeType(filePath);
-    res.writeHead(200, { 'Content-Type': mimeType });
+    const headers = { 'Content-Type': mimeType };
+    // Match index.html meta CSP so devtools / favicon loads are not blocked when only HTTP headers apply.
+    if (mimeType === 'text/html') {
+      headers['Content-Security-Policy'] = [
+        "default-src 'self'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "object-src 'none'",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.quilljs.com",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com https://cdn.quilljs.com",
+        "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://unpkg.com data:",
+        "img-src 'self' data: https: blob:",
+        "connect-src 'self' https: wss: ws:",
+        "frame-src 'self' https:",
+        "worker-src 'self' blob:"
+      ].join('; ');
+    }
+    res.writeHead(200, headers);
     res.end(data);
   });
 }

@@ -29,8 +29,18 @@ class LayoutService {
         if (this.router && typeof this.router.getCurrentPath === 'function') {
             return this.router.getCurrentPath();
         }
-        const hash = window.location.hash.replace(/^#/, '') || '/';
-        return hash.startsWith('/') ? hash : '/' + hash;
+        const pathFromLocation = () => {
+            const prefix = (typeof CONFIG !== 'undefined' && CONFIG.BASE_PATH)
+                ? String(CONFIG.BASE_PATH).replace(/\/$/, '')
+                : '';
+            let pathname = window.location.pathname;
+            if (prefix && pathname.startsWith(prefix + '/')) pathname = pathname.slice(prefix.length);
+            else if (prefix && pathname === prefix) pathname = '/';
+            if (/^\/index\.html$/i.test(pathname)) pathname = '/';
+            const p = pathname.replace(/^#/, '') || '/';
+            return p.startsWith('/') ? p : '/' + p;
+        };
+        return pathFromLocation();
     }
 
     /**

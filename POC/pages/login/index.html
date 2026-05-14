@@ -77,18 +77,19 @@
 }
 
 .pm-auth-page {
-    --auth-ink: #101820;
-    --auth-muted: #5f6b7a;
-    --auth-line: #d9e2ec;
-    --auth-teal: #0891b2;
-    --auth-teal-dark: #0e7490;
+    --auth-ink: var(--text-primary);
+    --auth-muted: var(--text-muted);
+    --auth-line: var(--border-color);
+    --auth-teal: var(--primary-color);
+    --auth-teal-dark: var(--primary-dark);
+    --auth-primary-tint: var(--portal-sidebar-active-bg, #ecfeff);
     --auth-coral: #e85d4f;
     width: 100%;
     max-width: none;
     min-height: calc(100vh - 64px);
     display: grid;
     grid-template-columns: minmax(420px, 0.95fr) minmax(420px, 1fr);
-    background: #f7f9fb;
+    background: var(--bg-secondary);
     color: var(--auth-ink);
 }
 
@@ -101,9 +102,9 @@
     padding: clamp(2rem, 5vw, 4rem);
     background:
         linear-gradient(90deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.78) 100%),
-        linear-gradient(0deg, rgba(16,24,32,0.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(16,24,32,0.045) 1px, transparent 1px),
-        #eef3f6;
+        linear-gradient(0deg, color-mix(in srgb, var(--text-primary) 4.5%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--text-primary) 4.5%, transparent) 1px, transparent 1px),
+        var(--portal-bg, var(--bg-tertiary));
     background-size: auto, 34px 34px, 34px 34px, auto;
     border-right: 1px solid var(--auth-line);
 }
@@ -112,8 +113,8 @@
     position: absolute;
     inset: 0;
     background:
-        linear-gradient(135deg, transparent 0 34%, rgba(8,145,178,0.16) 34.2% 34.6%, transparent 34.8% 100%),
-        linear-gradient(150deg, transparent 0 70%, rgba(232,93,79,0.14) 70.2% 70.6%, transparent 70.8% 100%);
+        linear-gradient(135deg, transparent 0 34%, color-mix(in srgb, var(--primary-color) 16%, transparent) 34.2% 34.6%, transparent 34.8% 100%),
+        linear-gradient(150deg, transparent 0 70%, color-mix(in srgb, var(--auth-coral) 14%, transparent) 70.2% 70.6%, transparent 70.8% 100%);
 }
 
 .pm-auth-visual-content {
@@ -158,14 +159,14 @@
     position: relative;
     height: 270px;
     margin-top: 2.5rem;
-    border: 1px solid rgba(16,24,32,0.12);
+    border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
     border-radius: 8px;
     background:
-        linear-gradient(0deg, rgba(8,145,178,0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(8,145,178,0.08) 1px, transparent 1px),
-        #ffffff;
+        linear-gradient(0deg, color-mix(in srgb, var(--primary-color) 8%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--primary-color) 8%, transparent) 1px, transparent 1px),
+        var(--bg-primary);
     background-size: 24px 24px;
-    box-shadow: 0 24px 60px rgba(16,24,32,0.13);
+    box-shadow: var(--shadow-lg);
     transform: rotateX(54deg) rotateZ(-35deg);
 }
 
@@ -175,7 +176,7 @@
     width: 70px;
     height: 112px;
     background: var(--auth-teal);
-    box-shadow: 18px -18px 0 #0e7490;
+    box-shadow: 18px -18px 0 var(--primary-dark);
 }
 
 .pm-auth-block-a { left: 20%; top: 26%; }
@@ -204,8 +205,8 @@
     padding: clamp(1.25rem, 4vw, 2rem);
     border: 1px solid var(--auth-line);
     border-radius: 8px;
-    background: #ffffff;
-    box-shadow: 0 24px 60px rgba(16,24,32,0.1);
+    background: var(--bg-primary);
+    box-shadow: var(--shadow-lg);
 }
 
 .pm-auth-header {
@@ -243,14 +244,14 @@
     padding: 0.7rem 0.85rem;
     border: 1px solid var(--auth-line);
     border-radius: 8px;
-    background: #ffffff;
+    background: var(--bg-primary);
     color: var(--auth-ink);
 }
 
 .pm-field input:focus {
     outline: none;
     border-color: var(--auth-teal);
-    box-shadow: 0 0 0 4px rgba(8,145,178,0.13);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary-color) 13%, transparent);
 }
 
 .pm-login-row {
@@ -282,13 +283,14 @@
     border: 1px solid var(--auth-ink);
     border-radius: 8px;
     background: var(--auth-ink);
-    color: #ffffff;
+    color: var(--bg-primary);
     font-weight: 850;
     cursor: pointer;
 }
 
 .pm-submit-btn:hover {
-    background: #26323e;
+    background: color-mix(in srgb, var(--text-primary) 88%, white);
+    border-color: color-mix(in srgb, var(--text-primary) 88%, white);
 }
 
 .pm-social-actions {
@@ -304,14 +306,14 @@
     min-height: 44px;
     border: 1px solid var(--auth-line);
     border-radius: 8px;
-    background: #ffffff;
+    background: var(--bg-primary);
     color: var(--auth-ink);
     font-weight: 800;
     cursor: pointer;
 }
 
 .pm-social-actions button:hover {
-    background: #f8fafc;
+    background: var(--bg-tertiary);
 }
 
 .pm-demo-link {

@@ -26,6 +26,7 @@ let regState = {
     documents: [],
     termsAccepted: false,
     individualType: null,
+    individualSubType: null,
     fullName: '',
     specialty: '',
     expertise: '',
@@ -137,6 +138,80 @@ function setRegLocationCascade(prefix, countryId, regionId, cityId) {
     }, 50);
 }
 
+function syncRegAccountTypeCards() {
+    document.querySelectorAll('input[name="accountType"]').forEach(radio => {
+        const card = radio.closest('.reg-account-card');
+        if (card) card.classList.toggle('reg-account-card--selected', radio.checked);
+    });
+}
+
+function consultationTypeToOptionId(label) {
+    const s = String(label).toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+    return s || 'other';
+}
+
+function getIndividualSubTypeOptions(individualType) {
+    if (!lookupsData) return [];
+    if (individualType === 'professional') {
+        const fields = lookupsData.professionalFields || [];
+        return fields.map(f => ({ id: f.id, label: f.label }));
+    }
+    if (individualType === 'consultant') {
+        const types = lookupsData.consultationTypes || [];
+        return types.map(t => {
+            if (typeof t === 'string') return { id: consultationTypeToOptionId(t), label: t };
+            const label = t.label || t.id || String(t);
+            return { id: t.id || consultationTypeToOptionId(label), label };
+        });
+    }
+    return [];
+}
+
+function getIndividualSubTypeDisplayLabel() {
+    const opts = getIndividualSubTypeOptions(regState.individualType);
+    const m = opts.find(o => o.id === regState.individualSubType);
+    return m ? m.label : (regState.individualSubType || '—');
+}
+
+function syncRegIndividualTypeCards() {
+    document.querySelectorAll('input[name="individualType"]').forEach(radio => {
+        const card = radio.closest('.reg-individual-type-card');
+        if (card) card.classList.toggle('reg-account-card--selected', radio.checked);
+    });
+}
+
+function refreshRegIndividualSubTypeSelect() {
+    const type = document.querySelector('input[name="individualType"]:checked')?.value || regState.individualType;
+    const wrap = document.getElementById('reg-individual-subtype-wrap');
+    const select = document.getElementById('reg-individual-subtype');
+    const hint = document.getElementById('reg-individual-subtype-hint');
+    if (!wrap || !select) return;
+    const opts = getIndividualSubTypeOptions(type);
+    if (!type || (type !== 'professional' && type !== 'consultant') || !opts.length) {
+        wrap.classList.add('hidden');
+        select.innerHTML = '<option value="">Select sub-type</option>';
+        return;
+    }
+    wrap.classList.remove('hidden');
+    select.innerHTML = '<option value="">Select sub-type</option>';
+    opts.forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o.id;
+        opt.textContent = o.label;
+        select.appendChild(opt);
+    });
+    if (hint) {
+        hint.textContent = type === 'professional'
+            ? 'Choose your primary discipline or field of practice.'
+            : 'Choose the type of consulting you primarily offer.';
+    }
+    if (regState.individualSubType && opts.some(o => o.id === regState.individualSubType)) {
+        select.value = regState.individualSubType;
+    } else {
+        select.value = '';
+    }
+}
+
 function fillRegDemoData() {
     const visible = document.querySelector('.reg-step-content:not(.hidden)');
     if (!visible) return;
@@ -144,9 +219,10 @@ function fillRegDemoData() {
     const d = regDemoData;
 
     if (id === 'reg-step-0') {
-        const ind = document.querySelector('input[name="accountType"][value="individual"]');
-        if (ind) { ind.checked = true; }
-        regState.accountType = 'individual';
+        const company = document.querySelector('input[name="accountType"][value="company"]');
+        if (company) company.checked = true;
+        regState.accountType = 'company';
+        syncRegAccountTypeCards();
         const btn = document.getElementById('reg-btn-continue');
         if (btn) btn.disabled = false;
         const hint = document.getElementById('reg-continue-hint');
@@ -155,9 +231,14 @@ function fillRegDemoData() {
         return;
     }
     if (id === 'reg-step-b1') {
-        const pro = document.querySelector('input[name="individualType"][value="professional"]');
-        if (pro) { pro.checked = true; }
-        regState.individualType = 'professional';
+        const con = document.querySelector('input[name="individualType"][value="consultant"]');
+        if (con) con.checked = true;
+        regState.individualType = 'consultant';
+        syncRegIndividualTypeCards();
+        refreshRegIndividualSubTypeSelect();
+        const sub = document.getElementById('reg-individual-subtype');
+        if (sub && sub.options.length > 1) sub.value = sub.options[1].value;
+        regState.individualSubType = sub ? sub.value : null;
         const nextBtn = document.getElementById('reg-btn-next-b1');
         if (nextBtn) nextBtn.disabled = false;
         const b1Hint = document.getElementById('reg-b1-continue-hint');
@@ -169,9 +250,14 @@ function fillRegDemoData() {
     if (id === 'reg-step-a1') {
         const roleSelect = document.getElementById('reg-company-role');
         if (roleSelect && roleSelect.options.length > 1) {
-            const opt = Array.from(roleSelect.options).find(o => o.value === 'vendor') || roleSelect.options[1];
+            const opt = Array.from(roleSelect.options).find(o => o.value === 'consultant_company') || roleSelect.options[1];
             if (opt) roleSelect.value = opt.value;
             roleSelect.dispatchEvent(new Event('change'));
+            const sub = document.getElementById('reg-company-subtype');
+            if (sub && sub.options.length > 1) {
+                sub.value = sub.options[1].value;
+                regState.companySubType = sub.value;
+            }
         }
         hideRegMessages();
         return;
@@ -194,13 +280,6 @@ function fillRegDemoData() {
         set('reg-confirm-password', d.company.password);
         setRegLocationCascade('company', d.company.country, d.company.region, d.company.city);
         clearAllRegFieldErrors();
-        hideRegMessages();
-        return;
-    }
-
-    if (id === 'reg-step-b1') {
-        const pro = document.querySelector('input[name="individualType"][value="professional"]');
-        if (pro) pro.checked = true;
         hideRegMessages();
         return;
     }
@@ -323,6 +402,21 @@ var regStepTitles = {
 var regStepNavLabelsCompany = ['Account Type', 'Role', 'Profile Info', 'Documents', 'Review', 'Vetting'];
 var regStepNavLabelsIndividual = ['Account Type', 'Role', 'Profile Info', 'Documents', 'Review', 'Verification'];
 
+/** Phosphor duotone icon per step index (0–5); reused for active & upcoming states */
+var regStepNavIcons = [
+    'ph-identification-card',
+    'ph-users-three',
+    'ph-user-circle',
+    'ph-files',
+    'ph-clipboard-text',
+    'ph-shield-check'
+];
+
+function regStepNavIconHtml(idx) {
+    const ph = regStepNavIcons[idx] || 'ph-circle';
+    return `<i class="ph-duotone ${ph}" aria-hidden="true"></i>`;
+}
+
 function updateRegProgress() {
     const progressWrap = document.getElementById('reg-wizard-progress');
     const label = document.getElementById('reg-step-label');
@@ -336,21 +430,36 @@ function updateRegProgress() {
     const labels = (regState.accountType === 'company' ? regStepNavLabelsCompany : regStepNavLabelsIndividual);
     list.querySelectorAll('.reg-step-nav-item').forEach((el, i) => {
         const idx = parseInt(el.getAttribute('data-step-index'), 10);
-        if (!isNaN(idx) && labels[idx]) el.querySelector('.reg-step-nav-label').textContent = labels[idx];
+        const labEl = el.querySelector('.reg-step-nav-label');
+        if (!isNaN(idx) && labels[idx] && labEl) {
+            labEl.textContent = labels[idx];
+            el.setAttribute('title', labels[idx]);
+        }
         el.classList.remove('reg-step-done', 'reg-step-active', 'reg-step-upcoming');
         const icon = el.querySelector('.reg-step-nav-icon');
         if (idx < activeIndex) {
             el.classList.add('reg-step-done');
-            el.setAttribute('aria-current', null);
-            if (icon) { icon.innerHTML = '<i class="ph-fill ph-check" aria-hidden="true"></i>'; icon.classList.add('reg-step-nav-icon-check'); }
+            el.removeAttribute('aria-current');
+            if (icon) {
+                icon.innerHTML = regStepNavIconHtml(idx);
+                icon.classList.remove('reg-step-nav-icon-muted');
+                icon.classList.add('reg-step-nav-icon-done');
+            }
         } else if (idx === activeIndex) {
             el.classList.add('reg-step-active');
             el.setAttribute('aria-current', 'step');
-            if (icon) { icon.innerHTML = ''; icon.classList.remove('reg-step-nav-icon-check'); }
+            if (icon) {
+                icon.innerHTML = regStepNavIconHtml(idx);
+                icon.classList.remove('reg-step-nav-icon-done', 'reg-step-nav-icon-muted');
+            }
         } else {
             el.classList.add('reg-step-upcoming');
-            el.setAttribute('aria-current', null);
-            if (icon) { icon.innerHTML = ''; icon.classList.remove('reg-step-nav-icon-check'); }
+            el.removeAttribute('aria-current');
+            if (icon) {
+                icon.innerHTML = regStepNavIconHtml(idx);
+                icon.classList.remove('reg-step-nav-icon-done');
+                icon.classList.add('reg-step-nav-icon-muted');
+            }
         }
     });
 }
@@ -372,7 +481,12 @@ function goToRegStep(step) {
         document.getElementById('reg-specialty-wrap')?.classList.toggle('hidden', regState.individualType !== 'professional');
         document.getElementById('reg-expertise-wrap')?.classList.toggle('hidden', regState.individualType !== 'consultant');
     }
-    if (stepId === 'reg-step-b1') updateRegB1CTAState();
+    if (stepId === 'reg-step-b1') {
+        syncRegIndividualTypeCards();
+        refreshRegIndividualSubTypeSelect();
+        updateRegB1CTAState();
+    }
+    if (stepId === 'reg-step-0') syncRegAccountTypeCards();
     updateRegProgress();
     hideRegMessages();
 }
@@ -381,8 +495,11 @@ function updateRegB1CTAState() {
     const sel = document.querySelector('input[name="individualType"]:checked')?.value;
     const nextBtn = document.getElementById('reg-btn-next-b1');
     const hint = document.getElementById('reg-b1-continue-hint');
-    if (nextBtn) nextBtn.disabled = !sel;
-    if (hint) hint.classList.toggle('hidden', !!sel);
+    const subVal = document.getElementById('reg-individual-subtype')?.value;
+    const needsSub = sel === 'professional' || sel === 'consultant';
+    const subOk = !needsSub || !!subVal;
+    if (nextBtn) nextBtn.disabled = !sel || !subOk;
+    if (hint) hint.classList.toggle('hidden', !!(sel && subOk));
 }
 
 function fillRegVettingStep(prefix) {
@@ -621,6 +738,8 @@ function validateRegStep(step) {
         if (step === 1) {
             const type = document.querySelector('input[name="individualType"]:checked')?.value;
             if (!type) { showRegError('Please select Professional or Consultant'); return false; }
+            const sub = document.getElementById('reg-individual-subtype')?.value;
+            if (!sub) { showRegFieldError('reg-individual-subtype', 'Please select a sub-type'); return false; }
             return true;
         }
     }
@@ -628,6 +747,8 @@ function validateRegStep(step) {
         if (step === 1) {
             const type = document.querySelector('input[name="individualType"]:checked')?.value;
             if (!type) { showRegError('Please select Professional or Consultant'); return false; }
+            const sub = document.getElementById('reg-individual-subtype')?.value;
+            if (!sub) { showRegFieldError('reg-individual-subtype', 'Please select a sub-type'); return false; }
             return true;
         }
         if (step === 2) {
@@ -897,6 +1018,9 @@ function updateRegProfileCompletionCompany() {
     const hasRequiredDocs = requiredDocs.every(id => regState.documents.some(d => d.type === id));
     const items = [
         { key: 'role', done: !!regState.companyRole },
+        ...((lookupsData?.companyRoleSubTypes?.[regState.companyRole] || []).length
+            ? [{ key: 'Sub-type', done: !!regState.companySubType }]
+            : []),
         { key: 'Company name', done: !!regState.companyName?.trim() },
         { key: 'Email', done: !!regState.email?.trim() },
         { key: 'Mobile', done: !!regState.mobile?.trim() },
@@ -925,6 +1049,8 @@ function updateRegProfileCompletionIndividual() {
     const hasRequiredDocs = requiredDocs.every(id => regState.documents.some(d => d.type === id));
     const items = [
         { key: 'Full name', done: !!regState.fullName?.trim() },
+        { key: 'Type', done: !!regState.individualType },
+        { key: 'Sub-type', done: !!regState.individualSubType },
         { key: 'Email', done: !!regState.email?.trim() },
         { key: 'Mobile', done: !!regState.mobile?.trim() },
         { key: 'Country', done: !!regState.address?.country },
@@ -941,6 +1067,15 @@ function updateRegProfileCompletionIndividual() {
     if (pctEl) pctEl.textContent = pct + '%';
     doneEl.innerHTML = done.length ? 'Completed:<br><span class="text-green-600">✔ ' + done.map(i => i.key).join('<br>✔ ') + '</span>' : '';
     missingEl.innerHTML = missing.length ? 'Missing:<br><span class="text-amber-600">• ' + missing.map(i => i.key).join('<br>• ') + '</span>' : '';
+}
+
+function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
 }
 
 function renderReviewCompany() {
@@ -961,21 +1096,25 @@ function renderReviewCompany() {
     const docList = regState.documents.map(d => d.label + ': ' + d.fileName).join('; ');
     const prefModels = (regState.preferredCollaborationModels || []).map(id => getRegPreferredModelsList().find(m => m.id === id)?.label || id).join(', ');
     const authRep = regState.authorizedRepresentative && (regState.authorizedRepresentative.name || regState.authorizedRepresentative.role) ? (regState.authorizedRepresentative.name + (regState.authorizedRepresentative.role ? ' (' + regState.authorizedRepresentative.role + ')' : '')) : '—';
-    container.innerHTML = `
-        <p><strong>Role:</strong> ${roleLabel} ${subLabel ? ' / ' + subLabel : ''}</p>
-        <p><strong>Company:</strong> ${regState.companyName}</p>
-        <p><strong>Industry:</strong> ${industryLabel}</p>
-        <p><strong>Company size:</strong> ${sizeLabel}</p>
-        ${regState.companyDescription ? `<p><strong>Description:</strong> ${regState.companyDescription.slice(0, 200)}${regState.companyDescription.length > 200 ? '…' : ''}</p>` : ''}
-        ${regState.crNumber ? `<p><strong>CR number:</strong> ${regState.crNumber}</p>` : ''}
-        ${regState.taxId ? `<p><strong>Tax ID:</strong> ${regState.taxId}</p>` : ''}
-        <p><strong>Authorized representative:</strong> ${authRep}</p>
-        <p><strong>Email:</strong> ${regState.email} (verified)</p>
-        <p><strong>Mobile:</strong> ${regState.mobile} (verified)</p>
-        <p><strong>Address:</strong> ${loc || '—'}</p>
-        <p><strong>Documents:</strong> ${docList || '—'}</p>
-        ${prefModels ? `<p><strong>Preferred collaboration models:</strong> ${prefModels}</p>` : ''}
-    `;
+    const rows = [
+        ['Company role', roleLabel],
+        ...(subLabel ? [['Sub-type', subLabel]] : []),
+        ['Company', regState.companyName],
+        ['Industry', industryLabel],
+        ['Company size', sizeLabel],
+        ...(regState.companyDescription ? [['Description', regState.companyDescription.slice(0, 200) + (regState.companyDescription.length > 200 ? '…' : '')]] : []),
+        ...(regState.crNumber ? [['CR number', regState.crNumber]] : []),
+        ...(regState.taxId ? [['Tax ID', regState.taxId]] : []),
+        ['Authorized representative', authRep],
+        ['Email', regState.email + ' (verified)'],
+        ['Mobile', regState.mobile + ' (verified)'],
+        ['Address', loc || '—'],
+        ['Documents', docList || '—'],
+        ...(prefModels ? [['Preferred collaboration', prefModels]] : [])
+    ];
+    container.innerHTML = '<dl class="reg-review-summary-inner">' + rows.map(([dt, dd]) =>
+        '<div class="reg-review-row"><dt>' + escapeHtml(dt) + '</dt><dd>' + escapeHtml(dd) + '</dd></div>'
+    ).join('') + '</dl>';
 }
 
 function renderReviewIndividual() {
@@ -984,27 +1123,31 @@ function renderReviewIndividual() {
     const container = document.getElementById('reg-review-individual');
     if (!container) return;
     const typeLabel = regState.individualType === 'professional' ? 'Professional' : 'Consultant';
+    const subLabel = getIndividualSubTypeDisplayLabel();
     const spec = regState.individualType === 'professional' ? regState.specialty : regState.expertise;
+    const specHeading = regState.individualType === 'professional' ? 'Discipline / specialty' : 'Expertise area';
     const loc = [regState.address.country, regState.address.region, regState.address.city].filter(Boolean).join(', ');
     const docList = regState.documents.map(d => d.label + ': ' + d.fileName).join('; ');
     const prefModels = (regState.preferredCollaborationModels || []).map(id => getRegPreferredModelsList().find(m => m.id === id)?.label || id).join(', ');
-    const optional = [];
-    if (regState.currentRole) optional.push(`<p><strong>Current role:</strong> ${regState.currentRole}</p>`);
-    if (regState.yearsExperience) optional.push(`<p><strong>Years of experience:</strong> ${regState.yearsExperience}</p>`);
-    if (regState.skills) optional.push(`<p><strong>Skills:</strong> ${regState.skills}</p>`);
-    if (regState.languages) optional.push(`<p><strong>Languages:</strong> ${regState.languages}</p>`);
-    if (regState.linkedin) optional.push(`<p><strong>LinkedIn:</strong> ${regState.linkedin}</p>`);
-    container.innerHTML = `
-        <p><strong>Type:</strong> ${typeLabel}</p>
-        <p><strong>Name:</strong> ${regState.fullName}</p>
-        <p><strong>Specialty/Expertise:</strong> ${spec}</p>
-        <p><strong>Email:</strong> ${regState.email} (verified)</p>
-        <p><strong>Mobile:</strong> ${regState.mobile} (verified)</p>
-        <p><strong>Address:</strong> ${loc || '—'}</p>
-        ${optional.join('')}
-        <p><strong>Documents:</strong> ${docList || '—'}</p>
-        ${prefModels ? `<p><strong>Preferred collaboration models:</strong> ${prefModels}</p>` : ''}
-    `;
+    const rows = [
+        ['Type', typeLabel],
+        ['Sub-type', subLabel],
+        ['Name', regState.fullName || '—'],
+        [specHeading, spec || '—'],
+        ['Email', (regState.email || '') + ' (verified)'],
+        ['Mobile', (regState.mobile || '') + ' (verified)'],
+        ['Address', loc || '—']
+    ];
+    if (regState.currentRole) rows.push(['Current role', regState.currentRole]);
+    if (regState.yearsExperience !== '' && regState.yearsExperience != null) rows.push(['Years of experience', String(regState.yearsExperience)]);
+    if (regState.skills) rows.push(['Skills', regState.skills]);
+    if (regState.languages) rows.push(['Languages', regState.languages]);
+    if (regState.linkedin) rows.push(['LinkedIn', regState.linkedin]);
+    rows.push(['Documents', docList || '—']);
+    if (prefModels) rows.push(['Preferred collaboration', prefModels]);
+    container.innerHTML = '<dl class="reg-review-summary-inner">' + rows.map(([dt, dd]) =>
+        '<div class="reg-review-row"><dt>' + escapeHtml(dt) + '</dt><dd>' + escapeHtml(dd) + '</dd></div>'
+    ).join('') + '</dl>';
 }
 
 async function notifyAdminsOfNewRegistration(entityName) {
@@ -1097,7 +1240,8 @@ async function submitIndividual() {
             preferredCollaborationModels: regState.preferredCollaborationModels || [],
             vettingSkippedAtRegistration: regState.vettingSkippedAtRegistration === true,
             primaryDomain: regState.primaryDomain || null,
-            expertiseAreas: regState.expertiseAreas || []
+            expertiseAreas: regState.expertiseAreas || [],
+            individualSubType: regState.individualSubType || null
         });
         await authService.register({
             email: regState.email,
@@ -1229,6 +1373,7 @@ function initRegister() {
         documents: [],
         termsAccepted: false,
         individualType: null,
+        individualSubType: null,
         fullName: '',
         specialty: '',
         expertise: '',
@@ -1310,14 +1455,25 @@ function initRegister() {
     document.querySelectorAll('input[name="accountType"]').forEach(radio => {
         radio.addEventListener('change', () => {
             regState.accountType = document.querySelector('input[name="accountType"]:checked')?.value || null;
+            syncRegAccountTypeCards();
             const btn = document.getElementById('reg-btn-continue');
             if (btn) btn.disabled = !regState.accountType;
             const hint = document.getElementById('reg-continue-hint');
             if (hint) hint.classList.toggle('hidden', !!regState.accountType);
         });
     });
+    syncRegAccountTypeCards();
     document.querySelectorAll('input[name="individualType"]').forEach(radio => {
-        radio.addEventListener('change', () => { updateRegB1CTAState(); });
+        radio.addEventListener('change', () => {
+            regState.individualSubType = null;
+            refreshRegIndividualSubTypeSelect();
+            syncRegIndividualTypeCards();
+            updateRegB1CTAState();
+        });
+    });
+    document.getElementById('reg-individual-subtype')?.addEventListener('change', () => {
+        regState.individualSubType = document.getElementById('reg-individual-subtype')?.value || null;
+        updateRegB1CTAState();
     });
     const continueHint = document.getElementById('reg-continue-hint');
     if (continueHint) continueHint.classList.remove('hidden');
@@ -1386,7 +1542,8 @@ function initRegister() {
     document.getElementById('reg-btn-next-b1')?.addEventListener('click', () => {
         if (!validateRegStep(1)) return;
         regState.individualType = document.querySelector('input[name="individualType"]:checked')?.value;
-        regState.accountType = regState.individualType; // so rest of flow sees professional/consultant
+        regState.individualSubType = document.getElementById('reg-individual-subtype')?.value || null;
+        regState.accountType = regState.individualType;
         goToRegStep(2);
     });
     document.getElementById('reg-btn-back-b2')?.addEventListener('click', () => goToRegStep(1));

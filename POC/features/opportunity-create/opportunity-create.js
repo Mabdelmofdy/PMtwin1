@@ -1109,7 +1109,7 @@ function setupWizardNavigation() {
             if (typeof router !== 'undefined' && router.navigate) {
                 router.navigate('/opportunities');
             } else {
-                window.location.hash = '#/opportunities';
+                window.location.assign(`${window.location.origin}${(typeof CONFIG !== 'undefined' && CONFIG.BASE_PATH) ? CONFIG.BASE_PATH.replace(/\/*$/, '') : ''}/opportunities`);
             }
         });
     }
