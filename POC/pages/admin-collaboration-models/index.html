@@ -1,48 +1,489 @@
 <div class="page-container admin-collaboration-models-page">
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1 class="page-title">Collaboration Models Management</h1>
-            <p class="page-subtitle">Enable or disable collaboration models and set display labels and order</p>
+    <div class="matching-hero cm-hero">
+        <div class="matching-hero-copy">
+            <div class="matching-eyebrow">Admin collaboration</div>
+            <h1 class="page-title">Collaboration models</h1>
+            <p class="page-subtitle">Choose which collaboration paths appear in the wizard and opportunity flows, rename them for your organization, and control the order users see.</p>
         </div>
-    </div>
-    <div class="page-body">
-
-    <div class="card">
-        <div class="card-header">
-            <h2>Models</h2>
-            <button type="button" id="save-models-btn" class="btn btn-primary">Save changes</button>
-        </div>
-        <div class="card-body">
-            <p class="text-secondary mb-4">Disabled models will not appear in the collaboration wizard or opportunity creation.</p>
-            <div id="models-list" class="models-list">
-                <div class="spinner"></div>
+        <div class="matching-hero-actions">
+            <div class="matching-run-state cm-save-state" aria-live="polite">
+                <span class="matching-run-dot" aria-hidden="true"></span>
+                <span id="cm-save-status">Edits are local until you save</span>
             </div>
+            <button type="button" id="save-models-btn" class="btn btn-primary matching-run-btn">
+                <span>Save changes</span>
+            </button>
         </div>
     </div>
+
+    <div class="page-body matching-page-body">
+        <section class="matching-control-panel cm-control-panel" aria-labelledby="cm-control-title">
+            <div class="matching-control-copy">
+                <h2 id="cm-control-title" class="section-title">Current configuration</h2>
+                <p class="section-desc">Disabled models are hidden from the collaboration wizard and from new opportunity setup. Labels and order are stored with system settings.</p>
+            </div>
+            <div class="matching-control-meta" aria-label="Model summary">
+                <div class="matching-meta-item">
+                    <span class="matching-meta-label">Models defined</span>
+                    <span class="matching-meta-value" id="cm-meta-total">—</span>
+                </div>
+                <div class="matching-meta-item">
+                    <span class="matching-meta-label">Enabled</span>
+                    <span class="matching-meta-value" id="cm-meta-enabled">—</span>
+                </div>
+                <div class="matching-meta-item">
+                    <span class="matching-meta-label">Last saved</span>
+                    <span class="matching-meta-value" id="cm-meta-saved">Not yet</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-section matching-report-section" aria-labelledby="cm-editor-title">
+            <div class="matching-section-heading">
+                <div>
+                    <h2 id="cm-editor-title" class="section-title">Model catalog</h2>
+                    <p class="section-desc">Toggle availability, set the label users read in the UI, and assign sort order (lower numbers appear first).</p>
+                </div>
+            </div>
+
+            <div id="models-list" class="cm-models-list" role="list">
+                <div class="cm-loading">
+                    <span class="spinner" aria-hidden="true"></span>
+                    <span>Loading models…</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-section workflow-overview" aria-labelledby="cm-guide-title">
+            <div class="matching-section-heading">
+                <div>
+                    <h2 id="cm-guide-title" class="section-title">How models are used</h2>
+                    <p class="section-desc">Each entry maps to a collaboration pattern in config. Turn off any path your pilot does not offer yet.</p>
+                </div>
+            </div>
+            <div class="workflow-cards cm-guide-cards">
+                <div class="workflow-card">
+                    <span class="workflow-card-icon" aria-hidden="true">1</span>
+                    <h3 class="workflow-card-title">Wizard &amp; opportunities</h3>
+                    <p class="workflow-card-desc">Only enabled models show when users pick how they want to work together on a post.</p>
+                </div>
+                <div class="workflow-card">
+                    <span class="workflow-card-icon" aria-hidden="true">2</span>
+                    <h3 class="workflow-card-title">Labels</h3>
+                    <p class="workflow-card-desc">Display names can match your glossary; the internal key stays the same for reporting and APIs.</p>
+                </div>
+                <div class="workflow-card">
+                    <span class="workflow-card-icon" aria-hidden="true">3</span>
+                    <h3 class="workflow-card-title">Order</h3>
+                    <p class="workflow-card-desc">Sort order controls list position everywhere the catalog is shown, not business logic.</p>
+                </div>
+                <div class="workflow-card">
+                    <span class="workflow-card-icon" aria-hidden="true">4</span>
+                    <h3 class="workflow-card-title">Settings link</h3>
+                    <p class="workflow-card-desc">The same overrides are available from Admin settings if you prefer editing next to other platform toggles.</p>
+                </div>
+            </div>
+        </section>
     </div>
 </div>
 
 <style>
-.admin-collaboration-models-page { /* Page specific styles */ }
-
-.models-list { display: flex; flex-direction: column; gap: var(--spacing-lg); }
-
-.model-row {
-    display: grid;
-    grid-template-columns: 1fr auto auto auto;
-    gap: var(--spacing-md);
-    align-items: center;
-    padding: var(--spacing-md);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    background: var(--bg-primary);
+.admin-collaboration-models-page {
+    --matching-accent: #0d9488;
+    --matching-accent-soft: #e6fffb;
+    --matching-surface: #fbfdff;
+    --matching-line: #d8e3ee;
+    --matching-blue: #2563eb;
+    --matching-blue-soft: #dbeafe;
+    --matching-amber: #d97706;
+    --matching-amber-soft: #fef3c7;
+    --matching-green: #059669;
+    --matching-green-soft: #dcfce7;
 }
 
-.model-row label { display: flex; align-items: center; gap: var(--spacing-sm); }
-.model-row input[type="text"],
-.model-row input[type="number"] { max-width: 200px; }
+.admin-collaboration-models-page [hidden] {
+    display: none !important;
+}
 
-@media (max-width: 640px) {
-    .model-row { grid-template-columns: 1fr; }
+.admin-collaboration-models-page .matching-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--spacing-xl);
+    align-items: center;
+    padding: var(--spacing-xl);
+    border: 1px solid var(--matching-line);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, #ffffff 0%, #f6fffd 54%, #f8fbff 100%);
+    margin-bottom: var(--spacing-lg);
+}
+
+.admin-collaboration-models-page .matching-eyebrow {
+    color: var(--primary-color);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    margin-bottom: var(--spacing-xs);
+}
+
+.admin-collaboration-models-page .matching-hero .page-title {
+    font-size: clamp(1.65rem, 2.2vw, 2.25rem);
+    line-height: 1.15;
+    margin-bottom: var(--spacing-sm);
+}
+
+.admin-collaboration-models-page .matching-hero .page-subtitle {
+    max-width: 720px;
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+}
+
+.admin-collaboration-models-page .matching-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
+}
+
+.admin-collaboration-models-page .matching-hero-actions > * {
+    max-width: 100%;
+}
+
+.admin-collaboration-models-page .matching-run-state {
+    min-width: 0;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 0 var(--spacing-md);
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    border: 1px solid var(--matching-line);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
+
+.admin-collaboration-models-page .matching-run-state.is-saved .matching-run-dot {
+    background: var(--matching-green);
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.12);
+}
+
+.admin-collaboration-models-page .matching-run-state.is-dirty .matching-run-dot {
+    background: var(--matching-amber);
+    box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.14);
+}
+
+.admin-collaboration-models-page .matching-run-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    background: var(--matching-green);
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.12);
+    flex: 0 0 auto;
+}
+
+.admin-collaboration-models-page .matching-run-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    min-height: 40px;
+    border-radius: var(--radius-md);
+    box-shadow: none;
+}
+
+.admin-collaboration-models-page .matching-page-body {
+    display: grid;
+    gap: var(--spacing-lg);
+    min-width: 0;
+}
+
+.admin-collaboration-models-page .matching-page-body > *,
+.admin-collaboration-models-page .matching-hero,
+.admin-collaboration-models-page .matching-control-panel,
+.admin-collaboration-models-page .matching-report-section,
+.admin-collaboration-models-page .workflow-overview {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.admin-collaboration-models-page .dashboard-section {
+    margin-bottom: 0;
+}
+
+.admin-collaboration-models-page .section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs);
+    letter-spacing: 0;
+}
+
+.admin-collaboration-models-page .section-desc {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: var(--font-size-sm);
+    line-height: 1.55;
+}
+
+.admin-collaboration-models-page .matching-section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.admin-collaboration-models-page .matching-control-panel {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--spacing-lg);
+    align-items: center;
+    padding: var(--spacing-lg);
+    background: var(--matching-surface);
+    border: 1px solid var(--matching-line);
+    border-radius: var(--radius-lg);
+    box-shadow: none;
+}
+
+.admin-collaboration-models-page .matching-control-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(120px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.admin-collaboration-models-page .matching-meta-item {
+    min-width: 0;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: #ffffff;
+    border: 1px solid var(--matching-line);
+    border-radius: var(--radius-md);
+}
+
+.admin-collaboration-models-page .matching-meta-label {
+    display: block;
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.4;
+}
+
+.admin-collaboration-models-page .matching-meta-value {
+    display: block;
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.admin-collaboration-models-page .cm-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    min-height: 42px;
+    padding: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    border: 1px solid var(--matching-line);
+    border-radius: var(--radius-lg);
+}
+
+.admin-collaboration-models-page .cm-loading .spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: cm-spin 0.8s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes cm-spin {
+    to { transform: rotate(360deg); }
+}
+
+.admin-collaboration-models-page .cm-models-list {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+.admin-collaboration-models-page .cm-model-card {
+    display: grid;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    background: var(--matching-surface);
+    border: 1px solid var(--matching-line);
+    border-radius: var(--radius-lg);
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.admin-collaboration-models-page .cm-model-card:hover {
+    border-color: rgba(13, 148, 136, 0.45);
+    background: #fafffe;
+}
+
+.admin-collaboration-models-page .cm-model-card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+}
+
+.admin-collaboration-models-page .cm-model-key-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: var(--font-size-xs);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: #0f766e;
+    background: var(--matching-accent-soft);
+    border: 1px solid rgba(13, 148, 136, 0.22);
+}
+
+.admin-collaboration-models-page .cm-model-id {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-family: ui-monospace, monospace;
+}
+
+.admin-collaboration-models-page .cm-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--text-primary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.admin-collaboration-models-page .cm-toggle input {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--primary-color);
+}
+
+.admin-collaboration-models-page .cm-model-card-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(100px, 140px);
+    gap: var(--spacing-lg);
+    align-items: end;
+}
+
+.admin-collaboration-models-page .cm-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    min-width: 0;
+}
+
+.admin-collaboration-models-page .cm-field label {
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0;
+}
+
+.admin-collaboration-models-page .cm-field .form-input {
+    width: 100%;
+    max-width: none;
+}
+
+.admin-collaboration-models-page .workflow-cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--spacing-md);
+}
+
+.admin-collaboration-models-page .workflow-card {
+    min-width: 0;
+    background: var(--matching-surface);
+    border: 1px solid var(--matching-line);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: none;
+}
+
+.admin-collaboration-models-page .workflow-card-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-md);
+    color: #ffffff;
+    background: var(--primary-color);
+    border-radius: 999px;
+    font-size: var(--font-size-sm);
+    font-weight: 800;
+}
+
+.admin-collaboration-models-page .workflow-card-title {
+    font-size: var(--font-size-base);
+    font-weight: 800;
+    margin: 0 0 var(--spacing-xs);
+    color: var(--text-primary);
+}
+
+.admin-collaboration-models-page .workflow-card-desc {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.55;
+}
+
+@media (max-width: 1100px) {
+    .admin-collaboration-models-page .workflow-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-collaboration-models-page .matching-control-panel {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .admin-collaboration-models-page .matching-hero {
+        grid-template-columns: 1fr;
+        align-items: start;
+        padding: var(--spacing-md);
+    }
+
+    .admin-collaboration-models-page .matching-hero-actions {
+        justify-content: stretch;
+    }
+
+    .admin-collaboration-models-page .matching-run-state,
+    .admin-collaboration-models-page .matching-run-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .admin-collaboration-models-page .matching-run-state {
+        white-space: normal;
+        text-align: center;
+    }
+
+    .admin-collaboration-models-page .matching-control-meta,
+    .admin-collaboration-models-page .workflow-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-collaboration-models-page .matching-control-panel {
+        padding: var(--spacing-md);
+    }
+
+    .admin-collaboration-models-page .cm-model-card-body {
+        grid-template-columns: 1fr;
+    }
 }
 </style>

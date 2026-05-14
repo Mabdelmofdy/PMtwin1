@@ -283,6 +283,14 @@
             description: 'Review submitted information, documents, and history before deciding on access.',
             primaryAction: { label: 'Approve', id: 'page-cta-userdetail-approve', type: 'button' },
             secondaryAction: { label: 'Back to vetting', route: R.ADMIN_VETTING || '/admin/vetting' }
+        },
+        adminAudit: {
+            label: 'Admin Workspace',
+            title: 'Audit trail',
+            description:
+                'Filter platform activity, inspect JSON details, export CSV for compliance, and review uploaded user and company documents.',
+            primaryAction: { label: 'Export CSV', id: 'page-cta-audit-export', type: 'button' },
+            secondaryAction: { label: 'Admin dashboard', route: R.ADMIN || '/admin' }
         }
     };
 

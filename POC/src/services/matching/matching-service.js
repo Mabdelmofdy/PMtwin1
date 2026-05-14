@@ -11,6 +11,20 @@ class MatchingService {
     }
 
     /**
+     * Re-read threshold values from CONFIG.MATCHING. Call after admin updates
+     * matching settings so live edits take effect without a page reload.
+     */
+    refreshFromConfig() {
+        if (!CONFIG || !CONFIG.MATCHING) return;
+        if (typeof CONFIG.MATCHING.MIN_THRESHOLD === 'number') {
+            this.minThreshold = CONFIG.MATCHING.MIN_THRESHOLD;
+        }
+        if (typeof CONFIG.MATCHING.AUTO_NOTIFY_THRESHOLD === 'number') {
+            this.autoNotifyThreshold = CONFIG.MATCHING.AUTO_NOTIFY_THRESHOLD;
+        }
+    }
+
+    /**
      * Detect which matching models apply to this opportunity (for auto-routing).
      * @param {Object} opportunity
      * @returns {string[]} model names: one_way, two_way, consortium, circular

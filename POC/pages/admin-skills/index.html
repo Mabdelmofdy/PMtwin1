@@ -1,46 +1,477 @@
 <div class="page-container admin-skills-page">
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1 class="page-title">Skills &amp; Categories</h1>
-            <p class="page-subtitle">Manage skills and skill categories used across the platform</p>
+    <div class="skills-hero">
+        <div class="skills-hero-copy">
+            <div class="skills-eyebrow">Admin skills</div>
+            <h1 class="page-title">Skills catalog</h1>
+            <p class="page-subtitle">Manage the skill names and categories used in profiles, opportunities, and the matching engine. Changes apply after you save; reset drops your local override and reloads the default bundle.</p>
+        </div>
+        <div class="skills-hero-actions">
+            <div class="skills-run-state" id="skills-run-state" aria-live="polite">
+                <span class="skills-run-dot" aria-hidden="true"></span>
+                <span id="skills-hero-status">Loading catalog…</span>
+            </div>
+            <button type="button" id="admin-skills-save" class="btn btn-primary skills-run-btn">
+                <span>Save changes</span>
+            </button>
         </div>
     </div>
-    <div class="page-body">
-        <div id="admin-skills-loading" class="loading-state" style="display: none;">
-            <div class="spinner"></div>
-            <p>Loading...</p>
+
+    <div id="admin-skills-loading" class="skills-loading" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <span>Loading lookups…</span>
+    </div>
+
+    <div class="page-body skills-page-body" id="admin-skills-content" hidden>
+        <section class="skills-control-panel" aria-labelledby="skills-control-title">
+            <div class="skills-control-copy">
+                <h2 id="skills-control-title" class="skills-section-title">Current catalog</h2>
+                <p class="skills-section-desc">Counts reflect the list you are editing. “Stored list” shows whether a saved browser override is active for this device.</p>
+            </div>
+            <div class="skills-control-meta" aria-label="Catalog metadata">
+                <div class="skills-meta-item">
+                    <span class="skills-meta-label">Stored list</span>
+                    <span class="skills-meta-value" id="skills-meta-stored">—</span>
+                </div>
+                <div class="skills-meta-item">
+                    <span class="skills-meta-label">Skills</span>
+                    <span class="skills-meta-value" id="skills-meta-skill-count">0</span>
+                </div>
+                <div class="skills-meta-item">
+                    <span class="skills-meta-label">Categories</span>
+                    <span class="skills-meta-value" id="skills-meta-cat-count">0</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-section skills-report-section" aria-labelledby="skills-library-title">
+            <div class="skills-section-heading">
+                <div>
+                    <h2 id="skills-library-title" class="skills-section-title">Skills library</h2>
+                    <p class="skills-section-desc">Add or remove individual skills. These values appear in autocomplete lists and profile tags.</p>
+                </div>
+            </div>
+            <div class="skills-editor-panel">
+                <div class="skills-panel-toolbar">
+                    <input type="text" id="admin-skill-new" class="form-input skills-toolbar-input" placeholder="New skill name" autocomplete="off">
+                    <button type="button" id="admin-skill-add" class="btn btn-primary">Add skill</button>
+                </div>
+                <p class="skills-panel-hint">Skills are used in profiles and opportunities. Changes stay in memory until you save.</p>
+                <div id="admin-skills-list" class="skills-chip-wrap" aria-label="Skills list"></div>
+            </div>
+        </section>
+
+        <section class="dashboard-section skills-report-section" aria-labelledby="skills-categories-title">
+            <div class="skills-section-heading">
+                <div>
+                    <h2 id="skills-categories-title" class="skills-section-title">Skill categories</h2>
+                    <p class="skills-section-desc">Categories group skills in dropdowns and help keep matching signals organized.</p>
+                </div>
+            </div>
+            <div class="skills-editor-panel">
+                <div class="skills-panel-toolbar">
+                    <input type="text" id="admin-category-new" class="form-input skills-toolbar-input" placeholder="New category name" autocomplete="off">
+                    <button type="button" id="admin-category-add" class="btn btn-primary">Add category</button>
+                </div>
+                <p class="skills-panel-hint">Keep names short and stable so historical posts stay readable.</p>
+                <div id="admin-categories-list" class="skills-chip-wrap" aria-label="Categories list"></div>
+            </div>
+        </section>
+
+        <div class="skills-actions-bar">
+            <button type="button" id="admin-skills-save-footer" class="btn btn-primary">Save changes</button>
+            <button type="button" id="admin-skills-reset" class="btn btn-secondary">Reset to default (clear override)</button>
         </div>
-        <div id="admin-skills-content" class="space-y-6">
-            <div class="card">
-                <div class="card-header flex items-center justify-between">
-                    <h2>Skills</h2>
-                    <div class="flex gap-2">
-                        <input type="text" id="admin-skill-new" class="form-input w-64" placeholder="New skill name">
-                        <button type="button" id="admin-skill-add" class="btn btn-primary">Add</button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <p class="text-sm text-gray-600 mb-3">Skills are used in profiles and opportunities. Changes are stored in browser and override the default list until cleared.</p>
-                    <div id="admin-skills-list" class="flex flex-wrap gap-2"></div>
+
+        <section class="dashboard-section skills-workflow-overview" aria-labelledby="skills-guide-title">
+            <div class="skills-section-heading">
+                <div>
+                    <h2 id="skills-guide-title" class="skills-section-title">How this fits the platform</h2>
+                    <p class="skills-section-desc">Same layout rhythm as Matching Center—snapshot first, then editable results, then reference cards.</p>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-header flex items-center justify-between">
-                    <h2>Skill Categories</h2>
-                    <div class="flex gap-2">
-                        <input type="text" id="admin-category-new" class="form-input w-64" placeholder="New category name">
-                        <button type="button" id="admin-category-add" class="btn btn-primary">Add</button>
-                    </div>
+            <div class="skills-workflow-cards">
+                <div class="skills-workflow-card">
+                    <span class="skills-workflow-card-icon" aria-hidden="true">1</span>
+                    <h3 class="skills-workflow-card-title">Catalog</h3>
+                    <p class="skills-workflow-card-desc">Meta chips summarize what is on disk in this browser versus what you are editing in this session.</p>
                 </div>
-                <div class="card-body">
-                    <p class="text-sm text-gray-600 mb-3">Categories group skills in dropdowns and matching.</p>
-                    <div id="admin-categories-list" class="flex flex-wrap gap-2"></div>
+                <div class="skills-workflow-card">
+                    <span class="skills-workflow-card-icon" aria-hidden="true">2</span>
+                    <h3 class="skills-workflow-card-title">Skills</h3>
+                    <p class="skills-workflow-card-desc">Each chip is one selectable skill. Removing a skill does not delete it from old profiles until those records are edited.</p>
+                </div>
+                <div class="skills-workflow-card">
+                    <span class="skills-workflow-card-icon" aria-hidden="true">3</span>
+                    <h3 class="skills-workflow-card-title">Categories</h3>
+                    <p class="skills-workflow-card-desc">Categories drive grouping in admin and user pickers; align them with your matching taxonomy.</p>
+                </div>
+                <div class="skills-workflow-card">
+                    <span class="skills-workflow-card-icon" aria-hidden="true">4</span>
+                    <h3 class="skills-workflow-card-title">Save &amp; reset</h3>
+                    <p class="skills-workflow-card-desc">Save writes an override to local storage. Reset clears that override and reloads defaults from <code class="skills-code">data/lookups.json</code>.</p>
                 </div>
             </div>
-            <div class="flex gap-2">
-                <button type="button" id="admin-skills-save" class="btn btn-primary">Save changes</button>
-                <button type="button" id="admin-skills-reset" class="btn btn-secondary">Reset to default (clear override)</button>
-            </div>
-        </div>
+        </section>
     </div>
 </div>
+
+<style>
+.admin-skills-page {
+    --skills-accent: #0d9488;
+    --skills-accent-soft: #e6fffb;
+    --skills-surface: #fbfdff;
+    --skills-line: #d8e3ee;
+    --skills-green: #059669;
+}
+
+.admin-skills-page [hidden] {
+    display: none !important;
+}
+
+.skills-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--spacing-xl);
+    align-items: center;
+    padding: var(--spacing-xl);
+    border: 1px solid var(--skills-line);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, #ffffff 0%, #f6fffd 54%, #f8fbff 100%);
+    margin-bottom: var(--spacing-lg);
+}
+
+.skills-eyebrow {
+    color: var(--primary-color);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: var(--spacing-xs);
+}
+
+.skills-hero .page-title {
+    font-size: clamp(1.65rem, 2.2vw, 2.25rem);
+    line-height: 1.15;
+    margin-bottom: var(--spacing-sm);
+}
+
+.skills-hero .page-subtitle {
+    max-width: 720px;
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+}
+
+.skills-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
+}
+
+.skills-run-state {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 0 var(--spacing-md);
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    border: 1px solid var(--skills-line);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    max-width: 280px;
+}
+
+.skills-run-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    background: var(--skills-green);
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.12);
+    flex-shrink: 0;
+}
+
+.skills-run-btn {
+    min-height: 40px;
+    border-radius: var(--radius-md);
+}
+
+.skills-loading {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    min-height: 48px;
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+}
+
+.skills-loading .spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: skills-spin 0.8s linear infinite;
+}
+
+@keyframes skills-spin {
+    to { transform: rotate(360deg); }
+}
+
+.skills-page-body {
+    display: grid;
+    gap: var(--spacing-lg);
+    min-width: 0;
+}
+
+.skills-page-body > *,
+.skills-hero,
+.skills-control-panel,
+.skills-report-section,
+.skills-workflow-overview {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.admin-skills-page .dashboard-section {
+    margin-bottom: 0;
+}
+
+.skills-section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs);
+}
+
+.skills-section-desc {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: var(--font-size-sm);
+    line-height: 1.55;
+}
+
+.skills-section-heading {
+    margin-bottom: var(--spacing-md);
+}
+
+.skills-control-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--spacing-lg);
+    align-items: center;
+    padding: var(--spacing-lg);
+    background: var(--skills-surface);
+    border: 1px solid var(--skills-line);
+    border-radius: var(--radius-lg);
+}
+
+.skills-control-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(112px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.skills-meta-item {
+    min-width: 0;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: #ffffff;
+    border: 1px solid var(--skills-line);
+    border-radius: var(--radius-md);
+}
+
+.skills-meta-label {
+    display: block;
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.4;
+}
+
+.skills-meta-value {
+    display: block;
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.skills-editor-panel {
+    padding: var(--spacing-lg);
+    background: var(--bg-primary);
+    border: 1px solid var(--skills-line);
+    border-radius: var(--radius-lg);
+}
+
+.skills-panel-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.skills-toolbar-input {
+    flex: 1 1 200px;
+    min-width: 0;
+    max-width: 420px;
+}
+
+.skills-panel-hint {
+    margin: 0 0 var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.skills-chip-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    min-height: 52px;
+    padding: var(--spacing-md);
+    background: #f8fafc;
+    border: 1px solid var(--skills-line);
+    border-radius: var(--radius-md);
+}
+
+.skills-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.75rem;
+    background: #ffffff;
+    border: 1px solid var(--skills-line);
+    border-radius: 999px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    max-width: 100%;
+}
+
+.skills-chip-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.15rem;
+    padding: 0 0.25rem;
+    border: none;
+    background: transparent;
+    color: var(--danger-color, #dc2626);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+}
+
+.skills-chip-remove:hover {
+    color: #991b1b;
+    background: #fef2f2;
+}
+
+.skills-actions-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    align-items: center;
+    padding: var(--spacing-lg);
+    background: var(--skills-surface);
+    border: 1px solid var(--skills-line);
+    border-radius: var(--radius-lg);
+}
+
+.skills-workflow-cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--spacing-md);
+}
+
+.skills-workflow-card {
+    min-width: 0;
+    background: var(--skills-surface);
+    border: 1px solid var(--skills-line);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+}
+
+.skills-workflow-card-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-md);
+    color: #ffffff;
+    background: var(--primary-color);
+    border-radius: 999px;
+    font-size: var(--font-size-sm);
+    font-weight: 800;
+}
+
+.skills-workflow-card-title {
+    font-size: var(--font-size-base);
+    font-weight: 800;
+    margin: 0 0 var(--spacing-xs);
+    color: var(--text-primary);
+}
+
+.skills-workflow-card-desc {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.55;
+}
+
+.skills-code {
+    font-size: 0.85em;
+    padding: 0.1em 0.35em;
+    background: #f1f5f9;
+    border-radius: 4px;
+    word-break: break-all;
+}
+
+@media (max-width: 1100px) {
+    .skills-workflow-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .skills-control-panel {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .skills-hero {
+        grid-template-columns: 1fr;
+        padding: var(--spacing-md);
+    }
+
+    .skills-hero-actions {
+        justify-content: stretch;
+    }
+
+    .skills-run-state,
+    .skills-run-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .skills-run-state {
+        max-width: none;
+    }
+
+    .skills-control-meta,
+    .skills-workflow-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .skills-control-panel {
+        padding: var(--spacing-md);
+    }
+}
+</style>

@@ -203,6 +203,18 @@ function determineWizardSteps(opportunity) {
 
 async function renderComprehensiveView(opportunity, creator, isOwner, canApply) {
     document.getElementById('opportunity-title').textContent = opportunity.title || 'Untitled Opportunity';
+    const heroMeta = document.getElementById('opportunity-hero-meta');
+    if (heroMeta) {
+        heroMeta.textContent =
+            'Opportunity ID: ' +
+            opportunity.id +
+            ' · Posted ' +
+            new Date(opportunity.createdAt).toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+    }
     const intentEl = document.getElementById('opportunity-intent');
     if (intentEl) {
         const intent = opportunity.intent || 'request';
@@ -1869,7 +1881,9 @@ function collectTaskBids() {
 async function loadApplications(opportunityId) {
     const applicationsList = document.getElementById('applications-list');
     const applicationsCount = document.getElementById('applications-count');
-    
+
+    if (!applicationsList || !applicationsCount) return;
+
     try {
         const allApplications = await dataService.getApplications();
         let opportunityApplications = allApplications.filter(a => a.opportunityId === opportunityId);
@@ -1889,7 +1903,7 @@ async function loadApplications(opportunityId) {
         // Load applicant info
         const applicationsWithUsers = await Promise.all(
             opportunityApplications.map(async (app) => {
-                const applicant = await dataService.getUserById(app.applicantId);
+                const applicant = await dataService.getUserOrCompanyById(app.applicantId);
                 return { ...app, applicant };
             })
         );
@@ -2175,8 +2189,25 @@ async function loadMatchingSection(opportunityId) {
 async function showApplicationDetailModal(applicationId) {
     try {
         const currentUser = authService.getCurrentUser();
-        const detail = await dataService.getApplicationDetail(applicationId, currentUser ? { ownerId: currentUser.id } : {});
-        if (!detail || !detail.application) return;
+        if (!currentUser) {
+            alert('Sign in to view applications.');
+            return;
+        }
+        const isOwner = currentOpportunity && currentOpportunity.creatorId === currentUser.id;
+        const isStaff = typeof authService.canAccessAdmin === 'function' && authService.canAccessAdmin();
+        if (!isOwner && !isStaff) {
+            alert('Only the opportunity owner or staff can view full application details.');
+            return;
+        }
+        const detailOpts = {};
+        if (isOwner) detailOpts.ownerId = currentUser.id;
+        if (!isOwner && isStaff) detailOpts.allowStaff = true;
+
+        const detail = await dataService.getApplicationDetail(applicationId, detailOpts);
+        if (!detail || !detail.application) {
+            alert('Application could not be loaded.');
+            return;
+        }
         const { application, applicant, opportunity, requirementsMatch, paymentTerms, deliverables, files, matchScore, matchBreakdown, matchType } = detail;
         const applicantName = applicant?.profile?.name || applicant?.email || application.applicantId;
         const proposalText = application.coverLetter || application.proposal || 'No proposal or cover letter provided.';
@@ -2197,14 +2228,19 @@ async function showApplicationDetailModal(applicationId) {
         });
 
         if (typeof modalService !== 'undefined') {
-            modalService.showCustom(contentHTML, 'Application details', { confirmText: 'Close' }).then(() => {});
-            const modalEl = document.getElementById('modal-container');
-            if (modalEl) {
-                const body = modalEl.querySelector('.modal-body-custom');
-                if (body) {
-                    setupApplicationDetailActions(body, applicationId, application.applicantId, application.status);
+            const modalTitle = applicantName ? `Application · ${escapeHtml(String(applicantName))}` : 'Application details';
+            modalService.showCustom(contentHTML, modalTitle, {
+                confirmText: 'Close',
+                modalClass: 'modal-dialog--application-detail',
+                onMount: (modal) => {
+                    const body = modal.querySelector('.modal-body-custom');
+                    if (body) {
+                        const viewRoot = body.querySelector('.application-details-view');
+                        setupApplicationDetailTabs(viewRoot);
+                        setupApplicationDetailActions(body, applicationId, application.applicantId, application.status);
+                    }
                 }
-            }
+            }).then(() => {});
         } else {
             alert('Application: ' + applicantName + '\nStatus: ' + application.status + '\n\n' + proposalText);
         }
@@ -2212,6 +2248,15 @@ async function showApplicationDetailModal(applicationId) {
         console.error('Error showing application detail:', error);
         alert('Failed to load application details.');
     }
+}
+
+function getApplicantInitials(name) {
+    if (!name || typeof name !== 'string') return '?';
+    const t = name.trim();
+    if (!t) return '?';
+    const parts = t.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    return parts[0].slice(0, 2).toUpperCase();
 }
 
 function buildApplicationDetailContent(data) {
@@ -2232,7 +2277,7 @@ function buildApplicationDetailContent(data) {
     const userTypeLabel = applicant?.role === 'company_owner' || applicant?.profile?.type === 'company' ? 'Company' : (applicant?.role === 'consultant' ? 'Consultant' : 'Professional');
     const reputationStr = profile.reputationScore != null ? String(profile.reputationScore) : 'N/A';
     const portfolioHtml = profile.portfolioUrl
-        ? `<a href="${escapeHtml(profile.portfolioUrl)}" target="_blank" rel="noopener" class="text-primary">${escapeHtml(profile.portfolioUrl)}</a>`
+        ? `<a href="${escapeHtml(profile.portfolioUrl)}" target="_blank" rel="noopener" class="app-detail-inline-link">${escapeHtml(profile.portfolioUrl)}</a>`
         : '—';
 
     const matchTypeLabel = data.matchType ? (data.matchType === 'one_way' ? 'One-way' : data.matchType === 'two_way' ? 'Two-way (barter)' : data.matchType === 'consortium' ? 'Consortium' : data.matchType === 'circular' ? 'Circular' : data.matchType) : '';
@@ -2247,158 +2292,386 @@ function buildApplicationDetailContent(data) {
     const av = application.application_value || {};
     const valueScorePct = av.value_score != null ? Math.round(av.value_score * 100) : null;
     const requestedVal = av.requestedValue != null ? av.requestedValue : av.requested_value;
-    const requestedStr = requestedVal != null ? `${typeof requestedVal === 'number' ? requestedVal.toLocaleString() : String(requestedVal)} ${escapeHtml(av.requestedCurrency || av.currency || 'SAR')}` : null;
+    const requestedStr =
+        requestedVal != null
+            ? `${typeof requestedVal === 'number' ? requestedVal.toLocaleString() : String(requestedVal)} ${escapeHtml(av.requestedCurrency || av.currency || 'SAR')}`
+            : null;
+    const offeredVal = av.offeredValue != null ? av.offeredValue : av.offered_value;
+    const offeredStr =
+        offeredVal != null && String(offeredVal).trim() !== ''
+            ? typeof offeredVal === 'number'
+                ? offeredVal.toLocaleString()
+                : String(offeredVal)
+            : null;
     const budgetRange = opportunity?.exchangeData?.budgetRange;
-    const budgetRangeStr = budgetRange && (budgetRange.min != null || budgetRange.max != null)
-        ? `${budgetRange.min != null ? Number(budgetRange.min).toLocaleString() : '—'}–${budgetRange.max != null ? Number(budgetRange.max).toLocaleString() : '—'} ${escapeHtml(budgetRange.currency || 'SAR')}`
-        : '—';
-    const exchangeModeLabel = (opportunity?.exchangeMode || av.exchange_mode || 'cash').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const budgetRangeStr =
+        budgetRange && (budgetRange.min != null || budgetRange.max != null)
+            ? `${budgetRange.min != null ? Number(budgetRange.min).toLocaleString() : '—'}–${budgetRange.max != null ? Number(budgetRange.max).toLocaleString() : '—'} ${escapeHtml(budgetRange.currency || 'SAR')}`
+            : '—';
+    const exchangeModeLabel = (opportunity?.exchangeMode || av.exchange_mode || av.exchangeMode || 'cash')
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
 
-    const reqMatchIcon = (m) => m === 'match' ? '✔' : m === 'partial' ? '◐' : '✗';
-    const reqMatchLabel = (m) => m === 'match' ? 'Match' : m === 'partial' ? 'Partial match' : 'Missing';
-    const requirementsHtml = requirementsMatch.length > 0
-        ? '<ul class="space-y-2">' + requirementsMatch.map(r => `
-            <li class="flex items-center gap-2">
-                <span class="font-medium">${escapeHtml(r.requiredValue)}</span>
-                <span class="badge badge-${r.applicantMatch === 'match' ? 'success' : r.applicantMatch === 'partial' ? 'warning' : 'danger'}">${reqMatchIcon(r.applicantMatch)} ${reqMatchLabel(r.applicantMatch)}</span>
-                ${r.applicantResponse ? `<span class="text-sm text-gray-600">${escapeHtml(r.applicantResponse)}</span>` : ''}
-            </li>
-        `).join('') + '</ul>'
-        : '<p class="text-sm text-gray-500">No requirements data.</p>';
+    const reqMatchIcon = (m) => (m === 'match' ? '✔' : m === 'partial' ? '◐' : '✗');
+    const reqMatchLabel = (m) => (m === 'match' ? 'Match' : m === 'partial' ? 'Partial match' : 'Missing');
+    const requirementsHtml =
+        requirementsMatch.length > 0
+            ? '<ul class="app-detail-req-list">' +
+              requirementsMatch
+                  .map(
+                      (r) => `
+            <li class="app-detail-req-item app-detail-req-item--${r.applicantMatch === 'match' ? 'match' : r.applicantMatch === 'partial' ? 'partial' : 'miss'}">
+                <div class="app-detail-req-item__head">
+                    <span class="app-detail-req-item__label">${escapeHtml(r.requiredValue)}</span>
+                    <span class="badge badge-${r.applicantMatch === 'match' ? 'success' : r.applicantMatch === 'partial' ? 'warning' : 'danger'}">${reqMatchIcon(r.applicantMatch)} ${reqMatchLabel(r.applicantMatch)}</span>
+                </div>
+                ${r.applicantResponse ? `<p class="app-detail-req-item__note">${escapeHtml(r.applicantResponse)}</p>` : ''}
+            </li>`
+                  )
+                  .join('') +
+              '</ul>'
+            : '<p class="app-detail-empty">No requirements match rows stored for this application.</p>';
+
+    const paymentPrefLabel = (pref) =>
+        pref === 'accept' ? 'Accept as stated' : pref === 'discuss' ? 'Prefer to discuss' : pref === 'custom' ? 'Custom terms' : pref ? escapeHtml(String(pref)) : '';
 
     let paymentTermsHtml = '';
     if (paymentTerms.length > 0) {
-        paymentTermsHtml = paymentTerms.map(pt => {
-            if (pt.type === 'milestone' && pt.details && Array.isArray(pt.details.milestones)) {
-                return pt.details.milestones.map((m, i) => `<div class="text-sm">Milestone ${i + 1} — ${escapeHtml(m.title || '')}</div>`).join('');
-            }
-            if (pt.type === 'equity' && pt.details && pt.details.equityPercent != null) return `<div class="text-sm">Equity: ${pt.details.equityPercent}%</div>`;
-            if (pt.type === 'profit_share' && pt.details && pt.details.profitSharePercent != null) return `<div class="text-sm">Profit share: ${pt.details.profitSharePercent}%</div>`;
-            return `<div class="text-sm">${escapeHtml(pt.type)}</div>`;
-        }).join('');
+        paymentTermsHtml = paymentTerms
+            .map((pt) => {
+                if (pt.type === 'milestone' && pt.details && Array.isArray(pt.details.milestones)) {
+                    return pt.details.milestones
+                        .map((m, i) => `<div class="text-sm">Milestone ${i + 1} — ${escapeHtml(m.title || '')}</div>`)
+                        .join('');
+                }
+                if (pt.type === 'equity' && pt.details && pt.details.equityPercent != null)
+                    return `<div class="text-sm">Equity: ${pt.details.equityPercent}%</div>`;
+                if (pt.type === 'profit_share' && pt.details && pt.details.profitSharePercent != null)
+                    return `<div class="text-sm">Profit share: ${pt.details.profitSharePercent}%</div>`;
+                return `<div class="text-sm">${escapeHtml(pt.type)}</div>`;
+            })
+            .join('');
     } else {
-        const pref = application.responses?.paymentPreference;
-        paymentTermsHtml = pref ? `<div class="text-sm">${escapeHtml(pref === 'accept' ? 'Accept as stated' : pref === 'discuss' ? 'Prefer to discuss' : 'Custom terms')}</div>` : '<p class="text-sm text-gray-500">No payment terms specified.</p>';
+        const resp = application.responses || {};
+        const prefRaw = resp.paymentPreference || av.paymentPreference;
+        const comments = resp.paymentComments || av.paymentComments;
+        const parts = [];
+        if (prefRaw) parts.push(`<p class="text-sm mb-1"><strong>Preference:</strong> ${paymentPrefLabel(prefRaw)}</p>`);
+        if (comments) parts.push(`<p class="text-sm mb-1"><strong>Comments:</strong><br/><span class="whitespace-pre-wrap">${escapeHtml(String(comments))}</span></p>`);
+        paymentTermsHtml =
+            parts.length > 0 ? parts.join('') : '<p class="app-detail-empty">No structured payment terms record. Values may appear under Value &amp; offer below.</p>';
     }
 
     const availabilityDate = application.availabilityDate ? new Date(application.availabilityDate).toLocaleDateString() : '—';
-    const durationStr = application.estimatedDurationDays != null ? `${application.estimatedDurationDays} days` : (application.responses?.taskBidDuration != null ? `${application.responses.taskBidDuration} days` : '—');
-    const deadlineLabel = application.deadlineCompatibility === 'full' ? 'Full' : application.deadlineCompatibility === 'partial' ? 'Partial' : application.deadlineCompatibility === 'no' ? 'No' : '—';
+    const durationStr =
+        application.estimatedDurationDays != null
+            ? `${application.estimatedDurationDays} days`
+            : application.responses?.taskBidDuration != null
+              ? `${application.responses.taskBidDuration} days`
+              : '—';
+    const deadlineLabel =
+        application.deadlineCompatibility === 'full'
+            ? 'Full'
+            : application.deadlineCompatibility === 'partial'
+              ? 'Partial'
+              : application.deadlineCompatibility === 'no'
+                ? 'No'
+                : '—';
 
-    const deliverablesHtml = deliverables.length > 0
-        ? '<ul class="list-disc list-inside space-y-1">' + deliverables.map(d => `<li>${escapeHtml(d.title)}${d.description ? ' — ' + escapeHtml(d.description) : ''}</li>`).join('') + '</ul>'
-        : '<p class="text-sm text-gray-500">No deliverables listed.</p>';
+    const deliverablesHtml =
+        deliverables.length > 0
+            ? '<ul class="app-detail-bullet-list app-detail-bullet-list--spaced">' +
+              deliverables.map((d) => `<li>${escapeHtml(d.title)}${d.description ? ' — ' + escapeHtml(d.description) : ''}</li>`).join('') +
+              '</ul>'
+            : '<p class="app-detail-empty">No deliverables list was saved with this application.</p>';
+
+    const resp = application.responses || {};
+    const skipKeys = new Set(['paymentPreference', 'paymentComments', 'taskBidAmount', 'taskBidDuration', 'taskBidComments']);
+    const submittedRows = [];
+    Object.keys(resp).forEach((key) => {
+        if (skipKeys.has(key)) return;
+        const val = resp[key];
+        if (val == null || val === '') return;
+        if (key.startsWith('response_')) {
+            const label = formatLabel(key.replace(/^response_/, ''));
+            submittedRows.push({ label, value: String(val) });
+        }
+    });
+    const submittedResponsesHtml =
+        submittedRows.length > 0
+            ? '<dl class="app-detail-qna-list">' +
+              submittedRows
+                  .map(
+                      (row) => `
+                <div class="app-detail-qna-item">
+                    <dt class="app-detail-qna-item__q">${escapeHtml(row.label)}</dt>
+                    <dd class="app-detail-qna-item__a app-detail-pre">${escapeHtml(row.value)}</dd>
+                </div>`
+                  )
+                  .join('') +
+              '</dl>'
+            : '<p class="app-detail-empty">No extra requirement answers were stored on this application.</p>';
+
+    let taskBidHtml = '';
+    if (resp.taskBidAmount != null || resp.taskBidDuration != null || (resp.taskBidComments && String(resp.taskBidComments).trim())) {
+        taskBidHtml = `
+            <div class="app-detail-callout app-detail-callout--muted">
+                ${resp.taskBidAmount != null ? `<p><strong>Bid amount:</strong> ${escapeHtml(String(resp.taskBidAmount))} SAR</p>` : ''}
+                ${resp.taskBidDuration != null ? `<p><strong>Duration:</strong> ${escapeHtml(String(resp.taskBidDuration))} days</p>` : ''}
+                ${resp.taskBidComments ? `<p class="app-detail-pre"><strong>Approach / comments:</strong><br/>${escapeHtml(String(resp.taskBidComments))}</p>` : ''}
+            </div>`;
+    } else {
+        taskBidHtml = '<p class="app-detail-empty">No task bid was submitted.</p>';
+    }
 
     const fileTypeLabel = (t) => ({ portfolio: 'Portfolio', certificate: 'Certificates', case_study: 'Case studies', report: 'Reports', other: 'Other' })[t] || t;
     const filesHtml = files.length > 0
-        ? '<ul class="space-y-2">' + files.map(f => `
-            <li class="flex items-center gap-2">
+        ? '<ul class="app-detail-file-list">' + files.map(f => `
+            <li class="app-detail-file-row">
                 <span class="badge badge-secondary">${escapeHtml(fileTypeLabel(f.fileType))}</span>
-                <a href="${escapeHtml(f.fileUrl || '#')}" target="_blank" rel="noopener" class="text-primary text-sm">${escapeHtml(f.fileName || '')}</a>
+                <a href="${escapeHtml(f.fileUrl || '#')}" target="_blank" rel="noopener" class="app-detail-file-link">${escapeHtml(f.fileName || '')}</a>
             </li>
         `).join('') + '</ul>'
-        : '<p class="text-sm text-gray-500">No attachments.</p>';
+        : '<p class="app-detail-empty">No attachments.</p>';
 
     const collabModels = profile.preferredCollaborationModels || [];
     const collabHtml = collabModels.length > 0
-        ? '<ul class="list-disc list-inside">' + collabModels.map(c => `<li>${escapeHtml(String(c).replace(/_/g, ' '))}</li>`).join('') + '</ul>'
-        : '<p class="text-sm text-gray-500">Not specified.</p>';
+        ? '<ul class="app-detail-bullet-list">' + collabModels.map(c => `<li>${escapeHtml(String(c).replace(/_/g, ' '))}</li>`).join('') + '</ul>'
+        : '<p class="app-detail-empty">Not specified.</p>';
 
     const skillsList = [].concat(profile.skills || [], profile.specializations || []).filter(Boolean);
     const skillsStr = skillsList.length > 0 ? skillsList.map(s => escapeHtml(String(s))).join(', ') : '—';
     const sectorsList = Array.isArray(profile.sectors) ? profile.sectors : (profile.industry ? (Array.isArray(profile.industry) ? profile.industry : [profile.industry]) : []);
     const sectorsStr = sectorsList.length > 0 ? sectorsList.map(s => escapeHtml(String(s))).join(', ') : '—';
 
+    const appliedDateLabel = new Date(application.createdAt).toLocaleDateString();
+    const initials = getApplicantInitials(String(applicantName || ''));
+    const oppTitleEsc = opportunity?.title ? escapeHtml(opportunity.title) : '';
+    const scoreRingBlock =
+        matchScorePct != null
+            ? `<div class="app-detail-hero__score"><div class="app-detail-score-ring" style="--app-match-p:${matchScorePct}"><span>${matchScorePct}%</span></div><span class="app-detail-score-caption">AI match</span></div>`
+            : '';
+
+    const aiMatchSectionBody =
+        (matchTypeLabel ? `<p class="app-detail-ai-type"><strong>Type</strong> ${escapeHtml(matchTypeLabel)}</p>` : '') +
+        '<ul class="app-detail-ai-bars">' +
+        (skillPct != null ? `<li><span class="app-detail-ai-bars__label">Skills</span><span class="app-detail-ai-bars__track"><i style="width:${skillPct}%"></i></span><span class="app-detail-ai-bars__pct">${skillPct}%</span></li>` : '') +
+        (budgetPct != null ? `<li><span class="app-detail-ai-bars__label">Budget</span><span class="app-detail-ai-bars__track"><i style="width:${budgetPct}%"></i></span><span class="app-detail-ai-bars__pct">${budgetPct}%</span></li>` : '') +
+        (timelinePct != null ? `<li><span class="app-detail-ai-bars__label">Timeline</span><span class="app-detail-ai-bars__track"><i style="width:${timelinePct}%"></i></span><span class="app-detail-ai-bars__pct">${timelinePct}%</span></li>` : '') +
+        (locationPct != null ? `<li><span class="app-detail-ai-bars__label">Location</span><span class="app-detail-ai-bars__track"><i style="width:${locationPct}%"></i></span><span class="app-detail-ai-bars__pct">${locationPct}%</span></li>` : '') +
+        (reputationPct != null ? `<li><span class="app-detail-ai-bars__label">Reputation</span><span class="app-detail-ai-bars__track"><i style="width:${reputationPct}%"></i></span><span class="app-detail-ai-bars__pct">${reputationPct}%</span></li>` : '') +
+        '</ul>' +
+        (!matchTypeLabel && matchScorePct == null && skillPct == null && budgetPct == null && timelinePct == null && locationPct == null && reputationPct == null
+            ? '<p class="app-detail-empty">No AI breakdown available for this application.</p>'
+            : '');
+
     return `
         <div class="application-details-view" data-application-id="${escapeHtml(application.id)}" data-applicant-id="${escapeHtml(application.applicantId || '')}" data-application-status="${escapeHtml(application.status)}">
-            <div class="application-details-body space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-                <section class="app-detail-section" id="section-applicant-summary">
-                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Applicant summary</h2>
-                    <dl class="summary-grid grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                        <dt class="text-gray-500">Name</dt><dd class="font-medium">${escapeHtml(applicantName)}</dd>
-                        <dt class="text-gray-500">User type</dt><dd>${escapeHtml(userTypeLabel)}</dd>
-                        <dt class="text-gray-500">Experience</dt><dd>${profile.yearsExperience != null ? escapeHtml(profile.yearsExperience + ' years') : '—'}</dd>
-                        <dt class="text-gray-500">Industry</dt><dd>${escapeHtml(profile.primaryDomain || '—')}</dd>
-                        <dt class="text-gray-500">Skills</dt><dd>${skillsStr}</dd>
-                        <dt class="text-gray-500">Sectors</dt><dd>${sectorsStr}</dd>
-                        <dt class="text-gray-500">Location</dt><dd>${escapeHtml(profile.location || '—')}</dd>
-                        <dt class="text-gray-500">Portfolio</dt><dd>${portfolioHtml}</dd>
-                        <dt class="text-gray-500">Reputation</dt><dd>${escapeHtml(reputationStr)}</dd>
-                        <dt class="text-gray-500">Application date</dt><dd>${new Date(application.createdAt).toLocaleDateString()}</dd>
-                        <dt class="text-gray-500">Status</dt><dd><span class="badge ${getApplicationStatusBadgeClass(application.status)}">${escapeHtml(getApplicationStatusLabel(application.status))}</span></dd>
-                    </dl>
-                </section>
-                <section class="app-detail-section" id="section-ai-match">
-                    <h2 class="text-sm font-semibold text-gray-700 mb-2">AI match summary</h2>
-                    <div class="p-3 bg-gray-50 rounded-lg">
-                        ${matchTypeLabel ? `<p class="text-xs text-gray-600"><strong>Match type:</strong> ${escapeHtml(matchTypeLabel)}</p>` : ''}
-                        ${matchScorePct != null ? `<p class="text-sm font-medium mt-1">Match score: ${matchScorePct}%</p>` : ''}
-                        <ul class="mt-2 space-y-1 text-xs text-gray-600">
-                            ${skillPct != null ? `<li>Skill match: ${skillPct}%</li>` : ''}
-                            ${budgetPct != null ? `<li>Budget: ${budgetPct}%</li>` : ''}
-                            ${timelinePct != null ? `<li>Timeline fit: ${timelinePct}%</li>` : ''}
-                            ${locationPct != null ? `<li>Location: ${locationPct}%</li>` : ''}
-                            ${reputationPct != null ? `<li>Reputation: ${reputationPct}%</li>` : ''}
-                        </ul>
+            <header class="app-detail-hero">
+                <div class="app-detail-hero__avatar" aria-hidden="true">${escapeHtml(initials)}</div>
+                <div class="app-detail-hero__text">
+                    <p class="app-detail-hero__eyebrow">Application review</p>
+                    <h2 class="app-detail-hero__name">${escapeHtml(applicantName)}</h2>
+                    ${oppTitleEsc ? `<p class="app-detail-hero__opp">${oppTitleEsc}</p>` : ''}
+                    <div class="app-detail-hero__meta">
+                        <span class="app-detail-pill">${escapeHtml(userTypeLabel)}</span>
+                        <span class="app-detail-pill app-detail-pill--muted">Applied ${escapeHtml(appliedDateLabel)}</span>
+                        <span class="badge ${getApplicationStatusBadgeClass(application.status)}">${escapeHtml(getApplicationStatusLabel(application.status))}</span>
                     </div>
-                </section>
-                <section class="app-detail-section" id="section-proposal">
-                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Proposal overview</h2>
-                    <p class="text-sm text-gray-900 whitespace-pre-wrap">${escapeHtml(proposalText)}</p>
-                </section>
-                <section class="app-detail-section" id="section-requirements-match">
-                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Requirements match</h2>
-                    ${requirementsHtml}
-                </section>
-                <section class="app-detail-section" id="section-value-bidding">
-                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Value &amp; bidding</h2>
-                    <div class="p-3 bg-gray-50 rounded-lg text-sm">
-                        <p><strong>Exchange mode:</strong> ${escapeHtml(exchangeModeLabel)}</p>
-                        ${requestedStr ? `<p class="mt-1"><strong>Requested:</strong> ${requestedStr}</p>` : ''}
-                        <p class="mt-1"><strong>Budget range:</strong> ${budgetRangeStr}</p>
-                        ${valueScorePct != null ? `<p class="mt-1"><strong>Value compatibility:</strong> ${valueScorePct}%</p>` : ''}
+                </div>
+                ${scoreRingBlock}
+            </header>
+            <div class="application-details-body">
+                <nav class="app-detail-tabs" role="tablist" aria-label="Application sections">
+                    <button type="button" class="app-detail-tabs__btn is-active" role="tab" aria-selected="true" data-tab="overview" id="app-tab-overview" aria-controls="app-detail-panel-overview">Overview</button>
+                    <button type="button" class="app-detail-tabs__btn" role="tab" aria-selected="false" data-tab="qa" id="app-tab-qa" aria-controls="app-detail-panel-qa">Q&amp;A &amp; bid</button>
+                    <button type="button" class="app-detail-tabs__btn" role="tab" aria-selected="false" data-tab="fit" id="app-tab-fit" aria-controls="app-detail-panel-fit">Requirements &amp; fit</button>
+                    <button type="button" class="app-detail-tabs__btn" role="tab" aria-selected="false" data-tab="terms" id="app-tab-terms" aria-controls="app-detail-panel-terms">Terms &amp; files</button>
+                </nav>
+                <div class="app-detail-tab-panels">
+                    <div class="app-detail-tab-panel is-active" role="tabpanel" id="app-detail-panel-overview" aria-labelledby="app-tab-overview" data-tab-panel="overview">
+                        <div class="app-detail-overview-grid">
+                            <section class="app-detail-card" id="section-proposal">
+                                <h3 class="app-detail-card__title">Proposal</h3>
+                                <div class="app-detail-card__body app-detail-proposal-scroll-wrap">
+                                    <div class="app-detail-proposal-scroll">
+                                        <div class="app-detail-proposal">${escapeHtml(proposalText)}</div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="app-detail-card app-detail-card--compact" id="section-applicant-summary">
+                                <h3 class="app-detail-card__title">Profile snapshot</h3>
+                                <div class="app-detail-card__body">
+                                    <dl class="app-detail-kv-grid">
+                                        <dt>User type</dt><dd>${escapeHtml(userTypeLabel)}</dd>
+                                        <dt>Experience</dt><dd>${profile.yearsExperience != null ? escapeHtml(profile.yearsExperience + ' years') : '—'}</dd>
+                                        <dt>Industry</dt><dd>${escapeHtml(profile.primaryDomain || '—')}</dd>
+                                        <dt>Skills</dt><dd class="app-detail-kv-grid__wide">${skillsStr}</dd>
+                                        <dt>Sectors</dt><dd class="app-detail-kv-grid__wide">${sectorsStr}</dd>
+                                        <dt>Location</dt><dd>${escapeHtml(profile.location || '—')}</dd>
+                                        <dt>Portfolio</dt><dd class="app-detail-kv-grid__wide">${portfolioHtml}</dd>
+                                        <dt>Reputation</dt><dd>${escapeHtml(reputationStr)}</dd>
+                                    </dl>
+                                </div>
+                            </section>
+                        </div>
                     </div>
-                </section>
-                <section class="app-detail-section" id="section-payment-terms">
-                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Payment terms</h2>
-                    <div class="text-sm">${paymentTermsHtml}</div>
-                </section>
-                <section class="app-detail-section" id="section-timeline">
-                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Timeline</h2>
-                    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                        <dt class="text-gray-500">Availability</dt><dd>${escapeHtml(availabilityDate)}</dd>
-                        <dt class="text-gray-500">Estimated duration</dt><dd>${escapeHtml(durationStr)}</dd>
-                        <dt class="text-gray-500">Deadline fit</dt><dd>${escapeHtml(deadlineLabel)}</dd>
-                    </dl>
-                </section>
-                <section class="app-detail-section" id="section-deliverables">
-                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Deliverables</h2>
-                    ${deliverablesHtml}
-                </section>
-                <section class="app-detail-section" id="section-attachments">
-                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Attachments</h2>
-                    ${filesHtml}
-                </section>
-                <section class="app-detail-section" id="section-collaboration-preferences">
-                    <h2 class="text-sm font-semibold text-gray-700 mb-2">Collaboration preferences</h2>
-                    ${collabHtml}
-                </section>
+                    <div class="app-detail-tab-panel" role="tabpanel" id="app-detail-panel-qa" aria-labelledby="app-tab-qa" data-tab-panel="qa" hidden>
+                        <div class="app-detail-tab-panel-stack">
+                            <section class="app-detail-card" id="section-requirement-answers">
+                                <h3 class="app-detail-card__title">Requirement answers</h3>
+                                <div class="app-detail-card__body">${submittedResponsesHtml}</div>
+                            </section>
+                            <section class="app-detail-card" id="section-task-bid-detail">
+                                <h3 class="app-detail-card__title">Task bid</h3>
+                                <div class="app-detail-card__body">${taskBidHtml}</div>
+                            </section>
+                        </div>
+                    </div>
+                    <div class="app-detail-tab-panel" role="tabpanel" id="app-detail-panel-fit" aria-labelledby="app-tab-fit" data-tab-panel="fit" hidden>
+                        <div class="app-detail-tab-panel-stack app-detail-fit-grid">
+                            <section class="app-detail-card" id="section-requirements-match">
+                                <h3 class="app-detail-card__title">Requirements match</h3>
+                                <div class="app-detail-card__body app-detail-req-scroll">${requirementsHtml}</div>
+                            </section>
+                            <section class="app-detail-card app-detail-card--accent" id="section-ai-match">
+                                <h3 class="app-detail-card__title">AI match breakdown</h3>
+                                <div class="app-detail-card__body">${aiMatchSectionBody}</div>
+                            </section>
+                        </div>
+                    </div>
+                    <div class="app-detail-tab-panel" role="tabpanel" id="app-detail-panel-terms" aria-labelledby="app-tab-terms" data-tab-panel="terms" hidden>
+                        <div class="app-detail-terms-grid">
+                            <section class="app-detail-card app-detail-terms-span" id="section-value-bidding">
+                                <h3 class="app-detail-card__title">Value &amp; offer</h3>
+                                <div class="app-detail-card__body">
+                                    <div class="app-detail-callout app-detail-callout--muted app-detail-callout--tight">
+                                        <p><strong>Exchange</strong> ${escapeHtml(exchangeModeLabel)}</p>
+                                        ${offeredStr ? `<p><strong>They offer</strong> ${escapeHtml(offeredStr)}</p>` : ''}
+                                        ${requestedStr ? `<p><strong>Requested</strong> ${requestedStr}</p>` : ''}
+                                        <p><strong>Budget range</strong> ${budgetRangeStr}</p>
+                                        ${valueScorePct != null ? `<p><strong>Value fit</strong> ${valueScorePct}%</p>` : ''}
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="app-detail-card" id="section-payment-terms">
+                                <h3 class="app-detail-card__title">Payment terms</h3>
+                                <div class="app-detail-card__body app-detail-compact">${paymentTermsHtml}</div>
+                            </section>
+                            <section class="app-detail-card" id="section-timeline">
+                                <h3 class="app-detail-card__title">Timeline</h3>
+                                <div class="app-detail-card__body">
+                                    <dl class="app-detail-kv-grid app-detail-kv-grid--tight">
+                                        <dt>Availability</dt><dd>${escapeHtml(availabilityDate)}</dd>
+                                        <dt>Duration</dt><dd>${escapeHtml(durationStr)}</dd>
+                                        <dt>Deadline fit</dt><dd>${escapeHtml(deadlineLabel)}</dd>
+                                    </dl>
+                                </div>
+                            </section>
+                            <section class="app-detail-card" id="section-deliverables">
+                                <h3 class="app-detail-card__title">Deliverables</h3>
+                                <div class="app-detail-card__body app-detail-terms-scroll">${deliverablesHtml}</div>
+                            </section>
+                            <section class="app-detail-card" id="section-attachments">
+                                <h3 class="app-detail-card__title">Attachments</h3>
+                                <div class="app-detail-card__body">${filesHtml}</div>
+                            </section>
+                            <section class="app-detail-card app-detail-terms-span" id="section-collaboration-preferences">
+                                <h3 class="app-detail-card__title">Collaboration</h3>
+                                <div class="app-detail-card__body">${collabHtml}</div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <footer class="application-details-footer mt-4 pt-4 border-t border-gray-200">
-                <div class="owner-actions flex flex-wrap gap-2 mb-3">
-                    <button type="button" class="btn btn-secondary btn-sm" data-action="shortlist" data-application-id="${escapeHtml(application.id)}" data-applicant-id="${escapeHtml(application.applicantId || '')}">Shortlist</button>
-                    <button type="button" class="btn btn-secondary btn-sm" data-action="invite-negotiation" data-application-id="${escapeHtml(application.id)}" data-applicant-id="${escapeHtml(application.applicantId || '')}">Invite to negotiation</button>
-                    <button type="button" class="btn btn-secondary btn-sm" data-action="send-message" data-applicant-id="${escapeHtml(application.applicantId || '')}">Send message</button>
-                    <button type="button" class="btn btn-outline btn-sm" data-action="view-profile" data-applicant-id="${escapeHtml(application.applicantId || '')}">View profile</button>
-                    <button type="button" class="btn btn-danger btn-sm" data-action="reject" data-application-id="${escapeHtml(application.id)}" data-applicant-id="${escapeHtml(application.applicantId || '')}">Reject application</button>
+            <footer class="application-details-footer">
+                <div class="application-details-footer__actions">
+                    <div class="application-details-footer__group">
+                        <button type="button" class="btn btn-primary btn-sm" data-action="shortlist" data-application-id="${escapeHtml(application.id)}" data-applicant-id="${escapeHtml(application.applicantId || '')}">Shortlist</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-action="invite-negotiation" data-application-id="${escapeHtml(application.id)}" data-applicant-id="${escapeHtml(application.applicantId || '')}">Invite to negotiate</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-action="send-message" data-applicant-id="${escapeHtml(application.applicantId || '')}">Message</button>
+                        <button type="button" class="btn btn-outline btn-sm" data-action="view-profile" data-applicant-id="${escapeHtml(application.applicantId || '')}">View profile</button>
+                    </div>
+                    <button type="button" class="btn btn-danger btn-sm application-details-footer__reject" data-action="reject" data-application-id="${escapeHtml(application.id)}" data-applicant-id="${escapeHtml(application.applicantId || '')}">Reject</button>
                 </div>
             </footer>
         </div>
     `;
 }
 
+/**
+ * Section tabs for application review modal — less vertical scroll than a single long column.
+ */
+function setupApplicationDetailTabs(viewRoot) {
+    if (!viewRoot) return;
+    const nav = viewRoot.querySelector('.app-detail-tabs');
+    const tabs = nav ? nav.querySelectorAll('[role="tab"]') : [];
+    const panels = viewRoot.querySelectorAll('.app-detail-tab-panel');
+    if (!nav || !tabs.length || !panels.length) return;
+
+    function activate(tabId) {
+        tabs.forEach((btn) => {
+            const on = btn.getAttribute('data-tab') === tabId;
+            btn.classList.toggle('is-active', on);
+            btn.setAttribute('aria-selected', on ? 'true' : 'false');
+            btn.setAttribute('tabindex', on ? '0' : '-1');
+        });
+        panels.forEach((panel) => {
+            const on = panel.getAttribute('data-tab-panel') === tabId;
+            panel.hidden = !on;
+            panel.classList.toggle('is-active', on);
+        });
+        const panelsHost = viewRoot.querySelector('.app-detail-tab-panels');
+        if (panelsHost) panelsHost.scrollTop = 0;
+    }
+
+    nav.addEventListener('click', (e) => {
+        const btn = e.target.closest('[role="tab"]');
+        if (!btn || !nav.contains(btn)) return;
+        e.preventDefault();
+        const id = btn.getAttribute('data-tab');
+        if (id) activate(id);
+    });
+
+    nav.addEventListener('keydown', (e) => {
+        const ids = Array.from(tabs).map((b) => b.getAttribute('data-tab')).filter(Boolean);
+        const activeEl = document.activeElement;
+        const idx = ids.findIndex((id) => activeEl && activeEl.getAttribute && activeEl.getAttribute('data-tab') === id);
+        if (idx < 0) return;
+        let next = idx;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            next = (idx + 1) % ids.length;
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            next = (idx - 1 + ids.length) % ids.length;
+        } else if (e.key === 'Home') {
+            e.preventDefault();
+            next = 0;
+        } else if (e.key === 'End') {
+            e.preventDefault();
+            next = ids.length - 1;
+        } else {
+            return;
+        }
+        const targetTab = ids[next];
+        const btn = Array.from(tabs).find((b) => b.getAttribute('data-tab') === targetTab);
+        if (btn) {
+            activate(targetTab);
+            btn.focus();
+        }
+    });
+
+    const initial = Array.from(tabs).find((b) => b.classList.contains('is-active'))?.getAttribute('data-tab') || 'overview';
+    activate(initial);
+}
+
 function setupApplicationDetailActions(container, applicationId, applicantId, currentStatus) {
     const actionable = ['pending', 'reviewing', 'shortlisted', 'in_negotiation'].includes(currentStatus);
+    const footer = container.querySelector('.application-details-footer');
+    if (footer) {
+        footer.style.display = actionable ? '' : 'none';
+    }
     container.querySelectorAll('[data-action]').forEach(btn => {
         const action = btn.dataset.action;
         const appId = btn.dataset.applicationId;

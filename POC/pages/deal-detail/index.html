@@ -730,26 +730,163 @@
     width: 100%;
 }
 
-.deal-work-actions__draft-start {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.deal-work-actions__draft-bar > .btn-primary {
+.deal-work-actions__draft-bar > .btn-primary,
+.deal-work-actions__draft-bar .deal-work-actions__primary-end {
     margin-left: auto;
 }
 
 @media (max-width: 520px) {
-    .deal-work-actions__draft-bar > .btn-primary {
+    .deal-work-actions__draft-bar > .btn-primary,
+    .deal-work-actions__draft-bar .deal-work-actions__primary-end {
         margin-left: 0;
         width: 100%;
         order: -1;
     }
 }
 
-.deal-participant-list {
+/* In-review workspace (e.g. demo-deal-04) */
+.deal-work-card--review {
+    border-left: 4px solid #6366f1;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.07);
+}
+
+.deal-review-contract-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: var(--radius-md, 10px);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.09) 0%, rgba(13, 148, 136, 0.07) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.28);
+}
+
+.deal-review-contract-strip__text {
+    margin: 0;
+    flex: 1 1 220px;
+    font-size: var(--font-size-sm, 0.875rem);
+    line-height: 1.55;
+    color: var(--text-primary, #334155);
+}
+
+.deal-review-contract-strip__text .ph-duotone {
+    color: var(--primary-color, #0d9488);
+    margin-right: 0.35rem;
+    vertical-align: -0.1em;
+}
+
+.deal-review-summary {
+    margin-bottom: 0.25rem;
+}
+
+.deal-review-progress {
+    margin-bottom: 1.15rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--border-color, #f1f5f9);
+}
+
+.deal-review-progress__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.45rem;
+}
+
+.deal-review-progress__label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary, #64748b);
+}
+
+.deal-review-progress__ratio {
+    font-size: 0.8125rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary, #0f172a);
+}
+
+.deal-review-progress__bar {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--bg-tertiary, #e2e8f0);
+    overflow: hidden;
+}
+
+.deal-review-progress__fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #6366f1 0%, #0d9488 100%);
+    transition: width 0.35s ease;
+}
+
+.deal-review-you {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.4rem;
+    padding: 0.12rem 0.45rem;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: 999px;
+    background: rgba(13, 148, 136, 0.16);
+    color: #0f766e;
+    vertical-align: middle;
+}
+
+.deal-participant-list__id {
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    color: var(--text-secondary, #94a3b8);
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.deal-review-participants-heading {
+    margin: 0 0 0.4rem 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary, #94a3b8);
+}
+
+.deal-participant-list--review {
+    padding-top: 0.1rem;
+}
+
+.deal-participant-list__row--review {
+    align-items: flex-start;
+}
+
+.deal-work-actions .deal-work-actions__review-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.deal-work-actions__review-bar > .btn-primary,
+.deal-work-actions__review-bar .deal-work-actions__primary-end {
+    margin-left: auto;
+}
+
+@media (max-width: 520px) {
+    .deal-work-actions__review-bar > .btn-primary,
+    .deal-work-actions__review-bar .deal-work-actions__primary-end {
+        margin-left: 0;
+        width: 100%;
+        order: -1;
+    }
+}
     list-style: none;
     margin: 0;
     padding: 0;

@@ -714,15 +714,15 @@ async function initDealDetail(params) {
 
         if (contentEl && !contentEl._dealDetailContentClickBound) {
             contentEl._dealDetailContentClickBound = true;
-            contentEl.addEventListener('click', async (ev) => {
+            contentEl.addEventListener('click', async ev => {
                 const link = ev.target.closest('a[data-route]');
                 if (link) {
                     const route = link.getAttribute('data-route');
                     if (route && route !== '#' && typeof router !== 'undefined' && router.navigate) {
                         ev.preventDefault();
                         router.navigate(route);
+                        return;
                     }
-                    return;
                 }
                 await handleDealStageContentClick(ev);
             });
@@ -778,7 +778,30 @@ function getParticipantRoleLabel(deal, participant) {
     if (deal.roleSlots && deal.roleSlots[participant.userId]) return deal.roleSlots[participant.userId];
     const roles = (deal.payload && deal.payload.roles) || [];
     const r = roles.find(x => x.userId === participant.userId);
-    return (r && r.role) || (participant.role === 'consortium_lead' ? 'Lead' : 'Member');
+    if (r && r.role) return r.role;
+    const pr = participant.role || '';
+    if (pr === 'consortium_lead') return 'Lead';
+    if (pr === 'consortium_member') return 'Member';
+    if (pr === 'creator') return 'Creator';
+    if (pr === 'contractor') return 'Contractor';
+    return pr ? pr.charAt(0).toUpperCase() + pr.slice(1) : 'Participant';
+}
+
+/** Display name for deal participant rows (user or company). Prefers profile.name over email. */
+function entityDisplayName(entity) {
+    if (!entity) return '';
+    const profile = entity.profile && typeof entity.profile === 'object' ? entity.profile : null;
+    const fromProfileName = profile && profile.name != null ? String(profile.name).trim() : '';
+    if (entity.name != null && String(entity.name).trim() !== '') return String(entity.name).trim();
+    if (fromProfileName) return fromProfileName;
+    if (entity.companyName != null && String(entity.companyName).trim() !== '') return String(entity.companyName).trim();
+    const fnRoot = [entity.firstName, entity.lastName].filter(Boolean).join(' ').trim();
+    if (fnRoot) return fnRoot;
+    const fnProf = profile ? [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim() : '';
+    if (fnProf) return fnProf;
+    if (entity.id != null && String(entity.id).trim() !== '') return String(entity.id).trim();
+    if (entity.email != null && String(entity.email).trim() !== '') return String(entity.email).trim();
+    return '';
 }
 
 async function renderConsortiumParticipantsBlock(deal, currentUserId) {
@@ -897,11 +920,9 @@ async function renderStageContent(deal, currentUserId) {
             '</dl>';
         const actions =
             '<div class="deal-work-actions__draft-bar">' +
-            '<span class="deal-work-actions__draft-start">' +
             '<button type="button" class="btn btn-outline btn-sm" id="deal-btn-edit-draft">Edit Draft</button>' +
             '<button type="button" class="btn btn-outline btn-sm" id="deal-btn-cancel-deal">Cancel Deal</button>' +
-            '</span>' +
-            '<button type="button" class="btn btn-primary btn-sm" id="deal-btn-approve-draft">Send for Review</button>' +
+            '<button type="button" class="btn btn-primary btn-sm deal-work-actions__primary-end" id="deal-btn-approve-draft">Send for Review</button>' +
             '</div>';
         return (
             consortiumBlock +
@@ -916,25 +937,173 @@ async function renderStageContent(deal, currentUserId) {
     }
 
     if (status === 'review') {
-        const partList = participants
-            .filter(p => (p.status || 'active') !== 'dropped')
-            .map(
-                p =>
-                    '<li class="deal-participant-list__row"><span class="deal-participant-list__name">' +
+        let contract = null;
+        if (deal.contractId) {
+            try {
+                contract = await dataService.getContractById(deal.contractId);
+            } catch (e) {
+                contract = null;
+            }
+        }
+        const activeParts = participants.filter(p => (p.status || 'active') !== 'dropped');
+        const approvedCount = activeParts.filter(p => (p.approvalStatus || 'pending') === 'approved').length;
+        const totalActive = Math.max(activeParts.length, 1);
+        const pct = Math.min(100, Math.round((approvedCount / totalActive) * 100));
+
+        const partRows = await Promise.all(
+            activeParts.map(async p => {
+                let entity = null;
+                try {
+                    entity = await dataService.getUserOrCompanyById(p.userId);
+                } catch (e) {
+                    entity = null;
+                }
+                const display = entityDisplayName(entity) || p.userId;
+                const roleLbl = getParticipantRoleLabel(deal, p);
+                const isYou = p.userId === currentUserId;
+                const st = p.approvalStatus || 'pending';
+                const badgeClass = st === 'approved' ? 'success' : 'secondary';
+                const stLabel = st === 'approved' ? 'Approved' : 'Pending';
+                return (
+                    '<li class="deal-participant-list__row deal-participant-list__row--review">' +
+                    '<span class="deal-participant-list__name">' +
+                    escapeHtml(display) +
+                    (isYou ? '<span class="deal-review-you">You</span>' : '') +
+                    '<span class="deal-participant-list__meta"> · ' +
+                    escapeHtml(roleLbl) +
+                    ' · <code class="deal-participant-list__id">' +
                     escapeHtml(p.userId) +
-                    '</span><span class="badge badge-' +
-                    (p.approvalStatus === 'approved' ? 'success' : 'secondary') +
+                    '</code></span></span>' +
+                    '<span class="badge badge-' +
+                    badgeClass +
                     '">' +
-                    escapeHtml(p.approvalStatus || 'pending') +
+                    escapeHtml(stLabel) +
                     '</span></li>'
-            )
-            .join('');
-        const body = '<ul class="deal-participant-list">' + partList + '</ul>';
+                );
+            })
+        );
+
+        const cLabel =
+            contract && window.DealContractFlowUi && typeof window.DealContractFlowUi.getContractStatusDisplayLabel === 'function'
+                ? window.DealContractFlowUi.getContractStatusDisplayLabel(contract.status)
+                : contract
+                  ? contract.status
+                  : '';
+
+        const contractStrip =
+            deal.contractId && contract
+                ? '<div class="deal-review-contract-strip">' +
+                  '<p class="deal-review-contract-strip__text"><i class="ph-duotone ph-file-text" aria-hidden="true"></i> Contract Agreement draft is <strong>' +
+                  escapeHtml(cLabel || '—') +
+                  '</strong>. Signing opens in the next step after everyone approves this workspace.</p>' +
+                  '<a href="#" data-route="/contracts/' +
+                  escapeHtml(deal.contractId) +
+                  '" class="btn btn-outline btn-sm">Preview contract</a>' +
+                  '</div>'
+                : '';
+
+        const scope = escapeHtml(deal.scope || '—');
+        const timeline =
+            deal.timeline && (deal.timeline.start || deal.timeline.end)
+                ? (deal.timeline.start || '') + ' – ' + (deal.timeline.end || '')
+                : '—';
+        const avLine =
+            deal.valueTerms && deal.valueTerms.agreedValue ? formatAgreedValueSummary(deal.valueTerms.agreedValue) : '';
+        const payLine =
+            deal.valueTerms && deal.valueTerms.paymentSchedule ? String(deal.valueTerms.paymentSchedule).trim() : '';
+        const valueTerms = avLine || payLine ? [avLine, payLine].filter(Boolean).join(' · ') : '—';
+        const exchangeLabel = formatExchangeModeLabel(deal.exchangeMode);
+        const delivRaw = (deal.deliverables || '').trim();
+        const delivDisplay = delivRaw ? escapeHtml(delivRaw) : '—';
+        const milestones = deal.milestones || [];
+        let milestoneHtml = '';
+        if (!milestones.length) {
+            milestoneHtml = '<span class="deal-draft-muted">None listed — can be refined after approval.</span>';
+        } else {
+            milestoneHtml =
+                '<ol class="deal-draft-milestone-list">' +
+                milestones
+                    .map(m => {
+                        const due =
+                            m.dueDate != null && String(m.dueDate).trim() !== ''
+                                ? ' <span class="deal-draft-muted">(' + escapeHtml(String(m.dueDate).slice(0, 10)) + ')</span>'
+                                : '';
+                        return '<li><span class="deal-draft-milestone-title">' + escapeHtml(m.title || 'Untitled') + '</span>' + due + '</li>';
+                    })
+                    .join('') +
+                '</ol>';
+        }
+
+        const summary =
+            '<dl class="deal-draft-dl deal-draft-dl--card deal-review-summary">' +
+            '<div class="deal-draft-dl__row deal-draft-dl__row--scope"><dt>Scope</dt><dd class="deal-draft-dl__scope">' +
+            scope +
+            '</dd></div>' +
+            '<div class="deal-draft-dl__row"><dt>Timeline</dt><dd>' +
+            escapeHtml(timeline) +
+            '</dd></div>' +
+            '<div class="deal-draft-dl__row"><dt>Exchange</dt><dd><span class="deal-draft-pill">' +
+            escapeHtml(exchangeLabel) +
+            '</span></dd></div>' +
+            '<div class="deal-draft-dl__row"><dt>Value</dt><dd class="deal-draft-dl__value">' +
+            escapeHtml(valueTerms) +
+            '</dd></div>' +
+            '<div class="deal-draft-dl__row"><dt>Deliverables</dt><dd class="deal-draft-dl__deliv">' +
+            delivDisplay +
+            '</dd></div>' +
+            '<div class="deal-draft-dl__row deal-draft-dl__row--milestones"><dt>Milestones</dt><dd>' +
+            milestoneHtml +
+            '</dd></div>' +
+            '</dl>';
+
+        const progress =
+            '<div class="deal-review-progress" role="group" aria-label="Deal workspace approvals">' +
+            '<div class="deal-review-progress__head">' +
+            '<span class="deal-review-progress__label">Workspace approvals</span>' +
+            '<span class="deal-review-progress__ratio">' +
+            approvedCount +
+            ' / ' +
+            totalActive +
+            '</span></div>' +
+            '<div class="deal-review-progress__bar" role="progressbar" aria-valuemin="0" aria-valuemax="' +
+            totalActive +
+            '" aria-valuenow="' +
+            approvedCount +
+            '">' +
+            '<span class="deal-review-progress__fill" style="width:' +
+            pct +
+            '%"></span></div></div>';
+
+        const body =
+            contractStrip +
+            summary +
+            progress +
+            '<h3 class="deal-review-participants-heading">Participants</h3>' +
+            '<ul class="deal-participant-list deal-participant-list--review">' +
+            partRows.join('') +
+            '</ul>';
+
+        const lead = deal.contractId
+            ? 'Review the agreed terms below. When every participant approves, the deal advances to signing the Contract Agreement.'
+            : 'All participants must approve this deal workspace before a contract is generated for signature.';
+
         const actions =
-            '<button type="button" class="btn btn-primary btn-sm" id="deal-btn-approve-review">Approve Deal</button>' +
+            '<div class="deal-work-actions__review-bar">' +
             '<button type="button" class="btn btn-outline btn-sm" id="deal-btn-request-changes">Request Changes</button>' +
-            '<button type="button" class="btn btn-outline btn-sm" id="deal-btn-reject-deal">Reject Deal</button>';
-        return consortiumBlock + dealWorkCard('<i class="ph-duotone ph-eye" aria-hidden="true"></i> In review', 'All participants must approve the deal to generate the Contract Agreement for signature.', body, actions);
+            '<button type="button" class="btn btn-outline btn-sm" id="deal-btn-reject-deal">Reject Deal</button>' +
+            '<button type="button" class="btn btn-primary btn-sm deal-work-actions__primary-end" id="deal-btn-approve-review">Approve Deal</button>' +
+            '</div>';
+
+        return (
+            consortiumBlock +
+            dealWorkCard(
+                '<i class="ph-duotone ph-eye" aria-hidden="true"></i> In review',
+                lead,
+                body,
+                actions,
+                'deal-work-card--review'
+            )
+        );
     }
 
     if (status === 'signing') {
@@ -1135,9 +1304,10 @@ async function handleDealStageContentClick(e) {
     const userId = stage.dataset.actorUserId;
     if (!dealId || !userId) return;
 
-    const target = e.target.closest(
-        '[id^="deal-btn-"], [id^="deal-link-"], .deal-milestone-start, .deal-milestone-submit, .deal-milestone-approve, .deal-milestone-reject, .deal-btn-message-unavailable'
-    );
+    const target =
+        e.target.closest(
+            '[id^="deal-btn-"], [id^="deal-link-"], .deal-milestone-start, .deal-milestone-submit, .deal-milestone-approve, .deal-milestone-reject, .deal-btn-message-unavailable'
+        ) || (e.target.matches && e.target.matches('button[id^="deal-btn-"]') ? e.target : null);
     if (!target) return;
 
     const modal = window.modalService;
@@ -1304,11 +1474,54 @@ async function handleDealStageContentClick(e) {
         }
         if (id === 'deal-btn-request-changes') {
             e.preventDefault();
+            let ok = false;
+            if (modal && typeof modal.confirm === 'function') {
+                ok = await modal.confirm(
+                    'Return this deal to draft? Participants will need to review again after edits.',
+                    'Request changes',
+                    { confirmText: 'Return to draft', cancelText: 'Cancel', type: 'warning' }
+                );
+            } else if (typeof window !== 'undefined' && typeof window.confirm === 'function') {
+                ok = window.confirm('Return this deal to draft? Participants will need to review again after edits.');
+            }
+            if (!ok) return;
             try {
-                await dataService.updateDeal(dealId, { status: CONFIG.DEAL_STATUS.DRAFT });
+                const deal = await dataService.getDealById(dealId);
+                const participants = (deal.participants || []).map(p =>
+                    (p.status || 'active') === 'dropped' ? p : { ...p, approvalStatus: 'pending' }
+                );
+                await dataService.updateDeal(dealId, { status: CONFIG.DEAL_STATUS.DRAFT, participants });
+                if (dataService.createAuditLog && userId) {
+                    dataService
+                        .createAuditLog({
+                            userId,
+                            action: 'deal_returned_to_draft',
+                            entityType: 'deal',
+                            entityId: dealId,
+                            details: { from: 'review' }
+                        })
+                        .catch(() => {});
+                }
+                try {
+                    sessionStorage.setItem(
+                        'pmtwin_deal_flash',
+                        JSON.stringify({ tone: 'info', message: 'Deal returned to draft. Edit terms, then send for review again.' })
+                    );
+                } catch {
+                    /* ignore storage quota */
+                }
                 await finalizeDealDetailRender(dealId, userId);
+                const flashEl = document.getElementById('deal-flash-banner');
+                if (flashEl) {
+                    flashEl.innerHTML =
+                        '<div class="deal-flash deal-flash--info" role="status">Deal returned to draft. Edit terms, then send for review again.</div>';
+                    flashEl.style.display = 'block';
+                }
             } catch (err) {
                 console.error(err);
+                if (modal && typeof modal.error === 'function') {
+                    await modal.error('Could not return the deal to draft. Please try again.', 'Request changes');
+                }
             }
             return;
         }

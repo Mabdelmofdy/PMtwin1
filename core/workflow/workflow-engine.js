@@ -34,15 +34,16 @@ const WORKFLOW_RULES = {
   },
 
   deal: {
-    negotiating: ["draft"],
-    draft: ["review"],
-    review: ["signing"],
-    signing: ["active"],
-    active: ["execution"],
-    execution: ["delivery"],
-    delivery: ["completed"],
+    negotiating: ["draft", "cancelled"],
+    draft: ["review", "cancelled"],
+    review: ["signing", "draft", "cancelled"],
+    signing: ["active", "cancelled"],
+    active: ["execution", "cancelled"],
+    execution: ["delivery", "cancelled"],
+    delivery: ["completed", "cancelled"],
     completed: ["closed"],
-    closed: []
+    closed: [],
+    cancelled: []
   },
 
   contract: {

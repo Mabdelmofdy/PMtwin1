@@ -1,33 +1,559 @@
 <div class="page-container admin-health-page">
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1 class="page-title">System Health</h1>
-            <p class="page-subtitle">Platform metrics and service availability</p>
+    <div class="health-hero">
+        <div class="health-hero-copy">
+            <div class="health-eyebrow">Admin system health</div>
+            <h1 class="page-title">Health Center</h1>
+            <p class="page-subtitle">Live counts from the local data layer plus a quick check that core services are loaded. Use this before demos or when validating a fresh environment.</p>
+        </div>
+        <div class="health-hero-actions">
+            <div class="health-run-state" id="health-run-state" aria-live="polite">
+                <span class="health-run-dot" aria-hidden="true"></span>
+                <span id="health-refresh-status">Ready to load metrics</span>
+            </div>
+            <button type="button" id="health-refresh-btn" class="btn btn-primary health-run-btn">
+                <span>Refresh metrics</span>
+            </button>
         </div>
     </div>
-    <div class="page-body">
-        <section class="dashboard-section">
-            <h2 class="section-title">Overview</h2>
-            <div id="health-stats-grid" class="stats-grid health-stats-grid"></div>
+
+    <div class="page-body health-page-body">
+        <section class="health-control-panel" aria-labelledby="health-control-title">
+            <div class="health-control-copy">
+                <h2 id="health-control-title" class="health-section-title">Current snapshot</h2>
+                <p class="health-section-desc">Counts reflect whatever is in the browser store for this session. Service rows only confirm that scripts initialized.</p>
+            </div>
+            <div class="health-control-meta" aria-label="Snapshot metadata">
+                <div class="health-meta-item">
+                    <span class="health-meta-label">Source</span>
+                    <span class="health-meta-value">Local data service</span>
+                </div>
+                <div class="health-meta-item">
+                    <span class="health-meta-label">Scope</span>
+                    <span class="health-meta-value">Full platform</span>
+                </div>
+                <div class="health-meta-item">
+                    <span class="health-meta-label">Last refresh</span>
+                    <span class="health-meta-value" id="health-last-refreshed">Not yet</span>
+                </div>
+            </div>
         </section>
-        <section class="dashboard-section">
-            <h2 class="section-title">Services</h2>
-            <div id="health-services" class="health-services"></div>
+
+        <section class="dashboard-section health-report-section" aria-labelledby="health-report-title">
+            <div class="health-section-heading">
+                <div>
+                    <h2 id="health-report-title" class="health-section-title">Platform counts</h2>
+                    <p class="health-section-desc">Totals across users, companies, opportunities, deals, contracts, persisted matches, and audit history.</p>
+                </div>
+            </div>
+
+            <div id="health-run-loading" class="health-loading" hidden>
+                <span class="spinner" aria-hidden="true"></span>
+                <span>Loading metrics…</span>
+            </div>
+            <div id="health-run-error" class="health-error" hidden></div>
+
+            <div id="health-stats-grid" class="stats-grid health-overview-grid" aria-label="Health metrics"></div>
+
+            <div class="health-table-section">
+                <div class="health-panel-header">
+                    <div>
+                        <h3 class="health-panel-title">Core services</h3>
+                        <p class="health-section-desc">Runtime availability of shared services used by matching, profiles, and admin tools.</p>
+                    </div>
+                </div>
+                <div class="health-summary-table-wrap">
+                    <table class="health-summary-table" aria-label="Service status">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Status</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="health-services"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-section health-workflow-overview" aria-labelledby="health-guide-title">
+            <div class="health-section-heading">
+                <div>
+                    <h2 id="health-guide-title" class="health-section-title">How to read this page</h2>
+                    <p class="health-section-desc">Same layout cues as Matching Center—start with the snapshot, then scan counts and services.</p>
+                </div>
+            </div>
+            <div class="health-workflow-cards">
+                <div class="health-workflow-card">
+                    <span class="health-workflow-card-icon" aria-hidden="true">1</span>
+                    <h3 class="health-workflow-card-title">Snapshot</h3>
+                    <p class="health-workflow-card-desc">Meta chips show where data comes from and when you last pulled fresh numbers.</p>
+                </div>
+                <div class="health-workflow-card">
+                    <span class="health-workflow-card-icon" aria-hidden="true">2</span>
+                    <h3 class="health-workflow-card-title">Counts</h3>
+                    <p class="health-workflow-card-desc">Entity totals help confirm imports, seed data, or cleanup jobs without opening each module.</p>
+                </div>
+                <div class="health-workflow-card">
+                    <span class="health-workflow-card-icon" aria-hidden="true">3</span>
+                    <h3 class="health-workflow-card-title">Services</h3>
+                    <p class="health-workflow-card-desc">If matching or data fails to initialize, downstream admin and user flows will behave inconsistently.</p>
+                </div>
+                <div class="health-workflow-card">
+                    <span class="health-workflow-card-icon" aria-hidden="true">4</span>
+                    <h3 class="health-workflow-card-title">Refresh</h3>
+                    <p class="health-workflow-card-desc">Use Refresh metrics after clearing storage or switching accounts to avoid stale totals.</p>
+                </div>
+            </div>
         </section>
     </div>
 </div>
 
 <style>
-.admin-health-page .dashboard-section { margin-bottom: var(--spacing-2xl); }
-.admin-health-page .section-title { font-size: var(--font-size-xl); margin-bottom: var(--spacing-lg); }
-.health-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--spacing-md); }
-.health-stat-card { padding: var(--spacing-lg); background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); text-align: center; }
-.health-stat-value { font-size: var(--font-size-2xl); font-weight: 700; color: var(--primary-color); }
-.health-stat-label { font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: var(--spacing-xs); }
-.health-services { display: flex; flex-direction: column; gap: var(--spacing-sm); }
-.health-service-row { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md); background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
-.health-service-name { font-weight: 500; }
-.health-service-status { font-size: var(--font-size-sm); }
-.health-service-ok { color: var(--success-color, #16a34a); }
-.health-service-unavailable { color: var(--text-secondary); }
+.admin-health-page {
+    --health-accent: #0d9488;
+    --health-accent-soft: #e6fffb;
+    --health-surface: #fbfdff;
+    --health-line: #d8e3ee;
+    --health-blue: #2563eb;
+    --health-blue-soft: #dbeafe;
+    --health-amber: #d97706;
+    --health-green: #059669;
+    --health-green-soft: #dcfce7;
+}
+
+.admin-health-page [hidden] {
+    display: none !important;
+}
+
+.health-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--spacing-xl);
+    align-items: center;
+    padding: var(--spacing-xl);
+    border: 1px solid var(--health-line);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, #ffffff 0%, #f6fffd 54%, #f8fbff 100%);
+    margin-bottom: var(--spacing-lg);
+}
+
+.health-eyebrow {
+    color: var(--primary-color);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    margin-bottom: var(--spacing-xs);
+}
+
+.health-hero .page-title {
+    font-size: clamp(1.65rem, 2.2vw, 2.25rem);
+    line-height: 1.15;
+    margin-bottom: var(--spacing-sm);
+}
+
+.health-hero .page-subtitle {
+    max-width: 720px;
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+}
+
+.health-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
+}
+
+.health-hero-actions > * {
+    max-width: 100%;
+}
+
+.health-run-state {
+    min-width: 0;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 0 var(--spacing-md);
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    border: 1px solid var(--health-line);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
+
+.health-run-state.is-running .health-run-dot {
+    background: var(--health-amber);
+    box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.14);
+}
+
+.health-run-state.is-error .health-run-dot {
+    background: var(--danger-color);
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.14);
+}
+
+.health-run-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    background: var(--health-green);
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.12);
+    flex: 0 0 auto;
+}
+
+.health-run-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    min-height: 40px;
+    border-radius: var(--radius-md);
+    box-shadow: none;
+}
+
+.health-run-btn[disabled] {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.health-page-body {
+    display: grid;
+    gap: var(--spacing-lg);
+    min-width: 0;
+}
+
+.health-page-body > *,
+.health-hero,
+.health-control-panel,
+.health-report-section,
+.health-workflow-overview,
+.health-table-section {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.admin-health-page .dashboard-section {
+    margin-bottom: 0;
+}
+
+.health-section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs);
+    letter-spacing: 0;
+}
+
+.health-section-desc {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: var(--font-size-sm);
+    line-height: 1.55;
+}
+
+.health-section-heading,
+.health-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.health-control-panel {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--spacing-lg);
+    align-items: center;
+    padding: var(--spacing-lg);
+    background: var(--health-surface);
+    border: 1px solid var(--health-line);
+    border-radius: var(--radius-lg);
+}
+
+.health-control-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(120px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.health-meta-item {
+    min-width: 0;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: #ffffff;
+    border: 1px solid var(--health-line);
+    border-radius: var(--radius-md);
+}
+
+.health-meta-label {
+    display: block;
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.4;
+}
+
+.health-meta-value {
+    display: block;
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.health-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    min-height: 42px;
+    padding: 0 var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--spacing-md);
+}
+
+.health-loading .spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: health-spin 0.8s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes health-spin {
+    to { transform: rotate(360deg); }
+}
+
+.health-error {
+    color: var(--danger-color);
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-sm);
+}
+
+.health-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
+}
+
+.health-overview-grid .stat-card,
+.health-metric-card {
+    position: relative;
+    min-height: 112px;
+    padding: var(--spacing-md);
+    background: var(--bg-primary);
+    border: 1px solid var(--health-line);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+}
+
+.health-overview-grid .stat-card:hover,
+.health-metric-card:hover {
+    border-color: rgba(13, 148, 136, 0.45);
+    background: #fafffe;
+}
+
+.health-overview-grid .stat-value,
+.health-metric-card .stat-value {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.1;
+}
+
+.health-overview-grid .stat-label,
+.health-metric-card .stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.health-overview-grid .stat-detail,
+.health-metric-card .stat-detail {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+.health-table-section {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+}
+
+.health-panel-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.health-summary-table-wrap {
+    overflow: auto;
+    max-width: 100%;
+    background: var(--bg-primary);
+    border: 1px solid var(--health-line);
+    border-radius: var(--radius-lg);
+}
+
+.health-summary-table {
+    width: 100%;
+    min-width: 480px;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+}
+
+.health-summary-table th,
+.health-summary-table td {
+    padding: 0.8rem var(--spacing-md);
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.health-summary-table tr:last-child td {
+    border-bottom: none;
+}
+
+.health-summary-table th {
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    background: #f8fafc;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.health-summary-table td:first-child {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.health-summary-table tbody tr:hover {
+    background: #fbfdff;
+}
+
+.health-status-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: var(--font-size-xs);
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.health-status-pill.is-ok {
+    color: #166534;
+    background: var(--health-green-soft);
+}
+
+.health-status-pill.is-warn {
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+}
+
+.health-workflow-cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--spacing-md);
+}
+
+.health-workflow-card {
+    min-width: 0;
+    background: var(--health-surface);
+    border: 1px solid var(--health-line);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+}
+
+.health-workflow-card-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-md);
+    color: #ffffff;
+    background: var(--primary-color);
+    border-radius: 999px;
+    font-size: var(--font-size-sm);
+    font-weight: 800;
+}
+
+.health-workflow-card-title {
+    font-size: var(--font-size-base);
+    font-weight: 800;
+    margin: 0 0 var(--spacing-xs);
+    color: var(--text-primary);
+}
+
+.health-workflow-card-desc {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.55;
+}
+
+@media (max-width: 1100px) {
+    .health-workflow-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .health-control-panel {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .health-hero {
+        grid-template-columns: 1fr;
+        align-items: start;
+        padding: var(--spacing-md);
+    }
+
+    .health-hero-actions {
+        justify-content: stretch;
+    }
+
+    .health-run-state,
+    .health-run-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .health-run-state {
+        white-space: normal;
+        text-align: center;
+    }
+
+    .health-control-meta,
+    .health-workflow-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .health-control-panel {
+        padding: var(--spacing-md);
+    }
+}
 </style>

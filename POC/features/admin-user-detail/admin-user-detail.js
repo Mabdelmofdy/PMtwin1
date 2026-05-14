@@ -1011,6 +1011,11 @@ async function renderActivitySection(userId) {
                         <div>
                             <span class="user-detail-audit-action">${escapeHtmlDetail((l.action || '').replace(/_/g, ' '))}</span>
                             ${l.entityType ? `<span class="user-detail-audit-entity">${escapeHtmlDetail(l.entityType)}${l.entityId ? ` · ${escapeHtmlDetail(l.entityId)}` : ''}</span>` : ''}
+                            ${
+                                l.userName || l.ipAddress
+                                    ? `<div class="user-detail-audit-meta">${escapeHtmlDetail([l.userName, l.ipAddress].filter(Boolean).join(' · '))}</div>`
+                                    : ''
+                            }
                         </div>
                         <span class="user-detail-audit-time">${escapeHtmlDetail(formatDateDetail(l.timestamp))}</span>
                     </div>`;

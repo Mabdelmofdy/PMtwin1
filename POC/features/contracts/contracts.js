@@ -299,10 +299,20 @@ async function loadContracts() {
                       escapeHtml((c.dealRecord && c.dealRecord.title) || c.dealId) +
                       '</a></li>'
                     : '';
+                const uiAv = window.DealContractFlowUi;
+                let valueHuman = '';
+                if (c.agreedValue != null) {
+                    valueHuman =
+                        uiAv && typeof uiAv.formatAgreedValueSummary === 'function'
+                            ? uiAv.formatAgreedValueSummary(c.agreedValue)
+                            : typeof c.agreedValue === 'object'
+                              ? JSON.stringify(c.agreedValue)
+                              : String(c.agreedValue);
+                }
                 const valueLine =
-                    c.agreedValue != null
+                    valueHuman !== ''
                         ? '<li><i class="ph-duotone ph-currency-circle-dollar" aria-hidden="true"></i> Value: <span>' +
-                          escapeHtml(typeof c.agreedValue === 'object' ? JSON.stringify(c.agreedValue) : String(c.agreedValue)) +
+                          escapeHtml(valueHuman) +
                           '</span></li>'
                         : '';
 
@@ -322,9 +332,9 @@ async function loadContracts() {
                     escapeHtml(c.rolePill.label) +
                     '</span>' +
                     '</div>' +
-                    '<h2 class="contract-card__title">' +
+                    '<h3 class="contract-card__title">' +
                     escapeHtml(c.scopeDisplay) +
-                    '</h2>' +
+                    '</h3>' +
                     '<p class="contract-card__party">Parties signed: <strong>' +
                     c.signedCount +
                     '/' +

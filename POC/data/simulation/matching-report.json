@@ -2,27 +2,27 @@
   "totalPostsAnalyzed": 26,
   "totalNeeds": 14,
   "totalOffers": 12,
-  "oneWayMatches": 9,
-  "twoWayMatches": 4,
+  "oneWayMatches": 15,
+  "twoWayMatches": 7,
   "groupFormations": 1,
-  "circularExchanges": 394,
-  "totalMatchesFound": 408,
+  "circularExchanges": 938,
+  "totalMatchesFound": 961,
   "oneWayDetails": [
     {
       "needId": "sim-opp-003",
-      "matchCount": 2,
-      "topScore": 0.643
+      "matchCount": 6,
+      "topScore": 0.843
     },
     {
       "needId": "sim-opp-004",
-      "matchCount": 7,
-      "topScore": 0.775
+      "matchCount": 9,
+      "topScore": 1.07
     }
   ],
   "twoWayDetails": [
     {
       "needId": "sim-opp-009",
-      "pairCount": 4
+      "pairCount": 7
     }
   ],
   "groupDetails": [
@@ -33,31 +33,10 @@
         "Construction expertise",
         "Equipment fleet"
       ],
-      "partnerCount": 0
+      "partnerCount": 2
     }
   ],
   "circularDetails": [
-    {
-      "cycle": [
-        "sim-user-004",
-        "sim-user-003",
-        "sim-user-026",
-        "sim-user-025",
-        "sim-user-003"
-      ],
-      "score": 0.893
-    },
-    {
-      "cycle": [
-        "sim-user-004",
-        "sim-user-003",
-        "sim-user-026",
-        "sim-user-025",
-        "sim-user-027",
-        "sim-user-003"
-      ],
-      "score": 0.8733333333333332
-    },
     {
       "cycle": [
         "sim-user-003",
@@ -65,7 +44,27 @@
         "sim-user-027",
         "sim-user-004"
       ],
-      "score": 0.8725
+      "score": 1.1225
+    },
+    {
+      "cycle": [
+        "sim-user-002",
+        "sim-user-001",
+        "sim-user-003",
+        "sim-user-004",
+        "sim-user-001"
+      ],
+      "score": 1.1149999999999998
+    },
+    {
+      "cycle": [
+        "sim-user-001",
+        "sim-user-002",
+        "sim-user-003",
+        "sim-user-004",
+        "sim-user-002"
+      ],
+      "score": 1.1149999999999998
     },
     {
       "cycle": [
@@ -75,17 +74,17 @@
         "sim-user-027",
         "sim-user-001"
       ],
-      "score": 0.853
+      "score": 1.113
     },
     {
       "cycle": [
         "sim-user-003",
-        "sim-user-004",
-        "sim-user-027",
         "sim-user-026",
-        "sim-user-004"
+        "sim-user-025",
+        "sim-user-027",
+        "sim-user-026"
       ],
-      "score": 0.853
+      "score": 1.113
     }
   ]
 }

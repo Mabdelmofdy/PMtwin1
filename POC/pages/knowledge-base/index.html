@@ -1,89 +1,445 @@
-<div class="page-container knowledge-base-page">
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1 class="page-title">Knowledge Base</h1>
-            <p class="page-subtitle">Collaboration model guides, SPV guides, FAQ, and how-to articles</p>
+<div class="page-container knowledge-base-page pm-kb-page">
+    <section class="kb-hero">
+        <div class="kb-hero-grid" aria-hidden="true"></div>
+        <div class="kb-hero-inner">
+            <div>
+                <p class="kb-kicker">
+                    <i class="ph-duotone ph-books" aria-hidden="true"></i>
+                    Collaboration knowledge
+                </p>
+                <h1>Guides for PMTwin collaboration models.</h1>
+                <p class="kb-subtitle">Understand project-based delivery, SPVs, legal structure, resource pooling, RFPs, and how to choose the right model before posting or applying.</p>
+            </div>
+            <div class="kb-hero-card" aria-hidden="true">
+                <span class="kb-card-label">Guide stack</span>
+                <strong>Design -> Consortium -> Contract</strong>
+                <div class="kb-card-lines">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="page-body">
+    </section>
 
-    <div class="kb-tabs" role="tablist">
-        <button type="button" role="tab" class="kb-tab kb-tab-active" data-tab="models" id="tab-models" aria-selected="true" aria-controls="panel-models">Collaboration Models</button>
-        <button type="button" role="tab" class="kb-tab" data-tab="spv" id="tab-spv" aria-selected="false" aria-controls="panel-spv">SPV & Legal</button>
-        <button type="button" role="tab" class="kb-tab" data-tab="faq" id="tab-faq" aria-selected="false" aria-controls="panel-faq">FAQ</button>
-    </div>
+    <div class="page-body kb-body">
+        <aside class="kb-sidebar" aria-label="Knowledge categories">
+            <div class="kb-sidebar-panel">
+                <span class="kb-sidebar-icon"><i class="ph-duotone ph-cube-focus" aria-hidden="true"></i></span>
+                <h2>Choose a guide area</h2>
+                <p>Switch between model guidance, SPV/legal basics, and platform FAQs.</p>
+            </div>
+        </aside>
 
-    <div class="kb-panel kb-panel-active" id="panel-models" role="tabpanel" data-tab="models" aria-labelledby="tab-models">
-        <div class="kb-qa-item">
-            <h3 class="kb-question">What is Project-Based Collaboration?</h3>
-            <div class="kb-answer"><p>Best for delivering a specific project with one or more partners. Includes task-based engagements, consortiums, project JVs, and Special Purpose Vehicles (SPV). Ideal when scope and timeline are well defined.</p></div>
-        </div>
-        <div class="kb-qa-item">
-            <h3 class="kb-question">What are Strategic Partnerships?</h3>
-            <div class="kb-answer"><p>Long-term alliances: strategic joint ventures, strategic alliances, and mentorship programs. Suited when you want ongoing collaboration rather than a single project.</p></div>
-        </div>
-        <div class="kb-qa-item">
-            <h3 class="kb-question">What is Resource Pooling?</h3>
-            <div class="kb-answer"><p>Reduce costs by sharing resources: bulk purchasing, equipment sharing, and resource exchange. Useful for companies with complementary needs.</p></div>
-        </div>
-        <div class="kb-qa-item">
-            <h3 class="kb-question">What are Hiring & Competitions?</h3>
-            <div class="kb-answer"><p>Engage professionals or consultants, or participate in RFPs and competitions to win work. Use when you need talent or want to compete for projects.</p></div>
-        </div>
-    </div>
+        <main class="kb-main">
+            <div class="kb-tabs" role="tablist">
+                <button type="button" role="tab" class="kb-tab kb-tab-active" data-tab="models" id="tab-models" aria-selected="true" aria-controls="panel-models">
+                    <i class="ph-duotone ph-stack" aria-hidden="true"></i>
+                    Collaboration Models
+                </button>
+                <button type="button" role="tab" class="kb-tab" data-tab="spv" id="tab-spv" aria-selected="false" aria-controls="panel-spv">
+                    <i class="ph-duotone ph-buildings" aria-hidden="true"></i>
+                    SPV & Legal
+                </button>
+                <button type="button" role="tab" class="kb-tab" data-tab="faq" id="tab-faq" aria-selected="false" aria-controls="panel-faq">
+                    <i class="ph-duotone ph-question" aria-hidden="true"></i>
+                    FAQ
+                </button>
+            </div>
 
-    <div class="kb-panel" id="panel-spv" role="tabpanel" data-tab="spv" aria-labelledby="tab-spv" hidden>
-        <div class="kb-qa-item">
-            <h3 class="kb-question">What is an SPV?</h3>
-            <div class="kb-answer"><p>Special Purpose Vehicles (SPVs) are used for project-specific legal entities. They allow partners to isolate risk and structure financing for a single project or asset.</p></div>
-        </div>
-        <div class="kb-qa-item">
-            <h3 class="kb-question">Do I need legal advice for an SPV?</h3>
-            <div class="kb-answer"><p>Yes. Consult your legal and tax advisors when setting up an SPV. PMTwin does not provide legal advice.</p></div>
-        </div>
-    </div>
+            <div class="kb-panel kb-panel-active" id="panel-models" role="tabpanel" data-tab="models" aria-labelledby="tab-models">
+                <div class="kb-qa-item">
+                    <h3 class="kb-question">What is Project-Based Collaboration?</h3>
+                    <div class="kb-answer"><p>Best for delivering a specific project with one or more partners. Includes task-based engagements, consortiums, project JVs, and Special Purpose Vehicles (SPV). Ideal when scope and timeline are well defined.</p></div>
+                </div>
+                <div class="kb-qa-item">
+                    <h3 class="kb-question">What are Strategic Partnerships?</h3>
+                    <div class="kb-answer"><p>Long-term alliances: strategic joint ventures, strategic alliances, and mentorship programs. Suited when you want ongoing collaboration rather than a single project.</p></div>
+                </div>
+                <div class="kb-qa-item">
+                    <h3 class="kb-question">What is Resource Pooling?</h3>
+                    <div class="kb-answer"><p>Reduce costs by sharing resources: bulk purchasing, equipment sharing, and resource exchange. Useful for companies with complementary needs.</p></div>
+                </div>
+                <div class="kb-qa-item">
+                    <h3 class="kb-question">What are Hiring & Competitions?</h3>
+                    <div class="kb-answer"><p>Engage professionals or consultants, or participate in RFPs and competitions to win work. Use when you need talent or want to compete for projects.</p></div>
+                </div>
+            </div>
 
-    <div class="kb-panel" id="panel-faq" role="tabpanel" data-tab="faq" aria-labelledby="tab-faq" hidden>
-        <div class="kb-qa-item">
-            <h3 class="kb-question">Who can use PMTwin?</h3>
-            <div class="kb-answer"><p>Companies and professionals in the construction and built environment sector in Saudi Arabia and the GCC can register and collaborate.</p></div>
-        </div>
-        <div class="kb-qa-item">
-            <h3 class="kb-question">How do I find the right collaboration model?</h3>
-            <div class="kb-answer"><p>Use the <a href="#" data-route="/collaboration-wizard">Collaboration Wizard</a> to answer a few questions and get a personalized recommendation.</p></div>
-        </div>
-        <div class="kb-qa-item">
-            <h3 class="kb-question">How do I post an opportunity?</h3>
-            <div class="kb-answer"><p>Register, then go to Opportunities → Create. Choose your collaboration model and fill in the details.</p></div>
-        </div>
-        <div class="kb-qa-item">
-            <h3 class="kb-question">Where can I get help?</h3>
-            <div class="kb-answer"><p>Check this Knowledge Base and the model guides. For platform support, use the contact options in the footer when available.</p></div>
-        </div>
-    </div>
+            <div class="kb-panel" id="panel-spv" role="tabpanel" data-tab="spv" aria-labelledby="tab-spv" hidden>
+                <div class="kb-qa-item">
+                    <h3 class="kb-question">What is an SPV?</h3>
+                    <div class="kb-answer"><p>Special Purpose Vehicles (SPVs) are used for project-specific legal entities. They allow partners to isolate risk and structure financing for a single project or asset.</p></div>
+                </div>
+                <div class="kb-qa-item">
+                    <h3 class="kb-question">Do I need legal advice for an SPV?</h3>
+                    <div class="kb-answer"><p>Yes. Consult your legal and tax advisors when setting up an SPV. PMTwin does not provide legal advice.</p></div>
+                </div>
+            </div>
 
-    <div class="kb-cta">
-        <a href="#" data-route="/collaboration-wizard" class="btn btn-primary">Take the Wizard</a>
-        <a href="#" data-route="/register" class="btn btn-secondary">Register</a>
-    </div>
+            <div class="kb-panel" id="panel-faq" role="tabpanel" data-tab="faq" aria-labelledby="tab-faq" hidden>
+                <div class="kb-qa-item">
+                    <h3 class="kb-question">Who can use PMTwin?</h3>
+                    <div class="kb-answer"><p>Companies and professionals in the construction and built environment sector in Saudi Arabia and the GCC can register and collaborate.</p></div>
+                </div>
+                <div class="kb-qa-item">
+                    <h3 class="kb-question">How do I find the right collaboration model?</h3>
+                    <div class="kb-answer"><p>Use the <a href="#" data-route="/collaboration-wizard">Collaboration Wizard</a> to answer a few questions and get a personalized recommendation.</p></div>
+                </div>
+                <div class="kb-qa-item">
+                    <h3 class="kb-question">How do I post an opportunity?</h3>
+                    <div class="kb-answer"><p>Register, then go to Opportunities -> Create. Choose your collaboration model and fill in the details.</p></div>
+                </div>
+                <div class="kb-qa-item">
+                    <h3 class="kb-question">Where can I get help?</h3>
+                    <div class="kb-answer"><p>Check this Knowledge Base and the model guides. For platform support, use the contact options in the footer when available.</p></div>
+                </div>
+            </div>
+
+            <div class="kb-cta">
+                <a href="#" data-route="/collaboration-wizard" class="btn btn-primary">Take the Wizard</a>
+                <a href="#" data-route="/register" class="btn btn-secondary">Register</a>
+            </div>
+        </main>
     </div>
 </div>
 
 <style>
-.knowledge-base-page .page-body { max-width: var(--portal-page-max-width); margin: 0 auto; width: 100%; }
-.kb-tabs { display: flex; gap: 0; margin-bottom: var(--spacing-xl); border-bottom: 2px solid var(--border-color); flex-wrap: wrap; }
-.kb-tab { padding: var(--spacing-md) var(--spacing-lg); font-size: var(--font-size-base); font-weight: 500; color: var(--text-secondary); background: none; border: none; border-bottom: 3px solid transparent; margin-bottom: -2px; cursor: pointer; font-family: inherit; }
-.kb-tab:hover { color: var(--primary-color); }
-.kb-tab.kb-tab-active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
-.kb-panel { display: none; margin-bottom: var(--spacing-xl); }
-.kb-panel.kb-panel-active { display: block; }
-.kb-panel[hidden] { display: none !important; }
-.kb-qa-item { margin-bottom: var(--spacing-lg); padding: var(--spacing-md) 0; border-bottom: 1px solid var(--border-color); }
-.kb-qa-item:last-child { border-bottom: none; }
-.kb-question { font-size: var(--font-size-lg); font-weight: 600; color: var(--text-primary); margin: 0 0 var(--spacing-sm); }
-.kb-answer { color: var(--text-secondary); }
-.kb-answer p { margin: 0; line-height: 1.6; }
-.kb-answer a { color: var(--primary-color); text-decoration: none; }
-.kb-answer a:hover { text-decoration: underline; }
-.kb-cta { margin-top: var(--spacing-2xl); display: flex; gap: var(--spacing-md); flex-wrap: wrap; }
+.app-public-layout #main-content:has(.pm-kb-page) {
+    max-width: none;
+    padding: 0;
+}
+
+.pm-kb-page {
+    --kb-ink: #101820;
+    --kb-muted: #5f6b7a;
+    --kb-line: #d9e2ec;
+    --kb-teal: #0891b2;
+    --kb-teal-dark: #0e7490;
+    --kb-coral: #e85d4f;
+    width: 100%;
+    max-width: none;
+    background: #f7f9fb;
+    color: var(--kb-ink);
+}
+
+.kb-hero {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(3.5rem, 8vw, 6rem) 0;
+    border-bottom: 1px solid var(--kb-line);
+    background:
+        linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.9) 48%, rgba(239,246,249,0.72) 100%),
+        linear-gradient(0deg, rgba(16,24,32,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,24,32,0.045) 1px, transparent 1px),
+        #eef3f6;
+    background-size: auto, 34px 34px, 34px 34px, auto;
+}
+
+.kb-hero-grid {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(135deg, transparent 0 36%, rgba(8,145,178,0.16) 36.2% 36.6%, transparent 36.8% 100%),
+        linear-gradient(150deg, transparent 0 70%, rgba(232,93,79,0.14) 70.2% 70.6%, transparent 70.8% 100%);
+}
+
+.kb-hero-inner,
+.kb-body {
+    position: relative;
+    z-index: 1;
+    width: min(1180px, calc(100% - 32px));
+    max-width: none;
+    margin: 0 auto;
+}
+
+.kb-hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.38fr);
+    gap: clamp(2rem, 6vw, 4rem);
+    align-items: center;
+}
+
+.kb-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+    color: var(--kb-teal-dark);
+    font-size: 0.78rem;
+    font-weight: 850;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.kb-kicker i {
+    font-size: 1.15rem;
+}
+
+.kb-hero h1 {
+    max-width: 760px;
+    margin: 0;
+    color: var(--kb-ink);
+    font-size: clamp(2.35rem, 5vw, 4.6rem);
+    line-height: 0.99;
+    font-weight: 850;
+    letter-spacing: 0;
+}
+
+.kb-subtitle {
+    max-width: 680px;
+    margin: 1.1rem 0 0;
+    color: var(--kb-muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+.kb-hero-card {
+    min-height: 260px;
+    padding: 1.2rem;
+    border: 1px solid rgba(16,24,32,0.12);
+    border-radius: 8px;
+    background:
+        linear-gradient(0deg, rgba(8,145,178,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(8,145,178,0.08) 1px, transparent 1px),
+        #ffffff;
+    background-size: 24px 24px;
+    box-shadow: 0 24px 60px rgba(16,24,32,0.13);
+}
+
+.kb-card-label {
+    display: inline-flex;
+    margin-bottom: 1rem;
+    color: var(--kb-teal-dark);
+    font-size: 0.75rem;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.kb-hero-card strong {
+    display: block;
+    color: var(--kb-ink);
+    font-size: 1.5rem;
+    line-height: 1.1;
+}
+
+.kb-card-lines {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 2rem;
+}
+
+.kb-card-lines span {
+    display: block;
+    height: 14px;
+    border-radius: 999px;
+    background: #e6eef4;
+}
+
+.kb-card-lines span:nth-child(1) {
+    width: 82%;
+    background: #cffafe;
+}
+
+.kb-card-lines span:nth-child(2) {
+    width: 66%;
+}
+
+.kb-card-lines span:nth-child(3) {
+    width: 74%;
+    background: #ffe3df;
+}
+
+.kb-body {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 1.25rem;
+    padding: clamp(2rem, 5vw, 4rem) 0;
+}
+
+.kb-sidebar-panel,
+.kb-main {
+    border: 1px solid var(--kb-line);
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(16,24,32,0.04);
+}
+
+.kb-sidebar-panel {
+    position: sticky;
+    top: 84px;
+    padding: 1rem;
+}
+
+.kb-sidebar-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    background: #101820;
+    color: #ffffff;
+    font-size: 1.4rem;
+}
+
+.kb-sidebar-panel h2 {
+    margin: 0;
+    color: var(--kb-ink);
+    font-size: 1.1rem;
+    line-height: 1.25;
+}
+
+.kb-sidebar-panel p {
+    margin: 0.55rem 0 0;
+    color: var(--kb-muted);
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+
+.kb-main {
+    padding: 1rem;
+}
+
+.kb-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    padding: 0.45rem;
+    border: 1px solid var(--kb-line);
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.kb-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 42px;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--kb-muted);
+    font: inherit;
+    font-weight: 850;
+    cursor: pointer;
+}
+
+.kb-tab:hover {
+    color: var(--kb-ink);
+    background: #ffffff;
+}
+
+.kb-tab.kb-tab-active {
+    color: #ffffff;
+    background: var(--kb-ink);
+}
+
+.kb-panel {
+    display: none;
+}
+
+.kb-panel.kb-panel-active {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.kb-panel[hidden] {
+    display: none !important;
+}
+
+.kb-qa-item {
+    padding: 1rem;
+    border: 1px solid var(--kb-line);
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.kb-question {
+    margin: 0 0 0.5rem;
+    color: var(--kb-ink);
+    font-size: 1.08rem;
+    line-height: 1.3;
+}
+
+.kb-answer {
+    color: var(--kb-muted);
+}
+
+.kb-answer p {
+    margin: 0;
+    line-height: 1.65;
+}
+
+.kb-answer a {
+    color: var(--kb-teal-dark);
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.kb-answer a:hover {
+    color: var(--kb-ink);
+}
+
+.kb-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--kb-line);
+}
+
+.kb-cta .btn {
+    min-height: 44px;
+    border-radius: 8px !important;
+    font-weight: 850;
+}
+
+.kb-cta .btn-primary {
+    background: var(--kb-ink) !important;
+    border-color: var(--kb-ink) !important;
+}
+
+.kb-cta .btn-secondary {
+    background: #ffffff !important;
+    border: 1px solid var(--kb-line) !important;
+    color: var(--kb-ink) !important;
+}
+
+@media (max-width: 900px) {
+    .kb-hero-inner,
+    .kb-body {
+        grid-template-columns: 1fr;
+    }
+
+    .kb-sidebar-panel {
+        position: static;
+    }
+}
+
+@media (max-width: 720px) {
+    .kb-hero-inner,
+    .kb-body {
+        width: min(100% - 24px, 1180px);
+    }
+
+    .kb-hero {
+        padding: 2.75rem 0;
+    }
+
+    .kb-hero h1 {
+        font-size: 2.55rem;
+    }
+
+    .kb-hero-card {
+        min-height: 190px;
+    }
+
+    .kb-cta .btn {
+        width: 100%;
+    }
+}
 </style>

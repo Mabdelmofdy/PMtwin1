@@ -1,0 +1,456 @@
+/**
+ * Admin console surface — Health, Skills, Matching (modern shell).
+ * Loaded from index.html; page fragments should not ship duplicate <style> for these routes.
+ */
+
+@keyframes ac-spin {
+    to { transform: rotate(360deg); }
+}
+
+.admin-health-page [hidden],
+.admin-skills-page [hidden] {
+    display: none !important;
+}
+
+/* —— Shared hero (health / skills / matching) —— */
+.admin-health-page .health-hero,
+.admin-skills-page .skills-hero,
+.admin-matching-page .matching-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: clamp(1.25rem, 3vw, 2rem);
+    align-items: center;
+    padding: clamp(1.35rem, 3vw, 2.25rem);
+    margin-bottom: 1.5rem;
+    border: none;
+    border-radius: 1.25rem;
+    background:
+        radial-gradient(900px 280px at 0% 0%, rgba(20, 184, 166, 0.11), transparent 55%),
+        radial-gradient(700px 240px at 100% 0%, rgba(14, 165, 233, 0.08), transparent 50%),
+        linear-gradient(165deg, #ffffff 0%, #f8fafc 45%, #f1f5f9 100%);
+    box-shadow:
+        0 4px 24px -6px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(15, 23, 42, 0.045);
+    overflow: hidden;
+}
+
+.admin-health-page .health-hero::before,
+.admin-skills-page .skills-hero::before,
+.admin-matching-page .matching-hero::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    border-radius: 1.25rem 0 0 1.25rem;
+    background: linear-gradient(180deg, var(--primary-light), var(--primary-color));
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+.admin-health-page .health-hero-copy,
+.admin-skills-page .skills-hero-copy,
+.admin-matching-page .matching-hero-copy {
+    position: relative;
+    z-index: 1;
+    padding-left: 0.35rem;
+}
+
+.admin-health-page .health-eyebrow,
+.admin-skills-page .skills-eyebrow,
+.admin-matching-page .matching-eyebrow {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-transform: none;
+    color: var(--text-secondary);
+}
+
+.admin-health-page .health-hero .page-title,
+.admin-skills-page .skills-hero .page-title,
+.admin-matching-page .matching-hero .page-title {
+    font-size: clamp(1.75rem, 2.4vw, 2.35rem);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.12;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.admin-health-page .health-hero .page-subtitle,
+.admin-skills-page .skills-hero .page-subtitle,
+.admin-matching-page .matching-hero .page-subtitle {
+    max-width: 38rem;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+.admin-health-page .health-hero-actions,
+.admin-skills-page .skills-hero-actions,
+.admin-matching-page .matching-hero-actions {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
+}
+
+.admin-health-page .health-hero-actions > *,
+.admin-skills-page .skills-hero-actions > *,
+.admin-matching-page .matching-hero-actions > * {
+    max-width: 100%;
+}
+
+.admin-health-page .health-run-state,
+.admin-skills-page .skills-run-state,
+.admin-matching-page .matching-run-state {
+    min-height: 2.5rem;
+    padding: 0.35rem 1rem 0.35rem 0.85rem;
+    border: none;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 0.06);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.admin-health-page .health-run-dot,
+.admin-skills-page .skills-run-dot,
+.admin-matching-page .matching-run-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+}
+
+.admin-health-page .health-run-btn,
+.admin-skills-page .skills-run-btn,
+.admin-matching-page .matching-run-btn {
+    min-height: 2.5rem;
+    border-radius: 0.65rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px -2px rgba(13, 148, 136, 0.35);
+}
+
+/* —— Control panels —— */
+.admin-health-page .health-control-panel,
+.admin-skills-page .skills-control-panel,
+.admin-matching-page .matching-control-panel {
+    border: none;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.78);
+    box-shadow:
+        0 2px 16px -4px rgba(15, 23, 42, 0.07),
+        0 0 0 1px rgba(15, 23, 42, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.admin-health-page .health-meta-item,
+.admin-skills-page .skills-meta-item,
+.admin-matching-page .matching-meta-item {
+    border: none;
+    border-radius: 0.875rem;
+    background: var(--bg-secondary);
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+.admin-health-page .health-meta-label,
+.admin-skills-page .skills-meta-label,
+.admin-matching-page .matching-meta-label {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+.admin-health-page .health-meta-value,
+.admin-skills-page .skills-meta-value,
+.admin-matching-page .matching-meta-value {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* —— Section typography —— */
+.admin-health-page .health-section-title,
+.admin-skills-page .skills-section-title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--text-primary);
+}
+
+.admin-health-page .health-section-desc,
+.admin-skills-page .skills-section-desc {
+    letter-spacing: -0.01em;
+}
+
+/* —— Loading / errors —— */
+.admin-health-page .health-loading,
+.admin-skills-page .skills-loading,
+.admin-matching-page .matching-loading {
+    border: none;
+    border-radius: 0.875rem;
+    background: var(--bg-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-health-page .health-loading .spinner,
+.admin-skills-page .skills-loading .spinner,
+.admin-matching-page .matching-loading .spinner {
+    animation: ac-spin 0.75s linear infinite;
+}
+
+.admin-health-page .health-error,
+.admin-matching-page .matching-error {
+    border: none;
+    border-radius: 0.875rem;
+    box-shadow: var(--shadow-sm);
+}
+
+/* —— Metric tiles —— */
+.admin-health-page .health-overview-grid .stat-card,
+.admin-health-page .health-metric-card,
+.admin-matching-page .matching-overview-grid .stat-card,
+.admin-matching-page .matching-metric-card {
+    border: none;
+    border-radius: 1rem;
+    background: var(--bg-primary);
+    box-shadow:
+        0 2px 12px -4px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(15, 23, 42, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-health-page .health-overview-grid .stat-card:hover,
+.admin-health-page .health-metric-card:hover,
+.admin-matching-page .matching-overview-grid .stat-card:hover,
+.admin-matching-page .matching-metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 12px 28px -10px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(13, 148, 136, 0.12);
+    background: #fff;
+}
+
+.admin-health-page .health-overview-grid .stat-value,
+.admin-health-page .health-metric-card .stat-value,
+.admin-matching-page .matching-overview-grid .stat-value,
+.admin-matching-page .matching-metric-card .stat-value {
+    letter-spacing: -0.04em;
+    font-weight: 750;
+}
+
+/* —— Tables —— */
+.admin-health-page .health-summary-table-wrap,
+.admin-matching-page .matching-summary-table-wrap {
+    border: none;
+    border-radius: 1rem;
+    box-shadow:
+        0 2px 16px -4px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+.admin-health-page .health-summary-table th,
+.admin-matching-page .matching-summary-table th {
+    text-transform: none;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+    background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+}
+
+.admin-health-page .health-summary-table tbody tr:hover,
+.admin-matching-page .matching-summary-table tbody tr:hover {
+    background: rgba(241, 245, 249, 0.65);
+}
+
+/* —— Matching report header / chips / tabs —— */
+.admin-matching-page .matching-report-header {
+    border: none;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow:
+        0 2px 16px -4px rgba(15, 23, 42, 0.07),
+        0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+.admin-matching-page .matching-summary-chip {
+    border: none;
+    border-radius: 0.75rem;
+    background: var(--bg-secondary);
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
+}
+
+.admin-matching-page .matching-match-type-tabs {
+    border: none;
+    gap: 0.2rem;
+    padding: 0.3rem;
+    border-radius: 0.875rem;
+    background: rgba(241, 245, 249, 0.95);
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
+}
+
+.admin-matching-page .matching-match-type-tab.is-active {
+    border-color: transparent;
+    box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.12);
+    border-radius: 0.65rem;
+}
+
+.admin-matching-page .matching-opp-card,
+.admin-matching-page .matching-two-way-pair,
+.admin-matching-page .matching-circular-cycle,
+.admin-matching-page .matching-match-row,
+.admin-matching-page .matching-consortium-role {
+    border: none;
+    box-shadow:
+        0 1px 8px -2px rgba(15, 23, 42, 0.06),
+        0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+.admin-matching-page .workflow-card-icon {
+    border-radius: 0.65rem;
+    font-weight: 700;
+}
+
+.admin-matching-page .workflow-card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow:
+        0 2px 12px -4px rgba(15, 23, 42, 0.07),
+        0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+/* —— Health tips (replaces numbered cards in HTML) —— */
+.admin-health-page .health-tips-panel {
+    padding: 0;
+}
+
+.admin-health-page .ac-tip-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.65rem;
+}
+
+.admin-health-page .ac-tip-list li {
+    margin: 0;
+    padding: 1rem 1.15rem;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.75);
+    border-radius: 0.875rem;
+    box-shadow:
+        0 2px 12px -4px rgba(15, 23, 42, 0.06),
+        0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+.admin-health-page .ac-tip-list strong {
+    color: var(--text-primary);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+/* —— Skills-specific —— */
+.admin-skills-page .skills-editor-panel {
+    border: none;
+    border-radius: 1rem;
+    background: var(--bg-primary);
+    box-shadow:
+        0 2px 16px -4px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+.admin-skills-page .skills-chip-wrap {
+    border: none;
+    border-radius: 0.875rem;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+.admin-skills-page .skills-chip {
+    border: none;
+    background: #fff;
+    box-shadow: 0 1px 4px -1px rgba(15, 23, 42, 0.08);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.admin-skills-page .skills-actions-bar {
+    border: none;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow:
+        0 2px 16px -4px rgba(15, 23, 42, 0.07),
+        0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+.admin-skills-page .skills-toolbar-input.form-input {
+    border-radius: 0.65rem;
+}
+
+.admin-skills-page .ac-tip-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.65rem;
+}
+
+.admin-skills-page .ac-tip-list li {
+    margin: 0;
+    padding: 1rem 1.15rem;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.75);
+    border-radius: 0.875rem;
+    box-shadow:
+        0 2px 12px -4px rgba(15, 23, 42, 0.06),
+        0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+.admin-skills-page .ac-tip-list strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.admin-skills-page .skills-code {
+    border-radius: 0.35rem;
+    background: rgba(15, 23, 42, 0.06);
+    padding: 0.1em 0.4em;
+}
+
+/* —— Page body rhythm —— */
+.admin-health-page .health-page-body,
+.admin-skills-page .skills-page-body,
+.admin-matching-page .matching-page-body {
+    gap: 1.35rem;
+}
+
+.admin-health-page .health-table-section {
+    border-top: none;
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 720px) {
+    .admin-health-page .health-run-state,
+    .admin-skills-page .skills-run-state,
+    .admin-matching-page .matching-run-state {
+        max-width: none;
+    }
+}

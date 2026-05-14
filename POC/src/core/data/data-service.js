@@ -1080,7 +1080,7 @@ class DataService {
      * Get enriched application detail for the full Application Details View.
      * Returns application, applicant, opportunity, requirementsMatch, paymentTerms, deliverables, files, and match info.
      * @param {string} applicationId
-     * @param {Object} [options] - { ownerId } to enforce owner check (optional)
+     * @param {Object} [options] - { ownerId } to enforce owner check; { allowStaff: true } for admin/moderator viewing any application on the opportunity
      * @returns {Promise<Object|null>}
      */
     async getApplicationDetail(applicationId, options = {}) {
@@ -1088,7 +1088,14 @@ class DataService {
         if (!application) return null;
 
         const opportunity = await this.getOpportunityById(application.opportunityId);
-        if (options.ownerId && opportunity && opportunity.creatorId !== options.ownerId) return null;
+        if (
+            options.ownerId &&
+            opportunity &&
+            opportunity.creatorId !== options.ownerId &&
+            !options.allowStaff
+        ) {
+            return null;
+        }
 
         const applicant = await this.getUserById(application.applicantId) || await this.getCompanyById(application.applicantId);
         const requirementsMatch = await this.getApplicationRequirements(applicationId);
@@ -2646,15 +2653,49 @@ class DataService {
     
     // Audit Log Operations
     async createAuditLog(logData) {
+        const payload = logData && typeof logData === 'object' ? { ...logData } : {};
+        const userId = payload.userId;
+        let userName = payload.userName;
+        if (userName == null || String(userName).trim() === '') {
+            if (userId) {
+                const entity = await this.getUserOrCompanyById(userId);
+                if (entity) {
+                    userName =
+                        (entity.profile && entity.profile.name && String(entity.profile.name).trim()) ||
+                        entity.email ||
+                        userId;
+                }
+            }
+        } else {
+            userName = String(userName).trim();
+        }
+
+        let ipAddress = payload.ipAddress;
+        if (ipAddress == null || String(ipAddress).trim() === '') {
+            try {
+                if (typeof sessionStorage !== 'undefined') {
+                    ipAddress = sessionStorage.getItem('pmtwin_client_ip') || undefined;
+                }
+            } catch {
+                ipAddress = undefined;
+            }
+        } else {
+            ipAddress = String(ipAddress).trim();
+        }
+
         const logs = this.storage.get(CONFIG.STORAGE_KEYS.AUDIT) || [];
         const newLog = {
+            ...payload,
             id: this.generateId(),
-            ...logData,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            userName: userName || undefined,
+            ipAddress: ipAddress || undefined
         };
         logs.push(newLog);
-        // Keep only last 1000 logs
-        if (logs.length > 1000) {
+        const cap = (typeof CONFIG.AUDIT_MAX_ENTRIES === 'number' && CONFIG.AUDIT_MAX_ENTRIES > 0)
+            ? CONFIG.AUDIT_MAX_ENTRIES
+            : 1000;
+        while (logs.length > cap) {
             logs.shift();
         }
         this.storage.set(CONFIG.STORAGE_KEYS.AUDIT, logs);
@@ -2674,10 +2715,14 @@ class DataService {
             logs = logs.filter(l => l.entityId === filters.entityId);
         }
         if (filters.startDate) {
-            logs = logs.filter(l => new Date(l.timestamp) >= new Date(filters.startDate));
+            const start = new Date(filters.startDate);
+            start.setHours(0, 0, 0, 0);
+            logs = logs.filter(l => new Date(l.timestamp) >= start);
         }
         if (filters.endDate) {
-            logs = logs.filter(l => new Date(l.timestamp) <= new Date(filters.endDate));
+            const end = new Date(filters.endDate);
+            end.setHours(23, 59, 59, 999);
+            logs = logs.filter(l => new Date(l.timestamp) <= end);
         }
         
         return logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));

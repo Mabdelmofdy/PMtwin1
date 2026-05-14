@@ -1,151 +1,471 @@
 <div class="page-container contract-detail-page">
-    <div id="contract-loading" class="loading-state">
+    <div id="contract-loading" class="contract-detail-loading">
         <div class="spinner"></div>
-        <p>Loading contract...</p>
+        <p>Loading contract…</p>
     </div>
 
-    <div id="contract-error" class="error-state" style="display: none;">
+    <div id="contract-error" class="contract-detail-error" style="display: none;">
+        <span class="contract-detail-error__icon" aria-hidden="true"><i class="ph-duotone ph-warning-circle"></i></span>
         <h2>Contract not found</h2>
         <p>This contract does not exist or you do not have access to it.</p>
         <a href="#" data-route="/contracts" class="btn btn-primary">Back to Contracts</a>
     </div>
 
     <div id="contract-content" class="contract-detail-content" style="display: none;">
-        <a href="#" data-route="/contracts" class="back-link no-print"><i class="ph-duotone ph-arrow-left"></i> Back to Contracts</a>
+        <a href="#" data-route="/contracts" class="contract-detail-back no-print"><i class="ph-duotone ph-arrow-left" aria-hidden="true"></i> Back to Contracts</a>
+
         <div id="contract-print-area">
-        <div class="contract-detail-header">
-            <h1 id="contract-title" class="page-title">Contract</h1>
-            <div class="contract-detail-meta">
-                <span id="contract-status-badge" class="badge">—</span>
-                <span id="contract-role-badge" class="badge badge-info">—</span>
+            <header class="contract-detail-hero" aria-labelledby="contract-title">
+                <div class="contract-detail-hero__main">
+                    <h1 id="contract-title" class="contract-detail-hero__title">Contract</h1>
+                    <p id="contract-hero-meta" class="contract-detail-hero__meta"></p>
+                    <div class="contract-detail-hero__pills">
+                        <span id="contract-status-badge" class="badge">—</span>
+                        <span id="contract-role-badge" class="badge badge-info">—</span>
+                    </div>
+                    <div id="contract-detail-actions" class="contract-detail-actions no-print" role="toolbar" aria-label="Contract actions"></div>
+                </div>
+            </header>
+
+            <div class="contract-detail-layout contract-detail-layout--stack cd-detail-surface">
+                <aside class="contract-detail-layout__aside" aria-label="Contract summary and links">
+                    <div class="cd-aside-card">
+                        <h2 class="cd-aside-card__title">
+                            <i class="ph-duotone ph-calendar" aria-hidden="true"></i>
+                            Dates
+                        </h2>
+                        <div id="contract-dates" class="cd-aside-card__body cd-dates-stack"></div>
+                    </div>
+                    <div class="cd-aside-card">
+                        <h2 class="cd-aside-card__title">
+                            <i class="ph-duotone ph-handshake" aria-hidden="true"></i>
+                            Deal workspace
+                        </h2>
+                        <div id="contract-linked-deal" class="cd-aside-card__body"></div>
+                    </div>
+                    <div class="cd-aside-card">
+                        <h2 class="cd-aside-card__title">
+                            <i class="ph-duotone ph-briefcase" aria-hidden="true"></i>
+                            Opportunity
+                        </h2>
+                        <div id="contract-opportunity-link" class="cd-aside-card__body"></div>
+                    </div>
+                </aside>
+                <div class="contract-detail-layout__main">
+                    <section class="cd-card" aria-labelledby="cd-parties-title">
+                        <h2 id="cd-parties-title" class="cd-card__title">
+                            <i class="ph-duotone ph-users-three" aria-hidden="true"></i>
+                            Parties
+                        </h2>
+                        <div id="contract-parties" class="cd-card__body cd-parties-grid"></div>
+                    </section>
+
+                    <section class="cd-card" aria-labelledby="cd-terms-title">
+                        <h2 id="cd-terms-title" class="cd-card__title">
+                            <i class="ph-duotone ph-scales" aria-hidden="true"></i>
+                            Scope &amp; terms
+                        </h2>
+                        <div id="contract-scope-terms" class="cd-card__body cd-terms-body"></div>
+                    </section>
+
+                    <section class="cd-card" id="contract-milestones-section" aria-labelledby="cd-milestones-title">
+                        <h2 id="cd-milestones-title" class="cd-card__title">
+                            <i class="ph-duotone ph-list-checks" aria-hidden="true"></i>
+                            Milestones snapshot
+                        </h2>
+                        <p class="cd-card__lead">Delivery runs in the linked Deal workspace. Below is the snapshot captured on this contract.</p>
+                        <div id="contract-milestones" class="cd-card__body"></div>
+                    </section>
+
+                    <section class="cd-card" id="contract-audit-section" style="display: none;" aria-labelledby="cd-audit-title">
+                        <h2 id="cd-audit-title" class="cd-card__title">
+                            <i class="ph-duotone ph-scroll" aria-hidden="true"></i>
+                            Activity
+                        </h2>
+                        <div id="contract-audit-log" class="cd-card__body cd-audit-list"></div>
+                    </section>
+
+                    <section class="cd-card" id="contract-reviews-section" style="display: none;" aria-labelledby="cd-reviews-title">
+                        <h2 id="cd-reviews-title" class="cd-card__title">
+                            <i class="ph-duotone ph-star" aria-hidden="true"></i>
+                            Reviews
+                        </h2>
+                        <div id="contract-reviews-list" class="cd-card__body"></div>
+                        <div id="contract-leave-review" class="cd-card__footer no-print" style="display: none;"></div>
+                    </section>
+                </div>
             </div>
-            <div id="contract-detail-actions" class="contract-detail-actions no-print"></div>
-        </div>
-
-        <div class="contract-detail-sections">
-            <section class="detail-section">
-                <h2><i class="ph-duotone ph-users-three"></i> Parties</h2>
-                <div id="contract-parties" class="detail-content"></div>
-            </section>
-
-            <section class="detail-section">
-                <h2><i class="ph-duotone ph-file-text"></i> Scope & terms</h2>
-                <div id="contract-scope-terms" class="detail-content"></div>
-            </section>
-
-            <section class="detail-section" id="contract-milestones-section">
-                <h2><i class="ph-duotone ph-list-checks"></i> Milestones</h2>
-                <div id="contract-milestones" class="detail-content"></div>
-            </section>
-
-            <section class="detail-section">
-                <h2><i class="ph-duotone ph-handshake"></i> Linked Deal Workspace</h2>
-                <div id="contract-linked-deal" class="detail-content"></div>
-            </section>
-
-            <section class="detail-section" id="contract-audit-section" style="display: none;">
-                <h2><i class="ph-duotone ph-scroll"></i> Activity</h2>
-                <div id="contract-audit-log" class="detail-content"></div>
-            </section>
-
-            <section class="detail-section">
-                <h2><i class="ph-duotone ph-calendar"></i> Dates</h2>
-                <div id="contract-dates" class="detail-content"></div>
-            </section>
-
-            <section class="detail-section">
-                <h2><i class="ph-duotone ph-briefcase"></i> Linked opportunity</h2>
-                <div id="contract-opportunity-link" class="detail-content"></div>
-            </section>
-
-            <section class="detail-section" id="contract-reviews-section" style="display: none;">
-                <h2><i class="ph-duotone ph-star"></i> Reviews</h2>
-                <div id="contract-reviews-list" class="detail-content"></div>
-                <div id="contract-leave-review" class="no-print" style="display: none;"></div>
-            </section>
-        </div>
         </div>
     </div>
 </div>
 
 <style>
-.contract-detail-page .loading-state,
-.contract-detail-page .error-state {
-    text-align: center;
-    padding: 2rem;
+.contract-detail-page {
+    --cd-max: min(var(--portal-page-max-width, 1180px), 100%);
 }
-.contract-detail-page .back-link {
+
+.contract-detail-loading,
+.contract-detail-error {
+    text-align: center;
+    padding: 3rem 1.25rem;
+    color: var(--text-secondary, #64748b);
+}
+
+.contract-detail-error__icon {
+    display: block;
+    font-size: 2.5rem;
+    color: var(--warning-color);
+    margin-bottom: 0.75rem;
+}
+
+.contract-detail-error h2 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary, #0f172a);
+    font-size: 1.25rem;
+}
+
+.contract-detail-error .btn {
+    margin-top: 1rem;
+}
+
+.contract-detail-content {
+    max-width: var(--cd-max);
+    margin: 0 auto;
+    width: 100%;
+    padding-bottom: 2.5rem;
+}
+
+.contract-detail-back {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    color: var(--text-secondary);
+    gap: 0.35rem;
+    margin-bottom: 1.25rem;
+    color: var(--primary-color, #0d9488);
     text-decoration: none;
-    font-size: 0.875rem;
-    margin-bottom: 1rem;
+    font-size: var(--font-size-sm, 0.875rem);
+    font-weight: 600;
 }
-.contract-detail-page .back-link:hover {
-    color: var(--color-primary);
+
+.contract-detail-back:hover {
+    text-decoration: underline;
 }
-.contract-detail-page .contract-detail-header {
-    margin-bottom: 1.5rem;
+
+.contract-detail-back .ph-duotone {
+    font-size: 1.1rem;
 }
-.contract-detail-page .contract-detail-meta {
+
+.contract-detail-hero {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.contract-detail-hero__main {
+    max-width: 42rem;
+}
+
+.contract-detail-hero__title {
+    margin: 0 0 var(--spacing-xs);
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    line-height: 1.25;
+}
+
+.contract-detail-hero__meta {
+    margin: 0 0 var(--spacing-md);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.contract-detail-hero__pills {
     display: flex;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
 }
-.contract-detail-page .detail-section {
+
+.contract-detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.cd-detail-surface {
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    padding: 1.25rem;
-    margin-bottom: 1rem;
+    box-shadow: var(--shadow-card);
+    padding: var(--spacing-lg) var(--spacing-xl);
 }
-.contract-detail-page .detail-section h2 {
-    font-size: 1rem;
+
+.contract-detail-layout--stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.contract-detail-layout__aside {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+}
+
+@media (min-width: 720px) {
+    .contract-detail-layout__aside {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.contract-detail-layout__main {
+    max-width: 48rem;
+}
+
+.cd-card {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 0;
+    padding: 0 0 var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: none;
+}
+
+.cd-card:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.cd-card__title {
+    font-size: var(--font-size-lg);
     font-weight: 600;
     color: var(--text-primary);
-    margin: 0 0 0.75rem 0;
+    margin: 0 0 var(--spacing-md);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--spacing-sm);
 }
-.contract-detail-page .detail-content {
-    font-size: 0.9375rem;
+
+.cd-card__title .ph-duotone {
+    font-size: var(--font-size-lg);
+    color: var(--text-muted);
+}
+
+.cd-card__lead {
+    margin: calc(-1 * var(--spacing-xs)) 0 var(--spacing-md);
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    line-height: 1.45;
+}
+
+.cd-card__body {
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
-    line-height: 1.5;
+    line-height: 1.6;
 }
-.contract-detail-page .detail-content p {
-    margin: 0.25rem 0;
-}
-.contract-detail-page .milestone-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-.contract-detail-page .milestone-item:last-child {
-    border-bottom: none;
-}
-.contract-detail-page .contract-detail-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+
+.cd-card__footer {
     margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color, #e2e8f0);
 }
-.contract-detail-page .review-item {
+
+.cd-parties-grid {
+    display: grid;
+    gap: 0.75rem;
+}
+
+@media (min-width: 560px) {
+    .cd-parties-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+}
+
+.cd-party-card {
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-md, 10px);
+    padding: 0.85rem 1rem;
+    background: var(--bg-primary, #fff);
+}
+
+.cd-party-card__role {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--primary-color, #0d9488);
+    margin-bottom: 0.35rem;
+}
+
+.cd-party-card__name {
+    font-weight: 600;
+    color: var(--text-primary, #0f172a);
+    margin: 0 0 0.25rem 0;
+}
+
+.cd-party-card__email,
+.cd-party-card__signed {
+    font-size: 0.8125rem;
+    margin: 0.15rem 0 0 0;
+    color: var(--text-secondary, #64748b);
+}
+
+.cd-terms-body p {
+    margin: 0 0 0.85rem 0;
+}
+
+.cd-terms-body p:last-child {
+    margin-bottom: 0;
+}
+
+.cd-terms-kv {
+    display: grid;
+    gap: 0.75rem;
+}
+
+@media (min-width: 520px) {
+    .cd-terms-kv {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.cd-kv {
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-md, 8px);
+    padding: 0.75rem 0.85rem;
+    background: var(--bg-secondary, #f8fafc);
+}
+
+.cd-kv__label {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--text-secondary, #64748b);
+    margin-bottom: 0.25rem;
+}
+
+.cd-kv__value {
+    font-size: 0.875rem;
+    color: var(--text-primary, #0f172a);
+    font-weight: 500;
+}
+
+.cd-milestone-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
     padding: 0.75rem 0;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
 }
-.contract-detail-page .review-item:last-child {
+
+.cd-milestone-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.cd-milestone-row:first-child {
+    padding-top: 0;
+}
+
+.cd-milestone-title {
+    font-weight: 600;
+    color: var(--text-primary, #0f172a);
+}
+
+.cd-milestone-meta {
+    font-size: 0.8125rem;
+    color: var(--text-secondary, #64748b);
+}
+
+.cd-audit-list {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.contract-audit-row {
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    font-size: 0.875rem;
+}
+
+.contract-audit-row:last-child {
     border-bottom: none;
 }
 
-.contract-detail-page .contract-audit-row {
-    padding: 0.35rem 0;
-    border-bottom: 1px solid var(--border-color, #eee);
-    font-size: 0.875rem;
+.cd-aside-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    box-shadow: none;
+    transition: border-color 0.15s ease;
+}
+
+.cd-aside-card:hover {
+    border-color: rgba(13, 148, 136, 0.28);
+}
+
+.cd-aside-card__title {
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin: 0 0 var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.cd-aside-card__title .ph-duotone {
+    font-size: var(--font-size-base);
+    color: var(--text-muted);
+}
+
+.cd-aside-card__body {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.cd-aside-card__body .btn {
+    margin-top: 0.5rem;
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+}
+
+.cd-dates-stack p {
+    margin: 0 0 0.65rem 0;
+}
+
+.cd-dates-stack p:last-child {
+    margin-bottom: 0;
+}
+
+.cd-dates-stack strong {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--text-secondary, #64748b);
+    margin-bottom: 0.15rem;
+}
+
+.review-item {
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+}
+
+.review-item:last-child {
+    border-bottom: none;
 }
 
 @media print {
@@ -161,7 +481,8 @@
     }
     .contract-detail-page .no-print,
     .contract-detail-page .contract-detail-actions { display: none !important; }
-    .contract-detail-page .detail-section {
+    .cd-card,
+    .cd-aside-card {
         break-inside: avoid;
         page-break-inside: avoid;
     }

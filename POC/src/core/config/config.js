@@ -50,6 +50,9 @@ const CONFIG = {
     
     // Session Management
     SESSION_DURATION: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+
+    // Audit log retention (in-memory cap; overridable via admin Settings -> Audit)
+    AUDIT_MAX_ENTRIES: 1000,
     
     // Roles
     ROLES: {

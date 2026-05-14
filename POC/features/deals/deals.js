@@ -86,13 +86,36 @@ function formatValueLine(deal) {
     return '—';
 }
 
-function formatParticipantsLine(deal) {
+function participantEntityLabel(ent) {
+    if (!ent) return '';
+    if (ent.profile && ent.profile.name) return String(ent.profile.name);
+    if (ent.companyName) return String(ent.companyName);
+    if (ent.email) return String(ent.email).split('@')[0];
+    return '';
+}
+
+async function formatParticipantsLine(deal) {
     const parts = (deal.participants || []).filter((p) => (p.status || 'active') !== 'dropped');
     if (!parts.length) return '—';
-    return parts
-        .map((p) => p.userId)
-        .slice(0, 4)
-        .join(', ') + (parts.length > 4 ? '…' : '');
+    const ds = typeof dataService !== 'undefined' ? dataService : window.dataService;
+    const slice = parts.slice(0, 4);
+    if (!ds || typeof ds.getUserOrCompanyById !== 'function') {
+        return slice.map((p) => p.userId).join(', ') + (parts.length > 4 ? '…' : '');
+    }
+    const labels = await Promise.all(
+        slice.map(async (p) => {
+            if (!p || !p.userId) return '';
+            try {
+                const ent = await ds.getUserOrCompanyById(p.userId);
+                const label = participantEntityLabel(ent);
+                return label || p.userId;
+            } catch {
+                return p.userId;
+            }
+        })
+    );
+    const line = labels.filter(Boolean).join(', ');
+    return (line || '—') + (parts.length > 4 ? '…' : '');
 }
 
 function renderDealsEmpty(opts) {
@@ -186,6 +209,8 @@ async function loadDealsList() {
             return;
         }
 
+        const dealsBase = typeof CONFIG !== 'undefined' && CONFIG.ROUTES ? CONFIG.ROUTES.DEALS : '/deals';
+
         const enriched = await Promise.all(
             deals.map(async (deal) => {
                 const contract = deal.contractId ? await dataService.getContractById(deal.contractId) : null;
@@ -196,17 +221,18 @@ async function loadDealsList() {
                 const parties = dataService.getContractParties ? dataService.getContractParties(contract || { parties: [] }) : [];
                 const signedN = contract ? parties.filter((p) => p.signedAt).length : 0;
                 const totalN = contract ? parties.length : 0;
-                return { deal, contract, hint, signedN, totalN };
+                const participantsLine = escapeHtml(await formatParticipantsLine(deal));
+                return { deal, contract, hint, signedN, totalN, participantsLine };
             })
         );
 
         container.innerHTML = enriched
-            .map(({ deal, contract, hint, signedN, totalN }) => {
+            .map(({ deal, contract, hint, signedN, totalN, participantsLine }) => {
                 const statusLabel = getDealStatusLabel(deal.status);
                 const statusClass = getDealStatusBadgeClass(deal.status);
                 const typeLabel = getMatchTypeLabel(deal.matchType);
                 const typeIcon = getMatchTypeIconClass(deal.matchType);
-                const route = CONFIG.ROUTES.DEALS + '/' + deal.id;
+                const route = dealsBase + '/' + deal.id;
                 const updated = formatDealDate(deal.updatedAt);
                 const updatedHtml = updated ? '<p class="deal-card__updated">Updated ' + escapeHtml(updated) + '</p>' : '';
                 const contractLine = contract
@@ -220,16 +246,15 @@ async function loadDealsList() {
                 const nextHtml = hint
                     ? '<p class="deal-card__next"><strong>Next:</strong> ' + escapeHtml(hint) + '</p>'
                     : '<p class="deal-card__next text-muted">—</p>';
-                const participantsLine = escapeHtml(formatParticipantsLine(deal));
                 const valueLine = escapeHtml(formatValueLine(deal));
 
                 return (
                     '<article class="deal-card" role="listitem">' +
                     '<div class="deal-card__top">' +
                     '<div class="deal-card__title-row">' +
-                    '<h2 class="deal-card__title">' +
+                    '<h3 class="deal-card__title">' +
                     escapeHtml(deal.title || 'Deal') +
-                    '</h2>' +
+                    '</h3>' +
                     '<span class="badge ' +
                     statusClass +
                     '">' +
@@ -258,7 +283,7 @@ async function loadDealsList() {
                     '</div>' +
                     '<div class="deal-card__actions">' +
                     '<a href="#" data-route="' +
-                    route +
+                    escapeHtml(route) +
                     '" class="btn btn-primary btn-sm">View Deal</a>' +
                     (deal.contractId
                         ? '<a href="#" data-route="/contracts/' +

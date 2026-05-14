@@ -1,65 +1,359 @@
-<div class="page-container login-page min-h-[calc(100vh-16rem)] flex items-center justify-center p-8">
-    <div class="w-full max-w-md">
-        <div class="bg-white rounded-lg p-8 shadow-lg">
-            <h1 class="text-2xl font-bold text-center text-gray-900 mb-2">Login to PMTwin</h1>
-            <p class="text-center text-gray-600 mb-8">Access your account to start collaborating</p>
-            
-            <form id="login-form" class="mt-6">
-                <div class="mb-6">
-                    <label for="email" class="block mb-2 font-medium text-gray-900">Email</label>
-                    <input 
-                        type="email" 
-                        id="email" 
-                        name="email" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
-                        required 
-                        placeholder="your@email.com"
-                    >
-                </div>
-                
-                <div class="mb-6">
-                    <label for="password" class="block mb-2 font-medium text-gray-900">Password</label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
-                        required 
-                        placeholder="Enter your password"
-                    >
-                </div>
-                
-                <div class="mb-4 flex items-center justify-between flex-wrap gap-2">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="remember-me" name="rememberMe" class="rounded border-gray-300 text-primary focus:ring-primary">
-                        <label for="remember-me" class="ml-2 text-sm text-gray-700">Remember me</label>
-                    </div>
-                    <a href="#" data-route="/forgot-password" class="text-sm text-primary font-medium hover:underline">Forgot password?</a>
-                </div>
-                
-                <div id="login-error" class="alert alert-error" style="display: none;"></div>
-                
-                <button type="submit" class="w-full mt-4 px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-primary-dark transition-all shadow-md">Login</button>
+<div class="page-container login-page pm-auth-page pm-login-page">
+    <section class="pm-auth-visual" aria-label="PMTwin workspace preview">
+        <div class="pm-auth-grid" aria-hidden="true"></div>
+        <div class="pm-auth-visual-content">
+            <p class="pm-auth-kicker">
+                <i class="ph-duotone ph-shield-check" aria-hidden="true"></i>
+                Secure workspace
+            </p>
+            <h1>Return to your 3D design and construction deal flow.</h1>
+            <p>Review matches, manage opportunities, continue negotiations, and move collaborations into contract execution.</p>
+            <div class="pm-auth-model" aria-hidden="true">
+                <span class="pm-auth-block pm-auth-block-a"></span>
+                <span class="pm-auth-block pm-auth-block-b"></span>
+                <span class="pm-auth-block pm-auth-block-c"></span>
+                <span class="pm-auth-line pm-auth-line-a"></span>
+                <span class="pm-auth-line pm-auth-line-b"></span>
+            </div>
+        </div>
+    </section>
 
-                <div class="mt-4 flex flex-col gap-2">
-                    <button type="button" id="btn-login-google" class="w-full px-6 py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 flex items-center justify-center gap-2">
-                        Sign in with Google
+    <section class="pm-auth-form-zone" aria-label="Login form">
+        <div class="pm-login-card">
+            <header class="pm-auth-header">
+                <p class="pm-auth-kicker">PMTwin portal</p>
+                <h2>Login to PMTwin</h2>
+                <p>Access your account to start collaborating.</p>
+            </header>
+
+            <form id="login-form" class="pm-login-form">
+                <div class="pm-field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="your@email.com">
+                </div>
+
+                <div class="pm-field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter your password">
+                </div>
+
+                <div class="pm-login-row">
+                    <label class="pm-check">
+                        <input type="checkbox" id="remember-me" name="rememberMe">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" data-route="/forgot-password">Forgot password?</a>
+                </div>
+
+                <div id="login-error" class="alert alert-error" style="display: none;"></div>
+
+                <button type="submit" class="pm-submit-btn">Login</button>
+
+                <div class="pm-social-actions">
+                    <button type="button" id="btn-login-google">
+                        <i class="ph-duotone ph-google-logo" aria-hidden="true"></i>
+                        <span>Sign in with Google</span>
                     </button>
-                    <button type="button" id="btn-login-linkedin" class="w-full px-6 py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 flex items-center justify-center gap-2">
-                        Sign in with LinkedIn
+                    <button type="button" id="btn-login-linkedin">
+                        <i class="ph-duotone ph-linkedin-logo" aria-hidden="true"></i>
+                        <span>Sign in with LinkedIn</span>
                     </button>
                 </div>
-                
-                <div class="mt-4 text-center">
-                    <button type="button" id="btn-view-demo-credentials" class="text-primary text-sm font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 rounded">
-                        View demo user credentials
-                    </button>
-                </div>
-                
-                <p class="text-center mt-6 text-gray-600">
-                    Don't have an account? <a href="#" data-route="/register" class="text-primary no-underline font-medium hover:underline">Register here</a>
+
+                <button type="button" id="btn-view-demo-credentials" class="pm-demo-link">View demo user credentials</button>
+
+                <p class="pm-auth-switch">
+                    Don't have an account? <a href="#" data-route="/register">Register here</a>
                 </p>
             </form>
         </div>
-    </div>
+    </section>
 </div>
+
+<style>
+.app-public-layout #main-content:has(.pm-login-page) {
+    max-width: none;
+    padding: 0;
+}
+
+.pm-auth-page {
+    --auth-ink: #101820;
+    --auth-muted: #5f6b7a;
+    --auth-line: #d9e2ec;
+    --auth-teal: #0891b2;
+    --auth-teal-dark: #0e7490;
+    --auth-coral: #e85d4f;
+    width: 100%;
+    max-width: none;
+    min-height: calc(100vh - 64px);
+    display: grid;
+    grid-template-columns: minmax(420px, 0.95fr) minmax(420px, 1fr);
+    background: #f7f9fb;
+    color: var(--auth-ink);
+}
+
+.pm-auth-visual {
+    position: relative;
+    overflow: hidden;
+    min-height: 680px;
+    display: flex;
+    align-items: center;
+    padding: clamp(2rem, 5vw, 4rem);
+    background:
+        linear-gradient(90deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.78) 100%),
+        linear-gradient(0deg, rgba(16,24,32,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,24,32,0.045) 1px, transparent 1px),
+        #eef3f6;
+    background-size: auto, 34px 34px, 34px 34px, auto;
+    border-right: 1px solid var(--auth-line);
+}
+
+.pm-auth-grid {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(135deg, transparent 0 34%, rgba(8,145,178,0.16) 34.2% 34.6%, transparent 34.8% 100%),
+        linear-gradient(150deg, transparent 0 70%, rgba(232,93,79,0.14) 70.2% 70.6%, transparent 70.8% 100%);
+}
+
+.pm-auth-visual-content {
+    position: relative;
+    z-index: 1;
+    width: min(620px, 100%);
+}
+
+.pm-auth-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+    color: var(--auth-teal-dark);
+    font-size: 0.78rem;
+    font-weight: 850;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.pm-auth-kicker i {
+    font-size: 1.15rem;
+}
+
+.pm-auth-visual h1 {
+    margin: 0;
+    font-size: clamp(2.45rem, 5vw, 4.8rem);
+    line-height: 0.98;
+    font-weight: 850;
+    letter-spacing: 0;
+}
+
+.pm-auth-visual p:not(.pm-auth-kicker) {
+    max-width: 570px;
+    margin: 1rem 0 0;
+    color: var(--auth-muted);
+    font-size: 1.02rem;
+    line-height: 1.7;
+}
+
+.pm-auth-model {
+    position: relative;
+    height: 270px;
+    margin-top: 2.5rem;
+    border: 1px solid rgba(16,24,32,0.12);
+    border-radius: 8px;
+    background:
+        linear-gradient(0deg, rgba(8,145,178,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(8,145,178,0.08) 1px, transparent 1px),
+        #ffffff;
+    background-size: 24px 24px;
+    box-shadow: 0 24px 60px rgba(16,24,32,0.13);
+    transform: rotateX(54deg) rotateZ(-35deg);
+}
+
+.pm-auth-block {
+    position: absolute;
+    display: block;
+    width: 70px;
+    height: 112px;
+    background: var(--auth-teal);
+    box-shadow: 18px -18px 0 #0e7490;
+}
+
+.pm-auth-block-a { left: 20%; top: 26%; }
+.pm-auth-block-b { left: 48%; top: 18%; height: 145px; background: #334155; box-shadow: 18px -18px 0 #1f2937; }
+.pm-auth-block-c { left: 57%; top: 58%; width: 110px; height: 58px; background: var(--auth-coral); box-shadow: 18px -18px 0 #c64a41; }
+
+.pm-auth-line {
+    position: absolute;
+    display: block;
+    height: 30px;
+    background: rgba(16,24,32,0.72);
+}
+
+.pm-auth-line-a { left: 8%; right: 8%; bottom: 28%; transform: rotate(-12deg); }
+.pm-auth-line-b { left: 34%; top: 10%; bottom: 12%; width: 30px; height: auto; transform: rotate(34deg); }
+
+.pm-auth-form-zone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1.25rem, 4vw, 3rem);
+}
+
+.pm-login-card {
+    width: min(440px, 100%);
+    padding: clamp(1.25rem, 4vw, 2rem);
+    border: 1px solid var(--auth-line);
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 24px 60px rgba(16,24,32,0.1);
+}
+
+.pm-auth-header {
+    margin-bottom: 1.25rem;
+}
+
+.pm-auth-header h2 {
+    margin: 0;
+    color: var(--auth-ink);
+    font-size: 1.85rem;
+    line-height: 1.15;
+    font-weight: 850;
+}
+
+.pm-auth-header p:not(.pm-auth-kicker) {
+    margin: 0.45rem 0 0;
+    color: var(--auth-muted);
+}
+
+.pm-login-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.pm-field label {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: var(--auth-ink);
+    font-weight: 800;
+}
+
+.pm-field input {
+    width: 100%;
+    min-height: 46px;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--auth-line);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--auth-ink);
+}
+
+.pm-field input:focus {
+    outline: none;
+    border-color: var(--auth-teal);
+    box-shadow: 0 0 0 4px rgba(8,145,178,0.13);
+}
+
+.pm-login-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.pm-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--auth-muted);
+    font-size: 0.9rem;
+}
+
+.pm-login-row a,
+.pm-auth-switch a,
+.pm-demo-link {
+    color: var(--auth-teal-dark);
+    font-weight: 850;
+    text-decoration: none;
+}
+
+.pm-submit-btn {
+    min-height: 48px;
+    border: 1px solid var(--auth-ink);
+    border-radius: 8px;
+    background: var(--auth-ink);
+    color: #ffffff;
+    font-weight: 850;
+    cursor: pointer;
+}
+
+.pm-submit-btn:hover {
+    background: #26323e;
+}
+
+.pm-social-actions {
+    display: grid;
+    gap: 0.55rem;
+}
+
+.pm-social-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    border: 1px solid var(--auth-line);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--auth-ink);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.pm-social-actions button:hover {
+    background: #f8fafc;
+}
+
+.pm-demo-link {
+    justify-self: center;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.pm-auth-switch {
+    margin: 0;
+    color: var(--auth-muted);
+    text-align: center;
+}
+
+@media (max-width: 980px) {
+    .pm-auth-page {
+        grid-template-columns: 1fr;
+    }
+
+    .pm-auth-visual {
+        min-height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--auth-line);
+    }
+
+    .pm-auth-model {
+        display: none;
+    }
+}
+
+@media (max-width: 560px) {
+    .pm-auth-visual h1 {
+        font-size: 2.35rem;
+    }
+
+    .pm-auth-form-zone {
+        padding: 1rem;
+    }
+
+    .pm-login-card {
+        box-shadow: none;
+    }
+}
+</style>

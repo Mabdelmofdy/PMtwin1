@@ -1,215 +1,158 @@
 <div class="page-container admin-audit-page">
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1 class="page-title">Audit Trail</h1>
-            <p class="page-subtitle">System activity and audit logs</p>
-        </div>
-    </div>
-    <div class="page-body">
+    <div id="page-context-header-mount"></div>
 
-        <nav class="audit-view-tabs" role="tablist" aria-label="Audit view">
-            <button type="button" class="audit-view-tab audit-view-tab-active" data-view="logs" role="tab" aria-selected="true">Activity logs</button>
-            <button type="button" class="audit-view-tab" data-view="docs" role="tab" aria-selected="false">User & company documents</button>
-        </nav>
+    <div class="page-body admin-audit-body">
+        <div class="audit-shell">
+            <nav class="audit-segmented" role="tablist" aria-label="Audit view">
+                <button type="button" class="audit-seg is-active" data-view="logs" id="audit-tab-logs" role="tab" aria-selected="true" aria-controls="audit-view-logs">
+                    <i class="ph-duotone ph-list-bullets" aria-hidden="true"></i>
+                    <span class="audit-seg__text">Activity logs</span>
+                </button>
+                <button type="button" class="audit-seg" data-view="docs" id="audit-tab-docs" role="tab" aria-selected="false" aria-controls="audit-view-docs">
+                    <i class="ph-duotone ph-folder-notch" aria-hidden="true"></i>
+                    <span class="audit-seg__text">Documents</span>
+                </button>
+            </nav>
 
-        <div id="audit-view-logs" class="audit-view-panel audit-view-panel-active">
-            <div class="filters-section">
-                <div class="filters">
-                    <select id="filter-user" class="form-select">
-                        <option value="">All Users</option>
-                    </select>
-                    
-                    <select id="filter-entity-type" class="form-select">
-                        <option value="">All Entity Types</option>
-                        <option value="user">User</option>
-                        <option value="company">Company</option>
-                        <option value="opportunity">Opportunity</option>
-                        <option value="application">Application</option>
-                        <option value="deal">Deal</option>
-                        <option value="contract">Contract</option>
-                        <option value="match">Match</option>
-                        <option value="session">Session</option>
-                        <option value="system">System</option>
-                    </select>
+            <div id="audit-inline-message" class="audit-toast" role="status" aria-live="polite" hidden></div>
 
-                    <input type="text" id="filter-entity-id" class="form-input" placeholder="Entity ID (optional)" autocomplete="off">
+            <div id="audit-view-logs" class="audit-view-panel audit-view-panel-active" role="tabpanel" aria-labelledby="audit-tab-logs">
+                <details class="audit-filters-drawer" open>
+                    <summary class="audit-filters-drawer__summary">
+                        <span class="audit-filters-drawer__lead">
+                            <i class="ph-duotone ph-faders-horizontal" aria-hidden="true"></i>
+                            <span class="audit-filters-drawer__title">Filters</span>
+                        </span>
+                        <span class="audit-filters-drawer__hint">Refine who, what, and when</span>
+                        <span class="audit-filters-drawer__chev" aria-hidden="true"></span>
+                    </summary>
+                    <div class="audit-filters-drawer__body">
+                        <div class="audit-filters-grid">
+                            <div class="audit-field">
+                                <label for="filter-user" class="audit-field-label">Actor</label>
+                                <select id="filter-user" class="audit-input audit-select">
+                                    <option value="">Everyone</option>
+                                </select>
+                            </div>
+                            <div class="audit-field">
+                                <label for="filter-entity-type" class="audit-field-label">Entity type</label>
+                                <select id="filter-entity-type" class="audit-input audit-select">
+                                    <option value="">All types</option>
+                                    <option value="user">User</option>
+                                    <option value="company">Company</option>
+                                    <option value="opportunity">Opportunity</option>
+                                    <option value="application">Application</option>
+                                    <option value="deal">Deal</option>
+                                    <option value="contract">Contract</option>
+                                    <option value="match">Match</option>
+                                    <option value="session">Session</option>
+                                    <option value="system">System</option>
+                                </select>
+                            </div>
+                            <div class="audit-field">
+                                <label for="filter-entity-id" class="audit-field-label">Entity ID</label>
+                                <input type="text" id="filter-entity-id" class="audit-input" placeholder="Exact id" autocomplete="off">
+                            </div>
+                            <div class="audit-field">
+                                <label for="filter-action" class="audit-field-label">Action</label>
+                                <select id="filter-action" class="audit-input audit-select">
+                                    <option value="">All actions</option>
+                                    <option value="user_registered">User registered</option>
+                                    <option value="user_logged_in">User logged in</option>
+                                    <option value="opportunity_created">Opportunity created</option>
+                                    <option value="application_submitted">Application submitted</option>
+                                    <option value="user_approved">User approved</option>
+                                    <option value="user_rejected">User rejected</option>
+                                    <option value="match_created">Match created</option>
+                                    <option value="deal_created">Deal created</option>
+                                    <option value="contract_signed">Contract signed</option>
+                                    <option value="contract_terminated">Contract terminated</option>
+                                    <option value="replacement_accepted">Participant replaced</option>
+                                    <option value="deal_terminated">Deal terminated</option>
+                                </select>
+                            </div>
+                            <div class="audit-field audit-field--full">
+                                <label for="filter-search" class="audit-field-label">Search in feed</label>
+                                <div class="audit-search">
+                                    <i class="ph-duotone ph-magnifying-glass" aria-hidden="true"></i>
+                                    <input type="text" id="filter-search" class="audit-search-input" placeholder="Action, entity id, or details…" autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="audit-filters-footer">
+                            <div class="audit-filters-dates">
+                                <div class="audit-field">
+                                    <label for="filter-start-date" class="audit-field-label">From</label>
+                                    <input type="date" id="filter-start-date" class="audit-input">
+                                </div>
+                                <div class="audit-field">
+                                    <label for="filter-end-date" class="audit-field-label">To</label>
+                                    <input type="date" id="filter-end-date" class="audit-input">
+                                </div>
+                            </div>
+                            <div class="audit-filter-actions">
+                                <button type="button" id="apply-filters" class="btn btn-primary">Apply</button>
+                                <button type="button" id="reset-filters" class="btn btn-secondary">Reset</button>
+                            </div>
+                        </div>
+                        <p class="audit-filters-tip">
+                            <i class="ph-duotone ph-link" aria-hidden="true"></i>
+                            URL filters: <code class="audit-code">?entityType=</code> and <code class="audit-code">entityId=</code> apply on load.
+                        </p>
+                    </div>
+                </details>
 
-                    <select id="filter-action" class="form-select">
-                        <option value="">All Actions</option>
-                        <option value="user_registered">User Registered</option>
-                        <option value="user_logged_in">User Logged In</option>
-                        <option value="opportunity_created">Opportunity Created</option>
-                        <option value="application_submitted">Application Submitted</option>
-                        <option value="user_approved">User Approved</option>
-                        <option value="user_rejected">User Rejected</option>
-                        <option value="match_created">Match created</option>
-                        <option value="deal_created">Deal created</option>
-                        <option value="contract_signed">Contract signed</option>
-                        <option value="contract_terminated">Contract terminated</option>
-                        <option value="replacement_accepted">Participant replaced</option>
-                        <option value="deal_terminated">Deal terminated</option>
-                    </select>
-
-                    <input type="text" id="filter-search" class="form-input" placeholder="Search in action or details...">
-
-                    <input type="date" id="filter-start-date" class="form-input" placeholder="Start Date">
-                    <input type="date" id="filter-end-date" class="form-input" placeholder="End Date">
-
-                    <button id="apply-filters" class="btn btn-secondary">Apply Filters</button>
-                    <button type="button" id="export-csv" class="btn btn-secondary">Export CSV</button>
-                </div>
+                <section class="audit-feed" aria-labelledby="audit-feed-title">
+                    <div class="audit-feed__head">
+                        <div class="audit-feed__head-main">
+                            <div class="audit-feed__title-row">
+                                <h2 id="audit-feed-title" class="audit-feed__title">Activity feed</h2>
+                                <span id="audit-logs-count" class="audit-feed__badge" aria-live="polite">Loading…</span>
+                            </div>
+                        </div>
+                        <button type="button" id="export-csv" class="btn btn-secondary audit-feed__export">
+                            <i class="ph-duotone ph-file-csv" aria-hidden="true"></i>
+                            <span>Export CSV</span>
+                        </button>
+                    </div>
+                    <div id="audit-logs" class="audit-feed__list audit-timeline" aria-busy="true">
+                        <div class="spinner" aria-hidden="true"></div>
+                    </div>
+                </section>
             </div>
-            
-            <div id="audit-logs" class="audit-logs">
-                <div class="spinner"></div>
-            </div>
-        </div>
 
-        <div id="audit-view-docs" class="audit-view-panel" hidden>
-            <div class="audit-docs-filters">
-                <select id="filter-docs-type" class="form-select">
-                    <option value="">All (User & Company)</option>
-                    <option value="user">User only</option>
-                    <option value="company">Company only</option>
-                </select>
-                <input type="text" id="filter-docs-search" class="form-input" placeholder="Search by email or name...">
-                <button type="button" id="apply-docs-filters" class="btn btn-secondary">Apply</button>
-            </div>
-            <div id="audit-docs-list" class="audit-docs-list">
-                <div class="spinner"></div>
+            <div id="audit-view-docs" class="audit-view-panel" role="tabpanel" aria-labelledby="audit-tab-docs" hidden>
+                <section class="audit-docs-board" aria-labelledby="audit-docs-title">
+                    <header class="audit-docs-board__head">
+                        <h2 id="audit-docs-title" class="audit-docs-board__title">Submitted documents</h2>
+                        <p class="audit-docs-board__desc">Registration and profile files by user or company account.</p>
+                    </header>
+                    <div class="audit-docs-toolbar">
+                        <div class="audit-field audit-field--compact">
+                            <label for="filter-docs-type" class="audit-field-label">Show</label>
+                            <select id="filter-docs-type" class="audit-input audit-select">
+                                <option value="">Users &amp; companies</option>
+                                <option value="user">Users only</option>
+                                <option value="company">Companies only</option>
+                            </select>
+                        </div>
+                        <div class="audit-field audit-field--grow audit-field--compact">
+                            <label for="filter-docs-search" class="audit-field-label">Search</label>
+                            <div class="audit-search">
+                                <i class="ph-duotone ph-magnifying-glass" aria-hidden="true"></i>
+                                <input type="text" id="filter-docs-search" class="audit-search-input" placeholder="Email or name…" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="audit-field audit-field--actions audit-field--compact">
+                            <span class="audit-field-label audit-field-label--ghost" aria-hidden="true">Go</span>
+                            <button type="button" id="apply-docs-filters" class="btn btn-primary">Apply</button>
+                        </div>
+                    </div>
+                    <div id="audit-docs-list" class="audit-docs-list">
+                        <div class="spinner" aria-hidden="true"></div>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-.admin-audit-page {
-    /* Page specific styles */
-}
-
-.audit-view-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-xl);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: var(--spacing-sm);
-}
-.audit-view-tab {
-    padding: var(--spacing-sm) var(--spacing-md);
-    border: 1px solid var(--border-color);
-    background: var(--bg-primary);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-.audit-view-tab:hover {
-    background: var(--bg-secondary, #f3f4f6);
-    color: var(--text-primary);
-}
-.audit-view-tab.audit-view-tab-active {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    color: #fff;
-}
-.audit-view-panel {
-    display: none;
-}
-.audit-view-panel.audit-view-panel-active {
-    display: block;
-}
-.audit-view-panel[hidden] {
-    display: none !important;
-}
-
-.audit-docs-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-lg);
-    align-items: center;
-}
-.audit-docs-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-}
-.audit-doc-card {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-}
-.audit-doc-card-header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 1px solid var(--border-color);
-}
-.audit-doc-card-title {
-    font-weight: 600;
-    margin: 0;
-}
-.audit-doc-card-meta {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-}
-.audit-doc-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: var(--font-size-sm);
-}
-.audit-doc-table th,
-.audit-doc-table td {
-    padding: var(--spacing-sm) var(--spacing-md);
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-}
-.audit-doc-table th {
-    font-weight: 600;
-}
-.audit-doc-table .audit-doc-view-link {
-    color: var(--primary-color);
-}
-.audit-doc-muted {
-    color: var(--text-muted, var(--text-secondary));
-}
-
-.audit-logs {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.audit-log-item {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-}
-
-.audit-log-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: var(--spacing-sm);
-}
-
-.audit-log-action {
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
-.audit-log-time {
-    color: var(--text-muted);
-    font-size: var(--font-size-sm);
-}
-
-.audit-log-details {
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-}
-</style>

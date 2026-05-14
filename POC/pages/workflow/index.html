@@ -1,105 +1,483 @@
-<div class="page-container workflow-page">
-    <div class="page-header">
-        <h1 class="page-title">Platform workflow</h1>
-        <p class="page-subtitle">End-to-end flow from registration to contract execution</p>
-    </div>
-    <div class="page-body max-w-4xl">
-        <p class="text-gray-600 mb-8">PMTwin connects professionals, consultants, and companies through a clear lifecycle: register, get vetted, discover opportunities, apply, negotiate, and contract.</p>
-
-        <section class="workflow-steps mb-10">
-            <div class="workflow-step card p-6 mb-4">
-                <div class="flex items-start gap-4">
-                    <span class="workflow-step-num flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">1</span>
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900 mb-1">Register</h2>
-                        <p class="text-gray-600 text-sm mb-3">Create an account as a professional, consultant, or company.</p>
-                        <a href="#" data-route="/register" class="text-primary font-medium text-sm hover:underline">Register</a>
-                    </div>
+<div class="page-container workflow-page pm-workflow-page">
+    <section class="wf-hero">
+        <div class="wf-hero-grid" aria-hidden="true"></div>
+        <div class="wf-hero-inner">
+            <div class="wf-hero-copy">
+                <p class="wf-kicker">
+                    <i class="ph-duotone ph-git-branch" aria-hidden="true"></i>
+                    Project lifecycle
+                </p>
+                <h1>From 3D design need to signed construction collaboration.</h1>
+                <p>PMTwin gives teams a structured path from registration and vetting to opportunity matching, negotiation, contracts, execution, and closure.</p>
+                <div class="wf-hero-actions">
+                    <a href="#" data-route="/register" class="btn btn-primary wf-btn-primary">Start registration</a>
+                    <a href="#" data-route="/find" class="btn btn-secondary wf-btn-secondary">Explore partners</a>
                 </div>
             </div>
-            <div class="workflow-step card p-6 mb-4">
-                <div class="flex items-start gap-4">
-                    <span class="workflow-step-num flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">2</span>
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900 mb-1">Vetting and activation</h2>
-                        <p class="text-gray-600 text-sm mb-3">Admins review your account (approve, reject, or request clarification). Once approved, you get full access.</p>
-                        <a href="#" data-route="/admin/vetting" class="text-primary font-medium text-sm hover:underline">Admin vetting</a> <span class="text-gray-400 text-sm">(admin only)</span>
-                    </div>
+            <div class="wf-visual" aria-hidden="true">
+                <div class="wf-stage">
+                    <span class="wf-tower wf-tower-a"></span>
+                    <span class="wf-tower wf-tower-b"></span>
+                    <span class="wf-tower wf-tower-c"></span>
+                    <span class="wf-route wf-route-a"></span>
+                    <span class="wf-route wf-route-b"></span>
+                    <span class="wf-pin wf-pin-a"><i class="ph-duotone ph-pencil-ruler"></i></span>
+                    <span class="wf-pin wf-pin-b"><i class="ph-duotone ph-graph"></i></span>
+                    <span class="wf-pin wf-pin-c"><i class="ph-duotone ph-file-text"></i></span>
+                </div>
+                <div class="wf-visual-panel">
+                    <strong>Deal status</strong>
+                    <span>Draft -> Review -> Signing -> Active</span>
                 </div>
             </div>
-            <div class="workflow-step card p-6 mb-4">
-                <div class="flex items-start gap-4">
-                    <span class="workflow-step-num flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">3</span>
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900 mb-1">Dashboard</h2>
-                        <p class="text-gray-600 text-sm mb-3">Your hub for opportunities, applications, matches, and notifications.</p>
-                        <a href="#" data-route="/dashboard" class="text-primary font-medium text-sm hover:underline">Dashboard</a>
-                    </div>
-                </div>
-            </div>
-            <div class="workflow-step card p-6 mb-4">
-                <div class="flex items-start gap-4">
-                    <span class="workflow-step-num flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">4</span>
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900 mb-1">Opportunity lifecycle</h2>
-                        <p class="text-gray-600 text-sm mb-3">Create and publish needs or offers (draft → published → in negotiation → contracted → completed → closed).</p>
-                        <a href="#" data-route="/opportunities" class="text-primary font-medium text-sm hover:underline">Opportunities</a> ·
-                        <a href="#" data-route="/opportunities/create" class="text-primary font-medium text-sm hover:underline">Create</a>
-                    </div>
-                </div>
-            </div>
-            <div class="workflow-step card p-6 mb-4">
-                <div class="flex items-start gap-4">
-                    <span class="workflow-step-num flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">5</span>
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900 mb-1">Matching</h2>
-                        <p class="text-gray-600 text-sm mb-3">The system matches needs with offers (one-way, two-way barter, consortium, circular). Admins can run matching and view results.</p>
-                        <a href="#" data-route="/admin/matching" class="text-primary font-medium text-sm hover:underline">Admin matching</a> <span class="text-gray-400 text-sm">(admin)</span>
-                    </div>
-                </div>
-            </div>
-            <div class="workflow-step card p-6 mb-4">
-                <div class="flex items-start gap-4">
-                    <span class="workflow-step-num flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">6</span>
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900 mb-1">Application and negotiation</h2>
-                        <p class="text-gray-600 text-sm mb-3">Applicants apply to opportunities; owners review, shortlist, and negotiate. Status flow: pending → reviewing → shortlisted → in_negotiation → accepted or rejected.</p>
-                        <a href="#" data-route="/pipeline" class="text-primary font-medium text-sm hover:underline">Pipeline</a>
-                    </div>
-                </div>
-            </div>
-            <div class="workflow-step card p-6 mb-4">
-                <div class="flex items-start gap-4">
-                    <span class="workflow-step-num flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">7</span>
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900 mb-1">Contract</h2>
-                        <p class="text-gray-600 text-sm mb-3">Accepted applications become contracts (pending → active → completed or terminated).</p>
-                        <a href="#" data-route="/contracts" class="text-primary font-medium text-sm hover:underline">Contracts</a>
-                    </div>
-                </div>
-            </div>
-            <div class="workflow-step card p-6 mb-4">
-                <div class="flex items-start gap-4">
-                    <span class="workflow-step-num flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">8</span>
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900 mb-1">Execution and closure</h2>
-                        <p class="text-gray-600 text-sm mb-3">Parties deliver on scope and milestones; contracts are completed or terminated; opportunities close.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <div class="border-t border-gray-200 pt-6">
-            <h3 class="font-semibold text-gray-900 mb-2">Quick links</h3>
-            <ul class="flex flex-wrap gap-4 text-sm">
-                <li><a href="#" data-route="/" class="text-primary hover:underline">Home</a></li>
-                <li><a href="#" data-route="/find" class="text-primary hover:underline">Find</a></li>
-                <li><a href="#" data-route="/login" class="text-primary hover:underline">Login</a></li>
-                <li><a href="#" data-route="/register" class="text-primary hover:underline">Register</a></li>
-                <li><a href="#" data-route="/dashboard" class="text-primary hover:underline">Dashboard</a></li>
-                <li><a href="#" data-route="/opportunities" class="text-primary hover:underline">Opportunities</a></li>
-                <li><a href="#" data-route="/contracts" class="text-primary hover:underline">Contracts</a></li>
-            </ul>
         </div>
-    </div>
+    </section>
+
+    <section class="wf-body">
+        <div class="wf-container">
+            <div class="wf-intro">
+                <p class="wf-kicker">End-to-end flow</p>
+                <h2>Every project relationship moves through a clear operational sequence.</h2>
+            </div>
+
+            <section class="workflow-steps" aria-label="Platform workflow steps">
+                <article class="workflow-step">
+                    <span class="workflow-step-num">1</span>
+                    <div>
+                        <h2>Register</h2>
+                        <p>Create an account as a professional, consultant, or company.</p>
+                        <a href="#" data-route="/register">Register</a>
+                    </div>
+                </article>
+                <article class="workflow-step">
+                    <span class="workflow-step-num">2</span>
+                    <div>
+                        <h2>Vetting and activation</h2>
+                        <p>Admins review your account, then activate full access when the profile is ready.</p>
+                        <a href="#" data-route="/admin/vetting">Admin vetting</a>
+                    </div>
+                </article>
+                <article class="workflow-step">
+                    <span class="workflow-step-num">3</span>
+                    <div>
+                        <h2>Dashboard</h2>
+                        <p>Your hub for opportunities, applications, matches, and notifications.</p>
+                        <a href="#" data-route="/dashboard">Dashboard</a>
+                    </div>
+                </article>
+                <article class="workflow-step">
+                    <span class="workflow-step-num">4</span>
+                    <div>
+                        <h2>Opportunity lifecycle</h2>
+                        <p>Create needs or offers, then move from draft to published, negotiation, contracted, completed, and closed.</p>
+                        <a href="#" data-route="/opportunities">Opportunities</a>
+                    </div>
+                </article>
+                <article class="workflow-step">
+                    <span class="workflow-step-num">5</span>
+                    <div>
+                        <h2>Matching</h2>
+                        <p>The system matches one-way needs, two-way barter, consortium roles, and circular value exchanges.</p>
+                        <a href="#" data-route="/admin/matching">Admin matching</a>
+                    </div>
+                </article>
+                <article class="workflow-step">
+                    <span class="workflow-step-num">6</span>
+                    <div>
+                        <h2>Application and negotiation</h2>
+                        <p>Applicants submit proposals; owners review, shortlist, and negotiate value, scope, and timing.</p>
+                        <a href="#" data-route="/pipeline">Pipeline</a>
+                    </div>
+                </article>
+                <article class="workflow-step">
+                    <span class="workflow-step-num">7</span>
+                    <div>
+                        <h2>Contract</h2>
+                        <p>Accepted applications become contract records with status, parties, and lifecycle tracking.</p>
+                        <a href="#" data-route="/contracts">Contracts</a>
+                    </div>
+                </article>
+                <article class="workflow-step">
+                    <span class="workflow-step-num">8</span>
+                    <div>
+                        <h2>Execution and closure</h2>
+                        <p>Parties deliver on scope and milestones; contracts complete or terminate, and opportunities close.</p>
+                    </div>
+                </article>
+            </section>
+
+            <section class="wf-links" aria-labelledby="wf-links-title">
+                <h3 id="wf-links-title">Quick links</h3>
+                <div>
+                    <a href="#" data-route="/">Home</a>
+                    <a href="#" data-route="/find">Find</a>
+                    <a href="#" data-route="/login">Login</a>
+                    <a href="#" data-route="/register">Register</a>
+                    <a href="#" data-route="/dashboard">Dashboard</a>
+                    <a href="#" data-route="/opportunities">Opportunities</a>
+                    <a href="#" data-route="/contracts">Contracts</a>
+                </div>
+            </section>
+        </div>
+    </section>
 </div>
+
+<style>
+.app-public-layout #main-content:has(.pm-workflow-page) {
+    max-width: none;
+    padding: 0;
+}
+
+.pm-workflow-page {
+    --wf-ink: #101820;
+    --wf-muted: #5f6b7a;
+    --wf-line: #d9e2ec;
+    --wf-teal: #0891b2;
+    --wf-teal-dark: #0e7490;
+    --wf-coral: #e85d4f;
+    --wf-green: #2f9f7b;
+    width: 100%;
+    max-width: none;
+    background: #f7f9fb;
+    color: var(--wf-ink);
+}
+
+.wf-hero {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(3.5rem, 8vw, 6.25rem) 0;
+    border-bottom: 1px solid var(--wf-line);
+    background:
+        linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.88) 50%, rgba(239,246,249,0.68) 100%),
+        linear-gradient(0deg, rgba(16,24,32,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,24,32,0.045) 1px, transparent 1px),
+        #eef3f6;
+    background-size: auto, 34px 34px, 34px 34px, auto;
+}
+
+.wf-hero-grid {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(135deg, transparent 0 33%, rgba(8,145,178,0.16) 33.2% 33.6%, transparent 33.8% 100%),
+        linear-gradient(150deg, transparent 0 66%, rgba(232,93,79,0.14) 66.2% 66.6%, transparent 66.8% 100%);
+}
+
+.wf-hero-inner,
+.wf-container {
+    position: relative;
+    z-index: 1;
+    width: min(1180px, calc(100% - 32px));
+    margin: 0 auto;
+}
+
+.wf-hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(390px, 0.8fr);
+    gap: clamp(2rem, 6vw, 5rem);
+    align-items: center;
+}
+
+.wf-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+    color: var(--wf-teal-dark);
+    font-size: 0.78rem;
+    font-weight: 850;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.wf-kicker i {
+    font-size: 1.15rem;
+}
+
+.wf-hero h1,
+.wf-intro h2 {
+    margin: 0;
+    color: var(--wf-ink);
+    font-size: clamp(2.35rem, 5vw, 4.7rem);
+    line-height: 0.99;
+    font-weight: 850;
+    letter-spacing: 0;
+}
+
+.wf-hero p,
+.wf-intro p + h2 + p {
+    max-width: 660px;
+}
+
+.wf-hero-copy > p:not(.wf-kicker) {
+    margin: 1.1rem 0 0;
+    color: var(--wf-muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+.wf-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+}
+
+.wf-btn-primary,
+.wf-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    border-radius: 8px !important;
+    font-weight: 850;
+}
+
+.wf-btn-primary {
+    background: var(--wf-ink) !important;
+    border-color: var(--wf-ink) !important;
+}
+
+.wf-btn-secondary {
+    background: #ffffff !important;
+    border: 1px solid var(--wf-line) !important;
+    color: var(--wf-ink) !important;
+}
+
+.wf-visual {
+    position: relative;
+    min-height: 360px;
+}
+
+.wf-stage {
+    position: absolute;
+    inset: 32px 5% 20px;
+    overflow: hidden;
+    border: 1px solid rgba(16,24,32,0.12);
+    border-radius: 8px;
+    background:
+        linear-gradient(0deg, rgba(8,145,178,0.09) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(8,145,178,0.09) 1px, transparent 1px),
+        linear-gradient(140deg, #ffffff 0%, #eef6f8 100%);
+    background-size: 28px 28px, 28px 28px, auto;
+    box-shadow: 0 28px 70px rgba(16,24,32,0.16);
+    transform: rotateX(58deg) rotateZ(-35deg);
+}
+
+.wf-tower {
+    position: absolute;
+    display: block;
+    width: 72px;
+    height: 112px;
+    background:
+        linear-gradient(90deg, rgba(255,255,255,0.22) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255,255,255,0.2) 1px, transparent 1px),
+        var(--wf-teal);
+    background-size: 16px 16px;
+    box-shadow: 18px -18px 0 #0e7490;
+}
+
+.wf-tower-a { left: 24%; top: 26%; }
+.wf-tower-b { left: 51%; top: 18%; height: 150px; background-color: #334155; box-shadow: 18px -18px 0 #1f2937; }
+.wf-tower-c { left: 58%; top: 57%; width: 110px; height: 58px; background-color: var(--wf-coral); box-shadow: 18px -18px 0 #c64a41; }
+
+.wf-route {
+    position: absolute;
+    display: block;
+    background: rgba(16,24,32,0.72);
+}
+
+.wf-route-a { left: 10%; right: 8%; bottom: 28%; height: 34px; transform: rotate(-12deg); }
+.wf-route-b { left: 34%; top: 7%; bottom: 12%; width: 34px; transform: rotate(34deg); }
+
+.wf-pin {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    color: #ffffff;
+    background: var(--wf-ink);
+    border: 4px solid rgba(255,255,255,0.9);
+    transform: rotate(35deg);
+}
+
+.wf-pin-a { left: 20%; top: 18%; background: var(--wf-teal); }
+.wf-pin-b { right: 18%; top: 34%; background: var(--wf-coral); }
+.wf-pin-c { left: 38%; bottom: 18%; background: var(--wf-green); }
+
+.wf-visual-panel {
+    position: absolute;
+    right: 0;
+    bottom: 16px;
+    width: min(260px, 62%);
+    padding: 0.9rem;
+    border: 1px solid rgba(16,24,32,0.12);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 18px 40px rgba(16,24,32,0.14);
+    backdrop-filter: blur(14px);
+}
+
+.wf-visual-panel strong,
+.wf-visual-panel span {
+    display: block;
+}
+
+.wf-visual-panel strong {
+    color: var(--wf-ink);
+}
+
+.wf-visual-panel span {
+    margin-top: 0.25rem;
+    color: var(--wf-muted);
+    font-size: 0.84rem;
+}
+
+.wf-body {
+    padding: clamp(3rem, 7vw, 5.5rem) 0;
+}
+
+.wf-intro {
+    max-width: 820px;
+    margin-bottom: 1.6rem;
+}
+
+.wf-intro h2 {
+    font-size: clamp(1.9rem, 4vw, 3.35rem);
+}
+
+.workflow-steps {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.workflow-step {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 1rem;
+    min-height: 180px;
+    padding: 1.05rem;
+    border: 1px solid var(--wf-line);
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(16,24,32,0.04);
+}
+
+.workflow-step-num {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+    background: #101820;
+    color: #ffffff;
+    font-weight: 900;
+}
+
+.workflow-step:nth-child(3n+2) .workflow-step-num {
+    background: var(--wf-teal);
+}
+
+.workflow-step:nth-child(3n) .workflow-step-num {
+    background: var(--wf-coral);
+}
+
+.workflow-step h2 {
+    margin: 0;
+    color: var(--wf-ink);
+    font-size: 1.08rem;
+    line-height: 1.25;
+}
+
+.workflow-step p {
+    margin: 0.45rem 0 0.65rem;
+    color: var(--wf-muted);
+    font-size: 0.92rem;
+    line-height: 1.55;
+}
+
+.workflow-step a,
+.wf-links a {
+    color: var(--wf-teal-dark);
+    font-weight: 850;
+    text-decoration: none;
+}
+
+.workflow-step a:hover,
+.wf-links a:hover {
+    color: var(--wf-ink);
+}
+
+.wf-links {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--wf-line);
+}
+
+.wf-links h3 {
+    margin: 0 0 0.7rem;
+    color: var(--wf-ink);
+    font-size: 1rem;
+}
+
+.wf-links div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 1rem;
+}
+
+@media (max-width: 1024px) {
+    .wf-hero-inner {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .wf-hero-inner,
+    .wf-container {
+        width: min(100% - 24px, 1180px);
+    }
+
+    .wf-hero {
+        padding: 2rem 0 1.35rem;
+    }
+
+    .wf-hero h1 {
+        font-size: 2.25rem;
+    }
+
+    .wf-hero-copy > p:not(.wf-kicker) {
+        font-size: 0.98rem;
+        line-height: 1.55;
+    }
+
+    .wf-hero-actions,
+    .wf-hero-actions .btn {
+        width: 100%;
+    }
+
+    .wf-visual {
+        min-height: 218px;
+    }
+
+    .wf-stage {
+        transform: rotateX(58deg) rotateZ(-35deg) scale(0.7);
+    }
+
+    .wf-visual-panel {
+        width: min(230px, 68%);
+        padding: 0.7rem;
+    }
+
+    .workflow-steps {
+        grid-template-columns: 1fr;
+    }
+
+    .workflow-step {
+        min-height: auto;
+    }
+}
+</style>

@@ -1,155 +1,552 @@
-<div class="page-container admin-reports-page">
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1 class="page-title">Reports & Analytics</h1>
-            <p class="page-subtitle">User, opportunity, application, and matching analytics</p>
+<div class="page-container admin-reports-page platform-analytics">
+    <!-- Dynamic header -->
+    <header class="pa-hero">
+        <div class="pa-hero-text">
+            <h1 class="pa-hero-title">Platform Analytics</h1>
+            <p class="pa-hero-desc">Monitor platform growth, marketplace performance, users, opportunities, matches, deals, contracts, and system activity.</p>
         </div>
-    </div>
-    <div class="page-body">
+        <div class="pa-hero-actions">
+            <div class="pa-dropdown">
+                <button type="button" class="btn btn-primary pa-btn-icon" id="pa-export-trigger" aria-haspopup="true" aria-expanded="false">
+                    <i class="ph-duotone ph-download-simple" aria-hidden="true"></i> Export Report
+                </button>
+                <div class="pa-dropdown-menu" id="pa-export-menu" hidden>
+                    <button type="button" class="pa-dropdown-item" id="pa-export-csv">Export CSV (summary)</button>
+                    <button type="button" class="pa-dropdown-item" id="pa-export-excel">Export Excel (TSV)</button>
+                    <button type="button" class="pa-dropdown-item" id="pa-export-pdf">Export PDF (print)</button>
+                    <hr class="pa-dropdown-sep" />
+                    <button type="button" class="pa-dropdown-item" id="export-offers-by-site-csv">Offers by site (CSV)</button>
+                    <button type="button" class="pa-dropdown-item" id="export-offers-per-opp-csv">Offers per opportunity (CSV)</button>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary pa-btn-icon" id="pa-schedule-btn">
+                <i class="ph-duotone ph-calendar-plus" aria-hidden="true"></i> Schedule Report
+            </button>
+        </div>
+    </header>
 
-        <nav class="report-module-tabs" role="tablist" aria-label="Report modules">
-            <button type="button" class="report-tab report-tab-active" data-module="overview" role="tab" aria-selected="true">Overview</button>
-            <button type="button" class="report-tab" data-module="users" role="tab" aria-selected="false">Users & Companies</button>
-            <button type="button" class="report-tab" data-module="opportunities" role="tab" aria-selected="false">Opportunities</button>
-            <button type="button" class="report-tab" data-module="applications" role="tab" aria-selected="false">Applications</button>
-            <button type="button" class="report-tab" data-module="matches" role="tab" aria-selected="false">Matches</button>
-            <button type="button" class="report-tab" data-module="audit" role="tab" aria-selected="false">Audit</button>
-        </nav>
+    <!-- Global filters -->
+    <section class="pa-filters" aria-label="Analytics filters">
+        <div class="pa-filters-inner">
+            <div class="pa-field">
+                <label class="pa-label" for="pa-filter-date">Date range</label>
+                <select id="pa-filter-date" class="pa-select">
+                    <option value="today">Today</option>
+                    <option value="7d" selected>7 days</option>
+                    <option value="30d">30 days</option>
+                    <option value="90d">90 days</option>
+                    <option value="all">All time</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+            <div class="pa-field pa-field-custom" id="pa-filter-custom-wrap" hidden>
+                <label class="pa-label" for="pa-filter-start">From</label>
+                <input type="date" id="pa-filter-start" class="pa-input" />
+                <label class="pa-label" for="pa-filter-end">To</label>
+                <input type="date" id="pa-filter-end" class="pa-input" />
+            </div>
+            <div class="pa-field">
+                <label class="pa-label" for="pa-filter-region">Region</label>
+                <select id="pa-filter-region" class="pa-select">
+                    <option value="all">All regions</option>
+                    <option value="sa">Saudi Arabia</option>
+                    <option value="gcc">GCC</option>
+                    <option value="riyadh">Riyadh</option>
+                    <option value="jeddah">Jeddah</option>
+                    <option value="dammam">Dammam</option>
+                    <option value="eastern">Eastern Province</option>
+                </select>
+            </div>
+            <div class="pa-field">
+                <label class="pa-label" for="pa-filter-user-type">User type</label>
+                <select id="pa-filter-user-type" class="pa-select">
+                    <option value="all">All</option>
+                    <option value="companies">Companies</option>
+                    <option value="professionals">Professionals</option>
+                    <option value="consultants">Consultants</option>
+                </select>
+            </div>
+            <div class="pa-field">
+                <label class="pa-label" for="pa-filter-category">Category / skill</label>
+                <select id="pa-filter-category" class="pa-select">
+                    <option value="all">All categories</option>
+                </select>
+            </div>
+            <div class="pa-field">
+                <label class="pa-label" for="pa-filter-status">Opportunity status</label>
+                <select id="pa-filter-status" class="pa-select">
+                    <option value="all">All statuses</option>
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                    <option value="in_negotiation">In negotiation</option>
+                    <option value="contracted">Contracted</option>
+                    <option value="in_execution">In execution</option>
+                    <option value="completed">Completed</option>
+                    <option value="closed">Closed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm pa-filter-apply" id="pa-apply-filters">Apply</button>
+        </div>
+    </section>
+
+    <!-- KPI row -->
+    <section class="pa-kpi-section" aria-label="Key performance indicators">
+        <div class="pa-kpi-grid" id="pa-kpi-grid"></div>
+    </section>
+
+    <!-- Tabs -->
+    <nav class="pa-tabs" role="tablist" aria-label="Analytics sections">
+        <div class="pa-tabs-scroll">
+            <button type="button" class="pa-tab pa-tab-active" data-module="overview" role="tab" aria-selected="true">Overview</button>
+            <button type="button" class="pa-tab" data-module="geography" role="tab" aria-selected="false">Geography</button>
+            <button type="button" class="pa-tab" data-module="opportunities" role="tab" aria-selected="false">Opportunities</button>
+            <button type="button" class="pa-tab" data-module="applications" role="tab" aria-selected="false">Applications</button>
+            <button type="button" class="pa-tab" data-module="matching" role="tab" aria-selected="false">Matching</button>
+            <button type="button" class="pa-tab" data-module="deals" role="tab" aria-selected="false">Deals &amp; contracts</button>
+            <button type="button" class="pa-tab" data-module="users" role="tab" aria-selected="false">Users &amp; companies</button>
+            <button type="button" class="pa-tab" data-module="audit" role="tab" aria-selected="false">Audit</button>
+        </div>
+    </nav>
+
+    <div class="page-body pa-body">
 
         <!-- Overview -->
-        <section id="report-module-overview" class="report-module-panel report-module-panel-visible" data-module="overview">
-            <h2 class="report-module-heading">Overview</h2>
-            <div class="report-actions">
-                <button type="button" id="export-offers-by-site-csv" class="btn btn-secondary btn-sm">Export offers by site (CSV)</button>
-                <button type="button" id="export-offers-per-opp-csv" class="btn btn-secondary btn-sm">Export offers per opportunity (CSV)</button>
-            </div>
-            <div class="stats-grid" id="reports-stats-grid">
-                <div class="stat-card"><div class="stat-value" id="stat-users">0</div><div class="stat-label">Total Users & Companies</div></div>
-                <div class="stat-card"><div class="stat-value" id="stat-opportunities">0</div><div class="stat-label">Opportunities</div></div>
-                <div class="stat-card"><div class="stat-value" id="stat-applications">0</div><div class="stat-label">Applications</div></div>
-                <div class="stat-card"><div class="stat-value" id="stat-matches">0</div><div class="stat-label">Matches</div></div>
-            </div>
-            <div class="report-charts-row">
-                <div class="report-chart-block">
-                    <h3 class="report-chart-title">Users & companies by status</h3>
-                    <div class="report-chart-container">
-                        <canvas id="chart-overview-users-status" aria-label="Users and companies by status"></canvas>
+        <section id="pa-panel-overview" class="pa-panel pa-panel-visible" data-module="overview">
+            <div class="pa-grid-2">
+                <div class="pa-card">
+                    <div class="pa-card-head">
+                        <h2 class="pa-card-title">Platform growth</h2>
+                        <span class="pa-badge pa-badge-soft">Registrations &amp; opportunities</span>
                     </div>
-                </div>
-                <div class="report-chart-block">
-                    <h3 class="report-chart-title">Opportunities by status</h3>
-                    <div class="report-chart-container">
-                        <canvas id="chart-overview-opportunities-status" aria-label="Opportunities by status"></canvas>
+                    <p class="pa-card-hint">New accounts and new opportunities over time (weekly buckets).</p>
+                    <div class="pa-chart-wrap pa-chart-tall">
+                        <canvas id="chart-pa-growth" aria-label="Platform growth over time"></canvas>
                     </div>
+                    <div class="pa-empty" id="pa-empty-growth" hidden></div>
                 </div>
+                <div class="pa-card">
+                    <div class="pa-card-head">
+                        <h2 class="pa-card-title">Marketplace conversion</h2>
+                        <span class="pa-badge pa-badge-soft">Funnel</span>
+                    </div>
+                    <p class="pa-card-hint">Published opportunities through to contracted pipeline.</p>
+                    <div class="pa-funnel" id="pa-funnel-marketplace"></div>
+                </div>
+            </div>
+            <div class="pa-grid-2">
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Users &amp; companies by status</h2>
+                    <div class="pa-chart-wrap">
+                        <canvas id="chart-pa-users-status" aria-label="Users and companies by status"></canvas>
+                    </div>
+                    <div class="pa-empty" id="pa-empty-users-status" hidden></div>
+                </div>
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Opportunities by status</h2>
+                    <div class="pa-chart-wrap">
+                        <canvas id="chart-pa-opps-status" aria-label="Opportunities by status"></canvas>
+                    </div>
+                    <div class="pa-empty" id="pa-empty-opps-status" hidden></div>
+                </div>
+            </div>
+            <div class="pa-grid-3">
+                <div class="pa-card pa-insight-card" id="pa-insights-1"></div>
+                <div class="pa-card pa-insight-card" id="pa-insights-2"></div>
+                <div class="pa-card pa-insight-card" id="pa-insights-3"></div>
+            </div>
+            <div class="pa-card">
+                <h2 class="pa-card-title">Activity summary</h2>
+                <p class="pa-card-hint">Counts in the selected period (after filters).</p>
+                <div class="pa-activity-row" id="pa-activity-summary"></div>
             </div>
         </section>
 
-        <!-- Users & Companies -->
-        <section id="report-module-users" class="report-module-panel" data-module="users" hidden>
-            <h2 class="report-module-heading">User & company status</h2>
-            <div class="report-chart-block">
-                <div class="report-chart-container">
-                    <canvas id="chart-user-status" aria-label="User and company status distribution"></canvas>
+        <!-- Geography -->
+        <section id="pa-panel-geography" class="pa-panel" data-module="geography" hidden>
+            <div class="pa-card pa-map-card">
+                <div class="pa-card-head">
+                    <h2 class="pa-card-title">Regional activity</h2>
+                    <span class="pa-badge pa-badge-soft">Saudi Arabia &amp; GCC</span>
                 </div>
+                <p class="pa-card-hint">Circle size reflects total marketplace signals (opportunities, applications, matches, deals) linked to each hub. Exact coordinates are illustrative for the POC.</p>
+                <div id="pa-map" class="pa-map" role="region" aria-label="Map of regional activity"></div>
+                <p class="pa-map-note" id="pa-map-fallback" hidden>No geographic signals for this filter — use the table below.</p>
             </div>
-            <h2 class="report-module-heading">User & company by role</h2>
-            <div class="report-chart-block">
-                <div class="report-chart-container">
-                    <canvas id="chart-user-role" aria-label="User and company by role"></canvas>
+            <div class="pa-card">
+                <h2 class="pa-card-title">Top locations</h2>
+                <div class="pa-table-scroll">
+                    <table class="pa-table" id="pa-locations-table">
+                        <thead>
+                            <tr>
+                                <th>Location</th>
+                                <th>Opportunities</th>
+                                <th>Applications</th>
+                                <th>Matches</th>
+                                <th>Deals</th>
+                                <th>Growth vs prior period</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
+                <div class="pa-empty" id="pa-empty-locations" hidden></div>
             </div>
         </section>
 
         <!-- Opportunities -->
-        <section id="report-module-opportunities" class="report-module-panel" data-module="opportunities" hidden>
-            <h2 class="report-module-heading">Opportunity status distribution</h2>
-            <div class="report-chart-block">
-                <div class="report-chart-container">
-                    <canvas id="chart-opportunity-status" aria-label="Opportunity status distribution"></canvas>
+        <section id="pa-panel-opportunities" class="pa-panel" data-module="opportunities" hidden>
+            <div class="pa-grid-2">
+                <div class="pa-card">
+                    <h2 class="pa-card-title">By status</h2>
+                    <div class="pa-chart-wrap"><canvas id="chart-pa-opp-status-detail" aria-label="Opportunities by status"></canvas></div>
+                    <div class="pa-empty" id="pa-empty-opp-status-detail" hidden></div>
+                </div>
+                <div class="pa-card">
+                    <h2 class="pa-card-title">By collaboration model</h2>
+                    <div class="pa-chart-wrap"><canvas id="chart-pa-opp-model" aria-label="Opportunities by model"></canvas></div>
+                    <div class="pa-empty" id="pa-empty-opp-model" hidden></div>
                 </div>
             </div>
-            <h2 class="report-module-heading">Opportunity by model type</h2>
-            <div class="report-chart-block">
-                <div class="report-chart-container">
-                    <canvas id="chart-opportunity-model" aria-label="Opportunity by model type"></canvas>
+            <div class="pa-grid-2">
+                <div class="pa-card">
+                    <h2 class="pa-card-title">By category / skill (top)</h2>
+                    <div class="pa-chart-wrap"><canvas id="chart-pa-opp-skill" aria-label="Opportunities by skill"></canvas></div>
+                    <div class="pa-empty" id="pa-empty-opp-skill" hidden></div>
+                </div>
+                <div class="pa-card">
+                    <h2 class="pa-card-title">By location (top)</h2>
+                    <div class="pa-chart-wrap"><canvas id="chart-pa-opp-location" aria-label="Opportunities by location"></canvas></div>
+                    <div class="pa-empty" id="pa-empty-opp-location" hidden></div>
                 </div>
             </div>
-            <h2 class="report-module-heading">Opportunity by intent</h2>
-            <div class="report-chart-block">
-                <div class="report-chart-container">
-                    <canvas id="chart-opportunity-intent" aria-label="Opportunity by intent"></canvas>
-                </div>
+            <div class="pa-card">
+                <h2 class="pa-card-title">Lifecycle &amp; velocity</h2>
+                <div class="pa-metrics-grid" id="pa-opp-metrics"></div>
             </div>
-            <h2 class="report-module-heading">Offers (applications) per opportunity</h2>
-            <div id="offers-per-opportunity" class="report-block"></div>
-            <h2 class="report-module-heading">Offers by site (location)</h2>
-            <div id="offers-by-site" class="report-block"></div>
+            <div class="pa-card">
+                <h2 class="pa-card-title">Top opportunities by applications</h2>
+                <div class="pa-table-scroll">
+                    <table class="pa-table" id="pa-top-opps-table">
+                        <thead><tr><th>Opportunity</th><th>Status</th><th>Applications</th><th>Avg. days to first application*</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <p class="pa-footnote">*Approximation: opportunity <code>createdAt</code> to first application <code>createdAt</code> (workflow timestamps not stored).</p>
+                <div class="pa-empty" id="pa-empty-top-opps" hidden></div>
+            </div>
         </section>
 
         <!-- Applications -->
-        <section id="report-module-applications" class="report-module-panel" data-module="applications" hidden>
-            <h2 class="report-module-heading">Application status distribution</h2>
-            <div class="report-chart-block">
-                <div class="report-chart-container">
-                    <canvas id="chart-application-status" aria-label="Application status distribution"></canvas>
+        <section id="pa-panel-applications" class="pa-panel" data-module="applications" hidden>
+            <div class="pa-grid-2">
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Applications by status</h2>
+                    <div class="pa-chart-wrap"><canvas id="chart-pa-app-status" aria-label="Applications by status"></canvas></div>
+                    <div class="pa-empty" id="pa-empty-app-status" hidden></div>
+                </div>
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Rates &amp; throughput</h2>
+                    <div class="pa-metrics-grid" id="pa-app-metrics"></div>
+                </div>
+            </div>
+            <div class="pa-grid-2">
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Top applicants</h2>
+                    <div class="pa-table-scroll">
+                        <table class="pa-table" id="pa-top-applicants-table">
+                            <thead><tr><th>Applicant</th><th>Applications</th><th>Accepted</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="pa-empty" id="pa-empty-top-applicants" hidden></div>
+                </div>
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Top opportunities by applications</h2>
+                    <div class="pa-table-scroll">
+                        <table class="pa-table" id="pa-top-opps-apps-table">
+                            <thead><tr><th>Opportunity</th><th>Count</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="pa-empty" id="pa-empty-top-opps-apps" hidden></div>
                 </div>
             </div>
         </section>
 
-        <!-- Matches -->
-        <section id="report-module-matches" class="report-module-panel" data-module="matches" hidden>
-            <h2 class="report-module-heading">Matches by notification status</h2>
-            <div class="report-chart-block">
-                <div class="report-chart-container">
-                    <canvas id="chart-matches-notified" aria-label="Matches notified vs not notified"></canvas>
+        <!-- Matching -->
+        <section id="pa-panel-matching" class="pa-panel" data-module="matching" hidden>
+            <div class="pa-grid-2">
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Match quality (person ↔ opportunity)</h2>
+                    <div class="pa-chart-wrap"><canvas id="chart-pa-match-quality" aria-label="Match quality distribution"></canvas></div>
+                    <div class="pa-empty" id="pa-empty-match-quality" hidden></div>
+                </div>
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Post-match types (discovery)</h2>
+                    <p class="pa-card-hint">Recommended = one-way; Barter = two-way; plus consortium &amp; circular.</p>
+                    <div class="pa-chart-wrap"><canvas id="chart-pa-match-types" aria-label="Matches by type"></canvas></div>
+                    <div class="pa-empty" id="pa-empty-match-types" hidden></div>
                 </div>
             </div>
-            <h2 class="report-module-heading">Matches by score band</h2>
-            <div class="report-chart-block">
-                <div class="report-chart-container">
-                    <canvas id="chart-matches-score-band" aria-label="Matches by score band"></canvas>
+            <div class="pa-card">
+                <h2 class="pa-card-title">Match conversion funnel</h2>
+                <p class="pa-card-hint">“Viewed” = notified matches; “Contacted” = post-matches confirmed or accepted (engagement proxy).</p>
+                <div class="pa-funnel" id="pa-funnel-matches"></div>
+                <p class="pa-card-hint" id="pa-match-avg" style="margin-top:0.75rem"></p>
+            </div>
+            <div class="pa-grid-2">
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Top matched skills</h2>
+                    <div class="pa-chart-wrap"><canvas id="chart-pa-match-skills" aria-label="Top matched skills"></canvas></div>
+                    <div class="pa-empty" id="pa-empty-match-skills" hidden></div>
+                </div>
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Categories with fewer matches</h2>
+                    <div id="pa-low-match-cats"></div>
+                    <div class="pa-empty" id="pa-empty-low-match" hidden></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Deals & contracts -->
+        <section id="pa-panel-deals" class="pa-panel" data-module="deals" hidden>
+            <div class="pa-card">
+                <h2 class="pa-card-title">Deal pipeline</h2>
+                <div class="pa-chart-wrap"><canvas id="chart-pa-deals-status" aria-label="Deals by status"></canvas></div>
+                <div class="pa-empty" id="pa-empty-deals-status" hidden></div>
+            </div>
+            <div class="pa-card">
+                <h2 class="pa-card-title">Contracts by status</h2>
+                <div class="pa-chart-wrap"><canvas id="chart-pa-contracts-status" aria-label="Contracts by status"></canvas></div>
+                <div class="pa-empty" id="pa-empty-contracts-status" hidden></div>
+            </div>
+            <div class="pa-card">
+                <h2 class="pa-card-title">Value &amp; risk signals</h2>
+                <div class="pa-metrics-grid" id="pa-deal-value-metrics"></div>
+            </div>
+        </section>
+
+        <!-- Users -->
+        <section id="pa-panel-users" class="pa-panel" data-module="users" hidden>
+            <div class="pa-grid-2">
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Users by type</h2>
+                    <div class="pa-chart-wrap"><canvas id="chart-pa-users-type" aria-label="Users by type"></canvas></div>
+                    <div class="pa-empty" id="pa-empty-users-type" hidden></div>
+                </div>
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Users by status</h2>
+                    <div class="pa-chart-wrap"><canvas id="chart-pa-users-status-detail" aria-label="Users by status"></canvas></div>
+                    <div class="pa-empty" id="pa-empty-users-status-detail" hidden></div>
+                </div>
+            </div>
+            <div class="pa-card">
+                <h2 class="pa-card-title">Verification funnel</h2>
+                <p class="pa-card-hint">Derived from account states (not full event history).</p>
+                <div class="pa-verification-funnel" id="pa-verification-funnel"></div>
+            </div>
+            <div class="pa-grid-2">
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Registrations &amp; active users over time</h2>
+                    <div class="pa-chart-wrap pa-chart-tall"><canvas id="chart-pa-users-time" aria-label="Users over time"></canvas></div>
+                    <div class="pa-empty" id="pa-empty-users-time" hidden></div>
+                </div>
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Suspended / rejected trend</h2>
+                    <div class="pa-chart-wrap pa-chart-tall"><canvas id="chart-pa-users-risk" aria-label="Suspended and rejected trend"></canvas></div>
+                    <div class="pa-empty" id="pa-empty-users-risk" hidden></div>
+                </div>
+            </div>
+            <div class="pa-grid-2">
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Top companies by activity</h2>
+                    <div class="pa-table-scroll">
+                        <table class="pa-table" id="pa-top-companies-table">
+                            <thead><tr><th>Company</th><th>Opportunities</th><th>Deals</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="pa-empty" id="pa-empty-top-companies" hidden></div>
+                </div>
+                <div class="pa-card">
+                    <h2 class="pa-card-title">Top professionals (applications &amp; deals)</h2>
+                    <div class="pa-table-scroll">
+                        <table class="pa-table" id="pa-top-pros-table">
+                            <thead><tr><th>User</th><th>Applications</th><th>Deals</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="pa-empty" id="pa-empty-top-pros" hidden></div>
                 </div>
             </div>
         </section>
 
         <!-- Audit -->
-        <section id="report-module-audit" class="report-module-panel" data-module="audit" hidden>
-            <h2 class="report-module-heading">Recent audit activity (last 30 days)</h2>
-            <div class="report-chart-block">
-                <div class="report-chart-container">
-                    <canvas id="chart-audit-actions" aria-label="Audit actions in last 30 days"></canvas>
+        <section id="pa-panel-audit" class="pa-panel" data-module="audit" hidden>
+            <div class="pa-card">
+                <div class="pa-audit-filters" id="pa-audit-categories" role="tablist" aria-label="Audit categories">
+                    <button type="button" class="pa-chip pa-chip-active" data-audit-cat="all">All</button>
+                    <button type="button" class="pa-chip" data-audit-cat="vetting">Vetting</button>
+                    <button type="button" class="pa-chip" data-audit-cat="deals">Deals</button>
+                    <button type="button" class="pa-chip" data-audit-cat="contracts">Contracts</button>
+                    <button type="button" class="pa-chip" data-audit-cat="users">Users</button>
+                    <button type="button" class="pa-chip" data-audit-cat="system">System</button>
+                    <button type="button" class="pa-chip" data-audit-cat="errors">Errors</button>
+                </div>
+                <div class="pa-grid-2 pa-audit-charts">
+                    <div>
+                        <h2 class="pa-card-title">Actions in period</h2>
+                        <div class="pa-chart-wrap"><canvas id="chart-pa-audit-actions" aria-label="Audit actions"></canvas></div>
+                        <div class="pa-empty" id="pa-empty-audit-chart" hidden></div>
+                    </div>
+                    <div>
+                        <h2 class="pa-card-title">Notification mix (platform)</h2>
+                        <p class="pa-card-hint">All stored notifications, filtered by date.</p>
+                        <div class="pa-chart-wrap"><canvas id="chart-pa-notif-types" aria-label="Notifications by type"></canvas></div>
+                        <div class="pa-empty" id="pa-empty-notif" hidden></div>
+                    </div>
                 </div>
             </div>
-            <div id="audit-summary" class="report-block"></div>
+            <div class="pa-card">
+                <h2 class="pa-card-title">Recent admin &amp; system activity</h2>
+                <div class="pa-table-scroll pa-audit-log-wrap">
+                    <table class="pa-table pa-table-compact" id="pa-audit-recent-table">
+                        <thead><tr><th>Time</th><th>Action</th><th>Entity</th><th>User</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="pa-empty" id="pa-empty-audit-list" hidden></div>
+            </div>
         </section>
     </div>
 </div>
 
+<!-- Schedule modal -->
+<div class="pa-modal" id="pa-schedule-modal" hidden aria-hidden="true">
+    <div class="pa-modal-backdrop" data-close-modal></div>
+    <div class="pa-modal-card" role="dialog" aria-labelledby="pa-schedule-title">
+        <h2 id="pa-schedule-title" class="pa-modal-title">Schedule report</h2>
+        <p class="pa-modal-body">Automated email delivery is not wired in this POC. In production, this would queue a weekly or monthly export using the active filters and date range.</p>
+        <button type="button" class="btn btn-primary" data-close-modal>OK</button>
+    </div>
+</div>
+
 <style>
-.admin-reports-page { /* Page specific styles */ }
-.report-module-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); margin-bottom: var(--spacing-xl); border-bottom: 1px solid var(--border-color); padding-bottom: var(--spacing-sm); }
-.report-tab { padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--border-color); background: var(--bg-primary); border-radius: var(--radius-md); cursor: pointer; font-weight: 500; color: var(--text-secondary); }
-.report-tab:hover { background: var(--bg-secondary, #f3f4f6); color: var(--text-primary); }
-.report-tab.report-tab-active { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
-.report-module-panel { display: none; }
-.report-module-panel.report-module-panel-visible { display: block; }
-.report-module-panel[hidden] { display: none !important; }
-.report-module-heading { font-size: var(--font-size-xl); margin-bottom: var(--spacing-lg); margin-top: var(--spacing-xl); }
-.report-module-heading:first-child { margin-top: 0; }
-.report-charts-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-xl); margin-top: var(--spacing-xl); }
-.report-chart-block { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-xl); }
-.report-chart-title { font-size: var(--font-size-lg); margin-bottom: var(--spacing-md); font-weight: 600; }
-.report-chart-container { position: relative; width: 100%; max-width: 100%; max-height: 360px; height: 320px; }
-.report-chart-container canvas { max-width: 100%; }
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl); }
-.report-block { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-xl); }
-.report-row { display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-sm) 0; border-bottom: 1px solid var(--border-color); }
-.report-row:last-child { border-bottom: none; }
-.report-label { font-weight: 500; }
-.report-value { color: var(--text-secondary); }
-.report-actions { display: flex; gap: var(--spacing-sm); margin-bottom: var(--spacing-lg); flex-wrap: wrap; }
-.report-table { width: 100%; border-collapse: collapse; }
-.report-table th, .report-table td { padding: var(--spacing-sm) var(--spacing-md); text-align: left; border-bottom: 1px solid var(--border-color); }
-.report-table th { font-weight: 600; }
+.platform-analytics { --pa-primary: #0d9488; --pa-primary-dark: #0f766e; --pa-surface: #ffffff; --pa-muted: #64748b; --pa-border: #e2e8f0; --pa-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.04); --pa-radius: 12px; }
+.pa-hero { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1.25rem; margin-bottom: 1.5rem; padding: 1.5rem 1.75rem; background: linear-gradient(135deg, #f0fdfa 0%, #ffffff 55%, #f8fafc 100%); border: 1px solid var(--pa-border); border-radius: var(--pa-radius); box-shadow: var(--pa-shadow); }
+.pa-hero-title { margin: 0 0 0.5rem; font-size: 1.65rem; font-weight: 700; color: var(--text-primary, #0f172a); letter-spacing: -0.02em; }
+.pa-hero-desc { margin: 0; max-width: 52rem; color: var(--pa-muted); font-size: 0.95rem; line-height: 1.55; }
+.pa-hero-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.pa-btn-icon { display: inline-flex; align-items: center; gap: 0.4rem; }
+.pa-dropdown { position: relative; }
+.pa-dropdown-menu { position: absolute; right: 0; top: calc(100% + 4px); min-width: 220px; background: var(--pa-surface); border: 1px solid var(--pa-border); border-radius: 10px; box-shadow: var(--pa-shadow); z-index: 30; padding: 0.35rem 0; }
+.pa-dropdown-item { display: block; width: 100%; text-align: left; padding: 0.5rem 0.85rem; border: none; background: none; font-size: 0.875rem; cursor: pointer; color: var(--text-primary, #0f172a); }
+.pa-dropdown-item:hover { background: #f1f5f9; }
+.pa-dropdown-sep { border: none; border-top: 1px solid var(--pa-border); margin: 0.25rem 0; }
+
+.pa-filters { margin-bottom: 1.25rem; padding: 1rem 1.25rem; background: var(--pa-surface); border: 1px solid var(--pa-border); border-radius: var(--pa-radius); box-shadow: var(--pa-shadow); }
+.pa-filters-inner { display: flex; flex-wrap: wrap; gap: 0.75rem 1rem; align-items: flex-end; }
+.pa-field { display: flex; flex-direction: column; gap: 0.25rem; min-width: 140px; }
+.pa-field-custom { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.pa-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--pa-muted); }
+.pa-select, .pa-input { padding: 0.45rem 0.6rem; border-radius: 8px; border: 1px solid var(--pa-border); font-size: 0.875rem; background: #fff; }
+.pa-filter-apply { margin-left: auto; }
+
+.pa-kpi-section { margin-bottom: 1.25rem; }
+.pa-kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.85rem; }
+.pa-kpi-card { background: var(--pa-surface); border: 1px solid var(--pa-border); border-radius: var(--pa-radius); padding: 1rem 1rem 0.9rem; box-shadow: var(--pa-shadow); cursor: default; transition: box-shadow 0.15s, border-color 0.15s; text-align: left; }
+.pa-kpi-card.pa-kpi-clickable { cursor: pointer; }
+.pa-kpi-card.pa-kpi-clickable:hover { border-color: var(--pa-primary); box-shadow: 0 4px 16px rgba(13, 148, 136, 0.12); }
+.pa-kpi-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
+.pa-kpi-icon { width: 36px; height: 36px; border-radius: 10px; background: #ecfdf5; color: var(--pa-primary-dark); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+.pa-kpi-value { font-size: 1.5rem; font-weight: 700; color: var(--text-primary, #0f172a); margin: 0.35rem 0 0; line-height: 1.2; }
+.pa-kpi-label { font-size: 0.8rem; font-weight: 600; color: var(--pa-muted); margin: 0; }
+.pa-kpi-trend { font-size: 0.75rem; font-weight: 600; margin-top: 0.35rem; }
+.pa-kpi-trend.up { color: #059669; }
+.pa-kpi-trend.down { color: #dc2626; }
+.pa-kpi-trend.flat { color: var(--pa-muted); }
+.pa-kpi-hint { font-size: 0.72rem; color: var(--pa-muted); margin: 0.4rem 0 0; line-height: 1.35; }
+
+.pa-tabs { margin-bottom: 1rem; border-bottom: 1px solid var(--pa-border); }
+.pa-tabs-scroll { display: flex; flex-wrap: nowrap; gap: 0.35rem; overflow-x: auto; padding-bottom: 0.5rem; -webkit-overflow-scrolling: touch; }
+.pa-tab { flex: 0 0 auto; padding: 0.5rem 0.9rem; border: 1px solid transparent; border-radius: 999px; background: #f8fafc; color: var(--pa-muted); font-weight: 600; font-size: 0.82rem; cursor: pointer; white-space: nowrap; }
+.pa-tab:hover { color: var(--text-primary, #0f172a); background: #f1f5f9; }
+.pa-tab.pa-tab-active { background: var(--pa-primary); color: #fff; border-color: var(--pa-primary); }
+
+.pa-body { padding-top: 0; }
+.pa-panel { display: none; }
+.pa-panel.pa-panel-visible { display: block; }
+.pa-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.pa-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.pa-card { background: var(--pa-surface); border: 1px solid var(--pa-border); border-radius: var(--pa-radius); padding: 1.1rem 1.2rem; box-shadow: var(--pa-shadow); margin-bottom: 1rem; }
+.pa-card-head { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.35rem; }
+.pa-card-title { font-size: 1rem; font-weight: 700; margin: 0 0 0.35rem; color: var(--text-primary, #0f172a); }
+.pa-card-hint { font-size: 0.8rem; color: var(--pa-muted); margin: 0 0 0.75rem; line-height: 1.45; }
+.pa-badge { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.2rem 0.45rem; border-radius: 6px; }
+.pa-badge-soft { background: #ecfdf5; color: var(--pa-primary-dark); }
+.pa-chart-wrap { position: relative; width: 100%; height: 280px; max-height: 40vh; }
+.pa-chart-tall { height: 320px; max-height: 45vh; }
+.pa-chart-wrap canvas { max-width: 100%; }
+.pa-empty { padding: 1.5rem; text-align: center; color: var(--pa-muted); font-size: 0.9rem; background: #f8fafc; border-radius: 8px; border: 1px dashed var(--pa-border); }
+.pa-footnote { font-size: 0.75rem; color: var(--pa-muted); margin-top: 0.5rem; }
+
+.pa-funnel { display: flex; flex-direction: column; gap: 0.5rem; }
+.pa-funnel-step { display: flex; align-items: center; gap: 0.75rem; }
+.pa-funnel-bar-wrap { flex: 1; height: 32px; background: #f1f5f9; border-radius: 8px; overflow: hidden; }
+.pa-funnel-bar { height: 100%; background: linear-gradient(90deg, var(--pa-primary), #2dd4bf); border-radius: 8px; transition: width 0.3s ease; min-width: 4px; }
+.pa-funnel-meta { min-width: 120px; text-align: right; font-size: 0.8rem; font-weight: 600; color: var(--text-primary, #0f172a); }
+.pa-funnel-label { min-width: 100px; font-size: 0.8rem; font-weight: 600; color: var(--pa-muted); }
+
+.pa-insight-card { min-height: 100px; font-size: 0.88rem; line-height: 1.45; }
+.pa-insight-card strong { color: var(--pa-primary-dark); }
+.pa-activity-row { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.pa-activity-pill { padding: 0.5rem 0.85rem; background: #f8fafc; border-radius: 999px; font-size: 0.8rem; font-weight: 600; color: var(--text-primary, #334155); border: 1px solid var(--pa-border); }
+
+.pa-map-card .pa-map { height: 420px; border-radius: 10px; overflow: hidden; border: 1px solid var(--pa-border); margin-top: 0.5rem; }
+.pa-map-note { font-size: 0.85rem; color: var(--pa-muted); margin-top: 0.5rem; }
+
+.pa-table-scroll { overflow-x: auto; }
+.pa-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.pa-table th, .pa-table td { padding: 0.55rem 0.65rem; text-align: left; border-bottom: 1px solid var(--pa-border); }
+.pa-table th { font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--pa-muted); background: #f8fafc; }
+.pa-table-compact td { padding: 0.4rem 0.5rem; font-size: 0.8rem; }
+.pa-audit-log-wrap { max-height: 360px; overflow-y: auto; }
+
+.pa-metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; }
+.pa-metric-tile { padding: 0.75rem; border-radius: 10px; background: #f8fafc; border: 1px solid var(--pa-border); }
+.pa-metric-tile .v { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
+.pa-metric-tile .l { font-size: 0.72rem; color: var(--pa-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+
+.pa-verification-funnel .pa-vf-row { margin-bottom: 0.65rem; }
+.pa-vf-label { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.2rem; }
+.pa-vf-bar { height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+.pa-vf-fill { height: 100%; background: var(--pa-primary); border-radius: 999px; }
+
+.pa-audit-filters { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 1rem; }
+.pa-chip { padding: 0.35rem 0.75rem; border-radius: 999px; border: 1px solid var(--pa-border); background: #fff; font-size: 0.78rem; font-weight: 600; cursor: pointer; color: var(--pa-muted); }
+.pa-chip:hover { border-color: var(--pa-primary); color: var(--pa-primary-dark); }
+.pa-chip.pa-chip-active { background: #ecfdf5; border-color: var(--pa-primary); color: var(--pa-primary-dark); }
+
+.pa-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.pa-modal[hidden] { display: none; }
+.pa-modal-backdrop { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.45); }
+.pa-modal-card { position: relative; background: #fff; border-radius: var(--pa-radius); padding: 1.5rem; max-width: 400px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+.pa-modal-title { margin: 0 0 0.5rem; font-size: 1.1rem; }
+.pa-modal-body { font-size: 0.9rem; color: var(--pa-muted); margin: 0 0 1rem; line-height: 1.5; }
+
+@media (max-width: 1024px) {
+    .pa-grid-2, .pa-grid-3 { grid-template-columns: 1fr; }
+    .pa-filters-inner .pa-filter-apply { margin-left: 0; width: 100%; }
+}
+@media (max-width: 640px) {
+    .pa-hero { padding: 1.1rem; }
+    .pa-kpi-grid { grid-template-columns: 1fr 1fr; }
+    .pa-map-card .pa-map { height: 260px; }
+}
+@media print {
+    .pa-hero-actions, .pa-filters, .pa-tabs, .pa-filter-apply, .pa-dropdown { display: none !important; }
+    .pa-panel { display: block !important; }
+    .pa-panel[hidden] { display: block !important; }
+}
 </style>

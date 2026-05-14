@@ -336,7 +336,6 @@ class LayoutService {
         if (isFullAdmin) {
             configLinks.push({ route: CONFIG.ROUTES.ADMIN_SKILLS, label: 'Skills & Categories', icon: 'ph-duotone ph-tag' });
             configLinks.push({ route: CONFIG.ROUTES.ADMIN_SETTINGS, label: 'Settings', icon: 'ph-duotone ph-gear' });
-            configLinks.push({ route: CONFIG.ROUTES.ADMIN_SUBSCRIPTIONS, label: 'Subscriptions', icon: 'ph-duotone ph-credit-card' });
             configLinks.push({ route: CONFIG.ROUTES.ADMIN_COLLABORATION_MODELS, label: 'Collaboration Models', icon: 'ph-duotone ph-stack' });
         }
         renderAdminGroup('Configuration', configLinks);

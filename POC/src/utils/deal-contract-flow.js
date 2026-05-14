@@ -47,12 +47,48 @@
         return i >= 0 ? i : 0;
     }
 
+    function formatMoneyAmount(num, currencyCode) {
+        const n = Number(num);
+        if (Number.isNaN(n)) return String(num);
+        const code = currencyCode && String(currencyCode).trim() ? String(currencyCode).trim().toUpperCase() : 'SAR';
+        try {
+            return new Intl.NumberFormat(undefined, {
+                style: 'currency',
+                currency: code,
+                maximumFractionDigits: n % 1 === 0 ? 0 : 2
+            }).format(n);
+        } catch {
+            return n.toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' ' + code;
+        }
+    }
+
+    function formatAgreedValueSummary(agreedValue) {
+        if (agreedValue == null) return '';
+        if (typeof agreedValue === 'number' || typeof agreedValue === 'string') return String(agreedValue);
+        if (typeof agreedValue !== 'object') return String(agreedValue);
+        const o = agreedValue;
+        if (o.cash != null && o.currency) return formatMoneyAmount(o.cash, o.currency);
+        if (o.cash != null) return formatMoneyAmount(o.cash, o.currency || 'SAR');
+        const creditH = o.creditHours != null ? o.creditHours : o.credit_hours;
+        if (creditH != null) return String(creditH) + ' credit hours';
+        if (o.description) return String(o.description).slice(0, 80);
+        try {
+            return JSON.stringify(o);
+        } catch {
+            return '—';
+        }
+    }
+
     function formatValueSummary(deal) {
         if (!deal || !deal.valueTerms) return '—';
         const vt = deal.valueTerms;
         if (vt.agreedValue != null) {
             try {
-                return typeof vt.agreedValue === 'object' ? JSON.stringify(vt.agreedValue) : String(vt.agreedValue);
+                if (typeof vt.agreedValue === 'object') {
+                    const s = formatAgreedValueSummary(vt.agreedValue);
+                    return s || '—';
+                }
+                return String(vt.agreedValue);
             } catch {
                 return '—';
             }
@@ -81,7 +117,8 @@
         if (st === 'negotiating') return 'Agree terms, then accept proposal to open the Deal Workspace draft.';
         if (st === 'draft') return 'Review the Deal Workspace draft, then send it for review when ready.';
         if (st === 'review') {
-            if (me && me.approvalStatus !== 'approved') return 'Approve the deal to move toward signing.';
+            if (me && me.approvalStatus !== 'approved') return 'Approve the deal workspace to move toward contract signing.';
+            if (contract && contract.id) return 'Waiting for others to approve. The Contract Agreement draft is ready when everyone approves.';
             return 'Wait for all participants to approve the deal.';
         }
         if (st === 'signing') {
@@ -107,6 +144,7 @@
         getContractStatusDisplayLabel: getContractStatusDisplayLabel,
         dealStepIndex: dealStepIndex,
         formatValueSummary: formatValueSummary,
+        formatAgreedValueSummary: formatAgreedValueSummary,
         getDealNextActionHint: getDealNextActionHint
     };
 })();

@@ -1,49 +1,73 @@
-<div class="page-container find-page">
+<div class="page-container find-page pm-find-page">
     <section class="find-hero">
+        <div class="find-hero-grid" aria-hidden="true"></div>
         <div class="find-hero-content">
-            <h1>Find Partners & Opportunities</h1>
-            <p class="find-subtitle">Search for professionals, companies, and collaboration opportunities</p>
-            
-            <!-- Search Form -->
-            <div class="find-search-form">
-                <div class="search-input-wrapper">
-                    <i class="ph-duotone ph-magnifying-glass"></i>
-                    <input type="text" id="find-search-input" class="form-input" 
-                           placeholder="Search by name, skills, industry, or keywords...">
+            <div class="find-hero-copy">
+                <p class="find-kicker">
+                    <i class="ph-duotone ph-radar" aria-hidden="true"></i>
+                    Marketplace search
+                </p>
+                <h1>Find design, BIM, and construction partners.</h1>
+                <p class="find-subtitle">Search professionals, companies, and live opportunities across the built-environment network.</p>
+
+                <div class="find-search-form">
+                    <div class="search-input-wrapper">
+                        <i class="ph-duotone ph-magnifying-glass" aria-hidden="true"></i>
+                        <input type="text" id="find-search-input" class="form-input" placeholder="Search BIM, MEP, 3D visualization, contractors, tenders...">
+                    </div>
+                    <button id="find-search-btn" class="btn btn-primary">
+                        <i class="ph-duotone ph-magnifying-glass" aria-hidden="true"></i>
+                        <span>Search</span>
+                    </button>
                 </div>
-                <button id="find-search-btn" class="btn btn-primary">
-                    <i class="ph-duotone ph-magnifying-glass"></i> Search
-                </button>
+            </div>
+
+            <div class="find-hero-visual" aria-hidden="true">
+                <div class="find-map-plane">
+                    <span class="find-node find-node-a"><i class="ph-duotone ph-cube"></i></span>
+                    <span class="find-node find-node-b"><i class="ph-duotone ph-buildings"></i></span>
+                    <span class="find-node find-node-c"><i class="ph-duotone ph-hard-hat"></i></span>
+                    <span class="find-node find-node-d"><i class="ph-duotone ph-handshake"></i></span>
+                    <span class="find-link find-link-a"></span>
+                    <span class="find-link find-link-b"></span>
+                    <span class="find-link find-link-c"></span>
+                </div>
+                <div class="find-floating-card find-floating-card-a">
+                    <strong>BIM coordination</strong>
+                    <span>92% partner fit</span>
+                </div>
+                <div class="find-floating-card find-floating-card-b">
+                    <strong>Riyadh</strong>
+                    <span>Design + MEP demand</span>
+                </div>
             </div>
         </div>
     </section>
 
     <section class="find-content">
         <div class="container">
-            <!-- Tabs -->
-            <div class="find-tabs">
-                <button class="find-tab active" data-tab="people">
-                    <i class="ph-duotone ph-users"></i>
+            <div class="find-tabs" role="tablist" aria-label="Search result type">
+                <button class="find-tab active" data-tab="people" type="button">
+                    <i class="ph-duotone ph-users" aria-hidden="true"></i>
                     <span>People</span>
                     <span class="tab-count" id="people-count">0</span>
                 </button>
-                <button class="find-tab" data-tab="companies">
-                    <i class="ph-duotone ph-buildings"></i>
+                <button class="find-tab" data-tab="companies" type="button">
+                    <i class="ph-duotone ph-buildings" aria-hidden="true"></i>
                     <span>Companies</span>
                     <span class="tab-count" id="companies-count">0</span>
                 </button>
-                <button class="find-tab" data-tab="opportunities">
-                    <i class="ph-duotone ph-handshake"></i>
+                <button class="find-tab" data-tab="opportunities" type="button">
+                    <i class="ph-duotone ph-handshake" aria-hidden="true"></i>
                     <span>Opportunities</span>
                     <span class="tab-count" id="opportunities-count">0</span>
                 </button>
             </div>
 
-            <!-- Filters -->
             <div class="find-filters">
                 <div class="filter-row">
                     <div class="filter-group">
-                        <label>Location</label>
+                        <label for="filter-location">Location</label>
                         <select id="filter-location" class="form-select">
                             <option value="">All Locations</option>
                             <option value="Riyadh">Riyadh</option>
@@ -54,7 +78,7 @@
                         </select>
                     </div>
                     <div class="filter-group" id="sector-filter-group">
-                        <label>Sector</label>
+                        <label for="filter-sector">Sector</label>
                         <select id="filter-sector" class="form-select">
                             <option value="">All Sectors</option>
                             <option value="Construction">Construction</option>
@@ -65,7 +89,7 @@
                         </select>
                     </div>
                     <div class="filter-group" id="opportunity-type-filter" style="display: none;">
-                        <label>Type</label>
+                        <label for="filter-opp-type">Type</label>
                         <select id="filter-opp-type" class="form-select">
                             <option value="">All Types</option>
                             <option value="request">Needs</option>
@@ -73,7 +97,7 @@
                         </select>
                     </div>
                     <div class="filter-group" id="model-filter" style="display: none;">
-                        <label>Model</label>
+                        <label for="filter-model">Model</label>
                         <select id="filter-model" class="form-select">
                             <option value="">All Models</option>
                             <option value="project_based">Project Based</option>
@@ -86,12 +110,11 @@
                 </div>
             </div>
 
-            <!-- Login Banner for Non-Authenticated Users -->
             <div id="login-banner" class="login-banner" style="display: none;">
                 <div class="login-banner-content">
-                    <i class="ph-duotone ph-lock-simple"></i>
+                    <i class="ph-duotone ph-lock-simple" aria-hidden="true"></i>
                     <div class="login-banner-text">
-                        <h3>Login to View Full Details</h3>
+                        <h3>Login to view full details</h3>
                         <p>Create an account or login to see complete profiles, contact information, and apply to opportunities.</p>
                     </div>
                     <div class="login-banner-actions">
@@ -101,59 +124,55 @@
                 </div>
             </div>
 
-            <!-- Results -->
             <div class="find-results">
-                <!-- People Tab Content -->
                 <div id="tab-people" class="tab-content active">
                     <div id="people-results" class="results-grid">
                         <div class="spinner"></div>
                     </div>
                     <div id="people-empty" class="empty-state" style="display: none;">
-                        <i class="ph-duotone ph-users"></i>
+                        <i class="ph-duotone ph-users" aria-hidden="true"></i>
                         <h3>No people found</h3>
                         <p>Try adjusting your search criteria</p>
                     </div>
                 </div>
 
-                <!-- Companies Tab Content -->
                 <div id="tab-companies" class="tab-content">
                     <div id="companies-results" class="results-grid">
                         <div class="spinner"></div>
                     </div>
                     <div id="companies-empty" class="empty-state" style="display: none;">
-                        <i class="ph-duotone ph-buildings"></i>
+                        <i class="ph-duotone ph-buildings" aria-hidden="true"></i>
                         <h3>No companies found</h3>
                         <p>Try adjusting your search criteria</p>
                     </div>
                 </div>
 
-                <!-- Opportunities Tab Content -->
                 <div id="tab-opportunities" class="tab-content">
-                    <div id="find-map-link" class="mb-4" style="display: none;">
-                        <div class="flex items-center gap-3 mb-3">
-                            <button type="button" id="find-toggle-mini-map" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 hover:bg-blue-100 transition-all font-medium text-sm">
-                                <i class="ph-duotone ph-map-trifold" style="font-size:18px;"></i>
+                    <div id="find-map-link" class="find-map-tools" style="display: none;">
+                        <div class="find-map-toolbar">
+                            <button type="button" id="find-toggle-mini-map" class="find-map-btn">
+                                <i class="ph-duotone ph-map-trifold" aria-hidden="true"></i>
                                 <span id="find-mini-map-toggle-text">Show Map</span>
                             </button>
-                            <a href="#" data-route="/opportunities/map" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-100 transition-all font-medium text-sm">
-                                <i class="ph-duotone ph-arrows-out" style="font-size:16px;"></i>
-                                Full Map View
+                            <a href="#" data-route="/opportunities/map" class="find-map-btn find-map-btn-secondary">
+                                <i class="ph-duotone ph-arrows-out" aria-hidden="true"></i>
+                                <span>Full Map View</span>
                             </a>
                         </div>
                         <div id="find-mini-map-container" style="display: none;">
-                            <div id="find-mini-map" class="map-container" style="height:300px;margin-bottom:1rem;"></div>
+                            <div id="find-mini-map" class="map-container"></div>
                         </div>
                     </div>
-                    <div id="sample-opportunities-section" class="mb-6" style="display: none;">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Sample opportunities to explore</h3>
-                        <p class="text-sm text-gray-600 mb-3">Get started by browsing these sample opportunities.</p>
-                        <div id="sample-opportunities-list" class="flex flex-wrap gap-2"></div>
+                    <div id="sample-opportunities-section" class="sample-opportunities-section" style="display: none;">
+                        <h3>Sample opportunities to explore</h3>
+                        <p>Get started by browsing these sample opportunities.</p>
+                        <div id="sample-opportunities-list" class="sample-opportunities-list"></div>
                     </div>
                     <div id="opportunities-results" class="results-grid">
                         <div class="spinner"></div>
                     </div>
                     <div id="opportunities-empty" class="empty-state" style="display: none;">
-                        <i class="ph-duotone ph-handshake"></i>
+                        <i class="ph-duotone ph-handshake" aria-hidden="true"></i>
                         <h3>No opportunities found</h3>
                         <p>Try adjusting your search criteria</p>
                     </div>
@@ -164,168 +183,329 @@
 </div>
 
 <style>
-.find-page {
-    /* Page specific styles */
+.app-public-layout #main-content:has(.pm-find-page) {
+    max-width: none;
+    padding: 0;
+}
+
+.pm-find-page {
+    --find-ink: #101820;
+    --find-muted: #5f6b7a;
+    --find-line: #d9e2ec;
+    --find-teal: #0891b2;
+    --find-teal-dark: #0e7490;
+    --find-coral: #e85d4f;
+    --find-green: #2f9f7b;
+    --info-light: #e0f2fe;
+    --info-color: #075985;
+    width: 100%;
+    max-width: none;
+    background: #f7f9fb;
 }
 
 .find-hero {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-    color: white;
-    padding: var(--spacing-2xl) var(--spacing-lg);
-    text-align: center;
+    position: relative;
+    overflow: hidden;
+    padding: clamp(3.5rem, 8vw, 6.5rem) 0;
+    background:
+        linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.9) 46%, rgba(239,246,249,0.72) 100%),
+        linear-gradient(0deg, rgba(16,24,32,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,24,32,0.045) 1px, transparent 1px),
+        #eef3f6;
+    background-size: auto, 34px 34px, 34px 34px, auto;
+    border-bottom: 1px solid var(--find-line);
+}
+
+.find-hero-grid {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(135deg, transparent 0 34%, rgba(8,145,178,0.18) 34.2% 34.6%, transparent 34.8% 100%),
+        linear-gradient(150deg, transparent 0 68%, rgba(232,93,79,0.16) 68.2% 68.6%, transparent 68.8% 100%);
+}
+
+.find-hero-content,
+.find-content .container {
+    position: relative;
+    z-index: 1;
+    width: min(1180px, calc(100% - 32px));
+    max-width: none;
+    margin: 0 auto;
 }
 
 .find-hero-content {
-    max-width: 800px;
-    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(390px, 0.82fr);
+    align-items: center;
+    gap: clamp(2rem, 6vw, 5rem);
+}
+
+.find-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+    color: var(--find-teal-dark);
+    font-size: 0.78rem;
+    font-weight: 850;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.find-kicker i {
+    font-size: 1.15rem;
 }
 
 .find-hero h1 {
-    font-size: var(--font-size-2xl);
-    margin-bottom: var(--spacing-sm);
+    margin: 0;
+    max-width: 760px;
+    color: var(--find-ink);
+    font-size: clamp(2.4rem, 5vw, 4.8rem);
+    line-height: 0.98;
+    letter-spacing: 0;
+    font-weight: 850;
 }
 
 .find-subtitle {
-    font-size: var(--font-size-lg);
-    opacity: 0.9;
-    margin-bottom: var(--spacing-xl);
+    max-width: 620px;
+    margin: 1.1rem 0 0;
+    color: var(--find-muted);
+    font-size: 1.08rem;
+    line-height: 1.65;
 }
 
 .find-search-form {
-    display: flex;
-    gap: var(--spacing-md);
-    max-width: 600px;
-    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    max-width: 720px;
+    margin-top: 1.8rem;
 }
 
 .search-input-wrapper {
-    flex: 1;
     position: relative;
 }
 
 .search-input-wrapper i {
     position: absolute;
-    left: var(--spacing-md);
+    left: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-secondary);
-    font-size: var(--font-size-lg);
+    color: #718096;
+    font-size: 1.2rem;
 }
 
 .search-input-wrapper .form-input {
-    padding-left: calc(var(--spacing-md) * 2 + 20px);
-    height: 48px;
-    font-size: var(--font-size-base);
+    min-height: 50px;
+    padding-left: 3rem;
+    border-radius: 8px !important;
 }
 
 .find-search-form .btn {
-    height: 48px;
-    padding: 0 var(--spacing-xl);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 50px;
+    border-radius: 8px !important;
+    background: var(--find-ink) !important;
+    border-color: var(--find-ink) !important;
 }
+
+.find-hero-visual {
+    position: relative;
+    min-height: 380px;
+}
+
+.find-map-plane {
+    position: absolute;
+    inset: 34px 5% 24px;
+    border: 1px solid rgba(16,24,32,0.12);
+    border-radius: 8px;
+    background:
+        linear-gradient(0deg, rgba(8,145,178,0.09) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(8,145,178,0.09) 1px, transparent 1px),
+        linear-gradient(140deg, #ffffff 0%, #eef6f8 100%);
+    background-size: 28px 28px, 28px 28px, auto;
+    box-shadow: 0 28px 70px rgba(16,24,32,0.16);
+    transform: rotateX(58deg) rotateZ(-36deg);
+    transform-origin: center;
+}
+
+.find-node {
+    position: absolute;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 999px;
+    color: #ffffff;
+    background: var(--find-ink);
+    border: 4px solid rgba(255,255,255,0.9);
+    box-shadow: 0 12px 28px rgba(16,24,32,0.22);
+    transform: rotate(36deg);
+}
+
+.find-node i {
+    font-size: 1.25rem;
+}
+
+.find-node-a { left: 18%; top: 22%; background: var(--find-teal); }
+.find-node-b { left: 54%; top: 18%; }
+.find-node-c { left: 68%; top: 58%; background: var(--find-coral); }
+.find-node-d { left: 30%; top: 68%; background: var(--find-green); }
+
+.find-link {
+    position: absolute;
+    height: 4px;
+    background: rgba(8,145,178,0.42);
+    transform-origin: left center;
+}
+
+.find-link-a { left: 25%; top: 31%; width: 38%; transform: rotate(-8deg); }
+.find-link-b { left: 58%; top: 31%; width: 26%; transform: rotate(55deg); background: rgba(232,93,79,0.46); }
+.find-link-c { left: 35%; top: 73%; width: 40%; transform: rotate(-18deg); background: rgba(47,159,123,0.46); }
+
+.find-floating-card {
+    position: absolute;
+    z-index: 4;
+    width: 190px;
+    padding: 0.85rem;
+    border: 1px solid rgba(16,24,32,0.12);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 18px 40px rgba(16,24,32,0.14);
+    backdrop-filter: blur(14px);
+}
+
+.find-floating-card strong,
+.find-floating-card span {
+    display: block;
+}
+
+.find-floating-card strong {
+    color: var(--find-ink);
+    line-height: 1.2;
+}
+
+.find-floating-card span {
+    margin-top: 0.3rem;
+    color: var(--find-muted);
+    font-size: 0.82rem;
+}
+
+.find-floating-card-a { left: 0; bottom: 32px; }
+.find-floating-card-b { right: 0; top: 36px; }
 
 .find-content {
-    padding: var(--spacing-xl) var(--spacing-lg);
+    padding: 2rem 0 4.5rem;
+    background: #f7f9fb;
 }
 
-.find-content .container {
-    max-width: var(--max-width);
-    margin: 0 auto;
-}
-
-/* Tabs */
 .find-tabs {
     display: flex;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-lg);
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: var(--spacing-md);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.45rem;
+    overflow-x: auto;
+    border: 1px solid var(--find-line);
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(16,24,32,0.04);
 }
 
 .find-tab {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-lg);
+    justify-content: center;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
     background: transparent;
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-base);
-    color: var(--text-secondary);
+    color: var(--find-muted);
+    font-weight: 800;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
 .find-tab:hover {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
+    background: #f4f7f9;
+    color: var(--find-ink);
 }
 
 .find-tab.active {
-    background: var(--primary-color);
-    color: white;
-}
-
-.find-tab i {
-    font-size: var(--font-size-lg);
+    background: var(--find-ink);
+    color: #ffffff;
 }
 
 .tab-count {
-    background: rgba(0, 0, 0, 0.1);
-    padding: 2px 8px;
-    border-radius: var(--radius-sm);
-    font-size: var(--font-size-xs);
-    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 24px;
+    padding: 0 0.45rem;
+    border-radius: 999px;
+    background: rgba(16,24,32,0.08);
+    color: inherit;
+    font-size: 0.75rem;
+    font-weight: 850;
 }
 
 .find-tab.active .tab-count {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255,255,255,0.18);
 }
 
-/* Filters */
-.find-filters {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
+.find-filters,
+.login-banner,
+.find-map-tools,
+.sample-opportunities-section {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--find-line);
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(16,24,32,0.04);
 }
 
 .filter-row {
-    display: flex;
-    gap: var(--spacing-md);
-    flex-wrap: wrap;
-}
-
-.filter-group {
-    flex: 1;
-    min-width: 150px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(150px, 1fr));
+    gap: 0.75rem;
 }
 
 .filter-group label {
     display: block;
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: 0.35rem;
+    color: var(--find-muted);
+    font-size: 0.78rem;
+    font-weight: 800;
 }
 
-/* Login Banner */
 .login-banner {
-    background: linear-gradient(135deg, var(--warning-light) 0%, var(--bg-tertiary) 100%);
-    border: 1px solid var(--warning-color);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
+    border-color: rgba(232,93,79,0.3);
+    background: #fff7f5;
 }
 
 .login-banner-content {
     display: flex;
     align-items: center;
-    gap: var(--spacing-lg);
+    gap: 1rem;
 }
 
 .login-banner-content > i {
-    font-size: 48px;
-    color: var(--warning-color);
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 auto;
+    border-radius: 8px;
+    color: #ffffff;
+    background: var(--find-coral);
+    font-size: 1.45rem;
 }
 
 .login-banner-text {
@@ -333,23 +513,83 @@
 }
 
 .login-banner-text h3 {
-    font-size: var(--font-size-lg);
-    margin-bottom: var(--spacing-xs);
-    color: var(--text-primary);
+    margin: 0 0 0.2rem;
+    color: var(--find-ink);
+    font-size: 1rem;
 }
 
 .login-banner-text p {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
     margin: 0;
+    color: var(--find-muted);
+    font-size: 0.9rem;
 }
 
-.login-banner-actions {
+.login-banner-actions,
+.find-map-toolbar {
     display: flex;
-    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    gap: 0.6rem;
 }
 
-/* Tab Content */
+.find-map-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 42px;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid rgba(8,145,178,0.28);
+    border-radius: 8px;
+    background: #ecfeff;
+    color: var(--find-teal-dark);
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.find-map-btn-secondary {
+    border-color: var(--find-line);
+    background: #f8fafc;
+    color: var(--find-muted);
+}
+
+#find-mini-map {
+    height: 320px;
+    margin-top: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.sample-opportunities-section h3 {
+    margin: 0 0 0.25rem;
+    color: var(--find-ink);
+    font-size: 1rem;
+}
+
+.sample-opportunities-section p {
+    margin: 0 0 0.75rem;
+    color: var(--find-muted);
+    font-size: 0.9rem;
+}
+
+.sample-opportunities-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.sample-opportunities-list a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid rgba(8,145,178,0.28);
+    border-radius: 8px;
+    background: #ecfeff;
+    color: var(--find-teal-dark);
+    font-size: 0.84rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
 .tab-content {
     display: none;
 }
@@ -358,158 +598,146 @@
     display: block;
 }
 
-/* Results Grid */
 .results-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
 }
 
-/* Preview Card Styles */
-.preview-card {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    transition: all 0.2s;
+.preview-card,
+.full-card {
+    min-height: 254px;
+    padding: 1rem;
+    border: 1px solid var(--find-line);
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(16,24,32,0.04);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
-.preview-card:hover {
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary-light);
+.preview-card:hover,
+.full-card:hover {
+    border-color: rgba(8,145,178,0.34);
+    box-shadow: 0 16px 36px rgba(16,24,32,0.1);
+    transform: translateY(-2px);
 }
 
 .preview-card-header {
     display: flex;
     align-items: flex-start;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
+    gap: 0.85rem;
+    margin-bottom: 0.9rem;
 }
 
 .preview-avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: var(--radius-full);
-    background: var(--primary-light);
-    color: var(--primary-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: var(--font-size-lg);
-    font-weight: 600;
-    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 54px;
+    height: 54px;
+    flex: 0 0 auto;
+    border-radius: 8px;
+    background: #ecfeff;
+    color: var(--find-teal-dark);
+    font-weight: 850;
 }
 
 .preview-info {
-    flex: 1;
     min-width: 0;
 }
 
 .preview-name {
-    font-size: var(--font-size-lg);
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-xs);
-    white-space: nowrap;
     overflow: hidden;
+    color: var(--find-ink);
+    font-size: 1rem;
+    font-weight: 850;
+    line-height: 1.3;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .preview-headline {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-xs);
     display: -webkit-box;
+    margin-top: 0.25rem;
+    overflow: hidden;
+    color: var(--find-muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    overflow: hidden;
 }
 
 .preview-location {
-    font-size: var(--font-size-xs);
-    color: var(--text-muted);
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: 0.35rem;
+    margin-top: 0.45rem;
+    color: #718096;
+    font-size: 0.8rem;
 }
 
-.preview-badges {
+.preview-badges,
+.full-card-skills {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
+    gap: 0.4rem;
+    margin-bottom: 0.9rem;
+}
+
+.skill-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: var(--find-muted);
+    font-size: 0.75rem;
+    font-weight: 800;
 }
 
 .preview-meta {
     display: flex;
-    gap: var(--spacing-md);
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    padding-top: var(--spacing-sm);
-    border-top: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--find-line);
+    color: var(--find-muted);
+    font-size: 0.78rem;
 }
 
 .preview-footer {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: var(--spacing-md);
-    padding-top: var(--spacing-md);
-    border-top: 1px solid var(--border-color);
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--find-line);
 }
 
 .preview-footer .btn {
-    flex: 1;
+    width: 100%;
+    border-radius: 8px !important;
 }
 
-/* Full Card (Authenticated) */
-.full-card {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    transition: all 0.2s;
-}
-
-.full-card:hover {
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary-light);
-}
-
-.full-card-skills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-xs);
-    margin-top: var(--spacing-sm);
-}
-
-.skill-tag {
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
-    padding: 2px 8px;
-    border-radius: var(--radius-sm);
-    font-size: var(--font-size-xs);
-}
-
-/* Empty State */
 .empty-state {
+    padding: 3rem 1rem;
     text-align: center;
-    padding: var(--spacing-2xl);
-    color: var(--text-secondary);
 }
 
 .empty-state i {
-    font-size: 64px;
-    margin-bottom: var(--spacing-lg);
-    opacity: 0.5;
+    color: var(--find-teal);
+    font-size: 3.5rem;
+    opacity: 0.6;
 }
 
 .empty-state h3 {
-    font-size: var(--font-size-lg);
-    margin-bottom: var(--spacing-sm);
+    margin: 1rem 0 0.3rem;
+    color: var(--find-ink);
 }
 
-/* Blurred Content Overlay */
+.empty-state p {
+    margin: 0;
+    color: var(--find-muted);
+}
+
 .blurred-content {
     position: relative;
 }
@@ -517,54 +745,101 @@
 .blurred-content::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(180deg, transparent 0%, var(--bg-primary) 100%);
+    inset: 0;
+    background: linear-gradient(180deg, transparent 0%, #ffffff 100%);
     pointer-events: none;
 }
 
 .login-overlay {
     position: absolute;
+    right: 0;
     bottom: 0;
     left: 0;
-    right: 0;
-    background: var(--bg-primary);
-    padding: var(--spacing-md);
+    padding: 1rem;
+    border-top: 1px dashed var(--find-line);
+    background: #ffffff;
     text-align: center;
-    border-top: 1px dashed var(--border-color);
 }
 
 .login-overlay a {
-    color: var(--primary-color);
-    font-weight: 500;
+    color: var(--find-teal-dark);
+    font-weight: 800;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .find-search-form {
-        flex-direction: column;
+@media (max-width: 1024px) {
+    .find-hero-content {
+        grid-template-columns: 1fr;
     }
-    
-    .find-tabs {
-        flex-wrap: wrap;
+
+    .find-hero-visual {
+        min-height: 320px;
     }
-    
-    .find-tab {
-        flex: 1;
-        justify-content: center;
-    }
-    
+
     .filter-row {
-        flex-direction: column;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    
+}
+
+@media (max-width: 720px) {
+    .find-hero {
+        padding: 2rem 0 1.35rem;
+    }
+
+    .find-hero-content,
+    .find-content .container {
+        width: min(100% - 24px, 1180px);
+    }
+
+    .find-hero h1 {
+        font-size: 2.25rem;
+    }
+
+    .find-subtitle {
+        font-size: 0.98rem;
+        line-height: 1.55;
+    }
+
+    .find-search-form {
+        margin-top: 1.15rem;
+    }
+
+    .find-search-form,
+    .filter-row {
+        grid-template-columns: 1fr;
+    }
+
+    .find-hero-visual {
+        min-height: 215px;
+    }
+
+    .find-map-plane {
+        inset: 24px 3% 12px;
+        transform: rotateX(58deg) rotateZ(-36deg) scale(0.74);
+    }
+
+    .find-floating-card {
+        width: 148px;
+        padding: 0.65rem;
+    }
+
+    .find-floating-card-a {
+        bottom: 10px;
+    }
+
+    .find-floating-card-b {
+        top: 14px;
+    }
+
     .login-banner-content {
+        align-items: flex-start;
         flex-direction: column;
-        text-align: center;
     }
-    
+
+    .login-banner-actions,
+    .login-banner-actions .btn {
+        width: 100%;
+    }
+
     .results-grid {
         grid-template-columns: 1fr;
     }

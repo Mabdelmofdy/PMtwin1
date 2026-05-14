@@ -1,110 +1,821 @@
 <div class="page-container admin-settings-page">
-    <div class="page-header">
+    <div class="page-header admin-settings-header">
         <div class="page-header-content">
+            <p class="admin-settings-eyebrow">Administration</p>
             <h1 class="page-title">System Settings</h1>
-            <p class="page-subtitle">Configure platform settings</p>
+            <p class="page-subtitle">Configure the PMTwin platform: branding, security, matching, workflow, exchange rules, lookups, integrations, and more.</p>
+        </div>
+        <div class="admin-settings-header-actions">
+            <span id="settings-last-saved" class="admin-settings-last-saved" aria-live="polite"></span>
         </div>
     </div>
-    <div class="page-body">
-    
-    <div class="settings-content">
-        <div class="card">
-            <div class="card-header">
-                <h2>Platform Settings</h2>
-            </div>
-            <div class="card-body">
-                <form id="settings-form">
-                    <div class="form-group">
-                        <label for="platform-name" class="form-label">Platform Name</label>
-                        <input
-                            type="text"
-                            id="platform-name"
-                            name="platformName"
-                            class="form-input"
-                            placeholder="PMTwin"
-                        >
-                        <small class="form-help">Display name used in the application header and branding</small>
-                    </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Maintenance Mode</label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="maintenance-mode" name="maintenanceMode" value="1">
-                            <span>Enable maintenance mode (shows a notice to users; admins can still access)</span>
-                        </label>
-                    </div>
+    <div class="page-body admin-settings-body">
 
-                    <div class="form-group">
-                        <label for="matching-threshold" class="form-label">Matching Threshold (%)</label>
-                        <input 
-                            type="number" 
-                            id="matching-threshold" 
-                            name="matchingThreshold" 
-                            class="form-input" 
-                            min="0" 
-                            max="100" 
-                            value="70"
-                        >
-                        <small class="form-help">Minimum match score percentage for recommendations</small>
+        <!-- Sidebar -->
+        <aside class="admin-settings-sidebar" id="settings-sidebar" aria-label="Settings categories">
+            <nav class="admin-settings-nav" role="tablist" aria-orientation="vertical">
+                <button type="button" class="admin-settings-nav-item is-active" role="tab" data-tab="general" aria-selected="true">
+                    <i class="ph-duotone ph-gear-six" aria-hidden="true"></i>
+                    <span>General</span>
+                </button>
+                <button type="button" class="admin-settings-nav-item" role="tab" data-tab="branding" aria-selected="false">
+                    <i class="ph-duotone ph-paint-brush-broad" aria-hidden="true"></i>
+                    <span>Branding</span>
+                </button>
+                <button type="button" class="admin-settings-nav-item" role="tab" data-tab="security" aria-selected="false">
+                    <i class="ph-duotone ph-shield-check" aria-hidden="true"></i>
+                    <span>Security &amp; sessions</span>
+                </button>
+                <button type="button" class="admin-settings-nav-item" role="tab" data-tab="matching" aria-selected="false">
+                    <i class="ph-duotone ph-magnet-straight" aria-hidden="true"></i>
+                    <span>Matching algorithm</span>
+                </button>
+                <button type="button" class="admin-settings-nav-item" role="tab" data-tab="workflow" aria-selected="false">
+                    <i class="ph-duotone ph-tree-structure" aria-hidden="true"></i>
+                    <span>Workflow &amp; negotiation</span>
+                </button>
+                <button type="button" class="admin-settings-nav-item" role="tab" data-tab="exchange" aria-selected="false">
+                    <i class="ph-duotone ph-arrows-left-right" aria-hidden="true"></i>
+                    <span>Exchange rules</span>
+                </button>
+                <button type="button" class="admin-settings-nav-item" role="tab" data-tab="collab" aria-selected="false">
+                    <i class="ph-duotone ph-users-three" aria-hidden="true"></i>
+                    <span>Collaboration models</span>
+                </button>
+                <button type="button" class="admin-settings-nav-item" role="tab" data-tab="notifications" aria-selected="false">
+                    <i class="ph-duotone ph-bell-ringing" aria-hidden="true"></i>
+                    <span>Notifications</span>
+                </button>
+                <button type="button" class="admin-settings-nav-item" role="tab" data-tab="lookups" aria-selected="false">
+                    <i class="ph-duotone ph-list-bullets" aria-hidden="true"></i>
+                    <span>Lookups &amp; taxonomy</span>
+                </button>
+                <button type="button" class="admin-settings-nav-item" role="tab" data-tab="audit" aria-selected="false">
+                    <i class="ph-duotone ph-clipboard-text" aria-hidden="true"></i>
+                    <span>Audit &amp; compliance</span>
+                </button>
+                <button type="button" class="admin-settings-nav-item" role="tab" data-tab="flags" aria-selected="false">
+                    <i class="ph-duotone ph-flag" aria-hidden="true"></i>
+                    <span>Feature flags</span>
+                </button>
+                <button type="button" class="admin-settings-nav-item" role="tab" data-tab="data" aria-selected="false">
+                    <i class="ph-duotone ph-database" aria-hidden="true"></i>
+                    <span>Data management</span>
+                </button>
+                <button type="button" class="admin-settings-nav-item" role="tab" data-tab="about" aria-selected="false">
+                    <i class="ph-duotone ph-info" aria-hidden="true"></i>
+                    <span>About</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Content -->
+        <div class="admin-settings-content">
+
+            <!-- General -->
+            <section class="admin-settings-panel is-active" role="tabpanel" data-tab-panel="general" aria-labelledby="general">
+                <header class="admin-settings-panel-header">
+                    <h2 class="admin-settings-panel-title">General</h2>
+                    <p class="admin-settings-panel-desc">Platform identity, locale, and maintenance.</p>
+                </header>
+                <form id="form-general" class="card admin-settings-card" autocomplete="off">
+                    <div class="card-body admin-settings-card-body">
+                        <div class="form-group">
+                            <label for="platform-name" class="form-label">Platform name</label>
+                            <input type="text" id="platform-name" name="platformName" class="form-input" placeholder="PMTwin">
+                            <small class="form-help">Display name used in the application header, sidebar, and tab title.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="app-description" class="form-label">Tagline / description</label>
+                            <input type="text" id="app-description" name="appDescription" class="form-input" placeholder="Construction Collaboration Platform">
+                            <small class="form-help">Short tagline shown on the login page and meta description.</small>
+                        </div>
+                        <div class="admin-settings-row">
+                            <div class="form-group">
+                                <label for="default-locale" class="form-label">Default locale</label>
+                                <select id="default-locale" name="defaultLocale" class="form-input">
+                                    <option value="en-US">English (United States)</option>
+                                    <option value="en-GB">English (United Kingdom)</option>
+                                    <option value="ar-SA">Arabic (Saudi Arabia)</option>
+                                    <option value="fr-FR">French (France)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="default-timezone" class="form-label">Default timezone</label>
+                                <select id="default-timezone" name="defaultTimezone" class="form-input">
+                                    <option value="Asia/Riyadh">Asia/Riyadh (UTC+3)</option>
+                                    <option value="UTC">UTC</option>
+                                    <option value="Europe/London">Europe/London</option>
+                                    <option value="America/New_York">America/New_York</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group admin-settings-toggle-row">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="maintenance-mode" name="maintenanceMode" value="1">
+                                <span>
+                                    <strong>Enable maintenance mode</strong>
+                                    <small>Shows a notice to all users; admins can still access the portal.</small>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="maintenance-message" class="form-label">Maintenance message</label>
+                            <textarea id="maintenance-message" name="maintenanceMessage" class="form-input" rows="2" placeholder="We will be back shortly..."></textarea>
+                        </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="auto-notify-threshold" class="form-label">Auto-Notify Threshold (%)</label>
-                        <input 
-                            type="number" 
-                            id="auto-notify-threshold" 
-                            name="autoNotifyThreshold" 
-                            class="form-input" 
-                            min="0" 
-                            max="100" 
-                            value="80"
-                        >
-                        <small class="form-help">Match score percentage to automatically notify users</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="session-duration" class="form-label">Session Duration (hours)</label>
-                        <input 
-                            type="number" 
-                            id="session-duration" 
-                            name="sessionDuration" 
-                            class="form-input" 
-                            min="1" 
-                            max="168" 
-                            value="24"
-                        >
-                        <small class="form-help">How long user sessions remain active</small>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                    <footer class="admin-settings-footer">
+                        <button type="submit" class="btn btn-primary" data-write-cap="admin.settings.write">Save general settings</button>
+                    </footer>
                 </form>
-            </div>
+            </section>
+
+            <!-- Branding -->
+            <section class="admin-settings-panel" role="tabpanel" data-tab-panel="branding" hidden>
+                <header class="admin-settings-panel-header">
+                    <h2 class="admin-settings-panel-title">Branding</h2>
+                    <p class="admin-settings-panel-desc">Colors and assets that visually identify the platform. Color changes apply instantly.</p>
+                </header>
+                <form id="form-branding" class="card admin-settings-card" autocomplete="off">
+                    <div class="card-body admin-settings-card-body">
+                        <div class="admin-settings-row">
+                            <div class="form-group">
+                                <label for="branding-primary-color" class="form-label">Primary color</label>
+                                <div class="admin-settings-color-row">
+                                    <input type="color" id="branding-primary-color" name="primaryColor" value="#0d9488">
+                                    <input type="text" id="branding-primary-color-hex" class="form-input admin-settings-color-hex" value="#0d9488">
+                                </div>
+                                <small class="form-help">Used for buttons, links, highlights.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="branding-primary-dark" class="form-label">Primary (dark variant)</label>
+                                <div class="admin-settings-color-row">
+                                    <input type="color" id="branding-primary-dark" name="primaryDark" value="#0f766e">
+                                    <input type="text" id="branding-primary-dark-hex" class="form-input admin-settings-color-hex" value="#0f766e">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="admin-settings-row">
+                            <div class="form-group">
+                                <label for="branding-accent" class="form-label">Accent color</label>
+                                <div class="admin-settings-color-row">
+                                    <input type="color" id="branding-accent" name="accentColor" value="#2dd4bf">
+                                    <input type="text" id="branding-accent-hex" class="form-input admin-settings-color-hex" value="#2dd4bf">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="branding-bg-secondary" class="form-label">Page background</label>
+                                <div class="admin-settings-color-row">
+                                    <input type="color" id="branding-bg-secondary" name="bgSecondary" value="#f8fafc">
+                                    <input type="text" id="branding-bg-secondary-hex" class="form-input admin-settings-color-hex" value="#f8fafc">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="branding-logo-url" class="form-label">Logo URL</label>
+                            <input type="url" id="branding-logo-url" name="logoUrl" class="form-input" placeholder="https://...">
+                            <small class="form-help">Optional. Recommended SVG or PNG with transparent background.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="branding-favicon-url" class="form-label">Favicon URL</label>
+                            <input type="url" id="branding-favicon-url" name="faviconUrl" class="form-input" placeholder="https://...">
+                            <small class="form-help">Optional. 32x32 PNG or SVG.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="branding-login-bg" class="form-label">Login background URL</label>
+                            <input type="url" id="branding-login-bg" name="loginBackground" class="form-input" placeholder="https://...">
+                        </div>
+                        <div class="admin-settings-preview" aria-live="polite">
+                            <span class="admin-settings-preview-label">Preview</span>
+                            <div class="admin-settings-preview-row">
+                                <span class="admin-settings-preview-chip" id="preview-primary">Primary</span>
+                                <span class="admin-settings-preview-chip" id="preview-primary-dark">Primary dark</span>
+                                <span class="admin-settings-preview-chip" id="preview-accent">Accent</span>
+                            </div>
+                        </div>
+                    </div>
+                    <footer class="admin-settings-footer">
+                        <button type="button" id="branding-reset" class="btn btn-secondary">Reset to defaults</button>
+                        <button type="submit" class="btn btn-primary" data-write-cap="admin.settings.write">Save branding</button>
+                    </footer>
+                </form>
+            </section>
+
+            <!-- Security -->
+            <section class="admin-settings-panel" role="tabpanel" data-tab-panel="security" hidden>
+                <header class="admin-settings-panel-header">
+                    <h2 class="admin-settings-panel-title">Security &amp; sessions</h2>
+                    <p class="admin-settings-panel-desc">Session lifetimes, password requirements, social login, and the admin capability matrix.</p>
+                </header>
+                <form id="form-security" class="card admin-settings-card" autocomplete="off">
+                    <div class="card-body admin-settings-card-body">
+                        <div class="admin-settings-row">
+                            <div class="form-group">
+                                <label for="session-duration" class="form-label">Session duration (hours)</label>
+                                <input type="number" id="session-duration" name="sessionDuration" class="form-input" min="1" max="168" value="24">
+                                <small class="form-help">How long user sessions remain active before requiring sign-in again.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="reset-token-ttl" class="form-label">Reset token TTL (minutes)</label>
+                                <input type="number" id="reset-token-ttl" name="resetTokenTtl" class="form-input" min="5" max="1440" value="30">
+                            </div>
+                        </div>
+                        <div class="admin-settings-row">
+                            <div class="form-group">
+                                <label for="password-min-length" class="form-label">Password minimum length</label>
+                                <input type="number" id="password-min-length" name="passwordMinLength" class="form-input" min="4" max="64" value="8">
+                            </div>
+                            <div class="form-group">
+                                <label for="max-failed-attempts" class="form-label">Max failed login attempts</label>
+                                <input type="number" id="max-failed-attempts" name="maxFailedAttempts" class="form-input" min="1" max="20" value="5">
+                            </div>
+                        </div>
+                        <div class="form-group admin-settings-toggle-row">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="password-require-digit" name="passwordRequireDigit" value="1">
+                                <span><strong>Require digit</strong><small>Passwords must include at least one digit.</small></span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="password-require-symbol" name="passwordRequireSymbol" value="1">
+                                <span><strong>Require symbol</strong><small>Passwords must include at least one non-alphanumeric character.</small></span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="password-require-uppercase" name="passwordRequireUppercase" value="1">
+                                <span><strong>Require uppercase letter</strong></span>
+                            </label>
+                        </div>
+                        <div class="form-group admin-settings-toggle-row">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enforce-2fa" name="enforce2fa" value="1">
+                                <span><strong>Enforce two-factor authentication</strong><small>Placeholder for the POC; no real 2FA wired yet.</small></span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="social-login-enabled" name="socialLoginEnabled" value="1">
+                                <span><strong>Enable social login (Google / LinkedIn)</strong><small>OAuth provider integration is not implemented in the POC.</small></span>
+                            </label>
+                        </div>
+                    </div>
+                    <footer class="admin-settings-footer">
+                        <button type="submit" class="btn btn-primary" data-write-cap="admin.settings.write">Save security settings</button>
+                    </footer>
+                </form>
+
+                <div class="card admin-settings-card admin-settings-readonly">
+                    <div class="card-header">
+                        <h3 class="admin-settings-subtitle">Admin capability matrix (read-only)</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="admin-settings-help">Changing this matrix requires editing <code>auth-service.js</code>.</p>
+                        <div id="capability-matrix" class="admin-settings-cap-matrix"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Matching algorithm -->
+            <section class="admin-settings-panel" role="tabpanel" data-tab-panel="matching" hidden>
+                <header class="admin-settings-panel-header">
+                    <h2 class="admin-settings-panel-title">Matching algorithm</h2>
+                    <p class="admin-settings-panel-desc">Thresholds, score weights, and tuning knobs for the post-to-post and opportunity matcher.</p>
+                </header>
+                <form id="form-matching" class="card admin-settings-card" autocomplete="off">
+                    <div class="card-body admin-settings-card-body">
+                        <div class="admin-settings-row">
+                            <div class="form-group">
+                                <label for="matching-threshold" class="form-label">Minimum match threshold (%)</label>
+                                <input type="number" id="matching-threshold" name="matchingThreshold" class="form-input" min="0" max="100" value="70">
+                                <small class="form-help">Matches below this score are not surfaced.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="auto-notify-threshold" class="form-label">Auto-notify threshold (%)</label>
+                                <input type="number" id="auto-notify-threshold" name="autoNotifyThreshold" class="form-input" min="0" max="100" value="80">
+                                <small class="form-help">Scores at or above this auto-create user notifications.</small>
+                            </div>
+                        </div>
+                        <div class="admin-settings-row">
+                            <div class="form-group">
+                                <label for="post-to-post-threshold" class="form-label">Post-to-post threshold (%)</label>
+                                <input type="number" id="post-to-post-threshold" name="postToPostThreshold" class="form-input" min="0" max="100" value="50">
+                            </div>
+                            <div class="form-group">
+                                <label for="candidate-max" class="form-label">Max candidates per run</label>
+                                <input type="number" id="candidate-max" name="candidateMax" class="form-input" min="10" max="2000" value="200">
+                            </div>
+                        </div>
+
+                        <div class="admin-settings-weights-block">
+                            <div class="admin-settings-subheader">
+                                <h3 class="admin-settings-subtitle">Score weights</h3>
+                                <div class="admin-settings-weights-actions">
+                                    <button type="button" class="btn btn-secondary btn-sm-touch" id="apply-balanced-preset">Apply balanced preset</button>
+                                    <button type="button" class="btn btn-secondary btn-sm-touch" id="apply-design-preset">Apply design preset (skills-first)</button>
+                                </div>
+                            </div>
+                            <p class="admin-settings-help">Adjust how much each factor influences the overall match score. Total must equal 100%.</p>
+                            <div id="weights-grid" class="admin-settings-weights-grid"></div>
+                            <div class="admin-settings-weights-total" id="weights-total" data-state="ok">Total: 100%</div>
+                        </div>
+
+                        <div class="admin-settings-row">
+                            <div class="form-group">
+                                <label for="value-compat-max" class="form-label">Value compatibility max points</label>
+                                <input type="number" id="value-compat-max" name="valueCompatibilityMaxPoints" class="form-input" min="0" max="100" value="15">
+                            </div>
+                            <div class="form-group">
+                                <label for="label-threshold-match" class="form-label">Label threshold "match"</label>
+                                <input type="number" id="label-threshold-match" name="labelThresholdMatch" class="form-input" min="0" max="1" step="0.01" value="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="label-threshold-partial" class="form-label">Label threshold "partial"</label>
+                                <input type="number" id="label-threshold-partial" name="labelThresholdPartial" class="form-input" min="0" max="1" step="0.01" value="0.25">
+                            </div>
+                        </div>
+
+                        <div class="admin-settings-subheader">
+                            <h3 class="admin-settings-subtitle">Value risk factors</h3>
+                            <p class="admin-settings-help">Multiplier applied to each exchange mode when computing value compatibility. 1.0 = full value, 0.5 = 50% discounted.</p>
+                        </div>
+                        <div id="value-risk-grid" class="admin-settings-risk-grid"></div>
+
+                        <div class="form-group admin-settings-toggle-row">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="matching-debug" name="matchingDebug" value="1">
+                                <span><strong>Matching debug logging</strong><small>Print verbose matcher diagnostics to the browser console.</small></span>
+                            </label>
+                        </div>
+                    </div>
+                    <footer class="admin-settings-footer">
+                        <a href="#" data-route="/admin/matching" class="btn btn-secondary">Open Matching Center</a>
+                        <button type="submit" class="btn btn-primary" data-write-cap="admin.settings.write">Save matching settings</button>
+                    </footer>
+                </form>
+            </section>
+
+            <!-- Workflow & negotiation -->
+            <section class="admin-settings-panel" role="tabpanel" data-tab-panel="workflow" hidden>
+                <header class="admin-settings-panel-header">
+                    <h2 class="admin-settings-panel-title">Workflow &amp; negotiation</h2>
+                    <p class="admin-settings-panel-desc">Negotiation limits, consortium replacement rules, and workflow transitions.</p>
+                </header>
+                <form id="form-workflow" class="card admin-settings-card" autocomplete="off">
+                    <div class="card-body admin-settings-card-body">
+                        <div class="admin-settings-row">
+                            <div class="form-group">
+                                <label for="negotiation-max-rounds" class="form-label">Max negotiation rounds</label>
+                                <input type="number" id="negotiation-max-rounds" name="negotiationMaxRounds" class="form-input" min="1" max="50" value="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="negotiation-expire-days" class="form-label">Negotiation expiry (days)</label>
+                                <input type="number" id="negotiation-expire-days" name="negotiationExpireDays" class="form-input" min="1" max="90" value="14">
+                            </div>
+                        </div>
+                        <div class="admin-settings-row">
+                            <div class="form-group">
+                                <label for="consortium-min-participants" class="form-label">Consortium minimum participants</label>
+                                <input type="number" id="consortium-min-participants" name="consortiumMinParticipants" class="form-input" min="2" max="20" value="2">
+                            </div>
+                            <div class="form-group">
+                                <label for="max-replacement-attempts" class="form-label">Max replacement attempts</label>
+                                <input type="number" id="max-replacement-attempts" name="maxReplacementAttempts" class="form-input" min="1" max="20" value="5">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Consortium replacement allowed stages</label>
+                            <div id="consortium-stages" class="admin-settings-chips"></div>
+                            <small class="form-help">Stages at which a dropped participant can be replaced.</small>
+                        </div>
+                    </div>
+                    <footer class="admin-settings-footer">
+                        <button type="submit" class="btn btn-primary" data-write-cap="admin.settings.write">Save workflow settings</button>
+                    </footer>
+                </form>
+
+                <div class="card admin-settings-card admin-settings-readonly">
+                    <div class="card-header">
+                        <h3 class="admin-settings-subtitle">Workflow transitions (read-only)</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="admin-settings-help">Defined in <code>core/workflow/workflow-engine.js</code>.</p>
+                        <div id="workflow-rules" class="admin-settings-workflow"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Exchange rules -->
+            <section class="admin-settings-panel" role="tabpanel" data-tab-panel="exchange" hidden>
+                <header class="admin-settings-panel-header">
+                    <h2 class="admin-settings-panel-title">Exchange rules</h2>
+                    <p class="admin-settings-panel-desc">Override conversion rules used by the Equivalence Calculator. Resolution priority: campaign &rarr; tier &rarr; custom &rarr; default.</p>
+                </header>
+                <form id="form-exchange" class="card admin-settings-card" autocomplete="off">
+                    <div class="card-body admin-settings-card-body">
+                        <div class="form-group">
+                            <label for="exchange-campaigns" class="form-label">Campaign IDs</label>
+                            <div id="exchange-campaigns-tags" class="admin-settings-chips"></div>
+                            <input type="text" id="exchange-campaigns-input" class="form-input" placeholder="Type a campaign id and press Enter">
+                            <small class="form-help">Campaign-specific overrides (highest priority). IDs only; rule mappings can be edited in the custom JSON below.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="exchange-tiers" class="form-label">Tier names</label>
+                            <div id="exchange-tiers-tags" class="admin-settings-chips"></div>
+                            <input type="text" id="exchange-tiers-input" class="form-input" placeholder="Type a tier name and press Enter">
+                            <small class="form-help">Tier-level overrides (medium priority).</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="exchange-custom-json" class="form-label">Custom rules (JSON)</label>
+                            <textarea id="exchange-custom-json" name="exchangeCustom" class="form-input admin-settings-json-editor" rows="10" spellcheck="false"></textarea>
+                            <div class="admin-settings-json-actions">
+                                <button type="button" class="btn btn-secondary btn-sm-touch" data-json-action="validate" data-json-target="exchange-custom-json">Validate JSON</button>
+                                <button type="button" class="btn btn-secondary btn-sm-touch" data-json-action="format" data-json-target="exchange-custom-json">Format</button>
+                            </div>
+                            <small class="form-help">Keyed by <code>{fromAsset}_to_{toAsset}</code>. See built-in defaults below.</small>
+                        </div>
+                    </div>
+                    <footer class="admin-settings-footer">
+                        <button type="submit" class="btn btn-primary" data-write-cap="admin.settings.write">Save exchange rules</button>
+                    </footer>
+                </form>
+
+                <div class="card admin-settings-card admin-settings-readonly">
+                    <div class="card-header">
+                        <h3 class="admin-settings-subtitle">Built-in default rules (read-only)</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="exchange-defaults" class="admin-settings-defaults"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Collaboration models -->
+            <section class="admin-settings-panel" role="tabpanel" data-tab-panel="collab" hidden>
+                <header class="admin-settings-panel-header">
+                    <h2 class="admin-settings-panel-title">Collaboration models</h2>
+                    <p class="admin-settings-panel-desc">Enable, rename, and order the top-level collaboration models offered in opportunity creation.</p>
+                </header>
+                <form id="form-collab" class="card admin-settings-card" autocomplete="off">
+                    <div class="card-body admin-settings-card-body">
+                        <div id="collab-models-list" class="admin-settings-collab-list"></div>
+                    </div>
+                    <footer class="admin-settings-footer">
+                        <a href="#" data-route="/admin/collaboration-models" class="btn btn-secondary">Open dedicated editor</a>
+                        <button type="submit" class="btn btn-primary" data-write-cap="admin.settings.write">Save collaboration models</button>
+                    </footer>
+                </form>
+
+                <div class="card admin-settings-card admin-settings-readonly">
+                    <div class="card-header">
+                        <h3 class="admin-settings-subtitle">Sub-model eligibility (read-only)</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="admin-settings-help">Entity types allowed per sub-model. Defined in <code>config.js</code>.</p>
+                        <div id="eligibility-list" class="admin-settings-defaults"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Notifications -->
+            <section class="admin-settings-panel" role="tabpanel" data-tab-panel="notifications" hidden>
+                <header class="admin-settings-panel-header">
+                    <h2 class="admin-settings-panel-title">Notifications</h2>
+                    <p class="admin-settings-panel-desc">Channels, event subscriptions, and digest cadence.</p>
+                </header>
+                <form id="form-notifications" class="card admin-settings-card" autocomplete="off">
+                    <div class="card-body admin-settings-card-body">
+                        <h3 class="admin-settings-subtitle">Channels</h3>
+                        <div class="form-group admin-settings-toggle-row">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="channel-inapp" name="channelInApp" value="1" checked>
+                                <span><strong>In-app</strong><small>Notification bell and notifications page.</small></span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="channel-email" name="channelEmail" value="1">
+                                <span><strong>Email</strong><small>Requires backend mail provider (placeholder).</small></span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="channel-sms" name="channelSms" value="1">
+                                <span><strong>SMS</strong><small>Requires backend SMS provider (placeholder).</small></span>
+                            </label>
+                        </div>
+
+                        <h3 class="admin-settings-subtitle">Event categories</h3>
+                        <div class="form-group admin-settings-toggle-row">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="event-matches" name="eventMatches" value="1" checked>
+                                <span><strong>Matches</strong><small>New matches and auto-notify alerts.</small></span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="event-deals" name="eventDeals" value="1" checked>
+                                <span><strong>Deals</strong><small>Negotiation, signing, execution updates.</small></span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="event-contracts" name="eventContracts" value="1" checked>
+                                <span><strong>Contracts</strong><small>Contract creation, activation, termination.</small></span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="event-system" name="eventSystem" value="1" checked>
+                                <span><strong>System</strong><small>Maintenance, admin actions, security events.</small></span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="event-marketing" name="eventMarketing" value="1">
+                                <span><strong>Marketing</strong><small>Product news, tips, announcements.</small></span>
+                            </label>
+                        </div>
+
+                        <div class="admin-settings-row">
+                            <div class="form-group">
+                                <label for="digest-frequency" class="form-label">Digest frequency</label>
+                                <select id="digest-frequency" name="digestFrequency" class="form-input">
+                                    <option value="instant">Instant</option>
+                                    <option value="daily">Daily digest</option>
+                                    <option value="weekly">Weekly digest</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="digest-hour" class="form-label">Digest send hour (local)</label>
+                                <input type="number" id="digest-hour" name="digestHour" class="form-input" min="0" max="23" value="9">
+                            </div>
+                        </div>
+                    </div>
+                    <footer class="admin-settings-footer">
+                        <button type="submit" class="btn btn-primary" data-write-cap="admin.settings.write">Save notification settings</button>
+                    </footer>
+                </form>
+            </section>
+
+            <!-- Lookups & taxonomy -->
+            <section class="admin-settings-panel" role="tabpanel" data-tab-panel="lookups" hidden>
+                <header class="admin-settings-panel-header">
+                    <h2 class="admin-settings-panel-title">Lookups &amp; taxonomy</h2>
+                    <p class="admin-settings-panel-desc">Override the platform's reference data: skills, categories, lookups, and valid sectors.</p>
+                </header>
+
+                <div class="card admin-settings-card">
+                    <div class="card-header">
+                        <h3 class="admin-settings-subtitle">Lookups override</h3>
+                    </div>
+                    <div class="card-body admin-settings-card-body">
+                        <p class="admin-settings-help">Replaces <code>data/lookups.json</code> when set. Used in registration, profile, and opportunity wizard forms.</p>
+                        <textarea id="lookups-override-json" class="form-input admin-settings-json-editor" rows="10" spellcheck="false" placeholder="{ &quot;skills&quot;: [...], &quot;skillCategories&quot;: [...] }"></textarea>
+                        <div class="admin-settings-json-actions">
+                            <button type="button" class="btn btn-secondary btn-sm-touch" data-json-action="validate" data-json-target="lookups-override-json">Validate JSON</button>
+                            <button type="button" class="btn btn-secondary btn-sm-touch" data-json-action="format" data-json-target="lookups-override-json">Format</button>
+                            <button type="button" class="btn btn-secondary btn-sm-touch" id="lookups-load-default">Load default</button>
+                            <button type="button" class="btn btn-danger btn-sm-touch" id="lookups-clear">Clear override</button>
+                        </div>
+                    </div>
+                    <footer class="admin-settings-footer">
+                        <a href="#" data-route="/admin/skills" class="btn btn-secondary">Skills manager</a>
+                        <button type="button" id="lookups-save" class="btn btn-primary" data-write-cap="admin.settings.write">Save lookups override</button>
+                    </footer>
+                </div>
+
+                <div class="card admin-settings-card">
+                    <div class="card-header">
+                        <h3 class="admin-settings-subtitle">Skill canonical override</h3>
+                    </div>
+                    <div class="card-body admin-settings-card-body">
+                        <p class="admin-settings-help">Replaces <code>data/skill-canonical.json</code>. Used by skill normalization and semantic matching.</p>
+                        <textarea id="skill-canonical-json" class="form-input admin-settings-json-editor" rows="8" spellcheck="false"></textarea>
+                        <div class="admin-settings-json-actions">
+                            <button type="button" class="btn btn-secondary btn-sm-touch" data-json-action="validate" data-json-target="skill-canonical-json">Validate JSON</button>
+                            <button type="button" class="btn btn-secondary btn-sm-touch" data-json-action="format" data-json-target="skill-canonical-json">Format</button>
+                            <button type="button" class="btn btn-secondary btn-sm-touch" id="canonical-load-default">Load default</button>
+                            <button type="button" class="btn btn-danger btn-sm-touch" id="canonical-clear">Clear override</button>
+                        </div>
+                    </div>
+                    <footer class="admin-settings-footer">
+                        <button type="button" id="canonical-save" class="btn btn-primary" data-write-cap="admin.settings.write">Save canonical override</button>
+                    </footer>
+                </div>
+
+                <form id="form-sectors" class="card admin-settings-card">
+                    <div class="card-header">
+                        <h3 class="admin-settings-subtitle">Valid sectors</h3>
+                    </div>
+                    <div class="card-body admin-settings-card-body">
+                        <p class="admin-settings-help">Sector tags used for profile interest filtering and matching. Press Enter to add.</p>
+                        <div id="valid-sectors-tags" class="admin-settings-chips"></div>
+                        <input type="text" id="valid-sectors-input" class="form-input" placeholder="Type a sector and press Enter">
+                    </div>
+                    <footer class="admin-settings-footer">
+                        <button type="submit" class="btn btn-primary" data-write-cap="admin.settings.write">Save sectors</button>
+                    </footer>
+                </form>
+            </section>
+
+            <!-- Audit & compliance -->
+            <section class="admin-settings-panel" role="tabpanel" data-tab-panel="audit" hidden>
+                <header class="admin-settings-panel-header">
+                    <h2 class="admin-settings-panel-title">Audit &amp; compliance</h2>
+                    <p class="admin-settings-panel-desc">Audit log retention and export.</p>
+                </header>
+                <form id="form-audit" class="card admin-settings-card" autocomplete="off">
+                    <div class="card-body admin-settings-card-body">
+                        <div class="admin-settings-row">
+                            <div class="form-group">
+                                <label for="audit-max-entries" class="form-label">Max audit entries</label>
+                                <input type="number" id="audit-max-entries" name="auditMaxEntries" class="form-input" min="100" max="100000" value="1000">
+                                <small class="form-help">When exceeded, oldest entries are dropped first.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="audit-retention-days" class="form-label">Retention (days)</label>
+                                <input type="number" id="audit-retention-days" name="auditRetentionDays" class="form-input" min="7" max="3650" value="365">
+                                <small class="form-help">For reporting; the in-memory cap above is what actually enforces removal in the POC.</small>
+                            </div>
+                        </div>
+                        <div class="admin-settings-stats">
+                            <div class="admin-settings-stat">
+                                <span class="admin-settings-stat-label">Current audit entries</span>
+                                <span class="admin-settings-stat-value" id="audit-current-count">-</span>
+                            </div>
+                            <div class="admin-settings-stat">
+                                <span class="admin-settings-stat-label">Oldest entry</span>
+                                <span class="admin-settings-stat-value" id="audit-oldest">-</span>
+                            </div>
+                            <div class="admin-settings-stat">
+                                <span class="admin-settings-stat-label">Newest entry</span>
+                                <span class="admin-settings-stat-value" id="audit-newest">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <footer class="admin-settings-footer">
+                        <a href="#" data-route="/admin/audit" class="btn btn-secondary">Open audit trail</a>
+                        <button type="button" id="audit-export" class="btn btn-secondary">Export audit log (JSON)</button>
+                        <button type="submit" class="btn btn-primary" data-write-cap="admin.settings.write">Save audit settings</button>
+                    </footer>
+                </form>
+
+                <div class="card admin-settings-card admin-settings-danger-card">
+                    <div class="card-header">
+                        <h3 class="admin-settings-subtitle">Danger zone</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="admin-settings-help">Permanently clear the audit log. This cannot be undone.</p>
+                        <button type="button" id="audit-clear" class="btn btn-danger" data-write-cap="admin.settings.write">Clear audit log</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Feature flags -->
+            <section class="admin-settings-panel" role="tabpanel" data-tab-panel="flags" hidden>
+                <header class="admin-settings-panel-header">
+                    <h2 class="admin-settings-panel-title">Feature flags</h2>
+                    <p class="admin-settings-panel-desc">Enable or disable experimental and optional features.</p>
+                </header>
+                <form id="form-flags" class="card admin-settings-card" autocomplete="off">
+                    <div class="card-body admin-settings-card-body">
+                        <div id="feature-flags-list" class="admin-settings-flags-list"></div>
+                    </div>
+                    <footer class="admin-settings-footer">
+                        <button type="submit" class="btn btn-primary" data-write-cap="admin.settings.write">Save feature flags</button>
+                    </footer>
+                </form>
+            </section>
+
+            <!-- Data management -->
+            <section class="admin-settings-panel" role="tabpanel" data-tab-panel="data" hidden>
+                <header class="admin-settings-panel-header">
+                    <h2 class="admin-settings-panel-title">Data management</h2>
+                    <p class="admin-settings-panel-desc">Inspect storage usage, export and import data, and reset to seed.</p>
+                </header>
+                <div class="card admin-settings-card">
+                    <div class="card-header">
+                        <h3 class="admin-settings-subtitle">Storage overview</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="admin-settings-storage-bar" aria-label="Storage usage">
+                            <div class="admin-settings-storage-bar-fill" id="storage-bar-fill"></div>
+                        </div>
+                        <p class="admin-settings-help" id="storage-usage-line">Calculating...</p>
+                        <div class="admin-settings-stats">
+                            <div class="admin-settings-stat">
+                                <span class="admin-settings-stat-label">Users</span>
+                                <span class="admin-settings-stat-value" id="data-users-count">-</span>
+                            </div>
+                            <div class="admin-settings-stat">
+                                <span class="admin-settings-stat-label">Companies</span>
+                                <span class="admin-settings-stat-value" id="data-companies-count">-</span>
+                            </div>
+                            <div class="admin-settings-stat">
+                                <span class="admin-settings-stat-label">Opportunities</span>
+                                <span class="admin-settings-stat-value" id="data-opps-count">-</span>
+                            </div>
+                            <div class="admin-settings-stat">
+                                <span class="admin-settings-stat-label">Deals</span>
+                                <span class="admin-settings-stat-value" id="data-deals-count">-</span>
+                            </div>
+                            <div class="admin-settings-stat">
+                                <span class="admin-settings-stat-label">Contracts</span>
+                                <span class="admin-settings-stat-value" id="data-contracts-count">-</span>
+                            </div>
+                            <div class="admin-settings-stat">
+                                <span class="admin-settings-stat-label">Notifications</span>
+                                <span class="admin-settings-stat-value" id="data-notifs-count">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card admin-settings-card">
+                    <div class="card-header">
+                        <h3 class="admin-settings-subtitle">Per-key breakdown</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="storage-keys-table" class="admin-settings-keys-table"></div>
+                    </div>
+                </div>
+
+                <div class="card admin-settings-card">
+                    <div class="card-header">
+                        <h3 class="admin-settings-subtitle">Export &amp; import</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="admin-settings-help">Export everything in <code>localStorage</code> under the <code>pmtwin_*</code> prefix to a JSON file, or restore from one.</p>
+                        <div class="admin-settings-data-actions">
+                            <button type="button" id="data-export" class="btn btn-secondary">Export all data (JSON)</button>
+                            <label class="btn btn-secondary admin-settings-import-label">
+                                <span>Import data...</span>
+                                <input type="file" id="data-import" accept="application/json" hidden>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card admin-settings-card admin-settings-danger-card">
+                    <div class="card-header">
+                        <h3 class="admin-settings-subtitle">Danger zone</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="admin-settings-help">Reset all data back to the seed JSON files, or clear individual stores. This cannot be undone.</p>
+                        <div class="admin-settings-data-actions">
+                            <button type="button" id="data-reset" class="btn btn-danger" data-write-cap="admin.settings.write">Reset to seed</button>
+                            <button type="button" id="data-clear-settings" class="btn btn-danger" data-write-cap="admin.settings.write">Reset settings to defaults</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About -->
+            <section class="admin-settings-panel" role="tabpanel" data-tab-panel="about" hidden>
+                <header class="admin-settings-panel-header">
+                    <h2 class="admin-settings-panel-title">About</h2>
+                    <p class="admin-settings-panel-desc">Build info, environment, and limitations.</p>
+                </header>
+                <div class="card admin-settings-card">
+                    <div class="card-body">
+                        <div class="admin-settings-info-grid">
+                            <div class="admin-settings-info">
+                                <strong>App name</strong>
+                                <span id="about-app-name">-</span>
+                            </div>
+                            <div class="admin-settings-info">
+                                <strong>Version</strong>
+                                <span id="about-app-version">-</span>
+                            </div>
+                            <div class="admin-settings-info">
+                                <strong>Base path</strong>
+                                <span id="about-base-path">-</span>
+                            </div>
+                            <div class="admin-settings-info">
+                                <strong>API base URL</strong>
+                                <span id="about-api-base">-</span>
+                            </div>
+                            <div class="admin-settings-info">
+                                <strong>Storage type</strong>
+                                <span>localStorage (POC)</span>
+                            </div>
+                            <div class="admin-settings-info">
+                                <strong>Environment</strong>
+                                <span id="about-env">POC</span>
+                            </div>
+                            <div class="admin-settings-info">
+                                <strong>Last settings save</strong>
+                                <span id="about-last-saved">Never</span>
+                            </div>
+                            <div class="admin-settings-info">
+                                <strong>Signed-in admin</strong>
+                                <span id="about-current-admin">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card admin-settings-card admin-settings-readonly">
+                    <div class="card-header">
+                        <h3 class="admin-settings-subtitle">Out of scope</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="admin-settings-list">
+                            <li>OAuth (social login) - placeholder toggle only.</li>
+                            <li>Server-side webhooks and external integrations.</li>
+                            <li>Editing the admin capability matrix - requires editing <code>auth-service.js</code>.</li>
+                            <li>Email / SMS delivery providers - placeholder toggles only.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
         </div>
-        
-        <div class="card">
-            <div class="card-header">
-                <h2>System Information</h2>
-            </div>
-            <div class="card-body">
-                <div class="info-item">
-                    <strong>Platform Version:</strong>
-                    <span>1.0.0 (POC)</span>
-                </div>
-                <div class="info-item">
-                    <strong>Storage Type:</strong>
-                    <span>localStorage (POC)</span>
-                </div>
-                <div class="info-item">
-                    <strong>Total Users:</strong>
-                    <span id="total-users-count">-</span>
-                </div>
-                <div class="info-item">
-                    <strong>Total Opportunities:</strong>
-                    <span id="total-opportunities-count">-</span>
-                </div>
-            </div>
-        </div>
-    </div>
     </div>
 </div>
 
@@ -115,40 +826,845 @@
     margin-inline: auto;
 }
 
-.settings-content {
+.admin-settings-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.admin-settings-eyebrow {
+    margin: 0 0 0.25rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.admin-settings-last-saved {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+.admin-settings-body {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+/* Sidebar */
+.admin-settings-sidebar {
+    position: sticky;
+    top: calc(var(--header-height, 64px) + 1rem);
+    align-self: flex-start;
+}
+
+.admin-settings-nav {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg);
+    gap: 0.15rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 0.5rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
-.info-item {
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-md);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.info-item:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-}
-
-.info-item strong {
-    display: block;
-    margin-bottom: var(--spacing-xs);
+.admin-settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.75rem;
+    border: none;
+    background: transparent;
     color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.admin-settings-nav-item i {
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    color: var(--text-muted);
+}
+
+.admin-settings-nav-item:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.admin-settings-nav-item.is-active {
+    background: rgba(13, 148, 136, 0.12);
+    color: var(--primary-dark, #0f766e);
+}
+
+.admin-settings-nav-item.is-active i {
+    color: var(--primary-color);
+}
+
+/* Panels */
+.admin-settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.admin-settings-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.admin-settings-panel[hidden] {
+    display: none;
+}
+
+.admin-settings-panel-header {
+    padding: 0;
+    margin-bottom: 0.25rem;
+}
+
+.admin-settings-panel-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+}
+
+.admin-settings-panel-desc {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+}
+
+.admin-settings-card {
+    margin: 0;
+}
+
+.admin-settings-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.admin-settings-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.admin-settings-row.three-col {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-settings-footer {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    border-bottom-left-radius: var(--radius-xl);
+    border-bottom-right-radius: var(--radius-xl);
+}
+
+.admin-settings-toggle-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.admin-settings-toggle-row .checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    cursor: pointer;
+}
+
+.admin-settings-toggle-row .checkbox-label input {
+    margin-top: 0.2em;
+}
+
+.admin-settings-toggle-row .checkbox-label span {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.admin-settings-toggle-row .checkbox-label span strong {
+    color: var(--text-primary);
     font-size: var(--font-size-sm);
 }
 
-.info-item span {
-    color: var(--text-primary);
-    font-size: var(--font-size-base);
+.admin-settings-toggle-row .checkbox-label span small {
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    font-weight: 400;
 }
 
-.checkbox-label {
+.admin-settings-subheader {
     display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.admin-settings-subtitle {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.admin-settings-help {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin: 0 0 0.5rem 0;
+    line-height: 1.45;
+}
+
+.admin-settings-readonly {
+    background: var(--bg-secondary);
+}
+
+/* Color editor */
+.admin-settings-color-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-settings-color-row input[type="color"] {
+    width: 3rem;
+    height: 2.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0;
+    cursor: pointer;
+    background: var(--bg-primary);
+}
+
+.admin-settings-color-hex {
+    flex: 1;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+    text-transform: uppercase;
+}
+
+.admin-settings-preview {
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1rem;
+    background: var(--bg-secondary);
+}
+
+.admin-settings-preview-label {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.5rem;
+}
+
+.admin-settings-preview-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.admin-settings-preview-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    color: #fff;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    background: var(--primary-color);
+}
+
+#preview-primary-dark { background: var(--primary-dark); }
+#preview-accent { background: #2dd4bf; color: #0f172a; }
+
+/* Capability matrix */
+.admin-settings-cap-matrix {
+    display: grid;
+    grid-template-columns: 1fr repeat(3, minmax(70px, auto));
+    gap: 0;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.admin-settings-cap-matrix > div {
+    padding: 0.5rem 0.75rem;
+    font-size: var(--font-size-sm);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-primary);
+}
+
+.admin-settings-cap-matrix > div:nth-last-child(-n+4) {
+    border-bottom: none;
+}
+
+.admin-settings-cap-matrix .cap-head {
+    background: var(--bg-secondary);
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.admin-settings-cap-matrix .cap-name {
+    background: var(--bg-secondary);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.admin-settings-cap-matrix .cap-cell {
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.admin-settings-cap-matrix .cap-cell.has-cap {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+/* Weights */
+.admin-settings-weights-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-top: 0.25rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.admin-settings-weights-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.admin-settings-weights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.85rem;
+}
+
+.admin-settings-weight {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+}
+
+.admin-settings-weight-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.admin-settings-weight-value {
+    font-variant-numeric: tabular-nums;
+    color: var(--primary-dark, #0f766e);
+    font-weight: 600;
+}
+
+.admin-settings-weight input[type="range"] {
+    width: 100%;
+}
+
+.admin-settings-weights-total {
+    align-self: flex-end;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.admin-settings-weights-total[data-state="warn"] {
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.admin-settings-weights-total[data-state="bad"] {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.admin-settings-risk-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 0.6rem;
+}
+
+.admin-settings-risk-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+}
+
+.admin-settings-risk-item label {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    text-transform: capitalize;
+}
+
+.admin-settings-risk-item input {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.35rem 0.5rem;
+    font-size: var(--font-size-sm);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Chips / tag editors */
+.admin-settings-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    min-height: 1.5rem;
+    margin-bottom: 0.45rem;
+}
+
+.admin-settings-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem 0.25rem 0.75rem;
+    background: rgba(13, 148, 136, 0.1);
+    color: var(--primary-dark, #0f766e);
+    border-radius: 999px;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+}
+
+.admin-settings-chip button {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0;
+    opacity: 0.7;
+}
+
+.admin-settings-chip button:hover {
+    opacity: 1;
+}
+
+.admin-settings-chip.is-toggle {
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--border-color);
+}
+
+.admin-settings-chip.is-toggle.is-active {
+    background: rgba(13, 148, 136, 0.12);
+    color: var(--primary-dark, #0f766e);
+    border-color: rgba(13, 148, 136, 0.4);
+}
+
+/* JSON editor */
+.admin-settings-json-editor {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+    font-size: 0.825rem;
+    line-height: 1.5;
+    white-space: pre;
+    overflow-x: auto;
+    background: #0f172a;
+    color: #e2e8f0;
+    border-color: #1e293b;
+}
+
+.admin-settings-json-editor:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.25);
+}
+
+.admin-settings-json-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+.admin-settings-defaults {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.5rem;
+}
+
+.admin-settings-defaults-item {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.55rem 0.75rem;
+    font-size: var(--font-size-xs);
+}
+
+.admin-settings-defaults-item strong {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    margin-bottom: 0.15rem;
+}
+
+/* Collaboration list */
+.admin-settings-collab-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.admin-settings-collab-row {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr 90px;
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+}
+
+.admin-settings-collab-row label.toggle-only {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--font-size-sm);
+}
+
+/* Workflow rules */
+.admin-settings-workflow {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.admin-settings-workflow-entity {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.65rem 0.85rem;
+}
+
+.admin-settings-workflow-entity strong {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    margin-bottom: 0.35rem;
+}
+
+.admin-settings-workflow-entity ul {
+    margin: 0;
+    padding-left: 1rem;
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+/* Stats blocks */
+.admin-settings-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.6rem;
+}
+
+.admin-settings-stat {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.65rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.admin-settings-stat-label {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.admin-settings-stat-value {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Feature flags */
+.admin-settings-flags-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.admin-settings-flag-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+}
+
+.admin-settings-flag-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.admin-settings-flag-info strong {
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.admin-settings-flag-info span {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+/* Switch (CSS only) */
+.admin-settings-switch {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.admin-settings-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.admin-settings-switch-slider {
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    background: #cbd5e1;
+    transition: background 0.15s ease;
     cursor: pointer;
 }
-.checkbox-label input { margin-top: 0.2em; }
+
+.admin-settings-switch-slider::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.15s ease;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.2);
+}
+
+.admin-settings-switch input:checked + .admin-settings-switch-slider {
+    background: var(--primary-color);
+}
+
+.admin-settings-switch input:checked + .admin-settings-switch-slider::before {
+    transform: translateX(18px);
+}
+
+/* Storage bar */
+.admin-settings-storage-bar {
+    width: 100%;
+    height: 10px;
+    background: var(--border-color);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 0.4rem;
+}
+
+.admin-settings-storage-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--primary-color), #2dd4bf);
+    transition: width 0.3s ease;
+}
+
+.admin-settings-keys-table {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.admin-settings-keys-table > div {
+    padding: 0.5rem 0.75rem;
+    font-size: var(--font-size-sm);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+}
+
+.admin-settings-keys-table > div.head {
+    background: var(--bg-secondary);
+    font-weight: 600;
+}
+
+.admin-settings-keys-table > div:nth-last-child(-n+3):not(.head) {
+    border-bottom: none;
+}
+
+.admin-settings-keys-table .num {
+    justify-content: flex-end;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Data actions */
+.admin-settings-data-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.admin-settings-import-label {
+    cursor: pointer;
+}
+
+/* Danger card */
+.admin-settings-danger-card {
+    border-color: rgba(220, 38, 38, 0.3);
+    background: #fff5f5;
+}
+
+.admin-settings-danger-card .card-header {
+    border-bottom-color: rgba(220, 38, 38, 0.2);
+}
+
+.btn-danger {
+    background-color: #dc2626;
+    color: #fff;
+    border: 1px solid #dc2626;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+/* About */
+.admin-settings-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.85rem;
+}
+
+.admin-settings-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+}
+
+.admin-settings-info strong {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.admin-settings-info span {
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    word-break: break-word;
+}
+
+.admin-settings-list {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+}
+
+.admin-settings-list li + li {
+    margin-top: 0.25rem;
+}
+
+/* Save buttons disabled feedback */
+button[data-write-cap][disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+    .admin-settings-body {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-settings-sidebar {
+        position: static;
+        overflow-x: auto;
+    }
+
+    .admin-settings-nav {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 0.35rem;
+    }
+
+    .admin-settings-nav-item {
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
+
+    .admin-settings-row {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-settings-cap-matrix {
+        grid-template-columns: 1.5fr repeat(3, auto);
+        font-size: var(--font-size-xs);
+    }
+
+    .admin-settings-collab-row {
+        grid-template-columns: auto 1fr;
+    }
+}
 </style>

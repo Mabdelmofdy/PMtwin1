@@ -1,13 +1,9 @@
 <div class="page-container opportunity-detail-page">
-    <div id="loading" class="spinner"></div>
+    <div id="loading" class="opp-detail-loading">
+        <div class="spinner"></div>
+        <p class="opp-detail-loading__text">Loading opportunity…</p>
+    </div>
     <div id="content" class="page-body opportunity-detail-body" style="display: none;">
-        <nav class="opp-detail-topbar" aria-label="Opportunity navigation">
-            <a href="#" data-route="/opportunities" class="opp-detail-back">
-                <i class="ph-duotone ph-arrow-left" aria-hidden="true"></i>
-                <span>All opportunities</span>
-            </a>
-        </nav>
-
         <!-- Wizard Steps Indicator -->
         <div id="wizard-steps" class="wizard-steps" style="display: none;">
             <div class="wizard-step active" data-step="1">
@@ -38,46 +34,49 @@
 
         <!-- Step 1: Comprehensive View -->
         <div id="step-1" class="wizard-step-content">
-            <div class="opp-detail-panel">
-            <header class="opportunity-header">
-                <div class="opportunity-header__main">
-                    <h1 id="opportunity-title" class="opportunity-title-heading"></h1>
-                    <div class="opportunity-meta">
-                        <span id="opportunity-intent" class="badge badge-info" style="display: none;"></span>
-                        <span id="opportunity-model" class="badge badge-primary"></span>
-                        <span id="opportunity-status" class="badge"></span>
-                    </div>
+            <nav class="opp-detail-topbar" aria-label="Opportunity navigation">
+                <a href="#" data-route="/opportunities" class="opp-detail-back">
+                    <i class="ph-duotone ph-arrow-left" aria-hidden="true"></i>
+                    <span>All opportunities</span>
+                </a>
+            </nav>
+
+            <header class="opp-page-head" aria-labelledby="opportunity-title">
+                <h1 id="opportunity-title" class="opp-page-title"></h1>
+                <p id="opportunity-hero-meta" class="opp-page-meta"></p>
+                <div class="opportunity-meta opp-page-badges">
+                    <span id="opportunity-intent" class="badge badge-info" style="display: none;"></span>
+                    <span id="opportunity-model" class="badge badge-primary"></span>
+                    <span id="opportunity-status" class="badge"></span>
                 </div>
-                <div class="opportunity-actions" id="opportunity-actions" aria-label="Opportunity actions">
+                <div class="opportunity-actions opp-page-actions" id="opportunity-actions" aria-label="Opportunity actions">
                     <!-- Actions will be populated by JS -->
                 </div>
-            </header>
-            
-            <div class="opportunity-full-view">
-                <!-- Quick Info Bar -->
-                <div class="quick-info-bar">
-                    <div class="info-chip">
-                        <i class="ph-duotone ph-calendar"></i>
-                        <span>Posted: <strong id="info-created"></strong></span>
+                <div class="opp-summary-strip" aria-label="Key facts">
+                    <div class="opp-sum-item">
+                        <span class="opp-sum-label">Posted</span>
+                        <strong id="info-created" class="opp-sum-value"></strong>
                     </div>
-                    <div class="info-chip">
-                        <i class="ph-duotone ph-user"></i>
-                        <span>By: <strong id="info-creator"></strong></span>
+                    <div class="opp-sum-item">
+                        <span class="opp-sum-label">Posted by</span>
+                        <strong id="info-creator" class="opp-sum-value"></strong>
                     </div>
-                    <div class="info-chip" id="info-location-chip" style="display: none;">
-                        <i class="ph-duotone ph-map-pin"></i>
-                        <span id="info-location"></span>
+                    <div class="opp-sum-item" id="info-location-chip" style="display: none;">
+                        <span class="opp-sum-label">Location</span>
+                        <strong id="info-location" class="opp-sum-value"></strong>
                     </div>
-                    <div class="info-chip" id="info-exchange-chip" style="display: none;">
-                        <i class="ph-duotone ph-currency-circle-dollar"></i>
-                        <span>Exchange: <strong id="info-exchange"></strong></span>
+                    <div class="opp-sum-item" id="info-exchange-chip" style="display: none;">
+                        <span class="opp-sum-label">Exchange</span>
+                        <strong id="info-exchange" class="opp-sum-value"></strong>
                     </div>
-                    <div class="info-chip" id="info-match-chip" style="display: none;">
-                        <i class="ph-duotone ph-star"></i>
-                        <span>Match: <strong id="info-match-score"></strong></span>
+                    <div class="opp-sum-item" id="info-match-chip" style="display: none;">
+                        <span class="opp-sum-label">Your match</span>
+                        <strong id="info-match-score" class="opp-sum-value"></strong>
                     </div>
                 </div>
+            </header>
 
+            <div class="opportunity-full-view opp-detail-panel">
                 <!-- Location Map -->
                 <div class="detail-section" id="detail-map-section" style="display: none;">
                     <h2><i class="ph-duotone ph-map-trifold"></i> Location</h2>
@@ -176,7 +175,6 @@
                         </button>
                     </div>
                 </div>
-            </div>
             </div>
         </div>
 
@@ -349,15 +347,15 @@
 
 <style>
 .opportunity-detail-page {
-    max-width: min(1180px, 100%);
+    max-width: var(--portal-page-max-width, 1180px);
     width: 100%;
     margin: 0 auto;
 }
 
 .opportunity-detail-body {
-    max-width: min(1180px, 100%);
+    max-width: var(--portal-page-max-width, 1180px);
     margin: 0 auto;
-    padding-bottom: var(--spacing-2xl, 2rem);
+    padding-bottom: var(--spacing-2xl);
 }
 
 .opp-detail-topbar {
@@ -370,7 +368,7 @@
     gap: 0.4rem;
     font-size: var(--font-size-sm, 0.875rem);
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--primary-color, #0d9488);
     text-decoration: none;
     padding: 0.35rem 0.15rem;
     border-radius: var(--radius-md, 8px);
@@ -378,7 +376,7 @@
 }
 
 .opp-detail-back:hover {
-    color: var(--primary-color);
+    color: var(--primary-color, #0d9488);
     background: var(--bg-secondary, #f4f4f5);
     text-decoration: none;
 }
@@ -388,13 +386,95 @@
     opacity: 0.85;
 }
 
-.opp-detail-panel {
-    background: var(--bg-primary, #fff);
+.opp-detail-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 3rem 1.25rem;
+    color: var(--text-secondary, #64748b);
+}
+
+.opp-detail-loading__text {
+    margin: 0;
+    font-size: 0.9375rem;
+}
+
+.opp-page-head {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.opp-page-title {
+    margin: 0 0 var(--spacing-xs);
+    max-width: 42rem;
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: var(--text-primary);
+}
+
+.opp-page-meta {
+    margin: 0 0 var(--spacing-md);
+    max-width: 42rem;
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.opp-page-badges {
+    margin-bottom: var(--spacing-md);
+}
+
+.opp-page-actions {
+    margin-bottom: var(--spacing-md);
+}
+
+.opp-summary-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md) var(--spacing-xl);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg, 12px);
-    box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.04));
-    padding: var(--spacing-lg, 1.25rem) var(--spacing-xl, 1.5rem);
-    margin-bottom: var(--spacing-lg, 1rem);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+}
+
+.opp-sum-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    min-width: 6.5rem;
+}
+
+.opp-sum-label {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.opp-sum-value {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+/* Main content: same white panel pattern as deals/contracts lists */
+.opp-detail-panel {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    max-width: 100%;
 }
 
 /* Wizard Steps Indicator */
@@ -402,11 +482,14 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-xl);
-    padding: var(--spacing-lg);
-    background: var(--bg-secondary);
+    flex-wrap: wrap;
+    gap: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
 }
 
 .wizard-step {
@@ -434,23 +517,23 @@
 }
 
 .wizard-step .step-number {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: var(--border-color);
-    color: var(--text-secondary);
+    background: var(--border-color, #e2e8f0);
+    color: var(--text-secondary, #64748b);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 600;
-    font-size: var(--font-size-sm);
-    transition: all 0.3s ease;
+    font-size: 0.8125rem;
+    transition: background 0.2s ease, color 0.2s ease;
 }
 
 .wizard-step.active .step-number {
-    background: var(--primary-color);
-    color: white;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+    background: var(--primary-color, #0d9488);
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
 }
 
 .wizard-step.completed .step-number {
@@ -500,6 +583,7 @@
     background: var(--bg-primary);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-card);
 }
 
 /* Wizard Navigation */
@@ -507,10 +591,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-lg);
-    margin-top: var(--spacing-xl);
-    background: var(--bg-secondary);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
     gap: var(--spacing-md);
 }
 
@@ -565,32 +651,7 @@
     margin-right: 4px;
 }
 
-/* Opportunity Header */
-.opportunity-header {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: var(--spacing-md, 1rem);
-    margin-bottom: var(--spacing-lg);
-    padding-bottom: var(--spacing-lg);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.opportunity-header__main {
-    flex: 1 1 min(0, 28rem);
-    min-width: 0;
-}
-
-.opportunity-title-heading {
-    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.25;
-    margin: 0 0 var(--spacing-sm) 0;
-    color: var(--text-primary);
-}
-
+/* Opportunity hero: meta + actions (legacy class names used by JS) */
 .opportunity-meta {
     display: flex;
     flex-wrap: wrap;
@@ -603,52 +664,27 @@
     flex-wrap: wrap;
     gap: var(--spacing-sm, 0.5rem);
     align-items: center;
-    justify-content: flex-end;
-    flex-shrink: 0;
 }
 
 .opportunity-actions .btn {
     white-space: nowrap;
 }
 
-/* Quick Info Bar */
-.quick-info-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md);
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
-    margin-bottom: var(--spacing-xl);
-}
-
-.info-chip {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-xs) var(--spacing-md);
-    background: var(--bg-primary);
-    border-radius: var(--radius-full);
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-}
-
-.info-chip i {
-    font-size: 1rem;
-    color: var(--primary-color);
-}
-
-.info-chip strong {
-    color: var(--text-primary);
-}
-
 /* Detail Sections */
 .opportunity-full-view .detail-section {
     margin-bottom: var(--spacing-lg);
-    padding: var(--spacing-lg);
-    background: var(--bg-secondary, #fafafa);
-    border-radius: var(--radius-lg, 12px);
-    border: 1px solid var(--border-color);
+    padding: 0 0 var(--spacing-lg);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.opportunity-full-view .detail-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 
 .detail-section h2 {
@@ -656,18 +692,24 @@
     align-items: center;
     gap: var(--spacing-sm);
     font-size: var(--font-size-lg);
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-md);
-    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+    margin: 0 0 var(--spacing-md);
+    color: var(--text-primary);
 }
 
 .detail-section h2 i {
-    color: var(--primary-color);
+    color: var(--text-muted);
+    font-size: var(--font-size-lg);
 }
 
 .detail-content {
-    color: var(--text-primary);
+    color: var(--text-secondary);
     line-height: 1.6;
+    font-size: var(--font-size-sm);
+}
+
+.detail-content p {
+    color: var(--text-secondary);
 }
 
 .detail-grid {
@@ -719,34 +761,36 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--spacing-xl);
-    background: linear-gradient(135deg, var(--primary-color), #4f46e5);
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    color: white;
+    border-left: 3px solid var(--primary-color);
+    box-shadow: var(--shadow-card);
 }
 
 .apply-info h3 {
-    font-size: var(--font-size-xl);
-    margin-bottom: var(--spacing-xs);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin: 0 0 var(--spacing-xs);
+    color: var(--text-primary);
 }
 
 .apply-info p {
-    opacity: 0.9;
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.5;
 }
 
 .apply-cta .btn {
-    background: white;
-    color: var(--primary-color);
-    font-weight: 600;
-}
-
-.apply-cta .btn:hover {
-    background: var(--bg-secondary);
+    flex-shrink: 0;
 }
 
 /* Already Applied Section */
 .already-applied-section {
-    margin-top: var(--spacing-xl);
+    margin-top: var(--spacing-lg);
 }
 
 .applied-info {
@@ -754,18 +798,23 @@
     align-items: center;
     gap: var(--spacing-lg);
     padding: var(--spacing-lg);
-    background: var(--bg-secondary);
+    background: var(--badge-success-bg);
+    border: 1px solid var(--badge-success-border);
     border-radius: var(--radius-lg);
-    border: 2px solid var(--success-color, #10b981);
+    box-shadow: var(--shadow-card);
 }
 
 .applied-info > i {
-    font-size: 3rem;
-    color: var(--success-color, #10b981);
+    font-size: 2rem;
+    color: var(--success-color);
+    flex-shrink: 0;
 }
 
 .applied-info h3 {
-    margin-bottom: var(--spacing-xs);
+    margin: 0 0 var(--spacing-xs);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
 }
 
 .applied-info p {
@@ -882,15 +931,20 @@
         display: none;
     }
     
-    .opportunity-header {
-        flex-direction: column;
-        gap: var(--spacing-md);
+    .opp-page-actions {
+        width: 100%;
     }
-    
-    .quick-info-bar {
+
+    .opportunity-actions.opp-page-actions {
         flex-direction: column;
+        align-items: stretch;
     }
-    
+
+    .opportunity-actions.opp-page-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
     .apply-cta {
         flex-direction: column;
         text-align: center;

@@ -84,6 +84,30 @@ function assertAdminCapability(role, capability) {
     }
 }
 
+/** Session key for best-effort client public IP (used by audit log). */
+const PMTWIN_CLIENT_IP_KEY = 'pmtwin_client_ip';
+
+/**
+ * Fetch public IP via ipify (browser POC). Stores result in sessionStorage for audit entries.
+ * @returns {Promise<string|null>}
+ */
+async function refreshPmtwinClientIpCache() {
+    if (typeof sessionStorage === 'undefined') return null;
+    try {
+        const ctrl = new AbortController();
+        const to = setTimeout(() => ctrl.abort(), 3200);
+        const res = await fetch('https://api.ipify.org?format=json', { signal: ctrl.signal });
+        clearTimeout(to);
+        if (!res.ok) return null;
+        const j = await res.json();
+        const ip = j && j.ip ? String(j.ip).trim() : null;
+        if (ip) sessionStorage.setItem(PMTWIN_CLIENT_IP_KEY, ip);
+        return ip;
+    } catch {
+        return null;
+    }
+}
+
 class AuthService {
     constructor() {
         this.dataService = window.dataService || dataService;
@@ -137,7 +161,9 @@ class AuthService {
             status: 'pending',
             profile
         });
-        
+
+        await refreshPmtwinClientIpCache();
+
         await this.dataService.createAuditLog({
             userId: user.id,
             action: 'user_registered',
@@ -196,7 +222,9 @@ class AuthService {
             status: 'pending',
             profile
         });
-        
+
+        await refreshPmtwinClientIpCache();
+
         await this.dataService.createAuditLog({
             userId: company.id,
             action: 'company_registered',
@@ -238,10 +266,12 @@ class AuthService {
         // Create session
         const token = this.generateToken();
         await this.dataService.createSession(user.id, token);
-        
+
+        await refreshPmtwinClientIpCache();
+
         this.currentUser = user;
         this.currentSession = { token, userId: user.id };
-        
+
         // Create audit log
         await this.dataService.createAuditLog({
             userId: user.id,
@@ -278,6 +308,11 @@ class AuthService {
         
         this.currentUser = null;
         this.currentSession = null;
+        try {
+            sessionStorage.removeItem(PMTWIN_CLIENT_IP_KEY);
+        } catch {
+            /* ignore */
+        }
         sessionStorage.removeItem('pmtwin_token');
         sessionStorage.removeItem('pmtwin_user');
         localStorage.removeItem('pmtwin_token');

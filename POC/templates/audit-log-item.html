@@ -1,13 +1,33 @@
-<div class="audit-log-item">
-    <div class="audit-log-header">
-        <span class="audit-log-action">{{actionFormatted}}</span>
-        <span class="audit-log-time">{{timestampFormatted}}</span>
-    </div>
-    <div class="audit-log-details">
-        <p><strong>User:</strong> {{user.email}} ({{user.role}})</p>
-        <p><strong>Entity:</strong> {{entityType}} {{#if entityId}}({{entityId}}){{/if}}</p>
+<article class="audit-log-item">
+    <div class="audit-log-item__rail" aria-hidden="true"></div>
+    <div class="audit-log-item__body">
+        <div class="audit-log-item__head">
+            <h3 class="audit-log-item__action">{{actionFormatted}}</h3>
+            <time class="audit-log-time"{{#if timestampIso}} datetime="{{timestampIso}}"{{/if}}>{{timestampFormatted}}</time>
+        </div>
+        <dl class="audit-log-dl">
+            <div class="audit-log-dl__cell">
+                <dt>Name</dt>
+                <dd>{{userDisplayName}}</dd>
+            </div>
+            <div class="audit-log-dl__cell">
+                <dt>IP address</dt>
+                <dd>{{ipDisplay}}</dd>
+            </div>
+            <div class="audit-log-dl__cell">
+                <dt>Account</dt>
+                <dd>{{accountLabel}}</dd>
+            </div>
+            <div class="audit-log-dl__cell">
+                <dt>Entity</dt>
+                <dd>{{entitySummary}}</dd>
+            </div>
+        </dl>
         {{#if hasDetails}}
-            <p><strong>Details:</strong> {{detailsJson}}</p>
+        <details class="audit-log-payload">
+            <summary class="audit-log-payload__summary">View payload</summary>
+            <pre class="audit-log-json">{{detailsFormatted}}</pre>
+        </details>
         {{/if}}
     </div>
-</div>
+</article>

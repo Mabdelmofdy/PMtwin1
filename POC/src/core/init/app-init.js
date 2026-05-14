@@ -149,6 +149,8 @@ async function initializeApp() {
     try {
         // Initialize storage with seed data
         await initializeStorage();
+        // Apply persisted admin settings to CONFIG and CSS variables before anything reads them
+        applySystemSettingsToConfig();
         // Normalize existing opportunities for post-to-post matching (non-blocking)
         if (window.opportunityService && typeof window.opportunityService.normalizeAllOpportunities === 'function') {
             window.opportunityService.normalizeAllOpportunities().catch(e => console.warn('Normalize opportunities:', e));
@@ -200,6 +202,101 @@ async function initializeStorage() {
     const hasAdmin = users.some(u => u.role === CONFIG.ROLES.ADMIN && u.status === 'active');
     if (!hasAdmin) {
         await createDefaultAdmin();
+    }
+}
+
+/**
+ * Apply persisted admin settings (SYSTEM_SETTINGS) to runtime CONFIG and CSS variables.
+ * Runs once at boot so saved values survive page reloads. Mirrors what admin-settings.js
+ * does on save, just in reverse (storage -> CONFIG / :root).
+ */
+function applySystemSettingsToConfig() {
+    try {
+        const settings = storageService.get(CONFIG.STORAGE_KEYS.SYSTEM_SETTINGS);
+        if (!settings || typeof settings !== 'object') return;
+
+        if (settings.general) {
+            if (settings.general.platformName) CONFIG.APP_NAME = settings.general.platformName;
+            if (settings.general.appDescription) CONFIG.APP_DESCRIPTION = settings.general.appDescription;
+        }
+
+        if (settings.security && settings.security.sessionDurationMs) {
+            CONFIG.SESSION_DURATION = settings.security.sessionDurationMs;
+        }
+
+        if (settings.matching) {
+            CONFIG.MATCHING = CONFIG.MATCHING || {};
+            const m = settings.matching;
+            if (typeof m.minThreshold === 'number') CONFIG.MATCHING.MIN_THRESHOLD = m.minThreshold;
+            if (typeof m.autoNotifyThreshold === 'number') CONFIG.MATCHING.AUTO_NOTIFY_THRESHOLD = m.autoNotifyThreshold;
+            if (typeof m.postToPostThreshold === 'number') CONFIG.MATCHING.POST_TO_POST_THRESHOLD = m.postToPostThreshold;
+            if (typeof m.candidateMax === 'number') CONFIG.MATCHING.CANDIDATE_MAX = m.candidateMax;
+            if (typeof m.valueCompatibilityMaxPoints === 'number') CONFIG.MATCHING.VALUE_COMPATIBILITY_MAX_POINTS = m.valueCompatibilityMaxPoints;
+            if (typeof m.debug === 'boolean') CONFIG.MATCHING.DEBUG = m.debug;
+            if (typeof m.labelThresholdMatch === 'number' || typeof m.labelThresholdPartial === 'number') {
+                CONFIG.MATCHING.LABEL_THRESHOLDS = {
+                    MATCH: m.labelThresholdMatch != null ? m.labelThresholdMatch : (CONFIG.MATCHING.LABEL_THRESHOLDS && CONFIG.MATCHING.LABEL_THRESHOLDS.MATCH) || 1,
+                    PARTIAL: m.labelThresholdPartial != null ? m.labelThresholdPartial : (CONFIG.MATCHING.LABEL_THRESHOLDS && CONFIG.MATCHING.LABEL_THRESHOLDS.PARTIAL) || 0.25
+                };
+            }
+            if (m.weights && typeof m.weights === 'object') {
+                CONFIG.MATCHING.WEIGHTS = Object.assign({}, CONFIG.MATCHING.WEIGHTS, m.weights, {
+                    ATTRIBUTE_OVERLAP: m.weights.SKILL_MATCH != null ? m.weights.SKILL_MATCH : (CONFIG.MATCHING.WEIGHTS && CONFIG.MATCHING.WEIGHTS.ATTRIBUTE_OVERLAP),
+                    BUDGET_FIT_LEGACY: m.weights.BUDGET_FIT != null ? m.weights.BUDGET_FIT : (CONFIG.MATCHING.WEIGHTS && CONFIG.MATCHING.WEIGHTS.BUDGET_FIT_LEGACY)
+                });
+            }
+            if (m.valueRiskFactors && typeof m.valueRiskFactors === 'object') {
+                CONFIG.MATCHING.VALUE_RISK_FACTORS = Object.assign({}, CONFIG.MATCHING.VALUE_RISK_FACTORS, m.valueRiskFactors);
+            }
+        }
+
+        if (settings.workflow) {
+            CONFIG.MATCHING = CONFIG.MATCHING || {};
+            const w = settings.workflow;
+            CONFIG.MATCHING.NEGOTIATION = Object.assign({}, CONFIG.MATCHING.NEGOTIATION, {
+                MAX_ROUNDS: w.negotiationMaxRounds != null ? w.negotiationMaxRounds : (CONFIG.MATCHING.NEGOTIATION && CONFIG.MATCHING.NEGOTIATION.MAX_ROUNDS),
+                EXPIRE_DAYS: w.negotiationExpireDays != null ? w.negotiationExpireDays : (CONFIG.MATCHING.NEGOTIATION && CONFIG.MATCHING.NEGOTIATION.EXPIRE_DAYS)
+            });
+            if (w.consortiumMinParticipants != null) CONFIG.MATCHING.CONSORTIUM_MIN_PARTICIPANTS = w.consortiumMinParticipants;
+            if (w.maxReplacementAttempts != null) CONFIG.MATCHING.MAX_REPLACEMENT_ATTEMPTS = w.maxReplacementAttempts;
+            if (Array.isArray(w.consortiumReplacementAllowedStages)) {
+                CONFIG.MATCHING.CONSORTIUM_REPLACEMENT_ALLOWED_STAGES = w.consortiumReplacementAllowedStages.slice();
+            }
+        }
+
+        if (settings.featureFlags) {
+            CONFIG.AUTH = CONFIG.AUTH || {};
+            if (typeof settings.featureFlags.socialLogin === 'boolean') {
+                CONFIG.AUTH.SOCIAL_LOGIN_ENABLED = settings.featureFlags.socialLogin;
+            }
+            if (typeof settings.featureFlags.matchingDebug === 'boolean') {
+                CONFIG.MATCHING = CONFIG.MATCHING || {};
+                CONFIG.MATCHING.DEBUG = settings.featureFlags.matchingDebug;
+            }
+        }
+
+        if (settings.audit && typeof settings.audit.maxEntries === 'number') {
+            CONFIG.AUDIT_MAX_ENTRIES = settings.audit.maxEntries;
+        }
+
+        if (settings.branding) {
+            const root = document.documentElement;
+            const b = settings.branding;
+            if (b.primaryColor) root.style.setProperty('--primary-color', b.primaryColor);
+            if (b.primaryDark) root.style.setProperty('--primary-dark', b.primaryDark);
+            if (b.bgSecondary) root.style.setProperty('--bg-secondary', b.bgSecondary);
+            if (b.faviconUrl) {
+                let link = document.querySelector('link[rel="icon"]');
+                if (!link) {
+                    link = document.createElement('link');
+                    link.rel = 'icon';
+                    document.head.appendChild(link);
+                }
+                link.href = b.faviconUrl;
+            }
+        }
+    } catch (e) {
+        console.warn('applySystemSettingsToConfig failed:', e);
     }
 }
 
@@ -500,7 +597,7 @@ function initializeRoutes() {
             router.navigate(CONFIG.ROUTES.DASHBOARD);
             return;
         }
-        await loadPage('admin-subscriptions');
+        router.navigate(CONFIG.ROUTES.ADMIN_SETTINGS);
     }, [CONFIG.ROLES.ADMIN]));
     
     router.register(CONFIG.ROUTES.ADMIN_REPORTS, authGuard.protect(async () => {
@@ -560,20 +657,20 @@ function initializeRoutes() {
     }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
     
     router.register('/admin/users/:id', authGuard.protect(async (params) => {
-        if (!authService.isAdmin()) {
+        if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.users.read')) {
             router.navigate(CONFIG.ROUTES.DASHBOARD);
             return;
         }
         await loadPage('admin-user-detail', params);
-    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR]));
+    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
 
     router.register('/admin/people/:id', authGuard.protect(async (params) => {
-        if (!authService.isAdmin()) {
+        if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.users.read')) {
             router.navigate(CONFIG.ROUTES.DASHBOARD);
             return;
         }
         await loadPage('admin-user-detail', params);
-    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR]));
+    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
 }
 
 /**
@@ -604,8 +701,10 @@ function setupGlobalNavigation() {
     });
 }
 
-/** Guard to prevent concurrent/repeated load of the same or any page (avoids ERR_INSUFFICIENT_RESOURCES from storm of fetches) */
+/** Guard to prevent concurrent fetch/init storms; coalesce overlapping navigations into one follow-up load. */
 let loadPageInProgress = false;
+/** Latest `{ pageName, params }` requested while a load is running (replaced if multiple arrive). */
+let pendingLoad = null;
 
 /**
  * Resolve URL for a page path relative to the current document (same origin).
@@ -622,37 +721,41 @@ function resolvePageUrl(relativePath) {
 async function loadPage(pageName, params = {}) {
     const mainContent = document.getElementById('main-content');
     if (!mainContent) return;
-    
+
     if (loadPageInProgress) {
+        pendingLoad = { pageName, params: { ...params } };
         return;
     }
     loadPageInProgress = true;
-    
+
     // Path relative to index.html (e.g. pages/notifications/index.html)
     const pagePath = resolvePageUrl(`pages/${pageName}/index.html`);
-    
+
     try {
         const response = await fetch(pagePath);
         if (!response.ok) {
             throw new Error(`Page not found: ${pageName}`);
         }
         const html = await response.text();
-        
+
         mainContent.innerHTML = html;
-        
+
         const scriptPath = `features/${pageName}/${pageName}.js`;
         try {
             if (pageName === 'matches') {
                 await loadScript('features/pipeline/pipeline.js');
             }
             await loadScript(scriptPath);
-            const functionName = pageName.split('-').map((word, index) => 
+            const functionName = pageName.split('-').map((word, index) =>
                 index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
             ).join('');
             const initFunctionName = `init${functionName.charAt(0).toUpperCase() + functionName.slice(1)}`;
-            
+
             if (window[initFunctionName]) {
-                window[initFunctionName](params);
+                const initResult = window[initFunctionName](params);
+                if (initResult != null && typeof initResult.then === 'function') {
+                    await initResult;
+                }
             }
         } catch (error) {
             console.log(`No script found for ${pageName}`);
@@ -666,5 +769,10 @@ async function loadPage(pageName, params = {}) {
         mainContent.innerHTML = `<div class="error">Page not found: ${pageName}.${hint}</div>`;
     } finally {
         loadPageInProgress = false;
+        const next = pendingLoad;
+        pendingLoad = null;
+        if (next) {
+            void loadPage(next.pageName, next.params);
+        }
     }
 }
