@@ -54,6 +54,35 @@ flowchart LR
     end
 ```
 
+## Current implementation flow
+
+1. A user creates or edits an opportunity. The opportunity stores its intent (`request`, `offer`, or `hybrid`), collaboration model, payment/value exchange data, location/timeline, and matching attributes.
+2. When the opportunity status becomes `published`, `data-service.updateOpportunity()` triggers matching in the background.
+3. Two matching paths can run:
+   - **Post-to-post matching** creates user-facing `post_matches`. This is the primary matching flow for Need/Offer exchange.
+   - **Legacy person-to-opportunity matching** creates `matches`. This is still used by parts of the pipeline and opportunity-match UI.
+4. `matchingService.persistPostMatches(opportunityId)` calls `findMatchesForPost()` for the published post, converts returned results into `post_match` records, deduplicates them, creates a matching-run record, writes audit logs, and notifies participants.
+5. `persistPostMatches()` also runs a circular scan and persists only cycles that include the published opportunity creator.
+6. Users see post matches on `/matches`, open `/matches/:id`, then accept or decline. If any participant declines, the match is declined. If all participants accept, the match becomes confirmed and can become a draft deal.
+7. Admin Matching Center runs a report over current published posts. The report itself is a preview; the per-opportunity **Save** action calls `persistPostMatches(opportunityId)` for a published opportunity and creates saved matches/notifications.
+
+```mermaid
+flowchart TD
+  Draft[Create or edit opportunity] --> Publish[Status = published]
+  Publish --> Legacy[Legacy candidate matching: matches]
+  Publish --> Persist[persistPostMatches]
+  Persist --> Route[findMatchesForPost]
+  Route --> P2P[One-way / barter / consortium]
+  Persist --> Circular[Circular scan for creator cycles]
+  P2P --> Store[createPostMatch + dedupe]
+  Circular --> Store
+  Store --> Notify[Notify participants]
+  Notify --> UserMatches[/matches]
+  UserMatches --> Respond[Accept or decline]
+  Respond --> Confirmed[Confirmed when all accept]
+  Confirmed --> Deal[Draft deal workspace]
+```
+
 ---
 
 ## Routing (post-to-post)
@@ -217,19 +246,22 @@ Cycle: 002→003→004→002 (Offer of 003 satisfies Need of 002; Offer of 004 s
 
 ## Post-to-post scoring
 
-Implemented in [post-to-post-scoring.js](../../POC/src/services/matching/post-to-post-scoring.js). Weights (from [config.js](../../POC/src/core/config/config.js)):
+Implemented in [post-to-post-scoring.js](../../POC/src/services/matching/post-to-post-scoring.js). Current live weights (from [config.js](../../POC/src/core/config/config.js)):
 
 | Factor | Weight |
 |--------|--------|
-| Attribute Overlap (skills/categories) | 40% |
-| Budget Fit | 30% |
-| Timeline | 15% |
+| Skill / Attribute Overlap | 25% |
+| Exchange Compatibility | 20% |
+| Value Compatibility | 20% |
+| Budget Fit | 10% |
+| Timeline | 10% |
 | Location | 10% |
 | Reputation | 5% |
 
 - **Threshold:** `CONFIG.MATCHING.POST_TO_POST_THRESHOLD` (default **0.50**). Pairs below this are filtered out.
 - **Labels per factor:** Match (≥1), Partial (≥0.25), No Match (&lt;0.25).
 - Candidate generation (budget, location, timeline, category) is in [candidate-generator.js](../../POC/src/services/matching/candidate-generator.js).
+- **Product-spec variant:** A disabled `WEIGHTS_DESIGN` profile exists in config for Attribute 40%, Budget 30%, Timeline 15%, Location 10%, Reputation 5%. It is not the current default unless enabled in config.
 
 ---
 
@@ -310,3 +342,29 @@ Implemented in [post-to-post-scoring.js](../../POC/src/services/matching/post-to
 
 - `model`: `'one_way'` | `'two_way'` | `'consortium'` | `'circular'`.
 - `matches`: array of objects with `matchScore`, `breakdown`, `suggestedPartners`; type-specific fields (`matchedOpportunity`, `matchedNeed`/`matchedOffer`, `valueEquivalence`, `cycle`, `roles`) as described above.
+
+---
+
+## Current gaps and how to fix them
+
+| Gap | Impact | How to fix |
+|-----|--------|------------|
+| **Two match systems still coexist (`matches` and `post_matches`).** | Users and reports can see two kinds of "match" with different fields and lifecycle rules. | Make `post_matches` the canonical user-facing match entity. Keep `matches` only as "candidate recommendations" or migrate it behind an adapter. Update pipeline/reports to label the two concepts clearly. |
+| **`findMatchesForPost()` uses route precedence, not the full `detectMatchingModel()` list.** | A post that qualifies for more than one model can have only the first matching route persisted, plus circular. Example: consortium can win before barter. | In `persistPostMatches()`, call `detectMatchingModel(opportunity)` and run each returned model explicitly, then run circular. Keep `options.model` for admin/debug single-model runs. |
+| **Two-way payload can miss the current creator's paired need/offer id.** | Dedupe and deal payloads are weaker because `sideA.needId` or `sideA.offerId` can be `null`. | In `persistPostMatches()` hydrate the creator's full need+offer pair before building `sideA`, the same way `findBarterMatches()` does. |
+| **Circular results do not persist `needId` and `offerId` in `linkScores`.** | Circular match detail cannot reliably show what each participant gives/receives, and circular deal creation can fail because no opportunity ids are available. | In `matching-models.findCircularExchanges()`, include `needId: detail.need.id` and `offerId: detail.offer.id` in each link score. Add a circular match-detail/deal test. |
+| **Match detail attempts deal creation after an accept even when not all participants accepted yet.** | The helper correctly rejects non-confirmed matches, so the first accept can log an error instead of showing a clean "waiting for others" state. | Move `dataService.createDealFromMatch(updated)` inside the `updated.status === CONFIRMED` branch in `match-detail.js`. Show a pending participant state until confirmation. |
+| **Admin report and persistence are separate.** | "Run report" previews results; saving is per opportunity only. There is no bulk save or "save exactly these previewed results" action. | Add a selected-results save flow: store preview run metadata, let admin select rows, then persist selected result ids/model with an explicit run id. |
+| **Expiry is lazy and often unset.** | `getPostMatches()` can expire pending matches when read, but most generated post matches have `expiresAt: null`, and there is no scheduled expiry job. | Set a default expiry when creating post matches, add an app-load/server scheduled sweep, and filter expired records in all user/admin lists. |
+| **Matching run history is minimal.** | `matching_runs` records only opportunity, model, and timestamp, so analytics cannot explain why a run changed. | Store threshold, weights profile, candidate counts, result counts, created/skipped duplicate counts, top scores, and actor/source (`publish`, `admin_save`, `scheduled`). |
+| **Scoring profile is split between product spec and implementation.** | Docs/product may expect 40/30/15/10/5 scoring, while live config uses 25/20/20/10/10/10/5 with exchange/value factors. | Choose one default profile or expose named profiles in Admin Settings. Persist the profile name on `matching_runs` and show it in Admin Matching. |
+| **Matching depends on normalized opportunity fields.** | Missing `normalized`, skills, roles, budget, location, or value fields reduce or block matching. | Normalize on create/update/publish, add a "matching readiness" validation before publish, and keep the opportunity audit report in CI/demo QA. |
+| **Legacy person-to-opportunity matching scores active users only.** | Companies can be creators in post-to-post matching, but the legacy candidate matcher can miss company candidates. | Either include active companies in `findMatchesForOpportunity()` or retire the legacy path from user-facing recommendations. |
+| **No production backend/job runner yet.** | Local storage is fine for the POC but cannot enforce uniqueness, scheduled expiry, concurrent matching runs, or cross-device results. | Move match creation to a backend service with database constraints, transactional persistence, scheduled jobs, and server-side validation. |
+
+### Suggested fix order
+
+1. Fix correctness bugs first: circular link ids, confirmed-only deal creation, and two-way side hydration.
+2. Then align model execution: use `detectMatchingModel()` for publish persistence and keep admin single-model preview explicit.
+3. Then clean the product surface: decide the canonical match entity, clarify legacy recommendations, and update pipeline/report labels.
+4. Then harden operations: default expiry, richer `matching_runs`, admin selected-results save, and backend uniqueness/jobs.

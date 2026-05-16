@@ -8,6 +8,20 @@ let currentWizardStep = 1;
 let hasDetailedResponses = false;
 let hasTaskBidding = false;
 let isEditMode = false;
+let opportunityApplicationsCanManage = true;
+
+function canAdminViewOpportunityApplications() {
+    return typeof authService !== 'undefined'
+        && typeof authService.canAccessAdmin === 'function'
+        && authService.canAccessAdmin()
+        && authService.hasAdminCapability
+        && authService.hasAdminCapability('admin.opportunities.read');
+}
+
+function canAdminManageOpportunityApplications() {
+    return canAdminViewOpportunityApplications()
+        && authService.hasAdminCapability('admin.opportunities.write');
+}
 
 async function initOpportunityDetail(params) {
     const opportunityId = params.id;
@@ -81,6 +95,8 @@ async function loadOpportunity(id) {
         const creator = await dataService.getUserOrCompanyById(opportunity.creatorId);
         
         const isOwner = user && opportunity.creatorId === user.id;
+        const canViewApplications = isOwner || canAdminViewOpportunityApplications();
+        const canManageApplications = isOwner || canAdminManageOpportunityApplications();
         const canApply = user && !isOwner && (opportunity.status === 'published' || opportunity.status === 'in_negotiation') && !(authService.isPendingApproval && authService.isPendingApproval());
         
         // Check if user has already applied
@@ -95,11 +111,12 @@ async function loadOpportunity(id) {
         determineWizardSteps(opportunity);
         
         // Render comprehensive view
-        await renderComprehensiveView(opportunity, creator, isOwner, canApply);
+        await renderComprehensiveView(opportunity, creator, isOwner, canApply, canViewApplications);
         
-        // Load applications if owner (use opportunity.id so canonical id matches application records)
-        if (isOwner) {
-            await loadApplications(opportunity.id);
+        // Load applications for owner or admin moderators (use opportunity.id so canonical id matches application records)
+        if (canViewApplications) {
+            opportunityApplicationsCanManage = canManageApplications;
+            await loadApplications(opportunity.id, { manage: canManageApplications });
         }
         // Load matching section if owner and opportunity is published or in negotiation
         if (isOwner && (opportunity.status === 'published' || opportunity.status === 'in_negotiation')) {
@@ -201,7 +218,7 @@ function determineWizardSteps(opportunity) {
     if (step6NumberEl) step6NumberEl.textContent = hasTaskBidding ? '6' : '5';
 }
 
-async function renderComprehensiveView(opportunity, creator, isOwner, canApply) {
+async function renderComprehensiveView(opportunity, creator, isOwner, canApply, canViewApplications) {
     document.getElementById('opportunity-title').textContent = opportunity.title || 'Untitled Opportunity';
     const heroMeta = document.getElementById('opportunity-hero-meta');
     if (heroMeta) {
@@ -357,7 +374,7 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply) 
         }
     }
     
-    if (isOwner) {
+    if (canViewApplications) {
         document.getElementById('applications-section').style.display = 'block';
     }
     
@@ -1878,9 +1895,10 @@ function collectTaskBids() {
     return bids;
 }
 
-async function loadApplications(opportunityId) {
+async function loadApplications(opportunityId, options = {}) {
     const applicationsList = document.getElementById('applications-list');
     const applicationsCount = document.getElementById('applications-count');
+    const canManage = options.manage != null ? options.manage : opportunityApplicationsCanManage;
 
     if (!applicationsList || !applicationsCount) return;
 
@@ -1910,11 +1928,13 @@ async function loadApplications(opportunityId) {
         
         // Render applications (Accept/Reject/Start negotiation when status is pending, reviewing, shortlisted, or in_negotiation)
         const canActOnApplication = (app) => {
+            if (!canManage) return false;
             const actionable = ['pending', 'reviewing', 'shortlisted', 'in_negotiation'].includes(app.status);
             const opportunityClosed = currentOpportunity && ['contracted', 'in_execution', 'completed', 'closed', 'cancelled'].includes(currentOpportunity.status);
             return actionable && !opportunityClosed;
         };
         const canStartNegotiation = (app) => {
+            if (!canManage) return false;
             return ['pending', 'reviewing', 'shortlisted'].includes(app.status) && currentOpportunity && !['contracted', 'in_execution', 'completed', 'closed', 'cancelled'].includes(currentOpportunity.status);
         };
         const transitionableStatuses = ['pending', 'reviewing', 'shortlisted', 'in_negotiation'];
@@ -1985,7 +2005,7 @@ async function loadApplications(opportunityId) {
                 if (!applicationId || !newStatus) return;
                 try {
                     await dataService.updateApplication(applicationId, { status: newStatus });
-                    await loadApplications(opportunityId);
+                    await loadApplications(opportunityId, { manage: canManage });
                     if (newStatus === 'in_negotiation' && applicantId) {
                         await ensureConnectionAndOpenChat(applicantId);
                     }
@@ -2005,7 +2025,7 @@ async function loadApplications(opportunityId) {
                 if (!applicationId) return;
                 try {
                     await dataService.updateApplication(applicationId, { status: 'in_negotiation' });
-                    await loadApplications(opportunityId);
+                    await loadApplications(opportunityId, { manage: canManage });
                     if (applicantId) {
                         await ensureConnectionAndOpenChat(applicantId);
                     }

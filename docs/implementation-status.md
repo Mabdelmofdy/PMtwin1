@@ -113,7 +113,7 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | Value compatibility | ✅ | value-compatibility.js; oneWay, barter, consortium, circular |
 | rankMatches (tier, compositeRank) | ✅ | matching-service.rankMatches |
 | persistPostMatches on publish | ✅ | In updateOpportunity when status === 'published' |
-| createPostMatch + dedupe (signature) | ✅ | data-service.createPostMatch; _postMatchSignature |
+| createPostMatch + dedupe | ✅ | data-service.createPostMatch; strong keys plus signature fallback |
 | notifyPostMatch | ✅ | matching-service.notifyPostMatch |
 | Legacy findMatchesForOpportunity | ✅ | User–opportunity matching; creates pmtwin_matches |
 | findOpportunitiesForCandidate | ✅ | Candidate-centric; returns list, no persist |
@@ -129,9 +129,9 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | Filter by type (one_way, two_way, consortium, circular) | ✅ | getPostMatchesByType or client filter |
 | Accept / decline | ✅ | updatePostMatchStatus; declinePostMatch |
 | Status: pending → accepted/declined/confirmed | ✅ | All participants accepted → confirmed |
-| Create deal from confirmed match | ⚠️ | Deal creation exists; “Start deal” from match detail may be wired (check feature) |
+| Create deal from confirmed match | ⚠️ | Deal creation exists; accept handler should only call it after post_match status is confirmed |
 | Match cards (templates) | ✅ | match-card-one-way, two-way, consortium, circular |
-| Expiry (expiresAt) | ⚠️ | Field stored; no cron/job to set status expired |
+| Expiry (expiresAt) | ⚠️ | Read-time expiry exists for pending matches; generated records usually have no default expiresAt and no scheduled job |
 
 ---
 
@@ -214,7 +214,7 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | Admin skills | ✅ | admin-skills |
 | Admin subscriptions | ✅ | admin-subscriptions |
 | Admin collaboration models | ✅ | admin-collaboration-models |
-| Persist matches from admin run | ❌ | Admin “Run matching” shows results; persist only on publish unless extra button added |
+| Persist matches from admin matching | ✅ | Per-opportunity Save calls persistPostMatches; bulk selected-results save is not implemented |
 | Moderator vs Admin permission split | ⚠️ | Roles exist; UI may not hide by role everywhere |
 | Bulk user actions | ❌ | BRD future |
 
@@ -253,8 +253,8 @@ Prioritize ⚠️ and ❌ items against your release goals.
 ## Summary
 
 - **Core flows:** Auth, opportunities, matching (all four models), post_matches, deals, contracts, pipeline, admin list/detail/vetting/matching/reports/settings are **implemented**.
-- **Partial:** Application sub-entities (requirements/deliverables) UI, contract “all signed → active” automation, notification mark read, moderator vs admin UI, messages/connections, match expiry handling, “Start deal” from match explicitly wired.
-- **Missing:** Real password hashing, social login, company member management, bulk admin actions, persist-from-admin-run button, scheduled jobs (expiry, etc.).
+- **Partial:** Application sub-entities (requirements/deliverables) UI, contract “all signed → active” automation, notification mark read, moderator vs admin UI, messages/connections, match expiry handling, confirmed-only deal creation polish.
+- **Missing:** Real password hashing, social login, company member management, bulk admin actions, bulk matching report persistence, scheduled jobs (expiry, etc.).
 
 ---
 

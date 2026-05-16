@@ -52,7 +52,7 @@ Admin operates within a POC architecture:
 | Approve/reject/suspend users | ✅ | ✅ | ⚠️ | Auditor should be read-only by intent, but strict enforcement is partial |
 | Opportunity moderation (close/delete) | ✅ | ✅ | ⚠️ | Auditor should not mutate by policy; UI/guard split is partial |
 | Run admin matching preview | ✅ | ✅ | ⚠️ | Auditor access may exist depending on route gating |
-| Persist matches from admin run | ❌ | ❌ | ❌ | Not implemented |
+| Persist matches from admin matching | ✅ | ⚠️ | ❌ | Per-opportunity Save exists for `admin.matching.persist`; moderator access depends on capability wiring |
 | View deals/contracts | ✅ | ✅ | ✅ | Visibility present |
 | Edit system settings | ✅ | ⚠️ | ❌ | Fine-grained enforcement not consistently strict |
 | Audit log access | ✅ | ✅ | ✅ | Auditor-target feature |
@@ -179,13 +179,16 @@ Implementation:
 | Path | Trigger | Persist `post_matches` | Notification | Status |
 |---|---|---|---|---|
 | Publish-driven matching | Opportunity publish | ✅ | ✅ | ✅ Implemented |
-| Admin run matching | Manual run from admin page | ❌ | ❌ | ⚠️ Preview only |
+| Admin run report | Manual run from admin page | ❌ | ❌ | ⚠️ Preview only |
+| Admin Save on opportunity | Manual Save from admin matching row | ✅ | ✅ | ✅ Per opportunity |
 
 ## 7.2 Step Flow
 
-1. **Admin Action:** Select published opportunity and click run matching.
+1. **Admin Action:** Open Admin Matching and click **Run report**.
 2. **System Action:** Execute matching logic and return scored in-memory results.
 3. **Result:** Admin sees candidate/match preview and quality insight.
+4. **Optional Admin Action:** Click **Save** for a published opportunity row.
+5. **System Action:** `persistPostMatches(opportunityId)` creates deduped `post_matches` and participant notifications.
 
 ```mermaid
 flowchart LR
@@ -193,14 +196,17 @@ flowchart LR
   persistPath --> postMatchCreated[PostMatchesCreated]
   postMatchCreated --> notifyUsers[NotifyParticipants]
 
-  adminPath[AdminRunMatching] --> previewOnly[PreviewResults]
-  previewOnly --> noPersist[NoPersistence]
+  adminPath[AdminRunReport] --> previewOnly[PreviewResults]
+  previewOnly --> saveAction[SaveOpportunityMatches]
+  saveAction --> adminPersist[persistPostMatches]
+  adminPersist --> notifyFromAdmin[NotifyParticipants]
 ```
 
 Implementation:
 
 - ✅ Manual run for inspection exists.
-- ❌ Persist-from-admin-run is not implemented.
+- ✅ Per-opportunity Save from admin matching exists.
+- ❌ Bulk persist from the full report is not implemented.
 
 ---
 
@@ -352,6 +358,7 @@ Implementation:
 | Match created on publish | Match participants | Opportunity/matching context updates | Match notification and match list entry | ✅ |
 | Application status change | Applicant | Status in admin/user views | Application status notification | ✅ |
 | Admin run matching preview | No participant notification by default | Preview results only | No new notification | ⚠️ |
+| Admin Save matching row | Match participants | Saved outcome count and audit update | Match notification and match list entry | ✅ |
 
 ## 13.2 Flow Summary
 
@@ -364,7 +371,7 @@ Implementation:
 ## 14. What Admin Cannot Do (Current Implementation)
 
 - ❌ Enforce server-side policy through backend (no backend layer).
-- ❌ Persist matches directly from admin matching run.
+- ❌ Bulk-persist a whole admin matching report in one action.
 - ❌ Execute built-in bulk user/opportunity governance actions.
 - ⚠️ Rely on strict RBAC at action granularity across all pages.
 - ❌ Use enterprise-grade compliance controls (immutable logs, signed workflow, policy engine).
@@ -414,7 +421,9 @@ flowchart TB
   dashboardNode --> reportsNode[Reports]
   dashboardNode --> settingsNode[Settings]
 
-  matchingNode --> previewNode[PreviewOnlyNoPersist]
+  matchingNode --> previewNode[RunReportPreview]
+  matchingNode --> saveNode[SaveOpportunityMatches]
+  saveNode --> persistNode[persistPostMatches]
   oppNode --> publishNode[PublishPathTriggersPersistence]
 ```
 
@@ -423,12 +432,13 @@ flowchart TB
 ## 17. QA Checklist (Actionable)
 
 1. Verify vetting status transitions and corresponding notifications.
-2. Verify admin matching does not create persisted `post_matches`.
-3. Verify publish-triggered matching does create persisted `post_matches`.
-4. Verify deal/contract pages reflect expected lifecycle states.
-5. Verify consortium replacement candidate list appears with expected exclusions.
-6. Verify audit entries exist for core admin actions.
-7. Verify role behavior differences and document any unexpected mutation access.
+2. Verify admin **Run report** does not create persisted `post_matches`.
+3. Verify admin **Save** creates persisted `post_matches` for one published opportunity and notifies participants.
+4. Verify publish-triggered matching creates persisted `post_matches`.
+5. Verify deal/contract pages reflect expected lifecycle states.
+6. Verify consortium replacement candidate list appears with expected exclusions.
+7. Verify audit entries exist for core admin actions.
+8. Verify role behavior differences and document any unexpected mutation access.
 
 ---
 

@@ -35,7 +35,8 @@ This document describes the current matching system so the simulation environmen
 ## Match Score (Post-to-Post)
 
 - **Implementation:** `POC/src/services/matching/post-to-post-scoring.js` — `scorePair(needPost, offerPost, needNorm, offerNorm, needProfile?, offerProfile?)`.
-- **Weights** (from `POC/src/core/config/config.js`): Attribute Overlap 40%, Budget Fit 30%, Timeline 15%, Location 10%, Reputation 5%.
+- **Live weights** (from `POC/src/core/config/config.js`): Skill/Attribute 25%, Exchange Compatibility 20%, Value Compatibility 20%, Budget Fit 10%, Timeline 10%, Location 10%, Reputation 5%.
+- **Product-spec variant:** A 40/30/15/10/5 profile is documented as an optional design profile, but it is not the active default unless `WEIGHTS_DESIGN` is enabled.
 - **Threshold:** `CONFIG.MATCHING.POST_TO_POST_THRESHOLD` (default 0.50). Pairs below this are filtered out.
 - **Candidate generation:** `POC/src/services/matching/candidate-generator.js` filters by budget, location, timeline, category before scoring.
 

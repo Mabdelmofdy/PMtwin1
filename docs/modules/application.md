@@ -457,15 +457,19 @@ In addition to **opportunity–candidate** matching (above), the platform suppor
 
 **Pipeline:** Preprocess (extract & normalize) → Semantic profile (category/skill expansion) → Candidate generation (filter) → Score pairs (weighted) → Model routing → Rank & validate.
 
-**Post-to-Post Weights:**
+**Post-to-Post Live Weights:**
 
 | Factor              | Weight |
 |---------------------|--------|
-| Attribute Overlap   | 40%    |
-| Budget Fit          | 30%    |
-| Timeline Compatibility | 15% |
+| Skill / Attribute Overlap | 25% |
+| Exchange Compatibility | 20% |
+| Value Compatibility | 20% |
+| Budget Fit          | 10%    |
+| Timeline Compatibility | 10% |
 | Location Match      | 10%    |
 | Reputation          | 5%     |
+
+The product-spec 40/30/15/10/5 profile is available as a design target, but it is not the current default unless `CONFIG.MATCHING.WEIGHTS_DESIGN` is enabled.
 
 **Models:**
 

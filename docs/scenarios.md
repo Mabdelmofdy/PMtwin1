@@ -235,12 +235,13 @@ Use [full-user-journey.md](full-user-journey.md) for the full lifecycle outside 
 - **Result:** User can use full platform; notification in list.
 - **Outcome:** Normal onboarding.
 
-### 28. Admin runs matching (no persist)
+### 28. Admin runs matching report, then optionally saves
 
-- **Setup:** Admin opens Admin → Matching; selects published opportunity O; clicks “Run matching.”
-- **Action:** findMatchesForPost(O.id, {}) returns { model, matches } in memory; UI displays results.
-- **Result:** No createPostMatch called; no new notifications.
-- **Outcome:** Admin sees what would match; actual matches only when O was (or is) published. (Persist button would close gap.)
+- **Setup:** Admin opens Admin → Matching and clicks **Run report**.
+- **Action:** The page calls matching services and renders current results in memory.
+- **Result:** No createPostMatch called from the report refresh itself; no new notifications.
+- **Optional action:** Admin clicks **Save** on a published opportunity row.
+- **Outcome:** `persistPostMatches(O.id)` creates deduped `post_matches`, writes audit logs, and notifies participants.
 
 ### 29. Publish triggers matching and notify
 
@@ -300,12 +301,12 @@ Use [full-user-journey.md](full-user-journey.md) for the full lifecycle outside 
 - **Result:** One of them logs in; the other cannot with same email.
 - **Outcome:** Ambiguity; production should enforce unique email across entities or separate by type.
 
-### 37. Expired post_match still shown
+### 37. Expired post_match lazy expiration
 
 - **Setup:** post_match has expiresAt in the past; no job has set status to expired.
-- **Action:** getPostMatchesForUser returns it; status still “pending.”
-- **Result:** User sees expired match as pending.
-- **Outcome:** Gap: expiry not enforced.
+- **Action:** `getPostMatchesForUser` calls `getPostMatches`, which marks pending expired records as `expired` when read.
+- **Result:** Expiry is corrected at read time, but records without `expiresAt` never expire.
+- **Outcome:** Gap: no default expiry and no scheduled/background expiry job.
 
 ### 38. Consortium deal: replacement over MAX_REPLACEMENT_ATTEMPTS
 

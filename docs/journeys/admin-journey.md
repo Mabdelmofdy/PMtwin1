@@ -132,15 +132,17 @@ Implementation:
 
 Admin matching flow:
 
-1. Select a published opportunity.
-2. Run matching to preview scored results by model.
+1. Open Admin Matching.
+2. Run report to preview scored results by model.
 3. Inspect score breakdown and suggested participants.
+4. Optionally Save a published opportunity row to persist matches and notify participants.
 
 Critical limitation:
 
-- ⚠️ Admin run is preview/in-memory oriented.
-- ❌ By default, admin run does **not** persist new `post_matches`.
-- ✅ Persistent `post_match` creation is tied to opportunity publish trigger flow.
+- ⚠️ Run report is preview/in-memory oriented.
+- ✅ Per-opportunity Save can persist new `post_matches`.
+- ❌ Bulk save for a whole report or selected preview rows is not implemented.
+- ✅ Persistent `post_match` creation is also tied to opportunity publish trigger flow.
 
 ---
 
@@ -248,7 +250,7 @@ Implementation:
 Current known limitations for admin operations:
 
 - ❌ No backend authority layer; POC is localStorage-based.
-- ❌ Admin matching run does not persist matches by default.
+- ⚠️ Admin matching **Run report** is preview-only; per-opportunity **Save** persists matches, but bulk selected-results persistence is not implemented.
 - ⚠️ Moderator/auditor permission slicing is partially enforced.
 - ❌ Bulk governance operations (bulk approve/reject/export) are not fully implemented.
 - ❌ Full moderation queue/case management is not implemented.

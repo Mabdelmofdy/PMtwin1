@@ -186,10 +186,13 @@ flowchart TB
 
 ## 7. Missing or Partial Logic (Honest Gaps)
 
-- **Deduplication across runs:** persistPostMatches uses _postMatchSignature to avoid duplicate post_matches for the same (type, participants, payload keys). Re-publishing the same opportunity can still create new matches if the set of candidates or scores changes; duplicate detection is by signature, not by “already matched these two opportunities.”
-- **Expiry of post_matches:** expiresAt is stored but no automated job marks status as expired or hides expired matches from UI.
+- **Multi-model publish routing:** `detectMatchingModel()` can identify several models, but `findMatchesForPost()` currently follows precedence unless a model is passed explicitly. Publish persistence should run every applicable model plus circular.
+- **Deduplication across runs:** createPostMatch has strong keys plus a signature fallback. Reliability still depends on complete payload ids; two-way sideA and circular links should be hydrated with all need/offer ids.
+- **Expiry of post_matches:** read-time expiry exists for pending records with `expiresAt`, but generated post_matches usually do not set a default expiry and there is no scheduled job.
 - **Legacy match vs post_match:** Two systems coexist; pipeline and some UI may still refer to legacy matches (pmtwin_matches) for opportunity–candidate; post_matches are the primary user-facing matches.
 - **Circular on publish:** Only cycles that **include the publishing opportunity’s creator** are persisted; global circular discovery is run but filtered by creator inclusion.
+- **Circular link details:** Circular `linkScores` should include `needId` and `offerId` so match detail and circular deal creation can reference actual opportunities.
+- **Admin persistence:** Admin Run report is preview-only; per-opportunity Save persists matches, but there is no bulk selected-results persistence.
 - **Replacement candidates:** findReplacementCandidatesForRole is implemented; UI and admin flows for “replace member” may be partial (see implementation-status and gaps-and-missing).
 
 ---

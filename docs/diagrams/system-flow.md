@@ -77,7 +77,7 @@ flowchart TB
 ### Notes
 
 - ✅ Matching tied to **publish** is implemented for persistence.
-- ⚠️ Admin matching is often **preview**; it may not persist matches the same way as publish.
+- ⚠️ Admin matching **Run report** is preview; per-opportunity **Save** can persist matches, but bulk report persistence is not implemented.
 - ❌ Central orchestration and scheduled jobs are not in the POC.
 
 ### What happens next

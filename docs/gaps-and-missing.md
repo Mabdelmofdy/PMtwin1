@@ -58,12 +58,16 @@ Turn rows into tickets; owners estimate fix vs accept.
 
 | Gap | Severity | Description |
 |-----|----------|-------------|
-| **Duplicate post_matches** | Medium | Dedupe by _postMatchSignature; re-publishing or slight payload change can create duplicates. No “already matched these two opportunities” check. |
+| **Multi-model publish routing** | Medium | `detectMatchingModel()` can return multiple models, but `findMatchesForPost()` persists the first precedence route plus circular. A post that qualifies for barter and consortium may not persist every applicable model. |
+| **Circular payload ids** | Medium | Circular `linkScores` do not currently include the underlying `needId` / `offerId`, so match detail and circular deal creation have weak opportunity references. |
+| **Two-way side hydration** | Medium | Two-way `sideA` can store only the currently published opportunity id, leaving the creator's paired need/offer id as null. This weakens dedupe and deal payloads. |
+| **Duplicate-looking post_matches** | Low | Strong dedupe keys exist, but incomplete two-way/circular payloads can still make dedupe less reliable until those ids are hydrated. |
 | **Circular only for publishing creator** | Low | persistPostMatches only persists circular cycles that include the publishing opportunity’s creator; other cycles are computed but not stored. |
-| **Expiry not enforced** | Low | post_match.expiresAt stored; no job or filter to set status expired or hide expired. |
+| **Expiry is lazy / often unset** | Low | `getPostMatches()` expires pending records when read, but most generated records have no default expiresAt and there is no scheduled expiry job. |
 | **Legacy vs post_match duality** | Low | Two systems (pmtwin_matches vs pmtwin_post_matches); some UI or reports might still use legacy. |
-| **Admin “Run matching” does not persist** | Low | Admin sees results in memory; only publish triggers persistPostMatches unless a separate “Save matches” is added. |
-| **No matching history/versioning** | Low | No record of “matching run at T for opportunity O” for analytics. |
+| **Admin report persistence is per opportunity** | Low | Run report is preview-only; per-opportunity Save persists matches, but there is no bulk selected-results save. |
+| **Matching history is minimal** | Low | matching_runs exists, but only stores opportunity/model/timestamp; it does not store thresholds, weights, candidate counts, or created/skipped counts. |
+| **Scoring profile mismatch risk** | Low | Product docs mention a 40/30/15/10/5 profile, while live config uses skill/exchange/value/budget/timeline/location/reputation weights. |
 
 ---
 
@@ -71,7 +75,7 @@ Turn rows into tickets; owners estimate fix vs accept.
 
 | Gap | Severity | Description |
 |-----|----------|-------------|
-| **Deal from match** | Medium | “Start deal” from confirmed match: flow may exist but not clearly wired (createDeal with post_match payload). |
+| **Deal from match accept timing** | Medium | Match detail calls deal creation after an accept; the helper requires confirmed status, so this should only run after all participants accept. |
 | **Contract “all signed” automation** | Medium | When all parties have signedAt, contract status and deal status should auto-update to active; may be done in UI only or partially. |
 | **Document signing** | High | No e-signature integration; signedAt is a timestamp only. |
 | **Milestone approval workflow** | Medium | Milestone submit/approve stored; notifications or strict workflow (e.g. only creator can approve) may be partial. |
@@ -98,7 +102,7 @@ Turn rows into tickets; owners estimate fix vs accept.
 | **Auditor read-only** | Medium | No enforcement that auditor cannot edit; role check only. |
 | **Bulk actions** | Low | No bulk approve/reject/suspend or bulk export (BRD future). |
 | **Content moderation queue** | Low | No “flagged” queue or assignment to moderators. |
-| **Run matching and persist** | Low | Admin run shows results; optional “Save these matches” not implemented. |
+| **Bulk matching persistence** | Low | Admin Run report shows preview results and per-opportunity Save persists matches; bulk selected-results save is not implemented. |
 
 ---
 
@@ -146,11 +150,11 @@ Turn rows into tickets; owners estimate fix vs accept.
 ## 11. Broken or Weak Flows (Summary)
 
 1. **Forgot password:** Token created but no real email; user cannot reset without manual link/token.
-2. **Deal from match:** Create deal from confirmed post_match may not be one-click from match detail.
+2. **Deal from match:** Create deal only after the post_match is confirmed; current accept handler should move deal creation inside the confirmed branch.
 3. **Contract signing:** All-parties-signed → active may be manual or only in one place.
 4. **Company login vs user login:** Same form; company and user can have same email in different tables — which one wins on login is implementation-dependent (getUserOrCompanyByEmail order).
-5. **Re-publish:** Editing and re-publishing an opportunity runs persistPostMatches again; can create duplicate-looking post_matches if signature differs slightly.
-6. **Expired matches:** No automatic status update or filter; expired matches may still show as pending.
+5. **Re-publish:** Editing and re-publishing an opportunity runs persistPostMatches again; strong dedupe helps, but incomplete payload ids can still create duplicate-looking cases.
+6. **Expired matches:** Expiry is enforced lazily when post_matches are read, but generated matches usually do not get a default expiration date.
 
 ---
 

@@ -58,7 +58,7 @@ All under `POC/pages/` and `POC/features/` with corresponding route registration
 | `/admin/people` | (admin-people) | — | People (may alias users or extend to companies). |
 | `/admin/vetting` | admin-vetting | admin-vetting.js | Pending users/companies; quick approve/reject. |
 | `/admin/opportunities` | admin-opportunities | admin-opportunities.js | All opportunities; filter by status/model; view, close, delete. |
-| `/admin/matching` | admin-matching | admin-matching.js | Run matching for a selected published opportunity; view results (matches/post_matches). |
+| `/admin/matching` | admin-matching | admin-matching.js | Run report preview; Save per published opportunity to persist post_matches. |
 | `/admin/deals` | admin-deals | admin-deals.js | List all deals; filter; link to deal detail. |
 | `/admin/deals/:id` | (deal-detail or admin deal detail) | deal-detail.js | Deal detail (shared or admin-specific view). |
 | `/admin/contracts` | admin-contracts | admin-contracts.js | List all contracts; view detail. |
@@ -103,9 +103,10 @@ All under `POC/pages/` and `POC/features/` with corresponding route registration
 
 ### 3.5 Matching
 
-- **Run matching:** Select a **published** opportunity from dropdown/list; click “Run matching”. Calls matchingService.findMatchesForPost(opportunityId, options) (and optionally model selector: one_way, two_way, consortium, circular). Results displayed (matches list with scores, breakdown, type).
-- **View existing:** Can show post_matches for the opportunity or globally (implementation-dependent).
-- **No “persist” button in UI for run:** Admin run typically only returns in-memory results; persistPostMatches is triggered by **publish**, not by admin run. (If admin has a “Save matches” that calls createPostMatch for each result, that would be an extra feature.)
+- **Run report:** Admin Matching Center analyzes published needs/offers and displays in-memory results grouped by model (one_way, two_way, consortium, circular).
+- **View existing:** Saved-outcome analytics show persisted `post_matches`, confirmations, and deals from matches.
+- **Save matches:** Each published opportunity row can show a **Save** action for admins with `admin.matching.persist`. This calls `matchingService.persistPostMatches(opportunityId)`, creates deduped `post_matches`, writes audit logs, and notifies participants.
+- **Remaining limitation:** Save is per opportunity. There is no bulk “persist this whole report” or “persist exactly these previewed result rows” flow yet.
 
 ### 3.6 Deals and Contracts
 
@@ -150,7 +151,7 @@ All under `POC/pages/` and `POC/features/` with corresponding route registration
 - **No bulk export:** Bulk user export, bulk opportunity export may be future.
 - **No automated moderation queue:** Flagged content queue and assignment to moderators are BRD future.
 - **No role-specific UI hiding:** Moderator vs Admin may see same menu; permission checks may be partial.
-- **No “persist matches” from admin run:** Unless explicitly added, admin “Run matching” only shows results; persist happens on publish.
+- **Admin matching persistence:** Admin report preview is in-memory, but per-opportunity **Save** can persist matches. Bulk report persistence is not implemented.
 
 ---
 

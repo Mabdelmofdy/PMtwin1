@@ -54,13 +54,13 @@ flowchart LR
 
 **Trigger:** When `data-service.updateOpportunity(id, { status: 'published' })` is called, the data-service (after saving) calls `matching-service.persistPostMatches(id)` (async).
 
-**Manual trigger:** Admin can run matching from **Admin → Matching** for a selected published opportunity; same `findMatchesForPost` + create post_match + notify flow.
+**Manual/admin trigger:** Admin Matching Center has two behaviors. **Run report** previews current matching results in memory. **Save** on a published opportunity row calls `matching-service.persistPostMatches(id)`, creates deduped `post_matches`, and notifies participants.
 
 ---
 
 ## 2. Model Detection
 
-`matching-service.detectMatchingModel(opportunity)` returns a list of applicable models:
+`matching-service.detectMatchingModel(opportunity)` returns a list of applicable models, but the current `findMatchesForPost()` route still uses precedence unless a model is passed explicitly:
 
 | Condition | Models added |
 |-----------|----------------|
@@ -69,7 +69,9 @@ flowchart LR
 | exchangeMode or accepted_modes includes barter | two_way |
 | memberRoles / partnerRoles length > 0 or subModelType === 'consortium' | consortium |
 
-Circular is not auto-run from a single opportunity publish in the same way; `persistPostMatches` explicitly calls `findMatchesForPost(opportunityId, { model: 'circular' })` after one_way/two_way/consortium to add circular cycles that include the opportunity’s creator.
+Current routing precedence is: explicit `options.model`, then consortium, then barter/two_way, then one_way by intent, then hybrid fallback. Circular is not part of that first route; `persistPostMatches` explicitly calls `findMatchesForPost(opportunityId, { model: 'circular' })` afterward and stores cycles that include the publishing creator.
+
+**Gap to fix:** Use `detectMatchingModel()` inside `persistPostMatches()` to run every applicable model for a published post, instead of only the first route plus circular.
 
 ---
 
