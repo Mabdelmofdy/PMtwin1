@@ -8,12 +8,24 @@
     <script>
     (function () {
         var path = window.location.pathname.replace(/[?#].*$/, '');
-        if (/^(.+)\/index\.html$/i.test(path)) path = path.replace(/\/index\.html$/i, '/');
-        else if (/\/[^/]+\.html?$/i.test(path)) path = path.replace(/\/[^/]+\.html?$/i, '/');
-        else if (path && path !== '/' && !path.endsWith('/')) {
-            var segments = path.split('/').filter(Boolean);
-            if (segments.length > 1) path = path.replace(/\/[^/]+$/, '/');
-            else path += '/';
+        if (document.querySelector('meta[name="pmtwin-spa-server"]')) {
+            var mountMeta = document.querySelector('meta[name="pmtwin-mount"]');
+            path = (mountMeta && mountMeta.getAttribute('content')) || '/';
+        } else if (/^(.+)\/index\.html$/i.test(path)) {
+            path = path.replace(/\/index\.html$/i, '/');
+            try { sessionStorage.setItem('pmtwin-app-base', path); } catch (e) {}
+        } else if (/\/[^/]+\.html?$/i.test(path)) {
+            path = path.replace(/\/[^/]+\.html?$/i, '/');
+        } else {
+            var stored = null;
+            try { stored = sessionStorage.getItem('pmtwin-app-base'); } catch (e) {}
+            if (stored) {
+                path = stored;
+            } else if (path && path !== '/' && !path.endsWith('/')) {
+                var segments = path.split('/').filter(Boolean);
+                if (segments.length > 1) path = path.replace(/\/[^/]+$/, '/');
+                else path += '/';
+            }
         }
         if (path && !path.endsWith('/')) path += '/';
         var b = document.createElement('base');

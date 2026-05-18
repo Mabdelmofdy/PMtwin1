@@ -3,22 +3,32 @@
  * Bootstraps the application
  */
 
+/** POC root URL derived from this module (independent of <base> and history routes). */
+function getAppRootUrl() {
+    return new URL('../../../', import.meta.url);
+}
+
 /**
- * Detect base path from document location
- * This is the single source of truth for base path
- * Works whether app is served from root or subdirectory
+ * Detect base path for loading assets.
+ * Prefer the module URL so deep links like /dashboard still resolve pages/ under the app root.
  */
 function detectBasePath() {
-    // Method 1: Use document.baseURI (most reliable)
+    try {
+        let basePath = getAppRootUrl().pathname;
+        if (!basePath.endsWith('/')) {
+            basePath += '/';
+        }
+        return basePath;
+    } catch (e) {
+        console.warn('Could not resolve app root from import.meta.url', e);
+    }
+
     try {
         const baseURI = new URL(document.baseURI);
         let basePath = baseURI.pathname;
-        
-        // Remove index.html if present
         if (basePath.endsWith('index.html')) {
             basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
         }
-        // Ensure ends with /
         if (!basePath.endsWith('/')) {
             basePath += '/';
         }
@@ -26,23 +36,14 @@ function detectBasePath() {
     } catch (e) {
         console.warn('Could not parse document.baseURI', e);
     }
-    
-    // Method 2: Fallback to window.location.pathname
-    let pathname = window.location.pathname;
-    
-    // Remove hash and query
-    pathname = pathname.split('?')[0].split('#')[0];
-    
-    // Remove index.html if present
+
+    let pathname = window.location.pathname.split('?')[0].split('#')[0];
     if (pathname.endsWith('index.html')) {
         pathname = pathname.substring(0, pathname.lastIndexOf('/') + 1);
     }
-    
-    // Ensure ends with /
     if (!pathname.endsWith('/')) {
         pathname += '/';
     }
-    
     return pathname;
 }
 
@@ -722,8 +723,7 @@ let pendingLoad = null;
  * (relative to location.href would incorrectly resolve under /POC/admin/).
  */
 function resolvePageUrl(relativePath) {
-    const base = (typeof document !== 'undefined' && document.baseURI) ? document.baseURI : window.location.href;
-    return new URL(relativePath, base).href;
+    return new URL(relativePath, getAppRootUrl()).href;
 }
 
 /**
@@ -779,10 +779,14 @@ async function loadPage(pageName, params = {}) {
         }
     } catch (error) {
         console.error(`Error loading page ${pageName}:`, error);
-        const isNetworkError = error?.message === 'Failed to fetch' || error?.name === 'TypeError';
-        const hint = isNetworkError && window.location.protocol === 'file:'
-            ? ' Open the app via a local server (e.g. Live Server) instead of file://.'
-            : isNetworkError ? ' Check that the server is running and the path is correct.' : '';
+        const isNetworkError = error?.name === 'TypeError' && (
+            error?.message === 'Failed to fetch' || /NetworkError/i.test(String(error?.message || ''))
+        );
+        const hint = window.location.protocol === 'file:'
+            ? ' Open via a local server: in the POC folder run `npm start`, then open http://127.0.0.1:5500/'
+            : isNetworkError
+                ? ' Start the dev server (`cd POC` then `npm start`) or use hash URLs (e.g. index.html#/dashboard).'
+                : '';
         mainContent.innerHTML = `<div class="error">Page not found: ${pageName}.${hint}</div>`;
     } finally {
         loadPageInProgress = false;

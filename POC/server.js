@@ -15,6 +15,25 @@ const url = require('url');
 
 const PORT = process.argv[2] || 5500;
 const ROOT_DIR = __dirname;
+/** URL prefix when the app is opened as /POC/... while files live at server root (override with PMTWIN_MOUNT). */
+const MOUNT_PREFIX = (() => {
+  const fromEnv = process.env.PMTWIN_MOUNT;
+  if (fromEnv === '' || fromEnv === '/') return '';
+  if (fromEnv) return fromEnv.startsWith('/') ? fromEnv.replace(/\/$/, '') : '/' + fromEnv.replace(/\/$/, '');
+  const base = path.basename(ROOT_DIR);
+  return base ? '/' + base : '';
+})();
+
+function splitMountPrefix(pathname) {
+  if (!MOUNT_PREFIX || MOUNT_PREFIX === '/') {
+    return { filePath: pathname, mountUsed: false };
+  }
+  if (pathname === MOUNT_PREFIX || pathname.startsWith(MOUNT_PREFIX + '/')) {
+    const rest = pathname.slice(MOUNT_PREFIX.length) || '/';
+    return { filePath: rest.startsWith('/') ? rest : '/' + rest, mountUsed: true };
+  }
+  return { filePath: pathname, mountUsed: false };
+}
 
 const MIME_TYPES = {
   '.html': 'text/html',
@@ -51,6 +70,13 @@ function serveFile(filePath, res, options = {}) {
         if (!html.includes('name="pmtwin-spa-server"')) {
           html = html.replace(/<head(\s[^>]*)?>/i, '$&\n    <meta name="pmtwin-spa-server" content="1">');
         }
+        const mountBase = options.mountBase || '/';
+        if (!html.includes('name="pmtwin-mount"')) {
+          html = html.replace(
+            /(<meta name="pmtwin-spa-server"[^>]*>)/i,
+            `$1\n    <meta name="pmtwin-mount" content="${mountBase}">`
+          );
+        }
         body = Buffer.from(html, 'utf8');
       }
       headers['Content-Security-Policy'] = [
@@ -77,48 +103,59 @@ function isAppIndex(filePath) {
     && path.resolve(filePath) === path.join(ROOT_DIR, 'index.html');
 }
 
+function pathnameToDiskPath(pathname) {
+  let p = pathname;
+  if (p.startsWith('/')) p = p.substring(1);
+  if (!p || p === '') p = 'index.html';
+  return p;
+}
+
+function serveSpaIndex(res, mountUsed) {
+  const indexPath = path.join(ROOT_DIR, 'index.html');
+  const mountBase = mountUsed && MOUNT_PREFIX ? MOUNT_PREFIX + '/' : '/';
+  serveFile(indexPath, res, { injectSpaMeta: true, mountBase });
+}
+
 const server = http.createServer((req, res) => {
   const parsedUrl = url.parse(req.url, true);
-  let pathname = parsedUrl.pathname;
+  const { filePath: routedPath, mountUsed } = splitMountPrefix(parsedUrl.pathname || '/');
+  const diskPath = pathnameToDiskPath(routedPath);
+  const filePath = path.join(ROOT_DIR, diskPath);
 
-  // Remove leading slash for path resolution
-  if (pathname.startsWith('/')) {
-    pathname = pathname.substring(1);
-  }
-
-  // If no pathname or root, serve index.html
-  if (!pathname || pathname === '') {
-    pathname = 'index.html';
-  }
-
-  const filePath = path.join(ROOT_DIR, pathname);
-
-  // Check if file exists
   fs.access(filePath, fs.constants.F_OK, (err) => {
     if (err) {
-      // File doesn't exist - serve index.html for SPA routing
-      const indexPath = path.join(ROOT_DIR, 'index.html');
-      serveFile(indexPath, res, { injectSpaMeta: true });
-    } else {
-      // Check if it's a directory
-      fs.stat(filePath, (err, stats) => {
-        if (err) {
-          const indexPath = path.join(ROOT_DIR, 'index.html');
-          serveFile(indexPath, res, { injectSpaMeta: true });
-        } else if (stats.isDirectory()) {
-          // Try index.html in directory
-          const indexPath = path.join(filePath, 'index.html');
-          serveFile(indexPath, res, { injectSpaMeta: isAppIndex(indexPath) });
-        } else {
-          // Serve the file
-          serveFile(filePath, res, { injectSpaMeta: isAppIndex(filePath) });
-        }
-      });
+      serveSpaIndex(res, mountUsed);
+      return;
     }
+    fs.stat(filePath, (err, stats) => {
+      if (err) {
+        serveSpaIndex(res, mountUsed);
+        return;
+      }
+      if (stats.isDirectory()) {
+        const indexPath = path.join(filePath, 'index.html');
+        const mountBase = mountUsed && MOUNT_PREFIX ? MOUNT_PREFIX + '/' : '/';
+        serveFile(indexPath, res, {
+          injectSpaMeta: isAppIndex(indexPath),
+          mountBase: isAppIndex(indexPath) ? mountBase : undefined
+        });
+        return;
+      }
+      const mountBase = mountUsed && MOUNT_PREFIX ? MOUNT_PREFIX + '/' : '/';
+      serveFile(filePath, res, {
+        injectSpaMeta: isAppIndex(filePath),
+        mountBase: isAppIndex(filePath) ? mountBase : undefined
+      });
+    });
   });
 });
 
 server.listen(PORT, () => {
-  console.log(`PMTwin POC server running at http://127.0.0.1:${PORT}/`);
-  console.log(`Access login at: http://127.0.0.1:${PORT}/login`);
+  const rootUrl = `http://127.0.0.1:${PORT}/`;
+  const mountUrl = MOUNT_PREFIX ? `http://127.0.0.1:${PORT}${MOUNT_PREFIX}/` : null;
+  console.log(`PMTwin POC server running at ${rootUrl}`);
+  if (mountUrl) {
+    console.log(`Also available under mount: ${mountUrl}`);
+  }
+  console.log(`Access login at: ${rootUrl}login`);
 });
