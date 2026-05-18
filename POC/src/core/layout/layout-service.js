@@ -347,6 +347,7 @@ class LayoutService {
             configLinks.push({ route: CONFIG.ROUTES.ADMIN_SKILLS, label: 'Skills & Categories', icon: 'ph-duotone ph-tag' });
             configLinks.push({ route: CONFIG.ROUTES.ADMIN_SETTINGS, label: 'Settings', icon: 'ph-duotone ph-gear' });
             configLinks.push({ route: CONFIG.ROUTES.ADMIN_COLLABORATION_MODELS, label: 'Collaboration Models', icon: 'ph-duotone ph-stack' });
+            configLinks.push({ route: CONFIG.ROUTES.ADMIN_SITE_CONTENT, label: 'Site Content', icon: 'ph-duotone ph-article' });
         }
         renderAdminGroup('Configuration', configLinks);
         html += `<div class="portal-sidebar-footer portal-sidebar-footer--admin"><button type="button" class="portal-logout-btn portal-logout-btn--subtle" onclick="layoutService.handleLogout()"><i class="ph-duotone ph-sign-out" aria-hidden="true"></i><span>Log out</span></button></div>`;

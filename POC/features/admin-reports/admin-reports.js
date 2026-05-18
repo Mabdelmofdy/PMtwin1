@@ -1526,6 +1526,7 @@ async function initAdminReports() {
     document.getElementById('export-offers-per-opp-csv')?.addEventListener('click', exportOffersPerOpportunityCSV);
 
     await loadReports();
+    if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
 }
 
 window.initAdminReports = initAdminReports;

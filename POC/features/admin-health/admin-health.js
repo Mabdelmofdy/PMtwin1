@@ -48,6 +48,7 @@ async function initAdminHealth() {
     }
 
     await loadHealth({ manual: false });
+    if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
 }
 
 /**

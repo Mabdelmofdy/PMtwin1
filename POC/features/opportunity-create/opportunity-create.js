@@ -1316,6 +1316,9 @@ function updateMatchingReadinessIndicator() {
     }
     const report = mr.buildMatchingReadinessReport(collectReadinessPreviewPayload());
     ui.renderInlineIndicator(mount, report);
+    if (typeof ui.updateReviewStepIndicator === 'function') {
+        ui.updateReviewStepIndicator(report);
+    }
 }
 
 async function confirmPublishReadinessIfNeeded(opportunityPayload) {

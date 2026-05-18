@@ -300,10 +300,18 @@ async function renderCommandCenter() {
                 : escapeHtml(r.opportunityId || '—');
             return '<li>' + link + ' · ' + escapeHtml(r.roleToFill || '') + ' · ' + escapeHtml(r.status || '') + '</li>';
         }, 'No replacement requests found.')
-        + renderCommandCenterPanel('ph-prohibit', 'Blocked matches', queues.blockedMatches, (m) =>
-            '<li>' + renderCommandCenterLink(matchRoute + m.id, escapeHtml(friendlyMatchType(m.matchType)))
-            + ' · ' + escapeHtml(m.status || '') + '</li>'
-        , 'No blocked matches right now.')
+        + renderCommandCenterPanel('ph-prohibit', 'Blocked matches', queues.blockedMatches, (m) => {
+            const canResolve = typeof authService !== 'undefined'
+                && authService.hasAdminCapability
+                && (authService.hasAdminCapability('admin.matching.resolve_blocked')
+                    || authService.hasAdminCapability('admin.matching.persist'));
+            const resolveBtn = canResolve && !(authService.isReadOnlyAdmin && authService.isReadOnlyAdmin())
+                ? ' <button type="button" class="btn btn-outline btn-sm matching-resolve-blocked" data-match-id="'
+                + escapeHtml(m.id) + '" data-requires-persist>Clear blocked</button>'
+                : '';
+            return '<li>' + renderCommandCenterLink(matchRoute + m.id, escapeHtml(friendlyMatchType(m.matchType)))
+                + ' · ' + escapeHtml(m.status || '') + resolveBtn + '</li>';
+        }, 'No blocked matches right now.')
         + renderCommandCenterPanel('ph-floppy-disk', 'Persist runs', queues.matchingRuns, (r) =>
             '<li>' + escapeHtml(r.opportunityId || '—') + ' · '
             + escapeHtml((r.modelsRun && r.modelsRun.join(', ')) || r.model || '—')
@@ -320,6 +328,35 @@ async function renderCommandCenter() {
             e.preventDefault();
             const route = this.getAttribute('data-route');
             if (route && typeof router !== 'undefined' && router.navigate) router.navigate(route);
+        });
+    });
+
+    lifecycleEl.querySelectorAll('.matching-resolve-blocked').forEach(btn => {
+        btn.addEventListener('click', async function (e) {
+            e.preventDefault();
+            const matchId = this.getAttribute('data-match-id');
+            const user = authService.getCurrentUser();
+            if (!matchId || !user || !dataService.adminResolveBlockedPostMatch) return;
+            if (!confirm('Clear blocked flags on this match?')) return;
+            this.disabled = true;
+            try {
+                authService.assertAdminCapability('admin.matching.resolve_blocked');
+            } catch (_) {
+                try {
+                    authService.assertAdminCapability('admin.matching.persist');
+                } catch (err) {
+                    alert((err && err.message) || 'Permission denied.');
+                    this.disabled = false;
+                    return;
+                }
+            }
+            try {
+                await dataService.adminResolveBlockedPostMatch(matchId, user.id);
+                await renderCommandCenter();
+            } catch (err) {
+                alert((err && err.message) || 'Could not resolve blocked match.');
+            }
+            this.disabled = false;
         });
     });
 }

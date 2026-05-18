@@ -389,4 +389,5 @@ async function initAdminConsortium() {
 
     setupAdminConsortiumFilters();
     await loadAdminConsortiumDeals();
+    if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
 }

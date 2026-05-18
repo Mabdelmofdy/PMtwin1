@@ -188,7 +188,37 @@ function setupMatchesFilters() {
             if ((accept || decline) && e.target.tagName !== 'A') {
                 e.preventDefault();
                 const matchId = (accept || decline).getAttribute('data-match-id');
-                if (matchId && window.router?.navigate) window.router.navigate('/matches/' + matchId);
+                const user = authService.getCurrentUser();
+                if (!matchId || !user) return;
+                const btn = accept || decline;
+                const actions = window.postMatchListActions;
+                if (!actions) {
+                    if (window.router?.navigate) window.router.navigate('/matches/' + matchId);
+                    return;
+                }
+                btn.disabled = true;
+                try {
+                    const result = accept
+                        ? await actions.acceptPostMatchFromList(matchId, user.id, dataService)
+                        : await actions.declinePostMatchFromList(matchId, user.id, dataService);
+                    if (result.cancelled) return;
+                    actions.notifyListResult(result);
+                    if (result.navigateTo) {
+                        actions.navigateIfNeeded(result);
+                        return;
+                    }
+                    if (result.ok) await loadOpportunityMatches();
+                    else if (!result.ok && result.message) actions.notifyListResult(result);
+                } catch (err) {
+                    console.error('Match list action error:', err);
+                    actions.notifyListResult({
+                        ok: false,
+                        message: (err && err.message) ? err.message : 'Action failed.',
+                        tone: 'danger'
+                    });
+                } finally {
+                    btn.disabled = false;
+                }
             }
         });
     }

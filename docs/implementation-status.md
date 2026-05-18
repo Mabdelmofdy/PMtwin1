@@ -67,7 +67,7 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | Item | Status | Notes |
 |------|--------|-------|
 | Create opportunity | ✅ | opportunity-create page + opportunity-service + data-service |
-| Edit opportunity | ✅ | opportunity-edit page |
+| Edit opportunity | ✅ | `/opportunities/:id/edit` uses opportunity-create (edit mode); standalone opportunity-edit page is deprecated |
 | Delete opportunity | ✅ | data-service.deleteOpportunity |
 | Opportunity list (my / all) | ✅ | opportunities, find, pipeline |
 | Opportunity detail | ✅ | opportunity-detail page |
@@ -90,7 +90,7 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | Application list by opportunity | ✅ | getApplicationsByOpportunityId |
 | Application status (pending/shortlisted/accepted/rejected) | ✅ | CONFIG.APPLICATION_STATUS |
 | Pipeline Kanban (applications) | ✅ | pipeline feature; columns by status |
-| Application requirements/deliverables/files/payment terms | ⚠️ | Storage keys and demo data exist; UI integration may be partial |
+| Application requirements/deliverables/files/payment terms | ⚠️ | View in application modal; owners can add requirement rows; deliverables/files still partial |
 | Application count by opportunity | ✅ | getApplicationCountByOpportunityId (API/reports) |
 
 ---
@@ -213,7 +213,8 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | Admin reports | ✅ | admin-reports |
 | Admin settings | ✅ | admin-settings |
 | Admin skills | ✅ | admin-skills |
-| Admin subscriptions | ✅ | admin-subscriptions |
+| Admin subscriptions | ✅ | admin-subscriptions page at `/admin/subscriptions` |
+| Admin site content (CMS) | ✅ | `/admin/site-content`; public pages hydrate from site-content.json + localStorage overrides |
 | Admin collaboration models | ✅ | admin-collaboration-models |
 | Admin matching Run report | ✅ | Preview only (in-memory); does not persist |
 | Persist matches from admin matching (Save) | ✅ | Per-opportunity Save calls `persistPostMatches` → `post_matches`; bulk selected-results save is not implemented |
@@ -244,7 +245,7 @@ Prioritize ⚠️ and ❌ items against your release goals.
 |------|--------|-------|
 | Home | ✅ | home page |
 | Collaboration wizard | ✅ | collaboration-wizard |
-| Collaboration models (public) | ✅ | collaboration-models page |
+| Collaboration models (public) | ✅ | collaboration-models page (CMS sections via site-content-service) |
 | Knowledge base | ✅ | knowledge-base page |
 | Workflow (public) | ✅ | workflow page |
 | Messages | ⚠️ | messages page exists; full threading may be partial |

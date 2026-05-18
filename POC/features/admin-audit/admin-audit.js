@@ -83,6 +83,7 @@ async function initAdminAudit() {
     setupViewSwitcher();
     setupHashQuerySync();
     await loadAuditLogs();
+    if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
 }
 
 function setupHashQuerySync() {

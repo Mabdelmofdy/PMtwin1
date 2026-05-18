@@ -101,6 +101,7 @@ loadScript('src/core/config/config.js').then(async () => {
     await loadScript('src/core/router/auth-guard.js');
     await loadScript('src/core/layout/layout-service.js');
     await loadScript('src/core/api/api-service.js');
+    await loadScript('src/services/site-content/site-content-service.js');
     
     // Load utilities
     await loadScript('src/utils/icon-helper.js');
@@ -114,6 +115,8 @@ loadScript('src/core/config/config.js').then(async () => {
     await loadScript('src/utils/profile-search-text.js');
     await loadScript('src/utils/page-context-header.js');
     await loadScript('src/utils/deal-contract-flow.js');
+    await loadScript('src/utils/post-match-list-actions.js');
+    await loadScript('src/utils/admin-readonly-guard.js');
     
     // Load business logic
     await loadScript('src/business-logic/models/opportunity-models.js');
@@ -603,12 +606,24 @@ function initializeRoutes() {
         await loadPage('admin-collaboration-models');
     }, [CONFIG.ROLES.ADMIN]));
 
+    router.register(CONFIG.ROUTES.ADMIN_SITE_CONTENT, authGuard.protect(async () => {
+        if (!authService.hasRole(CONFIG.ROLES.ADMIN)) {
+            router.navigate(CONFIG.ROUTES.DASHBOARD);
+            return;
+        }
+        if (!authService.hasAdminCapability('admin.settings.write')) {
+            router.navigate(CONFIG.ROUTES.ADMIN);
+            return;
+        }
+        await loadPage('admin-site-content');
+    }, [CONFIG.ROLES.ADMIN]));
+
     router.register(CONFIG.ROUTES.ADMIN_SUBSCRIPTIONS, authGuard.protect(async () => {
         if (!authService.hasRole(CONFIG.ROLES.ADMIN)) {
             router.navigate(CONFIG.ROUTES.DASHBOARD);
             return;
         }
-        router.navigate(CONFIG.ROUTES.ADMIN_SETTINGS);
+        await loadPage('admin-subscriptions');
     }, [CONFIG.ROLES.ADMIN]));
     
     router.register(CONFIG.ROUTES.ADMIN_REPORTS, authGuard.protect(async () => {
@@ -712,6 +727,32 @@ function setupGlobalNavigation() {
     });
 }
 
+/** Pages whose HTML sections are hydrated from site-content.json (+ localStorage overrides). */
+const SITE_CONTENT_PAGE_IDS = {
+    home: 'home',
+    find: 'find',
+    workflow: 'workflow',
+    'knowledge-base': 'knowledge-base',
+    'collaboration-models': 'collaboration-models',
+    'collaboration-wizard': 'collaboration-wizard',
+    login: 'login',
+    register: 'register',
+    'forgot-password': 'forgot-password',
+    'reset-password': 'reset-password'
+};
+
+async function applySiteContentForPage(pageName) {
+    const pageId = SITE_CONTENT_PAGE_IDS[pageName];
+    if (!pageId || !window.siteContentService || typeof window.siteContentService.applyPage !== 'function') {
+        return;
+    }
+    try {
+        await window.siteContentService.applyPage(pageId);
+    } catch (err) {
+        console.warn('Site content apply failed for', pageName, err);
+    }
+}
+
 /** Guard to prevent concurrent fetch/init storms; coalesce overlapping navigations into one follow-up load. */
 let loadPageInProgress = false;
 /** Latest `{ pageName, params }` requested while a load is running (replaced if multiple arrive). */
@@ -751,6 +792,7 @@ async function loadPage(pageName, params = {}) {
         const html = await response.text();
 
         mainContent.innerHTML = html;
+        await applySiteContentForPage(pageName);
 
         const scriptPath = `features/${pageName}/${pageName}.js`;
         try {

@@ -447,14 +447,32 @@ async function loadPostMatchDashboard(userId, isCompany) {
 
         if (!list.dataset.matchActionsBound) {
             list.dataset.matchActionsBound = '1';
-            list.addEventListener('click', (e) => {
+            list.addEventListener('click', async (e) => {
                 const accept = e.target.closest('.btn-accept-match');
                 const decline = e.target.closest('.btn-decline-match');
                 if ((accept || decline) && e.target.tagName !== 'A') {
                     e.preventDefault();
                     const matchId = (accept || decline).getAttribute('data-match-id');
-                    if (matchId && window.router?.navigate) {
-                        window.router.navigate('/matches/' + matchId);
+                    const actions = window.postMatchListActions;
+                    if (!matchId || !actions) return;
+                    const btn = accept || decline;
+                    btn.disabled = true;
+                    try {
+                        const result = accept
+                            ? await actions.acceptPostMatchFromList(matchId, userId, dataService)
+                            : await actions.declinePostMatchFromList(matchId, userId, dataService);
+                        if (result.cancelled) return;
+                        actions.notifyListResult(result);
+                        if (result.navigateTo) {
+                            actions.navigateIfNeeded(result);
+                            return;
+                        }
+                        if (result.ok) await loadPostMatchDashboard(userId, isCompany);
+                        else if (!result.ok && result.message) actions.notifyListResult(result);
+                    } catch (err) {
+                        console.error('Dashboard match action error:', err);
+                    } finally {
+                        btn.disabled = false;
                     }
                 }
             });
@@ -578,7 +596,8 @@ async function buildPostMatchViewModel(postMatch, currentUserId) {
         matchScore: postMatch.matchScore,
         matchScorePercent: scorePct,
         status: postMatch.status,
-        tierLabel: postMatch.matchScore >= 0.85 ? 'Top match' : postMatch.matchScore >= 0.70 ? 'High match' : 'New match'
+        tierLabel: postMatch.matchScore >= 0.85 ? 'Top match' : postMatch.matchScore >= 0.70 ? 'High match' : 'New match',
+        canRespond: userNeedsMatchAction(postMatch, currentUserId)
     };
     const payload = postMatch.payload || {};
 
@@ -869,7 +888,9 @@ function renderDashboardMatchCard(match) {
             ${skills.length ? `<div class="dashboard-match-skills">${skills.map(skill => `<span>${escDash(skill)}</span>`).join('')}</div>` : ''}
         </div>
         <div class="dashboard-match-actions">
-            <a href="#" data-route="/matches/${escDash(match.id)}" class="btn btn-primary btn-sm">View details</a>
+            ${match.canRespond ? `<button type="button" class="btn btn-primary btn-sm btn-accept-match" data-match-id="${escDash(match.id)}">Accept</button>
+            <button type="button" class="btn btn-outline btn-sm btn-decline-match" data-match-id="${escDash(match.id)}">Decline</button>` : ''}
+            <a href="#" data-route="/matches/${escDash(match.id)}" class="btn btn-${match.canRespond ? 'outline' : 'primary'} btn-sm">View details</a>
             <a href="#" data-route="${escDash(match.messageRoute || ('/matches/' + match.id))}" class="btn btn-secondary btn-sm">Message</a>
         </div>
     </article>`;

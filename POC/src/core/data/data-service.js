@@ -38,6 +38,7 @@ import {
     assertReplacementOwnerOrAdmin,
     assertNotReadOnlyAdmin,
     assertAdminMatchingPersist,
+    assertAdminMatchingRead,
     buildLifecycleAuditDetails,
     hasRecentDuplicateNotification,
     notificationDedupeKey
@@ -1724,6 +1725,51 @@ class DataService {
         }
 
         return slots;
+    }
+
+    /**
+     * Admin clears blocked / replacement-blocked flags on a post_match (POC localStorage).
+     * @param {string} matchId
+     * @param {string} actorUserId
+     */
+    async adminResolveBlockedPostMatch(matchId, actorUserId) {
+        const actor = await this.getUserById(actorUserId);
+        const actorRole = actor?.role || null;
+        assertNotReadOnlyAdmin(actorRole);
+        const hasResolve = typeof window !== 'undefined' && window.hasAdminCapability
+            ? window.hasAdminCapability(actorRole, 'admin.matching.resolve_blocked')
+            : actorRole === 'admin';
+        const hasPersist = typeof window !== 'undefined' && window.hasAdminCapability
+            ? window.hasAdminCapability(actorRole, 'admin.matching.persist')
+            : actorRole === 'admin';
+        if (!hasResolve && !hasPersist) {
+            throw new Error(PERMISSION_ERRORS.DENIED);
+        }
+        const list = await this.getPostMatches();
+        const idx = list.findIndex(m => m.id === matchId);
+        if (idx < 0) throw new Error('Match not found.');
+        const match = list[idx];
+        const updated = {
+            ...match,
+            blocked: false,
+            replacementBlocked: false,
+            updatedAt: new Date().toISOString(),
+            metadata: { ...(match.metadata || {}), blocked: false, adminResolvedAt: new Date().toISOString() }
+        };
+        list[idx] = updated;
+        this.storage.set(CONFIG.STORAGE_KEYS.POST_MATCHES, list);
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'post_match_blocked_resolved',
+                entityType: 'post_match',
+                entityId: matchId,
+                details: buildLifecycleAuditDetails({ summary: 'Admin resolved blocked match flags' }, { actorRole, matchId })
+            });
+        } catch (e) {
+            void e;
+        }
+        return updated;
     }
 
     async _notifyReplacementStakeholders(matchId, notification, excludeUserId) {
@@ -4347,6 +4393,12 @@ class DataService {
     }
 
     async createMatchingPreviewRun(data) {
+        const inputActorId = data && data.actorId;
+        if (inputActorId) {
+            const actor = await this.getUserById(inputActorId);
+            const role = actor?.role;
+            if (role) assertAdminMatchingRead(role);
+        }
         const list = await this.getMatchingPreviewRuns();
         const record = {
             id: this.generateId(),

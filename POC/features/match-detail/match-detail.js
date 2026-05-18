@@ -125,6 +125,30 @@ async function renderMatchDetail(postMatch, currentUserId) {
     statusEl.textContent = vm?.statusLabel || (sb ? sb.getStatusLabel(st, 'match') : formatStatusLabel(st));
     statusEl.className = 'badge ' + (sb ? sb.getStatusBadgeClass(st, 'match') : 'badge--neutral');
 
+    const runIdWrap = document.getElementById('match-detail-runid-wrap');
+    const runIdEl = document.getElementById('match-detail-runid');
+    if (runIdWrap && runIdEl) {
+        if (postMatch.runId) {
+            runIdWrap.style.display = '';
+            runIdEl.textContent = postMatch.runId;
+        } else {
+            runIdWrap.style.display = 'none';
+        }
+    }
+    const expiresWrap = document.getElementById('match-detail-expires-wrap');
+    const expiresEl = document.getElementById('match-detail-expires');
+    if (expiresWrap && expiresEl) {
+        if (postMatch.expiresAt) {
+            expiresWrap.style.display = '';
+            const exp = new Date(postMatch.expiresAt);
+            expiresEl.textContent = Number.isNaN(exp.getTime())
+                ? postMatch.expiresAt
+                : exp.toLocaleString();
+        } else {
+            expiresWrap.style.display = 'none';
+        }
+    }
+
     // —— Exchange Flow ——
     const exchangeFlowEl = document.getElementById('match-detail-exchange-flow-body');
     if (exchangeFlowEl) {
@@ -165,7 +189,17 @@ async function renderMatchDetail(postMatch, currentUserId) {
     const valueEl = document.getElementById('match-detail-value-body');
     if (valueEl) {
         let valueHtml = '';
-        if (payload.valueEquivalence) valueHtml = '<p>' + escapeHtml(payload.valueEquivalence) + '</p>';
+        if (matchType === 'two_way' && (payload.scoreAtoB != null || payload.scoreBtoA != null)) {
+            valueHtml += '<p class="text-sm text-gray-600">Directional fit: A→B '
+                + Math.round((payload.scoreAtoB || 0) * 100) + '% · B→A '
+                + Math.round((payload.scoreBtoA || 0) * 100) + '%</p>';
+        }
+        if (matchType === 'consortium' && Array.isArray(payload.roles) && payload.roles.some(r => r.score != null)) {
+            valueHtml += '<ul class="text-sm text-gray-600 list-disc pl-5">' + payload.roles.map(r =>
+                '<li>' + escapeHtml(r.role || 'Role') + ': ' + Math.round((r.score || 0) * 100) + '%</li>'
+            ).join('') + '</ul>';
+        }
+        if (payload.valueEquivalence) valueHtml += '<p>' + escapeHtml(payload.valueEquivalence) + '</p>';
         else if (payload.valueAnalysis && (payload.valueAnalysis.fit || payload.valueAnalysis.budgetInRange)) valueHtml = '<p>Fit: ' + escapeHtml(payload.valueAnalysis.fit || '—') + (payload.valueAnalysis.budgetInRange !== undefined ? ' · Budget in range: ' + (payload.valueAnalysis.budgetInRange ? 'Yes' : 'No') : '') + '</p>';
         else if (payload.valueBalance) valueHtml = '<p>Consortium balance score: ' + Math.round((payload.valueBalance.consortiumBalanceScore || 0) * 100) + '%' + (payload.valueBalance.viable !== undefined ? ' · Viable: ' + (payload.valueBalance.viable ? 'Yes' : 'No') : '') + '</p>';
         else if (payload.chainBalance) valueHtml = '<p>Chain balance score: ' + Math.round((payload.chainBalance.chainBalanceScore || 0) * 100) + '%' + (payload.chainBalance.viable !== undefined ? ' · Viable: ' + (payload.chainBalance.viable ? 'Yes' : 'No') : '') + '</p>';

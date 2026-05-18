@@ -2612,6 +2612,10 @@ function buildApplicationDetailContent(data) {
                             <section class="app-detail-card" id="section-requirements-match">
                                 <h3 class="app-detail-card__title">Requirements match</h3>
                                 <div class="app-detail-card__body app-detail-req-scroll">${requirementsHtml}</div>
+                                <div class="app-detail-add-requirement" data-requires-write style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;padding:0 1rem 1rem;">
+                                    <input type="text" class="form-input" id="app-req-label-input" placeholder="Requirement label (e.g. BIM Level 2)" style="flex:1;min-width:12rem;">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-action="add-requirement" data-application-id="${escapeHtml(application.id)}">Add requirement</button>
+                                </div>
                             </section>
                             <section class="app-detail-card app-detail-card--accent" id="section-ai-match">
                                 <h3 class="app-detail-card__title">AI match breakdown</h3>
@@ -2802,6 +2806,29 @@ function setupApplicationDetailActions(container, applicationId, applicantId, cu
                 } catch (err) {
                     console.error(err);
                     alert('Failed to reject application.');
+                }
+            } else if (action === 'add-requirement' && appId) {
+                const input = container.querySelector('#app-req-label-input');
+                const label = (input && input.value || '').trim();
+                if (!label) {
+                    alert('Enter a requirement label.');
+                    return;
+                }
+                try {
+                    const existing = await dataService.getApplicationRequirements(appId);
+                    await dataService.replaceApplicationRequirements(appId, existing.concat([{
+                        requirementKey: 'custom_' + Date.now(),
+                        requirementLabel: label,
+                        requiredValue: label,
+                        applicantMatch: 'pending',
+                        applicantResponse: null
+                    }]));
+                    if (input) input.value = '';
+                    if (typeof modalService !== 'undefined') modalService.close();
+                    await showApplicationDetailModal(appId);
+                } catch (err) {
+                    console.error(err);
+                    alert('Could not add requirement.');
                 }
             }
         });

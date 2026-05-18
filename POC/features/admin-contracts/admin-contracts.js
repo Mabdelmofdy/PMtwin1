@@ -342,4 +342,5 @@ async function initAdminContracts() {
 
     setupAdminContractsFilters();
     await loadAdminContracts();
+    if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
 }

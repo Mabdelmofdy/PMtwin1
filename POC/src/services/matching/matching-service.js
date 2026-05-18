@@ -1240,6 +1240,18 @@ class MatchingService {
         const startedAt = Date.now();
         const emptyResult = { created: [], createdCount: 0, skippedDuplicateCount: 0, resultCount: 0 };
 
+        const adminPersistSources = new Set(['admin_save', 'admin_command_center', 'manual_debug']);
+        if (adminPersistSources.has(options.source || '')) {
+            const actorRole = options.actorRole
+                || (typeof window !== 'undefined' && window.authService?.getCurrentUser?.()?.role)
+                || null;
+            if (actorRole && typeof window !== 'undefined' && window.hasAdminCapability) {
+                if (!window.hasAdminCapability(actorRole, 'admin.matching.persist')) {
+                    throw new Error('You do not have permission to perform this action.');
+                }
+            }
+        }
+
         // 1. Load opportunity
         const opportunity = await this.dataService.getOpportunityById(opportunityId);
         if (!opportunity || opportunity.status !== 'published') return emptyResult;

@@ -597,6 +597,7 @@ async function initPipeline(params = {}) {
     initPipelineMatchesFilterFromStorage();
     ensurePipelineMatchesSubtabsMarkup();
     setupPipelineMatchesSubtabs();
+    setupPipelineMatchListActions();
     let tabForHeader = 'opportunities';
     const tab = params.tab;
     if (tab === 'applications' || tab === 'opportunities' || tab === 'matches') {
@@ -853,9 +854,66 @@ function renderPipelineMatchCardHtml(vm) {
         + '<div class="pipeline-match-card__row"><span class="pipeline-match-card__kicker">Related opportunities</span>'
         + '<ul class="pipeline-match-card__opps">' + (opps || '<li>—</li>') + '</ul></div>'
         + '</div>'
-        + '<footer class="pipeline-match-card__foot">'
-        + '<a href="#" data-route="' + esc('/matches/' + vm.id) + '" class="btn btn-primary btn-sm">View Match</a>'
+        + '<footer class="pipeline-match-card__foot pipeline-match-card__actions">'
+        + renderPipelineMatchActionsHtml(vm, esc)
+        + '<a href="#" data-route="' + esc('/matches/' + vm.id) + '" class="btn btn-outline btn-sm">View Match</a>'
         + '</footer></article>';
+}
+
+function setupPipelineMatchListActions() {
+    const listEl = document.getElementById('pipeline-matches-list');
+    if (!listEl || listEl.dataset.pipelineMatchActionsBound) return;
+    listEl.dataset.pipelineMatchActionsBound = '1';
+    listEl.addEventListener('click', async (e) => {
+        const btn = e.target.closest('[data-pipeline-action]');
+        if (!btn) return;
+        e.preventDefault();
+        const action = btn.getAttribute('data-pipeline-action');
+        const matchId = btn.getAttribute('data-match-id');
+        const user = authService.getCurrentUser();
+        const actions = window.postMatchListActions;
+        if (!matchId || !user || !actions) return;
+        btn.disabled = true;
+        try {
+            if (action === 'negotiate') {
+                const existing = await dataService.getActiveNegotiationForMatch(matchId);
+                if (!existing) await dataService.startNegotiationFromMatch(matchId, user.id);
+                if (window.router?.navigate) window.router.navigate('/matches/' + matchId + '#negotiation');
+                return;
+            }
+            if (action === 'invite_apply') {
+                await dataService.createOpportunityInvitationFromMatch(matchId, user.id);
+                await loadPipelineMatchesTabContent();
+                return;
+            }
+            if (action === 'accept' || action === 'decline') {
+                const result = action === 'accept'
+                    ? await actions.acceptPostMatchFromList(matchId, user.id, dataService)
+                    : await actions.declinePostMatchFromList(matchId, user.id, dataService);
+                if (result.cancelled) return;
+                actions.notifyListResult(result);
+                if (result.navigateTo) {
+                    actions.navigateIfNeeded(result);
+                    return;
+                }
+                if (result.ok) await loadPipelineMatchesTabContent();
+            }
+        } catch (err) {
+            console.error('Pipeline match action:', err);
+            actions.notifyListResult({ ok: false, message: (err && err.message) || 'Action failed.', tone: 'danger' });
+        } finally {
+            btn.disabled = false;
+        }
+    });
+}
+
+function renderPipelineMatchActionsHtml(vm, esc) {
+    const actions = (vm.availableActions || []).filter(a =>
+        ['accept', 'decline', 'negotiate', 'invite_apply'].includes(a.id) && a.enabled !== false && !vm.isExpired
+    );
+    return actions.map(action =>
+        '<button type="button" class="btn btn-sm ' + (action.kind === 'primary' ? 'btn-primary' : 'btn-outline') + '" data-pipeline-action="' + esc(action.id) + '" data-match-id="' + esc(vm.id) + '">' + esc(action.label) + '</button>'
+    ).join(' ');
 }
 
 function updatePipelineMatchHeaderStatsFromRaw(rawMatches) {

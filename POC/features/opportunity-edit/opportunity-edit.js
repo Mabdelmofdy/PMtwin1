@@ -1,4 +1,5 @@
 /**
+ * @deprecated Router loads opportunity-create for /opportunities/:id/edit. Kept for reference; not initialized by app-init.
  * Opportunity Edit Component
  * Note: Function names are prefixed with 'edit' to avoid conflicts with opportunity-detail.js
  */

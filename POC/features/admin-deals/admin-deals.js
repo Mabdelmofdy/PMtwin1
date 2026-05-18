@@ -383,4 +383,5 @@ async function initAdminDeals() {
 
     setupAdminDealsFilters();
     await loadAdminDeals();
+    if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
 }
