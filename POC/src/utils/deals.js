@@ -97,3 +97,37 @@ export function createDealFromMatch(postMatch, requiredStatus = "confirmed") {
         roleSlots: matchType === "consortium" && roleSlots && Object.keys(roleSlots).length ? roleSlots : null
     };
 }
+
+/**
+ * Build deal payload from an accepted application (Phase 7).
+ * @throws {Error} when application is not accepted or opportunity is missing
+ */
+export function buildDealPayloadFromApplication(application, opportunity) {
+    if (application == null || !isPlainObject(application)) {
+        throw new Error("buildDealPayloadFromApplication: valid application is required.");
+    }
+    if ((application.status || "").toLowerCase() !== "accepted") {
+        throw new Error("buildDealPayloadFromApplication: application must be accepted.");
+    }
+    if (!opportunity || !opportunity.id) {
+        throw new Error("buildDealPayloadFromApplication: opportunity is required.");
+    }
+    const creatorId = opportunity.creatorId;
+    const applicantId = application.applicantId;
+    if (!creatorId || !applicantId) {
+        throw new Error("buildDealPayloadFromApplication: creator and applicant are required.");
+    }
+    return {
+        applicationId: application.id,
+        matchId: application.matchId || null,
+        negotiationId: application.negotiationId || null,
+        opportunityId: opportunity.id,
+        opportunityIds: [opportunity.id],
+        participants: [
+            { userId: creatorId, role: "creator" },
+            { userId: applicantId, role: "contractor" }
+        ],
+        scope: application.proposalSummary || application.coverLetter || opportunity.title || "",
+        exchangeMode: opportunity.exchangeMode || opportunity.paymentModes?.[0] || "cash"
+    };
+}

@@ -592,10 +592,18 @@ async function initContractDetail(params) {
                 const fresh = await dataService.getContractById(contractId);
                 if (!fresh) return;
                 const plist = dataService.getContractParties(fresh);
-                const partiesSigned = plist.map((p) =>
-                    p.userId === user.id ? { ...p, signedAt: new Date().toISOString() } : p
-                );
-                await dataService.updateContract(contractId, { parties: partiesSigned });
+                if (plist.some((p) => p.userId === user.id && p.signedAt)) {
+                    await initContractDetail({ id: contractId });
+                    return;
+                }
+                if (typeof dataService.signContractParty === 'function') {
+                    await dataService.signContractParty(contractId, user.id);
+                } else {
+                    const partiesSigned = plist.map((p) =>
+                        p.userId === user.id ? { ...p, signedAt: new Date().toISOString() } : p
+                    );
+                    await dataService.updateContract(contractId, { parties: partiesSigned });
+                }
                 if (dealId) {
                     const d = await dataService.getDealById(dealId);
                     if (d && d.participants) {
@@ -604,31 +612,6 @@ async function initContractDetail(params) {
                         );
                         await dataService.updateDeal(dealId, { participants: merged });
                     }
-                }
-                if (dataService.createAuditLog) {
-                    await dataService
-                        .createAuditLog({
-                            userId: user.id,
-                            action: 'contract_signed',
-                            entityType: 'contract',
-                            entityId: contractId,
-                            details: { dealId }
-                        })
-                        .catch(() => {});
-                }
-                const others = plist.filter((p) => p.userId !== user.id);
-                for (const o of others) {
-                    if (!o.userId) continue;
-                    await dataService
-                        .createNotification({
-                            userId: o.userId,
-                            type: 'contract_signed_by_party',
-                            title: 'A party signed the contract',
-                            message: 'Another participant signed the Contract Agreement.',
-                            link: '/contracts/' + contractId,
-                            read: false
-                        })
-                        .catch(() => {});
                 }
                 await initContractDetail({ id: contractId });
             } catch (err) {

@@ -409,7 +409,11 @@ function exportSummaryCSV() {
         { Metric: 'Active companies', Value: s.kpi.activeCompanies },
         { Metric: 'Opportunities', Value: s.kpi.opportunities },
         { Metric: 'Applications', Value: s.kpi.applications },
-        { Metric: 'Matches', Value: s.kpi.matches },
+        { Metric: 'Post matches', Value: s.kpi.matches },
+        { Metric: 'Pending post matches', Value: s.kpi.pendingMatches },
+        { Metric: 'Confirmed post matches', Value: s.kpi.confirmedMatches },
+        { Metric: 'Declined post matches', Value: s.kpi.declinedMatches },
+        { Metric: 'Expired post matches', Value: s.kpi.expiredMatches },
         { Metric: 'Deals', Value: s.kpi.deals },
         { Metric: 'Contracts', Value: s.kpi.contracts },
         { Metric: 'Pending signatures', Value: s.kpi.pendingSignatures },
@@ -446,7 +450,11 @@ function renderKpiCards(snap) {
         { key: 'companies', label: 'Active companies', value: k.activeCompanies, trend: t.activeCompanies, hint: 'Companies with active status. Trend = new company accounts vs prior window.', icon: 'ph-buildings', route: CONFIG?.ROUTES?.ADMIN_PEOPLE },
         { key: 'opps', label: 'Opportunities', value: k.opportunities, trend: t.opportunities, hint: 'New posts matching filters.', icon: 'ph-briefcase', route: CONFIG?.ROUTES?.ADMIN_OPPORTUNITIES },
         { key: 'apps', label: 'Applications', value: k.applications, trend: t.applications, hint: 'Offers submitted on filtered opportunities.', icon: 'ph-paper-plane-tilt', route: CONFIG?.ROUTES?.ADMIN_APPLICATIONS },
-        { key: 'matches', label: 'Matches', value: k.matches, trend: t.matches, hint: 'Person ↔ opportunity matches generated.', icon: 'ph-git-merge', route: CONFIG?.ROUTES?.ADMIN_MATCHING },
+        { key: 'matches', label: 'Post matches', value: k.matches, trend: t.matches, hint: 'Need/Offer post_matches generated.', icon: 'ph-git-merge', route: CONFIG?.ROUTES?.ADMIN_MATCHING },
+        { key: 'matches-pending', label: 'Pending matches', value: k.pendingMatches, trend: t.pendingMatches, hint: 'Pending post_matches waiting for participant response.', icon: 'ph-hourglass', route: CONFIG?.ROUTES?.ADMIN_MATCHING },
+        { key: 'matches-confirmed', label: 'Confirmed matches', value: k.confirmedMatches, trend: t.confirmedMatches, hint: 'Confirmed post_matches.', icon: 'ph-check-circle', route: CONFIG?.ROUTES?.ADMIN_MATCHING },
+        { key: 'matches-declined', label: 'Declined matches', value: k.declinedMatches, trend: t.declinedMatches, hint: 'Declined post_matches.', icon: 'ph-x-circle', route: CONFIG?.ROUTES?.ADMIN_MATCHING },
+        { key: 'matches-expired', label: 'Expired matches', value: k.expiredMatches, trend: t.expiredMatches, hint: 'Expired post_matches.', icon: 'ph-timer', route: CONFIG?.ROUTES?.ADMIN_MATCHING },
         { key: 'deals', label: 'Deals', value: k.deals, trend: t.deals, hint: 'Deal workspaces in period.', icon: 'ph-handshake', route: CONFIG?.ROUTES?.ADMIN_DEALS },
         { key: 'contracts', label: 'Contracts', value: k.contracts, trend: t.contracts, hint: 'Legal contracts tied to filtered pipeline.', icon: 'ph-file-text', route: CONFIG?.ROUTES?.ADMIN_CONTRACTS },
         { key: 'sig', label: 'Pending signatures', value: k.pendingSignatures, trend: t.pendingSignatures, hint: 'Contracts awaiting one or more signatures.', icon: 'ph-signature', route: CONFIG?.ROUTES?.ADMIN_CONTRACTS },
@@ -672,12 +680,35 @@ function auditCategoryMatch(cat, action, entityType) {
     return true;
 }
 
+function postMatchOpportunityIds(pm) {
+    const p = pm.payload || {};
+    const ids = [];
+    if (p.needOpportunityId) ids.push(p.needOpportunityId);
+    if (p.offerOpportunityId) ids.push(p.offerOpportunityId);
+    if (p.leadNeedId) ids.push(p.leadNeedId);
+    const sideA = p.sideA || {};
+    const sideB = p.sideB || {};
+    if (sideA.needId) ids.push(sideA.needId);
+    if (sideA.offerId) ids.push(sideA.offerId);
+    if (sideB.needId) ids.push(sideB.needId);
+    if (sideB.offerId) ids.push(sideB.offerId);
+    return ids;
+}
+
+function filterPostMatchesByOppSet(postMatches, oppIds, range) {
+    return postMatches.filter(pm => {
+        const linked = postMatchOpportunityIds(pm).some(id => oppIds.has(id));
+        if (!linked) return false;
+        return inRange(pm.createdAt, range.start, range.end);
+    });
+}
+
 async function buildSnapshot(range, prevRange, region, userType, category, oppStatus) {
     const users = await dataService.getUsers();
     const companies = await dataService.getCompanies();
     const opportunities = await dataService.getOpportunities();
     const applications = await dataService.getApplications();
-    const matches = await dataService.getMatches();
+    const matches = [];
     const postMatches = await dataService.getPostMatches();
     const deals = await dataService.getDeals();
     const contracts = await dataService.getContracts();
@@ -690,7 +721,7 @@ async function buildSnapshot(range, prevRange, region, userType, category, oppSt
     const oppsLoose = filterOpportunitiesLoose(opportunities, users, companies, region, userType, category, oppStatus);
 
     const appsF = filterByOppSet(applications, a => a.opportunityId, oppIds, range);
-    const matchesF = filterByOppSet(matches, m => m.opportunityId, oppIds, range);
+    const matchesF = filterPostMatchesByOppSet(postMatches, oppIds, range);
     const dealsF = deals.filter(d => {
         const oid = d.opportunityId || (d.opportunityIds && d.opportunityIds[0]);
         if (!oppIds.has(oid)) return false;
@@ -706,7 +737,7 @@ async function buildSnapshot(range, prevRange, region, userType, category, oppSt
     const prevOpps = filterOpportunities(opportunities, users, companies, prevRange, region, userType, category, oppStatus);
     const prevOppIds = new Set(prevOpps.map(o => o.id));
     const prevApps = filterByOppSet(applications, a => a.opportunityId, prevOppIds, prevRange);
-    const prevMatches = filterByOppSet(matches, m => m.opportunityId, prevOppIds, prevRange);
+    const prevMatches = filterPostMatchesByOppSet(postMatches, prevOppIds, prevRange);
     const prevDeals = deals.filter(d => {
         const oid = d.opportunityId || (d.opportunityIds && d.opportunityIds[0]);
         if (!prevOppIds.has(oid)) return false;
@@ -732,6 +763,15 @@ async function buildSnapshot(range, prevRange, region, userType, category, oppSt
     const newCompaniesRange = companies.filter(c => inRange(c.createdAt, range.start, range.end)).length;
     const newCompaniesPrev = companies.filter(c => inRange(c.createdAt, prevRange.start, prevRange.end)).length;
 
+    const pendingMatches = matchesF.filter(m => (m.status || '').toLowerCase() === 'pending').length;
+    const confirmedMatches = matchesF.filter(m => (m.status || '').toLowerCase() === 'confirmed').length;
+    const declinedMatches = matchesF.filter(m => (m.status || '').toLowerCase() === 'declined').length;
+    const expiredMatches = matchesF.filter(m => (m.status || '').toLowerCase() === 'expired').length;
+    const prevPendingMatches = prevMatches.filter(m => (m.status || '').toLowerCase() === 'pending').length;
+    const prevConfirmedMatches = prevMatches.filter(m => (m.status || '').toLowerCase() === 'confirmed').length;
+    const prevDeclinedMatches = prevMatches.filter(m => (m.status || '').toLowerCase() === 'declined').length;
+    const prevExpiredMatches = prevMatches.filter(m => (m.status || '').toLowerCase() === 'expired').length;
+
     const kpi = {
         usersTotal: countAccounts(users, companies, userType),
         users: newRegsInRange,
@@ -739,6 +779,10 @@ async function buildSnapshot(range, prevRange, region, userType, category, oppSt
         opportunities: oppsF.length,
         applications: appsF.length,
         matches: matchesF.length,
+        pendingMatches,
+        confirmedMatches,
+        declinedMatches,
+        expiredMatches,
         deals: dealsF.length,
         contracts: contractsF.length,
         pendingSignatures,
@@ -768,6 +812,10 @@ async function buildSnapshot(range, prevRange, region, userType, category, oppSt
         opportunities: { cur: kpi.opportunities, prev: prevOpps.length },
         applications: { cur: kpi.applications, prev: prevApps.length },
         matches: { cur: kpi.matches, prev: prevMatches.length },
+        pendingMatches: { cur: pendingMatches, prev: prevPendingMatches },
+        confirmedMatches: { cur: confirmedMatches, prev: prevConfirmedMatches },
+        declinedMatches: { cur: declinedMatches, prev: prevDeclinedMatches },
+        expiredMatches: { cur: expiredMatches, prev: prevExpiredMatches },
         deals: { cur: kpi.deals, prev: prevDeals.length },
         contracts: { cur: kpi.contracts, prev: contracts.filter(c => {
             const oid = c.opportunityId;
@@ -798,7 +846,8 @@ async function buildSnapshot(range, prevRange, region, userType, category, oppSt
         x.total++;
     });
     matchesF.forEach(m => {
-        const opp = opportunities.find(o => o.id === m.opportunityId);
+        const oid = postMatchOpportunityIds(m).find(id => oppIds.has(id));
+        const opp = opportunities.find(o => o.id === oid);
         const h = hubForOpportunity(opp || {});
         const x = ensureHub(h);
         x.matches++;
@@ -832,7 +881,9 @@ async function buildSnapshot(range, prevRange, region, userType, category, oppSt
         { label: 'Contracted opps', n: contracted, sub: 'status' }
     ];
 
-    const notified = matchesF.filter(m => m.notified).length;
+    const notified = matchesF.filter(m =>
+        (m.participants || []).some(p => (p.participantStatus || '') === 'accepted')
+    ).length;
     const PM = CONFIG?.POST_MATCH_STATUS || { ACCEPTED: 'accepted', CONFIRMED: 'confirmed' };
     const engagedPost = postMatches.filter(pm => {
         const st = (pm.status || '').toLowerCase();
@@ -1114,7 +1165,7 @@ function renderChartsForSnapshot(snap, prevSnap) {
         toggleEmpty('chart-pa-match-quality', 'pa-empty-match-quality', false);
     } else toggleEmpty('chart-pa-match-quality', 'pa-empty-match-quality', true);
 
-    const typeMap = { one_way: 'Recommended', two_way: 'Barter', consortium: 'Consortium', circular: 'Circular' };
+    const typeMap = { one_way: 'Need/Offer', two_way: 'Barter', consortium: 'Consortium', circular: 'Circular Exchange' };
     const pmByType = countBy(snap.postMatches.filter(pm => inRange(pm.createdAt, snap.range.start, snap.range.end)), pm => typeMap[pm.matchType] || pm.matchType || 'Other');
     const tmLabels = Object.keys(pmByType);
     const tmData = tmLabels.map(k => pmByType[k]);
@@ -1127,7 +1178,8 @@ function renderChartsForSnapshot(snap, prevSnap) {
 
     const matchSkillCounts = {};
     snap.matchesF.forEach(m => {
-        const opp = snap.oppById[m.opportunityId];
+        const oid = postMatchOpportunityIds(m).find(id => snap.oppById[id]);
+        const opp = oid ? snap.oppById[oid] : null;
         (opp?.scope?.requiredSkills || []).forEach(sk => {
             matchSkillCounts[sk] = (matchSkillCounts[sk] || 0) + 1;
         });
@@ -1160,7 +1212,7 @@ function renderChartsForSnapshot(snap, prevSnap) {
         ? (snap.matchesF.reduce((acc, m) => acc + (Number(m.matchScore) > 1 ? Number(m.matchScore) : Number(m.matchScore) * 100), 0) / snap.matchesF.length).toFixed(1)
         : '—';
     const matchAvgEl = document.getElementById('pa-match-avg');
-    if (matchAvgEl) matchAvgEl.textContent = `Average match score (0–100 scale): ${avgMatchScore}`;
+    if (matchAvgEl) matchAvgEl.textContent = `Average Need/Offer compatibility (0–100 scale): ${avgMatchScore}`;
 
     const dealCounts = countBy(snap.dealsF, d => d.status || 'unknown');
     const dealLabels = Object.keys(dealCounts).map(s => dealStatusDisplay(s));

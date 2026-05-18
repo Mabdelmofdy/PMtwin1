@@ -29,7 +29,13 @@ function notificationMatchesTypeFilter(n, typeFilter) {
     if (!typeFilter) return true;
     const t = n.type || '';
     if (typeFilter === 'match') {
-        return t === 'match' || t === 'match_found';
+        return (
+            t === 'match' ||
+            t === 'match_found' ||
+            t === 'new_match_found' ||
+            t === 'opportunity_match' ||
+            t === 'candidate_match'
+        );
     }
     if (typeFilter === 'application') {
         return (
@@ -52,7 +58,15 @@ function escapeHtml(value) {
 /** Normalize type for icon / badge grouping */
 function resolveNotificationKind(type) {
     const t = type || '';
-    if (t === 'match_found') return 'match';
+    if (
+        t === 'match' ||
+        t === 'match_found' ||
+        t === 'new_match_found' ||
+        t === 'opportunity_match' ||
+        t === 'candidate_match'
+    ) {
+        return 'match';
+    }
     if (
         t === 'application' ||
         t === 'application_status_changed' ||
@@ -68,7 +82,7 @@ function resolveNotificationKind(type) {
 function getNotificationPresentation(type) {
     const kind = resolveNotificationKind(type);
     const map = {
-        match: { label: 'Match', icon: 'ph-handshake', mod: 'match' },
+        match: { label: 'Need/Offer match', icon: 'ph-handshake', mod: 'match' },
         application: { label: 'Application', icon: 'ph-file-text', mod: 'application' },
         message: { label: 'Message', icon: 'ph-chat-circle-text', mod: 'message' },
         deal: { label: 'Deal', icon: 'ph-briefcase', mod: 'deal' },

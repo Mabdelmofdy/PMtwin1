@@ -12,7 +12,7 @@ const OPP_STAGE_KEY_TO_STATUS = {
 
 const OPPORTUNITY_STAGE_NAV = [
     { key: 'draft', label: 'Draft', hint: 'Work in progress—not visible to the network until you publish.' },
-    { key: 'published', label: 'Published', hint: 'Visible to others; candidates can discover and apply.' },
+    { key: 'published', label: 'Published', hint: 'Visible to others; partners can discover and apply.' },
     { key: 'in_progress', label: 'In progress', hint: 'Active collaboration: negotiation, contract, or execution.' },
     { key: 'closed', label: 'Closed', hint: 'Completed, cancelled, or otherwise finished.' }
 ];
@@ -52,6 +52,23 @@ const APP_PIPELINE_STATUS_LABELS = {
     rejected: 'Rejected',
     withdrawn: 'Withdrawn'
 };
+
+const PIPELINE_MATCHES_TAB_ALL = 'all';
+const PIPELINE_MATCHES_TABS = [
+    { id: PIPELINE_MATCHES_TAB_ALL, label: 'All' },
+    { id: 'one_way', label: 'Need/Offer' },
+    { id: 'two_way', label: 'Barter' },
+    { id: 'consortium', label: 'Consortium' },
+    { id: 'circular', label: 'Circular' },
+    { id: 'pending', label: 'Pending' },
+    { id: 'confirmed', label: 'Confirmed' },
+    { id: 'declined', label: 'Declined' },
+    { id: 'expired', label: 'Expired' }
+];
+const PIPELINE_MATCH_TYPE_ORDER = ['one_way', 'two_way', 'consortium', 'circular'];
+
+let pipelineMatchesViewModels = [];
+let pipelineMatchesFilterTab = PIPELINE_MATCHES_TAB_ALL;
 
 function humanizeModelType(mt) {
     if (!mt) return '';
@@ -483,7 +500,9 @@ function setupIntentSegment(panelId) {
 function mountPipelinePageHeader(tabName) {
     const mount = document.getElementById('page-context-header-mount');
     if (!mount || !window.pageContextHeader || !window.pageContextHeader.PRESETS) return;
-    const presetKey = tabName === 'applications' ? 'pipelineApplications' : 'pipelineOpportunities';
+    let presetKey = 'pipelineOpportunities';
+    if (tabName === 'applications') presetKey = 'pipelineApplications';
+    else if (tabName === 'matches') presetKey = 'pipelineMatches';
     window.pageContextHeader.mount(mount, window.pageContextHeader.PRESETS[presetKey]);
 }
 
@@ -516,6 +535,11 @@ function setupPipelinePageHeaderActions() {
         if (el.closest('#pipeline-cta-export-apps')) {
             e.preventDefault();
             void exportPipelineApplicationsCsv();
+            return;
+        }
+        if (el.closest('#pipeline-cta-matches-scroll')) {
+            e.preventDefault();
+            document.getElementById('pipeline-matches-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     });
 }
@@ -570,10 +594,13 @@ async function initPipeline(params = {}) {
     setupApplicationSidebarDropZones();
     setupOpportunityStageNav();
     setupOpportunitySidebarDropZones();
+    initPipelineMatchesFilterFromStorage();
+    ensurePipelineMatchesSubtabsMarkup();
+    setupPipelineMatchesSubtabs();
     let tabForHeader = 'opportunities';
     const tab = params.tab;
-    if (tab === 'applications' || tab === 'opportunities') {
-        const tabBtn = document.querySelector('.tab-btn[data-tab="' + tab + '"]');
+    if (tab === 'applications' || tab === 'opportunities' || tab === 'matches') {
+        const tabBtn = document.querySelector('.pipeline-board-tab[data-tab="' + tab + '"]');
         if (tabBtn) tabBtn.click();
         tabForHeader = tab;
     } else {
@@ -619,6 +646,9 @@ function setupTabs() {
             } else if (tabName === 'applications') {
                 mountPipelinePageHeader('applications');
                 loadApplicationsPipeline();
+            } else if (tabName === 'matches') {
+                mountPipelinePageHeader('matches');
+                void loadPipelineMatchesTabContent();
             }
         });
     });
@@ -713,382 +743,213 @@ async function loadApplicationsPipeline() {
     }
 }
 
-/**
- * Get viewer role for a one_way post-match (from participants).
- * @returns {{ isNeedOwner: boolean, isOfferOwner: boolean }}
- */
-function getOneWayViewerRole(postMatch, currentUserId) {
-    const participants = postMatch.participants || [];
-    const needOwner = participants.find(p => p.role === 'need_owner');
-    const offerProvider = participants.find(p => p.role === 'offer_provider');
-    const needOwnerId = needOwner?.userId || null;
-    const offerOwnerId = offerProvider?.userId || null;
-    return {
-        isNeedOwner: needOwnerId === currentUserId,
-        isOfferOwner: offerOwnerId === currentUserId
-    };
+function initPipelineMatchesFilterFromStorage() {
+    try {
+        const v = sessionStorage.getItem('pipeline-matches-tab');
+        if (v && PIPELINE_MATCHES_TABS.some(t => t.id === v)) pipelineMatchesFilterTab = v;
+    } catch (e) { /* ignore */ }
 }
 
-async function buildPostMatchViewModelPipeline(postMatch, currentUserId) {
-    const ds = dataService;
-    const scorePct = Math.round((postMatch.matchScore || 0) * 100);
-    const matchBadgeClass = scorePct >= 90 ? 'badge-match-high' : scorePct >= 70 ? 'badge-match-medium' : 'badge-match-low';
-    const base = {
-        id: postMatch.id,
-        matchType: postMatch.matchType,
-        matchScore: postMatch.matchScore,
-        matchScorePercent: scorePct,
-        matchBadgeClass,
-        status: postMatch.status,
-        tierLabel: postMatch.matchScore >= 0.85 ? 'Top match' : postMatch.matchScore >= 0.70 ? 'Good match' : 'Possible match'
-    };
-    const payload = postMatch.payload || {};
-    if (postMatch.matchType === 'one_way') {
-        const needOpp = await ds.getOpportunityById(payload.needOpportunityId);
-        const offerOpp = await ds.getOpportunityById(payload.offerOpportunityId);
-        const otherPart = (postMatch.participants || []).find(p => p.userId !== currentUserId);
-        const { isNeedOwner } = getOneWayViewerRole(postMatch, currentUserId);
-        const cardTitle = isNeedOwner ? 'Recommended Provider Found' : 'Recommended Opportunity Found';
-        const section1Label = isNeedOwner ? 'Your Need' : 'Opportunity Need';
-        const section2Label = isNeedOwner ? 'Provider Offer' : 'Your Offer';
-        const needTitle = needOpp?.title || 'Need';
-        const offerTitle = offerOpp?.title || 'Offer';
-        const otherUserId = otherPart?.userId || '';
-        const needOpportunityId = payload.needOpportunityId || '';
-        const offerOpportunityId = payload.offerOpportunityId || '';
-        let primaryActionLabel, primaryActionRoute, secondaryActionLabel, secondaryActionRoute, tertiaryActionLabel, tertiaryActionRoute;
-        if (isNeedOwner) {
-            primaryActionLabel = 'View Provider';
-            primaryActionRoute = '/opportunities/' + offerOpportunityId;
-            secondaryActionLabel = 'Invite to Apply';
-            secondaryActionRoute = '/opportunities/' + offerOpportunityId;
-            tertiaryActionLabel = 'Message Provider';
-            tertiaryActionRoute = '/messages/' + otherUserId;
-        } else {
-            primaryActionLabel = 'View Opportunity';
-            primaryActionRoute = '/opportunities/' + needOpportunityId;
-            secondaryActionLabel = 'Apply to Opportunity';
-            secondaryActionRoute = '/opportunities/' + needOpportunityId;
-            tertiaryActionLabel = 'Message Owner';
-            tertiaryActionRoute = '/messages/' + otherUserId;
-        }
-        return {
-            ...base,
-            needTitle,
-            offerTitle,
-            needOpportunityId,
-            offerOpportunityId,
-            otherUserId,
-            cardTitle,
-            section1Label,
-            section2Label,
-            primaryActionLabel,
-            primaryActionRoute,
-            secondaryActionLabel,
-            secondaryActionRoute,
-            tertiaryActionLabel,
-            tertiaryActionRoute
-        };
-    }
-    if (postMatch.matchType === 'two_way') {
-        const sideA = payload.sideA || {}, sideB = payload.sideB || {};
-        const isA = sideA.userId === currentUserId;
-        const myNeedId = isA ? sideA.needId : sideB.needId, myOfferId = isA ? sideA.offerId : sideB.offerId, theirNeedId = isA ? sideB.needId : sideA.needId, theirOfferId = isA ? sideB.offerId : sideA.offerId;
-        const myNeed = myNeedId ? await ds.getOpportunityById(myNeedId) : null, myOffer = myOfferId ? await ds.getOpportunityById(myOfferId) : null, theirNeed = theirNeedId ? await ds.getOpportunityById(theirNeedId) : null, theirOffer = theirOfferId ? await ds.getOpportunityById(theirOfferId) : null;
-        return { ...base, yourNeedTitle: myNeed?.title || 'Your need', yourOfferTitle: myOffer?.title || 'Your offer', theirNeedTitle: theirNeed?.title || 'Their need', theirOfferTitle: theirOffer?.title || 'Their offer', valueEquivalence: payload.valueEquivalence || '', otherUserId: isA ? (sideB.userId || '') : (sideA.userId || '') };
-    }
-    if (postMatch.matchType === 'consortium') {
-        const leadOpp = await ds.getOpportunityById(payload.leadNeedId);
-        const rawTitle = leadOpp?.title || 'Project';
-        const projectTitle = rawTitle.replace(/^Need:\s*/i, '').trim() || rawTitle;
-        const roles = await Promise.all((payload.roles || []).map(async (r) => { const u = await ds.getUserOrCompanyById(r.userId); return { role: r.role || 'Partner', partnerName: u?.profile?.name || r.userId }; }));
-        return { ...base, projectTitle, roles };
-    }
-    if (postMatch.matchType === 'circular') {
-        const cycle = payload.cycle || [], links = payload.links || [];
-        const youGiveLink = links.find(l => (l.fromCreatorId || l.from) === currentUserId), youReceiveLink = links.find(l => (l.toCreatorId || l.to) === currentUserId);
-        const youGiveOpp = youGiveLink?.offerId ? await ds.getOpportunityById(youGiveLink.offerId) : null;
-        const youReceiveNeedOpp = youReceiveLink?.needId ? await ds.getOpportunityById(youReceiveLink.needId) : null;
-        const names = await Promise.all(cycle.map(uid => ds.getUserOrCompanyById(uid).then(u => u?.profile?.name || uid)));
-        const cycleLabel = cycle.map((uid, i) => (uid === currentUserId ? 'You' : (names[i] || uid))).join(' → ') + ' → You';
-        return { ...base, cycleLabel, youGiveTitle: youGiveOpp?.title || 'Your offer', youReceiveTitle: youReceiveNeedOpp ? 'Need: ' + youReceiveNeedOpp.title : 'Their need' };
-    }
-    return base;
+function ensurePipelineMatchesSubtabsMarkup() {
+    const container = document.getElementById('pipeline-matches-subtabs');
+    if (!container || container.querySelector('[data-pipeline-matches-tab]')) return;
+    container.innerHTML = PIPELINE_MATCHES_TABS.map((tab, index) => {
+        const active = tab.id === pipelineMatchesFilterTab ? ' active' : '';
+        const selected = tab.id === pipelineMatchesFilterTab ? 'true' : 'false';
+        return '<button type="button" class="matches-segment' + active + '" role="tab" data-pipeline-matches-tab="' + tab.id + '" aria-selected="' + selected + '">'
+            + '<span class="matches-segment__inner"><span class="matches-segment__label">' + tab.label + '</span>'
+            + '<span class="matches-segment__count" id="pipeline-matches-count-' + tab.id + '" hidden></span></span></button>';
+    }).join('');
 }
 
-const POST_MATCH_TEMPLATES = { one_way: 'match-card-one-way', two_way: 'match-card-two-way', consortium: 'match-card-consortium', circular: 'match-card-circular' };
-const MATCH_TYPE_LABELS = { one_way: 'Recommended Matches', two_way: 'Barter Matches', consortium: 'Consortium Invitations', circular: 'Circular Exchange Opportunities' };
+function setupPipelineMatchesSubtabs() {
+    const root = document.querySelector('[data-pipeline-matches-root="1"]');
+    const container = document.getElementById('pipeline-matches-subtabs');
+    if (!root || !container || root.dataset.pipelineMatchesSubtabsBound === '1') return;
+    root.dataset.pipelineMatchesSubtabsBound = '1';
+    container.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-pipeline-matches-tab]');
+        if (!btn) return;
+        pipelineMatchesFilterTab = btn.getAttribute('data-pipeline-matches-tab') || PIPELINE_MATCHES_TAB_ALL;
+        try {
+            sessionStorage.setItem('pipeline-matches-tab', pipelineMatchesFilterTab);
+        } catch (err) { /* ignore */ }
+        container.querySelectorAll('[data-pipeline-matches-tab]').forEach(b => {
+            const active = b === btn;
+            b.classList.toggle('active', active);
+            b.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        renderPipelineMatchesList();
+    });
+}
 
-/** Tab count badges on the standalone /matches page (elements may be absent on pipeline tab). */
-function updateMatchesPageTabCounts(recommendedCount, opportunityCount, consortiumCount) {
-    const rows = [
-        ['matches-count-recommended', recommendedCount],
-        ['matches-count-opportunity', opportunityCount],
-        ['matches-count-consortium', consortiumCount]
-    ];
-    for (const [id, raw] of rows) {
-        const el = document.getElementById(id);
-        if (!el) continue;
-        const n = typeof raw === 'number' && raw > 0 ? Math.floor(raw) : 0;
-        if (n > 0) {
-            el.textContent = String(n);
+function filterPipelineMatchesViewModels(viewModels) {
+    const tab = pipelineMatchesFilterTab;
+    return viewModels.filter(vm => {
+        if (tab === 'pending' && vm.status !== 'pending') return false;
+        if (tab === 'confirmed' && vm.status !== 'confirmed') return false;
+        if (tab === 'declined' && vm.status !== 'declined') return false;
+        if (tab === 'expired' && vm.status !== 'expired') return false;
+        if (['one_way', 'two_way', 'consortium', 'circular'].includes(tab) && vm.matchType !== tab) return false;
+        return true;
+    });
+}
+
+function filterPipelineMatchesForTabCount(viewModels, tabId) {
+    const prev = pipelineMatchesFilterTab;
+    pipelineMatchesFilterTab = tabId;
+    const out = filterPipelineMatchesViewModels(viewModels);
+    pipelineMatchesFilterTab = prev;
+    return out;
+}
+
+function updatePipelineMatchesSubtabCounts() {
+    PIPELINE_MATCHES_TABS.forEach(tab => {
+        const el = document.getElementById('pipeline-matches-count-' + tab.id);
+        if (!el) return;
+        const count = tab.id === PIPELINE_MATCHES_TAB_ALL
+            ? pipelineMatchesViewModels.length
+            : filterPipelineMatchesForTabCount(pipelineMatchesViewModels, tab.id).length;
+        if (count > 0) {
+            el.textContent = String(count);
             el.removeAttribute('hidden');
         } else {
             el.textContent = '';
             el.setAttribute('hidden', 'hidden');
         }
-    }
+    });
 }
 
-function setupMatchesSubTabs() {
-    const tabMatches = document.getElementById('tab-matches');
-    const btnRecommended = document.getElementById('matches-subtab-recommended');
-    const btnOpportunity = document.getElementById('matches-subtab-opportunity');
-    const btnConsortium = document.getElementById('matches-subtab-consortium');
-    const panelRecommended = document.getElementById('matches-recommended');
-    const panelOpportunity = document.getElementById('matches-opportunity');
-    const panelConsortium = document.getElementById('matches-consortium');
-    if (!tabMatches || !btnRecommended || !btnOpportunity || !panelRecommended || !panelOpportunity) return;
-    function setActive(btn, panel) {
-        [btnRecommended, btnOpportunity, btnConsortium].forEach(b => b && b.classList.remove('active'));
-        [panelRecommended, panelOpportunity, panelConsortium].forEach(p => p && p.classList.remove('active'));
-        if (btn) btn.classList.add('active');
-        if (panel) panel.classList.add('active');
-        [btnRecommended, btnOpportunity, btnConsortium].forEach(b => { if (b) b.setAttribute('aria-selected', b === btn ? 'true' : 'false'); });
+function pipelineMatchStatusBadgeClass(status) {
+    if (window.statusBadgeSystem && typeof window.statusBadgeSystem.getStatusBadgeClass === 'function') {
+        return window.statusBadgeSystem.getStatusBadgeClass(status, 'match') || 'badge--neutral';
     }
-    btnRecommended.addEventListener('click', () => setActive(btnRecommended, panelRecommended));
-    btnOpportunity.addEventListener('click', () => setActive(btnOpportunity, panelOpportunity));
-    if (btnConsortium) btnConsortium.addEventListener('click', () => setActive(btnConsortium, panelConsortium));
+    return 'badge--neutral';
 }
 
-async function loadMatchesPipeline() {
+function renderPipelineMatchCardHtml(vm) {
+    const umv = window.unifiedMatchViewModel;
+    const esc = umv && typeof umv.escapeHtml === 'function' ? umv.escapeHtml : function (str) {
+        if (str == null) return '';
+        const div = document.createElement('div');
+        div.textContent = String(str);
+        return div.innerHTML;
+    };
+    const statusCls = pipelineMatchStatusBadgeClass(vm.status);
+    const scoreHtml = '<span class="badge badge-match ' + esc(vm.matchQualityClass) + '">' + esc(vm.matchQualityLabel) + ' · ' + vm.matchScorePercent + '%</span>';
+    const opps = (vm.opportunities || []).map(o =>
+        '<li><a href="#" data-route="' + esc('/opportunities/' + o.id) + '">' + esc(o.title || o.id) + '</a></li>'
+    ).join('');
+    const participants = esc(vm.participantSummary || '—');
+    const typeLine = esc(vm.matchTypeLabel);
+    const statusLine = esc(vm.statusLabel);
+    const title = esc(vm.cardTitle || (vm.matchTypeLabel + ' match'));
+    return '<article class="pipeline-match-card" data-match-id="' + esc(vm.id) + '" data-match-type="' + esc(vm.matchType) + '">'
+        + '<header class="pipeline-match-card__head"><h3 class="pipeline-match-card__title">' + title + '</h3>' + scoreHtml + '</header>'
+        + '<div class="pipeline-match-card__body">'
+        + '<p class="pipeline-match-card__row"><span class="pipeline-match-card__kicker">Match type</span>' + typeLine + '</p>'
+        + '<p class="pipeline-match-card__row"><span class="pipeline-match-card__kicker">Status</span> <span class="badge ' + statusCls + '">' + statusLine + '</span></p>'
+        + '<p class="pipeline-match-card__row"><span class="pipeline-match-card__kicker">Participants</span>' + participants + '</p>'
+        + '<div class="pipeline-match-card__row"><span class="pipeline-match-card__kicker">Related opportunities</span>'
+        + '<ul class="pipeline-match-card__opps">' + (opps || '<li>—</li>') + '</ul></div>'
+        + '</div>'
+        + '<footer class="pipeline-match-card__foot">'
+        + '<a href="#" data-route="' + esc('/matches/' + vm.id) + '" class="btn btn-primary btn-sm">View Match</a>'
+        + '</footer></article>';
+}
+
+function updatePipelineMatchHeaderStatsFromRaw(rawMatches) {
+    const list = Array.isArray(rawMatches) ? rawMatches : [];
+    const total = list.length;
+    const pending = list.filter(m => (m.status || '').toLowerCase() === 'pending').length;
+    const confirmed = list.filter(m => (m.status || '').toLowerCase() === 'confirmed').length;
+    setPipelineStat('pipeline-stat-match-total', total);
+    setPipelineStat('pipeline-stat-match-pending', pending);
+    setPipelineStat('pipeline-stat-match-confirmed', confirmed);
+}
+
+function renderPipelineMatchesList() {
+    const listEl = document.getElementById('pipeline-matches-list');
+    const summaryEl = document.getElementById('pipeline-matches-summary');
+    if (!listEl) return;
+
+    const filtered = filterPipelineMatchesViewModels(pipelineMatchesViewModels);
+    if (summaryEl) {
+        summaryEl.textContent = filtered.length === pipelineMatchesViewModels.length
+            ? filtered.length + ' match' + (filtered.length === 1 ? '' : 'es')
+            : 'Showing ' + filtered.length + ' of ' + pipelineMatchesViewModels.length;
+    }
+
+    if (pipelineMatchesViewModels.length === 0) {
+        listEl.innerHTML = '<div class="empty-state">No matches yet. Publish a Need or Offer to start matching.</div>';
+        return;
+    }
+    if (filtered.length === 0) {
+        listEl.innerHTML = '<div class="empty-state">No matches for this filter.</div>';
+        return;
+    }
+
+    if (pipelineMatchesFilterTab === PIPELINE_MATCHES_TAB_ALL) {
+        const byType = {};
+        filtered.forEach(vm => {
+            const t = vm.matchType || 'one_way';
+            if (!byType[t]) byType[t] = [];
+            byType[t].push(vm);
+        });
+        const parts = [];
+        PIPELINE_MATCH_TYPE_ORDER.forEach(mt => {
+            const group = (byType[mt] || []).slice().sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+            if (!group.length) return;
+            const label = window.unifiedMatchViewModel && typeof window.unifiedMatchViewModel.getMatchTypeLabel === 'function'
+                ? window.unifiedMatchViewModel.getMatchTypeLabel(mt)
+                : mt;
+            parts.push('<section class="matches-section" data-pipeline-match-type="' + mt + '"><h3 class="matches-section-title">' + label + '</h3><div class="match-cards-grid">'
+                + group.map(renderPipelineMatchCardHtml).join('')
+                + '</div></section>');
+        });
+        Object.keys(byType).forEach(mt => {
+            if (PIPELINE_MATCH_TYPE_ORDER.includes(mt)) return;
+            const group = (byType[mt] || []).slice().sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+            if (!group.length) return;
+            const escMt = window.unifiedMatchViewModel && typeof window.unifiedMatchViewModel.escapeHtml === 'function'
+                ? window.unifiedMatchViewModel.escapeHtml(mt)
+                : String(mt).replace(/</g, '&lt;');
+            parts.push('<section class="matches-section" data-pipeline-match-type="' + escMt + '"><h3 class="matches-section-title">' + escMt + '</h3><div class="match-cards-grid">'
+                + group.map(renderPipelineMatchCardHtml).join('')
+                + '</div></section>');
+        });
+        listEl.innerHTML = parts.join('') || '<div class="empty-state">No matches for this filter.</div>';
+        return;
+    }
+
+    listEl.innerHTML = '<div class="match-cards-grid">' + filtered.map(renderPipelineMatchCardHtml).join('') + '</div>';
+}
+
+/**
+ * Pipeline Matches tab — post_matches only (getPostMatchesForUser). No legacy / pmtwin_matches.
+ */
+async function loadPipelineMatchesTabContent() {
+    const listEl = document.getElementById('pipeline-matches-list');
     const user = authService.getCurrentUser();
-    if (!user) return;
+    if (!listEl || !user) return;
 
-    const recommendedContainer = document.getElementById('matches-recommended-list');
-    const opportunityContainer = document.getElementById('matches-opportunity-list');
-    const consortiumContainer = document.getElementById('matches-consortium-list');
-    if (!recommendedContainer || !opportunityContainer) return;
+    const umv = window.unifiedMatchViewModel;
+    if (!umv || typeof umv.buildUnifiedMatchViewModels !== 'function' || typeof dataService.getPostMatchesForUser !== 'function') {
+        listEl.innerHTML = '<div class="empty-state">We couldn’t load matches. Please try again.</div>';
+        return;
+    }
 
-    recommendedContainer.innerHTML = '<div class="spinner"></div>';
-    opportunityContainer.innerHTML = '<div class="spinner"></div>';
-    if (consortiumContainer) consortiumContainer.innerHTML = '<div class="spinner"></div>';
-    setupMatchesSubTabs();
-
+    listEl.innerHTML = '<div class="spinner" aria-label="Loading matches"></div>';
     try {
-        const legacyMatches = await dataService.getMatches();
-        const candidateMatches = legacyMatches.filter(m => (m.candidateId || m.userId) === user.id);
-        const allOpportunities = await dataService.getOpportunities();
-        const needOwnerOppIds = new Set((allOpportunities.filter(o => o.creatorId === user.id)).map(o => o.id));
-        const needOwnerMatches = legacyMatches.filter(m => needOwnerOppIds.has(m.opportunityId));
-        const userLegacyMatches = [...candidateMatches, ...needOwnerMatches.filter(m => !candidateMatches.some(c => c.id === m.id))];
-        const postMatches = dataService.getPostMatchesForUser ? await dataService.getPostMatchesForUser(user.id) : [];
-        const pendingPostMatches = postMatches.filter(pm => (pm.status || '') !== 'declined' && (pm.status || '') !== 'expired');
-
-        const hasLegacy = userLegacyMatches.length > 0;
-        const hasPost = pendingPostMatches.length > 0;
-
-        const emptyStateProfile = 'No matches found. Keep your profile updated to receive matches! <a href="#" data-route="' + CONFIG.ROUTES.PROFILE + '" class="text-primary font-medium">Update your profile</a>';
-        const emptyStateRecommended = 'No recommended matches. <a href="#" data-route="' + CONFIG.ROUTES.PROFILE + '" class="text-primary font-medium">Update your profile</a> or explore opportunities to get matches.';
-        const emptyStateOpportunity = 'No opportunity matches.';
-
-        if (!hasLegacy && !hasPost) {
-            updateMatchesPageTabCounts(0, 0, 0);
-            recommendedContainer.innerHTML = '<div class="empty-state">' + emptyStateProfile + '</div>';
-            opportunityContainer.innerHTML = '<div class="empty-state">' + emptyStateProfile + '</div>';
-            if (consortiumContainer) consortiumContainer.innerHTML = '<div class="empty-state">' + emptyStateProfile + '</div>';
-            document.getElementById('matches-recommended')?.classList.add('active');
-            document.getElementById('matches-opportunity')?.classList.remove('active');
-            document.getElementById('matches-consortium')?.classList.remove('active');
-            document.getElementById('matches-subtab-recommended')?.classList.add('active');
-            document.getElementById('matches-subtab-opportunity')?.classList.remove('active');
-            document.getElementById('matches-subtab-consortium')?.classList.remove('active');
-            return;
-        }
-
-        if (hasPost) {
-            const byType = {};
-            pendingPostMatches.forEach(pm => {
-                const t = pm.matchType || 'one_way';
-                if (!byType[t]) byType[t] = [];
-                byType[t].push(pm);
-            });
-            const recommendedParts = [];
-            ['one_way', 'two_way', 'circular'].forEach(matchType => {
-                const list = (byType[matchType] || []).sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
-                if (list.length === 0) return;
-                const label = MATCH_TYPE_LABELS[matchType];
-                recommendedParts.push('<div class="matches-section"><h3 class="matches-section-title">' + label + '</h3><div class="match-cards-grid post-match-cards-' + matchType + '"></div></div>');
-            });
-            recommendedContainer.innerHTML = recommendedParts.length ? recommendedParts.join('') : '<div class="empty-state">' + emptyStateRecommended + '</div>';
-            for (const matchType of ['one_way', 'two_way', 'circular']) {
-                const list = (byType[matchType] || []).sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
-                if (list.length === 0) continue;
-                const subContainer = recommendedContainer.querySelector('.post-match-cards-' + matchType);
-                if (!subContainer) continue;
-                const templateName = POST_MATCH_TEMPLATES[matchType];
-                const template = await templateLoader.load(templateName);
-                const htmlParts = [];
-                for (const pm of list) {
-                    const viewModel = await buildPostMatchViewModelPipeline(pm, user.id);
-                    htmlParts.push(templateRenderer.render(template, viewModel));
-                }
-                subContainer.innerHTML = htmlParts.join('');
-            }
-            if (consortiumContainer) {
-                const consortiumList = (byType.consortium || []).sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
-                if (consortiumList.length > 0) {
-                    consortiumContainer.innerHTML = '<div class="matches-section"><div class="match-cards-grid post-match-cards-consortium"></div></div>';
-                    const consortiumSub = consortiumContainer.querySelector('.post-match-cards-consortium');
-                    if (consortiumSub) {
-                        const template = await templateLoader.load('match-card-consortium');
-                        const htmlParts = [];
-                        for (const pm of consortiumList) {
-                            const viewModel = await buildPostMatchViewModelPipeline(pm, user.id);
-                            htmlParts.push(templateRenderer.render(template, viewModel));
-                        }
-                        consortiumSub.innerHTML = htmlParts.join('');
-                    }
-                } else {
-                    consortiumContainer.innerHTML = '<div class="empty-state">No consortium invitations.</div>';
-                }
-            }
-        } else {
-            recommendedContainer.innerHTML = '<div class="empty-state">' + emptyStateRecommended + '</div>';
-        }
-
-        if (hasLegacy) {
-            opportunityContainer.innerHTML = '<div class="matches-section"><h3 class="matches-section-title">Opportunity Matches</h3><div class="match-cards-grid legacy-match-cards"></div></div>';
-            const legacyContainer = opportunityContainer.querySelector('.legacy-match-cards');
-            if (legacyContainer) {
-                const matchesWithOpps = await Promise.all(
-                    userLegacyMatches.map(async (m) => {
-                        const opportunity = await dataService.getOpportunityById(m.opportunityId);
-                        const opp = opportunity || { id: m.opportunityId, title: 'Unknown', description: 'No description', modelType: '—', status: '—', creatorId: null };
-                        const isNeedOwner = opp.creatorId === user.id;
-                        const providerId = m.candidateId || m.userId;
-                        let providerName = '';
-                        if (isNeedOwner && providerId) {
-                            const provider = await dataService.getUserOrCompanyById(providerId);
-                            providerName = provider?.profile?.name || provider?.profile?.companyName || providerId;
-                        }
-                        const needOwnerId = opp.creatorId || '';
-                        const cardTitle = isNeedOwner ? 'Recommended Provider Found' : 'Recommended Opportunity Found';
-                        const section1Label = isNeedOwner ? 'Your Need' : 'Opportunity Need';
-                        const section2Label = isNeedOwner ? 'Provider Offer' : 'Your Offer';
-                        const section1Content = opp.title + (opp.description ? ': ' + opp.description : '');
-                        const section2Content = isNeedOwner ? providerName || 'Provider' : 'Your application / offer';
-                        const industryLabel = (Array.isArray(opp.sectors) && opp.sectors[0]) ? opp.sectors[0] : (opp.industry || (opp.sectors && !Array.isArray(opp.sectors) ? opp.sectors : null));
-                        let primaryActionLabel, primaryActionRoute, secondaryActionLabel, secondaryActionRoute, tertiaryActionLabel, tertiaryActionRoute;
-                        if (isNeedOwner) {
-                            primaryActionLabel = 'View Provider';
-                            primaryActionRoute = '/people/' + providerId;
-                            secondaryActionLabel = 'Invite to Apply';
-                            secondaryActionRoute = '/opportunities/' + opp.id;
-                            tertiaryActionLabel = 'Message Provider';
-                            tertiaryActionRoute = '/messages/' + providerId;
-                        } else {
-                            primaryActionLabel = 'View Opportunity';
-                            primaryActionRoute = '/opportunities/' + opp.id;
-                            secondaryActionLabel = 'Apply to Opportunity';
-                            secondaryActionRoute = '/opportunities/' + opp.id;
-                            tertiaryActionLabel = 'Message Owner';
-                            tertiaryActionRoute = '/messages/' + needOwnerId;
-                        }
-                        return {
-                            id: m.id,
-                            opportunity: { ...opp, description: opp.description || 'No description' },
-                            matchScore: m.matchScore != null ? m.matchScore : 0,
-                            criteria: m.criteria || m.matchReasons,
-                            cardTitle,
-                            section1Label,
-                            section2Label,
-                            section1Content,
-                            section2Content,
-                            industryLabel: industryLabel || null,
-                            primaryActionLabel,
-                            primaryActionRoute,
-                            secondaryActionLabel,
-                            secondaryActionRoute,
-                            tertiaryActionLabel,
-                            tertiaryActionRoute
-                        };
-                    })
-                );
-                matchesWithOpps.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
-                const template = await templateLoader.load('match-card');
-                legacyContainer.innerHTML = matchesWithOpps.map(match => {
-                    const matchScorePercent = Math.round((match.matchScore || 0) * 100);
-                    const matchBadgeClass = matchScorePercent >= 90 ? 'badge-match-high' : matchScorePercent >= 70 ? 'badge-match-medium' : 'badge-match-low';
-                    const data = {
-                        ...match,
-                        opportunity: { ...match.opportunity, description: match.opportunity.description || 'No description' },
-                        matchScorePercent,
-                        matchBadgeClass
-                    };
-                    return templateRenderer.render(template, data);
-                }).join('');
-            }
-        } else {
-            opportunityContainer.innerHTML = '<div class="empty-state">' + emptyStateOpportunity + '</div>';
-        }
-
-        if (!document.getElementById('tab-matches')?.dataset.matchActionsBound) {
-            document.getElementById('tab-matches').dataset.matchActionsBound = '1';
-            document.getElementById('tab-matches').addEventListener('click', (e) => {
-                const accept = e.target.closest('.btn-accept-match');
-                const decline = e.target.closest('.btn-decline-match');
-                if ((accept || decline) && e.target.tagName !== 'A') {
-                    e.preventDefault();
-                    const matchId = (accept || decline).getAttribute('data-match-id');
-                    if (matchId && window.router && typeof window.router.navigate === 'function') {
-                        window.router.navigate('/matches/' + matchId);
-                    }
-                }
-            });
-        }
-
-        let recCount = 0;
-        let consCount = 0;
-        if (hasPost) {
-            const bt = {};
-            pendingPostMatches.forEach(pm => {
-                const t = pm.matchType || 'one_way';
-                if (!bt[t]) bt[t] = [];
-                bt[t].push(pm);
-            });
-            recCount = ['one_way', 'two_way', 'circular'].reduce((sum, t) => sum + (bt[t] || []).length, 0);
-            consCount = (bt.consortium || []).length;
-        }
-        const oppCount = hasLegacy ? userLegacyMatches.length : 0;
-        updateMatchesPageTabCounts(recCount, oppCount, consCount);
-
-        const panelRecommendedEl = document.getElementById('matches-recommended');
-        const panelOpportunityEl = document.getElementById('matches-opportunity');
-        const panelConsortiumEl = document.getElementById('matches-consortium');
-        const btnRec = document.getElementById('matches-subtab-recommended');
-        const btnOpp = document.getElementById('matches-subtab-opportunity');
-        const btnCons = document.getElementById('matches-subtab-consortium');
-        [panelRecommendedEl, panelOpportunityEl, panelConsortiumEl].forEach(p => p && p.classList.remove('active'));
-        [btnRec, btnOpp, btnCons].forEach(b => b && b.classList.remove('active'));
-        if (hasPost) {
-            panelRecommendedEl?.classList.add('active');
-            btnRec?.classList.add('active');
-        } else if (hasLegacy) {
-            panelOpportunityEl?.classList.add('active');
-            btnOpp?.classList.add('active');
-        } else if (consortiumContainer && consortiumContainer.querySelector('.match-cards-grid')) {
-            panelConsortiumEl?.classList.add('active');
-            btnCons?.classList.add('active');
-        } else {
-            panelRecommendedEl?.classList.add('active');
-            btnRec?.classList.add('active');
-        }
+        const rawMatches = await dataService.getPostMatchesForUser(user.id);
+        updatePipelineMatchHeaderStatsFromRaw(rawMatches);
+        const context = { currentUserId: user.id, dataService };
+        pipelineMatchesViewModels = await umv.buildUnifiedMatchViewModels(rawMatches, context);
+        pipelineMatchesViewModels.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+        updatePipelineMatchesSubtabCounts();
+        renderPipelineMatchesList();
     } catch (error) {
-        console.error('Error loading matches:', error);
-        updateMatchesPageTabCounts(0, 0, 0);
-        recommendedContainer.innerHTML = '<div class="empty-state">Error loading matches. Please try again.</div>';
-        opportunityContainer.innerHTML = '<div class="empty-state">Error loading matches. Please try again.</div>';
-        if (consortiumContainer) consortiumContainer.innerHTML = '<div class="empty-state">Error loading matches. Please try again.</div>';
+        console.error('Error loading pipeline matches:', error);
+        listEl.innerHTML = '<div class="empty-state">Error loading matches. Please try again.</div>';
     }
 }

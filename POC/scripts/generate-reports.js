@@ -22,7 +22,9 @@ function run() {
     const companies = loadJson('companies.json');
     const opportunities = loadJson('opportunities.json');
     const applications = loadJson('applications.json');
-    const matches = loadJson('matches.json');
+    const legacyMatches = loadJson('matches.json');
+    const postMatches = loadJson('demo-post-matches.json');
+    const matches = postMatches.length ? postMatches : legacyMatches;
     const notifications = loadJson('notifications.json');
     const connections = loadJson('connections.json');
     const messages = loadJson('messages.json');
@@ -67,7 +69,7 @@ function run() {
         `| Companies | ${companies.length} | Company profiles (company_owner) |`,
         `| Opportunities | ${opportunities.length} | ${needs.length} needs, ${offers.length} offers (published) |`,
         `| Applications | ${applications.length} | Applications to opportunities |`,
-        `| Matches | ${matches.length} | opportunity–candidate matches |`,
+        `| Post matches (demo) | ${matches.length} | post-to-post matches (demo-post-matches.json; legacy matches.json deprecated) |`,
         `| Notifications | ${notifications.length} | User notifications |`,
         `| Connections | ${connections.length} | User connections |`,
         `| Messages | ${messages.length} | Direct messages |`,
@@ -77,7 +79,7 @@ function run() {
         '',
         '## Sufficiency for platform workflows',
         '',
-        '- **Individual users:** Sufficient. Users can register, create profiles (professionals have full profiles), create opportunities, receive matches (matches use candidateId), and collaborate (applications, connections, messages present).',
+        '- **Individual users:** Sufficient. Users can register, create profiles (professionals have full profiles), create opportunities, receive post-to-post matches (participants on post_matches), and collaborate (applications, connections, messages present).',
         `- **Companies:** Sufficient. ${companies.length} companies with full profiles; companies can post opportunities (including consortium opp-001).`,
         `- **Admin:** Sufficient. Admin/moderator/auditor roles present; ${pendingUsers.length} pending users, ${pendingCompanies.length} pending companies for vetting; opportunities and matching can be managed; audit trail has ${audit.length} entries.`,
         ''

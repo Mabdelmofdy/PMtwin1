@@ -1,10 +1,5 @@
 <div class="page-container collaboration-wizard-page">
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1 class="page-title">AI Collaboration Wizard</h1>
-            <p class="page-subtitle">Answer a few questions to discover the best collaboration model for your needs</p>
-        </div>
-    </div>
+    <div class="page-header" data-site-section="intro"></div>
     <div class="page-body">
 
     <div class="wizard-container">
@@ -20,19 +15,9 @@
         </div>
     </div>
 
-    <div class="wizard-result card" id="wizard-result" style="display: none;">
-        <h2>Recommended Collaboration Models</h2>
-        <p class="result-intro">Based on your answers, here are the models that best fit your situation:</p>
-        <div id="wizard-result-models"></div>
-        <p class="result-cta-text">Create an account to post or apply for opportunities using these models.</p>
-        <div class="result-actions">
-            <button type="button" id="wizard-restart" class="btn btn-secondary">Start Over</button>
-            <a href="#" data-route="/register" class="btn btn-primary">Register</a>
-            <a href="#" data-route="/opportunities/create" class="btn btn-secondary" id="wizard-create-opp">Create opportunity</a>
-            <a href="#" data-route="/opportunities" class="btn btn-secondary">Browse opportunities</a>
-        </div>
+    <div class="wizard-result card" id="wizard-result" style="display: none;" data-site-section="result-block"></div>
     </div>
-    </div>
+</div>
 </div>
 
 <style>

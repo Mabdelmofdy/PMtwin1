@@ -131,6 +131,9 @@ loadScript('src/core/config/config.js').then(async () => {
     await loadScript('src/services/matching/post-to-post-scoring.js');
     await loadScript('src/services/matching/matching-models.js');
     await loadScript('src/services/matching/matching-service.js');
+    await loadScript('src/services/matching/unified-match-view-model.js');
+    await loadScript('src/services/matching/matching-readiness.js', { type: 'module' });
+    await loadScript('src/services/matching/matching-readiness-ui.js');
     await loadScript('src/services/opportunities/opportunity-service.js');
     await loadScript('src/services/value-exchange/value-estimator.js');
     await loadScript('src/services/value-exchange/value-compatibility.js');
@@ -196,6 +199,14 @@ async function initializeStorage() {
     
     // Initialize data from JSON seed files
     await dataService.initializeFromJSON();
+
+    if (typeof dataService.sweepExpiredOpportunityInvitations === 'function') {
+        try {
+            await dataService.sweepExpiredOpportunityInvitations();
+        } catch (e) {
+            console.warn('Invitation expiry sweep on init:', e);
+        }
+    }
     
     // Create default admin user if no admin exists
     const users = await dataService.getUsers();
@@ -745,6 +756,11 @@ async function loadPage(pageName, params = {}) {
         try {
             if (pageName === 'matches') {
                 await loadScript('features/pipeline/pipeline.js');
+            }
+            if (pageName === 'admin-matching') {
+                await loadScript('src/utils/post-match-analytics.js');
+                await loadScript('src/services/matching/admin-matching-one-way-diagnostics.js');
+                await loadScript('src/services/matching/admin-matching-command-center.js');
             }
             await loadScript(scriptPath);
             const functionName = pageName.split('-').map((word, index) =>

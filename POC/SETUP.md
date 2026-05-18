@@ -101,7 +101,7 @@ Located in `POC/data/`:
 - `users.json` - User accounts (companies, professionals, admin)
 - `opportunities.json` - Sample opportunities across all business models
 - `applications.json` - Applications to opportunities
-- `matches.json` - AI-generated matches between users and opportunities
+- `matches.json` - Deprecated empty stub (legacy person-to-opportunity); use `demo-post-matches.json` / `post_matches` for matching demos
 - `notifications.json` - User notifications
 - `audit.json` - System audit logs
 - `sessions.json` - Active sessions (starts empty)

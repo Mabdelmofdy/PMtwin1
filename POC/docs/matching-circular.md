@@ -1,5 +1,7 @@
 # Circular exchange matching
 
+> **Canonical entity:** Persisted as **`post_matches`** only. Legacy **`pmtwin_matches`** is deprecated.
+
 ### What this page is
 
 POC note on **circular** cycles (3+ parties) and how edges are scored.

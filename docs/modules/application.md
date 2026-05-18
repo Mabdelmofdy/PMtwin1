@@ -441,12 +441,11 @@ The matching algorithm calculates a compatibility score (0.0 to 1.0) between an 
 
 ### Auto-Notification
 
-When a match score >= 80%, the system automatically:
-1. Creates a notification for the candidate:
-   - `type`: `match_found`
-   - `title`: "New Match Found"
-   - `message`: "You have a [X]% match for '[opportunity title]'"
-2. Updates the match record as `notified: true`.
+When a new post_match is created, the system automatically:
+1. Creates notifications for post_match participants:
+   - `type`: `new_match_found`
+   - `link`: `/matches/:postMatchId`
+2. Keeps lifecycle state on the post_match record (pending/confirmed/declined/expired).
 
 ---
 

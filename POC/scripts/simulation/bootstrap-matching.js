@@ -15,6 +15,7 @@ function setupGlobalConfig(options = {}) {
     global.CONFIG = global.CONFIG || {};
     global.CONFIG.BASE_PATH = options.basePath || '';
     global.CONFIG.MATCHING = {
+        LEGACY_PERSON_OPPORTUNITY_ENABLED: false,
         MIN_THRESHOLD: 0.70,
         AUTO_NOTIFY_THRESHOLD: 0.80,
         CANDIDATE_MAX: 200,

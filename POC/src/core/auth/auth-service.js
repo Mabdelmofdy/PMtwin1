@@ -13,6 +13,7 @@ const ADMIN_CAPABILITIES = {
     OPPORTUNITIES_WRITE: 'admin.opportunities.write',
     MATCHING_READ: 'admin.matching.read',
     MATCHING_PERSIST: 'admin.matching.persist',
+    MATCHING_RESOLVE_BLOCKED: 'admin.matching.resolve_blocked',
     DEALS_READ: 'admin.deals.read',
     DEALS_WRITE: 'admin.deals.write',
     CONTRACTS_READ: 'admin.contracts.read',
@@ -39,7 +40,8 @@ function _buildAdminRoleCapabilities() {
         [R.MODERATOR]: [
             ADMIN_CAPABILITIES.DASHBOARD, ADMIN_CAPABILITIES.USERS_READ, ADMIN_CAPABILITIES.USERS_WRITE,
             ADMIN_CAPABILITIES.VETTING, ADMIN_CAPABILITIES.OPPORTUNITIES_READ, ADMIN_CAPABILITIES.OPPORTUNITIES_WRITE,
-            ADMIN_CAPABILITIES.MATCHING_READ, ADMIN_CAPABILITIES.DEALS_READ, ADMIN_CAPABILITIES.DEALS_WRITE,
+            ADMIN_CAPABILITIES.MATCHING_READ, ADMIN_CAPABILITIES.MATCHING_RESOLVE_BLOCKED,
+            ADMIN_CAPABILITIES.DEALS_READ, ADMIN_CAPABILITIES.DEALS_WRITE,
             ADMIN_CAPABILITIES.CONTRACTS_READ, ADMIN_CAPABILITIES.CONTRACTS_WRITE, ADMIN_CAPABILITIES.AUDIT_READ,
             ADMIN_CAPABILITIES.REPORTS_READ, ADMIN_CAPABILITIES.SETTINGS_READ, ADMIN_CAPABILITIES.SKILLS_READ, ADMIN_CAPABILITIES.SKILLS_WRITE,
             ADMIN_CAPABILITIES.SUBSCRIPTIONS_READ
@@ -397,6 +399,16 @@ class AuthService {
         return this.hasAnyRole([CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]);
     }
 
+    /** Read-only admin portal role (auditor). */
+    isAuditor() {
+        return this.hasRole(CONFIG.ROLES.AUDITOR);
+    }
+
+    /** Auditor accounts cannot mutate platform data through admin tools. */
+    isReadOnlyAdmin() {
+        return this.isAuditor();
+    }
+
     /**
      * Check if current user has an admin capability.
      * @param {string} capability - e.g. admin.matching.persist, admin.users.write
@@ -508,6 +520,12 @@ authService.ADMIN_CAPABILITIES = ADMIN_CAPABILITIES;
 // Export
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = authService;
+    module.exports.ADMIN_CAPABILITIES = ADMIN_CAPABILITIES;
+    module.exports.hasAdminCapability = hasAdminCapability;
+    module.exports.assertAdminCapability = assertAdminCapability;
 } else {
     window.authService = authService;
+    window.ADMIN_CAPABILITIES = ADMIN_CAPABILITIES;
+    window.hasAdminCapability = hasAdminCapability;
+    window.assertAdminCapability = assertAdminCapability;
 }

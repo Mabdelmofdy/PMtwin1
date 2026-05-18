@@ -74,7 +74,10 @@ Manuals align with:
 
 - [full-user-journey.md](../full-user-journey.md)
 - [workflow/](../workflow/) (user and opportunity flows)
+- [workflow/matching-workflow.md](../workflow/matching-workflow.md) (publish, preview vs Save, accept/decline)
+- [modules/matching-system.md](../modules/matching-system.md) (match types and lifecycle)
 - [admin-user-journey.md](../admin-user-journey.md)
+- [journeys/admin-journey.md](../journeys/admin-journey.md) (admin matching command center)
 - [implementation-status.md](../implementation-status.md)
 - [gaps-and-missing.md](../gaps-and-missing.md)
 

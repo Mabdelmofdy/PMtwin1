@@ -5,7 +5,7 @@
         <div class="match-detail-header bg-white border border-gray-200 rounded-lg p-6 mb-6" id="match-detail-header">
             <h1 class="page-title text-2xl font-bold text-gray-900 mb-2" id="match-detail-title">Match Details</h1>
             <div class="flex flex-wrap gap-3 items-center text-sm">
-                <span class="text-gray-600">Type: <strong id="match-detail-type"></strong></span>
+                <span class="text-gray-600">Match type: <strong id="match-detail-type"></strong></span>
                 <span class="text-gray-600">Score: <strong id="match-detail-score" class="text-primary"></strong></span>
                 <span class="text-gray-600">Status: <span id="match-detail-status" class="badge"></span></span>
             </div>
@@ -15,19 +15,24 @@
             <div class="match-detail-main space-y-6">
                 <!-- Exchange Flow -->
                 <div class="bg-white border border-gray-200 rounded-lg p-6" id="match-detail-exchange-flow">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-3">Exchange Flow</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-3">Match Summary</h2>
                     <div id="match-detail-exchange-flow-body" class="match-exchange-diagram"></div>
                 </div>
 
-                <!-- Value Exchange -->
+                <div class="bg-white border border-gray-200 rounded-lg p-6" id="match-detail-why">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-3">Why this match?</h2>
+                    <div id="match-detail-why-body" class="text-gray-700"></div>
+                </div>
+
+                <!-- Value compatibility -->
                 <div class="bg-white border border-gray-200 rounded-lg p-6" id="match-detail-value">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-3">Value Exchange</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-3" id="match-detail-value-heading">Compatibility</h2>
                     <div id="match-detail-value-body" class="text-gray-700"></div>
                 </div>
 
-                <!-- Match Score & Criteria -->
+                <!-- Compatibility breakdown -->
                 <div class="bg-white border border-gray-200 rounded-lg p-6" id="match-detail-score-section">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-3">Match Score</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-3">Compatibility breakdown</h2>
                     <div class="mb-3">
                         <span id="match-detail-score-badge" class="badge badge-success text-base"></span>
                     </div>
@@ -36,6 +41,42 @@
                 </div>
             </div>
             <div class="space-y-6">
+                <div class="bg-white border border-gray-200 rounded-lg p-6 match-detail-lifecycle-section" id="match-detail-lifecycle" style="display:none">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-3">Progress</h2>
+                    <div class="space-y-3 text-sm text-gray-700">
+                        <div id="match-detail-invitation-wrap" style="display:none">
+                            <p class="font-medium text-gray-900">Invitation</p>
+                            <div id="match-detail-invitation-body"></div>
+                        </div>
+                        <div id="match-detail-application-wrap" style="display:none">
+                            <p class="font-medium text-gray-900">Application</p>
+                            <div id="match-detail-application-body"></div>
+                        </div>
+                        <div id="match-detail-negotiation-wrap" style="display:none">
+                            <p class="font-medium text-gray-900">Negotiation</p>
+                            <div id="match-detail-negotiation-body"></div>
+                        </div>
+                        <div id="match-detail-replacement-wrap" style="display:none">
+                            <p class="font-medium text-gray-900">Replacement</p>
+                            <div id="match-detail-replacement-body"></div>
+                        </div>
+                        <div id="match-detail-deal-wrap" style="display:none">
+                            <p class="font-medium text-gray-900">Deal</p>
+                            <div id="match-detail-deal-body"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-6" id="match-detail-negotiation-panel" style="display:none">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-3">Value Negotiation</h2>
+                    <div id="match-detail-negotiation-panel-body" class="text-sm text-gray-700 space-y-3"></div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-6" id="match-detail-replacement-panel" style="display:none">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-3" id="match-detail-replacement-panel-title">Participant Replacement</h2>
+                    <div id="match-detail-replacement-panel-body" class="text-sm text-gray-700 space-y-3"></div>
+                </div>
+
                 <!-- Participants -->
                 <div class="bg-white border border-gray-200 rounded-lg p-6">
                     <h2 class="text-lg font-semibold text-gray-900 mb-3">Participants</h2>
@@ -44,10 +85,17 @@
 
                 <!-- Actions -->
                 <div class="bg-white border border-gray-200 rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-3">Actions</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-3">Next Actions</h2>
                     <div class="flex flex-col gap-2" id="match-detail-actions">
-                        <button type="button" class="btn btn-primary w-full" id="btn-accept-match">Start collaboration (create deal)</button>
-                        <a href="#" id="link-start-negotiation" class="btn btn-outline w-full text-center no-underline">Start Negotiation</a>
+                        <button type="button" class="btn btn-primary w-full" id="btn-accept-match">Accept match</button>
+                        <button type="button" class="btn btn-outline w-full" id="btn-invite-apply" style="display:none">Invite to Apply</button>
+                        <button type="button" class="btn btn-primary w-full" id="btn-create-deal-match" style="display:none">Start Deal</button>
+                        <button type="button" class="btn btn-primary w-full" id="btn-create-deal-negotiation" style="display:none">Create Deal</button>
+                        <a href="#" id="link-view-deal" class="btn btn-primary w-full text-center no-underline" style="display:none">View Deal</a>
+                        <button type="button" class="btn btn-outline w-full" id="btn-start-negotiation" style="display:none">Start Negotiation</button>
+                        <button type="button" class="btn btn-outline w-full" id="btn-suggest-replacement" style="display:none">Suggest Replacement</button>
+                        <button type="button" class="btn btn-outline w-full" id="btn-manage-replacement" style="display:none">Manage Replacement</button>
+                        <button type="button" class="btn btn-primary w-full" id="btn-accept-replacement" style="display:none">Accept Replacement Invitation</button>
                         <a href="#" id="link-message-participants" class="btn btn-outline w-full text-center no-underline">Message Participants</a>
                         <button type="button" class="btn btn-outline w-full text-gray-600" id="btn-decline-match">Decline</button>
                     </div>

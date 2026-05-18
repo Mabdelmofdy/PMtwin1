@@ -56,16 +56,15 @@ Turn rows into tickets; owners estimate fix vs accept.
 
 ## 3. Matching Engine
 
+**Resolved:** Legacy person-to-opportunity matching (`pmtwin_matches`) is **deprecated and removed from UI, publish, and seed merge**. The only operational model is **post-to-post** → `post_matches`. Dashboard, pipeline, and `/matches` use `getPostMatches*` only.
+
 | Gap | Severity | Description |
 |-----|----------|-------------|
 | **Multi-model publish routing** | Medium | `detectMatchingModel()` can return multiple models, but `findMatchesForPost()` persists the first precedence route plus circular. A post that qualifies for barter and consortium may not persist every applicable model. |
-| **Circular payload ids** | Medium | Circular `linkScores` do not currently include the underlying `needId` / `offerId`, so match detail and circular deal creation have weak opportunity references. |
-| **Two-way side hydration** | Medium | Two-way `sideA` can store only the currently published opportunity id, leaving the creator's paired need/offer id as null. This weakens dedupe and deal payloads. |
-| **Duplicate-looking post_matches** | Low | Strong dedupe keys exist, but incomplete two-way/circular payloads can still make dedupe less reliable until those ids are hydrated. |
+| **Duplicate-looking post_matches** | Low | Strong dedupe keys exist; edge cases may still appear if opportunities are re-published with overlapping scores. |
 | **Circular only for publishing creator** | Low | persistPostMatches only persists circular cycles that include the publishing opportunity’s creator; other cycles are computed but not stored. |
 | **Expiry is lazy / often unset** | Low | `getPostMatches()` expires pending records when read, but most generated records have no default expiresAt and there is no scheduled expiry job. |
-| **Legacy vs post_match duality** | Low | Two systems (pmtwin_matches vs pmtwin_post_matches); some UI or reports might still use legacy. |
-| **Admin report persistence is per opportunity** | Low | Run report is preview-only; per-opportunity Save persists matches, but there is no bulk selected-results save. |
+| **Admin report persistence is per opportunity** | Low | **Run report** is preview-only (no `post_matches` written). **Save** per published opportunity persists `post_matches`. No bulk selected-results save. |
 | **Matching history is minimal** | Low | matching_runs exists, but only stores opportunity/model/timestamp; it does not store thresholds, weights, candidate counts, or created/skipped counts. |
 | **Scoring profile mismatch risk** | Low | Product docs mention a 40/30/15/10/5 profile, while live config uses skill/exchange/value/budget/timeline/location/reputation weights. |
 
@@ -75,7 +74,7 @@ Turn rows into tickets; owners estimate fix vs accept.
 
 | Gap | Severity | Description |
 |-----|----------|-------------|
-| **Deal from match accept timing** | Medium | Match detail calls deal creation after an accept; the helper requires confirmed status, so this should only run after all participants accept. |
+| **Deal from match accept timing** | Low | Start Deal requires confirmed `post_match`; verify UX copy while participants are still pending. |
 | **Contract “all signed” automation** | Medium | When all parties have signedAt, contract status and deal status should auto-update to active; may be done in UI only or partially. |
 | **Document signing** | High | No e-signature integration; signedAt is a timestamp only. |
 | **Milestone approval workflow** | Medium | Milestone submit/approve stored; notifications or strict workflow (e.g. only creator can approve) may be partial. |
@@ -150,10 +149,10 @@ Turn rows into tickets; owners estimate fix vs accept.
 ## 11. Broken or Weak Flows (Summary)
 
 1. **Forgot password:** Token created but no real email; user cannot reset without manual link/token.
-2. **Deal from match:** Create deal only after the post_match is confirmed; current accept handler should move deal creation inside the confirmed branch.
+2. **Deal from match:** Start Deal requires a **confirmed** `post_match`; pending matches cannot create deals.
 3. **Contract signing:** All-parties-signed → active may be manual or only in one place.
 4. **Company login vs user login:** Same form; company and user can have same email in different tables — which one wins on login is implementation-dependent (getUserOrCompanyByEmail order).
-5. **Re-publish:** Editing and re-publishing an opportunity runs persistPostMatches again; strong dedupe helps, but incomplete payload ids can still create duplicate-looking cases.
+5. **Re-publish:** Editing and re-publishing an opportunity runs `persistPostMatches` again; strong dedupe limits duplicate `post_matches`.
 6. **Expired matches:** Expiry is enforced lazily when post_matches are read, but generated matches usually do not get a default expiration date.
 
 ---

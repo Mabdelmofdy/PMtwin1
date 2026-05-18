@@ -29,7 +29,12 @@ class AuthGuard {
     requiresRole(route, roles) {
         const isAdminRoute = route === CONFIG.ROUTES.ADMIN || (route && route.startsWith(CONFIG.ROUTES.ADMIN + '/'));
         if (isAdminRoute) {
-            return this.authService.hasAnyRole(roles || [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR]);
+            const allowed = roles || [
+                CONFIG.ROLES.ADMIN,
+                CONFIG.ROLES.MODERATOR,
+                CONFIG.ROLES.AUDITOR
+            ];
+            return this.authService.hasAnyRole(allowed);
         }
         return true;
     }

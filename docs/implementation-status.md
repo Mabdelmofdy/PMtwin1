@@ -115,8 +115,9 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | persistPostMatches on publish | ✅ | In updateOpportunity when status === 'published' |
 | createPostMatch + dedupe | ✅ | data-service.createPostMatch; strong keys plus signature fallback |
 | notifyPostMatch | ✅ | matching-service.notifyPostMatch |
-| Legacy findMatchesForOpportunity | ✅ | User–opportunity matching; creates pmtwin_matches |
-| findOpportunitiesForCandidate | ✅ | Candidate-centric; returns list, no persist |
+| Legacy findMatchesForOpportunity | ❌ Removed from product | Deprecated API; no-op when `LEGACY_PERSON_OPPORTUNITY_ENABLED` is false; not called on publish |
+| findOpportunitiesForCandidate | ❌ Removed from product | Deprecated API; no-op when legacy flag is false |
+| Legacy `pmtwin_matches` seed/UI | ❌ Removed from product | `post_matches` only; `matches.json` / `demo-matches.json` not merged when legacy off |
 
 ---
 
@@ -129,7 +130,7 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | Filter by type (one_way, two_way, consortium, circular) | ✅ | getPostMatchesByType or client filter |
 | Accept / decline | ✅ | updatePostMatchStatus; declinePostMatch |
 | Status: pending → accepted/declined/confirmed | ✅ | All participants accepted → confirmed |
-| Create deal from confirmed match | ⚠️ | Deal creation exists; accept handler should only call it after post_match status is confirmed |
+| Create deal from confirmed match | ✅ | Start Deal requires `post_match` status confirmed; `assertDealCreationSource` enforces on server |
 | Match cards (templates) | ✅ | match-card-one-way, two-way, consortium, circular |
 | Expiry (expiresAt) | ⚠️ | Read-time expiry exists for pending matches; generated records usually have no default expiresAt and no scheduled job |
 
@@ -214,7 +215,8 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | Admin skills | ✅ | admin-skills |
 | Admin subscriptions | ✅ | admin-subscriptions |
 | Admin collaboration models | ✅ | admin-collaboration-models |
-| Persist matches from admin matching | ✅ | Per-opportunity Save calls persistPostMatches; bulk selected-results save is not implemented |
+| Admin matching Run report | ✅ | Preview only (in-memory); does not persist |
+| Persist matches from admin matching (Save) | ✅ | Per-opportunity Save calls `persistPostMatches` → `post_matches`; bulk selected-results save is not implemented |
 | Moderator vs Admin permission split | ⚠️ | Roles exist; UI may not hide by role everywhere |
 | Bulk user actions | ❌ | BRD future |
 
@@ -227,7 +229,7 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | localStorage storage-service | ✅ | get, set, remove, clear |
 | data-service (CRUD all entities) | ✅ | Full CRUD for users, companies, opportunities, applications, matches, post_matches, deals, contracts, notifications, audit, etc. |
 | Seed from JSON | ✅ | initializeFromJSON; domains from data/ |
-| Merge demo data | ✅ | mergeDemoData; demo-users, demo-companies, demo-40-opportunities, demo-deals, demo-contracts, demo-matches, demo-post-matches, etc. |
+| Merge demo data | ✅ | mergeDemoData; demo-post-matches (canonical matches), demo-users, demo-companies, demo-40-opportunities, demo-deals, demo-contracts, etc.; legacy demo-matches not merged when legacy off |
 | Seed version migration | ✅ | CURRENT_SEED_VERSION; clear + re-seed on change |
 | Hash router | ✅ | router.js; register, navigate, path params |
 | Layout (public vs portal) | ✅ | layout-service; sidebar for portal; admin area |

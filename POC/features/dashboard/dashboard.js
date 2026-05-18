@@ -49,7 +49,7 @@ async function initDashboard(params) {
                 descriptionHtml:
                     'Welcome back, <span class="page-context-header__accent">' +
                     escDash(name) +
-                    '</span>. Track opportunities, applications, and recommended matches.',
+                    '</span>. Track opportunities, applications, and post-to-post matches.',
                 primaryAction: {
                     label: 'Create opportunity',
                     route: CONFIG.ROUTES.OPPORTUNITY_CREATE,
@@ -107,14 +107,13 @@ async function initDashboard(params) {
         unverifiedReminder.style.display = showReminder ? 'block' : 'none';
     }
 
-    loadYourMatches(user.id);
+    const recSection = document.getElementById('recommended-opportunities-section');
+    if (recSection) recSection.style.display = 'none';
 
     const isCompany = isCompanyView || (authService.isCompanyUser && authService.isCompanyUser());
+    await loadPostMatchDashboard(user.id, isCompany);
     if (isCompany) {
-        loadCompanyRecommendations(user.id);
         loadApplicationsReceived(user.id);
-    } else {
-        loadRecommendedOpportunities(user.id);
     }
 
     // Read-only demo: disable Create Opportunity for pending users
@@ -140,13 +139,18 @@ async function loadDashboardData(userId) {
         const userApplications = allApplications.filter(a => a.applicantId === userId);
         document.getElementById('stat-applications').textContent = userApplications.length;
         
-        // Load matches (legacy + post matches)
-        const allMatches = await dataService.getMatches();
-        const userMatches = allMatches.filter(m => (m.candidateId || m.userId) === userId);
-        const postMatchesForUser = dataService.getPostMatchesForUser ? await dataService.getPostMatchesForUser(userId) : [];
-        const pendingPostMatches = postMatchesForUser.filter(pm => (pm.status || '') !== 'declined');
+        // Load matches (post_matches only)
+        const postMatchesForUser = await fetchUserPostMatches(userId);
+        const buckets = categorizeUserPostMatches(postMatchesForUser, userId);
         const statMatchesEl = document.getElementById('stat-matches');
-        if (statMatchesEl) statMatchesEl.textContent = userMatches.length + pendingPostMatches.length;
+        if (statMatchesEl) statMatchesEl.textContent = buckets.all.length;
+        const statHint = document.querySelector('.dash-stat-card[data-route="/matches"] .dash-stat-hint');
+        if (statHint) {
+            const actionN = buckets.actionRequired.length;
+            statHint.textContent = actionN > 0
+                ? `${actionN} need${actionN === 1 ? '' : 's'} your response`
+                : 'Need/Offer fits';
+        }
         
         // Load notifications
         const notifications = await dataService.getNotifications(userId);
@@ -253,7 +257,7 @@ async function displayRecentApplications(applications) {
         const dateStr = formatDashboardDate(app.createdAt);
         const oppTitle = app.opportunity?.title || 'Opportunity';
         const matchHtml = valueScorePct != null
-            ? `<span class="dash-match-pill">${valueScorePct}% match</span>`
+            ? `<span class="dash-match-pill">${valueScorePct}% compatibility</span>`
             : '';
         return `<article class="dash-recent-app">
             <div class="dash-recent-app-main">
@@ -280,65 +284,191 @@ function escDash(str) {
     return d.innerHTML;
 }
 
-async function loadRecommendedOpportunities(userId) {
-    const section = document.getElementById('recommended-opportunities-section');
-    const list = document.getElementById('recommended-opportunities-list');
-    const loadingEl = document.getElementById('recommended-loading');
-    const emptyEl = document.getElementById('recommended-empty');
+
+const DASHBOARD_MATCH_EMPTY =
+    'No matches yet. Publish a Need or Offer to start matching.';
+
+async function fetchUserPostMatches(userId) {
+    if (!dataService.getPostMatchesForUser) return [];
+    return dataService.getPostMatchesForUser(userId);
+}
+
+function normalizePostMatchStatus(pm) {
+    return String(pm?.status || 'pending').toLowerCase();
+}
+
+function isPostMatchInactive(pm) {
+    const st = normalizePostMatchStatus(pm);
+    return st === 'declined' || st === 'expired';
+}
+
+function isPostMatchExpired(pm) {
+    if (isPostMatchInactive(pm)) return true;
+    if (dataService && typeof dataService.isExpired === 'function' && dataService.isExpired(pm)) {
+        return true;
+    }
+    return false;
+}
+
+function allParticipantsAccepted(pm) {
+    const parts = pm.participants || [];
+    return parts.length > 0 && parts.every(p => (p.participantStatus || 'pending') === 'accepted');
+}
+
+function userNeedsMatchAction(pm, userId) {
+    if (isPostMatchExpired(pm)) return false;
+    const st = normalizePostMatchStatus(pm);
+    if (st !== 'pending' && st !== (CONFIG.POST_MATCH_STATUS?.PENDING || 'pending')) return false;
+    const me = (pm.participants || []).find(p => p.userId === userId);
+    return !!me && (me.participantStatus || 'pending') === 'pending';
+}
+
+function isConfirmedPostMatch(pm) {
+    const st = normalizePostMatchStatus(pm);
+    const confirmed = CONFIG.POST_MATCH_STATUS?.CONFIRMED || 'confirmed';
+    const accepted = CONFIG.POST_MATCH_STATUS?.ACCEPTED || 'accepted';
+    return st === confirmed || (st === accepted && allParticipantsAccepted(pm));
+}
+
+function isReadyForDealPostMatch(pm) {
+    if (pm.dealId) return false;
+    if (isPostMatchExpired(pm)) return false;
+    const st = normalizePostMatchStatus(pm);
+    const confirmed = CONFIG.POST_MATCH_STATUS?.CONFIRMED || 'confirmed';
+    if (st === confirmed) return true;
+    const accepted = CONFIG.POST_MATCH_STATUS?.ACCEPTED || 'accepted';
+    return st === accepted && allParticipantsAccepted(pm);
+}
+
+function categorizeUserPostMatches(postMatches, userId) {
+    const all = postMatches.filter(pm => !isPostMatchInactive(pm));
+    const actionRequired = all.filter(pm => userNeedsMatchAction(pm, userId));
+    const confirmed = all.filter(pm => isConfirmedPostMatch(pm));
+    const readyForDeal = all.filter(pm => isReadyForDealPostMatch(pm));
+    const topByScore = [...all].sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+    const recent = [...all].sort(
+        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+    );
+    return { all, actionRequired, confirmed, readyForDeal, topByScore, recent };
+}
+
+async function getPostMatchDashboardLabel(pm, userId) {
+    const vm = await buildPostMatchViewModel(pm, userId);
+    return getMatchCardTitle(vm) || getMatchTypeLabel(pm.matchType);
+}
+
+async function renderDashboardMatchBucketRow(pm, userId) {
+    const label = await getPostMatchDashboardLabel(pm, userId);
+    const score = Math.round((pm.matchScore || 0) * 100);
+    const typeLabel = getMatchTypeLabel(pm.matchType);
+    const statusLabel = normalizePostMatchStatus(pm);
+    return `<a href="#" data-route="/matches/${escDash(pm.id)}" class="dashboard-match-bucket-chip">
+        <div class="dashboard-match-bucket-chip__main">
+            <div class="dashboard-match-bucket-chip__label">${escDash(label)}</div>
+            <div class="dashboard-match-bucket-chip__meta">${escDash(typeLabel)} · ${escDash(statusLabel)}</div>
+        </div>
+        <span class="dashboard-match-bucket-chip__score">${score}%</span>
+    </a>`;
+}
+
+async function renderDashboardBuckets(buckets, userId) {
+    const container = document.getElementById('dashboard-match-buckets');
+    if (!container) return;
+    if (!buckets.all.length) {
+        container.hidden = true;
+        container.innerHTML = '';
+        return;
+    }
+    const sections = [
+        { key: 'actionRequired', title: 'Pending — action required', items: buckets.actionRequired.slice(0, 3) },
+        { key: 'readyForDeal', title: 'Ready to start a deal', items: buckets.readyForDeal.slice(0, 3) },
+        { key: 'confirmed', title: 'Confirmed matches', items: buckets.confirmed.slice(0, 3) },
+        { key: 'topByScore', title: 'Top matches', items: buckets.topByScore.slice(0, 3) }
+    ];
+    const parts = [];
+    for (const sec of sections) {
+        if (!sec.items.length) continue;
+        const rows = await Promise.all(sec.items.map(pm => renderDashboardMatchBucketRow(pm, userId)));
+        parts.push(`<div class="dashboard-match-bucket" data-bucket="${sec.key}">
+            <h3 class="dashboard-match-bucket__title">${escDash(sec.title)}</h3>
+            <div class="dashboard-match-bucket__list">${rows.join('')}</div>
+        </div>`);
+    }
+    container.innerHTML = parts.join('');
+    container.hidden = parts.length === 0;
+}
+
+async function loadPostMatchDashboard(userId, isCompany) {
+    const section = document.getElementById('your-matches-section');
+    const list = document.getElementById('your-matches-list');
+    const emptyEl = document.getElementById('dashboard-matches-empty');
+    const summaryEl = document.getElementById('matches-results-summary');
     if (!section || !list) return;
 
+    if (!dataService.getPostMatchesForUser) {
+        section.style.display = 'none';
+        return;
+    }
+
     section.style.display = 'block';
-    if (loadingEl) loadingEl.style.display = 'block';
 
     try {
-        const ms = window.matchingService || (typeof matchingService !== 'undefined' ? matchingService : null);
-        if (!ms) { section.style.display = 'none'; return; }
+        const postMatches = await fetchUserPostMatches(userId);
+        const buckets = categorizeUserPostMatches(postMatches, userId);
 
-        const user = authService.getCurrentUser();
-        const minScore = user?.profile?.matchingPreferences?.minScore;
-        const matches = await ms.findOpportunitiesForCandidate(userId, minScore != null ? { minThreshold: minScore } : {});
-        if (loadingEl) loadingEl.style.display = 'none';
-        const top = matches.slice(0, 5);
+        if (isCompany) {
+            await loadCompanyPostMatchRecommendations(userId, buckets);
+        } else {
+            const companyRec = document.getElementById('company-recommendations-section');
+            if (companyRec) companyRec.style.display = 'none';
+        }
 
-        if (top.length === 0) {
-            if (emptyEl) emptyEl.style.display = 'block';
+        const hasMatches = buckets.all.length > 0;
+        const filterSidebar = document.querySelector('#your-matches-section .matches-filter-sidebar');
+        const filterBackdrop = document.querySelector('#your-matches-section .matches-filter-backdrop');
+        const filterToggle = document.getElementById('matches-filter-toggle');
+        if (filterSidebar) filterSidebar.style.display = hasMatches ? '' : 'none';
+        if (filterBackdrop) filterBackdrop.style.display = 'none';
+        if (filterToggle) filterToggle.style.display = hasMatches ? '' : 'none';
+        if (emptyEl) emptyEl.hidden = hasMatches;
+        if (summaryEl) {
+            summaryEl.textContent = hasMatches
+                ? `Recent post matches · ${buckets.recent.length} total`
+                : '';
+            summaryEl.hidden = !hasMatches;
+        }
+
+        await renderDashboardBuckets(buckets, userId);
+
+        if (!hasMatches) {
+            list.innerHTML = '';
             return;
         }
 
-        const items = await Promise.all(top.map(async (m) => {
-            const opp = m.opportunity;
-            const owner = await dataService.getUserOrCompanyById(opp.creatorId);
-            const ownerName = owner?.profile?.name || opp.creatorId;
-            const scorePercent = Math.round((m.matchScore || 0) * 100);
-            const skillDetail = m.criteria?.skillMatch;
-            const matchedSkills = skillDetail?.matched || [];
-            const unmatchedSkills = skillDetail?.unmatched || [];
+        if (!list.dataset.matchActionsBound) {
+            list.dataset.matchActionsBound = '1';
+            list.addEventListener('click', (e) => {
+                const accept = e.target.closest('.btn-accept-match');
+                const decline = e.target.closest('.btn-decline-match');
+                if ((accept || decline) && e.target.tagName !== 'A') {
+                    e.preventDefault();
+                    const matchId = (accept || decline).getAttribute('data-match-id');
+                    if (matchId && window.router?.navigate) {
+                        window.router.navigate('/matches/' + matchId);
+                    }
+                }
+            });
+        }
 
-            return `<div class="flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:border-primary/40 transition-colors">
-                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span class="text-lg font-bold text-primary">${scorePercent}%</span>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <a href="#" data-route="/opportunities/${opp.id}" class="text-base font-semibold text-gray-900 hover:text-primary no-underline block truncate">${escDash(opp.title)}</a>
-                    <p class="text-sm text-gray-500 mt-0.5">by ${escDash(ownerName)}</p>
-                    ${matchedSkills.length > 0 ? `<div class="flex flex-wrap gap-1 mt-2">
-                        ${matchedSkills.map(s => `<span class="inline-block px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs font-medium">${escDash(s)}</span>`).join('')}
-                        ${unmatchedSkills.map(s => `<span class="inline-block px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs">${escDash(s)}</span>`).join('')}
-                    </div>` : ''}
-                </div>
-                <a href="#" data-route="/opportunities/${opp.id}" class="flex-shrink-0 px-3 py-1.5 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-dark no-underline">View</a>
-            </div>`;
-        }));
-
-        list.innerHTML = items.join('');
+        const forList = buckets.recent.length ? buckets.recent : buckets.topByScore;
+        await renderYourMatchesList(list, userId, forList.slice(0, 12));
     } catch (e) {
-        console.error('Error loading recommended opportunities:', e);
-        if (loadingEl) loadingEl.style.display = 'none';
-        if (emptyEl) emptyEl.style.display = 'block';
+        console.error('Error loading post-match dashboard:', e);
+        if (emptyEl) emptyEl.hidden = false;
     }
 }
 
-async function loadCompanyRecommendations(companyId) {
+async function loadCompanyPostMatchRecommendations(companyId, buckets) {
     const section = document.getElementById('company-recommendations-section');
     const list = document.getElementById('company-recommendations-list');
     const emptyEl = document.getElementById('company-recommendations-empty');
@@ -361,85 +491,62 @@ async function loadCompanyRecommendations(companyId) {
     section.style.display = 'block';
 
     try {
-        const ms = window.matchingService || (typeof matchingService !== 'undefined' ? matchingService : null);
-        if (!ms) { section.style.display = 'none'; return; }
+        const oneWayAsNeedOwner = buckets.topByScore.filter(pm => {
+            if (pm.matchType !== 'one_way') return false;
+            const me = (pm.participants || []).find(p => p.userId === companyId);
+            return me?.role === 'need_owner';
+        });
 
-        const allOpps = await dataService.getOpportunities();
-        const myPublished = allOpps.filter(o => o.creatorId === companyId && o.status === 'published');
-
-        if (myPublished.length === 0) {
+        if (oneWayAsNeedOwner.length === 0) {
             showEmpty(`<div class="dash-empty-pro-icon" aria-hidden="true"><i class="ph-duotone ph-users-three"></i></div>
-                <h3>No recommendations yet</h3>
-                <p>Publish an opportunity so we can surface professionals whose skills align with your needs.</p>
-                <a href="#" data-route="/opportunities/create" class="btn btn-primary">Post opportunity</a>`);
+                <h3>No post matches yet</h3>
+                <p>${escDash(DASHBOARD_MATCH_EMPTY)}</p>
+                <a href="#" data-route="/opportunities/create" class="btn btn-primary">Publish Need or Offer</a>`);
             return;
         }
 
-        const candidateMap = new Map();
-        for (const opp of myPublished.slice(0, 3)) {
-            try {
-                const allUsers = await dataService.getUsers();
-                const active = allUsers.filter(u => u.status === 'active' && u.id !== companyId);
-                for (const user of active) {
-                    const score = await ms.calculateMatchScore(opp, user);
-                    if (score >= (ms.minThreshold || 0.3)) {
-                        const existing = candidateMap.get(user.id);
-                        if (!existing || existing.score < score) {
-                            candidateMap.set(user.id, {
-                                user,
-                                score,
-                                opportunity: opp,
-                                criteria: ms._lastSkillDetail
-                            });
-                        }
-                    }
-                }
-            } catch (e) { /* skip */ }
+        const rows = [];
+        for (const pm of oneWayAsNeedOwner.slice(0, 5)) {
+            const provider = (pm.participants || []).find(p => p.role === 'offer_provider');
+            const providerId = provider?.userId;
+            if (!providerId) continue;
+            const user = await dataService.getUserById(providerId)
+                || await dataService.getCompanyById(providerId);
+            if (!user) continue;
+            const payload = pm.payload || {};
+            const needOpp = payload.needOpportunityId
+                ? await dataService.getOpportunityById(payload.needOpportunityId)
+                : null;
+            const prof = user.profile || {};
+            const scorePercent = Math.round((pm.matchScore || 0) * 100);
+            rows.push(`<div class="company-compact-item">
+                <div class="company-avatar">${escDash((prof.name || user.email || '?')[0])}</div>
+                <div class="company-compact-main">
+                    <div class="company-compact-topline">
+                        <div class="company-compact-title">${escDash(prof.name || user.email)}</div>
+                        <span class="company-score-pill">${scorePercent}%</span>
+                    </div>
+                    <div class="company-compact-meta">${escDash(prof.title || user.role || '')} &middot; ${escDash(needOpp?.title || 'Your need')}</div>
+                    <a href="#" data-route="/matches/${escDash(pm.id)}" class="dash-inline-link">View match</a>
+                </div>
+            </div>`);
         }
 
-        const sorted = Array.from(candidateMap.values())
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 5);
-
-        if (sorted.length === 0) {
+        if (!rows.length) {
             showEmpty(`<div class="dash-empty-pro-icon" aria-hidden="true"><i class="ph-duotone ph-magnifying-glass"></i></div>
-                <h3>No strong matches yet</h3>
-                <p>Try broadening skills on your postings or publish another opportunity to improve suggestions.</p>
-                <a href="#" data-route="/opportunities/create" class="btn btn-primary">Post opportunity</a>`);
+                <h3>No provider matches yet</h3>
+                <p>${escDash(DASHBOARD_MATCH_EMPTY)}</p>
+                <a href="#" data-route="/opportunities/create" class="btn btn-primary">Publish Need or Offer</a>`);
             return;
         }
 
         hideEmpty();
-
-        list.innerHTML = sorted.map(item => {
-            const u = item.user;
-            const prof = u.profile || {};
-            const scorePercent = Math.round(item.score * 100);
-            const matchedSkills = item.criteria?.matched || [];
-            const visibleSkills = matchedSkills.slice(0, 3);
-            const hiddenSkillCount = Math.max(0, matchedSkills.length - visibleSkills.length);
-            return `<div class="company-compact-item">
-                <div class="company-avatar">${escDash((prof.name || u.email || '?')[0])}</div>
-                <div class="company-compact-main">
-                    <div class="company-compact-topline">
-                        <div class="company-compact-title">${escDash(prof.name || u.email)}</div>
-                        <span class="company-score-pill">${scorePercent}%</span>
-                    </div>
-                    <div class="company-compact-meta">${escDash(prof.title || u.role)} &middot; ${escDash(item.opportunity.title)}</div>
-                    ${visibleSkills.length > 0 ? `<div class="company-skill-row">
-                        ${visibleSkills.map(s => `<span class="company-skill-chip">${escDash(s)}</span>`).join('')}
-                        ${hiddenSkillCount > 0 ? `<span class="company-skill-more">+${hiddenSkillCount}</span>` : ''}
-                    </div>` : ''}
-                    <a href="#" data-route="/people/${escDash(u.id)}" class="dash-inline-link">View profile</a>
-                </div>
-            </div>`;
-        }).join('');
+        list.innerHTML = rows.join('');
     } catch (e) {
-        console.error('Error loading company recommendations:', e);
+        console.error('Error loading company post-match recommendations:', e);
         showEmpty(`<div class="dash-empty-pro-icon" aria-hidden="true"><i class="ph-duotone ph-warning-circle"></i></div>
-            <h3>Could not load recommendations</h3>
-            <p>Refresh the page or try again shortly.</p>
-            <a href="#" data-route="/opportunities/create" class="btn btn-primary">Post opportunity</a>`);
+            <h3>Could not load matches</h3>
+            <p>Refresh the page or try again shortly.</p>`);
     }
 }
 
@@ -485,7 +592,7 @@ async function buildPostMatchViewModel(postMatch, currentUserId) {
         const needOpportunityId = payload.needOpportunityId || '';
         const offerOpportunityId = payload.offerOpportunityId || '';
         const { isNeedOwner } = getOneWayViewerRole(postMatch, currentUserId);
-        const cardTitle = isNeedOwner ? 'Recommended Provider Found' : 'Recommended Opportunity Found';
+        const cardTitle = isNeedOwner ? 'Need/Offer Match Found' : 'Need/Offer Match Found';
         const section1Label = isNeedOwner ? 'Your Need' : 'Opportunity Need';
         const section2Label = isNeedOwner ? 'Provider Offer' : 'Your Offer';
         let primaryActionLabel, primaryActionRoute, secondaryActionLabel, secondaryActionRoute, tertiaryActionLabel, tertiaryActionRoute;
@@ -555,7 +662,7 @@ async function buildPostMatchViewModel(postMatch, currentUserId) {
 
     if (postMatch.matchType === 'consortium') {
         const leadOpp = await ds.getOpportunityById(payload.leadNeedId);
-        const projectTitle = leadOpp?.title || 'Project';
+        const projectTitle = leadOpp?.title || 'Opportunity';
         const roles = (payload.roles || []).map(async (r) => {
             const user = await ds.getUserOrCompanyById(r.userId);
             return { role: r.role || 'Partner', partnerName: user?.profile?.name || r.userId };
@@ -593,46 +700,6 @@ async function buildPostMatchViewModel(postMatch, currentUserId) {
     }
 
     return base;
-}
-
-async function loadYourMatches(userId) {
-    const section = document.getElementById('your-matches-section');
-    const list = document.getElementById('your-matches-list');
-    if (!section || !list) return;
-
-    if (!dataService.getPostMatchesForUser) {
-        section.style.display = 'none';
-        return;
-    }
-
-    try {
-        const postMatches = await dataService.getPostMatchesForUser(userId);
-        const pending = postMatches.filter(pm => (pm.status || '') !== 'declined' && (pm.status || '') !== 'expired');
-        const sorted = pending.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
-
-        if (sorted.length === 0) {
-            section.style.display = 'none';
-            return;
-        }
-
-        section.style.display = 'block';
-        list.addEventListener('click', (e) => {
-            const accept = e.target.closest('.btn-accept-match');
-            const decline = e.target.closest('.btn-decline-match');
-            if ((accept || decline) && e.target.tagName !== 'A') {
-                e.preventDefault();
-                const matchId = (accept || decline).getAttribute('data-match-id');
-                if (matchId && window.router && typeof window.router.navigate === 'function') {
-                    window.router.navigate('/matches/' + matchId);
-                }
-            }
-        });
-
-        await renderYourMatchesList(list, userId, sorted);
-    } catch (e) {
-        console.error('Error loading your matches:', e);
-        section.style.display = 'none';
-    }
 }
 
 async function renderYourMatchesList(container, userId, postMatches) {
@@ -759,7 +826,9 @@ function renderFilteredMatches(container, matches, state) {
     }
 
     if (filtered.length === 0) {
-        container.innerHTML = '<div class="matches-empty-state">No matches found. Try clearing filters or changing your search.</div>';
+        container.innerHTML = matches.length === 0
+            ? `<div class="matches-empty-state">${escDash(DASHBOARD_MATCH_EMPTY)}</div>`
+            : '<div class="matches-empty-state">No matches match your filters. Try clearing filters or changing your search.</div>';
         return;
     }
 
@@ -808,7 +877,7 @@ function renderDashboardMatchCard(match) {
 
 function getMatchTypeLabel(type) {
     const labels = {
-        one_way: 'Recommended',
+        one_way: 'Need/Offer',
         two_way: 'Barter',
         consortium: 'Consortium',
         circular: 'Circular'
@@ -827,14 +896,14 @@ function getMatchCardTitle(match) {
     if (match.matchType === 'two_way') return 'Barter exchange opportunity';
     if (match.matchType === 'consortium') return match.projectTitle || 'Consortium opportunity';
     if (match.matchType === 'circular') return 'Circular exchange opportunity';
-    return match.cardTitle || 'Recommended match';
+    return match.cardTitle || 'Need/Offer match';
 }
 
 function getMatchCardDetails(match) {
     if (match.matchType === 'two_way') return `${match.yourOfferTitle || 'Your offer'} matches ${match.theirNeedTitle || 'their need'}`;
     if (match.matchType === 'consortium') return 'Potential partner group for this project need.';
     if (match.matchType === 'circular') return match.cycleLabel || 'A multi-party exchange chain is available.';
-    return `${match.needTitle || 'Project need'} · ${match.offerTitle || 'Provider offer'}`;
+    return `${match.needTitle || 'Need'} · ${match.offerTitle || 'Offer'}`;
 }
 
 function extractMatchSkills(...opportunities) {
@@ -946,7 +1015,7 @@ async function loadApplicationsReceived(userId) {
                             <div class="company-compact-title">${escDash(app.applicantName)}</div>
                             <span class="badge ${statusBadgeClass}">${escDash(statusText)}</span>
                         </div>
-                        <div class="company-project-label">Project need</div>
+                        <div class="company-project-label">Source opportunity</div>
                         <div class="company-compact-meta company-project-title">${escDash(app.opportunityTitle)}</div>
                         <div class="company-compact-date">${formattedDate}</div>
                     </div>

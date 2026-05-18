@@ -430,12 +430,12 @@ flowchart TB
 ### Step 6 — Publish Opportunity
 
 - Status changes from `draft` to `published`.
-- Triggers `matchingService.findMatchesForOpportunity()` (person-to-opportunity) and, for post-to-post, matching can be run from admin or on-demand; notifications created for matched candidates.
+- Triggers `matchingService.persistPostMatches(opportunityId)` to create canonical `post_matches`; notifications are sent to post_match participants.
 
 ### Step 7 — Matching Results
 
-- **Implementation**: `POC/features/dashboard/dashboard.js`; `matchingService.findOpportunitiesForCandidate`, `calculateMatchScore`.
-- Dashboard shows recommended matches with scores and breakdown (skill, value, timeline, location). Tiered results: top / good / possible.
+- **Implementation**: `POC/features/dashboard/dashboard.js`; `dataService.getPostMatchesForUser`.
+- Dashboard shows Need/Offer, barter, consortium, and circular post-to-post matches.
 
 ### Step 8 — Connect with Matches
 

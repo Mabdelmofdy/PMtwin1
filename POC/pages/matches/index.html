@@ -4,24 +4,17 @@
         <section class="matches-browser" aria-labelledby="matches-browser-heading">
             <div id="matches-toolbar" class="matches-toolbar">
                 <div class="matches-toolbar__intro">
-                    <h2 id="matches-browser-heading" class="matches-toolbar__title">Review your matches</h2>
+                    <h2 id="matches-browser-heading" class="matches-toolbar__title">Need/Offer Matches</h2>
                     <p class="matches-toolbar__lead">
-                        Suggestions from the matching engine, your opportunity list, and consortium invites live in separate tabs so you can focus on one type at a time.
+                        Review post-to-post exchange matches from your published Needs and Offers.
                     </p>
                 </div>
                 <div class="matches-segmented" id="matches-subtabs" role="tablist" aria-label="Match categories">
                     <button type="button" class="matches-segment active" role="tab" data-subtab="recommended" id="matches-subtab-recommended" aria-selected="true" aria-controls="matches-recommended">
                         <span class="matches-segment__inner">
                             <i class="ph-duotone ph-sparkle matches-segment__icon" aria-hidden="true"></i>
-                            <span class="matches-segment__label">For you</span>
+                            <span class="matches-segment__label">Need/Offer</span>
                             <span class="matches-segment__count" id="matches-count-recommended" hidden></span>
-                        </span>
-                    </button>
-                    <button type="button" class="matches-segment" role="tab" data-subtab="opportunity" id="matches-subtab-opportunity" aria-selected="false" aria-controls="matches-opportunity">
-                        <span class="matches-segment__inner">
-                            <i class="ph-duotone ph-briefcase matches-segment__icon" aria-hidden="true"></i>
-                            <span class="matches-segment__label">Opportunities</span>
-                            <span class="matches-segment__count" id="matches-count-opportunity" hidden></span>
                         </span>
                     </button>
                     <button type="button" class="matches-segment" role="tab" data-subtab="consortium" id="matches-subtab-consortium" aria-selected="false" aria-controls="matches-consortium">
@@ -34,22 +27,25 @@
                 </div>
             </div>
 
+            <div id="matches-filters" class="matches-filters">
+                <label class="matches-filter-field"><span class="matches-filter-label">Status</span>
+                    <select id="matches-filter-status" class="matches-filter-select"><option value="">Any status</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="declined">Declined</option><option value="expired">Expired</option></select>
+                </label>
+                <label class="matches-filter-field"><span class="matches-filter-label">Match quality</span>
+                    <select id="matches-filter-quality" class="matches-filter-select"><option value="">Any quality</option><option value="top">Top Match</option><option value="high">High Match</option><option value="medium">Medium Match</option><option value="low">Low Match</option></select>
+                </label>
+                <label class="matches-filter-field"><span class="matches-filter-label">Has deal</span>
+                    <select id="matches-filter-has-deal" class="matches-filter-select"><option value="">Any</option><option value="yes">Yes</option><option value="no">No</option></select>
+                </label>
+                <button type="button" class="btn btn-outline btn-sm" id="matches-clear-filters">Clear filters</button>
+            </div>
+
+            <p id="matches-results-summary" class="matches-results-summary" aria-live="polite"></p>
+
             <div id="matches-panel-wrap" class="matches-panel-wrap">
                 <div id="tab-matches" class="matches-tab-root">
-                    <div id="matches-recommended" class="matches-panel active" role="tabpanel" aria-labelledby="matches-subtab-recommended">
-                        <div id="matches-recommended-list" class="matches-container">
-                            <div class="spinner"></div>
-                        </div>
-                    </div>
-                    <div id="matches-opportunity" class="matches-panel" role="tabpanel" aria-labelledby="matches-subtab-opportunity">
-                        <div id="matches-opportunity-list" class="matches-container">
-                            <div class="spinner"></div>
-                        </div>
-                    </div>
-                    <div id="matches-consortium" class="matches-panel" role="tabpanel" aria-labelledby="matches-subtab-consortium">
-                        <div id="matches-consortium-list" class="matches-container">
-                            <div class="spinner"></div>
-                        </div>
+                    <div id="matches-list" class="matches-container">
+                        <div class="spinner"></div>
                     </div>
                 </div>
             </div>
@@ -327,5 +323,122 @@
 
 .matches-page .empty-state a {
     font-weight: 600;
+}
+
+.matches-segmented--scroll {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    max-width: 100%;
+}
+
+.matches-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    align-items: flex-end;
+    padding: 0 0.25rem;
+}
+
+.matches-filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 10rem;
+}
+
+.matches-filter-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.matches-filter-select {
+    font-size: 0.875rem;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md, 8px);
+    background: var(--bg-primary, #fff);
+}
+
+.matches-results-summary {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.match-card-unified {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.match-card-unified__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1rem 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.match-card-unified__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.match-card-unified__type {
+    margin: 0.2rem 0 0;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.match-card-unified__body {
+    padding: 0.75rem 1rem;
+    flex: 1;
+}
+
+.match-card-unified__footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary, #fafafa);
+}
+
+.match-card-block {
+    margin-bottom: 0.65rem;
+}
+
+.match-card-kicker {
+    margin: 0 0 0.2rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+}
+
+.match-card-line {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.match-card-line--muted {
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.match-card-intent {
+    font-weight: 600;
+    color: var(--primary-color, #0d9488);
+}
+
+.match-card-unified__status,
+.match-card-unified__next {
+    margin: 0.5rem 0 0;
+    font-size: 0.8125rem;
 }
 </style>

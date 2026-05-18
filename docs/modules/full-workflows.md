@@ -163,13 +163,13 @@ flowchart LR
 
 **Steps**
 1. System preprocesses opportunity/profile attributes.
-2. System executes person-to-opportunity scoring and/or post-to-post matching.
+2. System executes post-to-post matching between published Needs and Offers.
 3. Results below threshold are filtered.
-4. Qualified matches are stored and sorted.
-5. Notifications are sent for high-confidence scores.
+4. Qualified `post_matches` are stored and sorted.
+5. Notifications are sent for newly created post_matches.
 
 **State changes**
-- Match records are created/updated with score and criteria.
+- `post_matches` records are created/updated with score and payload.
 
 **Exceptions**
 - Sparse or malformed profile/opportunity attributes reduce precision.

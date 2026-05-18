@@ -1,5 +1,6 @@
 {
   "domain": "matches",
-  "version": "1.1",
+  "version": "1.2",
+  "description": "Deprecated legacy person-to-opportunity store. Kept as empty stub for initializeFromJSON compatibility; use demo-post-matches.json / post_matches.",
   "data": []
 }

@@ -26,7 +26,8 @@ After a match is **confirmed**, continue with [deal-workflow.md](deal-workflow.m
 
 ### Tips
 
-- Admin “run matching” may behave like preview; publish is the main persistence path in the POC.
+- **Canonical matches** are `post_matches` only (`pmtwin_matches` is deprecated).
+- **Admin Run report** is preview-only; **Admin Save** and **publish** call `persistPostMatches` to create `post_matches`.
 
 ---
 
@@ -54,7 +55,14 @@ flowchart LR
 
 **Trigger:** When `data-service.updateOpportunity(id, { status: 'published' })` is called, the data-service (after saving) calls `matching-service.persistPostMatches(id)` (async).
 
-**Manual/admin trigger:** Admin Matching Center has two behaviors. **Run report** previews current matching results in memory. **Save** on a published opportunity row calls `matching-service.persistPostMatches(id)`, creates deduped `post_matches`, and notifies participants.
+**Manual/admin trigger (Admin Matching Center):**
+
+| Action | Persists `post_matches` | Notifications |
+|--------|-------------------------|---------------|
+| **Run report** | No (preview / in-memory only) | No |
+| **Save** on a published opportunity row | Yes (`persistPostMatches`) | Yes |
+
+Publish (`status: published`) also calls `persistPostMatches` and does **not** create `pmtwin_matches` or call `findMatchesForOpportunity`.
 
 ---
 

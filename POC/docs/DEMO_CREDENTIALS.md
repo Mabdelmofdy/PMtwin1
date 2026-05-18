@@ -153,7 +153,8 @@ Use these to test the **registration → vetting → activation** flow. Both can
 - **Opportunities:** [POC/data/demo-40-opportunities.json](../data/demo-40-opportunities.json)
 - **Applications:** [POC/data/demo-applications.json](../data/demo-applications.json)
 - **Contracts:** [POC/data/demo-contracts.json](../data/demo-contracts.json)
-- **Matches:** [POC/data/demo-matches.json](../data/demo-matches.json)
+- **Post matches (canonical):** [POC/data/demo-post-matches.json](../data/demo-post-matches.json)
+- **Matches (deprecated):** [POC/data/demo-matches.json](../data/demo-matches.json) — not loaded when legacy matching is off
 - **Notifications:** [POC/data/demo-notifications.json](../data/demo-notifications.json)
 - **Connections (pre-accepted demo pairs):** [POC/data/demo-connections.json](../data/demo-connections.json)
 
@@ -163,4 +164,4 @@ Use these to test the **registration → vetting → activation** flow. Both can
 
 To see the platform workflow (Register → Vetting → Dashboard → Opportunity → Matching → Application → Negotiation → Contract → Execution), open **How it works** from the public navigation, or go to `/workflow`.
 
-**Demo data for dashboard counts:** Every demo user and demo company has at least one application, one match, and one notification aligned with opportunities. Log in as any demo user (e.g. **demo04@demo.test**, **demo01@demo.test**, **company01@demo.test**) to see Applications, Matches, and Notifications non-zero. Demo matches and notifications are merged from `demo-matches.json` and `demo-notifications.json` on each load. Pre-accepted **connections** merge from `demo-connections.json` so **Find / People** and **Messages** have partners without creating requests first.
+**Demo data for dashboard counts:** Every demo user and demo company has at least one application, one **post match**, and one notification aligned with opportunities. Log in as any demo user (e.g. **demo04@demo.test**, **demo01@demo.test**, **company01@demo.test**) to see Applications, Matches, and Notifications non-zero. Demo **`post_matches`** merge from `demo-post-matches.json`; notifications from `demo-notifications.json`. Legacy `demo-matches.json` is not merged into the app when `LEGACY_PERSON_OPPORTUNITY_ENABLED` is false. Pre-accepted **connections** merge from `demo-connections.json` so **Find / People** and **Messages** have partners without creating requests first.

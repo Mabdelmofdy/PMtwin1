@@ -158,11 +158,11 @@
         },
         matches: {
             label: 'Matching',
-            title: 'Your matches',
+            title: 'Need/Offer Matches',
             description:
-                'Review suggestions from the engine, opportunity-based matches, and consortium invites in one place.',
-            primaryAction: { label: 'Jump to suggestions', id: 'page-cta-matches-top', type: 'button' },
-            secondaryAction: { label: 'Focus tabs', id: 'page-cta-matches-filters', type: 'button' }
+                'Review Need/Offer, barter, consortium, and circular exchange matches from published posts.',
+            primaryAction: { label: 'View matches', id: 'page-cta-matches-top', type: 'button' },
+            secondaryAction: { label: 'Filter matches', id: 'page-cta-matches-filters', type: 'button' }
         },
         people: {
             label: 'Talent Network',
@@ -220,6 +220,14 @@
                 'Review provider applications, track statuses, and manage applicant decisions.',
             primaryAction: { label: 'Review Applications', id: 'pipeline-cta-review-apps', type: 'button' },
             secondaryAction: { label: 'Export List', id: 'pipeline-cta-export-apps', type: 'button' }
+        },
+        pipelineMatches: {
+            label: 'Matching',
+            title: 'Your Matches',
+            description:
+                'Post-to-post matches from your published Needs and Offers. Open a match to respond, negotiate, or create a deal when confirmed.',
+            primaryAction: { label: 'All matches', id: 'pipeline-cta-matches-scroll', type: 'button' },
+            secondaryAction: { label: 'Full matches page', route: R.MATCHES || '/matches' }
         },
         adminDashboard: {
             label: 'Admin Workspace',

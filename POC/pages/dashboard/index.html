@@ -67,7 +67,7 @@
         <div class="dash-panel-head dashboard-matches-header">
             <div>
                 <h2 class="dash-panel-title" id="your-matches-heading">Your matches</h2>
-                <p class="dash-panel-sub">Curated collaboration fits from the matching engine</p>
+                <p class="dash-panel-sub">Post-to-post matches from your published Needs and Offers</p>
             </div>
             <div class="dashboard-matches-header-actions">
                 <button type="button" class="matches-filter-toggle" id="matches-filter-toggle"><i class="ph-duotone ph-faders"></i> Filters</button>
@@ -89,7 +89,7 @@
                         <div class="matches-filter-title">Match type</div>
                         <div class="matches-filter-options" id="matches-type-filters">
                             <button type="button" class="matches-filter-option active" data-match-type="all">All <span data-count="all">0</span></button>
-                            <button type="button" class="matches-filter-option" data-match-type="one_way">Recommended <span data-count="one_way">0</span></button>
+                            <button type="button" class="matches-filter-option" data-match-type="one_way">Need/Offer <span data-count="one_way">0</span></button>
                             <button type="button" class="matches-filter-option" data-match-type="two_way">Barter <span data-count="two_way">0</span></button>
                             <button type="button" class="matches-filter-option" data-match-type="consortium">Consortium <span data-count="consortium">0</span></button>
                             <button type="button" class="matches-filter-option" data-match-type="circular">Circular <span data-count="circular">0</span></button>
@@ -112,26 +112,31 @@
             </aside>
             <div class="matches-filter-backdrop" id="matches-filter-backdrop"></div>
             <div class="matches-results">
+                <div id="dashboard-match-buckets" class="dashboard-match-buckets" hidden></div>
                 <div class="matches-results-summary" id="matches-results-summary">Showing matches</div>
+                <div id="dashboard-matches-empty" class="dashboard-matches-empty" hidden>
+                    <p class="dashboard-matches-empty__text">No matches yet. Publish a Need or Offer to start matching.</p>
+                    <a href="#" data-route="/opportunities/create" class="btn btn-primary btn-sm">Publish Need or Offer</a>
+                </div>
                 <div id="your-matches-list" class="matches-card-list"></div>
             </div>
         </div>
     </section>
 
     <section id="recommended-opportunities-section" class="dash-panel" style="display: none;" aria-labelledby="rec-opp-heading">
-        <h2 class="dash-panel-title" id="rec-opp-heading">Recommended opportunities</h2>
-        <p class="dash-panel-sub">Based on your skills and profile</p>
+        <h2 class="dash-panel-title" id="rec-opp-heading">Need/Offer matches</h2>
+        <p class="dash-panel-sub">Matches between your published Needs and Offers</p>
         <div id="recommended-opportunities-list" class="dash-stack"></div>
         <div id="recommended-loading" class="dash-muted-center" style="display:none;">Finding matches…</div>
-        <div id="recommended-empty" class="dash-muted-center" style="display:none;">No recommended opportunities yet. Add skills to improve suggestions.</div>
+        <div id="recommended-empty" class="dash-muted-center" style="display:none;">No matches yet. Publish a Need or Offer to start matching.</div>
     </section>
 
     <div class="company-insights-grid">
         <section id="company-recommendations-section" class="dash-panel company-insight-card" style="display: none;" aria-labelledby="rec-pro-heading">
             <div class="company-insight-header">
                 <div>
-                    <h2 class="dash-panel-title" id="rec-pro-heading">Recommended professionals</h2>
-                    <p class="dash-panel-sub">Strong fits for your published needs</p>
+                    <h2 class="dash-panel-title" id="rec-pro-heading">Matched Offers for your Needs</h2>
+                    <p class="dash-panel-sub">Offer posts paired with your published Needs by compatibility score</p>
                 </div>
                 <a href="#" data-route="/people" class="dash-link-btn company-insight-link">Browse talent</a>
             </div>
@@ -837,6 +842,80 @@
     display: flex;
     flex-direction: column;
     gap: 0.65rem;
+}
+
+.dashboard-match-buckets {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.dashboard-match-bucket__title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--dash-ink);
+    margin: 0 0 0.5rem;
+}
+
+.dashboard-match-bucket__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.dashboard-match-bucket-chip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    background: #fff;
+    text-decoration: none;
+    color: inherit;
+}
+
+.dashboard-match-bucket-chip:hover {
+    border-color: rgba(37, 99, 235, 0.35);
+}
+
+.dashboard-match-bucket-chip__main {
+    min-width: 0;
+}
+
+.dashboard-match-bucket-chip__label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--dash-ink);
+}
+
+.dashboard-match-bucket-chip__meta {
+    font-size: 0.75rem;
+    color: var(--dash-muted);
+    margin-top: 0.125rem;
+}
+
+.dashboard-match-bucket-chip__score {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #2563eb;
+    white-space: nowrap;
+}
+
+.dashboard-matches-empty {
+    text-align: center;
+    padding: 2rem 1rem;
+    border: 1px dashed #cbd5e1;
+    border-radius: 0.75rem;
+    background: #f8fafc;
+}
+
+.dashboard-matches-empty__text {
+    margin: 0 0 1rem;
+    color: var(--dash-muted);
+    font-size: 0.9375rem;
 }
 
 /* Match result cards */

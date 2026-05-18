@@ -6,6 +6,9 @@
 const MATCHING_REFRESH_INTERVAL_MS = 60000;
 let matchingRefreshIntervalId = null;
 let matchingVisibilityHandler = null;
+let lastPreviewReport = null;
+let lastSelectableRows = [];
+let lastPreviewRunId = null;
 
 async function runAndShowReport() {
     const runLoading = document.getElementById('matching-run-loading');
@@ -44,8 +47,11 @@ async function runAndShowReport() {
     if (refreshStatus) refreshStatus.textContent = 'Analyzing current opportunities';
     try {
         const report = await runMatchingOnCurrentData();
+        lastPreviewReport = report;
+        await recordPreviewRun(report);
         renderReport(reportGrid, reportDetails || null, report);
         await renderAdminAnalytics(window.dataService);
+        await renderCommandCenter();
         if (runLoading) runLoading.hidden = true;
         if (reportBlock) reportBlock.hidden = false;
         const nowLabel = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -75,16 +81,249 @@ async function renderAdminAnalytics(dataService) {
     const stats = await getAdminMatchingAnalytics(dataService);
     el.innerHTML = ''
         + renderMetricCard(stats.totalPostMatches, 'Saved matches', 'Persisted matches')
-        + renderMetricCard(stats.confirmedPostMatches, 'Confirmed', 'Accepted by users')
+        + renderMetricCard(stats.confirmedPostMatches, 'Confirmed', 'Confirmed post matches')
         + renderMetricCard(stats.totalDeals, 'Deals', 'All collaboration deals')
         + renderMetricCard(stats.dealsFromMatches, 'From matches', 'Deals created from matches')
-        + renderMetricCard(escapeHtml(stats.conversionRate), 'Conversion', 'Confirmed to deal rate');
+        + renderMetricCard(escapeHtml(stats.conversionRate), 'Conversion', 'Confirmed to deal rate')
+        + renderMetricCard(stats.invitationsSent, 'Invitations sent', 'Invite to Apply records')
+        + renderMetricCard(stats.applicationsFromInvitations, 'Invited applications', 'Applications linked to invitations')
+        + renderMetricCard(escapeHtml(stats.invitationAcceptanceRate), 'Invitation rate', 'Accepted invitations vs sent')
+        + renderMetricCard(stats.dealsFromInvitedApplications, 'Deals from invites', 'Deals tied to invited applications')
+        + renderMetricCard(stats.openNegotiations, 'Open negotiations', 'Active term discussions')
+        + renderMetricCard(stats.agreedNegotiations, 'Terms agreed', 'Negotiations ready for deal')
+        + renderMetricCard(stats.blockedMatches, 'Blocked matches', 'Consortium/circular with drop-outs')
+        + renderMetricCard(stats.replacementPendingReview, 'Suggestions pending', 'Awaiting owner review')
+        + renderMetricCard(stats.replacementInvitationsSent, 'Replacement invites', 'Invitations sent')
+        + renderMetricCard(stats.replacementAccepted, 'Replacements accepted', 'Awaiting finalize')
+        + renderMetricCard(stats.replacementCompleted, 'Replacements completed', 'Participant swaps done')
+        + renderMetricCard(escapeHtml(stats.replacementConversionRate), 'Replacement rate', 'Completed vs invitations')
+        + renderMetricCard(stats.dealsFromApplications, 'Deals from applications', 'Accepted application path')
+        + renderMetricCard(stats.draftDeals, 'Draft deals', 'Deal workspaces not yet active')
+        + renderMetricCard(stats.activeDeals, 'Active deals', 'Fully signed / in execution')
+        + renderMetricCard(stats.dealsWithContracts, 'Deals with contracts', 'Linked contract agreements');
 }
 
 /**
  * Persist post_matches for one opportunity using matchingService.persistPostMatches.
  * Shows message in matching-run-error area.
  */
+async function recordPreviewRun(report) {
+    const cc = window.AdminMatchingCommandCenter;
+    if (!cc || !window.dataService || typeof window.dataService.createMatchingPreviewRun !== 'function') {
+        return;
+    }
+    const summary = cc.buildPreviewRunSummary(report);
+    const actor = authService.getCurrentUser && authService.getCurrentUser();
+    try {
+        const run = await window.dataService.createMatchingPreviewRun({
+            ...summary,
+            actorId: actor?.id || null
+        });
+        lastPreviewRunId = run?.id || null;
+        updatePreviewMeta(run);
+    } catch (e) {
+        void e;
+    }
+}
+
+function updatePreviewMeta(run) {
+    const el = document.getElementById('matching-cc-preview-meta');
+    if (!el || !run) return;
+    el.hidden = false;
+    const when = run.createdAt ? new Date(run.createdAt).toLocaleString() : 'just now';
+    el.textContent = 'Latest preview run (' + when + '): '
+        + (run.totalMatchesFound || 0) + ' matches found. Preview only — use Save matches or Save selected opportunities to persist.';
+}
+
+/** Published opportunity ids selected in the per-opportunity table (bulk save). */
+function getCheckedOpportunityIds() {
+    const ids = new Set();
+    document.querySelectorAll('.matching-opp-select:checked').forEach(cb => {
+        const id = cb.getAttribute('data-opp-id');
+        if (id) ids.add(id);
+    });
+    return Array.from(ids);
+}
+
+async function filterPublishedOpportunityIds(opportunityIds) {
+    if (!window.dataService || typeof window.dataService.getOpportunityById !== 'function') {
+        return [];
+    }
+    const published = [];
+    for (const id of opportunityIds || []) {
+        const opp = await window.dataService.getOpportunityById(id);
+        if (opp && (opp.status || '') === 'published') published.push(id);
+    }
+    return published;
+}
+
+function formatPersistSummaryMessage(result) {
+    if (!result) return 'Nothing was persisted.';
+    const created = result.createdCount != null ? result.createdCount : (result.created && result.created.length) || 0;
+    const skipped = result.skippedDuplicateCount || 0;
+    const failed = result.failedCount != null ? result.failedCount : (result.errors && result.errors.length) || 0;
+    const oppCount = result.opportunityCount != null ? result.opportunityCount : null;
+    let msg = 'Created ' + created + ' match' + (created === 1 ? '' : 'es');
+    if (skipped > 0) msg += ', skipped ' + skipped + ' duplicate' + (skipped === 1 ? '' : 's');
+    if (failed > 0) msg += ', ' + failed + ' opportunit' + (failed === 1 ? 'y' : 'ies') + ' failed';
+    if (oppCount != null) {
+        msg += ' across ' + oppCount + ' opportunit' + (oppCount === 1 ? 'y' : 'ies');
+    }
+    msg += '.';
+    if (created > 0) msg += ' Participants were notified for new matches.';
+    return msg;
+}
+
+function updateBulkPersistBar() {
+    const bar = document.getElementById('matching-bulk-persist-bar');
+    const countEl = document.getElementById('matching-bulk-selection-count');
+    const canPersist = typeof authService !== 'undefined'
+        && authService.hasAdminCapability
+        && authService.hasAdminCapability('admin.matching.persist');
+    const ids = getCheckedOpportunityIds();
+    if (bar) bar.hidden = !canPersist;
+    if (countEl) countEl.textContent = ids.length + ' opportunit' + (ids.length === 1 ? 'y' : 'ies') + ' selected';
+    const btn = document.getElementById('matching-bulk-persist-btn');
+    if (btn) btn.disabled = ids.length === 0;
+}
+
+async function persistSelectedOpportunities(opportunityIds) {
+    authService.assertAdminCapability('admin.matching.persist');
+    const runError = document.getElementById('matching-run-error');
+    const clearError = () => { if (runError) { runError.hidden = true; runError.textContent = ''; } };
+    if (!window.matchingService || typeof window.matchingService.persistPreviewOpportunities !== 'function') {
+        if (runError) { runError.hidden = false; runError.textContent = 'Bulk persist is not available.'; }
+        return;
+    }
+    const unique = await filterPublishedOpportunityIds(
+        window.AdminMatchingCommandCenter
+            ? window.AdminMatchingCommandCenter.collectOpportunityIdsFromIdList(opportunityIds)
+            : Array.from(new Set((opportunityIds || []).filter(Boolean)))
+    );
+    if (!unique.length) {
+        if (runError) {
+            runError.hidden = false;
+            runError.textContent = 'Select at least one published opportunity to save matches.';
+        }
+        return;
+    }
+    clearError();
+    const actor = authService.getCurrentUser && authService.getCurrentUser();
+    const bulkBtn = document.getElementById('matching-bulk-persist-btn');
+    if (bulkBtn) bulkBtn.disabled = true;
+    try {
+        const result = await window.matchingService.persistPreviewOpportunities(unique, {
+            source: 'admin_command_center',
+            actorId: actor?.id || null,
+            actorRole: actor?.role || null,
+            previewRunId: lastPreviewRunId
+        });
+        const errCount = result.failedCount != null ? result.failedCount : (result.errors && result.errors.length) || 0;
+        if (runError) {
+            runError.hidden = false;
+            runError.style.color = errCount ? '' : 'var(--success-color, #059669)';
+            runError.textContent = formatPersistSummaryMessage(result);
+        }
+        await renderAdminAnalytics(window.dataService);
+        await renderCommandCenter();
+        document.querySelectorAll('.matching-opp-select:checked').forEach(cb => { cb.checked = false; });
+        const selectAll = document.getElementById('matching-select-all-opp');
+        if (selectAll) selectAll.checked = false;
+        updateBulkPersistBar();
+    } catch (e) {
+        if (runError) {
+            runError.hidden = false;
+            runError.textContent = (e && e.message) ? e.message : 'Bulk persist failed.';
+        }
+    } finally {
+        if (bulkBtn) bulkBtn.disabled = getCheckedOpportunityIds().length === 0;
+    }
+}
+
+function renderLifecycleQueueList(items, formatItem, emptyMessage) {
+    if (!items || !items.length) {
+        return '<p class="matching-cc-empty">' + escapeHtml(emptyMessage || 'None right now.') + '</p>';
+    }
+    return '<ul class="matching-cc-list">' + items.map(formatItem).join('') + '</ul>';
+}
+
+function renderCommandCenterLink(path, label) {
+    return '<a href="#" class="matching-cc-link" data-route="' + escapeHtml(path) + '">' + escapeHtml(label) + '</a>';
+}
+
+function renderCommandCenterPanel(iconClass, title, items, formatItem, emptyMessage) {
+    const count = items && items.length ? items.length : 0;
+    const body = renderLifecycleQueueList(items, formatItem, emptyMessage);
+    const emptyClass = count === 0 ? ' is-empty' : '';
+    return ''
+        + '<article class="matching-cc-panel' + emptyClass + '">'
+        + '<header class="matching-cc-panel-head">'
+        + '<span class="matching-cc-panel-icon" aria-hidden="true"><i class="ph-duotone ' + escapeHtml(iconClass) + '"></i></span>'
+        + '<h3 class="matching-cc-panel-title">' + escapeHtml(title) + '</h3>'
+        + '<span class="matching-cc-count" aria-label="' + count + ' items">' + count + '</span>'
+        + '</header>'
+        + '<div class="matching-cc-panel-body">' + body + '</div>'
+        + '</article>';
+}
+
+async function renderCommandCenter() {
+    const lifecycleEl = document.getElementById('matching-cc-lifecycle');
+    const cc = window.AdminMatchingCommandCenter;
+    if (!lifecycleEl || !cc || !window.dataService) return;
+
+    const queues = await cc.buildLifecycleQueues(window.dataService);
+    const matchRoute = (window.CONFIG && window.CONFIG.ROUTES && window.CONFIG.ROUTES.MATCH_DETAIL)
+        ? window.CONFIG.ROUTES.MATCH_DETAIL.replace(':id', '')
+        : '/matches/';
+
+    const friendlyMatchType = (t) => (window.unifiedMatchViewModel && window.unifiedMatchViewModel.getMatchTypeLabel)
+        ? window.unifiedMatchViewModel.getMatchTypeLabel(t)
+        : (t || 'Match');
+
+    lifecycleEl.innerHTML = ''
+        + '<div class="matching-cc-grid">'
+        + renderCommandCenterPanel('ph-envelope-simple', 'Invitations (sent)', queues.invitations, (i) => {
+            const link = i.matchId
+                ? renderCommandCenterLink(matchRoute + i.matchId, 'Match ' + i.matchId.slice(0, 8))
+                : escapeHtml(i.opportunityId || '—');
+            return '<li>' + link + ' · ' + escapeHtml(i.kind) + ' · ' + escapeHtml(i.status || '') + '</li>';
+        }, 'No invitations have been sent yet.')
+        + renderCommandCenterPanel('ph-chats-circle', 'Negotiations', queues.negotiations, (n) => {
+            const link = n.matchId
+                ? renderCommandCenterLink(matchRoute + n.matchId, 'Match ' + n.matchId.slice(0, 8))
+                : 'Application';
+            return '<li>' + link + ' · ' + escapeHtml(n.status || '') + '</li>';
+        }, 'No negotiations yet.')
+        + renderCommandCenterPanel('ph-arrows-counter-clockwise', 'Replacements', queues.replacements, (r) => {
+            const link = r.matchId
+                ? renderCommandCenterLink(matchRoute + r.matchId, 'Match ' + r.matchId.slice(0, 8))
+                : escapeHtml(r.opportunityId || '—');
+            return '<li>' + link + ' · ' + escapeHtml(r.roleToFill || '') + ' · ' + escapeHtml(r.status || '') + '</li>';
+        }, 'No replacement requests found.')
+        + renderCommandCenterPanel('ph-prohibit', 'Blocked matches', queues.blockedMatches, (m) =>
+            '<li>' + renderCommandCenterLink(matchRoute + m.id, escapeHtml(friendlyMatchType(m.matchType)))
+            + ' · ' + escapeHtml(m.status || '') + '</li>'
+        , 'No blocked matches right now.')
+        + renderCommandCenterPanel('ph-floppy-disk', 'Persist runs', queues.matchingRuns, (r) =>
+            '<li>' + escapeHtml(r.opportunityId || '—') + ' · '
+            + escapeHtml((r.modelsRun && r.modelsRun.join(', ')) || r.model || '—')
+            + ' · ' + escapeHtml(r.source || '') + ' · created ' + (r.createdCount != null ? r.createdCount : '—') + '</li>'
+        , 'No matching persist runs yet.')
+        + renderCommandCenterPanel('ph-eye', 'Preview runs', queues.previewRuns, (r) =>
+            '<li>' + escapeHtml(new Date(r.createdAt).toLocaleString()) + ' · '
+            + (r.totalMatchesFound || 0) + ' found · ' + (r.selectableRowCount || 0) + ' rows</li>'
+        , 'Run a preview report to see history here.')
+        + '</div>';
+
+    lifecycleEl.querySelectorAll('.matching-cc-link').forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const route = this.getAttribute('data-route');
+            if (route && typeof router !== 'undefined' && router.navigate) router.navigate(route);
+        });
+    });
+}
+
 async function persistForOpportunity(opportunityId) {
     authService.assertAdminCapability('admin.matching.persist');
     const runError = document.getElementById('matching-run-error');
@@ -100,11 +339,21 @@ async function persistForOpportunity(opportunityId) {
     }
     clearError();
     try {
-        const created = await window.matchingService.persistPostMatches(opportunityId);
+        const actor = authService.getCurrentUser && authService.getCurrentUser();
+        const result = await window.matchingService.persistPostMatches(opportunityId, {
+            source: 'admin_save',
+            actorId: actor?.id || null,
+            actorRole: actor?.role || null
+        });
         if (runError) {
             runError.hidden = false;
             runError.style.color = '';
-            runError.textContent = 'Persisted ' + (created && created.length ? created.length : 0) + ' match(es) for this opportunity.';
+            runError.textContent = formatPersistSummaryMessage({
+                createdCount: result?.createdCount || 0,
+                skippedDuplicateCount: result?.skippedDuplicateCount || 0,
+                failedCount: 0,
+                opportunityCount: 1
+            });
         }
         await renderAdminAnalytics(window.dataService);
     } catch (e) {
@@ -115,14 +364,52 @@ async function persistForOpportunity(opportunityId) {
     }
 }
 
+function applyAuditorReadOnlyUi() {
+    const isAuditor = typeof authService !== 'undefined'
+        && authService.isReadOnlyAdmin
+        && authService.isReadOnlyAdmin();
+    const runError = document.getElementById('matching-run-error');
+    if (isAuditor && runError) {
+        runError.hidden = false;
+        runError.style.color = '';
+        runError.textContent = 'This account is read-only. You can run preview reports but cannot persist matches.';
+    }
+    document.querySelectorAll('[data-requires-persist]').forEach(el => {
+        el.disabled = true;
+        el.title = 'This action is read-only for auditor accounts.';
+    });
+}
+
 async function initAdminMatching() {
     if (!authService.canAccessAdmin()) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }
+    applyAuditorReadOnlyUi();
 
     const runButton = document.getElementById('matching-run-report-btn');
     if (runButton) runButton.onclick = runAndShowReport;
+
+    const bulkBtn = document.getElementById('matching-bulk-persist-btn');
+    if (bulkBtn) {
+        bulkBtn.onclick = function () {
+            void persistSelectedOpportunities(getCheckedOpportunityIds());
+        };
+    }
+    const pageRoot = document.querySelector('.admin-matching-page');
+    if (pageRoot) {
+        pageRoot.addEventListener('change', function (e) {
+            const t = e.target;
+            if (!t || !t.classList) return;
+            if (t.id === 'matching-select-all-opp') {
+                document.querySelectorAll('.matching-opp-select').forEach(cb => { cb.checked = t.checked; });
+            }
+            if (t.classList.contains('matching-opp-select') || t.id === 'matching-select-all-opp') {
+                updateBulkPersistBar();
+            }
+        });
+    }
+    updateBulkPersistBar();
 
     if (matchingRefreshIntervalId != null) {
         clearInterval(matchingRefreshIntervalId);
@@ -133,6 +420,7 @@ async function initAdminMatching() {
         matchingVisibilityHandler = null;
     }
 
+    await renderCommandCenter();
     await runAndShowReport();
 
     matchingRefreshIntervalId = setInterval(runAndShowReport, MATCHING_REFRESH_INTERVAL_MS);
@@ -142,6 +430,10 @@ async function initAdminMatching() {
     document.addEventListener('visibilitychange', matchingVisibilityHandler);
 }
 
+/**
+ * Preview-only matching report (findMatchesForPost / findCircularExchanges).
+ * Does not call persistPostMatches and does not notify participants.
+ */
 async function runMatchingOnCurrentData() {
     const dataService = window.dataService;
     const matchingService = window.matchingService;
@@ -252,7 +544,28 @@ async function runMatchingOnCurrentData() {
     }
 
     report.creatorNames = await buildCreatorNamesMap(dataService, report);
+
+    if (window.AdminMatchingOneWayDiagnostics && typeof window.AdminMatchingOneWayDiagnostics.collectOneWayDiagnostics === 'function') {
+        try {
+            report.oneWayDiagnostics = await window.AdminMatchingOneWayDiagnostics.collectOneWayDiagnostics();
+        } catch (diagErr) {
+            report.oneWayDiagnostics = { error: diagErr && diagErr.message ? diagErr.message : 'Diagnostics failed' };
+        }
+    }
+    if (typeof CONFIG !== 'undefined' && CONFIG.MATCHING && CONFIG.MATCHING.DEBUG && report.oneWayDiagnostics) {
+        console.log('[admin-matching one-way diagnostics]', report.oneWayDiagnostics);
+    }
+
     return report;
+}
+
+function isConfirmedLikeMatch(match) {
+    const helper = window.postMatchAnalytics;
+    if (helper && typeof helper.isConfirmedLikeMatch === 'function') {
+        return helper.isConfirmedLikeMatch(match);
+    }
+    const s = (match && match.status) || '';
+    return s === 'confirmed' || s === 'accepted';
 }
 
 function escapeHtml(s) {
@@ -312,18 +625,77 @@ async function buildCreatorNamesMap(dataService, report) {
  * @returns {Promise<{ totalPostMatches: number, confirmedPostMatches: number, totalDeals: number, dealsFromMatches: number, conversionRate: string }>}
  */
 async function getAdminMatchingAnalytics(dataService) {
-    if (!dataService) return { totalPostMatches: 0, confirmedPostMatches: 0, totalDeals: 0, dealsFromMatches: 0, conversionRate: '—' };
+    const emptyInvite = {
+        invitationsSent: 0,
+        applicationsFromInvitations: 0,
+        invitationAcceptanceRate: '—',
+        replacementInvitationsAccepted: 0,
+        dealsFromInvitedApplications: 0,
+        openNegotiations: 0,
+        agreedNegotiations: 0,
+        cancelledNegotiations: 0,
+        dealsFromNegotiations: 0,
+        blockedMatches: 0,
+        replacementPendingReview: 0,
+        replacementInvitationsSent: 0,
+        replacementAccepted: 0,
+        replacementCompleted: 0,
+        replacementConversionRate: '—',
+        dealsFromApplications: 0,
+        draftDeals: 0,
+        activeDeals: 0,
+        dealsWithContracts: 0
+    };
+    if (!dataService) {
+        return { totalPostMatches: 0, confirmedPostMatches: 0, totalDeals: 0, dealsFromMatches: 0, conversionRate: '—', ...emptyInvite };
+    }
     const postMatches = await dataService.getPostMatches();
     const deals = await dataService.getDeals();
     const totalPostMatches = postMatches.length;
-    const confirmedStatus = (typeof CONFIG !== 'undefined' && CONFIG.POST_MATCH_STATUS && CONFIG.POST_MATCH_STATUS.CONFIRMED) ? CONFIG.POST_MATCH_STATUS.CONFIRMED : 'confirmed';
-    const confirmedPostMatches = postMatches.filter(m => (m.status || '') === confirmedStatus).length;
+    const confirmedPostMatches = postMatches.filter(isConfirmedLikeMatch).length;
     const totalDeals = deals.length;
     const dealsFromMatches = deals.filter(d => d.matchId).length;
     const conversionRate = confirmedPostMatches > 0
         ? (Math.round((dealsFromMatches / confirmedPostMatches) * 100) + '%')
         : '—';
-    return { totalPostMatches, confirmedPostMatches, totalDeals, dealsFromMatches, conversionRate };
+    const inviteStats = typeof dataService.getInvitationMatchingAnalytics === 'function'
+        ? await dataService.getInvitationMatchingAnalytics()
+        : emptyInvite;
+    const negStats = typeof dataService.getNegotiationMatchingAnalytics === 'function'
+        ? await dataService.getNegotiationMatchingAnalytics()
+        : emptyInvite;
+    const replStats = typeof dataService.getReplacementMatchingAnalytics === 'function'
+        ? await dataService.getReplacementMatchingAnalytics()
+        : emptyInvite;
+    const dealStats = typeof dataService.getDealFlowMatchingAnalytics === 'function'
+        ? await dataService.getDealFlowMatchingAnalytics()
+        : emptyInvite;
+    return {
+        totalPostMatches,
+        confirmedPostMatches,
+        totalDeals,
+        dealsFromMatches,
+        conversionRate,
+        invitationsSent: inviteStats.invitationsSent,
+        applicationsFromInvitations: inviteStats.applicationsFromInvitations,
+        invitationAcceptanceRate: inviteStats.invitationAcceptanceRate,
+        replacementInvitationsAccepted: inviteStats.replacementInvitationsAccepted,
+        dealsFromInvitedApplications: inviteStats.dealsFromInvitedApplications,
+        openNegotiations: negStats.openNegotiations,
+        agreedNegotiations: negStats.agreedNegotiations,
+        cancelledNegotiations: negStats.cancelledNegotiations,
+        dealsFromNegotiations: negStats.dealsFromNegotiations,
+        blockedMatches: replStats.blockedMatches,
+        replacementPendingReview: replStats.pendingReview,
+        replacementInvitationsSent: replStats.invitationsSent,
+        replacementAccepted: replStats.accepted,
+        replacementCompleted: replStats.completed,
+        replacementConversionRate: replStats.conversionRate,
+        dealsFromApplications: dealStats.dealsFromApplications,
+        draftDeals: dealStats.draftDeals,
+        activeDeals: dealStats.activeDeals,
+        dealsWithContracts: dealStats.dealsWithContracts
+    };
 }
 
 function getOpportunityRoute(id) {
@@ -368,6 +740,47 @@ function renderStatusBadge(status) {
 function renderMatchKindBadge(matchType, filterKey) {
     const key = filterKey || 'neutral';
     return '<span class="matching-kind-badge matching-kind-' + escapeHtml(key) + '">' + escapeHtml(matchType) + '</span>';
+}
+
+function renderOneWayDiagnostics(report) {
+    const panel = document.getElementById('matching-one-way-diagnostics');
+    const body = document.getElementById('matching-one-way-diagnostics-body');
+    if (!panel || !body) return;
+    const diag = report && report.oneWayDiagnostics;
+    const showAdmin = typeof authService !== 'undefined' && authService.canAccessAdmin && authService.canAccessAdmin();
+    if (!showAdmin || !diag) {
+        panel.hidden = true;
+        return;
+    }
+    panel.hidden = false;
+    if (diag.error) {
+        body.innerHTML = '<p class="matching-details">' + escapeHtml(diag.error) + '</p>';
+        return;
+    }
+    const reasons = diag.rejectionReasons || {};
+    const reasonLines = Object.keys(reasons).length
+        ? Object.keys(reasons).map(k => escapeHtml(k) + ': ' + reasons[k]).join('<br>')
+        : '—';
+    const below = (diag.topBelowThreshold || []).map(p => {
+        const ids = p.direction === 'offer_to_needs'
+            ? ('offer ' + (p.offerId || '') + ' → need ' + (p.needId || ''))
+            : ('need ' + (p.needId || '') + ' → offer ' + (p.offerId || ''));
+        return '<li>score ' + escapeHtml(String(p.score)) + ' · ' + escapeHtml(ids)
+            + (p.weak && p.weak.length ? ' · ' + escapeHtml(p.weak.join(', ')) : '') + '</li>';
+    }).join('');
+    body.innerHTML = ''
+        + '<dl class="matching-diagnostics-dl">'
+        + '<dt>Published needs / offers</dt><dd>' + escapeHtml(diag.publishedNeedCount) + ' / ' + escapeHtml(diag.publishedOfferCount) + '</dd>'
+        + '<dt>Inspected (capped)</dt><dd>' + escapeHtml(diag.needsInspected) + ' needs, ' + escapeHtml(diag.offersInspected) + ' offers</dd>'
+        + '<dt>Post pairs scanned</dt><dd>' + escapeHtml(diag.candidatePairsFromGenerator) + '</dd>'
+        + '<dt>Scored pairs</dt><dd>' + escapeHtml(diag.scoredPairs) + '</dd>'
+        + '<dt>Above threshold (' + escapeHtml(diag.threshold) + ')</dt><dd>' + escapeHtml(diag.pairsAboveThreshold) + '</dd>'
+        + '<dt>Below threshold</dt><dd>' + escapeHtml(diag.pairsBelowThreshold) + '</dd>'
+        + '</dl>'
+        + '<p class="matching-diagnostics-subtitle">Common below-threshold signals</p>'
+        + '<div class="matching-diagnostics-reasons">' + reasonLines + '</div>'
+        + '<p class="matching-diagnostics-subtitle">Top below-threshold pairs</p>'
+        + '<ul class="matching-diagnostics-list">' + (below || '<li>None scored in inspected set</li>') + '</ul>';
 }
 
 function renderMatchingSummary(report) {
@@ -463,7 +876,7 @@ function buildMatchesSummaryRows(report) {
             const participants = [getName(item.creatorId), getName(partId)].filter(Boolean).join(', ') || '—';
             const oppRefs = [item.opportunityId, (m.matchedOpportunity && m.matchedOpportunity.id) || (m.suggestedPartners && m.suggestedPartners[0] && m.suggestedPartners[0].opportunityId)].filter(Boolean).join(' ↔ ') || '—';
             const score = (m.matchScore != null) ? Math.round(m.matchScore * 100) + '%' : '—';
-            rows.push({ matchType: 'One Way', participants, opportunityRefs: oppRefs, matchScore: score, status: 'Suggested' });
+            rows.push({ matchType: 'Need/Offer', participants, opportunityRefs: oppRefs, matchScore: score, status: 'Suggested' });
         });
     });
     (report.oneWayOfferToNeeds || []).forEach(item => {
@@ -472,7 +885,7 @@ function buildMatchesSummaryRows(report) {
             const participants = [getName(item.creatorId), getName(partId)].filter(Boolean).join(', ') || '—';
             const oppRefs = [item.opportunityId, (m.matchedOpportunity && m.matchedOpportunity.id) || (m.suggestedPartners && m.suggestedPartners[0] && m.suggestedPartners[0].opportunityId)].filter(Boolean).join(' ↔ ') || '—';
             const score = (m.matchScore != null) ? Math.round(m.matchScore * 100) + '%' : '—';
-            rows.push({ matchType: 'One Way', participants, opportunityRefs: oppRefs, matchScore: score, status: 'Suggested' });
+            rows.push({ matchType: 'Need/Offer', participants, opportunityRefs: oppRefs, matchScore: score, status: 'Suggested' });
         });
     });
     (report.twoWayPairs || []).forEach(p => {
@@ -492,7 +905,10 @@ function buildMatchesSummaryRows(report) {
         const score = (match && match.matchScore != null) ? Math.round(match.matchScore * 100) + '%' : '—';
         rows.push({ matchType: 'Consortium', participants, opportunityRefs: oppRefs, matchScore: score, status: 'Suggested' });
     });
-    (report.circularCycles || []).forEach(c => {
+    const circularCap = (window.AdminMatchingCommandCenter && window.AdminMatchingCommandCenter.capCircularCyclesForDisplay)
+        ? window.AdminMatchingCommandCenter.capCircularCyclesForDisplay(report.circularCycles || [])
+        : { cycles: (report.circularCycles || []).slice(0, 100) };
+    circularCap.cycles.forEach(c => {
         const cycleIds = c.cycle || [];
         const participants = cycleIds.map(id => getName(id)).join(' → ') + (cycleIds.length ? ' → ' + getName(cycleIds[0]) : '');
         const oppRefs = (c.opportunityIds && c.opportunityIds.length) ? c.opportunityIds.join(' → ') : (cycleIds.join(' → ') || '—');
@@ -508,7 +924,7 @@ function renderReport(gridEl, detailsEl, report) {
     gridEl.innerHTML = ''
         + renderMetricCard(report.totalMatchesFound, 'Total found', 'All suggested matches')
         + renderMetricCard(report.oneWayMatches, 'Need-offer', 'Direct matches')
-        + renderMetricCard(report.twoWayMatches, 'Barter', 'Two-way exchange')
+        + renderMetricCard(report.twoWayMatches, 'Barter', 'Barter exchange')
         + renderMetricCard(report.groupFormations, 'Group', 'Multi-partner groups')
         + renderMetricCard(report.circularExchanges, 'Cycle', 'Circular exchanges');
 
@@ -518,24 +934,37 @@ function renderReport(gridEl, detailsEl, report) {
         if (perOppRows.length === 0) {
             perOppEl.innerHTML = '<p class="matching-details">No opportunities analyzed in this run.</p>';
         } else {
-            let table = '<table class="matching-summary-table matching-per-opp-table"><thead><tr><th>Opportunity title</th><th>Matches</th><th>Best score</th><th>Average score</th><th>Action</th></tr></thead><tbody>';
             const canPersist = typeof authService !== 'undefined' && authService.hasAdminCapability && authService.hasAdminCapability('admin.matching.persist');
+            let table = '<table class="matching-summary-table matching-per-opp-table"><thead><tr>';
+            if (canPersist) {
+                table += '<th class="matching-select-col"><input type="checkbox" id="matching-select-all-opp" aria-label="Select all opportunities" /></th>';
+            }
+            table += '<th>Opportunity title</th><th>Matches</th><th>Best score</th><th>Average score</th><th>Action</th></tr></thead><tbody>';
             perOppRows.forEach(r => {
                 const viewHref = r.sectionId === 'matching-two-way' ? '#matching-two-way' : '#matching-opp-' + escapeHtml(r.opportunityId);
                 const viewMatchesLink = '<a href="' + viewHref + '" class="matching-view-matches-link" data-section="' + escapeHtml(r.sectionId) + '" data-opp-id="' + escapeHtml(r.opportunityId) + '">View</a>';
-                const persistBtn = canPersist ? ('<button type="button" class="matching-persist-btn" data-opp-id="' + escapeHtml(r.opportunityId) + '">Save</button>') : '';
-                table += '<tr><td>' + escapeHtml(r.title) + '</td><td>' + r.matchCount + '</td><td>' + renderScoreBadge(r.bestScorePct) + '</td><td>' + renderScoreBadge(r.avgScorePct) + '</td><td><div class="matching-action-cell">' + viewMatchesLink + persistBtn + '</div></td></tr>';
+                const persistBtn = canPersist
+                    ? ('<button type="button" class="matching-persist-btn" data-opp-id="' + escapeHtml(r.opportunityId) + '" data-requires-persist title="Persist post_matches and notify participants">Save matches</button>')
+                    : '';
+                const selectCell = canPersist
+                    ? ('<td class="matching-select-col"><input type="checkbox" class="matching-opp-select" data-opp-id="' + escapeHtml(r.opportunityId) + '" aria-label="Select opportunity" /></td>')
+                    : '';
+                table += '<tr>' + selectCell + '<td>' + escapeHtml(r.title) + '</td><td>' + r.matchCount + '</td><td>' + renderScoreBadge(r.bestScorePct) + '</td><td>' + renderScoreBadge(r.avgScorePct) + '</td><td><div class="matching-action-cell">' + viewMatchesLink + persistBtn + '</div></td></tr>';
             });
             table += '</tbody></table>';
             perOppEl.innerHTML = table;
+            updateBulkPersistBar();
         }
     }
 
     const summaryTabsEl = document.getElementById('matching-summary-tabs');
     const summaryEl = document.getElementById('matching-summary-table');
-    const MATCH_TYPE_FILTER_KEYS = { 'One Way': 'one-way', 'Barter': 'two-way', 'Consortium': 'consortium', 'Circular': 'circular' };
+    const MATCH_TYPE_FILTER_KEYS = { 'Need/Offer': 'one-way', 'Barter': 'two-way', 'Consortium': 'consortium', 'Circular': 'circular' };
     if (summaryEl) {
-        const rows = buildMatchesSummaryRows(report);
+        const rows = (window.AdminMatchingCommandCenter && window.AdminMatchingCommandCenter.buildSelectableMatchRows)
+            ? window.AdminMatchingCommandCenter.buildSelectableMatchRows(report)
+            : buildMatchesSummaryRows(report);
+        lastSelectableRows = rows;
         if (rows.length === 0) {
             if (summaryTabsEl) summaryTabsEl.innerHTML = '';
             summaryEl.innerHTML = '<p class="matching-details">No matches in this run.</p>';
@@ -545,26 +974,41 @@ function renderReport(gridEl, detailsEl, report) {
                 const key = MATCH_TYPE_FILTER_KEYS[r.matchType];
                 if (key) counts[key]++;
             });
+            const circularMeta = (window.AdminMatchingCommandCenter && window.AdminMatchingCommandCenter.getCircularDisplayMeta)
+                ? window.AdminMatchingCommandCenter.getCircularDisplayMeta(report)
+                : { total: report.circularExchanges || 0, hidden: 0, note: null };
+            const circularTabCount = circularMeta.total > counts['circular']
+                ? (counts['circular'] + ' of ' + circularMeta.total)
+                : String(counts['circular']);
             if (summaryTabsEl) {
                 const tabs = [
                     { id: 'all', label: 'All', count: rows.length },
-                    { id: 'one-way', label: 'Need-offer', count: counts['one-way'] },
+                    { id: 'one-way', label: 'Need/Offer', count: counts['one-way'] },
                     { id: 'two-way', label: 'Barter', count: counts['two-way'] },
                     { id: 'consortium', label: 'Group', count: counts['consortium'] },
-                    { id: 'circular', label: 'Cycle', count: counts['circular'] }
+                    { id: 'circular', label: 'Cycle', count: circularTabCount }
                 ];
                 summaryTabsEl.innerHTML = tabs.map((t, i) =>
                     '<button type="button" class="matching-match-type-tab' + (i === 0 ? ' is-active' : '') + '" role="tab" data-filter="' + escapeHtml(t.id) + '" aria-selected="' + (i === 0 ? 'true' : 'false') + '">' + escapeHtml(t.label) + ' <span class="tab-count">(' + t.count + ')</span></button>'
                 ).join('');
             }
             const visibleRows = rows.slice(0, 200);
-            const note = rows.length > visibleRows.length
-                ? '<p class="matching-table-note">Showing the first ' + visibleRows.length + ' matches. Use the filters above to focus the list.</p>'
+            const noteParts = [];
+            if (rows.length > visibleRows.length) {
+                noteParts.push('Showing the first ' + visibleRows.length + ' matches. Use the filters above to focus the list.');
+            }
+            if (circularMeta.hidden > 0 && circularMeta.note) {
+                noteParts.push(circularMeta.note);
+            }
+            const note = noteParts.length
+                ? '<p class="matching-table-note">' + escapeHtml(noteParts.join(' ')) + '</p>'
                 : '';
-            let table = '<table class="matching-summary-table"><thead><tr><th>Match type</th><th>Participants</th><th>Opportunity references</th><th>Score</th><th>Status</th></tr></thead><tbody>';
+            let table = '<table class="matching-summary-table"><thead><tr>';
+            table += '<th>Match type</th><th>Participants</th><th>Opportunity references</th><th>Score</th><th>Status</th></tr></thead><tbody>';
             visibleRows.forEach(r => {
-                const filterKey = MATCH_TYPE_FILTER_KEYS[r.matchType] || '';
-                table += '<tr data-match-type="' + escapeHtml(filterKey) + '"><td>' + renderMatchKindBadge(r.matchType, filterKey) + '</td><td>' + escapeHtml(r.participants) + '</td><td>' + escapeHtml(r.opportunityRefs) + '</td><td>' + renderScoreBadge(r.matchScore) + '</td><td>' + renderStatusBadge(r.status) + '</td></tr>';
+                const filterKey = r.filterKey || MATCH_TYPE_FILTER_KEYS[r.matchType] || '';
+                table += '<tr data-match-type="' + escapeHtml(filterKey) + '">'
+                    + '<td>' + renderMatchKindBadge(r.matchType, filterKey) + '</td><td>' + escapeHtml(r.participants) + '</td><td>' + escapeHtml(r.opportunityRefs) + '</td><td>' + renderScoreBadge(r.matchScore) + '</td><td>' + renderStatusBadge(r.status) + '</td></tr>';
             });
             table += '</tbody></table>';
             summaryEl.innerHTML = note + table;
@@ -737,14 +1181,25 @@ function renderReport(gridEl, detailsEl, report) {
         }
     }
 
+    renderOneWayDiagnostics(report);
+
     const circularEl = document.getElementById('matching-circular');
     if (circularEl) {
-        const cycles = report.circularCycles || [];
-        if (cycles.length === 0) {
+        const allCycles = report.circularCycles || [];
+        const circularCap = (window.AdminMatchingCommandCenter && window.AdminMatchingCommandCenter.capCircularCyclesForDisplay)
+            ? window.AdminMatchingCommandCenter.capCircularCyclesForDisplay(allCycles)
+            : { cycles: allCycles.slice(0, 100), hidden: Math.max(0, allCycles.length - 100), displayed: Math.min(allCycles.length, 100), total: allCycles.length };
+        const circularMeta = (window.AdminMatchingCommandCenter && window.AdminMatchingCommandCenter.getCircularDisplayMeta)
+            ? window.AdminMatchingCommandCenter.getCircularDisplayMeta(report)
+            : null;
+        if (allCycles.length === 0) {
             circularEl.innerHTML = '<p class="matching-details">No circular exchanges found.</p>';
         } else {
             let html = '';
-            for (const c of cycles) {
+            if (circularMeta && circularMeta.note) {
+                html += '<p class="matching-table-note">' + escapeHtml(circularMeta.note) + '</p>';
+            }
+            for (const c of circularCap.cycles) {
                 const cycleIds = c.cycle || [];
                 const cycleNames = cycleIds.map(id => escapeHtml(creatorNames[id] || id));
                 const participantChain = cycleNames.length > 0 ? cycleNames.join(' &rarr; ') + ' &rarr; ' + cycleNames[0] : (cycleIds.join(' &rarr; ') + ' &rarr; ' + (cycleIds[0] || ''));

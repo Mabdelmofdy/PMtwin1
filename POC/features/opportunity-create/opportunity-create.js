@@ -1157,7 +1157,7 @@ function fillReviewSummary() {
     const descPlain = plainTextFromHtml(descRaw);
     const descPreview = descPlain.length > 280 ? descPlain.slice(0, 280) + '…' : descPlain;
     const intentEl = document.querySelector('input[name="intent"]:checked');
-    const intentLabel = intentEl ? (intentEl.value === 'request' ? 'NEED' : intentEl.value === 'hybrid' ? 'NEED + OFFER' : 'OFFER') : '—';
+    const intentLabel = intentEl ? (intentEl.value === 'request' ? 'Need' : intentEl.value === 'hybrid' ? 'Need & Offer' : 'Offer') : '—';
     const intent = intentLabel;
     const location = document.getElementById('location')?.value || document.getElementById('location-country')?.value || '—';
     const modelType = document.getElementById('model-type')?.value;
@@ -1228,7 +1228,7 @@ function fillReviewSummary() {
     summary.innerHTML = `
         <div class="occ-review-summary">
             <div class="occ-review-grid">
-                <div class="occ-review-row"><span class="occ-review-key">Project type</span><span class="occ-review-val">${escapeHtml(projectTypeLabel)}</span></div>
+                <div class="occ-review-row"><span class="occ-review-key">Opportunity scope</span><span class="occ-review-val">${escapeHtml(projectTypeLabel)}</span></div>
                 <div class="occ-review-row"><span class="occ-review-key">Title</span><span class="occ-review-val">${escapeHtml(title)}</span></div>
                 <div class="occ-review-row"><span class="occ-review-key">Intent</span><span class="occ-review-val">${escapeHtml(intent)}</span></div>
                 <div class="occ-review-row"><span class="occ-review-key">Location</span><span class="occ-review-val">${escapeHtml(location)}</span></div>
@@ -1250,6 +1250,83 @@ function fillReviewSummary() {
             </div>
         </div>
     `;
+    updateMatchingReadinessIndicator();
+}
+
+function collectReadinessPreviewPayload() {
+    const intentEl = document.querySelector('input[name="intent"]:checked');
+    const intent = intentEl ? intentEl.value : 'request';
+    const scopeSkillsTags = getScopeTagsFromInput('scope-skills');
+    const requiredSkills = (intent === 'request' || intent === 'hybrid') ? scopeSkillsTags : [];
+    const offeredSkills = (intent === 'offer' || intent === 'hybrid') ? scopeSkillsTags : [];
+    const exchangeMode = document.getElementById('exchange-mode')?.value;
+    const currency = document.getElementById('currency')?.value || 'SAR';
+    const exchangeData = {
+        exchangeMode,
+        currency,
+        budgetRange: {
+            min: parseFloat(document.getElementById('budgetRange_min')?.value) || 0,
+            max: parseFloat(document.getElementById('budgetRange_max')?.value) || 0,
+            currency
+        }
+    };
+    if (exchangeMode === 'cash') {
+        exchangeData.cashAmount = parseFloat(document.getElementById('cash-amount')?.value) || 0;
+    } else if (exchangeMode === 'barter') {
+        exchangeData.barterOffer = document.getElementById('barter-offer')?.value || '';
+        exchangeData.barterNeed = document.getElementById('barter-need')?.value || '';
+    }
+    const locationRequirement = document.getElementById('location-requirement')?.value?.trim();
+    const attrs = {
+        locationRequirement,
+        startDate: document.getElementById('attr-startDate')?.value?.trim(),
+        applicationDeadline: document.getElementById('attr-applicationDeadline')?.value?.trim(),
+        endDate: document.getElementById('attr-endDate')?.value?.trim()
+    };
+    return {
+        intent,
+        title: (document.getElementById('title')?.value || '').trim(),
+        description: document.getElementById('description')?.value || '',
+        exchangeMode,
+        exchangeData,
+        scope: { requiredSkills, offeredSkills, sectors: getScopeTagsFromInput('scope-sectors') },
+        attributes: attrs,
+        modelType: document.getElementById('model-type')?.value,
+        subModelType: document.getElementById('submodel-type')?.value,
+        location: document.getElementById('location')?.value,
+        locationCity: document.getElementById('location-city')?.value,
+        locationCountry: document.getElementById('location-country')?.value,
+        latitude: parseFloat(document.getElementById('latitude')?.value),
+        longitude: parseFloat(document.getElementById('longitude')?.value)
+    };
+}
+
+function updateMatchingReadinessIndicator() {
+    const mr = window.MatchingReadiness;
+    const ui = window.MatchingReadinessUI;
+    if (!mr || !ui) return;
+    let mount = document.getElementById('matching-readiness-indicator');
+    if (!mount) {
+        const summary = document.getElementById('review-summary');
+        if (!summary || !summary.parentNode) return;
+        mount = document.createElement('div');
+        mount.id = 'matching-readiness-indicator';
+        mount.hidden = true;
+        summary.parentNode.insertBefore(mount, summary.nextSibling);
+    }
+    const report = mr.buildMatchingReadinessReport(collectReadinessPreviewPayload());
+    ui.renderInlineIndicator(mount, report);
+}
+
+async function confirmPublishReadinessIfNeeded(opportunityPayload) {
+    const mr = window.MatchingReadiness;
+    const ui = window.MatchingReadinessUI;
+    if (!mr || !ui || (opportunityPayload.status || '') !== 'published') {
+        return true;
+    }
+    const report = mr.buildMatchingReadinessReport(opportunityPayload);
+    const choice = await ui.confirmPublishWithReadiness(report);
+    return choice === 'publish';
 }
 
 function escapeHtml(str) {
@@ -4503,14 +4580,22 @@ function setupFormHandlers() {
             }
             if (value_exchange) oppPayload.value_exchange = value_exchange;
 
+            const publishOk = await confirmPublishReadinessIfNeeded(oppPayload);
+            if (!publishOk) return;
+
             const oppService = window.opportunityService || (typeof opportunityService !== 'undefined' ? opportunityService : null);
 
             if (wizardEditOpportunityId) {
-                await dataService.updateOpportunity(wizardEditOpportunityId, oppPayload);
-                const fresh = await dataService.getOpportunityById(wizardEditOpportunityId);
-                if (oppService && typeof oppService._ensureNormalized === 'function') {
-                    await oppService._ensureNormalized(fresh);
+                const existing = await dataService.getOpportunityById(wizardEditOpportunityId);
+                if (
+                    oppService &&
+                    typeof oppService._ensureNormalized === 'function' &&
+                    existing &&
+                    (oppPayload.status || '') === 'published'
+                ) {
+                    await oppService._ensureNormalized({ ...existing, ...oppPayload });
                 }
+                await dataService.updateOpportunity(wizardEditOpportunityId, oppPayload);
                 await dataService.createAuditLog({
                     userId: user.id,
                     action: 'opportunity_updated',

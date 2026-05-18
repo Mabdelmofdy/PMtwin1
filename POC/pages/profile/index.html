@@ -600,6 +600,7 @@
                     <div class="stat-item">
                         <strong>Matches Received</strong>
                         <span id="stat-matches-received" class="stat-value">0</span>
+                        <span id="stat-matches-breakdown" class="profile-muted text-xs">Pending 0 · Confirmed 0 · Declined 0 · Expired 0</span>
                     </div>
                     <div class="stat-item">
                         <strong>Completed Collaborations</strong>
@@ -627,7 +628,7 @@
                     <h3 class="profile-section-title">Profile strength</h3>
                 </div>
                 <div class="card-body">
-                    <p class="profile-sidebar-intro">Complete your profile to improve <strong>matching visibility</strong>. Higher completion helps you appear in more recommendations.</p>
+                    <p class="profile-sidebar-intro">Complete your profile so your <strong>Need and Offer posts</strong> match accurately. Richer scope improves exchange, barter, and consortium matching.</p>
                     <ul id="profile-completion-checklist" class="profile-completion-checklist">
                         <li id="check-basic" class="check-item"><span class="check-icon"></span><span>Basic info</span></li>
                         <li id="check-skills" class="check-item"><span class="check-icon"></span><span>Skills</span></li>
@@ -640,7 +641,7 @@
             </div>
             <div class="card" id="recommended-actions-card">
                 <div class="card-header">
-                    <h3 class="profile-section-title">Recommended actions</h3>
+                    <h3 class="profile-section-title">Suggested next steps</h3>
                 </div>
                 <div class="card-body">
                     <ul id="profile-recommended-actions-list" class="profile-reco-list"></ul>
@@ -652,11 +653,11 @@
                     <h3 class="profile-section-title">Matching preferences</h3>
                 </div>
                 <div class="card-body">
-                    <p id="matching-preferences-summary" class="profile-muted">Only candidates with <strong id="matching-min-score-value">75</strong>% or above match score will be shown.</p>
+                    <p id="matching-preferences-summary" class="profile-muted">Only Need/Offer matches at <strong id="matching-min-score-value">75</strong>% compatibility or above will be shown.</p>
                     <div class="form-group profile-form-tight">
-                        <label for="matching-min-score" class="form-label">Minimum match score (%)</label>
+                        <label for="matching-min-score" class="form-label">Minimum compatibility threshold (%)</label>
                         <input type="number" id="matching-min-score" class="form-input profile-input-narrow" min="70" max="100" value="70" placeholder="70">
-                        <p class="profile-field-hint">Only show recommendations at or above this score (70–100).</p>
+                        <p class="profile-field-hint">Hide post-to-post matches below this score (70–100).</p>
                     </div>
                     <div class="profile-section-actions profile-section-actions--borderless">
                         <button type="button" id="matching-preferences-review" class="btn btn-secondary btn-sm">Review preferences</button>

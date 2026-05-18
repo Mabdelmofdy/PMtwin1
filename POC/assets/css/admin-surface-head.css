@@ -332,6 +332,25 @@
         0 0 0 1px rgba(15, 23, 42, 0.05);
 }
 
+.admin-matching-page .matching-cc-panel {
+    border: none;
+}
+
+.admin-matching-page .matching-run-state.is-running .matching-run-dot {
+    background: var(--warning-color);
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+}
+
+.admin-matching-page .matching-run-state.is-error .matching-run-dot {
+    background: var(--danger-color);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+.admin-matching-page .matching-run-btn[disabled] {
+    cursor: wait;
+    opacity: 0.72;
+}
+
 /* —— Health tips (replaces numbered cards in HTML) —— */
 .admin-health-page .health-tips-panel {
     padding: 0;

@@ -8,8 +8,12 @@ class Router {
         this.routes = [];
         this.currentRoute = null;
         this.params = {};
-        /** History API (no #); use `npm run start` in POC for SPA fallback — plain Live Server cannot serve deep links. */
-        this.useHash = false;
+        /**
+         * Hash routing works on Live Server (no SPA fallback). History API is enabled when
+         * index.html includes <meta name="pmtwin-spa-server"> (injected by `npm run start`).
+         */
+        this.useHash = typeof document === 'undefined'
+            || !document.querySelector('meta[name="pmtwin-spa-server"]');
     }
 
     getBasePathPrefix() {

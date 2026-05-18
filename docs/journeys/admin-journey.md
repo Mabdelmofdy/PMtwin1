@@ -130,19 +130,24 @@ Implementation:
 
 ## 6. Matching (Admin)
 
+Matching is **post-to-post only** (`post_matches`). Legacy `pmtwin_matches` is not used in admin or user UIs.
+
 Admin matching flow:
 
 1. Open Admin Matching.
-2. Run report to preview scored results by model.
+2. **Run report** — preview scored results by model (in-memory only; does **not** write `post_matches`).
 3. Inspect score breakdown and suggested participants.
-4. Optionally Save a published opportunity row to persist matches and notify participants.
+4. **Save** on a published opportunity row — calls `persistPostMatches`, creates `post_matches`, and notifies participants.
 
-Critical limitation:
+| Action | Writes `post_matches` |
+|--------|------------------------|
+| Run report | No (preview only) |
+| Save (per opportunity) | Yes |
+| Opportunity publish | Yes (automatic) |
 
-- ⚠️ Run report is preview/in-memory oriented.
-- ✅ Per-opportunity Save can persist new `post_matches`.
+Limitations:
+
 - ❌ Bulk save for a whole report or selected preview rows is not implemented.
-- ✅ Persistent `post_match` creation is also tied to opportunity publish trigger flow.
 
 ---
 
@@ -250,7 +255,7 @@ Implementation:
 Current known limitations for admin operations:
 
 - ❌ No backend authority layer; POC is localStorage-based.
-- ⚠️ Admin matching **Run report** is preview-only; per-opportunity **Save** persists matches, but bulk selected-results persistence is not implemented.
+- ⚠️ Admin matching **Run report** is preview-only (no `post_matches` written); per-opportunity **Save** persists `post_matches`; bulk selected-results persistence is not implemented.
 - ⚠️ Moderator/auditor permission slicing is partially enforced.
 - ❌ Bulk governance operations (bulk approve/reject/export) are not fully implemented.
 - ❌ Full moderation queue/case management is not implemented.

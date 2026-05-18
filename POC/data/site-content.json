@@ -1,0 +1,184 @@
+{
+  "home": {
+    "label": "Home",
+    "route": "/",
+    "sections": {
+      "hero": {
+        "label": "Hero",
+        "html": "<div class=\"pm-hero-grid\" aria-hidden=\"true\"></div>\n        <div class=\"pm-hero-shell\">\n            <div class=\"pm-hero-copy\">\n                <p class=\"pm-kicker\">\n                    <i class=\"ph-duotone ph-cube-focus\" aria-hidden=\"true\"></i>\n                    Built environment collaboration\n                </p>\n                <h1 id=\"pm-home-title\">PMTwin</h1>\n                <p class=\"pm-hero-subtitle\">3D design, BIM, and construction partners in one deal-ready workspace.</p>\n                <p class=\"pm-hero-description\">\n                    Match project needs with architects, BIM teams, contractors, consultants, equipment providers, and consortium partners across Saudi Arabia and the GCC.\n                </p>\n                <div class=\"pm-hero-actions\" aria-label=\"Primary actions\">\n                    <a href=\"#\" data-route=\"/register\" class=\"btn btn-primary pm-btn pm-btn-primary\">\n                        <i class=\"ph-duotone ph-rocket-launch\" aria-hidden=\"true\"></i>\n                        <span>Start collaborating</span>\n                    </a>\n                    <a href=\"#\" data-route=\"/find\" class=\"btn btn-secondary pm-btn pm-btn-secondary\">\n                        <i class=\"ph-duotone ph-magnifying-glass\" aria-hidden=\"true\"></i>\n                        <span>Explore marketplace</span>\n                    </a>\n                </div>\n                <div class=\"pm-trust-row\" aria-label=\"Platform focus\">\n                    <span><strong>3D/BIM</strong> design services</span>\n                    <span><strong>Consortium</strong> formation</span>\n                    <span><strong>Deal</strong> workflow</span>\n                </div>\n            </div>\n\n            <div class=\"pm-hero-visual\" aria-label=\"3D project collaboration preview\">\n                <div class=\"pm-cad-toolbar\">\n                    <span></span>\n                    <span></span>\n                    <span></span>\n                    <strong>BIM Coordination</strong>\n                </div>\n                <div class=\"pm-model-stage\">\n                    <div class=\"pm-model-shadow\"></div>\n                    <div class=\"pm-building pm-building-a\">\n                        <span class=\"pm-face pm-face-front\"></span>\n                        <span class=\"pm-face pm-face-side\"></span>\n                        <span class=\"pm-face pm-face-top\"></span>\n                    </div>\n                    <div class=\"pm-building pm-building-b\">\n                        <span class=\"pm-face pm-face-front\"></span>\n                        <span class=\"pm-face pm-face-side\"></span>\n                        <span class=\"pm-face pm-face-top\"></span>\n                    </div>\n                    <div class=\"pm-building pm-building-c\">\n                        <span class=\"pm-face pm-face-front\"></span>\n                        <span class=\"pm-face pm-face-side\"></span>\n                        <span class=\"pm-face pm-face-top\"></span>\n                    </div>\n                    <div class=\"pm-road pm-road-main\"></div>\n                    <div class=\"pm-road pm-road-cross\"></div>\n                    <div class=\"pm-site-pin pm-site-pin-a\">\n                        <i class=\"ph-duotone ph-buildings\" aria-hidden=\"true\"></i>\n                    </div>\n                    <div class=\"pm-site-pin pm-site-pin-b\">\n                        <i class=\"ph-duotone ph-crane\" aria-hidden=\"true\"></i>\n                    </div>\n                </div>\n                <div class=\"pm-match-panel pm-match-panel-left\">\n                    <span class=\"pm-panel-label\">Need</span>\n                    <strong>Mixed-use tower</strong>\n                    <small>Design lead + MEP + PM</small>\n                </div>\n                <div class=\"pm-match-panel pm-match-panel-right\">\n                    <span class=\"pm-panel-label\">Match</span>\n                    <strong>92%</strong>\n                    <small>Exchange compatibility ready</small>\n                </div>\n                <div class=\"pm-model-status\">\n                    <span></span>\n                    Live project twin\n                </div>\n            </div>\n        </div>"
+      },
+      "metrics": {
+        "label": "Metrics",
+        "html": "<div class=\"pm-container pm-metrics-grid\">\n            <article>\n                <strong>3D + BIM</strong>\n                <span>Architectural design, visualization, coordination, and clash detection.</span>\n            </article>\n            <article>\n                <strong>Multi-party deals</strong>\n                <span>Build consortiums with design, construction, finance, and equipment roles.</span>\n            </article>\n            <article>\n                <strong>Value exchange</strong>\n                <span>Support cash, barter, equity, profit sharing, and hybrid proposals.</span>\n            </article>\n        </div>"
+      },
+      "process": {
+        "label": "Project flow",
+        "html": "<div class=\"pm-container pm-split\">\n            <div>\n                <p class=\"pm-section-kicker\">Project flow</p>\n                <h2 id=\"pm-process-title\">From model intent to signed collaboration.</h2>\n                <p class=\"pm-section-copy\">\n                    PMTwin turns design and construction needs into structured opportunities, matches published Needs with compatible Offers, then carries the relationship into negotiation and contract execution.\n                </p>\n                <a href=\"#\" data-route=\"/workflow\" class=\"pm-text-link\">\n                    <span>See how it works</span>\n                    <i class=\"ph-duotone ph-arrow-right\" aria-hidden=\"true\"></i>\n                </a>\n            </div>\n            <div class=\"pm-flow-board\" aria-label=\"PMTwin workflow\">\n                <div class=\"pm-flow-step is-active\">\n                    <i class=\"ph-duotone ph-pencil-ruler\" aria-hidden=\"true\"></i>\n                    <span>Define scope</span>\n                    <strong>Design, BIM, site, budget</strong>\n                </div>\n                <div class=\"pm-flow-step\">\n                    <i class=\"ph-duotone ph-graph\" aria-hidden=\"true\"></i>\n                    <span>Match partners</span>\n                    <strong>Skills, value, timeline</strong>\n                </div>\n                <div class=\"pm-flow-step\">\n                    <i class=\"ph-duotone ph-handshake\" aria-hidden=\"true\"></i>\n                    <span>Negotiate</span>\n                    <strong>Cash, barter, hybrid</strong>\n                </div>\n                <div class=\"pm-flow-step\">\n                    <i class=\"ph-duotone ph-file-text\" aria-hidden=\"true\"></i>\n                    <span>Contract</span>\n                    <strong>Deal record and status</strong>\n                </div>\n            </div>\n        </div>"
+      },
+      "audience": {
+        "label": "Audience",
+        "html": "<div class=\"pm-container\">\n            <div class=\"pm-section-head\">\n                <p class=\"pm-section-kicker\">Who it is for</p>\n                <h2 id=\"pm-audience-title\">A market surface for teams that design, build, and deliver.</h2>\n            </div>\n            <div class=\"pm-card-grid\">\n                <article class=\"pm-card\">\n                    <i class=\"ph-duotone ph-cube\" aria-hidden=\"true\"></i>\n                    <h3>Design and BIM studios</h3>\n                    <p>Offer architecture, 3D visualization, BIM modeling, MEP design, and coordination packages.</p>\n                </article>\n                <article class=\"pm-card\">\n                    <i class=\"ph-duotone ph-hard-hat\" aria-hidden=\"true\"></i>\n                    <h3>Contractors and suppliers</h3>\n                    <p>Join tenders, provide site execution, share equipment, or contribute construction material capacity.</p>\n                </article>\n                <article class=\"pm-card\">\n                    <i class=\"ph-duotone ph-compass-tool\" aria-hidden=\"true\"></i>\n                    <h3>Consultants and PM teams</h3>\n                    <p>Match planning, supervision, sustainability, legal, finance, and project management capabilities.</p>\n                </article>\n            </div>\n        </div>"
+      },
+      "models": {
+        "label": "Collaboration models",
+        "html": "<div class=\"pm-container\">\n            <div class=\"pm-section-head pm-section-head-row\">\n                <div>\n                    <p class=\"pm-section-kicker\">Collaboration models</p>\n                    <h2 id=\"pm-models-title\">Choose the structure that fits the opportunity.</h2>\n                </div>\n                <a href=\"#\" data-route=\"/collaboration-wizard\" class=\"pm-text-link\">\n                    <span>Open wizard</span>\n                    <i class=\"ph-duotone ph-magic-wand\" aria-hidden=\"true\"></i>\n                </a>\n            </div>\n            <div class=\"pm-model-grid\">\n                <article>\n                    <span>01</span>\n                    <h3>Project-based</h3>\n                    <p>Tasks, consortiums, joint ventures, and SPVs for defined project packages.</p>\n                </article>\n                <article>\n                    <span>02</span>\n                    <h3>Strategic</h3>\n                    <p>Long-term alliances, mentorship, and strategic joint venture relationships.</p>\n                </article>\n                <article>\n                    <span>03</span>\n                    <h3>Resource pooling</h3>\n                    <p>Equipment sharing, resource exchange, and bulk purchasing opportunities.</p>\n                </article>\n                <article>\n                    <span>04</span>\n                    <h3>Hiring and RFPs</h3>\n                    <p>Professional hiring, consultant engagement, design contests, and competitions.</p>\n                </article>\n            </div>\n        </div>"
+      },
+      "cta": {
+        "label": "Call to action",
+        "html": "<div class=\"pm-container pm-cta-inner\">\n            <div>\n                <p class=\"pm-section-kicker\">Ready for the next package?</p>\n                <h2 id=\"pm-cta-title\">Bring your design, construction, and partner search into PMTwin.</h2>\n            </div>\n            <a href=\"#\" data-route=\"/register\" class=\"btn btn-primary pm-btn pm-btn-primary\">\n                <i class=\"ph-duotone ph-user-plus\" aria-hidden=\"true\"></i>\n                <span>Create account</span>\n            </a>\n        </div>"
+      }
+    }
+  },
+  "find": {
+    "label": "Find",
+    "route": "/find",
+    "sections": {
+      "hero": {
+        "label": "Hero",
+        "html": "<div class=\"find-hero-grid\" aria-hidden=\"true\"></div>\n        <div class=\"find-hero-content\">\n            <div class=\"find-hero-copy\">\n                <p class=\"find-kicker\">\n                    <i class=\"ph-duotone ph-radar\" aria-hidden=\"true\"></i>\n                    Marketplace search\n                </p>\n                <h1>Find design, BIM, and construction partners.</h1>\n                <p class=\"find-subtitle\">Search professionals, companies, and live opportunities across the built-environment network.</p>\n\n                <div class=\"find-search-form\">\n                    <div class=\"search-input-wrapper\">\n                        <i class=\"ph-duotone ph-magnifying-glass\" aria-hidden=\"true\"></i>\n                        <input type=\"text\" id=\"find-search-input\" class=\"form-input\" placeholder=\"Search BIM, MEP, 3D visualization, contractors, tenders...\">\n                    </div>\n                    <button id=\"find-search-btn\" class=\"btn btn-primary\">\n                        <i class=\"ph-duotone ph-magnifying-glass\" aria-hidden=\"true\"></i>\n                        <span>Search</span>\n                    </button>\n                </div>\n            </div>\n\n            <div class=\"find-hero-visual\" aria-hidden=\"true\">\n                <div class=\"find-map-plane\">\n                    <span class=\"find-node find-node-a\"><i class=\"ph-duotone ph-cube\"></i></span>\n                    <span class=\"find-node find-node-b\"><i class=\"ph-duotone ph-buildings\"></i></span>\n                    <span class=\"find-node find-node-c\"><i class=\"ph-duotone ph-hard-hat\"></i></span>\n                    <span class=\"find-node find-node-d\"><i class=\"ph-duotone ph-handshake\"></i></span>\n                    <span class=\"find-link find-link-a\"></span>\n                    <span class=\"find-link find-link-b\"></span>\n                    <span class=\"find-link find-link-c\"></span>\n                </div>\n                <div class=\"find-floating-card find-floating-card-a\">\n                    <strong>BIM coordination</strong>\n                    <span>92% exchange compatibility</span>\n                </div>\n                <div class=\"find-floating-card find-floating-card-b\">\n                    <strong>Riyadh</strong>\n                    <span>Design + MEP demand</span>\n                </div>\n            </div>\n        </div>"
+      }
+    }
+  },
+  "workflow": {
+    "label": "How it works",
+    "route": "/workflow",
+    "sections": {
+      "hero": {
+        "label": "Hero",
+        "html": "<div class=\"wf-hero-grid\" aria-hidden=\"true\"></div>\n        <div class=\"wf-hero-inner\">\n            <div class=\"wf-hero-copy\">\n                <p class=\"wf-kicker\">\n                    <i class=\"ph-duotone ph-git-branch\" aria-hidden=\"true\"></i>\n                    Project lifecycle\n                </p>\n                <h1>From 3D design need to signed construction collaboration.</h1>\n                <p>PMTwin gives teams a structured path from registration and vetting to opportunity matching, negotiation, contracts, execution, and closure.</p>\n                <div class=\"wf-hero-actions\">\n                    <a href=\"#\" data-route=\"/register\" class=\"btn btn-primary wf-btn-primary\">Start registration</a>\n                    <a href=\"#\" data-route=\"/find\" class=\"btn btn-secondary wf-btn-secondary\">Explore partners</a>\n                </div>\n            </div>\n            <div class=\"wf-visual\" aria-hidden=\"true\">\n                <div class=\"wf-stage\">\n                    <span class=\"wf-tower wf-tower-a\"></span>\n                    <span class=\"wf-tower wf-tower-b\"></span>\n                    <span class=\"wf-tower wf-tower-c\"></span>\n                    <span class=\"wf-route wf-route-a\"></span>\n                    <span class=\"wf-route wf-route-b\"></span>\n                    <span class=\"wf-pin wf-pin-a\"><i class=\"ph-duotone ph-pencil-ruler\"></i></span>\n                    <span class=\"wf-pin wf-pin-b\"><i class=\"ph-duotone ph-graph\"></i></span>\n                    <span class=\"wf-pin wf-pin-c\"><i class=\"ph-duotone ph-file-text\"></i></span>\n                </div>\n                <div class=\"wf-visual-panel\">\n                    <strong>Deal status</strong>\n                    <span>Draft -> Review -> Signing -> Active</span>\n                </div>\n            </div>\n        </div>"
+      },
+      "steps": {
+        "label": "Steps",
+        "html": "<div class=\"wf-container\">\n            <div class=\"wf-intro\">\n                <p class=\"wf-kicker\">End-to-end flow</p>\n                <h2>Every project relationship moves through a clear operational sequence.</h2>\n            </div>\n\n            <section class=\"workflow-steps\" aria-label=\"Platform workflow steps\">\n                <article class=\"workflow-step\">\n                    <span class=\"workflow-step-num\">1</span>\n                    <div>\n                        <h2>Register</h2>\n                        <p>Create an account as a professional, consultant, or company.</p>\n                        <a href=\"#\" data-route=\"/register\">Register</a>\n                    </div>\n                </article>\n                <article class=\"workflow-step\">\n                    <span class=\"workflow-step-num\">2</span>\n                    <div>\n                        <h2>Vetting and activation</h2>\n                        <p>Admins review your account, then activate full access when the profile is ready.</p>\n                        <a href=\"#\" data-route=\"/admin/vetting\">Admin vetting</a>\n                    </div>\n                </article>\n                <article class=\"workflow-step\">\n                    <span class=\"workflow-step-num\">3</span>\n                    <div>\n                        <h2>Dashboard</h2>\n                        <p>Your hub for opportunities, applications, matches, and notifications.</p>\n                        <a href=\"#\" data-route=\"/dashboard\">Dashboard</a>\n                    </div>\n                </article>\n                <article class=\"workflow-step\">\n                    <span class=\"workflow-step-num\">4</span>\n                    <div>\n                        <h2>Opportunity lifecycle</h2>\n                        <p>Create needs or offers, then move from draft to published, negotiation, contracted, completed, and closed.</p>\n                        <a href=\"#\" data-route=\"/opportunities\">Opportunities</a>\n                    </div>\n                </article>\n                <article class=\"workflow-step\">\n                    <span class=\"workflow-step-num\">5</span>\n                    <div>\n                        <h2>Matching</h2>\n                        <p>The system matches one-way needs, two-way barter, consortium roles, and circular value exchanges.</p>\n                        <a href=\"#\" data-route=\"/admin/matching\">Admin matching</a>\n                    </div>\n                </article>\n                <article class=\"workflow-step\">\n                    <span class=\"workflow-step-num\">6</span>\n                    <div>\n                        <h2>Application and negotiation</h2>\n                        <p>Applicants submit proposals; owners review, shortlist, and negotiate value, scope, and timing.</p>\n                        <a href=\"#\" data-route=\"/pipeline\">Pipeline</a>\n                    </div>\n                </article>\n                <article class=\"workflow-step\">\n                    <span class=\"workflow-step-num\">7</span>\n                    <div>\n                        <h2>Contract</h2>\n                        <p>Accepted applications become contract records with status, parties, and lifecycle tracking.</p>\n                        <a href=\"#\" data-route=\"/contracts\">Contracts</a>\n                    </div>\n                </article>\n                <article class=\"workflow-step\">\n                    <span class=\"workflow-step-num\">8</span>\n                    <div>\n                        <h2>Execution and closure</h2>\n                        <p>Parties deliver on scope and milestones; contracts complete or terminate, and opportunities close.</p>\n                    </div>\n                </article>"
+      }
+    }
+  },
+  "knowledge-base": {
+    "label": "Knowledge Base",
+    "route": "/knowledge-base",
+    "sections": {
+      "hero": {
+        "label": "Hero",
+        "html": "<div class=\"kb-hero-grid\" aria-hidden=\"true\"></div>\n        <div class=\"kb-hero-inner\">\n            <div>\n                <p class=\"kb-kicker\">\n                    <i class=\"ph-duotone ph-books\" aria-hidden=\"true\"></i>\n                    Collaboration knowledge\n                </p>\n                <h1>Guides for PMTwin collaboration models.</h1>\n                <p class=\"kb-subtitle\">Understand project-based delivery, SPVs, legal structure, resource pooling, RFPs, and how to choose the right model before posting or applying.</p>\n            </div>\n            <div class=\"kb-hero-card\" aria-hidden=\"true\">\n                <span class=\"kb-card-label\">Guide stack</span>\n                <strong>Design -> Consortium -> Contract</strong>\n                <div class=\"kb-card-lines\">\n                    <span></span>\n                    <span></span>\n                    <span></span>\n                </div>\n            </div>\n        </div>"
+      },
+      "sidebar": {
+        "label": "Sidebar",
+        "html": "<div class=\"kb-sidebar-panel\">\n                <span class=\"kb-sidebar-icon\"><i class=\"ph-duotone ph-cube-focus\" aria-hidden=\"true\"></i></span>\n                <h2>Choose a guide area</h2>\n                <p>Switch between model guidance, SPV/legal basics, and platform FAQs.</p>\n            </div>"
+      },
+      "panel-models": {
+        "label": "Models tab",
+        "html": "<div class=\"kb-qa-item\">\n                    <h3 class=\"kb-question\">What is Project-Based Collaboration?</h3>\n                    <div class=\"kb-answer\"><p>Best for delivering a specific project with one or more partners. Includes task-based engagements, consortiums, project JVs, and Special Purpose Vehicles (SPV). Ideal when scope and timeline are well defined.</p></div>\n                </div>\n                <div class=\"kb-qa-item\">\n                    <h3 class=\"kb-question\">What are Strategic Partnerships?</h3>\n                    <div class=\"kb-answer\"><p>Long-term alliances: strategic joint ventures, strategic alliances, and mentorship programs. Suited when you want ongoing collaboration rather than a single project.</p></div>\n                </div>\n                <div class=\"kb-qa-item\">\n                    <h3 class=\"kb-question\">What is Resource Pooling?</h3>\n                    <div class=\"kb-answer\"><p>Reduce costs by sharing resources: bulk purchasing, equipment sharing, and resource exchange. Useful for companies with complementary needs.</p></div>\n                </div>\n                <div class=\"kb-qa-item\">\n                    <h3 class=\"kb-question\">What are Hiring & Competitions?</h3>\n                    <div class=\"kb-answer\"><p>Engage professionals or consultants, or participate in RFPs and competitions to win work. Use when you need talent or want to compete for projects.</p></div>\n                </div>"
+      },
+      "panel-spv": {
+        "label": "SPV tab",
+        "html": "<div class=\"kb-qa-item\">\n                    <h3 class=\"kb-question\">What is an SPV?</h3>\n                    <div class=\"kb-answer\"><p>Special Purpose Vehicles (SPVs) are used for project-specific legal entities. They allow partners to isolate risk and structure financing for a single project or asset.</p></div>\n                </div>\n                <div class=\"kb-qa-item\">\n                    <h3 class=\"kb-question\">Do I need legal advice for an SPV?</h3>\n                    <div class=\"kb-answer\"><p>Yes. Consult your legal and tax advisors when setting up an SPV. PMTwin does not provide legal advice.</p></div>\n                </div>"
+      },
+      "panel-faq": {
+        "label": "FAQ tab",
+        "html": "<div class=\"kb-qa-item\">\n                    <h3 class=\"kb-question\">Who can use PMTwin?</h3>\n                    <div class=\"kb-answer\"><p>Companies and professionals in the construction and built environment sector in Saudi Arabia and the GCC can register and collaborate.</p></div>\n                </div>\n                <div class=\"kb-qa-item\">\n                    <h3 class=\"kb-question\">How do I find the right collaboration model?</h3>\n                    <div class=\"kb-answer\"><p>Use the <a href=\"#\" data-route=\"/collaboration-wizard\">Collaboration Wizard</a> to answer a few questions and get a personalized recommendation.</p></div>\n                </div>\n                <div class=\"kb-qa-item\">\n                    <h3 class=\"kb-question\">How do I post an opportunity?</h3>\n                    <div class=\"kb-answer\"><p>Register, then go to Opportunities -> Create. Choose your collaboration model and fill in the details.</p></div>\n                </div>\n                <div class=\"kb-qa-item\">\n                    <h3 class=\"kb-question\">Where can I get help?</h3>\n                    <div class=\"kb-answer\"><p>Check this Knowledge Base and the model guides. For platform support, use the contact options in the footer when available.</p></div>\n                </div>\n            </div>\n\n            <div class=\"kb-cta\">\n                <a href=\"#\" data-route=\"/collaboration-wizard\" class=\"btn btn-primary\">Take the Wizard</a>\n                <a href=\"#\" data-route=\"/register\" class=\"btn btn-secondary\">Register</a>"
+      }
+    }
+  },
+  "collaboration-models": {
+    "label": "Collaboration Models",
+    "route": "/collaboration-models",
+    "sections": {
+      "hero": {
+        "label": "Page header",
+        "html": "<div class=\"page-header-content\">\r\n            <h1 class=\"page-title\">Collaboration Models</h1>\r\n            <p class=\"page-subtitle\">Explore how you can collaborate on PMTwin — from project-based partnerships to hiring and competitions</p>\r\n        </div>"
+      },
+      "cards": {
+        "label": "Models overview",
+        "html": "<div class=\"card models-intro\">\r\n            <p>PMTwin supports multiple collaboration models to match your goals. Use the <strong>AI Collaboration Wizard</strong> to get a personalized recommendation, or browse the <strong>Knowledge Base</strong> for guides and FAQs.</p>\r\n            <div class=\"cta-actions\">\r\n                <a href=\"#\" data-route=\"/collaboration-wizard\" class=\"btn btn-primary\">Take the Collaboration Wizard</a>\r\n                <a href=\"#\" data-route=\"/knowledge-base\" class=\"btn btn-secondary\">Knowledge Base & FAQ</a>\r\n            </div>\r\n        </div>\r\n\r\n        <h2 class=\"section-title\">Model Categories</h2>\r\n        <div class=\"models-grid\">\r\n            <div class=\"card model-card\">\r\n                <h3>Project-Based Collaboration</h3>\r\n                <p>Joint delivery of specific projects: task-based engagements, consortiums, project JVs, and Special Purpose Vehicles (SPV).</p>\r\n            </div>\r\n            <div class=\"card model-card\">\r\n                <h3>Strategic Partnerships</h3>\r\n                <p>Long-term alliances: strategic JVs, strategic alliances, and mentorship programs.</p>\r\n            </div>\r\n            <div class=\"card model-card\">\r\n                <h3>Resource Pooling</h3>\r\n                <p>Share costs and assets: bulk purchasing, equipment sharing, and resource exchange.</p>\r\n            </div>\r\n            <div class=\"card model-card\">\r\n                <h3>Hiring & Competitions</h3>\r\n                <p>Engage talent or compete for work: professional hiring, consultant engagement, and RFPs/competitions.</p>\r\n            </div>\r\n        </div>"
+      },
+      "cta": {
+        "label": "CTA",
+        "html": "<p>Ready to find your collaboration fit?</p>\r\n        <a href=\"#\" data-route=\"/collaboration-wizard\" class=\"btn btn-primary\">Start the Wizard</a>\r\n        <a href=\"#\" data-route=\"/register\" class=\"btn btn-secondary\">Register</a>"
+      }
+    }
+  },
+  "collaboration-wizard": {
+    "label": "Collaboration Wizard",
+    "route": "/collaboration-wizard",
+    "sections": {
+      "intro": {
+        "label": "Page header",
+        "html": "<div class=\"page-header-content\">\r\n            <h1 class=\"page-title\">AI Collaboration Wizard</h1>\r\n            <p class=\"page-subtitle\">Answer a few questions to discover the best collaboration model for your needs</p>\r\n        </div>"
+      },
+      "result-block": {
+        "label": "Results block",
+        "html": "<h2>Recommended Collaboration Models</h2>\r\n        <p class=\"result-intro\">Based on your answers, here are the models that best fit your situation:</p>\r\n        <div id=\"wizard-result-models\"></div>\r\n        <p class=\"result-cta-text\">Create an account to post or apply for opportunities using these models.</p>\r\n        <div class=\"result-actions\">\r\n            <button type=\"button\" id=\"wizard-restart\" class=\"btn btn-secondary\">Start Over</button>\r\n            <a href=\"#\" data-route=\"/register\" class=\"btn btn-primary\">Register</a>\r\n            <a href=\"#\" data-route=\"/opportunities/create\" class=\"btn btn-secondary\" id=\"wizard-create-opp\">Create opportunity</a>\r\n            <a href=\"#\" data-route=\"/opportunities\" class=\"btn btn-secondary\">Browse opportunities</a>"
+      }
+    }
+  },
+  "login": {
+    "label": "Login",
+    "route": "/login",
+    "sections": {
+      "marketing-column": {
+        "label": "Marketing column",
+        "html": "<div class=\"pm-auth-grid\" aria-hidden=\"true\"></div>\n        <div class=\"pm-auth-visual-content\">\n            <p class=\"pm-auth-kicker\">\n                <i class=\"ph-duotone ph-shield-check\" aria-hidden=\"true\"></i>\n                Secure workspace\n            </p>\n            <h1>Return to your 3D design and construction deal flow.</h1>\n            <p>Review matches, manage opportunities, continue negotiations, and move collaborations into contract execution.</p>\n            <div class=\"pm-auth-model\" aria-hidden=\"true\">\n                <span class=\"pm-auth-block pm-auth-block-a\"></span>\n                <span class=\"pm-auth-block pm-auth-block-b\"></span>\n                <span class=\"pm-auth-block pm-auth-block-c\"></span>\n                <span class=\"pm-auth-line pm-auth-line-a\"></span>\n                <span class=\"pm-auth-line pm-auth-line-b\"></span>\n            </div>\n        </div>"
+      },
+      "form-header": {
+        "label": "Form header",
+        "html": "<p class=\"pm-auth-kicker\">PMTwin portal</p>\n                <h2>Login to PMTwin</h2>\n                <p>Access your account to start collaborating.</p>"
+      }
+    }
+  },
+  "register": {
+    "label": "Register",
+    "route": "/register",
+    "sections": {
+      "marketing-column": {
+        "label": "Marketing column",
+        "html": "<div class=\"pm-auth-grid\" aria-hidden=\"true\"></div>\n        <div class=\"pm-auth-visual-content\">\n            <p class=\"pm-auth-kicker\">\n                <i class=\"ph-duotone ph-user-plus\" aria-hidden=\"true\"></i>\n                Join the network\n            </p>\n            <h1>Build your PMTwin profile for design and construction collaboration.</h1>\n            <p>Register as a company, professional, or consultant, then add the details PMTwin needs for vetting, matching, and partner discovery.</p>\n            <div class=\"pm-auth-model\" aria-hidden=\"true\">\n                <span class=\"pm-auth-block pm-auth-block-a\"></span>\n                <span class=\"pm-auth-block pm-auth-block-b\"></span>\n                <span class=\"pm-auth-block pm-auth-block-c\"></span>\n                <span class=\"pm-auth-line pm-auth-line-a\"></span>\n                <span class=\"pm-auth-line pm-auth-line-b\"></span>\n            </div>\n            <div class=\"pm-register-points\" aria-hidden=\"true\">\n                <span><strong>01</strong> Account type</span>\n                <span><strong>02</strong> Profile details</span>\n                <span><strong>03</strong> Verification</span>\n            </div>\n        </div>"
+      },
+      "form-header": {
+        "label": "Form header",
+        "html": "<div class=\"reg-header-top\">\n                    <div class=\"reg-header-lead\">\n                        <h1 class=\"reg-header-title\">Join PMTwin</h1>\n                        <p class=\"reg-header-subtitle\">Create your account to start collaborating</p>\n                    </div>\n                    <button type=\"button\" id=\"reg-fill-demo\" class=\"reg-btn-demo\">Try Demo Data</button>\n                </div>\n                <p class=\"reg-header-login\">\n                    Already have an account? <a href=\"#\" data-route=\"/login\" class=\"reg-header-login-link\">Login here</a>\n                </p>"
+      }
+    }
+  },
+  "forgot-password": {
+    "label": "Forgot password",
+    "route": "/forgot-password",
+    "sections": {
+      "hero": {
+        "label": "Heading",
+        "html": "<h1 class=\"text-2xl font-bold text-center text-gray-900 mb-2\">Reset password</h1><p class=\"text-center text-gray-600 mb-6\">Enter your email and we’ll help you reset your password.</p>"
+      },
+      "body": {
+        "label": "Footer link",
+        "html": "<a href=\"#\" data-route=\"/login\" class=\"text-primary font-medium hover:underline\">Back to login</a>"
+      }
+    }
+  },
+  "reset-password": {
+    "label": "Reset password",
+    "route": "/reset-password",
+    "sections": {
+      "hero": {
+        "label": "Heading",
+        "html": "<h1 class=\"text-2xl font-bold text-center text-gray-900 mb-2\">Set new password</h1><p class=\"text-center text-gray-600 mb-6\">Enter your new password below.</p>"
+      },
+      "body": {
+        "label": "Footer link",
+        "html": "<a href=\"#\" data-route=\"/login\" class=\"text-primary font-medium hover:underline\">Back to login</a>"
+      }
+    }
+  },
+  "global": {
+    "label": "Global",
+    "route": "",
+    "sections": {
+      "public-nav": {
+        "label": "Public navigation",
+        "html": "<ul class=\"flex list-none gap-6 items-center m-0 p-0 public-nav-list\">\n<li><a href=\"#\" data-route=\"/find\" class=\"text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link\">Find</a></li>\n<li><a href=\"#\" data-route=\"/workflow\" class=\"text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link\">How it works</a></li>\n<li><a href=\"#\" data-route=\"/knowledge-base\" class=\"text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link\">Knowledge Base</a></li>\n<li><a href=\"#\" data-route=\"/login\" class=\"text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link\">Login</a></li>\n<li><a href=\"#\" data-route=\"/register\" class=\"text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link\">Register</a></li>\n</ul>"
+      },
+      "footer": {
+        "label": "Footer",
+        "html": "<p class=\"mb-1\">&copy; {{year}} {{appName}}. All rights reserved.</p>\n<p>Construction Collaboration Platform for Saudi Arabia &amp; GCC</p>"
+      }
+    }
+  }
+}

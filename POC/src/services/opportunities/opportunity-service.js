@@ -17,10 +17,10 @@ class OpportunityService {
         await this._ensureNormalized(opportunity);
         const updated = await this.dataService.getOpportunityById(opportunity.id);
 
-        // If published, trigger matching (await so callers can show results immediately)
-        if (updated.status === 'published') {
-            await this.matchingService.findMatchesForOpportunity(updated.id)
-                .catch(error => console.error('Error running matching:', error));
+        // If published, persist post-to-post matches
+        if (updated.status === 'published' && typeof this.matchingService.persistPostMatches === 'function') {
+            await this.matchingService.persistPostMatches(updated.id, { source: 'publish' })
+                .catch(error => console.error('Error persisting post matches:', error));
         }
 
         return updated;
@@ -59,20 +59,23 @@ class OpportunityService {
      * Update opportunity status with validation (e.g. cancel only before execution)
      */
     async updateOpportunityStatus(opportunityId, newStatus) {
+        const existing = await this.dataService.getOpportunityById(opportunityId);
+        if (!existing) throw new Error('Opportunity not found');
+
         if (newStatus === 'cancelled') {
-            const opportunity = await this.dataService.getOpportunityById(opportunityId);
-            if (!opportunity) throw new Error('Opportunity not found');
-            if (!this.canCancelOpportunity(opportunity)) {
+            if (!this.canCancelOpportunity(existing)) {
                 throw new Error('Cancellation is not allowed once the opportunity is contracted or in execution. Termination must follow contract rules.');
             }
         }
+
+        if (newStatus === 'published' && (existing.status || '') !== 'published') {
+            await this._ensureNormalized(existing);
+        }
+
         const opportunity = await this.dataService.updateOpportunity(opportunityId, {
             status: newStatus
         });
         if (newStatus === 'published') {
-            await this._ensureNormalized(opportunity);
-            await this.matchingService.findMatchesForOpportunity(opportunityId)
-                .catch(error => console.error('Error running matching:', error));
             return this.dataService.getOpportunityById(opportunityId);
         }
         return opportunity;

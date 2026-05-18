@@ -2,7 +2,7 @@
   "domain": "matches",
   "version": "1.0",
   "dataset": "demo40",
-  "description": "Demo match records including new opportunities; supports dashboard and matching.",
+  "description": "DEPRECATED legacy person-to-opportunity records. Not merged when LEGACY_PERSON_OPPORTUNITY_ENABLED is false. Use demo-post-matches.json for UI and dashboard demos.",
   "data": [
     {
       "id": "demo-match-01",

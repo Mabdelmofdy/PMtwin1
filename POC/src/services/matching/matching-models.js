@@ -340,6 +340,47 @@
     }
 
     /**
+     * Drop duplicate closing node from cycle paths (e.g. [A,B,C,A] → [A,B,C]).
+     * @param {string[]} cycle
+     * @returns {string[]}
+     */
+    function normalizeCycleRing(cycle) {
+        if (!Array.isArray(cycle) || !cycle.length) return [];
+        const ring = cycle.filter(Boolean);
+        if (ring.length > 1 && ring[0] === ring[ring.length - 1]) {
+            return ring.slice(0, -1);
+        }
+        return ring;
+    }
+
+    /**
+     * One directed edge per step in the ring; each link includes needId + offerId from edgeDetails.
+     * @param {string[]} ring - normalized creator id ring
+     * @param {Object} edgeDetails - map "from->to" → { score, need, offer }
+     * @returns {Array|null} linkScores or null if any edge is incomplete
+     */
+    function buildCircularLinkScores(ring, edgeDetails) {
+        if (!ring || ring.length < 2) return null;
+        const linkScores = [];
+        for (let i = 0; i < ring.length; i++) {
+            const fromCreatorId = ring[i];
+            const toCreatorId = ring[(i + 1) % ring.length];
+            const detail = edgeDetails[fromCreatorId + '->' + toCreatorId];
+            if (!detail || !detail.need || !detail.offer || detail.need.id == null || detail.offer.id == null || detail.score == null) {
+                return null;
+            }
+            linkScores.push({
+                fromCreatorId,
+                toCreatorId,
+                needId: detail.need.id,
+                offerId: detail.offer.id,
+                score: detail.score
+            });
+        }
+        return linkScores;
+    }
+
+    /**
      * Model 4: Circular Exchange. Find cycles A→B→C→A (Offer_A satisfies Need_B, etc.).
      * Graph: nodes = creatorIds. Edge creatorI -> creatorJ if some offer from J satisfies some need from I.
      */
@@ -421,45 +462,48 @@
         const uniqueCycles = [];
         const seen = new Set();
         cycles.forEach(cycle => {
-            const key = cycle.slice().sort().join('|');
+            const ring = normalizeCycleRing(cycle);
+            if (ring.length < minCycleLength) return;
+
+            const key = ring.slice().sort().join('|');
             if (seen.has(key)) return;
             seen.add(key);
+
+            const linkScores = buildCircularLinkScores(ring, edgeDetails);
+            if (!linkScores || linkScores.length < minCycleLength) return;
+
             let cycleScore = 0;
             const suggestedPartners = [];
-            const linkScores = [];
             const edgeScoresForBalance = [];
-            for (let i = 0; i < cycle.length; i++) {
-                const from = cycle[i];
-                const to = cycle[(i + 1) % cycle.length];
-                const edgeKey = from + '->' + to;
+            for (const link of linkScores) {
+                cycleScore += link.score;
+                const edgeKey = link.fromCreatorId + '->' + link.toCreatorId;
                 const detail = edgeDetails[edgeKey];
-                if (detail) {
-                    cycleScore += detail.score;
-                    linkScores.push({ fromCreatorId: from, toCreatorId: to, score: detail.score });
-                    suggestedPartners.push({
-                        opportunityId: detail.offer?.id,
-                        creatorId: to
-                    });
-                    const needNorm = getNorm(detail.need);
-                    const offerNorm = getNorm(detail.offer);
-                    edgeScoresForBalance.push({
-                        from,
-                        to,
-                        offeredValue: offerNorm.totalOffered || offerNorm.riskAdjustedOffered || 0,
-                        expectedValue: needNorm.totalExpected || needNorm.riskAdjustedExpected || 1
-                    });
-                }
+                if (!detail) continue;
+                suggestedPartners.push({
+                    opportunityId: link.offerId,
+                    creatorId: link.toCreatorId
+                });
+                const needNorm = getNorm(detail.need);
+                const offerNorm = getNorm(detail.offer);
+                edgeScoresForBalance.push({
+                    from: link.fromCreatorId,
+                    to: link.toCreatorId,
+                    offeredValue: offerNorm.totalOffered || offerNorm.riskAdjustedOffered || 0,
+                    expectedValue: needNorm.totalExpected || needNorm.riskAdjustedExpected || 1
+                });
             }
-            cycleScore = cycle.length > 0 ? cycleScore / cycle.length : 0;
+            cycleScore = ring.length > 0 ? cycleScore / ring.length : 0;
             let chainBalance = null;
             if (vc && vc.circularValueBalance && edgeScoresForBalance.length > 0) {
-                chainBalance = vc.circularValueBalance(cycle, edgeScoresForBalance);
+                chainBalance = vc.circularValueBalance(ring, edgeScoresForBalance);
             }
             uniqueCycles.push({
                 matchScore: cycleScore,
-                cycle: cycle,
+                cycle: ring,
                 suggestedPartners,
                 linkScores,
+                links: linkScores,
                 valueAnalysis: chainBalance ? { chainBalance } : undefined
             });
         });
@@ -532,6 +576,8 @@
         findConsortiumCandidates,
         findReplacementCandidatesForRole,
         findCircularExchanges,
+        normalizeCycleRing,
+        buildCircularLinkScores,
         estimateValueSar,
         valueEquivalenceText
     };

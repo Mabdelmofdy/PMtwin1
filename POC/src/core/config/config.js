@@ -29,9 +29,12 @@ const CONFIG = {
         APPLICATION_DELIVERABLES: 'pmtwin_application_deliverables',
         APPLICATION_FILES: 'pmtwin_application_files',
         APPLICATION_PAYMENT_TERMS: 'pmtwin_application_payment_terms',
+        OPPORTUNITY_INVITATIONS: 'pmtwin_opportunity_invitations',
+        REPLACEMENT_REQUESTS: 'pmtwin_replacement_requests',
         MATCHES: 'pmtwin_matches',
         POST_MATCHES: 'pmtwin_post_matches',
         MATCHING_RUNS: 'pmtwin_matching_runs',
+        MATCHING_PREVIEW_RUNS: 'pmtwin_matching_preview_runs',
         AUDIT: 'pmtwin_audit',
         NOTIFICATIONS: 'pmtwin_notifications',
         CONNECTIONS: 'pmtwin_connections',
@@ -42,6 +45,7 @@ const CONFIG = {
         REVIEWS: 'pmtwin_reviews',
         SYSTEM_SETTINGS: 'pmtwin_system_settings',
         LOOKUPS_OVERRIDE: 'pmtwin_lookups_override',
+        SITE_CONTENT_OVERRIDE: 'pmtwin_site_content_override',
         SKILL_CANONICAL_OVERRIDE: 'pmtwin_skill_canonical_override',
         SUBSCRIPTION_PLANS: 'pmtwin_subscription_plans',
         SUBSCRIPTIONS: 'pmtwin_subscriptions',
@@ -205,6 +209,34 @@ const CONFIG = {
     REVIEW_RATING_MIN: 1,
     REVIEW_RATING_MAX: 5,
     
+    /** Default TTL for sent invitations when expiresAt is omitted on create. */
+    DEFAULT_INVITATION_EXPIRY_DAYS: 14,
+
+    // Opportunity invitation (Invite to Apply → application tracking)
+    INVITATION_STATUS: {
+        SENT: 'sent',
+        ACCEPTED: 'accepted',
+        DECLINED: 'declined',
+        CANCELLED: 'cancelled',
+        EXPIRED: 'expired'
+    },
+
+    INVITATION_KIND: {
+        APPLY: 'apply',
+        REPLACEMENT: 'replacement'
+    },
+
+    REPLACEMENT_REQUEST_STATUS: {
+        PENDING_OWNER_REVIEW: 'pending_owner_review',
+        PENDING_INVITATION: 'pending_invitation',
+        INVITATION_SENT: 'invitation_sent',
+        REPLACEMENT_ACCEPTED: 'replacement_accepted',
+        REJECTED: 'rejected',
+        CANCELLED: 'cancelled',
+        COMPLETED: 'completed',
+        SUPERSEDED: 'superseded'
+    },
+
     // Application Status
     APPLICATION_STATUS: {
         PENDING: 'pending',
@@ -248,11 +280,16 @@ const CONFIG = {
 
     // Matching
     MATCHING: {
+        /** Legacy person-to-opportunity matching (pmtwin_matches). Disabled; post_matches is canonical. When false, matches.json / demo-matches.json are not loaded into localStorage. */
+        LEGACY_PERSON_OPPORTUNITY_ENABLED: false,
         MIN_THRESHOLD: 0.70, // 70% minimum match score
         AUTO_NOTIFY_THRESHOLD: 0.80, // 80% for auto-notification
         // Post-to-post matching
         CANDIDATE_MAX: 200,
         POST_TO_POST_THRESHOLD: 0.50,
+        /** Max circular rows shown in Admin Matching lists (full count stays in summary). */
+        ADMIN_MATCHING_MAX_CIRCULAR_ROWS: 100,
+        DEFAULT_MATCH_EXPIRY_DAYS: 14,
         WEIGHTS: {
             SKILL_MATCH: 0.25,
             EXCHANGE_COMPATIBILITY: 0.20,
@@ -284,7 +321,14 @@ const CONFIG = {
         NEGOTIATION: {
             MAX_ROUNDS: 10,
             EXPIRE_DAYS: 14,
-            STATUS: { OPEN: 'open', COUNTER_OFFERED: 'counter_offered', AGREED: 'agreed', FAILED: 'failed', EXPIRED: 'expired' }
+            STATUS: {
+                OPEN: 'open',
+                COUNTER_OFFERED: 'counter_offered',
+                AGREED: 'agreed',
+                FAILED: 'failed',
+                EXPIRED: 'expired',
+                CANCELLED: 'cancelled'
+            }
         },
         // Opportunity–candidate matching: extra weight for value compatibility (budget + exchange mode)
         VALUE_COMPATIBILITY_MAX_POINTS: 15,
@@ -325,6 +369,7 @@ const CONFIG = {
         ADMIN_PEOPLE: '/admin/people',
         ADMIN_SUBSCRIPTIONS: '/admin/subscriptions',
         ADMIN_COLLABORATION_MODELS: '/admin/collaboration-models',
+        ADMIN_SITE_CONTENT: '/admin/site-content',
         ADMIN_SKILLS: '/admin/skills',
         ADMIN_DEALS: '/admin/deals',
         ADMIN_DEAL_DETAIL: '/admin/deals/:id',

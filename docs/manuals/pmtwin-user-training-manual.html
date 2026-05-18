@@ -108,7 +108,7 @@
     <h1>PMTwin</h1>
     <p class="subtitle">Your step-by-step guide<br /><strong>For professionals and companies</strong></p>
     <div class="meta muted">
-      Welcome · A4 print &amp; PDF · March 2026
+      Welcome · A4 print &amp; PDF · May 2026
     </div>
   </div>
 
@@ -450,8 +450,24 @@ flowchart LR
     <h4>What you see</h4>
     <ul>
       <li>A <strong>match score</strong> — how closely the suggestion fits (higher usually means a better fit).</li>
-      <li>The <strong>other party</strong> and short context.</li>
-      <li>The <strong>type</strong> of match (for example simple pairing, barter-style, group, or chain-style).</li>
+      <li>The <strong>other party</strong> (or parties) and short context.</li>
+      <li>The <strong>type</strong> of match and a <strong>status</strong> (for example waiting for responses, confirmed, or closed).</li>
+    </ul>
+    <h4>Types of suggestions (plain language)</h4>
+    <table class="avoid-break">
+      <thead><tr><th>Type on screen</th><th>What it means</th></tr></thead>
+      <tbody>
+        <tr><td><strong>One-way</strong></td><td>Your need lines up with someone’s offer (or the other way around).</td></tr>
+        <tr><td><strong>Two-way / barter</strong></td><td>Both sides exchange value in two directions (you give X, they give Y).</td></tr>
+        <tr><td><strong>Consortium / group</strong></td><td>Several roles or partners fit one lead opportunity.</td></tr>
+        <tr><td><strong>Circular / chain</strong></td><td>A ring of members where each step connects to the next.</td></tr>
+      </tbody>
+    </table>
+    <h4>Typical status flow</h4>
+    <ul>
+      <li><strong>Pending</strong> — Waiting for each participant to accept or decline.</li>
+      <li><strong>Confirmed</strong> — Everyone accepted; you can move to a deal.</li>
+      <li><strong>Declined</strong> — Someone said no; the suggestion is closed.</li>
     </ul>
     <h4>What affects the score (plain language)</h4>
     <p>Mainly: how well skills line up, whether budgets and timing make sense together, location and work mode, and trust signals when available. Small changes in your post can change the score.</p>
@@ -468,7 +484,7 @@ flowchart LR
       </ol>
     </div>
     <h4>What happens next</h4>
-    <p>You see the match detail screen where you can read the summary, compare scores, and choose your next action. If you accept and all participants accept, a deal is created automatically.</p>
+    <p>You see the match detail screen where you can read the summary, compare scores, and choose your next action. When you <strong>publish</strong> an opportunity, suggestions are generated automatically in the background—refresh <strong>Matches</strong> after a short wait if the list is still empty.</p>
     <h4>Tips</h4>
     <ul>
       <li>If you see few or no suggestions, widen skills slightly or adjust budget and dates, then publish again.</li>
@@ -505,7 +521,7 @@ flowchart LR
       </ol>
     </div>
     <h4>What happens next</h4>
-    <p>If you declined, the suggestion closes. If you accepted, the match stays open until all parties respond; when all accept, a deal is created.</p>
+    <p>If you declined, the suggestion closes. If you accepted, the match stays <strong>pending</strong> until every participant responds. When all accept, status becomes <strong>confirmed</strong> and a deal is created for the group.</p>
     <div class="note-box">
       <strong>Important:</strong>
       <p>A deal is only created when <strong>all participants</strong> accept the match.</p>
@@ -823,6 +839,9 @@ stateDiagram-v2
       <li><strong>Draft</strong> — Saved but not live for others yet.</li>
       <li><strong>Published</strong> — Your opportunity is visible so people can find it.</li>
       <li><strong>Match / suggestion</strong> — A recommended pairing based on your post and someone else’s.</li>
+      <li><strong>Pending</strong> — The suggestion is open; not everyone has accepted yet.</li>
+      <li><strong>Confirmed</strong> — Everyone accepted; you can open or continue in a deal.</li>
+      <li><strong>One-way / two-way / consortium / circular</strong> — The shape of the suggestion (simple pairing, barter, group, or chain).</li>
       <li><strong>Deal</strong> — Where you manage the work after people agree to collaborate.</li>
       <li><strong>Contract</strong> — The signed agreement that captures scope, payment, and timing.</li>
     </ul>

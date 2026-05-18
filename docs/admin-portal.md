@@ -101,11 +101,14 @@ All under `POC/pages/` and `POC/features/` with corresponding route registration
 - **Actions:** View (detail), Close (status → closed), Delete (deleteOpportunity). Edit (future).
 - **No automatic re-matching** on edit; if opportunity is republished, persistPostMatches runs again.
 
-### 3.5 Matching
+### 3.5 Matching (post-to-post only)
 
-- **Run report:** Admin Matching Center analyzes published needs/offers and displays in-memory results grouped by model (one_way, two_way, consortium, circular).
+User-facing matches are **`post_matches` only**. Legacy **`pmtwin_matches`** (person-to-opportunity) is deprecated and not shown in admin or portal UIs.
+
+- **Run report (preview only):** Admin Matching Center analyzes published needs/offers and displays **in-memory** results grouped by model (one_way, two_way, consortium, circular). Does **not** create `post_matches` or send notifications.
+- **Save matches:** Each published opportunity row can show a **Save** action (permission `admin.matching.persist`). This calls `matchingService.persistPostMatches(opportunityId)`, creates deduped **`post_matches`**, writes audit logs, and notifies participants.
 - **View existing:** Saved-outcome analytics show persisted `post_matches`, confirmations, and deals from matches.
-- **Save matches:** Each published opportunity row can show a **Save** action for admins with `admin.matching.persist`. This calls `matchingService.persistPostMatches(opportunityId)`, creates deduped `post_matches`, writes audit logs, and notifies participants.
+- **Publish:** When an opportunity becomes `published`, `persistPostMatches` runs automatically (same persistence path as Save; no legacy `pmtwin_matches`).
 - **Remaining limitation:** Save is per opportunity. There is no bulk “persist this whole report” or “persist exactly these previewed result rows” flow yet.
 
 ### 3.6 Deals and Contracts

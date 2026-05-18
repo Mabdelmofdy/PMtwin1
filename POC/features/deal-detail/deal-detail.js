@@ -1155,8 +1155,12 @@ async function renderStageContent(deal, currentUserId) {
             )
             .join('');
         const signBody = '<ul class="deal-participant-list">' + partList + '</ul>';
+        const myParty = parties.find(p => p.userId === currentUserId);
+        const mySigned = !!(myParty && myParty.signedAt);
         const signActions =
-            '<button type="button" class="btn btn-primary btn-sm" id="deal-btn-sign">Sign Agreement</button>' +
+            (mySigned
+                ? '<p class="text-muted mb-2">You have signed this agreement.</p>'
+                : '<button type="button" class="btn btn-primary btn-sm" id="deal-btn-sign">Sign Agreement</button>') +
             '<button type="button" class="btn btn-outline btn-sm" id="deal-btn-cancel-deal">Cancel Deal</button>';
         return (
             consortiumBlock +
@@ -1365,18 +1369,7 @@ async function handleDealStageContentClick(e) {
                             const excludeUserIds = (updatedDeal.participants || []).map(p => p.userId);
                             const { candidates } = await matchingService.findReplacementCandidatesForRole(leadNeedId, missingRole, { excludeUserIds, topN: 1 });
                             if (candidates && candidates[0]) {
-                                const postMatch = await dataService.createReplacementPostMatch(dealId, candidates[0], missingRole, userId);
-                                const notif = window.dataService || dataService;
-                                if (postMatch && notif && notif.createNotification) {
-                                    await notif.createNotification({
-                                        userId: candidates[0].userId,
-                                        type: 'match',
-                                        title: 'Consortium replacement invitation',
-                                        message: 'You have been invited to replace a participant in a consortium deal.',
-                                        link: '/matches/' + postMatch.id,
-                                        read: false
-                                    });
-                                }
+                                await dataService.createReplacementPostMatch(dealId, candidates[0], missingRole, userId);
                             }
                         }
                     }
@@ -1565,29 +1558,26 @@ async function handleDealStageContentClick(e) {
                     }
                     return;
                 }
-                const participants = (deal.participants || []).map(p => (p.userId === userId ? { ...p, signedAt: new Date().toISOString() } : p));
-                await dataService.updateDeal(dealId, { participants });
                 const contract = await dataService.getContractById(contractId);
                 if (!contract) return;
-                const parties = dataService.getContractParties(contract).map(p => (p.userId === userId ? { ...p, signedAt: new Date().toISOString() } : p));
-                await dataService.updateContract(contractId, { parties });
-                if (dataService.createAuditLog && userId) {
-                    await dataService.createAuditLog({ userId, action: 'contract_signed', entityType: 'contract', entityId: contractId, details: { dealId } }).catch(() => {});
+                const beforeParties = dataService.getContractParties(contract);
+                const alreadySigned = beforeParties.some(p => p.userId === userId && p.signedAt);
+                if (alreadySigned) {
+                    await finalizeDealDetailRender(dealId, userId);
+                    return;
                 }
-                const others = participants.filter(p => p.userId !== userId && (p.status || 'active') !== 'dropped');
-                for (const o of others) {
-                    if (!o.userId) continue;
-                    await dataService
-                        .createNotification({
-                            userId: o.userId,
-                            type: 'contract_signed_by_party',
-                            title: 'A party signed the contract',
-                            message: 'Another participant signed the Contract Agreement.',
-                            link: '/deals/' + dealId,
-                            read: false
-                        })
-                        .catch(() => {});
+                if (typeof dataService.signContractParty === 'function') {
+                    await dataService.signContractParty(contractId, userId);
+                } else {
+                    const parties = beforeParties.map(p =>
+                        (p.userId === userId ? { ...p, signedAt: new Date().toISOString() } : p)
+                    );
+                    await dataService.updateContract(contractId, { parties });
                 }
+                const dealParticipants = (deal.participants || []).map(p =>
+                    (p.userId === userId ? { ...p, signedAt: new Date().toISOString() } : p)
+                );
+                await dataService.updateDeal(dealId, { participants: dealParticipants });
                 await finalizeDealDetailRender(dealId, userId);
             } catch (err) {
                 console.error(err);

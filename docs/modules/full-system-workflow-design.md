@@ -107,7 +107,7 @@ flowchart TB
 ### 2.1 Entry Points
 
 - **Post-to-post:** `matchingService.findMatchesForPost(opportunityId, options)` — [POC/src/services/matching/matching-service.js](../../POC/src/services/matching/matching-service.js).
-- **Person-to-opportunity:** `matchingService.findMatchesForOpportunity(opportunityId)` and `findOpportunitiesForCandidate(candidateId)` for candidate discovery.
+- **Legacy person-to-opportunity (deprecated / removed from product):** `pmtwin_matches` is not user-facing. `findMatchesForOpportunity` / `findOpportunitiesForCandidate` are no-ops when `LEGACY_PERSON_OPPORTUNITY_ENABLED` is false. Publish and UI use **post-to-post** → `post_matches` only.
 
 ### 2.2 Router
 

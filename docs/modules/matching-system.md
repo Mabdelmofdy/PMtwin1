@@ -2,7 +2,7 @@
 
 ### What this page is
 
-Explains **both** matching layers, every **match type**, scoring, and **one example per type** with inputs and expected behavior.
+Explains the **post-to-post matching system** (the only operational matching model), every **match type**, scoring, and **one example per type** with inputs and expected behavior.
 
 ### Why it matters
 
@@ -10,7 +10,7 @@ It bridges product language and the matching service entry points.
 
 ### What you can do here
 
-- Compare post-to-post vs legacy layers in the overview table.
+- See how Need/Offer posts are matched into `post_matches`.
 - Walk examples before reading source.
 
 ### Step-by-step actions
@@ -30,37 +30,38 @@ Use [matching-engine.md](../matching-engine.md) for function-level detail and [m
 
 ## Overview
 
-The system has two matching layers:
+**Official matching system:** Post-to-post matching only. Published Need and Offer **opportunities** are scored and persisted as **`post_matches`** (`CONFIG.STORAGE_KEYS.POST_MATCHES`). Users see these on `/matches`, `/pipeline` (Matches tab), and the dashboard.
 
-| Layer | Purpose | Entry point | Implementation |
-|-------|---------|-------------|----------------|
-| **Post-to-post** | Match Need posts to Offer posts (exchange models) | `matchingService.findMatchesForPost(opportunityId, options)` | [matching-models.js](../../POC/src/services/matching/matching-models.js) |
-| **Person-to-opportunity** | Score candidates for an opportunity (or opportunities for a candidate) | `matchingService.findMatchesForOpportunity(opportunityId)` / `findOpportunitiesForCandidate(candidateId)` | [matching-service.js](../../POC/src/services/matching/matching-service.js) |
+| Concept | Storage key | Role |
+|---------|-------------|------|
+| **`post_matches`** | `pmtwin_post_matches` | **Canonical** user-facing match entity (one-way, barter, consortium, circular). |
+| **`pmtwin_matches`** | `pmtwin_matches` | **Deprecated / not user-facing.** Legacy person-to-opportunity records; not loaded from seed when `LEGACY_PERSON_OPPORTUNITY_ENABLED` is false. UI and publish flows do not read or write this store. |
+
+| Entry point | Purpose | Implementation |
+|-------------|---------|----------------|
+| `matchingService.findMatchesForPost(opportunityId, options)` | Score published posts by model | [matching-models.js](../../POC/src/services/matching/matching-models.js) |
+| `matchingService.persistPostMatches(opportunityId, options)` | Create deduped `post_matches`, notify, audit | [matching-service.js](../../POC/src/services/matching/matching-service.js) |
 
 ```mermaid
 flowchart LR
-    subgraph postToPost [Post-to-Post]
-        findPost[findMatchesForPost]
-        findPost --> oneWay[One-Way]
-        findPost --> twoWay[Two-Way Barter]
-        findPost --> consortium[Consortium]
-        findPost --> circular[Circular]
-    end
-    subgraph personToOpp [Person-to-Opportunity]
-        findOpp[findMatchesForOpportunity]
-        findCand[findOpportunitiesForCandidate]
-        findOpp --> score[calculateMatchScore]
-        findCand --> score
-    end
+    findPost[findMatchesForPost]
+    findPost --> oneWay[One-Way]
+    findPost --> twoWay[Two-Way Barter]
+    findPost --> consortium[Consortium]
+    findPost --> circular[Circular]
+    persist[persistPostMatches]
+    oneWay --> persist
+    twoWay --> persist
+    consortium --> persist
+    circular --> persist
+    persist --> store[(post_matches)]
 ```
 
 ## Current implementation flow
 
 1. A user creates or edits an opportunity. The opportunity stores its intent (`request`, `offer`, or `hybrid`), collaboration model, payment/value exchange data, location/timeline, and matching attributes.
 2. When the opportunity status becomes `published`, `data-service.updateOpportunity()` triggers matching in the background.
-3. Two matching paths can run:
-   - **Post-to-post matching** creates user-facing `post_matches`. This is the primary matching flow for Need/Offer exchange.
-   - **Legacy person-to-opportunity matching** creates `matches`. This is still used by parts of the pipeline and opportunity-match UI.
+3. **Post-to-post matching** is the only active flow: publish and admin Save call `persistPostMatches()`, which creates user-facing `post_matches`. Legacy person-to-opportunity matching is **removed from UI and publish** (`LEGACY_PERSON_OPPORTUNITY_ENABLED = false`; `findMatchesForOpportunity` is not called on publish).
 4. `matchingService.persistPostMatches(opportunityId)` calls `findMatchesForPost()` for the published post, converts returned results into `post_match` records, deduplicates them, creates a matching-run record, writes audit logs, and notifies participants.
 5. `persistPostMatches()` also runs a circular scan and persists only cycles that include the published opportunity creator.
 6. Users see post matches on `/matches`, open `/matches/:id`, then accept or decline. If any participant declines, the match is declined. If all participants accept, the match becomes confirmed and can become a draft deal.
@@ -69,7 +70,6 @@ flowchart LR
 ```mermaid
 flowchart TD
   Draft[Create or edit opportunity] --> Publish[Status = published]
-  Publish --> Legacy[Legacy candidate matching: matches]
   Publish --> Persist[persistPostMatches]
   Persist --> Route[findMatchesForPost]
   Route --> P2P[One-way / barter / consortium]
@@ -265,65 +265,19 @@ Implemented in [post-to-post-scoring.js](../../POC/src/services/matching/post-to
 
 ---
 
-## Person-to-opportunity matching (candidate scoring)
+## Deprecated / removed: Legacy person-to-opportunity matching
 
-**Entry points:**
+This path is **not** part of the current operational model. It matched an opportunity to a **person** (`candidateId`) and stored rows in **`pmtwin_matches`** (`matches.json` / `demo-matches.json` seed).
 
-- `matchingService.findMatchesForOpportunity(opportunityId)` — find candidates for an opportunity.
-- `matchingService.findOpportunitiesForCandidate(candidateId, options)` — find opportunities for a candidate (e.g. dashboard).
+| Item | Status |
+|------|--------|
+| `LEGACY_PERSON_OPPORTUNITY_ENABLED` | `false` in [config.js](../../POC/src/core/config/config.js) |
+| Publish flow | Does **not** call `findMatchesForOpportunity` or `createMatch` |
+| UI (dashboard, pipeline, `/matches`) | Uses **`getPostMatches*`** only; does not read `pmtwin_matches` |
+| Seed | `matches.json` / `demo-matches.json` are not merged into localStorage when legacy is off; demo data uses **`demo-post-matches.json`** |
+| API surface | `findMatchesForOpportunity`, `findOpportunitiesForCandidate`, `getMatches`, `createMatch` remain as **deprecated no-ops** for migration/tests only |
 
-**Logic:** [matching-service.js](../../POC/src/services/matching/matching-service.js): `calculateMatchScore(opportunity, candidate)` plus model-specific methods.
-
-### Model types (from config)
-
-| Model | Config key | Sub-models (examples) |
-|-------|------------|------------------------|
-| Project-based | `project_based` | task_based, consortium, project_jv, spv |
-| Strategic Partnership | `strategic_partnership` | strategic_jv, strategic_alliance, mentorship |
-| Resource Pooling | `resource_pooling` | bulk_purchasing, equipment_sharing, resource_sharing |
-| Hiring | `hiring` | professional_hiring, consultant_hiring |
-| Competition | `competition` | competition_rfp |
-
-### Scoring components
-
-- **Scope (generic):** skills (up to 50), sectors (15), certifications (15), payment compatibility (10). Max 90 from scope when all present.
-- **Model-specific block:** up to 100 points (e.g. task_based: skills, experience, budget, location, availability; consortium/project_jv: roles, financial capacity, geography; spv: financial capacity, sector, experience; strategic: alignment, contributions, capital; resource pooling: resource type, quantity, timeline; hiring: qualifications, experience, skills; competition: eligibility, experience).
-- **Past performance:** up to 20 points (acceptance rate on applications for that model type).
-- **Normalization:** total / max possible → score in 0–1.
-- **Thresholds:** `MIN_THRESHOLD` **0.70** (candidate appears in results), `AUTO_NOTIFY_THRESHOLD` **0.80** (auto-notify candidate).
-
-### Example (person-to-opportunity match)
-
-**Input:** Opportunity `opp-002` (e.g. structural engineering project); candidate `user-pro-001` (professional with Structural Design, SAP2000, ETABS, 15 years experience, PMP and PE, Riyadh).
-
-**Output:** A match record as stored in [matches.json](../../POC/data/matches.json):
-
-```json
-{
-  "id": "match-001",
-  "opportunityId": "opp-002",
-  "candidateId": "user-pro-001",
-  "matchScore": 0.92,
-  "criteria": {
-    "modelType": "project_based",
-    "subModelType": "task_based",
-    "skillMatch": { "matched": ["Structural Design", "SAP2000", "ETABS"], "score": 0.95 },
-    "sectorMatch": true,
-    "paymentCompatible": true,
-    "matchedAt": "2026-01-12T10:00:00.000Z"
-  },
-  "matchReasons": [
-    { "factor": "Skills Match", "score": 0.95, "details": "Strong match on Structural Design, SAP2000, ETABS" },
-    { "factor": "Experience Level", "score": 0.9, "details": "15 years experience exceeds 10 year requirement" },
-    { "factor": "Location", "score": 0.9, "details": "Based in Riyadh, on-site available" },
-    { "factor": "Certifications", "score": 0.95, "details": "PMP and PE certifications match requirements" }
-  ],
-  "notified": true,
-  "createdAt": "2026-01-12T10:00:00.000Z"
-}
-```
-
-**Reference:** [matches.json](../../POC/data/matches.json) (e.g. match-001).
+For historical scoring detail (project_based, hiring, etc.), see git history or archived notes; do not build new features on this path.
 
 ---
 
@@ -334,11 +288,11 @@ Implemented in [post-to-post-scoring.js](../../POC/src/services/matching/post-to
 - **Required for post-to-post:** `id`, `title`, `creatorId`, `intent` (`'request'` | `'offer'`), `status` (`'published'` for candidates), `scope` (`requiredSkills` / `offeredSkills`, `sectors`), `exchangeData` (e.g. `budgetRange`, `cashAmount`, or barter fields), `attributes` (e.g. `memberRoles`, `partnerRoles`, `startDate`, `applicationDeadline`, `locationRequirement`), `exchangeMode`, `subModelType`.
 - **Optional:** `normalized` (preprocessor output), `location`, `modelType`, `paymentModes`.
 
-### Match (person-to-opportunity)
+### Post_match (canonical)
 
-- `id`, `opportunityId`, `candidateId` (or `userId`), `matchScore` (0–1), `criteria` (object with modelType, subModelType, skillMatch, sectorMatch, paymentCompatible, etc.), `notified`, `createdAt`.
+- `id`, `matchType` (`one_way` \| `two_way` \| `consortium` \| `circular`), `status`, `matchScore`, `participants[]`, `payload` (model-specific), `expiresAt`, `createdAt`, `updatedAt`.
 
-### Post-to-post result
+### Post-to-post result (engine output before persist)
 
 - `model`: `'one_way'` | `'two_way'` | `'consortium'` | `'circular'`.
 - `matches`: array of objects with `matchScore`, `breakdown`, `suggestedPartners`; type-specific fields (`matchedOpportunity`, `matchedNeed`/`matchedOffer`, `valueEquivalence`, `cycle`, `roles`) as described above.
@@ -349,22 +303,17 @@ Implemented in [post-to-post-scoring.js](../../POC/src/services/matching/post-to
 
 | Gap | Impact | How to fix |
 |-----|--------|------------|
-| **Two match systems still coexist (`matches` and `post_matches`).** | Users and reports can see two kinds of "match" with different fields and lifecycle rules. | Make `post_matches` the canonical user-facing match entity. Keep `matches` only as "candidate recommendations" or migrate it behind an adapter. Update pipeline/reports to label the two concepts clearly. |
 | **`findMatchesForPost()` uses route precedence, not the full `detectMatchingModel()` list.** | A post that qualifies for more than one model can have only the first matching route persisted, plus circular. Example: consortium can win before barter. | In `persistPostMatches()`, call `detectMatchingModel(opportunity)` and run each returned model explicitly, then run circular. Keep `options.model` for admin/debug single-model runs. |
-| **Two-way payload can miss the current creator's paired need/offer id.** | Dedupe and deal payloads are weaker because `sideA.needId` or `sideA.offerId` can be `null`. | In `persistPostMatches()` hydrate the creator's full need+offer pair before building `sideA`, the same way `findBarterMatches()` does. |
-| **Circular results do not persist `needId` and `offerId` in `linkScores`.** | Circular match detail cannot reliably show what each participant gives/receives, and circular deal creation can fail because no opportunity ids are available. | In `matching-models.findCircularExchanges()`, include `needId: detail.need.id` and `offerId: detail.offer.id` in each link score. Add a circular match-detail/deal test. |
-| **Match detail attempts deal creation after an accept even when not all participants accepted yet.** | The helper correctly rejects non-confirmed matches, so the first accept can log an error instead of showing a clean "waiting for others" state. | Move `dataService.createDealFromMatch(updated)` inside the `updated.status === CONFIRMED` branch in `match-detail.js`. Show a pending participant state until confirmation. |
-| **Admin report and persistence are separate.** | "Run report" previews results; saving is per opportunity only. There is no bulk save or "save exactly these previewed results" action. | Add a selected-results save flow: store preview run metadata, let admin select rows, then persist selected result ids/model with an explicit run id. |
+| **Admin report and persistence are separate.** | **Run report** is preview-only (in-memory). **Save** on a published opportunity row calls `persistPostMatches` and writes `post_matches`. There is no bulk save of selected preview rows. | Add a selected-results save flow: store preview run metadata, let admin select rows, then persist with an explicit run id. |
 | **Expiry is lazy and often unset.** | `getPostMatches()` can expire pending matches when read, but most generated post matches have `expiresAt: null`, and there is no scheduled expiry job. | Set a default expiry when creating post matches, add an app-load/server scheduled sweep, and filter expired records in all user/admin lists. |
 | **Matching run history is minimal.** | `matching_runs` records only opportunity, model, and timestamp, so analytics cannot explain why a run changed. | Store threshold, weights profile, candidate counts, result counts, created/skipped duplicate counts, top scores, and actor/source (`publish`, `admin_save`, `scheduled`). |
 | **Scoring profile is split between product spec and implementation.** | Docs/product may expect 40/30/15/10/5 scoring, while live config uses 25/20/20/10/10/10/5 with exchange/value factors. | Choose one default profile or expose named profiles in Admin Settings. Persist the profile name on `matching_runs` and show it in Admin Matching. |
 | **Matching depends on normalized opportunity fields.** | Missing `normalized`, skills, roles, budget, location, or value fields reduce or block matching. | Normalize on create/update/publish, add a "matching readiness" validation before publish, and keep the opportunity audit report in CI/demo QA. |
-| **Legacy person-to-opportunity matching scores active users only.** | Companies can be creators in post-to-post matching, but the legacy candidate matcher can miss company candidates. | Either include active companies in `findMatchesForOpportunity()` or retire the legacy path from user-facing recommendations. |
 | **No production backend/job runner yet.** | Local storage is fine for the POC but cannot enforce uniqueness, scheduled expiry, concurrent matching runs, or cross-device results. | Move match creation to a backend service with database constraints, transactional persistence, scheduled jobs, and server-side validation. |
+
+**Resolved (no longer gaps):** Dual match systems (`pmtwin_matches` vs `post_matches`) — `post_matches` is canonical; legacy matching is deprecated and removed from UI/publish/seed. Two-way `sideA`/`sideB` hydration and circular `needId`/`offerId` on links are enforced at persist. Deal creation from match detail requires **confirmed** status (Start Deal button).
 
 ### Suggested fix order
 
-1. Fix correctness bugs first: circular link ids, confirmed-only deal creation, and two-way side hydration.
-2. Then align model execution: use `detectMatchingModel()` for publish persistence and keep admin single-model preview explicit.
-3. Then clean the product surface: decide the canonical match entity, clarify legacy recommendations, and update pipeline/report labels.
-4. Then harden operations: default expiry, richer `matching_runs`, admin selected-results save, and backend uniqueness/jobs.
+1. Align model execution: use `detectMatchingModel()` for publish persistence and keep admin single-model preview explicit.
+2. Harden operations: default expiry on all new post_matches, richer `matching_runs`, admin selected-results save, and backend uniqueness/jobs.

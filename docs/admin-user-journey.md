@@ -174,13 +174,15 @@ Implementation:
 - **Route:** `/admin/matching`
 - **Feature script:** `admin-matching.js`
 
-## 7.1 Two Matching Paths (Critical Difference)
+## 7.1 Matching persistence paths (post-to-post only)
+
+All user-facing matches are **`post_matches`**. Legacy **`pmtwin_matches`** is deprecated and not used in admin workflows.
 
 | Path | Trigger | Persist `post_matches` | Notification | Status |
 |---|---|---|---|---|
 | Publish-driven matching | Opportunity publish | ✅ | ✅ | ✅ Implemented |
-| Admin run report | Manual run from admin page | ❌ | ❌ | ⚠️ Preview only |
-| Admin Save on opportunity | Manual Save from admin matching row | ✅ | ✅ | ✅ Per opportunity |
+| Admin **Run report** | Manual run from admin page | ❌ | ❌ | ✅ Preview only |
+| Admin **Save** on opportunity | Manual Save from admin matching row | ✅ | ✅ | ✅ Per opportunity |
 
 ## 7.2 Step Flow
 

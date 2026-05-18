@@ -1,5 +1,47 @@
 import { enforceTransition } from "/core/workflow/workflow-engine.js";
-import { createDealFromMatch as buildDealPayloadFromMatch } from "../../utils/deals.js";
+import {
+    createDealFromMatch as buildDealPayloadFromMatch,
+    buildDealPayloadFromApplication
+} from "../../utils/deals.js";
+import {
+    canCreateDealFromApplication,
+    canCreateDealFromNegotiation
+} from "../../services/matching/deal-lifecycle.js";
+import {
+    pickActiveInvitation,
+    isActiveInvitation
+} from "../../services/matching/opportunity-invitation-tracking.js";
+import {
+    isActiveNegotiation,
+    isTerminalNegotiation,
+    buildFinalAgreedSnapshot,
+    getNegotiationRequiredParticipantIds,
+    hasParticipantAgreed,
+    allRequiredParticipantsAgreed
+} from "../../services/matching/negotiation-lifecycle.js";
+import {
+    isTerminalInvitationStatus,
+    shouldExpireInvitation,
+    computeDefaultInvitationExpiresAt
+} from "../../services/matching/opportunity-invitation-lifecycle.js";
+import { normalizeAuditAction } from "../../services/matching/lifecycle-constants.js";
+import {
+    isReplacementEligibleMatchType,
+    buildReplacementSlotKey,
+    getReplacementRequestStatusLabel,
+    invitationAcceptsActor
+} from "../../services/matching/replacement-lifecycle.js";
+import {
+    PERMISSION_ERRORS,
+    assertMatchParticipant,
+    assertMatchOwner,
+    assertReplacementOwnerOrAdmin,
+    assertNotReadOnlyAdmin,
+    assertAdminMatchingPersist,
+    buildLifecycleAuditDetails,
+    hasRecentDuplicateNotification,
+    notificationDedupeKey
+} from "../../services/matching/matching-lifecycle-permissions.js";
 
 /**
  * Data Service
@@ -12,7 +54,7 @@ class DataService {
         this.storage = window.storageService || storageService;
         this.initialized = false;
         this.SEED_DATA_VERSION_KEY = 'pmtwin_seed_version';
-        this.CURRENT_SEED_VERSION = '1.21.0'; // Deal vs Contract lifecycle: contract legal-only, milestones on deal, migration
+        this.CURRENT_SEED_VERSION = '1.22.0'; // Legacy pmtwin_matches seed disabled; demo-post-matches is canonical
     }
     
     /**
@@ -48,8 +90,11 @@ class DataService {
                 this.clearAllData();
             }
             
-            // Load from JSON files
-            const domains = ['users', 'companies', 'opportunities', 'applications', 'matches', 'notifications', 'connections', 'messages', 'audit', 'sessions', 'contracts', 'reviews'];
+            // Load from JSON files (legacy matches.json skipped when person-to-opportunity matching is off)
+            const domains = ['users', 'companies', 'opportunities', 'applications', 'notifications', 'connections', 'messages', 'audit', 'sessions', 'contracts', 'reviews'];
+            if (this._isLegacyPersonOpportunityEnabled()) {
+                domains.splice(4, 0, 'matches');
+            }
             
             for (const domain of domains) {
                 try {
@@ -186,14 +231,18 @@ class DataService {
                     console.log(`Merged ${json.data.length} demo contracts`);
                 }
             }
-            const demoMatchesRes = await fetch(`${base}demo-matches.json`);
-            if (demoMatchesRes.ok) {
-                const json = await demoMatchesRes.json();
-                if (json.data && json.data.length) {
-                    const matches = this.storage.get(CONFIG.STORAGE_KEYS.MATCHES) || [];
-                    this.storage.set(CONFIG.STORAGE_KEYS.MATCHES, mergeById(matches, json.data));
-                    console.log(`Merged ${json.data.length} demo matches`);
+            if (this._isLegacyPersonOpportunityEnabled()) {
+                const demoMatchesRes = await fetch(`${base}demo-matches.json`);
+                if (demoMatchesRes.ok) {
+                    const json = await demoMatchesRes.json();
+                    if (json.data && json.data.length) {
+                        const matches = this.storage.get(CONFIG.STORAGE_KEYS.MATCHES) || [];
+                        this.storage.set(CONFIG.STORAGE_KEYS.MATCHES, mergeById(matches, json.data));
+                        console.log(`Merged ${json.data.length} demo matches`);
+                    }
                 }
+            } else {
+                this.storage.set(CONFIG.STORAGE_KEYS.MATCHES, []);
             }
             const demoNotificationsRes = await fetch(`${base}demo-notifications.json`);
             if (demoNotificationsRes.ok) {
@@ -539,6 +588,8 @@ class DataService {
             'application_deliverables': CONFIG.STORAGE_KEYS.APPLICATION_DELIVERABLES,
             'application_files': CONFIG.STORAGE_KEYS.APPLICATION_FILES,
             'application_payment_terms': CONFIG.STORAGE_KEYS.APPLICATION_PAYMENT_TERMS,
+            'opportunity_invitations': CONFIG.STORAGE_KEYS.OPPORTUNITY_INVITATIONS,
+            'replacement_requests': CONFIG.STORAGE_KEYS.REPLACEMENT_REQUESTS,
             'matches': CONFIG.STORAGE_KEYS.MATCHES,
             'post_matches': CONFIG.STORAGE_KEYS.POST_MATCHES,
             'matching_runs': CONFIG.STORAGE_KEYS.MATCHING_RUNS,
@@ -820,7 +871,9 @@ class DataService {
         const index = opportunities.findIndex(o => o.id === id);
         if (index === -1) return null;
 
-        if (updates && updates.status != null && updates.status !== opportunities[index].status) {
+        const previousStatus = opportunities[index].status;
+
+        if (updates && updates.status != null && updates.status !== previousStatus) {
             enforceTransition('opportunity', opportunities[index], updates.status);
         }
         
@@ -832,14 +885,12 @@ class DataService {
         this.storage.set(CONFIG.STORAGE_KEYS.OPPORTUNITIES, opportunities);
         const updated = opportunities[index];
 
-        // When publishing, trigger matching so match records are generated (any code path that sets status to published)
-        if (updates.status === 'published') {
+        // Publish → persistPostMatches → findMatchesForPost → createPostMatch → notify (no legacy pmtwin_matches)
+        const isNewlyPublished = updates.status === 'published' && previousStatus !== 'published';
+        if (isNewlyPublished) {
             const ms = window.matchingService || (typeof matchingService !== 'undefined' ? matchingService : null);
-            if (ms && typeof ms.findMatchesForOpportunity === 'function') {
-                ms.findMatchesForOpportunity(id).catch(err => console.warn('Matching after publish:', err));
-            }
             if (ms && typeof ms.persistPostMatches === 'function') {
-                ms.persistPostMatches(id).catch(err => console.warn('Post-match persistence after publish:', err));
+                ms.persistPostMatches(id, { source: 'publish' }).catch(err => console.warn('Post-match persistence after publish:', err));
             }
         }
         return updated;
@@ -941,25 +992,1279 @@ class DataService {
         return applications.find(a => a.id === id) || null;
     }
     
-    async createApplication(applicationData) {
+    async createApplication(applicationData, options = {}) {
         const applications = await this.getApplications();
+        const applicantId = applicationData.applicantId;
+        let companyId = options.companyId || applicationData.applicantCompanyId || null;
+        if (!companyId && applicantId) {
+            const applicantUser = await this.getUserById(applicantId);
+            if (applicantUser?.companyId) companyId = applicantUser.companyId;
+        }
+
+        const invitation = applicationData.opportunityId
+            ? await this.findActiveInvitationForApplicant({
+                opportunityId: applicationData.opportunityId,
+                userId: applicantId,
+                companyId,
+                matchId: options.matchId || applicationData.matchId,
+                isReplacementApplication: !!options.isReplacementApplication
+            })
+            : null;
+
+        const payload = { ...applicationData };
+        if (invitation) {
+            payload.invitationId = invitation.id;
+            payload.matchId = invitation.matchId || payload.matchId;
+            if (invitation.projectId && !payload.projectId) payload.projectId = invitation.projectId;
+            if (invitation.invitationKind && !payload.invitationKind) payload.invitationKind = invitation.invitationKind;
+            if (invitation.replacementRequestId && !payload.replacementRequestId) {
+                payload.replacementRequestId = invitation.replacementRequestId;
+            }
+        }
+
         const newApplication = {
             id: this.generateId(),
-            ...applicationData,
+            ...payload,
             status: CONFIG.APPLICATION_STATUS.PENDING,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
         applications.push(newApplication);
         this.storage.set(CONFIG.STORAGE_KEYS.APPLICATIONS, applications);
+
+        if (invitation) {
+            await this.linkApplicationToInvitation(invitation, newApplication, options);
+        }
+
         return newApplication;
     }
-    
+
+    // Opportunity invitation operations (Phase 4)
+    async sweepExpiredOpportunityInvitations(now) {
+        return this.expireOpportunityInvitations(now);
+    }
+
+    async getOpportunityInvitations() {
+        await this.sweepExpiredOpportunityInvitations();
+        return this.storage.get(CONFIG.STORAGE_KEYS.OPPORTUNITY_INVITATIONS) || [];
+    }
+
+    async getOpportunityInvitationById(id) {
+        const list = await this.getOpportunityInvitations();
+        return list.find(i => i.id === id) || null;
+    }
+
+    async getInvitationsByMatchId(matchId) {
+        const list = await this.getOpportunityInvitations();
+        return list.filter(i => i.matchId === matchId);
+    }
+
+    async getInvitationsByOpportunityId(opportunityId) {
+        const list = await this.getOpportunityInvitations();
+        return list.filter(i => i.opportunityId === opportunityId);
+    }
+
+    async findActiveInvitationForApplicant(options = {}) {
+        const list = await this.getOpportunityInvitations();
+        return pickActiveInvitation(list, options);
+    }
+
+    async createOpportunityInvitation(invitationData) {
+        await this.sweepExpiredOpportunityInvitations();
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.OPPORTUNITY_INVITATIONS) || [];
+        const kind = invitationData.invitationKind
+            || (invitationData.isReplacement ? CONFIG.INVITATION_KIND.REPLACEMENT : CONFIG.INVITATION_KIND.APPLY);
+        const createdAt = invitationData.createdAt || new Date().toISOString();
+        const terminalOnCreate = isTerminalInvitationStatus(invitationData.status);
+        const expiresAt = invitationData.expiresAt != null
+            ? invitationData.expiresAt
+            : (terminalOnCreate
+                ? null
+                : computeDefaultInvitationExpiresAt(
+                    createdAt,
+                    CONFIG.DEFAULT_INVITATION_EXPIRY_DAYS
+                ));
+        const newInvitation = {
+            id: this.generateId(),
+            opportunityId: invitationData.opportunityId,
+            matchId: invitationData.matchId || null,
+            projectId: invitationData.projectId || null,
+            invitedUserId: invitationData.invitedUserId || null,
+            invitedCompanyId: invitationData.invitedCompanyId || null,
+            invitedByUserId: invitationData.invitedByUserId || null,
+            invitationKind: kind,
+            replacementRequestId: invitationData.replacementRequestId || null,
+            roleToFill: invitationData.roleToFill || null,
+            blockedParticipantId: invitationData.blockedParticipantId || null,
+            blockedOpportunityId: invitationData.blockedOpportunityId || null,
+            status: invitationData.status || CONFIG.INVITATION_STATUS.SENT,
+            applicationId: invitationData.applicationId || null,
+            message: invitationData.message || null,
+            respondedAt: invitationData.respondedAt || null,
+            expiresAt,
+            createdAt,
+            updatedAt: new Date().toISOString()
+        };
+        list.push(newInvitation);
+        this.storage.set(CONFIG.STORAGE_KEYS.OPPORTUNITY_INVITATIONS, list);
+        return newInvitation;
+    }
+
+    async updateOpportunityInvitation(id, updates) {
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.OPPORTUNITY_INVITATIONS) || [];
+        const index = list.findIndex(i => i.id === id);
+        if (index === -1) return null;
+        list[index] = {
+            ...list[index],
+            ...updates,
+            updatedAt: new Date().toISOString()
+        };
+        this.storage.set(CONFIG.STORAGE_KEYS.OPPORTUNITY_INVITATIONS, list);
+        return list[index];
+    }
+
+    /**
+     * Resolve invite target from a unified match (post_match or legacy).
+     */
+    async resolveMatchInviteContext(matchRecord, senderUserId) {
+        if (!matchRecord || !senderUserId) return null;
+
+        const isLegacy = !matchRecord.matchType && !matchRecord.participants?.length && matchRecord.opportunityId;
+        if (isLegacy) {
+            const opp = await this.getOpportunityById(matchRecord.opportunityId);
+            if (!opp || opp.creatorId !== senderUserId) return null;
+            const invitedUserId = matchRecord.candidateId || matchRecord.userId;
+            if (!invitedUserId || invitedUserId === senderUserId) return null;
+            return {
+                opportunityId: matchRecord.opportunityId,
+                invitedUserId,
+                invitedCompanyId: null,
+                matchId: matchRecord.id,
+                isLegacy: true
+            };
+        }
+
+        const participants = matchRecord.participants || [];
+        const payload = matchRecord.payload || {};
+        let sourceOpportunityId = payload.needOpportunityId || payload.leadNeedId || null;
+        if (!sourceOpportunityId && matchRecord.matchType === 'consortium') {
+            sourceOpportunityId = payload.leadNeedId;
+        }
+        if (!sourceOpportunityId && matchRecord.matchType === 'two_way') {
+            const sideA = payload.sideA || {};
+            const sideB = payload.sideB || {};
+            if (sideA.userId === senderUserId) sourceOpportunityId = sideA.needId;
+            else if (sideB.userId === senderUserId) sourceOpportunityId = sideB.needId;
+        }
+        if (!sourceOpportunityId) {
+            const needOwner = participants.find(p =>
+                p.role === 'need_owner' || p.role === 'consortium_lead'
+            );
+            if (needOwner?.userId === senderUserId) {
+                sourceOpportunityId = payload.needOpportunityId || payload.leadNeedId;
+            }
+        }
+
+        const sourceOpp = sourceOpportunityId ? await this.getOpportunityById(sourceOpportunityId) : null;
+        if (!sourceOpp || sourceOpp.creatorId !== senderUserId) return null;
+
+        const inviteePart = participants.find(p => p.userId && p.userId !== senderUserId);
+        if (!inviteePart?.userId) return null;
+
+        let invitedCompanyId = null;
+        const inviteeEntity = await this.getUserOrCompanyById(inviteePart.userId);
+        if (inviteeEntity?.companyId) invitedCompanyId = inviteeEntity.companyId;
+        else if (inviteeEntity?.profile?.companyName && !inviteeEntity.email?.includes('@')) {
+            invitedCompanyId = inviteePart.userId;
+        }
+
+        return {
+            opportunityId: sourceOpportunityId,
+            invitedUserId: inviteePart.userId,
+            invitedCompanyId,
+            matchId: matchRecord.id,
+            isLegacy: false,
+            invitationKind: matchRecord.isReplacement
+                ? CONFIG.INVITATION_KIND.REPLACEMENT
+                : CONFIG.INVITATION_KIND.APPLY,
+            replacementRequestId: matchRecord.replacementRequestId || null
+        };
+    }
+
+    async _getActorRole(actorUserId) {
+        if (!actorUserId) return null;
+        const entity = await this.getUserOrCompanyById(actorUserId);
+        return entity?.role || null;
+    }
+
+    async createLifecycleNotification(spec) {
+        const userId = spec.userId;
+        if (!userId) return null;
+        const existing = await this.getNotifications(userId);
+        const dedupeKey = spec.dedupeKey
+            || notificationDedupeKey(spec.type, spec.entityType, spec.entityId);
+        if (hasRecentDuplicateNotification(existing, {
+            type: spec.type,
+            dedupeKey,
+            link: spec.link,
+            entityType: spec.entityType,
+            entityId: spec.entityId
+        })) {
+            return null;
+        }
+        return this.createNotification({ ...spec, dedupeKey });
+    }
+
+    async createOpportunityInvitationFromMatch(matchId, senderUserId, options = {}) {
+        if (!senderUserId) {
+            throw new Error(PERMISSION_ERRORS.DENIED);
+        }
+        const postMatch = await this.getPostMatchById(matchId);
+        let matchRecord = postMatch;
+        let isLegacy = false;
+        if (!matchRecord && this._isLegacyPersonOpportunityEnabled()) {
+            const legacy = await this.getMatches();
+            matchRecord = legacy.find(m => m.id === matchId) || null;
+            isLegacy = !!matchRecord;
+        }
+        if (!matchRecord) {
+            throw new Error('Match not found.');
+        }
+
+        const ctx = await this.resolveMatchInviteContext(matchRecord, senderUserId);
+        if (!ctx) {
+            throw new Error('You can only invite from a match where you own the source opportunity.');
+        }
+
+        const existing = (await this.getInvitationsByMatchId(matchId)).find(inv =>
+            isActiveInvitation(inv)
+            && inv.invitedUserId === ctx.invitedUserId
+            && inv.opportunityId === ctx.opportunityId
+        );
+        if (existing) return existing;
+
+        const invitation = await this.createOpportunityInvitation({
+            opportunityId: ctx.opportunityId,
+            matchId: ctx.matchId,
+            invitedUserId: ctx.invitedUserId,
+            invitedCompanyId: ctx.invitedCompanyId,
+            invitedByUserId: senderUserId,
+            invitationKind: ctx.invitationKind,
+            replacementRequestId: ctx.replacementRequestId,
+            status: matchRecord.isReplacement ? 'invitation_sent' : CONFIG.INVITATION_STATUS.SENT,
+            message: options.message || null
+        });
+
+        if (isLegacy) {
+            await this.updateMatch(matchId, { invitationId: invitation.id });
+        } else {
+            await this.updatePostMatch(matchId, { invitationId: invitation.id });
+        }
+
+        const opp = await this.getOpportunityById(ctx.opportunityId);
+        const inviteTitle = matchRecord.isReplacement
+            ? 'Replacement invitation'
+            : 'Invitation to apply';
+        const inviteMessage = matchRecord.isReplacement
+            ? `You have been invited to apply as a replacement for "${opp?.title || 'an opportunity'}".`
+            : `You have been invited to apply to "${opp?.title || 'an opportunity'}".`;
+
+        try {
+            await this.createLifecycleNotification({
+                userId: ctx.invitedUserId,
+                type: matchRecord.isReplacement ? 'replacement_invitation_sent' : 'opportunity_invitation',
+                entityType: 'invitation',
+                entityId: invitation.id,
+                title: inviteTitle,
+                message: inviteMessage,
+                link: '/opportunities/' + ctx.opportunityId + '?matchId=' + encodeURIComponent(matchId),
+                read: false
+            });
+        } catch (e) {
+            void e;
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: senderUserId,
+                action: matchRecord.isReplacement ? 'replacement_invitation_sent' : 'opportunity_invitation_sent',
+                entityType: 'invitation',
+                entityId: invitation.id,
+                details: buildLifecycleAuditDetails({
+                    summary: matchRecord.isReplacement ? 'Replacement invitation sent' : 'Invitation to apply sent',
+                    invitationId: invitation.id,
+                    matchId,
+                    opportunityId: ctx.opportunityId,
+                    sourceOpportunityId: ctx.opportunityId,
+                    invitedUserId: ctx.invitedUserId,
+                    invitedCompanyId: ctx.invitedCompanyId,
+                    invitationKind: invitation.invitationKind
+                }, { actorRole: await this._getActorRole(senderUserId) })
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return invitation;
+    }
+
+    async linkApplicationToInvitation(invitation, application, options = {}) {
+        const acceptedStatus = CONFIG.INVITATION_STATUS.ACCEPTED;
+        await this.updateOpportunityInvitation(invitation.id, {
+            status: acceptedStatus,
+            applicationId: application.id,
+            respondedAt: new Date().toISOString()
+        });
+
+        if (invitation.matchId) {
+            const postMatch = await this.getPostMatchById(invitation.matchId);
+            if (postMatch) {
+                await this.updatePostMatch(invitation.matchId, {
+                    applicationId: application.id,
+                    invitationId: invitation.id
+                });
+            } else if (this._isLegacyPersonOpportunityEnabled()) {
+                await this.updateMatch(invitation.matchId, {
+                    applicationId: application.id,
+                    invitationId: invitation.id
+                });
+            }
+        }
+
+        const opp = await this.getOpportunityById(invitation.opportunityId);
+        const ownerId = opp?.creatorId;
+        const isReplacement = (invitation.invitationKind || '') === CONFIG.INVITATION_KIND.REPLACEMENT
+            || !!invitation.replacementRequestId;
+
+        if (ownerId) {
+            try {
+                await this.createLifecycleNotification({
+                    userId: ownerId,
+                    type: isReplacement ? 'replacement_invitation_accepted' : 'invitation_accepted',
+                    entityType: 'invitation',
+                    entityId: invitation.id,
+                    title: isReplacement ? 'Replacement invitation accepted' : 'Invitation accepted',
+                    message: isReplacement
+                        ? 'The invited replacement provider has applied or accepted the invitation.'
+                        : 'An invited participant has applied to your opportunity.',
+                    link: isReplacement
+                        ? '/matches/' + (invitation.matchId || '')
+                        : '/opportunities/' + invitation.opportunityId,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: options.actorId || application.applicantId || 'system',
+                action: isReplacement ? 'replacement_invitation_accepted' : 'opportunity_invitation_accepted',
+                entityType: 'invitation',
+                entityId: invitation.id,
+                details: {
+                    invitationId: invitation.id,
+                    matchId: invitation.matchId,
+                    opportunityId: invitation.opportunityId,
+                    projectId: invitation.projectId,
+                    applicationId: application.id,
+                    invitedUserId: invitation.invitedUserId,
+                    invitedCompanyId: invitation.invitedCompanyId,
+                    invitationKind: invitation.invitationKind
+                }
+            });
+        } catch (e) {
+            void e;
+        }
+    }
+
+    async getInvitationMatchingAnalytics() {
+        const invitations = await this.getOpportunityInvitations();
+        const applications = await this.getApplications();
+        const deals = await this.getDeals();
+
+        const sentStatuses = new Set([
+            CONFIG.INVITATION_STATUS.SENT,
+            'invitation_sent',
+            CONFIG.INVITATION_STATUS.ACCEPTED
+        ]);
+        const invitationsSent = invitations.filter(i => sentStatuses.has((i.status || '').toLowerCase())).length;
+        const appsFromInvitations = applications.filter(a => a.invitationId);
+        const applicationsFromInvitations = appsFromInvitations.length;
+        const acceptedInvitations = invitations.filter(i =>
+            (i.status || '').toLowerCase() === CONFIG.INVITATION_STATUS.ACCEPTED
+        ).length;
+        const invitationAcceptanceRate = invitationsSent > 0
+            ? Math.round((acceptedInvitations / invitationsSent) * 100) + '%'
+            : '—';
+        const replacementInvitationsAccepted = invitations.filter(i =>
+            (i.invitationKind === CONFIG.INVITATION_KIND.REPLACEMENT || i.replacementRequestId)
+            && (i.status || '').toLowerCase() === CONFIG.INVITATION_STATUS.ACCEPTED
+        ).length;
+        const invitedAppIds = new Set(appsFromInvitations.map(a => a.id));
+        const dealsFromInvitedApplications = deals.filter(d =>
+            d.applicationId && invitedAppIds.has(d.applicationId)
+        ).length;
+
+        return {
+            invitationsSent,
+            applicationsFromInvitations,
+            invitationAcceptanceRate,
+            replacementInvitationsAccepted,
+            dealsFromInvitedApplications
+        };
+    }
+
+    async declineOpportunityInvitation(invitationId, actorId, reason) {
+        const invitation = await this.getOpportunityInvitationById(invitationId);
+        if (!invitation) throw new Error('Invitation not found.');
+        const status = (invitation.status || '').toLowerCase();
+        if (status === CONFIG.INVITATION_STATUS.DECLINED) return invitation;
+        if (isTerminalInvitationStatus(status)) {
+            throw new Error('Cannot decline this invitation.');
+        }
+        if (!isActiveInvitation(invitation)) {
+            throw new Error('Cannot decline this invitation.');
+        }
+
+        const user = await this.getUserById(actorId);
+        const companyId = user?.companyId || null;
+        if (!invitationAcceptsActor(invitation, actorId, companyId)) {
+            throw new Error('Only the invited party can decline this invitation.');
+        }
+
+        const updated = await this.updateOpportunityInvitation(invitationId, {
+            status: CONFIG.INVITATION_STATUS.DECLINED,
+            respondedAt: new Date().toISOString(),
+            declineReason: reason || null
+        });
+
+        const ownerId = invitation.invitedByUserId
+            || (await this.getOpportunityById(invitation.opportunityId))?.creatorId;
+        if (ownerId && ownerId !== actorId) {
+            try {
+                await this.createLifecycleNotification({
+                    userId: ownerId,
+                    type: 'invitation_declined',
+                    entityType: 'invitation',
+                    entityId: invitationId,
+                    title: 'Invitation declined',
+                    message: reason || 'The invited party declined your invitation.',
+                    link: invitation.matchId
+                        ? '/matches/' + invitation.matchId
+                        : '/opportunities/' + invitation.opportunityId,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: actorId,
+                action: 'opportunity_invitation_declined',
+                entityType: 'invitation',
+                entityId: invitationId,
+                details: buildLifecycleAuditDetails({
+                    summary: 'Invitation declined',
+                    invitationId,
+                    matchId: invitation.matchId,
+                    opportunityId: invitation.opportunityId,
+                    reason: reason || null
+                }, { actorRole: await this._getActorRole(actorId) })
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return updated;
+    }
+
+    async cancelOpportunityInvitation(invitationId, actorId, reason) {
+        const invitation = await this.getOpportunityInvitationById(invitationId);
+        if (!invitation) throw new Error('Invitation not found.');
+        const status = (invitation.status || '').toLowerCase();
+        if (status === CONFIG.INVITATION_STATUS.CANCELLED) return invitation;
+        if (isTerminalInvitationStatus(status)) {
+            throw new Error('Cannot cancel this invitation.');
+        }
+        if (!isActiveInvitation(invitation)) {
+            throw new Error('Cannot cancel this invitation.');
+        }
+
+        const actorRole = await this._getActorRole(actorId);
+        assertNotReadOnlyAdmin(actorRole);
+        const opp = await this.getOpportunityById(invitation.opportunityId);
+        const isOwner = !!(opp && opp.creatorId === actorId);
+        const isInviter = invitation.invitedByUserId === actorId;
+        if (!isOwner && !isInviter && actorRole !== 'admin') {
+            throw new Error('Only the inviter, opportunity owner, or admin can cancel this invitation.');
+        }
+
+        const updated = await this.updateOpportunityInvitation(invitationId, {
+            status: CONFIG.INVITATION_STATUS.CANCELLED,
+            cancelledAt: new Date().toISOString(),
+            cancelReason: reason || null
+        });
+
+        if (invitation.invitedUserId && invitation.invitedUserId !== actorId) {
+            try {
+                await this.createLifecycleNotification({
+                    userId: invitation.invitedUserId,
+                    type: 'invitation_cancelled',
+                    entityType: 'invitation',
+                    entityId: invitationId,
+                    title: 'Invitation cancelled',
+                    message: reason || 'An invitation to apply was cancelled.',
+                    link: invitation.opportunityId
+                        ? '/opportunities/' + invitation.opportunityId
+                        : null,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: actorId,
+                action: 'opportunity_invitation_cancelled',
+                entityType: 'invitation',
+                entityId: invitationId,
+                details: buildLifecycleAuditDetails({
+                    summary: 'Invitation cancelled',
+                    invitationId,
+                    matchId: invitation.matchId,
+                    opportunityId: invitation.opportunityId,
+                    reason: reason || null
+                }, { actorRole })
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return updated;
+    }
+
+    /**
+     * Mark sent invitations past expiresAt as expired. Skips accepted and other terminal states.
+     * @param {string|Date} [now]
+     * @returns {Promise<object[]>}
+     */
+    async expireOpportunityInvitations(now) {
+        const nowMs = now ? new Date(now).getTime() : Date.now();
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.OPPORTUNITY_INVITATIONS) || [];
+        const expired = [];
+        for (const inv of list) {
+            if (!shouldExpireInvitation(inv, nowMs)) continue;
+            const status = (inv.status || '').toLowerCase();
+            if (status === CONFIG.INVITATION_STATUS.EXPIRED) continue;
+
+            const updated = await this.updateOpportunityInvitation(inv.id, {
+                status: CONFIG.INVITATION_STATUS.EXPIRED,
+                expiredAt: new Date(nowMs).toISOString()
+            });
+            expired.push(updated);
+
+            const notifyIds = new Set();
+            if (inv.invitedUserId) notifyIds.add(inv.invitedUserId);
+            const opp = await this.getOpportunityById(inv.opportunityId);
+            if (opp?.creatorId) notifyIds.add(opp.creatorId);
+            for (const uid of notifyIds) {
+                try {
+                    await this.createLifecycleNotification({
+                        userId: uid,
+                        type: 'invitation_expired',
+                        entityType: 'invitation',
+                        entityId: inv.id,
+                        title: 'Invitation expired',
+                        message: 'An invitation to apply has expired.',
+                        link: inv.matchId
+                            ? '/matches/' + inv.matchId
+                            : '/opportunities/' + (inv.opportunityId || ''),
+                        read: false
+                    });
+                } catch (e) {
+                    void e;
+                }
+            }
+
+            try {
+                await this.createAuditLog({
+                    userId: 'system',
+                    action: 'opportunity_invitation_expired',
+                    entityType: 'invitation',
+                    entityId: inv.id,
+                    details: {
+                        invitationId: inv.id,
+                        matchId: inv.matchId,
+                        opportunityId: inv.opportunityId,
+                        expiresAt: inv.expiresAt
+                    }
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+        return expired;
+    }
+
+    // Replacement request operations (Phase 6 — consortium / circular)
+    async getReplacementRequests() {
+        return this.storage.get(CONFIG.STORAGE_KEYS.REPLACEMENT_REQUESTS) || [];
+    }
+
+    async getReplacementRequestById(id) {
+        const list = await this.getReplacementRequests();
+        return list.find(r => r.id === id) || null;
+    }
+
+    async getReplacementRequestsByMatchId(matchId) {
+        const list = await this.getReplacementRequests();
+        return list.filter(r => r.matchId === matchId);
+    }
+
+    async createReplacementRequest(data) {
+        const list = await this.getReplacementRequests();
+        const record = {
+            id: this.generateId(),
+            matchId: data.matchId,
+            opportunityId: data.opportunityId || null,
+            dealId: data.dealId || null,
+            contractId: data.contractId || null,
+            requestedByUserId: data.requestedByUserId || null,
+            roleToFill: data.roleToFill || 'General',
+            blockedParticipantId: data.blockedParticipantId || null,
+            blockedOpportunityId: data.blockedOpportunityId || null,
+            suggestedUserId: data.suggestedUserId || null,
+            suggestedCompanyId: data.suggestedCompanyId || null,
+            invitedUserId: data.invitedUserId || null,
+            invitedCompanyId: data.invitedCompanyId || null,
+            invitationId: data.invitationId || null,
+            message: data.message || null,
+            status: data.status || CONFIG.REPLACEMENT_REQUEST_STATUS.PENDING_OWNER_REVIEW,
+            slotKey: data.slotKey || buildReplacementSlotKey(
+                data.blockedParticipantId,
+                data.roleToFill,
+                data.blockedOpportunityId
+            ),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+        list.push(record);
+        this.storage.set(CONFIG.STORAGE_KEYS.REPLACEMENT_REQUESTS, list);
+        return record;
+    }
+
+    async updateReplacementRequest(id, updates) {
+        const list = await this.getReplacementRequests();
+        const index = list.findIndex(r => r.id === id);
+        if (index === -1) return null;
+        list[index] = { ...list[index], ...updates, updatedAt: new Date().toISOString() };
+        this.storage.set(CONFIG.STORAGE_KEYS.REPLACEMENT_REQUESTS, list);
+        return list[index];
+    }
+
+    async _getPrimaryOpportunityForPostMatch(postMatch) {
+        const payload = postMatch.payload || {};
+        return payload.leadNeedId || payload.needOpportunityId
+            || (postMatch.opportunityIds && postMatch.opportunityIds[0])
+            || null;
+    }
+
+    async isUserOwnerOfPostMatch(postMatch, userId) {
+        if (!postMatch || !userId) return false;
+        const oppId = await this._getPrimaryOpportunityForPostMatch(postMatch);
+        if (!oppId) return false;
+        const opp = await this.getOpportunityById(oppId);
+        return !!(opp && opp.creatorId === userId);
+    }
+
+    _isUserParticipantOfPostMatch(postMatch, userId) {
+        return !!(postMatch?.participants || []).some(p => p.userId === userId);
+    }
+
+    getBlockedSlotsForPostMatch(postMatch) {
+        if (!postMatch || !isReplacementEligibleMatchType(postMatch.matchType)) return [];
+        const slots = [];
+        const seen = new Set();
+        const add = (entry) => {
+            const key = buildReplacementSlotKey(entry.userId, entry.role, entry.opportunityId);
+            if (!entry.userId || seen.has(key)) return;
+            seen.add(key);
+            slots.push({ ...entry, slotKey: key });
+        };
+
+        (postMatch.participants || []).forEach(p => {
+            const st = (p.participantStatus || 'pending').toLowerCase();
+            if (st === 'declined' || p.replacedByUserId) {
+                add({
+                    userId: p.userId,
+                    role: p.role || 'consortium_member',
+                    opportunityId: p.opportunityId || null,
+                    reason: st === 'declined' ? 'declined' : 'replaced'
+                });
+            }
+        });
+
+        if (postMatch.matchType === 'consortium') {
+            (postMatch.payload?.roles || []).forEach(r => {
+                if (!r.userId) {
+                    add({
+                        userId: r.blockedUserId || 'vacant',
+                        role: r.role || 'consortium_member',
+                        opportunityId: r.opportunityId || null,
+                        reason: 'vacant_role'
+                    });
+                }
+            });
+        }
+
+        return slots;
+    }
+
+    async _notifyReplacementStakeholders(matchId, notification, excludeUserId) {
+        const match = await this.getPostMatchById(matchId);
+        if (!match) return;
+        const ids = new Set((match.participants || []).map(p => p.userId).filter(Boolean));
+        const oppId = await this._getPrimaryOpportunityForPostMatch(match);
+        if (oppId) {
+            const opp = await this.getOpportunityById(oppId);
+            if (opp?.creatorId) ids.add(opp.creatorId);
+        }
+        for (const uid of ids) {
+            if (uid === excludeUserId) continue;
+            try {
+                await this.createNotification({ userId: uid, read: false, ...notification });
+            } catch (e) {
+                void e;
+            }
+        }
+    }
+
+    async _createReplacementInvitationForRequest(request, senderUserId, invitee) {
+        const invitedUserId = invitee.invitedUserId || invitee.suggestedUserId || null;
+        const invitedCompanyId = invitee.invitedCompanyId || invitee.suggestedCompanyId || null;
+        if (!invitedUserId && !invitedCompanyId) {
+            throw new Error('An invited user or company is required.');
+        }
+
+        const invitation = await this.createOpportunityInvitation({
+            opportunityId: request.opportunityId,
+            matchId: request.matchId,
+            dealId: request.dealId,
+            invitedUserId,
+            invitedCompanyId,
+            invitedByUserId: senderUserId,
+            invitationKind: CONFIG.INVITATION_KIND.REPLACEMENT,
+            replacementRequestId: request.id,
+            roleToFill: request.roleToFill,
+            blockedParticipantId: request.blockedParticipantId,
+            blockedOpportunityId: request.blockedOpportunityId,
+            status: 'invitation_sent',
+            message: request.message || null
+        });
+
+        await this.updateReplacementRequest(request.id, {
+            invitationId: invitation.id,
+            invitedUserId,
+            invitedCompanyId,
+            status: CONFIG.REPLACEMENT_REQUEST_STATUS.INVITATION_SENT
+        });
+
+        const link = '/matches/' + request.matchId;
+        if (invitedUserId) {
+            try {
+                await this.createNotification({
+                    userId: invitedUserId,
+                    type: 'opportunity_invitation',
+                    title: 'Invitation to join collaboration',
+                    message: 'You have been invited as a replacement provider for a consortium or circular match.',
+                    link,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: senderUserId,
+                action: 'replacement_invitation_sent',
+                entityType: 'invitation',
+                entityId: invitation.id,
+                details: {
+                    replacementRequestId: request.id,
+                    matchId: request.matchId,
+                    invitedUserId,
+                    invitedCompanyId
+                }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return invitation;
+    }
+
+    async suggestReplacementForMatch(matchId, actorUserId, data) {
+        const match = await this.getPostMatchById(matchId);
+        if (!match) throw new Error('Match not found.');
+        if (!isReplacementEligibleMatchType(match.matchType)) {
+            throw new Error('Replacement is only available for Consortium and Circular matches.');
+        }
+        assertMatchParticipant(match, actorUserId);
+        if (await this.isUserOwnerOfPostMatch(match, actorUserId)) {
+            throw new Error('Use Invite Replacement as the opportunity owner.');
+        }
+        const actorRole = await this._getActorRole(actorUserId);
+        assertNotReadOnlyAdmin(actorRole);
+        if (!data.blockedParticipantId) {
+            throw new Error('Select the participant or role to replace.');
+        }
+
+        const opportunityId = await this._getPrimaryOpportunityForPostMatch(match);
+        const request = await this.createReplacementRequest({
+            matchId,
+            opportunityId,
+            dealId: match.dealId || null,
+            requestedByUserId: actorUserId,
+            roleToFill: data.roleToFill || 'General',
+            blockedParticipantId: data.blockedParticipantId,
+            blockedOpportunityId: data.blockedOpportunityId || null,
+            suggestedUserId: data.suggestedUserId || null,
+            suggestedCompanyId: data.suggestedCompanyId || null,
+            message: data.message || null,
+            status: CONFIG.REPLACEMENT_REQUEST_STATUS.PENDING_OWNER_REVIEW
+        });
+
+        const opp = opportunityId ? await this.getOpportunityById(opportunityId) : null;
+        if (opp?.creatorId) {
+            try {
+                await this.createNotification({
+                    userId: opp.creatorId,
+                    type: 'replacement_suggestion_submitted',
+                    title: 'Replacement suggestion received',
+                    message: 'A participant suggested a replacement for your match.',
+                    link: '/matches/' + matchId,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'replacement_suggested',
+                entityType: 'replacement_request',
+                entityId: request.id,
+                details: { matchId, blockedParticipantId: data.blockedParticipantId }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return request;
+    }
+
+    async approveReplacementSuggestion(requestId, actorUserId) {
+        const request = await this.getReplacementRequestById(requestId);
+        if (!request) throw new Error('Replacement request not found.');
+        const match = await this.getPostMatchById(request.matchId);
+        if (!match) throw new Error('Match not found.');
+        const isOwner = await this.isUserOwnerOfPostMatch(match, actorUserId);
+        const actorRole = await this._getActorRole(actorUserId);
+        assertNotReadOnlyAdmin(actorRole);
+        assertReplacementOwnerOrAdmin(isOwner, actorRole);
+
+        await this._createReplacementInvitationForRequest(request, actorUserId, {
+            suggestedUserId: request.suggestedUserId,
+            suggestedCompanyId: request.suggestedCompanyId
+        });
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'replacement_suggestion_approved',
+                entityType: 'replacement_request',
+                entityId: requestId,
+                details: { matchId: request.matchId }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        if (request.requestedByUserId) {
+            try {
+                await this.createNotification({
+                    userId: request.requestedByUserId,
+                    type: 'replacement_invitation_sent',
+                    title: 'Replacement invitation sent',
+                    message: 'Your replacement suggestion was approved and an invitation was sent.',
+                    link: '/matches/' + request.matchId,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+
+        return await this.getReplacementRequestById(requestId);
+    }
+
+    async rejectReplacementSuggestion(requestId, actorUserId, reason) {
+        const request = await this.getReplacementRequestById(requestId);
+        if (!request) throw new Error('Replacement request not found.');
+        const match = await this.getPostMatchById(request.matchId);
+        if (!match) throw new Error('Match not found.');
+        const isOwner = await this.isUserOwnerOfPostMatch(match, actorUserId);
+        const actorRole = await this._getActorRole(actorUserId);
+        assertNotReadOnlyAdmin(actorRole);
+        assertReplacementOwnerOrAdmin(isOwner, actorRole);
+
+        await this.updateReplacementRequest(requestId, {
+            status: CONFIG.REPLACEMENT_REQUEST_STATUS.REJECTED,
+            rejectReason: reason || null
+        });
+
+        if (request.requestedByUserId) {
+            try {
+                await this.createNotification({
+                    userId: request.requestedByUserId,
+                    type: 'replacement_suggestion_rejected',
+                    title: 'Replacement suggestion rejected',
+                    message: reason || 'Your replacement suggestion was not approved.',
+                    link: '/matches/' + request.matchId,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'replacement_suggestion_rejected',
+                entityType: 'replacement_request',
+                entityId: requestId,
+                details: { matchId: request.matchId }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return await this.getReplacementRequestById(requestId);
+    }
+
+    async ownerInviteReplacementDirect(matchId, actorUserId, data) {
+        const match = await this.getPostMatchById(matchId);
+        if (!match) throw new Error('Match not found.');
+        if (!isReplacementEligibleMatchType(match.matchType)) {
+            throw new Error('Replacement is only available for Consortium and Circular matches.');
+        }
+        const isOwner = await this.isUserOwnerOfPostMatch(match, actorUserId);
+        const actorRole = await this._getActorRole(actorUserId);
+        assertNotReadOnlyAdmin(actorRole);
+        assertMatchOwner(isOwner);
+        if (!data.blockedParticipantId) throw new Error('Select who is being replaced.');
+        if (!data.invitedUserId && !data.invitedCompanyId) {
+            throw new Error('Select a provider to invite.');
+        }
+
+        const opportunityId = await this._getPrimaryOpportunityForPostMatch(match);
+        let request = await this.createReplacementRequest({
+            matchId,
+            opportunityId,
+            dealId: match.dealId || null,
+            requestedByUserId: actorUserId,
+            roleToFill: data.roleToFill || 'General',
+            blockedParticipantId: data.blockedParticipantId,
+            blockedOpportunityId: data.blockedOpportunityId || null,
+            invitedUserId: data.invitedUserId || null,
+            invitedCompanyId: data.invitedCompanyId || null,
+            message: data.message || null,
+            status: CONFIG.REPLACEMENT_REQUEST_STATUS.PENDING_INVITATION
+        });
+
+        await this._createReplacementInvitationForRequest(request, actorUserId, data);
+        return await this.getReplacementRequestById(request.id);
+    }
+
+    async acceptReplacementInvitation(invitationId, actorUserId) {
+        const invitation = await this.getOpportunityInvitationById(invitationId);
+        if (!invitation || invitation.invitationKind !== CONFIG.INVITATION_KIND.REPLACEMENT) {
+            throw new Error('Replacement invitation not found.');
+        }
+
+        const user = await this.getUserById(actorUserId);
+        const companyId = user?.companyId || null;
+        if (!invitationAcceptsActor(invitation, actorUserId, companyId)) {
+            throw new Error('This invitation is not addressed to you.');
+        }
+
+        const activeStatuses = ['sent', 'invitation_sent'];
+        if (!activeStatuses.includes((invitation.status || '').toLowerCase())) {
+            throw new Error('This invitation is no longer active.');
+        }
+
+        await this.updateOpportunityInvitation(invitationId, {
+            status: CONFIG.INVITATION_STATUS.ACCEPTED,
+            respondedAt: new Date().toISOString()
+        });
+
+        if (invitation.replacementRequestId) {
+            await this.updateReplacementRequest(invitation.replacementRequestId, {
+                status: CONFIG.REPLACEMENT_REQUEST_STATUS.REPLACEMENT_ACCEPTED
+            });
+            const request = await this.getReplacementRequestById(invitation.replacementRequestId);
+            if (request?.matchId) {
+                await this._notifyReplacementStakeholders(request.matchId, {
+                    type: 'replacement_invitation_accepted',
+                    title: 'Replacement invitation accepted',
+                    message: 'An invited replacement provider accepted the invitation.',
+                    link: '/matches/' + request.matchId
+                }, actorUserId);
+            }
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'replacement_invitation_accepted',
+                entityType: 'invitation',
+                entityId: invitationId,
+                details: { matchId: invitation.matchId, replacementRequestId: invitation.replacementRequestId }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return await this.getOpportunityInvitationById(invitationId);
+    }
+
+    _swapUserInPostMatchPayload(match, oldUserId, newUserId, newOpportunityId) {
+        const payload = { ...(match.payload || {}) };
+        if (match.matchType === 'consortium' && Array.isArray(payload.roles)) {
+            payload.roles = payload.roles.map(r =>
+                (r.userId === oldUserId)
+                    ? { ...r, userId: newUserId, opportunityId: newOpportunityId || r.opportunityId }
+                    : r
+            );
+        }
+        if (match.matchType === 'circular') {
+            if (Array.isArray(payload.cycle)) {
+                payload.cycle = payload.cycle.map(uid => (uid === oldUserId ? newUserId : uid));
+            }
+            if (Array.isArray(payload.links)) {
+                payload.links = payload.links.map(l => ({
+                    ...l,
+                    fromCreatorId: l.fromCreatorId === oldUserId ? newUserId : l.fromCreatorId,
+                    toCreatorId: l.toCreatorId === oldUserId ? newUserId : l.toCreatorId
+                }));
+            }
+        }
+        return payload;
+    }
+
+    async _supersedeCompetingReplacementRequests(matchId, slotKey, keepRequestId, context = {}) {
+        const list = await this.getReplacementRequestsByMatchId(matchId);
+        for (const r of list) {
+            if (r.id === keepRequestId) continue;
+            if (r.slotKey !== slotKey) continue;
+            if ([CONFIG.REPLACEMENT_REQUEST_STATUS.COMPLETED, CONFIG.REPLACEMENT_REQUEST_STATUS.SUPERSEDED].includes(r.status)) {
+                continue;
+            }
+            const prevStatus = r.status;
+            await this.updateReplacementRequest(r.id, { status: CONFIG.REPLACEMENT_REQUEST_STATUS.SUPERSEDED });
+            if (prevStatus === CONFIG.REPLACEMENT_REQUEST_STATUS.SUPERSEDED) continue;
+
+            try {
+                await this.createAuditLog({
+                    userId: context.actorUserId || 'system',
+                    action: 'replacement_superseded',
+                    entityType: 'replacement_request',
+                    entityId: r.id,
+                    details: {
+                        replacementRequestId: r.id,
+                        supersededBy: context.actorUserId || null,
+                        selectedReplacementRequestId: keepRequestId,
+                        matchId,
+                        dealId: r.dealId || context.dealId || null,
+                        role: r.roleToFill || null,
+                        roleSlotId: r.slotKey || slotKey
+                    }
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+    }
+
+    async finalizeParticipantReplacement(requestId, actorUserId) {
+        const request = await this.getReplacementRequestById(requestId);
+        if (!request) throw new Error('Replacement request not found.');
+        const match = await this.getPostMatchById(request.matchId);
+        if (!match) throw new Error('Match not found.');
+        const isOwner = await this.isUserOwnerOfPostMatch(match, actorUserId);
+        const actorRole = await this._getActorRole(actorUserId);
+        assertNotReadOnlyAdmin(actorRole);
+        assertReplacementOwnerOrAdmin(isOwner, actorRole);
+        if (request.status !== CONFIG.REPLACEMENT_REQUEST_STATUS.REPLACEMENT_ACCEPTED) {
+            throw new Error('The replacement must be accepted before finalizing.');
+        }
+
+        const newUserId = request.invitedUserId || request.suggestedUserId;
+        if (!newUserId) throw new Error('No replacement participant to add.');
+        const oldUserId = request.blockedParticipantId;
+        if (!oldUserId) throw new Error('Blocked participant is missing.');
+
+        const dealId = request.dealId || match.dealId;
+        if (dealId) {
+            const deal = await this.getDealById(dealId);
+            if (deal?.contractId) {
+                const contract = await this.getContractById(deal.contractId);
+                if (contract && (contract.status || '') === CONFIG.CONTRACT_STATUS.ACTIVE) {
+                    throw new Error('This contract is already active. Use contract amendment or termination flow.');
+                }
+            }
+            if (deal) {
+                const participants = (deal.participants || []).map(p =>
+                    p.userId === oldUserId && !p.replacedByUserId
+                        ? { ...p, status: 'dropped', replacedByUserId: newUserId }
+                        : p
+                );
+                if (!participants.some(p => p.userId === newUserId)) {
+                    participants.push({
+                        userId: newUserId,
+                        role: request.roleToFill || 'consortium_member',
+                        opportunityId: request.blockedOpportunityId || null,
+                        approvalStatus: 'pending',
+                        signedAt: null,
+                        status: 'active'
+                    });
+                }
+                await this.updateDeal(dealId, { participants });
+                if (deal.contractId) {
+                    await this.amendContractAddParty(deal.contractId, {
+                        userId: newUserId,
+                        role: request.roleToFill || 'consortium_member'
+                    });
+                }
+            }
+        }
+
+        const participants = (match.participants || []).map(p => {
+            if (p.userId === oldUserId) {
+                return {
+                    ...p,
+                    participantStatus: 'declined',
+                    replacedByUserId: newUserId
+                };
+            }
+            return p;
+        });
+        if (!participants.some(p => p.userId === newUserId)) {
+            participants.push({
+                userId: newUserId,
+                role: request.roleToFill || 'consortium_member',
+                opportunityId: request.blockedOpportunityId || null,
+                participantStatus: 'pending',
+                respondedAt: null
+            });
+        }
+
+        const payload = this._swapUserInPostMatchPayload(
+            match,
+            oldUserId,
+            newUserId,
+            request.blockedOpportunityId
+        );
+
+        await this.updatePostMatch(match.id, { participants, payload, replacementRequestId: request.id });
+
+        await this.updateReplacementRequest(requestId, { status: CONFIG.REPLACEMENT_REQUEST_STATUS.COMPLETED });
+        await this._supersedeCompetingReplacementRequests(match.id, request.slotKey, requestId, {
+            actorUserId,
+            dealId: request.dealId || match.dealId
+        });
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'participant_replaced',
+                entityType: 'match',
+                entityId: match.id,
+                details: {
+                    replacementRequestId: requestId,
+                    droppedUserId: oldUserId,
+                    newUserId
+                }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        await this._notifyReplacementStakeholders(match.id, {
+            type: 'replacement_completed',
+            title: 'Participant replaced',
+            message: 'The match participants were updated after a replacement.',
+            link: '/matches/' + match.id
+        }, actorUserId);
+
+        return await this.getPostMatchById(match.id);
+    }
+
+    async getReplacementMatchingAnalytics() {
+        const requests = await this.getReplacementRequests();
+        const postMatches = await this.getPostMatches();
+        const blockedMatches = postMatches.filter(m =>
+            isReplacementEligibleMatchType(m.matchType)
+            && (m.participants || []).some(p => (p.participantStatus || '') === 'declined')
+        ).length;
+        const pendingReview = requests.filter(r => r.status === CONFIG.REPLACEMENT_REQUEST_STATUS.PENDING_OWNER_REVIEW).length;
+        const invitationsSent = requests.filter(r =>
+            [CONFIG.REPLACEMENT_REQUEST_STATUS.INVITATION_SENT, CONFIG.REPLACEMENT_REQUEST_STATUS.PENDING_INVITATION].includes(r.status)
+        ).length;
+        const accepted = requests.filter(r => r.status === CONFIG.REPLACEMENT_REQUEST_STATUS.REPLACEMENT_ACCEPTED).length;
+        const completed = requests.filter(r => r.status === CONFIG.REPLACEMENT_REQUEST_STATUS.COMPLETED).length;
+        const conversionRate = invitationsSent > 0
+            ? Math.round((completed / invitationsSent) * 100) + '%'
+            : '—';
+        return { blockedMatches, pendingReview, invitationsSent, accepted, completed, conversionRate };
+    }
+
+    async getDealFlowMatchingAnalytics() {
+        const deals = await this.getDeals();
+        const fromMatches = deals.filter(d => d.matchId && !d.applicationId).length;
+        const fromApplications = deals.filter(d => d.applicationId).length;
+        const fromNegotiations = deals.filter(d => d.negotiationId).length;
+        const draftDeals = deals.filter(d =>
+            (d.status || '') === CONFIG.DEAL_STATUS.DRAFT || (d.status || '') === 'draft'
+        ).length;
+        const activeDeals = deals.filter(d => (d.status || '') === CONFIG.DEAL_STATUS.ACTIVE).length;
+        const withContracts = deals.filter(d => d.contractId).length;
+        return {
+            dealsFromMatches: fromMatches,
+            dealsFromApplications: fromApplications,
+            dealsFromNegotiations: fromNegotiations,
+            draftDeals,
+            activeDeals,
+            dealsWithContracts: withContracts
+        };
+    }
+
     async updateApplication(id, updates) {
         const applications = await this.getApplications();
         const index = applications.findIndex(a => a.id === id);
         if (index === -1) return null;
-        
+
         applications[index] = {
             ...applications[index],
             ...updates,
@@ -1103,14 +2408,25 @@ class DataService {
         const deliverables = await this.getApplicationDeliverables(applicationId);
         const files = await this.getApplicationFiles(applicationId);
 
-        // Match record for AI breakdown (Section 2)
-        const matches = await this.getMatches();
+        // Match record for AI breakdown (Section 2) — post_matches first, legacy only when enabled
         const candidateId = application.applicantId;
-        const match = matches.find(m => m.opportunityId === application.opportunityId && (m.candidateId === candidateId || m.userId === candidateId));
+        const postMatches = await this.getPostMatchesByOpportunityId(application.opportunityId);
+        let match = postMatches.find(pm =>
+            pm.applicationId === applicationId
+            || (pm.participants || []).some(p => p.userId === candidateId)
+        ) || null;
+        if (!match && this._isLegacyPersonOpportunityEnabled()) {
+            const matches = await this.getMatches();
+            match = matches.find(m =>
+                m.opportunityId === application.opportunityId
+                && (m.candidateId === candidateId || m.userId === candidateId)
+            ) || null;
+        }
         let matchScore = application.matchScore != null ? application.matchScore : (match && match.matchScore != null ? match.matchScore : null);
         let matchBreakdown = application.matchBreakdown || null;
-        if (!matchBreakdown && match && match.criteria) {
-            const c = match.criteria;
+        const matchCriteria = match && (match.criteria || (match.payload && match.payload.criteria));
+        if (!matchBreakdown && matchCriteria) {
+            const c = matchCriteria;
             if (typeof c === 'object' && !Array.isArray(c)) {
                 matchBreakdown = {
                     skillMatch: c.skillMatch ?? c.attributeOverlap ?? null,
@@ -1121,8 +2437,8 @@ class DataService {
                 };
             }
         }
-        if (matchScore != null && matchBreakdown && typeof matchBreakdown.skillMatch !== 'number' && match && match.criteria && typeof match.criteria === 'object') {
-            const cr = match.criteria;
+        if (matchScore != null && matchBreakdown && typeof matchBreakdown.skillMatch !== 'number' && matchCriteria && typeof matchCriteria === 'object') {
+            const cr = matchCriteria;
             if (cr.skillMatch != null || cr.budgetFit != null || cr.timelineFit != null || cr.locationFit != null || cr.reputation != null) {
                 matchBreakdown = {
                     skillMatch: cr.skillMatch ?? matchBreakdown.skillMatch,
@@ -1150,7 +2466,7 @@ class DataService {
             files: files.map(f => ({ id: f.id, fileType: f.fileType, fileName: f.fileName, fileUrl: f.fileUrl })),
             matchScore,
             matchBreakdown,
-            matchType: application.matchType || (match && match.model) || null
+            matchType: application.matchType || (match && (match.matchType || match.model)) || null
         };
     }
 
@@ -1264,7 +2580,7 @@ class DataService {
     /**
      * Build payload for a pending contract from an in-flight deal (signing or repair).
      */
-    _buildPendingContractPayloadFromDeal(deal) {
+    async _buildPendingContractPayloadFromDeal(deal) {
         const activeParts = (deal.participants || []).filter(p => (p.status || 'active') !== 'dropped');
         const parties = activeParts.map(p => ({
             userId: p.userId,
@@ -1272,6 +2588,23 @@ class DataService {
             signedAt: p.signedAt || null
         }));
         const oppId = deal.opportunityId || (deal.opportunityIds && deal.opportunityIds[0]) || null;
+        const opportunityIds = Array.isArray(deal.opportunityIds) && deal.opportunityIds.length
+            ? [...deal.opportunityIds]
+            : (oppId ? [oppId] : []);
+        let matchId = deal.matchId || null;
+        let negotiationId = deal.negotiationId || null;
+        let invitationId = null;
+        if (deal.applicationId) {
+            const app = await this.getApplicationById(deal.applicationId);
+            if (app) {
+                invitationId = app.invitationId || null;
+                matchId = matchId || app.matchId || null;
+            }
+        }
+        if (matchId && !invitationId) {
+            const postMatch = await this.getPostMatchById(matchId);
+            if (postMatch?.invitationId) invitationId = postMatch.invitationId;
+        }
         const duration =
             deal.timeline && (deal.timeline.start || deal.timeline.end)
                 ? (deal.timeline.start || '') + ' to ' + (deal.timeline.end || '')
@@ -1287,7 +2620,11 @@ class DataService {
         return {
             dealId: deal.id,
             opportunityId: oppId,
+            opportunityIds,
+            matchId,
             applicationId: deal.applicationId || null,
+            negotiationId,
+            invitationId,
             parties,
             scope: deal.scope || '',
             paymentMode: deal.exchangeMode || 'cash',
@@ -1301,7 +2638,12 @@ class DataService {
     }
 
     async createPendingContractFromDeal(deal) {
-        return this.createContract(this._buildPendingContractPayloadFromDeal(deal));
+        if (deal?.id) {
+            const existing = await this.getContractByDealId(deal.id);
+            if (existing) return existing;
+        }
+        const payload = await this._buildPendingContractPayloadFromDeal(deal);
+        return this.createContract(payload);
     }
 
     /**
@@ -1410,6 +2752,10 @@ class DataService {
     }
 
     async createContract(contractData) {
+        if (contractData?.dealId) {
+            const existing = await this.getContractByDealId(contractData.dealId);
+            if (existing) return existing;
+        }
         const contracts = await this.getContracts();
         const partiesInput = contractData.parties;
         if (!partiesInput || !Array.isArray(partiesInput) || partiesInput.length === 0) {
@@ -1420,11 +2766,18 @@ class DataService {
             role: p.role || 'participant',
             signedAt: p.signedAt || null
         }));
+        const oppIds = Array.isArray(contractData.opportunityIds) && contractData.opportunityIds.length
+            ? contractData.opportunityIds
+            : (contractData.opportunityId ? [contractData.opportunityId] : []);
         const newContract = {
             id: this.generateId(),
             dealId: contractData.dealId || null,
-            opportunityId: contractData.opportunityId || null,
+            opportunityId: contractData.opportunityId || oppIds[0] || null,
+            opportunityIds: oppIds,
+            matchId: contractData.matchId || null,
             applicationId: contractData.applicationId || null,
+            negotiationId: contractData.negotiationId || null,
+            invitationId: contractData.invitationId || null,
             parties,
             scope: contractData.scope || '',
             paymentMode: contractData.paymentMode || 'cash',
@@ -1521,11 +2874,23 @@ class DataService {
                 for (const p of notifyParts) {
                     if (!p.userId) continue;
                     try {
-                        await this.createNotification({
+                        await this.createLifecycleNotification({
                             userId: p.userId,
                             type: 'contract_fully_signed',
+                            entityType: 'contract',
+                            entityId: id,
                             title: 'Contract fully signed',
                             message: 'All required parties signed the Contract Agreement. Your deal is now active.',
+                            link: '/deals/' + updated.dealId,
+                            read: false
+                        });
+                        await this.createLifecycleNotification({
+                            userId: p.userId,
+                            type: 'deal_activated',
+                            entityType: 'deal',
+                            entityId: updated.dealId,
+                            title: 'Deal activated',
+                            message: 'Your deal workspace is now active. You can start execution when ready.',
                             link: '/deals/' + updated.dealId,
                             read: false
                         });
@@ -1537,6 +2902,68 @@ class DataService {
         }
 
         return updated;
+    }
+
+    /**
+     * Record one party signature; no-op if that party already signed.
+     */
+    async signContractParty(contractId, userId) {
+        const contract = await this.getContractById(contractId);
+        if (!contract) throw new Error('Contract not found.');
+        if ((contract.status || '') !== CONFIG.CONTRACT_STATUS.PENDING) {
+            throw new Error(PERMISSION_ERRORS.ALREADY_COMPLETED);
+        }
+        const parties = this.getContractParties(contract);
+        const mine = parties.find(p => p.userId === userId);
+        if (!mine) throw new Error('You are not a party to this contract.');
+        if (mine.signedAt) return contract;
+
+        const signedAt = new Date().toISOString();
+        const nextParties = parties.map(p =>
+            p.userId === userId ? { ...p, signedAt } : p
+        );
+        const updated = await this.updateContract(contractId, { parties: nextParties });
+        await this._emitContractPartySigned(updated, userId, signedAt);
+        return updated;
+    }
+
+    /**
+     * Central audit/notification when one party signs (UI should not duplicate).
+     */
+    async _emitContractPartySigned(contract, userId, signedAt) {
+        if (!contract || !userId) return;
+        const dealId = contract.dealId || null;
+        try {
+            await this.createAuditLog({
+                userId,
+                action: 'contract_signed',
+                entityType: 'contract',
+                entityId: contract.id,
+                details: { dealId, signedAt: signedAt || new Date().toISOString() }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        const parties = this.getContractParties(contract);
+        const link = dealId ? '/deals/' + dealId : '/contracts/' + contract.id;
+        for (const p of parties) {
+            if (!p.userId || p.userId === userId) continue;
+            try {
+                await this.createLifecycleNotification({
+                    userId: p.userId,
+                    type: 'contract_signed',
+                    entityType: 'contract',
+                    entityId: contract.id,
+                    title: 'A party signed the contract',
+                    message: 'Another participant signed the Contract Agreement.',
+                    link,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
     }
 
     /**
@@ -1608,12 +3035,181 @@ class DataService {
         return deals.find(d => d.matchId === matchId) || null;
     }
 
-    async createDealFromMatch(postMatch) {
+    async assertDealCreationSource(dealData) {
+        const matchId = dealData && dealData.matchId;
+        const applicationId = dealData && dealData.applicationId;
+        const negotiationId = dealData && dealData.negotiationId;
+
+        if (!matchId && !applicationId && !negotiationId) {
+            throw new Error('A deal requires a confirmed match, accepted application, or agreed negotiation.');
+        }
+
+        if (matchId) {
+            const sourcePostMatch = dealData && dealData.sourcePostMatch && dealData.sourcePostMatch.id === matchId
+                ? dealData.sourcePostMatch
+                : null;
+            const postMatch = sourcePostMatch || await this.getPostMatchById(matchId);
+            if (!postMatch || (postMatch.status || '') !== CONFIG.POST_MATCH_STATUS.CONFIRMED) {
+                throw new Error('A deal can only be created from a confirmed match.');
+            }
+        }
+
+        if (applicationId) {
+            const application = await this.getApplicationById(applicationId);
+            if (!application || (application.status || '') !== CONFIG.APPLICATION_STATUS.ACCEPTED) {
+                throw new Error('A deal can only be created from an accepted application.');
+            }
+        }
+
+        if (negotiationId) {
+            const negotiation = await this.getNegotiationById(negotiationId);
+            if (!negotiation || (negotiation.status || '') !== 'agreed') {
+                throw new Error('A deal can only be created from agreed negotiation terms.');
+            }
+        }
+    }
+
+    async linkEntitiesAfterDealCreated(deal, options = {}) {
+        if (!deal || !deal.id) return deal;
+        const actorUserId = options.actorUserId || 'system';
+
+        let matchId = deal.matchId || null;
+        if (!matchId && deal.applicationId) {
+            const app = await this.getApplicationById(deal.applicationId);
+            matchId = app?.matchId || null;
+        }
+        if (!matchId && deal.negotiationId) {
+            const neg = await this.getNegotiationById(deal.negotiationId);
+            matchId = neg?.matchId || null;
+        }
+
+        if (matchId) {
+            await this.updatePostMatch(matchId, { dealId: deal.id }).catch(() => null);
+        }
+        if (deal.applicationId) {
+            await this.updateApplication(deal.applicationId, { dealId: deal.id }).catch(() => null);
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'deal_linked_to_sources',
+                entityType: 'deal',
+                entityId: deal.id,
+                details: {
+                    matchId,
+                    applicationId: deal.applicationId || null,
+                    negotiationId: deal.negotiationId || null
+                }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return deal;
+    }
+
+    async createDealFromApplication(applicationId, actorUserId) {
+        const application = await this.getApplicationById(applicationId);
+        if (!application) throw new Error('Application not found.');
+        if (!canCreateDealFromApplication(application)) {
+            throw new Error('A deal can only be created from an accepted application.');
+        }
+
+        const existing = await this.getDealByApplicationId(applicationId);
+        if (existing) {
+            await this.linkEntitiesAfterDealCreated(existing, { actorUserId });
+            return existing;
+        }
+
+        const opp = await this.getOpportunityById(application.opportunityId);
+        if (!opp) throw new Error('Opportunity not found.');
+        if (opp.creatorId !== actorUserId) {
+            throw new Error('Only the opportunity owner can create a deal from this application.');
+        }
+
+        const built = buildDealPayloadFromApplication(application, opp);
+        let negotiationId = built.negotiationId || null;
+        if (!negotiationId) {
+            const negs = await this.getNegotiationsByApplicationId(applicationId);
+            const agreed = (negs || []).find(n =>
+                (n.status || '').toLowerCase() === CONFIG.MATCHING.NEGOTIATION.STATUS.AGREED
+            );
+            negotiationId = agreed?.id || null;
+        }
+
+        const deal = await this.createDeal({
+            applicationId: built.applicationId,
+            matchId: built.matchId,
+            negotiationId,
+            opportunityId: built.opportunityId,
+            opportunityIds: built.opportunityIds,
+            status: CONFIG.DEAL_STATUS.DRAFT,
+            title: 'Deal – ' + (opp.title || application.id),
+            participants: built.participants.map(p => ({
+                ...p,
+                approvalStatus: 'pending',
+                signedAt: null
+            })),
+            scope: built.scope,
+            exchangeMode: built.exchangeMode,
+            valueTerms: { agreedValue: null, paymentSchedule: '' },
+            timeline: { start: null, end: null },
+            deliverables: '',
+            milestones: []
+        });
+
+        await this.linkEntitiesAfterDealCreated(deal, { actorUserId });
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'deal_created_from_application',
+                entityType: 'deal',
+                entityId: deal.id,
+                details: {
+                    applicationId,
+                    opportunityId: opp.id,
+                    matchId: built.matchId
+                }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        if (application.applicantId) {
+            try {
+                await this.createLifecycleNotification({
+                    userId: application.applicantId,
+                    type: 'deal_created_from_application',
+                    entityType: 'deal',
+                    entityId: deal.id,
+                    title: 'Deal workspace created',
+                    message: 'A draft Deal Workspace was created for your accepted application.',
+                    link: '/deals/' + deal.id,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+
+        return deal;
+    }
+
+    async createDealFromMatch(postMatch, actorUserId = null) {
         const payload = buildDealPayloadFromMatch(postMatch, CONFIG.POST_MATCH_STATUS.CONFIRMED);
 
         const { matchId, matchType, participants, opportunityIds, primaryOpportunityId, payload: consortiumPayload, roleSlots } = payload;
+        const actor = actorUserId || participants[0]?.userId;
+        if (actor) {
+            assertMatchParticipant(postMatch, actor);
+        }
         const existing = await this.getDealByMatchId(matchId);
-        if (existing) return existing;
+        if (existing) {
+            await this.linkEntitiesAfterDealCreated(existing, { actorUserId: actor });
+            return existing;
+        }
 
         const dealParticipants = participants.map(p => ({
             userId: p.userId,
@@ -1632,6 +3228,7 @@ class DataService {
             opportunityId: primaryOpportunityId,
             payload: consortiumPayload,
             roleSlots,
+            sourcePostMatch: postMatch,
             negotiationId: null,
             scope: '',
             timeline: { start: null, end: null },
@@ -1642,12 +3239,26 @@ class DataService {
         });
 
         try {
+            const auditCtx = {
+                matchId,
+                opportunityId: primaryOpportunityId,
+                sourceOpportunityId: primaryOpportunityId,
+                dealId: deal.id,
+                actorRole: actor ? await this._getActorRole(actor) : null
+            };
             await this.createAuditLog({
-                userId: (participants[0] && participants[0].userId) || 'system',
-                action: 'deal_created',
+                userId: actor || 'system',
+                action: 'deal_created_from_match',
                 entityType: 'deal',
                 entityId: deal.id,
-                details: { matchId, opportunityIds }
+                details: buildLifecycleAuditDetails({ summary: 'Deal created from confirmed match', opportunityIds }, auditCtx)
+            });
+            await this.createAuditLog({
+                userId: actor || 'system',
+                action: 'match_converted_to_deal',
+                entityType: 'match',
+                entityId: matchId,
+                details: buildLifecycleAuditDetails({ summary: 'Match converted to deal' }, auditCtx)
             });
         } catch (e) {
             void e;
@@ -1658,9 +3269,11 @@ class DataService {
             if (!p.userId || seen.has(p.userId)) continue;
             seen.add(p.userId);
             try {
-                await this.createNotification({
+                await this.createLifecycleNotification({
                     userId: p.userId,
-                    type: 'deal_created',
+                    type: 'deal_created_from_match',
+                    entityType: 'deal',
+                    entityId: deal.id,
                     title: 'Deal workspace created',
                     message: 'A draft Deal Workspace is ready from your confirmed match.',
                     link: '/deals/' + deal.id,
@@ -1670,6 +3283,8 @@ class DataService {
                 void e;
             }
         }
+
+        await this.linkEntitiesAfterDealCreated(deal, { actorUserId: actor });
 
         return deal;
     }
@@ -1708,6 +3323,20 @@ class DataService {
     }
 
     async createDeal(dealData) {
+        await this.assertDealCreationSource(dealData || {});
+        if (dealData && dealData.matchId) {
+            const existingByMatch = await this.getDealByMatchId(dealData.matchId);
+            if (existingByMatch) return existingByMatch;
+        }
+        if (dealData && dealData.applicationId) {
+            const existingByApplication = await this.getDealByApplicationId(dealData.applicationId);
+            if (existingByApplication) return existingByApplication;
+        }
+        if (dealData && dealData.negotiationId) {
+            const existingByNegotiation = (await this.getDeals()).find(d => d.negotiationId === dealData.negotiationId) || null;
+            if (existingByNegotiation) return existingByNegotiation;
+        }
+
         const deals = await this.getDeals();
         const participants = (dealData.participants || []).map(p => ({
             userId: p.userId,
@@ -1848,6 +3477,524 @@ class DataService {
         return list[index];
     }
 
+    getActiveNegotiationForMatch(matchId) {
+        return this.getNegotiationsByMatchId(matchId).then(list =>
+            (list || []).find(n => isActiveNegotiation(n)) || null
+        );
+    }
+
+    async assertNegotiationParticipant(negotiation, userId) {
+        if (!negotiation || !userId) {
+            throw new Error('Negotiation participant required.');
+        }
+        const parties = negotiation.parties || [];
+        if (!parties.some(p => p.userId === userId)) {
+            throw new Error('You are not a participant in this negotiation.');
+        }
+    }
+
+    _buildInitialTermsFromApplication(application) {
+        if (!application) return null;
+        const av = application.application_value || {};
+        const value = av.requestedValue != null ? av.requestedValue : av.offeredValue;
+        if (value == null && !application.proposal) return null;
+        return {
+            value: value != null ? value : undefined,
+            currency: av.requestedCurrency || av.currency || 'SAR',
+            message: (application.proposal || application.coverLetter || '').slice(0, 500) || undefined
+        };
+    }
+
+    async _linkNegotiationToRecords(negotiation) {
+        if (negotiation.matchId) {
+            const postMatch = await this.getPostMatchById(negotiation.matchId);
+            if (postMatch) {
+                await this.updatePostMatch(negotiation.matchId, { negotiationId: negotiation.id });
+            } else if (this._isLegacyPersonOpportunityEnabled()) {
+                await this.updateMatch(negotiation.matchId, { negotiationId: negotiation.id });
+            }
+        }
+        if (negotiation.applicationId) {
+            await this.updateApplication(negotiation.applicationId, { negotiationId: negotiation.id });
+        }
+    }
+
+    async startNegotiationFromMatch(matchId, actorUserId, options = {}) {
+        const postMatch = await this.getPostMatchById(matchId);
+        let matchRecord = postMatch;
+        if (!matchRecord && this._isLegacyPersonOpportunityEnabled()) {
+            const legacy = await this.getMatches();
+            matchRecord = legacy.find(m => m.id === matchId) || null;
+        }
+        if (!matchRecord) throw new Error('Match not found.');
+
+        assertMatchParticipant(matchRecord, actorUserId);
+        const participants = matchRecord.participants || [];
+
+        const existing = await this.getActiveNegotiationForMatch(matchId);
+        if (existing) return existing;
+
+        let opportunityId = options.opportunityId || null;
+        const payload = matchRecord.payload || {};
+        if (!opportunityId) {
+            opportunityId = payload.needOpportunityId || payload.leadNeedId || matchRecord.opportunityId || null;
+        }
+        if (!opportunityId) throw new Error('Could not resolve opportunity for this negotiation.');
+
+        const applicationId = matchRecord.applicationId || options.applicationId || null;
+        let application = null;
+        if (applicationId) application = await this.getApplicationById(applicationId);
+
+        const parties = participants
+            .filter(p => p.userId)
+            .map(p => ({ userId: p.userId, role: p.role || 'participant' }));
+
+        const initialTerms = options.initialTerms
+            || this._buildInitialTermsFromApplication(application)
+            || { message: 'Negotiation opened from opportunity match.' };
+
+        const negotiation = await this.createNegotiation({
+            opportunityId,
+            matchId,
+            applicationId,
+            parties,
+            status: CONFIG.MATCHING.NEGOTIATION.STATUS.OPEN,
+            initialTerms,
+            rounds: []
+        });
+
+        await this._linkNegotiationToRecords(negotiation);
+
+        const opp = await this.getOpportunityById(opportunityId);
+        if (opp && (opp.status || '') === CONFIG.OPPORTUNITY_STATUS.PUBLISHED) {
+            await this.updateOpportunity(opportunityId, { status: CONFIG.OPPORTUNITY_STATUS.IN_NEGOTIATION });
+        }
+
+        const otherIds = parties.map(p => p.userId).filter(id => id !== actorUserId);
+        for (const uid of otherIds) {
+            try {
+                await this.createNotification({
+                    userId: uid,
+                    type: 'negotiation_started',
+                    title: 'Negotiation started',
+                    message: 'A participant started negotiating terms on your opportunity match.',
+                    link: '/matches/' + matchId,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'negotiation_started',
+                entityType: 'negotiation',
+                entityId: negotiation.id,
+                details: { matchId, opportunityId, applicationId }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return negotiation;
+    }
+
+    async startNegotiationFromApplication(applicationId, actorUserId) {
+        const application = await this.getApplicationById(applicationId);
+        if (!application) throw new Error('Application not found.');
+
+        const opp = await this.getOpportunityById(application.opportunityId);
+        const isOwner = opp && opp.creatorId === actorUserId;
+        const isApplicant = application.applicantId === actorUserId;
+        if (!isOwner && !isApplicant) {
+            throw new Error('Only the opportunity owner or applicant can start negotiation.');
+        }
+
+        const existingList = await this.getNegotiationsByApplicationId(applicationId);
+        const existing = (existingList || []).find(n => isActiveNegotiation(n));
+        if (existing) return existing;
+
+        if (application.matchId) {
+            return this.startNegotiationFromMatch(application.matchId, actorUserId, {
+                applicationId,
+                opportunityId: application.opportunityId
+            });
+        }
+
+        const parties = [];
+        if (opp?.creatorId) parties.push({ userId: opp.creatorId, role: 'need_owner' });
+        if (application.applicantId && !parties.some(p => p.userId === application.applicantId)) {
+            parties.push({ userId: application.applicantId, role: 'offer_provider' });
+        }
+
+        const negotiation = await this.createNegotiation({
+            opportunityId: application.opportunityId,
+            matchId: null,
+            applicationId,
+            parties,
+            status: CONFIG.MATCHING.NEGOTIATION.STATUS.OPEN,
+            initialTerms: this._buildInitialTermsFromApplication(application),
+            rounds: []
+        });
+
+        await this.updateApplication(applicationId, { negotiationId: negotiation.id });
+
+        if (opp && (opp.status || '') === CONFIG.OPPORTUNITY_STATUS.PUBLISHED) {
+            await this.updateOpportunity(application.opportunityId, { status: CONFIG.OPPORTUNITY_STATUS.IN_NEGOTIATION });
+        }
+
+        const notifyIds = parties.map(p => p.userId).filter(id => id !== actorUserId);
+        for (const uid of notifyIds) {
+            try {
+                await this.createNotification({
+                    userId: uid,
+                    type: 'negotiation_started',
+                    title: 'Negotiation started',
+                    message: 'Negotiation has started on an application for your opportunity.',
+                    link: '/opportunities/' + application.opportunityId,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'negotiation_started',
+                entityType: 'negotiation',
+                entityId: negotiation.id,
+                details: { applicationId, opportunityId: application.opportunityId }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return negotiation;
+    }
+
+    async addNegotiationProposal(negotiationId, actorUserId, { proposal, message } = {}) {
+        const negotiation = await this.getNegotiationById(negotiationId);
+        if (!negotiation) throw new Error('Negotiation not found.');
+        assertNotReadOnlyAdmin(await this._getActorRole(actorUserId));
+        await this.assertNegotiationParticipant(negotiation, actorUserId);
+        if (!isActiveNegotiation(negotiation)) {
+            throw new Error('This negotiation is no longer active.');
+        }
+
+        const maxRounds = CONFIG.MATCHING.NEGOTIATION.MAX_ROUNDS || 10;
+        const rounds = [...(negotiation.rounds || [])];
+        if (rounds.length >= maxRounds) {
+            throw new Error('Maximum negotiation rounds reached.');
+        }
+
+        rounds.push({
+            by: actorUserId,
+            at: new Date().toISOString(),
+            proposal: proposal || {},
+            message: message || ''
+        });
+
+        const updated = await this.updateNegotiation(negotiationId, {
+            rounds,
+            status: CONFIG.MATCHING.NEGOTIATION.STATUS.COUNTER_OFFERED
+        });
+
+        const otherIds = (negotiation.parties || []).map(p => p.userId).filter(id => id !== actorUserId);
+        for (const uid of otherIds) {
+            try {
+                await this.createNotification({
+                    userId: uid,
+                    type: 'negotiation_countered',
+                    title: 'New negotiation proposal',
+                    message: message || 'A counter-proposal was submitted.',
+                    link: negotiation.matchId ? '/matches/' + negotiation.matchId : '/opportunities/' + negotiation.opportunityId,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: normalizeAuditAction('negotiation_counter_offer'),
+                entityType: 'negotiation',
+                entityId: negotiationId,
+                details: { roundIndex: rounds.length - 1, legacyAction: 'negotiation_counter_offer' }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return updated;
+    }
+
+    async agreeNegotiation(negotiationId, actorUserId, agreedTerms) {
+        const negotiation = await this.getNegotiationById(negotiationId);
+        if (!negotiation) throw new Error('Negotiation not found.');
+        assertNotReadOnlyAdmin(await this._getActorRole(actorUserId));
+        await this.assertNegotiationParticipant(negotiation, actorUserId);
+
+        const agreedStatus = CONFIG.MATCHING.NEGOTIATION.STATUS.AGREED;
+        if ((negotiation.status || '') === agreedStatus) {
+            return negotiation;
+        }
+        if (!isActiveNegotiation(negotiation)) {
+            throw new Error('This negotiation is no longer active.');
+        }
+        if (hasParticipantAgreed(negotiation, actorUserId)) {
+            return negotiation;
+        }
+
+        const lastRound = (negotiation.rounds || [])[negotiation.rounds.length - 1];
+        const terms = agreedTerms
+            || (lastRound && lastRound.proposal)
+            || negotiation.initialTerms
+            || {};
+
+        const agreedAt = new Date().toISOString();
+        const participantAgreements = [
+            ...(negotiation.participantAgreements || []),
+            { userId: actorUserId, agreedAt }
+        ];
+        const agreedBy = participantAgreements.map(a => ({
+            userId: a.userId,
+            agreedAt: a.agreedAt
+        }));
+
+        const allAgreed = allRequiredParticipantsAgreed(negotiation, participantAgreements);
+        if (!allAgreed) {
+            return this.updateNegotiation(negotiationId, {
+                participantAgreements,
+                agreedBy
+            });
+        }
+
+        const match = negotiation.matchId
+            ? await this.getPostMatchById(negotiation.matchId)
+            : null;
+        const requiredCount = getNegotiationRequiredParticipantIds(negotiation).length;
+        const finalAgreedSnapshot = buildFinalAgreedSnapshot({
+            negotiation,
+            match,
+            terms,
+            actorUserId,
+            agreedAt,
+            agreedBy,
+            multiParty: requiredCount > 1
+        });
+
+        const updated = await this.updateNegotiation(negotiationId, {
+            status: agreedStatus,
+            agreedTerms: terms,
+            finalAgreedSnapshot,
+            agreedBy,
+            participantAgreements,
+            agreedAt
+        });
+
+        const otherIds = (negotiation.parties || []).map(p => p.userId).filter(id => id !== actorUserId);
+        for (const uid of otherIds) {
+            try {
+                await this.createLifecycleNotification({
+                    userId: uid,
+                    type: 'negotiation_agreed',
+                    entityType: 'negotiation',
+                    entityId: negotiationId,
+                    title: 'Terms agreed',
+                    message: 'Negotiation terms have been agreed. You can create a deal workspace next.',
+                    link: negotiation.matchId ? '/matches/' + negotiation.matchId : '/opportunities/' + negotiation.opportunityId,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'negotiation_agreed',
+                entityType: 'negotiation',
+                entityId: negotiationId,
+                details: {
+                    matchId: negotiation.matchId,
+                    applicationId: negotiation.applicationId,
+                    agreementMode: finalAgreedSnapshot.agreementMode
+                }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return updated;
+    }
+
+    async cancelNegotiation(negotiationId, actorUserId, reason) {
+        const negotiation = await this.getNegotiationById(negotiationId);
+        if (!negotiation) throw new Error('Negotiation not found.');
+        assertNotReadOnlyAdmin(await this._getActorRole(actorUserId));
+        await this.assertNegotiationParticipant(negotiation, actorUserId);
+        if (isTerminalNegotiation(negotiation)) {
+            throw new Error('This negotiation has already ended.');
+        }
+
+        const updated = await this.updateNegotiation(negotiationId, {
+            status: CONFIG.MATCHING.NEGOTIATION.STATUS.CANCELLED,
+            cancelReason: reason || 'cancelled_by_participant',
+            cancelledByUserId: actorUserId,
+            cancelledAt: new Date().toISOString()
+        });
+
+        const otherIds = (negotiation.parties || []).map(p => p.userId).filter(id => id !== actorUserId);
+        for (const uid of otherIds) {
+            try {
+                await this.createNotification({
+                    userId: uid,
+                    type: 'negotiation_cancelled',
+                    title: 'Negotiation cancelled',
+                    message: 'The negotiation was cancelled. You can start a new negotiation when ready.',
+                    link: negotiation.matchId ? '/matches/' + negotiation.matchId : '/opportunities/' + negotiation.opportunityId,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'negotiation_cancelled',
+                entityType: 'negotiation',
+                entityId: negotiationId,
+                details: { reason: reason || 'cancelled_by_participant' }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return updated;
+    }
+
+    async createDealFromNegotiation(negotiationId, actorUserId) {
+        const negotiation = await this.getNegotiationById(negotiationId);
+        if (!negotiation) throw new Error('Negotiation not found.');
+        await this.assertNegotiationParticipant(negotiation, actorUserId);
+        if ((negotiation.status || '') !== CONFIG.MATCHING.NEGOTIATION.STATUS.AGREED) {
+            throw new Error('Agree to terms before creating a deal.');
+        }
+
+        const opp = negotiation.opportunityId
+            ? await this.getOpportunityById(negotiation.opportunityId)
+            : null;
+        const isOwner = !!(opp && opp.creatorId === actorUserId);
+        if (!isOwner) {
+            throw new Error('Only the opportunity owner can create a deal from agreed negotiation terms.');
+        }
+
+        const existing = (await this.getDeals()).find(d => d.negotiationId === negotiationId);
+        if (existing) {
+            await this.linkEntitiesAfterDealCreated(existing, { actorUserId });
+            return existing;
+        }
+
+        const snapshot = negotiation.finalAgreedSnapshot || {};
+        const agreed = negotiation.agreedTerms || snapshot.valueTerms || {};
+        const participants = (snapshot.participants || (negotiation.parties || [])).map(p => ({
+            userId: p.userId,
+            role: p.role || 'participant',
+            approvalStatus: 'pending',
+            signedAt: null
+        }));
+
+        const valueFromSnapshot = snapshot.valueTerms || {};
+        const agreedValue = valueFromSnapshot.agreedValue
+            || (agreed.value != null ? { amount: agreed.value, currency: agreed.currency || 'SAR' } : null);
+
+        const deal = await this.createDeal({
+            negotiationId,
+            matchId: negotiation.matchId || snapshot.matchId || null,
+            applicationId: negotiation.applicationId || snapshot.applicationId || null,
+            opportunityId: negotiation.opportunityId,
+            opportunityIds: snapshot.opportunityIds?.length
+                ? snapshot.opportunityIds
+                : (negotiation.opportunityId ? [negotiation.opportunityId] : []),
+            status: CONFIG.DEAL_STATUS.NEGOTIATING,
+            title: 'Deal – negotiation ' + negotiationId.slice(-6),
+            participants,
+            valueTerms: {
+                agreedValue,
+                paymentSchedule: valueFromSnapshot.paymentSchedule || agreed.paymentSchedule || ''
+            },
+            scope: snapshot.scope || agreed.scope || agreed.message || '',
+            timeline: snapshot.timeline || { start: agreed.startDate || null, end: agreed.endDate || null },
+            exchangeMode: 'cash',
+            deliverables: '',
+            milestones: []
+        });
+
+        await this.linkEntitiesAfterDealCreated(deal, { actorUserId });
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'deal_created_from_negotiation',
+                entityType: 'deal',
+                entityId: deal.id,
+                details: buildLifecycleAuditDetails({
+                    summary: 'Deal created from agreed negotiation',
+                    negotiationId,
+                    matchId: negotiation.matchId,
+                    opportunityId: negotiation.opportunityId,
+                    applicationId: negotiation.applicationId
+                }, { actorRole: await this._getActorRole(actorUserId), dealId: deal.id })
+            });
+        } catch (e) {
+            void e;
+        }
+
+        const notifyIds = (negotiation.parties || []).map(p => p.userId).filter(Boolean);
+        for (const uid of notifyIds) {
+            if (uid === actorUserId) continue;
+            try {
+                await this.createLifecycleNotification({
+                    userId: uid,
+                    type: 'deal_created_from_negotiation',
+                    entityType: 'deal',
+                    entityId: deal.id,
+                    title: 'Deal workspace created',
+                    message: 'A deal workspace was created from your agreed negotiation terms.',
+                    link: '/deals/' + deal.id,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+
+        return deal;
+    }
+
+    async getNegotiationMatchingAnalytics() {
+        const negotiations = await this.getNegotiations();
+        const deals = await this.getDeals();
+        const openNegotiations = negotiations.filter(n => isActiveNegotiation(n)).length;
+        const agreedNegotiations = negotiations.filter(n =>
+            (n.status || '').toLowerCase() === CONFIG.MATCHING.NEGOTIATION.STATUS.AGREED
+        ).length;
+        const cancelledNegotiations = negotiations.filter(n =>
+            (n.status || '').toLowerCase() === CONFIG.MATCHING.NEGOTIATION.STATUS.CANCELLED
+        ).length;
+        const dealsFromNegotiations = deals.filter(d => d.negotiationId).length;
+        return { openNegotiations, agreedNegotiations, cancelledNegotiations, dealsFromNegotiations };
+    }
+
     // Review Operations (post-completion reputation)
     async getReviews() {
         return this.storage.get(CONFIG.STORAGE_KEYS.REVIEWS) || [];
@@ -1886,17 +4033,72 @@ class DataService {
         return newReview;
     }
 
-    // Match Operations
+    _isLegacyPersonOpportunityEnabled() {
+        return !!(CONFIG && CONFIG.MATCHING && CONFIG.MATCHING.LEGACY_PERSON_OPPORTUNITY_ENABLED === true);
+    }
+
+    // --- Legacy match operations (pmtwin_matches / CONFIG.STORAGE_KEYS.MATCHES) ---
+    // UI and publish flows must use post_match helpers below. Kept for migration and tests.
+
+    /**
+     * @deprecated Legacy person-to-opportunity store (`pmtwin_matches`). Use `getPostMatches()`.
+     */
     async getMatches() {
         return this.storage.get(CONFIG.STORAGE_KEYS.MATCHES) || [];
     }
 
+    /**
+     * @deprecated Legacy `pmtwin_matches`. Use `getPostMatchById(matchId)`.
+     */
+    async getMatchById(matchId) {
+        if (!this._isLegacyPersonOpportunityEnabled()) return null;
+        const matches = await this.getMatches();
+        return matches.find(m => m.id === matchId) || null;
+    }
+
+    /**
+     * @deprecated Legacy `pmtwin_matches`. Use `getPostMatchesForUser(userId)`.
+     */
+    async getMatchesForUser(userId) {
+        if (!this._isLegacyPersonOpportunityEnabled()) return [];
+        const matches = await this.getMatches();
+        return matches.filter(m => m.candidateId === userId || m.userId === userId);
+    }
+
+    /**
+     * @deprecated Legacy `pmtwin_matches`. Use `getPostMatchesByOpportunityId(opportunityId)`.
+     */
     async getMatchesByOpportunityId(opportunityId) {
+        if (!this._isLegacyPersonOpportunityEnabled()) return [];
         const matches = await this.getMatches();
         return matches.filter(m => m.opportunityId === opportunityId);
     }
-    
+
+    /**
+     * @deprecated Legacy `pmtwin_matches`. Use `updatePostMatch(matchId, updates)`.
+     */
+    async updateMatch(matchId, updates) {
+        if (!this._isLegacyPersonOpportunityEnabled()) return null;
+        const matches = await this.getMatches();
+        const index = matches.findIndex(m => m.id === matchId);
+        if (index === -1) return null;
+        matches[index] = {
+            ...matches[index],
+            ...updates,
+            updatedAt: new Date().toISOString()
+        };
+        this.storage.set(CONFIG.STORAGE_KEYS.MATCHES, matches);
+        return matches[index];
+    }
+
+    /**
+     * @deprecated Legacy `pmtwin_matches`. Use `createPostMatch` / `persistPostMatches` (post-to-post only).
+     */
     async createMatch(matchData) {
+        if (!this._isLegacyPersonOpportunityEnabled()) {
+            console.warn('[data-service] createMatch is disabled; use post_matches (createPostMatch).');
+            return null;
+        }
         const matches = await this.getMatches();
         // Single canonical field for candidate: candidateId (prefer over userId)
         const candidateId = matchData.candidateId != null ? matchData.candidateId : matchData.userId;
@@ -1916,11 +4118,24 @@ class DataService {
         return newMatch;
     }
 
+    // --- PostMatch operations (canonical: pmtwin_post_matches / CONFIG.STORAGE_KEYS.POST_MATCHES) ---
+
     // PostMatch Operations (user-facing post-to-post match discovery)
-    async getPostMatches() {
+    getDefaultPostMatchExpiresAt(status) {
+        const nextStatus = status || CONFIG.POST_MATCH_STATUS.PENDING;
+        if (nextStatus !== CONFIG.POST_MATCH_STATUS.PENDING) return null;
+        const configured = CONFIG.MATCHING && CONFIG.MATCHING.DEFAULT_MATCH_EXPIRY_DAYS;
+        const parsed = Number(configured);
+        const days = Number.isFinite(parsed) && parsed > 0 ? parsed : 14;
+        return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+    }
+
+    async expirePendingPostMatches() {
         const list = this.storage.get(CONFIG.STORAGE_KEYS.POST_MATCHES) || [];
         let changed = false;
         const now = Date.now();
+        const nowIso = new Date().toISOString();
+        const expired = [];
         for (let i = 0; i < list.length; i++) {
             const m = list[i];
             if (!m || (m.status || '') !== CONFIG.POST_MATCH_STATUS.PENDING) continue;
@@ -1933,16 +4148,60 @@ class DataService {
             list[i] = {
                 ...m,
                 status: CONFIG.POST_MATCH_STATUS.EXPIRED,
-                updatedAt: new Date().toISOString()
+                updatedAt: nowIso
             };
+            expired.push(list[i]);
             changed = true;
         }
         if (changed) {
             this.storage.set(CONFIG.STORAGE_KEYS.POST_MATCHES, list);
+            for (const m of expired) {
+                try {
+                    await this.createAuditLog({
+                        userId: 'system',
+                        action: 'match_expired',
+                        entityType: 'match',
+                        entityId: m.id,
+                        details: buildLifecycleAuditDetails({
+                            summary: 'Match expired',
+                            matchId: m.id,
+                            matchType: m.matchType,
+                            expiresAt: m.expiresAt
+                        })
+                    });
+                } catch (e) {
+                    void e;
+                }
+                const seen = new Set();
+                for (const p of m.participants || []) {
+                    if (!p.userId || seen.has(p.userId)) continue;
+                    seen.add(p.userId);
+                    try {
+                        await this.createLifecycleNotification({
+                            userId: p.userId,
+                            type: 'match_expired',
+                            entityType: 'match',
+                            entityId: m.id,
+                            title: 'Match expired',
+                            message: 'This match expired before all participants responded. You can explore other opportunities.',
+                            link: '/matches/' + m.id,
+                            read: false
+                        });
+                    } catch (e) {
+                        void e;
+                    }
+                }
+            }
         }
         return list;
     }
 
+    /** All post_match records (expires pending rows first). */
+    async getPostMatches() {
+        return this.expirePendingPostMatches();
+    }
+
+    /** Single post_match by id. */
     async getPostMatchById(matchId) {
         const list = await this.getPostMatches();
         const match = list.find(m => m.id === matchId) || null;
@@ -1950,6 +4209,7 @@ class DataService {
         return this.expirePostMatchIfNeeded(match);
     }
 
+    /** Post matches where `userId` is a participant. */
     async getPostMatchesForUser(userId) {
         const list = await this.getPostMatches();
         return list.filter(m =>
@@ -1957,9 +4217,41 @@ class DataService {
         );
     }
 
-    async getPostMatchesByType(userId, matchType) {
-        const list = await this.getPostMatchesForUser(userId);
+    /**
+     * Filter post_matches by type. With one argument, returns all matches of that type globally.
+     * With two arguments, filters the given user's matches by type.
+     * @param {string} userIdOrType
+     * @param {string} [matchType]
+     */
+    async getPostMatchesByType(userIdOrType, matchType) {
+        if (matchType === undefined || matchType === null || matchType === '') {
+            const list = await this.getPostMatches();
+            return list.filter(m => m.matchType === userIdOrType);
+        }
+        const list = await this.getPostMatchesForUser(userIdOrType);
         return list.filter(m => m.matchType === matchType);
+    }
+
+    /**
+     * Post matches linked to an opportunity (need, offer, lead need, or two-way side).
+     * @param {string} opportunityId
+     */
+    async getPostMatchesByOpportunityId(opportunityId) {
+        const list = await this.getPostMatches();
+        return list.filter(pm => this._postMatchReferencesOpportunity(pm, opportunityId));
+    }
+
+    _postMatchReferencesOpportunity(postMatch, opportunityId) {
+        if (!postMatch || !opportunityId) return false;
+        const p = postMatch.payload || {};
+        if (p.needOpportunityId === opportunityId || p.offerOpportunityId === opportunityId) return true;
+        if (p.leadNeedId === opportunityId) return true;
+        const sideA = p.sideA || {};
+        const sideB = p.sideB || {};
+        if (sideA.needId === opportunityId || sideA.offerId === opportunityId) return true;
+        if (sideB.needId === opportunityId || sideB.offerId === opportunityId) return true;
+        const links = p.links || [];
+        return links.some(l => l.needId === opportunityId || l.offerId === opportunityId);
     }
 
     /**
@@ -2021,11 +4313,101 @@ class DataService {
             id: this.generateId(),
             opportunityId: data && data.opportunityId ? data.opportunityId : null,
             model: data && data.model ? data.model : null,
+            modelsRun: Array.isArray(data && data.modelsRun) ? data.modelsRun.slice() : (data && data.model ? [data.model] : []),
+            source: (data && data.source) || null,
+            actorId: (data && data.actorId) || null,
+            threshold: data && data.threshold != null ? data.threshold : null,
+            weightsProfile: (data && data.weightsProfile) || null,
+            candidateCount: data && data.candidateCount != null ? data.candidateCount : null,
+            resultCount: data && data.resultCount != null ? data.resultCount : null,
+            createdCount: data && data.createdCount != null ? data.createdCount : null,
+            skippedDuplicateCount: data && data.skippedDuplicateCount != null ? data.skippedDuplicateCount : null,
+            topScores: Array.isArray(data && data.topScores) ? data.topScores.slice() : [],
+            durationMs: data && data.durationMs != null ? data.durationMs : null,
             createdAt: new Date().toISOString()
         };
         list.push(record);
         this.storage.set(CONFIG.STORAGE_KEYS.MATCHING_RUNS, list);
         return record;
+    }
+
+    async updateMatchingRun(runId, updates) {
+        if (!runId) return null;
+        const list = await this.getMatchingRuns();
+        const index = list.findIndex(r => r.id === runId);
+        if (index === -1) return null;
+        list[index] = { ...list[index], ...updates };
+        this.storage.set(CONFIG.STORAGE_KEYS.MATCHING_RUNS, list);
+        return list[index];
+    }
+
+    /** Admin preview runs (in-memory report snapshots; not persisted matches). */
+    async getMatchingPreviewRuns() {
+        return this.storage.get(CONFIG.STORAGE_KEYS.MATCHING_PREVIEW_RUNS) || [];
+    }
+
+    async createMatchingPreviewRun(data) {
+        const list = await this.getMatchingPreviewRuns();
+        const record = {
+            id: this.generateId(),
+            createdAt: new Date().toISOString(),
+            actorId: (data && data.actorId) || null,
+            totalPostsAnalyzed: (data && data.totalPostsAnalyzed) != null ? data.totalPostsAnalyzed : 0,
+            totalMatchesFound: (data && data.totalMatchesFound) != null ? data.totalMatchesFound : 0,
+            oneWayMatches: (data && data.oneWayMatches) != null ? data.oneWayMatches : 0,
+            twoWayMatches: (data && data.twoWayMatches) != null ? data.twoWayMatches : 0,
+            groupFormations: (data && data.groupFormations) != null ? data.groupFormations : 0,
+            circularExchanges: (data && data.circularExchanges) != null ? data.circularExchanges : 0,
+            selectableRowCount: (data && data.selectableRowCount) != null ? data.selectableRowCount : 0
+        };
+        list.unshift(record);
+        const trimmed = list.slice(0, 30);
+        this.storage.set(CONFIG.STORAGE_KEYS.MATCHING_PREVIEW_RUNS, trimmed);
+        const actorId = record.actorId;
+        try {
+            await this.createAuditLog({
+                userId: actorId || 'system',
+                action: 'matching_preview_run_created',
+                entityType: 'matching_preview_run',
+                entityId: record.id,
+                details: buildLifecycleAuditDetails({
+                    summary: 'Admin matching preview run',
+                    previewRunId: record.id,
+                    totalMatchesFound: record.totalMatchesFound,
+                    selectableRowCount: record.selectableRowCount
+                }, { actorRole: actorId ? await this._getActorRole(actorId) : null })
+            });
+        } catch (e) {
+            void e;
+        }
+        return record;
+    }
+
+    /**
+     * Admin command center: audit selected-opportunity persist batch.
+     * @param {'started'|'completed'} phase
+     */
+    async auditMatchingSelectedPersist(phase, { actorId, actorRole, previewRunId, opportunityIds, createdCount, errorCount }) {
+        const action = phase === 'started'
+            ? 'matching_selected_persist_started'
+            : 'matching_selected_persist_completed';
+        try {
+            await this.createAuditLog({
+                userId: actorId || 'system',
+                action,
+                entityType: 'matching_run',
+                entityId: previewRunId || 'bulk',
+                details: buildLifecycleAuditDetails({
+                    summary: phase === 'started' ? 'Bulk persist started' : 'Bulk persist completed',
+                    previewRunId,
+                    opportunityIds: opportunityIds || [],
+                    createdCount: createdCount != null ? createdCount : undefined,
+                    errorCount: errorCount != null ? errorCount : undefined
+                }, { actorRole: actorRole || null, matchingRunId: previewRunId })
+            });
+        } catch (e) {
+            void e;
+        }
     }
 
     _postMatchSignature(record) {
@@ -2038,6 +4420,11 @@ class DataService {
                 ? JSON.stringify(record.payload[k])
                 : (record.payload[k] || ''));
         return `${type}:${parts.join('|')}:${oppIds.join(',')}`;
+    }
+
+    /** Strong dedupe key for post_match create / persist-run checks (public for matching-service). */
+    getPostMatchStrongKey(record) {
+        return this._postMatchStrongKey(record);
     }
 
     _postMatchStrongKey(record) {
@@ -2095,22 +4482,34 @@ class DataService {
     async createPostMatch(data) {
         const list = await this.getPostMatches();
         const isReplacement = !!data.isReplacement;
+        const status = data.status || CONFIG.POST_MATCH_STATUS.PENDING;
         const newRecord = {
             id: this.generateId(),
             matchType: data.matchType || 'one_way',
-            status: data.status || CONFIG.POST_MATCH_STATUS.PENDING,
+            status,
             matchScore: data.matchScore != null ? data.matchScore : 0,
             runId: data.runId || null,
             participants: Array.isArray(data.participants) ? data.participants : [],
             payload: data.payload != null ? data.payload : {},
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            expiresAt: data.expiresAt || null,
+            expiresAt: (data.expiresAt != null && data.expiresAt !== '')
+                ? data.expiresAt
+                : this.getDefaultPostMatchExpiresAt(status),
             isReplacement: isReplacement || false,
             replacementDealId: data.replacementDealId || null,
             replacementRole: data.replacementRole || null,
             replacementPayload: data.replacementPayload || null
         };
+        if (newRecord.matchType === 'two_way') {
+            const sideA = newRecord.payload.sideA || {};
+            const sideB = newRecord.payload.sideB || {};
+            if (!sideA.userId || !sideA.needId || !sideA.offerId || !sideB.userId || !sideB.needId || !sideB.offerId) return null;
+        }
+        if (newRecord.matchType === 'circular') {
+            const links = Array.isArray(newRecord.payload.links) ? newRecord.payload.links : [];
+            if (!links.length || links.some(l => !l.fromCreatorId || !l.toCreatorId || !l.needId || !l.offerId || l.score == null)) return null;
+        }
         if (!isReplacement) {
             const strongKey = this._postMatchStrongKey(newRecord);
             if (strongKey) {
@@ -2127,7 +4526,18 @@ class DataService {
         }
         list.push(newRecord);
         this.storage.set(CONFIG.STORAGE_KEYS.POST_MATCHES, list);
-        const flatOppIds = [newRecord.payload && newRecord.payload.leadNeedId, newRecord.payload && newRecord.payload.needOpportunityId, newRecord.payload && newRecord.payload.offerOpportunityId].concat((newRecord.payload && newRecord.payload.roles) ? newRecord.payload.roles.map(r => r.opportunityId) : []).filter(Boolean);
+        const flatOppIds = [
+            newRecord.payload && newRecord.payload.leadNeedId,
+            newRecord.payload && newRecord.payload.needOpportunityId,
+            newRecord.payload && newRecord.payload.offerOpportunityId,
+            newRecord.payload && newRecord.payload.sideA && newRecord.payload.sideA.needId,
+            newRecord.payload && newRecord.payload.sideA && newRecord.payload.sideA.offerId,
+            newRecord.payload && newRecord.payload.sideB && newRecord.payload.sideB.needId,
+            newRecord.payload && newRecord.payload.sideB && newRecord.payload.sideB.offerId
+        ]
+            .concat((newRecord.payload && newRecord.payload.roles) ? newRecord.payload.roles.map(r => r.opportunityId) : [])
+            .concat((newRecord.payload && newRecord.payload.links) ? newRecord.payload.links.flatMap(l => [l.needId, l.offerId]) : [])
+            .filter(Boolean);
         try {
             await this.createAuditLog({
                 userId: (newRecord.participants && newRecord.participants[0] && newRecord.participants[0].userId) || 'system',
@@ -2153,9 +4563,18 @@ class DataService {
         return list[index];
     }
 
+    /** Update participant status on a post_match (accept/decline); may confirm or decline the match. */
     async updatePostMatchStatus(matchId, userId, newStatus) {
         const match = await this.getPostMatchById(matchId);
         if (!match || !match.participants) return null;
+        if ((match.status || '') === CONFIG.POST_MATCH_STATUS.EXPIRED) return match;
+        if ((match.status || '') !== CONFIG.POST_MATCH_STATUS.PENDING) return match;
+
+        assertMatchParticipant(match, userId);
+
+        const targetParticipants = match.participants.filter(p => p.userId === userId);
+        if (!targetParticipants.length) return match;
+        const alreadySet = targetParticipants.every(p => (p.participantStatus || '').toLowerCase() === String(newStatus || '').toLowerCase());
 
         const participants = match.participants.map(p =>
             p.userId === userId
@@ -2173,6 +4592,80 @@ class DataService {
         }
 
         const updated = await this.updatePostMatch(matchId, { participants, status });
+        if (!updated) return updated;
+
+        if (!alreadySet) {
+            const action = newStatus === CONFIG.POST_MATCH_PARTICIPANT_STATUS.DECLINED ? 'match_declined' : 'match_accepted';
+            const title = action === 'match_declined' ? 'Match declined' : 'Match accepted';
+            const message = action === 'match_declined'
+                ? 'A participant declined the match.'
+                : 'A participant accepted the match.';
+            try {
+                await this.createAuditLog({
+                    userId,
+                    action,
+                    entityType: 'match',
+                    entityId: matchId,
+                    details: { matchType: match.matchType, status }
+                });
+            } catch (e) {
+                void e;
+            }
+
+            const seen = new Set();
+            for (const p of participants) {
+                if (!p.userId || p.userId === userId || seen.has(p.userId)) continue;
+                seen.add(p.userId);
+                try {
+                    await this.createLifecycleNotification({
+                        userId: p.userId,
+                        type: action,
+                        entityType: 'match',
+                        entityId: matchId,
+                        title,
+                        message,
+                        link: '/matches/' + matchId,
+                        read: false
+                    });
+                } catch (e) {
+                    void e;
+                }
+            }
+        }
+
+        if (updated.status === CONFIG.POST_MATCH_STATUS.CONFIRMED && match.status !== CONFIG.POST_MATCH_STATUS.CONFIRMED) {
+            try {
+                await this.createAuditLog({
+                    userId,
+                    action: 'match_confirmed',
+                    entityType: 'match',
+                    entityId: matchId,
+                    details: { matchType: match.matchType }
+                });
+            } catch (e) {
+                void e;
+            }
+
+            const seen = new Set();
+            for (const p of participants) {
+                if (!p.userId || seen.has(p.userId)) continue;
+                seen.add(p.userId);
+                try {
+                    await this.createLifecycleNotification({
+                        userId: p.userId,
+                        type: 'match_confirmed',
+                        entityType: 'match',
+                        entityId: matchId,
+                        title: 'Match confirmed',
+                        message: 'All participants accepted. A Deal Workspace can now be created.',
+                        link: '/matches/' + matchId,
+                        read: false
+                    });
+                } catch (e) {
+                    void e;
+                }
+            }
+        }
         return updated;
     }
 
@@ -2321,6 +4814,14 @@ class DataService {
                 entityId: dealId,
                 details: { matchId: postMatch.id, invitedUserId: candidate.userId, replacementRole: missingRole }
             });
+            const ms = typeof window !== 'undefined' ? window.matchingService : null;
+            if (ms && typeof ms.notifyPostMatch === 'function') {
+                try {
+                    await ms.notifyPostMatch(postMatch);
+                } catch (e) {
+                    void e;
+                }
+            }
         }
         return postMatch;
     }
@@ -2654,6 +5155,9 @@ class DataService {
     // Audit Log Operations
     async createAuditLog(logData) {
         const payload = logData && typeof logData === 'object' ? { ...logData } : {};
+        if (payload.details && typeof payload.details === 'object' && !payload.details.summary && payload.action) {
+            payload.details = { ...payload.details, summary: String(payload.action).replace(/_/g, ' ') };
+        }
         const userId = payload.userId;
         let userName = payload.userName;
         if (userName == null || String(userName).trim() === '') {
@@ -2846,6 +5350,8 @@ class DataService {
 const dataService = new DataService();
 
 // Export
+export { DataService };
+
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = dataService;
 } else {

@@ -1,5 +1,7 @@
 # Consortium matching
 
+> **Canonical entity:** Persisted as **`post_matches`** only. Legacy **`pmtwin_matches`** is deprecated.
+
 ### What this page is
 
 POC note on **consortium** matching: lead need, role slots, and member offers.

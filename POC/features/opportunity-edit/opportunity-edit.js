@@ -1371,15 +1371,37 @@ function editSetupFormHandlers() {
                 modelData: formData
             };
             if (value_exchange) updates.value_exchange = value_exchange;
-            
+
+            const newStatus = updates.status || editingOpportunity.status;
+            if (newStatus === 'published' && (editingOpportunity.status || '') !== 'published') {
+                const merged = { ...editingOpportunity, ...updates, scope, attributes: formData };
+                const mr = window.MatchingReadiness;
+                const ui = window.MatchingReadinessUI;
+                if (mr && ui) {
+                    const report = mr.buildMatchingReadinessReport(merged);
+                    const choice = await ui.confirmPublishWithReadiness(report);
+                    if (choice !== 'publish') return;
+                }
+            }
+
+            const oppService = window.opportunityService || (typeof opportunityService !== 'undefined' ? opportunityService : null);
+            if (
+                oppService &&
+                typeof oppService._ensureNormalized === 'function' &&
+                newStatus === 'published' &&
+                (editingOpportunity.status || '') !== 'published'
+            ) {
+                const merged = { ...editingOpportunity, ...updates, scope, attributes: formData };
+                await oppService._ensureNormalized(merged);
+            }
+
             const updated = await dataService.updateOpportunity(editingOpportunity.id, updates);
-            
+
             if (!updated) {
                 throw new Error('Failed to update opportunity');
             }
 
-            // When saving as published, matching is triggered inside dataService.updateOpportunity
-            // (opportunity-edit sends full updates including status, so we rely on that hook)
+            // Publish matching: dataService.updateOpportunity → persistPostMatches (post-to-post only)
             
             // Create audit log
             await dataService.createAuditLog({

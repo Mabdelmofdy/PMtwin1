@@ -1,5 +1,7 @@
 # Barter (two-way) matching
 
+> **Canonical entity:** Persisted as **`post_matches`** only. Legacy **`pmtwin_matches`** is deprecated.
+
 ### What this page is
 
 POC note on **two-way / barter** matching and when both directions must score well.

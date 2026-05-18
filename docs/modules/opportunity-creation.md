@@ -674,8 +674,8 @@ The review step gives the creator a final chance to verify all entered data. The
    - `action`: `opportunity_created`
    - `entityType`: `opportunity`
 4. If status is `published`:
-   - Trigger matching algorithm (`matchingService.findMatchesForOpportunity()`).
-   - Auto-notify candidates with match score >= 80%.
+   - Trigger post-to-post persistence (`matchingService.persistPostMatches(opportunityId)`).
+   - Notify participants for newly created `post_matches` only.
 5. Redirect to the opportunity detail page.
 
 ---

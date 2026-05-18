@@ -1,0 +1,18 @@
+<article class="card match-card match-card-unified" data-match-id="{{id}}" data-match-type="{{matchType}}">
+    <header class="match-card-unified__header">
+        <h3 class="match-card-unified__title">{{cardTitle}}</h3>
+        <span class="badge badge-match {{matchQualityClass}}">{{matchQualityLabel}} · {{matchScorePercent}}%</span>
+    </header>
+    <div class="match-card-unified__body">
+        {{{cardBodyHtml}}}
+        <div class="match-card-block match-card-block--why">
+            <p class="match-card-kicker">Why this match?</p>
+            <p class="match-card-line match-card-line--muted">{{whySummary}}</p>
+        </div>
+        <p class="match-card-unified__status"><span class="match-card-kicker">Status</span> <span class="badge badge--neutral">{{statusLabel}}</span></p>
+        <p class="match-card-unified__next"><span class="match-card-kicker">Next</span> {{nextBestAction}}</p>
+    </div>
+    <footer class="match-card-unified__footer">
+        {{{actionsHtml}}}
+    </footer>
+</article>

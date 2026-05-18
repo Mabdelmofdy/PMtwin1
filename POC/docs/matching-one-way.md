@@ -1,5 +1,7 @@
 # One-way matching
 
+> **Canonical entity:** All match types persist as **`post_matches`** (`pmtwin_post_matches`). Legacy **`pmtwin_matches`** (person-to-opportunity) is deprecated and not used in UI or publish flows.
+
 ### What this page is
 
 POC note on **one-way** matches: need ↔ offer, fields involved, and diagram links.

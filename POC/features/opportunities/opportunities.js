@@ -269,18 +269,10 @@ async function loadOpportunities() {
         }
 
         if (user) {
-            const fullUser = (await dataService.getUserById(user.id)) || (await dataService.getCompanyById(user.id)) || user;
-
-            for (const opp of list) {
-                if (opp.creatorId === user.id) {
-                    opp.matchScore = null;
-                    opp.matchScorePercent = null;
-                } else {
-                    const score = await matchingService.calculateMatchScore(opp, fullUser);
-                    opp.matchScore = score;
-                    opp.matchScorePercent = Math.round(score * 100);
-                }
-            }
+            list.forEach(opp => {
+                opp.matchScore = null;
+                opp.matchScorePercent = null;
+            });
         }
 
         const template = await templateLoader.load('opportunity-card');

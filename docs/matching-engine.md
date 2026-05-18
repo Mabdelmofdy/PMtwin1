@@ -85,14 +85,18 @@ flowchart TB
 
 ---
 
-## 1. Entry Points
+## 1. Entry Points (post-to-post only)
+
+The operational matching system is **post-to-post** only. User-facing matches are always **`post_matches`** (`pmtwin_post_matches`). **`pmtwin_matches`** is deprecated and not used by UI or publish flows.
 
 | Entry | When | What runs |
 |-------|------|-----------|
-| **persistPostMatches(opportunityId)** | `data-service.updateOpportunity(id, { status: 'published' })` | Loads opportunity; runs findMatchesForPost(opportunityId, {}); then findMatchesForPost(..., { model: 'circular' }); creates post_match per result; notifies participants. |
-| **findMatchesForPost(opportunityId, options)** | Admin matching UI or persistPostMatches | Detects model or uses options.model; calls one of findOffersForNeed, findNeedsForOffer, findBarterMatches, findConsortiumCandidates, findCircularExchanges; rankMatches(); returns { model, matches }. |
-| **findMatchesForOpportunity(opportunityId)** | Legacy path | User-to-opportunity matching (all active users scored against opportunity); creates legacy **matches** (pmtwin_matches), not post_matches. |
-| **findOpportunitiesForCandidate(candidateId, options)** | Candidate-centric | All published opportunities scored for one candidate; returns list of { opportunity, matchScore, criteria }; no post_match creation. |
+| **persistPostMatches(opportunityId)** | Opportunity publish (`updateOpportunity` → `status: published`) or **Admin Save** on a published row | Runs `findMatchesForPost` (+ circular pass); creates deduped `post_match` records; notifies participants. Does **not** write `pmtwin_matches`. |
+| **findMatchesForPost(opportunityId, options)** | `persistPostMatches`, or **Admin Run report** (preview only) | Detects model or uses `options.model`; scores candidates; `rankMatches()`; returns `{ model, matches }` in memory. |
+| **findMatchesForOpportunity** | — | **Deprecated / removed from product flows.** No-op when `LEGACY_PERSON_OPPORTUNITY_ENABLED` is false. |
+| **findOpportunitiesForCandidate** | — | **Deprecated / removed from product flows.** No-op when legacy flag is false. |
+
+**Admin Matching Center:** **Run report** = preview only (no `post_matches` written). **Save** (per published opportunity) = `persistPostMatches` (writes `post_matches` + notifications).
 
 ---
 
@@ -172,8 +176,8 @@ flowchart TB
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| MIN_THRESHOLD | 0.70 | Legacy opportunity–candidate matching (not post-to-post). |
-| AUTO_NOTIFY_THRESHOLD | 0.80 | Legacy: auto-notify when match score >= this. |
+| MIN_THRESHOLD | 0.70 | Legacy person-to-opportunity only (deprecated; unused when legacy flag is off). |
+| AUTO_NOTIFY_THRESHOLD | 0.80 | Legacy person-to-opportunity only (deprecated). |
 | POST_TO_POST_THRESHOLD | 0.50 | Minimum score for post-to-post match to be created. |
 | CANDIDATE_MAX | 200 | Max candidates before scoring (candidate generator). |
 | WEIGHTS | (see above) | Post-to-post weighted score. |
@@ -184,16 +188,21 @@ flowchart TB
 
 ---
 
-## 7. Missing or Partial Logic (Honest Gaps)
+## 7. Canonical entities and remaining gaps
 
-- **Multi-model publish routing:** `detectMatchingModel()` can identify several models, but `findMatchesForPost()` currently follows precedence unless a model is passed explicitly. Publish persistence should run every applicable model plus circular.
-- **Deduplication across runs:** createPostMatch has strong keys plus a signature fallback. Reliability still depends on complete payload ids; two-way sideA and circular links should be hydrated with all need/offer ids.
-- **Expiry of post_matches:** read-time expiry exists for pending records with `expiresAt`, but generated post_matches usually do not set a default expiry and there is no scheduled job.
-- **Legacy match vs post_match:** Two systems coexist; pipeline and some UI may still refer to legacy matches (pmtwin_matches) for opportunity–candidate; post_matches are the primary user-facing matches.
-- **Circular on publish:** Only cycles that **include the publishing opportunity’s creator** are persisted; global circular discovery is run but filtered by creator inclusion.
-- **Circular link details:** Circular `linkScores` should include `needId` and `offerId` so match detail and circular deal creation can reference actual opportunities.
-- **Admin persistence:** Admin Run report is preview-only; per-opportunity Save persists matches, but there is no bulk selected-results persistence.
-- **Replacement candidates:** findReplacementCandidatesForRole is implemented; UI and admin flows for “replace member” may be partial (see implementation-status and gaps-and-missing).
+**Canonical match entity**
+
+| Store | Key | Status |
+|-------|-----|--------|
+| `post_matches` | `pmtwin_post_matches` | **Canonical** — all user/admin match UIs, publish, and admin Save. |
+| `pmtwin_matches` | `pmtwin_matches` | **Deprecated / not user-facing** — legacy person-to-opportunity; not seeded or used when `LEGACY_PERSON_OPPORTUNITY_ENABLED` is false. |
+
+**Remaining gaps (partial logic)**
+
+- **Circular on publish:** Only cycles that **include the publishing opportunity’s creator** are persisted.
+- **Admin persistence:** **Run report** is preview-only; **Save** persists `post_matches` per opportunity. Bulk “persist selected preview rows” is not implemented.
+- **Multi-model routing:** `persistPostMatches` may not run every model returned by `detectMatchingModel()` (precedence + separate circular pass).
+- **Replacement candidates:** `findReplacementCandidatesForRole` exists; some replacement UI flows may be partial (see [gaps-and-missing.md](gaps-and-missing.md)).
 
 ---
 

@@ -24,7 +24,7 @@ Map keys to future tables using [database-schema.md](database-schema.md).
 
 ### Tips
 
-- Legacy `pmtwin_matches` may still appear in older paths; prefer **post match** for new work.
+- **`post_matches`** is the canonical user-facing matching entity. **`pmtwin_matches`** is deprecated, not loaded from seed when legacy matching is off, and not used by UI or publish flows.
 
 ---
 
@@ -136,11 +136,11 @@ Additional related storage: application_requirements, application_deliverables, 
 
 ---
 
-## 5. Matches (Legacy / Internal)
+## 5. Matches (Deprecated Compatibility)
 
 **Storage key:** `CONFIG.STORAGE_KEYS.MATCHES` (`pmtwin_matches`)
 
-Used by the legacy opportunity-to-candidate matching path (findMatchesForOpportunity). Post-to-post matching uses **post_matches** instead.
+**Deprecated / not user-facing.** Compatibility storage only (`LEGACY_PERSON_OPPORTUNITY_ENABLED = false`). All active matching uses **post_matches**; dashboard, pipeline, `/matches`, publish, and admin Save do not read or write `pmtwin_matches`.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -246,7 +246,7 @@ Legal layer; created/linked when deal reaches signing.
 |-------|------|-------------|
 | `id` | string | Unique identifier |
 | `userId` | string | Recipient |
-| `type` | string | match_found, application_received, application_status_changed, account_approved, account_rejected, account_suspended, account_activated, match (for post_match) |
+| `type` | string | new_match_found (from post_match), application_received, application_status_changed, account_approved, account_rejected, account_suspended, account_activated |
 | `title` | string | Title |
 | `message` | string | Body |
 | `link` | string | Optional deep link (e.g. /matches/:id) |

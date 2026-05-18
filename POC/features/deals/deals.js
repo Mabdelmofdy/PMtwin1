@@ -47,13 +47,16 @@ function getContractStatusBadgeClass(s) {
 }
 
 function getMatchTypeLabel(matchType) {
+    if (window.unifiedMatchViewModel && typeof window.unifiedMatchViewModel.getMatchTypeLabel === 'function') {
+        return window.unifiedMatchViewModel.getMatchTypeLabel(matchType);
+    }
     const map = {
-        one_way: 'Direct match',
+        one_way: 'Need/Offer',
         two_way: 'Barter',
         consortium: 'Consortium',
-        circular: 'Circular exchange'
+        circular: 'Circular'
     };
-    return map[matchType] || matchType;
+    return map[matchType] || 'Match';
 }
 
 function getMatchTypeIconClass(matchType) {

@@ -16,6 +16,12 @@
                         <span class="pipeline-board-tab__label">Applications</span>
                     </span>
                 </button>
+                <button type="button" class="tab-btn pipeline-board-tab" data-tab="matches" id="pipeline-tab-matches" role="tab" aria-controls="tab-matches" aria-selected="false">
+                    <span class="pipeline-board-tab__inner">
+                        <i class="ph-duotone ph-handshake pipeline-board-tab__icon" aria-hidden="true"></i>
+                        <span class="pipeline-board-tab__label">Matches</span>
+                    </span>
+                </button>
             </nav>
 
             <div class="pipeline-board-inner">
@@ -59,7 +65,7 @@
                                     <span class="pipeline-status-nav__text">Draft</span>
                                     <span class="pipeline-status-nav__count" id="sidebar-opp-count-draft">0</span>
                                 </button>
-                                <button type="button" class="pipeline-status-nav__btn" role="tab" data-opp-stage="published" aria-selected="false" title="Visible to others; candidates can discover and apply.">
+                                <button type="button" class="pipeline-status-nav__btn" role="tab" data-opp-stage="published" aria-selected="false" title="Visible to others; partners can discover and apply.">
                                     <i class="ph-duotone ph-megaphone-simple pipeline-status-nav__icon" aria-hidden="true"></i>
                                     <span class="pipeline-status-nav__text">Published</span>
                                     <span class="pipeline-status-nav__count" id="sidebar-opp-count-published">0</span>
@@ -162,6 +168,37 @@
                         </div>
                     </div>
                 </div>
+
+                <div id="tab-matches" class="tab-content tab-panel" style="display: none;" role="tabpanel" aria-labelledby="pipeline-tab-matches" data-pipeline-matches-root="1">
+                    <div class="pipeline-stats" aria-live="polite" aria-label="Match summary">
+                        <div class="pipeline-stat">
+                            <span class="pipeline-stat__value" id="pipeline-stat-match-total">0</span>
+                            <span class="pipeline-stat__label">In view</span>
+                        </div>
+                        <div class="pipeline-stat">
+                            <span class="pipeline-stat__value" id="pipeline-stat-match-pending">0</span>
+                            <span class="pipeline-stat__label">Pending</span>
+                        </div>
+                        <div class="pipeline-stat">
+                            <span class="pipeline-stat__value" id="pipeline-stat-match-confirmed">0</span>
+                            <span class="pipeline-stat__label">Confirmed</span>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-toolbar">
+                        <div class="pipeline-toolbar__text">
+                            <h2 class="pipeline-board-heading">Post matches</h2>
+                            <p class="pipeline-board-lead">Need/Offer, barter, consortium, and circular matches from your published posts. Open a match to accept, negotiate, or create a deal once it is confirmed.</p>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-matches-toolbar">
+                        <p class="pipeline-matches-toolbar__label" id="pipeline-matches-subtabs-label">Filter</p>
+                        <div class="pipeline-matches-segmented matches-segmented matches-segmented--scroll" id="pipeline-matches-subtabs" role="tablist" aria-labelledby="pipeline-matches-subtabs-label"></div>
+                    </div>
+                    <p id="pipeline-matches-summary" class="pipeline-matches-summary" aria-live="polite"></p>
+                    <div id="pipeline-matches-list" class="pipeline-matches-list"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -194,7 +231,7 @@
 
 .pipeline-board-tab.tab-btn {
     flex: 1;
-    max-width: 50%;
+    max-width: none;
     position: relative;
     padding: 14px 18px;
     margin: 0;
@@ -994,5 +1031,184 @@
         flex: 1;
         text-align: center;
     }
+}
+
+/* Pipeline — Matches tab (post_matches only) */
+.pipeline-page .matches-segmented {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    padding: 0.35rem;
+    background: var(--bg-primary, #fff);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+}
+
+.pipeline-page .matches-segment {
+    flex: 1 1 auto;
+    min-width: min(100%, 5.5rem);
+    margin: 0;
+    padding: 0.5rem 0.55rem;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    text-align: center;
+}
+
+.pipeline-page .matches-segment:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+
+.pipeline-page .matches-segment.active {
+    color: var(--primary-dark);
+    background: var(--bg-primary);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.pipeline-page .matches-segment__inner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.pipeline-page .matches-segment__count[hidden] {
+    display: none;
+}
+
+.pipeline-page .matches-segment__count:not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.2rem;
+    height: 1.2rem;
+    padding: 0 0.3rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: 999px;
+    background: rgba(13, 148, 136, 0.12);
+    color: var(--primary-dark);
+}
+
+.pipeline-matches-toolbar {
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+}
+
+.pipeline-matches-toolbar__label {
+    margin: 0 0 var(--spacing-sm);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.pipeline-matches-summary {
+    margin: 0 0 var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.pipeline-matches-list .match-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+    align-content: start;
+}
+
+.pipeline-matches-list .matches-section-title {
+    margin: var(--spacing-lg) 0 var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.pipeline-matches-list .matches-section-title:first-child {
+    margin-top: 0;
+}
+
+.pipeline-match-card {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 0;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    overflow: hidden;
+}
+
+.pipeline-match-card__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.pipeline-match-card__title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.35;
+}
+
+.pipeline-match-card__body {
+    padding: 12px 14px;
+    flex: 1;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+.pipeline-match-card__row {
+    margin: 0 0 8px;
+}
+
+.pipeline-match-card__row:last-child {
+    margin-bottom: 0;
+}
+
+.pipeline-match-card__kicker {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+}
+
+.pipeline-match-card__opps {
+    margin: 4px 0 0;
+    padding-left: 1.1rem;
+}
+
+.pipeline-match-card__opps li {
+    margin-bottom: 2px;
+}
+
+.pipeline-match-card__foot {
+    padding: 10px 14px 12px;
+    border-top: 1px solid #eef2f7;
+    background: rgba(248, 250, 252, 0.85);
 }
 </style>

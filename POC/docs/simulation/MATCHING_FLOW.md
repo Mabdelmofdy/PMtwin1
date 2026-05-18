@@ -16,6 +16,8 @@ Compare with [matching-engine.md](../../../docs/matching-engine.md) and unit tes
 
 This document describes the current matching system so the simulation environment stays aligned with production behavior.
 
+**Product persistence:** The live app persists **`post_matches` only** via `persistPostMatches` (publish or admin Save). Legacy **`pmtwin_matches`** is deprecated. Simulation scoring uses the same `findMatchesForPost` entry point but writes to isolated simulation data, not `pmtwin_post_matches` in the main app.
+
 ## Entry point and routing
 
 - **Entry:** `matchingService.findMatchesForPost(opportunityId, options)` in `POC/src/services/matching/matching-service.js` (lines 16–44).

@@ -1,35 +1,8 @@
 <div class="page-container knowledge-base-page pm-kb-page">
-    <section class="kb-hero">
-        <div class="kb-hero-grid" aria-hidden="true"></div>
-        <div class="kb-hero-inner">
-            <div>
-                <p class="kb-kicker">
-                    <i class="ph-duotone ph-books" aria-hidden="true"></i>
-                    Collaboration knowledge
-                </p>
-                <h1>Guides for PMTwin collaboration models.</h1>
-                <p class="kb-subtitle">Understand project-based delivery, SPVs, legal structure, resource pooling, RFPs, and how to choose the right model before posting or applying.</p>
-            </div>
-            <div class="kb-hero-card" aria-hidden="true">
-                <span class="kb-card-label">Guide stack</span>
-                <strong>Design -> Consortium -> Contract</strong>
-                <div class="kb-card-lines">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </div>
-        </div>
-    </section>
+    <section class="kb-hero" data-site-section="hero"></section>
 
     <div class="page-body kb-body">
-        <aside class="kb-sidebar" aria-label="Knowledge categories">
-            <div class="kb-sidebar-panel">
-                <span class="kb-sidebar-icon"><i class="ph-duotone ph-cube-focus" aria-hidden="true"></i></span>
-                <h2>Choose a guide area</h2>
-                <p>Switch between model guidance, SPV/legal basics, and platform FAQs.</p>
-            </div>
-        </aside>
+        <aside class="kb-sidebar" aria-label="Knowledge categories" data-site-section="sidebar"></aside>
 
         <main class="kb-main">
             <div class="kb-tabs" role="tablist">
@@ -47,59 +20,11 @@
                 </button>
             </div>
 
-            <div class="kb-panel kb-panel-active" id="panel-models" role="tabpanel" data-tab="models" aria-labelledby="tab-models">
-                <div class="kb-qa-item">
-                    <h3 class="kb-question">What is Project-Based Collaboration?</h3>
-                    <div class="kb-answer"><p>Best for delivering a specific project with one or more partners. Includes task-based engagements, consortiums, project JVs, and Special Purpose Vehicles (SPV). Ideal when scope and timeline are well defined.</p></div>
-                </div>
-                <div class="kb-qa-item">
-                    <h3 class="kb-question">What are Strategic Partnerships?</h3>
-                    <div class="kb-answer"><p>Long-term alliances: strategic joint ventures, strategic alliances, and mentorship programs. Suited when you want ongoing collaboration rather than a single project.</p></div>
-                </div>
-                <div class="kb-qa-item">
-                    <h3 class="kb-question">What is Resource Pooling?</h3>
-                    <div class="kb-answer"><p>Reduce costs by sharing resources: bulk purchasing, equipment sharing, and resource exchange. Useful for companies with complementary needs.</p></div>
-                </div>
-                <div class="kb-qa-item">
-                    <h3 class="kb-question">What are Hiring & Competitions?</h3>
-                    <div class="kb-answer"><p>Engage professionals or consultants, or participate in RFPs and competitions to win work. Use when you need talent or want to compete for projects.</p></div>
-                </div>
-            </div>
+            <div class="kb-panel kb-panel-active" id="panel-models" role="tabpanel" data-tab="models" aria-labelledby="tab-models" data-site-section="panel-models"></div>
 
-            <div class="kb-panel" id="panel-spv" role="tabpanel" data-tab="spv" aria-labelledby="tab-spv" hidden>
-                <div class="kb-qa-item">
-                    <h3 class="kb-question">What is an SPV?</h3>
-                    <div class="kb-answer"><p>Special Purpose Vehicles (SPVs) are used for project-specific legal entities. They allow partners to isolate risk and structure financing for a single project or asset.</p></div>
-                </div>
-                <div class="kb-qa-item">
-                    <h3 class="kb-question">Do I need legal advice for an SPV?</h3>
-                    <div class="kb-answer"><p>Yes. Consult your legal and tax advisors when setting up an SPV. PMTwin does not provide legal advice.</p></div>
-                </div>
-            </div>
+            <div class="kb-panel" id="panel-spv" role="tabpanel" data-tab="spv" aria-labelledby="tab-spv" hidden data-site-section="panel-spv"></div>
 
-            <div class="kb-panel" id="panel-faq" role="tabpanel" data-tab="faq" aria-labelledby="tab-faq" hidden>
-                <div class="kb-qa-item">
-                    <h3 class="kb-question">Who can use PMTwin?</h3>
-                    <div class="kb-answer"><p>Companies and professionals in the construction and built environment sector in Saudi Arabia and the GCC can register and collaborate.</p></div>
-                </div>
-                <div class="kb-qa-item">
-                    <h3 class="kb-question">How do I find the right collaboration model?</h3>
-                    <div class="kb-answer"><p>Use the <a href="#" data-route="/collaboration-wizard">Collaboration Wizard</a> to answer a few questions and get a personalized recommendation.</p></div>
-                </div>
-                <div class="kb-qa-item">
-                    <h3 class="kb-question">How do I post an opportunity?</h3>
-                    <div class="kb-answer"><p>Register, then go to Opportunities -> Create. Choose your collaboration model and fill in the details.</p></div>
-                </div>
-                <div class="kb-qa-item">
-                    <h3 class="kb-question">Where can I get help?</h3>
-                    <div class="kb-answer"><p>Check this Knowledge Base and the model guides. For platform support, use the contact options in the footer when available.</p></div>
-                </div>
-            </div>
-
-            <div class="kb-cta">
-                <a href="#" data-route="/collaboration-wizard" class="btn btn-primary">Take the Wizard</a>
-                <a href="#" data-route="/register" class="btn btn-secondary">Register</a>
-            </div>
+            <div class="kb-panel" id="panel-faq" role="tabpanel" data-tab="faq" aria-labelledby="tab-faq" hidden data-site-section="panel-faq"></div>
         </main>
     </div>
 </div>

@@ -10,6 +10,54 @@ let hasTaskBidding = false;
 let isEditMode = false;
 let opportunityApplicationsCanManage = true;
 
+const APPLY_INVITE_SESSION_KEY = 'pmtwin_apply_invite';
+
+function readApplyInviteContext(opportunityId) {
+    const ctx = { matchId: null, invitationId: null, isReplacement: false };
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const matchId = params.get('matchId');
+        if (matchId) ctx.matchId = matchId;
+    } catch (e) {
+        void e;
+    }
+    try {
+        const raw = sessionStorage.getItem(APPLY_INVITE_SESSION_KEY);
+        if (raw) {
+            const stored = JSON.parse(raw);
+            if (!stored.opportunityId || stored.opportunityId === opportunityId) {
+                if (stored.matchId) ctx.matchId = stored.matchId;
+                if (stored.invitationId) ctx.invitationId = stored.invitationId;
+                if (stored.isReplacement) ctx.isReplacement = true;
+            }
+        }
+    } catch (e) {
+        void e;
+    }
+    return ctx;
+}
+
+function storeApplyInviteContext(opportunityId, matchId, invitationId, isReplacement) {
+    try {
+        sessionStorage.setItem(APPLY_INVITE_SESSION_KEY, JSON.stringify({
+            opportunityId,
+            matchId: matchId || null,
+            invitationId: invitationId || null,
+            isReplacement: !!isReplacement
+        }));
+    } catch (e) {
+        void e;
+    }
+}
+
+function clearApplyInviteContext() {
+    try {
+        sessionStorage.removeItem(APPLY_INVITE_SESSION_KEY);
+    } catch (e) {
+        void e;
+    }
+}
+
 function canAdminViewOpportunityApplications() {
     return typeof authService !== 'undefined'
         && typeof authService.canAccessAdmin === 'function'
@@ -68,6 +116,10 @@ async function loadOpportunity(id) {
         }
         
         currentOpportunity = opportunity;
+        const inviteCtx = readApplyInviteContext(id);
+        if (inviteCtx.matchId) {
+            storeApplyInviteContext(id, inviteCtx.matchId, inviteCtx.invitationId, inviteCtx.isReplacement);
+        }
         
         const user = authService.getCurrentUser();
         const isVetted = user && user.status === 'active';
@@ -275,15 +327,16 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply, 
         document.getElementById('info-exchange').textContent = formatExchangeMode(opportunity.exchangeMode);
     }
 
-    // Match score for current user (when not owner)
+    // Match score for current user from post_matches (when not owner)
     const user = authService.getCurrentUser();
-    if (!isOwner && user) {
-        const allMatches = await dataService.getMatches();
-        const myMatch = allMatches.find(
-            m => m.opportunityId === opportunity.id &&
-                 (m.candidateId || m.userId) === user.id
-        );
-        if (myMatch) {
+    if (!isOwner && user && dataService.getPostMatchesForUser) {
+        const postMatches = await dataService.getPostMatchesForUser(user.id);
+        const myMatch = postMatches.find(pm => {
+            if (pm.matchType !== 'one_way') return false;
+            const p = pm.payload || {};
+            return p.needOpportunityId === opportunity.id || p.offerOpportunityId === opportunity.id;
+        });
+        if (myMatch && myMatch.matchScore != null) {
             const pct = Math.round(myMatch.matchScore * 100);
             document.getElementById('info-match-chip').style.display = 'flex';
             document.getElementById('info-match-score').textContent = `${pct}%`;
@@ -1280,29 +1333,36 @@ async function submitApplication() {
                 deadlineCompatibility: deadlineCompatibility || undefined
             };
             
-            const newApp = await dataService.createApplication(applicationData);
+            const applyContext = readApplyInviteContext(currentOpportunity.id);
+            const newApp = await dataService.createApplication(applicationData, {
+                matchId: applyContext.matchId,
+                actorId: user.id,
+                isReplacementApplication: !!applyContext.isReplacement
+            });
+            clearApplyInviteContext();
             if (deliverablesList.length > 0 && newApp && newApp.id) {
                 await dataService.replaceApplicationDeliverables(newApp.id, deliverablesList);
             }
-            if (newApp && newApp.id) {
-                const matches = await dataService.getMatches();
-                const match = matches.find(m => m.opportunityId === currentOpportunity.id && (m.candidateId === user.id || m.userId === user.id));
+            if (newApp && newApp.id && dataService.getPostMatchesForUser) {
+                const postMatches = await dataService.getPostMatchesForUser(user.id);
+                const match = postMatches.find(pm => {
+                    const p = pm.payload || {};
+                    return pm.matchType === 'one_way' && p.needOpportunityId === currentOpportunity.id;
+                });
                 if (match) {
-                    const updates = {};
-                    if (match.model) updates.matchType = match.model;
-                    else if (match.matchType) updates.matchType = match.matchType;
+                    const updates = { matchType: match.matchType || 'one_way' };
                     if (match.matchScore != null) updates.matchScore = match.matchScore;
-                    if (match.criteria && typeof match.criteria === 'object') {
-                        const c = match.criteria;
+                    const reasons = match.matchReasons || [];
+                    if (reasons.length) {
                         updates.matchBreakdown = {
-                            skillMatch: c.skillMatch ?? c.attributeOverlap ?? null,
-                            budgetFit: c.budgetFit ?? null,
-                            timelineFit: c.timelineFit ?? null,
-                            locationFit: c.locationFit ?? null,
-                            reputation: c.reputation ?? null
+                            skillMatch: reasons.find(r => r.factor === 'skills') || null,
+                            budgetFit: reasons.find(r => r.factor === 'budget') || null,
+                            timelineFit: reasons.find(r => r.factor === 'timeline') || null,
+                            locationFit: reasons.find(r => r.factor === 'location') || null,
+                            reputation: reasons.find(r => r.factor === 'reputation') || null
                         };
                     }
-                    if (Object.keys(updates).length) await dataService.updateApplication(newApp.id, updates);
+                    await dataService.updateApplication(newApp.id, updates);
                 }
                 await dataService.computeAndSaveRequirementsMatch(newApp.id);
             }
@@ -1966,8 +2026,14 @@ async function loadApplications(opportunityId, options = {}) {
             const valueScoreHtml = valueScorePct != null ? `<span class="badge badge-info ml-1" title="Value compatibility">Value: ${valueScorePct}%</span>` : '';
             const valueAmount = av?.requestedValue != null ? `${Number(av.requestedValue).toLocaleString()} ${(av.requestedCurrency || 'SAR')}` : (av?.offeredValue != null ? `${Number(av.offeredValue).toLocaleString()} ${(av.requestedCurrency || av.currency || 'SAR')}` : null);
             const valueAmountHtml = valueAmount ? `<span class="text-sm text-gray-600 ml-1">${valueAmount}</span>` : '';
-            const matchTypeLabel = app.matchType ? (app.matchType === 'one_way' ? 'One-way' : app.matchType === 'two_way' ? 'Two-way (barter)' : app.matchType === 'consortium' ? 'Consortium' : app.matchType === 'circular' ? 'Circular' : app.matchType) : '';
+            const matchTypeLabel = app.matchType && window.unifiedMatchViewModel
+                ? window.unifiedMatchViewModel.getMatchTypeLabel(app.matchType)
+                : '';
             const matchTypeHtml = matchTypeLabel ? `<span class="badge badge-secondary ml-1" title="Match type">${escapeHtml(matchTypeLabel)}</span>` : '';
+            const invitedBadge = app.invitationId ? '<span class="badge badge-info ml-1">Invited Applicant</span>' : '';
+            const fromMatchBadge = app.matchId ? '<span class="badge badge-secondary ml-1">From Match</span>' : '';
+            const replacementBadge = (app.replacementRequestId || app.invitationKind === 'replacement')
+                ? '<span class="badge badge-warning ml-1">Replacement invite</span>' : '';
             const lowValueBadge = av?.lowValueMatch ? '<span class="badge badge-warning ml-1" title="Applicant requested value is more than 30% below opportunity expected value">Low Value Match</span>' : '';
             const breakdown = av?.value_breakdown;
             const budgetPct = breakdown && (breakdown.budgetFit != null || breakdown.budget != null) ? Math.round((breakdown.budgetFit != null ? breakdown.budgetFit : breakdown.budget) * 100) : null;
@@ -1981,6 +2047,9 @@ async function loadApplications(opportunityId, options = {}) {
                     ${valueScoreHtml}
                     ${valueAmountHtml}
                     ${matchTypeHtml}
+                    ${invitedBadge}
+                    ${fromMatchBadge}
+                    ${replacementBadge}
                     ${lowValueBadge}
                     <span class="badge ${getApplicationStatusBadgeClass(app.status)}">${escapeHtml(getApplicationStatusLabel(app.status))}</span>
                 </div>
@@ -2025,6 +2094,10 @@ async function loadApplications(opportunityId, options = {}) {
                 if (!applicationId) return;
                 try {
                     await dataService.updateApplication(applicationId, { status: 'in_negotiation' });
+                    const user = authService.getCurrentUser();
+                    if (user && typeof dataService.startNegotiationFromApplication === 'function') {
+                        await dataService.startNegotiationFromApplication(applicationId, user.id);
+                    }
                     await loadApplications(opportunityId, { manage: canManage });
                     if (applicantId) {
                         await ensureConnectionAndOpenChat(applicantId);
@@ -2092,35 +2165,35 @@ async function loadMatchingSection(opportunityId) {
     section.style.display = 'block';
 
     const opportunity = currentOpportunity || await dataService.getOpportunityById(opportunityId);
-    const creatorId = opportunity?.creatorId;
 
-    const matches = await dataService.getMatchesByOpportunityId(opportunityId);
-    const professionalMatches = matches.filter(m => (m.candidateId || m.userId || '').startsWith('user-pro-'));
-    const companyMatches = matches.filter(m => (m.candidateId || m.userId || '').startsWith('user-company-'));
+    const postMatches = dataService.getPostMatchesByOpportunityId
+        ? await dataService.getPostMatchesByOpportunityId(opportunityId)
+        : [];
+    const oneWayMatches = postMatches.filter(pm => pm.matchType === 'one_way');
 
-    const professionalsWithProfiles = await Promise.all(
-        professionalMatches.map(async (m) => {
-            const candidateId = m.candidateId || m.userId;
-            const candidate = await dataService.getUserById(candidateId);
-            return { match: m, candidate };
-        })
-    );
-    const companiesWithProfiles = await Promise.all(
-        companyMatches.map(async (m) => {
-            const candidateId = m.candidateId || m.userId;
-            const candidate = await dataService.getCompanyById(candidateId);
-            return { match: m, candidate };
-        })
-    );
+    const professionalsWithProfiles = [];
+    const companiesWithProfiles = [];
+    for (const pm of oneWayMatches) {
+        const provider = (pm.participants || []).find(p => p.role === 'offer_provider');
+        const providerId = provider?.userId;
+        if (!providerId) continue;
+        if (providerId.startsWith('user-pro-')) {
+            const candidate = await dataService.getUserById(providerId);
+            professionalsWithProfiles.push({ match: pm, candidate });
+        } else if (providerId.startsWith('user-company-')) {
+            const candidate = await dataService.getCompanyById(providerId);
+            companiesWithProfiles.push({ match: pm, candidate });
+        }
+    }
 
     const scorePct = (m) => Math.round((m.matchScore != null ? m.matchScore : 0) * 100);
     const criteriaSnippet = (m) => {
-        const c = (m.criteria || m.matchReasons || []);
-        return c.length ? c[0].details || c[0].factor : '';
+        const c = m.matchReasons || m.criteria || [];
+        return c.length ? (c[0].details || c[0].factor || '') : '';
     };
 
     if (professionalsWithProfiles.length === 0) {
-        professionalsList.innerHTML = '<p class="text-gray-500 text-sm">No matching professionals yet. Publish the opportunity to run matching, or click Run matching below.</p>';
+        professionalsList.innerHTML = '<p class="text-gray-500 text-sm">No Need/Offer matches yet for this opportunity.</p>';
     } else {
         professionalsList.innerHTML = professionalsWithProfiles.map(({ match, candidate }) => {
             const name = candidate?.profile?.name || candidate?.email || (match.candidateId || match.userId);
@@ -2133,36 +2206,16 @@ async function loadMatchingSection(opportunityId) {
                             <strong class="text-gray-900">${escapeHtml(name)}</strong>
                             ${headline ? `<p class="text-sm text-gray-600 mt-0.5">${escapeHtml(headline)}</p>` : ''}
                             ${snippet ? `<p class="text-xs text-gray-500 mt-1">${escapeHtml(snippet)}</p>` : ''}
+                            <p class="text-xs mt-2"><a href="#" data-route="/matches/${escapeHtml(match.id)}" class="text-primary font-medium">View match</a></p>
                         </div>
-                        <span class="badge badge-primary whitespace-nowrap">${scorePct(match)}% match</span>
+                        <span class="badge badge-primary whitespace-nowrap">${scorePct(match)}% compatibility</span>
                     </div>
                 </div>`;
         }).join('');
     }
 
     if (companiesWithProfiles.length === 0) {
-        const companies = await dataService.getCompanies();
-        const suggested = companies
-            .filter(c => c.id !== creatorId && c.status === 'active')
-            .slice(0, 6)
-            .map((c, i) => ({ company: c, score: 0.70 + (i * 0.04) + Math.random() * 0.05 }));
-        suggested.sort((a, b) => b.score - a.score);
-        companiesList.innerHTML = suggested.length === 0
-            ? '<p class="text-gray-500 text-sm">No matching companies yet.</p>'
-            : suggested.map(({ company, score }) => {
-            const name = company?.profile?.name || company?.email || company.id;
-            const headline = company?.profile?.headline || company?.profile?.description || '';
-            return `
-                <div class="border border-gray-200 rounded-lg p-3 bg-white">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <strong class="text-gray-900">${escapeHtml(name)}</strong>
-                            ${headline ? `<p class="text-sm text-gray-600 mt-0.5">${escapeHtml(headline.substring(0, 80))}${headline.length > 80 ? '…' : ''}</p>` : ''}
-                        </div>
-                        <span class="badge badge-secondary whitespace-nowrap">${Math.round(score * 100)}% match</span>
-                    </div>
-                </div>`;
-        }).join('');
+        companiesList.innerHTML = '<p class="text-gray-500 text-sm">No Need/Offer company matches yet.</p>';
     } else {
         companiesList.innerHTML = companiesWithProfiles.map(({ match, candidate }) => {
             const name = candidate?.profile?.name || candidate?.email || (match.candidateId || match.userId);
@@ -2175,8 +2228,9 @@ async function loadMatchingSection(opportunityId) {
                             <strong class="text-gray-900">${escapeHtml(name)}</strong>
                             ${headline ? `<p class="text-sm text-gray-600 mt-0.5">${escapeHtml(headline.substring(0, 80))}${headline.length > 80 ? '…' : ''}</p>` : ''}
                             ${snippet ? `<p class="text-xs text-gray-500 mt-1">${escapeHtml(snippet)}</p>` : ''}
+                            <p class="text-xs mt-2"><a href="#" data-route="/matches/${escapeHtml(match.id)}" class="text-primary font-medium">View match</a></p>
                         </div>
-                        <span class="badge badge-secondary whitespace-nowrap">${scorePct(match)}% match</span>
+                        <span class="badge badge-secondary whitespace-nowrap">${scorePct(match)}% compatibility</span>
                     </div>
                 </div>`;
         }).join('');
@@ -2193,7 +2247,10 @@ async function loadMatchingSection(opportunityId) {
             runBtn.disabled = true;
             runStatus.textContent = 'Running…';
             try {
-                await window.matchingService.findMatchesForOpportunity(opportunityId);
+                if (typeof window.matchingService.persistPostMatches !== 'function') {
+                    throw new Error('Post-match persistence is not available.');
+                }
+                await window.matchingService.persistPostMatches(opportunityId, { source: 'manual' });
                 runStatus.textContent = 'Done. Refreshing…';
                 await loadMatchingSection(opportunityId);
                 runStatus.textContent = 'Updated.';
@@ -2300,7 +2357,9 @@ function buildApplicationDetailContent(data) {
         ? `<a href="${escapeHtml(profile.portfolioUrl)}" target="_blank" rel="noopener" class="app-detail-inline-link">${escapeHtml(profile.portfolioUrl)}</a>`
         : '—';
 
-    const matchTypeLabel = data.matchType ? (data.matchType === 'one_way' ? 'One-way' : data.matchType === 'two_way' ? 'Two-way (barter)' : data.matchType === 'consortium' ? 'Consortium' : data.matchType === 'circular' ? 'Circular' : data.matchType) : '';
+    const matchTypeLabel = data.matchType && window.unifiedMatchViewModel
+        ? window.unifiedMatchViewModel.getMatchTypeLabel(data.matchType)
+        : '';
     const matchScorePct = matchScore != null ? Math.round(matchScore * 100) : null;
     const breakdown = matchBreakdown || {};
     const skillPct = breakdown.skillMatch != null ? Math.round(Number(breakdown.skillMatch) * 100) : null;
@@ -2711,6 +2770,10 @@ function setupApplicationDetailActions(container, applicationId, applicantId, cu
             } else if (action === 'invite-negotiation' && actionable && appId) {
                 try {
                     await dataService.updateApplication(appId, { status: 'in_negotiation' });
+                    const user = authService.getCurrentUser();
+                    if (user && typeof dataService.startNegotiationFromApplication === 'function') {
+                        await dataService.startNegotiationFromApplication(appId, user.id);
+                    }
                     if (currentOpportunity) await loadApplications(currentOpportunity.id);
                     if (appApplicantId) await ensureConnectionAndOpenChat(appApplicantId);
                     if (typeof modalService !== 'undefined') modalService.close();
@@ -2841,47 +2904,9 @@ async function updateApplicationStatus(applicationId, status) {
         const application = await dataService.getApplicationById(applicationId);
         
         if (status === 'accepted') {
-            const opp = await dataService.getOpportunityById(currentOpportunity.id);
-            const creatorId = opp.creatorId;
-            const contractorId = application.applicantId;
-            const participants = [
-                { userId: creatorId, role: 'creator', approvalStatus: 'pending', signedAt: null },
-                { userId: contractorId, role: 'contractor', approvalStatus: 'pending', signedAt: null }
-            ];
-            const newDeal = await dataService.createDeal({
-                opportunityId: currentOpportunity.id,
-                applicationId: application.id,
-                participants,
-                title: 'Deal – ' + (opp.title || application.id),
-                status: window.CONFIG?.DEAL_STATUS?.DRAFT || 'draft',
-                scope: opp.title || '',
-                exchangeMode: opp.exchangeMode || opp.paymentModes?.[0] || 'cash',
-                valueTerms: { agreedValue: null, paymentSchedule: '' },
-                timeline: { start: null, end: null }
-            });
-            await dataService.updateOpportunity(currentOpportunity.id, { status: 'contracted' });
             const user = authService.getCurrentUser();
-            if (user) {
-                await dataService.createAuditLog({
-                    userId: user.id,
-                    action: 'deal_created',
-                    entityType: 'deal',
-                    entityId: newDeal.id,
-                    details: { opportunityId: currentOpportunity.id, applicationId: application.id }
-                });
-            }
-            try {
-                await dataService.createNotification({
-                    userId: application.applicantId,
-                    type: 'deal_created',
-                    title: 'Deal workspace created',
-                    message: 'A draft Deal Workspace was created for your accepted application.',
-                    link: '/deals/' + newDeal.id,
-                    read: false
-                });
-            } catch (e) {
-                void e;
-            }
+            const newDeal = await dataService.createDealFromApplication(applicationId, user?.id);
+            await dataService.updateOpportunity(currentOpportunity.id, { status: 'contracted' });
             try {
                 sessionStorage.setItem(
                     'pmtwin_deal_flash',

@@ -214,13 +214,46 @@
         }
 
         if (ctx === 'match') {
-            if (!s) return 'Pending';
+            if (!s) return 'Pending Response';
             const labels = {
-                pending: 'Pending',
+                pending: 'Pending Response',
                 accepted: 'Accepted',
                 declined: 'Declined',
                 confirmed: 'Confirmed',
-                expired: 'Expired'
+                expired: 'Expired',
+                converted_to_deal: 'Converted to Deal'
+            };
+            return labels[s] || humanize(s);
+        }
+
+        if (ctx === 'negotiation') {
+            const labels = {
+                open: 'Negotiation Open',
+                counter_offered: 'Negotiation Open',
+                agreed: 'Terms Agreed',
+                cancelled: 'Negotiation Cancelled'
+            };
+            return labels[s] || humanize(s);
+        }
+
+        if (ctx === 'invitation') {
+            const labels = {
+                sent: 'Invitation Sent',
+                invitation_sent: 'Invitation Sent',
+                accepted: 'Application Submitted',
+                declined: 'Invitation Declined'
+            };
+            return labels[s] || humanize(s);
+        }
+
+        if (ctx === 'replacement') {
+            const labels = {
+                pending_owner_review: 'Replacement Pending',
+                invitation_sent: 'Replacement Pending',
+                replacement_accepted: 'Replacement Accepted',
+                completed: 'Replacement Completed',
+                superseded: 'Superseded',
+                rejected: 'Declined'
             };
             return labels[s] || humanize(s);
         }

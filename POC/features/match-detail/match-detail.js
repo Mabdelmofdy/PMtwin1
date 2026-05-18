@@ -51,16 +51,36 @@ async function initMatchDetail(params) {
 }
 
 function getMatchTypeLabel(matchType) {
-    const labels = { one_way: 'One Way Matching', two_way: 'Two Way Matching (Barter)', consortium: 'Group Formation (Consortium)', circular: 'Circular Exchange' };
-    return labels[matchType] || matchType;
+    if (window.unifiedMatchViewModel) return window.unifiedMatchViewModel.getMatchTypeLabel(matchType);
+    return matchType;
 }
 
 function getUnifiedMatchTitle(matchType) {
-    const titles = { one_way: 'Project Collaboration Match', two_way: 'Barter Match', consortium: 'Consortium Match', circular: 'Circular Exchange Match' };
-    return titles[matchType] || 'Match';
+    if (window.unifiedMatchViewModel) return window.unifiedMatchViewModel.getMatchTypeLabel(matchType) + ' Match';
+    return 'Match';
 }
 
-var CRITERION_LABELS = { skills: 'Skill compatibility', budget: 'Budget compatibility', timeline: 'Timeline alignment', location: 'Location compatibility' };
+var CRITERION_LABELS = {
+    skills: 'Skill compatibility',
+    skillMatch: 'Skill compatibility',
+    attributeOverlap: 'Attribute overlap',
+    exchangeCompatibility: 'Exchange compatibility',
+    valueCompatibility: 'Value compatibility',
+    budget: 'Budget fit',
+    budgetFit: 'Budget fit',
+    timeline: 'Timeline alignment',
+    timelineFit: 'Timeline alignment',
+    location: 'Location fit',
+    locationFit: 'Location fit',
+    reputation: 'Reputation'
+};
+
+var MATCH_VALUE_HEADINGS = {
+    one_way: 'Exchange compatibility',
+    two_way: 'Barter compatibility',
+    consortium: 'Consortium role fit',
+    circular: 'Circular exchange chain'
+};
 
 function getStatusBadgeClass(status) {
     return window.statusBadgeSystem ? window.statusBadgeSystem.getStatusBadgeClass(status, 'match') : 'badge--neutral';
@@ -79,27 +99,38 @@ function getOneWayViewerRole(postMatch, currentUserId) {
 
 async function renderMatchDetail(postMatch, currentUserId) {
     const ds = dataService;
-    const scorePct = Math.round((postMatch.matchScore || 0) * 100);
     const payload = postMatch.payload || {};
     const matchType = postMatch.matchType || 'one_way';
+    const umv = window.unifiedMatchViewModel;
+    let vm = null;
+    if (umv) {
+        vm = umv.buildUnifiedMatchViewModel(postMatch, { currentUserId, dataService: ds });
+        vm = await umv.enrichUnifiedMatchViewModel(vm, { currentUserId, dataService: ds });
+    }
+    const scorePct = vm?.matchScorePercent ?? Math.round((postMatch.matchScore || 0) * 100);
+    const qualityLabel = vm?.matchQualityLabel || '';
 
     // —— Header ——
     const titleEl = document.getElementById('match-detail-title');
     titleEl.textContent = postMatch.isReplacement
         ? ('Replacement invitation – ' + (postMatch.replacementRole || 'consortium member'))
-        : getUnifiedMatchTitle(matchType);
-    document.getElementById('match-detail-type').textContent = getMatchTypeLabel(matchType);
-    document.getElementById('match-detail-score').textContent = scorePct + '%';
+        : (vm?.cardTitle || getUnifiedMatchTitle(matchType));
+    document.getElementById('match-detail-type').textContent = vm?.matchTypeLabel || getMatchTypeLabel(matchType);
+    document.getElementById('match-detail-score').textContent = qualityLabel
+        ? (qualityLabel + ' · ' + scorePct + '%')
+        : (scorePct + '%');
     const statusEl = document.getElementById('match-detail-status');
     const sb = window.statusBadgeSystem;
     const st = postMatch.status || 'pending';
-    statusEl.textContent = sb ? sb.getStatusLabel(st, 'match') : formatStatusLabel(st);
+    statusEl.textContent = vm?.statusLabel || (sb ? sb.getStatusLabel(st, 'match') : formatStatusLabel(st));
     statusEl.className = 'badge ' + (sb ? sb.getStatusBadgeClass(st, 'match') : 'badge--neutral');
 
     // —— Exchange Flow ——
     const exchangeFlowEl = document.getElementById('match-detail-exchange-flow-body');
     if (exchangeFlowEl) {
-        if (matchType === 'one_way') {
+        if (vm?.cardBodyHtml) {
+            exchangeFlowEl.innerHTML = vm.cardBodyHtml;
+        } else if (matchType === 'one_way') {
             const needOpp = await ds.getOpportunityById(payload.needOpportunityId);
             const offerOpp = await ds.getOpportunityById(payload.offerOpportunityId);
             exchangeFlowEl.innerHTML = '<div class="flex flex-wrap items-center gap-2 min-w-0"><span class="px-3 py-2 bg-amber-50 border border-amber-200 rounded shrink-0">Need</span><span class="text-gray-400 min-w-0 break-words">' + escapeHtml(needOpp?.title || '—') + '</span><span class="text-gray-500 shrink-0">→</span><span class="px-3 py-2 bg-teal-50 border border-teal-200 rounded shrink-0">Offer</span><span class="text-gray-400 min-w-0 break-words">' + escapeHtml(offerOpp?.title || '—') + '</span></div>';
@@ -125,6 +156,11 @@ async function renderMatchDetail(postMatch, currentUserId) {
         }
     }
 
+    const valueHeadingEl = document.getElementById('match-detail-value-heading');
+    if (valueHeadingEl) {
+        valueHeadingEl.textContent = MATCH_VALUE_HEADINGS[matchType] || 'Compatibility';
+    }
+
     // —— Value Exchange ——
     const valueEl = document.getElementById('match-detail-value-body');
     if (valueEl) {
@@ -138,7 +174,14 @@ async function renderMatchDetail(postMatch, currentUserId) {
 
     // —— Match Score & Criteria ——
     const scoreBadgeEl = document.getElementById('match-detail-score-badge');
-    if (scoreBadgeEl) scoreBadgeEl.textContent = scorePct + '% Match';
+    if (scoreBadgeEl) {
+        scoreBadgeEl.textContent = (qualityLabel ? qualityLabel + ' · ' : '') + scorePct + '% compatibility';
+        if (vm?.matchQualityClass) scoreBadgeEl.className = 'badge badge-match ' + vm.matchQualityClass;
+    }
+    const whyEl = document.getElementById('match-detail-why-body');
+    if (whyEl) {
+        whyEl.innerHTML = '<p class="text-gray-700">' + escapeHtml(vm?.whySummary || '—') + '</p>';
+    }
     const breakdownBody = document.getElementById('match-detail-breakdown-body');
     const breakdown = payload.breakdown || {};
     if (Object.keys(breakdown).length > 0) {
@@ -166,26 +209,535 @@ async function renderMatchDetail(postMatch, currentUserId) {
 
     // —— Actions ——
     const actionsEl = document.getElementById('match-detail-actions');
-    const isPending = (postMatch.status || '') === 'pending';
-    const myPart = participants.find(p => p.userId === currentUserId);
-    const myStatus = myPart?.participantStatus || 'pending';
-    const canAct = isPending && myStatus === 'pending';
-    actionsEl.querySelector('#btn-accept-match').style.display = canAct ? '' : 'none';
-    actionsEl.querySelector('#btn-decline-match').style.display = canAct ? '' : 'none';
-    const firstOther = uniqueByUser.find(p => p.userId !== currentUserId);
-    const linkNegotiation = actionsEl.querySelector('#link-start-negotiation');
+    const expired = vm?.isExpired ?? isPostMatchExpired(postMatch);
+    const actionIds = new Set((vm?.availableActions || []).map(a => a.id));
+    const acceptBtn = actionsEl.querySelector('#btn-accept-match');
+    const declineBtn = actionsEl.querySelector('#btn-decline-match');
+    const btnNegotiation = actionsEl.querySelector('#btn-start-negotiation');
     const linkMessage = actionsEl.querySelector('#link-message-participants');
-    if (firstOther && firstOther.userId) {
-        linkNegotiation.setAttribute('href', '#');
-        linkNegotiation.setAttribute('data-route', '/messages/' + firstOther.userId);
-        linkNegotiation.style.display = '';
-        linkMessage.setAttribute('href', '#');
-        linkMessage.setAttribute('data-route', '/messages/' + firstOther.userId);
-        linkMessage.style.display = '';
-    } else {
-        linkNegotiation.style.display = 'none';
-        linkMessage.style.display = 'none';
+    const linkDeal = actionsEl.querySelector('#link-view-deal');
+
+    if (acceptBtn) {
+        acceptBtn.style.display = actionIds.has('accept') && !expired ? '' : 'none';
+        acceptBtn.disabled = expired;
+        acceptBtn.textContent = 'Accept match';
     }
+    if (declineBtn) {
+        declineBtn.style.display = actionIds.has('decline') && !expired ? '' : 'none';
+        declineBtn.disabled = expired;
+    }
+    if (btnNegotiation) {
+        const showNeg = actionIds.has('negotiate') && !expired;
+        btnNegotiation.style.display = showNeg ? '' : 'none';
+        btnNegotiation.disabled = !showNeg;
+        const negAction = (vm?.availableActions || []).find(a => a.id === 'negotiate');
+        if (negAction?.label) btnNegotiation.textContent = negAction.label;
+    }
+    const btnCreateDeal = actionsEl.querySelector('#btn-create-deal-match');
+    if (btnCreateDeal) {
+        const dealAction = (vm?.availableActions || []).find(a => a.id === 'create_deal');
+        const showDeal = actionIds.has('create_deal') && !expired;
+        btnCreateDeal.style.display = showDeal ? '' : 'none';
+        btnCreateDeal.disabled = !showDeal;
+        btnCreateDeal.textContent = dealAction?.label || 'Start Deal';
+    }
+    const btnDealFromNeg = actionsEl.querySelector('#btn-create-deal-negotiation');
+    if (btnDealFromNeg) {
+        const show = actionIds.has('create_deal_from_negotiation') && !expired;
+        btnDealFromNeg.style.display = show ? '' : 'none';
+    }
+    if (linkMessage) {
+        const firstOther = uniqueByUser.find(p => p.userId !== currentUserId);
+        if (firstOther?.userId && !expired) {
+            linkMessage.style.display = '';
+            linkMessage.setAttribute('data-route', '/messages/' + firstOther.userId);
+        } else {
+            linkMessage.style.display = 'none';
+        }
+    }
+    if (linkDeal) {
+        const showDeal = actionIds.has('view_deal') && vm?.dealId;
+        linkDeal.style.display = showDeal ? '' : 'none';
+        if (showDeal) linkDeal.setAttribute('data-route', '/deals/' + vm.dealId);
+    }
+    const inviteBtn = actionsEl.querySelector('#btn-invite-apply');
+    if (inviteBtn) {
+        const showInvite = actionIds.has('invite_apply') && !expired;
+        inviteBtn.style.display = showInvite ? '' : 'none';
+        inviteBtn.disabled = !showInvite;
+    }
+
+    renderMatchDetailLifecycleSections(vm, postMatch);
+    await renderMatchNegotiationSection(vm, postMatch, currentUserId);
+    await renderMatchReplacementSection(vm, postMatch, currentUserId);
+
+    const btnSuggestRepl = actionsEl.querySelector('#btn-suggest-replacement');
+    if (btnSuggestRepl) {
+        const show = actionIds.has('suggest_replacement') && !expired;
+        btnSuggestRepl.style.display = show ? '' : 'none';
+    }
+    const btnManageRepl = actionsEl.querySelector('#btn-manage-replacement');
+    if (btnManageRepl) {
+        const show = actionIds.has('manage_replacement') && !expired;
+        btnManageRepl.style.display = show ? '' : 'none';
+    }
+    const btnAcceptRepl = actionsEl.querySelector('#btn-accept-replacement');
+    if (btnAcceptRepl) {
+        const show = actionIds.has('accept_replacement') && !expired;
+        btnAcceptRepl.style.display = show ? '' : 'none';
+    }
+
+    const matchStatus = (postMatch.status || '').toLowerCase();
+    if (expired) {
+        setMatchActionFeedback('This match has expired. Accept and decline are no longer available.', 'danger');
+    } else if (vm?.dealId) {
+        setMatchActionFeedback('Deal already exists. Open your deal workspace to continue.', 'success');
+    } else if (matchStatus === CONFIG.POST_MATCH_STATUS.DECLINED) {
+        setMatchActionFeedback('This match was declined', 'danger');
+    } else if (matchStatus === CONFIG.POST_MATCH_STATUS.PENDING) {
+        setMatchActionFeedback('Waiting for all participants to accept', 'info');
+    } else if (matchStatus === CONFIG.POST_MATCH_STATUS.CONFIRMED) {
+        setMatchActionFeedback('All participants have accepted. Use Start Deal to open your deal workspace.', 'success');
+    } else if (vm?.nextBestAction) {
+        setMatchActionFeedback(vm.nextBestAction, 'info');
+    }
+}
+
+function getNegotiationLabel(status) {
+    if (window.negotiationLifecycle && typeof window.negotiationLifecycle.getNegotiationStatusLabel === 'function') {
+        return window.negotiationLifecycle.getNegotiationStatusLabel(status);
+    }
+    const s = (status || '').toLowerCase();
+    if (s === 'agreed') return 'Terms Agreed';
+    if (s === 'cancelled') return 'Negotiation Cancelled';
+    if (s === 'open' || s === 'counter_offered') return 'Negotiation Open';
+    return 'Negotiation';
+}
+
+async function renderMatchNegotiationSection(vm, postMatch, currentUserId) {
+    const panel = document.getElementById('match-detail-negotiation-panel');
+    const body = document.getElementById('match-detail-negotiation-panel-body');
+    if (!panel || !body) return;
+
+    let negotiation = null;
+    if (vm?.negotiationId) {
+        negotiation = await dataService.getNegotiationById(vm.negotiationId);
+    } else if (typeof dataService.getActiveNegotiationForMatch === 'function') {
+        negotiation = await dataService.getActiveNegotiationForMatch(postMatch.id);
+    }
+
+    const showPanel = !!(negotiation || vm?.hasActiveNegotiation || vm?.hasAgreedNegotiation);
+    panel.style.display = showPanel ? '' : 'none';
+    if (!negotiation) {
+        body.innerHTML = '<p class="text-gray-500">No negotiation yet. Use <strong>Start Negotiation</strong> in Next Actions.</p>';
+        return;
+    }
+
+    const status = negotiation.status || 'open';
+    const label = getNegotiationLabel(status);
+    const rounds = negotiation.rounds || [];
+    const roundsHtml = rounds.length
+        ? '<ul class="space-y-2 mt-2">' + rounds.map(r => {
+            const val = r.proposal && r.proposal.value != null ? String(r.proposal.value) : '';
+            const cur = r.proposal && r.proposal.currency ? r.proposal.currency : '';
+            const valLine = val ? '<span class="text-gray-600">' + escapeHtml(val + (cur ? ' ' + cur : '')) + '</span> ' : '';
+            return '<li class="p-2 border border-gray-100 rounded"><span class="font-medium">' + escapeHtml(r.by || '') + '</span> ' + valLine
+                + '<p class="text-gray-600 mt-1">' + escapeHtml(r.message || '') + '</p></li>';
+        }).join('') + '</ul>'
+        : '<p class="text-gray-500 mt-1">No proposals yet.</p>';
+
+    const isActive = window.negotiationLifecycle
+        ? window.negotiationLifecycle.isActiveNegotiation(negotiation)
+        : ['open', 'counter_offered'].includes((status || '').toLowerCase());
+    const isAgreed = (status || '').toLowerCase() === 'agreed';
+    const isCancelled = (status || '').toLowerCase() === 'cancelled';
+
+    let actionsHtml = '';
+    if (isActive) {
+        actionsHtml = ''
+            + '<div class="mt-3 space-y-2">'
+            + '<label class="block text-xs font-medium text-gray-700">Proposal message</label>'
+            + '<textarea id="negotiation-proposal-message" class="w-full border border-gray-200 rounded p-2 text-sm" rows="2" placeholder="Describe your terms…"></textarea>'
+            + '<label class="block text-xs font-medium text-gray-700">Value (optional)</label>'
+            + '<input type="number" id="negotiation-proposal-value" class="w-full border border-gray-200 rounded p-2 text-sm" placeholder="Amount" />'
+            + '<div class="flex flex-wrap gap-2">'
+            + '<button type="button" class="btn btn-outline btn-sm" id="btn-negotiation-propose">Send proposal</button>'
+            + '<button type="button" class="btn btn-primary btn-sm" id="btn-negotiation-agree">Agree to terms</button>'
+            + '<button type="button" class="btn btn-outline btn-sm text-gray-600" id="btn-negotiation-cancel">Cancel negotiation</button>'
+            + '</div></div>';
+    } else if (isAgreed && !vm?.dealId) {
+        actionsHtml = '<div class="mt-3"><button type="button" class="btn btn-primary btn-sm" id="btn-negotiation-create-deal">Create Deal</button></div>';
+    } else if (isCancelled) {
+        actionsHtml = '<p class="text-gray-600 mt-2">This negotiation was cancelled. Start a new negotiation from Next Actions when you are ready.</p>';
+    }
+
+    body.innerHTML = ''
+        + '<p><span class="badge badge--info">' + escapeHtml(label) + '</span></p>'
+        + (negotiation.agreedTerms && isAgreed
+            ? '<p class="mt-2 text-gray-700">Agreed value: ' + escapeHtml(String(negotiation.agreedTerms.value != null ? negotiation.agreedTerms.value : '—')) + '</p>'
+            : '')
+        + '<div class="mt-2"><p class="font-medium text-gray-900 text-sm">Proposals</p>' + roundsHtml + '</div>'
+        + actionsHtml;
+
+    body.dataset.negotiationId = negotiation.id;
+
+    const bind = (id, fn) => {
+        const el = body.querySelector(id);
+        if (el) el.addEventListener('click', fn);
+    };
+
+    bind('#btn-negotiation-propose', async () => {
+        const msg = body.querySelector('#negotiation-proposal-message')?.value?.trim() || '';
+        const valRaw = body.querySelector('#negotiation-proposal-value')?.value;
+        const proposal = {};
+        if (valRaw !== '' && valRaw != null) proposal.value = Number(valRaw);
+        try {
+            await dataService.addNegotiationProposal(negotiation.id, currentUserId, { proposal, message: msg });
+            const match = await dataService.getPostMatchById(postMatch.id);
+            if (match) await renderMatchDetail(match, currentUserId);
+            setMatchActionFeedback('Proposal sent.', 'success');
+        } catch (err) {
+            setMatchActionFeedback((err && err.message) ? err.message : 'Could not send proposal.', 'danger');
+        }
+    });
+
+    bind('#btn-negotiation-agree', async () => {
+        try {
+            await dataService.agreeNegotiation(negotiation.id, currentUserId);
+            const match = await dataService.getPostMatchById(postMatch.id);
+            if (match) await renderMatchDetail(match, currentUserId);
+            setMatchActionFeedback('Terms agreed.', 'success');
+        } catch (err) {
+            setMatchActionFeedback((err && err.message) ? err.message : 'Could not agree terms.', 'danger');
+        }
+    });
+
+    bind('#btn-negotiation-cancel', async () => {
+        if (!confirm('Cancel this negotiation?')) return;
+        try {
+            await dataService.cancelNegotiation(negotiation.id, currentUserId);
+            const match = await dataService.getPostMatchById(postMatch.id);
+            if (match) await renderMatchDetail(match, currentUserId);
+            setMatchActionFeedback('Negotiation cancelled.', 'info');
+        } catch (err) {
+            setMatchActionFeedback((err && err.message) ? err.message : 'Could not cancel negotiation.', 'danger');
+        }
+    });
+
+    bind('#btn-negotiation-create-deal', async () => {
+        try {
+            const deal = await dataService.createDealFromNegotiation(negotiation.id, currentUserId);
+            if (deal && window.router?.navigate) window.router.navigate('/deals/' + deal.id);
+            else {
+                const match = await dataService.getPostMatchById(postMatch.id);
+                if (match) await renderMatchDetail(match, currentUserId);
+            }
+        } catch (err) {
+            setMatchActionFeedback((err && err.message) ? err.message : 'Could not create deal.', 'danger');
+        }
+    });
+
+    if (window.location.hash === '#negotiation') {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+function getReplacementStatusLabel(status) {
+    if (window.replacementLifecycle && typeof window.replacementLifecycle.getReplacementRequestStatusLabel === 'function') {
+        return window.replacementLifecycle.getReplacementRequestStatusLabel(status);
+    }
+    return status || 'Replacement';
+}
+
+async function renderMatchReplacementSection(vm, postMatch, currentUserId) {
+    const panel = document.getElementById('match-detail-replacement-panel');
+    const body = document.getElementById('match-detail-replacement-panel-body');
+    if (!panel || !body) return;
+
+    const showPanel = !!(vm?.replacementEligible && (
+        vm.hasBlockedParticipant
+        || vm.pendingReplacementInvitation
+        || (vm.replacementRequests && vm.replacementRequests.length)
+        || vm.canManageReplacement
+        || vm.canSuggestReplacement
+    ));
+    panel.style.display = showPanel ? '' : 'none';
+    if (!showPanel) return;
+
+    const blockedSlots = typeof dataService.getBlockedSlotsForPostMatch === 'function'
+        ? dataService.getBlockedSlotsForPostMatch(postMatch)
+        : [];
+    const participantIds = new Set((postMatch.participants || []).map(p => p.userId).filter(Boolean));
+    let candidateUsers = [];
+    if (typeof dataService.getUsers === 'function') {
+        const users = await dataService.getUsers();
+        candidateUsers = (users || []).filter(u => u.id && !participantIds.has(u.id) && u.id !== currentUserId);
+    }
+
+    const slotOptions = blockedSlots.map(s => {
+        const label = (s.userId === 'vacant' ? 'Vacant role' : s.userId) + ' · ' + (s.role || 'role');
+        return '<option value="' + escapeHtml(s.userId) + '" data-role="' + escapeHtml(s.role || '') + '" data-opp="' + escapeHtml(s.opportunityId || '') + '">' + escapeHtml(label) + '</option>';
+    }).join('');
+
+    const userOptions = candidateUsers.map(u => {
+        const name = u.profile?.name || u.email || u.id;
+        return '<option value="' + escapeHtml(u.id) + '">' + escapeHtml(name) + '</option>';
+    }).join('');
+
+    let html = '';
+    if (vm.replacementBadge) {
+        html += '<p><span class="badge badge--warning">' + escapeHtml(vm.replacementBadge) + '</span></p>';
+    }
+
+    if (vm.pendingReplacementInvitation) {
+        html += '<p class="mt-2 text-gray-700">You are invited to join this match as a replacement provider.</p>';
+        html += '<button type="button" class="btn btn-primary btn-sm mt-2" id="btn-replacement-accept-invite" data-invitation-id="' + escapeHtml(vm.pendingReplacementInvitation.id) + '">Accept invitation</button>';
+    }
+
+    const pendingStatus = CONFIG.REPLACEMENT_REQUEST_STATUS.PENDING_OWNER_REVIEW;
+    const acceptedStatus = CONFIG.REPLACEMENT_REQUEST_STATUS.REPLACEMENT_ACCEPTED;
+
+    const suggestSlots = blockedSlots.filter(s => s.userId && s.userId !== 'vacant');
+    const suggestSlotOptions = suggestSlots.map(s => {
+        const label = s.userId + ' · ' + (s.role || 'role');
+        return '<option value="' + escapeHtml(s.userId) + '" data-role="' + escapeHtml(s.role || '') + '" data-opp="' + escapeHtml(s.opportunityId || '') + '">' + escapeHtml(label) + '</option>';
+    }).join('');
+
+    if (vm.canSuggestReplacement && suggestSlots.length && userOptions) {
+        html += '<div class="mt-4 border-t border-gray-100 pt-3"><p class="font-medium text-gray-900 mb-2">Suggest replacement</p>'
+            + '<label class="block text-xs text-gray-600 mb-1">Participant to replace</label>'
+            + '<select id="replacement-suggest-slot" class="w-full border border-gray-200 rounded p-2 text-sm mb-2">' + suggestSlotOptions + '</select>'
+            + '<label class="block text-xs text-gray-600 mb-1">Suggested provider</label>'
+            + '<select id="replacement-suggest-user" class="w-full border border-gray-200 rounded p-2 text-sm mb-2">' + userOptions + '</select>'
+            + '<textarea id="replacement-suggest-message" class="w-full border border-gray-200 rounded p-2 text-sm mb-2" rows="2" placeholder="Optional note for the owner"></textarea>'
+            + '<button type="button" class="btn btn-outline btn-sm" id="btn-replacement-submit-suggest">Submit suggestion</button></div>';
+    }
+
+    if (vm.canManageReplacement) {
+        const inbox = (vm.replacementRequests || []).filter(r => (r.status || '') === pendingStatus);
+        if (inbox.length) {
+            html += '<div class="mt-4 border-t border-gray-100 pt-3"><p class="font-medium text-gray-900 mb-2">Owner inbox</p><ul class="space-y-2">';
+            for (const req of inbox) {
+                const sugName = req.suggestedUserId
+                    ? (candidateUsers.find(u => u.id === req.suggestedUserId)?.profile?.name || req.suggestedUserId)
+                    : '—';
+                html += '<li class="border border-gray-200 rounded p-2"><p class="text-gray-800">Replace <strong>' + escapeHtml(req.blockedParticipantId || 'participant') + '</strong> with <strong>' + escapeHtml(sugName) + '</strong></p>'
+                    + '<p class="text-xs text-gray-500 mt-1">' + escapeHtml(getReplacementStatusLabel(req.status)) + '</p>'
+                    + '<div class="flex gap-2 mt-2"><button type="button" class="btn btn-primary btn-sm btn-replacement-approve" data-request-id="' + escapeHtml(req.id) + '">Approve & invite</button>'
+                    + '<button type="button" class="btn btn-outline btn-sm btn-replacement-reject" data-request-id="' + escapeHtml(req.id) + '">Reject</button></div></li>';
+            }
+            html += '</ul></div>';
+        }
+
+        if (blockedSlots.length && userOptions) {
+            html += '<div class="mt-4 border-t border-gray-100 pt-3"><p class="font-medium text-gray-900 mb-2">Invite alternative provider</p>'
+                + '<select id="replacement-invite-slot" class="w-full border border-gray-200 rounded p-2 text-sm mb-2">' + slotOptions + '</select>'
+                + '<select id="replacement-invite-user" class="w-full border border-gray-200 rounded p-2 text-sm mb-2">' + userOptions + '</select>'
+                + '<textarea id="replacement-invite-message" class="w-full border border-gray-200 rounded p-2 text-sm mb-2" rows="2" placeholder="Invitation message"></textarea>'
+                + '<button type="button" class="btn btn-primary btn-sm" id="btn-replacement-direct-invite">Send invitation</button></div>';
+        }
+
+        const ready = (vm.replacementRequests || []).filter(r => (r.status || '') === acceptedStatus);
+        if (ready.length) {
+            html += '<div class="mt-4 border-t border-gray-100 pt-3"><p class="font-medium text-gray-900 mb-2">Ready to finalize</p><ul class="space-y-2">';
+            for (const req of ready) {
+                const name = req.invitedUserId || req.suggestedUserId || 'replacement';
+                html += '<li class="border border-emerald-200 bg-emerald-50 rounded p-2 flex items-center justify-between gap-2">'
+                    + '<span>' + escapeHtml(getReplacementStatusLabel(req.status)) + ' — ' + escapeHtml(name) + '</span>'
+                    + '<button type="button" class="btn btn-primary btn-sm btn-replacement-finalize" data-request-id="' + escapeHtml(req.id) + '">Finalize replacement</button></li>';
+            }
+            html += '</ul></div>';
+        }
+    }
+
+    if (!html) {
+        html = '<p class="text-gray-500">No replacement activity yet.</p>';
+    }
+
+    body.innerHTML = html;
+    body.dataset.matchId = postMatch.id;
+
+    const refresh = async () => {
+        const match = await dataService.getPostMatchById(postMatch.id);
+        if (match) await renderMatchDetail(match, currentUserId);
+    };
+
+    const bind = (sel, fn) => {
+        const el = body.querySelector(sel);
+        if (el) el.addEventListener('click', fn);
+    };
+
+    bind('#btn-replacement-accept-invite', async () => {
+        const invId = body.querySelector('#btn-replacement-accept-invite')?.dataset?.invitationId;
+        if (!invId) return;
+        try {
+            await dataService.acceptReplacementInvitation(invId, currentUserId);
+            setMatchActionFeedback('Replacement invitation accepted. The owner can finalize when ready.', 'success');
+            await refresh();
+        } catch (err) {
+            setMatchActionFeedback((err && err.message) ? err.message : 'Could not accept invitation.', 'danger');
+        }
+    });
+
+    bind('#btn-replacement-submit-suggest', async () => {
+        const slot = body.querySelector('#replacement-suggest-slot');
+        const userSel = body.querySelector('#replacement-suggest-user');
+        const msg = body.querySelector('#replacement-suggest-message')?.value?.trim() || '';
+        const opt = slot?.selectedOptions?.[0];
+        if (!slot?.value || !userSel?.value) {
+            setMatchActionFeedback('Select who to replace and who to suggest.', 'danger');
+            return;
+        }
+        try {
+            await dataService.suggestReplacementForMatch(postMatch.id, currentUserId, {
+                blockedParticipantId: slot.value,
+                roleToFill: opt?.dataset?.role || 'General',
+                blockedOpportunityId: opt?.dataset?.opp || null,
+                suggestedUserId: userSel.value,
+                message: msg
+            });
+            setMatchActionFeedback('Suggestion sent to the opportunity owner.', 'success');
+            await refresh();
+        } catch (err) {
+            setMatchActionFeedback((err && err.message) ? err.message : 'Could not submit suggestion.', 'danger');
+        }
+    });
+
+    bind('#btn-replacement-direct-invite', async () => {
+        const slot = body.querySelector('#replacement-invite-slot');
+        const userSel = body.querySelector('#replacement-invite-user');
+        const msg = body.querySelector('#replacement-invite-message')?.value?.trim() || '';
+        const opt = slot?.selectedOptions?.[0];
+        if (!userSel?.value) {
+            setMatchActionFeedback('Select a provider to invite.', 'danger');
+            return;
+        }
+        try {
+            await dataService.ownerInviteReplacementDirect(postMatch.id, currentUserId, {
+                blockedParticipantId: slot?.value === 'vacant' ? null : slot.value,
+                roleToFill: opt?.dataset?.role || 'General',
+                blockedOpportunityId: opt?.dataset?.opp || null,
+                invitedUserId: userSel.value,
+                message: msg
+            });
+            setMatchActionFeedback('Replacement invitation sent.', 'success');
+            await refresh();
+        } catch (err) {
+            setMatchActionFeedback((err && err.message) ? err.message : 'Could not send invitation.', 'danger');
+        }
+    });
+
+    body.querySelectorAll('.btn-replacement-approve').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            try {
+                await dataService.approveReplacementSuggestion(btn.dataset.requestId, currentUserId);
+                setMatchActionFeedback('Suggestion approved and invitation sent.', 'success');
+                await refresh();
+            } catch (err) {
+                setMatchActionFeedback((err && err.message) ? err.message : 'Could not approve.', 'danger');
+            }
+        });
+    });
+
+    body.querySelectorAll('.btn-replacement-reject').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const reason = window.prompt('Optional reason for rejection:') || '';
+            try {
+                await dataService.rejectReplacementSuggestion(btn.dataset.requestId, currentUserId, reason);
+                setMatchActionFeedback('Suggestion rejected.', 'info');
+                await refresh();
+            } catch (err) {
+                setMatchActionFeedback((err && err.message) ? err.message : 'Could not reject.', 'danger');
+            }
+        });
+    });
+
+    body.querySelectorAll('.btn-replacement-finalize').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            if (!confirm('Finalize replacement and update match participants?')) return;
+            try {
+                await dataService.finalizeParticipantReplacement(btn.dataset.requestId, currentUserId);
+                setMatchActionFeedback('Participant replaced successfully.', 'success');
+                await refresh();
+            } catch (err) {
+                setMatchActionFeedback((err && err.message) ? err.message : 'Could not finalize replacement.', 'danger');
+            }
+        });
+    });
+
+    if (window.location.hash === '#replacement') {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+function renderMatchDetailLifecycleSections(vm, postMatch) {
+    const lifecycleRoot = document.getElementById('match-detail-lifecycle');
+    const showLifecycle = !!(vm?.hasInvitation || vm?.hasApplication || vm?.hasNegotiation || vm?.hasBlockedParticipant || vm?.replacementBadge || vm?.dealId);
+    if (lifecycleRoot) lifecycleRoot.style.display = showLifecycle ? '' : 'none';
+
+    const setBlock = (wrapId, bodyId, visible, html) => {
+        const wrap = document.getElementById(wrapId);
+        const body = document.getElementById(bodyId);
+        if (wrap) wrap.style.display = visible ? '' : 'none';
+        if (body && visible && html != null) body.innerHTML = html;
+    };
+
+    const invLabel = vm?.invitationStatusLabel || (vm?.hasActiveInvitation ? 'Invitation Sent' : '');
+    let invHtml = '';
+    if (vm?.hasInvitation) {
+        invHtml = '<p><span class="badge badge--info">' + escapeHtml(invLabel || 'Invitation Sent') + '</span></p>';
+        if (vm?.hasActiveInvitation && vm?.sourceOpportunityId) {
+            invHtml += '<p class="text-gray-600 mt-1">Waiting for the invited party to apply.</p>';
+        }
+        if (vm?.canDeclineInvitation && vm?.invitationId) {
+            invHtml += '<button type="button" class="btn btn-secondary btn-sm mt-2" id="btn-decline-invitation" data-invitation-id="'
+                + escapeHtml(vm.invitationId) + '">Decline invitation</button>';
+        }
+        if (vm?.canCancelInvitation && vm?.invitationId) {
+            invHtml += '<button type="button" class="btn btn-secondary btn-sm mt-2 ml-1" id="btn-cancel-invitation" data-invitation-id="'
+                + escapeHtml(vm.invitationId) + '">Cancel invitation</button>';
+        }
+    }
+
+    let appHtml = '';
+    if (vm?.hasApplication && vm?.applicationId) {
+        appHtml = '<p><span class="badge badge--success">Application Submitted</span></p>';
+        if (vm.sourceOpportunityId) {
+            appHtml += '<p class="mt-1"><a href="#" data-route="/opportunities/' + escapeHtml(vm.sourceOpportunityId) + '" class="text-primary font-medium">View opportunity applications</a></p>';
+        }
+    }
+
+    let dealHtml = '';
+    if (vm?.dealId) {
+        dealHtml = '<p><span class="badge badge--success">Deal created</span>'
+            + (vm.dealSourceLabel ? ' <span class="text-gray-500 text-xs">(' + escapeHtml(vm.dealSourceLabel) + ')</span>' : '')
+            + '</p>';
+        dealHtml += '<p class="mt-1"><a href="#" data-route="/deals/' + escapeHtml(vm.dealId) + '" class="text-primary font-medium">View Deal Workspace</a></p>';
+    }
+
+    let negHtml = '';
+    if (vm?.hasNegotiation) {
+        negHtml = '<p><span class="badge badge--info">' + escapeHtml(vm.negotiationStatusLabel || getNegotiationLabel(vm.negotiationStatus)) + '</span></p>';
+        if (vm.hasActiveNegotiation) {
+            negHtml += '<p class="text-gray-600 mt-1"><a href="#negotiation" class="text-primary font-medium">Continue in Value Negotiation</a></p>';
+        } else if (vm.hasAgreedNegotiation && !vm.dealId) {
+            negHtml += '<p class="text-gray-600 mt-1">Ready to create deal workspace.</p>';
+        }
+    }
+
+    let replHtml = '';
+    if (vm?.replacementEligible && (vm.replacementBadge || vm.activeReplacementRequest)) {
+        replHtml = '<p><span class="badge badge--warning">' + escapeHtml(vm.replacementBadge || getReplacementStatusLabel(vm.activeReplacementRequest?.status)) + '</span></p>';
+        replHtml += '<p class="text-gray-600 mt-1"><a href="#replacement" class="text-primary font-medium">Open replacement inbox</a></p>';
+    }
+
+    setBlock('match-detail-invitation-wrap', 'match-detail-invitation-body', !!(vm?.hasInvitation), invHtml);
+    setBlock('match-detail-application-wrap', 'match-detail-application-body', !!(vm?.hasApplication), appHtml);
+    setBlock('match-detail-negotiation-wrap', 'match-detail-negotiation-body', !!(vm?.hasNegotiation), negHtml);
+    setBlock('match-detail-replacement-wrap', 'match-detail-replacement-body', !!(vm?.replacementEligible && replHtml), replHtml);
+    setBlock('match-detail-deal-wrap', 'match-detail-deal-body', !!(vm?.dealId), dealHtml);
+
+    void postMatch;
 }
 
 async function buildParticipantsList(ds, matchType, payload, participants, uniqueByUser, currentUserId) {
@@ -227,7 +779,7 @@ async function buildParticipantsList(ds, matchType, payload, participants, uniqu
                 need = '—';
             }
         } else if (matchType === 'circular') {
-            const links = payload.links || [];
+            const links = payload.links || payload.linkScores || [];
             const outLink = links.find(l => (l.fromCreatorId || l.from) === p.userId);
             const inLink = links.find(l => (l.toCreatorId || l.to) === p.userId);
             const offerOpp = outLink?.offerId ? await ds.getOpportunityById(outLink.offerId) : null;
@@ -247,18 +799,218 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
-function setupMatchDetailActions(matchId, userId) {
+function isPostMatchExpired(postMatch) {
+    if (!postMatch) return false;
+    if ((postMatch.status || '') === CONFIG.POST_MATCH_STATUS.EXPIRED) return true;
+    if (postMatch.expiresAt) {
+        const t = new Date(postMatch.expiresAt).getTime();
+        return !Number.isNaN(t) && t < Date.now();
+    }
+    return false;
+}
+
+function setMatchActionFeedback(message, tone = 'info') {
     const actionsEl = document.getElementById('match-detail-actions');
     if (!actionsEl) return;
+    let feedback = actionsEl.querySelector('#match-action-feedback');
+    if (!feedback) {
+        feedback = document.createElement('p');
+        feedback.id = 'match-action-feedback';
+        actionsEl.appendChild(feedback);
+    }
+    const toneClass = tone === 'danger'
+        ? 'text-sm text-red-700 bg-red-50 border border-red-200 rounded p-2 mb-0'
+        : tone === 'success'
+            ? 'text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded p-2 mb-0'
+            : 'text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded p-2 mb-0';
+    feedback.className = toneClass;
+    feedback.textContent = message;
+}
+
+function setupMatchDetailActions(matchId, userId) {
+    const actionsEl = document.getElementById('match-detail-actions');
+    const rootEl = document.getElementById('match-detail-content') || actionsEl;
+    if (!rootEl) return;
     // Use a single delegated listener so we don't add duplicates after re-render
     const handler = async (e) => {
+        const declineInvBtn = e.target.closest('#btn-decline-invitation');
+        const cancelInvBtn = e.target.closest('#btn-cancel-invitation');
+        if (declineInvBtn) {
+            e.preventDefault();
+            const invId = declineInvBtn.dataset.invitationId;
+            if (!invId || !confirm('Decline this invitation?')) return;
+            declineInvBtn.disabled = true;
+            try {
+                if (typeof dataService.declineOpportunityInvitation === 'function') {
+                    await dataService.declineOpportunityInvitation(invId, userId);
+                }
+                const match = await dataService.getPostMatchById(matchId);
+                if (match) await renderMatchDetail(match, userId);
+                setMatchActionFeedback('Invitation declined.', 'success');
+            } catch (err) {
+                setMatchActionFeedback((err && err.message) ? err.message : 'Could not decline invitation.', 'danger');
+            }
+            declineInvBtn.disabled = false;
+            return;
+        }
+        if (cancelInvBtn) {
+            e.preventDefault();
+            const invId = cancelInvBtn.dataset.invitationId;
+            if (!invId || !confirm('Cancel this invitation?')) return;
+            cancelInvBtn.disabled = true;
+            try {
+                if (typeof dataService.cancelOpportunityInvitation === 'function') {
+                    await dataService.cancelOpportunityInvitation(invId, userId);
+                }
+                const match = await dataService.getPostMatchById(matchId);
+                if (match) await renderMatchDetail(match, userId);
+                setMatchActionFeedback('Invitation cancelled.', 'success');
+            } catch (err) {
+                setMatchActionFeedback((err && err.message) ? err.message : 'Could not cancel invitation.', 'danger');
+            }
+            cancelInvBtn.disabled = false;
+            return;
+        }
         const acceptBtn = e.target.closest('#btn-accept-match');
         const declineBtn = e.target.closest('#btn-decline-match');
+        const startNegBtn = e.target.closest('#btn-start-negotiation');
+        const createDealMatchBtn = e.target.closest('#btn-create-deal-match');
+        const createDealNegBtn = e.target.closest('#btn-create-deal-negotiation');
+        if (createDealMatchBtn) {
+            e.preventDefault();
+            createDealMatchBtn.disabled = true;
+            try {
+                const match = await dataService.getPostMatchById(matchId);
+                if (!match || (match.status || '') !== CONFIG.POST_MATCH_STATUS.CONFIRMED) {
+                    throw new Error('The match must be confirmed before creating a deal.');
+                }
+                let deal = await dataService.getDealByMatchId(matchId);
+                if (!deal) deal = await dataService.createDealFromMatch(match, currentUserId);
+                if (deal && window.router?.navigate) {
+                    try {
+                        sessionStorage.setItem('pmtwin_deal_flash', JSON.stringify({
+                            message: 'Your Deal Workspace is ready.',
+                            tone: 'success'
+                        }));
+                    } catch (err) {
+                        void err;
+                    }
+                    window.router.navigate('/deals/' + deal.id);
+                }
+            } catch (err) {
+                setMatchActionFeedback((err && err.message) ? err.message : 'Could not create deal.', 'danger');
+            }
+            createDealMatchBtn.disabled = false;
+            return;
+        }
+        const suggestReplBtn = e.target.closest('#btn-suggest-replacement');
+        const manageReplBtn = e.target.closest('#btn-manage-replacement');
+        const acceptReplBtn = e.target.closest('#btn-accept-replacement');
+        if (suggestReplBtn || manageReplBtn) {
+            e.preventDefault();
+            const panel = document.getElementById('match-detail-replacement-panel');
+            if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (window.history?.replaceState) {
+                window.history.replaceState(null, '', window.location.pathname + window.location.search + '#replacement');
+            } else {
+                window.location.hash = 'replacement';
+            }
+            return;
+        }
+        if (acceptReplBtn) {
+            e.preventDefault();
+            acceptReplBtn.disabled = true;
+            try {
+                const match = await dataService.getPostMatchById(matchId);
+                let inv = null;
+                if (typeof dataService.getInvitationsByMatchId === 'function') {
+                    const list = await dataService.getInvitationsByMatchId(matchId);
+                    const replKind = CONFIG.INVITATION_KIND.REPLACEMENT;
+                    const user = await dataService.getUserById(userId);
+                    inv = list.find(i => (i.invitationKind || '') === replKind
+                        && ['sent', 'invitation_sent'].includes((i.status || '').toLowerCase())
+                        && window.replacementLifecycle?.invitationAcceptsActor(i, userId, user?.companyId));
+                }
+                if (!inv) throw new Error('No active replacement invitation found.');
+                await dataService.acceptReplacementInvitation(inv.id, userId);
+                if (match) await renderMatchDetail(match, userId);
+                setMatchActionFeedback('Replacement invitation accepted.', 'success');
+            } catch (err) {
+                setMatchActionFeedback((err && err.message) ? err.message : 'Could not accept invitation.', 'danger');
+            }
+            acceptReplBtn.disabled = false;
+            return;
+        }
+        if (startNegBtn) {
+            e.preventDefault();
+            startNegBtn.disabled = true;
+            try {
+                await dataService.startNegotiationFromMatch(matchId, userId);
+                const match = await dataService.getPostMatchById(matchId);
+                if (match) await renderMatchDetail(match, userId);
+                setMatchActionFeedback('Negotiation started. Continue in the Value Negotiation section.', 'success');
+                const panel = document.getElementById('match-detail-negotiation-panel');
+                if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (err) {
+                setMatchActionFeedback((err && err.message) ? err.message : 'Could not start negotiation.', 'danger');
+            }
+            startNegBtn.disabled = false;
+            return;
+        }
+        if (createDealNegBtn) {
+            e.preventDefault();
+            createDealNegBtn.disabled = true;
+            try {
+                const match = await dataService.getPostMatchById(matchId);
+                let negId = match?.negotiationId;
+                if (!negId && typeof dataService.getActiveNegotiationForMatch === 'function') {
+                    const neg = await dataService.getActiveNegotiationForMatch(matchId);
+                    negId = neg?.id;
+                }
+                if (!negId) {
+                    const list = await dataService.getNegotiationsByMatchId(matchId);
+                    const agreed = (list || []).find(n => (n.status || '') === 'agreed');
+                    negId = agreed?.id;
+                }
+                if (!negId) throw new Error('No agreed negotiation found.');
+                const deal = await dataService.createDealFromNegotiation(negId, userId);
+                if (deal && window.router?.navigate) window.router.navigate('/deals/' + deal.id);
+            } catch (err) {
+                setMatchActionFeedback((err && err.message) ? err.message : 'Could not create deal.', 'danger');
+            }
+            createDealNegBtn.disabled = false;
+            return;
+        }
+        const inviteBtn = e.target.closest('#btn-invite-apply');
+        if (inviteBtn) {
+            e.preventDefault();
+            inviteBtn.disabled = true;
+            try {
+                const invitation = await dataService.createOpportunityInvitationFromMatch(matchId, userId);
+                const match = await dataService.getPostMatchById(matchId);
+                if (match) await renderMatchDetail(match, userId);
+                setMatchActionFeedback(
+                    invitation ? 'Invitation sent. The invited party can apply from their notification or opportunity page.' : 'Invitation could not be sent.',
+                    invitation ? 'success' : 'danger'
+                );
+            } catch (err) {
+                console.error('Invite to apply error:', err);
+                setMatchActionFeedback((err && err.message) ? err.message : 'Could not send invitation.', 'danger');
+            }
+            inviteBtn.disabled = false;
+            return;
+        }
         if (acceptBtn) {
             e.preventDefault();
             acceptBtn.disabled = true;
             try {
                 const match = await dataService.getPostMatchById(matchId);
+                if (isPostMatchExpired(match)) {
+                    if (match) await renderMatchDetail(match, userId);
+                    setMatchActionFeedback('This match has expired.', 'danger');
+                    acceptBtn.disabled = false;
+                    return;
+                }
                 if (match && match.isReplacement && match.replacementDealId) {
                     const deal = await dataService.acceptReplacementPostMatch(matchId, userId);
                     if (deal && window.router && typeof window.router.navigate === 'function') {
@@ -271,43 +1023,30 @@ function setupMatchDetailActions(matchId, userId) {
                 }
                 const updated = await dataService.updatePostMatchStatus(matchId, userId, CONFIG.POST_MATCH_PARTICIPANT_STATUS.ACCEPTED);
                 if (updated) {
-                    await notifyOtherParticipants(updated, userId, 'accepted');
-                    if (updated.status === CONFIG.POST_MATCH_STATUS.CONFIRMED) {
-                        await notifyAllParticipantsConfirmed(updated);
-                    }
-                    let deal = await dataService.getDealByMatchId(matchId);
-                    if (!deal) {
-                        deal = await dataService.createDealFromMatch(updated);
-                    }
                     await renderMatchDetail(updated, userId);
-                    if (deal && window.router && typeof window.router.navigate === 'function') {
-                        try {
-                            sessionStorage.setItem(
-                                'pmtwin_deal_flash',
-                                JSON.stringify({
-                                    message: 'Your Deal Workspace is ready. Continue in the draft stage.',
-                                    tone: 'success'
-                                })
-                            );
-                        } catch (e) {
-                            void e;
-                        }
-                        window.router.navigate('/deals/' + deal.id);
+                    if (isPostMatchExpired(updated)) {
+                        setMatchActionFeedback('This match has expired.', 'danger');
+                    } else if ((updated.status || '') === CONFIG.POST_MATCH_STATUS.DECLINED) {
+                        setMatchActionFeedback('This match was declined', 'danger');
+                    } else if ((updated.status || '') === CONFIG.POST_MATCH_STATUS.CONFIRMED) {
+                        setMatchActionFeedback('All participants have accepted. Use Start Deal to open your deal workspace.', 'success');
+                    } else {
+                        setMatchActionFeedback('Waiting for all participants to accept', 'info');
                     }
                 }
             } catch (err) {
                 console.error('Accept match error:', err);
+                setMatchActionFeedback((err && err.message) ? err.message : 'Could not accept this match. Please try again.', 'danger');
             }
             acceptBtn.disabled = false;
         } else if (declineBtn) {
             e.preventDefault();
             const match = await dataService.getPostMatchById(matchId);
             const isReplacement = match && match.isReplacement;
-            if (!confirm(isReplacement ? 'Decline this replacement invitation? The next candidate may be invited.' : 'Decline this match? Other participants will be notified.')) return;
+            if (!confirm(isReplacement ? 'Decline this replacement invitation? The next replacement for this role may be invited.' : 'Decline this match? Other participants will be notified.')) return;
             declineBtn.disabled = true;
             try {
                 const updated = await dataService.declinePostMatch(matchId, userId);
-                if (updated && !isReplacement) await notifyOtherParticipants(updated, userId, 'declined');
                 if (isReplacement) {
                     const nextMatch = await dataService.inviteNextReplacementCandidate(matchId, userId);
                     if (nextMatch) {
@@ -336,43 +1075,7 @@ function setupMatchDetailActions(matchId, userId) {
             declineBtn.disabled = false;
         }
     };
-    actionsEl.removeEventListener('click', actionsEl._matchDetailClickHandler);
-    actionsEl._matchDetailClickHandler = handler;
-    actionsEl.addEventListener('click', handler);
-}
-
-async function notifyAllParticipantsConfirmed(postMatch) {
-    const ds = dataService;
-    const participants = postMatch.participants || [];
-    const seen = new Set();
-    for (const p of participants) {
-        if (!p.userId || seen.has(p.userId)) continue;
-        seen.add(p.userId);
-        await ds.createNotification({
-            userId: p.userId,
-            type: 'match',
-            title: 'Match confirmed',
-            message: 'All participants accepted. A draft Deal Workspace has been created—open it to continue.',
-            link: '/matches/' + postMatch.id,
-            read: false
-        });
-    }
-}
-
-async function notifyOtherParticipants(postMatch, actingUserId, action) {
-    const ds = dataService;
-    const others = (postMatch.participants || []).filter(p => p.userId && p.userId !== actingUserId);
-    const seen = new Set();
-    for (const p of others) {
-        if (seen.has(p.userId)) continue;
-        seen.add(p.userId);
-        await ds.createNotification({
-            userId: p.userId,
-            type: 'match',
-            title: action === 'accepted' ? 'Match accepted' : 'Match declined',
-            message: action === 'accepted' ? 'A participant accepted the match.' : 'A participant declined the match.',
-            link: '/matches/' + postMatch.id,
-            read: false
-        });
-    }
+    rootEl.removeEventListener('click', rootEl._matchDetailClickHandler);
+    rootEl._matchDetailClickHandler = handler;
+    rootEl.addEventListener('click', handler);
 }

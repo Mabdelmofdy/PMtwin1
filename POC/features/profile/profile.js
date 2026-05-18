@@ -3049,8 +3049,6 @@ async function saveSection(section, userId) {
             }
         }
         closeSectionEdit(section);
-        const ms = window.matchingService;
-        if (ms && typeof ms.findOpportunitiesForCandidate === 'function') ms.findOpportunitiesForCandidate(userId).catch(() => {});
         showProfileSuccess('Section updated successfully.');
     } catch (err) {
         console.error('Error saving section:', err);
@@ -3174,13 +3172,7 @@ function setupCompanyForm(userId) {
             renderCompleteness(merged, true);
             showCompanyView();
             populateProfilePreview(authService.getCurrentUser());
-            const ms = window.matchingService;
-            if (ms && typeof ms.findOpportunitiesForCandidate === 'function') {
-                ms.findOpportunitiesForCandidate(userId).catch(e =>
-                    console.warn('Matching refresh after profile save failed', e)
-                );
-            }
-            showProfileSuccess('Profile updated successfully. Your match recommendations will update to reflect these changes.');
+            showProfileSuccess('Profile updated successfully.');
         } catch (error) {
             console.error('Error updating profile:', error);
             alert('Failed to update profile. Please try again.');
@@ -3324,13 +3316,7 @@ function setupProfessionalForm(userId) {
             renderCompleteness(merged, false);
             showProfessionalView();
             populateProfilePreview(authService.getCurrentUser());
-            const ms = window.matchingService;
-            if (ms && typeof ms.findOpportunitiesForCandidate === 'function') {
-                ms.findOpportunitiesForCandidate(userId).catch(e =>
-                    console.warn('Matching refresh after profile save failed', e)
-                );
-            }
-            showProfileSuccess('Profile updated successfully. Your match recommendations will update to reflect these changes.');
+            showProfileSuccess('Profile updated successfully.');
         } catch (error) {
             console.error('Error updating profile:', error);
             alert('Failed to update profile. Please try again.');
@@ -3348,9 +3334,19 @@ async function loadProfileStats(userId) {
         const appsSubmitted = allApplications.filter(a => a.applicantId === userId).length;
         document.getElementById('stat-apps-submitted').textContent = appsSubmitted;
 
-        const allMatches = await dataService.getMatches();
-        const matchesReceived = allMatches.filter(m => (m.candidateId || m.userId) === userId).length;
+        const postMatches = dataService.getPostMatchesForUser
+            ? await dataService.getPostMatchesForUser(userId)
+            : [];
+        const pendingMatches = postMatches.filter(pm => (pm.status || '').toLowerCase() === 'pending').length;
+        const confirmedMatches = postMatches.filter(pm => (pm.status || '').toLowerCase() === 'confirmed').length;
+        const declinedMatches = postMatches.filter(pm => (pm.status || '').toLowerCase() === 'declined').length;
+        const expiredMatches = postMatches.filter(pm => (pm.status || '').toLowerCase() === 'expired').length;
+        const matchesReceived = pendingMatches + confirmedMatches;
         document.getElementById('stat-matches-received').textContent = matchesReceived;
+        const breakdownEl = document.getElementById('stat-matches-breakdown');
+        if (breakdownEl) {
+            breakdownEl.textContent = `Pending ${pendingMatches} · Confirmed ${confirmedMatches} · Declined ${declinedMatches} · Expired ${expiredMatches}`;
+        }
 
         const contracts = typeof dataService.getContracts === 'function'
             ? await dataService.getContracts() : [];

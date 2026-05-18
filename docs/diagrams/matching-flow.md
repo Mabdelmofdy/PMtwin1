@@ -26,7 +26,8 @@ After a match is **confirmed**, continue with [deal-contract-flow.md](deal-contr
 
 ### Tips
 
-- If admin runs matching manually, behavior can differ from publish—see implementation notes at the bottom.
+- User-facing matches are **`post_matches` only** (legacy `pmtwin_matches` is deprecated).
+- Admin **Run report** is preview-only; **Save** or **publish** persist `post_matches`.
 
 ---
 
@@ -96,7 +97,7 @@ Treat percentages as a **mental model**, not a guarantee. Product tuning can cha
 
 ## Implementation notes
 
-- ✅ All four matching models are implemented.
-- ✅ Publish-triggered runs create match records and notifications.
-- ⚠️ Expiry field exists; automatic expiry enforcement is partial.
-- ⚠️ Admin run is often preview-first; persistence may differ from publish.
+- ✅ All four post-to-post matching models are implemented.
+- ✅ Publish and admin **Save** create `post_match` records and notifications.
+- ⚠️ Admin **Run report** is preview-only (in-memory); it does not write matches.
+- ⚠️ Expiry: pending matches can transition to expired on read; scheduled jobs are not implemented.

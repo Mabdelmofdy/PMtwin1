@@ -41,7 +41,7 @@ Design SQL tables to mirror entities and relationships when you leave localStora
 | `pmtwin_application_deliverables` | — | Array (demo/merge) |
 | `pmtwin_application_files` | — | Array (demo/merge) |
 | `pmtwin_application_payment_terms` | — | Array (demo/merge) |
-| `pmtwin_matches` | matches | Array of Match (legacy opportunity–candidate) |
+| `pmtwin_matches` | matches | Deprecated compatibility records only (legacy person-to-opportunity); not active when legacy flag is off |
 | `pmtwin_post_matches` | — | Array of PostMatch (demo merge: demo-post-matches.json) |
 | `pmtwin_audit` | audit | Array of AuditLog |
 | `pmtwin_notifications` | notifications | Array of Notification |

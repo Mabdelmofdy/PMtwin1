@@ -118,7 +118,7 @@
     <h1>PMTwin</h1>
     <p class="subtitle">Your step-by-step guide<br /><strong>For platform administrators</strong></p>
     <div class="meta muted">
-      Welcome · A4 print &amp; PDF · March 2026
+      Welcome · A4 print &amp; PDF · May 2026
     </div>
   </div>
 
@@ -129,7 +129,7 @@
       <li><a href="#admin-2">Admin dashboard</a></li>
       <li><a href="#admin-3">User management</a></li>
       <li><a href="#admin-4">Opportunities management</a></li>
-      <li><a href="#admin-5">Matching (admin view)</a></li>
+      <li><a href="#admin-5">Matching (command center)</a></li>
       <li><a href="#admin-6">Matches monitoring</a></li>
       <li><a href="#admin-7">Deals monitoring</a></li>
       <li><a href="#admin-8">Contracts monitoring</a></li>
@@ -276,38 +276,58 @@
   </section>
 
   <section id="admin-5" class="page-break">
-    <h1>5. Matching (admin view)</h1>
+    <h1>5. Matching (admin command center)</h1>
     <figure class="avoid-break">
-      <img src="assets/admin/matching.png" alt="Admin matching screen with opportunity selector and match results" width="1100" />
-      <figcaption>Figure 4 — Matching tools for reviewing suggestions and running matching when available</figcaption>
+      <img src="assets/admin/matching.png" alt="Admin matching command center with report, metrics, and save actions" width="1100" />
+      <figcaption>Figure 4 — Admin Matching: preview report, metrics, and per-row Save for published opportunities</figcaption>
     </figure>
     <h4>What you are seeing</h4>
     <ul>
-      <li>The opportunity you are inspecting and the suggested pairings or scores.</li>
-      <li>Controls to refresh or run matching again, when your screen shows them.</li>
-      <li>Enough detail to judge whether suggestions look fair and useful for members.</li>
+      <li><strong>Summary metrics</strong> — Saved matches, invitations sent, applications from invitations, and replacement activity when shown.</li>
+      <li><strong>Run report</strong> — A preview of current suggestions across published posts (scores and types).</li>
+      <li><strong>Save</strong> on a published opportunity row — Writes suggestions to member accounts and sends notifications.</li>
+      <li><strong>Work queues</strong> — Short lists (for example stuck matches or recent invitations) to prioritize follow-up.</li>
     </ul>
     <h4>What this page is about</h4>
-    <p>This area helps you <strong>see how suggestions are built</strong> for an opportunity. The platform suggests matches on its own; you use this screen to review and, when your role allows, refresh or run matching from here.</p>
+    <p>The <strong>Matching command center</strong> lets you inspect how suggestions are built and, when needed, persist them for members. Matching also runs automatically when a member <strong>publishes</strong> an opportunity—you use this screen to preview, verify, or save again for a specific post.</p>
+    <div class="note-box avoid-break">
+      <strong>Preview vs Save:</strong>
+      <p><strong>Run report</strong> shows results in memory only—it does <strong>not</strong> create matches for members. Use <strong>Save</strong> on a <strong>published</strong> opportunity row when your process requires persisting suggestions and notifying participants.</p>
+    </div>
     <h4>What you can do here</h4>
     <ul>
-      <li>View matching results tied to an opportunity.</li>
-      <li>Run matching again if your screen shows a <strong>Run</strong> or similar action.</li>
+      <li>Run a report to preview one-way, barter, consortium, and circular-style suggestions.</li>
+      <li>Save matches for a published opportunity when preview results look correct.</li>
+      <li>Scan metrics and queues for invitations, replacements, or items needing attention.</li>
     </ul>
     <h4>👉 Admin Actions</h4>
     <div class="action-box avoid-break"><strong>👉 Admin Actions</strong>
       <ol>
-        <li>Open <strong>Matching</strong> (or the admin matching page) from the menu.</li>
-        <li>Choose the opportunity you want to inspect.</li>
-        <li>Review the suggested pairings or list the screen shows.</li>
-        <li>If you see a control to run matching again, use it only when your process says so.</li>
+        <li>Open <strong>Admin</strong> → <strong>Matching</strong>.</li>
+        <li>Click <strong>Run report</strong> to refresh the preview (no member records are created yet).</li>
+        <li>Review scores, match type, and participants for each row.</li>
+        <li>For a <strong>published</strong> opportunity that needs persisted suggestions, click <strong>Save</strong> on that row.</li>
+        <li>Check metrics and work queues if members report missing or duplicate suggestions.</li>
       </ol>
     </div>
     <h4>What happens next</h4>
-    <p>You see suggested matches and can confirm they look reasonable for members. The platform suggests matches automatically; your job is to review when needed.</p>
+    <p>After <strong>Save</strong>, members see new or updated suggestions on <strong>Matches</strong> and may receive notifications. After <strong>Run report</strong> only, nothing changes for members until you Save or they publish again.</p>
+    <div class="mermaid avoid-break">
+flowchart LR
+  Publish[Member publishes] --> Auto[Suggestions saved automatically]
+  Report[Admin Run report] --> Preview[Preview only]
+  Save[Admin Save row] --> Persist[Saved matches + alerts]
+    </div>
     <h4>Tips</h4>
     <ul>
-      <li>Clear, complete opportunities usually lead to clearer suggestions for everyone.</li>
+      <li>Prefer fixing unclear opportunities before repeatedly saving the same post.</li>
+      <li>Treat Run report as a quality check; use Save only when you intend members to see those suggestions.</li>
+    </ul>
+    <h4>Common mistakes</h4>
+    <ul>
+      <li>Assuming Run report created matches for members—it is preview only.</li>
+      <li>Trying to Save on a draft opportunity—Save is for published posts.</li>
+      <li>Expecting bulk Save for every row at once—persist is per opportunity row.</li>
     </ul>
   </section>
 
@@ -319,7 +339,7 @@
     </figure>
     <h4>What you are seeing</h4>
     <ul>
-      <li>A list of match rows with parties, scores or fit labels, and status.</li>
+      <li>A list of match rows with parties, scores or fit labels, and status (pending, confirmed, or declined).</li>
       <li>A way to open one match to see participants and progress in full.</li>
       <li>Filters or sorting, when shown, to focus on new or stuck items.</li>
     </ul>
@@ -487,7 +507,7 @@ flowchart LR
       <ol>
         <li>Start with <strong>Users</strong> when accounts or trust are the issue.</li>
         <li>Move to <strong>Opportunities</strong> when the question is about a post.</li>
-        <li>Check <strong>Matching</strong> and <strong>Matches</strong> when suggestions are in doubt.</li>
+        <li>Check <strong>Matching</strong> (Run report / Save) and <strong>Matches</strong> when suggestions are in doubt.</li>
         <li>Open <strong>Deals</strong> and <strong>Contracts</strong> when work or signing needs attention.</li>
       </ol>
     </div>
@@ -500,6 +520,8 @@ flowchart LR
   </section>
 
   <p class="muted page-break" style="margin-top: 12mm;">End of guide — PMTwin Administrator Guide</p>
+
+  <footer class="footer">PMTwin — Admin Guide</footer>
 
 </body>
 </html>
