@@ -3,39 +3,184 @@
   "version": "1.0",
   "data": [
     {
-      "id": "sim-company-001",
-      "email": "contact@sim-company-1.test",
+      "id": "seed-co-001",
+      "email": "contact@seed-co-1.test",
       "passwordHash": "cGFzc3dvcmQxMjM=",
       "role": "company_owner",
       "status": "active",
       "isPublic": true,
-      "connectionCount": 182,
+      "connectionCount": 11,
       "profile": {
-        "name": "Sim Company 1 (Accounting)",
+        "name": "Seed Company 1 (Construction)",
         "type": "company",
-        "headline": "Accounting services",
-        "companyType": "Large Enterprise",
-        "registrationNumber": "1000000001",
-        "phone": "+966 50 001 0000",
+        "headline": "Construction services",
+        "companyType": "SME",
+        "registrationNumber": "2000000001",
+        "phone": "+966 50 001 1000",
+        "location": "Riyadh, Saudi Arabia",
+        "address": "Riyadh, Saudi Arabia",
+        "description": "Controlled seed company for matching scenarios.",
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "industry": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "employeeCount": "50-200",
+        "yearEstablished": 2001,
+        "certifications": [
+          "ISO 9001"
+        ],
+        "financialCapacity": 5000000,
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "services": [
+          "Construction Services"
+        ],
+        "interests": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "rating": 0.75,
+        "avatar": null
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z"
+    },
+    {
+      "id": "seed-co-002",
+      "email": "contact@seed-co-2.test",
+      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "role": "company_owner",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 12,
+      "profile": {
+        "name": "Seed Company 2 (Engineering)",
+        "type": "company",
+        "headline": "Engineering services",
+        "companyType": "SME",
+        "registrationNumber": "2000000002",
+        "phone": "+966 50 002 1000",
+        "location": "Jeddah, Saudi Arabia",
+        "address": "Jeddah, Saudi Arabia",
+        "description": "Controlled seed company for matching scenarios.",
+        "sectors": [
+          "Engineering",
+          "Consulting"
+        ],
+        "industry": [
+          "Engineering",
+          "Consulting"
+        ],
+        "employeeCount": "50-200",
+        "yearEstablished": 2002,
+        "certifications": [
+          "ISO 9001"
+        ],
+        "financialCapacity": 5000000,
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "services": [
+          "Engineering Services"
+        ],
+        "interests": [
+          "Engineering",
+          "Consulting"
+        ],
+        "rating": 0.75,
+        "avatar": null
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z"
+    },
+    {
+      "id": "seed-co-003",
+      "email": "contact@seed-co-3.test",
+      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "role": "company_owner",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 13,
+      "profile": {
+        "name": "Seed Company 3 (Equipment Rental)",
+        "type": "company",
+        "headline": "Equipment Rental services",
+        "companyType": "SME",
+        "registrationNumber": "2000000003",
+        "phone": "+966 50 003 1000",
         "location": "Dammam, Saudi Arabia",
         "address": "Dammam, Saudi Arabia",
-        "description": "Simulation Accounting company.",
+        "description": "Controlled seed company for matching scenarios.",
         "sectors": [
-          "Financial",
+          "Equipment Rental",
+          "Consulting"
+        ],
+        "industry": [
+          "Equipment Rental",
+          "Consulting"
+        ],
+        "employeeCount": "50-200",
+        "yearEstablished": 2003,
+        "certifications": [
+          "ISO 9001"
+        ],
+        "financialCapacity": 5000000,
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "services": [
+          "Equipment Rental Services"
+        ],
+        "interests": [
+          "Equipment Rental",
+          "Consulting"
+        ],
+        "rating": 0.75,
+        "avatar": null
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z"
+    },
+    {
+      "id": "seed-co-004",
+      "email": "contact@seed-co-4.test",
+      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "role": "company_owner",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 14,
+      "profile": {
+        "name": "Seed Company 4 (Accounting)",
+        "type": "company",
+        "headline": "Accounting services",
+        "companyType": "SME",
+        "registrationNumber": "2000000004",
+        "phone": "+966 50 004 1000",
+        "location": "NEOM, Saudi Arabia",
+        "address": "NEOM, Saudi Arabia",
+        "description": "Controlled seed company for matching scenarios.",
+        "sectors": [
           "Accounting",
           "Consulting"
         ],
         "industry": [
-          "Financial",
           "Accounting",
           "Consulting"
         ],
         "employeeCount": "50-200",
-        "yearEstablished": 2007,
+        "yearEstablished": 2004,
         "certifications": [
           "ISO 9001"
         ],
-        "financialCapacity": 27055806,
+        "financialCapacity": 5000000,
         "preferredPaymentModes": [
           "cash",
           "barter"
@@ -44,206 +189,47 @@
           "Accounting Services"
         ],
         "interests": [
-          "Financial",
           "Accounting",
           "Consulting"
         ],
-        "rating": 0.39109404091308547,
+        "rating": 0.75,
         "avatar": null
       },
-      "createdAt": "2026-06-09T10:00:40.505Z",
-      "updatedAt": "2026-06-09T10:00:40.505Z"
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z"
     },
     {
-      "id": "sim-company-002",
-      "email": "contact@sim-company-2.test",
+      "id": "seed-co-005",
+      "email": "contact@seed-co-5.test",
       "passwordHash": "cGFzc3dvcmQxMjM=",
       "role": "company_owner",
       "status": "active",
       "isPublic": true,
-      "connectionCount": 57,
+      "connectionCount": 15,
       "profile": {
-        "name": "Sim Company 2 (Construction)",
-        "type": "company",
-        "headline": "Construction services",
-        "companyType": "Large Enterprise",
-        "registrationNumber": "1000000002",
-        "phone": "+966 50 002 0000",
-        "location": "Jeddah, Saudi Arabia",
-        "address": "Jeddah, Saudi Arabia",
-        "description": "Simulation Construction company.",
-        "sectors": [
-          "Construction",
-          "Infrastructure",
-          "Real Estate"
-        ],
-        "industry": [
-          "Construction",
-          "Infrastructure",
-          "Real Estate"
-        ],
-        "employeeCount": "50-200",
-        "yearEstablished": 2006,
-        "certifications": [
-          "ISO 9001"
-        ],
-        "financialCapacity": 19094336,
-        "preferredPaymentModes": [
-          "cash",
-          "barter"
-        ],
-        "services": [
-          "Construction Services"
-        ],
-        "interests": [
-          "Construction",
-          "Infrastructure",
-          "Real Estate"
-        ],
-        "rating": 0.4537975788832631,
-        "avatar": null
-      },
-      "createdAt": "2026-06-09T10:00:40.505Z",
-      "updatedAt": "2026-06-09T10:00:40.505Z"
-    },
-    {
-      "id": "sim-company-003",
-      "email": "contact@sim-company-3.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
-      "role": "company_owner",
-      "status": "active",
-      "isPublic": true,
-      "connectionCount": 169,
-      "profile": {
-        "name": "Sim Company 3 (Construction)",
-        "type": "company",
-        "headline": "Construction services",
-        "companyType": "Large Enterprise",
-        "registrationNumber": "1000000003",
-        "phone": "+966 50 003 0000",
-        "location": "Remote, Saudi Arabia",
-        "address": "Remote, Saudi Arabia",
-        "description": "Simulation Construction company.",
-        "sectors": [
-          "Construction",
-          "Infrastructure",
-          "Real Estate"
-        ],
-        "industry": [
-          "Construction",
-          "Infrastructure",
-          "Real Estate"
-        ],
-        "employeeCount": "10-50",
-        "yearEstablished": 2013,
-        "certifications": [
-          "ISO 9001"
-        ],
-        "financialCapacity": 3274447,
-        "preferredPaymentModes": [
-          "cash",
-          "barter"
-        ],
-        "services": [
-          "Construction Services"
-        ],
-        "interests": [
-          "Construction",
-          "Infrastructure",
-          "Real Estate"
-        ],
-        "rating": 0.7596611919159355,
-        "avatar": null
-      },
-      "createdAt": "2026-06-09T10:00:40.505Z",
-      "updatedAt": "2026-06-09T10:00:40.505Z"
-    },
-    {
-      "id": "sim-company-004",
-      "email": "contact@sim-company-4.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
-      "role": "company_owner",
-      "status": "active",
-      "isPublic": true,
-      "connectionCount": 23,
-      "profile": {
-        "name": "Sim Company 4 (Financial)",
-        "type": "company",
-        "headline": "Financial services",
-        "companyType": "SME",
-        "registrationNumber": "1000000004",
-        "phone": "+966 50 004 0000",
-        "location": "Tabuk, Saudi Arabia",
-        "address": "Tabuk, Saudi Arabia",
-        "description": "Simulation Financial company.",
-        "sectors": [
-          "Financial",
-          "Investment",
-          "Real Estate"
-        ],
-        "industry": [
-          "Financial",
-          "Investment",
-          "Real Estate"
-        ],
-        "employeeCount": "50-200",
-        "yearEstablished": 1982,
-        "certifications": [
-          "ISO 9001"
-        ],
-        "financialCapacity": 14452215,
-        "preferredPaymentModes": [
-          "cash",
-          "barter"
-        ],
-        "services": [
-          "Financial Services"
-        ],
-        "interests": [
-          "Financial",
-          "Investment",
-          "Real Estate"
-        ],
-        "rating": 0.6029750348548288,
-        "avatar": null
-      },
-      "createdAt": "2026-06-09T10:00:40.505Z",
-      "updatedAt": "2026-06-09T10:00:40.505Z"
-    },
-    {
-      "id": "sim-company-005",
-      "email": "contact@sim-company-5.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
-      "role": "company_owner",
-      "status": "active",
-      "isPublic": true,
-      "connectionCount": 103,
-      "profile": {
-        "name": "Sim Company 5 (Real Estate)",
+        "name": "Seed Company 5 (Real Estate)",
         "type": "company",
         "headline": "Real Estate services",
         "companyType": "SME",
-        "registrationNumber": "1000000005",
-        "phone": "+966 50 005 0000",
+        "registrationNumber": "2000000005",
+        "phone": "+966 50 005 1000",
         "location": "Eastern Province, Saudi Arabia",
         "address": "Eastern Province, Saudi Arabia",
-        "description": "Simulation Real Estate company.",
+        "description": "Controlled seed company for matching scenarios.",
         "sectors": [
           "Real Estate",
-          "Construction",
-          "Property"
+          "Consulting"
         ],
         "industry": [
           "Real Estate",
-          "Construction",
-          "Property"
+          "Consulting"
         ],
-        "employeeCount": "200-1000",
-        "yearEstablished": 2006,
+        "employeeCount": "50-200",
+        "yearEstablished": 2005,
         "certifications": [
           "ISO 9001"
         ],
-        "financialCapacity": 36100746,
+        "financialCapacity": 5000000,
         "preferredPaymentModes": [
           "cash",
           "barter"
@@ -253,170 +239,13 @@
         ],
         "interests": [
           "Real Estate",
-          "Construction",
-          "Property"
+          "Consulting"
         ],
-        "rating": 0.8121700289250211,
+        "rating": 0.75,
         "avatar": null
       },
-      "createdAt": "2026-06-09T10:00:40.505Z",
-      "updatedAt": "2026-06-09T10:00:40.505Z"
-    },
-    {
-      "id": "sim-company-006",
-      "email": "contact@sim-company-6.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
-      "role": "company_owner",
-      "status": "active",
-      "isPublic": true,
-      "connectionCount": 167,
-      "profile": {
-        "name": "Sim Company 6 (Real Estate)",
-        "type": "company",
-        "headline": "Real Estate services",
-        "companyType": "SME",
-        "registrationNumber": "1000000006",
-        "phone": "+966 50 006 0000",
-        "location": "Jeddah, Saudi Arabia",
-        "address": "Jeddah, Saudi Arabia",
-        "description": "Simulation Real Estate company.",
-        "sectors": [
-          "Real Estate",
-          "Construction",
-          "Property"
-        ],
-        "industry": [
-          "Real Estate",
-          "Construction",
-          "Property"
-        ],
-        "employeeCount": "50-200",
-        "yearEstablished": 1985,
-        "certifications": [
-          "ISO 9001"
-        ],
-        "financialCapacity": 43322869,
-        "preferredPaymentModes": [
-          "cash",
-          "barter"
-        ],
-        "services": [
-          "Real Estate Services"
-        ],
-        "interests": [
-          "Real Estate",
-          "Construction",
-          "Property"
-        ],
-        "rating": 0.4739449025010434,
-        "avatar": null
-      },
-      "createdAt": "2026-06-09T10:00:40.505Z",
-      "updatedAt": "2026-06-09T10:00:40.505Z"
-    },
-    {
-      "id": "sim-company-007",
-      "email": "contact@sim-company-7.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
-      "role": "company_owner",
-      "status": "active",
-      "isPublic": true,
-      "connectionCount": 5,
-      "profile": {
-        "name": "Sim Company 7 (Construction)",
-        "type": "company",
-        "headline": "Construction services",
-        "companyType": "SME",
-        "registrationNumber": "1000000007",
-        "phone": "+966 50 007 0000",
-        "location": "NEOM, Saudi Arabia",
-        "address": "NEOM, Saudi Arabia",
-        "description": "Simulation Construction company.",
-        "sectors": [
-          "Construction",
-          "Infrastructure",
-          "Real Estate"
-        ],
-        "industry": [
-          "Construction",
-          "Infrastructure",
-          "Real Estate"
-        ],
-        "employeeCount": "50-200",
-        "yearEstablished": 1989,
-        "certifications": [
-          "ISO 9001"
-        ],
-        "financialCapacity": 17273774,
-        "preferredPaymentModes": [
-          "cash",
-          "barter"
-        ],
-        "services": [
-          "Construction Services"
-        ],
-        "interests": [
-          "Construction",
-          "Infrastructure",
-          "Real Estate"
-        ],
-        "rating": 0.6685616256522767,
-        "avatar": null
-      },
-      "createdAt": "2026-06-09T10:00:40.505Z",
-      "updatedAt": "2026-06-09T10:00:40.505Z"
-    },
-    {
-      "id": "sim-company-008",
-      "email": "contact@sim-company-8.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
-      "role": "company_owner",
-      "status": "active",
-      "isPublic": true,
-      "connectionCount": 161,
-      "profile": {
-        "name": "Sim Company 8 (Real Estate)",
-        "type": "company",
-        "headline": "Real Estate services",
-        "companyType": "Large Enterprise",
-        "registrationNumber": "1000000008",
-        "phone": "+966 50 008 0000",
-        "location": "Dammam, Saudi Arabia",
-        "address": "Dammam, Saudi Arabia",
-        "description": "Simulation Real Estate company.",
-        "sectors": [
-          "Real Estate",
-          "Construction",
-          "Property"
-        ],
-        "industry": [
-          "Real Estate",
-          "Construction",
-          "Property"
-        ],
-        "employeeCount": "50-200",
-        "yearEstablished": 1983,
-        "certifications": [
-          "ISO 9001"
-        ],
-        "financialCapacity": 14471157,
-        "preferredPaymentModes": [
-          "cash",
-          "barter"
-        ],
-        "services": [
-          "Real Estate Services"
-        ],
-        "interests": [
-          "Real Estate",
-          "Construction",
-          "Property"
-        ],
-        "rating": 0.34789323808992895,
-        "avatar": null
-      },
-      "createdAt": "2026-06-09T10:00:40.505Z",
-      "updatedAt": "2026-06-09T10:00:40.505Z"
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z"
     }
   ]
 }

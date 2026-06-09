@@ -3,7 +3,10 @@
  * Generates realistic companies, users, and opportunities for matching simulation.
  * Ensures coverage of all four models: one-way, two-way barter, consortium, circular.
  *
- * Run from POC directory: node scripts/simulation/seed-simulation-data.js
+ * Run from POC directory:
+ *   node scripts/simulation/seed-simulation-data.js --controlled  (exactly 25 posts, wipes sim + browser seed)
+ *   node scripts/simulation/seed-simulation-data.js --small
+ *   node scripts/simulation/seed-simulation-data.js
  * Output: POC/data/simulation/companies.json, users.json, opportunities.json
  */
 
@@ -69,6 +72,514 @@ function pickN(arr, n) {
 function id(prefix, n) { return `${prefix}-${String(n).padStart(3, '0')}`; }
 
 const SMALL_MODE = process.argv.includes('--small');
+const CONTROLLED_MODE = process.argv.includes('--controlled');
+const DATA_DIR = path.join(__dirname, '..', '..', 'data');
+
+// ─── Controlled mode: wipe + deterministic 25-post dataset ───────────────────
+
+const CONTROLLED_ARTIFACTS = [
+    'matching-report.json',
+    'matching-report.txt',
+    'match-graph.mmd',
+    'match-graph.dot'
+];
+
+function writeJsonEnvelope(filePath, domain, data, extra = {}) {
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(filePath, JSON.stringify({ domain, version: '1.0', ...extra, data }, null, 2));
+}
+
+function wipeSimulationData(outDir) {
+    if (!fs.existsSync(outDir)) {
+        fs.mkdirSync(outDir, { recursive: true });
+    }
+    CONTROLLED_ARTIFACTS.forEach(name => {
+        const p = path.join(outDir, name);
+        if (fs.existsSync(p)) fs.unlinkSync(p);
+    });
+    writeJsonEnvelope(path.join(outDir, 'companies.json'), 'companies', []);
+    writeJsonEnvelope(path.join(outDir, 'users.json'), 'users', []);
+    writeJsonEnvelope(path.join(outDir, 'opportunities.json'), 'opportunities', []);
+    console.log('Wiped simulation data:', outDir);
+}
+
+function wipeBrowserSeedData() {
+    writeJsonEnvelope(path.join(DATA_DIR, 'opportunities.json'), 'opportunities', [], { version: '1.2' });
+    writeJsonEnvelope(path.join(DATA_DIR, 'demo-40-opportunities.json'), 'opportunities', [], {
+        dataset: 'demo40',
+        description: 'Cleared by controlled seeder — canonical dataset lives in opportunities.json'
+    });
+    writeJsonEnvelope(path.join(DATA_DIR, 'demo-post-matches.json'), 'post_matches', [], {
+        description: 'Cleared by controlled seeder'
+    });
+    writeJsonEnvelope(path.join(DATA_DIR, 'demo-deals.json'), 'deals', [], {
+        description: 'Cleared by controlled seeder'
+    });
+    writeJsonEnvelope(path.join(DATA_DIR, 'demo-contracts.json'), 'contracts', [], {
+        description: 'Cleared by controlled seeder'
+    });
+    console.log('Wiped browser seed files in', DATA_DIR);
+}
+
+function seedUserId(n) {
+    return `seed-user-${String(n).padStart(3, '0')}`;
+}
+
+function seedCoId(n) {
+    return `seed-co-${String(n).padStart(3, '0')}`;
+}
+
+function loadMatchingDeps() {
+    global.CONFIG = global.CONFIG || {};
+    global.CONFIG.MATCHING = {
+        HARD_CONSTRAINTS_ENABLED: true,
+        STRICT_ROLE_REQUIRED: true,
+        MIN_REQUIRED_SERVICE_OVERLAP: 0.50,
+        MIN_SKILL_SCORE_FOR_MATCH: 0.50
+    };
+    const postPreprocessor = require(path.join(__dirname, '..', '..', 'src', 'services', 'matching', 'post-preprocessor.js'));
+    const hardConstraints = require(path.join(__dirname, '..', '..', 'src', 'services', 'matching', 'hard-constraints.js'));
+    let skillCanonical = {};
+    try {
+        skillCanonical = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'skill-canonical.json'), 'utf8'));
+    } catch (_) { /* optional */ }
+    return { postPreprocessor, hardConstraints, skillCanonical };
+}
+
+function generateControlledCompanies() {
+    const industries = ['Construction', 'Engineering', 'Equipment Rental', 'Accounting', 'Real Estate'];
+    const locations = ['Riyadh', 'Jeddah', 'Dammam', 'NEOM', 'Eastern Province'];
+    return industries.map((industry, i) => {
+        const n = i + 1;
+        const loc = locations[i];
+        const sectors = industry === 'Construction'
+            ? ['Construction', 'Infrastructure']
+            : [industry, 'Consulting'];
+        return {
+            id: seedCoId(n),
+            email: `contact@seed-co-${n}.test`,
+            passwordHash: 'cGFzc3dvcmQxMjM=',
+            role: 'company_owner',
+            status: 'active',
+            isPublic: true,
+            connectionCount: 10 + n,
+            profile: {
+                name: `Seed Company ${n} (${industry})`,
+                type: 'company',
+                headline: `${industry} services`,
+                companyType: 'SME',
+                registrationNumber: String(2000000000 + n),
+                phone: `+966 50 ${String(n).padStart(3, '0')} 1000`,
+                location: `${loc}, Saudi Arabia`,
+                address: `${loc}, Saudi Arabia`,
+                description: `Controlled seed company for matching scenarios.`,
+                sectors,
+                industry: sectors,
+                employeeCount: '50-200',
+                yearEstablished: 2000 + n,
+                certifications: ['ISO 9001'],
+                financialCapacity: 5000000,
+                preferredPaymentModes: ['cash', 'barter'],
+                services: [`${industry} Services`],
+                interests: sectors,
+                rating: 0.75,
+                avatar: null
+            },
+            createdAt: NOW,
+            updatedAt: NOW
+        };
+    });
+}
+
+function generateControlledUsers() {
+    const profiles = [
+        { name: 'Scenario A Need Owner', headline: 'Architect' },
+        { name: 'Scenario A/B/C Offer Owner', headline: 'Multi-offer professional' },
+        { name: 'Scenario D Need Owner', headline: 'Architect' },
+        { name: 'Scenario D Offer Owner', headline: 'Architect' },
+        { name: 'Scenario E Need Owner', headline: 'Civil Engineer' },
+        { name: 'Scenario E Offer Owner', headline: 'Civil Engineer' },
+        { name: 'Scenario F Legacy Owner', headline: 'Legacy post' },
+        { name: 'Barter User A', headline: 'MEP / Architect barter' },
+        { name: 'Barter User B', headline: 'Architect / MEP barter' },
+        { name: 'Consortium Lead', headline: 'Project Management' },
+        { name: 'Consortium Partner Architect', headline: 'Architect' },
+        { name: 'Consortium Partner Civil', headline: 'Civil Engineer' },
+        { name: 'Circular User A', headline: 'Equipment' },
+        { name: 'Circular User B', headline: 'Real Estate' },
+        { name: 'Circular User C', headline: 'Accounting' },
+        { name: 'Filler Structural', headline: 'Structural Engineer' },
+        { name: 'Filler PM', headline: 'Project Management' },
+        { name: 'Filler MEP', headline: 'MEP' }
+    ];
+    return profiles.map((p, i) => {
+        const n = i + 1;
+        return {
+            id: seedUserId(n),
+            email: `seed-user-${n}@controlled.test`,
+            passwordHash: 'cGFzc3dvcmQxMjM=',
+            role: 'professional',
+            status: 'active',
+            isPublic: true,
+            connectionCount: 5 + n,
+            profile: {
+                name: p.name,
+                type: 'professional',
+                headline: p.headline,
+                title: p.headline,
+                phone: `+966 55 ${String(n).padStart(3, '0')} 2000`,
+                location: 'Riyadh, Saudi Arabia',
+                specializations: [p.headline],
+                skills: [p.headline],
+                sectors: ['Construction', 'Infrastructure'],
+                yearsExperience: 8 + n,
+                preferredPaymentModes: ['cash', 'barter'],
+                rating: 0.8,
+                avatar: null
+            },
+            createdAt: NOW,
+            updatedAt: NOW
+        };
+    });
+}
+
+function buildControlledPost(spec, deps) {
+    const location = spec.location || 'Riyadh, Saudi Arabia';
+    const sectors = spec.sectors || ['Construction', 'Architecture'];
+    const budgetMin = spec.budgetMin != null ? spec.budgetMin : 100000;
+    const budgetMax = spec.budgetMax != null ? spec.budgetMax : 300000;
+    const isRequest = spec.intent === 'request';
+
+    const scope = {
+        sectors,
+        certifications: [],
+        coreSkills: spec.coreSkills || []
+    };
+    if (isRequest) {
+        scope.requiredSkills = spec.skills || [];
+        scope.offeredSkills = [];
+    } else {
+        scope.offeredSkills = spec.skills || [];
+        scope.requiredSkills = [];
+    }
+
+    const attributes = {
+        startDate: '2026-03-01',
+        tenderDeadline: '2026-06-01',
+        locationRequirement: spec.locationRequirement || 'On-Site',
+        ...(spec.attributes || {})
+    };
+    if (!spec.legacyNoRole && spec.targetRole) {
+        attributes.targetRole = spec.targetRole;
+    }
+    if (spec.coreSkills && spec.coreSkills.length) {
+        attributes.coreSkills = spec.coreSkills;
+    }
+    if (!isRequest) {
+        attributes.availability = { start: '2026-02-01', end: '2026-12-31' };
+    }
+
+    const exchangeMode = spec.exchangeMode || 'cash';
+    const post = {
+        id: spec.id,
+        title: spec.title,
+        description: spec.description || spec.title,
+        creatorId: seedUserId(spec.creator),
+        intent: spec.intent,
+        status: 'published',
+        modelType: spec.modelType || 'project_based',
+        subModelType: spec.subModelType || 'project',
+        location,
+        locationCountry: 'sa',
+        locationRegion: 'riyadh',
+        exchangeMode,
+        paymentModes: spec.paymentModes || [exchangeMode === 'barter' ? 'barter' : 'cash'],
+        scope,
+        exchangeData: {
+            exchangeMode,
+            currency: 'SAR',
+            budgetRange: { min: budgetMin, max: budgetMax, currency: 'SAR' },
+            ...(spec.intent === 'offer' ? { cashAmount: (budgetMin + budgetMax) / 2 } : {}),
+            ...(spec.barter || {})
+        },
+        attributes,
+        createdAt: NOW,
+        updatedAt: NOW
+    };
+
+    post.normalized = deps.postPreprocessor.extractAndNormalize(post, deps.skillCanonical);
+    if (spec.legacyNoRole) {
+        post.normalized.role = '';
+    }
+    return post;
+}
+
+function generateControlledOpportunities() {
+    const deps = loadMatchingDeps();
+    const architectSkills = ['BIM', '3D Visualization', 'Sustainable Design', 'LEED Certification'];
+    const civilServices = ['Site Planning', 'Drainage Design', 'Road Design', 'Surveying'];
+
+    const specs = [
+        // Scenario A — strict Architect match
+        {
+            id: 'seed-opp-001', intent: 'request', creator: 1, scenario: 'A',
+            title: '[A] Architect need — full coreSkills match',
+            targetRole: 'Architect', skills: architectSkills, coreSkills: architectSkills,
+            budgetMin: 150000, budgetMax: 400000
+        },
+        {
+            id: 'seed-opp-002', intent: 'offer', creator: 2, scenario: 'A',
+            title: '[A] Architect offer — strict match pair',
+            targetRole: 'Architect', skills: architectSkills,
+            budgetMin: 150000, budgetMax: 400000
+        },
+        // Scenario B — compatible Interior Designer
+        {
+            id: 'seed-opp-003', intent: 'offer', creator: 2, scenario: 'B',
+            title: '[B] Interior Designer offer — matrix compatibility',
+            targetRole: 'Interior Designer',
+            skills: ['BIM', '3D Visualization', 'Sustainable Design', 'LEED Certification', 'Space Planning', 'FF&E'],
+            budgetMin: 120000, budgetMax: 350000
+        },
+        // Scenario C — role reject (Civil Engineer vs Architect need)
+        {
+            id: 'seed-opp-004', intent: 'offer', creator: 2, scenario: 'C',
+            title: '[C] Civil Engineer offer — role incompatible with Architect need',
+            targetRole: 'Civil Engineer',
+            skills: ['BIM', '3D Visualization', 'Structural Analysis', 'SAP2000'],
+            budgetMin: 150000, budgetMax: 400000,
+            location: 'Riyadh, Saudi Arabia'
+        },
+        // Scenario D — core skill missing
+        {
+            id: 'seed-opp-005', intent: 'request', creator: 3, scenario: 'D',
+            title: '[D] Architect need — BIM core skill required',
+            targetRole: 'Architect', skills: ['BIM', 'Revit'], coreSkills: ['BIM'],
+            budgetMin: 80000, budgetMax: 200000
+        },
+        {
+            id: 'seed-opp-006', intent: 'offer', creator: 4, scenario: 'D',
+            title: '[D] Architect offer — missing BIM core skill',
+            targetRole: 'Architect', skills: ['Revit'],
+            budgetMin: 80000, budgetMax: 200000
+        },
+        // Scenario E — low service overlap
+        {
+            id: 'seed-opp-007', intent: 'request', creator: 5, scenario: 'E',
+            title: '[E] Civil Engineer need — four required services',
+            targetRole: 'Civil Engineer', skills: civilServices,
+            budgetMin: 200000, budgetMax: 500000
+        },
+        {
+            id: 'seed-opp-008', intent: 'offer', creator: 6, scenario: 'E',
+            title: '[E] Civil Engineer offer — 25% service overlap',
+            targetRole: 'Civil Engineer', skills: ['Site Planning'],
+            budgetMin: 200000, budgetMax: 500000
+        },
+        // Scenario F — missing targetRole (legacy)
+        {
+            id: 'seed-opp-009', intent: 'request', creator: 7, scenario: 'F',
+            title: '[F] Legacy need — no targetRole',
+            legacyNoRole: true,
+            skills: ['General Consulting', 'Advisory'],
+            budgetMin: 50000, budgetMax: 150000
+        },
+        // Scenario G — barter (two_way)
+        {
+            id: 'seed-opp-010', intent: 'request', creator: 8, scenario: 'G-barter',
+            title: '[G] Barter need A — MEP services',
+            targetRole: 'MEP', skills: ['HVAC Design', 'MEP Coordination'],
+            exchangeMode: 'barter', paymentModes: ['barter'], budgetMin: 0, budgetMax: 500000,
+            barter: { barterNeed: 'HVAC Design', barterOffer: 'BIM', barterValue: '100000' }
+        },
+        {
+            id: 'seed-opp-011', intent: 'offer', creator: 8, scenario: 'G-barter',
+            title: '[G] Barter offer A — Architect services',
+            targetRole: 'Architect', skills: ['BIM', 'Space Planning'],
+            exchangeMode: 'barter', paymentModes: ['barter'], budgetMin: 0, budgetMax: 500000,
+            barter: { barterNeed: 'HVAC Design', barterOffer: 'BIM', barterValue: '100000' }
+        },
+        {
+            id: 'seed-opp-012', intent: 'request', creator: 9, scenario: 'G-barter',
+            title: '[G] Barter need B — Architect services',
+            targetRole: 'Architect', skills: ['BIM', 'Space Planning'],
+            exchangeMode: 'barter', paymentModes: ['barter'], budgetMin: 0, budgetMax: 500000,
+            barter: { barterNeed: 'BIM', barterOffer: 'HVAC Design', barterValue: '100000' }
+        },
+        {
+            id: 'seed-opp-013', intent: 'offer', creator: 9, scenario: 'G-barter',
+            title: '[G] Barter offer B — MEP services',
+            targetRole: 'MEP', skills: ['HVAC Design', 'MEP Coordination'],
+            exchangeMode: 'barter', paymentModes: ['barter'], budgetMin: 0, budgetMax: 500000,
+            barter: { barterNeed: 'BIM', barterOffer: 'HVAC Design', barterValue: '100000' }
+        },
+        // Scenario G — consortium
+        {
+            id: 'seed-opp-014', intent: 'request', creator: 10, scenario: 'G-consortium',
+            title: '[G] Consortium lead — highway package',
+            targetRole: 'Project Management',
+            skills: ['Project Management', 'Highway Design', 'Consortium Leadership'],
+            subModelType: 'consortium',
+            budgetMin: 10000000, budgetMax: 50000000,
+            attributes: {
+                memberRoles: [
+                    { role: 'Architect', scope: 'Design and BIM' },
+                    { role: 'Civil Engineer', scope: 'Civil works and drainage' }
+                ]
+            }
+        },
+        {
+            id: 'seed-opp-015', intent: 'offer', creator: 11, scenario: 'G-consortium',
+            title: '[G] Consortium partner — Architect',
+            targetRole: 'Architect',
+            skills: ['Architect', 'BIM', '3D Visualization', 'Design Development'],
+            budgetMin: 2000000, budgetMax: 8000000
+        },
+        {
+            id: 'seed-opp-016', intent: 'offer', creator: 12, scenario: 'G-consortium',
+            title: '[G] Consortium partner — Civil Engineer',
+            targetRole: 'Civil Engineer',
+            skills: ['Civil Engineer', 'Site Planning', 'Drainage Design', 'Road Design'],
+            budgetMin: 3000000, budgetMax: 12000000
+        },
+        // Scenario G — circular (3-party ring)
+        {
+            id: 'seed-opp-017', intent: 'request', creator: 13, scenario: 'G-circular',
+            title: '[G] Circular A needs Excavator',
+            targetRole: 'Excavator', skills: ['Excavator', 'Equipment Rental'],
+            budgetMin: 50000, budgetMax: 200000
+        },
+        {
+            id: 'seed-opp-018', intent: 'offer', creator: 13, scenario: 'G-circular',
+            title: '[G] Circular A offers Office space',
+            targetRole: 'Office space', skills: ['Office space', 'Real Estate'],
+            budgetMin: 50000, budgetMax: 200000
+        },
+        {
+            id: 'seed-opp-019', intent: 'request', creator: 14, scenario: 'G-circular',
+            title: '[G] Circular B needs Office space',
+            targetRole: 'Office space', skills: ['Office space', 'Real Estate'],
+            budgetMin: 50000, budgetMax: 200000
+        },
+        {
+            id: 'seed-opp-020', intent: 'offer', creator: 14, scenario: 'G-circular',
+            title: '[G] Circular B offers Accounting',
+            targetRole: 'Accounting', skills: ['Accounting', 'Financial Reporting'],
+            budgetMin: 50000, budgetMax: 200000
+        },
+        {
+            id: 'seed-opp-021', intent: 'request', creator: 15, scenario: 'G-circular',
+            title: '[G] Circular C needs Accounting',
+            targetRole: 'Accounting', skills: ['Accounting', 'Financial Reporting'],
+            budgetMin: 50000, budgetMax: 200000
+        },
+        {
+            id: 'seed-opp-022', intent: 'offer', creator: 15, scenario: 'G-circular',
+            title: '[G] Circular C offers Excavator',
+            targetRole: 'Excavator', skills: ['Excavator', 'Equipment Rental'],
+            budgetMin: 50000, budgetMax: 200000
+        },
+        // Fillers — collaboration modelType spread
+        {
+            id: 'seed-opp-023', intent: 'request', creator: 16, scenario: 'filler',
+            title: 'Filler need — Structural Engineer',
+            targetRole: 'Structural Engineer',
+            skills: ['Structural Analysis', 'SAP2000', 'Steel Design'],
+            modelType: 'strategic_partnership', subModelType: 'joint_venture',
+            budgetMin: 250000, budgetMax: 600000
+        },
+        {
+            id: 'seed-opp-024', intent: 'request', creator: 17, scenario: 'filler',
+            title: 'Filler need — Project Management',
+            targetRole: 'Project Management',
+            skills: ['Project Management', 'PMP', 'Risk Management'],
+            modelType: 'resource_pooling', subModelType: 'shared_resources',
+            budgetMin: 100000, budgetMax: 300000
+        },
+        {
+            id: 'seed-opp-025', intent: 'offer', creator: 18, scenario: 'filler',
+            title: 'Filler offer — MEP',
+            targetRole: 'MEP',
+            skills: ['HVAC Design', 'MEP Coordination', 'Fire Protection'],
+            modelType: 'hiring', subModelType: 'professional_hiring',
+            budgetMin: 80000, budgetMax: 250000
+        }
+    ];
+
+    return specs.map(spec => buildControlledPost(spec, deps));
+}
+
+function findPostById(opportunities, id) {
+    return opportunities.find(o => o.id === id);
+}
+
+function validateScenarioChecklist(opportunities) {
+    const deps = loadMatchingDeps();
+    const needA = findPostById(opportunities, 'seed-opp-001');
+    const offerA = findPostById(opportunities, 'seed-opp-002');
+    const offerB = findPostById(opportunities, 'seed-opp-003');
+    const offerC = findPostById(opportunities, 'seed-opp-004');
+    const needD = findPostById(opportunities, 'seed-opp-005');
+    const offerD = findPostById(opportunities, 'seed-opp-006');
+    const needE = findPostById(opportunities, 'seed-opp-007');
+    const offerE = findPostById(opportunities, 'seed-opp-008');
+    const needF = findPostById(opportunities, 'seed-opp-009');
+
+    const checks = [
+        { label: 'A strict match', result: deps.hardConstraints.passesPair(needA, offerA) },
+        { label: 'B compatibility', result: deps.hardConstraints.passesPair(needA, offerB) },
+        { label: 'C role reject', result: deps.hardConstraints.passesPair(needA, offerC), expectFail: true },
+        { label: 'D core skill reject', result: deps.hardConstraints.passesPair(needD, offerD), expectFail: true },
+        { label: 'E overlap reject', result: deps.hardConstraints.passesPair(needE, offerE), expectFail: true },
+        { label: 'F missing role', result: deps.hardConstraints.passesPair(needF, offerA), expectFail: true, expectReason: 'role_missing' }
+    ];
+
+    console.log('\nScenario checklist:');
+    checks.forEach(({ label, result, expectFail, expectReason }) => {
+        const pass = expectFail
+            ? (!result.ok && (!expectReason || result.reason === expectReason))
+            : result.ok;
+        const detail = result.ok ? 'pass' : (result.reason || 'fail');
+        console.log(`  ${pass ? '✓' : '✗'} ${label}: ${detail}`);
+    });
+
+    const needs = opportunities.filter(o => o.intent === 'request').length;
+    const offers = opportunities.filter(o => o.intent === 'offer').length;
+    console.log(`\nIntent balance: ${needs} requests, ${offers} offers`);
+    if (needs !== 12 || offers !== 13) {
+        console.warn('WARNING: expected 12 requests and 13 offers');
+    }
+}
+
+function mainControlled() {
+    wipeSimulationData(OUT_DIR);
+    wipeBrowserSeedData();
+
+    const companies = generateControlledCompanies();
+    const users = generateControlledUsers();
+    const opportunities = generateControlledOpportunities();
+
+    writeJsonEnvelope(path.join(OUT_DIR, 'companies.json'), 'companies', companies);
+    writeJsonEnvelope(path.join(OUT_DIR, 'users.json'), 'users', users);
+    writeJsonEnvelope(path.join(OUT_DIR, 'opportunities.json'), 'opportunities', opportunities);
+
+    writeJsonEnvelope(path.join(DATA_DIR, 'opportunities.json'), 'opportunities', opportunities, { version: '1.2' });
+    writeJsonEnvelope(path.join(DATA_DIR, 'seed-controlled-users.json'), 'users', users, {
+        description: 'Controlled seed users for 25-post matching scenarios (password: password123)'
+    });
+
+    console.log('\nControlled seed written.');
+    console.log('Simulation:', OUT_DIR);
+    console.log('Browser:', path.join(DATA_DIR, 'opportunities.json'));
+    console.log('Companies:', companies.length);
+    console.log('Users:', users.length);
+    console.log('Opportunities:', opportunities.length);
+
+    validateScenarioChecklist(opportunities);
+}
 
 // ─── Companies (30–50, or 8 in small mode) ────────────────────────────────────
 function generateCompanies() {
@@ -369,6 +880,11 @@ function generateOpportunities(companyIds, users) {
 
 // ─── Main ───────────────────────────────────────────────────────────────────
 function main() {
+    if (CONTROLLED_MODE) {
+        mainControlled();
+        return;
+    }
+
     if (!fs.existsSync(OUT_DIR)) {
         fs.mkdirSync(OUT_DIR, { recursive: true });
     }

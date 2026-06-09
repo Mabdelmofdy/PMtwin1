@@ -18,12 +18,28 @@ Tools to validate the matching system under realistic conditions without changin
 
 **Data isolation:** All simulation data is written to and read from `POC/data/simulation/` only. The live platform (dashboard, opportunities, users) loads from `POC/data/*.json` (and localStorage). Simulation data never appears on the platform; the app never reads from `data/simulation/`.
 
-## Quick start
+## Quick start (controlled — recommended for hard-constraint testing)
 
 ```bash
 # From POC directory
 
-# 1. Seed small dataset (fast, for tests and quick runs)
+# 1. Wipe + seed exactly 25 posts (scenarios A–G) to simulation + browser JSON
+npm run seed:controlled
+# or: node scripts/simulation/seed-simulation-data.js --controlled
+
+# 2. Run matching simulation and write report
+npm run sim:controlled
+
+# 3. Browser: reset localStorage after seed version bump (DevTools console)
+#    resetAppData()
+```
+
+The controlled dataset includes 12 needs and 13 offers covering strict match, role compatibility, role/core/overlap rejects, barter, consortium, and circular workflows. It also writes `POC/data/opportunities.json`, `seed-controlled-users.json`, and clears demo opportunity/deal/contract merges.
+
+## Quick start (random small dataset)
+
+```bash
+# 1. Seed small dataset (fast, legacy random data)
 node scripts/simulation/seed-simulation-data.js --small
 
 # 2. Run simulation and write report
@@ -58,7 +74,7 @@ npm run test
 npx vitest run tests/simulation/matching-simulation.test.js
 ```
 
-Tests seed the small dataset and assert minimum matches for all four models (one-way, two-way barter, consortium, circular).
+Tests seed the controlled 25-post dataset and assert minimum matches for all four models (one-way, two-way barter, consortium, circular).
 
 ## Debug logging
 

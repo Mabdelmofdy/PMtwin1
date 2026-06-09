@@ -56,7 +56,7 @@ class DataService {
         this.storage = window.storageService || storageService;
         this.initialized = false;
         this.SEED_DATA_VERSION_KEY = 'pmtwin_seed_version';
-        this.CURRENT_SEED_VERSION = '1.22.0'; // Legacy pmtwin_matches seed disabled; demo-post-matches is canonical
+        this.CURRENT_SEED_VERSION = '1.23.0'; // Controlled 25-post seed; demo-40-opportunities cleared by controlled seeder
     }
     
     /**
@@ -177,6 +177,15 @@ class DataService {
                     const users = this.storage.get(CONFIG.STORAGE_KEYS.USERS) || [];
                     this.storage.set(CONFIG.STORAGE_KEYS.USERS, mergeById(users, json.data));
                     console.log(`Merged ${json.data.length} demo users`);
+                }
+            }
+            const seedUsersRes = await fetch(`${base}seed-controlled-users.json`);
+            if (seedUsersRes.ok) {
+                const json = await seedUsersRes.json();
+                if (json.data && json.data.length) {
+                    const users = this.storage.get(CONFIG.STORAGE_KEYS.USERS) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.USERS, mergeById(users, json.data));
+                    console.log(`Merged ${json.data.length} controlled seed users`);
                 }
             }
             const demoPendingRes = await fetch(`${base}demo-pending-users.json`);

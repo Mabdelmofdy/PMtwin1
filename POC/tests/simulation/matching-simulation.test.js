@@ -16,9 +16,8 @@ const POC_ROOT = path.join(__dirname, '..', '..');
 const SIM_DIR = path.join(POC_ROOT, 'data', 'simulation');
 
 beforeAll(() => {
-    // Seed small dataset so simulation and circular exchange complete in reasonable time
     const seederPath = path.join(POC_ROOT, 'scripts', 'simulation', 'seed-simulation-data.js');
-    spawnSync(process.execPath, [seederPath, '--small'], { cwd: POC_ROOT, stdio: 'pipe' });
+    spawnSync(process.execPath, [seederPath, '--controlled'], { cwd: POC_ROOT, stdio: 'pipe' });
 });
 
 describe('Matching simulation', () => {
@@ -29,9 +28,9 @@ describe('Matching simulation', () => {
             oneWayLimit: 5,
             barterLimit: 3
         });
-        expect(report.totalPostsAnalyzed).toBeGreaterThan(0);
-        expect(report.totalNeeds).toBeGreaterThan(0);
-        expect(report.totalOffers).toBeGreaterThan(0);
+        expect(report.totalPostsAnalyzed).toBe(25);
+        expect(report.totalNeeds).toBe(12);
+        expect(report.totalOffers).toBe(13);
 
         expect(report.oneWayMatches).toBeGreaterThanOrEqual(1);
         expect(report.twoWayMatches).toBeGreaterThanOrEqual(1);

@@ -1,5 +1,2294 @@
 {
   "domain": "opportunities",
   "version": "1.2",
-  "data": []
+  "data": [
+    {
+      "id": "seed-opp-001",
+      "title": "[A] Architect need — full coreSkills match",
+      "description": "[A] Architect need — full coreSkills match",
+      "creatorId": "seed-user-001",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [
+          "BIM",
+          "3D Visualization",
+          "Sustainable Design",
+          "LEED Certification"
+        ],
+        "requiredSkills": [
+          "BIM",
+          "3D Visualization",
+          "Sustainable Design",
+          "LEED Certification"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 150000,
+          "max": 400000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Architect",
+        "coreSkills": [
+          "BIM",
+          "3D Visualization",
+          "Sustainable Design",
+          "LEED Certification"
+        ]
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "BIM",
+          "3D Visualization",
+          "Sustainable Design",
+          "LEED Certification"
+        ],
+        "requiredServices": [
+          "BIM",
+          "3D Visualization",
+          "Sustainable Design",
+          "LEED Certification"
+        ],
+        "offeredServices": [],
+        "role": "Architect",
+        "coreSkills": [
+          "BIM",
+          "3D Visualization",
+          "Sustainable Design",
+          "LEED Certification"
+        ],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 150000,
+          "max": 400000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-002",
+      "title": "[A] Architect offer — strict match pair",
+      "description": "[A] Architect offer — strict match pair",
+      "creatorId": "seed-user-002",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "BIM",
+          "3D Visualization",
+          "Sustainable Design",
+          "LEED Certification"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 150000,
+          "max": 400000,
+          "currency": "SAR"
+        },
+        "cashAmount": 275000
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Architect",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "BIM",
+          "3D Visualization",
+          "Sustainable Design",
+          "LEED Certification"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "BIM",
+          "3D Visualization",
+          "Sustainable Design",
+          "LEED Certification"
+        ],
+        "role": "Architect",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 150000,
+          "max": 400000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-003",
+      "title": "[B] Interior Designer offer — matrix compatibility",
+      "description": "[B] Interior Designer offer — matrix compatibility",
+      "creatorId": "seed-user-002",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "BIM",
+          "3D Visualization",
+          "Sustainable Design",
+          "LEED Certification",
+          "Space Planning",
+          "FF&E"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 120000,
+          "max": 350000,
+          "currency": "SAR"
+        },
+        "cashAmount": 235000
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Interior Designer",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "BIM",
+          "3D Visualization",
+          "Sustainable Design",
+          "LEED Certification",
+          "Space Planning",
+          "FF&E"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "BIM",
+          "3D Visualization",
+          "Sustainable Design",
+          "LEED Certification",
+          "Space Planning",
+          "FF&E"
+        ],
+        "role": "Interior Designer",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 120000,
+          "max": 350000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-004",
+      "title": "[C] Civil Engineer offer — role incompatible with Architect need",
+      "description": "[C] Civil Engineer offer — role incompatible with Architect need",
+      "creatorId": "seed-user-002",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "BIM",
+          "3D Visualization",
+          "Structural Analysis",
+          "SAP2000"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 150000,
+          "max": 400000,
+          "currency": "SAR"
+        },
+        "cashAmount": 275000
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Civil Engineer",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "BIM",
+          "3D Visualization",
+          "Structural Analysis",
+          "SAP2000"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "BIM",
+          "3D Visualization",
+          "Structural Analysis",
+          "SAP2000"
+        ],
+        "role": "Civil Engineer",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 150000,
+          "max": 400000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-005",
+      "title": "[D] Architect need — BIM core skill required",
+      "description": "[D] Architect need — BIM core skill required",
+      "creatorId": "seed-user-003",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [
+          "BIM"
+        ],
+        "requiredSkills": [
+          "BIM",
+          "Revit"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 80000,
+          "max": 200000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Architect",
+        "coreSkills": [
+          "BIM"
+        ]
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "BIM",
+          "Revit"
+        ],
+        "requiredServices": [
+          "BIM",
+          "Revit"
+        ],
+        "offeredServices": [],
+        "role": "Architect",
+        "coreSkills": [
+          "BIM"
+        ],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 80000,
+          "max": 200000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-006",
+      "title": "[D] Architect offer — missing BIM core skill",
+      "description": "[D] Architect offer — missing BIM core skill",
+      "creatorId": "seed-user-004",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "Revit"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 80000,
+          "max": 200000,
+          "currency": "SAR"
+        },
+        "cashAmount": 140000
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Architect",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "Revit"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Revit"
+        ],
+        "role": "Architect",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 80000,
+          "max": 200000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-007",
+      "title": "[E] Civil Engineer need — four required services",
+      "description": "[E] Civil Engineer need — four required services",
+      "creatorId": "seed-user-005",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "Site Planning",
+          "Drainage Design",
+          "Road Design",
+          "Surveying"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 200000,
+          "max": 500000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Civil Engineer"
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "Site Planning",
+          "Drainage Design",
+          "Road Design",
+          "Surveying"
+        ],
+        "requiredServices": [
+          "Site Planning",
+          "Drainage Design",
+          "Road Design",
+          "Surveying"
+        ],
+        "offeredServices": [],
+        "role": "Civil Engineer",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 200000,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-008",
+      "title": "[E] Civil Engineer offer — 25% service overlap",
+      "description": "[E] Civil Engineer offer — 25% service overlap",
+      "creatorId": "seed-user-006",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "Site Planning"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 200000,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "cashAmount": 350000
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Civil Engineer",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "Site Planning"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Site Planning"
+        ],
+        "role": "Civil Engineer",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 200000,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-009",
+      "title": "[F] Legacy need — no targetRole",
+      "description": "[F] Legacy need — no targetRole",
+      "creatorId": "seed-user-007",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "General Consulting",
+          "Advisory"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 50000,
+          "max": 150000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site"
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "General Consulting",
+          "Advisory"
+        ],
+        "requiredServices": [
+          "General Consulting",
+          "Advisory"
+        ],
+        "offeredServices": [],
+        "role": "",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 50000,
+          "max": 150000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-010",
+      "title": "[G] Barter need A — MEP services",
+      "description": "[G] Barter need A — MEP services",
+      "creatorId": "seed-user-008",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "paymentModes": [
+        "barter"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "HVAC Design",
+          "MEP Coordination"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "barterNeed": "HVAC Design",
+        "barterOffer": "BIM",
+        "barterValue": "100000"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "MEP"
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "HVAC Design",
+          "MEP Coordination"
+        ],
+        "requiredServices": [
+          "HVAC Design",
+          "MEP Coordination"
+        ],
+        "offeredServices": [],
+        "role": "MEP",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-011",
+      "title": "[G] Barter offer A — Architect services",
+      "description": "[G] Barter offer A — Architect services",
+      "creatorId": "seed-user-008",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "paymentModes": [
+        "barter"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "BIM",
+          "Space Planning"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "cashAmount": 250000,
+        "barterNeed": "HVAC Design",
+        "barterOffer": "BIM",
+        "barterValue": "100000"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Architect",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "BIM",
+          "Space Planning"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "BIM",
+          "Space Planning"
+        ],
+        "role": "Architect",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-012",
+      "title": "[G] Barter need B — Architect services",
+      "description": "[G] Barter need B — Architect services",
+      "creatorId": "seed-user-009",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "paymentModes": [
+        "barter"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "BIM",
+          "Space Planning"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "barterNeed": "BIM",
+        "barterOffer": "HVAC Design",
+        "barterValue": "100000"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Architect"
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "BIM",
+          "Space Planning"
+        ],
+        "requiredServices": [
+          "BIM",
+          "Space Planning"
+        ],
+        "offeredServices": [],
+        "role": "Architect",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-013",
+      "title": "[G] Barter offer B — MEP services",
+      "description": "[G] Barter offer B — MEP services",
+      "creatorId": "seed-user-009",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "paymentModes": [
+        "barter"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "HVAC Design",
+          "MEP Coordination"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "cashAmount": 250000,
+        "barterNeed": "BIM",
+        "barterOffer": "HVAC Design",
+        "barterValue": "100000"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "MEP",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "HVAC Design",
+          "MEP Coordination"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "HVAC Design",
+          "MEP Coordination"
+        ],
+        "role": "MEP",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-014",
+      "title": "[G] Consortium lead — highway package",
+      "description": "[G] Consortium lead — highway package",
+      "creatorId": "seed-user-010",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "consortium",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "Project Management",
+          "Highway Design",
+          "Consortium Leadership"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 10000000,
+          "max": 50000000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "memberRoles": [
+          {
+            "role": "Architect",
+            "scope": "Design and BIM"
+          },
+          {
+            "role": "Civil Engineer",
+            "scope": "Civil works and drainage"
+          }
+        ],
+        "targetRole": "Project Management"
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "Project Management",
+          "Highway Design",
+          "Consortium Leadership"
+        ],
+        "requiredServices": [
+          "Project Management",
+          "Highway Design",
+          "Consortium Leadership"
+        ],
+        "offeredServices": [],
+        "role": "Project Management",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "consortium",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 10000000,
+          "max": 50000000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "consortium"
+      }
+    },
+    {
+      "id": "seed-opp-015",
+      "title": "[G] Consortium partner — Architect",
+      "description": "[G] Consortium partner — Architect",
+      "creatorId": "seed-user-011",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "Architect",
+          "BIM",
+          "3D Visualization",
+          "Design Development"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 2000000,
+          "max": 8000000,
+          "currency": "SAR"
+        },
+        "cashAmount": 5000000
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Architect",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "Architect",
+          "BIM",
+          "3D Visualization",
+          "Design Development"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Architect",
+          "BIM",
+          "3D Visualization",
+          "Design Development"
+        ],
+        "role": "Architect",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 2000000,
+          "max": 8000000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-016",
+      "title": "[G] Consortium partner — Civil Engineer",
+      "description": "[G] Consortium partner — Civil Engineer",
+      "creatorId": "seed-user-012",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "Civil Engineer",
+          "Site Planning",
+          "Drainage Design",
+          "Road Design"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 3000000,
+          "max": 12000000,
+          "currency": "SAR"
+        },
+        "cashAmount": 7500000
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Civil Engineer",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "Civil Engineer",
+          "Site Planning",
+          "Drainage Design",
+          "Road Design"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Civil Engineer",
+          "Site Planning",
+          "Drainage Design",
+          "Road Design"
+        ],
+        "role": "Civil Engineer",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 3000000,
+          "max": 12000000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-017",
+      "title": "[G] Circular A needs Excavator",
+      "description": "[G] Circular A needs Excavator",
+      "creatorId": "seed-user-013",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "Excavator",
+          "Equipment Rental"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 50000,
+          "max": 200000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Excavator"
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "Excavator",
+          "Equipment Rental"
+        ],
+        "requiredServices": [
+          "Excavator",
+          "Equipment Rental"
+        ],
+        "offeredServices": [],
+        "role": "Excavator",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 50000,
+          "max": 200000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-018",
+      "title": "[G] Circular A offers Office space",
+      "description": "[G] Circular A offers Office space",
+      "creatorId": "seed-user-013",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "Office space",
+          "Real Estate"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 50000,
+          "max": 200000,
+          "currency": "SAR"
+        },
+        "cashAmount": 125000
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Office space",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "Office space",
+          "Real Estate"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Office space",
+          "Real Estate"
+        ],
+        "role": "Office space",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 50000,
+          "max": 200000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-019",
+      "title": "[G] Circular B needs Office space",
+      "description": "[G] Circular B needs Office space",
+      "creatorId": "seed-user-014",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "Office space",
+          "Real Estate"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 50000,
+          "max": 200000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Office space"
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "Office space",
+          "Real Estate"
+        ],
+        "requiredServices": [
+          "Office space",
+          "Real Estate"
+        ],
+        "offeredServices": [],
+        "role": "Office space",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 50000,
+          "max": 200000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-020",
+      "title": "[G] Circular B offers Accounting",
+      "description": "[G] Circular B offers Accounting",
+      "creatorId": "seed-user-014",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "Accounting",
+          "Financial Reporting"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 50000,
+          "max": 200000,
+          "currency": "SAR"
+        },
+        "cashAmount": 125000
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Accounting",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "Accounting",
+          "Financial Reporting"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Accounting",
+          "Financial Reporting"
+        ],
+        "role": "Accounting",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 50000,
+          "max": 200000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-021",
+      "title": "[G] Circular C needs Accounting",
+      "description": "[G] Circular C needs Accounting",
+      "creatorId": "seed-user-015",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "Accounting",
+          "Financial Reporting"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 50000,
+          "max": 200000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Accounting"
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "Accounting",
+          "Financial Reporting"
+        ],
+        "requiredServices": [
+          "Accounting",
+          "Financial Reporting"
+        ],
+        "offeredServices": [],
+        "role": "Accounting",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 50000,
+          "max": 200000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-022",
+      "title": "[G] Circular C offers Excavator",
+      "description": "[G] Circular C offers Excavator",
+      "creatorId": "seed-user-015",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "Excavator",
+          "Equipment Rental"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 50000,
+          "max": 200000,
+          "currency": "SAR"
+        },
+        "cashAmount": 125000
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Excavator",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "Excavator",
+          "Equipment Rental"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Excavator",
+          "Equipment Rental"
+        ],
+        "role": "Excavator",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 50000,
+          "max": 200000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "project"
+      }
+    },
+    {
+      "id": "seed-opp-023",
+      "title": "Filler need — Structural Engineer",
+      "description": "Filler need — Structural Engineer",
+      "creatorId": "seed-user-016",
+      "intent": "request",
+      "status": "published",
+      "modelType": "strategic_partnership",
+      "subModelType": "joint_venture",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "Structural Analysis",
+          "SAP2000",
+          "Steel Design"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 250000,
+          "max": 600000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Structural Engineer"
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "Structural Analysis",
+          "SAP2000",
+          "Steel Design"
+        ],
+        "requiredServices": [
+          "Structural Analysis",
+          "SAP2000",
+          "Steel Design"
+        ],
+        "offeredServices": [],
+        "role": "Structural Engineer",
+        "coreSkills": [],
+        "categories": [
+          "strategic_partnership",
+          "joint_venture",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 250000,
+          "max": 600000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "strategic_partnership",
+        "subModelType": "joint_venture"
+      }
+    },
+    {
+      "id": "seed-opp-024",
+      "title": "Filler need — Project Management",
+      "description": "Filler need — Project Management",
+      "creatorId": "seed-user-017",
+      "intent": "request",
+      "status": "published",
+      "modelType": "resource_pooling",
+      "subModelType": "shared_resources",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "Project Management",
+          "PMP",
+          "Risk Management"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 100000,
+          "max": 300000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Project Management"
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "Project Management",
+          "PMP",
+          "Risk Management"
+        ],
+        "requiredServices": [
+          "Project Management",
+          "PMP",
+          "Risk Management"
+        ],
+        "offeredServices": [],
+        "role": "Project Management",
+        "coreSkills": [],
+        "categories": [
+          "resource_pooling",
+          "shared_resources",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 100000,
+          "max": 300000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "resource_pooling",
+        "subModelType": "shared_resources"
+      }
+    },
+    {
+      "id": "seed-opp-025",
+      "title": "Filler offer — MEP",
+      "description": "Filler offer — MEP",
+      "creatorId": "seed-user-018",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "hiring",
+      "subModelType": "professional_hiring",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "HVAC Design",
+          "MEP Coordination",
+          "Fire Protection"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 80000,
+          "max": 250000,
+          "currency": "SAR"
+        },
+        "cashAmount": 165000
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "MEP",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-09T12:00:10.133Z",
+      "updatedAt": "2026-06-09T12:00:10.133Z",
+      "normalized": {
+        "skills": [
+          "HVAC Design",
+          "MEP Coordination",
+          "Fire Protection"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "HVAC Design",
+          "MEP Coordination",
+          "Fire Protection"
+        ],
+        "role": "MEP",
+        "coreSkills": [],
+        "categories": [
+          "hiring",
+          "professional_hiring",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 80000,
+          "max": 250000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "hiring",
+        "subModelType": "professional_hiring"
+      }
+    }
+  ]
 }

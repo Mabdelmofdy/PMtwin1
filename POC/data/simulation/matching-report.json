@@ -1,37 +1,36 @@
 {
-  "totalPostsAnalyzed": 28,
-  "totalNeeds": 15,
+  "totalPostsAnalyzed": 25,
+  "totalNeeds": 12,
   "totalOffers": 13,
-  "oneWayMatches": 3,
+  "oneWayMatches": 5,
   "twoWayMatches": 1,
   "groupFormations": 1,
-  "circularExchanges": 3,
+  "circularExchanges": 1,
   "totalMatchesFound": 8,
   "oneWayDetails": [
     {
-      "needId": "sim-opp-003",
-      "matchCount": 1,
-      "topScore": 0.843
+      "needId": "seed-opp-001",
+      "matchCount": 2,
+      "topScore": 1.275
     },
     {
-      "needId": "sim-opp-004",
-      "matchCount": 2,
+      "needId": "seed-opp-005",
+      "matchCount": 3,
       "topScore": 0.975
     }
   ],
   "twoWayDetails": [
     {
-      "needId": "sim-opp-011",
+      "needId": "seed-opp-010",
       "pairCount": 1
     }
   ],
   "groupDetails": [
     {
-      "needId": "sim-opp-019",
+      "needId": "seed-opp-014",
       "roles": [
-        "Financial partner",
-        "Construction expertise",
-        "Equipment fleet"
+        "Architect",
+        "Civil Engineer"
       ],
       "partnerCount": 0
     }
@@ -39,31 +38,11 @@
   "circularDetails": [
     {
       "cycle": [
-        "sim-user-027",
-        "sim-user-026",
-        "sim-user-025"
+        "seed-user-015",
+        "seed-user-014",
+        "seed-user-013"
       ],
       "score": 1.275
-    },
-    {
-      "cycle": [
-        "sim-user-025",
-        "sim-user-027",
-        "sim-user-026",
-        "sim-user-002",
-        "sim-user-001"
-      ],
-      "score": 1.153
-    },
-    {
-      "cycle": [
-        "sim-user-026",
-        "sim-user-025",
-        "sim-user-027",
-        "sim-user-004",
-        "sim-user-003"
-      ],
-      "score": 1.153
     }
   ]
 }
