@@ -485,7 +485,9 @@ function buildOpportunityRoleHints(deal) {
     if (!Array.isArray(slots)) return hints;
     for (const slot of slots) {
         if (!slot || !slot.opportunityId) continue;
-        const role = (slot.role || 'Participant').trim();
+        const role = typeof formatParticipantRole === 'function'
+            ? formatParticipantRole(slot.role, 'Participant')
+            : (slot.role || 'Participant').trim();
         if (!hints[slot.opportunityId]) hints[slot.opportunityId] = [];
         if (!hints[slot.opportunityId].includes(role)) hints[slot.opportunityId].push(role);
     }
@@ -775,15 +777,23 @@ async function initDealDetail(params) {
 }
 
 function getParticipantRoleLabel(deal, participant) {
-    if (deal.roleSlots && deal.roleSlots[participant.userId]) return deal.roleSlots[participant.userId];
+    if (deal.roleSlots && deal.roleSlots[participant.userId]) {
+        const slot = deal.roleSlots[participant.userId];
+        return typeof formatParticipantRole === 'function'
+            ? formatParticipantRole(slot, slot)
+            : slot;
+    }
     const roles = (deal.payload && deal.payload.roles) || [];
     const r = roles.find(x => x.userId === participant.userId);
-    if (r && r.role) return r.role;
+    if (r && r.role) {
+        return typeof formatParticipantRole === 'function'
+            ? formatParticipantRole(r.role, r.role)
+            : r.role;
+    }
     const pr = participant.role || '';
-    if (pr === 'consortium_lead') return 'Lead';
-    if (pr === 'consortium_member') return 'Member';
-    if (pr === 'creator') return 'Creator';
-    if (pr === 'contractor') return 'Contractor';
+    if (typeof formatParticipantRole === 'function') {
+        return formatParticipantRole(pr, 'Participant');
+    }
     return pr ? pr.charAt(0).toUpperCase() + pr.slice(1) : 'Participant';
 }
 

@@ -231,6 +231,67 @@ describe('DataService negotiation lifecycle', () => {
         expect(deal.negotiationId).toBe(neg.id);
     });
 
+    it('resolves negotiation opportunity from viewer post for offer providers', () => {
+        const match = {
+            matchType: 'one_way',
+            participants: [
+                { userId: 'owner-1', role: 'need_owner', opportunityId: 'need-1' },
+                { userId: 'provider-1', role: 'offer_provider', opportunityId: 'offer-1' }
+            ],
+            payload: { needOpportunityId: 'need-1', offerOpportunityId: 'offer-1' }
+        };
+        expect(ds._resolveNegotiationOpportunityId(match, 'owner-1')).toBe('need-1');
+        expect(ds._resolveNegotiationOpportunityId(match, 'provider-1')).toBe('offer-1');
+    });
+
+    it('resolves negotiation opportunity for barter matches', () => {
+        const match = {
+            matchType: 'two_way',
+            participants: [
+                { userId: 'owner-1', role: 'need_owner' },
+                { userId: 'provider-1', role: 'offer_provider' }
+            ],
+            payload: {
+                sideA: { userId: 'owner-1', needId: 'need-a', offerId: 'offer-a' },
+                sideB: { userId: 'provider-1', needId: 'need-b', offerId: 'offer-b' }
+            }
+        };
+        expect(ds._resolveNegotiationOpportunityId(match, 'provider-1')).toBe('need-b');
+    });
+
+    it('allows any match participant to create deal from agreed negotiation', async () => {
+        ds.storage.set(CONFIG.STORAGE_KEYS.OPPORTUNITIES, [
+            { id: 'need-1', creatorId: 'owner-1', title: 'Need', status: 'published' },
+            { id: 'offer-1', creatorId: 'provider-1', title: 'Offer', status: 'published' }
+        ]);
+        ds.storage.set(CONFIG.STORAGE_KEYS.POST_MATCHES, [{
+            id: 'match-1',
+            status: CONFIG.POST_MATCH_STATUS.CONFIRMED,
+            matchType: 'one_way',
+            participants: [
+                { userId: 'owner-1', role: 'need_owner' },
+                { userId: 'provider-1', role: 'offer_provider' }
+            ],
+            payload: { needOpportunityId: 'need-1', offerOpportunityId: 'offer-1' }
+        }]);
+        const neg = await ds.createNegotiation({
+            opportunityId: 'offer-1',
+            matchId: 'match-1',
+            parties: [
+                { userId: 'owner-1', role: 'need_owner' },
+                { userId: 'provider-1', role: 'offer_provider' }
+            ],
+            status: CONFIG.MATCHING.NEGOTIATION.STATUS.OPEN,
+            initialTerms: { message: 'Terms' },
+            rounds: []
+        });
+        await ds.agreeNegotiation(neg.id, 'owner-1');
+        await ds.agreeNegotiation(neg.id, 'provider-1');
+        const deal = await ds.createDealFromNegotiation(neg.id, 'provider-1');
+        expect(deal.negotiationId).toBe(neg.id);
+        expect(deal.matchId).toBe('match-1');
+    });
+
     it('supports proposal counter and finalAgreedSnapshot', async () => {
         const neg = await seedNegotiation([
             { userId: 'owner-1', role: 'need_owner' },

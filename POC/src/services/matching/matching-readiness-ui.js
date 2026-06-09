@@ -114,7 +114,7 @@
             'Your opportunity can be published, but adding the missing details below will improve match quality.';
         fillList(root, report);
         root.querySelector('.matching-readiness-dialog__hint').textContent =
-            'Readiness score: ' + (report.score != null ? report.score + '%' : '—') + ' · Matching works best when Need/Offer posts include full scope, exchange, and timeline details.';
+            'Readiness score: ' + (report.score != null ? report.score + '%' : '—') + ' · This score reflects posting completeness before publish.';
         root.querySelector('[data-readiness-publish]').hidden = false;
         root.querySelector('[data-readiness-publish]').textContent = 'Publish anyway';
         root.querySelector('[data-readiness-fix]').textContent = 'Fix now';
@@ -144,7 +144,7 @@
         mountEl.innerHTML = ''
             + '<div class="readiness-inline ' + escapeHtml(report.indicatorClass) + '" role="status">'
             + '<strong>' + escapeHtml(report.indicatorLabel) + '</strong>'
-            + '<span> · ' + escapeHtml(String(report.score)) + '% match-ready</span>'
+            + '<span> · ' + escapeHtml(String(report.score)) + '% completion</span>'
             + '</div>';
         mountEl.hidden = false;
     }

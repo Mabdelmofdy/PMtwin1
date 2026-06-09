@@ -94,6 +94,7 @@ loadScript('src/core/config/config.js').then(async () => {
     
     // Load core services
     await loadScript('src/core/storage/storage-service.js');
+    await loadScript('src/core/events/event-bus.js', { type: 'module' });
     await loadScript('src/core/data/data-service.js', { type: 'module' });
     await loadScript('src/core/auth/auth-service.js');
     await loadScript('src/core/vetting/vetting-actions.js');
@@ -104,6 +105,7 @@ loadScript('src/core/config/config.js').then(async () => {
     await loadScript('src/services/site-content/site-content-service.js');
     
     // Load utilities
+    await loadScript('src/utils/participant-role-labels.js');
     await loadScript('src/utils/icon-helper.js');
     await loadScript('src/utils/template-loader.js');
     await loadScript('src/utils/template-renderer.js');

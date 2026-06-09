@@ -268,6 +268,12 @@ class Router {
             if (route.handler) {
                 await route.handler(route.params);
             }
+            const currentUser = window.authService && typeof window.authService.getCurrentUser === 'function'
+                ? window.authService.getCurrentUser()
+                : null;
+            if (currentUser && window.dataService && typeof window.dataService.markNotificationsReadForRoute === 'function') {
+                await window.dataService.markNotificationsReadForRoute(currentUser.id, normalizedPath);
+            }
             if (window.layoutService && typeof window.layoutService.updateNavigation === 'function') {
                 await window.layoutService.updateNavigation();
             }

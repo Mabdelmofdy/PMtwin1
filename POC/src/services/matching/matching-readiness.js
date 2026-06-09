@@ -106,6 +106,17 @@ function hasHybridNeedOffer(opp) {
     return false;
 }
 
+function countCandidateMatches(opp) {
+    const preview = Array.isArray(opp.matchPreviewCandidates) ? opp.matchPreviewCandidates.length : null;
+    if (preview != null) return preview;
+    const postMatches = Array.isArray(opp.post_matches) ? opp.post_matches : [];
+    if (!postMatches.length) return null;
+    return postMatches.filter((pm) => {
+        const status = String(pm.status || '').toLowerCase();
+        return status !== 'declined' && status !== 'expired' && status !== 'blocked';
+    }).length;
+}
+
 /**
  * @param {object} opportunity - opportunity record or publish payload
  * @returns {{
@@ -201,6 +212,13 @@ export function buildMatchingReadinessReport(opportunity) {
     }
 
     const pct = Math.round((score / maxScore) * 100);
+    const candidateCount = countCandidateMatches(opp);
+    let adjustedPct = pct;
+    if (candidateCount === 0) {
+        adjustedPct = Math.min(adjustedPct, 35);
+        warnings.push('No candidate matches available yet');
+        recommendations.push('Publish and refine scope/skills to attract relevant candidates.');
+    }
     const criticalMissing = missingFields.length > 0;
     const canPublish = !criticalMissing;
 
@@ -208,7 +226,7 @@ export function buildMatchingReadinessReport(opportunity) {
     if (criticalMissing) status = 'incomplete';
     else if (warnings.length > 0) status = 'warning';
 
-    let indicatorLabel = 'Ready for matching';
+    let indicatorLabel = 'Ready to publish';
     let indicatorClass = 'readiness--ready';
     if (status === 'incomplete') {
         indicatorLabel = 'Missing key details';
@@ -220,7 +238,7 @@ export function buildMatchingReadinessReport(opportunity) {
 
     return {
         status,
-        score: pct,
+        score: adjustedPct,
         missingFields,
         warnings,
         recommendations,

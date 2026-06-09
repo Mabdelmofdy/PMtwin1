@@ -42,6 +42,7 @@ async function initMatchDetail(params) {
 
         await renderMatchDetail(postMatch, user.id);
         setupMatchDetailActions(matchId, user.id);
+        scrollMatchDetailToHash();
     } catch (e) {
         console.error('Match detail load error:', e);
         if (loadingEl) loadingEl.style.display = 'none';
@@ -93,8 +94,10 @@ function formatStatusLabel(status) {
 function getOneWayViewerRole(postMatch, currentUserId) {
     const participants = postMatch.participants || [];
     const needOwner = participants.find(p => p.role === 'need_owner');
-    const needOwnerId = needOwner?.userId || null;
-    return { isNeedOwner: needOwnerId === currentUserId };
+    const offerProvider = participants.find(p => p.role === 'offer_provider');
+    if (needOwner?.userId === currentUserId) return { isNeedOwner: true };
+    if (offerProvider?.userId === currentUserId) return { isNeedOwner: false };
+    return { isNeedOwner: needOwner?.userId === currentUserId };
 }
 
 async function renderMatchDetail(postMatch, currentUserId) {
@@ -157,7 +160,15 @@ async function renderMatchDetail(postMatch, currentUserId) {
         } else if (matchType === 'one_way') {
             const needOpp = await ds.getOpportunityById(payload.needOpportunityId);
             const offerOpp = await ds.getOpportunityById(payload.offerOpportunityId);
-            exchangeFlowEl.innerHTML = '<div class="flex flex-wrap items-center gap-2 min-w-0"><span class="px-3 py-2 bg-amber-50 border border-amber-200 rounded shrink-0">Need</span><span class="text-gray-400 min-w-0 break-words">' + escapeHtml(needOpp?.title || '—') + '</span><span class="text-gray-500 shrink-0">→</span><span class="px-3 py-2 bg-teal-50 border border-teal-200 rounded shrink-0">Offer</span><span class="text-gray-400 min-w-0 break-words">' + escapeHtml(offerOpp?.title || '—') + '</span></div>';
+            const viewerRole = getOneWayViewerRole(postMatch, currentUserId);
+            const sourceOpp = viewerRole.isNeedOwner ? needOpp : offerOpp;
+            const matchedOpp = viewerRole.isNeedOwner ? offerOpp : needOpp;
+            const sourceLabel = viewerRole.isNeedOwner ? 'Need' : 'Offer';
+            const matchedLabel = viewerRole.isNeedOwner ? 'Offer' : 'Need';
+            exchangeFlowEl.innerHTML = '<div class="space-y-2 min-w-0">'
+                + '<div class="flex flex-wrap items-center gap-2 min-w-0"><span class="px-3 py-2 bg-primary/10 border border-primary/20 rounded shrink-0 font-medium">Your ' + sourceLabel + '</span><span class="text-gray-700 min-w-0 break-words">' + escapeHtml(sourceOpp?.title || '—') + '</span></div>'
+                + '<div class="flex flex-wrap items-center gap-2 min-w-0"><span class="px-3 py-2 bg-gray-50 border border-gray-200 rounded shrink-0">Matched ' + matchedLabel + '</span><span class="text-gray-600 min-w-0 break-words">' + escapeHtml(matchedOpp?.title || '—') + '</span></div>'
+                + '</div>';
         } else if (matchType === 'two_way') {
             const sideA = payload.sideA || {}, sideB = payload.sideB || {};
             const nameA = await ds.getUserOrCompanyById(sideA.userId).then(u => u?.profile?.name || sideA.userId);
@@ -196,7 +207,7 @@ async function renderMatchDetail(postMatch, currentUserId) {
         }
         if (matchType === 'consortium' && Array.isArray(payload.roles) && payload.roles.some(r => r.score != null)) {
             valueHtml += '<ul class="text-sm text-gray-600 list-disc pl-5">' + payload.roles.map(r =>
-                '<li>' + escapeHtml(r.role || 'Role') + ': ' + Math.round((r.score || 0) * 100) + '%</li>'
+                '<li>' + escapeHtml(typeof formatParticipantRole === 'function' ? formatParticipantRole(r.role, 'Role') : (r.role || 'Role')) + ': ' + Math.round((r.score || 0) * 100) + '%</li>'
             ).join('') + '</ul>';
         }
         if (payload.valueEquivalence) valueHtml += '<p>' + escapeHtml(payload.valueEquivalence) + '</p>';
@@ -509,7 +520,8 @@ async function renderMatchReplacementSection(vm, postMatch, currentUserId) {
     }
 
     const slotOptions = blockedSlots.map(s => {
-        const label = (s.userId === 'vacant' ? 'Vacant role' : s.userId) + ' · ' + (s.role || 'role');
+        const roleLabel = typeof formatParticipantRole === 'function' ? formatParticipantRole(s.role, 'Role') : (s.role || 'role');
+        const label = (s.userId === 'vacant' ? 'Vacant role' : s.userId) + ' · ' + roleLabel;
         return '<option value="' + escapeHtml(s.userId) + '" data-role="' + escapeHtml(s.role || '') + '" data-opp="' + escapeHtml(s.opportunityId || '') + '">' + escapeHtml(label) + '</option>';
     }).join('');
 
@@ -533,7 +545,8 @@ async function renderMatchReplacementSection(vm, postMatch, currentUserId) {
 
     const suggestSlots = blockedSlots.filter(s => s.userId && s.userId !== 'vacant');
     const suggestSlotOptions = suggestSlots.map(s => {
-        const label = s.userId + ' · ' + (s.role || 'role');
+        const roleLabel = typeof formatParticipantRole === 'function' ? formatParticipantRole(s.role, 'Role') : (s.role || 'role');
+        const label = s.userId + ' · ' + roleLabel;
         return '<option value="' + escapeHtml(s.userId) + '" data-role="' + escapeHtml(s.role || '') + '" data-opp="' + escapeHtml(s.opportunityId || '') + '">' + escapeHtml(label) + '</option>';
     }).join('');
 
@@ -833,6 +846,25 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
+function scrollMatchDetailToHash() {
+    const hash = window.location.hash;
+    if (!hash) return;
+    requestAnimationFrame(() => {
+        if (hash === '#negotiation') {
+            const panel = document.getElementById('match-detail-negotiation-panel');
+            if (panel && panel.style.display !== 'none') {
+                panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+            }
+            document.getElementById('btn-start-negotiation')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+        if (hash === '#replacement') {
+            document.getElementById('match-detail-replacement-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+}
+
 function isPostMatchExpired(postMatch) {
     if (!postMatch) return false;
     if ((postMatch.status || '') === CONFIG.POST_MATCH_STATUS.EXPIRED) return true;
@@ -919,7 +951,7 @@ function setupMatchDetailActions(matchId, userId) {
                     throw new Error('The match must be confirmed before creating a deal.');
                 }
                 let deal = await dataService.getDealByMatchId(matchId);
-                if (!deal) deal = await dataService.createDealFromMatch(match, currentUserId);
+                if (!deal) deal = await dataService.createDealFromMatch(match, userId);
                 if (deal && window.router?.navigate) {
                     try {
                         sessionStorage.setItem('pmtwin_deal_flash', JSON.stringify({
@@ -932,6 +964,7 @@ function setupMatchDetailActions(matchId, userId) {
                     window.router.navigate('/deals/' + deal.id);
                 }
             } catch (err) {
+                console.error('[match-detail] Create deal from match failed:', { matchId, userId, err });
                 setMatchActionFeedback((err && err.message) ? err.message : 'Could not create deal.', 'danger');
             }
             createDealMatchBtn.disabled = false;
@@ -979,13 +1012,18 @@ function setupMatchDetailActions(matchId, userId) {
             e.preventDefault();
             startNegBtn.disabled = true;
             try {
-                await dataService.startNegotiationFromMatch(matchId, userId);
+                const matchForNeg = await dataService.getPostMatchById(matchId);
+                const opportunityId = matchForNeg && typeof dataService._resolveNegotiationOpportunityId === 'function'
+                    ? dataService._resolveNegotiationOpportunityId(matchForNeg, userId)
+                    : null;
+                await dataService.startNegotiationFromMatch(matchId, userId, opportunityId ? { opportunityId } : {});
                 const match = await dataService.getPostMatchById(matchId);
                 if (match) await renderMatchDetail(match, userId);
                 setMatchActionFeedback('Negotiation started. Continue in the Value Negotiation section.', 'success');
                 const panel = document.getElementById('match-detail-negotiation-panel');
                 if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
             } catch (err) {
+                console.error('[match-detail] Start negotiation failed:', { matchId, userId, err });
                 setMatchActionFeedback((err && err.message) ? err.message : 'Could not start negotiation.', 'danger');
             }
             startNegBtn.disabled = false;
@@ -1010,6 +1048,7 @@ function setupMatchDetailActions(matchId, userId) {
                 const deal = await dataService.createDealFromNegotiation(negId, userId);
                 if (deal && window.router?.navigate) window.router.navigate('/deals/' + deal.id);
             } catch (err) {
+                console.error('[match-detail] Create deal from negotiation failed:', { matchId, userId, err });
                 setMatchActionFeedback((err && err.message) ? err.message : 'Could not create deal.', 'danger');
             }
             createDealNegBtn.disabled = false;

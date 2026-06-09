@@ -18,8 +18,34 @@ class LayoutService {
      * Initialize layout
      */
     async init() {
+        this.setupDataRefreshListener();
         await this.renderLayout();
         await this.renderFooter();
+    }
+
+    setupDataRefreshListener() {
+        if (this._dataRefreshBound) return;
+        this._dataRefreshBound = true;
+        let refreshTimer = null;
+        const scheduleNavRefresh = () => {
+            if (refreshTimer) clearTimeout(refreshTimer);
+            refreshTimer = setTimeout(() => {
+                refreshTimer = null;
+                if (this.authService && this.authService.getCurrentUser && this.authService.getCurrentUser()) {
+                    void this.updateNavigation();
+                }
+            }, 120);
+        };
+        [
+            'pmtwin:notifications-updated',
+            'pmtwin:messages-updated',
+            'pmtwin:post-matches-updated',
+            'pmtwin:deals-updated',
+            'pmtwin:contracts-updated',
+            'pmtwin:data-changed'
+        ].forEach((eventName) => {
+            window.addEventListener(eventName, scheduleNavRefresh);
+        });
     }
 
     /**

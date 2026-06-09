@@ -23,6 +23,7 @@ let matchesPageState = {
 };
 
 let matchesPageViewModels = [];
+let matchesLoadError = null;
 
 async function initMatches() {
     try {
@@ -41,11 +42,27 @@ async function initMatches() {
         ensureMatchesTabsMarkup();
         setupMatchesTabs();
         setupMatchesFilters();
+        setupMatchesRefreshListener();
         await loadOpportunityMatches();
     } catch (err) {
-        console.error('Error initializing Matches page:', err);
-        showMatchesError();
+        console.error('[matches] Error initializing Matches page:', err);
+        showMatchesError('init', err);
     }
+}
+
+function setupMatchesRefreshListener() {
+    const root = document.getElementById('tab-matches') || document.getElementById('matches-list')?.closest('section');
+    if (!root || root.dataset.matchesRefreshBound) return;
+    root.dataset.matchesRefreshBound = '1';
+    const refreshMatches = () => {
+        loadOpportunityMatches().catch(err => {
+            console.error('[matches] Refresh after post-matches update failed:', err);
+            showMatchesError('refresh', err);
+        });
+    };
+    ['pmtwin:post-matches-updated', 'pmtwin:deals-updated', 'pmtwin:data-changed'].forEach((eventName) => {
+        window.addEventListener(eventName, refreshMatches);
+    });
 }
 
 function getUmv() {
@@ -87,14 +104,16 @@ async function loadOpportunityMatches() {
 
     try {
         const rawMatches = await collectUserMatches(user);
+        matchesLoadError = null;
         const context = { currentUserId: user.id, dataService };
         matchesPageViewModels = await umv.buildUnifiedMatchViewModels(rawMatches, context);
         matchesPageViewModels.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
         updateMatchesTabCounts(matchesPageViewModels);
         renderMatchesList();
     } catch (error) {
-        console.error('Error loading Need/Offer matches:', error);
-        showMatchesError();
+        matchesLoadError = error;
+        console.error('[matches] Error loading Need/Offer matches for user', user.id, error);
+        showMatchesError('load', error);
     }
 }
 
@@ -158,9 +177,16 @@ function setupMatchesFilters() {
                 negotiate.disabled = true;
                 try {
                     const existing = await dataService.getActiveNegotiationForMatch(matchId);
-                    if (!existing) await dataService.startNegotiationFromMatch(matchId, user.id);
+                    if (!existing) {
+                        const match = await dataService.getPostMatchById(matchId);
+                        const opportunityId = match && typeof dataService._resolveNegotiationOpportunityId === 'function'
+                            ? dataService._resolveNegotiationOpportunityId(match, user.id)
+                            : null;
+                        await dataService.startNegotiationFromMatch(matchId, user.id, opportunityId ? { opportunityId } : {});
+                    }
                     if (window.router?.navigate) window.router.navigate('/matches/' + matchId + '#negotiation');
                 } catch (err) {
+                    console.error('[matches] Start/continue negotiation failed:', { matchId, userId: user.id, err });
                     alert((err && err.message) ? err.message : 'Could not start negotiation.');
                 }
                 negotiate.disabled = false;
@@ -181,6 +207,56 @@ function setupMatchesFilters() {
                     alert((err && err.message) ? err.message : 'Could not send invitation.');
                 }
                 invite.disabled = false;
+                return;
+            }
+            const createDealBtn = e.target.closest('[data-action="create_deal"], [data-action="create_deal_from_negotiation"]');
+            if (createDealBtn) {
+                e.preventDefault();
+                const matchId = createDealBtn.getAttribute('data-match-id');
+                const action = createDealBtn.getAttribute('data-action');
+                const user = authService.getCurrentUser();
+                if (!matchId || !user) return;
+                createDealBtn.disabled = true;
+                try {
+                    let deal = null;
+                    if (action === 'create_deal') {
+                        const match = await dataService.getPostMatchById(matchId);
+                        if (!match || (match.status || '') !== CONFIG.POST_MATCH_STATUS.CONFIRMED) {
+                            throw new Error('The match must be confirmed before creating a deal.');
+                        }
+                        deal = await dataService.getDealByMatchId(matchId);
+                        if (!deal) deal = await dataService.createDealFromMatch(match, user.id);
+                    } else {
+                        let negId = null;
+                        const match = await dataService.getPostMatchById(matchId);
+                        negId = match?.negotiationId || null;
+                        if (!negId && typeof dataService.getActiveNegotiationForMatch === 'function') {
+                            const neg = await dataService.getActiveNegotiationForMatch(matchId);
+                            negId = neg?.id;
+                        }
+                        if (!negId && typeof dataService.getNegotiationsByMatchId === 'function') {
+                            const list = await dataService.getNegotiationsByMatchId(matchId);
+                            negId = (list || []).find(n => (n.status || '') === 'agreed')?.id || null;
+                        }
+                        if (!negId) throw new Error('No agreed negotiation found for this match.');
+                        deal = await dataService.createDealFromNegotiation(negId, user.id);
+                    }
+                    if (deal && window.router?.navigate) {
+                        try {
+                            sessionStorage.setItem('pmtwin_deal_flash', JSON.stringify({
+                                message: 'Your Deal Workspace is ready.',
+                                tone: 'success'
+                            }));
+                        } catch (storageErr) {
+                            void storageErr;
+                        }
+                        window.router.navigate('/deals/' + deal.id);
+                    }
+                } catch (err) {
+                    console.error('[matches] Create deal failed:', { matchId, action, userId: user.id, err });
+                    alert((err && err.message) ? err.message : 'Could not create deal.');
+                }
+                createDealBtn.disabled = false;
                 return;
             }
             const accept = e.target.closest('[data-action="accept"]');
@@ -297,7 +373,7 @@ function renderUnifiedMatchCardHtml(vm) {
     const actionsHtml = (vm.availableActions || []).map(action => {
         const cls = action.kind === 'primary' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
         const disabled = action.enabled === false || vm.isExpired;
-        if (action.id === 'accept' || action.id === 'decline' || action.id === 'invite_apply' || action.id === 'negotiate') {
+        if (['accept', 'decline', 'invite_apply', 'negotiate', 'create_deal', 'create_deal_from_negotiation'].includes(action.id)) {
             return `<button type="button" class="${cls}" data-action="${esc(action.id)}" data-match-id="${esc(vm.id)}"${disabled ? ' disabled' : ''}>${esc(action.label)}</button>`;
         }
         return `<a href="#" data-route="${esc(action.route)}" class="${cls}${disabled ? ' opacity-50 pointer-events-none' : ''}">${esc(action.label)}</a>`;
@@ -336,10 +412,13 @@ function escapeMatchesHtml(str) {
     return div.innerHTML;
 }
 
-function showMatchesError() {
+function showMatchesError(phase = 'load', error = null) {
     const listEl = document.getElementById('matches-list');
     if (listEl) {
-        listEl.innerHTML = '<div class="empty-state">We couldn’t load your matches. Please try again.</div>';
+        const detail = error?.message ? ` (${error.message})` : '';
+        listEl.innerHTML = '<div class="empty-state" role="alert">We couldn’t load your matches. Please refresh or try again.'
+            + (phase === 'load' ? '' : ' (' + escapeMatchesHtml(phase) + ')')
+            + escapeMatchesHtml(detail) + '</div>';
     }
 }
 

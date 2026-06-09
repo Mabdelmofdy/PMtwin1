@@ -9,6 +9,26 @@ function humanizeUnderscores(value) {
         .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+function setupDashboardRefreshListener(user, isCompanyView) {
+    if (window.__pmtwinDashboardRefreshBound) return;
+    window.__pmtwinDashboardRefreshBound = true;
+    const refresh = async () => {
+        if (!document.querySelector('.dashboard-page')) return;
+        const currentUser = authService.getCurrentUser();
+        if (!currentUser) return;
+        const isCompany = isCompanyView || (authService.isCompanyUser && authService.isCompanyUser());
+        try {
+            await loadDashboardData(currentUser.id);
+            await loadPostMatchDashboard(currentUser.id, isCompany);
+            if (isCompany) loadApplicationsReceived(currentUser.id);
+        } catch (err) {
+            console.error('Dashboard refresh failed:', err);
+        }
+    };
+    ['pmtwin:notifications-updated', 'pmtwin:messages-updated', 'pmtwin:post-matches-updated', 'pmtwin:deals-updated', 'pmtwin:data-changed']
+        .forEach((eventName) => window.addEventListener(eventName, () => { void refresh(); }));
+}
+
 async function initDashboard(params) {
     const user = authService.getCurrentUser();
     if (!user) {
@@ -17,6 +37,7 @@ async function initDashboard(params) {
     }
 
     const isCompanyView = params?.view === 'company';
+    setupDashboardRefreshListener(user, isCompanyView);
     const dashboardPage = document.querySelector('.dashboard-page');
     if (dashboardPage) {
         dashboardPage.classList.toggle('dashboard-page--company', isCompanyView);

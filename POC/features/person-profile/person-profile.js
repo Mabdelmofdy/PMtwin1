@@ -545,10 +545,25 @@ async function setupActions(person) {
             }
         } else {
             messageBtn.style.display = status === 'pending_sent' ? 'none' : 'inline-block';
-            if (status !== 'accepted') {
-                messageBtn.textContent = 'Message';
-                messageBtn.disabled = true;
-                messageBtn.title = 'Connect first to message';
+            messageBtn.textContent = 'Message';
+            messageBtn.disabled = false;
+            messageBtn.removeAttribute('title');
+            messageBtn.replaceWith(messageBtn.cloneNode(true));
+            const blockedMessageBtn = document.getElementById('btn-message');
+            if (blockedMessageBtn) {
+                blockedMessageBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const personName = person.profile?.name || person.email || 'this person';
+                    const guidance = status === 'pending_received'
+                        ? `Accept ${personName}'s connection request before you can send messages.`
+                        : `You need to connect with ${personName} before you can send messages. Send a connection request first.`;
+                    if (typeof window.modalService !== 'undefined' && window.modalService.info) {
+                        await window.modalService.info(guidance, 'Connect to message');
+                    } else {
+                        alert(guidance);
+                    }
+                });
             }
         }
     }

@@ -62,4 +62,20 @@ describe('matching-readiness', () => {
         });
         expect(report.warnings.some(w => w.toLowerCase().includes('consortium'))).toBe(true);
     });
+
+    it('caps readiness when explicit candidate matches are zero', () => {
+        const report = buildMatchingReadinessReport({
+            intent: 'request',
+            title: 'Well filled post with no candidates yet',
+            description: 'x'.repeat(120),
+            exchangeMode: 'cash',
+            exchangeData: { cashAmount: 1000, budgetRange: { min: 1000, max: 2000 } },
+            scope: { requiredSkills: ['Engineering'], sectors: ['Construction'] },
+            attributes: { startDate: '2026-07-01' },
+            location: 'Remote',
+            matchPreviewCandidates: []
+        });
+        expect(report.score).toBeLessThanOrEqual(35);
+        expect(report.warnings.some(w => w.toLowerCase().includes('no candidate matches'))).toBe(true);
+    });
 });

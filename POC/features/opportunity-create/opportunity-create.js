@@ -650,8 +650,13 @@ async function initOpportunityCreate(params = {}) {
     if (!window.opportunityFormService) {
         await loadScript('src/services/opportunities/opportunity-form-service.js');
     }
+    if (!window.validateOpportunityForm) {
+        await loadScript('src/services/opportunities/opportunity-validation.js');
+    }
     
     await initializeForm();
+    applyNumericInputConstraints();
+    setupRealtimeValidationClearing();
     setupWizardNavigation();
     setupFormHandlers();
     setupDemoDataFiller();
@@ -676,6 +681,22 @@ async function initOpportunityCreate(params = {}) {
             wizardEditOpportunityId = null;
         }
     }
+}
+
+function applyNumericInputConstraints() {
+    const setAttr = (id, attrs) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        Object.keys(attrs).forEach((key) => el.setAttribute(key, attrs[key]));
+    };
+    setAttr('cash-amount', { min: '0', step: '0.01' });
+    setAttr('budgetRange_min', { min: '0', step: '0.01' });
+    setAttr('budgetRange_max', { min: '0', step: '0.01' });
+    setAttr('equity-percentage', { min: '0', max: '100', step: '0.1' });
+    setAttr('profit-share-percentage', { min: '0', max: '100', step: '0.1' });
+    setAttr('profit-duration', { min: '1', step: '1' });
+    setAttr('duration', { min: '1', step: '1' });
+    setAttr('durationDays', { min: '1', step: '1' });
 }
 
 async function loadDataFiles() {
@@ -1100,7 +1121,16 @@ function setupWizardNavigation() {
         saveDraftBtn.addEventListener('click', () => {
             const statusField = document.getElementById('status');
             if (statusField) statusField.value = 'draft';
-            if (!validateStepsRange(1, 7)) return;
+            clearValidationUI();
+            const sharedValidator = window.validateOpportunityForm;
+            if (sharedValidator) {
+                const result = sharedValidator(collectOpportunityValidationState());
+                if (!result.isValid) {
+                    renderValidationErrors(result.fieldErrors);
+                    showError(result.errors[0] || 'Please correct invalid values before saving draft.');
+                    return;
+                }
+            }
             form.requestSubmit();
         });
     }
@@ -1347,9 +1377,87 @@ function plainTextFromHtml(html) {
     return (d.textContent || d.innerText || '').replace(/\s+/g, ' ').trim();
 }
 
+function clearValidationUI() {
+    document.querySelectorAll('.occ-field-error').forEach((el) => el.remove());
+    document.querySelectorAll('.occ-field-invalid').forEach((el) => el.classList.remove('occ-field-invalid'));
+}
+
+function clearFieldValidationUIByField(field) {
+    if (!field) return;
+    field.classList.remove('occ-field-invalid');
+    const host = field.closest('.form-group') || field.parentElement;
+    if (!host) return;
+    host.querySelectorAll('.occ-field-error').forEach((el) => el.remove());
+}
+
+function mapValidationKeyToFieldId(key) {
+    const map = {
+        cashAmount: 'cash-amount',
+        durationDays: 'profit-duration',
+        budgetMin: 'budgetRange_min',
+        budgetMax: 'budgetRange_max',
+        equityPercentage: 'equity-percentage',
+        profitSharePercentage: 'profit-share-percentage',
+        startDate: 'attr-startDate',
+        applicationDeadline: 'attr-applicationDeadline',
+        endDate: 'attr-endDate'
+    };
+    return map[key] || key;
+}
+
+function renderValidationErrors(fieldErrors) {
+    Object.entries(fieldErrors || {}).forEach(([key, message]) => {
+        const fieldId = mapValidationKeyToFieldId(key);
+        const field = document.getElementById(fieldId);
+        if (!field) return;
+        field.classList.add('occ-field-invalid');
+        const msg = document.createElement('div');
+        msg.className = 'occ-field-error text-red-600 text-sm mt-1';
+        msg.textContent = message;
+        const parent = field.closest('.form-group') || field.parentElement;
+        if (parent) parent.appendChild(msg);
+    });
+}
+
+function setupRealtimeValidationClearing() {
+    const form = document.getElementById('opportunity-form');
+    if (!form || form.dataset.validationClearBound === 'true') return;
+    form.dataset.validationClearBound = 'true';
+    const handler = (e) => {
+        const target = e.target;
+        if (!target || !target.id) return;
+        clearFieldValidationUIByField(target);
+        const errorDiv = document.getElementById('form-error');
+        if (errorDiv && !errorDiv.classList.contains('hidden')) {
+            const remaining = document.querySelectorAll('.occ-field-error');
+            if (!remaining.length) errorDiv.classList.add('hidden');
+        }
+    };
+    form.addEventListener('input', handler);
+    form.addEventListener('change', handler);
+}
+
+function collectOpportunityValidationState() {
+    const mode = document.getElementById('exchange-mode')?.value || '';
+    const getVal = (id) => document.getElementById(id)?.value?.trim();
+    return {
+        exchangeMode: mode,
+        cashAmount: getVal('cash-amount'),
+        durationDays: getVal('durationDays') || getVal('duration') || getVal('profit-duration'),
+        budgetMin: getVal('budgetRange_min'),
+        budgetMax: getVal('budgetRange_max'),
+        equityPercentage: getVal('equity-percentage'),
+        profitSharePercentage: getVal('profit-share-percentage'),
+        startDate: getVal('attr-startDate'),
+        applicationDeadline: getVal('attr-applicationDeadline'),
+        endDate: getVal('attr-endDate')
+    };
+}
+
 function validateCurrentStep() {
     const errorDiv = document.getElementById('form-error');
     errorDiv.classList.add('hidden');
+    clearValidationUI();
     
     switch (currentStep) {
         case 1: {
@@ -1380,6 +1488,15 @@ function validateCurrentStep() {
             if (country !== 'remote' && !city) {
                 showError('City is required');
                 return false;
+            }
+            const sharedValidator = window.validateOpportunityForm;
+            if (sharedValidator) {
+                const result = sharedValidator(collectOpportunityValidationState());
+                if (result.fieldErrors.startDate || result.fieldErrors.applicationDeadline || result.fieldErrors.endDate) {
+                    renderValidationErrors(result.fieldErrors);
+                    showError(result.errors[0] || 'Please correct invalid date fields.');
+                    return false;
+                }
             }
             break;
         }
@@ -1471,17 +1588,14 @@ function validateCurrentStep() {
             break;
         }
         case 6: {
-            const budgetMin = document.getElementById('budgetRange_min')?.value?.trim();
-            const budgetMax = document.getElementById('budgetRange_max')?.value?.trim();
-            if (!budgetMin || !budgetMax) {
-                showError('Budget range: both minimum and maximum are required');
-                return false;
-            }
-            const minVal = parseFloat(budgetMin);
-            const maxVal = parseFloat(budgetMax);
-            if (isNaN(minVal) || isNaN(maxVal) || minVal > maxVal) {
-                showError('Budget range: minimum must be less than or equal to maximum');
-                return false;
+            const sharedValidator = window.validateOpportunityForm;
+            if (sharedValidator) {
+                const result = sharedValidator(collectOpportunityValidationState());
+                if (!result.isValid) {
+                    renderValidationErrors(result.fieldErrors);
+                    showError(result.errors[0] || 'Please correct invalid values before continuing.');
+                    return false;
+                }
             }
             const exchangeMode = document.getElementById('exchange-mode')?.value;
             const validModes = ['cash', 'equity', 'profit_sharing', 'barter', 'hybrid'];
@@ -1501,11 +1615,6 @@ function validateCurrentStep() {
                 const profitPct = document.getElementById('profit-share-percentage')?.value?.trim();
                 if (!profitPct || isNaN(parseFloat(profitPct))) {
                     showError('Profit share percentage is required');
-                    return false;
-                }
-                const profitDur = document.getElementById('profit-duration')?.value?.trim();
-                if (!profitDur) {
-                    showError('Duration is required for profit sharing');
                     return false;
                 }
             } else if (exchangeMode === 'barter') {
@@ -3635,6 +3744,8 @@ function setupExchangeModeSelection() {
             });
         }
         fieldsContainer.innerHTML = html;
+        applyNumericInputConstraints();
+        applyNumericInputConstraints();
         fieldsContainer.querySelectorAll('input:not([type="checkbox"]):not([type="hidden"]), select, textarea').forEach(el => {
             el.classList.add('occ-vx-control');
         });
@@ -4377,7 +4488,10 @@ function setupFormHandlers() {
             }
         });
         
-        if (!validateStepsRange(1, 7)) {
+        const statusField = document.getElementById('status');
+        const submissionStatus = (statusField?.value || 'draft').trim();
+        const isDraftSubmission = submissionStatus === 'draft';
+        if (!isDraftSubmission && !validateStepsRange(1, 7)) {
             // Restore required attributes if validation fails
             hiddenFields.forEach(field => field.setAttribute('required', 'required'));
             return;
@@ -4390,6 +4504,16 @@ function setupFormHandlers() {
         const successDiv = document.getElementById('form-success');
         errorDiv.classList.add('hidden');
         successDiv.classList.add('hidden');
+        clearValidationUI();
+        const sharedValidator = window.validateOpportunityForm;
+        if (sharedValidator) {
+            const result = sharedValidator(collectOpportunityValidationState());
+            if (!result.isValid) {
+                renderValidationErrors(result.fieldErrors);
+                showError(result.errors[0] || 'Please correct invalid fields before saving.');
+                return;
+            }
+        }
         
         try {
             const user = authService.getCurrentUser();
@@ -4413,14 +4537,15 @@ function setupFormHandlers() {
             });
             const accepted_modes = paymentModesArr.slice();
             const description = document.getElementById('description')?.value?.trim() || '';
-            const title = (document.getElementById('title')?.value || '').trim();
+            const titleRaw = (document.getElementById('title')?.value || '').trim();
+            const title = titleRaw || (isDraftSubmission ? 'Untitled Draft Opportunity' : '');
             if (!title) throw new Error('Please enter a title');
             const location = document.getElementById('location')?.value || '';
             const locationCountry = document.getElementById('location-country')?.value || '';
             const locationRegion = document.getElementById('location-region')?.value || '';
             const locationCity = document.getElementById('location-city')?.value || '';
             const locationDistrict = document.getElementById('location-district')?.value || '';
-            const status = document.getElementById('status')?.value || 'draft';
+            const status = submissionStatus || 'draft';
             const currency = document.getElementById('currency')?.value || 'SAR';
             
             const scopeSkillsTags = getScopeTagsFromInput('scope-skills');
@@ -4583,17 +4708,28 @@ function setupFormHandlers() {
             }
             if (value_exchange) oppPayload.value_exchange = value_exchange;
 
-            const publishOk = await confirmPublishReadinessIfNeeded(oppPayload);
+            const readinessPayload = {
+                ...collectReadinessPreviewPayload(),
+                status: oppPayload.status
+            };
+            const publishOk = await confirmPublishReadinessIfNeeded(readinessPayload);
             if (!publishOk) return;
 
             const oppService = window.opportunityService || (typeof opportunityService !== 'undefined' ? opportunityService : null);
 
             if (wizardEditOpportunityId) {
                 const existing = await dataService.getOpportunityById(wizardEditOpportunityId);
+                if (!existing) {
+                    throw new Error('The draft could not be loaded for editing.');
+                }
+                const requestedStatus = oppPayload.status || existing.status || 'draft';
+                oppPayload.id = existing.id;
+                oppPayload.creatorId = existing.creatorId;
+                oppPayload.createdAt = existing.createdAt;
+                oppPayload.status = requestedStatus === 'published' ? 'published' : (existing.status || 'draft');
                 if (
                     oppService &&
                     typeof oppService._ensureNormalized === 'function' &&
-                    existing &&
                     (oppPayload.status || '') === 'published'
                 ) {
                     await oppService._ensureNormalized({ ...existing, ...oppPayload });

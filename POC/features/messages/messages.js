@@ -4,6 +4,25 @@
 
 let currentPartnerId = null;
 
+function setupMessagesRefreshListener() {
+    if (window.__pmtwinMessagesRefreshBound) return;
+    window.__pmtwinMessagesRefreshBound = true;
+    const refresh = async () => {
+        if (!document.getElementById('conversations-list')) return;
+        try {
+            await renderConversationsList(currentPartnerId || undefined);
+            if (currentPartnerId) await loadThread(currentPartnerId);
+            if (typeof layoutService !== 'undefined' && typeof layoutService.updateNavigation === 'function') {
+                void layoutService.updateNavigation();
+            }
+        } catch (err) {
+            console.error('Messages refresh failed:', err);
+        }
+    };
+    window.addEventListener('pmtwin:messages-updated', () => { void refresh(); });
+    window.addEventListener('pmtwin:notifications-updated', () => { void refresh(); });
+}
+
 async function initMessages(params) {
     const currentUser = authService.getCurrentUser();
     if (!currentUser) {
@@ -11,6 +30,7 @@ async function initMessages(params) {
         return;
     }
 
+    setupMessagesRefreshListener();
     try {
         const headerMount = document.getElementById('page-context-header-mount');
         if (headerMount && window.pageContextHeader && window.pageContextHeader.PRESETS) {

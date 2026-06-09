@@ -14,6 +14,7 @@ async function initNotifications() {
         window.pageContextHeader.mount(headerMount, window.pageContextHeader.PRESETS.notifications);
     }
 
+    setupNotificationsRefreshListener();
     await loadNotifications();
     setupFilters();
     const markBtn = document.getElementById('mark-all-read');
@@ -42,7 +43,9 @@ function notificationMatchesTypeFilter(n, typeFilter) {
             t === 'application' ||
             t === 'application_status_changed' ||
             t === 'application_update' ||
-            t === 'application_received'
+            t === 'application_received' ||
+            t === 'application_updated' ||
+            t === 'application_submitted'
         );
     }
     return t === typeFilter;
@@ -71,7 +74,9 @@ function resolveNotificationKind(type) {
         t === 'application' ||
         t === 'application_status_changed' ||
         t === 'application_update' ||
-        t === 'application_received'
+        t === 'application_received' ||
+        t === 'application_updated' ||
+        t === 'application_submitted'
     ) {
         return 'application';
     }
@@ -125,6 +130,28 @@ function setNotificationsSummary({ showing, total, unread, filtersOn }) {
     } else {
         el.innerHTML = `<strong>${total}</strong> notification${total === 1 ? '' : 's'} · <strong>${unread}</strong> unread`;
     }
+}
+
+function setupNotificationsRefreshListener() {
+    if (window.__pmtwinNotificationsRefreshBound) return;
+    window.__pmtwinNotificationsRefreshBound = true;
+    const refresh = () => {
+        if (!document.getElementById('notifications-list')) return;
+        loadNotifications().catch(err => console.error('Notifications refresh failed:', err));
+    };
+    window.addEventListener('pmtwin:notifications-updated', refresh);
+    window.addEventListener('pmtwin:data-changed', refresh);
+}
+
+async function openNotification(notifId, route) {
+    if (notifId) {
+        const notifs = await dataService.getNotifications(authService.getCurrentUser()?.id);
+        const notif = (notifs || []).find(n => n.id === notifId);
+        if (notif && !notif.read) {
+            await dataService.markNotificationRead(notifId);
+        }
+    }
+    if (route) router.navigate(route);
 }
 
 function setMarkAllReadEnabled(unreadCount) {
@@ -270,12 +297,13 @@ async function loadNotifications() {
             })
             .join('');
 
-        // Click on card (excluding buttons and title link) navigates to link when present
+        // Click on card (excluding buttons and title link) navigates and marks read
         container.querySelectorAll('.notification-item[data-route]').forEach(item => {
             item.addEventListener('click', (e) => {
                 if (e.target.closest('button') || e.target.closest('a.notification-link')) return;
                 const route = item.getAttribute('data-route');
-                if (route) router.navigate(route);
+                const notifId = item.getAttribute('data-id');
+                if (route) void openNotification(notifId, route);
             });
             item.style.cursor = 'pointer';
         });
@@ -340,13 +368,8 @@ async function loadNotifications() {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const route = link.getAttribute('data-route');
-                if (route) {
-                    const notif = list.find(n => n.link === route);
-                    if (notif && !notif.read) {
-                        dataService.markNotificationRead(notif.id);
-                    }
-                    router.navigate(route);
-                }
+                const notifId = link.closest('.notification-item')?.getAttribute('data-id');
+                if (route) void openNotification(notifId, route);
             });
         });
 

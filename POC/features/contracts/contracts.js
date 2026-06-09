@@ -68,15 +68,17 @@ function getNegotiationLabel(opportunityStatus) {
 /** Human label + pill variant for the current user's party role */
 function getRolePillInfo(myRole) {
     const r = (myRole || '').toLowerCase();
+    const label = typeof formatParticipantRole === 'function'
+        ? formatParticipantRole(myRole, 'Participant')
+        : (myRole || 'participant');
     if (r === 'need_owner' || r === 'creator') {
-        return { label: 'Need side', pillClass: 'contracts-role-pill--need' };
+        return { label, pillClass: 'contracts-role-pill--need' };
     }
     if (r === 'offer_provider' || r === 'contractor') {
-        return { label: 'Offer side', pillClass: 'contracts-role-pill--offer' };
+        return { label, pillClass: 'contracts-role-pill--offer' };
     }
-    const raw = (myRole || 'participant').replace(/_/g, ' ');
     return {
-        label: raw.charAt(0).toUpperCase() + raw.slice(1),
+        label,
         pillClass: 'contracts-role-pill--neutral'
     };
 }

@@ -1202,7 +1202,9 @@ function renderReport(gridEl, detailsEl, report) {
                 const partners = (match && match.suggestedPartners) ? match.suggestedPartners : [];
                 const balance = (match && match.valueAnalysis && match.valueAnalysis.consortiumBalance) ? match.valueAnalysis.consortiumBalance : null;
                 for (const rolePartner of partners) {
-                    const role = rolePartner.role || 'Partner';
+                    const role = typeof formatParticipantRole === 'function'
+                        ? formatParticipantRole(rolePartner.role, 'Partner')
+                        : (rolePartner.role || 'Partner');
                     const oppId = rolePartner.opportunityId || '';
                     const partnerName = escapeHtml(creatorNames[rolePartner.creatorId] || rolePartner.creatorId || '');
                     html += '<div class="matching-consortium-role">' + escapeHtml(role) + ': ' + (partnerName ? partnerName + ' (' + escapeHtml(oppId) + ')' : escapeHtml(oppId)) + '</div>';

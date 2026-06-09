@@ -215,6 +215,106 @@
         return needOwner?.userId === currentUserId;
     }
 
+    /** Viewer-relative source (your post) vs matched (counterpart) opportunity ids. */
+    function resolveViewerOpportunityIds(match, currentUserId, internalMatchType) {
+        const payload = match?.payload || {};
+        const result = { viewerId: null, counterpartId: null };
+        if (!match || !currentUserId) return result;
+
+        if (internalMatchType === 'one_way') {
+            const needOwner = (match.participants || []).find(p => p.role === 'need_owner');
+            const offerProvider = (match.participants || []).find(p => p.role === 'offer_provider');
+            if (needOwner?.userId === currentUserId) {
+                result.viewerId = payload.needOpportunityId || needOwner.opportunityId || null;
+                result.counterpartId = payload.offerOpportunityId || offerProvider?.opportunityId || null;
+            } else if (offerProvider?.userId === currentUserId) {
+                result.viewerId = payload.offerOpportunityId || offerProvider.opportunityId || null;
+                result.counterpartId = payload.needOpportunityId || needOwner?.opportunityId || null;
+            }
+            return result;
+        }
+
+        if (internalMatchType === 'two_way') {
+            const sideA = payload.sideA || {};
+            const sideB = payload.sideB || {};
+            const isA = sideA.userId === currentUserId;
+            const mySide = isA ? sideA : sideB;
+            const theirSide = isA ? sideB : sideA;
+            result.viewerId = mySide.needId || mySide.offerId || null;
+            result.counterpartId = theirSide.needId || theirSide.offerId || null;
+            return result;
+        }
+
+        if (internalMatchType === 'consortium') {
+            const lead = (match.participants || []).find(p => p.role === 'consortium_lead');
+            const member = (match.participants || []).find(p => p.userId === currentUserId && p.role !== 'consortium_lead');
+            if (lead?.userId === currentUserId) {
+                result.viewerId = payload.leadNeedId || lead.opportunityId || null;
+            } else if (member) {
+                const roleEntry = (payload.roles || []).find(r => r.userId === currentUserId);
+                result.viewerId = member.opportunityId || roleEntry?.opportunityId || null;
+                result.counterpartId = payload.leadNeedId || null;
+            }
+            return result;
+        }
+
+        if (internalMatchType === 'circular') {
+            const links = payload.links || [];
+            const outLink = links.find(l => (l.fromCreatorId || l.from) === currentUserId);
+            const inLink = links.find(l => (l.toCreatorId || l.to) === currentUserId);
+            result.viewerId = outLink?.offerId || inLink?.needId || null;
+            result.counterpartId = inLink?.needId && inLink.needId !== result.viewerId
+                ? inLink.needId
+                : (outLink?.needId || null);
+            return result;
+        }
+
+        const myPart = (match.participants || []).find(p => p.userId === currentUserId);
+        if (myPart?.opportunityId) result.viewerId = myPart.opportunityId;
+        return result;
+    }
+
+    function userCanInviteToApply(match, currentUserId, internalMatchType) {
+        if (!currentUserId || !match) return false;
+        if (internalMatchType === 'one_way') {
+            const needOwner = (match.participants || []).find(p => p.role === 'need_owner');
+            return needOwner?.userId === currentUserId;
+        }
+        if (internalMatchType === 'consortium') {
+            const lead = (match.participants || []).find(p => p.role === 'consortium_lead');
+            return lead?.userId === currentUserId;
+        }
+        return userOwnsSourceOpportunity(
+            match,
+            currentUserId,
+            match.payload?.leadNeedId || match.payload?.needOpportunityId,
+            null
+        );
+    }
+
+    function applyViewerOpportunityContext(vm, match, currentUserId, opportunitiesById) {
+        const { viewerId, counterpartId } = resolveViewerOpportunityIds(match, currentUserId, vm.internalMatchType);
+        if (!viewerId && !counterpartId) return;
+
+        if (viewerId) {
+            vm.sourceOpportunityId = viewerId;
+            vm.sourceOpportunity = opportunitiesById[viewerId] || vm.sourceOpportunity;
+            if (vm.sourceOpportunity) {
+                vm.sourceOpportunityType = vm.sourceOpportunity.intent || 'request';
+                vm.sourceOpportunityTypeLabel = getOpportunityTypeLabel(vm.sourceOpportunity.intent);
+            }
+            vm.sourceOpportunityRoute = '/opportunities/' + viewerId;
+        }
+
+        const counterpartOpp = counterpartId ? opportunitiesById[counterpartId] : null;
+        vm.counterpartOpportunityId = counterpartId;
+        vm.counterpartOpportunity = counterpartOpp;
+        vm.matchedOpportunities = counterpartOpp ? [counterpartOpp] : vm.matchedOpportunities;
+        if (counterpartOpp) {
+            vm.matchedSummary = getOpportunityTypeLabel(counterpartOpp.intent) + ': ' + (counterpartOpp.title || 'Matched post');
+        }
+    }
+
     function getAvailableActions(vm) {
         const actions = [];
         const push = (id, label, kind, route, enabled = true) => {
@@ -474,8 +574,10 @@
         vm.canRespond = !vm.isExpired && isPending && myStatus === 'pending' && !!currentUserId
             && (match.participants || []).some(p => p.userId === currentUserId);
 
+        applyViewerOpportunityContext(vm, match, currentUserId, opportunitiesById);
+
         vm.canInviteToApply = !vm.isExpired && vm.status !== 'declined' && vm.status !== 'expired'
-            && userOwnsSourceOpportunity(match, currentUserId, vm.sourceOpportunityId, opportunitiesById);
+            && userCanInviteToApply(match, currentUserId, vm.internalMatchType);
 
         const otherPart = (match.participants || []).find(p => p.userId && p.userId !== currentUserId);
         if (otherPart?.userId) {
@@ -694,13 +796,21 @@
         if (type === 'one_way') {
             const needOpp = opportunitiesById[payload.needOpportunityId];
             const offerOpp = opportunitiesById[payload.offerOpportunityId];
+            const { viewerId, counterpartId } = resolveViewerOpportunityIds(match, currentUserId, type);
+            const viewerOpp = viewerId ? opportunitiesById[viewerId] : (needOpp || offerOpp);
+            const counterpartOpp = counterpartId
+                ? opportunitiesById[counterpartId]
+                : (viewerId === payload.needOpportunityId ? offerOpp : needOpp);
+            const viewerLabel = getOpportunityTypeLabel(viewerOpp?.intent);
+            const counterpartLabel = getOpportunityTypeLabel(counterpartOpp?.intent);
             vm.cardTitle = 'Need/Offer Match';
-            vm.matchedSummary = 'Offer: ' + (offerOpp?.title || 'Matched offer');
+            vm.matchedSummary = counterpartLabel + ': ' + (counterpartOpp?.title || 'Matched post');
             vm.cardBodyHtml = buildCardBlocks([
-                ['Source Opportunity', '<span class="match-card-intent">Need:</span> ' + escapeHtml(needOpp?.title || '—')],
-                ['Matched Opportunity', '<span class="match-card-intent">Offer:</span> ' + escapeHtml(offerOpp?.title || '—')]
+                ['Source Opportunity', '<span class="match-card-intent">' + escapeHtml(viewerLabel) + ':</span> ' + escapeHtml(viewerOpp?.title || '—')],
+                ['Matched Opportunity', '<span class="match-card-intent">' + escapeHtml(counterpartLabel) + ':</span> ' + escapeHtml(counterpartOpp?.title || '—')]
             ]);
-            if (needOpp?.id) vm.inviteRoute = '/opportunities/' + needOpp.id;
+            const needOwner = (match.participants || []).find(p => p.role === 'need_owner');
+            if (needOwner?.userId === currentUserId && needOpp?.id) vm.inviteRoute = '/opportunities/' + needOpp.id;
             return;
         }
 
@@ -731,7 +841,10 @@
             const contributorLines = await Promise.all(roles.map(async (r) => {
                 const u = await ds.getUserOrCompanyById(r.userId);
                 const name = u?.profile?.name || u?.profile?.companyName || r.userId;
-                return escapeHtml(r.role || 'Contributor') + ': ' + escapeHtml(name);
+                const roleLabel = typeof formatParticipantRole === 'function'
+                    ? formatParticipantRole(r.role, 'Contributor')
+                    : (r.role || 'Contributor');
+                return escapeHtml(roleLabel) + ': ' + escapeHtml(name);
             }));
             vm.cardTitle = 'Consortium Match';
             vm.matchedSummary = contributorLines.slice(0, 3).join(' · ') || 'Suggested contributors';
@@ -799,6 +912,9 @@
         getAvailableActions,
         getNextBestAction,
         detectSourceType,
+        resolveViewerOpportunityIds,
+        userCanInviteToApply,
+        applyViewerOpportunityContext,
         buildUnifiedMatchViewModel,
         enrichUnifiedMatchViewModel,
         buildUnifiedMatchViewModels,

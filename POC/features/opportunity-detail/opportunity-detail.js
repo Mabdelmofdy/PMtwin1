@@ -460,7 +460,10 @@ async function loadAndRenderContract(opportunity) {
     const partiesLabel = parties.map((p, i) => {
         const u = partyUsers[i];
         const name = u?.profile?.name || u?.email || p.userId;
-        return name + ' (' + (p.role || 'participant') + ')';
+        const roleLabel = typeof formatParticipantRole === 'function'
+            ? formatParticipantRole(p.role, 'Participant')
+            : (p.role || 'participant');
+        return name + ' (' + roleLabel + ')';
     }).join(' – ');
 
     summaryEl.innerHTML = `
@@ -1313,7 +1316,8 @@ async function submitApplication() {
                 userId: currentOpportunity.creatorId,
                 type: 'application_updated',
                 title: 'Application Updated',
-                message: `${user.email || 'An applicant'} updated their application for "${currentOpportunity.title}"`
+                message: `${user.email || 'An applicant'} updated their application for "${currentOpportunity.title}"`,
+                link: `/opportunities/${currentOpportunity.id}`
             });
             
             alert('Application updated successfully!');
@@ -1378,7 +1382,8 @@ async function submitApplication() {
                 userId: currentOpportunity.creatorId,
                 type: 'application_received',
                 title: 'New Application',
-                message: `You received a new application for "${currentOpportunity.title}"`
+                message: `You received a new application for "${currentOpportunity.title}"`,
+                link: `/opportunities/${currentOpportunity.id}`
             });
 
             await dataService.createNotification({
@@ -2764,7 +2769,13 @@ function setupApplicationDetailActions(container, applicationId, applicantId, cu
             if (action === 'shortlist' && actionable && appId) {
                 try {
                     await dataService.updateApplication(appId, { status: 'shortlisted' });
-                    await dataService.createNotification({ userId: appApplicantId, type: 'application_status_changed', title: 'Shortlisted', message: 'Your application has been shortlisted.' });
+                    await dataService.createNotification({
+                        userId: appApplicantId,
+                        type: 'application_status_changed',
+                        title: 'Shortlisted',
+                        message: 'Your application has been shortlisted.',
+                        link: currentOpportunity ? `/opportunities/${currentOpportunity.id}` : undefined
+                    });
                     if (currentOpportunity) await loadApplications(currentOpportunity.id);
                     if (typeof modalService !== 'undefined') modalService.close();
                 } catch (err) {
@@ -2800,7 +2811,13 @@ function setupApplicationDetailActions(container, applicationId, applicantId, cu
                 if (!confirm('Reject this application? The applicant will be notified.')) return;
                 try {
                     await dataService.updateApplication(appId, { status: 'rejected' });
-                    await dataService.createNotification({ userId: appApplicantId, type: 'application_status_changed', title: 'Application Rejected', message: 'Your application has been rejected.' });
+                    await dataService.createNotification({
+                        userId: appApplicantId,
+                        type: 'application_status_changed',
+                        title: 'Application Rejected',
+                        message: 'Your application has been rejected.',
+                        link: currentOpportunity ? `/opportunities/${currentOpportunity.id}` : undefined
+                    });
                     if (currentOpportunity) await loadApplications(currentOpportunity.id);
                     if (typeof modalService !== 'undefined') modalService.close();
                 } catch (err) {
@@ -2954,7 +2971,8 @@ async function updateApplicationStatus(applicationId, status) {
             userId: application.applicantId,
             type: 'application_status_changed',
             title: 'Application Status Updated',
-            message: `Your application for "${currentOpportunity.title}" has been ${status}`
+            message: `Your application for "${currentOpportunity.title}" has been ${status}`,
+            link: `/opportunities/${currentOpportunity.id}`
         });
         
         await loadApplications(currentOpportunity.id);

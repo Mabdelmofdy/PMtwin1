@@ -94,7 +94,11 @@ function buildContractEditReadonlyHtml(contract, parties, partyUsers, opportunit
         .map((p, i) => {
             const u = partyUsers[i];
             const name = escapeHtml(u?.profile?.name || u?.email || p.userId);
-            const role = escapeHtml((p.role || 'participant').replace(/_/g, ' '));
+            const role = escapeHtml(
+                typeof formatParticipantRole === 'function'
+                    ? formatParticipantRole(p.role, 'Participant')
+                    : (p.role || 'participant').replace(/_/g, ' ')
+            );
             const sig = p.signedAt ? escapeHtml(formatDateShort(p.signedAt)) : 'Not signed';
             return '<li><strong>' + name + '</strong> — ' + role + ' — ' + sig + '</li>';
         })
@@ -380,8 +384,9 @@ async function initContractDetail(params) {
                 const u = partyUsers[i];
                 const name = u?.profile?.name || u?.email || p.userId;
                 const email = u?.email || '—';
-                const roleLabel =
-                    (p.role || 'participant').charAt(0).toUpperCase() + (p.role || 'participant').slice(1);
+                const roleLabel = typeof formatParticipantRole === 'function'
+                    ? formatParticipantRole(p.role, 'Participant')
+                    : (p.role || 'participant').charAt(0).toUpperCase() + (p.role || 'participant').slice(1);
                 const signed = p.signedAt ? formatDate(p.signedAt) : 'Signature pending';
                 return (
                     '<div class="cd-party-card">' +

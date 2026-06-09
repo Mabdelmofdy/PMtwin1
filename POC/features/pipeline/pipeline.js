@@ -583,7 +583,29 @@ async function exportPipelineApplicationsCsv() {
     }
 }
 
+function setupPipelineRefreshListener() {
+    if (window.__pmtwinPipelineRefreshBound) return;
+    window.__pmtwinPipelineRefreshBound = true;
+    const refresh = async () => {
+        if (!document.querySelector('.pipeline-page')) return;
+        try {
+            const activeBtn = document.querySelector('.pipeline-board-tab.active.tab-btn');
+            const tab = activeBtn?.dataset?.tab;
+            if (tab === 'matches') {
+                await loadPipelineMatchesTabContent();
+            } else {
+                await loadPipelineData();
+            }
+        } catch (err) {
+            console.error('Pipeline refresh failed:', err);
+        }
+    };
+    ['pmtwin:post-matches-updated', 'pmtwin:deals-updated', 'pmtwin:notifications-updated', 'pmtwin:data-changed']
+        .forEach((eventName) => window.addEventListener(eventName, () => { void refresh(); }));
+}
+
 async function initPipeline(params = {}) {
+    setupPipelineRefreshListener();
     setupPipelinePageHeaderActions();
     setupTabs();
     setupIntentSegment('tab-opportunities');
@@ -877,7 +899,13 @@ function setupPipelineMatchListActions() {
         try {
             if (action === 'negotiate') {
                 const existing = await dataService.getActiveNegotiationForMatch(matchId);
-                if (!existing) await dataService.startNegotiationFromMatch(matchId, user.id);
+                if (!existing) {
+                    const match = await dataService.getPostMatchById(matchId);
+                    const opportunityId = match && typeof dataService._resolveNegotiationOpportunityId === 'function'
+                        ? dataService._resolveNegotiationOpportunityId(match, user.id)
+                        : null;
+                    await dataService.startNegotiationFromMatch(matchId, user.id, opportunityId ? { opportunityId } : {});
+                }
                 if (window.router?.navigate) window.router.navigate('/matches/' + matchId + '#negotiation');
                 return;
             }

@@ -51,6 +51,25 @@ describe('unified-match-view-model', () => {
         expect(vm.availableActions.some(a => a.id === 'view_details')).toBe(true);
     });
 
+    it('resolves viewer-relative opportunity ids for one_way matches', () => {
+        const match = {
+            matchType: 'one_way',
+            participants: [
+                { userId: 'need-owner', role: 'need_owner', opportunityId: 'need-1' },
+                { userId: 'offer-owner', role: 'offer_provider', opportunityId: 'offer-1' }
+            ],
+            payload: { needOpportunityId: 'need-1', offerOpportunityId: 'offer-1' }
+        };
+        expect(umv.resolveViewerOpportunityIds(match, 'need-owner', 'one_way')).toEqual({
+            viewerId: 'need-1',
+            counterpartId: 'offer-1'
+        });
+        expect(umv.resolveViewerOpportunityIds(match, 'offer-owner', 'one_way')).toEqual({
+            viewerId: 'offer-1',
+            counterpartId: 'need-1'
+        });
+    });
+
     it('shows waiting for others when current user accepted but peers have not', () => {
         const match = {
             status: 'accepted',

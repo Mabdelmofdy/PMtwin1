@@ -1,4 +1,5 @@
 import { enforceTransition } from "/core/workflow/workflow-engine.js";
+import { PMTWIN_EVENTS, emitDataChange } from "../events/event-bus.js";
 import {
     createDealFromMatch as buildDealPayloadFromMatch,
     buildDealPayloadFromApplication
@@ -2947,6 +2948,7 @@ class DataService {
             }
         }
 
+        emitDataChange(PMTWIN_EVENTS.CONTRACTS_UPDATED, { contractId: id });
         return updated;
     }
 
@@ -3439,6 +3441,7 @@ class DataService {
             updatedAt: new Date().toISOString()
         };
         this.storage.set(CONFIG.STORAGE_KEYS.DEALS, deals);
+        emitDataChange(PMTWIN_EVENTS.DEALS_UPDATED, { dealId: id });
         return deals[index];
     }
 
@@ -3565,6 +3568,52 @@ class DataService {
         }
     }
 
+    /**
+     * Resolve which opportunity anchors a match negotiation for the acting user.
+     * Prefers the viewer's own post (Need or Offer) so both sides can start negotiations.
+     */
+    _resolveNegotiationOpportunityId(matchRecord, actorUserId, options = {}) {
+        if (options.opportunityId) return options.opportunityId;
+        const payload = matchRecord?.payload || {};
+        const matchType = matchRecord?.matchType || 'one_way';
+        const myParts = (matchRecord?.participants || []).filter(p => p.userId === actorUserId);
+        const myOppId = myParts.map(p => p.opportunityId).find(Boolean);
+        if (myOppId) return myOppId;
+
+        if (matchType === 'one_way') {
+            const needOwner = (matchRecord.participants || []).find(p => p.role === 'need_owner');
+            const offerProvider = (matchRecord.participants || []).find(p => p.role === 'offer_provider');
+            if (needOwner?.userId === actorUserId) return payload.needOpportunityId || null;
+            if (offerProvider?.userId === actorUserId) return payload.offerOpportunityId || null;
+            return payload.needOpportunityId || payload.offerOpportunityId || null;
+        }
+        if (matchType === 'two_way') {
+            const sideA = payload.sideA || {};
+            const sideB = payload.sideB || {};
+            if (sideA.userId === actorUserId) return sideA.needId || sideA.offerId || null;
+            if (sideB.userId === actorUserId) return sideB.needId || sideB.offerId || null;
+        }
+        if (matchType === 'consortium') {
+            const lead = (matchRecord.participants || []).find(p => p.role === 'consortium_lead');
+            if (lead?.userId === actorUserId) return payload.leadNeedId || null;
+            const member = (matchRecord.participants || []).find(p => p.userId === actorUserId);
+            if (member?.opportunityId) return member.opportunityId;
+            const roleEntry = (payload.roles || []).find(r => r.userId === actorUserId);
+            if (roleEntry?.opportunityId) return roleEntry.opportunityId;
+            return payload.leadNeedId || null;
+        }
+        if (matchType === 'circular') {
+            const links = payload.links || [];
+            for (const link of links) {
+                const from = link.fromCreatorId || link.from;
+                if (from === actorUserId) return link.needId || link.offerId || null;
+            }
+            const first = links[0];
+            return first?.needId || first?.offerId || null;
+        }
+        return payload.needOpportunityId || payload.leadNeedId || matchRecord.opportunityId || null;
+    }
+
     async startNegotiationFromMatch(matchId, actorUserId, options = {}) {
         const postMatch = await this.getPostMatchById(matchId);
         let matchRecord = postMatch;
@@ -3580,11 +3629,7 @@ class DataService {
         const existing = await this.getActiveNegotiationForMatch(matchId);
         if (existing) return existing;
 
-        let opportunityId = options.opportunityId || null;
-        const payload = matchRecord.payload || {};
-        if (!opportunityId) {
-            opportunityId = payload.needOpportunityId || payload.leadNeedId || matchRecord.opportunityId || null;
-        }
+        const opportunityId = this._resolveNegotiationOpportunityId(matchRecord, actorUserId, options);
         if (!opportunityId) throw new Error('Could not resolve opportunity for this negotiation.');
 
         const applicationId = matchRecord.applicationId || options.applicationId || null;
@@ -3936,12 +3981,25 @@ class DataService {
             throw new Error('Agree to terms before creating a deal.');
         }
 
-        const opp = negotiation.opportunityId
-            ? await this.getOpportunityById(negotiation.opportunityId)
-            : null;
-        const isOwner = !!(opp && opp.creatorId === actorUserId);
-        if (!isOwner) {
-            throw new Error('Only the opportunity owner can create a deal from agreed negotiation terms.');
+        const matchId = negotiation.matchId || negotiation.finalAgreedSnapshot?.matchId || null;
+        if (matchId) {
+            const postMatch = await this.getPostMatchById(matchId);
+            if (postMatch) {
+                assertMatchParticipant(postMatch, actorUserId);
+            }
+        } else {
+            const opp = negotiation.opportunityId
+                ? await this.getOpportunityById(negotiation.opportunityId)
+                : null;
+            const isOwner = !!(opp && opp.creatorId === actorUserId);
+            let isApplicant = false;
+            if (negotiation.applicationId) {
+                const application = await this.getApplicationById(negotiation.applicationId);
+                isApplicant = application?.applicantId === actorUserId;
+            }
+            if (!isOwner && !isApplicant) {
+                throw new Error('Only the opportunity owner or applicant can create a deal from agreed negotiation terms.');
+            }
         }
 
         const existing = (await this.getDeals()).find(d => d.negotiationId === negotiationId);
@@ -4599,6 +4657,10 @@ class DataService {
                 details: { matchType: newRecord.matchType, opportunityIds: flatOppIds.length ? flatOppIds : undefined }
             });
         } catch (e) { /* non-fatal */ }
+        emitDataChange(PMTWIN_EVENTS.POST_MATCHES_UPDATED, {
+            matchId: newRecord.id,
+            matchType: newRecord.matchType
+        });
         return newRecord;
     }
 
@@ -4612,6 +4674,7 @@ class DataService {
             updatedAt: new Date().toISOString()
         };
         this.storage.set(CONFIG.STORAGE_KEYS.POST_MATCHES, list);
+        emitDataChange(PMTWIN_EVENTS.POST_MATCHES_UPDATED, { matchId });
         return list[index];
     }
 
@@ -4718,6 +4781,7 @@ class DataService {
                 }
             }
         }
+        emitDataChange(PMTWIN_EVENTS.POST_MATCHES_UPDATED, { matchId, status: updated.status });
         return updated;
     }
 
@@ -4943,6 +5007,7 @@ class DataService {
         };
         notifications.push(newNotification);
         this.storage.set(CONFIG.STORAGE_KEYS.NOTIFICATIONS, notifications);
+        emitDataChange(PMTWIN_EVENTS.NOTIFICATIONS_UPDATED, { notificationId: newNotification.id });
         return newNotification;
     }
     
@@ -4952,6 +5017,27 @@ class DataService {
         if (index !== -1) {
             notifications[index].read = true;
             this.storage.set(CONFIG.STORAGE_KEYS.NOTIFICATIONS, notifications);
+            emitDataChange(PMTWIN_EVENTS.NOTIFICATIONS_UPDATED, { notificationId: id });
+        }
+    }
+
+    /** Mark all unread notifications for a user whose link matches the visited route. */
+    async markNotificationsReadForRoute(userId, route) {
+        if (!userId || !route) return;
+        const routePath = String(route).split('?')[0].replace(/\/$/, '') || '/';
+        const notifications = this.storage.get(CONFIG.STORAGE_KEYS.NOTIFICATIONS) || [];
+        let changed = false;
+        for (const n of notifications) {
+            if (!n || n.userId !== userId || n.read === true || !n.link) continue;
+            const linkPath = String(n.link).split('?')[0].replace(/\/$/, '') || '/';
+            if (linkPath === routePath) {
+                n.read = true;
+                changed = true;
+            }
+        }
+        if (changed) {
+            this.storage.set(CONFIG.STORAGE_KEYS.NOTIFICATIONS, notifications);
+            emitDataChange(PMTWIN_EVENTS.NOTIFICATIONS_UPDATED, { route: routePath });
         }
     }
 
@@ -5114,6 +5200,7 @@ class DataService {
         };
         messages.push(newMessage);
         this.storage.set(CONFIG.STORAGE_KEYS.MESSAGES, messages);
+        emitDataChange(PMTWIN_EVENTS.MESSAGES_UPDATED, { senderId, receiverId });
 
         try {
             const sender = await this.getUserOrCompanyById(senderId);
@@ -5144,15 +5231,19 @@ class DataService {
         if (!viewerId || !partnerId) return;
         const notifications = this.storage.get(CONFIG.STORAGE_KEYS.NOTIFICATIONS) || [];
         const threadLink = `${CONFIG.ROUTES.MESSAGES}/${partnerId}`;
+        const messagesRoot = CONFIG.ROUTES.MESSAGES || '/messages';
         let changed = false;
         for (const n of notifications) {
-            if (n.userId === viewerId && n.type === 'message' && !n.read && n.link === threadLink) {
+            if (n.userId !== viewerId || n.type !== 'message' || n.read) continue;
+            const link = n.link || '';
+            if (link === threadLink || link === messagesRoot) {
                 n.read = true;
                 changed = true;
             }
         }
         if (changed) {
             this.storage.set(CONFIG.STORAGE_KEYS.NOTIFICATIONS, notifications);
+            emitDataChange(PMTWIN_EVENTS.NOTIFICATIONS_UPDATED, { partnerId });
         }
     }
 
@@ -5165,7 +5256,10 @@ class DataService {
                 changed = true;
             }
         });
-        if (changed) this.storage.set(CONFIG.STORAGE_KEYS.MESSAGES, messages);
+        if (changed) {
+            this.storage.set(CONFIG.STORAGE_KEYS.MESSAGES, messages);
+            emitDataChange(PMTWIN_EVENTS.MESSAGES_UPDATED, { senderId, receiverId });
+        }
     }
 
     /** Get list of conversation partners for a user (people they have messages with), with last message and unread count */
