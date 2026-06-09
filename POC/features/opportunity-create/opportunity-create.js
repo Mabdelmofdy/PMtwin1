@@ -4,6 +4,16 @@
 
 let currentStep = 1;
 const TOTAL_STEPS = 7;
+
+/** Canonical professional roles for Stage 1 hard-constraint matching. */
+const CANONICAL_PROFESSIONAL_ROLES = [
+    'Architect',
+    'Interior Designer',
+    'Civil Engineer',
+    'Structural Engineer',
+    'Project Management',
+    'MEP'
+];
 /** When set, submit updates this opportunity instead of creating a new one (loaded from /opportunities/:id/edit). */
 let wizardEditOpportunityId = null;
 let allLocations = [];
@@ -43,7 +53,9 @@ const DEMO_DATASETS = [
         },
         step2: { intent: 'request' },
         step3: {
+            targetRole: 'Structural Engineer',
             skills: ['Structural Engineering', 'Reinforced Concrete', 'Foundation Design', 'Construction Supervision'],
+            coreSkills: ['Structural Engineering', 'Foundation Design'],
             sectors: ['Construction', 'Real Estate'],
             interests: ['Sustainability', 'BIM'],
             certifications: ['PMP', 'PE']
@@ -87,7 +99,9 @@ const DEMO_DATASETS = [
         },
         step2: { intent: 'request' },
         step3: {
+            targetRole: 'Project Management',
             skills: ['Program Management', 'Construction Supervision', 'Quality Assurance'],
+            coreSkills: ['Program Management'],
             sectors: ['Construction', 'Infrastructure'],
             interests: ['Multi-site', 'Rollout'],
             certifications: ['PMP']
@@ -474,6 +488,7 @@ function opportunityToEditWizardDataset(opp) {
     const skipScopeKeys = new Set([
         'requiredSkills',
         'offeredSkills',
+        'coreSkills',
         'sectors',
         'interests',
         'certifications',
@@ -545,6 +560,8 @@ function opportunityToEditWizardDataset(opp) {
         step2: { intent },
         step3: {
             skills,
+            coreSkills: asTagArray(scope.coreSkills || attrs.coreSkills),
+            targetRole: attrs.targetRole || attrs.professionalRole || '',
             sectors: asTagArray(scope.sectors || attrs.sectors || opp.sectors),
             interests: asTagArray(scope.interests || attrs.interests || opp.interests),
             certifications: asTagArray(scope.certifications || attrs.certifications || opp.certifications)
@@ -734,6 +751,7 @@ function flattenLocations() {
 async function initializeForm() {
     setupLocationSearch();
     setupIntentLabels();
+    setupProfessionalRoleSelect();
     setupScopeTags();
     setupCategoryAndSubModel();
     setupInlineAdvisor();
@@ -756,40 +774,83 @@ function updateScopeLabels() {
     const skillsLabel = document.getElementById('scope-skills-label');
     if (!intro || !skillsLabel) return;
     if (intent === 'offer') {
-        intro.textContent = 'Add offered services/skills, sectors, and interests. Used for matching.';
+        intro.textContent = 'Select your professional role, then add offered services/skills, sectors, and interests. Used for matching.';
         skillsLabel.innerHTML = 'Offered services / skills <span class="text-red-600">*</span>';
     } else {
-        intro.textContent = 'Add required services/skills, sectors, and interests. Used for matching.';
+        intro.textContent = 'Select your professional role, then add required services/skills, sectors, and interests. Used for matching.';
         skillsLabel.innerHTML = 'Required services / skills <span class="text-red-600">*</span>';
     }
+}
+
+function setupProfessionalRoleSelect() {
+    const select = document.getElementById('target-role');
+    if (!select) return;
+    CANONICAL_PROFESSIONAL_ROLES.forEach((role) => {
+        const opt = document.createElement('option');
+        opt.value = role;
+        opt.textContent = role;
+        select.appendChild(opt);
+    });
+}
+
+function readScopeTagsFromEl(el) {
+    if (!el) return [];
+    try {
+        return JSON.parse(el.dataset.tagsArray || '[]');
+    } catch {
+        const v = (el.value || '').trim();
+        return v ? v.split(',').map(s => s.trim()).filter(Boolean) : [];
+    }
+}
+
+function readCoreSkillsFromEl(el) {
+    if (!el) return [];
+    try {
+        return JSON.parse(el.dataset.coreSkillsArray || '[]');
+    } catch {
+        return [];
+    }
+}
+
+function writeScopeTagsToEl(el, tags) {
+    if (!el) return;
+    el.dataset.tagsArray = JSON.stringify(tags);
+}
+
+function writeCoreSkillsToEl(el, coreSkills) {
+    if (!el) return;
+    el.dataset.coreSkillsArray = JSON.stringify(coreSkills);
 }
 
 function setupScopeTags() {
     ['scope-skills', 'scope-sectors', 'scope-interests', 'scope-certifications'].forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
-        let tags = [];
+        writeScopeTagsToEl(el, []);
+        if (id === 'scope-skills') {
+            writeCoreSkillsToEl(el, []);
+        }
         el.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ',') {
                 e.preventDefault();
                 const v = (el.value || '').trim().replace(/,/g, '');
                 if (v) {
-                    tags.push(v);
+                    const tags = readScopeTagsFromEl(el);
+                    if (!tags.includes(v)) tags.push(v);
                     el.value = '';
                     renderScopeTags(el, tags);
                     hideScopeSkillSuggestions();
                 }
             }
         });
-        el.dataset.tagsArray = JSON.stringify(tags);
 
         if (id === 'scope-skills') {
-            setupScopeSkillAutocomplete(el, tags);
+            setupScopeSkillAutocomplete(el);
         }
     });
 }
 
-function setupScopeSkillAutocomplete(el, tags) {
+function setupScopeSkillAutocomplete(el) {
     const wrapper = el.closest('.form-group');
     if (!wrapper) return;
     wrapper.style.position = 'relative';
@@ -808,6 +869,7 @@ function setupScopeSkillAutocomplete(el, tags) {
         const svc = window.skillService || (typeof skillService !== 'undefined' ? skillService : null);
         if (!svc) return;
         const catalog = await svc.getCatalog();
+        const tags = readScopeTagsFromEl(el);
         const lq = q.toLowerCase();
         let html = '';
         for (const [cat, skills] of Object.entries(catalog)) {
@@ -829,9 +891,10 @@ function setupScopeSkillAutocomplete(el, tags) {
             item.addEventListener('mousedown', (e) => {
                 e.preventDefault();
                 const skill = item.dataset.skill;
-                if (skill && !tags.includes(skill)) {
-                    tags.push(skill);
-                    renderScopeTags(el, tags);
+                const currentTags = readScopeTagsFromEl(el);
+                if (skill && !currentTags.includes(skill)) {
+                    currentTags.push(skill);
+                    renderScopeTags(el, currentTags);
                 }
                 el.value = '';
                 sugBox.style.display = 'none';
@@ -859,26 +922,58 @@ function renderScopeTags(containerInput, tags) {
         tagEl.className = 'scope-tags-display flex flex-wrap gap-2 mt-2';
         containerInput.after(tagEl);
     }
-    tagEl.innerHTML = tags.map((t, i) => `<span class="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-800 text-sm" data-tag-index="${i}">${escapeHtml(t)} <button type="button" class="ml-1 text-blue-600 hover:text-blue-800 scope-tag-remove" data-index="${i}" aria-label="Remove">&times;</button></span>`).join('');
+    const isSkills = containerInput.id === 'scope-skills';
+    const coreSkills = isSkills ? readCoreSkillsFromEl(containerInput) : [];
+    const coreSet = new Set(coreSkills);
+    tagEl.innerHTML = tags.map((t, i) => {
+        const isCore = coreSet.has(t);
+        const tagClass = isCore
+            ? 'scope-skill-tag--core inline-flex items-center px-2 py-1 rounded text-sm'
+            : 'inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-800 text-sm';
+        const starBtn = isSkills
+            ? `<button type="button" class="scope-tag-core${isCore ? ' is-core' : ''}" data-skill="${escapeHtml(t)}" aria-label="${isCore ? 'Unmark core skill' : 'Mark as core skill'}" title="${isCore ? 'Core skill' : 'Mark as core skill'}">${isCore ? '⭐' : '☆'}</button>`
+            : '';
+        return `<span class="${tagClass}" data-tag-index="${i}">${starBtn}${escapeHtml(t)} <button type="button" class="ml-1 text-blue-600 hover:text-blue-800 scope-tag-remove" data-index="${i}" aria-label="Remove">&times;</button></span>`;
+    }).join('');
+
+    if (isSkills) {
+        tagEl.querySelectorAll('.scope-tag-core').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const skill = btn.dataset.skill;
+                const currentCore = readCoreSkillsFromEl(containerInput);
+                const nextCore = currentCore.includes(skill)
+                    ? currentCore.filter(s => s !== skill)
+                    : currentCore.concat(skill);
+                writeCoreSkillsToEl(containerInput, nextCore);
+                renderScopeTags(containerInput, tags);
+            });
+        });
+    }
+
     tagEl.querySelectorAll('.scope-tag-remove').forEach(btn => {
         btn.addEventListener('click', () => {
-            tags.splice(parseInt(btn.dataset.index, 10), 1);
-            renderScopeTags(containerInput, tags);
-            containerInput.dataset.tagsArray = JSON.stringify(tags);
+            const idx = parseInt(btn.dataset.index, 10);
+            const removed = tags[idx];
+            const nextTags = tags.filter((_, i) => i !== idx);
+            if (isSkills && removed) {
+                writeCoreSkillsToEl(
+                    containerInput,
+                    readCoreSkillsFromEl(containerInput).filter(s => s !== removed)
+                );
+            }
+            renderScopeTags(containerInput, nextTags);
+            writeScopeTagsToEl(containerInput, nextTags);
         });
     });
-    containerInput.dataset.tagsArray = JSON.stringify(tags);
+    writeScopeTagsToEl(containerInput, tags);
 }
 
 function getScopeTagsFromInput(inputId) {
-    const el = document.getElementById(inputId);
-    if (!el) return [];
-    try {
-        return JSON.parse(el.dataset.tagsArray || '[]');
-    } catch {
-        const v = (el.value || '').trim();
-        return v ? v.split(',').map(s => s.trim()).filter(Boolean) : [];
-    }
+    return readScopeTagsFromEl(document.getElementById(inputId));
+}
+
+function getCoreSkillsFromInput() {
+    return readCoreSkillsFromEl(document.getElementById('scope-skills'));
 }
 
 function collectValueExpectedFromForm() {
@@ -1230,6 +1325,8 @@ function fillReviewSummary() {
         }).join('');
     }
     const skills = getScopeTagsFromInput('scope-skills');
+    const coreSkills = getCoreSkillsFromInput();
+    const targetRole = document.getElementById('target-role')?.value?.trim() || '—';
     let projectTasksBlock = '';
     if (isMultiProjectSelected()) {
         const pt = collectProjectTasksFromUI().filter(t => t.title);
@@ -1269,8 +1366,10 @@ function fillReviewSummary() {
                 <div class="occ-review-row"><span class="occ-review-key">Exchange mode</span><span class="occ-review-val">${escapeHtml(modeLabel)}</span></div>
                 ${alsoOpenLine ? `<div class="occ-review-row"><span class="occ-review-key">Also open to</span><span class="occ-review-val">${escapeHtml(alsoOpenLine)}</span></div>` : ''}
                 ${alternateDetailsBlock}
+                <div class="occ-review-row"><span class="occ-review-key">Professional role</span><span class="occ-review-val">${escapeHtml(targetRole)}</span></div>
                 <div class="occ-review-row"><span class="occ-review-key">Budget range</span><span class="occ-review-val">${escapeHtml(budgetLabel)}</span></div>
                 <div class="occ-review-row"><span class="occ-review-key">Skills</span><span class="occ-review-val">${skills.length ? escapeHtml(skills.join(', ')) : '—'}</span></div>
+                ${coreSkills.length ? `<div class="occ-review-row"><span class="occ-review-key">Core skills</span><span class="occ-review-val">${escapeHtml(coreSkills.join(', '))}</span></div>` : ''}
                 ${projectTasksBlock}
                 <div class="occ-review-row"><span class="occ-review-key">Model details</span><span class="occ-review-val">${escapeHtml(modelDetailsLine)}</span></div>
             </div>
@@ -1287,8 +1386,10 @@ function collectReadinessPreviewPayload() {
     const intentEl = document.querySelector('input[name="intent"]:checked');
     const intent = intentEl ? intentEl.value : 'request';
     const scopeSkillsTags = getScopeTagsFromInput('scope-skills');
+    const coreSkills = getCoreSkillsFromInput();
     const requiredSkills = (intent === 'request' || intent === 'hybrid') ? scopeSkillsTags : [];
     const offeredSkills = (intent === 'offer' || intent === 'hybrid') ? scopeSkillsTags : [];
+    const targetRole = document.getElementById('target-role')?.value?.trim() || '';
     const exchangeMode = document.getElementById('exchange-mode')?.value;
     const currency = document.getElementById('currency')?.value || 'SAR';
     const exchangeData = {
@@ -1311,7 +1412,8 @@ function collectReadinessPreviewPayload() {
         locationRequirement,
         startDate: document.getElementById('attr-startDate')?.value?.trim(),
         applicationDeadline: document.getElementById('attr-applicationDeadline')?.value?.trim(),
-        endDate: document.getElementById('attr-endDate')?.value?.trim()
+        endDate: document.getElementById('attr-endDate')?.value?.trim(),
+        ...(targetRole ? { targetRole } : {})
     };
     return {
         intent,
@@ -1319,7 +1421,7 @@ function collectReadinessPreviewPayload() {
         description: document.getElementById('description')?.value || '',
         exchangeMode,
         exchangeData,
-        scope: { requiredSkills, offeredSkills, sectors: getScopeTagsFromInput('scope-sectors') },
+        scope: { requiredSkills, offeredSkills, coreSkills, sectors: getScopeTagsFromInput('scope-sectors') },
         attributes: attrs,
         modelType: document.getElementById('model-type')?.value,
         subModelType: document.getElementById('submodel-type')?.value,
@@ -1509,6 +1611,12 @@ function validateCurrentStep() {
             break;
         }
         case 4: {
+            const targetRole = document.getElementById('target-role')?.value?.trim();
+            if (!targetRole) {
+                showError('Please select a professional role');
+                document.getElementById('target-role')?.focus();
+                return false;
+            }
             const skills = getScopeTagsFromInput('scope-skills');
             const scopeInput = document.getElementById('scope-skills');
             const pending = (scopeInput?.value || '').trim().replace(/,/g, '');
@@ -3988,16 +4096,24 @@ async function fillDemoData(dataset) {
         // Step 3: Scope tags (skills, sectors, interests, certifications)
         const step3 = d.step3 || {};
         const skills = step3.skills || [];
+        const coreSkills = step3.coreSkills || [];
         const sectors = step3.sectors || [];
         const interests = step3.interests || [];
         const certifications = step3.certifications || [];
+        const targetRoleEl = document.getElementById('target-role');
+        if (targetRoleEl && step3.targetRole) {
+            targetRoleEl.value = step3.targetRole;
+        }
         const scopeIds = ['scope-skills', 'scope-sectors', 'scope-interests', 'scope-certifications'];
         const tagArrays = [skills, sectors, interests, certifications];
         scopeIds.forEach((id, i) => {
             const el = document.getElementById(id);
             if (!el) return;
             const tags = tagArrays[i] || [];
-            el.dataset.tagsArray = JSON.stringify(tags);
+            writeScopeTagsToEl(el, tags);
+            if (id === 'scope-skills') {
+                writeCoreSkillsToEl(el, coreSkills);
+            }
             renderScopeTags(el, tags);
             el.value = '';
         });
@@ -4549,15 +4665,19 @@ function setupFormHandlers() {
             const currency = document.getElementById('currency')?.value || 'SAR';
             
             const scopeSkillsTags = getScopeTagsFromInput('scope-skills');
+            const coreSkills = getCoreSkillsFromInput();
             const requiredSkillsForRequest = (intent === 'request' || intent === 'hybrid') ? scopeSkillsTags : [];
             const offeredSkills = (intent === 'offer' || intent === 'hybrid') ? scopeSkillsTags : [];
             const sectors = getScopeTagsFromInput('scope-sectors');
             const interests = getScopeTagsFromInput('scope-interests');
             const certifications = getScopeTagsFromInput('scope-certifications');
+            const targetRole = document.getElementById('target-role')?.value?.trim();
+            if (!targetRole) throw new Error('Please select a professional role');
             
             const scope = {
                 requiredSkills: requiredSkillsForRequest,
                 offeredSkills: offeredSkills,
+                coreSkills,
                 sectors,
                 interests,
                 certifications
@@ -4662,7 +4782,7 @@ function setupFormHandlers() {
             const attrStartDate = document.getElementById('attr-startDate')?.value?.trim();
             const attrApplicationDeadline = document.getElementById('attr-applicationDeadline')?.value?.trim();
             const attrEndDate = document.getElementById('attr-endDate')?.value?.trim();
-            const commonAttrs = {};
+            const commonAttrs = { targetRole };
             if (locationRequirement) commonAttrs.locationRequirement = locationRequirement;
             if (attrStartDate) commonAttrs.startDate = attrStartDate;
             if (attrApplicationDeadline) commonAttrs.applicationDeadline = attrApplicationDeadline;

@@ -133,12 +133,32 @@
         return { start: start || undefined, end: end || undefined, durationDays: durationDays != null ? durationDays : undefined };
     }
 
+    function toSkillString(s) {
+        if (!s) return '';
+        return typeof s === 'string' ? s.trim() : String(s.label || s.name || s).trim();
+    }
+
+    function extractRole(opportunity, scope, att, synonyms) {
+        const explicit = att.targetRole || att.professionalRole;
+        if (explicit) return normalizeSkill(toSkillString(explicit), synonyms);
+
+        const primary = (opportunity.intent === 'offer')
+            ? (scope.offeredSkills?.[0] || att.offeredSkills?.[0])
+            : (scope.requiredSkills?.[0] || att.requiredSkills?.[0]);
+        return primary ? normalizeSkill(toSkillString(primary), synonyms) : '';
+    }
+
+    function extractCoreSkills(opportunity, scope, att, synonyms) {
+        const raw = [].concat(scope.coreSkills || [], att.coreSkills || []).filter(Boolean);
+        return [...new Set(raw.map(s => normalizeSkill(toSkillString(s), synonyms)))];
+    }
+
     /**
      * Extract and normalize structured attributes from an opportunity.
      * @param {Object} opportunity - Raw opportunity (Need or Offer post)
      * @param {Object} [canonicalMap] - Optional { skillSynonyms, locationCanonical, categoryExpansion } from skill-canonical.json
      * @param {Object} [creator] - Optional creator profile for reputation (rating, completion count)
-     * @returns {Object} normalizedPost - { skills, categories, budget, timeline, deadline, availability, location, reputation }
+     * @returns {Object} normalizedPost - { skills, requiredServices, offeredServices, role, coreSkills, categories, budget, timeline, deadline, availability, location, reputation }
      */
     function extractAndNormalize(opportunity, canonicalMap = {}, creator = null) {
         const synonyms = canonicalMap.skillSynonyms || {};
@@ -146,13 +166,16 @@
         const scope = opportunity.scope || {};
         const att = opportunity.attributes || {};
 
-        const rawSkills = [].concat(
-            scope.requiredSkills || [],
-            scope.offeredSkills || [],
-            att.requiredSkills || [],
-            att.offeredSkills || []
-        ).filter(Boolean);
-        const skills = [...new Set(rawSkills.map(s => normalizeSkill(typeof s === 'string' ? s : (s?.label || s), synonyms)))];
+        const requiredRaw = [].concat(scope.requiredSkills || [], att.requiredSkills || []).filter(Boolean);
+        const offeredRaw = [].concat(scope.offeredSkills || [], att.offeredSkills || []).filter(Boolean);
+
+        const requiredServices = [...new Set(requiredRaw.map(s => normalizeSkill(toSkillString(s), synonyms)))];
+        const offeredServices = [...new Set(offeredRaw.map(s => normalizeSkill(toSkillString(s), synonyms)))];
+
+        const role = extractRole(opportunity, scope, att, synonyms);
+        const coreSkills = extractCoreSkills(opportunity, scope, att, synonyms);
+
+        const skills = [...new Set([...requiredServices, ...offeredServices])];
 
         const categories = [].concat(
             opportunity.modelType ? [opportunity.modelType] : [],
@@ -191,6 +214,10 @@
 
         return {
             skills,
+            requiredServices,
+            offeredServices,
+            role,
+            coreSkills,
             categories,
             budget,
             timeline,
@@ -207,6 +234,9 @@
     const postPreprocessor = {
         loadSkillCanonical,
         extractAndNormalize,
+        extractRole,
+        extractCoreSkills,
+        toSkillString,
         normalizeSkill,
         normalizeLocation,
         extractBudget,

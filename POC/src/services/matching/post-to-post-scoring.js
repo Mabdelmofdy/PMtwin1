@@ -37,27 +37,24 @@
     }
 
     /**
-     * Skill/attribute overlap: Jaccard-like overlap of skills/categories (and expanded if provided).
+     * Service overlap: exact match of Need requiredServices against Offer offeredServices.
      */
     function attributeOverlap(needNorm, offerNorm, needProfile, offerProfile) {
-        const needSkills = needProfile?.expandedSkillsOrCategories || needNorm.skills || [];
-        const offerSkills = offerProfile?.expandedSkillsOrCategories || offerNorm.skills || [];
-        const needSet = new Set((needSkills || []).map(s => String(s).toLowerCase()));
-        const offerSet = new Set((offerSkills || []).map(s => String(s).toLowerCase()));
-        if (needSet.size === 0 && offerSet.size === 0) return { score: 1, label: 'Match' };
-        if (needSet.size === 0) return { score: 1, label: 'Match' };
-        let intersection = 0;
+        const needServices = needNorm.requiredServices || needNorm.skills || [];
+        const offerServices = offerNorm.offeredServices || offerNorm.skills || [];
+
+        if (!needServices.length) return { score: 1, label: 'Match', matched: 0, total: 0 };
+
+        const needSet = new Set(needServices.map(s => String(s).toLowerCase()));
+        const offerSet = new Set(offerServices.map(s => String(s).toLowerCase()));
+
+        let matched = 0;
         needSet.forEach(s => {
-            if (offerSet.has(s)) intersection++;
-            else {
-                for (const o of offerSet) {
-                    if (s.includes(o) || o.includes(s)) { intersection++; break; }
-                }
-            }
+            if (offerSet.has(s)) matched++;
         });
-        const union = needSet.size + offerSet.size - intersection;
-        const score = union > 0 ? intersection / Math.max(needSet.size, 1) : 0;
-        return { score, label: labelFromScore(score) };
+
+        const score = matched / needSet.size;
+        return { score, label: labelFromScore(score), matched, total: needSet.size };
     }
 
     /**
@@ -171,9 +168,39 @@
         const location = locationFit(nNorm, oNorm);
         const reputation = reputationScore(oNorm);
 
+        const minSkillForScore = CONFIG.MATCHING?.MIN_SKILL_SCORE_FOR_MATCH ?? 0.50;
+        if (nNorm.requiredServices?.length && skill.score < minSkillForScore) {
+            return {
+                score: 0,
+                breakdown: {
+                    skillMatch: skill.score,
+                    attributeOverlap: skill.score,
+                    serviceOverlapPct: skill.score,
+                    exchangeCompatibility: exchange.score,
+                    valueCompatibility: value.score,
+                    budgetFit: budget.score,
+                    timelineFit: timeline.score,
+                    locationFit: location.score,
+                    reputation: reputation.score,
+                    rejected: 'skill_floor'
+                },
+                labels: {
+                    skillMatch: skill.label,
+                    attributeOverlap: skill.label,
+                    exchangeCompatibility: exchange.label,
+                    valueCompatibility: value.label,
+                    budgetFit: budget.label,
+                    timelineFit: timeline.label,
+                    locationFit: location.label,
+                    reputation: reputation.label
+                }
+            };
+        }
+
         const breakdown = {
             skillMatch: skill.score,
             attributeOverlap: skill.score,
+            serviceOverlapPct: skill.score,
             exchangeCompatibility: exchange.score,
             valueCompatibility: value.score,
             budgetFit: budget.score,

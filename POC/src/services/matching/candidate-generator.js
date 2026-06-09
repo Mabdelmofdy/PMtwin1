@@ -8,6 +8,10 @@
     const CONFIG = global.CONFIG || {};
     const CANDIDATE_MAX = CONFIG.MATCHING?.CANDIDATE_MAX ?? 200;
 
+    function getHardConstraints() {
+        return global.hardConstraints || null;
+    }
+
     /**
      * Check if budget ranges overlap or offer satisfies need (needMax >= offerMin when need has budget).
      */
@@ -88,6 +92,11 @@
             if (!locationCompatible(needNorm, offerNorm)) return false;
             if (!timelineOverlap(needNorm, offerNorm)) return false;
             if (!categoryOverlap(needNorm, offerNorm)) return false;
+            const hard = getHardConstraints();
+            if (hard) {
+                const gate = hard.passesPair(needPost, offer, { needNorm, offerNorm });
+                if (!gate.ok) return false;
+            }
             return true;
         });
 
@@ -122,6 +131,11 @@
             if (!locationCompatible(needNorm, offerNorm)) return false;
             if (!timelineOverlap(needNorm, offerNorm)) return false;
             if (!categoryOverlap(needNorm, offerNorm)) return false;
+            const hard = getHardConstraints();
+            if (hard) {
+                const gate = hard.passesPair(need, offerPost, { needNorm, offerNorm });
+                if (!gate.ok) return false;
+            }
             return true;
         });
 

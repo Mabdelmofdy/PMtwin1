@@ -20,6 +20,10 @@ function setupGlobalConfig(options = {}) {
         AUTO_NOTIFY_THRESHOLD: 0.80,
         CANDIDATE_MAX: 200,
         POST_TO_POST_THRESHOLD: 0.50,
+        HARD_CONSTRAINTS_ENABLED: true,
+        STRICT_ROLE_REQUIRED: true,
+        MIN_REQUIRED_SERVICE_OVERLAP: 0.50,
+        MIN_SKILL_SCORE_FOR_MATCH: 0.50,
         DEBUG: debug,
         WEIGHTS: {
             ATTRIBUTE_OVERLAP: 0.40,
@@ -55,12 +59,14 @@ function patchFetchForSkillCanonical(skillCanonical) {
 function loadMatchingScripts() {
     const postPreprocessor = require(path.join(SRC_MATCHING, 'post-preprocessor.js'));
     const semanticProfile = require(path.join(SRC_MATCHING, 'semantic-profile.js'));
+    const hardConstraints = require(path.join(SRC_MATCHING, 'hard-constraints.js'));
     const candidateGenerator = require(path.join(SRC_MATCHING, 'candidate-generator.js'));
     const postToPostScoring = require(path.join(SRC_MATCHING, 'post-to-post-scoring.js'));
     const matchingModels = require(path.join(SRC_MATCHING, 'matching-models.js'));
     const matchingService = require(path.join(SRC_MATCHING, 'matching-service.js'));
     global.postPreprocessor = postPreprocessor;
     global.semanticProfile = semanticProfile;
+    global.hardConstraints = hardConstraints;
     global.candidateGenerator = candidateGenerator;
     global.postToPostScoring = postToPostScoring;
     global.matchingModels = matchingModels;
@@ -68,6 +74,7 @@ function loadMatchingScripts() {
     if (global.window) {
         global.window.postPreprocessor = postPreprocessor;
         global.window.semanticProfile = semanticProfile;
+        global.window.hardConstraints = hardConstraints;
         global.window.candidateGenerator = candidateGenerator;
         global.window.postToPostScoring = postToPostScoring;
         global.window.matchingModels = matchingModels;

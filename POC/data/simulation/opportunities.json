@@ -45,13 +45,21 @@
           "start": "2026-02-01",
           "end": "2026-12-31"
         },
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Financial Investment"
       },
       "normalized": {
         "skills": [
           "Financial Investment",
           "Structural Engineering"
         ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Financial Investment",
+          "Structural Engineering"
+        ],
+        "role": "Financial Investment",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -75,8 +83,8 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
       "id": "sim-opp-002",
@@ -121,13 +129,21 @@
           "start": "2026-02-01",
           "end": "2026-12-31"
         },
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Financial Investment"
       },
       "normalized": {
         "skills": [
           "Financial Investment",
           "Accounting"
         ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Financial Investment",
+          "Accounting"
+        ],
+        "role": "Financial Investment",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -151,8 +167,8 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
       "id": "sim-opp-003",
@@ -193,13 +209,21 @@
       "attributes": {
         "startDate": "2026-03-01",
         "tenderDeadline": "2026-06-01",
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Engineering Consulting"
       },
       "normalized": {
         "skills": [
           "Engineering Consulting",
           "Project Management"
         ],
+        "requiredServices": [
+          "Engineering Consulting",
+          "Project Management"
+        ],
+        "offeredServices": [],
+        "role": "Engineering Consulting",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -220,8 +244,8 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
       "id": "sim-opp-004",
@@ -262,13 +286,21 @@
       "attributes": {
         "startDate": "2026-03-01",
         "tenderDeadline": "2026-06-01",
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Accounting"
       },
       "normalized": {
         "skills": [
           "Accounting",
           "Equipment Rental"
         ],
+        "requiredServices": [
+          "Accounting",
+          "Equipment Rental"
+        ],
+        "offeredServices": [],
+        "role": "Accounting",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -289,8 +321,8 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
       "id": "sim-opp-005",
@@ -331,13 +363,21 @@
       "attributes": {
         "startDate": "2026-03-01",
         "tenderDeadline": "2026-06-01",
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Financial Investment"
       },
       "normalized": {
         "skills": [
           "Financial Investment",
           "Engineering Consulting"
         ],
+        "requiredServices": [
+          "Financial Investment",
+          "Engineering Consulting"
+        ],
+        "offeredServices": [],
+        "role": "Financial Investment",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -358,8 +398,8 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
       "id": "sim-opp-006",
@@ -400,13 +440,21 @@
       "attributes": {
         "startDate": "2026-03-01",
         "tenderDeadline": "2026-06-01",
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Financial Investment"
       },
       "normalized": {
         "skills": [
           "Financial Investment",
           "Engineering Consulting"
         ],
+        "requiredServices": [
+          "Financial Investment",
+          "Engineering Consulting"
+        ],
+        "offeredServices": [],
+        "role": "Financial Investment",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -427,8 +475,8 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
       "id": "sim-opp-007",
@@ -469,13 +517,21 @@
       "attributes": {
         "startDate": "2026-03-01",
         "tenderDeadline": "2026-06-01",
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Accounting"
       },
       "normalized": {
         "skills": [
           "Accounting",
           "Structural Engineering"
         ],
+        "requiredServices": [
+          "Accounting",
+          "Structural Engineering"
+        ],
+        "offeredServices": [],
+        "role": "Accounting",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -496,8 +552,8 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
       "id": "sim-opp-008",
@@ -538,13 +594,21 @@
       "attributes": {
         "startDate": "2026-03-01",
         "tenderDeadline": "2026-06-01",
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Structural Engineering"
       },
       "normalized": {
         "skills": [
           "Structural Engineering",
           "Financial Investment"
         ],
+        "requiredServices": [
+          "Structural Engineering",
+          "Financial Investment"
+        ],
+        "offeredServices": [],
+        "role": "Structural Engineering",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -565,11 +629,172 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
       "id": "sim-opp-009",
+      "title": "Strict one-way need: Structural Engineering",
+      "description": "Strict one-way need: Structural Engineering",
+      "creatorId": "sim-company-001",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "requiredSkills": [
+          "Structural Engineering",
+          "Structural Analysis"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "certifications": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 80000,
+          "max": 200000,
+          "currency": "SAR"
+        }
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Structural Engineering"
+      },
+      "normalized": {
+        "skills": [
+          "Structural Engineering",
+          "Structural Analysis"
+        ],
+        "requiredServices": [
+          "Structural Engineering",
+          "Structural Analysis"
+        ],
+        "offeredServices": [],
+        "role": "Structural Engineering",
+        "coreSkills": [],
+        "categories": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "budget": {
+          "min": 80000,
+          "max": 200000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "location": "Riyadh",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "project"
+      },
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
+    },
+    {
+      "id": "sim-opp-010",
+      "title": "Strict one-way offer: Structural Engineering",
+      "description": "Strict one-way offer: Structural Engineering",
+      "creatorId": "sim-company-002",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "cash",
+      "paymentModes": [
+        "cash"
+      ],
+      "scope": {
+        "offeredSkills": [
+          "Structural Engineering",
+          "Structural Analysis"
+        ],
+        "requiredSkills": [],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "certifications": []
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 80000,
+          "max": 200000,
+          "currency": "SAR"
+        },
+        "cashAmount": 140000
+      },
+      "attributes": {
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "locationRequirement": "On-Site",
+        "targetRole": "Structural Engineering"
+      },
+      "normalized": {
+        "skills": [
+          "Structural Engineering",
+          "Structural Analysis"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Structural Engineering",
+          "Structural Analysis"
+        ],
+        "role": "Structural Engineering",
+        "coreSkills": [],
+        "categories": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "budget": {
+          "min": 80000,
+          "max": 200000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "project"
+      },
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
+    },
+    {
+      "id": "sim-opp-011",
       "title": "Barter Need A: Office space",
       "description": "Barter Need A: Office space",
       "creatorId": "sim-user-001",
@@ -606,12 +831,19 @@
       "attributes": {
         "startDate": "2026-03-01",
         "tenderDeadline": "2026-06-01",
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Office space"
       },
       "normalized": {
         "skills": [
           "Office space"
         ],
+        "requiredServices": [
+          "Office space"
+        ],
+        "offeredServices": [],
+        "role": "Office space",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -632,11 +864,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-010",
+      "id": "sim-opp-012",
       "title": "Barter Offer A: Engineering Consulting",
       "description": "Barter Offer A: Engineering Consulting",
       "creatorId": "sim-user-001",
@@ -680,12 +912,19 @@
           "start": "2026-02-01",
           "end": "2026-12-31"
         },
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Engineering Consulting"
       },
       "normalized": {
         "skills": [
           "Engineering Consulting"
         ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Engineering Consulting"
+        ],
+        "role": "Engineering Consulting",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -709,11 +948,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-011",
+      "id": "sim-opp-013",
       "title": "Barter Need B: Engineering Consulting",
       "description": "Barter Need B: Engineering Consulting",
       "creatorId": "sim-user-002",
@@ -750,12 +989,19 @@
       "attributes": {
         "startDate": "2026-03-01",
         "tenderDeadline": "2026-06-01",
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Engineering Consulting"
       },
       "normalized": {
         "skills": [
           "Engineering Consulting"
         ],
+        "requiredServices": [
+          "Engineering Consulting"
+        ],
+        "offeredServices": [],
+        "role": "Engineering Consulting",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -776,11 +1022,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-012",
+      "id": "sim-opp-014",
       "title": "Barter Offer B: Office space",
       "description": "Barter Offer B: Office space",
       "creatorId": "sim-user-002",
@@ -824,12 +1070,19 @@
           "start": "2026-02-01",
           "end": "2026-12-31"
         },
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Office space"
       },
       "normalized": {
         "skills": [
           "Office space"
         ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Office space"
+        ],
+        "role": "Office space",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -853,11 +1106,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-013",
+      "id": "sim-opp-015",
       "title": "Barter Need A: Accounting",
       "description": "Barter Need A: Accounting",
       "creatorId": "sim-user-003",
@@ -894,12 +1147,19 @@
       "attributes": {
         "startDate": "2026-03-01",
         "tenderDeadline": "2026-06-01",
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Accounting"
       },
       "normalized": {
         "skills": [
           "Accounting"
         ],
+        "requiredServices": [
+          "Accounting"
+        ],
+        "offeredServices": [],
+        "role": "Accounting",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -920,11 +1180,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-014",
+      "id": "sim-opp-016",
       "title": "Barter Offer A: Equipment Rental",
       "description": "Barter Offer A: Equipment Rental",
       "creatorId": "sim-user-003",
@@ -968,12 +1228,19 @@
           "start": "2026-02-01",
           "end": "2026-12-31"
         },
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Equipment Rental"
       },
       "normalized": {
         "skills": [
           "Equipment Rental"
         ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Equipment Rental"
+        ],
+        "role": "Equipment Rental",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -997,11 +1264,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-015",
+      "id": "sim-opp-017",
       "title": "Barter Need B: Equipment Rental",
       "description": "Barter Need B: Equipment Rental",
       "creatorId": "sim-user-004",
@@ -1038,12 +1305,19 @@
       "attributes": {
         "startDate": "2026-03-01",
         "tenderDeadline": "2026-06-01",
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Equipment Rental"
       },
       "normalized": {
         "skills": [
           "Equipment Rental"
         ],
+        "requiredServices": [
+          "Equipment Rental"
+        ],
+        "offeredServices": [],
+        "role": "Equipment Rental",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -1064,11 +1338,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-016",
+      "id": "sim-opp-018",
       "title": "Barter Offer B: Accounting",
       "description": "Barter Offer B: Accounting",
       "creatorId": "sim-user-004",
@@ -1112,12 +1386,19 @@
           "start": "2026-02-01",
           "end": "2026-12-31"
         },
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Accounting"
       },
       "normalized": {
         "skills": [
           "Accounting"
         ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Accounting"
+        ],
+        "role": "Accounting",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -1141,11 +1422,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-017",
+      "id": "sim-opp-019",
       "title": "Highway Project - Consortium Partners",
       "description": "Highway Project - Consortium Partners",
       "creatorId": "sim-user-021",
@@ -1185,6 +1466,7 @@
         "startDate": "2026-03-01",
         "tenderDeadline": "2026-06-01",
         "locationRequirement": "On-Site",
+        "targetRole": "Financial partner",
         "memberRoles": [
           {
             "role": "Financial partner",
@@ -1206,6 +1488,14 @@
           "Construction expertise",
           "Equipment fleet"
         ],
+        "requiredServices": [
+          "Financial partner",
+          "Construction expertise",
+          "Equipment fleet"
+        ],
+        "offeredServices": [],
+        "role": "Financial partner",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -1226,11 +1516,11 @@
         "modelType": "project_based",
         "subModelType": "consortium"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-018",
+      "id": "sim-opp-020",
       "title": "Financial partner offer",
       "description": "Financial partner offer",
       "creatorId": "sim-user-022",
@@ -1247,6 +1537,7 @@
       ],
       "scope": {
         "offeredSkills": [
+          "Financial partner",
           "Investment",
           "Financial Investment",
           "Capital"
@@ -1272,14 +1563,25 @@
           "start": "2026-02-01",
           "end": "2026-12-31"
         },
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Financial partner"
       },
       "normalized": {
         "skills": [
+          "Financial partner",
           "Investment",
           "Financial Investment",
           "Capital"
         ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Financial partner",
+          "Investment",
+          "Financial Investment",
+          "Capital"
+        ],
+        "role": "Financial partner",
+        "coreSkills": [],
         "categories": [
           "Financial"
         ],
@@ -1302,11 +1604,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-019",
+      "id": "sim-opp-021",
       "title": "Construction expertise offer",
       "description": "Construction expertise offer",
       "creatorId": "sim-user-023",
@@ -1323,6 +1625,7 @@
       ],
       "scope": {
         "offeredSkills": [
+          "Construction expertise",
           "Road Construction",
           "Infrastructure Development",
           "Project Management"
@@ -1349,14 +1652,25 @@
           "start": "2026-02-01",
           "end": "2026-12-31"
         },
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Construction expertise"
       },
       "normalized": {
         "skills": [
+          "Construction expertise",
           "Road Construction",
           "Infrastructure Development",
           "Project Management"
         ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Construction expertise",
+          "Road Construction",
+          "Infrastructure Development",
+          "Project Management"
+        ],
+        "role": "Construction expertise",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -1380,11 +1694,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-020",
+      "id": "sim-opp-022",
       "title": "Equipment fleet offer",
       "description": "Equipment fleet offer",
       "creatorId": "sim-user-024",
@@ -1401,6 +1715,7 @@
       ],
       "scope": {
         "offeredSkills": [
+          "Equipment fleet",
           "Excavator",
           "Heavy Equipment",
           "Equipment Rental"
@@ -1427,14 +1742,25 @@
           "start": "2026-02-01",
           "end": "2026-12-31"
         },
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Equipment fleet"
       },
       "normalized": {
         "skills": [
+          "Equipment fleet",
           "Excavator",
           "Heavy Equipment",
           "Equipment Rental"
         ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Equipment fleet",
+          "Excavator",
+          "Heavy Equipment",
+          "Equipment Rental"
+        ],
+        "role": "Equipment fleet",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Industrial"
@@ -1458,11 +1784,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-021",
+      "id": "sim-opp-023",
       "title": "Circular A needs Excavator",
       "description": "Circular A needs Excavator",
       "creatorId": "sim-user-025",
@@ -1500,13 +1826,21 @@
       "attributes": {
         "startDate": "2026-03-01",
         "tenderDeadline": "2026-06-01",
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Excavator"
       },
       "normalized": {
         "skills": [
           "Excavator",
           "Equipment Rental"
         ],
+        "requiredServices": [
+          "Excavator",
+          "Equipment Rental"
+        ],
+        "offeredServices": [],
+        "role": "Excavator",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -1527,11 +1861,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-022",
+      "id": "sim-opp-024",
       "title": "Circular A offers Office space",
       "description": "Circular A offers Office space",
       "creatorId": "sim-user-025",
@@ -1573,13 +1907,21 @@
           "start": "2026-02-01",
           "end": "2026-12-31"
         },
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Office space"
       },
       "normalized": {
         "skills": [
           "Office space",
           "Real Estate"
         ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Office space",
+          "Real Estate"
+        ],
+        "role": "Office space",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -1603,11 +1945,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-023",
+      "id": "sim-opp-025",
       "title": "Circular B needs Office space",
       "description": "Circular B needs Office space",
       "creatorId": "sim-user-026",
@@ -1645,13 +1987,21 @@
       "attributes": {
         "startDate": "2026-03-01",
         "tenderDeadline": "2026-06-01",
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Office space"
       },
       "normalized": {
         "skills": [
           "Office space",
           "Real Estate"
         ],
+        "requiredServices": [
+          "Office space",
+          "Real Estate"
+        ],
+        "offeredServices": [],
+        "role": "Office space",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -1672,11 +2022,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-024",
+      "id": "sim-opp-026",
       "title": "Circular B offers Accounting",
       "description": "Circular B offers Accounting",
       "creatorId": "sim-user-026",
@@ -1718,13 +2068,21 @@
           "start": "2026-02-01",
           "end": "2026-12-31"
         },
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Accounting"
       },
       "normalized": {
         "skills": [
           "Accounting",
           "Financial Reporting"
         ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Accounting",
+          "Financial Reporting"
+        ],
+        "role": "Accounting",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -1748,11 +2106,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-025",
+      "id": "sim-opp-027",
       "title": "Circular C needs Accounting",
       "description": "Circular C needs Accounting",
       "creatorId": "sim-user-027",
@@ -1790,13 +2148,21 @@
       "attributes": {
         "startDate": "2026-03-01",
         "tenderDeadline": "2026-06-01",
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Accounting"
       },
       "normalized": {
         "skills": [
           "Accounting",
           "Financial Reporting"
         ],
+        "requiredServices": [
+          "Accounting",
+          "Financial Reporting"
+        ],
+        "offeredServices": [],
+        "role": "Accounting",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -1817,11 +2183,11 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     },
     {
-      "id": "sim-opp-026",
+      "id": "sim-opp-028",
       "title": "Circular C offers Excavator",
       "description": "Circular C offers Excavator",
       "creatorId": "sim-user-027",
@@ -1863,13 +2229,21 @@
           "start": "2026-02-01",
           "end": "2026-12-31"
         },
-        "locationRequirement": "On-Site"
+        "locationRequirement": "On-Site",
+        "targetRole": "Excavator"
       },
       "normalized": {
         "skills": [
           "Excavator",
           "Equipment Rental"
         ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Excavator",
+          "Equipment Rental"
+        ],
+        "role": "Excavator",
+        "coreSkills": [],
         "categories": [
           "Construction",
           "Infrastructure"
@@ -1893,8 +2267,8 @@
         "modelType": "project_based",
         "subModelType": "project"
       },
-      "createdAt": "2026-06-09T08:48:02.132Z",
-      "updatedAt": "2026-06-09T08:48:02.132Z"
+      "createdAt": "2026-06-09T10:00:40.505Z",
+      "updatedAt": "2026-06-09T10:00:40.505Z"
     }
   ]
 }

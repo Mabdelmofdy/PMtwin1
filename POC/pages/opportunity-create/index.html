@@ -363,9 +363,16 @@
                     <p class="occ-step-lead" id="scope-intro">Add required or offered services/skills, sectors, and interests. Used for matching.</p>
                 </div>
                 <div class="form-group">
+                    <label for="target-role" class="form-label">Professional role <span class="text-red-600">*</span></label>
+                    <select id="target-role" name="targetRole" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+                        <option value="">Select role…</option>
+                    </select>
+                    <p class="text-sm text-gray-500 mt-1">The professional discipline for this post — used in Stage 1 role matching.</p>
+                </div>
+                <div class="form-group">
                     <label for="scope-skills" class="form-label" id="scope-skills-label">Required services / skills <span class="text-red-600">*</span></label>
                     <input type="text" id="scope-skills" name="scopeSkills" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g. Structural Engineering, Project Management (comma-separated or press Enter)" data-tags="true">
-                    <p class="text-sm text-gray-500 mt-1">Add skills or services; press Enter or comma to add a tag.</p>
+                    <p class="text-sm text-gray-500 mt-1">Add skills or services; press Enter or comma to add a tag. Click the star (☆) on a tag to mark it as a <strong>core skill</strong> — core skills must be matched exactly.</p>
                 </div>
                 <div class="form-group">
                     <label for="scope-sectors" class="form-label">Sectors</label>
@@ -1080,6 +1087,36 @@
     border: 1px solid #e5e7eb;
     border-radius: 0.875rem;
     padding: 1.5rem 1.35rem 1.25rem;
+}
+
+/* Core skill tags (scope step) */
+.scope-tag-core {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    padding: 0;
+    margin-right: 0.15rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1;
+    opacity: 0.55;
+    transition: opacity 0.15s, transform 0.12s;
+}
+.scope-tag-core:hover {
+    opacity: 1;
+    transform: scale(1.12);
+}
+.scope-tag-core.is-core {
+    opacity: 1;
+}
+.scope-skill-tag--core {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    border: 1px solid #fcd34d;
 }
 
 /* Sticky form actions */

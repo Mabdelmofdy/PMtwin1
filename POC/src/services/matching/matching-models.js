@@ -32,6 +32,20 @@
         return window.valueCompatibility || global.valueCompatibility || null;
     }
 
+    function getHardConstraints() {
+        return window.hardConstraints || global.hardConstraints || null;
+    }
+
+    function passHardGate(needPost, offerPost, needNorm, offerNorm) {
+        const hard = getHardConstraints();
+        if (!hard) return true;
+        const gate = hard.passesPair(needPost, offerPost, { needNorm, offerNorm });
+        if (!gate.ok && CONFIG.MATCHING?.DEBUG) {
+            console.log('[hard-constraints]', gate.reason, gate);
+        }
+        return gate.ok;
+    }
+
     /** Build a synthetic "post" for barter side: need (expected) + offer (offered). */
     function barterSidePost(needPost, offerPost) {
         const vc = getValueCompatibility();
@@ -118,7 +132,8 @@
 
         const results = [];
         for (const offer of candidates) {
-            const offerNorm = offer.normalized;
+            const offerNorm = offer.normalized || (preprocessor ? preprocessor.extractAndNormalize(offer, canonical) : {});
+            if (!passHardGate(needPost, offer, needNorm, offerNorm)) continue;
             const offerProfile = semantic && offerNorm ? semantic.buildSemanticProfile(offerNorm, offer, {}) : null;
             const { score, breakdown, labels } = scoring.scorePair(needPost, offer, needNorm, offerNorm, needProfile, offerProfile);
             if (CONFIG.MATCHING && CONFIG.MATCHING.DEBUG && score >= POST_THRESHOLD - 0.05 && score < POST_THRESHOLD) {
@@ -173,6 +188,7 @@
         const results = [];
         for (const need of candidates) {
             const needNorm = need.normalized || (preprocessor ? preprocessor.extractAndNormalize(need, canonical) : {});
+            if (!passHardGate(need, offerPost, needNorm, offerNorm)) continue;
             const needProfile = semantic && needNorm ? semantic.buildSemanticProfile(needNorm, need, {}) : null;
             const { score, breakdown, labels } = scoring.scorePair(need, offerPost, needNorm, offerNorm, needProfile, offerProfile);
             if (score < POST_THRESHOLD) continue;
@@ -223,6 +239,9 @@
             for (const offerB of offersByCreator) {
                 const normNeedB = needB.normalized || (preprocessor ? preprocessor.extractAndNormalize(needB, canonical) : {});
                 const normOfferB = offerB.normalized || (preprocessor ? preprocessor.extractAndNormalize(offerB, canonical) : {});
+
+                if (!passHardGate(needB, offerA, normNeedB, normOfferA)) continue;
+                if (!passHardGate(needA, offerB, normNeedA, normOfferB)) continue;
 
                 const scoreAtoB = scoring.scorePair(needB, offerA, normNeedB, normOfferA).score;
                 const scoreBtoA = scoring.scorePair(needA, offerB, normNeedA, normOfferB).score;
@@ -289,18 +308,27 @@
         const roleResults = [];
 
         for (const role of roles) {
+            const roleServices = [role].concat(leadNorm.requiredServices || leadNorm.skills || []).slice(0, 10);
             const syntheticNeed = {
                 ...leadNeed,
                 id: leadNeed.id + '-role-' + role.replace(/\s/g, '_'),
-                scope: { ...(leadNeed.scope || {}), requiredSkills: [role].concat(leadNorm.skills || []).slice(0, 10) },
-                normalized: { ...leadNorm, skills: [role].concat(leadNorm.skills || []).slice(0, 10) }
+                attributes: { ...(leadNeed.attributes || {}), targetRole: role },
+                scope: { ...(leadNeed.scope || {}), requiredSkills: roleServices },
+                normalized: {
+                    ...leadNorm,
+                    role,
+                    requiredServices: roleServices,
+                    skills: roleServices
+                }
             };
             const candidates = gen.getCandidates(syntheticNeed, offerPosts, { needNormalized: syntheticNeed.normalized, maxCandidates: 50 });
             let best = null;
             let bestScore = POST_THRESHOLD;
             for (const offer of candidates) {
                 if (usedCreatorIds.has(offer.creatorId)) continue;
-                const { score } = scoring.scorePair(syntheticNeed, offer, syntheticNeed.normalized, offer.normalized);
+                const offerNorm = offer.normalized || (preprocessor ? preprocessor.extractAndNormalize(offer, canonical) : {});
+                if (!passHardGate(syntheticNeed, offer, syntheticNeed.normalized, offerNorm)) continue;
+                const { score } = scoring.scorePair(syntheticNeed, offer, syntheticNeed.normalized, offerNorm);
                 if (score > bestScore) {
                     bestScore = score;
                     best = offer;
@@ -405,6 +433,7 @@
             for (const offer of offers) {
                 if (offer.creatorId === fromCreator) continue;
                 const offerNorm = offer.normalized || (preprocessor ? preprocessor.extractAndNormalize(offer, canonical) : {});
+                if (!passHardGate(need, offer, needNorm, offerNorm)) continue;
                 const { score } = scoring.scorePair(need, offer, needNorm, offerNorm);
                 if (score >= POST_THRESHOLD) {
                     const toCreator = offer.creatorId;
@@ -545,17 +574,26 @@
         const canonical = preprocessor ? await preprocessor.loadSkillCanonical(CONFIG.BASE_PATH || '') : {};
         const leadNormResolved = leadNeed.normalized || (preprocessor ? preprocessor.extractAndNormalize(leadNeed, canonical) : {});
 
+        const roleServices = [roleToUse].concat((leadNormResolved && leadNormResolved.requiredServices) || leadNormResolved.skills || []).slice(0, 10);
         const syntheticNeed = {
             ...leadNeed,
             id: leadNeed.id + '-role-' + roleToUse.replace(/\s/g, '_'),
-            scope: { ...(leadNeed.scope || {}), requiredSkills: [roleToUse].concat((leadNormResolved && leadNormResolved.skills) || []).slice(0, 10) },
-            normalized: { ...leadNormResolved, skills: [roleToUse].concat((leadNormResolved && leadNormResolved.skills) || []).slice(0, 10) }
+            attributes: { ...(leadNeed.attributes || {}), targetRole: roleToUse },
+            scope: { ...(leadNeed.scope || {}), requiredSkills: roleServices },
+            normalized: {
+                ...leadNormResolved,
+                role: roleToUse,
+                requiredServices: roleServices,
+                skills: roleServices
+            }
         };
         const candidates = gen.getCandidates(syntheticNeed, offerPosts, { needNormalized: syntheticNeed.normalized, maxCandidates: 50 });
         const scored = [];
         for (const offer of candidates) {
             if (excludeUserIds.has(offer.creatorId)) continue;
-            const { score } = scoring.scorePair(syntheticNeed, offer, syntheticNeed.normalized, offer.normalized);
+            const offerNorm = offer.normalized || (preprocessor ? preprocessor.extractAndNormalize(offer, canonical) : {});
+            if (!passHardGate(syntheticNeed, offer, syntheticNeed.normalized, offerNorm)) continue;
+            const { score } = scoring.scorePair(syntheticNeed, offer, syntheticNeed.normalized, offerNorm);
             if (score >= POST_THRESHOLD) {
                 scored.push({
                     userId: offer.creatorId,

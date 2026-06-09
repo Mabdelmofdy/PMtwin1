@@ -133,6 +133,7 @@ loadScript('src/core/config/config.js').then(async () => {
     // Load services (matching pipeline: preprocessor, semantic profile, then matching)
     await loadScript('src/services/matching/post-preprocessor.js');
     await loadScript('src/services/matching/semantic-profile.js');
+    await loadScript('src/services/matching/hard-constraints.js');
     await loadScript('src/services/matching/candidate-generator.js');
     await loadScript('src/services/matching/post-to-post-scoring.js');
     await loadScript('src/services/matching/matching-models.js');

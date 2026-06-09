@@ -287,6 +287,10 @@ const CONFIG = {
         // Post-to-post matching
         CANDIDATE_MAX: 200,
         POST_TO_POST_THRESHOLD: 0.50,
+        HARD_CONSTRAINTS_ENABLED: true,
+        STRICT_ROLE_REQUIRED: true,
+        MIN_REQUIRED_SERVICE_OVERLAP: 0.50,
+        MIN_SKILL_SCORE_FOR_MATCH: 0.50,
         /** Max circular rows shown in Admin Matching lists (full count stays in summary). */
         ADMIN_MATCHING_MAX_CIRCULAR_ROWS: 100,
         DEFAULT_MATCH_EXPIRY_DAYS: 14,
