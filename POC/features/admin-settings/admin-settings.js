@@ -152,6 +152,16 @@ async function initAdminSettings() {
 
     _settingsState = loadFullSettings();
 
+    const headerMount = document.getElementById('page-context-header-mount');
+    if (
+        headerMount
+        && window.pageContextHeader
+        && window.pageContextHeader.PRESETS
+        && window.pageContextHeader.PRESETS.adminSettings
+    ) {
+        window.pageContextHeader.mount(headerMount, window.pageContextHeader.PRESETS.adminSettings);
+    }
+
     gateWriteButtons();
     initTabRouting();
 
@@ -171,6 +181,7 @@ async function initAdminSettings() {
 
     initJsonActions();
     initLastSavedDisplay();
+    if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
 }
 
 window.initAdminSettings = initAdminSettings;

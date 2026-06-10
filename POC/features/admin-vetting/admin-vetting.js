@@ -98,6 +98,7 @@ async function initAdminVetting() {
     setupVettingFilters();
     setupBulkBar();
     await loadVettingList();
+    if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
 }
 
 function setupVettingFilters() {

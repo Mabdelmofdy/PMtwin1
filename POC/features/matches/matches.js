@@ -369,40 +369,10 @@ function renderMatchesList() {
 
 function renderUnifiedMatchCardHtml(vm) {
     const umv = getUmv();
-    const esc = umv?.escapeHtml || escapeMatchesHtml;
-    const actionsHtml = (vm.availableActions || []).map(action => {
-        const cls = action.kind === 'primary' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
-        const disabled = action.enabled === false || vm.isExpired;
-        if (['accept', 'decline', 'invite_apply', 'negotiate', 'create_deal', 'create_deal_from_negotiation'].includes(action.id)) {
-            return `<button type="button" class="${cls}" data-action="${esc(action.id)}" data-match-id="${esc(vm.id)}"${disabled ? ' disabled' : ''}>${esc(action.label)}</button>`;
-        }
-        return `<a href="#" data-route="${esc(action.route)}" class="${cls}${disabled ? ' opacity-50 pointer-events-none' : ''}">${esc(action.label)}</a>`;
-    }).join(' ');
-
-    const typeLine = vm.sourceOpportunityTypeLabel
-        ? `<p class="match-card-unified__type">${esc(vm.sourceOpportunityTypeLabel)}</p>`
-        : '';
-
-    return `<article class="card match-card match-card-unified" data-match-id="${esc(vm.id)}" data-match-type="${esc(vm.matchType)}">
-        <header class="match-card-unified__header">
-            <div>
-                <h3 class="match-card-unified__title">${esc(vm.cardTitle || vm.matchTypeLabel + ' Match')}</h3>
-                ${typeLine}
-            </div>
-            <span class="badge badge-match ${esc(vm.matchQualityClass)}">${esc(vm.matchQualityLabel)} · ${vm.matchScorePercent}%</span>
-        </header>
-        <div class="match-card-unified__body">
-            ${vm.cardBodyHtml || ''}
-            <div class="match-card-block match-card-block--why">
-                <p class="match-card-kicker">Why this match?</p>
-                <p class="match-card-line match-card-line--muted">${esc(vm.whySummary)}</p>
-            </div>
-            ${vm.replacementBadge ? `<p class="match-card-unified__ribbon"><span class="badge badge--warning">${esc(vm.replacementBadge)}</span></p>` : ''}
-            <p class="match-card-unified__status"><span class="match-card-kicker">Status</span> <span class="badge badge--neutral">${esc(vm.statusLabel)}</span></p>
-            <p class="match-card-unified__next"><span class="match-card-kicker">Next</span> ${esc(vm.nextBestAction)}</p>
-        </div>
-        <footer class="match-card-unified__footer">${actionsHtml}</footer>
-    </article>`;
+    if (umv && typeof umv.renderUnifiedMatchCardHtml === 'function') {
+        return umv.renderUnifiedMatchCardHtml(vm);
+    }
+    return '';
 }
 
 function escapeMatchesHtml(str) {

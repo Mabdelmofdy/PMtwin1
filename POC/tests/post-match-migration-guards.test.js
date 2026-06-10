@@ -505,7 +505,10 @@ describe('screen wiring uses post_matches helpers', () => {
         expect(bulkFn.includes('filterPublishedOpportunityIds')).toBe(true);
         const html = fs.readFileSync(path.join(__dirname, '..', 'pages', 'admin-matching', 'index.html'), 'utf8');
         expect(html.includes('Save selected opportunities')).toBe(true);
-        expect(html.includes('Run preview report')).toBe(true);
+        expect(html.includes('page-context-header-mount')).toBe(true);
+        const headerPreset = fs.readFileSync(path.join(__dirname, '..', 'src', 'utils', 'page-context-header.js'), 'utf8');
+        expect(headerPreset.includes('Run preview report')).toBe(true);
+        expect(src.includes('adminMatching')).toBe(true);
     });
 });
 

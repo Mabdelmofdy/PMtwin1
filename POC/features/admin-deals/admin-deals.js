@@ -38,28 +38,29 @@ function adSetText(id, value) {
 }
 
 function getDealStatusLabel(s) {
+    if (window.statusBadgeSystem && typeof window.statusBadgeSystem.getStatusLabel === 'function') {
+        return window.statusBadgeSystem.getStatusLabel(s, 'deal');
+    }
     const ui = window.DealContractFlowUi;
     if (ui && typeof ui.getDealStatusDisplayLabel === 'function') return ui.getDealStatusDisplayLabel(s);
-    const map = {
-        negotiating: 'Negotiating',
-        draft: 'Draft',
-        review: 'In Review',
-        signing: 'Waiting for Signatures',
-        active: 'Active Deal',
-        execution: 'Execution',
-        delivery: 'Delivery',
-        completed: 'Completed',
-        closed: 'Closed',
-        cancelled: 'Cancelled'
-    };
-    return map[s] || s;
+    return s || '—';
 }
 
 function getContractStatusLabel(s) {
+    if (window.statusBadgeSystem && typeof window.statusBadgeSystem.getStatusLabel === 'function') {
+        return window.statusBadgeSystem.getStatusLabel(s, 'contract');
+    }
     const ui = window.DealContractFlowUi;
     if (ui && typeof ui.getContractStatusDisplayLabel === 'function') return ui.getContractStatusDisplayLabel(s);
-    const map = { pending: 'Pending Signature', active: 'Active Contract', completed: 'Completed', terminated: 'Terminated' };
-    return map[s] || s || '—';
+    return s || '—';
+}
+
+function renderAdminDealStatusBadge(status) {
+    const sb = window.statusBadgeSystem;
+    if (sb && typeof sb.renderStatusBadge === 'function') {
+        return sb.renderStatusBadge(status, 'deal');
+    }
+    return `<span class="badge badge--neutral">${adEscape(getDealStatusLabel(status))}</span>`;
 }
 
 function getDealTypeLabel(matchType) {
@@ -72,17 +73,6 @@ function adFormatDate(value) {
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return '—';
     return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-function dealCardStatusClass(status) {
-    const s = status || 'draft';
-    if (['negotiating'].includes(s)) return 'ao-card-status--negotiation';
-    if (['draft', 'review'].includes(s)) return 'ao-card-status--draft';
-    if (['signing'].includes(s)) return 'ao-card-status--progress';
-    if (['active', 'execution', 'delivery'].includes(s)) return 'ao-card-status--progress';
-    if (['completed'].includes(s)) return 'ao-card-status--completed';
-    if (['closed', 'cancelled'].includes(s)) return 'ao-card-status--closed';
-    return 'ao-card-status--draft';
 }
 
 function getAdminDealsVisible() {
@@ -161,7 +151,7 @@ function renderAdminDealCard(d) {
     const dealRoute = di => (CONFIG.ROUTES.ADMIN_DEAL_DETAIL || '/admin/deals/:id').replace(':id', di);
     const auditDealRoute = di => auditBase + '?entityType=deal&entityId=' + encodeURIComponent(di);
     const oppRoute = oid => (CONFIG.ROUTES.OPPORTUNITY_DETAIL || '/opportunities/:id').replace(':id', oid);
-    const contractDetailRoute = coid => (CONFIG.ROUTES.CONTRACT_DETAIL || '/contracts/:id').replace(':id', coid);
+    const contractDetailRoute = coid => (CONFIG.ROUTES.ADMIN_CONTRACT_DETAIL || '/admin/contracts/:id').replace(':id', coid);
 
     const meta = [];
     meta.push(`<span class="ao-meta-chip">${adEscape(getDealTypeLabel(d.matchType))}</span>`);
@@ -219,10 +209,7 @@ function renderAdminDealCard(d) {
         <div class="ao-card-body">
             <div class="ao-card-top">
                 <h3 class="ao-card-title">${adEscape(d.title || d.id)}</h3>
-                <span class="ao-card-status ${dealCardStatusClass(status)}">
-                    <span class="ao-card-status-dot"></span>
-                    ${adEscape(getDealStatusLabel(status))}
-                </span>
+                ${renderAdminDealStatusBadge(status)}
             </div>
             ${desc ? `<p class="ao-card-desc">${adEscape(desc)}</p>` : ''}
             <div class="ao-card-foot">

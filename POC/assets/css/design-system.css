@@ -1,0 +1,253 @@
+/**
+ * PM-Twin Design System — UI/UX Pro Max
+ * Flat marketplace pattern · navy + blue CTA · Plus Jakarta Sans
+ */
+
+:root {
+    --color-primary: #0f172a;
+    --color-secondary: #334155;
+    --color-cta: #0369a1;
+    --color-cta-hover: #0284c7;
+    --color-background: #f8fafc;
+    --color-text: #020617;
+    --color-muted: #475569;
+    --ds-transition: 200ms ease;
+    --ds-transition-fast: 150ms ease;
+    --ds-radius: 8px;
+    --ds-radius-lg: 12px;
+    --ds-focus-ring: 0 0 0 3px rgba(3, 105, 161, 0.25);
+}
+
+/* Motion — respects prefers-reduced-motion */
+@keyframes ds-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes ds-fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes ds-fade-in-left {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.ds-animate-in {
+    animation: ds-fade-in-up 0.4s ease-out both;
+}
+
+.ds-animate-in-fast {
+    animation: ds-fade-in 0.25s ease-out both;
+}
+
+.ds-stagger > * {
+    animation: ds-fade-in-up 0.45s ease-out both;
+}
+
+.ds-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.ds-stagger > *:nth-child(2) { animation-delay: 60ms; }
+.ds-stagger > *:nth-child(3) { animation-delay: 120ms; }
+.ds-stagger > *:nth-child(4) { animation-delay: 180ms; }
+.ds-stagger > *:nth-child(5) { animation-delay: 240ms; }
+.ds-stagger > *:nth-child(6) { animation-delay: 300ms; }
+
+@media (prefers-reduced-motion: reduce) {
+    .ds-animate-in,
+    .ds-animate-in-fast,
+    .ds-stagger > *,
+    .reg-step-content.ds-step-enter {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
+
+/* Register step transitions */
+.reg-step-content.ds-step-enter {
+    animation: ds-fade-in-left 0.3s ease-out both;
+}
+
+/* Interactive affordances */
+a[href],
+button:not(:disabled),
+[role="button"],
+.stat-card-link,
+.dash-stat-card,
+.admin-attention-card,
+.admin-kpi-card,
+.reg-account-card,
+.pm-card,
+.pm-btn,
+.pm-hero-search-btn {
+    cursor: pointer;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.reg-account-card:focus-within {
+    outline: 2px solid var(--color-cta);
+    outline-offset: 2px;
+}
+
+/* Flat design buttons */
+.btn-primary,
+.reg-btn-primary,
+.pm-btn-primary {
+    transition: background-color var(--ds-transition), border-color var(--ds-transition), opacity var(--ds-transition);
+}
+
+.btn-primary:hover,
+.reg-btn-primary:hover:not(:disabled) {
+    background-color: var(--color-cta-hover) !important;
+}
+
+/* Hero marketplace search */
+.pm-hero-search {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    max-width: 560px;
+}
+
+.pm-hero-search-input-wrap {
+    flex: 1 1 220px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 46px;
+    padding: 0 0.85rem;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--ds-radius);
+    transition: border-color var(--ds-transition), box-shadow var(--ds-transition);
+}
+
+.pm-hero-search-input-wrap:focus-within {
+    border-color: var(--color-cta);
+    box-shadow: var(--ds-focus-ring);
+}
+
+.pm-hero-search-input-wrap i {
+    color: var(--color-muted);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.pm-hero-search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    min-width: 0;
+}
+
+.pm-hero-search-input::placeholder {
+    color: #94a3b8;
+}
+
+.pm-hero-search-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 46px;
+    padding: 0 1.1rem;
+    background: var(--color-cta);
+    color: #fff;
+    border: 1px solid var(--color-cta);
+    border-radius: var(--ds-radius);
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: background-color var(--ds-transition), border-color var(--ds-transition);
+}
+
+.pm-hero-search-btn:hover {
+    background: var(--color-cta-hover);
+    border-color: var(--color-cta-hover);
+}
+
+.pm-hero-search-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.65rem;
+    width: 100%;
+}
+
+.pm-hero-search-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.65rem;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    color: var(--color-muted);
+    transition: border-color var(--ds-transition), color var(--ds-transition), background-color var(--ds-transition);
+}
+
+.pm-hero-search-chip:hover {
+    border-color: var(--color-cta);
+    color: var(--color-cta);
+    background: #fff;
+}
+
+/* Dashboard & admin card polish */
+.dash-stat-card,
+.admin-attention-card,
+.admin-kpi-card {
+    transition: border-color var(--ds-transition), box-shadow var(--ds-transition), background-color var(--ds-transition);
+}
+
+.dash-stat-card:hover,
+.admin-attention-card:hover,
+.admin-kpi-card:hover {
+    border-color: rgba(3, 105, 161, 0.35);
+}
+
+.register-page .reg-account-card {
+    transition: border-color var(--ds-transition), background-color var(--ds-transition);
+}
+
+.register-page .reg-account-card:hover {
+    border-color: var(--color-cta);
+}
+
+.register-page .reg-account-card:has(input:checked) {
+    border-color: var(--color-cta);
+    background-color: rgba(3, 105, 161, 0.06);
+    box-shadow: 0 0 0 1px var(--color-cta);
+}
+
+.register-page input,
+.register-page select,
+.register-page textarea {
+    transition: border-color var(--ds-transition), box-shadow var(--ds-transition);
+}
+
+.register-page input:focus,
+.register-page select:focus,
+.register-page textarea:focus {
+    border-color: var(--color-cta);
+    box-shadow: var(--ds-focus-ring);
+}

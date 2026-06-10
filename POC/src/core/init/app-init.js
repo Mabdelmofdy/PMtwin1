@@ -116,6 +116,7 @@ loadScript('src/core/config/config.js').then(async () => {
     await loadScript('src/utils/profile-completion.js');
     await loadScript('src/utils/profile-search-text.js');
     await loadScript('src/utils/page-context-header.js');
+    await loadScript('src/utils/motion-utils.js');
     await loadScript('src/utils/deal-contract-flow.js');
     await loadScript('src/utils/post-match-list-actions.js');
     await loadScript('src/utils/admin-readonly-guard.js');
@@ -669,6 +670,14 @@ function initializeRoutes() {
         await loadPage('admin-contracts');
     }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
 
+    router.register('/admin/contracts/:id', authGuard.protect(async (params) => {
+        if (!authService.canAccessAdmin()) {
+            router.navigate(CONFIG.ROUTES.DASHBOARD);
+            return;
+        }
+        await loadPage('contract-detail', params);
+    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
+
     router.register(CONFIG.ROUTES.ADMIN_CONSORTIUM, authGuard.protect(async () => {
         if (!authService.canAccessAdmin()) {
             router.navigate(CONFIG.ROUTES.DASHBOARD);
@@ -818,6 +827,10 @@ async function loadPage(pageName, params = {}) {
                 if (initResult != null && typeof initResult.then === 'function') {
                     await initResult;
                 }
+            }
+
+            if (window.motionUtils && typeof window.motionUtils.initPageMotion === 'function') {
+                window.motionUtils.initPageMotion(pageName);
             }
         } catch (error) {
             console.log(`No script found for ${pageName}`);

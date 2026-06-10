@@ -1,20 +1,5 @@
 <div class="page-container admin-skills-page">
-    <div class="skills-hero">
-        <div class="skills-hero-copy">
-            <div class="skills-eyebrow">Admin skills</div>
-            <h1 class="page-title">Skills catalog</h1>
-            <p class="page-subtitle">Manage the skill names and categories used in profiles, opportunities, and the matching engine. Changes apply after you save; reset drops your local override and reloads the default bundle.</p>
-        </div>
-        <div class="skills-hero-actions">
-            <div class="skills-run-state" id="skills-run-state" aria-live="polite">
-                <span class="skills-run-dot" aria-hidden="true"></span>
-                <span id="skills-hero-status">Loading catalog…</span>
-            </div>
-            <button type="button" id="admin-skills-save" class="btn btn-primary skills-run-btn">
-                <span>Save changes</span>
-            </button>
-        </div>
-    </div>
+    <div id="page-context-header-mount"></div>
 
     <div id="admin-skills-loading" class="skills-loading" hidden>
         <span class="spinner" aria-hidden="true"></span>
@@ -28,6 +13,10 @@
                 <p class="skills-section-desc">Counts reflect the list you are editing. “Stored list” shows whether a saved browser override is active for this device.</p>
             </div>
             <div class="skills-control-meta" aria-label="Catalog metadata">
+                <div class="skills-meta-item">
+                    <span class="skills-meta-label">Catalog</span>
+                    <span class="skills-meta-value" id="skills-catalog-status" aria-live="polite">Loading catalog…</span>
+                </div>
                 <div class="skills-meta-item">
                     <span class="skills-meta-label">Stored list</span>
                     <span class="skills-meta-value" id="skills-meta-stored">—</span>

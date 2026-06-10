@@ -1,20 +1,5 @@
 <div class="page-container admin-collaboration-models-page">
-    <div class="matching-hero cm-hero">
-        <div class="matching-hero-copy">
-            <div class="matching-eyebrow">Admin collaboration</div>
-            <h1 class="page-title">Collaboration models</h1>
-            <p class="page-subtitle">Choose which collaboration paths appear in the wizard and opportunity flows, rename them for your organization, and control the order users see.</p>
-        </div>
-        <div class="matching-hero-actions">
-            <div class="matching-run-state cm-save-state" aria-live="polite">
-                <span class="matching-run-dot" aria-hidden="true"></span>
-                <span id="cm-save-status">Edits are local until you save</span>
-            </div>
-            <button type="button" id="save-models-btn" class="btn btn-primary matching-run-btn">
-                <span>Save changes</span>
-            </button>
-        </div>
-    </div>
+    <div id="page-context-header-mount"></div>
 
     <div class="page-body matching-page-body">
         <section class="matching-control-panel cm-control-panel" aria-labelledby="cm-control-title">
@@ -23,6 +8,10 @@
                 <p class="section-desc">Disabled models are hidden from the collaboration wizard and from new opportunity setup. Labels and order are stored with system settings.</p>
             </div>
             <div class="matching-control-meta" aria-label="Model summary">
+                <div class="matching-meta-item">
+                    <span class="matching-meta-label">Save status</span>
+                    <span class="matching-meta-value cm-save-state" id="cm-save-status" aria-live="polite">Edits are local until you save</span>
+                </div>
                 <div class="matching-meta-item">
                     <span class="matching-meta-label">Models defined</span>
                     <span class="matching-meta-value" id="cm-meta-total">—</span>

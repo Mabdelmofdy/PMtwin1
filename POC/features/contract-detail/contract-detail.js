@@ -368,6 +368,22 @@ async function initContractDetail(params) {
         errorEl.style.display = 'none';
         contentEl.style.display = 'block';
 
+        const backLink = document.querySelector('.contract-detail-back');
+        const adminContractsRoute = (window.CONFIG && window.CONFIG.ROUTES && window.CONFIG.ROUTES.ADMIN_CONTRACTS)
+            ? window.CONFIG.ROUTES.ADMIN_CONTRACTS
+            : '/admin/contracts';
+        const userContractsRoute = (window.CONFIG && window.CONFIG.ROUTES && window.CONFIG.ROUTES.CONTRACTS)
+            ? window.CONFIG.ROUTES.CONTRACTS
+            : '/contracts';
+        if (backLink && isAdminView && typeof router !== 'undefined' && router.getCurrentPath
+            && router.getCurrentPath().startsWith('/admin/contracts')) {
+            backLink.setAttribute('data-route', adminContractsRoute);
+            backLink.innerHTML = '<i class="ph-duotone ph-arrow-left" aria-hidden="true"></i> Back to admin contracts';
+        } else if (backLink) {
+            backLink.setAttribute('data-route', userContractsRoute);
+            backLink.innerHTML = '<i class="ph-duotone ph-arrow-left" aria-hidden="true"></i> Back to Contracts';
+        }
+
         document.getElementById('contract-title').textContent = scopeDisplay;
         document.getElementById('contract-status-badge').textContent = getContractStatusLabel(contract.status);
         document.getElementById('contract-status-badge').className = 'badge ' + getContractStatusBadgeClass(contract.status);

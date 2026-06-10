@@ -7,6 +7,17 @@ async function initAdminSubscriptions() {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }
+
+    const headerMount = document.getElementById('page-context-header-mount');
+    if (
+        headerMount
+        && window.pageContextHeader
+        && window.pageContextHeader.PRESETS
+        && window.pageContextHeader.PRESETS.adminSubscriptions
+    ) {
+        window.pageContextHeader.mount(headerMount, window.pageContextHeader.PRESETS.adminSubscriptions);
+    }
+
     const canWrite = authService.hasAdminCapability('admin.subscriptions.write');
     await loadPlans(canWrite);
     await loadAssignments(canWrite);
@@ -16,6 +27,7 @@ async function initAdminSubscriptions() {
     const assignBtn = document.getElementById('btn-assign');
     if (addPlanBtn) { addPlanBtn.style.display = canWrite ? '' : 'none'; addPlanBtn.addEventListener('click', () => openPlanModal()); }
     if (assignBtn) { assignBtn.style.display = canWrite ? '' : 'none'; assignBtn.addEventListener('click', () => openAssignModal()); }
+    if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
 }
 
 async function loadPlans(canWrite = true) {

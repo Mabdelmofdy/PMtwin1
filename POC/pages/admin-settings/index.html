@@ -1,13 +1,7 @@
 <div class="page-container admin-settings-page">
-    <div class="page-header admin-settings-header">
-        <div class="page-header-content">
-            <p class="admin-settings-eyebrow">Administration</p>
-            <h1 class="page-title">System Settings</h1>
-            <p class="page-subtitle">Configure the PMTwin platform: branding, security, matching, workflow, exchange rules, lookups, integrations, and more.</p>
-        </div>
-        <div class="admin-settings-header-actions">
-            <span id="settings-last-saved" class="admin-settings-last-saved" aria-live="polite"></span>
-        </div>
+    <div id="page-context-header-mount"></div>
+    <div class="admin-settings-header-meta">
+        <span id="settings-last-saved" class="admin-settings-last-saved" aria-live="polite"></span>
     </div>
 
     <div class="page-body admin-settings-body">
@@ -824,6 +818,12 @@
     max-width: var(--portal-page-max-width);
     width: 100%;
     margin-inline: auto;
+}
+
+.admin-settings-header-meta {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.75rem;
 }
 
 .admin-settings-header {

@@ -9,6 +9,17 @@ async function initAdminSiteContent() {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }
+
+    const headerMount = document.getElementById('page-context-header-mount');
+    if (
+        headerMount
+        && window.pageContextHeader
+        && window.pageContextHeader.PRESETS
+        && window.pageContextHeader.PRESETS.adminSiteContent
+    ) {
+        window.pageContextHeader.mount(headerMount, window.pageContextHeader.PRESETS.adminSiteContent);
+    }
+
     if (!window.siteContentService) {
         const mount = document.getElementById('site-content-sections');
         if (mount) mount.innerHTML = '<p class="text-danger">Site content service is not loaded.</p>';
@@ -31,6 +42,7 @@ async function initAdminSiteContent() {
 
     siteContentEditorPageId = pageIds[0] || null;
     if (siteContentEditorPageId) await renderSiteContentEditor(siteContentEditorPageId);
+    if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
 }
 
 async function renderSiteContentEditor(pageId) {

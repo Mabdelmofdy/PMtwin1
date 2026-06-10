@@ -1,20 +1,5 @@
 <div class="page-container admin-health-page">
-    <div class="health-hero">
-        <div class="health-hero-copy">
-            <div class="health-eyebrow">Admin system health</div>
-            <h1 class="page-title">Health Center</h1>
-            <p class="page-subtitle">Live counts from the local data layer plus a quick check that core services are loaded. Use this before demos or when validating a fresh environment.</p>
-        </div>
-        <div class="health-hero-actions">
-            <div class="health-run-state" id="health-run-state" aria-live="polite">
-                <span class="health-run-dot" aria-hidden="true"></span>
-                <span id="health-refresh-status">Ready to load metrics</span>
-            </div>
-            <button type="button" id="health-refresh-btn" class="btn btn-primary health-run-btn">
-                <span>Refresh metrics</span>
-            </button>
-        </div>
-    </div>
+    <div id="page-context-header-mount"></div>
 
     <div class="page-body health-page-body">
         <section class="health-control-panel" aria-labelledby="health-control-title">
@@ -23,6 +8,10 @@
                 <p class="health-section-desc">Counts reflect whatever is in the browser store for this session. Service rows only confirm that scripts initialized.</p>
             </div>
             <div class="health-control-meta" aria-label="Snapshot metadata">
+                <div class="health-meta-item">
+                    <span class="health-meta-label">Status</span>
+                    <span class="health-meta-value health-run-state" id="health-refresh-status" aria-live="polite">Ready to load metrics</span>
+                </div>
                 <div class="health-meta-item">
                     <span class="health-meta-label">Source</span>
                     <span class="health-meta-value">Local data service</span>

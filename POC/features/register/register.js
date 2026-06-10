@@ -336,12 +336,16 @@ function getRegStepId() {
 function showRegStep(stepId) {
     document.querySelectorAll('.reg-step-content').forEach(el => {
         el.classList.add('hidden');
+        el.classList.remove('ds-step-enter');
         el.removeAttribute('aria-current');
     });
     const step = document.getElementById(stepId);
     if (step) {
         step.classList.remove('hidden');
         step.setAttribute('aria-current', 'step');
+        if (window.motionUtils && typeof window.motionUtils.animateStep === 'function') {
+            window.motionUtils.animateStep(step);
+        }
     }
 }
 

@@ -203,6 +203,166 @@
         return Array.from(new Set((opportunityIds || []).filter(Boolean)));
     }
 
+    /**
+     * Build post_match-shaped stubs from a preview report so unified view models can enrich cards.
+     * @param {object} report
+     * @returns {object[]}
+     */
+    function buildPreviewPostMatchStubsFromReport(report) {
+        const r = report || {};
+        const stubs = [];
+        const seen = new Set();
+
+        function pushStub(stub) {
+            const key = stub.id || stub.rowKey;
+            if (!key || seen.has(key)) return;
+            seen.add(key);
+            stubs.push(stub);
+        }
+
+        (r.oneWayNeedToOffers || []).forEach(item => {
+            (item.matches || []).forEach(m => {
+                const matchedOpp = m.matchedOpportunity || (m.suggestedPartners && m.suggestedPartners[0]) || null;
+                const offerId = matchedOpp?.id || matchedOpp?.opportunityId;
+                const partId = matchedOpp?.creatorId || (m.suggestedPartners && m.suggestedPartners[0]?.creatorId);
+                const rowKey = 'ow-need:' + item.opportunityId + ':' + (offerId || '');
+                pushStub({
+                    id: 'preview-' + rowKey,
+                    rowKey,
+                    matchType: 'one_way',
+                    status: 'pending',
+                    matchScore: m.matchScore,
+                    previewOnly: true,
+                    filterKey: MATCH_TYPE_FILTER_KEYS['One Way'],
+                    participants: [
+                        { userId: item.creatorId, role: 'need_owner', opportunityId: item.opportunityId },
+                        { userId: partId, role: 'offer_provider', opportunityId: offerId }
+                    ].filter(p => p.userId),
+                    payload: {
+                        needOpportunityId: item.opportunityId,
+                        offerOpportunityId: offerId,
+                        breakdown: m.breakdown || m.labels || {}
+                    }
+                });
+            });
+        });
+
+        (r.oneWayOfferToNeeds || []).forEach(item => {
+            (item.matches || []).forEach(m => {
+                const matchedOpp = m.matchedOpportunity || (m.suggestedPartners && m.suggestedPartners[0]) || null;
+                const needId = matchedOpp?.id || matchedOpp?.opportunityId;
+                const partId = matchedOpp?.creatorId || (m.suggestedPartners && m.suggestedPartners[0]?.creatorId);
+                const rowKey = 'ow-offer:' + item.opportunityId + ':' + (needId || '');
+                pushStub({
+                    id: 'preview-' + rowKey,
+                    rowKey,
+                    matchType: 'one_way',
+                    status: 'pending',
+                    matchScore: m.matchScore,
+                    previewOnly: true,
+                    filterKey: MATCH_TYPE_FILTER_KEYS['One Way'],
+                    participants: [
+                        { userId: item.creatorId, role: 'offer_provider', opportunityId: item.opportunityId },
+                        { userId: partId, role: 'need_owner', opportunityId: needId }
+                    ].filter(p => p.userId),
+                    payload: {
+                        needOpportunityId: needId,
+                        offerOpportunityId: item.opportunityId,
+                        breakdown: m.breakdown || m.labels || {}
+                    }
+                });
+            });
+        });
+
+        (r.twoWayPairs || []).forEach(p => {
+            const needAId = p.needA && p.needA.id;
+            const needBId = p.matchedNeed && p.matchedNeed.id;
+            const offerAId = p.offerA && p.offerA.id;
+            const offerBId = p.matchedOffer && p.matchedOffer.id;
+            const oppIds = [needAId, needBId].filter(Boolean);
+            const rowKey = 'tw:' + oppIds.slice().sort().join(':');
+            const score = (p.breakdown && (p.breakdown.scoreAtoB != null || p.breakdown.scoreBtoA != null))
+                ? ((p.breakdown.scoreAtoB ?? 0) + (p.breakdown.scoreBtoA ?? 0)) / 2
+                : p.matchScore;
+            pushStub({
+                id: 'preview-' + rowKey,
+                rowKey,
+                matchType: 'two_way',
+                status: 'pending',
+                matchScore: score,
+                previewOnly: true,
+                filterKey: MATCH_TYPE_FILTER_KEYS['Barter'],
+                participants: [
+                    { userId: p.needA && p.needA.creatorId, role: 'need_owner', opportunityId: needAId },
+                    { userId: p.matchedNeed && p.matchedNeed.creatorId, role: 'need_owner', opportunityId: needBId }
+                ].filter(party => party.userId),
+                payload: {
+                    needOpportunityId: needAId,
+                    offerOpportunityId: offerAId,
+                    matchedNeedId: needBId,
+                    matchedOfferId: offerBId,
+                    breakdown: p.breakdown || {}
+                }
+            });
+        });
+
+        (r.consortiumLeads || []).forEach(lead => {
+            const match = (lead.matches && lead.matches[0]) ? lead.matches[0] : null;
+            const partners = (match && match.suggestedPartners) ? match.suggestedPartners : [];
+            const rowKey = 'con:' + lead.opportunityId;
+            pushStub({
+                id: 'preview-' + rowKey,
+                rowKey,
+                matchType: 'consortium',
+                status: 'pending',
+                matchScore: match && match.matchScore != null ? match.matchScore : null,
+                previewOnly: true,
+                filterKey: MATCH_TYPE_FILTER_KEYS['Consortium'],
+                participants: [{ userId: lead.creatorId, role: 'lead', opportunityId: lead.opportunityId }]
+                    .concat(partners.map(sp => ({
+                        userId: sp.creatorId,
+                        role: sp.role || 'partner',
+                        opportunityId: sp.opportunityId
+                    })).filter(party => party.userId)),
+                payload: {
+                    leadNeedId: lead.opportunityId,
+                    suggestedPartners: partners,
+                    breakdown: (match && (match.breakdown || match.labels)) || {}
+                }
+            });
+        });
+
+        const circularCap = capCircularCyclesForDisplay((r && r.circularCycles) || []);
+        circularCap.cycles.forEach(c => {
+            const cycleIds = c.cycle || [];
+            const oppIds = (c.opportunityIds && c.opportunityIds.length)
+                ? c.opportunityIds.slice()
+                : (c.linkScores || []).map(l => l.opportunityId).filter(Boolean);
+            const rowKey = 'circ:' + (oppIds.length ? oppIds.slice().sort().join(':') : cycleIds.join(':'));
+            pushStub({
+                id: 'preview-' + rowKey,
+                rowKey,
+                matchType: 'circular',
+                status: 'pending',
+                matchScore: c.matchScore,
+                previewOnly: true,
+                filterKey: MATCH_TYPE_FILTER_KEYS['Circular'],
+                participants: cycleIds.map((creatorId, idx) => ({
+                    userId: creatorId,
+                    role: 'participant',
+                    opportunityId: oppIds[idx] || null
+                })).filter(party => party.userId),
+                payload: {
+                    cycle: cycleIds,
+                    links: c.links || c.linkScores || [],
+                    opportunityIds: oppIds
+                }
+            });
+        });
+
+        return stubs;
+    }
+
     async function buildLifecycleQueues(dataService) {
         const empty = {
             invitations: [],
@@ -328,6 +488,7 @@
         getCircularDisplayMeta,
         buildPreviewRunSummary,
         buildSelectableMatchRows,
+        buildPreviewPostMatchStubsFromReport,
         collectOpportunityIdsFromSelections,
         collectOpportunityIdsFromIdList,
         buildLifecycleQueues

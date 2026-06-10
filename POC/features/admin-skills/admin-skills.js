@@ -31,13 +31,13 @@ function hasLookupsOverrideInStorage() {
 }
 
 function updateSkillsMeta(skills, categories, storedOverrideActive) {
-    const heroStatus = document.getElementById('skills-hero-status');
+    const catalogStatus = document.getElementById('skills-catalog-status');
     const metaStored = document.getElementById('skills-meta-stored');
     const metaSkills = document.getElementById('skills-meta-skill-count');
     const metaCats = document.getElementById('skills-meta-cat-count');
     const n = skills.length;
     const m = categories.length;
-    if (heroStatus) heroStatus.textContent = n + ' skills · ' + m + ' categories';
+    if (catalogStatus) catalogStatus.textContent = n + ' skills · ' + m + ' categories';
     if (metaStored) metaStored.textContent = storedOverrideActive ? 'Custom override' : 'Default bundle';
     if (metaSkills) metaSkills.textContent = String(n);
     if (metaCats) metaCats.textContent = String(m);
@@ -73,6 +73,16 @@ async function initAdminSkills() {
     if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.skills.read')) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
+    }
+
+    const headerMount = document.getElementById('page-context-header-mount');
+    if (
+        headerMount
+        && window.pageContextHeader
+        && window.pageContextHeader.PRESETS
+        && window.pageContextHeader.PRESETS.adminSkills
+    ) {
+        window.pageContextHeader.mount(headerMount, window.pageContextHeader.PRESETS.adminSkills);
     }
 
     const loadingEl = document.getElementById('admin-skills-loading');
@@ -183,4 +193,6 @@ async function initAdminSkills() {
             void initAdminSkills();
         };
     }
+
+    if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
 }

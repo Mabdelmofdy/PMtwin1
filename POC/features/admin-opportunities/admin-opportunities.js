@@ -15,17 +15,6 @@ const AO_STATUS_GROUPS = {
     closed: ['completed', 'closed', 'cancelled']
 };
 
-const AO_STATUS_LABELS = {
-    draft: 'Draft',
-    published: 'Published',
-    in_negotiation: 'In negotiation',
-    contracted: 'Contracted',
-    in_execution: 'In execution',
-    completed: 'Completed',
-    closed: 'Closed',
-    cancelled: 'Cancelled'
-};
-
 const AO_MODEL_LABELS = {
     project_based: 'Project-based',
     strategic_partnership: 'Strategic partnership',
@@ -115,21 +104,12 @@ function aoIntentChipClass(intent) {
     return 'ao-meta-chip--need';
 }
 
-function aoStatusClass(status) {
-    switch (status) {
-        case 'published': return 'ao-card-status--live';
-        case 'in_negotiation': return 'ao-card-status--negotiation';
-        case 'contracted':
-        case 'in_execution': return 'ao-card-status--progress';
-        case 'completed': return 'ao-card-status--completed';
-        case 'closed':
-        case 'cancelled': return 'ao-card-status--closed';
-        default: return 'ao-card-status--draft';
+function renderAdminOppStatusBadge(status) {
+    const sb = window.statusBadgeSystem;
+    if (sb && typeof sb.renderStatusBadge === 'function') {
+        return sb.renderStatusBadge(status, 'opportunity');
     }
-}
-
-function aoStatusLabel(status) {
-    return AO_STATUS_LABELS[status] || (status ? status.replace(/_/g, ' ') : 'Draft');
+    return `<span class="badge badge--neutral">${aoEscape(status || 'draft')}</span>`;
 }
 
 function aoModelLabel(model) {
@@ -160,6 +140,7 @@ async function initAdminOpportunities() {
     setupAoFilters();
     setupAoBulk();
     await loadAdminOpportunities();
+    if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
 }
 
 function setupAoFilters() {
@@ -425,10 +406,7 @@ function renderAdminOppCard(opp) {
         <div class="ao-card-body">
             <div class="ao-card-top">
                 <h3 class="ao-card-title">${aoEscape(opp.title || 'Untitled opportunity')}</h3>
-                <span class="ao-card-status ${aoStatusClass(status)}">
-                    <span class="ao-card-status-dot"></span>
-                    ${aoEscape(aoStatusLabel(status))}
-                </span>
+                ${renderAdminOppStatusBadge(status)}
             </div>
             ${opp.description ? `<p class="ao-card-desc">${aoEscape(opp.description)}</p>` : ''}
             <div class="ao-card-foot">

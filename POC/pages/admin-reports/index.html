@@ -1,29 +1,24 @@
 <div class="page-container admin-reports-page platform-analytics">
-    <!-- Dynamic header -->
-    <header class="pa-hero">
-        <div class="pa-hero-text">
-            <h1 class="pa-hero-title">Platform Analytics</h1>
-            <p class="pa-hero-desc">Monitor platform growth, marketplace performance, users, opportunities, matches, deals, contracts, and system activity.</p>
-        </div>
-        <div class="pa-hero-actions">
-            <div class="pa-dropdown">
-                <button type="button" class="btn btn-primary pa-btn-icon" id="pa-export-trigger" aria-haspopup="true" aria-expanded="false">
-                    <i class="ph-duotone ph-download-simple" aria-hidden="true"></i> Export Report
-                </button>
-                <div class="pa-dropdown-menu" id="pa-export-menu" hidden>
-                    <button type="button" class="pa-dropdown-item" id="pa-export-csv">Export CSV (summary)</button>
-                    <button type="button" class="pa-dropdown-item" id="pa-export-excel">Export Excel (TSV)</button>
-                    <button type="button" class="pa-dropdown-item" id="pa-export-pdf">Export PDF (print)</button>
-                    <hr class="pa-dropdown-sep" />
-                    <button type="button" class="pa-dropdown-item" id="export-offers-by-site-csv">Offers by site (CSV)</button>
-                    <button type="button" class="pa-dropdown-item" id="export-offers-per-opp-csv">Offers per opportunity (CSV)</button>
-                </div>
-            </div>
-            <button type="button" class="btn btn-secondary pa-btn-icon" id="pa-schedule-btn">
-                <i class="ph-duotone ph-calendar-plus" aria-hidden="true"></i> Schedule Report
+    <div id="page-context-header-mount"></div>
+
+    <div class="pa-header-toolbar" aria-label="Report actions">
+        <div class="pa-dropdown">
+            <button type="button" class="btn btn-primary pa-btn-icon" id="pa-export-trigger" aria-haspopup="true" aria-expanded="false">
+                <i class="ph-duotone ph-download-simple" aria-hidden="true"></i> Export Report
             </button>
+            <div class="pa-dropdown-menu" id="pa-export-menu" hidden>
+                <button type="button" class="pa-dropdown-item" id="pa-export-csv">Export CSV (summary)</button>
+                <button type="button" class="pa-dropdown-item" id="pa-export-excel">Export Excel (TSV)</button>
+                <button type="button" class="pa-dropdown-item" id="pa-export-pdf">Export PDF (print)</button>
+                <hr class="pa-dropdown-sep" />
+                <button type="button" class="pa-dropdown-item" id="export-offers-by-site-csv">Offers by site (CSV)</button>
+                <button type="button" class="pa-dropdown-item" id="export-offers-per-opp-csv">Offers per opportunity (CSV)</button>
+            </div>
         </div>
-    </header>
+        <button type="button" class="btn btn-secondary pa-btn-icon" id="pa-schedule-btn">
+            <i class="ph-duotone ph-calendar-plus" aria-hidden="true"></i> Schedule Report
+        </button>
+    </div>
 
     <!-- Global filters -->
     <section class="pa-filters" aria-label="Analytics filters">
@@ -437,6 +432,7 @@
 .pa-hero { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1.25rem; margin-bottom: 1.5rem; padding: 1.5rem 1.75rem; background: linear-gradient(135deg, #f0fdfa 0%, #ffffff 55%, #f8fafc 100%); border: 1px solid var(--pa-border); border-radius: var(--pa-radius); box-shadow: var(--pa-shadow); }
 .pa-hero-title { margin: 0 0 0.5rem; font-size: 1.65rem; font-weight: 700; color: var(--text-primary, #0f172a); letter-spacing: -0.02em; }
 .pa-hero-desc { margin: 0; max-width: 52rem; color: var(--pa-muted); font-size: 0.95rem; line-height: 1.55; }
+.pa-header-toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 1.25rem; }
 .pa-hero-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
 .pa-btn-icon { display: inline-flex; align-items: center; gap: 0.4rem; }
 .pa-dropdown { position: relative; }

@@ -299,6 +299,61 @@
                 'Filter platform activity, inspect JSON details, export CSV for compliance, and review uploaded user and company documents.',
             primaryAction: { label: 'Export CSV', id: 'page-cta-audit-export', type: 'button' },
             secondaryAction: { label: 'Admin dashboard', route: R.ADMIN || '/admin' }
+        },
+        adminMatching: {
+            label: 'Admin Workspace',
+            title: 'Matching Center',
+            description:
+                'Preview matches across published needs and offers, review lifecycle queues, and persist outcomes when you are ready.',
+            primaryAction: { label: 'Run preview report', id: 'matching-run-report-btn', type: 'button', class: 'matching-run-btn' }
+        },
+        adminReports: {
+            label: 'Admin Workspace',
+            title: 'Platform Analytics',
+            description:
+                'Monitor platform growth, marketplace performance, users, opportunities, matches, deals, contracts, and system activity.'
+        },
+        adminSettings: {
+            label: 'Admin Workspace',
+            title: 'System Settings',
+            description:
+                'Configure the PMTwin platform: branding, security, matching, workflow, exchange rules, lookups, integrations, and more.'
+        },
+        adminSkills: {
+            label: 'Admin Workspace',
+            title: 'Skills catalog',
+            description:
+                'Manage the skill names and categories used in profiles, opportunities, and the matching engine. Changes apply after you save; reset drops your local override and reloads the default bundle.',
+            primaryAction: { label: 'Save changes', id: 'admin-skills-save', type: 'button', class: 'skills-run-btn' }
+        },
+        adminHealth: {
+            label: 'Admin Workspace',
+            title: 'Health Center',
+            description:
+                'Live counts from the local data layer plus a quick check that core services are loaded. Use this before demos or when validating a fresh environment.',
+            primaryAction: { label: 'Refresh metrics', id: 'health-refresh-btn', type: 'button', class: 'health-run-btn' }
+        },
+        adminSubscriptions: {
+            label: 'Admin Workspace',
+            title: 'Subscriptions',
+            description: 'Manage subscription plans and assign them to people or companies.',
+            primaryAction: { label: 'Add plan', id: 'btn-add-plan', type: 'button' },
+            secondaryAction: { label: 'Assign plan', id: 'btn-assign', type: 'button' }
+        },
+        adminSiteContent: {
+            label: 'Admin Workspace',
+            title: 'Site content',
+            description:
+                'Edit public page sections (hero, marketing copy, auth panels). Changes are stored in this browser only.',
+            primaryAction: { label: 'Save sections', id: 'site-content-save', type: 'button' },
+            secondaryAction: { label: 'Reset page', id: 'site-content-reset-page', type: 'button' }
+        },
+        adminCollaborationModels: {
+            label: 'Admin Workspace',
+            title: 'Collaboration models',
+            description:
+                'Choose which collaboration paths appear in the wizard and opportunity flows, rename them for your organization, and control the order users see.',
+            primaryAction: { label: 'Save changes', id: 'save-models-btn', type: 'button', class: 'matching-run-btn' }
         }
     };
 

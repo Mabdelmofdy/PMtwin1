@@ -369,6 +369,9 @@ class LayoutService {
         renderAdminGroup('Monitoring', monitoringLinks);
 
         const configLinks = [];
+        if (!isAuditor && (isFullAdmin || isModerator)) {
+            configLinks.push({ route: CONFIG.ROUTES.ADMIN_SUBSCRIPTIONS, label: 'Subscriptions', icon: 'ph-duotone ph-credit-card' });
+        }
         if (isFullAdmin) {
             configLinks.push({ route: CONFIG.ROUTES.ADMIN_SKILLS, label: 'Skills & Categories', icon: 'ph-duotone ph-tag' });
             configLinks.push({ route: CONFIG.ROUTES.ADMIN_SETTINGS, label: 'Settings', icon: 'ph-duotone ph-gear' });

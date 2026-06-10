@@ -12,6 +12,21 @@
                 <p class="pm-hero-description">
                     Match project needs with architects, BIM teams, contractors, consultants, equipment providers, and consortium partners across Saudi Arabia and the GCC.
                 </p>
+                <form class="pm-hero-search" id="pm-hero-search-form" role="search" aria-label="Search marketplace">
+                    <div class="pm-hero-search-input-wrap">
+                        <i class="ph-duotone ph-magnifying-glass" aria-hidden="true"></i>
+                        <input type="search" id="pm-hero-search-input" class="pm-hero-search-input" placeholder="Search BIM, design, contractors…" autocomplete="off" aria-label="Search opportunities and partners">
+                    </div>
+                    <button type="submit" class="pm-hero-search-btn">
+                        <i class="ph-duotone ph-arrow-right" aria-hidden="true"></i>
+                        <span>Search</span>
+                    </button>
+                    <div class="pm-hero-search-suggestions" aria-label="Popular searches">
+                        <button type="button" class="pm-hero-search-chip" data-search="BIM coordination">BIM coordination</button>
+                        <button type="button" class="pm-hero-search-chip" data-search="Architectural design">Architectural design</button>
+                        <button type="button" class="pm-hero-search-chip" data-search="MEP consultant">MEP consultant</button>
+                    </div>
+                </form>
                 <div class="pm-hero-actions" aria-label="Primary actions">
                     <a href="#" data-route="/register" class="btn btn-primary pm-btn pm-btn-primary">
                         <i class="ph-duotone ph-rocket-launch" aria-hidden="true"></i>
@@ -274,13 +289,19 @@
     align-items: center;
 }
 
+.pm-card,
+.pm-text-link {
+    cursor: pointer;
+    transition: border-color 200ms ease, color 200ms ease, background-color 200ms ease;
+}
+
 .pm-kicker,
 .pm-section-kicker {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     margin: 0 0 1rem;
-    color: var(--pm-teal-dark);
+    color: #0369a1;
     font-size: 0.78rem;
     font-weight: 800;
     letter-spacing: 0;
@@ -340,14 +361,15 @@
 }
 
 .pm-btn-primary {
-    background: #101820 !important;
-    border: 1px solid #101820 !important;
+    background: #0369a1 !important;
+    border: 1px solid #0369a1 !important;
     color: #ffffff !important;
+    transition: background-color 200ms ease, border-color 200ms ease;
 }
 
 .pm-btn-primary:hover {
-    background: #26323e !important;
-    border-color: #26323e !important;
+    background: #0284c7 !important;
+    border-color: #0284c7 !important;
 }
 
 .pm-btn-secondary {

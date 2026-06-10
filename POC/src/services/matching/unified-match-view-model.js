@@ -734,6 +734,34 @@
         vm.nextBestAction = getNextBestAction(vm);
         vm.statusLabel = getStatusLabel(vm.status, { match, currentUserId, dealId: vm.dealId });
 
+        if (context.adminMode) {
+            vm.isAdminView = true;
+            vm.isPreviewOnly = !!match.previewOnly;
+            const actions = [];
+            if (!match.previewOnly && vm.id && !String(vm.id).startsWith('preview-')) {
+                const matchRoute = (global.CONFIG && global.CONFIG.ROUTES && global.CONFIG.ROUTES.MATCH_DETAIL)
+                    ? global.CONFIG.ROUTES.MATCH_DETAIL.replace(':id', vm.id)
+                    : '/matches/' + vm.id;
+                actions.push({ id: 'view_details', label: 'View match', route: matchRoute, kind: 'primary', enabled: true });
+            }
+            if (vm.sourceOpportunityId) {
+                actions.push({
+                    id: 'view_source_opp',
+                    label: 'View opportunity',
+                    route: '/opportunities/' + vm.sourceOpportunityId,
+                    kind: 'secondary',
+                    enabled: true
+                });
+            }
+            vm.availableActions = actions;
+            vm.nextBestAction = match.previewOnly
+                ? 'Preview suggestion — save matches on the source opportunity to persist post_matches.'
+                : (vm.nextBestAction || 'Open match detail for lifecycle context.');
+            if (match.previewOnly) {
+                vm.statusLabel = 'Suggested (preview)';
+            }
+        }
+
         return vm;
     }
 
@@ -756,6 +784,56 @@
         return rows.map(([kicker, html]) =>
             '<div class="match-card-block"><p class="match-card-kicker">' + escapeHtml(kicker) + '</p><p class="match-card-line">' + html + '</p></div>'
         ).join('');
+    }
+
+    /**
+     * Shared rich match card markup (user /matches and admin matching center).
+     * @param {object} vm - enriched unified match view model
+     * @param {{ extraClass?: string }} [options]
+     */
+    function renderUnifiedMatchCardHtml(vm, options) {
+        if (!vm) return '';
+        const opts = options || {};
+        const extraClass = opts.extraClass ? ' ' + opts.extraClass : '';
+        const filterKey = vm.filterKey || vm.internalMatchType || vm.matchType || '';
+        const actionsHtml = (vm.availableActions || []).map(action => {
+            const cls = action.kind === 'primary' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+            const disabled = action.enabled === false || vm.isExpired;
+            if (['accept', 'decline', 'invite_apply', 'negotiate', 'create_deal', 'create_deal_from_negotiation'].includes(action.id)) {
+                return '<button type="button" class="' + cls + '" data-action="' + escapeHtml(action.id) + '" data-match-id="' + escapeHtml(vm.id) + '"' + (disabled ? ' disabled' : '') + '>' + escapeHtml(action.label) + '</button>';
+            }
+            return '<a href="#" data-route="' + escapeHtml(action.route || '#') + '" class="' + cls + (disabled ? ' opacity-50 pointer-events-none' : '') + '">' + escapeHtml(action.label) + '</a>';
+        }).join(' ');
+
+        const typeLine = vm.sourceOpportunityTypeLabel
+            ? '<p class="match-card-unified__type">' + escapeHtml(vm.sourceOpportunityTypeLabel) + '</p>'
+            : '';
+        const previewRibbon = vm.isPreviewOnly
+            ? '<p class="match-card-unified__ribbon"><span class="badge badge--info">Preview suggestion</span></p>'
+            : '';
+
+        return '<article class="card match-card match-card-unified' + extraClass + '" data-match-id="' + escapeHtml(vm.id) + '" data-match-type="' + escapeHtml(filterKey) + '">'
+            + '<header class="match-card-unified__header">'
+            + '<div>'
+            + '<h3 class="match-card-unified__title">' + escapeHtml(vm.cardTitle || vm.matchTypeLabel + ' Match') + '</h3>'
+            + typeLine
+            + '</div>'
+            + '<span class="badge badge-match ' + escapeHtml(vm.matchQualityClass || 'badge--neutral') + '">'
+            + escapeHtml(vm.matchQualityLabel || 'Match') + ' · ' + (vm.matchScorePercent != null ? vm.matchScorePercent : 0) + '%</span>'
+            + '</header>'
+            + '<div class="match-card-unified__body">'
+            + (vm.cardBodyHtml || '')
+            + '<div class="match-card-block match-card-block--why">'
+            + '<p class="match-card-kicker">Why this match?</p>'
+            + '<p class="match-card-line match-card-line--muted">' + escapeHtml(vm.whySummary || '') + '</p>'
+            + '</div>'
+            + (vm.replacementBadge ? '<p class="match-card-unified__ribbon"><span class="badge badge--warning">' + escapeHtml(vm.replacementBadge) + '</span></p>' : '')
+            + previewRibbon
+            + '<p class="match-card-unified__status"><span class="match-card-kicker">Status</span> <span class="badge badge--neutral">' + escapeHtml(vm.statusLabel || '') + '</span></p>'
+            + '<p class="match-card-unified__next"><span class="match-card-kicker">Next</span> ' + escapeHtml(vm.nextBestAction || '') + '</p>'
+            + '</div>'
+            + '<footer class="match-card-unified__footer">' + actionsHtml + '</footer>'
+            + '</article>';
     }
 
     async function userLabel(ds, userId) {
@@ -918,6 +996,7 @@
         buildUnifiedMatchViewModel,
         enrichUnifiedMatchViewModel,
         buildUnifiedMatchViewModels,
+        renderUnifiedMatchCardHtml,
         escapeHtml,
         buildCardBlocks
     };

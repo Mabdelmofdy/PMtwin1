@@ -1513,6 +1513,17 @@ async function initAdminReports() {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }
+
+    const headerMount = document.getElementById('page-context-header-mount');
+    if (
+        headerMount
+        && window.pageContextHeader
+        && window.pageContextHeader.PRESETS
+        && window.pageContextHeader.PRESETS.adminReports
+    ) {
+        window.pageContextHeader.mount(headerMount, window.pageContextHeader.PRESETS.adminReports);
+    }
+
     setupModuleTabs();
     setupExportMenu();
     setupFilters();

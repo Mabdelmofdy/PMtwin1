@@ -390,13 +390,19 @@
     text-decoration: none;
     color: inherit;
     box-shadow: var(--dash-shadow);
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    cursor: pointer;
+    transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
 }
 
 .dash-stat-card:hover {
-    border-color: rgba(13, 148, 136, 0.35);
+    border-color: rgba(3, 105, 161, 0.35);
     box-shadow: var(--dash-shadow-hover);
-    transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .dash-stat-card:hover {
+        transform: translateY(-1px);
+    }
 }
 
 .dash-stat-icon {

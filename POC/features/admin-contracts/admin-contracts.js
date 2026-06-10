@@ -37,10 +37,20 @@ function acSetText(id, value) {
 }
 
 function getContractStatusLabel(s) {
+    if (window.statusBadgeSystem && typeof window.statusBadgeSystem.getStatusLabel === 'function') {
+        return window.statusBadgeSystem.getStatusLabel(s, 'contract');
+    }
     const ui = window.DealContractFlowUi;
     if (ui && typeof ui.getContractStatusDisplayLabel === 'function') return ui.getContractStatusDisplayLabel(s);
-    const map = { pending: 'Pending Signature', active: 'Active Contract', completed: 'Completed', terminated: 'Terminated' };
-    return map[s] || s || '—';
+    return s || '—';
+}
+
+function renderAdminContractStatusBadge(status) {
+    const sb = window.statusBadgeSystem;
+    if (sb && typeof sb.renderStatusBadge === 'function') {
+        return sb.renderStatusBadge(status, 'contract');
+    }
+    return `<span class="badge badge--neutral">${acEscape(getContractStatusLabel(status))}</span>`;
 }
 
 function acFormatDate(value) {
@@ -48,15 +58,6 @@ function acFormatDate(value) {
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return '—';
     return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-function contractCardStatusClass(status) {
-    const s = status || 'pending';
-    if (s === 'pending') return 'ao-card-status--negotiation';
-    if (s === 'active') return 'ao-card-status--live';
-    if (s === 'completed') return 'ao-card-status--completed';
-    if (s === 'terminated') return 'ao-card-status--closed';
-    return 'ao-card-status--draft';
 }
 
 function getAdminContractsVisible() {
@@ -135,7 +136,7 @@ function renderAdminContractCard(c) {
     const valShort = val.length > 80 ? val.slice(0, 80) + '…' : val;
 
     const auditBase = (typeof CONFIG !== 'undefined' && CONFIG.ROUTES && CONFIG.ROUTES.ADMIN_AUDIT) ? CONFIG.ROUTES.ADMIN_AUDIT : '/admin/audit';
-    const contractDetailRoute = cid => (CONFIG.ROUTES.CONTRACT_DETAIL || '/contracts/:id').replace(':id', cid);
+    const contractDetailRoute = cid => (CONFIG.ROUTES.ADMIN_CONTRACT_DETAIL || '/admin/contracts/:id').replace(':id', cid);
     const dealRoute = did => (CONFIG.ROUTES.ADMIN_DEAL_DETAIL || '/admin/deals/:id').replace(':id', did);
     const auditContractRoute = cid => auditBase + '?entityType=contract&entityId=' + encodeURIComponent(cid);
 
@@ -189,10 +190,7 @@ function renderAdminContractCard(c) {
         <div class="ao-card-body">
             <div class="ao-card-top">
                 <h3 class="ao-card-title">${acEscape(scope)}</h3>
-                <span class="ao-card-status ${contractCardStatusClass(status)}">
-                    <span class="ao-card-status-dot"></span>
-                    ${acEscape(getContractStatusLabel(status))}
-                </span>
+                ${renderAdminContractStatusBadge(status)}
             </div>
             <div class="ao-card-foot">
                 <div class="ao-card-meta">${meta.join('')}</div>

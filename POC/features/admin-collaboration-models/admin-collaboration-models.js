@@ -110,10 +110,21 @@ async function initAdminCollaborationModels() {
         return;
     }
 
+    const headerMount = document.getElementById('page-context-header-mount');
+    if (
+        headerMount
+        && window.pageContextHeader
+        && window.pageContextHeader.PRESETS
+        && window.pageContextHeader.PRESETS.adminCollaborationModels
+    ) {
+        window.pageContextHeader.mount(headerMount, window.pageContextHeader.PRESETS.adminCollaborationModels);
+    }
+
     renderModelsList();
     bindModelsListChangeHandlers();
     const saveBtn = document.getElementById('save-models-btn');
     if (saveBtn) saveBtn.onclick = saveModels;
+    if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
 }
 
 function renderModelsList() {

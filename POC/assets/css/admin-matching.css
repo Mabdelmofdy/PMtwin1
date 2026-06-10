@@ -972,3 +972,28 @@ html:has(.admin-matching-page) {
         padding: 1rem;
     }
 }
+
+/* Rich match cards (shared with /matches pipeline) */
+.admin-matching-page .match-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 1rem;
+    margin-top: 0.75rem;
+}
+
+.admin-matching-page .match-card-unified.is-hidden {
+    display: none !important;
+}
+
+.admin-matching-page .match-card-unified {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-matching-page .match-card-unified__footer {
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}

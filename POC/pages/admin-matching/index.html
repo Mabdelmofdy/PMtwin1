@@ -6,28 +6,7 @@
         <a href="#matching-types-guide" class="matching-jump-link">Match types</a>
     </nav>
 
-    <header class="matching-hero">
-        <div class="matching-hero-copy">
-            <div class="matching-hero-badge" aria-hidden="true">
-                <i class="ph-duotone ph-git-merge"></i>
-            </div>
-            <div>
-                <div class="matching-eyebrow">Admin matching</div>
-                <h1 class="page-title">Matching Center</h1>
-                <p class="page-subtitle">Preview matches across published needs and offers, review lifecycle queues, and persist outcomes when you are ready.</p>
-            </div>
-        </div>
-        <div class="matching-hero-actions">
-            <div class="matching-run-state" aria-live="polite">
-                <span class="matching-run-dot" aria-hidden="true"></span>
-                <span id="matching-refresh-status">Ready to analyze current data</span>
-            </div>
-            <button type="button" id="matching-run-report-btn" class="btn btn-primary matching-run-btn">
-                <i class="ph-duotone ph-play-circle" aria-hidden="true"></i>
-                <span>Run preview report</span>
-            </button>
-        </div>
-    </header>
+    <div id="page-context-header-mount"></div>
 
     <div class="page-body matching-page-body">
         <section id="matching-snapshot" class="matching-control-panel" aria-labelledby="matching-control-title">
@@ -36,6 +15,10 @@
                 <p class="matching-section-desc">The report scans published posts only. Results stay in preview until you explicitly persist.</p>
             </div>
             <div class="matching-control-meta" aria-label="Report run status">
+                <div class="matching-meta-item">
+                    <span class="matching-meta-label">Status</span>
+                    <span class="matching-meta-value matching-run-state" id="matching-refresh-status" aria-live="polite">Ready to analyze current data</span>
+                </div>
                 <div class="matching-meta-item">
                     <span class="matching-meta-label">Refresh</span>
                     <span class="matching-meta-value">Every 60s</span>
@@ -136,7 +119,7 @@
                     <div class="matching-panel-header">
                         <div>
                             <h3 class="matching-section-title">Match list</h3>
-                            <p class="matching-section-desc">Filter by match type. Expand detail sections below for full Need/Offer, barter, consortium, and circular lists.</p>
+                            <p class="matching-section-desc">Rich match cards from the preview run — same layout as the user matches pipeline. Filter by type or expand detail sections below.</p>
                         </div>
                     </div>
                     <div id="matching-summary-tabs" class="matching-match-type-tabs" role="tablist"></div>

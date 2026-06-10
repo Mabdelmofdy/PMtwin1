@@ -105,6 +105,31 @@ describe('circular display cap', () => {
     });
 });
 
+describe('buildPreviewPostMatchStubsFromReport', () => {
+    it('creates post_match-shaped stubs from preview report rows', () => {
+        const report = {
+            oneWayNeedToOffers: [{
+                opportunityId: 'need-1',
+                creatorId: 'u1',
+                matches: [{
+                    matchScore: 0.82,
+                    matchedOpportunity: { id: 'offer-1', creatorId: 'u2' }
+                }]
+            }],
+            oneWayOfferToNeeds: [],
+            twoWayPairs: [],
+            consortiumLeads: [],
+            circularCycles: []
+        };
+        const stubs = cc.buildPreviewPostMatchStubsFromReport(report);
+        expect(stubs).toHaveLength(1);
+        expect(stubs[0].matchType).toBe('one_way');
+        expect(stubs[0].previewOnly).toBe(true);
+        expect(stubs[0].payload.needOpportunityId).toBe('need-1');
+        expect(stubs[0].payload.offerOpportunityId).toBe('offer-1');
+    });
+});
+
 describe('buildLifecycleQueues', () => {
     it('returns invitation and negotiation queues from data service', async () => {
         const dataService = {

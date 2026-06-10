@@ -41,6 +41,16 @@ async function initAdminHealth() {
         return;
     }
 
+    const headerMount = document.getElementById('page-context-header-mount');
+    if (
+        headerMount
+        && window.pageContextHeader
+        && window.pageContextHeader.PRESETS
+        && window.pageContextHeader.PRESETS.adminHealth
+    ) {
+        window.pageContextHeader.mount(headerMount, window.pageContextHeader.PRESETS.adminHealth);
+    }
+
     const btn = document.getElementById('health-refresh-btn');
     if (btn && !btn.dataset.bound) {
         btn.dataset.bound = '1';
@@ -62,7 +72,7 @@ async function loadHealth(opts) {
     const errorEl = document.getElementById('health-run-error');
     const refreshStatus = document.getElementById('health-refresh-status');
     const lastRefreshed = document.getElementById('health-last-refreshed');
-    const runState = document.getElementById('health-run-state');
+    const runState = document.querySelector('.health-run-state');
     const btn = document.getElementById('health-refresh-btn');
 
     if (!gridEl) return;

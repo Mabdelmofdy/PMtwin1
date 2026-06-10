@@ -129,6 +129,7 @@ async function initAdminUsers() {
 
     setupUserMgmtFilters();
     await loadUsers();
+    if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
 }
 
 function syncUserMgmtStatusTabs() {

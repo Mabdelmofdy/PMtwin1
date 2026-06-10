@@ -378,6 +378,7 @@ const CONFIG = {
         ADMIN_DEALS: '/admin/deals',
         ADMIN_DEAL_DETAIL: '/admin/deals/:id',
         ADMIN_CONTRACTS: '/admin/contracts',
+        ADMIN_CONTRACT_DETAIL: '/admin/contracts/:id',
         ADMIN_CONSORTIUM: '/admin/consortium',
         ADMIN_HEALTH: '/admin/health',
         NOTIFICATIONS: '/notifications',

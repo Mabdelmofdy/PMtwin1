@@ -49,7 +49,7 @@ async function runAndShowReport() {
         const report = await runMatchingOnCurrentData();
         lastPreviewReport = report;
         await recordPreviewRun(report);
-        renderReport(reportGrid, reportDetails || null, report);
+        await renderReport(reportGrid, reportDetails || null, report);
         await renderAdminAnalytics(window.dataService);
         await renderCommandCenter();
         if (runLoading) runLoading.hidden = true;
@@ -72,6 +72,8 @@ async function runAndShowReport() {
             runButton.classList.remove('is-running');
         }
         if (runState) runState.classList.remove('is-running');
+        applyAuditorReadOnlyUi();
+        if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
     }
 }
 
@@ -422,6 +424,17 @@ async function initAdminMatching() {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }
+
+    const headerMount = document.getElementById('page-context-header-mount');
+    if (
+        headerMount
+        && window.pageContextHeader
+        && window.pageContextHeader.PRESETS
+        && window.pageContextHeader.PRESETS.adminMatching
+    ) {
+        window.pageContextHeader.mount(headerMount, window.pageContextHeader.PRESETS.adminMatching);
+    }
+
     applyAuditorReadOnlyUi();
 
     const runButton = document.getElementById('matching-run-report-btn');
@@ -465,6 +478,7 @@ async function initAdminMatching() {
         if (document.visibilityState === 'visible') runAndShowReport();
     };
     document.addEventListener('visibilitychange', matchingVisibilityHandler);
+    if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
 }
 
 /**
@@ -956,6 +970,10 @@ function buildMatchesSummaryRows(report) {
 }
 
 function renderReport(gridEl, detailsEl, report) {
+    return renderReportAsync(gridEl, detailsEl, report);
+}
+
+async function renderReportAsync(gridEl, detailsEl, report) {
     if (!gridEl) return;
     renderMatchingSummary(report);
     gridEl.innerHTML = ''
@@ -1002,24 +1020,54 @@ function renderReport(gridEl, detailsEl, report) {
             ? window.AdminMatchingCommandCenter.buildSelectableMatchRows(report)
             : buildMatchesSummaryRows(report);
         lastSelectableRows = rows;
+
+        const cc = window.AdminMatchingCommandCenter;
+        const umv = window.unifiedMatchViewModel;
+        const ds = window.dataService;
+        let matchViewModels = [];
+        if (cc && umv && typeof cc.buildPreviewPostMatchStubsFromReport === 'function'
+            && typeof umv.buildUnifiedMatchViewModels === 'function') {
+            const stubs = cc.buildPreviewPostMatchStubsFromReport(report);
+            const adminUser = typeof authService !== 'undefined' && authService.getCurrentUser
+                ? authService.getCurrentUser()
+                : null;
+            matchViewModels = await umv.buildUnifiedMatchViewModels(stubs, {
+                dataService: ds,
+                currentUserId: adminUser?.id || null,
+                adminMode: true
+            });
+            matchViewModels.forEach((vm, idx) => {
+                const stub = stubs[idx];
+                if (stub && stub.filterKey) vm.filterKey = stub.filterKey;
+            });
+            matchViewModels.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+        }
+
         if (rows.length === 0) {
             if (summaryTabsEl) summaryTabsEl.innerHTML = '';
             summaryEl.innerHTML = '<p class="matching-details">No matches in this run.</p>';
         } else {
             const counts = { 'one-way': 0, 'two-way': 0, 'consortium': 0, 'circular': 0 };
-            rows.forEach(r => {
-                const key = MATCH_TYPE_FILTER_KEYS[r.matchType];
-                if (key) counts[key]++;
+            matchViewModels.forEach(vm => {
+                const key = vm.filterKey || MATCH_TYPE_FILTER_KEYS[vm.matchTypeLabel] || vm.internalMatchType;
+                if (key && counts[key] != null) counts[key]++;
             });
+            if (!matchViewModels.length) {
+                rows.forEach(r => {
+                    const key = r.filterKey || MATCH_TYPE_FILTER_KEYS[r.matchType];
+                    if (key) counts[key]++;
+                });
+            }
             const circularMeta = (window.AdminMatchingCommandCenter && window.AdminMatchingCommandCenter.getCircularDisplayMeta)
                 ? window.AdminMatchingCommandCenter.getCircularDisplayMeta(report)
                 : { total: report.circularExchanges || 0, hidden: 0, note: null };
             const circularTabCount = circularMeta.total > counts['circular']
                 ? (counts['circular'] + ' of ' + circularMeta.total)
                 : String(counts['circular']);
+            const totalCount = matchViewModels.length || rows.length;
             if (summaryTabsEl) {
                 const tabs = [
-                    { id: 'all', label: 'All', count: rows.length },
+                    { id: 'all', label: 'All', count: totalCount },
                     { id: 'one-way', label: 'Need/Offer', count: counts['one-way'] },
                     { id: 'two-way', label: 'Barter', count: counts['two-way'] },
                     { id: 'consortium', label: 'Group', count: counts['consortium'] },
@@ -1029,10 +1077,10 @@ function renderReport(gridEl, detailsEl, report) {
                     '<button type="button" class="matching-match-type-tab' + (i === 0 ? ' is-active' : '') + '" role="tab" data-filter="' + escapeHtml(t.id) + '" aria-selected="' + (i === 0 ? 'true' : 'false') + '">' + escapeHtml(t.label) + ' <span class="tab-count">(' + t.count + ')</span></button>'
                 ).join('');
             }
-            const visibleRows = rows.slice(0, 200);
+            const visibleVms = matchViewModels.slice(0, 200);
             const noteParts = [];
-            if (rows.length > visibleRows.length) {
-                noteParts.push('Showing the first ' + visibleRows.length + ' matches. Use the filters above to focus the list.');
+            if (totalCount > visibleVms.length) {
+                noteParts.push('Showing the first ' + visibleVms.length + ' matches. Use the filters above to focus the list.');
             }
             if (circularMeta.hidden > 0 && circularMeta.note) {
                 noteParts.push(circularMeta.note);
@@ -1040,26 +1088,18 @@ function renderReport(gridEl, detailsEl, report) {
             const note = noteParts.length
                 ? '<p class="matching-table-note">' + escapeHtml(noteParts.join(' ')) + '</p>'
                 : '';
-            let table = '<table class="matching-summary-table"><thead><tr>';
-            table += '<th>Match type</th><th>Participants</th><th>Opportunity references</th><th>Score</th><th>Status</th></tr></thead><tbody>';
-            visibleRows.forEach(r => {
-                const filterKey = r.filterKey || MATCH_TYPE_FILTER_KEYS[r.matchType] || '';
-                table += '<tr data-match-type="' + escapeHtml(filterKey) + '">'
-                    + '<td>' + renderMatchKindBadge(r.matchType, filterKey) + '</td><td>' + escapeHtml(r.participants) + '</td><td>' + escapeHtml(r.opportunityRefs) + '</td><td>' + renderScoreBadge(r.matchScore) + '</td><td>' + renderStatusBadge(r.status) + '</td></tr>';
-            });
-            table += '</tbody></table>';
-            summaryEl.innerHTML = note + table;
+            const cardsHtml = (umv && typeof umv.renderUnifiedMatchCardHtml === 'function')
+                ? visibleVms.map(vm => umv.renderUnifiedMatchCardHtml(vm)).join('')
+                : '';
+            summaryEl.innerHTML = note + '<div class="match-cards-grid admin-match-cards-grid">' + cardsHtml + '</div>';
             if (summaryTabsEl) {
                 const detailSections = document.querySelectorAll('.matching-detail-section[data-match-type]');
                 const applyFilter = (filter) => {
-                    const tbody = summaryEl.querySelector('tbody');
-                    if (tbody) {
-                        tbody.querySelectorAll('tr[data-match-type]').forEach(tr => {
-                            const rowType = tr.getAttribute('data-match-type');
-                            const show = filter === 'all' || rowType === filter;
-                            tr.classList.toggle('is-hidden', !show);
-                        });
-                    }
+                    summaryEl.querySelectorAll('.match-card-unified').forEach(card => {
+                        const rowType = card.getAttribute('data-match-type');
+                        const show = filter === 'all' || rowType === filter;
+                        card.classList.toggle('is-hidden', !show);
+                    });
                     detailSections.forEach(section => {
                         const sectionType = section.getAttribute('data-match-type');
                         const showSection = filter !== 'all' && sectionType === filter;
