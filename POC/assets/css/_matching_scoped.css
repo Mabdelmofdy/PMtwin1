@@ -1,6 +1,6 @@
 ﻿.admin-matching-page {
-    --matching-accent: #0d9488;
-    --matching-accent-soft: rgba(20, 184, 166, 0.12);
+    --matching-accent: #0369a1;
+    --matching-accent-soft: rgba(14, 165, 233, 0.12);
     --matching-surface: rgba(255, 255, 255, 0.72);
     --matching-line: rgba(15, 23, 42, 0.08);
     --matching-blue: #2563eb;
@@ -329,7 +329,7 @@
 
 .matching-overview-grid .stat-card:hover,
 .matching-metric-card:hover {
-    border-color: rgba(13, 148, 136, 0.45);
+    border-color: rgba(3, 105, 161, 0.45);
     background: #fafffe;
 }
 
@@ -510,7 +510,7 @@
 }
 
 .matching-kind-circular {
-    color: #0f766e;
+    color: #075985;
     background: var(--matching-accent-soft);
 }
 
@@ -560,12 +560,12 @@
 .matching-view-matches-link {
     color: var(--primary-dark);
     background: var(--matching-accent-soft);
-    border: 1px solid rgba(13, 148, 136, 0.22);
+    border: 1px solid rgba(3, 105, 161, 0.22);
 }
 
 .matching-view-matches-link:hover {
     color: var(--primary-dark);
-    border-color: rgba(13, 148, 136, 0.5);
+    border-color: rgba(3, 105, 161, 0.5);
 }
 
 .matching-persist-btn {

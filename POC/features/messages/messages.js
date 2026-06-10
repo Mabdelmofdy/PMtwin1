@@ -4,6 +4,23 @@
 
 let currentPartnerId = null;
 
+function getInitials(name) {
+    if (!name) return '?';
+    return name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase() || '?';
+}
+
+function setThreadHeader(name) {
+    const nameEl = document.getElementById('thread-partner-name');
+    if (nameEl) nameEl.textContent = name || 'Unknown';
+    const avatarEl = document.getElementById('thread-partner-avatar');
+    if (avatarEl) avatarEl.textContent = getInitials(name);
+}
+
+function setThreadOpen(open) {
+    const layout = document.querySelector('.messages-layout');
+    if (layout) layout.classList.toggle('thread-open', !!open);
+}
+
 function setupMessagesRefreshListener() {
     if (window.__pmtwinMessagesRefreshBound) return;
     window.__pmtwinMessagesRefreshBound = true;
@@ -57,6 +74,7 @@ async function initMessages(params) {
             currentPartnerId = partnerId;
             threadEmpty.style.display = 'none';
             threadView.style.display = 'flex';
+            setThreadOpen(true);
             setupThreadBack();
 
             if (!connected) {
@@ -64,8 +82,7 @@ async function initMessages(params) {
                 const partnerName = partner?.profile?.name || partner?.profile?.companyName || partner?.email || 'this person';
                 const threadMessages = document.getElementById('thread-messages');
                 const messageForm = document.getElementById('message-form');
-                const threadHeaderName = document.getElementById('thread-partner-name');
-                if (threadHeaderName) threadHeaderName.textContent = partnerName;
+                setThreadHeader(partnerName);
                 if (threadMessages) {
                     threadMessages.innerHTML = '<div class="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-900"><p class="font-medium">Connect to message</p><p class="text-sm mt-1">You must be connected with ' + escapeHtml(partnerName) + ' to send messages.</p><a href="#" data-route="/people/' + (partnerId || '').replace(/"/g, '&quot;') + '" class="inline-block mt-3 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-dark no-underline">View profile &amp; send connection request</a></div>';
                 }
@@ -74,17 +91,15 @@ async function initMessages(params) {
                 return;
             }
 
-            const threadHeaderName = document.getElementById('thread-partner-name');
-            if (threadHeaderName) {
-                const partner = await dataService.getUserOrCompanyById(partnerId);
-                threadHeaderName.textContent = partner?.profile?.name || partner?.profile?.companyName || partner?.email || 'Unknown';
-            }
+            const partner = await dataService.getUserOrCompanyById(partnerId);
+            setThreadHeader(partner?.profile?.name || partner?.profile?.companyName || partner?.email || 'Unknown');
             await loadThread(partnerId);
             setupMessageForm(partnerId);
         } else {
             currentPartnerId = null;
             threadEmpty.style.display = 'flex';
             threadView.style.display = 'none';
+            setThreadOpen(false);
         }
 
         await renderConversationsList(partnerId);
@@ -163,8 +178,7 @@ async function loadThread(partnerId) {
 
     const partner = await dataService.getPersonById(partnerId);
     const name = partner?.profile?.name || partner?.email || 'Unknown';
-    const nameEl = document.getElementById('thread-partner-name');
-    if (nameEl) nameEl.textContent = name;
+    setThreadHeader(name);
 
     const messages = await dataService.getMessagesBetween(currentUser.id, partnerId);
     await dataService.markMessagesAsRead(partnerId, currentUser.id);
@@ -209,7 +223,19 @@ function setupMessageForm(partnerId) {
 
     // Ensure input is enabled
     newInput.disabled = false;
-    newInput.placeholder = 'Type a message...';
+    newInput.placeholder = 'Type a message…';
+
+    const autoGrow = () => {
+        newInput.style.height = 'auto';
+        newInput.style.height = Math.min(newInput.scrollHeight, 140) + 'px';
+    };
+    newInput.addEventListener('input', autoGrow);
+    newInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            newForm.requestSubmit ? newForm.requestSubmit() : newForm.dispatchEvent(new Event('submit', { cancelable: true }));
+        }
+    });
 
     newForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -234,6 +260,7 @@ function setupMessageForm(partnerId) {
         try {
             await dataService.createMessage(currentUser.id, partnerId, text);
             newInput.value = '';
+            newInput.style.height = 'auto';
             newInput.disabled = false;
             if (submitBtn) submitBtn.disabled = false;
             await loadThread(partnerId);

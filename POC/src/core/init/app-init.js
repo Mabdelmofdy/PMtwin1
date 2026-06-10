@@ -116,6 +116,7 @@ loadScript('src/core/config/config.js').then(async () => {
     await loadScript('src/utils/profile-completion.js');
     await loadScript('src/utils/profile-search-text.js');
     await loadScript('src/utils/page-context-header.js');
+    await loadScript('src/utils/seed-storage-indicator.js');
     await loadScript('src/utils/motion-utils.js');
     await loadScript('src/utils/deal-contract-flow.js');
     await loadScript('src/utils/post-match-list-actions.js');
@@ -169,6 +170,10 @@ async function initializeApp() {
 
         // Initialize layout
         await layoutService.init();
+
+        if (window.seedStorageIndicator && typeof window.seedStorageIndicator.init === 'function') {
+            window.seedStorageIndicator.init();
+        }
         
         // Check authentication
         await authService.checkAuth();
@@ -325,6 +330,9 @@ function applySystemSettingsToConfig() {
  */
 async function resetAppData() {
     if (confirm('This will reset all data to default. Continue?')) {
+        if (window.seedStorageIndicator && typeof window.seedStorageIndicator.invalidateCanonicalCache === 'function') {
+            window.seedStorageIndicator.invalidateCanonicalCache();
+        }
         await dataService.reseedFromJSON();
         // Clear session
         sessionStorage.clear();

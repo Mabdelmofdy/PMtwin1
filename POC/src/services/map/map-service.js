@@ -334,7 +334,7 @@ const mapService = (() => {
         const locationText = opp.locationCity || opp.location || 'Unknown';
         const statusColors = {
             published: '#16a34a', in_execution: '#ca8a04', contracted: '#9333ea',
-            completed: '#0d9488', draft: '#6b7280', cancelled: '#dc2626'
+            completed: '#0369a1', draft: '#6b7280', cancelled: '#dc2626'
         };
         const statusLabel = (opp.status || 'unknown').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
         const statusColor = statusColors[opp.status] || '#6b7280';

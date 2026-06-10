@@ -289,9 +289,12 @@
 
         const att = leadNeed.attributes || {};
         const memberRoles = att.memberRoles || att.partnerRoles || [];
-        const roles = Array.isArray(memberRoles)
-            ? memberRoles.map(r => (typeof r === 'string' ? r : (r && (r.role || r.label)) || '')).filter(Boolean)
+        const roleDefs = Array.isArray(memberRoles)
+            ? memberRoles
+                .map(r => (typeof r === 'string' ? { role: r } : r))
+                .filter(r => r && (r.role || r.label))
             : [];
+        const roles = roleDefs.map(r => r.role || r.label).filter(Boolean);
 
         if (roles.length === 0) {
             const oneWay = await findOffersForNeed(leadNeedId, { topN: 10 });
@@ -307,8 +310,15 @@
         const suggestedPartners = [];
         const roleResults = [];
 
-        for (const role of roles) {
-            const roleServices = [role].concat(leadNorm.requiredServices || leadNorm.skills || []).slice(0, 10);
+        for (const roleDef of roleDefs) {
+            const role = roleDef.role || roleDef.label || '';
+            const scopeWords = (roleDef.scope || '')
+                .split(/[\s,/|&+-]+/)
+                .map(w => w.trim())
+                .filter(w => w.length > 2);
+            const roleServices = [role, ...scopeWords]
+                .filter((v, i, a) => v && a.indexOf(v) === i)
+                .slice(0, 10);
             const syntheticNeed = {
                 ...leadNeed,
                 id: leadNeed.id + '-role-' + role.replace(/\s/g, '_'),

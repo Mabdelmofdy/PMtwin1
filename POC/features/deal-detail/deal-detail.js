@@ -818,16 +818,28 @@ async function renderConsortiumParticipantsBlock(deal, currentUserId) {
     const participants = deal.participants || [];
     const replacementMatches = dataService.getPostMatchesByReplacementDealId(deal.id) || [];
     const pendingInvites = replacementMatches.filter(m => (m.status || '') === 'pending');
-    let rows = participants.map(p => {
+    const resolveName = async (userId) => {
+        if (!userId) return '';
+        let entity = null;
+        try {
+            entity = await dataService.getUserOrCompanyById(userId);
+        } catch (e) {
+            entity = null;
+        }
+        return entityDisplayName(entity) || userId;
+    };
+    let rows = (await Promise.all(participants.map(async p => {
         const roleLabel = getParticipantRoleLabel(deal, p);
         const isDropped = (p.status || 'active') === 'dropped';
-        const replacedBy = p.replacedByUserId ? ' (replaced by ' + escapeHtml(p.replacedByUserId) + ')' : '';
+        const displayName = await resolveName(p.userId);
+        const replacedBy = p.replacedByUserId ? ' (replaced by ' + escapeHtml(await resolveName(p.replacedByUserId)) + ')' : '';
         const badge = isDropped ? '<span class="badge badge-danger">Dropped' + replacedBy + '</span>' : (p.signedAt ? '<span class="badge badge-success">Signed</span>' : (p.approvalStatus === 'approved' ? '<span class="badge badge-info">Approved</span>' : '<span class="badge badge-secondary">Pending</span>'));
-        return '<li class="deal-participant-list__row"><span class="deal-participant-list__name">' + escapeHtml(p.userId) + ' <span class="deal-participant-list__meta">(' + escapeHtml(roleLabel) + ')</span></span>' + badge + '</li>';
-    }).join('');
+        return '<li class="deal-participant-list__row"><span class="deal-participant-list__name">' + escapeHtml(displayName) + ' <span class="deal-participant-list__meta">(' + escapeHtml(roleLabel) + ')</span></span>' + badge + '</li>';
+    }))).join('');
     let replacementHtml = '';
     if (pendingInvites.length > 0) {
-        const invited = pendingInvites[0].participants && pendingInvites[0].participants[0] ? pendingInvites[0].participants[0].userId : '—';
+        const invitedId = pendingInvites[0].participants && pendingInvites[0].participants[0] ? pendingInvites[0].participants[0].userId : '';
+        const invited = invitedId ? await resolveName(invitedId) : '—';
         replacementHtml = '<p class="deal-work-card__note">Replacement invitation sent to <strong>' + escapeHtml(invited) + '</strong>.</p>';
     }
     const isLead = participants.some(p => p.userId === currentUserId && (p.role || '') === 'consortium_lead');

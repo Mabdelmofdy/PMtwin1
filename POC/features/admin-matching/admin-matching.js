@@ -58,6 +58,9 @@ async function runAndShowReport() {
         if (lastUpdated) lastUpdated.textContent = nowLabel;
         if (refreshStatus) refreshStatus.textContent = 'Live report refreshed at ' + nowLabel;
         if (runState) runState.classList.remove('is-error');
+        if (window.seedStorageIndicator) {
+            void window.seedStorageIndicator.syncPageHint('#matching-report-summary', 'opportunities');
+        }
     } catch (e) {
         if (runError) {
             runError.hidden = false;

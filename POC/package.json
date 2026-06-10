@@ -12,6 +12,7 @@
     "manual:pdf:admin": "node scripts/render-manual-pdf.mjs pmtwin-admin-training-manual.html PMTwin-Admin-Training-Manual-A4.pdf",
     "manual:pdf:all": "npm run manual:pdf && npm run manual:pdf:admin",
     "seed:controlled": "node scripts/simulation/seed-simulation-data.js --controlled",
+    "seed:e2e": "node scripts/seed-e2e-workflow.js",
     "sim:controlled": "node scripts/simulation/run-matching-simulation.js --verbose"
   },
   "devDependencies": {

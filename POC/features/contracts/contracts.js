@@ -375,6 +375,10 @@ async function loadContracts() {
             .join('');
 
         container.innerHTML = html;
+
+        if (window.seedStorageIndicator) {
+            void window.seedStorageIndicator.syncPageHint('#contracts-summary', 'contracts');
+        }
     } catch (error) {
         console.error('Error loading contracts:', error);
         if (summaryEl) summaryEl.textContent = '';

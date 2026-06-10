@@ -1,88 +1,119 @@
 {
   "domain": "connections",
-  "version": "1.0",
-  "dataset": "demo40",
-  "description": "Pre-accepted user↔user and company↔user connections for People, Messages, and training demos. Merged by id on each load.",
+  "version": "2.0",
+  "description": "E2E workflow connections among the 18 seed users (scripts/seed-e2e-workflow.js).",
   "data": [
     {
-      "id": "demo-conn-c01-u01",
-      "fromUserId": "demo-c01",
-      "toUserId": "demo-u01",
+      "id": "seed-conn-001-002",
+      "fromUserId": "seed-user-001",
+      "toUserId": "seed-user-002",
       "status": "accepted",
-      "createdAt": "2026-03-01T08:00:00.000Z",
-      "updatedAt": "2026-03-01T08:00:00.000Z"
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
     },
     {
-      "id": "demo-conn-c01-u04",
-      "fromUserId": "demo-c01",
-      "toUserId": "demo-u04",
+      "id": "seed-conn-001-003",
+      "fromUserId": "seed-user-001",
+      "toUserId": "seed-user-003",
       "status": "accepted",
-      "createdAt": "2026-03-01T08:00:00.000Z",
-      "updatedAt": "2026-03-01T08:00:00.000Z"
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
     },
     {
-      "id": "demo-conn-c01-u06",
-      "fromUserId": "demo-c01",
-      "toUserId": "demo-u06",
+      "id": "seed-conn-003-002",
+      "fromUserId": "seed-user-003",
+      "toUserId": "seed-user-002",
       "status": "accepted",
-      "createdAt": "2026-03-02T09:00:00.000Z",
-      "updatedAt": "2026-03-02T09:00:00.000Z"
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
     },
     {
-      "id": "demo-conn-c02-u04",
-      "fromUserId": "demo-c02",
-      "toUserId": "demo-u04",
+      "id": "seed-conn-005-006",
+      "fromUserId": "seed-user-005",
+      "toUserId": "seed-user-006",
       "status": "accepted",
-      "createdAt": "2026-03-02T10:00:00.000Z",
-      "updatedAt": "2026-03-02T10:00:00.000Z"
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
     },
     {
-      "id": "demo-conn-c02-u07",
-      "fromUserId": "demo-c02",
-      "toUserId": "demo-u07",
+      "id": "seed-conn-005-012",
+      "fromUserId": "seed-user-005",
+      "toUserId": "seed-user-012",
       "status": "accepted",
-      "createdAt": "2026-03-02T10:15:00.000Z",
-      "updatedAt": "2026-03-02T10:15:00.000Z"
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
     },
     {
-      "id": "demo-conn-u01-u02",
-      "fromUserId": "demo-u01",
-      "toUserId": "demo-u02",
+      "id": "seed-conn-008-009",
+      "fromUserId": "seed-user-008",
+      "toUserId": "seed-user-009",
       "status": "accepted",
-      "createdAt": "2026-03-03T11:00:00.000Z",
-      "updatedAt": "2026-03-03T11:00:00.000Z"
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
     },
     {
-      "id": "demo-conn-u01-u04",
-      "fromUserId": "demo-u01",
-      "toUserId": "demo-u04",
+      "id": "seed-conn-010-011",
+      "fromUserId": "seed-user-010",
+      "toUserId": "seed-user-011",
       "status": "accepted",
-      "createdAt": "2026-03-03T11:30:00.000Z",
-      "updatedAt": "2026-03-03T11:30:00.000Z"
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
     },
     {
-      "id": "demo-conn-u02-u03",
-      "fromUserId": "demo-u02",
-      "toUserId": "demo-u03",
+      "id": "seed-conn-010-012",
+      "fromUserId": "seed-user-010",
+      "toUserId": "seed-user-012",
       "status": "accepted",
-      "createdAt": "2026-03-04T12:00:00.000Z",
-      "updatedAt": "2026-03-04T12:00:00.000Z"
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
     },
     {
-      "id": "demo-conn-u04-u06",
-      "fromUserId": "demo-u04",
-      "toUserId": "demo-u06",
+      "id": "seed-conn-011-012",
+      "fromUserId": "seed-user-011",
+      "toUserId": "seed-user-012",
       "status": "accepted",
-      "createdAt": "2026-03-04T13:00:00.000Z",
-      "updatedAt": "2026-03-04T13:00:00.000Z"
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
     },
     {
-      "id": "demo-conn-u04-u07",
-      "fromUserId": "demo-u04",
-      "toUserId": "demo-u07",
+      "id": "seed-conn-013-014",
+      "fromUserId": "seed-user-013",
+      "toUserId": "seed-user-014",
       "status": "accepted",
-      "createdAt": "2026-03-05T09:00:00.000Z",
-      "updatedAt": "2026-03-05T09:00:00.000Z"
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
+    },
+    {
+      "id": "seed-conn-014-015",
+      "fromUserId": "seed-user-014",
+      "toUserId": "seed-user-015",
+      "status": "accepted",
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
+    },
+    {
+      "id": "seed-conn-013-015",
+      "fromUserId": "seed-user-013",
+      "toUserId": "seed-user-015",
+      "status": "accepted",
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
+    },
+    {
+      "id": "seed-conn-016-002",
+      "fromUserId": "seed-user-016",
+      "toUserId": "seed-user-002",
+      "status": "accepted",
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
+    },
+    {
+      "id": "seed-conn-017-010",
+      "fromUserId": "seed-user-017",
+      "toUserId": "seed-user-010",
+      "status": "accepted",
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
     }
   ]
 }

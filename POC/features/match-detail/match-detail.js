@@ -25,6 +25,7 @@ async function initMatchDetail(params) {
 
         const user = authService.getCurrentUser();
         if (!user) {
+            if (loadingEl) loadingEl.style.display = 'none';
             router.navigate(CONFIG.ROUTES.LOGIN);
             return;
         }
@@ -32,7 +33,13 @@ async function initMatchDetail(params) {
         if (!isParticipant) {
             if (loadingEl) loadingEl.style.display = 'none';
             if (contentEl) contentEl.style.display = 'none';
-            if (notFoundEl) notFoundEl.style.display = 'block';
+            if (notFoundEl) {
+                notFoundEl.style.display = 'block';
+                const hint = notFoundEl.querySelector('.match-detail-access-hint');
+                if (hint) {
+                    hint.textContent = 'Sign in as a match participant (e.g. seed-user-14@controlled.test / password123 for demo-pm-oneway-06).';
+                }
+            }
             return;
         }
 

@@ -17,6 +17,11 @@ const CONFIG = {
     AUTH: {
         SOCIAL_LOGIN_ENABLED: false
     },
+
+    /** Seed vs localStorage debug UI (global bar + page hints). Off by default. */
+    SEED_TRACE: {
+        enabled: false
+    },
     
     // Storage Keys
     STORAGE_KEYS: {

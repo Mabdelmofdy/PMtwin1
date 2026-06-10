@@ -298,6 +298,10 @@ async function loadDealsList() {
                 );
             })
             .join('');
+
+        if (window.seedStorageIndicator) {
+            void window.seedStorageIndicator.syncPageHint('#deals-summary', 'deals');
+        }
     } catch (e) {
         console.error('Deals load error:', e);
         if (summaryEl) summaryEl.textContent = '';

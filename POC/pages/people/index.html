@@ -5,7 +5,7 @@
         <div class="people-workspace">
             <aside class="people-sidebar" aria-labelledby="people-sidebar-title">
                 <div class="people-sidebar__head">
-                    <h2 id="people-sidebar-title" class="people-sidebar__title">Quick filters</h2>
+                    <h2 id="people-sidebar-title" class="people-sidebar__title">Filters</h2>
                     <p id="people-filter-summary" class="people-sidebar__summary" aria-live="polite">No filters applied</p>
                     <button type="button" id="toggle-filters" class="people-toggle-filters" aria-expanded="true">Hide filters</button>
                 </div>
@@ -56,15 +56,25 @@
 
                     <div class="people-field people-field--skills">
                         <div class="people-skills-head">
-                            <span class="people-label people-label--plain" id="people-skills-label">Skills</span>
-                            <span id="people-skills-selected" class="people-skills-badge" hidden></span>
+                            <label class="people-label" id="people-skills-label" for="skills-dropdown-trigger">Skills</label>
+                            <button type="button" id="clear-skills-inline" class="people-skills-clear" hidden>Clear</button>
                         </div>
-                        <p id="people-skills-hint" class="people-hint">Select one or more skills to filter the results.</p>
-                        <span id="people-skills-sr-hint" class="people-sr-only">Toggle with Enter or Space when a skill is focused.</span>
-                        <div class="people-skills-panel" role="region" aria-labelledby="people-skills-label" aria-describedby="people-skills-sr-hint">
-                            <input type="text" id="skills-query" class="people-skills-query" placeholder="Search skills..." autocomplete="off" enterkeyhint="search" aria-label="Filter skills by name">
-                            <div class="people-skills-scroll">
-                                <div id="skills-filter" class="skills-filter-list"></div>
+                        <div id="people-skills-preview" class="people-skills-preview" hidden aria-live="polite"></div>
+                        <span id="people-skills-sr-hint" class="people-sr-only">Open the menu and toggle skills with Enter or Space when focused.</span>
+                        <div class="people-skills-dropdown" id="people-skills-dropdown">
+                            <button type="button" id="skills-dropdown-trigger" class="people-skills-trigger" aria-expanded="false" aria-haspopup="listbox" aria-controls="skills-dropdown-menu" aria-describedby="people-skills-sr-hint">
+                                <span class="people-skills-trigger__text" id="skills-dropdown-label">Select skills…</span>
+                                <i class="ph-duotone ph-caret-down people-skills-trigger__caret" aria-hidden="true"></i>
+                            </button>
+                            <div id="skills-dropdown-menu" class="people-skills-menu" hidden role="listbox" aria-labelledby="people-skills-label" aria-multiselectable="true">
+                                <div class="people-skills-search">
+                                    <i class="ph-duotone ph-magnifying-glass people-skills-search__icon" aria-hidden="true"></i>
+                                    <input type="text" id="skills-query" class="people-skills-search__input" placeholder="Search skills…" autocomplete="off" enterkeyhint="search" aria-label="Filter skills by name">
+                                </div>
+                                <div class="people-skills-menu__body">
+                                    <div id="skills-filter" class="skills-list"></div>
+                                    <p id="people-skills-empty" class="people-skills-empty" hidden>No skills match your search</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -77,26 +87,43 @@
             </aside>
 
             <section class="people-results" aria-label="Search results">
-                <header class="people-results__toolbar">
-                    <div id="results-count" class="people-count" aria-live="polite" aria-atomic="true">
-                        <span class="people-count__value">—</span>
-                        <span class="people-count__label">profiles</span>
+                <div class="people-results__head">
+                    <div class="people-segments" id="people-tabs" role="tablist" aria-label="People view">
+                        <button class="people-tab" type="button" role="tab" data-tab="network" id="people-tab-network" aria-selected="false" aria-controls="people-list">
+                            <span class="people-tab__icon" aria-hidden="true"><i class="ph-duotone ph-users-three"></i></span>
+                            <span class="people-tab__text">
+                                <span class="people-tab__count" id="network-count">0</span>
+                                <span class="people-tab__label">My Network</span>
+                            </span>
+                        </button>
+                        <button class="people-tab active" type="button" role="tab" data-tab="discover" id="people-tab-discover" aria-selected="true" aria-controls="people-list">
+                            <span class="people-tab__icon" aria-hidden="true"><i class="ph-duotone ph-compass"></i></span>
+                            <span class="people-tab__text">
+                                <span class="people-tab__count" id="discover-count">0</span>
+                                <span class="people-tab__label">Discover</span>
+                            </span>
+                        </button>
                     </div>
-                    <div class="people-sort">
-                        <label class="people-sort-label" for="sort-people">Sort by</label>
-                        <div class="people-sort__select">
-                            <select id="sort-people" class="form-select people-control people-control--sort">
-                                <option value="connections">Most connections</option>
-                                <option value="name">Name (A–Z)</option>
-                                <option value="experience">Experience</option>
-                                <option value="recent">Recently joined</option>
-                            </select>
-                            <i class="ph-duotone ph-caret-down people-sort__caret" aria-hidden="true"></i>
+                    <header class="people-results__toolbar">
+                        <p id="results-count" class="people-summary" aria-live="polite" aria-atomic="true">
+                            <span class="people-summary__value">—</span>
+                        </p>
+                        <div class="people-sort">
+                            <label class="people-sort-label" for="sort-people">Sort</label>
+                            <div class="people-sort__select">
+                                <select id="sort-people" class="form-select people-control people-control--sort">
+                                    <option value="connections">Most connections</option>
+                                    <option value="name">Name (A–Z)</option>
+                                    <option value="experience">Experience</option>
+                                    <option value="recent">Recently joined</option>
+                                </select>
+                                <i class="ph-duotone ph-caret-down people-sort__caret" aria-hidden="true"></i>
+                            </div>
                         </div>
-                    </div>
-                </header>
+                    </header>
+                </div>
 
-                <div id="people-list" class="people-list" role="list">
+                <div id="people-list" class="people-list" role="tabpanel" aria-labelledby="people-tab-discover">
                     <div class="people-list__loading" aria-busy="true">
                         <div class="spinner" aria-label="Loading results"></div>
                     </div>
@@ -107,120 +134,82 @@
 </div>
 
 <style>
-/* —— Layout —— */
-.people-intro {
-    margin-bottom: var(--spacing-xl);
-    padding-bottom: var(--spacing-lg);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.people-eyebrow {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--primary-dark);
-    margin: 0 0 var(--spacing-xs);
-}
-
-.people-intro__title {
-    font-size: clamp(1.75rem, 2.5vw, 2.25rem);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    margin-bottom: var(--spacing-xs);
-}
-
-.people-intro__sub {
-    max-width: 34rem;
-    line-height: 1.55;
-}
-
+/* —— Page shell —— */
 .people-body {
-    display: flex;
-    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .people-workspace {
-    width: 100%;
-    max-width: 1180px;
     display: grid;
-    grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
-    align-items: stretch;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    box-shadow: var(--shadow-md);
-    min-height: 420px;
+    grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
 }
 
 /* —— Sidebar —— */
+.people-sidebar,
+.people-results {
+    background: var(--bg-primary, #fff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.04));
+}
+
 .people-sidebar {
     display: flex;
     flex-direction: column;
-    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-    border-right: 1px solid var(--border-color);
     min-height: 0;
+    overflow: visible;
+    z-index: 2;
 }
 
 .people-sidebar__head {
-    padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
-    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+    padding: 1rem 1.1rem 0.85rem;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
     flex-shrink: 0;
 }
 
 .people-sidebar__title {
-    font-size: var(--font-size-sm);
+    margin: 0 0 0.2rem;
+    font-size: 0.9375rem;
     font-weight: 700;
-    letter-spacing: -0.01em;
     color: var(--text-primary);
-    margin: 0 0 4px;
+    letter-spacing: -0.01em;
 }
 
 .people-sidebar__summary {
     margin: 0;
-    font-size: var(--font-size-xs);
+    font-size: 0.75rem;
     line-height: 1.45;
     color: var(--text-muted);
 }
 
 .people-sidebar__summary.is-active {
     color: var(--primary-dark);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .people-toggle-filters {
-    margin-top: var(--spacing-sm);
-    padding: 6px 10px;
-    border: 1px solid #dbe5ef;
+    display: none;
+    margin-top: 0.5rem;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid var(--border-color);
     background: #fff;
     color: var(--text-secondary);
-    border-radius: 8px;
-    font-size: 12px;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
-    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
-}
-
-.people-toggle-filters:hover {
-    border-color: #c7d4e2;
-    color: var(--text-primary);
-    background: #f8fafc;
-}
-
-.people-toggle-filters:focus-visible {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
 }
 
 .people-sidebar__scroll {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    padding: var(--spacing-lg);
-    -webkit-overflow-scrolling: touch;
+    padding: 1rem 1.1rem;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg);
+    gap: 1rem;
+    overflow: visible;
 }
 
 .people-sidebar.is-collapsed .people-sidebar__scroll,
@@ -231,92 +220,82 @@
 .people-field {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-xs);
+    gap: 0.35rem;
 }
 
 .people-field--split {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-md);
+    gap: 0.75rem;
 }
 
 .people-label {
-    font-size: var(--font-size-xs);
+    font-size: 0.8125rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 .people-hint {
-    font-size: var(--font-size-xs);
-    color: var(--text-muted);
     margin: 0;
+    font-size: 0.75rem;
     line-height: 1.4;
+    color: var(--text-muted);
 }
 
-/* Search */
 .people-search {
     position: relative;
-    display: flex;
-    align-items: center;
 }
 
 .people-search__icon {
     position: absolute;
-    left: 12px;
-    font-size: 1.125rem;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.05rem;
     color: var(--text-muted);
     pointer-events: none;
-    z-index: 1;
+}
+
+.people-search__input,
+.people-control {
+    width: 100%;
+    min-height: 2.5rem;
+    border-radius: 0.65rem !important;
+    border: 1px solid var(--border-color) !important;
+    background: #fff !important;
+    font-size: 0.875rem !important;
 }
 
 .people-search__input {
-    width: 100%;
-    padding-left: 2.5rem !important;
-    border-radius: 10px !important;
-    border: 1px solid #e2e8f0 !important;
-    background: var(--bg-primary) !important;
-    font-size: var(--font-size-sm) !important;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    padding-left: 2.35rem !important;
 }
 
-.people-search__input:hover {
-    border-color: #cbd5e1 !important;
-}
-
-.people-search__input:focus {
+.people-search__input:focus,
+.people-control:focus {
     border-color: var(--primary-color) !important;
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15) !important;
+    box-shadow: 0 0 0 3px rgba(3, 105, 161, 0.12) !important;
     outline: none !important;
 }
 
-/* Segmented type control */
 .people-type-segment {
     display: flex;
-    padding: 3px;
-    border-radius: 10px;
-    background: #e2e8f0;
-    gap: 3px;
+    gap: 0.25rem;
+    padding: 0.2rem;
+    border-radius: 0.65rem;
+    background: #f1f5f9;
 }
 
 .people-type-option {
     position: relative;
     flex: 1;
-    min-width: 0;
     margin: 0;
     cursor: pointer;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
 }
 
 .people-type-option input {
     position: absolute;
     opacity: 0;
     inset: 0;
-    width: 100%;
-    height: 100%;
     margin: 0;
     cursor: pointer;
 }
@@ -325,73 +304,48 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    padding: 8px 6px;
-    border-radius: 8px;
+    padding: 0.5rem 0.4rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
     color: var(--text-secondary);
-    background: transparent;
-    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.people-type-option input:hover + .people-type-option__ui {
-    color: var(--text-primary);
+    transition: background 0.15s ease, color 0.15s ease;
 }
 
 .people-type-option input:checked + .people-type-option__ui {
-    background: var(--bg-primary);
+    background: #fff;
     color: var(--primary-dark);
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-}
-
-.people-type-option input:focus-visible + .people-type-option__ui {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
-}
-
-/* Controls */
-.people-control {
-    width: 100%;
-    border-radius: 10px !important;
-    border: 1px solid #e2e8f0 !important;
-    background: var(--bg-primary) !important;
-    font-size: var(--font-size-sm) !important;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.people-control:hover {
-    border-color: #cbd5e1 !important;
-}
-
-.people-control:focus {
-    border-color: var(--primary-color) !important;
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12) !important;
-    outline: none !important;
-}
-
-.people-label--plain {
-    text-transform: none;
-    letter-spacing: -0.01em;
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    color: var(--text-primary);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 }
 
 .people-skills-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--spacing-sm);
-    margin-bottom: 6px;
+    gap: 0.5rem;
 }
 
-.people-skills-badge {
-    font-size: 11px;
-    font-weight: 600;
+.people-skills-clear {
+    margin: 0;
+    padding: 0.2rem 0.5rem;
+    border: none;
+    background: transparent;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    cursor: pointer;
+    border-radius: 0.35rem;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.people-skills-clear:hover {
+    background: rgba(3, 105, 161, 0.08);
     color: var(--primary-dark);
-    background: rgba(13, 148, 136, 0.1);
-    padding: 2px 8px;
-    border-radius: 999px;
-    white-space: nowrap;
+}
+
+.people-skills-clear:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
 }
 
 .people-sr-only {
@@ -406,133 +360,245 @@
     border: 0;
 }
 
-.people-skills-panel {
-    border: 1px solid #e8edf3;
-    border-radius: 12px;
-    background: var(--bg-primary);
-    overflow: hidden;
-    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
+.people-skills-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 0.35rem;
 }
 
-.people-skills-query {
-    display: block;
+.people-skills-preview__chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    background: #e0f2fe;
+    border: 1px solid #bae6fd;
+}
+
+.people-skills-dropdown {
+    position: relative;
+}
+
+.people-skills-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
     width: 100%;
+    min-height: 2.5rem;
+    padding: 0.5rem 0.75rem;
     margin: 0;
-    padding: 8px 12px;
-    font-size: 12px;
+    font-family: inherit;
+    font-size: 0.875rem;
     font-weight: 500;
     color: var(--text-primary);
-    background: #fafbfc;
-    border: none;
-    border-bottom: 1px solid #eef2f6;
-    transition: background 0.15s ease;
+    text-align: left;
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 0.65rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.people-skills-query::placeholder {
+.people-skills-trigger:hover {
+    border-color: #cbd5e1;
+}
+
+.people-skills-dropdown.is-open .people-skills-trigger {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(3, 105, 161, 0.12);
+}
+
+.people-skills-trigger:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.people-skills-trigger__text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-secondary);
+}
+
+.people-skills-dropdown.has-selection .people-skills-trigger__text {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.people-skills-trigger__caret {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+}
+
+.people-skills-dropdown.is-open .people-skills-trigger__caret {
+    transform: rotate(180deg);
+}
+
+.people-skills-menu {
+    position: fixed;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14), 0 2px 8px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+}
+
+.people-skills-menu[hidden] {
+    display: none !important;
+}
+
+.people-skills-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    background: #fff;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.people-skills-search__icon {
+    position: absolute;
+    left: 0.7rem;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.people-skills-search__input {
+    width: 100%;
+    margin: 0;
+    padding: 0.6rem 0.75rem 0.6rem 2.1rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    border: none;
+    background: transparent;
+}
+
+.people-skills-search__input::placeholder {
     color: var(--text-muted);
     font-weight: 400;
 }
 
-.people-skills-query:hover {
-    background: #f8fafc;
-}
-
-.people-skills-query:focus {
+.people-skills-search__input:focus {
     outline: none;
-    background: var(--bg-primary);
-    box-shadow: inset 0 0 0 2px rgba(13, 148, 136, 0.2);
+    box-shadow: inset 0 0 0 2px rgba(3, 105, 161, 0.18);
 }
 
-.people-skills-scroll {
-    max-height: 240px;
+.people-skills-menu__body {
+    flex: 1;
+    min-height: 0;
+    padding: 0.65rem;
     overflow-y: auto;
-    overflow-x: hidden;
-    padding: 8px 6px 10px 10px;
+    overscroll-behavior: contain;
     scrollbar-width: thin;
-    scrollbar-color: rgba(100, 116, 139, 0.45) transparent;
+    scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
 }
 
-.people-skills-scroll::-webkit-scrollbar {
-    width: 5px;
+.people-skills-menu__body::-webkit-scrollbar {
+    width: 4px;
 }
 
-.people-skills-scroll::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.people-skills-scroll::-webkit-scrollbar-thumb {
+.people-skills-menu__body::-webkit-scrollbar-thumb {
     background: rgba(100, 116, 139, 0.35);
     border-radius: 99px;
 }
 
-.people-skills-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(100, 116, 139, 0.55);
-}
-
-.skills-filter-list {
+.skills-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 0.15rem;
 }
 
-.skill-check-item {
+.skill-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.6rem;
     width: 100%;
-    padding: 6px 8px;
-    border-radius: 8px;
+    margin: 0;
+    padding: 0.45rem 0.5rem;
+    border-radius: 0.5rem;
     cursor: pointer;
     transition: background 0.12s ease;
 }
 
-.skill-check-item:hover {
-    background: #f8fafc;
+.skill-row:hover {
+    background: #f1f5f9;
 }
 
-.skill-check-input {
-    width: 15px;
-    height: 15px;
+.skill-row.is-active {
+    background: #ecfeff;
+}
+
+.skill-row__input {
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 auto;
     margin: 0;
     accent-color: var(--primary-color);
-    flex: 0 0 auto;
+    cursor: pointer;
 }
 
-.skill-check-label {
-    font-size: 12px;
+.skill-row__label {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.8125rem;
     font-weight: 500;
-    color: var(--text-secondary);
-    line-height: 1.3;
+    line-height: 1.35;
+    color: #334155;
 }
 
-.skill-check-item.is-active .skill-check-label {
-    color: var(--primary-dark);
+.skill-row.is-active .skill-row__label {
     font-weight: 600;
+    color: var(--primary-dark);
+}
+
+.skill-row__input:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.people-skills-empty {
+    margin: 0.5rem 0 0;
+    padding: 0.75rem;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: #fff;
+    border: 1px dashed #e2e8f0;
+    border-radius: 0.5rem;
 }
 
 .people-actions {
     display: flex;
-    gap: var(--spacing-sm);
-    margin: 10px var(--spacing-lg) var(--spacing-md);
+    gap: 0.5rem;
+    padding: 0 1.1rem 1rem;
 }
 
 .people-reset {
-    padding: 8px 12px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-muted);
-    background: transparent;
-    border: 1px solid rgba(13, 148, 136, 0.22);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
     flex: 1;
-}
-
-.people-reset:hover {
-    color: var(--primary-dark);
-    background: rgba(13, 148, 136, 0.06);
-    border-color: rgba(13, 148, 136, 0.35);
+    min-height: 2.25rem;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
 }
 
 .people-reset--primary {
@@ -541,212 +607,330 @@
     border-color: var(--primary-color);
 }
 
-.people-reset--primary:hover {
-    color: #fff;
-    background: var(--primary-dark);
-    border-color: var(--primary-dark);
-}
-
-.people-reset:focus-visible {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
-}
-
-/* —— Results —— */
+/* —— Results panel —— */
 .people-results {
     display: flex;
     flex-direction: column;
     min-width: 0;
-    background: var(--bg-primary);
+    overflow: hidden;
+}
+
+.people-results__head {
+    padding: 1rem 1.1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.people-segments {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.people-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0;
+    padding: 0.65rem 0.85rem;
+    text-align: left;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    background: #fff;
+    color: var(--text-primary);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.people-tab:hover {
+    border-color: rgba(3, 105, 161, 0.35);
+    background: #f8fafc;
+}
+
+.people-tab.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 1px var(--primary-color);
+    background: rgba(3, 105, 161, 0.05);
+}
+
+.people-tab[hidden] {
+    display: none;
+}
+
+.people-tab__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    color: var(--primary-color);
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.people-tab.active .people-tab__icon {
+    background: rgba(3, 105, 161, 0.15);
+}
+
+.people-tab__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+    min-width: 0;
+}
+
+.people-tab__count {
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+}
+
+.people-tab__label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
 }
 
 .people-results__toolbar {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--spacing-md);
-    padding: var(--spacing-lg);
-    border-bottom: 1px solid var(--border-color);
-    flex-shrink: 0;
+    gap: 0.75rem;
+    padding-bottom: 0.85rem;
 }
 
-.people-count {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
+.people-summary {
     margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
 }
 
-.people-count__value {
-    font-size: 1.75rem;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    font-variant-numeric: tabular-nums;
+.people-summary__value {
+    font-weight: 600;
     color: var(--text-primary);
-    line-height: 1;
-}
-
-.people-count__label {
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    color: var(--text-muted);
-}
-
-.people-count__loading {
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    color: var(--text-muted);
 }
 
 .people-sort {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: 0.5rem;
+    flex-shrink: 0;
 }
 
 .people-sort-label {
-    font-size: var(--font-size-xs);
+    font-size: 0.75rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
     color: var(--text-muted);
 }
 
 .people-sort__select {
     position: relative;
-    display: inline-flex;
-    align-items: center;
 }
 
 .people-control--sort {
-    min-width: 11.5rem;
-    padding-right: 2rem !important;
+    min-width: 10rem;
+    padding-right: 1.75rem !important;
     appearance: none;
     cursor: pointer;
 }
 
 .people-sort__caret {
     position: absolute;
-    right: 10px;
+    right: 0.6rem;
+    top: 50%;
+    transform: translateY(-50%);
     font-size: 0.75rem;
     color: var(--text-muted);
     pointer-events: none;
 }
 
 .people-list {
-    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
-    padding: var(--spacing-lg);
+    gap: 0.65rem;
+    padding: 1rem 1.1rem 1.1rem;
     min-height: 280px;
 }
 
-.people-list__loading {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 220px;
-    border-radius: 12px;
-    background: var(--bg-secondary);
-    border: 1px dashed #e2e8f0;
-}
-
-/* Empty */
+.people-list__loading,
 .people-empty {
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: var(--spacing-2xl) var(--spacing-lg);
-    min-height: 220px;
-    border-radius: 12px;
-    background: var(--bg-secondary);
-    border: 1px dashed #e2e8f0;
+    min-height: 200px;
+    padding: 2rem 1rem;
+    border-radius: 0.75rem;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
 }
 
 .people-empty-icon {
-    width: 52px;
-    height: 52px;
-    margin-bottom: var(--spacing-md);
-    border-radius: 14px;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 0.75rem;
+    border-radius: 0.75rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-muted);
-    font-size: 1.5rem;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    color: var(--primary-color);
+    font-size: 1.35rem;
 }
 
 .people-empty .empty-state-title {
-    font-size: var(--font-size-lg);
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
     font-weight: 700;
-    letter-spacing: -0.02em;
     color: var(--text-primary);
-    margin: 0 0 var(--spacing-xs);
 }
 
 .people-empty .empty-state-description {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+    margin: 0 0 1rem;
     max-width: 22rem;
-    margin: 0 0 var(--spacing-lg);
+    font-size: 0.875rem;
     line-height: 1.55;
-}
-
-.people-empty .empty-state-description code {
-    font-size: 0.85em;
-    padding: 0.12em 0.4em;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
+    color: var(--text-secondary);
 }
 
 .people-empty-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-sm);
+    gap: 0.5rem;
     justify-content: center;
 }
 
-/* Cards in this view */
+/* —— Person cards —— */
 .people-page .person-card {
-    border-radius: 14px;
-    border: 1px solid #e8edf3;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-    padding: var(--spacing-lg);
-    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
+    gap: 0.75rem 1rem;
+    align-items: center;
+    padding: 0.85rem 1rem;
+    border-radius: 0.85rem !important;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .people-page .person-card::before {
-    display: none;
+    display: none !important;
 }
 
 .people-page .person-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(13, 148, 136, 0.35);
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    transform: none !important;
+    border-color: rgba(3, 105, 161, 0.35) !important;
+}
+
+.people-page .person-avatar .avatar-placeholder {
+    width: 3rem;
+    height: 3rem;
+    font-size: 0.875rem;
+    border-width: 2px;
 }
 
 .people-page .person-card:hover .person-avatar .avatar-placeholder {
-    transform: scale(1.04);
+    transform: none !important;
 }
 
+.people-page .person-name {
+    font-size: 0.9375rem;
+    font-weight: 700;
+}
+
+.people-page .person-headline {
+    font-size: 0.8125rem;
+    margin-bottom: 0.25rem;
+    -webkit-line-clamp: 1;
+}
+
+.people-page .person-location {
+    font-size: 0.75rem;
+    margin-bottom: 0.35rem;
+}
+
+.people-page .person-meta {
+    margin-bottom: 0.35rem;
+    gap: 0.5rem 0.75rem;
+}
+
+.people-page .person-meta .meta-item {
+    font-size: 0.75rem;
+}
+
+.people-page .person-skills {
+    gap: 0.35rem;
+}
+
+.people-page .person-skills .skill-tag {
+    padding: 0.15rem 0.45rem;
+    font-size: 0.6875rem;
+}
+
+.people-page .person-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 7.5rem;
+    align-self: center;
+}
+
+.people-page .person-actions .btn {
+    width: 100%;
+    justify-content: center;
+    box-shadow: none !important;
+}
+
+.people-page .person-actions .btn:hover {
+    transform: none !important;
+}
+
+/* —— Desktop sticky sidebar —— */
+@media (min-width: 901px) {
+    .people-sidebar {
+        position: sticky;
+        top: calc(var(--header-height, 64px) + 12px);
+        align-self: start;
+    }
+}
+
+/* —— Mobile —— */
 @media (max-width: 900px) {
     .people-workspace {
         grid-template-columns: 1fr;
-        border-radius: 12px;
     }
 
-    .people-sidebar {
-        border-right: none;
-        border-bottom: 1px solid var(--border-color);
-        max-height: min(70vh, 520px);
+    .people-toggle-filters {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .people-sidebar__head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .people-sidebar__title {
+        flex: 1;
+        margin: 0;
+    }
+
+    .people-sidebar__summary {
+        display: none;
     }
 
     .people-field--split {
@@ -759,7 +943,6 @@
     }
 
     .people-sort {
-        width: 100%;
         justify-content: space-between;
     }
 
@@ -767,375 +950,23 @@
         flex: 1;
         min-width: 0;
     }
-}
 
-@media (min-width: 901px) {
-    .people-sidebar {
-        position: sticky;
-        top: calc(var(--header-height) + 12px);
-        align-self: start;
-        max-height: calc(100vh - var(--header-height) - 32px);
-    }
-}
-
-/* ===== Easy UI mode: cleaner + simpler ===== */
-.people-page .people-eyebrow {
-    display: none;
-}
-
-.people-page .people-intro {
-    margin-bottom: var(--spacing-lg);
-    padding-bottom: var(--spacing-md);
-}
-
-.people-page .people-intro__title {
-    font-size: clamp(1.5rem, 2.2vw, 1.9rem);
-    letter-spacing: -0.02em;
-}
-
-.people-page .people-intro__sub {
-    max-width: 30rem;
-    font-size: var(--font-size-sm);
-    color: var(--text-muted);
-}
-
-.people-page .people-workspace {
-    border-radius: 12px;
-    box-shadow: var(--shadow-sm);
-    border-color: #e7edf5;
-}
-
-.people-page .people-sidebar {
-    background: #fbfcfe;
-    border-right-color: #e7edf5;
-}
-
-.people-page .people-sidebar__head,
-.people-page .people-results__toolbar {
-    border-bottom-color: #e7edf5;
-}
-
-.people-page .people-label {
-    text-transform: none;
-    letter-spacing: 0;
-    font-size: var(--font-size-sm);
-    color: var(--text-primary);
-}
-
-.people-page .people-search__icon,
-.people-page .people-sort__caret {
-    opacity: 0.55;
-}
-
-.people-page .people-type-segment {
-    background: #eef2f7;
-    border-radius: 8px;
-}
-
-.people-page .people-type-option__ui {
-    border-radius: 6px;
-    padding: 7px 6px;
-    font-size: 12px;
-}
-
-.people-page .people-skills-panel {
-    border-radius: 10px;
-    box-shadow: none;
-    border-color: #e7edf5;
-}
-
-.people-page .people-skills-query {
-    font-size: 13px;
-    padding: 9px 12px;
-}
-
-.people-page .people-actions {
-    margin-top: 8px;
-}
-
-.people-page .people-reset {
-    font-size: 12px;
-    border-radius: 7px;
-    padding: 8px 10px;
-}
-
-.people-page .people-count__value {
-    font-size: 1.4rem;
-}
-
-.people-page .people-list {
-    padding-top: var(--spacing-md);
-}
-
-@media (max-width: 900px) {
-    .people-page .people-body {
-        padding-left: max(0px, env(safe-area-inset-left, 0px));
-        padding-right: max(0px, env(safe-area-inset-right, 0px));
-    }
-
-    .people-page .people-intro {
-        margin-bottom: var(--spacing-md);
-        padding-bottom: var(--spacing-sm);
-    }
-
-    .people-page .people-intro__title {
-        font-size: 1.35rem;
-    }
-
-    .people-page .people-intro__sub {
-        font-size: 13px;
-        line-height: 1.45;
-    }
-
-    .people-page .people-workspace {
-        border: none;
-        box-shadow: none;
-        border-radius: 0;
-        background: transparent;
-        gap: 10px;
-    }
-
-    .people-page .people-sidebar {
-        max-height: none;
-        background: #fff;
-        border: 1px solid #e7edf5;
-        border-radius: 12px;
-        overflow: hidden;
-    }
-
-    /* Collapsed: compact bar only */
-    .people-page .people-sidebar.is-collapsed {
-        align-self: stretch;
-    }
-
-    /* Expanded: cap height so results stay visible */
-    .people-page .people-sidebar:not(.is-collapsed) {
-        max-height: min(78vh, 640px);
-        display: flex;
-        flex-direction: column;
-    }
-
-    .people-page .people-sidebar:not(.is-collapsed) .people-sidebar__scroll {
-        flex: 1 1 auto;
-        min-height: 0;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .people-page .people-sidebar__head {
-        padding: 10px 12px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        flex-shrink: 0;
-        min-height: 48px;
-    }
-
-    .people-page .people-sidebar__title {
-        font-size: 14px;
-        font-weight: 700;
-        margin: 0;
-        flex: 1;
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .people-page .people-sidebar__summary {
-        display: none;
-    }
-
-    .people-page .people-toggle-filters {
-        margin: 0;
-        flex-shrink: 0;
-        min-height: 44px;
-        padding: 0 14px;
-        font-size: 12px;
-        font-weight: 600;
-        border-radius: 10px;
-        white-space: nowrap;
-    }
-
-    .people-page .people-sidebar__scroll {
-        padding: 12px;
-        gap: 14px;
-    }
-
-    .people-page .people-search__input {
-        min-height: 44px;
-    }
-
-    .people-page .people-control {
-        min-height: 44px;
-    }
-
-    .people-page .people-skills-scroll {
-        max-height: min(32vh, 200px);
-    }
-
-    .people-page .skill-check-item {
-        min-height: 44px;
-        padding: 8px 10px;
-    }
-
-    .people-page .people-actions {
-        margin: 0 12px 12px;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .people-page .people-reset {
-        width: 100%;
-        min-height: 44px;
-        font-size: 13px;
-    }
-
-    .people-page .people-results {
-        border: 1px solid #e7edf5;
-        border-radius: 12px;
-        overflow: hidden;
-        background: #fff;
-    }
-
-    .people-page .people-results__toolbar {
-        position: sticky;
-        top: var(--header-height);
-        z-index: 2;
-        padding: 12px;
-        gap: 10px;
-        background: rgba(255, 255, 255, 0.92);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-bottom: 1px solid #eef2f6;
-    }
-
-    .people-page .people-sort-label {
-        text-transform: none;
-        letter-spacing: 0;
-        font-size: 12px;
-    }
-
-    .people-page .people-list {
-        padding: 12px;
-        gap: 10px;
-        min-height: 200px;
-    }
-
-    .people-page .people-list__loading {
-        min-height: 160px;
-        border-radius: 10px;
-    }
-
-    .people-page .people-count__value {
-        font-size: 1.25rem;
-    }
-
-    .people-page .people-empty {
-        padding: var(--spacing-xl) var(--spacing-md);
-        min-height: 180px;
-    }
-
-    /* Directory cards: force compact grid whenever workspace is single-column (scoped > main.css) */
     .people-page .person-card {
-        display: grid;
-        grid-template-columns: 48px minmax(0, 1fr);
-        gap: 10px 12px;
-        padding: 12px 14px;
-        text-align: left;
-        align-items: start;
-    }
-
-    .people-page .person-avatar {
-        grid-column: 1;
-        grid-row: 1;
-    }
-
-    .people-page .person-info {
-        grid-column: 2;
-        grid-row: 1;
-        min-width: 0;
-        text-align: left;
+        grid-template-columns: 2.75rem minmax(0, 1fr);
+        gap: 0.65rem 0.75rem;
     }
 
     .people-page .person-actions {
         grid-column: 1 / -1;
-        grid-row: 2;
-        display: flex;
         flex-direction: row;
         flex-wrap: wrap;
-        gap: 8px;
         min-width: 0;
         width: 100%;
-        justify-content: flex-start;
     }
 
     .people-page .person-actions .btn {
-        flex: 1 1 calc(50% - 4px);
+        flex: 1 1 calc(50% - 0.2rem);
         min-width: 0;
-        justify-content: center;
-    }
-
-    .people-page .person-avatar .avatar-placeholder {
-        width: 48px;
-        height: 48px;
-        font-size: var(--font-size-base);
-        border-width: 2px;
-    }
-
-    .people-page .person-header {
-        justify-content: flex-start;
-        flex-wrap: wrap;
-        margin-bottom: 4px;
-        gap: var(--spacing-xs) var(--spacing-sm);
-    }
-
-    .people-page .person-name {
-        font-size: var(--font-size-lg);
-        line-height: 1.25;
-    }
-
-    .people-page .person-headline {
-        margin-bottom: 4px;
-    }
-
-    .people-page .person-location {
-        margin-bottom: 6px;
-        justify-content: flex-start;
-    }
-
-    .people-page .person-meta {
-        justify-content: flex-start;
-        gap: var(--spacing-sm) var(--spacing-md);
-        margin-bottom: 6px;
-    }
-
-    .people-page .person-skills {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        align-items: flex-start;
-        width: 100%;
-        margin-top: 4px;
-        gap: 6px;
-    }
-
-    .people-page .person-skills .skill-tag {
-        padding: 3px 8px;
-        font-size: 11px;
-    }
-
-    @media (hover: none) {
-        .people-page .person-card:hover {
-            transform: none;
-            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-        }
-
-        .people-page .person-card:hover .person-avatar .avatar-placeholder {
-            transform: none;
-        }
     }
 }
 </style>

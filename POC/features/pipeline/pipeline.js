@@ -718,6 +718,10 @@ async function loadOpportunitiesPipeline() {
             pipelineSelectedOppStage = 'draft';
         }
         selectOpportunityStage(pipelineSelectedOppStage);
+
+        if (window.seedStorageIndicator) {
+            void window.seedStorageIndicator.syncPageHint('#tab-opportunities .pipeline-stats', 'opportunities');
+        }
         
     } catch (error) {
         console.error('Error loading opportunities pipeline:', error);
@@ -761,6 +765,10 @@ async function loadApplicationsPipeline() {
             pipelineSelectedAppStage = 'pending';
         }
         selectApplicationStage(pipelineSelectedAppStage);
+
+        if (window.seedStorageIndicator) {
+            void window.seedStorageIndicator.syncPageHint('#tab-applications .pipeline-stats', 'applications');
+        }
     } catch (error) {
         console.error('Error loading applications pipeline:', error);
     }
@@ -1034,6 +1042,10 @@ async function loadPipelineMatchesTabContent() {
         pipelineMatchesViewModels.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
         updatePipelineMatchesSubtabCounts();
         renderPipelineMatchesList();
+
+        if (window.seedStorageIndicator) {
+            void window.seedStorageIndicator.syncPageHint('#pipeline-matches-summary', 'post_matches');
+        }
     } catch (error) {
         console.error('Error loading pipeline matches:', error);
         listEl.innerHTML = '<div class="empty-state">Error loading matches. Please try again.</div>';

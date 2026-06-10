@@ -315,6 +315,23 @@
         }
     }
 
+    /**
+     * Resolve a 1:1 messages route for the first other participant on a match.
+     * @param {Array<{userId?: string}>} participants
+     * @param {string} [currentUserId]
+     * @param {string|null|undefined} [preferredRoute]
+     * @returns {string|null}
+     */
+    function resolveMatchMessageRoute(participants, currentUserId, preferredRoute) {
+        const preferred = preferredRoute == null ? '' : String(preferredRoute);
+        if (preferred.startsWith('/messages/')) {
+            const partnerId = preferred.slice('/messages/'.length);
+            if (partnerId) return '/messages/' + partnerId;
+        }
+        const other = (participants || []).find(p => p.userId && p.userId !== currentUserId);
+        return other?.userId ? '/messages/' + other.userId : null;
+    }
+
     function getAvailableActions(vm) {
         const actions = [];
         const push = (id, label, kind, route, enabled = true) => {
@@ -322,6 +339,10 @@
         };
 
         push('view_details', 'View Details', 'primary', '/matches/' + vm.id, true);
+
+        if (vm.messageRoute && !vm.isExpired) {
+            push('message', 'Message', 'secondary', vm.messageRoute, true);
+        }
 
         if (vm.dealId) {
             push('view_deal', 'View Deal', 'primary', '/deals/' + vm.dealId, true);
@@ -579,9 +600,8 @@
         vm.canInviteToApply = !vm.isExpired && vm.status !== 'declined' && vm.status !== 'expired'
             && userCanInviteToApply(match, currentUserId, vm.internalMatchType);
 
-        const otherPart = (match.participants || []).find(p => p.userId && p.userId !== currentUserId);
-        if (otherPart?.userId) {
-            vm.messageRoute = '/messages/' + otherPart.userId;
+        vm.messageRoute = resolveMatchMessageRoute(match.participants, currentUserId);
+        if (vm.messageRoute) {
             vm.negotiationRoute = vm.messageRoute;
         }
 
@@ -988,6 +1008,7 @@
         getStatusLabel,
         getMatchQuality,
         getAvailableActions,
+        resolveMatchMessageRoute,
         getNextBestAction,
         detectSourceType,
         resolveViewerOpportunityIds,

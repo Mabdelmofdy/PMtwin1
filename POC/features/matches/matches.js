@@ -365,6 +365,10 @@ function renderMatchesList() {
     }
 
     listEl.innerHTML = '<div class="match-cards-grid">' + filtered.map(renderUnifiedMatchCardHtml).join('') + '</div>';
+
+    if (window.seedStorageIndicator) {
+        void window.seedStorageIndicator.syncPageHint('#matches-results-summary', 'post_matches');
+    }
 }
 
 function renderUnifiedMatchCardHtml(vm) {

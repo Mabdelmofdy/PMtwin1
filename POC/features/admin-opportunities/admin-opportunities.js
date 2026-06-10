@@ -232,6 +232,9 @@ async function loadAdminOpportunities() {
             Array.from(adminOppState.selected).filter(id => enriched.some(o => o.id === id))
         );
         renderAdminOppList();
+        if (window.seedStorageIndicator) {
+            void window.seedStorageIndicator.syncPageHint('.ao-hero', 'opportunities');
+        }
     } catch (error) {
         console.error('Error loading opportunities:', error);
         if (container) {

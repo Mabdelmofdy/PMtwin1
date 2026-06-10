@@ -137,16 +137,16 @@
                             <div class="form-group">
                                 <label for="branding-primary-color" class="form-label">Primary color</label>
                                 <div class="admin-settings-color-row">
-                                    <input type="color" id="branding-primary-color" name="primaryColor" value="#0d9488">
-                                    <input type="text" id="branding-primary-color-hex" class="form-input admin-settings-color-hex" value="#0d9488">
+                                    <input type="color" id="branding-primary-color" name="primaryColor" value="#0369a1">
+                                    <input type="text" id="branding-primary-color-hex" class="form-input admin-settings-color-hex" value="#0369a1">
                                 </div>
                                 <small class="form-help">Used for buttons, links, highlights.</small>
                             </div>
                             <div class="form-group">
                                 <label for="branding-primary-dark" class="form-label">Primary (dark variant)</label>
                                 <div class="admin-settings-color-row">
-                                    <input type="color" id="branding-primary-dark" name="primaryDark" value="#0f766e">
-                                    <input type="text" id="branding-primary-dark-hex" class="form-input admin-settings-color-hex" value="#0f766e">
+                                    <input type="color" id="branding-primary-dark" name="primaryDark" value="#075985">
+                                    <input type="text" id="branding-primary-dark-hex" class="form-input admin-settings-color-hex" value="#075985">
                                 </div>
                             </div>
                         </div>
@@ -154,8 +154,8 @@
                             <div class="form-group">
                                 <label for="branding-accent" class="form-label">Accent color</label>
                                 <div class="admin-settings-color-row">
-                                    <input type="color" id="branding-accent" name="accentColor" value="#2dd4bf">
-                                    <input type="text" id="branding-accent-hex" class="form-input admin-settings-color-hex" value="#2dd4bf">
+                                    <input type="color" id="branding-accent" name="accentColor" value="#38bdf8">
+                                    <input type="text" id="branding-accent-hex" class="form-input admin-settings-color-hex" value="#38bdf8">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -707,6 +707,7 @@
                                 <span class="admin-settings-stat-value" id="data-notifs-count">-</span>
                             </div>
                         </div>
+                        <div id="seed-canonical-compare-mount"></div>
                     </div>
                 </div>
 
@@ -901,8 +902,8 @@
 }
 
 .admin-settings-nav-item.is-active {
-    background: rgba(13, 148, 136, 0.12);
-    color: var(--primary-dark, #0f766e);
+    background: rgba(3, 105, 161, 0.12);
+    color: var(--primary-dark, #075985);
 }
 
 .admin-settings-nav-item.is-active i {
@@ -1099,7 +1100,7 @@
 }
 
 #preview-primary-dark { background: var(--primary-dark); }
-#preview-accent { background: #2dd4bf; color: #0f172a; }
+#preview-accent { background: #38bdf8; color: #0f172a; }
 
 /* Capability matrix */
 .admin-settings-cap-matrix {
@@ -1186,7 +1187,7 @@
 
 .admin-settings-weight-value {
     font-variant-numeric: tabular-nums;
-    color: var(--primary-dark, #0f766e);
+    color: var(--primary-dark, #075985);
     font-weight: 600;
 }
 
@@ -1259,8 +1260,8 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.25rem 0.6rem 0.25rem 0.75rem;
-    background: rgba(13, 148, 136, 0.1);
-    color: var(--primary-dark, #0f766e);
+    background: rgba(3, 105, 161, 0.1);
+    color: var(--primary-dark, #075985);
     border-radius: 999px;
     font-size: var(--font-size-xs);
     font-weight: 500;
@@ -1290,9 +1291,9 @@
 }
 
 .admin-settings-chip.is-toggle.is-active {
-    background: rgba(13, 148, 136, 0.12);
-    color: var(--primary-dark, #0f766e);
-    border-color: rgba(13, 148, 136, 0.4);
+    background: rgba(3, 105, 161, 0.12);
+    color: var(--primary-dark, #075985);
+    border-color: rgba(3, 105, 161, 0.4);
 }
 
 /* JSON editor */
@@ -1309,7 +1310,7 @@
 
 .admin-settings-json-editor:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.25);
+    box-shadow: 0 0 0 3px rgba(3, 105, 161, 0.25);
 }
 
 .admin-settings-json-actions {
@@ -1515,7 +1516,7 @@
 .admin-settings-storage-bar-fill {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, var(--primary-color), #2dd4bf);
+    background: linear-gradient(90deg, var(--primary-color), #38bdf8);
     transition: width 0.3s ease;
 }
 

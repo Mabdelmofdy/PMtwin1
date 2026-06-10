@@ -309,6 +309,9 @@ async function loadAdminContracts() {
         enriched.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         adminContractState.items = enriched;
         renderAdminContractsList();
+        if (window.seedStorageIndicator) {
+            void window.seedStorageIndicator.syncPageHint('.ao-hero', 'contracts');
+        }
     } catch (err) {
         console.error('Admin contracts load error:', err);
         if (container) {

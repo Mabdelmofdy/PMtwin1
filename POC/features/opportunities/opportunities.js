@@ -329,6 +329,7 @@ async function loadOpportunities() {
                 }
             });
         });
+
     } catch (error) {
         console.error('Error loading opportunities:', error);
         if (summaryEl) summaryEl.textContent = '';
@@ -339,6 +340,10 @@ async function loadOpportunities() {
             actionsHtml: '<button type="button" class="btn btn-secondary btn-sm" id="opp-retry-btn">Try again</button>'
         });
         document.getElementById('opp-retry-btn')?.addEventListener('click', () => loadOpportunities());
+    } finally {
+        if (window.seedStorageIndicator) {
+            void window.seedStorageIndicator.syncPageHint('#opportunities-summary', 'opportunities');
+        }
     }
 }
 

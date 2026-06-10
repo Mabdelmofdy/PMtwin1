@@ -112,6 +112,10 @@ async function loadHealth(opts) {
 
         gridEl.innerHTML = stats.map(s => renderHealthMetricCard(s.value, s.label, s.detail)).join('');
 
+        if (window.seedStorageIndicator) {
+            void window.seedStorageIndicator.renderCompareStrip('#seed-canonical-compare-mount');
+        }
+
         if (servicesEl) {
             const matchingAvailable = !!(window.matchingService || (typeof matchingService !== 'undefined' && matchingService));
             const dataAvailable = !!(window.dataService || (typeof dataService !== 'undefined' && dataService));

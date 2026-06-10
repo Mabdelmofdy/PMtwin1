@@ -339,6 +339,9 @@ async function loadAdminDeals() {
         enriched.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         adminDealState.items = enriched;
         renderAdminDealsList();
+        if (window.seedStorageIndicator) {
+            void window.seedStorageIndicator.syncPageHint('.ao-hero', 'deals');
+        }
     } catch (err) {
         console.error('Admin deals load error:', err);
         if (container) {

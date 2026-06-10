@@ -195,6 +195,10 @@ async function loadUsers() {
         adminUsersState.raw = [...users, ...companies];
         adminUsersState.items = umgmtManagedOnly(adminUsersState.raw);
         renderUserMgmtList();
+        if (window.seedStorageIndicator) {
+            void window.seedStorageIndicator.syncPageHint('.umgmt-helper', 'users');
+            void window.seedStorageIndicator.syncPageHint('.umgmt-stats-grid', 'companies');
+        }
     } catch (error) {
         console.error('Error loading users:', error);
         if (container) {

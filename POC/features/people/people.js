@@ -5,6 +5,13 @@
 let allPeople = [];
 let filteredPeople = [];
 let selectedSkills = new Set();
+let activeTab = 'discover';
+let connectedIds = new Set();
+let currentUserId = null;
+
+let skillsDropdownDocHandler = null;
+let skillsDropdownKeyHandler = null;
+let skillsDropdownRepositionHandler = null;
 
 function isCompanyProfile(person) {
     return (person.profile || {}).type === 'company';
@@ -44,26 +51,23 @@ function escapeHTML(s) {
 function setResultsCountLoading() {
     const el = document.getElementById('results-count');
     if (!el) return;
-    el.innerHTML = '<span class="people-count__loading">Loading…</span>';
+    el.innerHTML = '<span class="people-summary__value">Loading…</span>';
 }
 
 function setResultsCount(n) {
     const el = document.getElementById('results-count');
     if (!el) return;
     const num = Math.max(0, Number(n) || 0);
-    const val = document.createElement('span');
-    val.className = 'people-count__value';
-    val.textContent = String(num);
-    const lab = document.createElement('span');
-    lab.className = 'people-count__label';
-    lab.textContent = num === 1 ? 'profile' : 'profiles';
-    el.replaceChildren(val, lab);
+    const label = activeTab === 'network'
+        ? (num === 1 ? 'connection' : 'connections')
+        : (num === 1 ? 'profile' : 'profiles');
+    el.innerHTML = `<span class="people-summary__value">${num} ${label}</span>`;
 }
 
 function setResultsCountDash() {
     const el = document.getElementById('results-count');
     if (!el) return;
-    el.innerHTML = '<span class="people-count__loading">—</span>';
+    el.innerHTML = '<span class="people-summary__value">—</span>';
 }
 
 function updateFilterSummary() {
@@ -86,25 +90,153 @@ function updateFilterSummary() {
 }
 
 function updateSkillsSelectionBadge() {
-    const el = document.getElementById('people-skills-selected');
-    if (!el) return;
+    const clearBtn = document.getElementById('clear-skills-inline');
+    const labelEl = document.getElementById('skills-dropdown-label');
+    const dropdown = document.getElementById('people-skills-dropdown');
+    const preview = document.getElementById('people-skills-preview');
     const n = selectedSkills.size;
-    if (n === 0) {
-        el.setAttribute('hidden', '');
-        el.textContent = '';
+
+    if (clearBtn) {
+        if (n === 0) {
+            clearBtn.setAttribute('hidden', '');
+            clearBtn.textContent = 'Clear';
+        } else {
+            clearBtn.removeAttribute('hidden');
+            clearBtn.textContent = n === 1 ? 'Clear (1)' : `Clear (${n})`;
+        }
+    }
+
+    if (labelEl) {
+        if (n === 0) labelEl.textContent = 'Select skills…';
+        else if (n === 1) labelEl.textContent = '1 skill selected';
+        else labelEl.textContent = `${n} skills selected`;
+    }
+
+    dropdown?.classList.toggle('has-selection', n > 0);
+
+    if (preview) {
+        if (n === 0) {
+            preview.hidden = true;
+            preview.innerHTML = '';
+        } else {
+            preview.hidden = false;
+            preview.innerHTML = Array.from(selectedSkills)
+                .map(skill => `<span class="people-skills-preview__chip">${escapeHTML(skill)}</span>`)
+                .join('');
+        }
+    }
+}
+
+function positionSkillsMenu() {
+    const trigger = document.getElementById('skills-dropdown-trigger');
+    const menu = document.getElementById('skills-dropdown-menu');
+    if (!trigger || !menu || menu.hidden) return;
+
+    const rect = trigger.getBoundingClientRect();
+    const gap = 4;
+    const maxH = Math.min(280, window.innerHeight - rect.bottom - gap - 16);
+    menu.style.top = `${rect.bottom + gap}px`;
+    menu.style.left = `${rect.left}px`;
+    menu.style.width = `${Math.max(rect.width, 220)}px`;
+    menu.style.maxHeight = `${Math.max(160, maxH)}px`;
+}
+
+function teardownSkillsDropdownListeners() {
+    if (skillsDropdownDocHandler) {
+        document.removeEventListener('pointerdown', skillsDropdownDocHandler, true);
+        skillsDropdownDocHandler = null;
+    }
+    if (skillsDropdownKeyHandler) {
+        document.removeEventListener('keydown', skillsDropdownKeyHandler);
+        skillsDropdownKeyHandler = null;
+    }
+    if (skillsDropdownRepositionHandler) {
+        window.removeEventListener('resize', skillsDropdownRepositionHandler);
+        window.removeEventListener('scroll', skillsDropdownRepositionHandler, true);
+        skillsDropdownRepositionHandler = null;
+    }
+}
+
+function setSkillsDropdownOpen(open) {
+    const root = document.getElementById('people-skills-dropdown');
+    const trigger = document.getElementById('skills-dropdown-trigger');
+    const menu = document.getElementById('skills-dropdown-menu');
+    if (!root || !trigger || !menu) return;
+
+    root.classList.toggle('is-open', open);
+    trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    menu.hidden = !open;
+
+    if (open) {
+        positionSkillsMenu();
+        requestAnimationFrame(positionSkillsMenu);
+        if (!skillsDropdownRepositionHandler) {
+            skillsDropdownRepositionHandler = () => positionSkillsMenu();
+            window.addEventListener('resize', skillsDropdownRepositionHandler);
+            window.addEventListener('scroll', skillsDropdownRepositionHandler, true);
+        }
+        document.getElementById('skills-query')?.focus();
         return;
     }
-    el.removeAttribute('hidden');
-    el.textContent = `Selected: ${n}`;
+
+    menu.style.top = '';
+    menu.style.left = '';
+    menu.style.width = '';
+    menu.style.maxHeight = '';
+    if (skillsDropdownRepositionHandler) {
+        window.removeEventListener('resize', skillsDropdownRepositionHandler);
+        window.removeEventListener('scroll', skillsDropdownRepositionHandler, true);
+        skillsDropdownRepositionHandler = null;
+    }
+}
+
+function setupSkillsDropdown() {
+    const root = document.getElementById('people-skills-dropdown');
+    const trigger = document.getElementById('skills-dropdown-trigger');
+    if (!root || !trigger || root.dataset.dropdownBound === '1') return;
+    root.dataset.dropdownBound = '1';
+
+    teardownSkillsDropdownListeners();
+
+    skillsDropdownDocHandler = (e) => {
+        const dropdown = document.getElementById('people-skills-dropdown');
+        const btn = document.getElementById('skills-dropdown-trigger');
+        const panel = document.getElementById('skills-dropdown-menu');
+        if (!dropdown || !btn || !panel || panel.hidden) return;
+        if (btn.contains(e.target) || panel.contains(e.target)) return;
+        setSkillsDropdownOpen(false);
+    };
+
+    skillsDropdownKeyHandler = (e) => {
+        const dropdown = document.getElementById('people-skills-dropdown');
+        if (e.key === 'Escape' && dropdown?.classList.contains('is-open')) {
+            setSkillsDropdownOpen(false);
+            document.getElementById('skills-dropdown-trigger')?.focus();
+        }
+    };
+
+    document.addEventListener('pointerdown', skillsDropdownDocHandler, true);
+    document.addEventListener('keydown', skillsDropdownKeyHandler);
+
+    trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setSkillsDropdownOpen(!root.classList.contains('is-open'));
+    });
 }
 
 function filterSkillTagsVisibility() {
     const qEl = document.getElementById('skills-query');
     const q = (qEl?.value || '').trim().toLowerCase();
-    document.querySelectorAll('#skills-filter .skill-check-item').forEach(item => {
+    let visible = 0;
+    document.querySelectorAll('#skills-filter .skill-row').forEach(item => {
         const t = (item.dataset.skill || '').trim().toLowerCase();
-        item.style.display = !q || t.includes(q) ? '' : 'none';
+        const show = !q || t.includes(q);
+        item.style.display = show ? '' : 'none';
+        if (show) visible++;
     });
+    const emptyEl = document.getElementById('people-skills-empty');
+    if (emptyEl) emptyEl.hidden = visible > 0;
 }
 
 function setupSkillsQuery() {
@@ -119,14 +251,15 @@ function setupSkillsFilterHost() {
     if (!root || root.dataset.delegationBound === '1') return;
     root.dataset.delegationBound = '1';
     root.addEventListener('change', (e) => {
-        const input = e.target.closest('.skill-check-input');
+        const input = e.target.closest('.skill-row__input');
         if (!input || !root.contains(input)) return;
         const skill = input.value;
         if (!skill) return;
         if (input.checked) selectedSkills.add(skill);
         else selectedSkills.delete(skill);
-        const item = input.closest('.skill-check-item');
+        const item = input.closest('.skill-row');
         if (item) item.classList.toggle('is-active', input.checked);
+        updateSkillsSelectionBadge();
         applyFilters();
     });
 }
@@ -134,15 +267,15 @@ function setupSkillsFilterHost() {
 function renderSkillCheckItem(skill) {
     const active = selectedSkills.has(skill);
     const checked = active ? ' checked' : '';
-    const activeClass = active ? 'skill-check-item is-active' : 'skill-check-item';
+    const activeClass = active ? 'skill-row is-active' : 'skill-row';
     const skillAttr = escapeAttr(skill);
     const skillText = escapeHTML(skill);
-    return `<label class="${activeClass}" data-skill="${skillAttr}"><input type="checkbox" class="skill-check-input" value="${skillAttr}"${checked}><span class="skill-check-label">${skillText}</span></label>`;
+    return `<label class="${activeClass}" data-skill="${skillAttr}"><input type="checkbox" class="skill-row__input" value="${skillAttr}"${checked}><span class="skill-row__label">${skillText}</span></label>`;
 }
 
 function syncSkillChecklistUI() {
-    document.querySelectorAll('#skills-filter .skill-check-item').forEach(item => {
-        const input = item.querySelector('.skill-check-input');
+    document.querySelectorAll('#skills-filter .skill-row').forEach(item => {
+        const input = item.querySelector('.skill-row__input');
         const skill = input?.value || '';
         const active = selectedSkills.has(skill);
         if (input) input.checked = active;
@@ -163,16 +296,26 @@ async function initPeople() {
     }
     document.getElementById('page-cta-people-invite')?.addEventListener('click', (e) => {
         e.preventDefault();
+        switchToDiscoverTab();
         document.getElementById('people-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
     document.getElementById('page-cta-people-filter')?.addEventListener('click', (e) => {
         e.preventDefault();
+        const sidebar = document.querySelector('.people-sidebar');
+        if (sidebar?.classList.contains('is-collapsed')) {
+            sidebar.classList.remove('is-collapsed');
+            const toggleBtn = document.getElementById('toggle-filters');
+            toggleBtn?.setAttribute('aria-expanded', 'true');
+            if (toggleBtn) toggleBtn.textContent = 'Hide filters';
+        }
         document.getElementById('search-people')?.focus();
     });
 
     setupSkillsFilterHost();
     setupSkillsQuery();
+    setupSkillsDropdown();
     await loadPeople();
+    setupTabs();
     setupFilters();
     setupSearch();
     setupSort();
@@ -218,6 +361,8 @@ async function loadPeople() {
             return;
         }
         
+        await loadNetworkConnections();
+
         // Extract all skills for filter
         populateSkillsFilter();
         
@@ -235,6 +380,87 @@ async function loadPeople() {
             '</div>'
         ].join('');
     }
+}
+
+async function loadNetworkConnections() {
+    connectedIds = new Set();
+    const currentUser = authService.getCurrentUser();
+    currentUserId = currentUser?.id || null;
+
+    const networkTab = document.getElementById('people-tab-network');
+    if (!currentUser) {
+        networkTab?.setAttribute('hidden', '');
+        activeTab = 'discover';
+        syncTabUI();
+        updateTabCounts();
+        return;
+    }
+
+    networkTab?.removeAttribute('hidden');
+    const status = CONFIG?.CONNECTION_STATUS?.ACCEPTED || 'accepted';
+    const connections = await dataService.getConnectionsForUser(currentUser.id, status);
+    connections.forEach(conn => {
+        const otherId = conn.fromUserId === currentUser.id ? conn.toUserId : conn.fromUserId;
+        connectedIds.add(otherId);
+    });
+    updateTabCounts();
+}
+
+function personMatchesActiveTab(person) {
+    if (currentUserId && person.id === currentUserId) return false;
+    const isConnected = connectedIds.has(person.id);
+    if (activeTab === 'network') return isConnected;
+    return !isConnected;
+}
+
+function updateTabCounts() {
+    const networkEl = document.getElementById('network-count');
+    const discoverEl = document.getElementById('discover-count');
+    if (!networkEl || !discoverEl) return;
+
+    let networkCount = 0;
+    let discoverCount = 0;
+    allPeople.forEach(person => {
+        if (currentUserId && person.id === currentUserId) return;
+        if (connectedIds.has(person.id)) networkCount++;
+        else discoverCount++;
+    });
+
+    networkEl.textContent = String(networkCount);
+    discoverEl.textContent = String(discoverCount);
+}
+
+function syncTabUI() {
+    const list = document.getElementById('people-list');
+    document.querySelectorAll('.people-tab').forEach(tab => {
+        const isActive = tab.dataset.tab === activeTab;
+        tab.classList.toggle('active', isActive);
+        tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        if (isActive && list) {
+            list.setAttribute('aria-labelledby', tab.id || '');
+        }
+    });
+}
+
+function setupTabs() {
+    const tabs = document.querySelectorAll('.people-tab');
+    if (!tabs.length || document.getElementById('people-tabs')?.dataset.bound === '1') return;
+    document.getElementById('people-tabs').dataset.bound = '1';
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            if (tab.hasAttribute('hidden')) return;
+            activeTab = tab.dataset.tab || 'discover';
+            syncTabUI();
+            applyFilters();
+        });
+    });
+}
+
+function switchToDiscoverTab() {
+    activeTab = 'discover';
+    syncTabUI();
+    applyFilters();
 }
 
 function populateSkillsFilter() {
@@ -275,6 +501,7 @@ function setupFilters() {
     if (clearSkillsBtn) {
         clearSkillsBtn.addEventListener('click', clearSkillsOnly);
     }
+    document.getElementById('clear-skills-inline')?.addEventListener('click', clearSkillsOnly);
     const resetFiltersBtn = document.getElementById('reset-filters');
     if (resetFiltersBtn) {
         resetFiltersBtn.addEventListener('click', clearFilters);
@@ -321,6 +548,8 @@ function applyFilters() {
     // Filter people
     filteredPeople = allPeople.filter(person => {
         const profile = person.profile || {};
+
+        if (!personMatchesActiveTab(person)) return false;
         
         // Type filter
         if (selectedTypes.length > 0) {
@@ -445,6 +674,7 @@ function clearSkillsOnly() {
         filterSkillTagsVisibility();
     }
 
+    setSkillsDropdownOpen(false);
     applyFilters();
 }
 
@@ -473,6 +703,17 @@ async function displayPeople() {
                 '</div></div>'
             ].join('');
             document.getElementById('people-empty-reset')?.addEventListener('click', clearFilters);
+        } else if (activeTab === 'network') {
+            container.innerHTML = [
+                '<div class="people-empty" role="status">',
+                '<div class="people-empty-icon" aria-hidden="true"><i class="ph-duotone ph-users-three"></i></div>',
+                '<h2 class="empty-state-title">No connections yet</h2>',
+                '<p class="empty-state-description">People you connect with will appear here. Browse the directory to find professionals and companies to add to your network.</p>',
+                '<div class="people-empty-actions">',
+                '<button type="button" class="btn btn-primary" id="people-empty-discover">Browse Discover</button>',
+                '</div></div>'
+            ].join('');
+            document.getElementById('people-empty-discover')?.addEventListener('click', switchToDiscoverTab);
         } else {
             container.innerHTML = [
                 '<div class="people-empty" role="status">',

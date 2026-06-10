@@ -166,11 +166,11 @@
         },
         people: {
             label: 'Talent Network',
-            title: 'Browse Talent',
+            title: 'People & Companies',
             description:
-                'Search for qualified professionals, providers, and companies that match your project needs.',
-            primaryAction: { label: 'Invite Provider', id: 'page-cta-people-invite', type: 'button' },
-            secondaryAction: { label: 'Filter Talent', id: 'page-cta-people-filter', type: 'button' }
+                'Browse your network and discover new professionals and companies. Filter by skills, location, and availability.',
+            primaryAction: { label: 'Browse Discover', id: 'page-cta-people-invite', type: 'button' },
+            secondaryAction: { label: 'Open Filters', id: 'page-cta-people-filter', type: 'button' }
         },
         messages: {
             label: 'Communication',

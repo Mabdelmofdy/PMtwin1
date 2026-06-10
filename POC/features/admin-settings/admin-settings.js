@@ -24,9 +24,9 @@ const ADMIN_SETTINGS_DEFAULTS = {
         maintenanceMessage: ''
     },
     branding: {
-        primaryColor: '#0d9488',
-        primaryDark: '#0f766e',
-        accentColor: '#2dd4bf',
+        primaryColor: '#0369a1',
+        primaryDark: '#075985',
+        accentColor: '#38bdf8',
         bgSecondary: '#f8fafc',
         logoUrl: '',
         faviconUrl: '',
@@ -441,9 +441,9 @@ function initBrandingPanel() {
         if (!(await assertWrite())) return;
         const patch = {
             branding: {
-                primaryColor: getVal('branding-primary-color-hex') || '#0d9488',
-                primaryDark: getVal('branding-primary-dark-hex') || '#0f766e',
-                accentColor: getVal('branding-accent-hex') || '#2dd4bf',
+                primaryColor: getVal('branding-primary-color-hex') || '#0369a1',
+                primaryDark: getVal('branding-primary-dark-hex') || '#075985',
+                accentColor: getVal('branding-accent-hex') || '#38bdf8',
                 bgSecondary: getVal('branding-bg-secondary-hex') || '#f8fafc',
                 logoUrl: (getVal('branding-logo-url') || '').trim(),
                 faviconUrl: (getVal('branding-favicon-url') || '').trim(),
@@ -1283,6 +1283,10 @@ async function refreshDataPanel() {
             <div class="num">${formatBytes(r.bytes)}</div>
         `).join('');
         table.innerHTML = header + rows;
+    }
+
+    if (window.seedStorageIndicator) {
+        void window.seedStorageIndicator.renderCompareStrip('#seed-canonical-compare-mount');
     }
 }
 

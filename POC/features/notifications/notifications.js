@@ -376,6 +376,10 @@ async function loadNotifications() {
         if (typeof layoutService !== 'undefined' && typeof layoutService.updateNavigation === 'function') {
             void layoutService.updateNavigation();
         }
+
+        if (window.seedStorageIndicator) {
+            void window.seedStorageIndicator.syncPageHint('#notifications-summary', 'notifications');
+        }
     } catch (err) {
         console.error('Error loading notifications:', err);
         container.innerHTML = `

@@ -501,6 +501,10 @@ async function loadPostMatchDashboard(userId, isCompany) {
 
         const forList = buckets.recent.length ? buckets.recent : buckets.topByScore;
         await renderYourMatchesList(list, userId, forList.slice(0, 12));
+
+        if (window.seedStorageIndicator) {
+            void window.seedStorageIndicator.syncPageHint('#matches-results-summary', 'post_matches');
+        }
     } catch (e) {
         console.error('Error loading post-match dashboard:', e);
         if (emptyEl) emptyEl.hidden = false;
@@ -608,6 +612,23 @@ function getOneWayViewerRole(postMatch, currentUserId) {
  * Build view model for a post-match card (resolves opportunity titles and names).
  * For one_way, includes role-based title, section labels, and actions per viewer.
  */
+function firstOtherParticipantUserId(postMatch, currentUserId) {
+    const other = (postMatch.participants || []).find(p => p.userId && p.userId !== currentUserId);
+    return other?.userId || '';
+}
+
+function buildMatchMessageRoute(otherUserId) {
+    return otherUserId ? '/messages/' + otherUserId : null;
+}
+
+function resolveDashboardMessageRoute(match) {
+    const route = match.messageRoute;
+    if (route && String(route).startsWith('/messages/') && route.length > '/messages/'.length) {
+        return route;
+    }
+    return match.otherUserId ? '/messages/' + match.otherUserId : null;
+}
+
 async function buildPostMatchViewModel(postMatch, currentUserId) {
     const ds = dataService;
     const scorePct = Math.round((postMatch.matchScore || 0) * 100);
@@ -627,8 +648,7 @@ async function buildPostMatchViewModel(postMatch, currentUserId) {
         const offerOpp = await ds.getOpportunityById(payload.offerOpportunityId);
         const needTitle = needOpp?.title || 'Need';
         const offerTitle = offerOpp?.title || 'Offer';
-        const otherPart = (postMatch.participants || []).find(p => p.userId !== currentUserId);
-        const otherUserId = otherPart?.userId || '';
+        const otherUserId = firstOtherParticipantUserId(postMatch, currentUserId);
         const needOpportunityId = payload.needOpportunityId || '';
         const offerOpportunityId = payload.offerOpportunityId || '';
         const { isNeedOwner } = getOneWayViewerRole(postMatch, currentUserId);
@@ -667,7 +687,7 @@ async function buildPostMatchViewModel(postMatch, currentUserId) {
             secondaryActionRoute,
             tertiaryActionLabel,
             tertiaryActionRoute,
-            messageRoute: tertiaryActionRoute,
+            messageRoute: buildMatchMessageRoute(otherUserId),
             skills: extractMatchSkills(needOpp, offerOpp),
             searchText: [cardTitle, needTitle, offerTitle].join(' ')
         };
@@ -686,6 +706,7 @@ async function buildPostMatchViewModel(postMatch, currentUserId) {
         const theirNeed = theirNeedId ? await ds.getOpportunityById(theirNeedId) : null;
         const theirOffer = theirOfferId ? await ds.getOpportunityById(theirOfferId) : null;
         const otherUserId = isA ? (sideB.userId || '') : (sideA.userId || '');
+        const twoWayOtherId = otherUserId || firstOtherParticipantUserId(postMatch, currentUserId);
         return {
             ...base,
             yourNeedTitle: myNeed?.title || 'Your need',
@@ -693,8 +714,8 @@ async function buildPostMatchViewModel(postMatch, currentUserId) {
             theirNeedTitle: theirNeed?.title || 'Their need',
             theirOfferTitle: theirOffer?.title || 'Their offer',
             valueEquivalence: payload.valueEquivalence || '',
-            otherUserId,
-            messageRoute: '/messages/' + otherUserId,
+            otherUserId: twoWayOtherId,
+            messageRoute: buildMatchMessageRoute(twoWayOtherId),
             skills: extractMatchSkills(myNeed, myOffer, theirNeed, theirOffer),
             searchText: [myNeed?.title, myOffer?.title, theirNeed?.title, theirOffer?.title, payload.valueEquivalence].filter(Boolean).join(' ')
         };
@@ -708,11 +729,13 @@ async function buildPostMatchViewModel(postMatch, currentUserId) {
             return { role: r.role || 'Partner', partnerName: user?.profile?.name || r.userId };
         });
         const rolesResolved = await Promise.all(roles);
+        const otherUserId = firstOtherParticipantUserId(postMatch, currentUserId);
         return {
             ...base,
             projectTitle,
             roles: rolesResolved,
-            messageRoute: '/matches/' + postMatch.id,
+            otherUserId,
+            messageRoute: buildMatchMessageRoute(otherUserId),
             skills: extractMatchSkills(leadOpp),
             searchText: [projectTitle, ...rolesResolved.map(r => r.partnerName), ...rolesResolved.map(r => r.role)].join(' ')
         };
@@ -728,12 +751,14 @@ async function buildPostMatchViewModel(postMatch, currentUserId) {
         const youReceiveNeedOpp = youReceiveLink?.needId ? await ds.getOpportunityById(youReceiveLink.needId) : null;
         const names = await Promise.all(cycle.map(uid => ds.getUserOrCompanyById(uid).then(u => u?.profile?.name || uid)));
         const cycleLabel = cycle.map((uid, i) => (uid === currentUserId ? 'You' : (names[i] || uid))).join(' → ') + ' → You';
+        const otherUserId = firstOtherParticipantUserId(postMatch, currentUserId);
         return {
             ...base,
             cycleLabel,
             youGiveTitle: youGiveOpp?.title || 'Your offer',
             youReceiveTitle: youReceiveNeedOpp ? `Need: ${youReceiveNeedOpp.title}` : 'Their need',
-            messageRoute: '/matches/' + postMatch.id,
+            otherUserId,
+            messageRoute: buildMatchMessageRoute(otherUserId),
             skills: extractMatchSkills(youGiveOpp, youReceiveNeedOpp),
             searchText: [cycleLabel, youGiveOpp?.title, youReceiveNeedOpp?.title].filter(Boolean).join(' ')
         };
@@ -898,6 +923,10 @@ function renderDashboardMatchCard(match) {
     const title = getMatchCardTitle(match);
     const skills = (match.skills || []).slice(0, 5);
     const body = renderMatchNeedOfferBody(match);
+    const messageRoute = resolveDashboardMessageRoute(match);
+    const messageBtn = messageRoute
+        ? `<a href="#" data-route="${escDash(messageRoute)}" class="btn btn-secondary btn-sm">Message</a>`
+        : '';
     return `<article class="dashboard-match-card">
         <div class="dashboard-match-main">
             <div class="dashboard-match-topline">
@@ -912,7 +941,7 @@ function renderDashboardMatchCard(match) {
             ${match.canRespond ? `<button type="button" class="btn btn-primary btn-sm btn-accept-match" data-match-id="${escDash(match.id)}">Accept</button>
             <button type="button" class="btn btn-outline btn-sm btn-decline-match" data-match-id="${escDash(match.id)}">Decline</button>` : ''}
             <a href="#" data-route="/matches/${escDash(match.id)}" class="btn btn-${match.canRespond ? 'outline' : 'primary'} btn-sm">View details</a>
-            <a href="#" data-route="${escDash(match.messageRoute || ('/matches/' + match.id))}" class="btn btn-secondary btn-sm">Message</a>
+            ${messageBtn}
         </div>
     </article>`;
 }

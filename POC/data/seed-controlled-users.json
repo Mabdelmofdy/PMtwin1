@@ -1,655 +1,1095 @@
 {
   "domain": "users",
-  "version": "1.0",
-  "description": "Controlled seed users for 25-post matching scenarios (password: password123)",
+  "version": "2.0",
+  "description": "Canonical 25-opportunity workflow users. Shared password: Pmtwin@2026 (Base64 in passwordHash). Profiles enriched to clear GAP-P05 (>=70%).",
   "data": [
     {
       "id": "seed-user-001",
-      "email": "seed-user-1@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "khalid.alharbi@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 6,
       "profile": {
-        "name": "Scenario A Need Owner",
+        "name": "Khalid Al-Harbi",
         "type": "professional",
-        "headline": "Architect",
-        "title": "Architect",
+        "headline": "Senior Architect — Sustainable Design",
+        "title": "Senior Architect",
         "phone": "+966 55 001 2000",
         "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Senior architect with 9+ years leading sustainable, BIM-driven building design across Saudi Arabia, focused on LEED-certified commercial and mixed-use developments.",
+        "photoUrl": "https://i.pravatar.cc/150?img=11",
         "specializations": [
-          "Architect"
+          "Architecture",
+          "Sustainable Design"
         ],
         "skills": [
-          "Architect"
+          "BIM",
+          "3D Visualization",
+          "Sustainable Design",
+          "LEED Certification",
+          "Architectural Design"
         ],
         "sectors": [
           "Construction",
-          "Infrastructure"
+          "Architecture"
         ],
         "yearsExperience": 9,
+        "certifications": [
+          "LEED AP BD+C",
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Riyadh Mixed-Use Tower",
+            "description": "LEED Gold design lead for a 40-storey mixed-use tower.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-002",
-      "email": "seed-user-2@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "sara.almutairi@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 7,
       "profile": {
-        "name": "Scenario A/B/C Offer Owner",
+        "name": "Sara Al-Mutairi",
         "type": "professional",
-        "headline": "Multi-offer professional",
-        "title": "Multi-offer professional",
+        "headline": "Architectural & BIM Consultant",
+        "title": "BIM Consultant",
         "phone": "+966 55 002 2000",
         "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Multi-disciplinary architectural consultant offering BIM modelling, Revit detailing and structural coordination services to developers and contractors.",
+        "photoUrl": "https://i.pravatar.cc/150?img=5",
         "specializations": [
-          "Multi-offer professional"
+          "BIM Modelling",
+          "Architectural Design"
         ],
         "skills": [
-          "Multi-offer professional"
+          "BIM",
+          "Revit",
+          "Architectural Design",
+          "Structural Analysis",
+          "SAP2000"
         ],
         "sectors": [
           "Construction",
-          "Infrastructure"
+          "Architecture"
         ],
         "yearsExperience": 10,
+        "certifications": [
+          "Autodesk Revit Certified Professional",
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Jeddah Waterfront Complex",
+            "description": "Lead BIM coordinator across architecture and MEP packages.",
+            "year": 2023
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "project",
+          "retainer"
+        ],
+        "primaryDomain": "Construction",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-003",
-      "email": "seed-user-3@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "faisal.alotaibi@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 8,
       "profile": {
-        "name": "Scenario D Need Owner",
+        "name": "Faisal Al-Otaibi",
         "type": "professional",
-        "headline": "Architect",
+        "headline": "Architect — Commercial Projects",
         "title": "Architect",
         "phone": "+966 55 003 2000",
         "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Architect specializing in commercial and retail developments, leading concept-to-delivery design teams for clients across the central region.",
+        "photoUrl": "https://i.pravatar.cc/150?img=12",
         "specializations": [
-          "Architect"
+          "Architecture",
+          "Concept Design"
         ],
         "skills": [
-          "Architect"
+          "Architectural Design",
+          "BIM",
+          "Revit",
+          "Concept Design",
+          "Space Planning"
         ],
         "sectors": [
           "Construction",
-          "Infrastructure"
+          "Architecture"
         ],
         "yearsExperience": 11,
+        "certifications": [
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Riyadh Retail Plaza",
+            "description": "Lead architect for a 25,000 sqm retail development.",
+            "year": 2022
+          }
+        ],
+        "preferredWorkMode": "On-Site",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-004",
-      "email": "seed-user-4@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "noura.aldossari@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 9,
       "profile": {
-        "name": "Scenario D Offer Owner",
+        "name": "Noura Al-Dossari",
         "type": "professional",
-        "headline": "Architect",
+        "headline": "Architect — Interior & Fit-Out",
         "title": "Architect",
         "phone": "+966 55 004 2000",
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Jeddah, Saudi Arabia",
+        "locationCity": "Jeddah",
+        "bio": "Architect with a focus on interior architecture and fit-out, delivering hospitality and office interiors with strong sustainability credentials.",
+        "photoUrl": "https://i.pravatar.cc/150?img=20",
         "specializations": [
-          "Architect"
+          "Interior Architecture",
+          "Fit-Out"
         ],
         "skills": [
-          "Architect"
+          "Architectural Design",
+          "Interior Design",
+          "3D Visualization",
+          "BIM",
+          "Sustainable Design"
         ],
         "sectors": [
           "Construction",
-          "Infrastructure"
+          "Architecture"
         ],
         "yearsExperience": 12,
+        "certifications": [
+          "LEED Green Associate",
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Boutique Hotel Interiors",
+            "description": "Interior architecture lead for a 120-key boutique hotel.",
+            "year": 2023
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-005",
-      "email": "seed-user-5@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "omar.alshehri@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 10,
       "profile": {
-        "name": "Scenario E Need Owner",
+        "name": "Omar Al-Shehri",
         "type": "professional",
-        "headline": "Civil Engineer",
+        "headline": "Civil Engineer — Infrastructure",
         "title": "Civil Engineer",
         "phone": "+966 55 005 2000",
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Dammam, Saudi Arabia",
+        "locationCity": "Dammam",
+        "bio": "Civil engineer delivering roads, drainage and site infrastructure for large developments, with hands-on site supervision experience.",
+        "photoUrl": "https://i.pravatar.cc/150?img=13",
         "specializations": [
-          "Civil Engineer"
+          "Civil Engineering",
+          "Infrastructure"
         ],
         "skills": [
-          "Civil Engineer"
+          "Site Planning",
+          "Surveying",
+          "Road Design",
+          "Drainage Design",
+          "AutoCAD Civil 3D"
         ],
         "sectors": [
           "Construction",
           "Infrastructure"
         ],
         "yearsExperience": 13,
+        "certifications": [
+          "Saudi Council of Engineers",
+          "PMP"
+        ],
+        "caseStudies": [
+          {
+            "title": "Eastern Province Road Network",
+            "description": "Civil lead for 18 km of urban road and drainage works.",
+            "year": 2021
+          }
+        ],
+        "preferredWorkMode": "On-Site",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Infrastructure",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-006",
-      "email": "seed-user-6@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "hessa.alqahtani@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 11,
       "profile": {
-        "name": "Scenario E Offer Owner",
+        "name": "Hessa Al-Qahtani",
         "type": "professional",
-        "headline": "Civil Engineer",
+        "headline": "Civil Engineer — Site Works",
         "title": "Civil Engineer",
         "phone": "+966 55 006 2000",
         "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Civil engineer providing site planning, surveying and earthworks design services for commercial and residential developments.",
+        "photoUrl": "https://i.pravatar.cc/150?img=16",
         "specializations": [
-          "Civil Engineer"
+          "Civil Engineering",
+          "Site Works"
         ],
         "skills": [
-          "Civil Engineer"
+          "Site Planning",
+          "Surveying",
+          "Earthworks",
+          "AutoCAD Civil 3D",
+          "Quantity Surveying"
         ],
         "sectors": [
           "Construction",
           "Infrastructure"
         ],
         "yearsExperience": 14,
+        "certifications": [
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Residential Compound Earthworks",
+            "description": "Site grading and drainage design for a 300-villa compound.",
+            "year": 2022
+          }
+        ],
+        "preferredWorkMode": "On-Site",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Infrastructure",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-007",
-      "email": "seed-user-7@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "yousef.alghamdi@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 12,
       "profile": {
-        "name": "Scenario F Legacy Owner",
+        "name": "Yousef Al-Ghamdi",
         "type": "professional",
-        "headline": "Legacy post",
-        "title": "Legacy post",
+        "headline": "Construction Manager",
+        "title": "Construction Manager",
         "phone": "+966 55 007 2000",
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Jeddah, Saudi Arabia",
+        "locationCity": "Jeddah",
+        "bio": "Construction manager with two decades of experience delivering turnkey building projects, coordinating multi-trade teams and subcontractors.",
+        "photoUrl": "https://i.pravatar.cc/150?img=14",
         "specializations": [
-          "Legacy post"
+          "Construction Management",
+          "General Contracting"
         ],
         "skills": [
-          "Legacy post"
+          "Construction Management",
+          "Project Scheduling",
+          "Cost Control",
+          "Site Supervision",
+          "Procurement"
         ],
         "sectors": [
           "Construction",
           "Infrastructure"
         ],
         "yearsExperience": 15,
+        "certifications": [
+          "PMP",
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Commercial Tower Delivery",
+            "description": "Construction manager for a 30-floor commercial tower.",
+            "year": 2020
+          }
+        ],
+        "preferredWorkMode": "On-Site",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-008",
-      "email": "seed-user-8@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "mansour.alzahrani@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 13,
       "profile": {
-        "name": "Barter User A",
+        "name": "Mansour Al-Zahrani",
         "type": "professional",
-        "headline": "MEP / Architect barter",
-        "title": "MEP / Architect barter",
+        "headline": "MEP Engineer",
+        "title": "MEP Engineer",
         "phone": "+966 55 008 2000",
         "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "MEP engineer designing mechanical, electrical and plumbing systems for commercial buildings, open to barter exchanges with architecture teams.",
+        "photoUrl": "https://i.pravatar.cc/150?img=15",
         "specializations": [
-          "MEP / Architect barter"
+          "MEP Engineering",
+          "HVAC Design"
         ],
         "skills": [
-          "MEP / Architect barter"
+          "MEP Design",
+          "HVAC",
+          "Electrical Design",
+          "Plumbing Design",
+          "Revit MEP"
         ],
         "sectors": [
           "Construction",
           "Infrastructure"
         ],
         "yearsExperience": 16,
+        "certifications": [
+          "Saudi Council of Engineers",
+          "ASHRAE Member"
+        ],
+        "caseStudies": [
+          {
+            "title": "Office Tower MEP",
+            "description": "MEP design lead for a LEED-certified office tower.",
+            "year": 2023
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "project",
+          "barter"
+        ],
+        "primaryDomain": "Construction",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-009",
-      "email": "seed-user-9@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "layla.alsubaie@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 14,
       "profile": {
-        "name": "Barter User B",
+        "name": "Layla Al-Subaie",
         "type": "professional",
-        "headline": "Architect / MEP barter",
-        "title": "Architect / MEP barter",
+        "headline": "Architect — Barter Exchange",
+        "title": "Architect",
         "phone": "+966 55 009 2000",
         "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Architect open to barter collaborations, exchanging design services with MEP and structural specialists on shared developments.",
+        "photoUrl": "https://i.pravatar.cc/150?img=9",
         "specializations": [
-          "Architect / MEP barter"
+          "Architecture",
+          "Design Coordination"
         ],
         "skills": [
-          "Architect / MEP barter"
+          "Architectural Design",
+          "BIM",
+          "Design Coordination",
+          "3D Visualization",
+          "Revit"
         ],
         "sectors": [
           "Construction",
-          "Infrastructure"
+          "Architecture"
         ],
         "yearsExperience": 17,
+        "certifications": [
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Barter-Based Villa Series",
+            "description": "Exchanged architecture services for MEP design across 6 villas.",
+            "year": 2022
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "project",
+          "barter"
+        ],
+        "primaryDomain": "Construction",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-010",
-      "email": "seed-user-10@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "abdullah.alrashid@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 15,
       "profile": {
-        "name": "Consortium Lead",
+        "name": "Abdullah Al-Rashid",
         "type": "professional",
-        "headline": "Project Management",
-        "title": "Project Management",
+        "headline": "Project Manager — Consortium Lead",
+        "title": "Project Manager",
         "phone": "+966 55 010 2000",
         "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Senior project manager leading multi-disciplinary consortia on large infrastructure programs, specializing in design-build delivery and risk control.",
+        "photoUrl": "https://i.pravatar.cc/150?img=17",
         "specializations": [
-          "Project Management"
+          "Project Management",
+          "Program Delivery"
         ],
         "skills": [
-          "Project Management"
+          "Project Management",
+          "Program Management",
+          "Risk Management",
+          "Stakeholder Management",
+          "Primavera P6"
         ],
         "sectors": [
           "Construction",
           "Infrastructure"
         ],
         "yearsExperience": 18,
+        "certifications": [
+          "PMP",
+          "PMI-RMP",
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Highway Design-Build Program",
+            "description": "Consortium lead PM for a multi-package highway program.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "consortium",
+          "project"
+        ],
+        "primaryDomain": "Infrastructure",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-011",
-      "email": "seed-user-11@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "reem.alharbi@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 16,
       "profile": {
-        "name": "Consortium Partner Architect",
+        "name": "Reem Al-Harbi",
         "type": "professional",
-        "headline": "Architect",
+        "headline": "Architect — Consortium Partner",
         "title": "Architect",
         "phone": "+966 55 011 2000",
         "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Architect partnering in consortia to deliver the design package on large infrastructure and mixed-use programs.",
+        "photoUrl": "https://i.pravatar.cc/150?img=10",
         "specializations": [
-          "Architect"
+          "Architecture",
+          "Infrastructure Design"
         ],
         "skills": [
-          "Architect"
+          "Architectural Design",
+          "BIM",
+          "Infrastructure Design",
+          "Revit",
+          "Design Coordination"
         ],
         "sectors": [
           "Construction",
           "Infrastructure"
         ],
         "yearsExperience": 19,
+        "certifications": [
+          "Saudi Council of Engineers",
+          "LEED Green Associate"
+        ],
+        "caseStudies": [
+          {
+            "title": "Highway Interchange Architecture",
+            "description": "Architectural package lead within a highway consortium.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "consortium",
+          "project"
+        ],
+        "primaryDomain": "Infrastructure",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-012",
-      "email": "seed-user-12@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "tariq.almaliki@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 17,
       "profile": {
-        "name": "Consortium Partner Civil",
+        "name": "Tariq Al-Maliki",
         "type": "professional",
-        "headline": "Civil Engineer",
+        "headline": "Civil Engineer — Consortium Partner",
         "title": "Civil Engineer",
         "phone": "+966 55 012 2000",
         "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Civil engineer delivering roadworks, structures and drainage within consortium-led infrastructure programs.",
+        "photoUrl": "https://i.pravatar.cc/150?img=18",
         "specializations": [
-          "Civil Engineer"
+          "Civil Engineering",
+          "Roadworks"
         ],
         "skills": [
-          "Civil Engineer"
+          "Road Design",
+          "Structural Analysis",
+          "Drainage Design",
+          "AutoCAD Civil 3D",
+          "Site Supervision"
         ],
         "sectors": [
           "Construction",
           "Infrastructure"
         ],
         "yearsExperience": 20,
+        "certifications": [
+          "Saudi Council of Engineers",
+          "PMP"
+        ],
+        "caseStudies": [
+          {
+            "title": "Highway Civil Works",
+            "description": "Civil package lead within a highway design-build consortium.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "consortium",
+          "project"
+        ],
+        "primaryDomain": "Infrastructure",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-013",
-      "email": "seed-user-13@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "bandar.alanazi@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 18,
       "profile": {
-        "name": "Circular User A",
+        "name": "Bandar Al-Anazi",
         "type": "professional",
-        "headline": "Equipment",
-        "title": "Equipment",
+        "headline": "Heavy Equipment Provider",
+        "title": "Equipment Manager",
         "phone": "+966 55 013 2000",
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Dammam, Saudi Arabia",
+        "locationCity": "Dammam",
+        "bio": "Provider of heavy construction equipment and plant, offering machinery and operators on rental or exchange terms for civil works.",
+        "photoUrl": "https://i.pravatar.cc/150?img=51",
         "specializations": [
-          "Equipment"
+          "Heavy Equipment",
+          "Plant Hire"
         ],
         "skills": [
-          "Equipment"
+          "Equipment Management",
+          "Plant Hire",
+          "Logistics",
+          "Fleet Maintenance",
+          "Operator Staffing"
         ],
         "sectors": [
           "Construction",
           "Infrastructure"
         ],
         "yearsExperience": 21,
+        "certifications": [
+          "OSHA Equipment Safety",
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Earthmoving Fleet Supply",
+            "description": "Supplied graders and excavators for a major earthworks package.",
+            "year": 2023
+          }
+        ],
+        "preferredWorkMode": "On-Site",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "barter",
+          "project"
+        ],
+        "primaryDomain": "Infrastructure",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-014",
-      "email": "seed-user-14@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "maha.aljuhani@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 19,
       "profile": {
-        "name": "Circular User B",
+        "name": "Maha Al-Juhani",
         "type": "professional",
-        "headline": "Real Estate",
-        "title": "Real Estate",
+        "headline": "Real Estate Development Manager",
+        "title": "Real Estate Manager",
         "phone": "+966 55 014 2000",
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Jeddah, Saudi Arabia",
+        "locationCity": "Jeddah",
+        "bio": "Real estate development manager structuring land, feasibility and development deals, frequently exchanging services within project consortia.",
+        "photoUrl": "https://i.pravatar.cc/150?img=23",
         "specializations": [
-          "Real Estate"
+          "Real Estate Development",
+          "Feasibility"
         ],
         "skills": [
-          "Real Estate"
+          "Real Estate Development",
+          "Feasibility Studies",
+          "Market Analysis",
+          "Investment Appraisal",
+          "Land Acquisition"
         ],
         "sectors": [
-          "Construction",
-          "Infrastructure"
+          "Real Estate",
+          "Construction"
         ],
         "yearsExperience": 22,
+        "certifications": [
+          "RICS Member",
+          "Saudi Real Estate Authority"
+        ],
+        "caseStudies": [
+          {
+            "title": "Mixed-Use Land Development",
+            "description": "Led feasibility and structuring for a mixed-use district.",
+            "year": 2023
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "barter",
+          "project"
+        ],
+        "primaryDomain": "Real Estate",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-015",
-      "email": "seed-user-15@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "rana.alfaraj@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 20,
       "profile": {
-        "name": "Circular User C",
+        "name": "Rana Al-Faraj",
         "type": "professional",
-        "headline": "Accounting",
-        "title": "Accounting",
+        "headline": "Accounting & Finance Consultant",
+        "title": "Finance Consultant",
         "phone": "+966 55 015 2000",
         "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Accounting and finance consultant supporting construction firms with project accounting, cost reporting and VAT compliance, open to service exchanges.",
+        "photoUrl": "https://i.pravatar.cc/150?img=25",
         "specializations": [
-          "Accounting"
+          "Accounting",
+          "Project Finance"
         ],
         "skills": [
-          "Accounting"
+          "Project Accounting",
+          "Cost Reporting",
+          "VAT Compliance",
+          "Financial Modelling",
+          "Auditing"
         ],
         "sectors": [
-          "Construction",
-          "Infrastructure"
+          "Finance",
+          "Construction"
         ],
         "yearsExperience": 23,
+        "certifications": [
+          "SOCPA",
+          "CMA"
+        ],
+        "caseStudies": [
+          {
+            "title": "Contractor Cost System",
+            "description": "Implemented project cost accounting for a mid-size contractor.",
+            "year": 2022
+          }
+        ],
+        "preferredWorkMode": "Remote",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "barter",
+          "retainer"
+        ],
+        "primaryDomain": "Finance",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-016",
-      "email": "seed-user-16@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "saad.alamri@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 21,
       "profile": {
-        "name": "Filler Structural",
+        "name": "Saad Al-Amri",
         "type": "professional",
         "headline": "Structural Engineer",
         "title": "Structural Engineer",
         "phone": "+966 55 016 2000",
         "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Structural engineer specializing in steel and concrete structures, providing analysis and detailed design for commercial and industrial buildings.",
+        "photoUrl": "https://i.pravatar.cc/150?img=33",
         "specializations": [
-          "Structural Engineer"
+          "Structural Engineering",
+          "Steel Design"
         ],
         "skills": [
-          "Structural Engineer"
+          "Structural Analysis",
+          "SAP2000",
+          "ETABS",
+          "Steel Design",
+          "Concrete Design"
         ],
         "sectors": [
           "Construction",
           "Infrastructure"
         ],
         "yearsExperience": 24,
+        "certifications": [
+          "Saudi Council of Engineers",
+          "PE Structural"
+        ],
+        "caseStudies": [
+          {
+            "title": "Industrial Warehouse Structure",
+            "description": "Structural design lead for a 12,000 sqm steel warehouse.",
+            "year": 2023
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-017",
-      "email": "seed-user-17@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "huda.albalawi@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 22,
       "profile": {
-        "name": "Filler PM",
+        "name": "Huda Al-Balawi",
         "type": "professional",
-        "headline": "Project Management",
-        "title": "Project Management",
+        "headline": "Project Manager — Delivery",
+        "title": "Project Manager",
         "phone": "+966 55 017 2000",
         "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Project manager focused on delivery governance, scheduling and shared-resource coordination for construction programs.",
+        "photoUrl": "https://i.pravatar.cc/150?img=44",
         "specializations": [
-          "Project Management"
+          "Project Management",
+          "Delivery Governance"
         ],
         "skills": [
-          "Project Management"
+          "Project Management",
+          "Scheduling",
+          "Risk Management",
+          "Resource Planning",
+          "Primavera P6"
         ],
         "sectors": [
           "Construction",
           "Infrastructure"
         ],
         "yearsExperience": 25,
+        "certifications": [
+          "PMP",
+          "PRINCE2 Practitioner"
+        ],
+        "caseStudies": [
+          {
+            "title": "Shared-Resource Program",
+            "description": "Coordinated shared resources across three concurrent projects.",
+            "year": 2023
+          }
+        ],
+        "preferredWorkMode": "On-Site",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "project",
+          "retainer"
+        ],
+        "primaryDomain": "Construction",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     },
     {
       "id": "seed-user-018",
-      "email": "seed-user-18@controlled.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "email": "ziad.alharthy@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "professional",
       "status": "active",
       "isPublic": true,
       "connectionCount": 23,
       "profile": {
-        "name": "Filler MEP",
+        "name": "Ziad Al-Harthy",
         "type": "professional",
-        "headline": "MEP",
-        "title": "MEP",
+        "headline": "MEP Engineer — Building Services",
+        "title": "MEP Engineer",
         "phone": "+966 55 018 2000",
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Jeddah, Saudi Arabia",
+        "locationCity": "Jeddah",
+        "bio": "MEP engineer providing building services design and energy modelling for commercial developments across the western region.",
+        "photoUrl": "https://i.pravatar.cc/150?img=60",
         "specializations": [
-          "MEP"
+          "MEP Engineering",
+          "Energy Modelling"
         ],
         "skills": [
-          "MEP"
+          "MEP Design",
+          "HVAC",
+          "Energy Modelling",
+          "Electrical Design",
+          "Revit MEP"
         ],
         "sectors": [
           "Construction",
           "Infrastructure"
         ],
         "yearsExperience": 26,
+        "certifications": [
+          "Saudi Council of Engineers",
+          "LEED AP"
+        ],
+        "caseStudies": [
+          {
+            "title": "Retail Mall Building Services",
+            "description": "MEP design lead for a regional retail mall.",
+            "year": 2022
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
         "rating": 0.8,
         "avatar": null
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z"
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z"
     }
   ]
 }

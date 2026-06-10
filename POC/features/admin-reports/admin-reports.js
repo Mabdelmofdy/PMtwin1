@@ -16,7 +16,7 @@ let auditCategory = 'all';
 let lastSnapshot = null;
 
 const CHART_COLORS = [
-    '#0d9488', '#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+    '#0369a1', '#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
     '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1'
 ];
 
@@ -619,8 +619,8 @@ function updateMap(snap) {
         const r = 8 + (n / maxR) * 28;
         const circle = L.circleMarker(coords, {
             radius: r,
-            color: '#0d9488',
-            fillColor: '#2dd4bf',
+            color: '#0369a1',
+            fillColor: '#38bdf8',
             fillOpacity: 0.55,
             weight: 2
         });
@@ -990,7 +990,7 @@ function renderChartsForSnapshot(snap, prevSnap) {
     const oppSeries = labels.map(l => oppByWeek[l] || 0);
     if (regSeries.some(x => x) || oppSeries.some(x => x)) {
         createLineChart('chart-pa-growth', labels, [
-            { label: 'New registrations', data: regSeries, borderColor: '#0d9488', backgroundColor: 'rgba(13,148,136,0.1)', tension: 0.25, fill: true },
+            { label: 'New registrations', data: regSeries, borderColor: '#0369a1', backgroundColor: 'rgba(3, 105, 161,0.1)', tension: 0.25, fill: true },
             { label: 'New opportunities', data: oppSeries, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.06)', tension: 0.25, fill: true }
         ]);
         toggleEmpty('chart-pa-growth', 'pa-empty-growth', false);
@@ -1338,7 +1338,7 @@ function renderChartsForSnapshot(snap, prevSnap) {
         if (idx >= 0) activeUsersByWeek[idx]++;
     });
     createLineChart('chart-pa-users-time', riskWeeks, [
-        { label: 'Active user touches (proxy)', data: activeUsersByWeek, borderColor: '#0d9488', tension: 0.2, fill: true, backgroundColor: 'rgba(13,148,136,0.08)' }
+        { label: 'Active user touches (proxy)', data: activeUsersByWeek, borderColor: '#0369a1', tension: 0.2, fill: true, backgroundColor: 'rgba(3, 105, 161,0.08)' }
     ]);
     toggleEmpty('chart-pa-users-time', 'pa-empty-users-time', false);
 

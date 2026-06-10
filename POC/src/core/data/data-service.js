@@ -56,7 +56,7 @@ class DataService {
         this.storage = window.storageService || storageService;
         this.initialized = false;
         this.SEED_DATA_VERSION_KEY = 'pmtwin_seed_version';
-        this.CURRENT_SEED_VERSION = '1.23.0'; // Controlled 25-post seed; demo-40-opportunities cleared by controlled seeder
+        this.CURRENT_SEED_VERSION = '2.0.0'; // Clean reseed: orphaned demo data wiped; lifecycle tied to 25 seed opportunities
     }
     
     /**

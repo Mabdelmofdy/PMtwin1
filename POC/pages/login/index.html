@@ -7,15 +7,29 @@
 
             <form id="login-form" class="pm-login-form">
                 <div class="pm-field">
-                    <span class="pm-field-label">Account type</span>
-                    <div class="pm-account-type" role="group" aria-label="Account type">
-                        <label class="pm-check">
-                            <input type="radio" name="accountType" id="account-type-individual" value="individual" checked>
-                            <span>Individual</span>
+                    <span class="pm-field-label" id="account-type-label">Account type</span>
+                    <div class="pm-account-type" role="radiogroup" aria-labelledby="account-type-label">
+                        <label class="pm-account-type-option">
+                            <input type="radio" name="accountType" id="account-type-individual" value="individual" checked class="sr-only">
+                            <span class="pm-account-type-card">
+                                <span class="pm-account-type-check" aria-hidden="true"><i class="ph-fill ph-check-circle"></i></span>
+                                <span class="pm-account-type-icon" aria-hidden="true"><i class="ph-duotone ph-user"></i></span>
+                                <span class="pm-account-type-copy">
+                                    <strong>Individual</strong>
+                                    <small>Professional or consultant</small>
+                                </span>
+                            </span>
                         </label>
-                        <label class="pm-check">
-                            <input type="radio" name="accountType" id="account-type-company" value="company">
-                            <span>Company</span>
+                        <label class="pm-account-type-option">
+                            <input type="radio" name="accountType" id="account-type-company" value="company" class="sr-only">
+                            <span class="pm-account-type-card">
+                                <span class="pm-account-type-check" aria-hidden="true"><i class="ph-fill ph-check-circle"></i></span>
+                                <span class="pm-account-type-icon" aria-hidden="true"><i class="ph-duotone ph-buildings"></i></span>
+                                <span class="pm-account-type-copy">
+                                    <strong>Company</strong>
+                                    <small>Business account</small>
+                                </span>
+                            </span>
                         </label>
                     </div>
                 </div>
@@ -53,7 +67,10 @@
                     </button>
                 </div>
 
-                <button type="button" id="btn-view-demo-credentials" class="pm-demo-link">View demo user credentials</button>
+                <button type="button" id="btn-view-demo-credentials" class="pm-demo-credentials-trigger">
+                    <i class="ph-duotone ph-users-three" aria-hidden="true"></i>
+                    <span>Browse demo accounts</span>
+                </button>
 
                 <p class="pm-auth-switch">
                     Don't have an account? <a href="#" data-route="/register">Register here</a>
@@ -239,9 +256,93 @@
 }
 
 .pm-account-type {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+}
+
+.pm-account-type-option {
+    cursor: pointer;
+    margin: 0;
+}
+
+.pm-account-type-card {
+    position: relative;
     display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.55rem;
+    min-height: 100%;
+    padding: 0.85rem 0.9rem;
+    border: 2px solid var(--auth-line);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pm-account-type-option:hover .pm-account-type-card {
+    border-color: color-mix(in srgb, var(--auth-teal) 55%, var(--auth-line));
+    box-shadow: var(--shadow-sm);
+}
+
+.pm-account-type-option:has(input:checked) .pm-account-type-card,
+.pm-account-type-option:has(input:focus-visible) .pm-account-type-card {
+    border-color: var(--auth-teal);
+    background: var(--auth-primary-tint);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--auth-teal) 35%, transparent), var(--shadow-sm);
+}
+
+.pm-account-type-option:has(input:focus-visible) .pm-account-type-card {
+    outline: none;
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--auth-teal) 35%, transparent),
+        0 0 0 4px color-mix(in srgb, var(--auth-teal) 13%, transparent);
+}
+
+.pm-account-type-check {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+    display: none;
+    color: var(--auth-teal-dark);
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.pm-account-type-option:has(input:checked) .pm-account-type-check {
+    display: inline-flex;
+}
+
+.pm-account-type-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--auth-teal) 12%, transparent);
+    color: var(--auth-teal-dark);
+    font-size: 1.35rem;
+}
+
+.pm-account-type-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.pm-account-type-copy strong {
+    color: var(--auth-ink);
+    font-size: 0.92rem;
+    font-weight: 850;
+    line-height: 1.25;
+}
+
+.pm-account-type-copy small {
+    color: var(--auth-muted);
+    font-size: 0.76rem;
+    line-height: 1.35;
+    font-weight: 500;
 }
 
 .pm-field input {
@@ -329,6 +430,35 @@
     cursor: pointer;
 }
 
+.pm-demo-credentials-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 44px;
+    margin-top: 0.15rem;
+    padding: 0.55rem 0.85rem;
+    border: 1px dashed color-mix(in srgb, var(--auth-teal) 45%, var(--auth-line));
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--auth-teal) 5%, var(--bg-primary));
+    color: var(--auth-teal-dark);
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pm-demo-credentials-trigger i {
+    font-size: 1.15rem;
+}
+
+.pm-demo-credentials-trigger:hover {
+    border-color: var(--auth-teal);
+    background: color-mix(in srgb, var(--auth-teal) 10%, var(--bg-primary));
+    box-shadow: var(--shadow-sm);
+}
+
 .pm-auth-switch {
     margin: 0;
     color: var(--auth-muted);
@@ -362,6 +492,10 @@
 
     .pm-login-card {
         box-shadow: none;
+    }
+
+    .pm-account-type {
+        grid-template-columns: 1fr;
     }
 }
 </style>

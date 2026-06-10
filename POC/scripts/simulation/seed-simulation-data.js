@@ -194,33 +194,38 @@ function generateControlledCompanies() {
     });
 }
 
+// Realistic, GAP-P05-passing workflow users. Shared password Pmtwin@2026 (Base64).
+// Kept in parity with data/seed-controlled-users.json so a --controlled re-seed
+// (also triggered by the simulation test's beforeAll) does not revert them.
+const CONTROLLED_USER_PASSWORD_HASH = 'UG10d2luQDIwMjY=';
+const REALISTIC_CONTROLLED_USERS = [
+    { email: 'khalid.alharbi@pmtwin.test', name: 'Khalid Al-Harbi', headline: 'Senior Architect — Sustainable Design', title: 'Senior Architect', location: 'Riyadh', bio: 'Senior architect with 9+ years leading sustainable, BIM-driven building design across Saudi Arabia, focused on LEED-certified commercial and mixed-use developments.', photo: 11, specializations: ['Architecture', 'Sustainable Design'], skills: ['BIM', '3D Visualization', 'Sustainable Design', 'LEED Certification', 'Architectural Design'], sectors: ['Construction', 'Architecture'], certifications: ['LEED AP BD+C', 'Saudi Council of Engineers'], caseStudies: [{ title: 'Riyadh Mixed-Use Tower', description: 'LEED Gold design lead for a 40-storey mixed-use tower.', year: 2024 }], workMode: 'On-Site', collab: ['project'], domain: 'Construction' },
+    { email: 'sara.almutairi@pmtwin.test', name: 'Sara Al-Mutairi', headline: 'Architectural & BIM Consultant', title: 'BIM Consultant', location: 'Riyadh', bio: 'Multi-disciplinary architectural consultant offering BIM modelling, Revit detailing and structural coordination services to developers and contractors.', photo: 5, specializations: ['BIM Modelling', 'Architectural Design'], skills: ['BIM', 'Revit', 'Architectural Design', 'Structural Analysis', 'SAP2000'], sectors: ['Construction', 'Architecture'], certifications: ['Autodesk Revit Certified Professional', 'Saudi Council of Engineers'], caseStudies: [{ title: 'Jeddah Waterfront Complex', description: 'Lead BIM coordinator across architecture and MEP packages.', year: 2023 }], workMode: 'Hybrid', collab: ['project', 'retainer'], domain: 'Construction' },
+    { email: 'faisal.alotaibi@pmtwin.test', name: 'Faisal Al-Otaibi', headline: 'Architect — Commercial Projects', title: 'Architect', location: 'Riyadh', bio: 'Architect specializing in commercial and retail developments, leading concept-to-delivery design teams for clients across the central region.', photo: 12, specializations: ['Architecture', 'Concept Design'], skills: ['Architectural Design', 'BIM', 'Revit', 'Concept Design', 'Space Planning'], sectors: ['Construction', 'Architecture'], certifications: ['Saudi Council of Engineers'], caseStudies: [{ title: 'Riyadh Retail Plaza', description: 'Lead architect for a 25,000 sqm retail development.', year: 2022 }], workMode: 'On-Site', collab: ['project'], domain: 'Construction' },
+    { email: 'noura.aldossari@pmtwin.test', name: 'Noura Al-Dossari', headline: 'Architect — Interior & Fit-Out', title: 'Architect', location: 'Jeddah', bio: 'Architect with a focus on interior architecture and fit-out, delivering hospitality and office interiors with strong sustainability credentials.', photo: 20, specializations: ['Interior Architecture', 'Fit-Out'], skills: ['Architectural Design', 'Interior Design', '3D Visualization', 'BIM', 'Sustainable Design'], sectors: ['Construction', 'Architecture'], certifications: ['LEED Green Associate', 'Saudi Council of Engineers'], caseStudies: [{ title: 'Boutique Hotel Interiors', description: 'Interior architecture lead for a 120-key boutique hotel.', year: 2023 }], workMode: 'Hybrid', collab: ['project'], domain: 'Construction' },
+    { email: 'omar.alshehri@pmtwin.test', name: 'Omar Al-Shehri', headline: 'Civil Engineer — Infrastructure', title: 'Civil Engineer', location: 'Dammam', bio: 'Civil engineer delivering roads, drainage and site infrastructure for large developments, with hands-on site supervision experience.', photo: 13, specializations: ['Civil Engineering', 'Infrastructure'], skills: ['Site Planning', 'Surveying', 'Road Design', 'Drainage Design', 'AutoCAD Civil 3D'], sectors: ['Construction', 'Infrastructure'], certifications: ['Saudi Council of Engineers', 'PMP'], caseStudies: [{ title: 'Eastern Province Road Network', description: 'Civil lead for 18 km of urban road and drainage works.', year: 2021 }], workMode: 'On-Site', collab: ['project'], domain: 'Infrastructure' },
+    { email: 'hessa.alqahtani@pmtwin.test', name: 'Hessa Al-Qahtani', headline: 'Civil Engineer — Site Works', title: 'Civil Engineer', location: 'Riyadh', bio: 'Civil engineer providing site planning, surveying and earthworks design services for commercial and residential developments.', photo: 16, specializations: ['Civil Engineering', 'Site Works'], skills: ['Site Planning', 'Surveying', 'Earthworks', 'AutoCAD Civil 3D', 'Quantity Surveying'], sectors: ['Construction', 'Infrastructure'], certifications: ['Saudi Council of Engineers'], caseStudies: [{ title: 'Residential Compound Earthworks', description: 'Site grading and drainage design for a 300-villa compound.', year: 2022 }], workMode: 'On-Site', collab: ['project'], domain: 'Infrastructure' },
+    { email: 'yousef.alghamdi@pmtwin.test', name: 'Yousef Al-Ghamdi', headline: 'Construction Manager', title: 'Construction Manager', location: 'Jeddah', bio: 'Construction manager with two decades of experience delivering turnkey building projects, coordinating multi-trade teams and subcontractors.', photo: 14, specializations: ['Construction Management', 'General Contracting'], skills: ['Construction Management', 'Project Scheduling', 'Cost Control', 'Site Supervision', 'Procurement'], sectors: ['Construction', 'Infrastructure'], certifications: ['PMP', 'Saudi Council of Engineers'], caseStudies: [{ title: 'Commercial Tower Delivery', description: 'Construction manager for a 30-floor commercial tower.', year: 2020 }], workMode: 'On-Site', collab: ['project'], domain: 'Construction' },
+    { email: 'mansour.alzahrani@pmtwin.test', name: 'Mansour Al-Zahrani', headline: 'MEP Engineer', title: 'MEP Engineer', location: 'Riyadh', bio: 'MEP engineer designing mechanical, electrical and plumbing systems for commercial buildings, open to barter exchanges with architecture teams.', photo: 15, specializations: ['MEP Engineering', 'HVAC Design'], skills: ['MEP Design', 'HVAC', 'Electrical Design', 'Plumbing Design', 'Revit MEP'], sectors: ['Construction', 'Infrastructure'], certifications: ['Saudi Council of Engineers', 'ASHRAE Member'], caseStudies: [{ title: 'Office Tower MEP', description: 'MEP design lead for a LEED-certified office tower.', year: 2023 }], workMode: 'Hybrid', collab: ['project', 'barter'], domain: 'Construction' },
+    { email: 'layla.alsubaie@pmtwin.test', name: 'Layla Al-Subaie', headline: 'Architect — Barter Exchange', title: 'Architect', location: 'Riyadh', bio: 'Architect open to barter collaborations, exchanging design services with MEP and structural specialists on shared developments.', photo: 9, specializations: ['Architecture', 'Design Coordination'], skills: ['Architectural Design', 'BIM', 'Design Coordination', '3D Visualization', 'Revit'], sectors: ['Construction', 'Architecture'], certifications: ['Saudi Council of Engineers'], caseStudies: [{ title: 'Barter-Based Villa Series', description: 'Exchanged architecture services for MEP design across 6 villas.', year: 2022 }], workMode: 'Hybrid', collab: ['project', 'barter'], domain: 'Construction' },
+    { email: 'abdullah.alrashid@pmtwin.test', name: 'Abdullah Al-Rashid', headline: 'Project Manager — Consortium Lead', title: 'Project Manager', location: 'Riyadh', bio: 'Senior project manager leading multi-disciplinary consortia on large infrastructure programs, specializing in design-build delivery and risk control.', photo: 17, specializations: ['Project Management', 'Program Delivery'], skills: ['Project Management', 'Program Management', 'Risk Management', 'Stakeholder Management', 'Primavera P6'], sectors: ['Construction', 'Infrastructure'], certifications: ['PMP', 'PMI-RMP', 'Saudi Council of Engineers'], caseStudies: [{ title: 'Highway Design-Build Program', description: 'Consortium lead PM for a multi-package highway program.', year: 2024 }], workMode: 'On-Site', collab: ['consortium', 'project'], domain: 'Infrastructure' },
+    { email: 'reem.alharbi@pmtwin.test', name: 'Reem Al-Harbi', headline: 'Architect — Consortium Partner', title: 'Architect', location: 'Riyadh', bio: 'Architect partnering in consortia to deliver the design package on large infrastructure and mixed-use programs.', photo: 10, specializations: ['Architecture', 'Infrastructure Design'], skills: ['Architectural Design', 'BIM', 'Infrastructure Design', 'Revit', 'Design Coordination'], sectors: ['Construction', 'Infrastructure'], certifications: ['Saudi Council of Engineers', 'LEED Green Associate'], caseStudies: [{ title: 'Highway Interchange Architecture', description: 'Architectural package lead within a highway consortium.', year: 2024 }], workMode: 'On-Site', collab: ['consortium', 'project'], domain: 'Infrastructure' },
+    { email: 'tariq.almaliki@pmtwin.test', name: 'Tariq Al-Maliki', headline: 'Civil Engineer — Consortium Partner', title: 'Civil Engineer', location: 'Riyadh', bio: 'Civil engineer delivering roadworks, structures and drainage within consortium-led infrastructure programs.', photo: 18, specializations: ['Civil Engineering', 'Roadworks'], skills: ['Road Design', 'Structural Analysis', 'Drainage Design', 'AutoCAD Civil 3D', 'Site Supervision'], sectors: ['Construction', 'Infrastructure'], certifications: ['Saudi Council of Engineers', 'PMP'], caseStudies: [{ title: 'Highway Civil Works', description: 'Civil package lead within a highway design-build consortium.', year: 2024 }], workMode: 'On-Site', collab: ['consortium', 'project'], domain: 'Infrastructure' },
+    { email: 'bandar.alanazi@pmtwin.test', name: 'Bandar Al-Anazi', headline: 'Heavy Equipment Provider', title: 'Equipment Manager', location: 'Dammam', bio: 'Provider of heavy construction equipment and plant, offering machinery and operators on rental or exchange terms for civil works.', photo: 51, specializations: ['Heavy Equipment', 'Plant Hire'], skills: ['Equipment Management', 'Plant Hire', 'Logistics', 'Fleet Maintenance', 'Operator Staffing'], sectors: ['Construction', 'Infrastructure'], certifications: ['OSHA Equipment Safety', 'Saudi Council of Engineers'], caseStudies: [{ title: 'Earthmoving Fleet Supply', description: 'Supplied graders and excavators for a major earthworks package.', year: 2023 }], workMode: 'On-Site', collab: ['barter', 'project'], domain: 'Infrastructure' },
+    { email: 'maha.aljuhani@pmtwin.test', name: 'Maha Al-Juhani', headline: 'Real Estate Development Manager', title: 'Real Estate Manager', location: 'Jeddah', bio: 'Real estate development manager structuring land, feasibility and development deals, frequently exchanging services within project consortia.', photo: 23, specializations: ['Real Estate Development', 'Feasibility'], skills: ['Real Estate Development', 'Feasibility Studies', 'Market Analysis', 'Investment Appraisal', 'Land Acquisition'], sectors: ['Real Estate', 'Construction'], certifications: ['RICS Member', 'Saudi Real Estate Authority'], caseStudies: [{ title: 'Mixed-Use Land Development', description: 'Led feasibility and structuring for a mixed-use district.', year: 2023 }], workMode: 'Hybrid', collab: ['barter', 'project'], domain: 'Real Estate' },
+    { email: 'rana.alfaraj@pmtwin.test', name: 'Rana Al-Faraj', headline: 'Accounting & Finance Consultant', title: 'Finance Consultant', location: 'Riyadh', bio: 'Accounting and finance consultant supporting construction firms with project accounting, cost reporting and VAT compliance, open to service exchanges.', photo: 25, specializations: ['Accounting', 'Project Finance'], skills: ['Project Accounting', 'Cost Reporting', 'VAT Compliance', 'Financial Modelling', 'Auditing'], sectors: ['Finance', 'Construction'], certifications: ['SOCPA', 'CMA'], caseStudies: [{ title: 'Contractor Cost System', description: 'Implemented project cost accounting for a mid-size contractor.', year: 2022 }], workMode: 'Remote', collab: ['barter', 'retainer'], domain: 'Finance' },
+    { email: 'saad.alamri@pmtwin.test', name: 'Saad Al-Amri', headline: 'Structural Engineer', title: 'Structural Engineer', location: 'Riyadh', bio: 'Structural engineer specializing in steel and concrete structures, providing analysis and detailed design for commercial and industrial buildings.', photo: 33, specializations: ['Structural Engineering', 'Steel Design'], skills: ['Structural Analysis', 'SAP2000', 'ETABS', 'Steel Design', 'Concrete Design'], sectors: ['Construction', 'Infrastructure'], certifications: ['Saudi Council of Engineers', 'PE Structural'], caseStudies: [{ title: 'Industrial Warehouse Structure', description: 'Structural design lead for a 12,000 sqm steel warehouse.', year: 2023 }], workMode: 'Hybrid', collab: ['project'], domain: 'Construction' },
+    { email: 'huda.albalawi@pmtwin.test', name: 'Huda Al-Balawi', headline: 'Project Manager — Delivery', title: 'Project Manager', location: 'Riyadh', bio: 'Project manager focused on delivery governance, scheduling and shared-resource coordination for construction programs.', photo: 44, specializations: ['Project Management', 'Delivery Governance'], skills: ['Project Management', 'Scheduling', 'Risk Management', 'Resource Planning', 'Primavera P6'], sectors: ['Construction', 'Infrastructure'], certifications: ['PMP', 'PRINCE2 Practitioner'], caseStudies: [{ title: 'Shared-Resource Program', description: 'Coordinated shared resources across three concurrent projects.', year: 2023 }], workMode: 'On-Site', collab: ['project', 'retainer'], domain: 'Construction' },
+    { email: 'ziad.alharthy@pmtwin.test', name: 'Ziad Al-Harthy', headline: 'MEP Engineer — Building Services', title: 'MEP Engineer', location: 'Jeddah', bio: 'MEP engineer providing building services design and energy modelling for commercial developments across the western region.', photo: 60, specializations: ['MEP Engineering', 'Energy Modelling'], skills: ['MEP Design', 'HVAC', 'Energy Modelling', 'Electrical Design', 'Revit MEP'], sectors: ['Construction', 'Infrastructure'], certifications: ['Saudi Council of Engineers', 'LEED AP'], caseStudies: [{ title: 'Retail Mall Building Services', description: 'MEP design lead for a regional retail mall.', year: 2022 }], workMode: 'Hybrid', collab: ['project'], domain: 'Construction' }
+];
+
 function generateControlledUsers() {
-    const profiles = [
-        { name: 'Scenario A Need Owner', headline: 'Architect' },
-        { name: 'Scenario A/B/C Offer Owner', headline: 'Multi-offer professional' },
-        { name: 'Scenario D Need Owner', headline: 'Architect' },
-        { name: 'Scenario D Offer Owner', headline: 'Architect' },
-        { name: 'Scenario E Need Owner', headline: 'Civil Engineer' },
-        { name: 'Scenario E Offer Owner', headline: 'Civil Engineer' },
-        { name: 'Scenario F Legacy Owner', headline: 'Legacy post' },
-        { name: 'Barter User A', headline: 'MEP / Architect barter' },
-        { name: 'Barter User B', headline: 'Architect / MEP barter' },
-        { name: 'Consortium Lead', headline: 'Project Management' },
-        { name: 'Consortium Partner Architect', headline: 'Architect' },
-        { name: 'Consortium Partner Civil', headline: 'Civil Engineer' },
-        { name: 'Circular User A', headline: 'Equipment' },
-        { name: 'Circular User B', headline: 'Real Estate' },
-        { name: 'Circular User C', headline: 'Accounting' },
-        { name: 'Filler Structural', headline: 'Structural Engineer' },
-        { name: 'Filler PM', headline: 'Project Management' },
-        { name: 'Filler MEP', headline: 'MEP' }
-    ];
-    return profiles.map((p, i) => {
+    return REALISTIC_CONTROLLED_USERS.map((p, i) => {
         const n = i + 1;
         return {
             id: seedUserId(n),
-            email: `seed-user-${n}@controlled.test`,
-            passwordHash: 'cGFzc3dvcmQxMjM=',
+            email: p.email,
+            passwordHash: CONTROLLED_USER_PASSWORD_HASH,
             role: 'professional',
             status: 'active',
             isPublic: true,
@@ -229,14 +234,22 @@ function generateControlledUsers() {
                 name: p.name,
                 type: 'professional',
                 headline: p.headline,
-                title: p.headline,
+                title: p.title,
                 phone: `+966 55 ${String(n).padStart(3, '0')} 2000`,
-                location: 'Riyadh, Saudi Arabia',
-                specializations: [p.headline],
-                skills: [p.headline],
-                sectors: ['Construction', 'Infrastructure'],
+                location: `${p.location}, Saudi Arabia`,
+                locationCity: p.location,
+                bio: p.bio,
+                photoUrl: `https://i.pravatar.cc/150?img=${p.photo}`,
+                specializations: p.specializations,
+                skills: p.skills,
+                sectors: p.sectors,
                 yearsExperience: 8 + n,
+                certifications: p.certifications,
+                caseStudies: p.caseStudies,
+                preferredWorkMode: p.workMode,
                 preferredPaymentModes: ['cash', 'barter'],
+                preferredCollaborationModels: p.collab,
+                primaryDomain: p.domain,
                 rating: 0.8,
                 avatar: null
             },
@@ -436,14 +449,14 @@ function generateControlledOpportunities() {
             title: '[G] Consortium partner — Architect',
             targetRole: 'Architect',
             skills: ['Architect', 'BIM', '3D Visualization', 'Design Development'],
-            budgetMin: 2000000, budgetMax: 8000000
+            budgetMin: 5000000, budgetMax: 25000000
         },
         {
             id: 'seed-opp-016', intent: 'offer', creator: 12, scenario: 'G-consortium',
             title: '[G] Consortium partner — Civil Engineer',
             targetRole: 'Civil Engineer',
             skills: ['Civil Engineer', 'Site Planning', 'Drainage Design', 'Road Design'],
-            budgetMin: 3000000, budgetMax: 12000000
+            budgetMin: 5000000, budgetMax: 25000000
         },
         // Scenario G — circular (3-party ring)
         {
@@ -568,7 +581,8 @@ function mainControlled() {
 
     writeJsonEnvelope(path.join(DATA_DIR, 'opportunities.json'), 'opportunities', opportunities, { version: '1.2' });
     writeJsonEnvelope(path.join(DATA_DIR, 'seed-controlled-users.json'), 'users', users, {
-        description: 'Controlled seed users for 25-post matching scenarios (password: password123)'
+        version: '2.0',
+        description: 'Canonical 25-opportunity workflow users. Shared password: Pmtwin@2026 (Base64 in passwordHash). Profiles enriched to clear GAP-P05 (>=70%).'
     });
 
     console.log('\nControlled seed written.');
@@ -579,6 +593,15 @@ function mainControlled() {
     console.log('Opportunities:', opportunities.length);
 
     validateScenarioChecklist(opportunities);
+
+    const { spawnSync } = require('child_process');
+    const seedMatches = spawnSync(process.execPath, [path.join(__dirname, '..', 'seed-post-matches.js')], {
+        cwd: path.join(__dirname, '..', '..'),
+        stdio: 'inherit'
+    });
+    if (seedMatches.status !== 0) {
+        console.warn('seed-post-matches.js exited with code', seedMatches.status);
+    }
 }
 
 // ─── Companies (30–50, or 8 in small mode) ────────────────────────────────────

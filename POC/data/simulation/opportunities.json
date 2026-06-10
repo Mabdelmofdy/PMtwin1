@@ -59,8 +59,8 @@
           "LEED Certification"
         ]
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -160,8 +160,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -258,8 +258,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -358,8 +358,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -452,8 +452,8 @@
           "BIM"
         ]
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -543,8 +543,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "Revit"
@@ -628,8 +628,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Civil Engineer"
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "Site Planning",
@@ -721,8 +721,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "Site Planning"
@@ -803,8 +803,8 @@
         "tenderDeadline": "2026-06-01",
         "locationRequirement": "On-Site"
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "General Consulting",
@@ -891,8 +891,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "MEP"
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "HVAC Design",
@@ -984,8 +984,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -1072,8 +1072,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Architect"
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -1165,8 +1165,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "HVAC Design",
@@ -1261,8 +1261,8 @@
         ],
         "targetRole": "Project Management"
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "Project Management",
@@ -1339,11 +1339,11 @@
         "exchangeMode": "cash",
         "currency": "SAR",
         "budgetRange": {
-          "min": 2000000,
-          "max": 8000000,
+          "min": 5000000,
+          "max": 25000000,
           "currency": "SAR"
         },
-        "cashAmount": 5000000
+        "cashAmount": 15000000
       },
       "attributes": {
         "startDate": "2026-03-01",
@@ -1355,8 +1355,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "Architect",
@@ -1380,8 +1380,8 @@
           "Architecture"
         ],
         "budget": {
-          "min": 2000000,
-          "max": 8000000,
+          "min": 5000000,
+          "max": 25000000,
           "currency": "SAR"
         },
         "timeline": {
@@ -1435,11 +1435,11 @@
         "exchangeMode": "cash",
         "currency": "SAR",
         "budgetRange": {
-          "min": 3000000,
-          "max": 12000000,
+          "min": 5000000,
+          "max": 25000000,
           "currency": "SAR"
         },
-        "cashAmount": 7500000
+        "cashAmount": 15000000
       },
       "attributes": {
         "startDate": "2026-03-01",
@@ -1451,8 +1451,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "Civil Engineer",
@@ -1476,8 +1476,8 @@
           "Architecture"
         ],
         "budget": {
-          "min": 3000000,
-          "max": 12000000,
+          "min": 5000000,
+          "max": 25000000,
           "currency": "SAR"
         },
         "timeline": {
@@ -1540,8 +1540,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Excavator"
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "Excavator",
@@ -1630,8 +1630,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "Office space",
@@ -1715,8 +1715,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Office space"
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "Office space",
@@ -1805,8 +1805,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "Accounting",
@@ -1890,8 +1890,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Accounting"
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "Accounting",
@@ -1980,8 +1980,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "Excavator",
@@ -2066,8 +2066,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Structural Engineer"
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "Structural Analysis",
@@ -2154,8 +2154,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Project Management"
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "Project Management",
@@ -2247,8 +2247,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-09T22:36:12.626Z",
-      "updatedAt": "2026-06-09T22:36:12.626Z",
+      "createdAt": "2026-06-10T11:57:04.027Z",
+      "updatedAt": "2026-06-10T11:57:04.027Z",
       "normalized": {
         "skills": [
           "HVAC Design",

@@ -80,4 +80,36 @@ describe('unified-match-view-model', () => {
         };
         expect(umv.getStatusLabel('accepted', { match, currentUserId: 'u1' })).toBe('Waiting for Others');
     });
+
+    it('resolveMatchMessageRoute prefers a valid messages path', () => {
+        expect(umv.resolveMatchMessageRoute(
+            [{ userId: 'u1' }, { userId: 'u2' }],
+            'u1',
+            '/messages/u2'
+        )).toBe('/messages/u2');
+    });
+
+    it('resolveMatchMessageRoute finds the first other participant', () => {
+        expect(umv.resolveMatchMessageRoute(
+            [{ userId: 'lead' }, { userId: 'member' }],
+            'lead'
+        )).toBe('/messages/member');
+    });
+
+    it('includes Message in available actions when messageRoute is set', () => {
+        const vm = umv.buildUnifiedMatchViewModel({
+            id: 'pm-consortium',
+            matchType: 'consortium',
+            status: 'confirmed',
+            matchScore: 0.88,
+            participants: [
+                { userId: 'lead', role: 'consortium_lead', participantStatus: 'accepted' },
+                { userId: 'member', role: 'consortium_member', participantStatus: 'accepted' }
+            ],
+            payload: { leadNeedId: 'need-1' }
+        }, { currentUserId: 'lead' });
+        vm.messageRoute = '/messages/member';
+        const actions = umv.getAvailableActions(vm);
+        expect(actions.some(a => a.id === 'message' && a.route === '/messages/member')).toBe(true);
+    });
 });
