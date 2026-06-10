@@ -55,6 +55,7 @@ stateDiagram-v2
 **From confirmed post_match:**
 
 1. User opens **Match detail** for a **confirmed** post_match and clicks “Start deal” (or equivalent).
+2. Alternatively: **Start negotiation** → agree terms → **Create deal from negotiation** ([negotiation-workflow.md](negotiation-workflow.md)).
 2. Frontend (or feature) builds deal payload: participants from post_match (userId, role), opportunityIds from payload (need/offer/lead/cycle), matchType, title, scope, exchangeMode, valueTerms (to be negotiated).
 3. `data-service.createDeal(dealData)` → new deal with `status: 'negotiating'` or `'draft'`.
 4. Optionally link back in UI (e.g. “Deal created” with link to deal detail); post_match has no formal dealId FK in schema.

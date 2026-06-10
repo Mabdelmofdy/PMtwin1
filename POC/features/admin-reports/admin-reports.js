@@ -1509,7 +1509,7 @@ function setupScheduleModal() {
 }
 
 async function initAdminReports() {
-    if (!authService.canAccessAdmin()) {
+    if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.reports.read')) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }

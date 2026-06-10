@@ -35,7 +35,8 @@ Prioritize ⚠️ and ❌ items against your release goals.
 |------|--------|-------|
 | Register (individual) | ✅ | auth-service + register page + data-service.createUser |
 | Register (company) | ✅ | Company account creation path exists |
-| Login (user + company) | ✅ | getUserOrCompanyByEmail; session in sessionStorage |
+| Login (user + company) | ✅ | Account type on login; individual vs company lookup |
+| Pending read-only mode | ✅ | assertCanMutate + data-service _assertPortalCanMutate |
 | Logout | ✅ | Session cleared |
 | Forgot password | ✅ | Reset token created; reset-password page |
 | Reset password | ✅ | Token validation; password update |
@@ -58,6 +59,7 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | User status (pending/active/suspended/rejected) | ✅ | CONFIG.USER_STATUS; admin can update |
 | Verification status | ✅ | Stored; display in profile; admin can set (if UI exposed) |
 | Normalize users/companies for matching | ✅ | normalizeUsersForMatching, normalizeCompaniesForMatching on init/merge |
+| Profile completeness on publish | ✅ | assertProfileReadyForPublish in updateOpportunity |
 | Company members / roles (invite, assign) | ❌ | BRD; not implemented in POC |
 
 ---
@@ -112,7 +114,9 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | Semantic profile | ✅ | semantic-profile.js |
 | Value compatibility | ✅ | value-compatibility.js; oneWay, barter, consortium, circular |
 | rankMatches (tier, compositeRank) | ✅ | matching-service.rankMatches |
-| persistPostMatches on publish | ✅ | In updateOpportunity when status === 'published' |
+| persistPostMatches on publish | ✅ | Runs all detectMatchingModel results + circular pass |
+| Admin bulk save selected opps | ✅ | persistPreviewOpportunities + admin-matching UI |
+| Matching run metadata | ✅ | matching_runs: modelsRun, threshold, counts, durationMs |
 | createPostMatch + dedupe | ✅ | data-service.createPostMatch; strong keys plus signature fallback |
 | notifyPostMatch | ✅ | matching-service.notifyPostMatch |
 | Legacy findMatchesForOpportunity | ❌ Removed from product | Deprecated API; no-op when `LEGACY_PERSON_OPPORTUNITY_ENABLED` is false; not called on publish |
@@ -130,13 +134,29 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | Filter by type (one_way, two_way, consortium, circular) | ✅ | getPostMatchesByType or client filter |
 | Accept / decline | ✅ | updatePostMatchStatus; declinePostMatch |
 | Status: pending → accepted/declined/confirmed | ✅ | All participants accepted → confirmed |
-| Create deal from confirmed match | ✅ | Start Deal requires `post_match` status confirmed; `assertDealCreationSource` enforces on server |
+| Create deal from confirmed match | ✅ | Start Deal requires `post_match` status confirmed; `assertDealCreationSource` enforces |
+| Create deal from agreed negotiation | ✅ | createDealFromNegotiation; multi-party agree in agreeNegotiation |
+| Create deal from accepted application | ✅ | createDealFromApplication on opportunity detail |
 | Match cards (templates) | ✅ | match-card-one-way, two-way, consortium, circular |
 | Expiry (expiresAt) | ⚠️ | Read-time expiry exists for pending matches; generated records usually have no default expiresAt and no scheduled job |
 
 ---
 
-## 7. Deals
+## 7. Negotiation
+
+| Item | Status | Notes |
+|------|--------|-------|
+| startNegotiationFromMatch | ✅ | data-service; links opportunity, notifies parties |
+| startNegotiationFromApplication | ✅ | Owner or applicant; may delegate to match |
+| agreeNegotiation (multi-party) | ✅ | participantAgreements → agreed + finalAgreedSnapshot |
+| createDealFromNegotiation | ✅ | Requires status agreed |
+| Negotiation workflow doc | ✅ | docs/workflow/negotiation-workflow.md |
+| Negotiation expiry job | ✅ | expireStaleNegotiations on getNegotiations; default expiresAt on create |
+| Round/counter UI | ⚠️ | Storage + service; full UI may be minimal on some screens |
+
+---
+
+## 8. Deals
 
 | Item | Status | Notes |
 |------|--------|-------|
@@ -154,7 +174,7 @@ Prioritize ⚠️ and ❌ items against your release goals.
 
 ---
 
-## 8. Contracts
+## 9. Contracts
 
 | Item | Status | Notes |
 |------|--------|-------|
@@ -163,12 +183,13 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | updateContract | ✅ | data-service |
 | Contract list (user) | ✅ | contracts page |
 | Contract detail | ✅ | contract-detail page |
-| Sign contract (party signedAt) | ⚠️ | updateContract to set signedAt; “all signed → active” logic may be in UI/feature |
+| Sign contract (party signedAt) | ✅ | signContractParty / updateContract |
+| All signed → active (contract + deal) | ✅ | Automated in data-service.updateContract |
 | Contract status (pending/active/completed/terminated) | ✅ | CONFIG.CONTRACT_STATUS |
 
 ---
 
-## 9. Notifications & Audit
+## 10. Notifications & Audit
 
 | Item | Status | Notes |
 |------|--------|-------|
@@ -181,7 +202,7 @@ Prioritize ⚠️ and ❌ items against your release goals.
 
 ---
 
-## 10. Pipeline & Discovery
+## 11. Pipeline & Discovery
 
 | Item | Status | Notes |
 |------|--------|-------|
@@ -195,7 +216,7 @@ Prioritize ⚠️ and ❌ items against your release goals.
 
 ---
 
-## 11. Admin Portal
+## 12. Admin Portal
 
 | Item | Status | Notes |
 |------|--------|-------|
@@ -217,13 +238,15 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | Admin site content (CMS) | ✅ | `/admin/site-content`; public pages hydrate from site-content.json + localStorage overrides |
 | Admin collaboration models | ✅ | admin-collaboration-models |
 | Admin matching Run report | ✅ | Preview only (in-memory); does not persist |
-| Persist matches from admin matching (Save) | ✅ | Per-opportunity Save calls `persistPostMatches` → `post_matches`; bulk selected-results save is not implemented |
-| Moderator vs Admin permission split | ⚠️ | Roles exist; UI may not hide by role everywhere |
+| Persist matches from admin matching (Save) | ✅ | Per-opportunity Save → `persistPostMatches` |
+| Bulk save selected opportunities | ✅ | `persistPreviewOpportunities` + checkbox UI |
+| Moderator vs Admin permission split | ✅ | Route guards + skills write UI; subscriptions/settings already gated |
+| Auditor read-only enforcement | ✅ | data-service _assertNotAuditorWrite + admin-readonly-guard + vetting |
 | Bulk user actions | ❌ | BRD future |
 
 ---
 
-## 12. Infrastructure & Data
+## 13. Infrastructure & Data
 
 | Item | Status | Notes |
 |------|--------|-------|
@@ -239,7 +262,7 @@ Prioritize ⚠️ and ❌ items against your release goals.
 
 ---
 
-## 13. Public & Content
+## 14. Public & Content
 
 | Item | Status | Notes |
 |------|--------|-------|
@@ -249,19 +272,22 @@ Prioritize ⚠️ and ❌ items against your release goals.
 | Knowledge base | ✅ | knowledge-base page |
 | Workflow (public) | ✅ | workflow page |
 | Messages | ⚠️ | messages page exists; full threading may be partial |
-| Connections | ⚠️ | Storage key exists; connection request flow may be partial |
+| Connections | ✅ | create/accept/reject + request/accept/reject notifications |
 
 ---
 
 ## Summary
 
-- **Core flows:** Auth, opportunities, matching (all four models), post_matches, deals, contracts, pipeline, admin list/detail/vetting/matching/reports/settings are **implemented**.
-- **Partial:** Application sub-entities (requirements/deliverables) UI, contract “all signed → active” automation, notification mark read, moderator vs admin UI, messages/connections, match expiry handling, confirmed-only deal creation polish.
-- **Missing:** Real password hashing, social login, company member management, bulk admin actions, bulk matching report persistence, scheduled jobs (expiry, etc.).
+- **Core flows:** Auth, opportunities, matching (all four models + multi-model persist), post_matches, negotiation, deals, contracts (incl. auto-activate on sign), pipeline, admin matching (preview + bulk save) are **implemented**.
+- **Partial:** Pending read-only enforcement, login user/company same-email, profile gate on publish, match/negotiation expiry defaults, application action UX, moderator/admin UI, messages, connection notifications.
+- **Missing (POC):** Real password hashing, social login, company members, negotiation expiry sweep, scheduled jobs.
+- **Fix plan (before code):** [gap-solutions.md](gap-solutions.md) — GAP-P01–P12 prioritized.
 
 ---
 
 ## Related Documentation
 
-- [Gaps and Missing](gaps-and-missing.md) — Detailed gaps and broken flows.
+- [Gaps and Missing](gaps-and-missing.md) — Detailed gaps and workflow overview.
+- [Gap solutions](gap-solutions.md) — Proposed fixes (not yet implemented).
+- [Negotiation workflow](workflow/negotiation-workflow.md) — Negotiation path.
 - [Overview](overview.md) — System summary.

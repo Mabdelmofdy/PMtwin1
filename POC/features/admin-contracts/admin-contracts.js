@@ -323,7 +323,7 @@ async function loadAdminContracts() {
 }
 
 async function initAdminContracts() {
-    if (!authService.canAccessAdmin()) {
+    if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.contracts.read')) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }

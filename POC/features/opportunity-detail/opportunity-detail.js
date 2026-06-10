@@ -2016,10 +2016,10 @@ async function loadApplications(opportunityId, options = {}) {
                 actionsHtml += `<select class="application-status-select form-input form-input-sm" data-application-id="${escapeHtml(app.id)}" data-applicant-id="${escapeHtml(app.applicantId || '')}" title="Change status">${statusOptions}</select>`;
             }
             if (showStartNegotiation) {
-                actionsHtml += `<button type="button" class="btn btn-secondary btn-sm btn-start-negotiation" data-application-id="${escapeHtml(app.id)}" data-applicant-id="${escapeHtml(app.applicantId || '')}">Start negotiation</button>`;
+                actionsHtml += `<button type="button" class="btn btn-secondary btn-sm btn-start-negotiation" data-application-id="${escapeHtml(app.id)}" data-applicant-id="${escapeHtml(app.applicantId || '')}" title="Open a negotiation to discuss and refine proposal terms before creating a deal">Discuss terms</button>`;
             }
             if (showActions) {
-                actionsHtml += `<button type="button" class="btn btn-success btn-sm btn-accept-application" data-application-id="${escapeHtml(app.id)}">Accept & Create Deal</button>`;
+                actionsHtml += `<button type="button" class="btn btn-success btn-sm btn-accept-application" data-application-id="${escapeHtml(app.id)}" title="Accept the application and create a deal workspace directly (use when terms are already clear)">Accept &amp; create deal</button>`;
                 actionsHtml += `<button type="button" class="btn btn-danger btn-sm btn-reject-application" data-application-id="${escapeHtml(app.id)}">Reject</button>`;
             }
             actionsHtml += '</div>';

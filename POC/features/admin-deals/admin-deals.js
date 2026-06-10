@@ -353,7 +353,7 @@ async function loadAdminDeals() {
 }
 
 async function initAdminDeals() {
-    if (!authService.canAccessAdmin()) {
+    if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.deals.read')) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }

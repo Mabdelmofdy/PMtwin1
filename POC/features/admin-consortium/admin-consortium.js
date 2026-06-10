@@ -372,7 +372,7 @@ async function loadAdminConsortiumDeals() {
 }
 
 async function initAdminConsortium() {
-    if (!authService.canAccessAdmin()) {
+    if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.deals.read')) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }

@@ -83,11 +83,55 @@
         return isPro ? getProfileCompletionSix(profile) : getProfessionalCompleteness(profile);
     }
 
+    function getMissingPublishFields(entity) {
+        if (!entity) return ['Account profile'];
+        var profile = entity.profile || {};
+        var isCompany = profile.type === 'company' || entity.role === 'company_owner';
+        var missing = [];
+        if (isCompany) {
+            if (!profile.name) missing.push('Company name');
+            var sectors = Array.isArray(profile.sectors) ? profile.sectors : parseArray(profile.sectors);
+            var classifications = Array.isArray(profile.classifications) ? profile.classifications : parseArray(profile.classifications);
+            if (!sectors.length && !classifications.length) missing.push('Sectors or classifications');
+            if (profile.financialCapacity == null || profile.financialCapacity === '') missing.push('Financial capacity');
+        } else {
+            if (!profile.name) missing.push('Name');
+            var skills = Array.isArray(profile.skills) ? profile.skills : parseArray(profile.skills);
+            if (!skills.length) missing.push('Skills');
+            if (!profile.location && !profile.locationCity) missing.push('Location');
+        }
+        return missing;
+    }
+
+    var PUBLISH_MIN_PERCENT = 70;
+
+    /**
+     * @param {Object} entity - user or company record
+     * @param {number} [minPercent=70]
+     * @returns {{ ok: boolean, message?: string, percent: number, missingFields: string[] }}
+     */
+    function assertProfileReadyForPublish(entity, minPercent) {
+        var threshold = minPercent != null ? minPercent : PUBLISH_MIN_PERCENT;
+        var result = getProfileCompletion(entity);
+        var missingFields = getMissingPublishFields(entity);
+        if (result.percent < threshold || missingFields.length > 0) {
+            var msg = 'Complete your profile before publishing (' + result.percent + '%).';
+            if (missingFields.length) {
+                msg += ' Missing: ' + missingFields.slice(0, 5).join(', ') + '.';
+            }
+            return { ok: false, message: msg, percent: result.percent, missingFields: missingFields };
+        }
+        return { ok: true, percent: result.percent, missingFields: [] };
+    }
+
     var profileCompletion = {
         getProfileCompletion: getProfileCompletion,
         getProfileCompletionSix: getProfileCompletionSix,
         getCompanyCompleteness: getCompanyCompleteness,
-        getProfessionalCompleteness: getProfessionalCompleteness
+        getProfessionalCompleteness: getProfessionalCompleteness,
+        getMissingPublishFields: getMissingPublishFields,
+        assertProfileReadyForPublish: assertProfileReadyForPublish,
+        PUBLISH_MIN_PERCENT: PUBLISH_MIN_PERCENT
     };
 
     global.profileCompletion = profileCompletion;

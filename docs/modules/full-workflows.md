@@ -237,7 +237,10 @@ User applies to a published opportunity.
 - `POC/features/pipeline/pipeline.js`
 - `POC/features/contracts/contracts.js`
 - `POC/features/contract-detail/contract-detail.js`
+- `POC/features/match-detail/match-detail.js`
 - `POC/src/core/data/data-service.js`
+
+See also [Negotiation Workflow](../workflow/negotiation-workflow.md) for the optional path between match acceptance and deal creation.
 
 ## Workflow 5 -- Execution, Completion, Closure, and Reviews
 

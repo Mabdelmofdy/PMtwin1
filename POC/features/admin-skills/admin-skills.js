@@ -124,7 +124,10 @@ async function initAdminSkills() {
     syncMeta();
 
     function doSave() {
-        try { authService.assertAdminCapability('admin.skills.write'); } catch (err) { alert(err && err.message ? err.message : 'You do not have permission.'); return; }
+        try {
+            authService.assertNotReadOnlyAdmin();
+            authService.assertAdminCapability('admin.skills.write');
+        } catch (err) { alert(err && err.message ? err.message : 'You do not have permission.'); return; }
         const storage = window.storageService || (typeof storageService !== 'undefined' ? storageService : null);
         if (!storage || !CONFIG.STORAGE_KEYS.LOOKUPS_OVERRIDE) {
             alert('Storage not available.');
@@ -195,4 +198,19 @@ async function initAdminSkills() {
     }
 
     if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
+
+    const canWriteSkills = authService.hasAdminCapability('admin.skills.write');
+    if (!canWriteSkills) {
+        ['admin-skill-add', 'admin-category-add', 'admin-skills-save', 'admin-skills-reset'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.disabled = true;
+                el.hidden = true;
+            }
+        });
+        document.querySelectorAll('.admin-skill-remove, .admin-category-remove, #admin-skill-new, #admin-category-new').forEach(el => {
+            el.disabled = true;
+            if (el.tagName === 'BUTTON') el.hidden = true;
+        });
+    }
 }

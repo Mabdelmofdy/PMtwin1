@@ -200,6 +200,7 @@
     }
 
     async function approveAccount(accountId, isCompany, meta = {}) {
+        authService.assertNotReadOnlyAdmin();
         authService.assertAdminCapability('admin.vetting');
         const record = await fetchActorRecord(accountId, isCompany);
         const previousStatus = record?.status;
@@ -234,6 +235,7 @@
     }
 
     async function rejectAccount(accountId, isCompany, reason, meta = {}) {
+        authService.assertNotReadOnlyAdmin();
         authService.assertAdminCapability('admin.vetting');
         const record = await fetchActorRecord(accountId, isCompany);
         const previousStatus = record?.status;
@@ -268,6 +270,7 @@
     }
 
     async function requestAccountUpdates(accountId, isCompany, reasonIds, note, meta = {}) {
+        authService.assertNotReadOnlyAdmin();
         authService.assertAdminCapability('admin.vetting');
         const ids = Array.isArray(reasonIds) ? reasonIds.filter(Boolean) : [];
         if (!ids.length) {

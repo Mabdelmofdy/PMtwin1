@@ -7,6 +7,20 @@
 
             <form id="login-form" class="pm-login-form">
                 <div class="pm-field">
+                    <span class="pm-field-label">Account type</span>
+                    <div class="pm-account-type" role="group" aria-label="Account type">
+                        <label class="pm-check">
+                            <input type="radio" name="accountType" id="account-type-individual" value="individual" checked>
+                            <span>Individual</span>
+                        </label>
+                        <label class="pm-check">
+                            <input type="radio" name="accountType" id="account-type-company" value="company">
+                            <span>Company</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pm-field">
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" required placeholder="your@email.com">
                 </div>
@@ -215,6 +229,19 @@
     margin-bottom: 0.35rem;
     color: var(--auth-ink);
     font-weight: 800;
+}
+
+.pm-field-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: var(--auth-ink);
+    font-weight: 800;
+}
+
+.pm-account-type {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .pm-field input {

@@ -65,6 +65,28 @@ class DataService {
     get jsonDataPath() {
         return (window.CONFIG?.BASE_PATH || '') + 'data/';
     }
+
+    /**
+     * Block portal mutations for pending-approval accounts (central guard — GAP-P01).
+     * No-op when authService is unavailable (e.g. unit tests) or options skip the check.
+     * @param {{ skipPendingCheck?: boolean, internal?: boolean, adminAction?: boolean }} [options]
+     */
+    _assertPortalCanMutate(options = {}) {
+        if (options.skipPendingCheck || options.internal || options.adminAction) return;
+        const auth = (typeof window !== 'undefined' && window.authService) ? window.authService : null;
+        if (auth && typeof auth.assertCanMutate === 'function') {
+            auth.assertCanMutate(options);
+        }
+    }
+
+    /** Block write operations for auditor (read-only admin) accounts — GAP-P10. */
+    _assertNotAuditorWrite(options = {}) {
+        if (options.skipAuditorCheck || options.internal) return;
+        const auth = (typeof window !== 'undefined' && window.authService) ? window.authService : null;
+        if (auth && typeof auth.isReadOnlyAdmin === 'function' && auth.isReadOnlyAdmin()) {
+            throw new Error(PERMISSION_ERRORS.READ_ONLY_AUDITOR);
+        }
+    }
     
     /**
      * Initialize data from JSON files on first launch or when seed version changes
@@ -678,7 +700,8 @@ class DataService {
         return newUser;
     }
     
-    async updateUser(id, updates) {
+    async updateUser(id, updates, options = {}) {
+        this._assertNotAuditorWrite(options);
         const users = await this.getUsers();
         const index = users.findIndex(u => u.id === id);
         if (index === -1) return null;
@@ -692,7 +715,8 @@ class DataService {
         return users[index];
     }
 
-    async deleteUser(id) {
+    async deleteUser(id, options = {}) {
+        this._assertNotAuditorWrite(options);
         const refs = await this.findActorReferences(id);
         if (this.hasReferences(refs)) {
             const parts = [];
@@ -750,7 +774,8 @@ class DataService {
         return newCompany;
     }
     
-    async updateCompany(id, updates) {
+    async updateCompany(id, updates, options = {}) {
+        this._assertNotAuditorWrite(options);
         const companies = await this.getCompanies();
         const index = companies.findIndex(c => c.id === id);
         if (index === -1) return null;
@@ -864,7 +889,9 @@ class DataService {
         return opportunity;
     }
     
-    async createOpportunity(opportunityData) {
+    async createOpportunity(opportunityData, options = {}) {
+        this._assertPortalCanMutate(options);
+        this._assertNotAuditorWrite(options);
         const opportunities = await this.getOpportunities();
         const newOpportunity = {
             id: this.generateId(),
@@ -877,12 +904,28 @@ class DataService {
         return newOpportunity;
     }
     
-    async updateOpportunity(id, updates) {
+    async updateOpportunity(id, updates, options = {}) {
+        this._assertPortalCanMutate(options);
+        this._assertNotAuditorWrite(options);
         const opportunities = await this.getOpportunities();
         const index = opportunities.findIndex(o => o.id === id);
         if (index === -1) return null;
 
         const previousStatus = opportunities[index].status;
+        const isNewlyPublished = updates && updates.status === 'published' && previousStatus !== 'published';
+
+        if (isNewlyPublished) {
+            const auth = (typeof window !== 'undefined' && window.authService) ? window.authService : null;
+            const actor = auth && typeof auth.getCurrentUser === 'function' ? auth.getCurrentUser() : null;
+            const pc = (typeof profileCompletion !== 'undefined' && profileCompletion)
+                || (typeof window !== 'undefined' && window.profileCompletion);
+            if (actor && pc && typeof pc.assertProfileReadyForPublish === 'function') {
+                const profileCheck = pc.assertProfileReadyForPublish(actor);
+                if (!profileCheck.ok) {
+                    throw new Error(profileCheck.message || 'Complete your profile before publishing.');
+                }
+            }
+        }
 
         if (updates && updates.status != null && updates.status !== previousStatus) {
             enforceTransition('opportunity', opportunities[index], updates.status);
@@ -897,7 +940,6 @@ class DataService {
         const updated = opportunities[index];
 
         // Publish → persistPostMatches → findMatchesForPost → createPostMatch → notify (no legacy pmtwin_matches)
-        const isNewlyPublished = updates.status === 'published' && previousStatus !== 'published';
         if (isNewlyPublished) {
             const ms = window.matchingService || (typeof matchingService !== 'undefined' ? matchingService : null);
             if (ms && typeof ms.persistPostMatches === 'function') {
@@ -977,7 +1019,9 @@ class DataService {
         return { opportunities: oppCount, applications: appCount, postMatches: postMatchCount, deals: dealCount, contracts: contractCount, notifications: notificationCount, audit: auditCount };
     }
 
-    async deleteOpportunity(id) {
+    async deleteOpportunity(id, options = {}) {
+        this._assertPortalCanMutate(options);
+        this._assertNotAuditorWrite(options);
         const refs = await this.findOpportunityReferences(id);
         if (this.hasReferences(refs)) {
             const parts = [];
@@ -1004,6 +1048,7 @@ class DataService {
     }
     
     async createApplication(applicationData, options = {}) {
+        this._assertPortalCanMutate(options);
         const applications = await this.getApplications();
         const applicantId = applicationData.applicantId;
         let companyId = options.companyId || applicationData.applicantCompanyId || null;
@@ -2964,7 +3009,8 @@ class DataService {
     /**
      * Record one party signature; no-op if that party already signed.
      */
-    async signContractParty(contractId, userId) {
+    async signContractParty(contractId, userId, options = {}) {
+        this._assertPortalCanMutate(options);
         const contract = await this.getContractById(contractId);
         if (!contract) throw new Error('Contract not found.');
         if ((contract.status || '') !== CONFIG.CONTRACT_STATUS.PENDING) {
@@ -3166,7 +3212,8 @@ class DataService {
         return deal;
     }
 
-    async createDealFromApplication(applicationId, actorUserId) {
+    async createDealFromApplication(applicationId, actorUserId, options = {}) {
+        this._assertPortalCanMutate(options);
         const application = await this.getApplicationById(applicationId);
         if (!application) throw new Error('Application not found.');
         if (!canCreateDealFromApplication(application)) {
@@ -3254,7 +3301,8 @@ class DataService {
         return deal;
     }
 
-    async createDealFromMatch(postMatch, actorUserId = null) {
+    async createDealFromMatch(postMatch, actorUserId = null, options = {}) {
+        this._assertPortalCanMutate(options);
         const payload = buildDealPayloadFromMatch(postMatch, CONFIG.POST_MATCH_STATUS.CONFIRMED);
 
         const { matchId, matchType, participants, opportunityIds, primaryOpportunityId, payload: consortiumPayload, roleSlots } = payload;
@@ -3379,7 +3427,8 @@ class DataService {
         };
     }
 
-    async createDeal(dealData) {
+    async createDeal(dealData, options = {}) {
+        this._assertPortalCanMutate(options);
         await this.assertDealCreationSource(dealData || {});
         if (dealData && dealData.matchId) {
             const existingByMatch = await this.getDealByMatchId(dealData.matchId);
@@ -3478,8 +3527,43 @@ class DataService {
     }
 
     // Negotiation Operations (value exchange negotiation phase)
+    getDefaultNegotiationExpiresAt(status) {
+        const s = (status || 'open').toLowerCase();
+        const active = ['open', 'counter_offered'];
+        if (!active.includes(s)) return null;
+        const configured = CONFIG.MATCHING && CONFIG.MATCHING.NEGOTIATION && CONFIG.MATCHING.NEGOTIATION.EXPIRE_DAYS;
+        const parsed = Number(configured);
+        const days = Number.isFinite(parsed) && parsed > 0 ? parsed : 14;
+        return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+    }
+
+    async expireStaleNegotiations() {
+        const list = this.storage.get(CONFIG.STORAGE_KEYS.NEGOTIATIONS) || [];
+        let changed = false;
+        const now = Date.now();
+        const nowIso = new Date().toISOString();
+        const expiredStatus = CONFIG.MATCHING.NEGOTIATION.STATUS.EXPIRED;
+        for (let i = 0; i < list.length; i++) {
+            const n = list[i];
+            if (!n || !isActiveNegotiation(n)) continue;
+            if (!n.expiresAt) continue;
+            const t = new Date(n.expiresAt).getTime();
+            if (Number.isNaN(t) || t >= now) continue;
+            list[i] = {
+                ...n,
+                status: expiredStatus,
+                updatedAt: nowIso
+            };
+            changed = true;
+        }
+        if (changed) {
+            this.storage.set(CONFIG.STORAGE_KEYS.NEGOTIATIONS, list);
+        }
+        return list;
+    }
+
     async getNegotiations() {
-        return this.storage.get(CONFIG.STORAGE_KEYS.NEGOTIATIONS) || [];
+        return this.expireStaleNegotiations();
     }
 
     async getNegotiationById(id) {
@@ -3504,16 +3588,20 @@ class DataService {
 
     async createNegotiation(negotiationData) {
         const list = await this.getNegotiations();
+        const status = negotiationData.status || 'open';
         const newNegotiation = {
             id: this.generateId(),
             opportunityId: negotiationData.opportunityId,
             matchId: negotiationData.matchId || null,
             applicationId: negotiationData.applicationId,
             parties: negotiationData.parties || [],
-            status: negotiationData.status || 'open',
+            status,
             initialTerms: negotiationData.initialTerms || null,
             rounds: negotiationData.rounds || [],
             agreedTerms: negotiationData.agreedTerms || null,
+            expiresAt: (negotiationData.expiresAt != null && negotiationData.expiresAt !== '')
+                ? negotiationData.expiresAt
+                : this.getDefaultNegotiationExpiresAt(status),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
@@ -3624,6 +3712,7 @@ class DataService {
     }
 
     async startNegotiationFromMatch(matchId, actorUserId, options = {}) {
+        this._assertPortalCanMutate(options);
         const postMatch = await this.getPostMatchById(matchId);
         let matchRecord = postMatch;
         if (!matchRecord && this._isLegacyPersonOpportunityEnabled()) {
@@ -3701,7 +3790,8 @@ class DataService {
         return negotiation;
     }
 
-    async startNegotiationFromApplication(applicationId, actorUserId) {
+    async startNegotiationFromApplication(applicationId, actorUserId, options = {}) {
+        this._assertPortalCanMutate(options);
         const application = await this.getApplicationById(applicationId);
         if (!application) throw new Error('Application not found.');
 
@@ -3834,7 +3924,8 @@ class DataService {
         return updated;
     }
 
-    async agreeNegotiation(negotiationId, actorUserId, agreedTerms) {
+    async agreeNegotiation(negotiationId, actorUserId, agreedTerms, options = {}) {
+        this._assertPortalCanMutate(options);
         const negotiation = await this.getNegotiationById(negotiationId);
         if (!negotiation) throw new Error('Negotiation not found.');
         assertNotReadOnlyAdmin(await this._getActorRole(actorUserId));
@@ -3982,7 +4073,8 @@ class DataService {
         return updated;
     }
 
-    async createDealFromNegotiation(negotiationId, actorUserId) {
+    async createDealFromNegotiation(negotiationId, actorUserId, options = {}) {
+        this._assertPortalCanMutate(options);
         const negotiation = await this.getNegotiationById(negotiationId);
         if (!negotiation) throw new Error('Negotiation not found.');
         await this.assertNegotiationParticipant(negotiation, actorUserId);
@@ -4688,7 +4780,8 @@ class DataService {
     }
 
     /** Update participant status on a post_match (accept/decline); may confirm or decline the match. */
-    async updatePostMatchStatus(matchId, userId, newStatus) {
+    async updatePostMatchStatus(matchId, userId, newStatus, options = {}) {
+        this._assertPortalCanMutate(options);
         const match = await this.getPostMatchById(matchId);
         if (!match || !match.participants) return null;
         if ((match.status || '') === CONFIG.POST_MATCH_STATUS.EXPIRED) return match;
@@ -5090,7 +5183,8 @@ class DataService {
         );
     }
 
-    async createConnection(fromUserId, toUserId) {
+    async createConnection(fromUserId, toUserId, options = {}) {
+        this._assertPortalCanMutate(options);
         const connections = await this.getConnections();
         const sameDirection = connections.find(
             c => c.fromUserId === fromUserId && c.toUserId === toUserId
@@ -5124,6 +5218,20 @@ class DataService {
         };
         connections.push(newConnection);
         this.storage.set(CONFIG.STORAGE_KEYS.CONNECTIONS, connections);
+        try {
+            const sender = await this.getUserOrCompanyById(fromUserId);
+            const senderName = sender?.profile?.name || sender?.email || 'Someone';
+            await this.createNotification({
+                userId: toUserId,
+                type: 'connection_request',
+                title: 'Connection request',
+                message: senderName + ' sent you a connection request.',
+                link: '/people/' + fromUserId,
+                read: false
+            });
+        } catch (e) {
+            void e;
+        }
         return newConnection;
     }
 
@@ -5144,7 +5252,8 @@ class DataService {
      * Accept a connection request. Also accepts any duplicate pending rows for the same
      * from→to pair so the sender does not stay stuck on "Pending" after one row was updated.
      */
-    async acceptConnection(connectionId) {
+    async acceptConnection(connectionId, options = {}) {
+        this._assertPortalCanMutate(options);
         const connections = await this.getConnections();
         const index = connections.findIndex(c => c.id === connectionId);
         if (index === -1) return null;
@@ -5162,11 +5271,46 @@ class DataService {
             return c;
         });
         this.storage.set(CONFIG.STORAGE_KEYS.CONNECTIONS, next);
-        return next.find(c => c.id === connectionId) || null;
+        const accepted = next.find(c => c.id === connectionId) || null;
+        if (accepted && fromUserId) {
+            try {
+                const accepter = await this.getUserOrCompanyById(toUserId);
+                const accepterName = accepter?.profile?.name || accepter?.email || 'Someone';
+                await this.createNotification({
+                    userId: fromUserId,
+                    type: 'connection_accepted',
+                    title: 'Connection accepted',
+                    message: accepterName + ' accepted your connection request.',
+                    link: '/people/' + toUserId,
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+        return accepted;
     }
 
-    async rejectConnection(connectionId) {
-        return this.updateConnection(connectionId, { status: CONFIG.CONNECTION_STATUS.REJECTED });
+    async rejectConnection(connectionId, options = {}) {
+        this._assertPortalCanMutate(options);
+        const connections = await this.getConnections();
+        const existing = connections.find(c => c.id === connectionId);
+        const rejected = await this.updateConnection(connectionId, { status: CONFIG.CONNECTION_STATUS.REJECTED });
+        if (existing && existing.fromUserId) {
+            try {
+                await this.createNotification({
+                    userId: existing.fromUserId,
+                    type: 'connection_rejected',
+                    title: 'Connection declined',
+                    message: 'Your connection request was declined.',
+                    link: '/people',
+                    read: false
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+        return rejected;
     }
 
     /** Ensure a connection exists between two users and is accepted (creates and auto-accepts if needed). Returns the connection. */
@@ -5196,7 +5340,8 @@ class DataService {
             .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     }
 
-    async createMessage(senderId, receiverId, text) {
+    async createMessage(senderId, receiverId, text, options = {}) {
+        this._assertPortalCanMutate(options);
         const messages = await this.getMessages();
         const trimmed = (text || '').trim();
         const newMessage = {
@@ -5397,7 +5542,8 @@ class DataService {
         return plans.find(p => p.id === id) || null;
     }
 
-    async createPlan(planData) {
+    async createPlan(planData, options = {}) {
+        this._assertNotAuditorWrite(options);
         const plans = await this.getSubscriptionPlans();
         const newPlan = {
             id: this.generateId(),
@@ -5414,7 +5560,8 @@ class DataService {
         return newPlan;
     }
 
-    async updatePlan(id, updates) {
+    async updatePlan(id, updates, options = {}) {
+        this._assertNotAuditorWrite(options);
         const plans = await this.getSubscriptionPlans();
         const index = plans.findIndex(p => p.id === id);
         if (index === -1) return null;
@@ -5427,7 +5574,8 @@ class DataService {
         return plans[index];
     }
 
-    async deletePlan(id) {
+    async deletePlan(id, options = {}) {
+        this._assertNotAuditorWrite(options);
         const plans = await this.getSubscriptionPlans();
         const filtered = plans.filter(p => p.id !== id);
         this.storage.set(CONFIG.STORAGE_KEYS.SUBSCRIPTION_PLANS, filtered);
@@ -5455,6 +5603,7 @@ class DataService {
     }
 
     async assignSubscription(entityId, planId, isCompany, options = {}) {
+        this._assertNotAuditorWrite(options);
         const subs = await this.getSubscriptions();
         const now = new Date().toISOString();
         const startsAt = options.startsAt || now;
@@ -5475,7 +5624,8 @@ class DataService {
         return newSub;
     }
 
-    async updateSubscription(id, updates) {
+    async updateSubscription(id, updates, options = {}) {
+        this._assertNotAuditorWrite(options);
         const subs = await this.getSubscriptions();
         const index = subs.findIndex(s => s.id === id);
         if (index === -1) return null;
@@ -5488,7 +5638,8 @@ class DataService {
         return subs[index];
     }
 
-    async removeSubscription(id) {
+    async removeSubscription(id, options = {}) {
+        this._assertNotAuditorWrite(options);
         const subs = await this.getSubscriptions();
         const filtered = subs.filter(s => s.id !== id);
         this.storage.set(CONFIG.STORAGE_KEYS.SUBSCRIPTIONS, filtered);

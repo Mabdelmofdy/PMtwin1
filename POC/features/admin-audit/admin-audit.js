@@ -71,7 +71,7 @@ function mountAuditPageHeader() {
 }
 
 async function initAdminAudit() {
-    if (!authService.canAccessAdmin()) {
+    if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.audit.read')) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }

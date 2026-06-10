@@ -74,12 +74,14 @@ function initLogin() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const rememberMe = document.getElementById('remember-me') ? document.getElementById('remember-me').checked : false;
+        const accountTypeEl = loginForm.querySelector('input[name="accountType"]:checked');
+        const accountType = accountTypeEl ? accountTypeEl.value : 'auto';
         
         // Hide previous errors
         errorDiv.style.display = 'none';
         
         try {
-            const result = await authService.login(email, password, { rememberMe });
+            const result = await authService.login(email, password, { rememberMe, accountType });
             
             if (result) {
                 // Update navigation
@@ -167,6 +169,17 @@ function initLogin() {
         if (email && password && emailInput && passwordInput) {
             emailInput.value = email;
             passwordInput.value = password;
+            const typeCell = row.querySelector('td');
+            const typeText = (typeCell && typeCell.textContent || '').toLowerCase();
+            const companyRadio = document.getElementById('account-type-company');
+            const individualRadio = document.getElementById('account-type-individual');
+            if (companyRadio && individualRadio) {
+                if (typeText.includes('company')) {
+                    companyRadio.checked = true;
+                } else {
+                    individualRadio.checked = true;
+                }
+            }
             if (window.modalService) modalService.close();
         }
     });

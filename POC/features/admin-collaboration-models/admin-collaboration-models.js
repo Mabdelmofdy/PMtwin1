@@ -105,7 +105,7 @@ function readOverridesFromDom() {
 }
 
 async function initAdminCollaborationModels() {
-    if (!authService.hasRole(CONFIG.ROLES.ADMIN)) {
+    if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.settings.write')) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }

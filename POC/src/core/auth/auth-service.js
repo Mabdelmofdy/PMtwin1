@@ -245,7 +245,16 @@ class AuthService {
      * @param {{ rememberMe?: boolean }} [options] - If rememberMe is true, store session in localStorage so user stays signed in on trusted devices.
      */
     async login(email, password, options = {}) {
-        const user = await this.dataService.getUserOrCompanyByEmail(email);
+        const accountType = String(options.accountType || 'auto').toLowerCase();
+        let user = null;
+        if (accountType === 'company') {
+            const companies = await this.dataService.getCompanies();
+            user = companies.find(c => (c.email || '').toLowerCase() === String(email || '').toLowerCase()) || null;
+        } else if (accountType === 'individual') {
+            user = await this.dataService.getUserByEmail(email);
+        } else {
+            user = await this.dataService.getUserOrCompanyByEmail(email);
+        }
         if (!user) {
             throw new Error('Invalid email or password');
         }
@@ -367,6 +376,19 @@ class AuthService {
     isPendingApproval() {
         return !!(this.currentUser && this.currentUser.status === 'pending');
     }
+
+    /**
+     * Throws when the current user is pending approval (read-only demo mode).
+     * @param {{ skipPendingCheck?: boolean }} [options]
+     */
+    assertCanMutate(options = {}) {
+        if (options.skipPendingCheck) return;
+        if (this.isPendingApproval()) {
+            throw new Error(
+                'Your account is pending admin approval. You can explore the platform but cannot perform this action yet.'
+            );
+        }
+    }
     
     /**
      * Check if user has required role
@@ -407,6 +429,13 @@ class AuthService {
     /** Auditor accounts cannot mutate platform data through admin tools. */
     isReadOnlyAdmin() {
         return this.isAuditor();
+    }
+
+    /** Throws when the current user is an auditor (read-only admin). */
+    assertNotReadOnlyAdmin() {
+        if (this.isReadOnlyAdmin()) {
+            throw new Error('This action is read-only for auditor accounts.');
+        }
     }
 
     /**

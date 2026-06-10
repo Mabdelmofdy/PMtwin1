@@ -420,7 +420,7 @@ function applyAuditorReadOnlyUi() {
 }
 
 async function initAdminMatching() {
-    if (!authService.canAccessAdmin()) {
+    if (!authService.canAccessAdmin() || !authService.hasAdminCapability('admin.matching.read')) {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
         return;
     }

@@ -22,7 +22,7 @@ Engineers and support use this file alongside [matching-engine.md](../matching-e
 
 ### What happens next
 
-After a match is **confirmed**, continue with [deal-workflow.md](deal-workflow.md).
+After a match is **confirmed**, continue with [deal-workflow.md](deal-workflow.md) or optional [negotiation-workflow.md](negotiation-workflow.md).
 
 ### Tips
 
