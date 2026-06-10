@@ -1,7 +1,8 @@
 /**
  * Layout Service
  * Manages application layout, navigation, and common UI elements.
- * When authenticated: portal layout (sidebar + main card). When not: public layout (top nav + full-width main).
+ * Portal layout (sidebar + main card) on authenticated workspace routes.
+ * Public layout (top nav + full-width main) on marketing routes and when not authenticated.
  */
 
 class LayoutService {
@@ -70,16 +71,28 @@ class LayoutService {
     }
 
     /**
-     * Switch layout by auth: move #main-content and show/hide portal vs public
+     * Whether current route is a public/marketing page
      */
-    async applyLayoutMode(isAuthenticated) {
+    isPublicRoute() {
+        const path = this.getCurrentPath();
+        const guard = window.authGuard || (typeof authGuard !== 'undefined' ? authGuard : null);
+        if (guard && typeof guard.isPublicRoute === 'function') {
+            return guard.isPublicRoute(path);
+        }
+        return (CONFIG.PUBLIC_ROUTES || []).includes(path);
+    }
+
+    /**
+     * Switch layout: move #main-content and show/hide portal vs public
+     */
+    async applyLayoutMode(usePortalLayout) {
         const mainContent = document.getElementById(this.mainContentId);
         const publicLayout = document.getElementById(this.publicLayoutId);
         const portalLayout = document.getElementById(this.portalLayoutId);
         const slot = document.getElementById(this.mainContentSlotId);
         if (!mainContent || !publicLayout || !portalLayout) return;
 
-        if (isAuthenticated) {
+        if (usePortalLayout) {
             publicLayout.classList.remove('public-visible');
             portalLayout.classList.add('portal-visible');
             if (slot && mainContent.parentElement !== slot) {
@@ -113,10 +126,11 @@ class LayoutService {
     async renderLayout() {
         const isAuthenticated = await this.authService.checkAuth();
         const user = this.authService.getCurrentUser();
+        const usePortalLayout = isAuthenticated && !this.isPublicRoute();
 
-        await this.applyLayoutMode(isAuthenticated);
+        await this.applyLayoutMode(usePortalLayout);
 
-        if (isAuthenticated) {
+        if (usePortalLayout) {
             const inAdminArea = this.isInAdminArea();
             const canAccessAdmin = this.authService.canAccessAdmin();
             if (inAdminArea && canAccessAdmin) {
@@ -135,26 +149,46 @@ class LayoutService {
     }
 
     /**
-     * Render public (top) nav – used when not authenticated.
-     * Collaboration Models is intentionally not shown in public view.
+     * Render public (top) nav – marketing pages and unauthenticated app shell.
+     * Logged-in users see Dashboard instead of Login. Collaboration Models is not in public nav.
      * Mobile: hamburger toggles .nav-open; menu is in a drawer below header.
      */
-    async renderPublicNav() {
+    async renderPublicNav(user) {
         const navElement = document.getElementById('main-nav');
         if (!navElement) return;
+
+        const linkClass = 'text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link';
+        const isAuthenticated = !!user;
+        const dashboardRoute =
+            isAuthenticated && this.authService.isCompanyUser && this.authService.isCompanyUser()
+                ? CONFIG.ROUTES.COMPANY_DASHBOARD
+                : CONFIG.ROUTES.DASHBOARD;
 
         let navHTML = '<nav class="public-nav bg-white border-b border-gray-200 h-16 sticky top-0 z-50 shadow-sm"><div class="max-w-container mx-auto px-4 sm:px-6 h-full flex items-center justify-between relative">';
         navHTML += `<div class="nav-brand"><a href="#" data-route="${CONFIG.ROUTES.HOME}" class="text-xl font-bold text-primary no-underline hover:text-primary-dark transition-colors">${CONFIG.APP_NAME}</a></div>`;
         navHTML += '<button type="button" class="public-nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="public-nav-menu"><i class="ph-duotone ph-list" style="font-size: 1.5rem;"></i></button>';
         navHTML += '<div id="public-nav-menu" class="public-nav-menu" role="navigation" aria-label="Main">';
         navHTML += '<ul class="flex list-none gap-6 items-center m-0 p-0 public-nav-list">';
-        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.FIND}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link">Find</a></li>`;
-        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.WORKFLOW}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link">How it works</a></li>`;
-        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.KNOWLEDGE_BASE}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link">Knowledge Base</a></li>`;
-        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.LOGIN}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link">Login</a></li>`;
-        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.REGISTER}" class="text-gray-900 no-underline font-medium hover:text-primary transition-colors public-nav-link">Register</a></li>`;
+        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.FIND}" class="${linkClass}">Find</a></li>`;
+        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.WORKFLOW}" class="${linkClass}">How it works</a></li>`;
+        navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.KNOWLEDGE_BASE}" class="${linkClass}">Knowledge Base</a></li>`;
+        if (isAuthenticated) {
+            navHTML += `<li><a href="#" data-route="${dashboardRoute}" class="${linkClass}">Dashboard</a></li>`;
+            navHTML += '<li><button type="button" class="public-nav-link public-nav-logout" style="background:none;border:none;cursor:pointer;font:inherit;padding:0;">Logout</button></li>';
+        } else {
+            navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.LOGIN}" class="${linkClass}">Login</a></li>`;
+            navHTML += `<li><a href="#" data-route="${CONFIG.ROUTES.REGISTER}" class="${linkClass}">Register</a></li>`;
+        }
         navHTML += '</ul></div></div></nav>';
         navElement.innerHTML = navHTML;
+
+        const logoutBtn = navElement.querySelector('.public-nav-logout');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                void this.handleLogout();
+            });
+        }
     }
 
     /**

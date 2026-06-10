@@ -398,6 +398,20 @@ const CONFIG = {
         WORKFLOW: '/workflow',
         CONTRACT_DETAIL: '/contracts/:id'
     },
+
+    // Marketing/public routes — no auth required; use public top nav even when logged in
+    PUBLIC_ROUTES: [
+        '/',
+        '/login',
+        '/register',
+        '/forgot-password',
+        '/reset-password',
+        '/find',
+        '/workflow',
+        '/knowledge-base',
+        '/collaboration-wizard',
+        '/collaboration-models'
+    ],
     
     // API Endpoints (for future backend integration)
     API: {

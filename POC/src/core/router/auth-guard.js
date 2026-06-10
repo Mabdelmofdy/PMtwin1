@@ -10,17 +10,18 @@ class AuthGuard {
     }
     
     /**
+     * Check if route is a public/marketing page (no auth required)
+     */
+    isPublicRoute(route) {
+        const path = route || '';
+        return (CONFIG.PUBLIC_ROUTES || []).includes(path);
+    }
+
+    /**
      * Check if route requires authentication
      */
     requiresAuth(route) {
-        const publicRoutes = [
-            CONFIG.ROUTES.HOME,
-            CONFIG.ROUTES.LOGIN,
-            CONFIG.ROUTES.REGISTER,
-            CONFIG.ROUTES.FIND,
-            CONFIG.ROUTES.WORKFLOW
-        ];
-        return !publicRoutes.includes(route);
+        return !this.isPublicRoute(route);
     }
     
     /**

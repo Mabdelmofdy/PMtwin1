@@ -103,7 +103,7 @@ flowchart TB
 ## Entry point and layout
 
 - **Entry:** `POC/index.html` loads the app bootstrap module.
-- **Layouts:** Public pages (home, login, register, and others) use a top nav; signed-in users get a **sidebar** plus main content; admin uses the same pattern on admin routes.
+- **Layouts:** Marketing pages (home, login, register, find, workflow, and others) always use the **public top nav** — even when signed in, with Login swapped for Dashboard. Workspace routes (dashboard, opportunities, deals, and others) use the **sidebar** plus main content when signed in; admin uses the same pattern on admin routes.
 - **Paths:** The app figures out the base path from the browser so it can load pages and data correctly.
 
 ---
