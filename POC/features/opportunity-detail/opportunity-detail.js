@@ -292,6 +292,26 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply, 
         intentEl.className = 'badge ' + (typeof getIntentBadgeClass === 'function' ? getIntentBadgeClass(intent, opportunity.modelType) : (intent === 'offer' ? 'badge-info' : 'badge-primary'));
     }
     document.getElementById('opportunity-model').textContent = formatModelType(opportunity.modelType) || (opportunity.collaborationModel || 'N/A');
+    const subModelEl = document.getElementById('opportunity-submodel');
+    if (subModelEl) {
+        const subModelDef = getModelDefinition(opportunity.modelType, opportunity.subModelType);
+        const subModelLabel = subModelDef?.name || formatLabel(opportunity.subModelType || '');
+        if (opportunity.subModelType && subModelLabel) {
+            subModelEl.textContent = subModelLabel;
+            subModelEl.style.display = 'inline-block';
+        } else {
+            subModelEl.style.display = 'none';
+        }
+    }
+    const projectTypeEl = document.getElementById('opportunity-project-type');
+    if (projectTypeEl) {
+        if (opportunity.projectType === 'multi') {
+            projectTypeEl.textContent = 'Multi-Project';
+            projectTypeEl.style.display = 'inline-block';
+        } else {
+            projectTypeEl.style.display = 'none';
+        }
+    }
     const sb = window.statusBadgeSystem;
     document.getElementById('opportunity-status').textContent = sb
         ? sb.getStatusLabel(opportunity.status, 'opportunity')
@@ -346,9 +366,14 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply, 
     // Description
     document.getElementById('opportunity-description').innerHTML = 
         escapeHtml(opportunity.description || 'No description available');
+
+    renderScopeSection(opportunity);
+    renderWorkPackages(opportunity);
     
     // Exchange details
-    if (opportunity.exchangeData && Object.keys(opportunity.exchangeData).length > 0) {
+    const hasExchangeData = opportunity.exchangeData && Object.keys(opportunity.exchangeData).length > 0;
+    const hasValueExchange = opportunity.value_exchange && Object.keys(opportunity.value_exchange).length > 0;
+    if (hasExchangeData || hasValueExchange) {
         document.getElementById('exchange-section').style.display = 'block';
         renderExchangeDetails(opportunity);
     }
@@ -764,14 +789,145 @@ function getExchangeDisplayState(opportunity) {
     return { primaryMode, acceptedPaymentModes: [...sorted, ...rest] };
 }
 
+const EXCHANGE_FIELD_LABELS = {
+    cashMilestones: 'Payment Milestones',
+    equityPercentage: 'Equity Percentage',
+    equityVesting: 'Vesting Schedule',
+    equityContribution: 'Equity Contribution',
+    companyValuation: 'Company Valuation',
+    profitSplit: 'Profit Split',
+    profitBasis: 'Profit Basis',
+    profitDuration: 'Profit Duration',
+    profitDistribution: 'Profit Distribution',
+    profitSharePercentage: 'Profit Share Percentage',
+    expectedProfit: 'Expected Profit',
+    barterOffer: 'Barter Offer',
+    barterNeed: 'Barter Need',
+    barterValue: 'Barter Value',
+    hybridCash: 'Hybrid Cash (%)',
+    hybridEquity: 'Hybrid Equity (%)',
+    hybridBarter: 'Hybrid Barter (%)',
+    hybridCashDetails: 'Hybrid Cash Details',
+    hybridEquityDetails: 'Hybrid Equity Details',
+    hybridBarterDetails: 'Hybrid Barter Details',
+    exchangeTermsSummary: 'Terms Summary'
+};
+
+const EXCHANGE_SKIP_KEYS = new Set([
+    'exchangeMode', 'budgetRange', 'currency', 'cashAmount', 'cashPaymentTerms',
+    'exchangeTermsSummary', 'valueItems', 'alternateExchangeDetails'
+]);
+
+const SCOPE_FIELD_KEYS = [
+    'requiredSkills', 'offeredSkills', 'coreSkills', 'sectors', 'interests', 'certifications', 'targetRole'
+];
+
+const SCOPE_FIELD_LABELS = {
+    requiredSkills: 'Required Skills',
+    offeredSkills: 'Offered Skills',
+    coreSkills: 'Core Skills',
+    sectors: 'Sectors',
+    interests: 'Interests',
+    certifications: 'Certifications',
+    targetRole: 'Professional Discipline'
+};
+
+const DISPLAY_SYSTEM_KEYS = new Set([
+    'title', 'description', 'status', 'modelType', 'subModelType',
+    'location', 'locationCountry', 'locationRegion', 'locationCity', 'locationDistrict',
+    'exchangeMode', 'exchangeData', 'paymentModes'
+]);
+
+function mergeArrayField(a, b) {
+    const arrA = Array.isArray(a) ? a : [];
+    const arrB = Array.isArray(b) ? b : [];
+    const seen = new Set();
+    const result = [];
+    [...arrA, ...arrB].forEach(v => {
+        if (v == null || v === '') return;
+        const key = typeof v === 'object' ? JSON.stringify(v) : String(v);
+        if (!seen.has(key)) {
+            seen.add(key);
+            result.push(v);
+        }
+    });
+    return result;
+}
+
+function getScopeDisplayFields(opportunity) {
+    const scope = opportunity.scope || {};
+    const attrs = opportunity.attributes || {};
+    const result = {};
+    SCOPE_FIELD_KEYS.forEach(key => {
+        const scopeVal = scope[key];
+        const attrVal = attrs[key];
+        if (key === 'targetRole') {
+            const val = scopeVal || attrVal;
+            if (val != null && val !== '') result[key] = val;
+        } else {
+            const merged = mergeArrayField(scopeVal, attrVal);
+            if (merged.length) result[key] = merged;
+        }
+    });
+    return result;
+}
+
+function getOpportunityDisplayFields(opportunity) {
+    const scope = opportunity.scope || {};
+    const attrs = opportunity.attributes || {};
+    const model = opportunity.modelData || {};
+    const merged = { ...model, ...attrs, ...scope };
+    const result = {};
+    Object.keys(merged).forEach(key => {
+        if (DISPLAY_SYSTEM_KEYS.has(key)) return;
+        if (SCOPE_FIELD_KEYS.includes(key)) return;
+        const val = merged[key];
+        if (val === null || val === undefined || val === '') return;
+        if (Array.isArray(val) && val.length === 0) return;
+        result[key] = val;
+    });
+    return result;
+}
+
+function renderExchangeDetailItem(label, value, fullWidth) {
+    if (value === null || value === undefined || value === '') return '';
+    const displayValue = formatModelDetailValue(value);
+    if (displayValue === 'N/A') return '';
+    const colStyle = fullWidth ? ' style="grid-column: 1 / -1;"' : '';
+    return `
+        <div class="detail-item"${colStyle}>
+            <div class="detail-label">${escapeHtml(label)}</div>
+            <div class="detail-value">${escapeHtml(displayValue)}</div>
+        </div>
+    `;
+}
+
+function formatValueItems(items) {
+    if (!Array.isArray(items) || items.length === 0) return '';
+    return items.map(item => {
+        const parts = [item.category, item.description].filter(Boolean);
+        const val = item.estimatedValue != null ? ` (${Number(item.estimatedValue).toLocaleString()} SAR)` : '';
+        return escapeHtml((parts.join(': ') || 'Item') + val);
+    }).join('<br>');
+}
+
+function formatAlternateExchangeDetails(alternates) {
+    if (!Array.isArray(alternates) || alternates.length === 0) return '';
+    return alternates.map(alt => {
+        const mode = alt.mode ? formatExchangeMode(alt.mode) : 'Alternate';
+        const details = alt.details ? `: ${alt.details}` : '';
+        return escapeHtml(mode + details);
+    }).join('<br>');
+}
+
 function renderExchangeDetails(opportunity) {
     const container = document.getElementById('exchange-details');
-    const exchangeData = opportunity.exchangeData || opportunity;
+    const exchangeData = opportunity.exchangeData || {};
+    const valueExchange = opportunity.value_exchange || {};
     const { primaryMode, acceptedPaymentModes } = getExchangeDisplayState(opportunity);
     const showAcceptedPaymentMethodsRow = acceptedPaymentModes.length > 1;
     let html = '<div class="detail-grid">';
 
-    // 1. Exchange Mode (always first when present)
     if (primaryMode) {
         html += `
             <div class="detail-item">
@@ -781,7 +937,6 @@ function renderExchangeDetails(opportunity) {
         `;
     }
 
-    // 2. Accepted Payment Methods (only when multiple)
     if (showAcceptedPaymentMethodsRow) {
         const modeLabels = acceptedPaymentModes.map(m => formatExchangeMode(m));
         html += `
@@ -792,7 +947,6 @@ function renderExchangeDetails(opportunity) {
         `;
     }
 
-    // 3. Budget Range (now part of exchange data)
     if (exchangeData.budgetRange) {
         const budget = exchangeData.budgetRange;
         const currency = budget.currency || exchangeData.currency || 'SAR';
@@ -805,7 +959,7 @@ function renderExchangeDetails(opportunity) {
             </div>
         `;
     }
-    
+
     if (exchangeData.currency) {
         html += `
             <div class="detail-item">
@@ -814,7 +968,7 @@ function renderExchangeDetails(opportunity) {
             </div>
         `;
     }
-    
+
     if (exchangeData.cashAmount) {
         html += `
             <div class="detail-item">
@@ -823,16 +977,39 @@ function renderExchangeDetails(opportunity) {
             </div>
         `;
     }
-    
+
     if (exchangeData.cashPaymentTerms) {
         html += `
             <div class="detail-item">
                 <div class="detail-label">Payment Terms</div>
-                <div class="detail-value">${exchangeData.cashPaymentTerms}</div>
+                <div class="detail-value">${escapeHtml(exchangeData.cashPaymentTerms)}</div>
             </div>
         `;
     }
-    
+
+    Object.keys(EXCHANGE_FIELD_LABELS).forEach(key => {
+        if (EXCHANGE_SKIP_KEYS.has(key)) return;
+        html += renderExchangeDetailItem(EXCHANGE_FIELD_LABELS[key], exchangeData[key]);
+    });
+
+    if (exchangeData.valueItems && exchangeData.valueItems.length > 0) {
+        html += `
+            <div class="detail-item" style="grid-column: 1 / -1;">
+                <div class="detail-label">Value Items</div>
+                <div class="detail-value">${formatValueItems(exchangeData.valueItems)}</div>
+            </div>
+        `;
+    }
+
+    if (exchangeData.alternateExchangeDetails && exchangeData.alternateExchangeDetails.length > 0) {
+        html += `
+            <div class="detail-item" style="grid-column: 1 / -1;">
+                <div class="detail-label">Alternate Exchange Options</div>
+                <div class="detail-value">${formatAlternateExchangeDetails(exchangeData.alternateExchangeDetails)}</div>
+            </div>
+        `;
+    }
+
     if (exchangeData.exchangeTermsSummary) {
         html += `
             <div class="detail-item" style="grid-column: 1 / -1;">
@@ -841,9 +1018,95 @@ function renderExchangeDetails(opportunity) {
             </div>
         `;
     }
-    
+
+    if (valueExchange.estimated_value != null) {
+        const currency = valueExchange.currency || exchangeData.currency || 'SAR';
+        html += `
+            <div class="detail-item">
+                <div class="detail-label">Estimated Value</div>
+                <div class="detail-value">${Number(valueExchange.estimated_value).toLocaleString()} ${currency}</div>
+            </div>
+        `;
+    }
+
+    if (valueExchange.value_offered) {
+        html += renderExchangeDetailItem('Value Offered', valueExchange.value_offered);
+    }
+    if (valueExchange.value_expected) {
+        const expected = Array.isArray(valueExchange.value_expected)
+            ? valueExchange.value_expected.join(', ')
+            : valueExchange.value_expected;
+        html += renderExchangeDetailItem('Value Expected', expected);
+    }
+    if (valueExchange.accepted_modes && valueExchange.accepted_modes.length > 0) {
+        const modes = valueExchange.accepted_modes.map(m => formatExchangeMode(m)).join(', ');
+        html += renderExchangeDetailItem('Accepted Modes', modes);
+    }
+    if (valueExchange.flexibility) {
+        const flex = valueExchange.flexibility;
+        const flexParts = [];
+        if (flex.negotiable) flexParts.push('Negotiable');
+        if (flex.min_acceptable != null) flexParts.push(`Min: ${flex.min_acceptable}`);
+        if (flex.max_offer != null) flexParts.push(`Max: ${flex.max_offer}`);
+        if (flexParts.length) {
+            html += renderExchangeDetailItem('Flexibility', flexParts.join(' · '));
+        }
+    }
+
     html += '</div>';
     container.innerHTML = html;
+}
+
+function renderScopeSection(opportunity) {
+    const section = document.getElementById('scope-section');
+    const container = document.getElementById('scope-details');
+    if (!section || !container) return;
+
+    const scopeFields = getScopeDisplayFields(opportunity);
+    const keys = Object.keys(scopeFields);
+    if (keys.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+
+    section.style.display = 'block';
+    container.innerHTML = keys.map(key => {
+        const label = SCOPE_FIELD_LABELS[key] || formatLabel(key);
+        const displayValue = formatModelDetailValue(scopeFields[key], key);
+        return `
+            <div class="detail-item">
+                <div class="detail-label">${escapeHtml(label)}</div>
+                <div class="detail-value">${escapeHtml(displayValue)}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderWorkPackages(opportunity) {
+    const section = document.getElementById('work-packages-section');
+    const container = document.getElementById('work-packages-list');
+    if (!section || !container) return;
+
+    const packages = Array.isArray(opportunity.projectTasks)
+        ? opportunity.projectTasks.filter(p => p && p.title)
+        : [];
+    if (packages.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+
+    section.style.display = 'block';
+    container.innerHTML = `
+        <ul class="work-packages-list" style="list-style:disc;padding-left:1.25rem;margin:0;">
+            ${packages.map(p => `
+                <li style="margin-bottom:0.75rem;">
+                    <strong>${escapeHtml(p.title)}</strong>
+                    ${p.duration ? ` · ${escapeHtml(String(p.duration))} days` : ''}
+                    ${p.notes ? `<div style="color:var(--text-secondary);font-size:0.875rem;margin-top:0.25rem;">${escapeHtml(p.notes)}</div>` : ''}
+                </li>
+            `).join('')}
+        </ul>
+    `;
 }
 
 // Matching-system attributes shown first in Opportunity Details (labels for display)
@@ -859,14 +1122,13 @@ const MATCHING_DETAIL_LABELS = {
 
 async function renderModelDetails(opportunity) {
     const container = document.getElementById('model-details');
-    const modelSpecificData = opportunity.attributes || opportunity.modelData;
-    
+    const modelSpecificData = getOpportunityDisplayFields(opportunity);
+
     if (!modelSpecificData || Object.keys(modelSpecificData).length === 0) {
         container.innerHTML = '<p class="text-muted">No additional details available.</p>';
         return;
     }
-    
-    // Get model definition for labels
+
     const modelDef = getModelDefinition(opportunity.modelType, opportunity.subModelType);
     const attributeMap = {};
     if (modelDef && modelDef.attributes) {
@@ -876,18 +1138,8 @@ async function renderModelDetails(opportunity) {
     }
     Object.assign(attributeMap, MATCHING_DETAIL_LABELS);
 
-    // System / non-detail keys to exclude from display
-    const systemKeys = ['title', 'description', 'status', 'modelType', 'subModelType',
-        'location', 'locationCountry', 'locationRegion', 'locationCity',
-        'locationDistrict', 'exchangeMode', 'exchangeData'];
-    const detailKeys = Object.keys(modelSpecificData).filter(key => !systemKeys.includes(key));
+    const detailKeys = Object.keys(modelSpecificData);
 
-    if (detailKeys.length === 0) {
-        container.innerHTML = '<p class="text-muted">No additional details available.</p>';
-        return;
-    }
-
-    // Sort so matching-related fields (timeline, location) appear first
     const priorityKeys = ['startDate', 'applicationDeadline', 'tenderDeadline', 'endDate', 'locationRequirement', 'workMode', 'availability'];
     const sortedKeys = [...detailKeys].sort((a, b) => {
         const ai = priorityKeys.indexOf(a);

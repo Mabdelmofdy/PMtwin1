@@ -47,6 +47,8 @@
                 <div class="opportunity-meta opp-page-badges">
                     <span id="opportunity-intent" class="badge badge-info" style="display: none;"></span>
                     <span id="opportunity-model" class="badge badge-primary"></span>
+                    <span id="opportunity-submodel" class="badge badge-secondary" style="display: none;"></span>
+                    <span id="opportunity-project-type" class="badge badge-info" style="display: none;"></span>
                     <span id="opportunity-status" class="badge"></span>
                 </div>
                 <div class="opportunity-actions opp-page-actions" id="opportunity-actions" aria-label="Opportunity actions">
@@ -89,6 +91,18 @@
                 <div class="detail-section">
                     <h2><i class="ph-duotone ph-text-align-left"></i> Description</h2>
                     <div class="detail-content" id="opportunity-description"></div>
+                </div>
+
+                <!-- Scope & Capabilities Section -->
+                <div class="detail-section" id="scope-section" style="display: none;">
+                    <h2><i class="ph-duotone ph-target"></i> Scope & Capabilities</h2>
+                    <div class="detail-content detail-grid" id="scope-details"></div>
+                </div>
+
+                <!-- Work Packages Section -->
+                <div class="detail-section" id="work-packages-section" style="display: none;">
+                    <h2><i class="ph-duotone ph-package"></i> Work Packages</h2>
+                    <div class="detail-content" id="work-packages-list"></div>
                 </div>
 
                 <!-- Exchange Terms Section -->
