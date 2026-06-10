@@ -1259,7 +1259,19 @@
             "scope": "Civil works and drainage"
           }
         ],
-        "targetRole": "Project Management"
+        "targetRole": "Project Management",
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "requiredSkills": [
+          "Project Management",
+          "Highway Design",
+          "Consortium Leadership"
+        ],
+        "offeredSkills": [],
+        "certifications": [],
+        "coreSkills": []
       },
       "createdAt": "2026-06-10T11:57:04.027Z",
       "updatedAt": "2026-06-10T11:57:04.027Z",
