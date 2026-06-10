@@ -7,7 +7,7 @@
       "id": "demo-pm-oneway-01",
       "matchType": "one_way",
       "status": "pending",
-      "matchScore": 1.275,
+      "matchScore": 0.975,
       "runId": "seed-run-001",
       "participants": [
         {
@@ -41,16 +41,16 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T11:57:04.763Z",
-      "updatedAt": "2026-06-10T11:57:04.764Z",
-      "expiresAt": "2026-06-24T11:57:04.764Z",
+      "createdAt": "2026-06-10T20:22:21.009Z",
+      "updatedAt": "2026-06-10T20:22:21.010Z",
+      "expiresAt": "2026-06-24T20:22:21.010Z",
       "isReplacement": false
     },
     {
       "id": "demo-pm-oneway-02",
       "matchType": "one_way",
       "status": "pending",
-      "matchScore": 1.275,
+      "matchScore": 0.975,
       "runId": "seed-run-010",
       "participants": [
         {
@@ -84,16 +84,16 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T11:57:04.805Z",
-      "updatedAt": "2026-06-10T11:57:04.805Z",
-      "expiresAt": "2026-06-24T11:57:04.805Z",
+      "createdAt": "2026-06-10T20:22:21.042Z",
+      "updatedAt": "2026-06-10T20:22:21.042Z",
+      "expiresAt": "2026-06-24T20:22:21.042Z",
       "isReplacement": false
     },
     {
       "id": "demo-pm-barter-01",
       "matchType": "two_way",
       "status": "pending",
-      "matchScore": 1.275,
+      "matchScore": 0.975,
       "runId": "seed-run-010",
       "participants": [
         {
@@ -136,20 +136,20 @@
           "needId": "seed-opp-012",
           "offerId": "seed-opp-013"
         },
-        "scoreAtoB": 1.275,
-        "scoreBtoA": 1.275,
+        "scoreAtoB": 0.975,
+        "scoreBtoA": 0.975,
         "valueEquivalence": "~1.0 × ([G] Barter need B — Architect services)"
       },
-      "createdAt": "2026-06-10T11:57:04.813Z",
-      "updatedAt": "2026-06-10T11:57:04.813Z",
-      "expiresAt": "2026-06-24T11:57:04.813Z",
+      "createdAt": "2026-06-10T20:22:21.043Z",
+      "updatedAt": "2026-06-10T20:22:21.043Z",
+      "expiresAt": "2026-06-24T20:22:21.043Z",
       "isReplacement": false
     },
     {
       "id": "demo-pm-oneway-03",
       "matchType": "one_way",
       "status": "pending",
-      "matchScore": 1.275,
+      "matchScore": 0.975,
       "runId": "seed-run-011",
       "participants": [
         {
@@ -183,16 +183,16 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T11:57:04.822Z",
-      "updatedAt": "2026-06-10T11:57:04.822Z",
-      "expiresAt": "2026-06-24T11:57:04.822Z",
+      "createdAt": "2026-06-10T20:22:21.045Z",
+      "updatedAt": "2026-06-10T20:22:21.045Z",
+      "expiresAt": "2026-06-24T20:22:21.045Z",
       "isReplacement": false
     },
     {
       "id": "demo-pm-oneway-04",
       "matchType": "one_way",
       "status": "pending",
-      "matchScore": 1.275,
+      "matchScore": 0.975,
       "runId": "seed-run-017",
       "participants": [
         {
@@ -226,16 +226,16 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T11:57:04.873Z",
-      "updatedAt": "2026-06-10T11:57:04.873Z",
-      "expiresAt": "2026-06-24T11:57:04.873Z",
+      "createdAt": "2026-06-10T20:22:21.069Z",
+      "updatedAt": "2026-06-10T20:22:21.069Z",
+      "expiresAt": "2026-06-24T20:22:21.069Z",
       "isReplacement": false
     },
     {
       "id": "demo-pm-circular-01",
       "matchType": "circular",
       "status": "pending",
-      "matchScore": 1.275,
+      "matchScore": 0.975,
       "runId": "seed-run-017",
       "participants": [
         {
@@ -272,21 +272,21 @@
             "toCreatorId": "seed-user-014",
             "needId": "seed-opp-021",
             "offerId": "seed-opp-020",
-            "score": 1.275
+            "score": 0.975
           },
           {
             "fromCreatorId": "seed-user-014",
             "toCreatorId": "seed-user-013",
             "needId": "seed-opp-019",
             "offerId": "seed-opp-018",
-            "score": 1.275
+            "score": 0.975
           },
           {
             "fromCreatorId": "seed-user-013",
             "toCreatorId": "seed-user-015",
             "needId": "seed-opp-017",
             "offerId": "seed-opp-022",
-            "score": 1.275
+            "score": 0.975
           }
         ],
         "linkScores": [
@@ -295,35 +295,35 @@
             "toCreatorId": "seed-user-014",
             "needId": "seed-opp-021",
             "offerId": "seed-opp-020",
-            "score": 1.275
+            "score": 0.975
           },
           {
             "fromCreatorId": "seed-user-014",
             "toCreatorId": "seed-user-013",
             "needId": "seed-opp-019",
             "offerId": "seed-opp-018",
-            "score": 1.275
+            "score": 0.975
           },
           {
             "fromCreatorId": "seed-user-013",
             "toCreatorId": "seed-user-015",
             "needId": "seed-opp-017",
             "offerId": "seed-opp-022",
-            "score": 1.275
+            "score": 0.975
           }
         ],
         "chainBalance": null
       },
-      "createdAt": "2026-06-10T11:57:04.877Z",
-      "updatedAt": "2026-06-10T11:57:04.877Z",
-      "expiresAt": "2026-06-24T11:57:04.877Z",
+      "createdAt": "2026-06-10T20:22:21.072Z",
+      "updatedAt": "2026-06-10T20:22:21.072Z",
+      "expiresAt": "2026-06-24T20:22:21.072Z",
       "isReplacement": false
     },
     {
       "id": "demo-pm-oneway-05",
       "matchType": "one_way",
       "status": "pending",
-      "matchScore": 1.275,
+      "matchScore": 0.975,
       "runId": "seed-run-018",
       "participants": [
         {
@@ -357,16 +357,16 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T11:57:04.878Z",
-      "updatedAt": "2026-06-10T11:57:04.878Z",
-      "expiresAt": "2026-06-24T11:57:04.878Z",
+      "createdAt": "2026-06-10T20:22:21.072Z",
+      "updatedAt": "2026-06-10T20:22:21.072Z",
+      "expiresAt": "2026-06-24T20:22:21.072Z",
       "isReplacement": false
     },
     {
       "id": "demo-pm-oneway-06",
       "matchType": "one_way",
       "status": "pending",
-      "matchScore": 1.275,
+      "matchScore": 0.975,
       "runId": "seed-run-020",
       "participants": [
         {
@@ -400,16 +400,145 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T11:57:04.882Z",
-      "updatedAt": "2026-06-10T11:57:04.882Z",
-      "expiresAt": "2026-06-24T11:57:04.882Z",
+      "createdAt": "2026-06-10T20:22:21.076Z",
+      "updatedAt": "2026-06-10T20:22:21.076Z",
+      "expiresAt": "2026-06-24T20:22:21.076Z",
       "isReplacement": false
     },
     {
       "id": "demo-pm-oneway-07",
       "matchType": "one_way",
       "status": "pending",
-      "matchScore": 1.215,
+      "matchScore": 0.975,
+      "runId": "seed-run-026",
+      "participants": [
+        {
+          "userId": "seed-user-001",
+          "opportunityId": "seed-opp-026",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-002",
+          "opportunityId": "seed-opp-027",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-026",
+        "offerOpportunityId": "seed-opp-027",
+        "breakdown": {
+          "skillMatch": 1,
+          "attributeOverlap": 1,
+          "serviceOverlapPct": 1,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.5,
+          "budgetFit": 1,
+          "timelineFit": 1,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null
+      },
+      "createdAt": "2026-06-10T20:22:21.099Z",
+      "updatedAt": "2026-06-10T20:22:21.099Z",
+      "expiresAt": "2026-06-24T20:22:21.099Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-oneway-08",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.975,
+      "runId": "seed-run-028",
+      "participants": [
+        {
+          "userId": "seed-co-corp-004",
+          "opportunityId": "seed-opp-028",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-009",
+          "opportunityId": "seed-opp-040",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-028",
+        "offerOpportunityId": "seed-opp-040",
+        "breakdown": {
+          "skillMatch": 1,
+          "attributeOverlap": 1,
+          "serviceOverlapPct": 1,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.5,
+          "budgetFit": 1,
+          "timelineFit": 1,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null
+      },
+      "createdAt": "2026-06-10T20:22:21.105Z",
+      "updatedAt": "2026-06-10T20:22:21.105Z",
+      "expiresAt": "2026-06-24T20:22:21.105Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-oneway-09",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.975,
+      "runId": "seed-run-032",
+      "participants": [
+        {
+          "userId": "seed-user-007",
+          "opportunityId": "seed-opp-032",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-017",
+          "opportunityId": "seed-opp-033",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-032",
+        "offerOpportunityId": "seed-opp-033",
+        "breakdown": {
+          "skillMatch": 1,
+          "attributeOverlap": 1,
+          "serviceOverlapPct": 1,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.5,
+          "budgetFit": 1,
+          "timelineFit": 1,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null
+      },
+      "createdAt": "2026-06-10T20:22:21.112Z",
+      "updatedAt": "2026-06-10T20:22:21.112Z",
+      "expiresAt": "2026-06-24T20:22:21.112Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-oneway-10",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.915,
       "runId": "seed-run-001",
       "participants": [
         {
@@ -443,16 +572,16 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T11:57:04.765Z",
-      "updatedAt": "2026-06-10T11:57:04.765Z",
-      "expiresAt": "2026-06-24T11:57:04.765Z",
+      "createdAt": "2026-06-10T20:22:21.010Z",
+      "updatedAt": "2026-06-10T20:22:21.010Z",
+      "expiresAt": "2026-06-24T20:22:21.010Z",
       "isReplacement": false
     },
     {
-      "id": "demo-pm-oneway-08",
+      "id": "demo-pm-oneway-11",
       "matchType": "one_way",
       "status": "pending",
-      "matchScore": 1.013,
+      "matchScore": 0.813,
       "runId": "seed-run-003",
       "participants": [
         {
@@ -486,16 +615,16 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T11:57:04.784Z",
-      "updatedAt": "2026-06-10T11:57:04.784Z",
-      "expiresAt": "2026-06-24T11:57:04.784Z",
+      "createdAt": "2026-06-10T20:22:21.027Z",
+      "updatedAt": "2026-06-10T20:22:21.027Z",
+      "expiresAt": "2026-06-24T20:22:21.027Z",
       "isReplacement": false
     },
     {
-      "id": "demo-pm-oneway-09",
+      "id": "demo-pm-oneway-12",
       "matchType": "one_way",
       "status": "pending",
-      "matchScore": 0.977,
+      "matchScore": 0.777,
       "runId": "seed-run-010",
       "participants": [
         {
@@ -506,7 +635,7 @@
           "respondedAt": null
         },
         {
-          "userId": "seed-user-018",
+          "userId": "seed-co-corp-003",
           "opportunityId": "seed-opp-025",
           "role": "offer_provider",
           "participantStatus": "pending",
@@ -529,63 +658,20 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T11:57:04.805Z",
-      "updatedAt": "2026-06-10T11:57:04.805Z",
-      "expiresAt": "2026-06-24T11:57:04.805Z",
+      "createdAt": "2026-06-10T20:22:21.042Z",
+      "updatedAt": "2026-06-10T20:22:21.042Z",
+      "expiresAt": "2026-06-24T20:22:21.042Z",
       "isReplacement": false
     },
     {
-      "id": "demo-pm-oneway-10",
+      "id": "demo-pm-oneway-13",
       "matchType": "one_way",
       "status": "pending",
-      "matchScore": 0.975,
-      "runId": "seed-run-003",
-      "participants": [
-        {
-          "userId": "seed-user-003",
-          "opportunityId": "seed-opp-005",
-          "role": "need_owner",
-          "participantStatus": "pending",
-          "respondedAt": null
-        },
-        {
-          "userId": "seed-user-002",
-          "opportunityId": "seed-opp-003",
-          "role": "offer_provider",
-          "participantStatus": "pending",
-          "respondedAt": null
-        }
-      ],
-      "payload": {
-        "needOpportunityId": "seed-opp-005",
-        "offerOpportunityId": "seed-opp-003",
-        "breakdown": {
-          "skillMatch": 0.5,
-          "attributeOverlap": 0.5,
-          "serviceOverlapPct": 0.5,
-          "exchangeCompatibility": 1,
-          "valueCompatibility": 0.5,
-          "budgetFit": 0.6666666666666666,
-          "timelineFit": 1,
-          "locationFit": 1,
-          "reputation": 0.5
-        },
-        "valueAnalysis": null
-      },
-      "createdAt": "2026-06-10T11:57:04.784Z",
-      "updatedAt": "2026-06-10T11:57:04.784Z",
-      "expiresAt": "2026-06-24T11:57:04.784Z",
-      "isReplacement": false
-    },
-    {
-      "id": "demo-pm-oneway-11",
-      "matchType": "one_way",
-      "status": "pending",
-      "matchScore": 0.975,
+      "matchScore": 0.775,
       "runId": "seed-run-005",
       "participants": [
         {
-          "userId": "seed-user-003",
+          "userId": "seed-co-corp-002",
           "opportunityId": "seed-opp-005",
           "role": "need_owner",
           "participantStatus": "pending",
@@ -615,20 +701,63 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T11:57:04.789Z",
-      "updatedAt": "2026-06-10T11:57:04.789Z",
-      "expiresAt": "2026-06-24T11:57:04.789Z",
+      "createdAt": "2026-06-10T20:22:21.032Z",
+      "updatedAt": "2026-06-10T20:22:21.032Z",
+      "expiresAt": "2026-06-24T20:22:21.032Z",
       "isReplacement": false
     },
     {
-      "id": "demo-pm-oneway-12",
+      "id": "demo-pm-oneway-14",
       "matchType": "one_way",
       "status": "pending",
-      "matchScore": 0.97,
+      "matchScore": 0.675,
+      "runId": "seed-run-003",
+      "participants": [
+        {
+          "userId": "seed-co-corp-002",
+          "opportunityId": "seed-opp-005",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-002",
+          "opportunityId": "seed-opp-003",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-005",
+        "offerOpportunityId": "seed-opp-003",
+        "breakdown": {
+          "skillMatch": 0.5,
+          "attributeOverlap": 0.5,
+          "serviceOverlapPct": 0.5,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.5,
+          "budgetFit": 0.6666666666666666,
+          "timelineFit": 1,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null
+      },
+      "createdAt": "2026-06-10T20:22:21.028Z",
+      "updatedAt": "2026-06-10T20:22:21.028Z",
+      "expiresAt": "2026-06-24T20:22:21.028Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-oneway-15",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.67,
       "runId": "seed-run-004",
       "participants": [
         {
-          "userId": "seed-user-016",
+          "userId": "seed-co-corp-001",
           "opportunityId": "seed-opp-023",
           "role": "need_owner",
           "participantStatus": "pending",
@@ -658,98 +787,16 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T11:57:04.787Z",
-      "updatedAt": "2026-06-10T11:57:04.787Z",
-      "expiresAt": "2026-06-24T11:57:04.787Z",
+      "createdAt": "2026-06-10T20:22:21.029Z",
+      "updatedAt": "2026-06-10T20:22:21.029Z",
+      "expiresAt": "2026-06-24T20:22:21.029Z",
       "isReplacement": false
     },
     {
-      "id": "demo-pm-oneway-13",
+      "id": "demo-pm-oneway-16",
       "matchType": "one_way",
       "status": "pending",
-      "matchScore": 0.9,
-      "runId": "seed-run-002",
-      "participants": [
-        {
-          "userId": "seed-user-003",
-          "opportunityId": "seed-opp-005",
-          "role": "need_owner",
-          "participantStatus": "pending",
-          "respondedAt": null
-        },
-        {
-          "userId": "seed-user-002",
-          "opportunityId": "seed-opp-002",
-          "role": "offer_provider",
-          "participantStatus": "pending",
-          "respondedAt": null
-        }
-      ],
-      "payload": {
-        "needOpportunityId": "seed-opp-005",
-        "offerOpportunityId": "seed-opp-002",
-        "breakdown": {
-          "skillMatch": 0.5,
-          "attributeOverlap": 0.5,
-          "serviceOverlapPct": 0.5,
-          "exchangeCompatibility": 1,
-          "valueCompatibility": 0.5,
-          "budgetFit": 0.4166666666666667,
-          "timelineFit": 1,
-          "locationFit": 1,
-          "reputation": 0.5
-        },
-        "valueAnalysis": null
-      },
-      "createdAt": "2026-06-10T11:57:04.782Z",
-      "updatedAt": "2026-06-10T11:57:04.782Z",
-      "expiresAt": "2026-06-24T11:57:04.782Z",
-      "isReplacement": false
-    },
-    {
-      "id": "demo-pm-consortium-01",
-      "matchType": "consortium",
-      "status": "pending",
-      "matchScore": 0.888,
-      "runId": "seed-run-014",
-      "participants": [
-        {
-          "userId": "seed-user-010",
-          "opportunityId": "seed-opp-014",
-          "role": "consortium_lead",
-          "participantStatus": "pending",
-          "respondedAt": null
-        },
-        {
-          "userId": "seed-user-011",
-          "opportunityId": "seed-opp-015",
-          "role": "consortium_member",
-          "participantStatus": "pending",
-          "respondedAt": null
-        }
-      ],
-      "payload": {
-        "leadNeedId": "seed-opp-014",
-        "roles": [
-          {
-            "role": "Architect",
-            "opportunityId": "seed-opp-015",
-            "userId": "seed-user-011",
-            "score": 0.888
-          }
-        ],
-        "valueBalance": null
-      },
-      "createdAt": "2026-06-10T11:57:04.839Z",
-      "updatedAt": "2026-06-10T11:57:04.839Z",
-      "expiresAt": "2026-06-24T11:57:04.839Z",
-      "isReplacement": false
-    },
-    {
-      "id": "demo-pm-oneway-14",
-      "matchType": "one_way",
-      "status": "pending",
-      "matchScore": 0.825,
+      "matchScore": 0.625,
       "runId": "seed-run-002",
       "participants": [
         {
@@ -783,9 +830,91 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T11:57:04.782Z",
-      "updatedAt": "2026-06-10T11:57:04.782Z",
-      "expiresAt": "2026-06-24T11:57:04.782Z",
+      "createdAt": "2026-06-10T20:22:21.025Z",
+      "updatedAt": "2026-06-10T20:22:21.025Z",
+      "expiresAt": "2026-06-24T20:22:21.025Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-oneway-17",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.6,
+      "runId": "seed-run-002",
+      "participants": [
+        {
+          "userId": "seed-co-corp-002",
+          "opportunityId": "seed-opp-005",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-002",
+          "opportunityId": "seed-opp-002",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-005",
+        "offerOpportunityId": "seed-opp-002",
+        "breakdown": {
+          "skillMatch": 0.5,
+          "attributeOverlap": 0.5,
+          "serviceOverlapPct": 0.5,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.5,
+          "budgetFit": 0.4166666666666667,
+          "timelineFit": 1,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null
+      },
+      "createdAt": "2026-06-10T20:22:21.025Z",
+      "updatedAt": "2026-06-10T20:22:21.025Z",
+      "expiresAt": "2026-06-24T20:22:21.025Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-consortium-01",
+      "matchType": "consortium",
+      "status": "pending",
+      "matchScore": 0.588,
+      "runId": "seed-run-014",
+      "participants": [
+        {
+          "userId": "seed-co-corp-005",
+          "opportunityId": "seed-opp-014",
+          "role": "consortium_lead",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-011",
+          "opportunityId": "seed-opp-015",
+          "role": "consortium_member",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "leadNeedId": "seed-opp-014",
+        "roles": [
+          {
+            "role": "Architect",
+            "opportunityId": "seed-opp-015",
+            "userId": "seed-user-011",
+            "score": 0.588
+          }
+        ],
+        "valueBalance": null
+      },
+      "createdAt": "2026-06-10T20:22:21.061Z",
+      "updatedAt": "2026-06-10T20:22:21.061Z",
+      "expiresAt": "2026-06-24T20:22:21.061Z",
       "isReplacement": false
     }
   ]

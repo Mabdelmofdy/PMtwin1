@@ -22,24 +22,24 @@ Run all scripts from the **repository root**: `node POC/scripts/<script>.js`
 6. **fill-canonical-from-audit.js** – Merge audit-report skills and locations into `skill-canonical.json` (run after audit).
 7. **generate-reports.js** – Generate Data Coverage, Matching Readiness, and Missing Entities reports in `POC/docs/reports/`.
 
-## E2E workflow seed (25 opportunities)
+## E2E workflow seed (40 opportunities)
 
-`npm run seed:e2e` (from `POC/`) runs `scripts/seed-e2e-workflow.js`, the re-runnable generator that produces one clean, realistic end-to-end dataset tied strictly to the 25 `seed-opp-*` opportunities and their 18 `seed-user-*` owners. It is idempotent:
+`npm run seed:e2e` (from `POC/`) runs `scripts/seed-e2e-workflow.js`, the re-runnable generator that produces one clean, realistic end-to-end dataset tied to the 40 `seed-opp-*` opportunities and their 18 `seed-user-*` owners. It is idempotent:
 
-1. Resets all 25 opportunities to `published`.
+1. Resets all 40 opportunities to `published`.
 2. Regenerates `demo-post-matches.json` through the real engine (`seed-post-matches.js`).
 3. Applies a deterministic lifecycle and writes `demo-applications.json`, `demo-negotiations.json`, `demo-deals.json`, `demo-contracts.json`, `demo-notifications.json`, and `demo-connections.json`, then sets the final opportunity/match statuses.
 
-**Credentials:** all 18 workflow users share the password **`Pmtwin@2026`** and use realistic emails (e.g. `khalid.alharbi@pmtwin.test`); their profiles are enriched to clear the GAP-P05 publish gate (>=70%). The base admin (`admin@pmtwin.com` / `admin123`) is unchanged. The legacy demo40 accounts (`demo*@demo.test`, `company*@demo.test`) and all their orphaned data have been wiped.
+**Credentials:** all 18 workflow users and 6 B2B company accounts share the password **`Pmtwin@2026`** (e.g. `khalid.alharbi@pmtwin.test`, `contact@alriyadh-construction.test`); profiles are enriched to clear the GAP-P05 publish gate (>=70%). Companies own 11 of 40 opportunities (`seed-co-corp-001`–`006`). The base admin (`admin@pmtwin.com` / `admin123`) is unchanged. Legacy demo40 accounts (`demo*@demo.test`, `company*@demo.test`) have been wiped.
 
 **Stage distribution:**
 
-- **Published + pending matches** — most opportunities (Scenario A offers, the circular ring `017`-`022`, fillers `023`-`025`).
-- **Active applications/proposals** — `seed-opp-001`, `005`, `007`, `023`, `024` (statuses `pending`/`reviewing`/`shortlisted`).
-- **Active negotiation** — `seed-opp-001` <-> `seed-opp-002` (opportunity `001` -> `in_negotiation`).
-- **Closed -> active contracts/deals** — barter two-way (`010`-`013`, opps `010`/`012` -> `contracted`) and the consortium (`014`-`016`; lead `014` -> `in_execution`).
+- **Published + pending matches** — most opportunities (Scenario A–G, circular ring `017`-`022`, fillers `023`-`025`, exchange block `029`-`038`).
+- **Active applications/proposals** — `seed-opp-007`, `023`, `024`, `031`, `032`, `037` (statuses `pending`/`reviewing`/`shortlisted`).
+- **Active negotiation** — barter `010`/`012`, task-based barter `026`/`027`, equity JV `028`/`040`, cash `005`.
+- **Closed -> active contracts/deals** — one-way `001`/`002` (completed), highway consortium `014`/`015` (active), wind consortium `039`/`035` (profit-sharing, active).
 
-After running, bump `CURRENT_SEED_VERSION` in `data-service.js` (already at `1.25.0` for this dataset) so browsers re-seed, or run `window.resetAppData()`.
+After running, bump `CURRENT_SEED_VERSION` in `data-service.js` (currently `2.2.0` for this dataset) so browsers re-seed, or run `window.resetAppData()`.
 
 ## Optional database reset (browser)
 

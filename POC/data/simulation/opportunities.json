@@ -59,8 +59,8 @@
           "LEED Certification"
         ]
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -160,8 +160,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -258,8 +258,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -358,8 +358,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -407,7 +407,7 @@
       "id": "seed-opp-005",
       "title": "[D] Architect need — BIM core skill required",
       "description": "[D] Architect need — BIM core skill required",
-      "creatorId": "seed-user-003",
+      "creatorId": "seed-co-corp-002",
       "intent": "request",
       "status": "published",
       "modelType": "project_based",
@@ -452,8 +452,8 @@
           "BIM"
         ]
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -543,8 +543,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "Revit"
@@ -586,7 +586,7 @@
       "id": "seed-opp-007",
       "title": "[E] Civil Engineer need — four required services",
       "description": "[E] Civil Engineer need — four required services",
-      "creatorId": "seed-user-005",
+      "creatorId": "seed-co-corp-001",
       "intent": "request",
       "status": "published",
       "modelType": "project_based",
@@ -628,8 +628,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Civil Engineer"
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "Site Planning",
@@ -721,8 +721,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "Site Planning"
@@ -803,8 +803,8 @@
         "tenderDeadline": "2026-06-01",
         "locationRequirement": "On-Site"
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "General Consulting",
@@ -891,8 +891,12 @@
         "locationRequirement": "On-Site",
         "targetRole": "MEP"
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": "100000"
+      },
       "normalized": {
         "skills": [
           "HVAC Design",
@@ -969,7 +973,6 @@
           "max": 500000,
           "currency": "SAR"
         },
-        "cashAmount": 250000,
         "barterNeed": "HVAC Design",
         "barterOffer": "BIM",
         "barterValue": "100000"
@@ -984,8 +987,12 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": "100000"
+      },
       "normalized": {
         "skills": [
           "BIM",
@@ -1072,8 +1079,12 @@
         "locationRequirement": "On-Site",
         "targetRole": "Architect"
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": "100000"
+      },
       "normalized": {
         "skills": [
           "BIM",
@@ -1150,7 +1161,6 @@
           "max": 500000,
           "currency": "SAR"
         },
-        "cashAmount": 250000,
         "barterNeed": "BIM",
         "barterOffer": "HVAC Design",
         "barterValue": "100000"
@@ -1165,8 +1175,12 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": "100000"
+      },
       "normalized": {
         "skills": [
           "HVAC Design",
@@ -1210,7 +1224,7 @@
       "id": "seed-opp-014",
       "title": "[G] Consortium lead — highway package",
       "description": "[G] Consortium lead — highway package",
-      "creatorId": "seed-user-010",
+      "creatorId": "seed-co-corp-005",
       "intent": "request",
       "status": "published",
       "modelType": "project_based",
@@ -1259,22 +1273,10 @@
             "scope": "Civil works and drainage"
           }
         ],
-        "targetRole": "Project Management",
-        "sectors": [
-          "Construction",
-          "Architecture"
-        ],
-        "requiredSkills": [
-          "Project Management",
-          "Highway Design",
-          "Consortium Leadership"
-        ],
-        "offeredSkills": [],
-        "certifications": [],
-        "coreSkills": []
+        "targetRole": "Project Management"
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "Project Management",
@@ -1367,8 +1369,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "Architect",
@@ -1463,8 +1465,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "Civil Engineer",
@@ -1552,8 +1554,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Excavator"
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "Excavator",
@@ -1642,8 +1644,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "Office space",
@@ -1727,8 +1729,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Office space"
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "Office space",
@@ -1817,8 +1819,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "Accounting",
@@ -1902,8 +1904,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Accounting"
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "Accounting",
@@ -1992,8 +1994,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "Excavator",
@@ -2037,7 +2039,7 @@
       "id": "seed-opp-023",
       "title": "Filler need — Structural Engineer",
       "description": "Filler need — Structural Engineer",
-      "creatorId": "seed-user-016",
+      "creatorId": "seed-co-corp-001",
       "intent": "request",
       "status": "published",
       "modelType": "strategic_partnership",
@@ -2078,8 +2080,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Structural Engineer"
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "Structural Analysis",
@@ -2125,7 +2127,7 @@
       "id": "seed-opp-024",
       "title": "Filler need — Project Management",
       "description": "Filler need — Project Management",
-      "creatorId": "seed-user-017",
+      "creatorId": "seed-co-corp-002",
       "intent": "request",
       "status": "published",
       "modelType": "resource_pooling",
@@ -2166,8 +2168,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Project Management"
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "Project Management",
@@ -2213,7 +2215,7 @@
       "id": "seed-opp-025",
       "title": "Filler offer — MEP",
       "description": "Filler offer — MEP",
-      "creatorId": "seed-user-018",
+      "creatorId": "seed-co-corp-003",
       "intent": "offer",
       "status": "published",
       "modelType": "hiring",
@@ -2259,8 +2261,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z",
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
       "normalized": {
         "skills": [
           "HVAC Design",
@@ -2300,6 +2302,1435 @@
         "intent": "offer",
         "modelType": "hiring",
         "subModelType": "professional_hiring"
+      }
+    },
+    {
+      "id": "seed-opp-026",
+      "title": "[H] Task-based need — CAD production (barter)",
+      "description": "[H] Task-based need — CAD production (barter)",
+      "creatorId": "seed-user-001",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "paymentModes": [
+        "barter"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "AutoCAD",
+          "3D Modeling",
+          "Documentation"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "barterNeed": "CAD production",
+        "barterOffer": "Project Management support",
+        "barterValue": "85000"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "CAD Technician"
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": "85000"
+      },
+      "normalized": {
+        "skills": [
+          "AutoCAD",
+          "3D Modeling",
+          "Documentation"
+        ],
+        "requiredServices": [
+          "AutoCAD",
+          "3D Modeling",
+          "Documentation"
+        ],
+        "offeredServices": [],
+        "role": "CAD Technician",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "task_based",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "task_based"
+      }
+    },
+    {
+      "id": "seed-opp-027",
+      "title": "[H] Task-based offer — CAD production (barter)",
+      "description": "[H] Task-based offer — CAD production (barter)",
+      "creatorId": "seed-user-002",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "paymentModes": [
+        "barter"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "AutoCAD",
+          "3D Modeling",
+          "Documentation"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "barterNeed": "Project Management support",
+        "barterOffer": "CAD production",
+        "barterValue": "85000"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "CAD Technician",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": "85000"
+      },
+      "normalized": {
+        "skills": [
+          "AutoCAD",
+          "3D Modeling",
+          "Documentation"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "AutoCAD",
+          "3D Modeling",
+          "Documentation"
+        ],
+        "role": "CAD Technician",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "task_based",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "task_based"
+      }
+    },
+    {
+      "id": "seed-opp-028",
+      "title": "[H] Project JV lead — mixed-use tower (equity)",
+      "description": "[H] Project JV lead — mixed-use tower (equity)",
+      "creatorId": "seed-co-corp-004",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project_jv",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "equity",
+      "paymentModes": [
+        "equity"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "General Contracting",
+          "EPC Contracting",
+          "Construction Management"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "equity",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 50000000,
+          "max": 120000000,
+          "currency": "SAR"
+        },
+        "equityPercentage": 45,
+        "equityVesting": "3_years",
+        "equityContribution": "Land and development rights"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Joint Venture Partner"
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "normalized": {
+        "skills": [
+          "General Contracting",
+          "EPC Contracting",
+          "Construction Management"
+        ],
+        "requiredServices": [
+          "General Contracting",
+          "EPC Contracting",
+          "Construction Management"
+        ],
+        "offeredServices": [],
+        "role": "Joint Venture Partner",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project_jv",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 50000000,
+          "max": 120000000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "project_jv"
+      }
+    },
+    {
+      "id": "seed-opp-029",
+      "title": "[H] SPV — renewable energy park (hybrid)",
+      "description": "[H] SPV — renewable energy park (hybrid)",
+      "creatorId": "seed-co-corp-006",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "spv",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "hybrid",
+      "paymentModes": [
+        "hybrid"
+      ],
+      "scope": {
+        "sectors": [
+          "Energy",
+          "Infrastructure"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "Infrastructure Development",
+          "Energy Efficiency",
+          "Project Management"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "hybrid",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 80000000,
+          "max": 200000000,
+          "currency": "SAR"
+        },
+        "hybridCash": 25,
+        "hybridEquity": 55,
+        "hybridBarter": 20,
+        "hybridCashDetails": "25% cash at financial close",
+        "hybridEquityDetails": "55% equity from sponsors",
+        "hybridBarterDetails": "20% in-kind EPC services"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "SPV Sponsor"
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "normalized": {
+        "skills": [
+          "Infrastructure Development",
+          "Energy Efficiency",
+          "Project Management"
+        ],
+        "requiredServices": [
+          "Infrastructure Development",
+          "Energy Efficiency",
+          "Project Management"
+        ],
+        "offeredServices": [],
+        "role": "SPV Sponsor",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "spv",
+          "Energy",
+          "Infrastructure"
+        ],
+        "budget": {
+          "min": 80000000,
+          "max": 200000000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "spv"
+      }
+    },
+    {
+      "id": "seed-opp-030",
+      "title": "[H] Strategic JV — GCC expansion (equity)",
+      "description": "[H] Strategic JV — GCC expansion (equity)",
+      "creatorId": "seed-user-005",
+      "intent": "request",
+      "status": "published",
+      "modelType": "strategic_partnership",
+      "subModelType": "strategic_jv",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "equity",
+      "paymentModes": [
+        "equity"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "General Contracting",
+          "EPC Contracting",
+          "Project Management"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "equity",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 30000000,
+          "max": 90000000,
+          "currency": "SAR"
+        },
+        "equityPercentage": 50,
+        "equityVesting": "4_years",
+        "equityContribution": "Regional market access and operations"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Strategic Partner"
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "normalized": {
+        "skills": [
+          "General Contracting",
+          "EPC Contracting",
+          "Project Management"
+        ],
+        "requiredServices": [
+          "General Contracting",
+          "EPC Contracting",
+          "Project Management"
+        ],
+        "offeredServices": [],
+        "role": "Strategic Partner",
+        "coreSkills": [],
+        "categories": [
+          "strategic_partnership",
+          "strategic_jv",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 30000000,
+          "max": 90000000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "strategic_partnership",
+        "subModelType": "strategic_jv"
+      }
+    },
+    {
+      "id": "seed-opp-031",
+      "title": "[H] Strategic alliance — preferred MEP supplier (profit-sharing)",
+      "description": "[H] Strategic alliance — preferred MEP supplier (profit-sharing)",
+      "creatorId": "seed-user-006",
+      "intent": "request",
+      "status": "published",
+      "modelType": "strategic_partnership",
+      "subModelType": "strategic_alliance",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "profit_sharing",
+      "paymentModes": [
+        "profit_sharing"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "MEP Services",
+          "HVAC Design",
+          "Procurement"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "profit_sharing",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 500000,
+          "max": 2000000,
+          "currency": "SAR"
+        },
+        "profitSplit": "70-30",
+        "profitBasis": "revenue",
+        "profitDistribution": "Monthly revenue share on joint projects"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "MEP Partner"
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "normalized": {
+        "skills": [
+          "MEP Services",
+          "HVAC Design",
+          "Procurement"
+        ],
+        "requiredServices": [
+          "MEP Services",
+          "HVAC Design",
+          "Procurement"
+        ],
+        "offeredServices": [],
+        "role": "MEP Partner",
+        "coreSkills": [],
+        "categories": [
+          "strategic_partnership",
+          "strategic_alliance",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 500000,
+          "max": 2000000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "strategic_partnership",
+        "subModelType": "strategic_alliance"
+      }
+    },
+    {
+      "id": "seed-opp-032",
+      "title": "[H] Mentorship need — junior PM coaching (barter)",
+      "description": "[H] Mentorship need — junior PM coaching (barter)",
+      "creatorId": "seed-user-007",
+      "intent": "request",
+      "status": "published",
+      "modelType": "strategic_partnership",
+      "subModelType": "mentorship",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "paymentModes": [
+        "barter"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "Mentoring",
+          "Professional Development",
+          "Project Management"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "barterNeed": "PM mentoring",
+        "barterOffer": "Admin and documentation support",
+        "barterValue": "12000"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Mentor"
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": "12000"
+      },
+      "normalized": {
+        "skills": [
+          "Mentoring",
+          "Professional Development",
+          "Project Management"
+        ],
+        "requiredServices": [
+          "Mentoring",
+          "Professional Development",
+          "Project Management"
+        ],
+        "offeredServices": [],
+        "role": "Mentor",
+        "coreSkills": [],
+        "categories": [
+          "strategic_partnership",
+          "mentorship",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "strategic_partnership",
+        "subModelType": "mentorship"
+      }
+    },
+    {
+      "id": "seed-opp-033",
+      "title": "[H] Mentorship offer — senior PM coaching (barter)",
+      "description": "[H] Mentorship offer — senior PM coaching (barter)",
+      "creatorId": "seed-user-017",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "strategic_partnership",
+      "subModelType": "mentorship",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "paymentModes": [
+        "barter"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "Mentoring",
+          "PMP",
+          "Project Management",
+          "Professional Development"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "barterNeed": "Admin and documentation support",
+        "barterOffer": "PM mentoring",
+        "barterValue": "12000"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Mentor",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": "12000"
+      },
+      "normalized": {
+        "skills": [
+          "Mentoring",
+          "PMP",
+          "Project Management",
+          "Professional Development"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Mentoring",
+          "PMP",
+          "Project Management",
+          "Professional Development"
+        ],
+        "role": "Mentor",
+        "coreSkills": [],
+        "categories": [
+          "strategic_partnership",
+          "mentorship",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "strategic_partnership",
+        "subModelType": "mentorship"
+      }
+    },
+    {
+      "id": "seed-opp-034",
+      "title": "[H] Bulk purchasing pool — structural steel (barter)",
+      "description": "[H] Bulk purchasing pool — structural steel (barter)",
+      "creatorId": "seed-co-corp-006",
+      "intent": "request",
+      "status": "published",
+      "modelType": "resource_pooling",
+      "subModelType": "bulk_purchasing",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "paymentModes": [
+        "barter"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "Procurement",
+          "Steel Fabrication",
+          "Supply Chain Management"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "barterNeed": "Bulk steel supply",
+        "barterOffer": "Logistics coordination",
+        "barterValue": "200000"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Steel Supplier"
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": "200000"
+      },
+      "normalized": {
+        "skills": [
+          "Procurement",
+          "Steel Fabrication",
+          "Supply Chain Management"
+        ],
+        "requiredServices": [
+          "Procurement",
+          "Steel Fabrication",
+          "Supply Chain Management"
+        ],
+        "offeredServices": [],
+        "role": "Steel Supplier",
+        "coreSkills": [],
+        "categories": [
+          "resource_pooling",
+          "bulk_purchasing",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "resource_pooling",
+        "subModelType": "bulk_purchasing"
+      }
+    },
+    {
+      "id": "seed-opp-035",
+      "title": "[H] Equipment sharing offer — tower crane co-ownership (equity)",
+      "description": "[H] Equipment sharing offer — tower crane co-ownership (equity)",
+      "creatorId": "seed-user-013",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "resource_pooling",
+      "subModelType": "equipment_sharing",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "equity",
+      "paymentModes": [
+        "equity"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "Tower Crane Operation",
+          "Heavy Equipment",
+          "Equipment Maintenance"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "equity",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 2000000,
+          "max": 8000000,
+          "currency": "SAR"
+        },
+        "equityPercentage": 25,
+        "equityVesting": "immediate",
+        "equityContribution": "Tower crane asset and operator"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Equipment Partner",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "normalized": {
+        "skills": [
+          "Tower Crane Operation",
+          "Heavy Equipment",
+          "Equipment Maintenance"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Tower Crane Operation",
+          "Heavy Equipment",
+          "Equipment Maintenance"
+        ],
+        "role": "Equipment Partner",
+        "coreSkills": [],
+        "categories": [
+          "resource_pooling",
+          "equipment_sharing",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 2000000,
+          "max": 8000000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "resource_pooling",
+        "subModelType": "equipment_sharing"
+      }
+    },
+    {
+      "id": "seed-opp-036",
+      "title": "[H] Resource sharing offer — surplus formwork (barter)",
+      "description": "[H] Resource sharing offer — surplus formwork (barter)",
+      "creatorId": "seed-user-014",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "resource_pooling",
+      "subModelType": "resource_sharing",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "paymentModes": [
+        "barter"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "Formwork",
+          "Construction Materials",
+          "Logistics"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "barterNeed": "Crane rental days",
+        "barterOffer": "Formwork panels",
+        "barterValue": "95000"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Formwork Supplier",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": "95000"
+      },
+      "normalized": {
+        "skills": [
+          "Formwork",
+          "Construction Materials",
+          "Logistics"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Formwork",
+          "Construction Materials",
+          "Logistics"
+        ],
+        "role": "Formwork Supplier",
+        "coreSkills": [],
+        "categories": [
+          "resource_pooling",
+          "resource_sharing",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "resource_pooling",
+        "subModelType": "resource_sharing"
+      }
+    },
+    {
+      "id": "seed-opp-037",
+      "title": "[H] Consultant hiring — legal contract review (barter)",
+      "description": "[H] Consultant hiring — legal contract review (barter)",
+      "creatorId": "seed-co-corp-004",
+      "intent": "request",
+      "status": "published",
+      "modelType": "hiring",
+      "subModelType": "consultant_hiring",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "barter",
+      "paymentModes": [
+        "barter"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "Construction Law",
+          "Contract Drafting",
+          "FIDIC Contracts"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "barterNeed": "Legal contract review",
+        "barterOffer": "Technical consulting hours",
+        "barterValue": "45000"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Legal Consultant"
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "value_exchange": {
+        "mode": "barter",
+        "estimated_value": "45000"
+      },
+      "normalized": {
+        "skills": [
+          "Construction Law",
+          "Contract Drafting",
+          "FIDIC Contracts"
+        ],
+        "requiredServices": [
+          "Construction Law",
+          "Contract Drafting",
+          "FIDIC Contracts"
+        ],
+        "offeredServices": [],
+        "role": "Legal Consultant",
+        "coreSkills": [],
+        "categories": [
+          "hiring",
+          "consultant_hiring",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 0,
+          "max": 500000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "hiring",
+        "subModelType": "consultant_hiring"
+      }
+    },
+    {
+      "id": "seed-opp-038",
+      "title": "[H] Design competition RFP — urban plaza (profit-sharing)",
+      "description": "[H] Design competition RFP — urban plaza (profit-sharing)",
+      "creatorId": "seed-user-011",
+      "intent": "request",
+      "status": "published",
+      "modelType": "competition",
+      "subModelType": "competition_rfp",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "profit_sharing",
+      "paymentModes": [
+        "profit_sharing"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "Architectural Design",
+          "Urban Planning",
+          "Sustainable Design"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "profit_sharing",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 500000,
+          "max": 1500000,
+          "currency": "SAR"
+        },
+        "profitSplit": "80-20",
+        "profitBasis": "gross_profit",
+        "profitDistribution": "Prize pool split among shortlisted finalists"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Architect"
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "normalized": {
+        "skills": [
+          "Architectural Design",
+          "Urban Planning",
+          "Sustainable Design"
+        ],
+        "requiredServices": [
+          "Architectural Design",
+          "Urban Planning",
+          "Sustainable Design"
+        ],
+        "offeredServices": [],
+        "role": "Architect",
+        "coreSkills": [],
+        "categories": [
+          "competition",
+          "competition_rfp",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 500000,
+          "max": 1500000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "competition",
+        "subModelType": "competition_rfp"
+      }
+    },
+    {
+      "id": "seed-opp-039",
+      "title": "[H] Consortium lead — wind farm package (profit-sharing)",
+      "description": "[H] Consortium lead — wind farm package (profit-sharing)",
+      "creatorId": "seed-co-corp-005",
+      "intent": "request",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "consortium",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "profit_sharing",
+      "paymentModes": [
+        "profit_sharing"
+      ],
+      "scope": {
+        "sectors": [
+          "Energy",
+          "Infrastructure"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "requiredSkills": [
+          "Infrastructure Development",
+          "Energy Efficiency",
+          "Project Management"
+        ],
+        "offeredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "profit_sharing",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 20000000,
+          "max": 80000000,
+          "currency": "SAR"
+        },
+        "profitSplit": "65-35",
+        "profitBasis": "profit",
+        "profitDistribution": "Profit share after O&M costs, distributed annually"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "memberRoles": [
+          {
+            "role": "EPC contractor",
+            "scope": "Design and construction"
+          },
+          {
+            "role": "O&M provider",
+            "scope": "Long-term operation and maintenance"
+          }
+        ],
+        "targetRole": "Project Management"
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "normalized": {
+        "skills": [
+          "Infrastructure Development",
+          "Energy Efficiency",
+          "Project Management"
+        ],
+        "requiredServices": [
+          "Infrastructure Development",
+          "Energy Efficiency",
+          "Project Management"
+        ],
+        "offeredServices": [],
+        "role": "Project Management",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "consortium",
+          "Energy",
+          "Infrastructure"
+        ],
+        "budget": {
+          "min": 20000000,
+          "max": 80000000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "deadline": "2026-06-01",
+        "availability": {
+          "start": "2026-03-01",
+          "end": "2026-06-01"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "consortium"
+      }
+    },
+    {
+      "id": "seed-opp-040",
+      "title": "[H] Project JV partner offer — mixed-use tower (equity)",
+      "description": "[H] Project JV partner offer — mixed-use tower (equity)",
+      "creatorId": "seed-user-009",
+      "intent": "offer",
+      "status": "published",
+      "modelType": "project_based",
+      "subModelType": "project_jv",
+      "location": "Riyadh, Saudi Arabia",
+      "locationCountry": "sa",
+      "locationRegion": "riyadh",
+      "exchangeMode": "equity",
+      "paymentModes": [
+        "equity"
+      ],
+      "scope": {
+        "sectors": [
+          "Construction",
+          "Architecture"
+        ],
+        "certifications": [],
+        "coreSkills": [],
+        "offeredSkills": [
+          "General Contracting",
+          "EPC Contracting",
+          "Construction Management"
+        ],
+        "requiredSkills": []
+      },
+      "exchangeData": {
+        "exchangeMode": "equity",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 50000000,
+          "max": 120000000,
+          "currency": "SAR"
+        },
+        "equityPercentage": 35,
+        "equityVesting": "3_years",
+        "equityContribution": "Construction management and EPC delivery"
+      },
+      "attributes": {
+        "startDate": "2026-03-01",
+        "tenderDeadline": "2026-06-01",
+        "locationRequirement": "On-Site",
+        "targetRole": "Joint Venture Partner",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        }
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z",
+      "normalized": {
+        "skills": [
+          "General Contracting",
+          "EPC Contracting",
+          "Construction Management"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "General Contracting",
+          "EPC Contracting",
+          "Construction Management"
+        ],
+        "role": "Joint Venture Partner",
+        "coreSkills": [],
+        "categories": [
+          "project_based",
+          "project_jv",
+          "Construction",
+          "Architecture"
+        ],
+        "budget": {
+          "min": 50000000,
+          "max": 120000000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-02-01",
+          "end": "2026-12-31"
+        },
+        "location": "On-Site",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "project_jv"
       }
     }
   ]

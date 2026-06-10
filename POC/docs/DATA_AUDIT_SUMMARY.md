@@ -1,30 +1,20 @@
-# Data audit summary
+# Data Audit Summary
 
-### What this page is
-
-Internal **data audit** notes for the POC dataset (coverage, gaps, follow-ups).
-
-### What happens next
-
-Use with [DATA_CLEANUP_CHANGELOG.md](DATA_CLEANUP_CHANGELOG.md) when fixing seed data.
-
----
-
-Generated: 2026-03-05T13:32:03.799Z
+Generated: 2026-06-10T15:59:53.389Z
 
 ## 1. Domain counts
 
-- **users**: 9
-- **companies**: 4
-- **opportunities**: 24
-- **applications**: 7
-- **matches**: 7
-- **notifications**: 11
-- **connections**: 16
+- **users**: 1
+- **companies**: 0
+- **opportunities**: 40
+- **applications**: 0
+- **matches**: 0
+- **notifications**: 0
+- **connections**: 0
 - **messages**: 0
-- **audit**: 12
+- **audit**: 0
 - **sessions**: 0
-- **contracts**: 3
+- **contracts**: 0
 
 ## 2. Duplicate records
 
@@ -53,7 +43,7 @@ Generated: 2026-03-05T13:32:03.799Z
 - **connections**: 0 orphan(s)
 - **messages**: 0 orphan(s)
 - **contracts**: 0 orphan(s)
-- **opportunities**: 0 orphan(s)
+- **opportunities**: 40 orphan(s)
 
 ## 5. Inconsistent category/sector names
 
@@ -61,26 +51,32 @@ Count: 0
 
 ## 6. Inconsistent skill names
 
-Count: 3
+Count: 21
 - "Platform Administration"
-- "Engineering Consulting"
-- "Design Review"
+- "FF&E"
+- "Site Planning"
+- "Drainage Design"
+- "Road Design"
+- "Surveying"
+- "General Consulting"
+- "Advisory"
+- "MEP Coordination"
+- "Highway Design"
+- "Consortium Leadership"
+- "Architect"
+- "Design Development"
+- "Civil Engineer"
+- "Excavator"
+- "Equipment Rental"
+- "Office space"
+- "Real Estate"
+- "Accounting"
+- "Financial Reporting"
+- "Construction Management"
 
 ## 7. Inconsistent location names
 
-Count: 12
-- "Saudi Arabia > Tabuk > NEOM > The Line"
-- "Saudi Arabia > Riyadh > Riyadh City > King Fahd District"
-- "Saudi Arabia > Eastern Province > Jubail"
-- "United Arab Emirates > Dubai > Dubai > Business Bay"
-- "Saudi Arabia > Eastern Province > Al Khobar"
-- "Saudi Arabia > Makkah > Makkah City"
-- "Saudi Arabia > Asir > Abha"
-- "Saudi Arabia > Makkah > Jeddah > Al Balad"
-- "Qatar > Doha > Doha > West Bay"
-- "Saudi Arabia > Eastern Province > Dammam"
-- "Saudi Arabia > Tabuk > Tabuk City"
-- "Kuwait > Al Asimah > Kuwait City"
+Count: 0
 
 ## 8. Unused tables / structures
 

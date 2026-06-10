@@ -28,6 +28,18 @@ describe('unified-match-view-model', () => {
         expect(umv.getMatchQuality(0.2).label).toBe('Low Match');
     });
 
+    it('caps displayed match score percent at 100', () => {
+        const vm = umv.buildUnifiedMatchViewModel({
+            id: 'pm-over',
+            matchType: 'one_way',
+            status: 'pending',
+            matchScore: 1.275,
+            participants: [],
+            payload: {}
+        });
+        expect(vm.matchScorePercent).toBe(100);
+    });
+
     it('builds a unified view model for post_match records', () => {
         const vm = umv.buildUnifiedMatchViewModel({
             id: 'pm-1',

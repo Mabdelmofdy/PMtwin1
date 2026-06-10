@@ -114,6 +114,46 @@
       "status": "accepted",
       "createdAt": "2026-02-20T08:00:00.000Z",
       "updatedAt": "2026-02-20T08:00:00.000Z"
+    },
+    {
+      "id": "seed-conn-001-009",
+      "fromUserId": "seed-user-001",
+      "toUserId": "seed-user-009",
+      "status": "accepted",
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
+    },
+    {
+      "id": "seed-conn-010-013",
+      "fromUserId": "seed-user-010",
+      "toUserId": "seed-user-013",
+      "status": "accepted",
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
+    },
+    {
+      "id": "seed-conn-001-006",
+      "fromUserId": "seed-co-corp-001",
+      "toUserId": "seed-user-006",
+      "status": "accepted",
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
+    },
+    {
+      "id": "seed-conn-002-002",
+      "fromUserId": "seed-co-corp-002",
+      "toUserId": "seed-user-002",
+      "status": "accepted",
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
+    },
+    {
+      "id": "seed-conn-005-011",
+      "fromUserId": "seed-co-corp-005",
+      "toUserId": "seed-user-011",
+      "status": "accepted",
+      "createdAt": "2026-02-20T08:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
     }
   ]
 }

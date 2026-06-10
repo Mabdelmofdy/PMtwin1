@@ -25,7 +25,8 @@ Sign in through the normal **Login** page (demo picker when available).
 
 **Passwords:**
 - **Admin:** `admin123`
-- **All other accounts (Demo40 and Pending):** `demo123`
+- **40-opportunity workflow users and companies:** `Pmtwin@2026`
+- **Legacy Demo40 and Pending accounts:** `demo123`
 
 Data is loaded automatically on first launch: the app merges demo users, demo companies, demo opportunities, demo applications, demo contracts, demo matches, demo notifications, **demo connections** (pre-accepted pairs for People and Messages), and pending users from the JSON files under `POC/data/`.
 
@@ -37,18 +38,28 @@ Data is loaded automatically on first launch: the app merges demo users, demo co
 
 ## Quick reference (suggested logins)
 
-**Full profile (skills, certifications, experience entries):** Use **demo06@demo.test** or **demo07@demo.test** to verify that the profile page shows skills, certificates, and experience (job history). Other demo accounts (e.g. demo01, demo02) have minimal profile data by design and will show mostly empty sections.
+**40-opportunity workflow (current canonical dataset):** Run `npm run seed:controlled` then `npm run seed:e2e` from `POC/`. Log in with account type **Individual** (professionals) or **Company** (B2B accounts). Reset browser data with `window.resetAppData()` after seeding.
 
 | Type | Email | Password | Note |
 |------|--------|----------|------|
 | Admin | admin@pmtwin.com | admin123 | Platform admin; access vetting, matching, reports |
+| Company (contractor) | contact@alriyadh-construction.test | Pmtwin@2026 | Owns `seed-opp-007`, `023`; applications and matches |
+| Company (developer) | contact@gulf-development.test | Pmtwin@2026 | Owns `seed-opp-005`, `024`; active negotiation on 005 |
+| Company (equipment) | contact@eastern-equipment.test | Pmtwin@2026 | Owns `seed-opp-025` (MEP offer) |
+| Company (investor) | contact@najd-investment.test | Pmtwin@2026 | Owns `seed-opp-028`, `037`; equity JV negotiation |
+| Company (infrastructure) | contact@sa-infra-partners.test | Pmtwin@2026 | Owns `seed-opp-014`, `039`; consortium deals in execution |
+| Company (developer) | contact@redsea-building.test | Pmtwin@2026 | Owns `seed-opp-029`, `034`; hybrid exchange needs |
+| Professional | khalid.alharbi@pmtwin.test | Pmtwin@2026 | Architect; owns `seed-opp-001`; completed one-way deal |
+| Professional | sara.almutairi@pmtwin.test | Pmtwin@2026 | BIM consultant; owns `seed-opp-002`; applications on company needs |
+
+**Legacy Demo40 (cleared from browser seed):** Use **demo06@demo.test** or **demo07@demo.test** for full profile UI testing if legacy data is restored.
+
+| Type | Email | Password | Note |
+|------|--------|----------|------|
 | Pending (vetting) | pending01@demo.test | demo123 | Professional awaiting approval; use to test vetting flow |
 | Pending (clarification) | pending02@demo.test | demo123 | Company in clarification_requested; use to test vetting flow |
-| Professional | demo01@demo.test | demo123 | Individual creator; has applications and matches for full workflow |
-| Professional | demo04@demo.test | demo123 | **Full workflow demo:** applications, matches, notifications (dashboard counts > 0) |
-| Consultant | demo06@demo.test | demo123 | Structural engineer; **full profile** (skills, certs, experience entries); has accepted application / contract |
-| Consultant | demo07@demo.test | demo123 | **Full profile** (skills, certifications, experience entries); project management / PMO |
-| Company (construction) | company01@demo.test | demo123 | Owns Need: Structural engineer; has applications and contract |
+| Professional | demo04@demo.test | demo123 | Legacy full workflow demo |
+| Company (construction) | company01@demo.test | demo123 | Legacy; cleared from current seed |
 
 ---
 
@@ -132,16 +143,29 @@ Use these to test the **registration → vetting → activation** flow. Both can
 
 ---
 
-## Demo companies
+## Workflow companies (canonical 40-opportunity dataset)
+
+All use password **`Pmtwin@2026`**. Log in with account type **Company**.
+
+| ID | Name | Email | Role | Owned opportunities |
+|----|------|--------|------|---------------------|
+| seed-co-corp-001 | Al-Riyadh Construction | contact@alriyadh-construction.test | company_owner | `seed-opp-007`, `023` |
+| seed-co-corp-002 | Gulf Development Co | contact@gulf-development.test | company_owner | `seed-opp-005`, `024` |
+| seed-co-corp-003 | Eastern Equipment & Supply | contact@eastern-equipment.test | company_owner | `seed-opp-025` |
+| seed-co-corp-004 | Najd Investment Group | contact@najd-investment.test | company_owner | `seed-opp-028`, `037` |
+| seed-co-corp-005 | Saudi Infrastructure Partners | contact@sa-infra-partners.test | company_owner | `seed-opp-014`, `039` |
+| seed-co-corp-006 | Red Sea Building Co | contact@redsea-building.test | company_owner | `seed-opp-029`, `034` |
+
+## Legacy demo companies (cleared)
 
 | ID | Name | Email | Password | Role | Notes |
 |----|------|--------|----------|------|--------|
-| demo-c01 | Al-Riyadh Construction | company01@demo.test | demo123 | company_owner | Construction; owns Need: Structural engineer |
-| demo-c02 | Gulf Development Co | company02@demo.test | demo123 | company_owner | Developer; owns Need: Project management |
-| demo-c03 | Eastern Equipment & Supply | company03@demo.test | demo123 | company_owner | Equipment supplier; owns Offer: Heavy equipment |
-| demo-c04 | Najd Investment Group | company04@demo.test | demo123 | company_owner | Investor |
-| demo-c05 | Saudi Infrastructure Partners | company05@demo.test | demo123 | company_owner | Infrastructure; consortium lead (Highway project) |
-| demo-c06 | Red Sea Building Co | company06@demo.test | demo123 | company_owner | Building developer; consortium lead (Mixed-use) |
+| demo-c01 | Al-Riyadh Construction | company01@demo.test | demo123 | company_owner | Legacy Demo40; no longer in browser seed |
+| demo-c02 | Gulf Development Co | company02@demo.test | demo123 | company_owner | Legacy Demo40 |
+| demo-c03 | Eastern Equipment & Supply | company03@demo.test | demo123 | company_owner | Legacy Demo40 |
+| demo-c04 | Najd Investment Group | company04@demo.test | demo123 | company_owner | Legacy Demo40 |
+| demo-c05 | Saudi Infrastructure Partners | company05@demo.test | demo123 | company_owner | Legacy Demo40 |
+| demo-c06 | Red Sea Building Co | company06@demo.test | demo123 | company_owner | Legacy Demo40 |
 
 ---
 
@@ -164,4 +188,4 @@ Use these to test the **registration → vetting → activation** flow. Both can
 
 To see the platform workflow (Register → Vetting → Dashboard → Opportunity → Matching → Application → Negotiation → Contract → Execution), open **How it works** from the public navigation, or go to `/workflow`.
 
-**Demo data for dashboard counts:** Every demo user and demo company has at least one application, one **post match**, and one notification aligned with opportunities. Log in as any demo user (e.g. **demo04@demo.test**, **demo01@demo.test**, **company01@demo.test**) to see Applications, Matches, and Notifications non-zero. Demo **`post_matches`** merge from `demo-post-matches.json`; notifications from `demo-notifications.json`. Legacy `demo-matches.json` is not merged into the app when `LEGACY_PERSON_OPPORTUNITY_ENABLED` is false. Pre-accepted **connections** merge from `demo-connections.json` so **Find / People** and **Messages** have partners without creating requests first.
+**Demo data for dashboard counts:** After `npm run seed:e2e`, workflow companies and professionals have applications, **post matches**, and notifications aligned with opportunities. Log in as **contact@alriyadh-construction.test** (Company) or **khalid.alharbi@pmtwin.test** (Individual) to see non-zero dashboard counts. Demo **`post_matches`** merge from `demo-post-matches.json`; notifications from `demo-notifications.json`. Pre-accepted **connections** merge from `demo-connections.json` so **Find / People** and **Messages** have partners without creating requests first.

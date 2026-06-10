@@ -1,7 +1,7 @@
 {
   "domain": "applications",
   "version": "2.0",
-  "description": "E2E workflow applications tied to the 25 seed opportunities (scripts/seed-e2e-workflow.js).",
+  "description": "E2E workflow applications tied to the 40 seed opportunities (scripts/seed-e2e-workflow.js).",
   "data": [
     {
       "id": "seed-app-001",
@@ -28,7 +28,7 @@
       "opportunityId": "seed-opp-005",
       "applicantId": "seed-user-002",
       "status": "in_negotiation",
-      "matchId": "demo-pm-oneway-10",
+      "matchId": "demo-pm-oneway-13",
       "matchType": "one_way",
       "negotiationId": "seed-neg-03",
       "proposal": "BIM + Revit delivery covering the required core skills for the architect need.",
@@ -107,6 +107,60 @@
       "responses": {},
       "availabilityDate": "2026-03-15",
       "estimatedDurationDays": 180,
+      "createdAt": "2026-03-05T10:00:00.000Z",
+      "updatedAt": "2026-03-05T10:00:00.000Z"
+    },
+    {
+      "id": "seed-app-007",
+      "opportunityId": "seed-opp-031",
+      "applicantId": "seed-user-008",
+      "status": "reviewing",
+      "matchType": "one_way",
+      "proposal": "MEP supply partnership with profit-sharing on joint commercial projects.",
+      "application_value": {
+        "exchangeMode": "profit_sharing",
+        "profitSplit": "70-30",
+        "currency": "SAR"
+      },
+      "responses": {},
+      "availabilityDate": "2026-04-01",
+      "estimatedDurationDays": 365,
+      "createdAt": "2026-03-05T10:00:00.000Z",
+      "updatedAt": "2026-03-05T10:00:00.000Z"
+    },
+    {
+      "id": "seed-app-008",
+      "opportunityId": "seed-opp-032",
+      "applicantId": "seed-user-017",
+      "status": "pending",
+      "matchType": "one_way",
+      "proposal": "Senior PM mentoring in exchange for admin and documentation support.",
+      "application_value": {
+        "exchangeMode": "barter",
+        "barterValue": 12000,
+        "currency": "SAR"
+      },
+      "responses": {},
+      "availabilityDate": "2026-03-10",
+      "estimatedDurationDays": 90,
+      "createdAt": "2026-03-05T10:00:00.000Z",
+      "updatedAt": "2026-03-05T10:00:00.000Z"
+    },
+    {
+      "id": "seed-app-009",
+      "opportunityId": "seed-opp-037",
+      "applicantId": "seed-user-016",
+      "status": "shortlisted",
+      "matchType": "one_way",
+      "proposal": "FIDIC contract review offered via barter for technical consulting hours.",
+      "application_value": {
+        "exchangeMode": "barter",
+        "barterValue": 45000,
+        "currency": "SAR"
+      },
+      "responses": {},
+      "availabilityDate": "2026-03-12",
+      "estimatedDurationDays": 45,
       "createdAt": "2026-03-05T10:00:00.000Z",
       "updatedAt": "2026-03-05T10:00:00.000Z"
     }

@@ -229,7 +229,7 @@
             (location.score * (W.LOCATION ?? 0.10)) +
             (reputation.score * (W.REPUTATION ?? 0.05));
 
-        const rounded = Math.round(score * 1000) / 1000;
+        const rounded = Math.min(1, Math.round(score * 1000) / 1000);
         const threshold = CONFIG.MATCHING?.POST_TO_POST_THRESHOLD ?? 0.50;
         if (CONFIG.MATCHING && CONFIG.MATCHING.DEBUG && needPost && offerPost && (rounded >= threshold - 0.05 && rounded <= threshold + 0.05)) {
             console.log('[post-to-post-scoring] need=' + (needPost.id || '') + ' offer=' + (offerPost.id || '') + ' score=' + rounded + ' threshold=' + threshold);

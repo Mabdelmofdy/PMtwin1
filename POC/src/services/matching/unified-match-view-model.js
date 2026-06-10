@@ -426,7 +426,7 @@
         const matchType = internalMatchType;
         const matchTypeLabel = getMatchTypeLabel(matchType);
         const score = match.matchScore != null ? Number(match.matchScore) : 0;
-        const matchScorePercent = Math.round(score * 100);
+        const matchScorePercent = Math.min(100, Math.round(score * 100));
         const quality = getMatchQuality(score);
         const opportunityIds = extractOpportunityIdsFromMatch(match, sourceType, internalMatchType);
         const primaryOpportunityId = opportunityIds[0] || match.opportunityId || null;

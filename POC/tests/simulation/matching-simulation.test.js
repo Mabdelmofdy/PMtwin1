@@ -28,9 +28,9 @@ describe('Matching simulation', () => {
             oneWayLimit: 5,
             barterLimit: 3
         });
-        expect(report.totalPostsAnalyzed).toBe(25);
-        expect(report.totalNeeds).toBe(12);
-        expect(report.totalOffers).toBe(13);
+        expect(report.totalPostsAnalyzed).toBe(40);
+        expect(report.totalNeeds).toBe(22);
+        expect(report.totalOffers).toBe(18);
 
         expect(report.oneWayMatches).toBeGreaterThanOrEqual(1);
         expect(report.twoWayMatches).toBeGreaterThanOrEqual(1);

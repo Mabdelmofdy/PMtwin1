@@ -26,7 +26,10 @@ function setupGlobalConfig(options = {}) {
         MIN_SKILL_SCORE_FOR_MATCH: 0.50,
         DEBUG: debug,
         WEIGHTS: {
+            SKILL_MATCH: 0.40,
             ATTRIBUTE_OVERLAP: 0.40,
+            EXCHANGE_COMPATIBILITY: 0,
+            VALUE_COMPATIBILITY: 0,
             BUDGET_FIT: 0.30,
             TIMELINE: 0.15,
             LOCATION: 0.10,

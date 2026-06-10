@@ -1,22 +1,22 @@
 {
-  "totalPostsAnalyzed": 25,
-  "totalNeeds": 12,
-  "totalOffers": 13,
+  "totalPostsAnalyzed": 40,
+  "totalNeeds": 22,
+  "totalOffers": 18,
   "oneWayMatches": 5,
   "twoWayMatches": 1,
-  "groupFormations": 1,
+  "groupFormations": 2,
   "circularExchanges": 1,
-  "totalMatchesFound": 8,
+  "totalMatchesFound": 9,
   "oneWayDetails": [
     {
       "needId": "seed-opp-001",
       "matchCount": 2,
-      "topScore": 1.275
+      "topScore": 0.975
     },
     {
       "needId": "seed-opp-005",
       "matchCount": 3,
-      "topScore": 0.975
+      "topScore": 0.775
     }
   ],
   "twoWayDetails": [
@@ -33,6 +33,14 @@
         "Civil Engineer"
       ],
       "partnerCount": 1
+    },
+    {
+      "needId": "seed-opp-039",
+      "roles": [
+        "EPC contractor",
+        "O&M provider"
+      ],
+      "partnerCount": 0
     }
   ],
   "circularDetails": [
@@ -42,7 +50,7 @@
         "seed-user-014",
         "seed-user-013"
       ],
-      "score": 1.275
+      "score": 0.975
     }
   ]
 }

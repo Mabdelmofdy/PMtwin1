@@ -1,7 +1,7 @@
 {
   "domain": "negotiations",
   "version": "2.0",
-  "description": "E2E workflow negotiations tied to the 25 seed opportunities (scripts/seed-e2e-workflow.js).",
+  "description": "E2E workflow negotiations tied to the 40 seed opportunities (scripts/seed-e2e-workflow.js).",
   "data": [
     {
       "id": "seed-neg-01",
@@ -111,11 +111,11 @@
     {
       "id": "seed-neg-03",
       "opportunityId": "seed-opp-005",
-      "matchId": "demo-pm-oneway-10",
+      "matchId": "demo-pm-oneway-13",
       "applicationId": "seed-app-002",
       "parties": [
         {
-          "userId": "seed-user-003",
+          "userId": "seed-co-corp-002",
           "role": "need_owner"
         },
         {
@@ -151,7 +151,7 @@
       "applicationId": null,
       "parties": [
         {
-          "userId": "seed-user-010",
+          "userId": "seed-co-corp-005",
           "role": "consortium_lead"
         },
         {
@@ -168,7 +168,7 @@
       },
       "rounds": [
         {
-          "by": "seed-user-010",
+          "by": "seed-co-corp-005",
           "at": "2026-03-08T11:00:00.000Z",
           "proposal": {
             "value": 15000000
@@ -189,6 +189,137 @@
         "currency": "SAR",
         "duration": "18 months",
         "paymentSchedule": "Milestone-based across design and works"
+      },
+      "createdAt": "2026-03-08T11:00:00.000Z",
+      "updatedAt": "2026-03-12T15:00:00.000Z"
+    },
+    {
+      "id": "seed-neg-05",
+      "opportunityId": "seed-opp-026",
+      "matchId": "demo-pm-oneway-07",
+      "applicationId": null,
+      "parties": [
+        {
+          "userId": "seed-user-001",
+          "role": "need_owner"
+        },
+        {
+          "userId": "seed-user-002",
+          "role": "offer_provider"
+        }
+      ],
+      "status": "counter_offered",
+      "initialTerms": {
+        "value": 85000,
+        "currency": "SAR",
+        "exchangeMode": "barter",
+        "duration": "6 weeks"
+      },
+      "rounds": [
+        {
+          "by": "seed-user-001",
+          "at": "2026-03-08T11:00:00.000Z",
+          "proposal": {
+            "value": 85000,
+            "exchangeMode": "barter"
+          },
+          "message": "Barter: CAD production for PM support, ~85K SAR equivalent."
+        },
+        {
+          "by": "seed-user-002",
+          "at": "2026-03-12T15:00:00.000Z",
+          "proposal": {
+            "value": 90000,
+            "exchangeMode": "barter"
+          },
+          "message": "Counter: scope includes QA pass, ~90K SAR equivalent."
+        }
+      ],
+      "agreedTerms": null,
+      "expiresAt": "2026-06-24T09:00:00.000Z",
+      "createdAt": "2026-03-08T11:00:00.000Z",
+      "updatedAt": "2026-03-12T15:00:00.000Z"
+    },
+    {
+      "id": "seed-neg-06",
+      "opportunityId": "seed-opp-028",
+      "matchId": "demo-pm-oneway-08",
+      "applicationId": null,
+      "parties": [
+        {
+          "userId": "seed-co-corp-004",
+          "role": "need_owner"
+        },
+        {
+          "userId": "seed-user-009",
+          "role": "offer_provider"
+        }
+      ],
+      "status": "open",
+      "initialTerms": {
+        "equityPercentage": 45,
+        "exchangeMode": "equity",
+        "duration": "36 months"
+      },
+      "rounds": [
+        {
+          "by": "seed-user-009",
+          "at": "2026-03-08T11:00:00.000Z",
+          "proposal": {
+            "equityPercentage": 35
+          },
+          "message": "Offering 35% equity for EPC and construction management contribution."
+        }
+      ],
+      "agreedTerms": null,
+      "expiresAt": "2026-06-24T09:00:00.000Z",
+      "createdAt": "2026-03-08T11:00:00.000Z",
+      "updatedAt": "2026-03-08T11:00:00.000Z"
+    },
+    {
+      "id": "seed-neg-07",
+      "opportunityId": "seed-opp-039",
+      "matchId": "demo-pm-consortium-wind",
+      "applicationId": null,
+      "parties": [
+        {
+          "userId": "seed-co-corp-005",
+          "role": "consortium_lead"
+        },
+        {
+          "userId": "seed-user-013",
+          "role": "consortium_member"
+        }
+      ],
+      "status": "agreed",
+      "initialTerms": {
+        "profitSplit": "65-35",
+        "exchangeMode": "profit_sharing",
+        "duration": "24 months"
+      },
+      "rounds": [
+        {
+          "by": "seed-co-corp-005",
+          "at": "2026-03-08T11:00:00.000Z",
+          "proposal": {
+            "profitSplit": "65-35"
+          },
+          "message": "Wind farm consortium: 65-35 profit share after O&M costs."
+        },
+        {
+          "by": "seed-user-013",
+          "at": "2026-03-12T15:00:00.000Z",
+          "proposal": {
+            "profitSplit": "65-35"
+          },
+          "message": "Equipment and O&M scope accepted. Proceeding to deal."
+        }
+      ],
+      "agreedTerms": {
+        "profitSplit": "65-35",
+        "exchangeMode": "profit_sharing",
+        "duration": "24 months",
+        "profitDistribution": "Annual distribution after O&M costs"
       },
       "createdAt": "2026-03-08T11:00:00.000Z",
       "updatedAt": "2026-03-12T15:00:00.000Z"

@@ -3,23 +3,24 @@
   "version": "1.0",
   "data": [
     {
-      "id": "seed-co-001",
-      "email": "contact@seed-co-1.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "id": "seed-co-corp-001",
+      "email": "contact@alriyadh-construction.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "company_owner",
       "status": "active",
       "isPublic": true,
-      "connectionCount": 11,
+      "connectionCount": 25,
       "profile": {
-        "name": "Seed Company 1 (Construction)",
+        "name": "Al-Riyadh Construction",
         "type": "company",
-        "headline": "Construction services",
-        "companyType": "SME",
-        "registrationNumber": "2000000001",
-        "phone": "+966 50 001 1000",
+        "headline": "General Contractor — Commercial & Residential",
+        "companyType": "Large Enterprise",
+        "companyRole": "Contractor",
+        "registrationNumber": "1010000001",
+        "phone": "+966 11 201 1001",
         "location": "Riyadh, Saudi Arabia",
         "address": "Riyadh, Saudi Arabia",
-        "description": "Controlled seed company for matching scenarios.",
+        "description": "Leading general contractor delivering turnkey commercial and residential projects across Saudi Arabia.",
         "sectors": [
           "Construction",
           "Infrastructure"
@@ -28,224 +29,419 @@
           "Construction",
           "Infrastructure"
         ],
-        "employeeCount": "50-200",
-        "yearEstablished": 2001,
+        "employeeCount": "500-1000",
+        "yearEstablished": 1993,
         "certifications": [
-          "ISO 9001"
+          "ISO 9001",
+          "ISO 14001"
         ],
-        "financialCapacity": 5000000,
+        "financialCapacity": 75000000,
         "preferredPaymentModes": [
           "cash",
-          "barter"
+          "barter",
+          "profit_sharing"
+        ],
+        "preferredCollaborationModels": [
+          "project",
+          "consortium"
         ],
         "services": [
-          "Construction Services"
+          "General Contracting",
+          "Design-Build",
+          "Site Supervision"
         ],
         "interests": [
           "Construction",
           "Infrastructure"
         ],
-        "rating": 0.75,
+        "caseStudies": [
+          {
+            "title": "Riyadh Business Park",
+            "description": "Turnkey delivery of a 45,000 sqm business park.",
+            "year": 2024
+          }
+        ],
+        "references": [
+          {
+            "name": "NEOM Delivery Partner",
+            "role": "Subcontractor",
+            "year": 2023
+          }
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.82,
         "avatar": null
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z"
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z"
     },
     {
-      "id": "seed-co-002",
-      "email": "contact@seed-co-2.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "id": "seed-co-corp-002",
+      "email": "contact@gulf-development.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "company_owner",
       "status": "active",
       "isPublic": true,
-      "connectionCount": 12,
+      "connectionCount": 30,
       "profile": {
-        "name": "Seed Company 2 (Engineering)",
+        "name": "Gulf Development Co",
         "type": "company",
-        "headline": "Engineering services",
-        "companyType": "SME",
-        "registrationNumber": "2000000002",
-        "phone": "+966 50 002 1000",
+        "headline": "Real Estate Developer — Mixed-Use & Residential",
+        "companyType": "Large Enterprise",
+        "companyRole": "Developer",
+        "registrationNumber": "1010000002",
+        "phone": "+966 11 202 1002",
         "location": "Jeddah, Saudi Arabia",
         "address": "Jeddah, Saudi Arabia",
-        "description": "Controlled seed company for matching scenarios.",
+        "description": "Regional developer specialising in mixed-use towers, residential compounds and hospitality projects.",
         "sectors": [
-          "Engineering",
-          "Consulting"
+          "Real Estate",
+          "Construction"
         ],
         "industry": [
-          "Engineering",
-          "Consulting"
+          "Real Estate",
+          "Construction"
         ],
-        "employeeCount": "50-200",
-        "yearEstablished": 2002,
+        "employeeCount": "500-1000",
+        "yearEstablished": 1996,
         "certifications": [
-          "ISO 9001"
+          "ISO 9001",
+          "ISO 14001"
         ],
-        "financialCapacity": 5000000,
+        "financialCapacity": 120000000,
         "preferredPaymentModes": [
           "cash",
-          "barter"
+          "equity",
+          "hybrid"
+        ],
+        "preferredCollaborationModels": [
+          "project",
+          "joint_venture",
+          "equity"
         ],
         "services": [
-          "Engineering Services"
+          "Development Management",
+          "Feasibility Studies",
+          "Project Sponsorship"
         ],
         "interests": [
-          "Engineering",
-          "Consulting"
+          "Real Estate",
+          "Construction"
         ],
-        "rating": 0.75,
+        "caseStudies": [
+          {
+            "title": "Jeddah Waterfront District",
+            "description": "Mixed-use waterfront development with 3 towers and retail podium.",
+            "year": 2023
+          }
+        ],
+        "references": [
+          {
+            "name": "Red Sea Global",
+            "role": "Development partner",
+            "year": 2024
+          }
+        ],
+        "primaryDomain": "Real Estate",
+        "rating": 0.82,
         "avatar": null
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z"
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z"
     },
     {
-      "id": "seed-co-003",
-      "email": "contact@seed-co-3.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "id": "seed-co-corp-003",
+      "email": "contact@eastern-equipment.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "company_owner",
       "status": "active",
       "isPublic": true,
-      "connectionCount": 13,
+      "connectionCount": 35,
       "profile": {
-        "name": "Seed Company 3 (Equipment Rental)",
+        "name": "Eastern Equipment & Supply",
         "type": "company",
-        "headline": "Equipment Rental services",
-        "companyType": "SME",
-        "registrationNumber": "2000000003",
-        "phone": "+966 50 003 1000",
+        "headline": "Heavy Equipment Rental & Plant Hire",
+        "companyType": "Medium Enterprise",
+        "companyRole": "Supplier",
+        "registrationNumber": "1010000003",
+        "phone": "+966 11 203 1003",
         "location": "Dammam, Saudi Arabia",
         "address": "Dammam, Saudi Arabia",
-        "description": "Controlled seed company for matching scenarios.",
+        "description": "Provider of heavy construction equipment, tower cranes and plant hire for civil and building works.",
         "sectors": [
-          "Equipment Rental",
-          "Consulting"
+          "Construction",
+          "Industrial"
         ],
         "industry": [
-          "Equipment Rental",
-          "Consulting"
+          "Construction",
+          "Industrial"
         ],
-        "employeeCount": "50-200",
-        "yearEstablished": 2003,
+        "employeeCount": "100-500",
+        "yearEstablished": 1999,
         "certifications": [
-          "ISO 9001"
+          "ISO 9001",
+          "ISO 14001"
         ],
-        "financialCapacity": 5000000,
+        "financialCapacity": 35000000,
         "preferredPaymentModes": [
           "cash",
           "barter"
         ],
-        "services": [
-          "Equipment Rental Services"
+        "preferredCollaborationModels": [
+          "project",
+          "barter",
+          "resource_sharing"
         ],
-        "interests": [
+        "services": [
           "Equipment Rental",
-          "Consulting"
-        ],
-        "rating": 0.75,
-        "avatar": null
-      },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z"
-    },
-    {
-      "id": "seed-co-004",
-      "email": "contact@seed-co-4.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
-      "role": "company_owner",
-      "status": "active",
-      "isPublic": true,
-      "connectionCount": 14,
-      "profile": {
-        "name": "Seed Company 4 (Accounting)",
-        "type": "company",
-        "headline": "Accounting services",
-        "companyType": "SME",
-        "registrationNumber": "2000000004",
-        "phone": "+966 50 004 1000",
-        "location": "NEOM, Saudi Arabia",
-        "address": "NEOM, Saudi Arabia",
-        "description": "Controlled seed company for matching scenarios.",
-        "sectors": [
-          "Accounting",
-          "Consulting"
-        ],
-        "industry": [
-          "Accounting",
-          "Consulting"
-        ],
-        "employeeCount": "50-200",
-        "yearEstablished": 2004,
-        "certifications": [
-          "ISO 9001"
-        ],
-        "financialCapacity": 5000000,
-        "preferredPaymentModes": [
-          "cash",
-          "barter"
-        ],
-        "services": [
-          "Accounting Services"
+          "Plant Hire",
+          "Fleet Maintenance"
         ],
         "interests": [
-          "Accounting",
-          "Consulting"
+          "Construction",
+          "Industrial"
         ],
-        "rating": 0.75,
+        "caseStudies": [
+          {
+            "title": "Eastern Province Earthworks",
+            "description": "Supplied excavators and graders for a major earthworks package.",
+            "year": 2023
+          }
+        ],
+        "references": [
+          {
+            "name": "Saudi Binladin Group",
+            "role": "Equipment supplier",
+            "year": 2022
+          }
+        ],
+        "primaryDomain": "Equipment Rental",
+        "rating": 0.82,
         "avatar": null
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z"
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z"
     },
     {
-      "id": "seed-co-005",
-      "email": "contact@seed-co-5.test",
-      "passwordHash": "cGFzc3dvcmQxMjM=",
+      "id": "seed-co-corp-004",
+      "email": "contact@najd-investment.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
       "role": "company_owner",
       "status": "active",
       "isPublic": true,
-      "connectionCount": 15,
+      "connectionCount": 40,
       "profile": {
-        "name": "Seed Company 5 (Real Estate)",
+        "name": "Najd Investment Group",
         "type": "company",
-        "headline": "Real Estate services",
-        "companyType": "SME",
-        "registrationNumber": "2000000005",
-        "phone": "+966 50 005 1000",
-        "location": "Eastern Province, Saudi Arabia",
-        "address": "Eastern Province, Saudi Arabia",
-        "description": "Controlled seed company for matching scenarios.",
+        "headline": "Investment & Real Estate — Equity & JV Partnerships",
+        "companyType": "Large Enterprise",
+        "companyRole": "Investor",
+        "registrationNumber": "1010000004",
+        "phone": "+966 11 204 1004",
+        "location": "Riyadh, Saudi Arabia",
+        "address": "Riyadh, Saudi Arabia",
+        "description": "Investment group structuring land acquisitions, equity JVs and profit-sharing deals on development projects.",
         "sectors": [
           "Real Estate",
-          "Consulting"
+          "Finance"
         ],
         "industry": [
           "Real Estate",
-          "Consulting"
+          "Finance"
         ],
-        "employeeCount": "50-200",
+        "employeeCount": "500-1000",
+        "yearEstablished": 2002,
+        "certifications": [
+          "ISO 9001",
+          "ISO 14001"
+        ],
+        "financialCapacity": 200000000,
+        "preferredPaymentModes": [
+          "equity",
+          "profit_sharing",
+          "hybrid"
+        ],
+        "preferredCollaborationModels": [
+          "joint_venture",
+          "equity",
+          "profit_sharing"
+        ],
+        "services": [
+          "Investment Appraisal",
+          "JV Structuring",
+          "Feasibility Analysis"
+        ],
+        "interests": [
+          "Real Estate",
+          "Finance"
+        ],
+        "caseStudies": [
+          {
+            "title": "Riyadh Logistics Hub JV",
+            "description": "Equity JV with EPC partner on a logistics and warehousing hub.",
+            "year": 2024
+          }
+        ],
+        "references": [
+          {
+            "name": "PIF Portfolio Partner",
+            "role": "Co-investor",
+            "year": 2023
+          }
+        ],
+        "primaryDomain": "Real Estate Investment",
+        "rating": 0.82,
+        "avatar": null
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z"
+    },
+    {
+      "id": "seed-co-corp-005",
+      "email": "contact@sa-infra-partners.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "company_owner",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 45,
+      "profile": {
+        "name": "Saudi Infrastructure Partners",
+        "type": "company",
+        "headline": "Infrastructure Developer — Highways & Energy",
+        "companyType": "Large Enterprise",
+        "companyRole": "Consortium Lead",
+        "registrationNumber": "1010000005",
+        "phone": "+966 11 205 1005",
+        "location": "Riyadh, Saudi Arabia",
+        "address": "Riyadh, Saudi Arabia",
+        "description": "Infrastructure developer leading multi-party consortia on highways, energy and public-private partnership programs.",
+        "sectors": [
+          "Infrastructure",
+          "Energy"
+        ],
+        "industry": [
+          "Infrastructure",
+          "Energy"
+        ],
+        "employeeCount": "500-1000",
         "yearEstablished": 2005,
         "certifications": [
-          "ISO 9001"
+          "ISO 9001",
+          "ISO 14001"
         ],
-        "financialCapacity": 5000000,
+        "financialCapacity": 500000000,
         "preferredPaymentModes": [
           "cash",
+          "profit_sharing"
+        ],
+        "preferredCollaborationModels": [
+          "consortium",
+          "project",
+          "profit_sharing"
+        ],
+        "services": [
+          "Consortium Leadership",
+          "Program Management",
+          "EPC Coordination"
+        ],
+        "interests": [
+          "Infrastructure",
+          "Energy"
+        ],
+        "caseStudies": [
+          {
+            "title": "Highway Design-Build Program",
+            "description": "Consortium lead for a multi-package highway design-build program.",
+            "year": 2024
+          }
+        ],
+        "references": [
+          {
+            "name": "Ministry of Transport",
+            "role": "PPP partner",
+            "year": 2023
+          }
+        ],
+        "primaryDomain": "Infrastructure",
+        "rating": 0.82,
+        "avatar": null
+      },
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z"
+    },
+    {
+      "id": "seed-co-corp-006",
+      "email": "contact@redsea-building.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "company_owner",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 50,
+      "profile": {
+        "name": "Red Sea Building Co",
+        "type": "company",
+        "headline": "Mixed-Use Developer — Coastal & Urban Projects",
+        "companyType": "Medium Enterprise",
+        "companyRole": "Developer",
+        "registrationNumber": "1010000006",
+        "phone": "+966 11 206 1006",
+        "location": "Jeddah, Saudi Arabia",
+        "address": "Jeddah, Saudi Arabia",
+        "description": "Building developer focused on mixed-use towers, hospitality and coastal urban regeneration projects.",
+        "sectors": [
+          "Construction",
+          "Real Estate"
+        ],
+        "industry": [
+          "Construction",
+          "Real Estate"
+        ],
+        "employeeCount": "100-500",
+        "yearEstablished": 2008,
+        "certifications": [
+          "ISO 9001",
+          "ISO 14001"
+        ],
+        "financialCapacity": 80000000,
+        "preferredPaymentModes": [
+          "cash",
+          "hybrid",
+          "barter"
+        ],
+        "preferredCollaborationModels": [
+          "project",
+          "hybrid",
           "barter"
         ],
         "services": [
-          "Real Estate Services"
+          "Development Management",
+          "BIM Coordination",
+          "Hybrid Deal Structuring"
         ],
         "interests": [
-          "Real Estate",
-          "Consulting"
+          "Construction",
+          "Real Estate"
         ],
-        "rating": 0.75,
+        "caseStudies": [
+          {
+            "title": "Red Sea Mixed-Use Tower",
+            "description": "Lead developer on a 25-storey mixed-use tower with hybrid financing.",
+            "year": 2024
+          }
+        ],
+        "references": [
+          {
+            "name": "Jeddah Economic Company",
+            "role": "Development partner",
+            "year": 2023
+          }
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.82,
         "avatar": null
       },
-      "createdAt": "2026-06-10T11:57:04.027Z",
-      "updatedAt": "2026-06-10T11:57:04.027Z"
+      "createdAt": "2026-06-10T20:22:20.831Z",
+      "updatedAt": "2026-06-10T20:22:20.831Z"
     }
   ]
 }

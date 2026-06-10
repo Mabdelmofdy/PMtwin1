@@ -9,7 +9,7 @@
                         Review post-to-post exchange matches from your published Needs and Offers.
                     </p>
                 </div>
-                <div class="matches-segmented" id="matches-subtabs" role="tablist" aria-label="Match categories">
+                <div class="matches-segmented matches-segmented--scroll" id="matches-subtabs" role="tablist" aria-label="Match categories">
                     <button type="button" class="matches-segment active" role="tab" data-subtab="recommended" id="matches-subtab-recommended" aria-selected="true" aria-controls="matches-recommended">
                         <span class="matches-segment__inner">
                             <i class="ph-duotone ph-sparkle matches-segment__icon" aria-hidden="true"></i>
@@ -69,19 +69,11 @@
 .matches-toolbar {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1rem;
 }
 
-@media (min-width: 900px) {
-    .matches-toolbar {
-        flex-direction: row;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 2rem;
-    }
-    .matches-toolbar__intro {
-        max-width: 32rem;
-    }
+.matches-toolbar__intro {
+    max-width: 40rem;
 }
 
 .matches-toolbar__title {
@@ -102,27 +94,22 @@
 /* Segmented tabs */
 .matches-segmented {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 0.35rem;
     padding: 0.35rem;
     background: var(--bg-primary, #fff);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg, 12px);
     box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.04));
-    flex-shrink: 0;
-}
-
-@media (min-width: 900px) {
-    .matches-segmented {
-        flex-wrap: nowrap;
-    }
+    width: 100%;
+    align-self: stretch;
 }
 
 .matches-segment {
-    flex: 1 1 auto;
-    min-width: min(100%, 7.5rem);
+    flex: 0 0 auto;
     margin: 0;
-    padding: 0.55rem 0.75rem;
+    padding: 0.55rem 0.85rem;
+    white-space: nowrap;
     border: none;
     border-radius: var(--radius-md, 8px);
     background: transparent;
@@ -156,7 +143,8 @@
     align-items: center;
     justify-content: center;
     gap: 0.4rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    white-space: nowrap;
 }
 
 .matches-segment__icon {
@@ -327,8 +315,29 @@
 
 .matches-segmented--scroll {
     overflow-x: auto;
+    overflow-y: hidden;
     flex-wrap: nowrap;
     max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
+}
+
+.matches-segmented--scroll::-webkit-scrollbar {
+    height: 6px;
+}
+
+.matches-segmented--scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.matches-segmented--scroll::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.3);
+    border-radius: 999px;
+}
+
+.matches-segmented--scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.5);
 }
 
 .matches-filters {

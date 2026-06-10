@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-05T13:32:03.799Z",
+  "timestamp": "2026-06-10T15:59:53.389Z",
   "duplicates": {
     "users": {
       "byId": [],
@@ -57,7 +57,168 @@
     "connections": [],
     "messages": [],
     "contracts": [],
-    "opportunities": []
+    "opportunities": [
+      {
+        "id": "seed-opp-001",
+        "creatorId": "seed-user-001"
+      },
+      {
+        "id": "seed-opp-002",
+        "creatorId": "seed-user-002"
+      },
+      {
+        "id": "seed-opp-003",
+        "creatorId": "seed-user-002"
+      },
+      {
+        "id": "seed-opp-004",
+        "creatorId": "seed-user-002"
+      },
+      {
+        "id": "seed-opp-005",
+        "creatorId": "seed-user-003"
+      },
+      {
+        "id": "seed-opp-006",
+        "creatorId": "seed-user-004"
+      },
+      {
+        "id": "seed-opp-007",
+        "creatorId": "seed-user-005"
+      },
+      {
+        "id": "seed-opp-008",
+        "creatorId": "seed-user-006"
+      },
+      {
+        "id": "seed-opp-009",
+        "creatorId": "seed-user-007"
+      },
+      {
+        "id": "seed-opp-010",
+        "creatorId": "seed-user-008"
+      },
+      {
+        "id": "seed-opp-011",
+        "creatorId": "seed-user-008"
+      },
+      {
+        "id": "seed-opp-012",
+        "creatorId": "seed-user-009"
+      },
+      {
+        "id": "seed-opp-013",
+        "creatorId": "seed-user-009"
+      },
+      {
+        "id": "seed-opp-014",
+        "creatorId": "seed-user-010"
+      },
+      {
+        "id": "seed-opp-015",
+        "creatorId": "seed-user-011"
+      },
+      {
+        "id": "seed-opp-016",
+        "creatorId": "seed-user-012"
+      },
+      {
+        "id": "seed-opp-017",
+        "creatorId": "seed-user-013"
+      },
+      {
+        "id": "seed-opp-018",
+        "creatorId": "seed-user-013"
+      },
+      {
+        "id": "seed-opp-019",
+        "creatorId": "seed-user-014"
+      },
+      {
+        "id": "seed-opp-020",
+        "creatorId": "seed-user-014"
+      },
+      {
+        "id": "seed-opp-021",
+        "creatorId": "seed-user-015"
+      },
+      {
+        "id": "seed-opp-022",
+        "creatorId": "seed-user-015"
+      },
+      {
+        "id": "seed-opp-023",
+        "creatorId": "seed-user-016"
+      },
+      {
+        "id": "seed-opp-024",
+        "creatorId": "seed-user-017"
+      },
+      {
+        "id": "seed-opp-025",
+        "creatorId": "seed-user-018"
+      },
+      {
+        "id": "seed-opp-026",
+        "creatorId": "seed-user-001"
+      },
+      {
+        "id": "seed-opp-027",
+        "creatorId": "seed-user-002"
+      },
+      {
+        "id": "seed-opp-028",
+        "creatorId": "seed-user-003"
+      },
+      {
+        "id": "seed-opp-029",
+        "creatorId": "seed-user-004"
+      },
+      {
+        "id": "seed-opp-030",
+        "creatorId": "seed-user-005"
+      },
+      {
+        "id": "seed-opp-031",
+        "creatorId": "seed-user-006"
+      },
+      {
+        "id": "seed-opp-032",
+        "creatorId": "seed-user-007"
+      },
+      {
+        "id": "seed-opp-033",
+        "creatorId": "seed-user-017"
+      },
+      {
+        "id": "seed-opp-034",
+        "creatorId": "seed-user-008"
+      },
+      {
+        "id": "seed-opp-035",
+        "creatorId": "seed-user-013"
+      },
+      {
+        "id": "seed-opp-036",
+        "creatorId": "seed-user-014"
+      },
+      {
+        "id": "seed-opp-037",
+        "creatorId": "seed-user-015"
+      },
+      {
+        "id": "seed-opp-038",
+        "creatorId": "seed-user-011"
+      },
+      {
+        "id": "seed-opp-039",
+        "creatorId": "seed-user-010"
+      },
+      {
+        "id": "seed-opp-040",
+        "creatorId": "seed-user-009"
+      }
+    ]
   },
   "inconsistentSectors": [],
   "inconsistentSkills": [
@@ -65,50 +226,67 @@
       "value": "Platform Administration"
     },
     {
-      "value": "Engineering Consulting"
+      "value": "FF&E"
     },
     {
-      "value": "Design Review"
+      "value": "Site Planning"
+    },
+    {
+      "value": "Drainage Design"
+    },
+    {
+      "value": "Road Design"
+    },
+    {
+      "value": "Surveying"
+    },
+    {
+      "value": "General Consulting"
+    },
+    {
+      "value": "Advisory"
+    },
+    {
+      "value": "MEP Coordination"
+    },
+    {
+      "value": "Highway Design"
+    },
+    {
+      "value": "Consortium Leadership"
+    },
+    {
+      "value": "Architect"
+    },
+    {
+      "value": "Design Development"
+    },
+    {
+      "value": "Civil Engineer"
+    },
+    {
+      "value": "Excavator"
+    },
+    {
+      "value": "Equipment Rental"
+    },
+    {
+      "value": "Office space"
+    },
+    {
+      "value": "Real Estate"
+    },
+    {
+      "value": "Accounting"
+    },
+    {
+      "value": "Financial Reporting"
+    },
+    {
+      "value": "Construction Management"
     }
   ],
-  "inconsistentLocations": [
-    {
-      "value": "Saudi Arabia > Tabuk > NEOM > The Line"
-    },
-    {
-      "value": "Saudi Arabia > Riyadh > Riyadh City > King Fahd District"
-    },
-    {
-      "value": "Saudi Arabia > Eastern Province > Jubail"
-    },
-    {
-      "value": "United Arab Emirates > Dubai > Dubai > Business Bay"
-    },
-    {
-      "value": "Saudi Arabia > Eastern Province > Al Khobar"
-    },
-    {
-      "value": "Saudi Arabia > Makkah > Makkah City"
-    },
-    {
-      "value": "Saudi Arabia > Asir > Abha"
-    },
-    {
-      "value": "Saudi Arabia > Makkah > Jeddah > Al Balad"
-    },
-    {
-      "value": "Qatar > Doha > Doha > West Bay"
-    },
-    {
-      "value": "Saudi Arabia > Eastern Province > Dammam"
-    },
-    {
-      "value": "Saudi Arabia > Tabuk > Tabuk City"
-    },
-    {
-      "value": "Kuwait > Al Asimah > Kuwait City"
-    }
-  ],
+  "inconsistentLocations": [],
   "unusedTables": [
     {
       "key": "subscription_plans",
@@ -120,16 +298,16 @@
     }
   ],
   "domainCounts": {
-    "users": 9,
-    "companies": 4,
-    "opportunities": 24,
-    "applications": 7,
-    "matches": 7,
-    "notifications": 11,
-    "connections": 16,
+    "users": 1,
+    "companies": 0,
+    "opportunities": 40,
+    "applications": 0,
+    "matches": 0,
+    "notifications": 0,
+    "connections": 0,
     "messages": 0,
-    "audit": 12,
+    "audit": 0,
     "sessions": 0,
-    "contracts": 3
+    "contracts": 0
   }
 }

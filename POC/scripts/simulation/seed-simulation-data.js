@@ -4,7 +4,7 @@
  * Ensures coverage of all four models: one-way, two-way barter, consortium, circular.
  *
  * Run from POC directory:
- *   node scripts/simulation/seed-simulation-data.js --controlled  (exactly 25 posts, wipes sim + browser seed)
+ *   node scripts/simulation/seed-simulation-data.js --controlled  (exactly 40 posts, wipes sim + browser seed)
  *   node scripts/simulation/seed-simulation-data.js --small
  *   node scripts/simulation/seed-simulation-data.js
  * Output: POC/data/simulation/companies.json, users.json, opportunities.json
@@ -75,7 +75,50 @@ const SMALL_MODE = process.argv.includes('--small');
 const CONTROLLED_MODE = process.argv.includes('--controlled');
 const DATA_DIR = path.join(__dirname, '..', '..', 'data');
 
-// ─── Controlled mode: wipe + deterministic 25-post dataset ───────────────────
+// ─── Controlled mode: wipe + deterministic 40-post dataset ───────────────────
+
+/** Canonical 13 collaboration sub-models from opportunity-models.js */
+const ALL_SUB_MODELS = [
+    { modelType: 'project_based', subModelType: 'task_based' },
+    { modelType: 'project_based', subModelType: 'consortium' },
+    { modelType: 'project_based', subModelType: 'project_jv' },
+    { modelType: 'project_based', subModelType: 'spv' },
+    { modelType: 'strategic_partnership', subModelType: 'strategic_jv' },
+    { modelType: 'strategic_partnership', subModelType: 'strategic_alliance' },
+    { modelType: 'strategic_partnership', subModelType: 'mentorship' },
+    { modelType: 'resource_pooling', subModelType: 'bulk_purchasing' },
+    { modelType: 'resource_pooling', subModelType: 'equipment_sharing' },
+    { modelType: 'resource_pooling', subModelType: 'resource_sharing' },
+    { modelType: 'hiring', subModelType: 'professional_hiring' },
+    { modelType: 'hiring', subModelType: 'consultant_hiring' },
+    { modelType: 'competition', subModelType: 'competition_rfp' }
+];
+
+function subModelKey(modelType, subModelType) {
+    return `${modelType}::${subModelType}`;
+}
+
+function coveredSubModelsFromPosts(posts) {
+    const covered = new Set();
+    posts.forEach((p) => {
+        if (p.modelType && p.subModelType) {
+            covered.add(subModelKey(p.modelType, p.subModelType));
+        }
+    });
+    return covered;
+}
+
+function coveredSubModelsFromSpecs(specs) {
+    return coveredSubModelsFromPosts(specs.map((s) => ({
+        modelType: s.modelType || 'project_based',
+        subModelType: s.subModelType || 'project'
+    })));
+}
+
+function missingSubModels(specs) {
+    const covered = coveredSubModelsFromSpecs(specs);
+    return ALL_SUB_MODELS.filter((m) => !covered.has(subModelKey(m.modelType, m.subModelType)));
+}
 
 const CONTROLLED_ARTIFACTS = [
     'matching-report.json',
@@ -131,6 +174,13 @@ function seedUserId(n) {
 function seedCoId(n) {
     return `seed-co-${String(n).padStart(3, '0')}`;
 }
+
+function seedCoCorpId(n) {
+    return `seed-co-corp-${String(n).padStart(3, '0')}`;
+}
+
+// Shared password Pmtwin@2026 (Base64) for workflow users and companies.
+const CONTROLLED_USER_PASSWORD_HASH = 'UG10d2luQDIwMjY=';
 
 function loadMatchingDeps() {
     global.CONFIG = global.CONFIG || {};
@@ -194,10 +244,160 @@ function generateControlledCompanies() {
     });
 }
 
-// Realistic, GAP-P05-passing workflow users. Shared password Pmtwin@2026 (Base64).
+// Realistic B2B workflow companies. Shared password Pmtwin@2026 (Base64).
+// Profiles enriched to clear GAP-P05 publish gate (>=70%).
+const WORKFLOW_COMPANIES = [
+    {
+        name: 'Al-Riyadh Construction',
+        email: 'contact@alriyadh-construction.test',
+        headline: 'General Contractor — Commercial & Residential',
+        companyType: 'Large Enterprise',
+        companyRole: 'Contractor',
+        location: 'Riyadh, Saudi Arabia',
+        sectors: ['Construction', 'Infrastructure'],
+        financialCapacity: 75000000,
+        description: 'Leading general contractor delivering turnkey commercial and residential projects across Saudi Arabia.',
+        services: ['General Contracting', 'Design-Build', 'Site Supervision'],
+        caseStudies: [{ title: 'Riyadh Business Park', description: 'Turnkey delivery of a 45,000 sqm business park.', year: 2024 }],
+        references: [{ name: 'NEOM Delivery Partner', role: 'Subcontractor', year: 2023 }],
+        primaryDomain: 'Construction',
+        preferredCollaborationModels: ['project', 'consortium'],
+        preferredPaymentModes: ['cash', 'barter', 'profit_sharing']
+    },
+    {
+        name: 'Gulf Development Co',
+        email: 'contact@gulf-development.test',
+        headline: 'Real Estate Developer — Mixed-Use & Residential',
+        companyType: 'Large Enterprise',
+        companyRole: 'Developer',
+        location: 'Jeddah, Saudi Arabia',
+        sectors: ['Real Estate', 'Construction'],
+        financialCapacity: 120000000,
+        description: 'Regional developer specialising in mixed-use towers, residential compounds and hospitality projects.',
+        services: ['Development Management', 'Feasibility Studies', 'Project Sponsorship'],
+        caseStudies: [{ title: 'Jeddah Waterfront District', description: 'Mixed-use waterfront development with 3 towers and retail podium.', year: 2023 }],
+        references: [{ name: 'Red Sea Global', role: 'Development partner', year: 2024 }],
+        primaryDomain: 'Real Estate',
+        preferredCollaborationModels: ['project', 'joint_venture', 'equity'],
+        preferredPaymentModes: ['cash', 'equity', 'hybrid']
+    },
+    {
+        name: 'Eastern Equipment & Supply',
+        email: 'contact@eastern-equipment.test',
+        headline: 'Heavy Equipment Rental & Plant Hire',
+        companyType: 'Medium Enterprise',
+        companyRole: 'Supplier',
+        location: 'Dammam, Saudi Arabia',
+        sectors: ['Construction', 'Industrial'],
+        financialCapacity: 35000000,
+        description: 'Provider of heavy construction equipment, tower cranes and plant hire for civil and building works.',
+        services: ['Equipment Rental', 'Plant Hire', 'Fleet Maintenance'],
+        caseStudies: [{ title: 'Eastern Province Earthworks', description: 'Supplied excavators and graders for a major earthworks package.', year: 2023 }],
+        references: [{ name: 'Saudi Binladin Group', role: 'Equipment supplier', year: 2022 }],
+        primaryDomain: 'Equipment Rental',
+        preferredCollaborationModels: ['project', 'barter', 'resource_sharing'],
+        preferredPaymentModes: ['cash', 'barter']
+    },
+    {
+        name: 'Najd Investment Group',
+        email: 'contact@najd-investment.test',
+        headline: 'Investment & Real Estate — Equity & JV Partnerships',
+        companyType: 'Large Enterprise',
+        companyRole: 'Investor',
+        location: 'Riyadh, Saudi Arabia',
+        sectors: ['Real Estate', 'Finance'],
+        financialCapacity: 200000000,
+        description: 'Investment group structuring land acquisitions, equity JVs and profit-sharing deals on development projects.',
+        services: ['Investment Appraisal', 'JV Structuring', 'Feasibility Analysis'],
+        caseStudies: [{ title: 'Riyadh Logistics Hub JV', description: 'Equity JV with EPC partner on a logistics and warehousing hub.', year: 2024 }],
+        references: [{ name: 'PIF Portfolio Partner', role: 'Co-investor', year: 2023 }],
+        primaryDomain: 'Real Estate Investment',
+        preferredCollaborationModels: ['joint_venture', 'equity', 'profit_sharing'],
+        preferredPaymentModes: ['equity', 'profit_sharing', 'hybrid']
+    },
+    {
+        name: 'Saudi Infrastructure Partners',
+        email: 'contact@sa-infra-partners.test',
+        headline: 'Infrastructure Developer — Highways & Energy',
+        companyType: 'Large Enterprise',
+        companyRole: 'Consortium Lead',
+        location: 'Riyadh, Saudi Arabia',
+        sectors: ['Infrastructure', 'Energy'],
+        financialCapacity: 500000000,
+        description: 'Infrastructure developer leading multi-party consortia on highways, energy and public-private partnership programs.',
+        services: ['Consortium Leadership', 'Program Management', 'EPC Coordination'],
+        caseStudies: [{ title: 'Highway Design-Build Program', description: 'Consortium lead for a multi-package highway design-build program.', year: 2024 }],
+        references: [{ name: 'Ministry of Transport', role: 'PPP partner', year: 2023 }],
+        primaryDomain: 'Infrastructure',
+        preferredCollaborationModels: ['consortium', 'project', 'profit_sharing'],
+        preferredPaymentModes: ['cash', 'profit_sharing']
+    },
+    {
+        name: 'Red Sea Building Co',
+        email: 'contact@redsea-building.test',
+        headline: 'Mixed-Use Developer — Coastal & Urban Projects',
+        companyType: 'Medium Enterprise',
+        companyRole: 'Developer',
+        location: 'Jeddah, Saudi Arabia',
+        sectors: ['Construction', 'Real Estate'],
+        financialCapacity: 80000000,
+        description: 'Building developer focused on mixed-use towers, hospitality and coastal urban regeneration projects.',
+        services: ['Development Management', 'BIM Coordination', 'Hybrid Deal Structuring'],
+        caseStudies: [{ title: 'Red Sea Mixed-Use Tower', description: 'Lead developer on a 25-storey mixed-use tower with hybrid financing.', year: 2024 }],
+        references: [{ name: 'Jeddah Economic Company', role: 'Development partner', year: 2023 }],
+        primaryDomain: 'Construction',
+        preferredCollaborationModels: ['project', 'hybrid', 'barter'],
+        preferredPaymentModes: ['cash', 'hybrid', 'barter']
+    }
+];
+
+function generateWorkflowCompanies() {
+    return WORKFLOW_COMPANIES.map((c, i) => {
+        const n = i + 1;
+        return {
+            id: seedCoCorpId(n),
+            email: c.email,
+            passwordHash: CONTROLLED_USER_PASSWORD_HASH,
+            role: 'company_owner',
+            status: 'active',
+            isPublic: true,
+            connectionCount: 20 + n * 5,
+            profile: {
+                name: c.name,
+                type: 'company',
+                headline: c.headline,
+                companyType: c.companyType,
+                companyRole: c.companyRole,
+                registrationNumber: String(1010000000 + n),
+                phone: `+966 11 ${String(200 + n).padStart(3, '0')} ${String(1000 + n)}`,
+                location: c.location,
+                address: c.location,
+                description: c.description,
+                sectors: c.sectors,
+                industry: c.sectors,
+                employeeCount: c.companyType === 'Large Enterprise' ? '500-1000' : '100-500',
+                yearEstablished: 1990 + n * 3,
+                certifications: ['ISO 9001', 'ISO 14001'],
+                financialCapacity: c.financialCapacity,
+                preferredPaymentModes: c.preferredPaymentModes,
+                preferredCollaborationModels: c.preferredCollaborationModels,
+                services: c.services,
+                interests: c.sectors,
+                caseStudies: c.caseStudies,
+                references: c.references,
+                primaryDomain: c.primaryDomain,
+                rating: 0.82,
+                avatar: null
+            },
+            createdAt: NOW,
+            updatedAt: NOW
+        };
+    });
+}
+
+// Realistic, GAP-P05-passing workflow users.
 // Kept in parity with data/seed-controlled-users.json so a --controlled re-seed
 // (also triggered by the simulation test's beforeAll) does not revert them.
-const CONTROLLED_USER_PASSWORD_HASH = 'UG10d2luQDIwMjY=';
 const REALISTIC_CONTROLLED_USERS = [
     { email: 'khalid.alharbi@pmtwin.test', name: 'Khalid Al-Harbi', headline: 'Senior Architect — Sustainable Design', title: 'Senior Architect', location: 'Riyadh', bio: 'Senior architect with 9+ years leading sustainable, BIM-driven building design across Saudi Arabia, focused on LEED-certified commercial and mixed-use developments.', photo: 11, specializations: ['Architecture', 'Sustainable Design'], skills: ['BIM', '3D Visualization', 'Sustainable Design', 'LEED Certification', 'Architectural Design'], sectors: ['Construction', 'Architecture'], certifications: ['LEED AP BD+C', 'Saudi Council of Engineers'], caseStudies: [{ title: 'Riyadh Mixed-Use Tower', description: 'LEED Gold design lead for a 40-storey mixed-use tower.', year: 2024 }], workMode: 'On-Site', collab: ['project'], domain: 'Construction' },
     { email: 'sara.almutairi@pmtwin.test', name: 'Sara Al-Mutairi', headline: 'Architectural & BIM Consultant', title: 'BIM Consultant', location: 'Riyadh', bio: 'Multi-disciplinary architectural consultant offering BIM modelling, Revit detailing and structural coordination services to developers and contractors.', photo: 5, specializations: ['BIM Modelling', 'Architectural Design'], skills: ['BIM', 'Revit', 'Architectural Design', 'Structural Analysis', 'SAP2000'], sectors: ['Construction', 'Architecture'], certifications: ['Autodesk Revit Certified Professional', 'Saudi Council of Engineers'], caseStudies: [{ title: 'Jeddah Waterfront Complex', description: 'Lead BIM coordinator across architecture and MEP packages.', year: 2023 }], workMode: 'Hybrid', collab: ['project', 'retainer'], domain: 'Construction' },
@@ -259,6 +459,55 @@ function generateControlledUsers() {
     });
 }
 
+function buildExchangeData(spec, exchangeMode, budgetMin, budgetMax, isRequest) {
+    const data = {
+        exchangeMode,
+        currency: 'SAR',
+        budgetRange: { min: budgetMin, max: budgetMax, currency: 'SAR' }
+    };
+    if (exchangeMode === 'cash' && !isRequest) {
+        data.cashAmount = (budgetMin + budgetMax) / 2;
+    }
+    if (exchangeMode === 'barter') {
+        Object.assign(data, spec.barter || {
+            barterNeed: 'Services',
+            barterOffer: 'Resources',
+            barterValue: '100000'
+        });
+    }
+    if (exchangeMode === 'equity') {
+        Object.assign(data, spec.equity || {
+            equityPercentage: 40,
+            equityVesting: '2_years',
+            equityContribution: 'Expertise and resources for equity stake'
+        });
+    }
+    if (exchangeMode === 'profit_sharing') {
+        Object.assign(data, spec.profitSharing || {
+            profitSplit: '60-40',
+            profitBasis: 'profit',
+            profitDistribution: 'Quarterly profit distribution'
+        });
+    }
+    if (exchangeMode === 'hybrid') {
+        Object.assign(data, spec.hybrid || {
+            hybridCash: 30,
+            hybridEquity: 50,
+            hybridBarter: 20,
+            hybridCashDetails: '30% cash upfront',
+            hybridEquityDetails: '50% equity stake',
+            hybridBarterDetails: '20% in-kind services'
+        });
+    }
+    return data;
+}
+
+function defaultPaymentModes(exchangeMode, spec) {
+    if (spec.paymentModes) return spec.paymentModes;
+    if (exchangeMode === 'cash') return ['cash'];
+    return [exchangeMode];
+}
+
 function buildControlledPost(spec, deps) {
     const location = spec.location || 'Riyadh, Saudi Arabia';
     const sectors = spec.sectors || ['Construction', 'Architecture'];
@@ -269,14 +518,15 @@ function buildControlledPost(spec, deps) {
     const scope = {
         sectors,
         certifications: [],
-        coreSkills: spec.coreSkills || []
+        coreSkills: spec.coreSkills || [],
+        ...(spec.scope || {})
     };
     if (isRequest) {
-        scope.requiredSkills = spec.skills || [];
-        scope.offeredSkills = [];
+        scope.requiredSkills = spec.skills || scope.requiredSkills || [];
+        scope.offeredSkills = scope.offeredSkills || [];
     } else {
-        scope.offeredSkills = spec.skills || [];
-        scope.requiredSkills = [];
+        scope.offeredSkills = spec.skills || scope.offeredSkills || [];
+        scope.requiredSkills = scope.requiredSkills || [];
     }
 
     const attributes = {
@@ -292,42 +542,214 @@ function buildControlledPost(spec, deps) {
         attributes.coreSkills = spec.coreSkills;
     }
     if (!isRequest) {
-        attributes.availability = { start: '2026-02-01', end: '2026-12-31' };
+        attributes.availability = attributes.availability || { start: '2026-02-01', end: '2026-12-31' };
     }
 
     const exchangeMode = spec.exchangeMode || 'cash';
+    const exchangeData = buildExchangeData(spec, exchangeMode, budgetMin, budgetMax, isRequest);
     const post = {
         id: spec.id,
         title: spec.title,
         description: spec.description || spec.title,
-        creatorId: seedUserId(spec.creator),
+        creatorId: spec.creatorCompany != null
+            ? seedCoCorpId(spec.creatorCompany)
+            : seedUserId(spec.creator),
         intent: spec.intent,
         status: 'published',
         modelType: spec.modelType || 'project_based',
         subModelType: spec.subModelType || 'project',
         location,
         locationCountry: 'sa',
-        locationRegion: 'riyadh',
+        locationRegion: spec.locationRegion || 'riyadh',
         exchangeMode,
-        paymentModes: spec.paymentModes || [exchangeMode === 'barter' ? 'barter' : 'cash'],
+        paymentModes: defaultPaymentModes(exchangeMode, spec),
         scope,
-        exchangeData: {
-            exchangeMode,
-            currency: 'SAR',
-            budgetRange: { min: budgetMin, max: budgetMax, currency: 'SAR' },
-            ...(spec.intent === 'offer' ? { cashAmount: (budgetMin + budgetMax) / 2 } : {}),
-            ...(spec.barter || {})
-        },
+        exchangeData,
         attributes,
         createdAt: NOW,
         updatedAt: NOW
     };
+
+    if (exchangeMode === 'barter') {
+        post.value_exchange = {
+            mode: 'barter',
+            estimated_value: exchangeData.barterValue || spec.barter?.barterValue
+        };
+    }
 
     post.normalized = deps.postPreprocessor.extractAndNormalize(post, deps.skillCanonical);
     if (spec.legacyNoRole) {
         post.normalized.role = '';
     }
     return post;
+}
+
+function generateExchangeModelSpecs() {
+    return [
+        {
+            id: 'seed-opp-026', intent: 'request', creator: 1, scenario: 'H-exchange-models',
+            title: '[H] Task-based need — CAD production (barter)',
+            targetRole: 'CAD Technician',
+            modelType: 'project_based', subModelType: 'task_based',
+            exchangeMode: 'barter',
+            skills: ['AutoCAD', '3D Modeling', 'Documentation'],
+            budgetMin: 0, budgetMax: 500000,
+            barter: { barterNeed: 'CAD production', barterOffer: 'Project Management support', barterValue: '85000' }
+        },
+        {
+            id: 'seed-opp-027', intent: 'offer', creator: 2, scenario: 'H-exchange-models',
+            title: '[H] Task-based offer — CAD production (barter)',
+            targetRole: 'CAD Technician',
+            modelType: 'project_based', subModelType: 'task_based',
+            exchangeMode: 'barter',
+            skills: ['AutoCAD', '3D Modeling', 'Documentation'],
+            budgetMin: 0, budgetMax: 500000,
+            barter: { barterNeed: 'Project Management support', barterOffer: 'CAD production', barterValue: '85000' }
+        },
+        {
+            id: 'seed-opp-028', intent: 'request', creatorCompany: 4, scenario: 'H-exchange-models',
+            title: '[H] Project JV lead — mixed-use tower (equity)',
+            targetRole: 'Joint Venture Partner',
+            modelType: 'project_based', subModelType: 'project_jv',
+            exchangeMode: 'equity',
+            skills: ['General Contracting', 'EPC Contracting', 'Construction Management'],
+            budgetMin: 50000000, budgetMax: 120000000,
+            equity: { equityPercentage: 45, equityVesting: '3_years', equityContribution: 'Land and development rights' }
+        },
+        {
+            id: 'seed-opp-029', intent: 'request', creatorCompany: 6, scenario: 'H-exchange-models',
+            title: '[H] SPV — renewable energy park (hybrid)',
+            targetRole: 'SPV Sponsor',
+            modelType: 'project_based', subModelType: 'spv',
+            exchangeMode: 'hybrid',
+            skills: ['Infrastructure Development', 'Energy Efficiency', 'Project Management'],
+            sectors: ['Energy', 'Infrastructure'],
+            budgetMin: 80000000, budgetMax: 200000000,
+            hybrid: {
+                hybridCash: 25, hybridEquity: 55, hybridBarter: 20,
+                hybridCashDetails: '25% cash at financial close',
+                hybridEquityDetails: '55% equity from sponsors',
+                hybridBarterDetails: '20% in-kind EPC services'
+            }
+        },
+        {
+            id: 'seed-opp-030', intent: 'request', creator: 5, scenario: 'H-exchange-models',
+            title: '[H] Strategic JV — GCC expansion (equity)',
+            targetRole: 'Strategic Partner',
+            modelType: 'strategic_partnership', subModelType: 'strategic_jv',
+            exchangeMode: 'equity',
+            skills: ['General Contracting', 'EPC Contracting', 'Project Management'],
+            budgetMin: 30000000, budgetMax: 90000000,
+            equity: { equityPercentage: 50, equityVesting: '4_years', equityContribution: 'Regional market access and operations' }
+        },
+        {
+            id: 'seed-opp-031', intent: 'request', creator: 6, scenario: 'H-exchange-models',
+            title: '[H] Strategic alliance — preferred MEP supplier (profit-sharing)',
+            targetRole: 'MEP Partner',
+            modelType: 'strategic_partnership', subModelType: 'strategic_alliance',
+            exchangeMode: 'profit_sharing',
+            skills: ['MEP Services', 'HVAC Design', 'Procurement'],
+            budgetMin: 500000, budgetMax: 2000000,
+            profitSharing: { profitSplit: '70-30', profitBasis: 'revenue', profitDistribution: 'Monthly revenue share on joint projects' }
+        },
+        {
+            id: 'seed-opp-032', intent: 'request', creator: 7, scenario: 'H-exchange-models',
+            title: '[H] Mentorship need — junior PM coaching (barter)',
+            targetRole: 'Mentor',
+            modelType: 'strategic_partnership', subModelType: 'mentorship',
+            exchangeMode: 'barter',
+            skills: ['Mentoring', 'Professional Development', 'Project Management'],
+            budgetMin: 0, budgetMax: 500000,
+            barter: { barterNeed: 'PM mentoring', barterOffer: 'Admin and documentation support', barterValue: '12000' }
+        },
+        {
+            id: 'seed-opp-033', intent: 'offer', creator: 17, scenario: 'H-exchange-models',
+            title: '[H] Mentorship offer — senior PM coaching (barter)',
+            targetRole: 'Mentor',
+            modelType: 'strategic_partnership', subModelType: 'mentorship',
+            exchangeMode: 'barter',
+            skills: ['Mentoring', 'PMP', 'Project Management', 'Professional Development'],
+            budgetMin: 0, budgetMax: 500000,
+            barter: { barterNeed: 'Admin and documentation support', barterOffer: 'PM mentoring', barterValue: '12000' }
+        },
+        {
+            id: 'seed-opp-034', intent: 'request', creatorCompany: 6, scenario: 'H-exchange-models',
+            title: '[H] Bulk purchasing pool — structural steel (barter)',
+            targetRole: 'Steel Supplier',
+            modelType: 'resource_pooling', subModelType: 'bulk_purchasing',
+            exchangeMode: 'barter',
+            skills: ['Procurement', 'Steel Fabrication', 'Supply Chain Management'],
+            budgetMin: 0, budgetMax: 500000,
+            barter: { barterNeed: 'Bulk steel supply', barterOffer: 'Logistics coordination', barterValue: '200000' }
+        },
+        {
+            id: 'seed-opp-035', intent: 'offer', creator: 13, scenario: 'H-exchange-models',
+            title: '[H] Equipment sharing offer — tower crane co-ownership (equity)',
+            targetRole: 'Equipment Partner',
+            modelType: 'resource_pooling', subModelType: 'equipment_sharing',
+            exchangeMode: 'equity',
+            skills: ['Tower Crane Operation', 'Heavy Equipment', 'Equipment Maintenance'],
+            budgetMin: 2000000, budgetMax: 8000000,
+            equity: { equityPercentage: 25, equityVesting: 'immediate', equityContribution: 'Tower crane asset and operator' }
+        },
+        {
+            id: 'seed-opp-036', intent: 'offer', creator: 14, scenario: 'H-exchange-models',
+            title: '[H] Resource sharing offer — surplus formwork (barter)',
+            targetRole: 'Formwork Supplier',
+            modelType: 'resource_pooling', subModelType: 'resource_sharing',
+            exchangeMode: 'barter',
+            skills: ['Formwork', 'Construction Materials', 'Logistics'],
+            budgetMin: 0, budgetMax: 500000,
+            barter: { barterNeed: 'Crane rental days', barterOffer: 'Formwork panels', barterValue: '95000' }
+        },
+        {
+            id: 'seed-opp-037', intent: 'request', creatorCompany: 4, scenario: 'H-exchange-models',
+            title: '[H] Consultant hiring — legal contract review (barter)',
+            targetRole: 'Legal Consultant',
+            modelType: 'hiring', subModelType: 'consultant_hiring',
+            exchangeMode: 'barter',
+            skills: ['Construction Law', 'Contract Drafting', 'FIDIC Contracts'],
+            budgetMin: 0, budgetMax: 500000,
+            barter: { barterNeed: 'Legal contract review', barterOffer: 'Technical consulting hours', barterValue: '45000' }
+        },
+        {
+            id: 'seed-opp-038', intent: 'request', creator: 11, scenario: 'H-exchange-models',
+            title: '[H] Design competition RFP — urban plaza (profit-sharing)',
+            targetRole: 'Architect',
+            modelType: 'competition', subModelType: 'competition_rfp',
+            exchangeMode: 'profit_sharing',
+            skills: ['Architectural Design', 'Urban Planning', 'Sustainable Design'],
+            budgetMin: 500000, budgetMax: 1500000,
+            profitSharing: { profitSplit: '80-20', profitBasis: 'gross_profit', profitDistribution: 'Prize pool split among shortlisted finalists' }
+        },
+        {
+            id: 'seed-opp-039', intent: 'request', creatorCompany: 5, scenario: 'H-exchange-models',
+            title: '[H] Consortium lead — wind farm package (profit-sharing)',
+            targetRole: 'Project Management',
+            modelType: 'project_based', subModelType: 'consortium',
+            exchangeMode: 'profit_sharing',
+            skills: ['Infrastructure Development', 'Energy Efficiency', 'Project Management'],
+            sectors: ['Energy', 'Infrastructure'],
+            budgetMin: 20000000, budgetMax: 80000000,
+            profitSharing: { profitSplit: '65-35', profitBasis: 'profit', profitDistribution: 'Profit share after O&M costs, distributed annually' },
+            attributes: {
+                memberRoles: [
+                    { role: 'EPC contractor', scope: 'Design and construction' },
+                    { role: 'O&M provider', scope: 'Long-term operation and maintenance' }
+                ]
+            }
+        },
+        {
+            id: 'seed-opp-040', intent: 'offer', creator: 9, scenario: 'H-exchange-models',
+            title: '[H] Project JV partner offer — mixed-use tower (equity)',
+            targetRole: 'Joint Venture Partner',
+            modelType: 'project_based', subModelType: 'project_jv',
+            exchangeMode: 'equity',
+            skills: ['General Contracting', 'EPC Contracting', 'Construction Management'],
+            budgetMin: 50000000, budgetMax: 120000000,
+            equity: { equityPercentage: 35, equityVesting: '3_years', equityContribution: 'Construction management and EPC delivery' }
+        }
+    ];
 }
 
 function generateControlledOpportunities() {
@@ -368,7 +790,7 @@ function generateControlledOpportunities() {
         },
         // Scenario D — core skill missing
         {
-            id: 'seed-opp-005', intent: 'request', creator: 3, scenario: 'D',
+            id: 'seed-opp-005', intent: 'request', creatorCompany: 2, scenario: 'D',
             title: '[D] Architect need — BIM core skill required',
             targetRole: 'Architect', skills: ['BIM', 'Revit'], coreSkills: ['BIM'],
             budgetMin: 80000, budgetMax: 200000
@@ -381,7 +803,7 @@ function generateControlledOpportunities() {
         },
         // Scenario E — low service overlap
         {
-            id: 'seed-opp-007', intent: 'request', creator: 5, scenario: 'E',
+            id: 'seed-opp-007', intent: 'request', creatorCompany: 1, scenario: 'E',
             title: '[E] Civil Engineer need — four required services',
             targetRole: 'Civil Engineer', skills: civilServices,
             budgetMin: 200000, budgetMax: 500000
@@ -431,7 +853,7 @@ function generateControlledOpportunities() {
         },
         // Scenario G — consortium
         {
-            id: 'seed-opp-014', intent: 'request', creator: 10, scenario: 'G-consortium',
+            id: 'seed-opp-014', intent: 'request', creatorCompany: 5, scenario: 'G-consortium',
             title: '[G] Consortium lead — highway package',
             targetRole: 'Project Management',
             skills: ['Project Management', 'Highway Design', 'Consortium Leadership'],
@@ -497,7 +919,7 @@ function generateControlledOpportunities() {
         },
         // Fillers — collaboration modelType spread
         {
-            id: 'seed-opp-023', intent: 'request', creator: 16, scenario: 'filler',
+            id: 'seed-opp-023', intent: 'request', creatorCompany: 1, scenario: 'filler',
             title: 'Filler need — Structural Engineer',
             targetRole: 'Structural Engineer',
             skills: ['Structural Analysis', 'SAP2000', 'Steel Design'],
@@ -505,7 +927,7 @@ function generateControlledOpportunities() {
             budgetMin: 250000, budgetMax: 600000
         },
         {
-            id: 'seed-opp-024', intent: 'request', creator: 17, scenario: 'filler',
+            id: 'seed-opp-024', intent: 'request', creatorCompany: 2, scenario: 'filler',
             title: 'Filler need — Project Management',
             targetRole: 'Project Management',
             skills: ['Project Management', 'PMP', 'Risk Management'],
@@ -513,14 +935,20 @@ function generateControlledOpportunities() {
             budgetMin: 100000, budgetMax: 300000
         },
         {
-            id: 'seed-opp-025', intent: 'offer', creator: 18, scenario: 'filler',
+            id: 'seed-opp-025', intent: 'offer', creatorCompany: 3, scenario: 'filler',
             title: 'Filler offer — MEP',
             targetRole: 'MEP',
             skills: ['HVAC Design', 'MEP Coordination', 'Fire Protection'],
             modelType: 'hiring', subModelType: 'professional_hiring',
             budgetMin: 80000, budgetMax: 250000
-        }
+        },
+        ...generateExchangeModelSpecs()
     ];
+
+    const missing = missingSubModels(specs.slice(0, -15));
+    if (missing.length) {
+        console.log('Sub-models filled by exchange block:', missing.map((m) => m.subModelType).join(', '));
+    }
 
     return specs.map(spec => buildControlledPost(spec, deps));
 }
@@ -562,16 +990,29 @@ function validateScenarioChecklist(opportunities) {
     const needs = opportunities.filter(o => o.intent === 'request').length;
     const offers = opportunities.filter(o => o.intent === 'offer').length;
     console.log(`\nIntent balance: ${needs} requests, ${offers} offers`);
-    if (needs !== 12 || offers !== 13) {
-        console.warn('WARNING: expected 12 requests and 13 offers');
+    if (needs !== 22 || offers !== 18) {
+        console.warn(`WARNING: expected 22 requests and 18 offers (got ${needs}/${offers})`);
     }
+
+    const covered = coveredSubModelsFromPosts(opportunities);
+    const stillMissing = ALL_SUB_MODELS.filter((m) => !covered.has(subModelKey(m.modelType, m.subModelType)));
+    console.log(`\nSub-model coverage: ${ALL_SUB_MODELS.length - stillMissing.length}/${ALL_SUB_MODELS.length} canonical sub-models`);
+    if (stillMissing.length) {
+        console.warn('WARNING: missing sub-models:', stillMissing.map((m) => m.subModelType).join(', '));
+    } else {
+        console.log('  ✓ All 13 canonical collaboration sub-models represented');
+    }
+
+    const exchangeBlock = opportunities.filter((o) => /^seed-opp-0(2[6-9]|3\d|40)$/.test(o.id));
+    const allNonCash = exchangeBlock.every((o) => o.exchangeMode !== 'cash');
+    console.log(`\nExchange block (026–040): ${exchangeBlock.length} opps, all non-cash: ${allNonCash ? 'yes' : 'NO'}`);
 }
 
 function mainControlled() {
     wipeSimulationData(OUT_DIR);
     wipeBrowserSeedData();
 
-    const companies = generateControlledCompanies();
+    const companies = generateWorkflowCompanies();
     const users = generateControlledUsers();
     const opportunities = generateControlledOpportunities();
 
@@ -582,7 +1023,12 @@ function mainControlled() {
     writeJsonEnvelope(path.join(DATA_DIR, 'opportunities.json'), 'opportunities', opportunities, { version: '1.2' });
     writeJsonEnvelope(path.join(DATA_DIR, 'seed-controlled-users.json'), 'users', users, {
         version: '2.0',
-        description: 'Canonical 25-opportunity workflow users. Shared password: Pmtwin@2026 (Base64 in passwordHash). Profiles enriched to clear GAP-P05 (>=70%).'
+        description: 'Canonical 40-opportunity workflow users. Shared password: Pmtwin@2026 (Base64 in passwordHash). Profiles enriched to clear GAP-P05 (>=70%).'
+    });
+    writeJsonEnvelope(path.join(DATA_DIR, 'demo-companies.json'), 'companies', companies, {
+        version: '2.2',
+        dataset: 'workflow',
+        description: '6 B2B workflow company accounts. Shared password: Pmtwin@2026. Own 11 of 40 seed opportunities.'
     });
 
     console.log('\nControlled seed written.');

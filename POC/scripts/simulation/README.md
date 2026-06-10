@@ -23,7 +23,7 @@ Tools to validate the matching system under realistic conditions without changin
 ```bash
 # From POC directory
 
-# 1. Wipe + seed exactly 25 posts (scenarios A–G) to simulation + browser JSON
+# 1. Wipe + seed exactly 40 posts (scenarios A–G + exchange models H) to simulation + browser JSON
 npm run seed:controlled
 # or: node scripts/simulation/seed-simulation-data.js --controlled
 
@@ -34,7 +34,7 @@ npm run sim:controlled
 #    resetAppData()
 ```
 
-The controlled dataset includes 12 needs and 13 offers covering strict match, role compatibility, role/core/overlap rejects, barter, consortium, and circular workflows. It also writes `POC/data/opportunities.json`, `seed-controlled-users.json`, and clears demo opportunity/deal/contract merges.
+The controlled dataset includes 40 opportunities (22 needs, 18 offers): scenarios A–G for matching hard constraints, plus 15 non-cash exchange-model posts (`026`–`040`) covering all 13 canonical collaboration sub-models (barter, equity, profit-sharing, hybrid). It also writes `POC/data/opportunities.json`, `seed-controlled-users.json`, **`demo-companies.json`** (6 B2B company accounts owning 11 opportunities), and clears demo opportunity/deal/contract merges. Run `npm run seed:e2e` after seeding for full lifecycle data (applications, deals, notifications).
 
 ## Quick start (random small dataset)
 

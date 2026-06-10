@@ -9,6 +9,10 @@ function humanizeUnderscores(value) {
         .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+function toMatchScorePercent(score) {
+    return Math.min(100, Math.round((Number(score) || 0) * 100));
+}
+
 function setupDashboardRefreshListener(user, isCompanyView) {
     if (window.__pmtwinDashboardRefreshBound) return;
     window.__pmtwinDashboardRefreshBound = true;
@@ -380,7 +384,7 @@ async function getPostMatchDashboardLabel(pm, userId) {
 
 async function renderDashboardMatchBucketRow(pm, userId) {
     const label = await getPostMatchDashboardLabel(pm, userId);
-    const score = Math.round((pm.matchScore || 0) * 100);
+    const score = toMatchScorePercent(pm.matchScore);
     const typeLabel = getMatchTypeLabel(pm.matchType);
     const statusLabel = normalizePostMatchStatus(pm);
     return `<a href="#" data-route="/matches/${escDash(pm.id)}" class="dashboard-match-bucket-chip">
@@ -561,7 +565,7 @@ async function loadCompanyPostMatchRecommendations(companyId, buckets) {
                 ? await dataService.getOpportunityById(payload.needOpportunityId)
                 : null;
             const prof = user.profile || {};
-            const scorePercent = Math.round((pm.matchScore || 0) * 100);
+            const scorePercent = toMatchScorePercent(pm.matchScore);
             rows.push(`<div class="company-compact-item">
                 <div class="company-avatar">${escDash((prof.name || user.email || '?')[0])}</div>
                 <div class="company-compact-main">
@@ -631,7 +635,7 @@ function resolveDashboardMessageRoute(match) {
 
 async function buildPostMatchViewModel(postMatch, currentUserId) {
     const ds = dataService;
-    const scorePct = Math.round((postMatch.matchScore || 0) * 100);
+    const scorePct = toMatchScorePercent(postMatch.matchScore);
     const base = {
         id: postMatch.id,
         matchType: postMatch.matchType,
@@ -919,7 +923,7 @@ function renderMatchNeedOfferBody(match) {
 function renderDashboardMatchCard(match) {
     const typeLabel = getMatchTypeLabel(match.matchType);
     const quality = getMatchQuality(match);
-    const score = match.matchScorePercent || Math.round((match.matchScore || 0) * 100);
+    const score = match.matchScorePercent != null ? match.matchScorePercent : toMatchScorePercent(match.matchScore);
     const title = getMatchCardTitle(match);
     const skills = (match.skills || []).slice(0, 5);
     const body = renderMatchNeedOfferBody(match);

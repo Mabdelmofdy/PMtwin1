@@ -56,7 +56,7 @@ class DataService {
         this.storage = window.storageService || storageService;
         this.initialized = false;
         this.SEED_DATA_VERSION_KEY = 'pmtwin_seed_version';
-        this.CURRENT_SEED_VERSION = '2.0.0'; // Clean reseed: orphaned demo data wiped; lifecycle tied to 25 seed opportunities
+        this.CURRENT_SEED_VERSION = '2.2.1'; // clamp inflated post_match scores; refreshed demo-post-matches
     }
     
     /**
@@ -102,6 +102,7 @@ class DataService {
             if (!needsSeed) {
                 console.log('Data already initialized, skipping seed');
                 await this.mergeDemoData();
+                this.normalizePostMatchScores();
                 this.initialized = true;
                 return;
             }
@@ -155,6 +156,7 @@ class DataService {
             // Normalize users and companies for matching compatibility
             this.normalizeUsersForMatching();
             this.normalizeCompaniesForMatching();
+            this.normalizePostMatchScores();
             
             // Store seed version
             this.storage.set(this.SEED_DATA_VERSION_KEY, this.CURRENT_SEED_VERSION);
@@ -510,6 +512,28 @@ class DataService {
         if (dealsChanged) this.storage.set(CONFIG.STORAGE_KEYS.DEALS, deals);
         if (contractsChanged) this.storage.set(CONFIG.STORAGE_KEYS.CONTRACTS, contracts);
         if (contractsChanged || dealsChanged) console.log('Migrated contracts to Deal/Contract lifecycle');
+    }
+
+    /**
+     * Clamp legacy post_match scores that exceeded 1.0 due to misconfigured weight totals.
+     */
+    normalizePostMatchScores() {
+        const key = CONFIG.STORAGE_KEYS.POST_MATCHES;
+        const matches = this.storage.get(key) || [];
+        let changed = false;
+        const normalized = matches.map((match) => {
+            const raw = Number(match.matchScore);
+            if (!Number.isFinite(raw) || raw <= 1) return match;
+            changed = true;
+            return {
+                ...match,
+                matchScore: Math.min(1, Math.round(raw * 1000) / 1000)
+            };
+        });
+        if (changed) {
+            this.storage.set(key, normalized);
+            console.log('Normalized inflated post_match scores');
+        }
     }
 
     /**

@@ -117,7 +117,7 @@ async function renderMatchDetail(postMatch, currentUserId) {
         vm = umv.buildUnifiedMatchViewModel(postMatch, { currentUserId, dataService: ds });
         vm = await umv.enrichUnifiedMatchViewModel(vm, { currentUserId, dataService: ds });
     }
-    const scorePct = vm?.matchScorePercent ?? Math.round((postMatch.matchScore || 0) * 100);
+    const scorePct = vm?.matchScorePercent ?? Math.min(100, Math.round((postMatch.matchScore || 0) * 100));
     const qualityLabel = vm?.matchQualityLabel || '';
 
     // —— Header ——

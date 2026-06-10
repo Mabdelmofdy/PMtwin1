@@ -1,7 +1,7 @@
 {
   "domain": "notifications",
   "version": "2.0",
-  "description": "E2E workflow notifications tied to the 25 seed opportunities (scripts/seed-e2e-workflow.js).",
+  "description": "E2E workflow notifications tied to the 40 seed opportunities (scripts/seed-e2e-workflow.js).",
   "data": [
     {
       "id": "seed-notif-01",
@@ -113,7 +113,7 @@
     },
     {
       "id": "seed-notif-10",
-      "userId": "seed-user-003",
+      "userId": "seed-co-corp-002",
       "type": "negotiation_started",
       "title": "Negotiation started",
       "message": "A provider opened negotiation on your BIM architect need.",
@@ -125,7 +125,7 @@
     },
     {
       "id": "seed-notif-11",
-      "userId": "seed-user-005",
+      "userId": "seed-co-corp-001",
       "type": "application_updated",
       "title": "New application",
       "message": "A civil engineer applied to your need.",
@@ -137,7 +137,7 @@
     },
     {
       "id": "seed-notif-12",
-      "userId": "seed-user-016",
+      "userId": "seed-co-corp-001",
       "type": "application_updated",
       "title": "New application",
       "message": "A provider applied to your structural need.",
@@ -149,7 +149,7 @@
     },
     {
       "id": "seed-notif-13",
-      "userId": "seed-user-017",
+      "userId": "seed-co-corp-002",
       "type": "application_updated",
       "title": "New application",
       "message": "A PM consultant applied to your need.",
@@ -161,7 +161,7 @@
     },
     {
       "id": "seed-notif-14",
-      "userId": "seed-user-010",
+      "userId": "seed-co-corp-005",
       "type": "match_confirmed",
       "title": "Consortium confirmed",
       "message": "Your consortium match is confirmed.",
@@ -173,7 +173,7 @@
     },
     {
       "id": "seed-notif-15",
-      "userId": "seed-user-010",
+      "userId": "seed-co-corp-005",
       "type": "deal_created_from_match",
       "title": "Deal created",
       "message": "A consortium deal was created.",
@@ -217,6 +217,114 @@
       "read": false,
       "entityType": "post_match",
       "entityId": null,
+      "createdAt": "2026-03-15T09:00:00.000Z"
+    },
+    {
+      "id": "seed-notif-19",
+      "userId": "seed-user-006",
+      "type": "application_updated",
+      "title": "New application",
+      "message": "An MEP partner applied to your strategic alliance.",
+      "link": "/opportunities/seed-opp-031",
+      "read": false,
+      "entityType": "application",
+      "entityId": "seed-app-007",
+      "createdAt": "2026-03-15T09:00:00.000Z"
+    },
+    {
+      "id": "seed-notif-20",
+      "userId": "seed-user-007",
+      "type": "application_updated",
+      "title": "New application",
+      "message": "A mentor applied to your mentorship need.",
+      "link": "/opportunities/seed-opp-032",
+      "read": false,
+      "entityType": "application",
+      "entityId": "seed-app-008",
+      "createdAt": "2026-03-15T09:00:00.000Z"
+    },
+    {
+      "id": "seed-notif-21",
+      "userId": "seed-co-corp-004",
+      "type": "application_updated",
+      "title": "New application",
+      "message": "A legal consultant application was shortlisted.",
+      "link": "/opportunities/seed-opp-037",
+      "read": false,
+      "entityType": "application",
+      "entityId": "seed-app-009",
+      "createdAt": "2026-03-15T09:00:00.000Z"
+    },
+    {
+      "id": "seed-notif-22",
+      "userId": "seed-user-001",
+      "type": "negotiation_started",
+      "title": "Negotiation started",
+      "message": "Your task-based barter match entered negotiation.",
+      "link": "/opportunities/seed-opp-026",
+      "read": false,
+      "entityType": "negotiation",
+      "entityId": "seed-neg-05",
+      "createdAt": "2026-03-15T09:00:00.000Z"
+    },
+    {
+      "id": "seed-notif-23",
+      "userId": "seed-user-002",
+      "type": "negotiation_started",
+      "title": "Counter-offer received",
+      "message": "A counter-offer was made on the CAD barter terms.",
+      "link": "/opportunities/seed-opp-026",
+      "read": false,
+      "entityType": "negotiation",
+      "entityId": "seed-neg-05",
+      "createdAt": "2026-03-15T09:00:00.000Z"
+    },
+    {
+      "id": "seed-notif-24",
+      "userId": "seed-co-corp-004",
+      "type": "negotiation_started",
+      "title": "Negotiation started",
+      "message": "An equity JV partner opened negotiation.",
+      "link": "/opportunities/seed-opp-028",
+      "read": false,
+      "entityType": "negotiation",
+      "entityId": "seed-neg-06",
+      "createdAt": "2026-03-15T09:00:00.000Z"
+    },
+    {
+      "id": "seed-notif-25",
+      "userId": "seed-co-corp-005",
+      "type": "deal_created_from_match",
+      "title": "Deal created",
+      "message": "A wind farm consortium deal was created.",
+      "link": "/deals/seed-deal-exchange-01",
+      "read": false,
+      "entityType": "deal",
+      "entityId": "seed-deal-exchange-01",
+      "createdAt": "2026-03-15T09:00:00.000Z"
+    },
+    {
+      "id": "seed-notif-26",
+      "userId": "seed-user-013",
+      "type": "deal_activated",
+      "title": "Deal in execution",
+      "message": "The wind consortium deal entered execution.",
+      "link": "/deals/seed-deal-exchange-01",
+      "read": false,
+      "entityType": "deal",
+      "entityId": "seed-deal-exchange-01",
+      "createdAt": "2026-03-15T09:00:00.000Z"
+    },
+    {
+      "id": "seed-notif-27",
+      "userId": "seed-user-013",
+      "type": "contract_fully_signed",
+      "title": "Contract signed",
+      "message": "The wind consortium contract is fully signed.",
+      "link": "/contracts/seed-contract-exchange-01",
+      "read": false,
+      "entityType": "contract",
+      "entityId": "seed-contract-exchange-01",
       "createdAt": "2026-03-15T09:00:00.000Z"
     }
   ]

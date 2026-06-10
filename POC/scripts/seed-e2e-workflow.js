@@ -1,9 +1,9 @@
 /**
- * Generate a clean, realistic end-to-end workflow strictly for the 25 seed
+ * Generate a clean, realistic end-to-end workflow for the 40 seed
  * opportunities (seed-opp-*) and their 18 owners (seed-user-*).
  *
  * Re-runnable orchestrator:
- *   1. Reset all 25 opportunities to "published".
+ *   1. Reset all 40 opportunities to "published".
  *   2. Regenerate demo-post-matches.json via the real engine (seed-post-matches.js).
  *   3. Apply a deterministic lifecycle: confirm select matches, create
  *      applications / negotiations / deals / contracts / reviews, set final
@@ -11,11 +11,11 @@
  *
  * Run from POC:  node scripts/seed-e2e-workflow.js   (or:  npm run seed:e2e)
  *
- * Stage distribution (4 realistic stages):
- *   - Stage A  Published + pending matches: circular ring (017-022), legacy 009, offers 006/008/025, and other published posts.
- *   - Stage B  Active applications/proposals: seed-opp-007, 023, 024 (statuses pending / reviewing / shortlisted).
- *   - Stage C  Active negotiation: barter two-way (010/011 <-> 012/013) and one-way seed-opp-005 -> in_negotiation.
- *   - Stage D  Closed -> active/completed deals + contracts: one-way 001 <-> 002 (completed) and consortium 014/015/016 (active).
+ * Stage distribution:
+ *   - Stage A  Published + pending matches: circular ring (017-022), legacy 009, offers 006/008/025, exchange block 029-038.
+ *   - Stage B  Active applications: seed-opp-007, 023, 024, 031, 032, 037 (exchange models).
+ *   - Stage C  Active negotiation: barter 010/012, task-based barter 026/027, equity JV 028/040, cash 005.
+ *   - Stage D  Deals + contracts: one-way 001/002 (completed), highway consortium 014/015, wind consortium 039/035 (profit-sharing).
  */
 
 const fs = require('fs');
@@ -24,6 +24,14 @@ const { execSync } = require('child_process');
 
 const POC_ROOT = path.join(__dirname, '..');
 const DATA_DIR = path.join(POC_ROOT, 'data');
+
+// B2B workflow company owners (see scripts/simulation/seed-simulation-data.js)
+const CO_AL_RIYADH = 'seed-co-corp-001';
+const CO_GULF = 'seed-co-corp-002';
+const CO_EASTERN = 'seed-co-corp-003';
+const CO_NAJD = 'seed-co-corp-004';
+const CO_INFRA = 'seed-co-corp-005';
+const CO_RED_SEA = 'seed-co-corp-006';
 
 function readEnvelope(file) {
     return JSON.parse(fs.readFileSync(path.join(DATA_DIR, file), 'utf8'));
@@ -68,7 +76,11 @@ function applyLifecycle() {
         'seed-opp-010': 'in_negotiation', // Stage C: barter negotiation (side A)
         'seed-opp-012': 'in_negotiation', // Stage C: barter negotiation (side B)
         'seed-opp-014': 'in_execution',   // Stage D: consortium lead, contract active
-        'seed-opp-015': 'contracted'      // Stage D: consortium partner (architect)
+        'seed-opp-015': 'contracted',     // Stage D: consortium partner (architect)
+        'seed-opp-026': 'in_negotiation', // Stage C: task-based barter negotiation
+        'seed-opp-028': 'in_negotiation', // Stage C: equity JV negotiation
+        'seed-opp-039': 'in_execution',   // Stage D: profit-sharing wind consortium lead
+        'seed-opp-035': 'contracted'      // Stage D: equipment partner in wind consortium
     };
     const oppEnv = readEnvelope('opportunities.json');
     oppEnv.data.forEach((o) => {
@@ -90,8 +102,49 @@ function applyLifecycle() {
     const need005 = matches.find(
         (m) => m.matchType === 'one_way' && m.payload && m.payload.needOpportunityId === 'seed-opp-005'
     );
-    const barter = matches.find((m) => m.matchType === 'two_way');
-    const consortium = matches.find((m) => m.matchType === 'consortium');
+    const barter = matches.find((m) => m.matchType === 'two_way'
+        && m.participants && m.participants.some((p) => p.opportunityId === 'seed-opp-010'));
+    const consortium = matches.find((m) => m.matchType === 'consortium'
+        && m.payload && (m.payload.leadNeedId === 'seed-opp-014' || m.payload.needOpportunityId === 'seed-opp-014'));
+    const barterTask = matches.find(
+        (m) => m.matchType === 'one_way' && m.payload
+            && m.payload.needOpportunityId === 'seed-opp-026'
+            && m.payload.offerOpportunityId === 'seed-opp-027'
+    );
+    const equityJv = matches.find(
+        (m) => m.matchType === 'one_way' && m.payload
+            && m.payload.needOpportunityId === 'seed-opp-028'
+            && m.payload.offerOpportunityId === 'seed-opp-040'
+    );
+    let consortiumWind = matches.find(
+        (m) => m.matchType === 'consortium'
+            && m.payload && (m.payload.leadNeedId === 'seed-opp-039' || m.payload.needOpportunityId === 'seed-opp-039')
+    );
+    if (!consortiumWind) {
+        consortiumWind = {
+            id: 'demo-pm-consortium-wind',
+            matchType: 'consortium',
+            status: 'pending',
+            matchScore: 1.1,
+            runId: 'seed-run-039',
+            participants: [
+                { userId: CO_INFRA, opportunityId: 'seed-opp-039', role: 'consortium_lead', participantStatus: 'pending', respondedAt: null },
+                { userId: 'seed-user-013', opportunityId: 'seed-opp-035', role: 'consortium_member', participantStatus: 'pending', respondedAt: null }
+            ],
+            payload: {
+                leadNeedId: 'seed-opp-039',
+                needOpportunityId: 'seed-opp-039',
+                roles: [
+                    { role: 'EPC contractor', opportunityId: 'seed-opp-035', userId: 'seed-user-013' }
+                ]
+            },
+            createdAt: T.matchAt,
+            updatedAt: T.matchAt,
+            expiresAt: pendingExpiry,
+            isReplacement: false
+        };
+        matches.push(consortiumWind);
+    }
 
     const confirm = (match, { dealId = null, negotiationId = null, at = T.dealAt }) => {
         if (!match) return;
@@ -107,12 +160,18 @@ function applyLifecycle() {
     confirm(need005, { negotiationId: 'seed-neg-03', at: T.negEnd });
     confirm(barter, { negotiationId: 'seed-neg-02', at: T.negEnd });
     confirm(consortium, { dealId: 'seed-deal-consortium-01', negotiationId: 'seed-neg-04', at: T.contractAt });
+    confirm(barterTask, { negotiationId: 'seed-neg-05', at: T.negEnd });
+    confirm(equityJv, { negotiationId: 'seed-neg-06', at: T.negEnd });
+    confirm(consortiumWind, { dealId: 'seed-deal-exchange-01', negotiationId: 'seed-neg-07', at: T.contractAt });
     writeEnvelope('demo-post-matches.json', pmEnv);
 
     const onewayId = oneway0102 ? oneway0102.id : null;
     const need005Id = need005 ? need005.id : null;
     const barterId = barter ? barter.id : null;
     const consortiumId = consortium ? consortium.id : null;
+    const barterTaskId = barterTask ? barterTask.id : null;
+    const equityJvId = equityJv ? equityJv.id : null;
+    const consortiumWindId = consortiumWind ? consortiumWind.id : null;
 
     // --- Applications ----------------------------------------------------------
     const applications = [
@@ -167,11 +226,35 @@ function applyLifecycle() {
             application_value: { amount: 220000, currency: 'SAR' },
             responses: {}, availabilityDate: '2026-03-15', estimatedDurationDays: 180,
             createdAt: T.appAt, updatedAt: T.appAt
+        },
+        {
+            id: 'seed-app-007', opportunityId: 'seed-opp-031', applicantId: 'seed-user-008',
+            status: 'reviewing', matchType: 'one_way',
+            proposal: 'MEP supply partnership with profit-sharing on joint commercial projects.',
+            application_value: { exchangeMode: 'profit_sharing', profitSplit: '70-30', currency: 'SAR' },
+            responses: {}, availabilityDate: '2026-04-01', estimatedDurationDays: 365,
+            createdAt: T.appAt, updatedAt: T.appAt
+        },
+        {
+            id: 'seed-app-008', opportunityId: 'seed-opp-032', applicantId: 'seed-user-017',
+            status: 'pending', matchType: 'one_way',
+            proposal: 'Senior PM mentoring in exchange for admin and documentation support.',
+            application_value: { exchangeMode: 'barter', barterValue: 12000, currency: 'SAR' },
+            responses: {}, availabilityDate: '2026-03-10', estimatedDurationDays: 90,
+            createdAt: T.appAt, updatedAt: T.appAt
+        },
+        {
+            id: 'seed-app-009', opportunityId: 'seed-opp-037', applicantId: 'seed-user-016',
+            status: 'shortlisted', matchType: 'one_way',
+            proposal: 'FIDIC contract review offered via barter for technical consulting hours.',
+            application_value: { exchangeMode: 'barter', barterValue: 45000, currency: 'SAR' },
+            responses: {}, availabilityDate: '2026-03-12', estimatedDurationDays: 45,
+            createdAt: T.appAt, updatedAt: T.appAt
         }
     ];
     writeEnvelope('demo-applications.json', {
         domain: 'applications', version: '2.0',
-        description: 'E2E workflow applications tied to the 25 seed opportunities (scripts/seed-e2e-workflow.js).',
+        description: 'E2E workflow applications tied to the 40 seed opportunities (scripts/seed-e2e-workflow.js).',
         data: applications
     });
 
@@ -215,7 +298,7 @@ function applyLifecycle() {
         {
             id: 'seed-neg-03', opportunityId: 'seed-opp-005', matchId: need005Id, applicationId: 'seed-app-002',
             parties: [
-                { userId: 'seed-user-003', role: 'need_owner' },
+                { userId: CO_GULF, role: 'need_owner' },
                 { userId: 'seed-user-002', role: 'offer_provider' }
             ],
             status: 'open',
@@ -231,22 +314,68 @@ function applyLifecycle() {
         {
             id: 'seed-neg-04', opportunityId: 'seed-opp-014', matchId: consortiumId, applicationId: null,
             parties: [
-                { userId: 'seed-user-010', role: 'consortium_lead' },
+                { userId: CO_INFRA, role: 'consortium_lead' },
                 { userId: 'seed-user-011', role: 'consortium_member' }
             ],
             status: 'agreed',
             initialTerms: { value: 15000000, currency: 'SAR', duration: '18 months', paymentSchedule: 'Milestone-based' },
             rounds: [
-                { by: 'seed-user-010', at: T.negStart, proposal: { value: 15000000 }, message: 'Consortium terms for the highway package; defined role split.' },
+                { by: CO_INFRA, at: T.negStart, proposal: { value: 15000000 }, message: 'Consortium terms for the highway package; defined role split.' },
                 { by: 'seed-user-011', at: T.negEnd, proposal: { value: 15000000 }, message: 'Architect scope accepted. Proceeding to deal.' }
             ],
             agreedTerms: { value: 15000000, currency: 'SAR', duration: '18 months', paymentSchedule: 'Milestone-based across design and works' },
+            createdAt: T.negStart, updatedAt: T.negEnd
+        },
+        {
+            id: 'seed-neg-05', opportunityId: 'seed-opp-026', matchId: barterTaskId, applicationId: null,
+            parties: [
+                { userId: 'seed-user-001', role: 'need_owner' },
+                { userId: 'seed-user-002', role: 'offer_provider' }
+            ],
+            status: 'counter_offered',
+            initialTerms: { value: 85000, currency: 'SAR', exchangeMode: 'barter', duration: '6 weeks' },
+            rounds: [
+                { by: 'seed-user-001', at: T.negStart, proposal: { value: 85000, exchangeMode: 'barter' }, message: 'Barter: CAD production for PM support, ~85K SAR equivalent.' },
+                { by: 'seed-user-002', at: T.negEnd, proposal: { value: 90000, exchangeMode: 'barter' }, message: 'Counter: scope includes QA pass, ~90K SAR equivalent.' }
+            ],
+            agreedTerms: null,
+            expiresAt: pendingExpiry,
+            createdAt: T.negStart, updatedAt: T.negEnd
+        },
+        {
+            id: 'seed-neg-06', opportunityId: 'seed-opp-028', matchId: equityJvId, applicationId: null,
+            parties: [
+                { userId: CO_NAJD, role: 'need_owner' },
+                { userId: 'seed-user-009', role: 'offer_provider' }
+            ],
+            status: 'open',
+            initialTerms: { equityPercentage: 45, exchangeMode: 'equity', duration: '36 months' },
+            rounds: [
+                { by: 'seed-user-009', at: T.negStart, proposal: { equityPercentage: 35 }, message: 'Offering 35% equity for EPC and construction management contribution.' }
+            ],
+            agreedTerms: null,
+            expiresAt: pendingExpiry,
+            createdAt: T.negStart, updatedAt: T.negStart
+        },
+        {
+            id: 'seed-neg-07', opportunityId: 'seed-opp-039', matchId: consortiumWindId, applicationId: null,
+            parties: [
+                { userId: CO_INFRA, role: 'consortium_lead' },
+                { userId: 'seed-user-013', role: 'consortium_member' }
+            ],
+            status: 'agreed',
+            initialTerms: { profitSplit: '65-35', exchangeMode: 'profit_sharing', duration: '24 months' },
+            rounds: [
+                { by: CO_INFRA, at: T.negStart, proposal: { profitSplit: '65-35' }, message: 'Wind farm consortium: 65-35 profit share after O&M costs.' },
+                { by: 'seed-user-013', at: T.negEnd, proposal: { profitSplit: '65-35' }, message: 'Equipment and O&M scope accepted. Proceeding to deal.' }
+            ],
+            agreedTerms: { profitSplit: '65-35', exchangeMode: 'profit_sharing', duration: '24 months', profitDistribution: 'Annual distribution after O&M costs' },
             createdAt: T.negStart, updatedAt: T.negEnd
         }
     ];
     writeEnvelope('demo-negotiations.json', {
         domain: 'negotiations', version: '2.0',
-        description: 'E2E workflow negotiations tied to the 25 seed opportunities (scripts/seed-e2e-workflow.js).',
+        description: 'E2E workflow negotiations tied to the 40 seed opportunities (scripts/seed-e2e-workflow.js).',
         data: negotiations
     });
 
@@ -280,7 +409,7 @@ function applyLifecycle() {
             opportunityId: 'seed-opp-014', opportunityIds: ['seed-opp-014', 'seed-opp-015'],
             matchType: 'consortium', status: 'execution', title: 'Highway package consortium',
             participants: [
-                { userId: 'seed-user-010', role: 'consortium_lead', approvalStatus: 'approved', signedAt: T.contractAt },
+                { userId: CO_INFRA, role: 'consortium_lead', approvalStatus: 'approved', signedAt: T.contractAt },
                 { userId: 'seed-user-011', role: 'consortium_member', approvalStatus: 'approved', signedAt: T.contractAt }
             ],
             payload: { leadNeedId: 'seed-opp-014', roles: [
@@ -293,16 +422,40 @@ function applyLifecycle() {
             valueTerms: { agreedValue: 15000000, paymentSchedule: 'Milestone-based across design and works' },
             deliverables: 'Design package, civil works, program management.',
             milestones: [
-                { id: 'seed-ms-cons-01', title: 'Mobilization', description: 'Consortium mobilized and kickoff complete.', dueDate: '2026-04-10', status: 'approved', deliverables: 'Mobilization report', submittedAt: '2026-04-08T09:00:00.000Z', approvedAt: '2026-04-10T09:00:00.000Z', approvedBy: 'seed-user-010' },
+                { id: 'seed-ms-cons-01', title: 'Mobilization', description: 'Consortium mobilized and kickoff complete.', dueDate: '2026-04-10', status: 'approved', deliverables: 'Mobilization report', submittedAt: '2026-04-08T09:00:00.000Z', approvedAt: '2026-04-10T09:00:00.000Z', approvedBy: CO_INFRA },
                 { id: 'seed-ms-cons-02', title: 'Detailed design', description: 'Detailed design package delivered.', dueDate: '2026-08-10', status: 'in_progress', deliverables: 'Design set', submittedAt: null, approvedAt: null, approvedBy: null }
             ],
             contractId: 'seed-contract-consortium-01',
+            createdAt: T.dealAt, updatedAt: T.contractAt, completedAt: null, closedAt: null
+        },
+        {
+            id: 'seed-deal-exchange-01', matchId: consortiumWindId, applicationId: null, negotiationId: 'seed-neg-07',
+            opportunityId: 'seed-opp-039', opportunityIds: ['seed-opp-039', 'seed-opp-035'],
+            matchType: 'consortium', status: 'execution', title: 'Wind farm consortium — profit-sharing',
+            participants: [
+                { userId: CO_INFRA, role: 'consortium_lead', approvalStatus: 'approved', signedAt: T.contractAt },
+                { userId: 'seed-user-013', role: 'consortium_member', approvalStatus: 'approved', signedAt: T.contractAt }
+            ],
+            payload: { leadNeedId: 'seed-opp-039', roles: [
+                { role: 'EPC contractor', opportunityId: 'seed-opp-035', userId: 'seed-user-013' }
+            ] },
+            roleSlots: null,
+            scope: 'Wind farm package delivered by a profit-sharing consortium (lead PM, equipment/O&M partner).',
+            timeline: { start: '2026-04-01', end: '2028-03-31' },
+            exchangeMode: 'profit_sharing',
+            valueTerms: { profitSplit: '65-35', profitDistribution: 'Annual distribution after O&M costs' },
+            deliverables: 'Wind farm EPC coordination, equipment provision, and O&M framework.',
+            milestones: [
+                { id: 'seed-ms-wind-01', title: 'Consortium formation', description: 'Partners aligned on profit-sharing terms.', dueDate: '2026-04-15', status: 'approved', deliverables: 'Consortium agreement', submittedAt: '2026-04-12T09:00:00.000Z', approvedAt: '2026-04-15T09:00:00.000Z', approvedBy: CO_INFRA },
+                { id: 'seed-ms-wind-02', title: 'Feasibility complete', description: 'Feasibility and permitting package delivered.', dueDate: '2026-09-30', status: 'in_progress', deliverables: 'Feasibility report', submittedAt: null, approvedAt: null, approvedBy: null }
+            ],
+            contractId: 'seed-contract-exchange-01',
             createdAt: T.dealAt, updatedAt: T.contractAt, completedAt: null, closedAt: null
         }
     ];
     writeEnvelope('demo-deals.json', {
         domain: 'deals', version: '2.0',
-        description: 'E2E workflow deals tied to the 25 seed opportunities (scripts/seed-e2e-workflow.js).',
+        description: 'E2E workflow deals tied to the 40 seed opportunities (scripts/seed-e2e-workflow.js).',
         data: deals
     });
 
@@ -330,7 +483,7 @@ function applyLifecycle() {
             opportunityId: 'seed-opp-014', opportunityIds: ['seed-opp-014', 'seed-opp-015'],
             matchId: consortiumId, applicationId: null, negotiationId: 'seed-neg-04', invitationId: null,
             parties: [
-                { userId: 'seed-user-010', role: 'consortium_lead', signedAt: T.contractAt },
+                { userId: CO_INFRA, role: 'consortium_lead', signedAt: T.contractAt },
                 { userId: 'seed-user-011', role: 'consortium_member', signedAt: T.contractAt }
             ],
             scope: 'Highway design-and-build package delivered by a led consortium.',
@@ -339,11 +492,26 @@ function applyLifecycle() {
             equityVesting: null, profitShare: null, milestonesSnapshot: null,
             status: 'active', signedAt: T.contractAt,
             createdAt: T.contractAt, updatedAt: T.contractAt
+        },
+        {
+            id: 'seed-contract-exchange-01', dealId: 'seed-deal-exchange-01',
+            opportunityId: 'seed-opp-039', opportunityIds: ['seed-opp-039', 'seed-opp-035'],
+            matchId: consortiumWindId, applicationId: null, negotiationId: 'seed-neg-07', invitationId: null,
+            parties: [
+                { userId: CO_INFRA, role: 'consortium_lead', signedAt: T.contractAt },
+                { userId: 'seed-user-013', role: 'consortium_member', signedAt: T.contractAt }
+            ],
+            scope: 'Wind farm package delivered by a profit-sharing consortium.',
+            paymentMode: 'profit_sharing', agreedValue: null, duration: '24 months',
+            paymentSchedule: null,
+            equityVesting: null, profitShare: '65-35', milestonesSnapshot: null,
+            status: 'active', signedAt: T.contractAt,
+            createdAt: T.contractAt, updatedAt: T.contractAt
         }
     ];
     writeEnvelope('demo-contracts.json', {
         domain: 'contracts', version: '2.0',
-        description: 'E2E workflow contracts tied to the 25 seed opportunities (scripts/seed-e2e-workflow.js).',
+        description: 'E2E workflow contracts tied to the 40 seed opportunities (scripts/seed-e2e-workflow.js).',
         data: contracts
     });
 
@@ -385,19 +553,28 @@ function applyLifecycle() {
         notif('seed-user-001', 'review_received', 'New review', 'You received a 5-star review.', '/contracts/seed-contract-oneway-01', 'review', 'seed-review-02', false),
         notif('seed-user-008', 'negotiation_started', 'Negotiation started', 'Your barter match entered negotiation.', '/opportunities/seed-opp-010', 'negotiation', 'seed-neg-02', false),
         notif('seed-user-009', 'negotiation_started', 'Counter-offer received', 'A counter-offer was made on the barter terms.', '/opportunities/seed-opp-010', 'negotiation', 'seed-neg-02', false),
-        notif('seed-user-003', 'negotiation_started', 'Negotiation started', 'A provider opened negotiation on your BIM architect need.', '/opportunities/seed-opp-005', 'negotiation', 'seed-neg-03', false),
-        notif('seed-user-005', 'application_updated', 'New application', 'A civil engineer applied to your need.', '/opportunities/seed-opp-007', 'application', 'seed-app-003', false),
-        notif('seed-user-016', 'application_updated', 'New application', 'A provider applied to your structural need.', '/opportunities/seed-opp-023', 'application', 'seed-app-005', false),
-        notif('seed-user-017', 'application_updated', 'New application', 'A PM consultant applied to your need.', '/opportunities/seed-opp-024', 'application', 'seed-app-006', false),
-        notif('seed-user-010', 'match_confirmed', 'Consortium confirmed', 'Your consortium match is confirmed.', `/matches/${consortiumId}`, 'post_match', consortiumId, true),
-        notif('seed-user-010', 'deal_created_from_match', 'Deal created', 'A consortium deal was created.', '/deals/seed-deal-consortium-01', 'deal', 'seed-deal-consortium-01', false),
+        notif(CO_GULF, 'negotiation_started', 'Negotiation started', 'A provider opened negotiation on your BIM architect need.', '/opportunities/seed-opp-005', 'negotiation', 'seed-neg-03', false),
+        notif(CO_AL_RIYADH, 'application_updated', 'New application', 'A civil engineer applied to your need.', '/opportunities/seed-opp-007', 'application', 'seed-app-003', false),
+        notif(CO_AL_RIYADH, 'application_updated', 'New application', 'A provider applied to your structural need.', '/opportunities/seed-opp-023', 'application', 'seed-app-005', false),
+        notif(CO_GULF, 'application_updated', 'New application', 'A PM consultant applied to your need.', '/opportunities/seed-opp-024', 'application', 'seed-app-006', false),
+        notif(CO_INFRA, 'match_confirmed', 'Consortium confirmed', 'Your consortium match is confirmed.', `/matches/${consortiumId}`, 'post_match', consortiumId, true),
+        notif(CO_INFRA, 'deal_created_from_match', 'Deal created', 'A consortium deal was created.', '/deals/seed-deal-consortium-01', 'deal', 'seed-deal-consortium-01', false),
         notif('seed-user-011', 'deal_activated', 'Deal in execution', 'The consortium deal entered execution.', '/deals/seed-deal-consortium-01', 'deal', 'seed-deal-consortium-01', false),
         notif('seed-user-011', 'contract_fully_signed', 'Contract signed', 'The consortium contract is fully signed.', '/contracts/seed-contract-consortium-01', 'contract', 'seed-contract-consortium-01', false),
-        notif('seed-user-013', 'new_match_found', 'New circular match', 'A circular exchange match was found.', '/matches', 'post_match', null, false)
+        notif('seed-user-013', 'new_match_found', 'New circular match', 'A circular exchange match was found.', '/matches', 'post_match', null, false),
+        notif('seed-user-006', 'application_updated', 'New application', 'An MEP partner applied to your strategic alliance.', '/opportunities/seed-opp-031', 'application', 'seed-app-007', false),
+        notif('seed-user-007', 'application_updated', 'New application', 'A mentor applied to your mentorship need.', '/opportunities/seed-opp-032', 'application', 'seed-app-008', false),
+        notif(CO_NAJD, 'application_updated', 'New application', 'A legal consultant application was shortlisted.', '/opportunities/seed-opp-037', 'application', 'seed-app-009', false),
+        notif('seed-user-001', 'negotiation_started', 'Negotiation started', 'Your task-based barter match entered negotiation.', '/opportunities/seed-opp-026', 'negotiation', 'seed-neg-05', false),
+        notif('seed-user-002', 'negotiation_started', 'Counter-offer received', 'A counter-offer was made on the CAD barter terms.', '/opportunities/seed-opp-026', 'negotiation', 'seed-neg-05', false),
+        notif(CO_NAJD, 'negotiation_started', 'Negotiation started', 'An equity JV partner opened negotiation.', '/opportunities/seed-opp-028', 'negotiation', 'seed-neg-06', false),
+        notif(CO_INFRA, 'deal_created_from_match', 'Deal created', 'A wind farm consortium deal was created.', '/deals/seed-deal-exchange-01', 'deal', 'seed-deal-exchange-01', false),
+        notif('seed-user-013', 'deal_activated', 'Deal in execution', 'The wind consortium deal entered execution.', '/deals/seed-deal-exchange-01', 'deal', 'seed-deal-exchange-01', false),
+        notif('seed-user-013', 'contract_fully_signed', 'Contract signed', 'The wind consortium contract is fully signed.', '/contracts/seed-contract-exchange-01', 'contract', 'seed-contract-exchange-01', false)
     ];
     writeEnvelope('demo-notifications.json', {
         domain: 'notifications', version: '2.0',
-        description: 'E2E workflow notifications tied to the 25 seed opportunities (scripts/seed-e2e-workflow.js).',
+        description: 'E2E workflow notifications tied to the 40 seed opportunities (scripts/seed-e2e-workflow.js).',
         data: notifications
     });
 
@@ -409,7 +586,9 @@ function applyLifecycle() {
         ['seed-user-010', 'seed-user-011'], ['seed-user-010', 'seed-user-012'],
         ['seed-user-011', 'seed-user-012'], ['seed-user-013', 'seed-user-014'],
         ['seed-user-014', 'seed-user-015'], ['seed-user-013', 'seed-user-015'],
-        ['seed-user-016', 'seed-user-002'], ['seed-user-017', 'seed-user-010']
+        ['seed-user-016', 'seed-user-002'], ['seed-user-017', 'seed-user-010'],
+        ['seed-user-001', 'seed-user-009'], ['seed-user-010', 'seed-user-013'],
+        [CO_AL_RIYADH, 'seed-user-006'], [CO_GULF, 'seed-user-002'], [CO_INFRA, 'seed-user-011']
     ];
     const connections = connPairs.map(([from, to]) => ({
         id: `seed-conn-${from.slice(-3)}-${to.slice(-3)}`,
@@ -425,16 +604,16 @@ function applyLifecycle() {
     console.log('Lifecycle generated:');
     console.log('  applications :', applications.length);
     console.log('  negotiations :', negotiations.length);
-    console.log('  deals        :', deals.length, '(1 completed one-way, 1 active consortium)');
-    console.log('  contracts    :', contracts.length, '(1 completed, 1 active)');
+    console.log('  deals        :', deals.length, '(1 completed one-way, 2 active consortium)');
+    console.log('  contracts    :', contracts.length, '(1 completed, 2 active)');
     console.log('  reviews      :', reviews.length);
     console.log('  notifications:', notifications.length);
     console.log('  connections  :', connections.length);
-    console.log('  confirmed matches:', [onewayId, need005Id, barterId, consortiumId].filter(Boolean).join(', '));
+    console.log('  confirmed matches:', [onewayId, need005Id, barterId, consortiumId, barterTaskId, equityJvId, consortiumWindId].filter(Boolean).join(', '));
 }
 
 function main() {
-    console.log('=== E2E workflow seed (25 opportunities) ===');
+    console.log('=== E2E workflow seed (40 opportunities) ===');
     resetOpportunityStatuses();
     regenerateMatches();
     applyLifecycle();

@@ -1536,6 +1536,8 @@ body {
     width: 100%;
     max-height: min(88vh, 760px);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-dialog.modal-dialog--demo-credentials .modal-body.modal-body-custom {
@@ -1564,6 +1566,73 @@ body {
     gap: var(--spacing-md);
     min-height: 0;
     flex: 1 1 auto;
+    overflow: hidden;
+}
+
+.pm-demo-credentials-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    flex-shrink: 0;
+}
+
+.pm-demo-credentials-tabs__btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    padding: 0.45rem 0.7rem;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pm-demo-credentials-tabs__btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.pm-demo-credentials-tabs__btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.pm-demo-credentials-tabs__btn.is-active {
+    background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+    border-color: color-mix(in srgb, var(--primary-color) 45%, var(--border-color));
+    color: var(--primary-dark, var(--primary-color));
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+.pm-demo-credentials-tabs__count {
+    font-variant-numeric: tabular-nums;
+    opacity: 0.9;
+}
+
+.pm-demo-credentials-scroll {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 0.15rem;
+}
+
+.pm-demo-credentials-tab-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    min-height: 0;
+}
+
+.pm-demo-credentials-tab-panel:not(.is-active) {
+    display: none;
 }
 
 .pm-demo-credentials-intro {
@@ -1653,10 +1722,6 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.45rem;
-    overflow-y: auto;
-    min-height: 0;
-    max-height: min(42vh, 320px);
-    padding-right: 0.15rem;
 }
 
 .pm-demo-credentials-card {
