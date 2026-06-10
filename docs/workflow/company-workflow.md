@@ -49,11 +49,12 @@ Same high-level flow as user registration, with company-specific fields:
 
 ## 2. Company Login
 
-- Company uses **same login page** as individuals: email + password.
-- `auth-service` (or login flow) uses `getUserOrCompanyByEmail(email)` so that both `pmtwin_users` and `pmtwin_companies` are checked.
-- Session stores identity (e.g. company id and type) so layout and data (e.g. “My opportunities”) are scoped to that company.
+- Company uses the **same login page** as individuals: select **Company** account type, then email + password.
+- `authService.login(email, password, { accountType: 'company' })` looks up `pmtwin_companies` by email only — required when the same email exists on both a user and a company record.
+- Session stores the company identity so layout and data (e.g. “My opportunities”) are scoped to that company.
+- **Pending** company accounts follow the same read-only rules as users ([user-workflow.md](user-workflow.md) §2b): browse allowed; publish, apply, matches, deals, connections blocked via `assertCanMutate`.
 
-**Inputs:** Company email, password.  
+**Inputs:** Account type Company, company email, password.  
 **Outputs:** Session (company context).
 
 ---
@@ -61,6 +62,7 @@ Same high-level flow as user registration, with company-specific fields:
 ## 3. Company as Opportunity Creator
 
 - Companies can create opportunities the same way as users: **Create opportunity** → select model/sub-model → fill attributes → save as draft or publish.
+- **Publish** requires an **active** company account and profile completeness ≥ 70% (`assertProfileReadyForPublish`) — same gate as individuals.
 - `creatorId` on the opportunity is the **company id** (from `pmtwin_companies`).
 - Pipeline, matches, deals, and contracts are then tied to that company (e.g. `getOpportunities()` filtered by creatorId when showing “My opportunities”).
 
@@ -94,7 +96,7 @@ BRD defines company roles: **Company Owner**, **Company Admin**, **Company Membe
 | Flow | User | Company |
 |------|------|---------|
 | Register | createUser, status pending | create company, status pending |
-| Login | getUserByEmail → session | getCompanyByEmail → session |
+| Login | Individual + getUserByEmail → session | Company + companies by email → session |
 | Create opportunity | creatorId = user id | creatorId = company id |
 | View matches | getPostMatchesForUser(userId) | getPostMatchesForUser(companyId) |
 | Deals / contracts | getDealsByUserId(userId) | getDealsByUserId(companyId) |

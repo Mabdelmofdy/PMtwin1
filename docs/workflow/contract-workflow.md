@@ -67,9 +67,9 @@ Contracts are created when a **deal** moves to **signing**:
 2. Contract shows: parties, scope, payment terms, milestones snapshot, status.
 3. Party “Signs” (UI action): backend updates that party’s `signedAt` in contract.parties (via updateContract or a dedicated sign method if present).
 4. When **all parties** have signed:
-   - Contract status → `active`.
-   - Deal status can be updated to `active` (if not already).
-5. Notifications may be sent to parties on contract created and on all signed.
+   - Contract status → `active` (**automatic** in `data-service.updateContract` / `signContractParty`).
+   - Linked deal status → `active` (if not already).
+5. Notifications and audit entries are created on contract created and when all parties have signed.
 
 **Inputs:** contractId, userId (signer).  
 **Outputs:** contract.parties[].signedAt updated; contract status → active when all signed.

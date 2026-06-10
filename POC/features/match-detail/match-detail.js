@@ -366,6 +366,87 @@ function getNegotiationLabel(status) {
     return 'Negotiation';
 }
 
+async function resolveNegotiationRoundDisplay(ds, round, negotiation, postMatch, currentUserId) {
+    const userId = round.by || round.byUserId || '';
+    let proposerName = round.byName || '';
+    if (!proposerName && userId && typeof ds.getUserOrCompanyById === 'function') {
+        const u = await ds.getUserOrCompanyById(userId);
+        proposerName = u?.profile?.name || u?.profile?.companyName || userId;
+    } else if (!proposerName) {
+        proposerName = userId || 'Unknown';
+    }
+
+    const party = (negotiation.parties || []).find(p => p.userId === userId);
+    const participant = (postMatch?.participants || []).find(p => p.userId === userId);
+    const roleRaw = party?.role || participant?.role || '';
+    const roleLabel = roleRaw
+        ? (typeof formatParticipantRole === 'function' ? formatParticipantRole(roleRaw, roleRaw) : roleRaw)
+        : '';
+
+    let scopeTitle = (round.proposal && round.proposal.title) || round.title || '';
+    if (!scopeTitle) {
+        const oppId = participant?.opportunityId || party?.opportunityId || null;
+        if (oppId && typeof ds.getOpportunityById === 'function') {
+            const opp = await ds.getOpportunityById(oppId);
+            scopeTitle = opp?.title || '';
+        }
+    }
+    if (!scopeTitle && negotiation.opportunityId && typeof ds.getOpportunityById === 'function') {
+        const opp = await ds.getOpportunityById(negotiation.opportunityId);
+        if (opp && ((opp.creatorId && opp.creatorId === userId) || (negotiation.parties || []).length <= 2)) {
+            scopeTitle = opp.title || '';
+        }
+    }
+
+    return {
+        proposerName,
+        roleLabel,
+        scopeTitle,
+        isYou: userId === currentUserId
+    };
+}
+
+async function buildNegotiationRoundsHtml(ds, rounds, negotiation, postMatch, currentUserId) {
+    if (!rounds.length) {
+        return '<p class="text-gray-500 mt-1">No proposals yet.</p>';
+    }
+
+    const displays = await Promise.all(
+        rounds.map(r => resolveNegotiationRoundDisplay(ds, r, negotiation, postMatch, currentUserId))
+    );
+
+    return '<ul class="space-y-2 mt-2">' + rounds.map((r, i) => {
+        const d = displays[i];
+        const val = r.proposal && r.proposal.value != null ? String(r.proposal.value) : '';
+        const cur = (r.proposal && r.proposal.currency)
+            || (negotiation.initialTerms && negotiation.initialTerms.currency)
+            || '';
+        const valLine = val
+            ? '<p class="text-sm text-gray-600 mt-1">Value: ' + escapeHtml(val + (cur ? ' ' + cur : '')) + '</p>'
+            : '';
+        const titleLine = d.scopeTitle
+            ? '<p class="font-medium text-gray-900">' + escapeHtml(d.scopeTitle) + '</p>'
+            : '<p class="font-medium text-gray-900">' + escapeHtml(d.proposerName) + (d.isYou ? ' <span class="text-gray-500 font-normal">(You)</span>' : '') + '</p>';
+        const whoLine = d.scopeTitle
+            ? '<p class="text-sm text-gray-600">' + escapeHtml(d.proposerName)
+                + (d.isYou ? ' <span class="text-gray-500">(You)</span>' : '')
+                + (d.roleLabel ? ' · ' + escapeHtml(d.roleLabel) : '')
+                + '</p>'
+            : (d.roleLabel
+                ? '<p class="text-sm text-gray-600">' + escapeHtml(d.roleLabel) + '</p>'
+                : '');
+        const messageLine = r.message
+            ? '<p class="text-gray-600 mt-1">' + escapeHtml(r.message) + '</p>'
+            : '';
+        return '<li class="p-2 border border-gray-100 rounded">'
+            + titleLine
+            + whoLine
+            + valLine
+            + messageLine
+            + '</li>';
+    }).join('') + '</ul>';
+}
+
 async function renderMatchNegotiationSection(vm, postMatch, currentUserId) {
     const panel = document.getElementById('match-detail-negotiation-panel');
     const body = document.getElementById('match-detail-negotiation-panel-body');
@@ -388,15 +469,7 @@ async function renderMatchNegotiationSection(vm, postMatch, currentUserId) {
     const status = negotiation.status || 'open';
     const label = getNegotiationLabel(status);
     const rounds = negotiation.rounds || [];
-    const roundsHtml = rounds.length
-        ? '<ul class="space-y-2 mt-2">' + rounds.map(r => {
-            const val = r.proposal && r.proposal.value != null ? String(r.proposal.value) : '';
-            const cur = r.proposal && r.proposal.currency ? r.proposal.currency : '';
-            const valLine = val ? '<span class="text-gray-600">' + escapeHtml(val + (cur ? ' ' + cur : '')) + '</span> ' : '';
-            return '<li class="p-2 border border-gray-100 rounded"><span class="font-medium">' + escapeHtml(r.by || '') + '</span> ' + valLine
-                + '<p class="text-gray-600 mt-1">' + escapeHtml(r.message || '') + '</p></li>';
-        }).join('') + '</ul>'
-        : '<p class="text-gray-500 mt-1">No proposals yet.</p>';
+    const roundsHtml = await buildNegotiationRoundsHtml(dataService, rounds, negotiation, postMatch, currentUserId);
 
     const isActive = window.negotiationLifecycle
         ? window.negotiationLifecycle.isActiveNegotiation(negotiation)

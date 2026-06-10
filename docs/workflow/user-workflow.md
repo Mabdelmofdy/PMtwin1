@@ -76,32 +76,51 @@ When **active**, the user can use the full portal (subject to role).
 
 ```mermaid
 sequenceDiagram
-  User->>Page: Enter email and password
-  Page->>Auth: login(email, password)
-  Auth->>Data: getUserOrCompanyByEmail(email)
+  User->>Page: Select Individual or Company + email/password
+  Page->>Auth: login(email, password, { accountType })
+  alt accountType individual
+    Auth->>Data: getUserByEmail(email)
+  else accountType company
+    Auth->>Data: getCompanies → match email
+  else accountType auto (legacy)
+    Auth->>Data: getUserOrCompanyByEmail(email)
+  end
   Data-->>Auth: user or company
   Auth->>Auth: Verify password (POC encode)
-  Auth->>Session: Store session (sessionStorage)
+  Auth->>Session: Store session (sessionStorage or localStorage)
   Auth-->>Page: success
   Page->>Router: Go to dashboard or return URL
 ```
 
 **Steps:**
 
-1. Open **Login**; enter email and password.
-2. Auth looks up **user or company** by email.
-3. Password is checked (POC encoding—not production hashing).
-4. Session is stored (token, user id, expiry).
-5. Redirect to dashboard or the route you tried to open.
+1. Open **Login**; choose **Individual** or **Company** account type.
+2. Enter email and password (optional **Remember me** → localStorage).
+3. `authService.login(email, password, { accountType: 'individual' | 'company' })` looks up the correct store — avoids ambiguity when the same email exists on both user and company records.
+4. Password is checked (POC encoding—not production hashing).
+5. **Rejected** and **suspended** accounts cannot log in; **pending** and **clarification_requested** can log in (pending is read-only — see section 2b).
+6. Session is stored; redirect to dashboard or return URL.
 
 **Edge cases:**
 
 - Wrong password: error, no session.
-- Non-active accounts: POC may still allow login; production should block as needed.
+- Wrong account type for email: “Invalid email or password” (no cross-store fallback when type is explicit).
 
 ### What happens next
 
 You land on the **Dashboard** (or deep link) with a live session until logout.
+
+---
+
+## 2b. Pending approval (read-only mode)
+
+Accounts with `status === 'pending'` can explore the portal but **cannot mutate** platform data:
+
+- **UI:** Layout shows a pending-approval banner; mutating buttons are disabled where wired.
+- **Service guard:** `authService.assertCanMutate()` throws for pending users.
+- **Data layer:** `data-service._assertPortalCanMutate()` on portal writes — opportunities, applications, matches, deals, negotiations, connections, messages, contract sign.
+
+Blocked actions include publish, apply, accept/decline matches, create deals, send connection requests, and pipeline drag-and-drop. Read-only browsing (dashboard, find, matches list, notifications) remains available.
 
 ---
 
@@ -140,6 +159,24 @@ Applications follow the pipeline workflow; matches follow [matching-workflow.md]
 
 ---
 
+## 4b. People and connections
+
+**Steps:**
+
+1. Open **People** (`/people`) or a **Person profile** (`/people/:id`).
+2. **Connect** → `data-service.createConnection(fromUserId, toUserId)`; status `pending`.
+3. Recipient gets a **connection_request** notification (link to sender profile).
+4. Recipient **Accept** or **Ignore** → `acceptConnection` / reject path; sender notified on accept.
+5. After **accepted**, users can open **Messages** (`/messages/:userId`) for that connection.
+
+**Guards:** Pending accounts cannot send connection requests (`assertCanMutate`). Connection accept/reject also requires an active account.
+
+### What happens next
+
+Accepted connections enable messaging; opportunities and matches remain separate entry paths to deals.
+
+---
+
 ## 5. Password reset (forgot / reset)
 
 **Forgot password**
@@ -163,7 +200,10 @@ You sign in with the new password.
 | Register | User/company | Created **`pending`** |
 | Admin approve | User/company | → **`active`** |
 | Admin reject | User/company | → **`rejected`** |
-| Login | Session | Created in sessionStorage |
+| Login | Session | Created in sessionStorage or localStorage (Remember me) |
+| Pending user mutate attempt | — | Error from assertCanMutate / _assertPortalCanMutate |
+| Connection request | Connection | pending; notification to recipient |
+| Connection accept | Connection | accepted; notification to sender |
 | Logout | Session | Cleared |
 | Update profile | User/company | Profile and **`updatedAt`** |
 

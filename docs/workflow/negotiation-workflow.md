@@ -27,7 +27,8 @@ After **agreed**, any participant can call **Create deal from negotiation**; the
 ### Tips
 
 - You can skip negotiation and create a deal directly from a **confirmed** match if terms are already clear.
-- For applications, negotiation is recommended when proposal terms need discussion before a deal.
+- For applications, use **Discuss terms** when proposal terms need discussion; use **Accept & create deal** when terms are already clear ([opportunity-workflow.md](opportunity-workflow.md)).
+- Negotiations **expire** after the configured window (default 14 days) if still open — see section 9.
 
 ---
 
@@ -171,7 +172,17 @@ Notifications and audit entries should accompany terminal transitions where impl
 
 ---
 
-## 9. Application vs negotiation vs deal (product guide)
+## 9. Negotiation expiry
+
+Stale negotiations are closed without a background job:
+
+1. **On create:** `createNegotiation` sets default `expiresAt` (14 days from `CONFIG.NEGOTIATION` / matching config).
+2. **On read:** `expireStaleNegotiations()` runs when `getNegotiations()` (or related list loads) and moves open negotiations past `expiresAt` to **`expired`**.
+3. **UI:** Expired negotiations cannot be used for `createDealFromNegotiation`; user may start a new negotiation if the match/application is still valid.
+
+---
+
+## 10. Application vs negotiation vs deal (product guide)
 
 | Situation | Recommended path |
 |-----------|------------------|
@@ -191,6 +202,7 @@ Notifications and audit entries should accompany terminal transitions where impl
 | All agree | `agreed`, snapshot stored | — | — |
 | Create deal | — | may progress later | created with `negotiationId` |
 | Cancel | `cancelled` | — | — |
+| Past expiresAt (lazy) | `expired` | — | — |
 
 ---
 
@@ -201,7 +213,8 @@ Notifications and audit entries should accompany terminal transitions where impl
 - `POC/features/match-detail/match-detail.js` — negotiate, agree, create deal actions
 - `POC/features/matches/matches.js` — list-level negotiate / deal shortcuts
 - `POC/features/pipeline/pipeline.js` — start negotiation from pipeline match card
-- `POC/features/opportunity-detail/opportunity-detail.js` — start negotiation from application
+- `POC/features/opportunity-detail/opportunity-detail.js` — **Discuss terms** from application; start negotiation
+- `POC/src/services/matching/unified-match-view-model.js` — Start/Continue Negotiation, Create Deal actions on match cards
 
 ---
 
@@ -209,4 +222,4 @@ Notifications and audit entries should accompany terminal transitions where impl
 
 - [Matching workflow](matching-workflow.md) — Match confirm before negotiation.
 - [Deal workflow](deal-workflow.md) — Deal states after negotiation.
-- [Gap solutions](../gap-solutions.md) — Proposed fixes for negotiation expiry and UX gaps (plan only; not yet implemented).
+- [Gap solutions](../gap-solutions.md) — Negotiation expiry (GAP-P04) and application UX labels (GAP-P06) are **Done**.

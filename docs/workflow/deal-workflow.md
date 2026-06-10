@@ -52,18 +52,22 @@ stateDiagram-v2
 
 ## 2. Create Deal (From Post Match or Application)
 
+All deal creation paths go through `assertDealCreationSource` in `data-service` — invalid sources (e.g. unconfirmed match, open negotiation) are rejected.
+
 **From confirmed post_match:**
 
-1. User opens **Match detail** for a **confirmed** post_match and clicks “Start deal” (or equivalent).
-2. Alternatively: **Start negotiation** → agree terms → **Create deal from negotiation** ([negotiation-workflow.md](negotiation-workflow.md)).
-2. Frontend (or feature) builds deal payload: participants from post_match (userId, role), opportunityIds from payload (need/offer/lead/cycle), matchType, title, scope, exchangeMode, valueTerms (to be negotiated).
-3. `data-service.createDeal(dealData)` → new deal with `status: 'negotiating'` or `'draft'`.
-4. Optionally link back in UI (e.g. “Deal created” with link to deal detail); post_match has no formal dealId FK in schema.
+1. User opens **Match detail** (or unified match card) for a **confirmed** `post_match` and clicks **Start Deal**.
+   - UI: `unified-match-view-model` exposes **Start Deal** only when `status === 'confirmed'`, no linked deal, and match not expired.
+2. Alternatively: **Start negotiation** → all parties agree → **Create Deal** from negotiation ([negotiation-workflow.md](negotiation-workflow.md)); requires `negotiation.status === 'agreed'`.
+3. `data-service.createDealFromMatch(matchId, actorUserId)` (or equivalent) builds deal payload: participants from post_match (userId, role), opportunityIds from payload (need/offer/lead/cycle), matchType, title, scope, exchangeMode, valueTerms.
+4. New deal with `status: 'negotiating'` or `'draft'`; UI resolves link via `getDealByMatchId` and view model `dealId`.
 
 **From application:**
 
-1. When an application is accepted, a deal can be created with `applicationId`, `opportunityId`, participants (creator + applicant), status draft/negotiating.
-2. Same `createDeal(dealData)`.
+1. Opportunity owner reviews application on **Opportunity detail**.
+2. **Discuss terms** → `startNegotiationFromApplication` when proposal needs refinement ([negotiation-workflow.md](negotiation-workflow.md)).
+3. **Accept & create deal** → `createDealFromApplication(applicationId, actorUserId)` when terms are clear (accepts application and opens deal workspace in one step).
+4. Deal carries `applicationId`, `opportunityId`, participants (creator + applicant).
 
 **Inputs:** participants, opportunityId(s), matchType, title, scope, timeline, exchangeMode, valueTerms, optional milestones, optional payload/roleSlots (consortium).  
 **Outputs:** New deal (id, status, createdAt).
@@ -141,9 +145,18 @@ For **consortium** deals, if a participant drops:
 
 ---
 
+## Implementation references
+
+- `POC/src/core/data/data-service.js` — `createDeal`, `createDealFromMatch`, `createDealFromApplication`, `createDealFromNegotiation`, `assertDealCreationSource`
+- `POC/src/services/matching/unified-match-view-model.js` — **Start Deal** and **Create Deal** action gating on match cards
+- `POC/features/deal-detail/deal-detail.js`, `POC/features/deals/deals.js` — deal workspace UI
+
+---
+
 ## Related Documentation
 
 - [Data Model](../data-model.md) — Deal and Contract entities.
 - [Contract Workflow](contract-workflow.md) — Contract lifecycle.
 - [Matching Workflow](matching-workflow.md) — From match to deal.
+- [Negotiation Workflow](negotiation-workflow.md) — Optional path before deal.
 - [POC Deal Lifecycle](../../POC/docs/deal-lifecycle.md) — Same lifecycle in POC docs.

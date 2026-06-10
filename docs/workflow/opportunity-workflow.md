@@ -27,6 +27,8 @@ On **publish**, matching runs (see [matching-workflow.md](matching-workflow.md))
 ### Tips
 
 - Editing a published opportunity does not always re-run matching unless you publish again—behavior is documented in edge cases below.
+- **Publish** requires profile completeness (≥ 70% + required fields) and an **active** (non-pending) account — see section 4.
+- Application owners use **Discuss terms** vs **Accept & create deal** on opportunity detail — see section 6.
 
 ---
 
@@ -95,18 +97,24 @@ stateDiagram-v2
 
 ## 4. Publish Opportunity (Trigger Matching)
 
+**Preconditions (enforced in `updateOpportunity`):**
+
+1. **Pending accounts** cannot publish — `data-service._assertPortalCanMutate()` → `authService.assertCanMutate()` throws for `status === 'pending'` (read-only demo mode).
+2. **Profile gate** — `profileCompletion.assertProfileReadyForPublish(actor)` requires ≥ 70% completeness and required profile fields; publish is blocked with an error message if not ready.
+
 **Steps:**
 
 1. From draft, user clicks **Publish** (e.g. in pipeline or opportunity detail).
-2. `data-service.updateOpportunity(id, { status: 'published' })` is called.
+2. `data-service.updateOpportunity(id, { status: 'published' })` is called (after preconditions pass).
 3. Inside `updateOpportunity`, when `updates.status === 'published'`:
    - Opportunity is saved.
    - `matching-service.persistPostMatches(id)` is invoked (async, non-blocking).
 4. **persistPostMatches(opportunityId):**
    - Loads opportunity; if status !== 'published', returns [].
-   - Calls `findMatchesForPost(opportunityId, {})` → detects model (one_way, two_way, consortium, circular) and runs corresponding matching (findOffersForNeed, findBarterMatches, findConsortiumCandidates, findCircularExchanges).
-   - For each result above threshold (POST_TO_POST_THRESHOLD, default 0.50), creates a **post_match** via `data-service.createPostMatch(...)`.
+   - Runs **every model** from `detectMatchingModel` (one_way, two_way, consortium) plus a **circular** pass — see [matching-workflow.md](matching-workflow.md).
+   - For each result above threshold (POST_TO_POST_THRESHOLD, default 0.50), creates a **post_match** via `data-service.createPostMatch(...)` (with default `expiresAt` for pending matches).
    - For each created post_match, calls `notifyPostMatch(postMatch)` → creates notifications for participants.
+   - Writes a `matching_runs` record (modelsRun, counts, duration).
 5. User sees success; matches appear in **Matches** for affected users; notifications sent.
 
 **Inputs:** opportunityId (implicit from update).  
@@ -114,8 +122,9 @@ stateDiagram-v2
 
 **Edge cases:**
 
-- Opportunity already published: update just overwrites; persistPostMatches runs again (may create duplicates; deduplication is by _postMatchSignature in createPostMatch).
+- Opportunity already published: update just overwrites; persistPostMatches runs again (deduplication via strong keys + signature in `createPostMatch`).
 - Matching fails: errors logged; opportunity still published; no post_matches for that run.
+- Incomplete profile: publish throws before status change.
 
 ---
 
@@ -133,8 +142,16 @@ stateDiagram-v2
 ## 6. Opportunity Discovery (Find) and Apply
 
 - **Find** page lists published opportunities; user/company can open detail.
-- From detail, user can **Apply** → creates **Application** (opportunityId, applicantId, proposal, status: pending).
-- Application workflow (review, shortlist, accept, reject) is separate; see pipeline and application handling in codebase.
+- From detail, user can **Apply** → creates **Application** (opportunityId, applicantId, proposal, status: pending). Pending accounts cannot apply (`assertCanMutate`).
+- Owner reviews applications on opportunity detail and in **Pipeline → Applications**.
+
+**Owner actions on applications (opportunity detail):**
+
+| Action | When to use | Service |
+|--------|-------------|---------|
+| **Discuss terms** | Proposal needs refinement before a deal | `startNegotiationFromApplication` → [negotiation-workflow.md](negotiation-workflow.md) |
+| **Accept & create deal** | Terms are clear; skip negotiation | `createDealFromApplication` → [deal-workflow.md](deal-workflow.md) |
+| Shortlist / Reject | Pipeline review | `updateApplication` status |
 
 ---
 
@@ -143,7 +160,8 @@ stateDiagram-v2
 | Action | Before | After |
 |--------|--------|-------|
 | Create | — | opportunity created, status draft |
-| Publish | draft | published; post_matches created; notifications |
+| Publish (profile + active account OK) | draft | published; post_matches created; notifications |
+| Publish blocked | draft | unchanged (pending account or incomplete profile) |
 | Start negotiation | published | in_negotiation (typically when deal created or application accepted) |
 | Contracted | in_negotiation | contracted (when contract is in place) |
 | Start execution | contracted | in_execution |

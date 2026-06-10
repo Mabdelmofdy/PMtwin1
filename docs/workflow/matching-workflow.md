@@ -26,8 +26,9 @@ After a match is **confirmed**, continue with [deal-workflow.md](deal-workflow.m
 
 ### Tips
 
-- **Canonical matches** are `post_matches` only (`pmtwin_matches` is deprecated).
+- **Canonical matches** are `post_matches` only (`pmtwin_matches` is deprecated; legacy person–opportunity matching is off unless `LEGACY_PERSON_OPPORTUNITY_ENABLED`).
 - **Admin Run report** is preview-only; **Admin Save** and **publish** call `persistPostMatches` to create `post_matches`.
+- **Match cards and actions** use `unified-match-view-model.js` — same labels on Matches list, Match detail, Pipeline, and Admin Matching Center.
 
 ---
 
@@ -66,9 +67,9 @@ Publish (`status: published`) also calls `persistPostMatches` and does **not** c
 
 ---
 
-## 2. Model Detection
+## 2. Model Detection and Multi-Model Persist
 
-`matching-service.detectMatchingModel(opportunity)` returns a list of applicable models, but the current `findMatchesForPost()` route still uses precedence unless a model is passed explicitly:
+`matching-service.detectMatchingModel(opportunity)` returns every applicable model for a published post:
 
 | Condition | Models added |
 |-----------|----------------|
@@ -77,9 +78,16 @@ Publish (`status: published`) also calls `persistPostMatches` and does **not** c
 | exchangeMode or accepted_modes includes barter | two_way |
 | memberRoles / partnerRoles length > 0 or subModelType === 'consortium' | consortium |
 
-Current routing precedence is: explicit `options.model`, then consortium, then barter/two_way, then one_way by intent, then hybrid fallback. Circular is not part of that first route; `persistPostMatches` explicitly calls `findMatchesForPost(opportunityId, { model: 'circular' })` afterward and stores cycles that include the publishing creator.
+**On publish and admin save**, `persistPostMatches()`:
 
-**Gap to fix:** Use `detectMatchingModel()` inside `persistPostMatches()` to run every applicable model for a published post, instead of only the first route plus circular.
+1. Builds a model plan from `detectMatchingModel()` (excluding circular from the main list).
+2. Runs **each** detected model via `findMatchesForPost(opportunityId, { model })` — no single-model precedence.
+3. Runs a **separate circular pass** (`findMatchesForPost(..., { model: 'circular' })`) and persists only cycles that include the publishing creator.
+4. Dedupes via `createPostMatch` strong keys + in-run seen set; writes a `matching_runs` record (`modelsRun`, threshold, counts, durationMs).
+
+**Admin/debug only:** `findMatchesForPost(opportunityId, {})` without `persistPostMatches` still uses route precedence (single model) for preview runs — use **Run report** or explicit `options.model` for one-model debugging.
+
+**Circular** is never returned from `detectMatchingModel()` alone; it is always the dedicated circular pass in step 3.
 
 ---
 
@@ -132,18 +140,27 @@ Current routing precedence is: explicit `options.model`, then consortium, then b
 
 ## 7. User-Side: View and Respond to Matches
 
+**Unified view model:** List and detail pages build cards via `unified-match-view-model.js` (`buildUnifiedMatchViewModels` → `enrichUnifiedMatchViewModel`). Each card exposes:
+
+- **Labels:** Need/Offer/Barter/Consortium/Circular; quality tier (Top/High/Medium/Low from score); status (“Pending Response”, “Waiting for Others”, “Confirmed”, etc.).
+- **Actions** (`getAvailableActions`): View Details, Message, Accept, Decline, Start Negotiation / Continue Negotiation, Create Deal (from agreed negotiation), **Start Deal** (confirmed match only), Invite to Apply, replacement actions when eligible.
+- **Next best action** hint for the current viewer.
+
 **Steps:**
 
-1. User opens **Matches** (`/matches`). Page loads `data-service.getPostMatchesForUser(userId)`.
-2. List shows post_matches (optionally filtered by type: one_way, two_way, consortium, circular); each card shows match type, score, other party/parties, and summary.
-3. User opens **Match detail** (`/matches/:id`). Detail shows full payload, participants, value equivalence (barter), roles (consortium), or cycle (circular).
+1. User opens **Matches** (`/matches`) or **Pipeline → Matches**. Page loads `data-service.getPostMatchesForUser(userId)` and renders unified match cards.
+2. List can filter by type (one_way, two_way, consortium, circular) and status tab (pending, confirmed, etc.).
+3. User opens **Match detail** (`/matches/:id`). Detail shows full payload, participants, value equivalence (barter), roles (consortium), or cycle (circular); negotiation and replacement sections when linked.
 4. User **Accepts** or **Declines**: `data-service.updatePostMatchStatus(matchId, userId, 'accepted' | 'declined')`.
    - If any participant declines → post_match status → `declined`.
    - If all accept → post_match status → `confirmed`.
-5. When **confirmed**, user can proceed to create a **Deal** (e.g. “Start deal” from match detail). Deal creation is in [Deal Workflow](deal-workflow.md).
+5. When **confirmed**, **Start Deal** is enabled (`unified-match-view-model`: `status === 'confirmed'` and no linked deal). `assertDealCreationSource` enforces the same rule in `data-service`. See [Deal Workflow](deal-workflow.md).
+6. Optional: **Start Negotiation** before deal creation ([negotiation-workflow.md](negotiation-workflow.md)).
 
-**Inputs (user):** matchId, action (accept/decline).  
-**Outputs:** post_match participants and status updated; optional redirect to deal creation.
+**Match expiry:** New pending `post_match` records get `expiresAt` from `getDefaultPostMatchExpiresAt` (default **14 days** from `CONFIG.MATCHING.DEFAULT_MATCH_EXPIRY_DAYS`). `expirePendingPostMatches()` runs on read; expired pending matches show as **Expired** and cannot be accepted.
+
+**Inputs (user):** matchId, action (accept/decline/negotiate/start deal).  
+**Outputs:** post_match participants and status updated; optional negotiation or deal creation.
 
 ---
 
@@ -168,7 +185,16 @@ Matches are sorted by compositeRank (or matchScore) descending.
 | notifyPostMatch | Notification | New notifications for participants |
 | User accepts | PostMatch | participantStatus = accepted for that user; if all accepted → status = confirmed |
 | User declines | PostMatch | participantStatus = declined; status = declined |
-| Deal created from match | Deal | New deal; post_match may be linked in UI (no FK on post_match to deal in schema) |
+| Pending match past expiresAt | PostMatch | status = expired (lazy sweep on read) |
+| Deal created from match | Deal | New deal; UI links via `getDealByMatchId` / view model `dealId` |
+
+---
+
+## Implementation references
+
+- `POC/src/services/matching/matching-service.js` — `persistPostMatches`, `detectMatchingModel`, `notifyPostMatch`
+- `POC/src/services/matching/unified-match-view-model.js` — match cards, actions, status labels
+- `POC/features/matches/matches.js`, `POC/features/match-detail/match-detail.js`, `POC/features/pipeline/pipeline.js`
 
 ---
 
@@ -177,3 +203,4 @@ Matches are sorted by compositeRank (or matchScore) descending.
 - [Matching Engine](../matching-engine.md) — Scoring, weights, value compatibility.
 - [Opportunity Workflow](opportunity-workflow.md) — Publish trigger.
 - [Deal Workflow](deal-workflow.md) — From confirmed match to deal.
+- [Gap solutions](../gap-solutions.md) — POC sprint status (multi-model persist, match expiry, Start Deal gating).
