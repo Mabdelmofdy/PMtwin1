@@ -274,54 +274,54 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply, 
     document.getElementById('opportunity-title').textContent = opportunity.title || 'Untitled Opportunity';
     const heroMeta = document.getElementById('opportunity-hero-meta');
     if (heroMeta) {
-        heroMeta.textContent =
-            'Opportunity ID: ' +
-            opportunity.id +
-            ' · Posted ' +
-            new Date(opportunity.createdAt).toLocaleDateString(undefined, {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
+        const posted = new Date(opportunity.createdAt).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+        heroMeta.textContent = opportunity.id + ' · Posted ' + posted;
     }
     const intentEl = document.getElementById('opportunity-intent');
     if (intentEl) {
         const intent = opportunity.intent || 'request';
-        intentEl.textContent = intent === 'offer' ? 'OFFER' : 'NEED';
-        intentEl.style.display = 'inline-block';
-        intentEl.className = 'badge ' + (typeof getIntentBadgeClass === 'function' ? getIntentBadgeClass(intent, opportunity.modelType) : (intent === 'offer' ? 'badge-info' : 'badge-primary'));
+        intentEl.textContent = intent === 'offer' ? 'Offer' : 'Need';
+        intentEl.style.display = 'inline-flex';
+        intentEl.className = 'opp-detail-pill opp-detail-pill--intent';
     }
-    document.getElementById('opportunity-model').textContent = formatModelType(opportunity.modelType) || (opportunity.collaborationModel || 'N/A');
+    const modelEl = document.getElementById('opportunity-model');
     const subModelEl = document.getElementById('opportunity-submodel');
-    if (subModelEl) {
-        const subModelDef = getModelDefinition(opportunity.modelType, opportunity.subModelType);
-        const subModelLabel = subModelDef?.name || formatLabel(opportunity.subModelType || '');
-        if (opportunity.subModelType && subModelLabel) {
-            subModelEl.textContent = subModelLabel;
-            subModelEl.style.display = 'inline-block';
-        } else {
-            subModelEl.style.display = 'none';
-        }
-    }
     const projectTypeEl = document.getElementById('opportunity-project-type');
-    if (projectTypeEl) {
-        if (opportunity.projectType === 'multi') {
-            projectTypeEl.textContent = 'Multi-Project';
-            projectTypeEl.style.display = 'inline-block';
-        } else {
-            projectTypeEl.style.display = 'none';
-        }
+    const modelPathEl = document.getElementById('opportunity-model-path');
+    const modelLabel = formatModelType(opportunity.modelType) || opportunity.collaborationModel || '';
+    const subModelDef = getModelDefinition(opportunity.modelType, opportunity.subModelType);
+    const subModelLabel = subModelDef?.name || (opportunity.subModelType ? formatLabel(opportunity.subModelType) : '');
+    const pathParts = [modelLabel, subModelLabel, opportunity.projectType === 'multi' ? 'Multi-project' : '']
+        .filter(Boolean);
+    if (modelPathEl && pathParts.length > 0) {
+        modelPathEl.textContent = pathParts.join(' · ');
+        modelPathEl.style.display = 'block';
+        modelPathEl.removeAttribute('aria-hidden');
+    } else if (modelPathEl) {
+        modelPathEl.style.display = 'none';
+        modelPathEl.setAttribute('aria-hidden', 'true');
     }
+    if (modelEl) modelEl.style.display = 'none';
+    if (subModelEl) subModelEl.style.display = 'none';
+    if (projectTypeEl) projectTypeEl.style.display = 'none';
     const sb = window.statusBadgeSystem;
     document.getElementById('opportunity-status').textContent = sb
         ? sb.getStatusLabel(opportunity.status, 'opportunity')
         : formatOpportunityStatus(opportunity.status);
     document.getElementById('opportunity-status').className = sb
-        ? `badge ${sb.getStatusBadgeClass(opportunity.status, 'opportunity')}`
-        : `badge ${getStatusBadgeClass(opportunity.status)}`;
+        ? `opp-detail-pill opp-detail-pill--status badge ${sb.getStatusBadgeClass(opportunity.status, 'opportunity')}`
+        : `opp-detail-pill opp-detail-pill--status badge ${getStatusBadgeClass(opportunity.status)}`;
     
     // Quick info bar
-    document.getElementById('info-created').textContent = new Date(opportunity.createdAt).toLocaleDateString();
+    document.getElementById('info-created').textContent = new Date(opportunity.createdAt).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
     document.getElementById('info-creator').textContent = creator?.profile?.name || creator?.email || 'Unknown';
     
     // Location
@@ -386,18 +386,18 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply, 
         let btns =
             '<a href="#" data-route="' +
             editRoute +
-            '" class="btn btn-primary" title="Open the editor for this posting">' +
-            '<i class="ph-duotone ph-pencil-simple"></i> Edit</a>';
+            '" class="btn btn--edit" title="Edit this opportunity">' +
+            '<i class="ph-duotone ph-pencil-simple" aria-hidden="true"></i><span>Edit</span></a>';
         if (canCancel) {
             btns +=
-                '<button type="button" id="btn-cancel-opportunity" class="btn btn-secondary" data-opp-id="' +
+                '<button type="button" id="btn-cancel-opportunity" class="btn btn--cancel" data-opp-id="' +
                 opportunity.id +
-                '"><i class="ph-duotone ph-x-circle"></i> Cancel posting</button>';
+                '" title="Cancel posting"><i class="ph-duotone ph-x-circle" aria-hidden="true"></i><span>Cancel</span></button>';
         }
         btns +=
-            '<button type="button" class="btn btn-danger btn-sm" data-opp-delete="' +
+            '<button type="button" class="btn btn--delete" data-opp-delete="' +
             opportunity.id +
-            '"><i class="ph-duotone ph-trash"></i> Delete</button>';
+            '" title="Delete opportunity"><i class="ph-duotone ph-trash" aria-hidden="true"></i><span class="btn__label">Delete</span></button>';
         actionsDiv.innerHTML = btns;
         const cancelBtn = document.getElementById('btn-cancel-opportunity');
         if (cancelBtn) {
@@ -889,17 +889,96 @@ function getOpportunityDisplayFields(opportunity) {
     return result;
 }
 
+const ARRAY_CHIP_KEYS = new Set([
+    'requiredSkills', 'offeredSkills', 'coreSkills', 'sectors', 'interests', 'certifications'
+]);
+
+const ROLE_CARD_KEYS = new Set([
+    'memberRoles', 'partnerRoles', 'minimumRequirements', 'partnerRequirements', 'equitySplit'
+]);
+
+const TIMELINE_KEYS = new Set([
+    'startDate', 'applicationDeadline', 'tenderDeadline', 'endDate'
+]);
+
+const TAG_VARIANT_BY_KEY = {
+    requiredSkills: 'skill',
+    offeredSkills: 'skill',
+    coreSkills: 'core',
+    sectors: 'sector',
+    interests: 'interest',
+    certifications: 'cert',
+    targetRole: 'role'
+};
+
+function renderTagChips(values, variant) {
+    const items = Array.isArray(values) ? values : [values];
+    return items.filter(Boolean).map(v => {
+        const text = typeof v === 'object' ? (v.label || v.name || v.role || JSON.stringify(v)) : String(v);
+        return `<span class="opp-tag opp-tag--${variant}">${escapeHtml(text)}</span>`;
+    }).join('');
+}
+
+function renderRoleCards(items) {
+    if (!Array.isArray(items) || items.length === 0) return '';
+    return `<div class="opp-role-cards">${items.map(item => {
+        if (typeof item !== 'object' || item === null) {
+            return `<div class="opp-role-card"><div class="opp-role-card__title">${escapeHtml(String(item))}</div></div>`;
+        }
+        const title = item.role || item.partner || item.label || item.requirement || item.criteria || 'Role';
+        const scope = item.scope || item.contribution || item.value || item.description || '';
+        return `
+            <div class="opp-role-card">
+                <div class="opp-role-card__title">${escapeHtml(title)}</div>
+                ${scope ? `<div class="opp-role-card__scope">${escapeHtml(scope)}</div>` : ''}
+            </div>
+        `;
+    }).join('')}</div>`;
+}
+
+function renderDetailFieldContent(key, value) {
+    if (value === null || value === undefined || value === '') return '<span class="text-muted">—</span>';
+
+    if (typeof value === 'string' && value.trim().startsWith('[')) {
+        try { value = JSON.parse(value); } catch (e) { /* keep string */ }
+    }
+
+    if (ROLE_CARD_KEYS.has(key) && Array.isArray(value)) {
+        return renderRoleCards(value);
+    }
+
+    if (ARRAY_CHIP_KEYS.has(key) && Array.isArray(value)) {
+        const variant = TAG_VARIANT_BY_KEY[key] || 'skill';
+        return renderTagChips(value, variant);
+    }
+
+    if (key === 'targetRole') {
+        return renderTagChips([value], 'role');
+    }
+
+    return escapeHtml(formatModelDetailValue(value, key));
+}
+
+function renderDetailItemHtml(label, value, key, options = {}) {
+    const { wide = false, timeline = false } = options;
+    const classes = ['detail-item'];
+    if (wide) classes.push('detail-item--wide');
+    if (timeline) classes.push('detail-item--timeline');
+    const content = renderDetailFieldContent(key, value);
+    if (!content || content === '<span class="text-muted">—</span>') return '';
+    return `
+        <div class="${classes.join(' ')}">
+            <div class="detail-label">${escapeHtml(label)}</div>
+            <div class="detail-value">${content}</div>
+        </div>
+    `;
+}
+
 function renderExchangeDetailItem(label, value, fullWidth) {
     if (value === null || value === undefined || value === '') return '';
     const displayValue = formatModelDetailValue(value);
     if (displayValue === 'N/A') return '';
-    const colStyle = fullWidth ? ' style="grid-column: 1 / -1;"' : '';
-    return `
-        <div class="detail-item"${colStyle}>
-            <div class="detail-label">${escapeHtml(label)}</div>
-            <div class="detail-value">${escapeHtml(displayValue)}</div>
-        </div>
-    `;
+    return renderDetailItemHtml(label, value, null, { wide: fullWidth });
 }
 
 function formatValueItems(items) {
@@ -926,65 +1005,43 @@ function renderExchangeDetails(opportunity) {
     const valueExchange = opportunity.value_exchange || {};
     const { primaryMode, acceptedPaymentModes } = getExchangeDisplayState(opportunity);
     const showAcceptedPaymentMethodsRow = acceptedPaymentModes.length > 1;
-    let html = '<div class="detail-grid">';
+    let html = '';
 
-    if (primaryMode) {
-        html += `
-            <div class="detail-item">
-                <div class="detail-label">Exchange Mode</div>
-                <div class="detail-value">${formatExchangeMode(primaryMode)}</div>
-            </div>
-        `;
+    if (exchangeData.budgetRange || primaryMode) {
+        const budget = exchangeData.budgetRange;
+        const currency = budget?.currency || exchangeData.currency || 'SAR';
+        html += '<div class="opp-exchange-featured">';
+        if (primaryMode) {
+            html += `<span class="opp-exchange-mode-pill"><i class="ph-duotone ph-currency-circle-dollar" aria-hidden="true"></i>${formatExchangeMode(primaryMode)}</span>`;
+        }
+        if (budget) {
+            html += `
+                <div>
+                    <div class="opp-exchange-featured__label">Budget Range</div>
+                    <div class="opp-exchange-featured__value">${budget.min?.toLocaleString() || 0} – ${budget.max?.toLocaleString() || 0} ${currency}</div>
+                </div>
+            `;
+        }
+        html += '</div>';
     }
+
+    html += '<div class="detail-grid">';
 
     if (showAcceptedPaymentMethodsRow) {
         const modeLabels = acceptedPaymentModes.map(m => formatExchangeMode(m));
-        html += `
-            <div class="detail-item accepted-payment-methods">
-                <div class="detail-label">Accepted Payment Methods</div>
-                <div class="detail-value">${escapeHtml(modeLabels.join(', '))}</div>
-            </div>
-        `;
+        html += renderDetailItemHtml('Accepted Payment Methods', modeLabels.join(', '), null, { wide: true });
     }
 
-    if (exchangeData.budgetRange) {
-        const budget = exchangeData.budgetRange;
-        const currency = budget.currency || exchangeData.currency || 'SAR';
-        html += `
-            <div class="detail-item budget-highlight">
-                <div class="detail-label">Budget Range</div>
-                <div class="detail-value budget-value">
-                    ${budget.min?.toLocaleString() || 0} - ${budget.max?.toLocaleString() || 0} ${currency}
-                </div>
-            </div>
-        `;
-    }
-
-    if (exchangeData.currency) {
-        html += `
-            <div class="detail-item">
-                <div class="detail-label">Currency</div>
-                <div class="detail-value">${exchangeData.currency}</div>
-            </div>
-        `;
+    if (exchangeData.currency && !exchangeData.budgetRange) {
+        html += renderDetailItemHtml('Currency', exchangeData.currency, null);
     }
 
     if (exchangeData.cashAmount) {
-        html += `
-            <div class="detail-item">
-                <div class="detail-label">Amount</div>
-                <div class="detail-value">${exchangeData.cashAmount.toLocaleString()} ${exchangeData.currency || 'SAR'}</div>
-            </div>
-        `;
+        html += renderDetailItemHtml('Amount', `${exchangeData.cashAmount.toLocaleString()} ${exchangeData.currency || 'SAR'}`, null);
     }
 
     if (exchangeData.cashPaymentTerms) {
-        html += `
-            <div class="detail-item">
-                <div class="detail-label">Payment Terms</div>
-                <div class="detail-value">${escapeHtml(exchangeData.cashPaymentTerms)}</div>
-            </div>
-        `;
+        html += renderDetailItemHtml('Payment Terms', exchangeData.cashPaymentTerms, null);
     }
 
     Object.keys(EXCHANGE_FIELD_LABELS).forEach(key => {
@@ -994,7 +1051,7 @@ function renderExchangeDetails(opportunity) {
 
     if (exchangeData.valueItems && exchangeData.valueItems.length > 0) {
         html += `
-            <div class="detail-item" style="grid-column: 1 / -1;">
+            <div class="detail-item detail-item--wide">
                 <div class="detail-label">Value Items</div>
                 <div class="detail-value">${formatValueItems(exchangeData.valueItems)}</div>
             </div>
@@ -1003,7 +1060,7 @@ function renderExchangeDetails(opportunity) {
 
     if (exchangeData.alternateExchangeDetails && exchangeData.alternateExchangeDetails.length > 0) {
         html += `
-            <div class="detail-item" style="grid-column: 1 / -1;">
+            <div class="detail-item detail-item--wide">
                 <div class="detail-label">Alternate Exchange Options</div>
                 <div class="detail-value">${formatAlternateExchangeDetails(exchangeData.alternateExchangeDetails)}</div>
             </div>
@@ -1011,22 +1068,12 @@ function renderExchangeDetails(opportunity) {
     }
 
     if (exchangeData.exchangeTermsSummary) {
-        html += `
-            <div class="detail-item" style="grid-column: 1 / -1;">
-                <div class="detail-label">Terms Summary</div>
-                <div class="detail-value">${escapeHtml(exchangeData.exchangeTermsSummary)}</div>
-            </div>
-        `;
+        html += renderDetailItemHtml('Terms Summary', exchangeData.exchangeTermsSummary, null, { wide: true });
     }
 
     if (valueExchange.estimated_value != null) {
         const currency = valueExchange.currency || exchangeData.currency || 'SAR';
-        html += `
-            <div class="detail-item">
-                <div class="detail-label">Estimated Value</div>
-                <div class="detail-value">${Number(valueExchange.estimated_value).toLocaleString()} ${currency}</div>
-            </div>
-        `;
+        html += renderDetailItemHtml('Estimated Value', `${Number(valueExchange.estimated_value).toLocaleString()} ${currency}`, null);
     }
 
     if (valueExchange.value_offered) {
@@ -1063,7 +1110,12 @@ function renderScopeSection(opportunity) {
     if (!section || !container) return;
 
     const scopeFields = getScopeDisplayFields(opportunity);
-    const keys = Object.keys(scopeFields);
+    const keys = Object.keys(scopeFields).filter(key => {
+        const val = scopeFields[key];
+        if (val === null || val === undefined || val === '') return false;
+        if (Array.isArray(val) && val.length === 0) return false;
+        return true;
+    });
     if (keys.length === 0) {
         section.style.display = 'none';
         return;
@@ -1072,11 +1124,11 @@ function renderScopeSection(opportunity) {
     section.style.display = 'block';
     container.innerHTML = keys.map(key => {
         const label = SCOPE_FIELD_LABELS[key] || formatLabel(key);
-        const displayValue = formatModelDetailValue(scopeFields[key], key);
+        const content = renderDetailFieldContent(key, scopeFields[key]);
         return `
-            <div class="detail-item">
-                <div class="detail-label">${escapeHtml(label)}</div>
-                <div class="detail-value">${escapeHtml(displayValue)}</div>
+            <div class="opp-scope-row">
+                <div class="opp-scope-row__label">${escapeHtml(label)}</div>
+                <div class="opp-scope-row__value">${content}</div>
             </div>
         `;
     }).join('');
@@ -1097,15 +1149,18 @@ function renderWorkPackages(opportunity) {
 
     section.style.display = 'block';
     container.innerHTML = `
-        <ul class="work-packages-list" style="list-style:disc;padding-left:1.25rem;margin:0;">
-            ${packages.map(p => `
-                <li style="margin-bottom:0.75rem;">
-                    <strong>${escapeHtml(p.title)}</strong>
-                    ${p.duration ? ` · ${escapeHtml(String(p.duration))} days` : ''}
-                    ${p.notes ? `<div style="color:var(--text-secondary);font-size:0.875rem;margin-top:0.25rem;">${escapeHtml(p.notes)}</div>` : ''}
-                </li>
+        <div class="opp-work-packages">
+            ${packages.map((p, i) => `
+                <div class="opp-work-package-card">
+                    <div class="opp-work-package-card__index" aria-hidden="true">${i + 1}</div>
+                    <div class="opp-work-package-card__body">
+                        <div class="opp-work-package-card__title">${escapeHtml(p.title)}</div>
+                        ${p.duration ? `<div class="opp-work-package-card__meta">${escapeHtml(String(p.duration))} days estimated</div>` : ''}
+                        ${p.notes ? `<div class="opp-work-package-card__notes">${escapeHtml(p.notes)}</div>` : ''}
+                    </div>
+                </div>
             `).join('')}
-        </ul>
+        </div>
     `;
 }
 
@@ -1152,17 +1207,13 @@ async function renderModelDetails(opportunity) {
 
     const detailsHTML = sortedKeys.map(key => {
         const value = modelSpecificData[key];
-        const displayValue = formatModelDetailValue(value, key);
         const label = attributeMap[key] || formatLabel(key);
-        return `
-            <div class="detail-item">
-                <div class="detail-label">${escapeHtml(label)}</div>
-                <div class="detail-value">${escapeHtml(displayValue)}</div>
-            </div>
-        `;
-    }).join('');
+        const isTimeline = TIMELINE_KEYS.has(key);
+        const isWide = ROLE_CARD_KEYS.has(key);
+        return renderDetailItemHtml(label, value, key, { timeline: isTimeline, wide: isWide });
+    }).filter(Boolean).join('');
 
-    container.innerHTML = detailsHTML;
+    container.innerHTML = detailsHTML || '<p class="text-muted">No additional details available.</p>';
 }
 
 function formatModelDetailValue(value, key) {
