@@ -41,9 +41,9 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T20:22:21.009Z",
-      "updatedAt": "2026-06-10T20:22:21.010Z",
-      "expiresAt": "2026-06-24T20:22:21.010Z",
+      "createdAt": "2026-06-10T21:05:01.680Z",
+      "updatedAt": "2026-06-10T21:05:01.681Z",
+      "expiresAt": "2026-06-24T21:05:01.681Z",
       "isReplacement": false
     },
     {
@@ -84,9 +84,9 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T20:22:21.042Z",
-      "updatedAt": "2026-06-10T20:22:21.042Z",
-      "expiresAt": "2026-06-24T20:22:21.042Z",
+      "createdAt": "2026-06-10T21:05:01.735Z",
+      "updatedAt": "2026-06-10T21:05:01.735Z",
+      "expiresAt": "2026-06-24T21:05:01.735Z",
       "isReplacement": false
     },
     {
@@ -140,9 +140,9 @@
         "scoreBtoA": 0.975,
         "valueEquivalence": "~1.0 × ([G] Barter need B — Architect services)"
       },
-      "createdAt": "2026-06-10T20:22:21.043Z",
-      "updatedAt": "2026-06-10T20:22:21.043Z",
-      "expiresAt": "2026-06-24T20:22:21.043Z",
+      "createdAt": "2026-06-10T21:05:01.742Z",
+      "updatedAt": "2026-06-10T21:05:01.742Z",
+      "expiresAt": "2026-06-24T21:05:01.742Z",
       "isReplacement": false
     },
     {
@@ -183,9 +183,9 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T20:22:21.045Z",
-      "updatedAt": "2026-06-10T20:22:21.045Z",
-      "expiresAt": "2026-06-24T20:22:21.045Z",
+      "createdAt": "2026-06-10T21:05:01.746Z",
+      "updatedAt": "2026-06-10T21:05:01.746Z",
+      "expiresAt": "2026-06-24T21:05:01.746Z",
       "isReplacement": false
     },
     {
@@ -226,9 +226,9 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T20:22:21.069Z",
-      "updatedAt": "2026-06-10T20:22:21.069Z",
-      "expiresAt": "2026-06-24T20:22:21.069Z",
+      "createdAt": "2026-06-10T21:05:01.763Z",
+      "updatedAt": "2026-06-10T21:05:01.763Z",
+      "expiresAt": "2026-06-24T21:05:01.763Z",
       "isReplacement": false
     },
     {
@@ -314,9 +314,9 @@
         ],
         "chainBalance": null
       },
-      "createdAt": "2026-06-10T20:22:21.072Z",
-      "updatedAt": "2026-06-10T20:22:21.072Z",
-      "expiresAt": "2026-06-24T20:22:21.072Z",
+      "createdAt": "2026-06-10T21:05:01.767Z",
+      "updatedAt": "2026-06-10T21:05:01.767Z",
+      "expiresAt": "2026-06-24T21:05:01.767Z",
       "isReplacement": false
     },
     {
@@ -357,9 +357,9 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T20:22:21.072Z",
-      "updatedAt": "2026-06-10T20:22:21.072Z",
-      "expiresAt": "2026-06-24T20:22:21.072Z",
+      "createdAt": "2026-06-10T21:05:01.767Z",
+      "updatedAt": "2026-06-10T21:05:01.767Z",
+      "expiresAt": "2026-06-24T21:05:01.767Z",
       "isReplacement": false
     },
     {
@@ -400,9 +400,9 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T20:22:21.076Z",
-      "updatedAt": "2026-06-10T20:22:21.076Z",
-      "expiresAt": "2026-06-24T20:22:21.076Z",
+      "createdAt": "2026-06-10T21:05:01.772Z",
+      "updatedAt": "2026-06-10T21:05:01.772Z",
+      "expiresAt": "2026-06-24T21:05:01.772Z",
       "isReplacement": false
     },
     {
@@ -443,9 +443,9 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T20:22:21.099Z",
-      "updatedAt": "2026-06-10T20:22:21.099Z",
-      "expiresAt": "2026-06-24T20:22:21.099Z",
+      "createdAt": "2026-06-10T21:05:01.782Z",
+      "updatedAt": "2026-06-10T21:05:01.782Z",
+      "expiresAt": "2026-06-24T21:05:01.782Z",
       "isReplacement": false
     },
     {
@@ -486,9 +486,9 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T20:22:21.105Z",
-      "updatedAt": "2026-06-10T20:22:21.105Z",
-      "expiresAt": "2026-06-24T20:22:21.105Z",
+      "createdAt": "2026-06-10T21:05:01.786Z",
+      "updatedAt": "2026-06-10T21:05:01.786Z",
+      "expiresAt": "2026-06-24T21:05:01.786Z",
       "isReplacement": false
     },
     {
@@ -529,99 +529,13 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T20:22:21.112Z",
-      "updatedAt": "2026-06-10T20:22:21.112Z",
-      "expiresAt": "2026-06-24T20:22:21.112Z",
+      "createdAt": "2026-06-10T21:05:01.791Z",
+      "updatedAt": "2026-06-10T21:05:01.791Z",
+      "expiresAt": "2026-06-24T21:05:01.791Z",
       "isReplacement": false
     },
     {
       "id": "demo-pm-oneway-10",
-      "matchType": "one_way",
-      "status": "pending",
-      "matchScore": 0.915,
-      "runId": "seed-run-001",
-      "participants": [
-        {
-          "userId": "seed-user-001",
-          "opportunityId": "seed-opp-001",
-          "role": "need_owner",
-          "participantStatus": "pending",
-          "respondedAt": null
-        },
-        {
-          "userId": "seed-user-002",
-          "opportunityId": "seed-opp-003",
-          "role": "offer_provider",
-          "participantStatus": "pending",
-          "respondedAt": null
-        }
-      ],
-      "payload": {
-        "needOpportunityId": "seed-opp-001",
-        "offerOpportunityId": "seed-opp-003",
-        "breakdown": {
-          "skillMatch": 1,
-          "attributeOverlap": 1,
-          "serviceOverlapPct": 1,
-          "exchangeCompatibility": 1,
-          "valueCompatibility": 0.5,
-          "budgetFit": 0.8,
-          "timelineFit": 1,
-          "locationFit": 1,
-          "reputation": 0.5
-        },
-        "valueAnalysis": null
-      },
-      "createdAt": "2026-06-10T20:22:21.010Z",
-      "updatedAt": "2026-06-10T20:22:21.010Z",
-      "expiresAt": "2026-06-24T20:22:21.010Z",
-      "isReplacement": false
-    },
-    {
-      "id": "demo-pm-oneway-11",
-      "matchType": "one_way",
-      "status": "pending",
-      "matchScore": 0.813,
-      "runId": "seed-run-003",
-      "participants": [
-        {
-          "userId": "seed-user-009",
-          "opportunityId": "seed-opp-012",
-          "role": "need_owner",
-          "participantStatus": "pending",
-          "respondedAt": null
-        },
-        {
-          "userId": "seed-user-002",
-          "opportunityId": "seed-opp-003",
-          "role": "offer_provider",
-          "participantStatus": "pending",
-          "respondedAt": null
-        }
-      ],
-      "payload": {
-        "needOpportunityId": "seed-opp-012",
-        "offerOpportunityId": "seed-opp-003",
-        "breakdown": {
-          "skillMatch": 1,
-          "attributeOverlap": 1,
-          "serviceOverlapPct": 1,
-          "exchangeCompatibility": 0.5,
-          "valueCompatibility": 0.5,
-          "budgetFit": 0.46,
-          "timelineFit": 1,
-          "locationFit": 1,
-          "reputation": 0.5
-        },
-        "valueAnalysis": null
-      },
-      "createdAt": "2026-06-10T20:22:21.027Z",
-      "updatedAt": "2026-06-10T20:22:21.027Z",
-      "expiresAt": "2026-06-24T20:22:21.027Z",
-      "isReplacement": false
-    },
-    {
-      "id": "demo-pm-oneway-12",
       "matchType": "one_way",
       "status": "pending",
       "matchScore": 0.777,
@@ -658,13 +572,13 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T20:22:21.042Z",
-      "updatedAt": "2026-06-10T20:22:21.042Z",
-      "expiresAt": "2026-06-24T20:22:21.042Z",
+      "createdAt": "2026-06-10T21:05:01.735Z",
+      "updatedAt": "2026-06-10T21:05:01.735Z",
+      "expiresAt": "2026-06-24T21:05:01.735Z",
       "isReplacement": false
     },
     {
-      "id": "demo-pm-oneway-13",
+      "id": "demo-pm-oneway-11",
       "matchType": "one_way",
       "status": "pending",
       "matchScore": 0.775,
@@ -701,99 +615,13 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T20:22:21.032Z",
-      "updatedAt": "2026-06-10T20:22:21.032Z",
-      "expiresAt": "2026-06-24T20:22:21.032Z",
+      "createdAt": "2026-06-10T21:05:01.721Z",
+      "updatedAt": "2026-06-10T21:05:01.721Z",
+      "expiresAt": "2026-06-24T21:05:01.721Z",
       "isReplacement": false
     },
     {
-      "id": "demo-pm-oneway-14",
-      "matchType": "one_way",
-      "status": "pending",
-      "matchScore": 0.675,
-      "runId": "seed-run-003",
-      "participants": [
-        {
-          "userId": "seed-co-corp-002",
-          "opportunityId": "seed-opp-005",
-          "role": "need_owner",
-          "participantStatus": "pending",
-          "respondedAt": null
-        },
-        {
-          "userId": "seed-user-002",
-          "opportunityId": "seed-opp-003",
-          "role": "offer_provider",
-          "participantStatus": "pending",
-          "respondedAt": null
-        }
-      ],
-      "payload": {
-        "needOpportunityId": "seed-opp-005",
-        "offerOpportunityId": "seed-opp-003",
-        "breakdown": {
-          "skillMatch": 0.5,
-          "attributeOverlap": 0.5,
-          "serviceOverlapPct": 0.5,
-          "exchangeCompatibility": 1,
-          "valueCompatibility": 0.5,
-          "budgetFit": 0.6666666666666666,
-          "timelineFit": 1,
-          "locationFit": 1,
-          "reputation": 0.5
-        },
-        "valueAnalysis": null
-      },
-      "createdAt": "2026-06-10T20:22:21.028Z",
-      "updatedAt": "2026-06-10T20:22:21.028Z",
-      "expiresAt": "2026-06-24T20:22:21.028Z",
-      "isReplacement": false
-    },
-    {
-      "id": "demo-pm-oneway-15",
-      "matchType": "one_way",
-      "status": "pending",
-      "matchScore": 0.67,
-      "runId": "seed-run-004",
-      "participants": [
-        {
-          "userId": "seed-co-corp-001",
-          "opportunityId": "seed-opp-023",
-          "role": "need_owner",
-          "participantStatus": "pending",
-          "respondedAt": null
-        },
-        {
-          "userId": "seed-user-002",
-          "opportunityId": "seed-opp-004",
-          "role": "offer_provider",
-          "participantStatus": "pending",
-          "respondedAt": null
-        }
-      ],
-      "payload": {
-        "needOpportunityId": "seed-opp-023",
-        "offerOpportunityId": "seed-opp-004",
-        "breakdown": {
-          "skillMatch": 0.6666666666666666,
-          "attributeOverlap": 0.6666666666666666,
-          "serviceOverlapPct": 0.6666666666666666,
-          "exchangeCompatibility": 1,
-          "valueCompatibility": 0.5,
-          "budgetFit": 0.42857142857142855,
-          "timelineFit": 1,
-          "locationFit": 1,
-          "reputation": 0.5
-        },
-        "valueAnalysis": null
-      },
-      "createdAt": "2026-06-10T20:22:21.029Z",
-      "updatedAt": "2026-06-10T20:22:21.029Z",
-      "expiresAt": "2026-06-24T20:22:21.029Z",
-      "isReplacement": false
-    },
-    {
-      "id": "demo-pm-oneway-16",
+      "id": "demo-pm-oneway-12",
       "matchType": "one_way",
       "status": "pending",
       "matchScore": 0.625,
@@ -830,13 +658,13 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T20:22:21.025Z",
-      "updatedAt": "2026-06-10T20:22:21.025Z",
-      "expiresAt": "2026-06-24T20:22:21.025Z",
+      "createdAt": "2026-06-10T21:05:01.705Z",
+      "updatedAt": "2026-06-10T21:05:01.705Z",
+      "expiresAt": "2026-06-24T21:05:01.705Z",
       "isReplacement": false
     },
     {
-      "id": "demo-pm-oneway-17",
+      "id": "demo-pm-oneway-13",
       "matchType": "one_way",
       "status": "pending",
       "matchScore": 0.6,
@@ -873,9 +701,9 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-10T20:22:21.025Z",
-      "updatedAt": "2026-06-10T20:22:21.025Z",
-      "expiresAt": "2026-06-24T20:22:21.025Z",
+      "createdAt": "2026-06-10T21:05:01.705Z",
+      "updatedAt": "2026-06-10T21:05:01.705Z",
+      "expiresAt": "2026-06-24T21:05:01.705Z",
       "isReplacement": false
     },
     {
@@ -912,9 +740,9 @@
         ],
         "valueBalance": null
       },
-      "createdAt": "2026-06-10T20:22:21.061Z",
-      "updatedAt": "2026-06-10T20:22:21.061Z",
-      "expiresAt": "2026-06-24T20:22:21.061Z",
+      "createdAt": "2026-06-10T21:05:01.757Z",
+      "updatedAt": "2026-06-10T21:05:01.757Z",
+      "expiresAt": "2026-06-24T21:05:01.757Z",
       "isReplacement": false
     }
   ]

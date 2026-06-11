@@ -22,6 +22,7 @@ function setupGlobalConfig(options = {}) {
         POST_TO_POST_THRESHOLD: 0.50,
         HARD_CONSTRAINTS_ENABLED: true,
         STRICT_ROLE_REQUIRED: true,
+        STRICT_ROLE_EXACT_MATCH: true,
         MIN_REQUIRED_SERVICE_OVERLAP: 0.50,
         MIN_SKILL_SCORE_FOR_MATCH: 0.50,
         DEBUG: debug,

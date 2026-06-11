@@ -771,10 +771,10 @@ function generateControlledOpportunities() {
             targetRole: 'Architect', skills: architectSkills,
             budgetMin: 150000, budgetMax: 400000
         },
-        // Scenario B — compatible Interior Designer
+        // Scenario B — different profession (Interior Designer) rejected under exact-role mode
         {
             id: 'seed-opp-003', intent: 'offer', creator: 2, scenario: 'B',
-            title: '[B] Interior Designer offer — matrix compatibility',
+            title: '[B] Interior Designer offer — role reject vs Architect need (exact mode)',
             targetRole: 'Interior Designer',
             skills: ['BIM', '3D Visualization', 'Sustainable Design', 'LEED Certification', 'Space Planning', 'FF&E'],
             budgetMin: 120000, budgetMax: 350000
@@ -971,7 +971,7 @@ function validateScenarioChecklist(opportunities) {
 
     const checks = [
         { label: 'A strict match', result: deps.hardConstraints.passesPair(needA, offerA) },
-        { label: 'B compatibility', result: deps.hardConstraints.passesPair(needA, offerB) },
+        { label: 'B role reject (exact mode: Architect vs Interior Designer)', result: deps.hardConstraints.passesPair(needA, offerB), expectFail: true, expectReason: 'role_incompatible' },
         { label: 'C role reject', result: deps.hardConstraints.passesPair(needA, offerC), expectFail: true },
         { label: 'D core skill reject', result: deps.hardConstraints.passesPair(needD, offerD), expectFail: true },
         { label: 'E overlap reject', result: deps.hardConstraints.passesPair(needE, offerE), expectFail: true },

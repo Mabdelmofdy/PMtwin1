@@ -59,6 +59,12 @@
         if (!need || !offer) return false;
         if (need.toLowerCase() === offer.toLowerCase()) return true;
 
+        // Exact-match mode: the requested profession is a non-negotiable filter.
+        // Skill overlap (e.g. shared AutoCAD/BIM) never bridges two different roles.
+        if (CONFIG.MATCHING?.STRICT_ROLE_EXACT_MATCH !== false) {
+            return false;
+        }
+
         const allowed = ROLE_COMPATIBILITY[need]
             || ROLE_COMPATIBILITY[needRole]
             || ROLE_COMPATIBILITY[normalizeRoleLabel(needRole)];

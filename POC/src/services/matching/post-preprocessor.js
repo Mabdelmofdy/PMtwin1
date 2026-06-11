@@ -142,6 +142,11 @@
         const explicit = att.targetRole || att.professionalRole;
         if (explicit) return normalizeSkill(toSkillString(explicit), synonyms);
 
+        // With strict role enforcement, an opportunity without an explicit profession
+        // must not borrow a skill name as its role; leave it empty so the hard gate
+        // rejects it (role_missing) instead of guessing.
+        if (CONFIG.MATCHING?.STRICT_ROLE_REQUIRED) return '';
+
         const primary = (opportunity.intent === 'offer')
             ? (scope.offeredSkills?.[0] || att.offeredSkills?.[0])
             : (scope.requiredSkills?.[0] || att.requiredSkills?.[0]);

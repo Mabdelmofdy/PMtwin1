@@ -18,6 +18,7 @@ function buildConfig() {
         MATCHING: {
             HARD_CONSTRAINTS_ENABLED: true,
             STRICT_ROLE_REQUIRED: true,
+            STRICT_ROLE_EXACT_MATCH: true,
             MIN_REQUIRED_SERVICE_OVERLAP: 0.50,
             MIN_SKILL_SCORE_FOR_MATCH: 0.50
         }
@@ -73,7 +74,7 @@ describe('hard-constraints role gate', () => {
         expect(result.offerRole).toBe('Civil Engineer');
     });
 
-    it('allows Architect Need with Interior Designer Offer', () => {
+    it('rejects Architect Need with Interior Designer Offer under exact-role mode', () => {
         const offer = offerPost({
             attributes: { targetRole: 'Interior Designer' },
             normalized: {
@@ -83,9 +84,51 @@ describe('hard-constraints role gate', () => {
             }
         });
         const result = hardConstraints.passesPair(needPost(), offer);
-        expect(result.ok).toBe(true);
+        expect(result.ok).toBe(false);
+        expect(result.reason).toBe('role_incompatible');
         expect(result.needRole).toBe('Architect');
         expect(result.offerRole).toBe('Interior Designer');
+    });
+
+    it('rejects Structural Engineer Need with Civil Engineer Offer under exact-role mode', () => {
+        const need = needPost({
+            attributes: { targetRole: 'Structural Engineer' },
+            normalized: {
+                role: 'Structural Engineer',
+                requiredServices: ['Structural Analysis', 'SAP2000'],
+                offeredServices: [],
+                coreSkills: [],
+                skills: ['Structural Analysis', 'SAP2000']
+            }
+        });
+        const offer = offerPost({
+            attributes: { targetRole: 'Civil Engineer' },
+            normalized: {
+                role: 'Civil Engineer',
+                offeredServices: ['Structural Analysis', 'SAP2000'],
+                skills: ['Structural Analysis', 'SAP2000']
+            }
+        });
+        const result = hardConstraints.passesPair(need, offer);
+        expect(result.ok).toBe(false);
+        expect(result.reason).toBe('role_incompatible');
+        expect(result.needRole).toBe('Structural Engineer');
+        expect(result.offerRole).toBe('Civil Engineer');
+    });
+
+    it('allows exact same role (Architect Need with Architect Offer)', () => {
+        const offer = offerPost({
+            attributes: { targetRole: 'Architect' },
+            normalized: {
+                role: 'Architect',
+                offeredServices: ['BIM', '3D Visualization'],
+                skills: ['BIM', '3D Visualization']
+            }
+        });
+        const result = hardConstraints.passesPair(needPost(), offer);
+        expect(result.ok).toBe(true);
+        expect(result.needRole).toBe('Architect');
+        expect(result.offerRole).toBe('Architect');
     });
 
     it('rejects when need role is missing', () => {
@@ -185,5 +228,15 @@ describe('post-preprocessor role and services extraction', () => {
         expect(needNorm.coreSkills).toEqual(['BIM']);
         expect(offerNorm.role).toBe('Architect');
         expect(offerNorm.offeredServices).toEqual(['BIM', 'SketchUp']);
+    });
+
+    it('does not fall back to first skill as role under strict role mode', () => {
+        const need = {
+            intent: 'request',
+            attributes: {},
+            scope: { requiredSkills: ['General Consulting', 'Advisory'] }
+        };
+        const needNorm = postPreprocessor.extractAndNormalize(need);
+        expect(needNorm.role).toBe('');
     });
 });

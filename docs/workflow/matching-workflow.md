@@ -91,6 +91,21 @@ Publish (`status: published`) also calls `persistPostMatches` and does **not** c
 
 ---
 
+## 2b. Hard Constraints: exact profession filter
+
+Before any pair is scored, `hard-constraints.passesPair()` (`POC/src/services/matching/hard-constraints.js`) applies mandatory gates. The first and strongest is the **profession/role gate**.
+
+- **Where the role comes from:** `attributes.targetRole` (or `attributes.professionalRole`) on each opportunity, normalized into `normalized.role` by `post-preprocessor.js`. Aliases such as "Civil Engineering" → "Civil Engineer" are normalized for label consistency only.
+- **Exact match required:** With `CONFIG.MATCHING.STRICT_ROLE_EXACT_MATCH` enabled (default), the need's role and the offer's role must be **identical** (case-insensitive after alias normalization). The related-profession compatibility matrix is disabled. An Architect need never matches a Civil Engineer or Interior Designer offer, even when they share skills like AutoCAD or BIM.
+- **Skill overlap never overrides profession:** Core-skill and service-overlap checks run only **after** the role gate passes. A perfect skill match cannot rescue a profession mismatch.
+- **Missing role is rejected:** With `CONFIG.MATCHING.STRICT_ROLE_REQUIRED` enabled (default), an opportunity without an explicit `targetRole` does not borrow its first skill as a role. The gate rejects it with `role_missing`, so role-less legacy posts produce no matches.
+
+This gate runs in both the candidate generator (`candidate-generator.js`) and the model flows (`matching-models.js`), so cross-profession pairs are filtered out before scoring in every model.
+
+**Verification:** `node scripts/audit-opportunities-matching.js` reports field readiness, per-opportunity model routing, and a role-safety scan asserting zero `one_way`/`two_way` matches across professions. `tests/hard-constraints.test.js` and `tests/opportunity-matching-coverage.test.js` cover the same guarantees.
+
+---
+
 ## 3. One-Way Matching Flow
 
 **Need (request) → Offers:**
