@@ -2,11 +2,11 @@
   "totalPostsAnalyzed": 40,
   "totalNeeds": 22,
   "totalOffers": 18,
-  "oneWayMatches": 6,
-  "twoWayMatches": 2,
+  "oneWayMatches": 3,
+  "twoWayMatches": 1,
   "groupFormations": 2,
   "circularExchanges": 1,
-  "totalMatchesFound": 11,
+  "totalMatchesFound": 7,
   "oneWayDetails": [
     {
       "needId": "seed-opp-001",
@@ -17,30 +17,11 @@
       "needId": "seed-opp-005",
       "matchCount": 2,
       "topScore": 0.775
-    },
-    {
-      "needId": "seed-opp-017",
-      "matchCount": 1,
-      "topScore": 0.975
-    },
-    {
-      "needId": "seed-opp-019",
-      "matchCount": 1,
-      "topScore": 0.975
-    },
-    {
-      "needId": "seed-opp-021",
-      "matchCount": 1,
-      "topScore": 0.975
     }
   ],
   "twoWayDetails": [
     {
       "needId": "seed-opp-010",
-      "pairCount": 1
-    },
-    {
-      "needId": "seed-opp-012",
       "pairCount": 1
     }
   ],

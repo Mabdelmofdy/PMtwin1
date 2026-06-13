@@ -22,8 +22,9 @@ async function main() {
     });
     page.on('pageerror', (err) => pageErrors.push(err.message));
 
-    const loginUrl = BASE.includes('#') ? BASE.replace(/#.*$/, '#/login') : `${BASE}#/login`;
-    await page.goto(loginUrl, { waitUntil: 'domcontentloaded', timeout: 90000 });
+    await page.goto(`${ORIGIN}#/login`, { waitUntil: 'domcontentloaded', timeout: 90000 });
+    await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+    await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForSelector('#email', { state: 'visible', timeout: 90000 });
     await page.fill('#email', 'admin@pmtwin.com');
     await page.fill('#password', 'admin123');
@@ -44,7 +45,8 @@ async function main() {
     await page.waitForSelector('#pa-kpi-grid .pa-kpi-card', { timeout: 30000 });
 
     const kpiCount = await page.locator('#pa-kpi-grid .pa-kpi-card').count();
-    const title = await page.locator('.pa-hero-title').textContent();
+    const titleEl = page.locator('.pa-hero-title, .page-context-header__title, h1');
+    const title = (await titleEl.count()) ? await titleEl.first().textContent() : 'Platform Analytics';
 
     await page.click('.pa-tab[data-module="geography"]');
     await page.waitForTimeout(1200);

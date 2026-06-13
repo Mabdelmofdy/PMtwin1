@@ -1,6 +1,235 @@
 {
   "domain": "deals",
-  "version": "1.0",
-  "description": "Cleared by controlled seeder",
-  "data": []
+  "version": "2.0",
+  "description": "E2E workflow deals tied to the 40 seed opportunities (scripts/seed-e2e-workflow.js).",
+  "data": [
+    {
+      "id": "seed-deal-oneway-01",
+      "matchId": "demo-pm-oneway-01",
+      "applicationId": "seed-app-001",
+      "negotiationId": "seed-neg-01",
+      "opportunityId": "seed-opp-001",
+      "opportunityIds": [
+        "seed-opp-001",
+        "seed-opp-002"
+      ],
+      "matchType": "one_way",
+      "status": "completed",
+      "title": "Architect package — sustainable tower design",
+      "participants": [
+        {
+          "userId": "seed-user-001",
+          "role": "need_owner",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-18T12:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-002",
+          "role": "offer_provider",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-18T12:00:00.000Z"
+        }
+      ],
+      "payload": null,
+      "roleSlots": null,
+      "scope": "Full architectural design package: BIM, 3D visualization, sustainable design, LEED support.",
+      "timeline": {
+        "start": "2026-03-20",
+        "end": "2026-05-20"
+      },
+      "exchangeMode": "cash",
+      "valueTerms": {
+        "agreedValue": 250000,
+        "paymentSchedule": "30% on start, 40% at midpoint, 30% on completion"
+      },
+      "deliverables": "Concept, schematic and detailed design with BIM model.",
+      "milestones": [
+        {
+          "id": "seed-ms-ow-01",
+          "title": "Concept design",
+          "description": "Concept design approved.",
+          "dueDate": "2026-04-05",
+          "status": "approved",
+          "deliverables": "Concept set",
+          "submittedAt": "2026-04-03T09:00:00.000Z",
+          "approvedAt": "2026-04-05T09:00:00.000Z",
+          "approvedBy": "seed-user-001"
+        },
+        {
+          "id": "seed-ms-ow-02",
+          "title": "Detailed design",
+          "description": "Detailed design delivered and approved.",
+          "dueDate": "2026-05-18",
+          "status": "approved",
+          "deliverables": "Detailed set + BIM",
+          "submittedAt": "2026-05-16T09:00:00.000Z",
+          "approvedAt": "2026-05-18T09:00:00.000Z",
+          "approvedBy": "seed-user-001"
+        }
+      ],
+      "contractId": "seed-contract-oneway-01",
+      "createdAt": "2026-03-15T09:00:00.000Z",
+      "updatedAt": "2026-05-20T16:00:00.000Z",
+      "completedAt": "2026-05-20T16:00:00.000Z",
+      "closedAt": null
+    },
+    {
+      "id": "seed-deal-consortium-01",
+      "matchId": "demo-pm-consortium-01",
+      "applicationId": null,
+      "negotiationId": "seed-neg-04",
+      "opportunityId": "seed-opp-014",
+      "opportunityIds": [
+        "seed-opp-014",
+        "seed-opp-015"
+      ],
+      "matchType": "consortium",
+      "status": "execution",
+      "title": "Highway package consortium",
+      "participants": [
+        {
+          "userId": "seed-co-corp-005",
+          "role": "consortium_lead",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-18T12:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-011",
+          "role": "consortium_member",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-18T12:00:00.000Z"
+        }
+      ],
+      "payload": {
+        "leadNeedId": "seed-opp-014",
+        "roles": [
+          {
+            "role": "Architect",
+            "opportunityId": "seed-opp-015",
+            "userId": "seed-user-011"
+          }
+        ]
+      },
+      "roleSlots": null,
+      "scope": "Highway design-and-build package delivered by a led consortium (PM lead, architect, civil).",
+      "timeline": {
+        "start": "2026-03-20",
+        "end": "2027-09-20"
+      },
+      "exchangeMode": "cash",
+      "valueTerms": {
+        "agreedValue": 15000000,
+        "paymentSchedule": "Milestone-based across design and works"
+      },
+      "deliverables": "Design package, civil works, program management.",
+      "milestones": [
+        {
+          "id": "seed-ms-cons-01",
+          "title": "Mobilization",
+          "description": "Consortium mobilized and kickoff complete.",
+          "dueDate": "2026-04-10",
+          "status": "approved",
+          "deliverables": "Mobilization report",
+          "submittedAt": "2026-04-08T09:00:00.000Z",
+          "approvedAt": "2026-04-10T09:00:00.000Z",
+          "approvedBy": "seed-co-corp-005"
+        },
+        {
+          "id": "seed-ms-cons-02",
+          "title": "Detailed design",
+          "description": "Detailed design package delivered.",
+          "dueDate": "2026-08-10",
+          "status": "in_progress",
+          "deliverables": "Design set",
+          "submittedAt": null,
+          "approvedAt": null,
+          "approvedBy": null
+        }
+      ],
+      "contractId": "seed-contract-consortium-01",
+      "createdAt": "2026-03-15T09:00:00.000Z",
+      "updatedAt": "2026-03-18T12:00:00.000Z",
+      "completedAt": null,
+      "closedAt": null
+    },
+    {
+      "id": "seed-deal-exchange-01",
+      "matchId": "demo-pm-consortium-wind",
+      "applicationId": null,
+      "negotiationId": "seed-neg-07",
+      "opportunityId": "seed-opp-039",
+      "opportunityIds": [
+        "seed-opp-039",
+        "seed-opp-035"
+      ],
+      "matchType": "consortium",
+      "status": "execution",
+      "title": "Wind farm consortium — profit-sharing",
+      "participants": [
+        {
+          "userId": "seed-co-corp-005",
+          "role": "consortium_lead",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-18T12:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-013",
+          "role": "consortium_member",
+          "approvalStatus": "approved",
+          "signedAt": "2026-03-18T12:00:00.000Z"
+        }
+      ],
+      "payload": {
+        "leadNeedId": "seed-opp-039",
+        "roles": [
+          {
+            "role": "EPC contractor",
+            "opportunityId": "seed-opp-035",
+            "userId": "seed-user-013"
+          }
+        ]
+      },
+      "roleSlots": null,
+      "scope": "Wind farm package delivered by a profit-sharing consortium (lead PM, equipment/O&M partner).",
+      "timeline": {
+        "start": "2026-04-01",
+        "end": "2028-03-31"
+      },
+      "exchangeMode": "profit_sharing",
+      "valueTerms": {
+        "profitSplit": "65-35",
+        "profitDistribution": "Annual distribution after O&M costs"
+      },
+      "deliverables": "Wind farm EPC coordination, equipment provision, and O&M framework.",
+      "milestones": [
+        {
+          "id": "seed-ms-wind-01",
+          "title": "Consortium formation",
+          "description": "Partners aligned on profit-sharing terms.",
+          "dueDate": "2026-04-15",
+          "status": "approved",
+          "deliverables": "Consortium agreement",
+          "submittedAt": "2026-04-12T09:00:00.000Z",
+          "approvedAt": "2026-04-15T09:00:00.000Z",
+          "approvedBy": "seed-co-corp-005"
+        },
+        {
+          "id": "seed-ms-wind-02",
+          "title": "Feasibility complete",
+          "description": "Feasibility and permitting package delivered.",
+          "dueDate": "2026-09-30",
+          "status": "in_progress",
+          "deliverables": "Feasibility report",
+          "submittedAt": null,
+          "approvedAt": null,
+          "approvedBy": null
+        }
+      ],
+      "contractId": "seed-contract-exchange-01",
+      "createdAt": "2026-03-15T09:00:00.000Z",
+      "updatedAt": "2026-03-18T12:00:00.000Z",
+      "completedAt": null,
+      "closedAt": null
+    }
+  ]
 }

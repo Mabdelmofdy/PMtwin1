@@ -1,0 +1,268 @@
+{
+  "timestamp": "2026-06-13T11:53:34.494Z",
+  "baseUrl": "http://127.0.0.1:5500/index.html",
+  "versions": {
+    "expected": {
+      "app": "1.2.0",
+      "seed": "2.2.1"
+    },
+    "codebase": {
+      "app": "1.2.0",
+      "seed": "2.2.1"
+    },
+    "ok": true
+  },
+  "smoke": [
+    {
+      "route": "/admin",
+      "label": "Dashboard",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin"
+    },
+    {
+      "route": "/admin/vetting",
+      "label": "Vetting",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin/vetting"
+    },
+    {
+      "route": "/admin/users",
+      "label": "Users",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin/users"
+    },
+    {
+      "route": "/admin/opportunities",
+      "label": "Opportunities",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin/opportunities"
+    },
+    {
+      "route": "/admin/matching",
+      "label": "Matching",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin/matching"
+    },
+    {
+      "route": "/admin/consortium",
+      "label": "Consortium",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin/consortium"
+    },
+    {
+      "route": "/admin/deals",
+      "label": "Deals",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin/deals"
+    },
+    {
+      "route": "/admin/contracts",
+      "label": "Contracts",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin/contracts"
+    },
+    {
+      "route": "/admin/audit",
+      "label": "Audit",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin/audit"
+    },
+    {
+      "route": "/admin/reports",
+      "label": "Reports",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin/reports"
+    },
+    {
+      "route": "/admin/health",
+      "label": "Health",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin/health"
+    },
+    {
+      "route": "/admin/subscriptions",
+      "label": "Subscriptions",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin/subscriptions"
+    },
+    {
+      "route": "/admin/skills",
+      "label": "Skills",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin/skills"
+    },
+    {
+      "route": "/admin/settings",
+      "label": "Settings",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin/settings"
+    },
+    {
+      "route": "/admin/collaboration-models",
+      "label": "Collaboration models",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin/collaboration-models"
+    },
+    {
+      "route": "/admin/site-content",
+      "label": "Site content",
+      "ok": true,
+      "notes": [],
+      "hash": "#/admin/site-content"
+    }
+  ],
+  "functional": {
+    "matchingPreview": {
+      "ok": true,
+      "reportVisible": true,
+      "commandCenter": true
+    },
+    "matchingSave": {
+      "ok": true,
+      "postMatchesBefore": 17,
+      "postMatchesAfter": 17
+    },
+    "matchingBulkBar": {
+      "ok": true,
+      "present": true
+    },
+    "deals": {
+      "ok": true,
+      "dealCount": 3,
+      "liveTabCount": 2,
+      "dealDetailOk": true,
+      "firstDealId": "seed-deal-oneway-01"
+    },
+    "contracts": {
+      "ok": true,
+      "contractCount": 3,
+      "contractDetailOk": true
+    },
+    "consortium": {
+      "ok": true,
+      "listCount": 2
+    },
+    "userDetail": {
+      "ok": true,
+      "userId": "seed-user-001"
+    },
+    "health": {
+      "ok": true,
+      "seedVersion": "2.2.1",
+      "expectedSeed": "2.2.1",
+      "seedOk": true,
+      "metricCount": 7,
+      "nonZero": 7,
+      "seedText": ""
+    },
+    "consoleClean": {
+      "ok": true,
+      "errors": []
+    }
+  },
+  "roles": [
+    {
+      "role": "admin",
+      "actualRole": "admin",
+      "tests": [
+        {
+          "route": "/admin",
+          "ok": true,
+          "hash": "#/admin",
+          "expected": "/admin"
+        },
+        {
+          "route": "/admin/settings",
+          "ok": true,
+          "hash": "#/admin/settings",
+          "expected": "/admin/settings"
+        },
+        {
+          "route": "/admin/skills",
+          "ok": true,
+          "hash": "#/admin/skills",
+          "expected": "/admin/skills"
+        }
+      ],
+      "auditorPersistBlocked": null
+    },
+    {
+      "role": "moderator",
+      "actualRole": "moderator",
+      "tests": [
+        {
+          "route": "/admin",
+          "ok": true,
+          "hash": "#/admin",
+          "expected": "/admin"
+        },
+        {
+          "route": "/admin/settings",
+          "ok": true,
+          "hash": "#/admin/settings",
+          "expected": "/admin/settings"
+        },
+        {
+          "route": "/admin/skills",
+          "ok": true,
+          "hash": "#/dashboard",
+          "expected": "/dashboard"
+        }
+      ],
+      "auditorPersistBlocked": null,
+      "persistButtonsHidden": true
+    },
+    {
+      "role": "auditor",
+      "actualRole": "auditor",
+      "tests": [
+        {
+          "route": "/admin",
+          "ok": true,
+          "hash": "#/admin/audit",
+          "expected": "/admin/audit"
+        },
+        {
+          "route": "/admin/settings",
+          "ok": true,
+          "hash": "#/dashboard",
+          "expected": "/dashboard"
+        },
+        {
+          "route": "/admin/matching",
+          "ok": true,
+          "hash": "#/admin/matching",
+          "expected": "/admin/matching"
+        }
+      ],
+      "auditorPersistBlocked": null,
+      "persistControlsDisabled": true
+    }
+  ],
+  "ok": true,
+  "seedOnLoad": "2.2.1",
+  "appVersionInBrowser": "1.2.0",
+  "summary": {
+    "smokePass": true,
+    "smokeTotal": 16,
+    "smokeFailed": [],
+    "functionalPass": true,
+    "rolesPass": true,
+    "versionPass": true
+  }
+}

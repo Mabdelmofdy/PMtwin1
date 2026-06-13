@@ -1,6 +1,118 @@
 {
   "domain": "contracts",
-  "version": "1.0",
-  "description": "Cleared by controlled seeder",
-  "data": []
+  "version": "2.0",
+  "description": "E2E workflow contracts tied to the 40 seed opportunities (scripts/seed-e2e-workflow.js).",
+  "data": [
+    {
+      "id": "seed-contract-oneway-01",
+      "dealId": "seed-deal-oneway-01",
+      "opportunityId": "seed-opp-001",
+      "opportunityIds": [
+        "seed-opp-001",
+        "seed-opp-002"
+      ],
+      "matchId": "demo-pm-oneway-01",
+      "applicationId": "seed-app-001",
+      "negotiationId": "seed-neg-01",
+      "invitationId": null,
+      "parties": [
+        {
+          "userId": "seed-user-001",
+          "role": "need_owner",
+          "signedAt": "2026-03-18T12:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-002",
+          "role": "offer_provider",
+          "signedAt": "2026-03-18T12:00:00.000Z"
+        }
+      ],
+      "scope": "Full architectural design package: BIM, 3D visualization, sustainable design, LEED support.",
+      "paymentMode": "cash",
+      "agreedValue": 250000,
+      "duration": "4 months",
+      "paymentSchedule": "30% on start, 40% at midpoint, 30% on completion",
+      "equityVesting": null,
+      "profitShare": null,
+      "milestonesSnapshot": null,
+      "status": "completed",
+      "signedAt": "2026-03-18T12:00:00.000Z",
+      "createdAt": "2026-03-18T12:00:00.000Z",
+      "updatedAt": "2026-05-20T16:00:00.000Z"
+    },
+    {
+      "id": "seed-contract-consortium-01",
+      "dealId": "seed-deal-consortium-01",
+      "opportunityId": "seed-opp-014",
+      "opportunityIds": [
+        "seed-opp-014",
+        "seed-opp-015"
+      ],
+      "matchId": "demo-pm-consortium-01",
+      "applicationId": null,
+      "negotiationId": "seed-neg-04",
+      "invitationId": null,
+      "parties": [
+        {
+          "userId": "seed-co-corp-005",
+          "role": "consortium_lead",
+          "signedAt": "2026-03-18T12:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-011",
+          "role": "consortium_member",
+          "signedAt": "2026-03-18T12:00:00.000Z"
+        }
+      ],
+      "scope": "Highway design-and-build package delivered by a led consortium.",
+      "paymentMode": "cash",
+      "agreedValue": 15000000,
+      "duration": "18 months",
+      "paymentSchedule": "Milestone-based across design and works",
+      "equityVesting": null,
+      "profitShare": null,
+      "milestonesSnapshot": null,
+      "status": "active",
+      "signedAt": "2026-03-18T12:00:00.000Z",
+      "createdAt": "2026-03-18T12:00:00.000Z",
+      "updatedAt": "2026-03-18T12:00:00.000Z"
+    },
+    {
+      "id": "seed-contract-exchange-01",
+      "dealId": "seed-deal-exchange-01",
+      "opportunityId": "seed-opp-039",
+      "opportunityIds": [
+        "seed-opp-039",
+        "seed-opp-035"
+      ],
+      "matchId": "demo-pm-consortium-wind",
+      "applicationId": null,
+      "negotiationId": "seed-neg-07",
+      "invitationId": null,
+      "parties": [
+        {
+          "userId": "seed-co-corp-005",
+          "role": "consortium_lead",
+          "signedAt": "2026-03-18T12:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-013",
+          "role": "consortium_member",
+          "signedAt": "2026-03-18T12:00:00.000Z"
+        }
+      ],
+      "scope": "Wind farm package delivered by a profit-sharing consortium.",
+      "paymentMode": "profit_sharing",
+      "agreedValue": null,
+      "duration": "24 months",
+      "paymentSchedule": null,
+      "equityVesting": null,
+      "profitShare": "65-35",
+      "milestonesSnapshot": null,
+      "status": "active",
+      "signedAt": "2026-03-18T12:00:00.000Z",
+      "createdAt": "2026-03-18T12:00:00.000Z",
+      "updatedAt": "2026-03-18T12:00:00.000Z"
+    }
+  ]
 }
