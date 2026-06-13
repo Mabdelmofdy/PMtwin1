@@ -1,12 +1,15 @@
 <div class="page-container admin-matching-page">
-    <nav class="matching-jump-nav" aria-label="Matching Center sections">
-        <a href="#matching-snapshot" class="matching-jump-link">Snapshot</a>
-        <a href="#matching-command-center" class="matching-jump-link">Command center</a>
-        <a href="#matching-results" class="matching-jump-link">Results</a>
-        <a href="#matching-types-guide" class="matching-jump-link">Match types</a>
-    </nav>
-
     <div id="page-context-header-mount"></div>
+
+    <div class="matching-page-toolbar">
+        <p class="matching-page-toolbar-label">Jump to</p>
+        <nav class="matching-jump-nav" aria-label="Matching Center sections">
+            <a href="#matching-snapshot" class="matching-jump-link">Snapshot</a>
+            <a href="#matching-command-center" class="matching-jump-link">Command center</a>
+            <a href="#matching-results" class="matching-jump-link">Results</a>
+            <a href="#matching-types-guide" class="matching-jump-link">Match types</a>
+        </nav>
+    </div>
 
     <div class="page-body matching-page-body">
         <section id="matching-snapshot" class="matching-control-panel" aria-labelledby="matching-control-title">
@@ -15,9 +18,12 @@
                 <p class="matching-section-desc">The report scans published posts only. Results stay in preview until you explicitly persist.</p>
             </div>
             <div class="matching-control-meta" aria-label="Report run status">
-                <div class="matching-meta-item">
+                <div class="matching-meta-item matching-meta-item--status">
                     <span class="matching-meta-label">Status</span>
-                    <span class="matching-meta-value matching-run-state" id="matching-refresh-status" aria-live="polite">Ready to analyze current data</span>
+                    <span class="matching-meta-value matching-run-state" id="matching-refresh-status" aria-live="polite">
+                        <span class="matching-run-dot" aria-hidden="true"></span>
+                        Ready
+                    </span>
                 </div>
                 <div class="matching-meta-item">
                     <span class="matching-meta-label">Refresh</span>
@@ -75,18 +81,18 @@
                 </div>
 
                 <div class="matching-report-grid">
-                    <div class="matching-report-panel">
+                    <div class="matching-report-panel matching-report-panel--analytics">
                         <div class="matching-panel-header">
                             <h3 class="matching-panel-title">
                                 <i class="ph-duotone ph-database" aria-hidden="true"></i>
                                 Saved outcomes
                             </h3>
-                            <p class="matching-panel-hint">Persisted matches, deals, and lifecycle metrics.</p>
+                            <p class="matching-panel-hint">Persisted matches, deals, and lifecycle metrics grouped by pipeline stage.</p>
                         </div>
-                        <div id="matching-admin-analytics" class="stats-grid matching-overview-grid matching-analytics-grid"></div>
+                        <div id="matching-admin-analytics" class="matching-analytics-groups"></div>
                     </div>
 
-                    <div class="matching-report-panel">
+                    <div class="matching-report-panel matching-report-panel--preview">
                         <div class="matching-panel-header">
                             <h3 class="matching-panel-title">
                                 <i class="ph-duotone ph-magnifying-glass" aria-hidden="true"></i>
@@ -94,7 +100,7 @@
                             </h3>
                             <p class="matching-panel-hint">Counts from the latest preview run (no post_matches created until you save).</p>
                         </div>
-                        <div class="stats-grid matching-overview-grid" id="matching-stats-grid"></div>
+                        <div class="stats-grid matching-overview-grid matching-preview-grid" id="matching-stats-grid"></div>
                     </div>
                 </div>
 
@@ -166,7 +172,7 @@
                     </div>
                 </div>
             </div>
-            <div class="workflow-cards">
+            <div class="workflow-cards ds-stagger">
                 <article class="workflow-card">
                     <span class="workflow-card-icon" aria-hidden="true"><i class="ph-duotone ph-arrows-left-right"></i></span>
                     <h3 class="workflow-card-title">Need-offer</h3>
