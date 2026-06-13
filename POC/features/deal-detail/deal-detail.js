@@ -430,6 +430,19 @@ async function finalizeDealDetailRender(dealId, userId) {
         stageEl.dataset.dealId = dealId;
         stageEl.dataset.actorUserId = userId;
     }
+
+    const rateLink = document.getElementById('deal-link-rate');
+    if (rateLink && (deal.status || '').toLowerCase() === 'completed') {
+        const reviews = typeof dataService.getReviews === 'function' ? await dataService.getReviews() : [];
+        const pendingReviewees = (deal.participants || []).filter(
+            p =>
+                p.userId !== userId &&
+                !reviews.some(r => r.dealId === dealId && r.reviewerId === userId && r.revieweeId === p.userId)
+        );
+        if (pendingReviewees.length === 0) {
+            rateLink.remove();
+        }
+    }
 }
 
 function getMilestoneStatusBadgeClass(status) {

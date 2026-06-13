@@ -149,7 +149,11 @@ function renderAdminDealCard(d) {
 
     const auditBase = (typeof CONFIG !== 'undefined' && CONFIG.ROUTES && CONFIG.ROUTES.ADMIN_AUDIT) ? CONFIG.ROUTES.ADMIN_AUDIT : '/admin/audit';
     const dealRoute = di => (CONFIG.ROUTES.ADMIN_DEAL_DETAIL || '/admin/deals/:id').replace(':id', di);
-    const auditDealRoute = di => auditBase + '?entityType=deal&entityId=' + encodeURIComponent(di);
+    const auditDealRoute = (dealId, linkedOppId) => {
+        let url = auditBase + '?dealId=' + encodeURIComponent(dealId);
+        if (linkedOppId) url += '&opportunityId=' + encodeURIComponent(linkedOppId);
+        return url;
+    };
     const oppRoute = oid => (CONFIG.ROUTES.OPPORTUNITY_DETAIL || '/opportunities/:id').replace(':id', oid);
     const contractDetailRoute = coid => (CONFIG.ROUTES.ADMIN_CONTRACT_DETAIL || '/admin/contracts/:id').replace(':id', coid);
 
@@ -197,7 +201,7 @@ function renderAdminDealCard(d) {
             Opportunity
         </a>`);
     }
-    actions.push(`<a href="#" data-route="${auditDealRoute(d.id)}" class="ao-action">
+    actions.push(`<a href="#" data-route="${auditDealRoute(d.id, oppId)}" class="ao-action">
         <i class="ph-duotone ph-list-checks" aria-hidden="true"></i>
         Audit
     </a>`);

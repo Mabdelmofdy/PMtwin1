@@ -4,8 +4,11 @@
         <p>Loading...</p>
     </div>
     <div id="deal-rate-error" style="display: none;" class="error-state">
-        <p>Deal not found or you cannot rate this deal.</p>
-        <a href="#" data-route="/deals" class="btn btn-primary">Back to Deals</a>
+        <p data-deal-rate-error-message>Deal not found or you cannot rate this deal.</p>
+        <div class="flex gap-2 justify-center flex-wrap mt-4">
+            <a href="#" data-deal-rate-deal-link data-route="/deals" class="btn btn-primary" style="display: none;">View deal</a>
+            <a href="#" data-route="/deals" class="btn btn-outline">Back to Deals</a>
+        </div>
     </div>
     <div id="deal-rate-form" style="display: none;">
         <a href="#" data-route="/deals" class="back-link"><i class="ph-duotone ph-arrow-left"></i> Back to Deals</a>

@@ -303,9 +303,8 @@
         adminMatching: {
             label: 'Admin Workspace',
             title: 'Matching Center',
-            description:
-                'Preview matches across published needs and offers, review lifecycle queues, and persist outcomes when you are ready.',
-            primaryAction: { label: 'Run preview report', id: 'matching-run-report-btn', type: 'button', class: 'matching-run-btn' },
+            description: 'Run a preview, review suggested matches, then save only what you want to persist.',
+            primaryAction: { label: 'Run preview', id: 'matching-run-report-btn', type: 'button', class: 'matching-run-btn' },
             secondaryAction: { label: 'Collaboration models', route: R.ADMIN_COLLABORATION_MODELS || '/admin/collaboration-models' }
         },
         adminReports: {

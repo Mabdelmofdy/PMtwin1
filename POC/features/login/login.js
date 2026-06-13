@@ -274,9 +274,15 @@ async function performLoginAndRedirect(email, password, accountType) {
     const isCompany = (user?.profile?.type === 'company') || (authService.isCompanyUser && authService.isCompanyUser());
     const hasSkills = Array.isArray(profile.skills) ? profile.skills.length > 0 : !!(profile.skills || '').toString().trim();
     const hasSectors = Array.isArray(profile.sectors) ? profile.sectors.length > 0 : !!(profile.sectors || profile.industry || '').toString().trim();
+    const returnUrl = sessionStorage.getItem('pmtwin_return_url');
+    if (returnUrl) {
+        sessionStorage.removeItem('pmtwin_return_url');
+    }
     const profileIncomplete = isCompany ? !hasSectors : !hasSkills;
     if (profileIncomplete && CONFIG.ROUTES.PROFILE) {
         router.navigate(CONFIG.ROUTES.PROFILE);
+    } else if (returnUrl) {
+        router.navigate(returnUrl);
     } else {
         router.navigate(CONFIG.ROUTES.DASHBOARD);
     }

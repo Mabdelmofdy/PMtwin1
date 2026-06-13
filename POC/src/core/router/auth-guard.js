@@ -89,6 +89,9 @@ class AuthGuard {
                         type: 'warning',
                         message: 'Your session has expired. Please login again.'
                     }));
+                    if (route && route !== CONFIG.ROUTES.LOGIN && route !== CONFIG.ROUTES.REGISTER) {
+                        sessionStorage.setItem('pmtwin_return_url', route);
+                    }
                 }
                 this.router.navigate(guardResult.redirect);
                 return;

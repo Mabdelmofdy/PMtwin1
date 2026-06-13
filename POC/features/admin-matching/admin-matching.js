@@ -88,60 +88,92 @@ async function runAndShowReport() {
 
 async function renderAdminAnalytics(dataService) {
     const el = document.getElementById('matching-admin-analytics');
+    const kpiEl = document.getElementById('matching-admin-analytics-kpis');
     if (!el) return;
     const stats = await getAdminMatchingAnalytics(dataService);
+
+    if (kpiEl) {
+        kpiEl.innerHTML = ''
+            + renderSavedKpi(stats.totalPostMatches, 'Saved matches', 'Persisted post_matches', 'primary')
+            + renderSavedKpi(stats.confirmedPostMatches, 'Confirmed', 'Accepted by participants', 'success')
+            + renderSavedKpi(stats.totalDeals, 'Deals', 'Collaboration deals', 'deals')
+            + renderSavedKpi(escapeHtml(stats.conversionRate), 'Conversion', 'Confirmed → deal rate', 'rate');
+    }
+
     const groups = [
         {
-            title: 'Match pipeline',
-            cards: [
-                renderMetricCard(stats.totalPostMatches, 'Saved matches', 'Persisted matches'),
-                renderMetricCard(stats.confirmedPostMatches, 'Confirmed', 'Confirmed post matches'),
-                renderMetricCard(stats.blockedMatches, 'Blocked matches', 'Consortium/circular drop-outs')
+            title: 'Deals pipeline',
+            hint: 'Deal workspaces created from matches and applications',
+            open: true,
+            rows: [
+                ['Deals from matches', stats.dealsFromMatches, 'Linked to a post_match'],
+                ['Draft deals', stats.draftDeals, 'Not yet active'],
+                ['Active deals', stats.activeDeals, 'Signed or in execution'],
+                ['Deals with contracts', stats.dealsWithContracts, 'Contract linked'],
+                ['Deals from applications', stats.dealsFromApplications, 'Accepted application path'],
+                ['Deals from invites', stats.dealsFromInvitedApplications, 'Invite → apply → deal']
             ]
         },
         {
-            title: 'Deals & conversion',
-            cards: [
-                renderMetricCard(stats.totalDeals, 'Deals', 'All collaboration deals'),
-                renderMetricCard(stats.dealsFromMatches, 'From matches', 'Deals created from matches'),
-                renderMetricCard(escapeHtml(stats.conversionRate), 'Conversion', 'Confirmed to deal rate'),
-                renderMetricCard(stats.draftDeals, 'Draft deals', 'Deal workspaces not yet active'),
-                renderMetricCard(stats.activeDeals, 'Active deals', 'Fully signed / in execution'),
-                renderMetricCard(stats.dealsWithContracts, 'Deals with contracts', 'Linked contract agreements')
-            ]
-        },
-        {
-            title: 'Invitations & applications',
-            cards: [
-                renderMetricCard(stats.invitationsSent, 'Invitations sent', 'Invite to Apply records'),
-                renderMetricCard(stats.applicationsFromInvitations, 'Invited applications', 'Applications linked to invitations'),
-                renderMetricCard(escapeHtml(stats.invitationAcceptanceRate), 'Invitation rate', 'Accepted invitations vs sent'),
-                renderMetricCard(stats.dealsFromInvitedApplications, 'Deals from invites', 'Deals tied to invited applications'),
-                renderMetricCard(stats.dealsFromApplications, 'Deals from applications', 'Accepted application path')
+            title: 'Invitations',
+            hint: 'Invite-to-apply activity',
+            rows: [
+                ['Invitations sent', stats.invitationsSent, 'Records created'],
+                ['Invited applications', stats.applicationsFromInvitations, 'Applications tied to invites'],
+                ['Invitation acceptance', escapeHtml(stats.invitationAcceptanceRate), 'Accepted vs sent']
             ]
         },
         {
             title: 'Negotiations & replacements',
-            cards: [
-                renderMetricCard(stats.openNegotiations, 'Open negotiations', 'Active term discussions'),
-                renderMetricCard(stats.agreedNegotiations, 'Terms agreed', 'Negotiations ready for deal'),
-                renderMetricCard(stats.replacementPendingReview, 'Suggestions pending', 'Awaiting owner review'),
-                renderMetricCard(stats.replacementInvitationsSent, 'Replacement invites', 'Invitations sent'),
-                renderMetricCard(stats.replacementAccepted, 'Replacements accepted', 'Awaiting finalize'),
-                renderMetricCard(stats.replacementCompleted, 'Replacements completed', 'Participant swaps done'),
-                renderMetricCard(escapeHtml(stats.replacementConversionRate), 'Replacement rate', 'Completed vs invitations')
+            hint: 'Term discussions and participant swaps',
+            rows: [
+                ['Open negotiations', stats.openNegotiations, 'In progress'],
+                ['Terms agreed', stats.agreedNegotiations, 'Ready for deal'],
+                ['Blocked matches', stats.blockedMatches, 'Consortium/circular drop-outs'],
+                ['Replacements pending', stats.replacementPendingReview, 'Awaiting owner review'],
+                ['Replacement invites', stats.replacementInvitationsSent, 'Sent to candidates'],
+                ['Replacements accepted', stats.replacementAccepted, 'Awaiting finalize'],
+                ['Replacements completed', stats.replacementCompleted, 'Participant swap done'],
+                ['Replacement rate', escapeHtml(stats.replacementConversionRate), 'Completed vs invites']
             ]
         }
     ];
+
     el.innerHTML = groups.map(function (group) {
+        const rowsHtml = group.rows.map(function (row) {
+            return renderSavedMetricRow(row[0], row[1], row[2]);
+        }).join('');
         return ''
-            + '<section class="matching-analytics-group" aria-label="' + escapeHtml(group.title) + '">'
-            + '<h4 class="matching-analytics-group-title">' + escapeHtml(group.title) + '</h4>'
-            + '<div class="matching-overview-grid matching-analytics-grid">'
-            + group.cards.join('')
+            + '<details class="matching-saved-group"' + (group.open ? ' open' : '') + '>'
+            + '<summary class="matching-saved-group-summary">'
+            + '<span class="matching-saved-group-title">' + escapeHtml(group.title) + '</span>'
+            + '<span class="matching-saved-group-hint">' + escapeHtml(group.hint) + '</span>'
+            + '</summary>'
+            + '<div class="matching-saved-table-wrap">'
+            + '<table class="matching-saved-table">'
+            + '<tbody>' + rowsHtml + '</tbody>'
+            + '</table>'
             + '</div>'
-            + '</section>';
+            + '</details>';
     }).join('');
+}
+
+function renderSavedKpi(value, label, hint, tone) {
+    return ''
+        + '<div class="matching-saved-kpi matching-saved-kpi--' + escapeHtml(tone || 'neutral') + '">'
+        + '<span class="matching-saved-kpi-value">' + escapeHtml(value) + '</span>'
+        + '<span class="matching-saved-kpi-label">' + escapeHtml(label) + '</span>'
+        + (hint ? '<span class="matching-saved-kpi-hint">' + escapeHtml(hint) + '</span>' : '')
+        + '</div>';
+}
+
+function renderSavedMetricRow(label, value, hint) {
+    return ''
+        + '<tr>'
+        + '<th scope="row">' + escapeHtml(label) + '</th>'
+        + '<td class="matching-saved-value">' + escapeHtml(value) + '</td>'
+        + '<td class="matching-saved-hint">' + escapeHtml(hint || '') + '</td>'
+        + '</tr>';
 }
 
 /**
@@ -177,8 +209,8 @@ function updatePreviewMeta(run) {
         hour: '2-digit',
         minute: '2-digit'
     }) : 'just now';
-    el.innerHTML = '<strong>Latest preview</strong> · ' + when + ' · '
-        + (run.totalMatchesFound || 0) + ' matches found. Preview only — save when ready.';
+    el.innerHTML = '<i class="ph ph-info" aria-hidden="true"></i><span><strong>Latest preview</strong> · '
+        + when + ' · ' + (run.totalMatchesFound || 0) + ' matches found. Preview only — save when ready.</span>';
 }
 
 /** Published opportunity ids selected in the per-opportunity table (bulk save). */
@@ -288,7 +320,8 @@ async function persistSelectedOpportunities(opportunityIds) {
 
 function renderLifecycleQueueList(items, formatItem, emptyMessage) {
     if (!items || !items.length) {
-        return '<p class="matching-cc-empty">' + escapeHtml(emptyMessage || 'None right now.') + '</p>';
+        return '<p class="matching-cc-empty"><i class="ph ph-check-circle" aria-hidden="true"></i>'
+            + escapeHtml(emptyMessage || 'All clear.') + '</p>';
     }
     return '<ul class="matching-cc-list">' + items.map(formatItem).join('') + '</ul>';
 }
@@ -319,6 +352,26 @@ function renderCommandCenterItem(titleHtml, metaText, metaTone) {
             ? '<span class="matching-cc-item-meta' + toneClass + '">' + escapeHtml(metaText) + '</span>'
             : '')
         + '</li>';
+}
+
+function renderCommandCenterSummary(queues) {
+    const chips = [
+        { label: 'Negotiations', count: (queues.negotiations || []).length, tone: 'negotiations' },
+        { label: 'Invitations', count: (queues.invitations || []).length, tone: 'invitations' },
+        { label: 'Replacements', count: (queues.replacements || []).length, tone: 'replacements' },
+        { label: 'Blocked', count: (queues.blockedMatches || []).length, tone: 'blocked' },
+        { label: 'Preview runs', count: (queues.previewRuns || []).length, tone: 'preview' }
+    ];
+    return ''
+        + '<div class="matching-cc-summary" aria-label="Queue overview">'
+        + chips.map(function (chip) {
+            return ''
+                + '<span class="matching-cc-summary-chip matching-cc-summary-chip--' + chip.tone + '">'
+                + '<span class="matching-cc-summary-value">' + chip.count + '</span>'
+                + '<span class="matching-cc-summary-label">' + escapeHtml(chip.label) + '</span>'
+                + '</span>';
+        }).join('')
+        + '</div>';
 }
 
 function queueStatusTone(status) {
@@ -403,17 +456,19 @@ function renderCommandCenterLink(path, label) {
     return '<a href="#" class="matching-cc-link" data-route="' + escapeHtml(path) + '">' + escapeHtml(label) + '</a>';
 }
 
-function renderCommandCenterPanel(iconClass, title, items, formatItem, emptyMessage, panelClass) {
+function renderCommandCenterPanel(iconClass, title, items, formatItem, emptyMessage, options) {
+    const opts = options || {};
     const count = items && items.length ? items.length : 0;
     const body = renderLifecycleQueueList(items, formatItem, emptyMessage);
     const emptyClass = count === 0 ? ' is-empty' : '';
-    const extraClass = panelClass ? ' ' + panelClass : '';
+    const themeClass = opts.theme ? ' matching-cc-panel--' + opts.theme : '';
+    const extraClass = opts.panelClass ? ' ' + opts.panelClass : '';
     return ''
-        + '<article class="matching-cc-panel' + emptyClass + extraClass + '">'
+        + '<article class="matching-cc-panel' + emptyClass + themeClass + extraClass + '">'
         + '<header class="matching-cc-panel-head">'
         + '<span class="matching-cc-panel-icon" aria-hidden="true"><i class="ph-duotone ' + escapeHtml(iconClass) + '"></i></span>'
         + '<h3 class="matching-cc-panel-title">' + escapeHtml(title) + '</h3>'
-        + '<span class="matching-cc-count" aria-label="' + count + ' items">' + count + '</span>'
+        + '<span class="matching-cc-count' + (count === 0 ? ' is-zero' : '') + '" aria-label="' + count + ' items">' + count + '</span>'
         + '</header>'
         + '<div class="matching-cc-panel-body">' + body + '</div>'
         + '</article>';
@@ -435,8 +490,11 @@ async function renderCommandCenter() {
         : (t || 'Match');
 
     lifecycleEl.innerHTML = ''
-        + '<div class="matching-cc-grid">'
-        + renderCommandCenterPanel('ph-envelope-simple', 'Invitations (sent)', queues.invitations, (i) => {
+        + renderCommandCenterSummary(queues)
+        + '<div class="matching-cc-zone">'
+        + '<h3 class="matching-cc-zone-title">Active queues</h3>'
+        + '<div class="matching-cc-grid matching-cc-grid--queues">'
+        + renderCommandCenterPanel('ph-envelope-simple', 'Invitations', queues.invitations, (i) => {
             const label = i.matchId
                 ? display.matchLabel(i.matchId)
                 : (display.opportunityTitle(i.opportunityId) || 'Invitation');
@@ -444,7 +502,7 @@ async function renderCommandCenter() {
                 ? renderCommandCenterLink(matchRoute + i.matchId, label)
                 : escapeHtml(label);
             return renderCommandCenterItem(link, friendlyQueueStatus(i.status), 'neutral');
-        }, 'No invitations have been sent yet.')
+        }, 'No invitations sent yet.', { theme: 'invitations' })
         + renderCommandCenterPanel('ph-chats-circle', 'Negotiations', queues.negotiations, (n) => {
             const label = n.matchId
                 ? display.matchLabel(n.matchId)
@@ -453,7 +511,7 @@ async function renderCommandCenter() {
                 ? renderCommandCenterLink(matchRoute + n.matchId, label)
                 : escapeHtml(label);
             return renderCommandCenterItem(link, friendlyQueueStatus(n.status), queueStatusTone(n.status));
-        }, 'No negotiations yet.')
+        }, 'No open negotiations.', { theme: 'negotiations' })
         + renderCommandCenterPanel('ph-arrows-counter-clockwise', 'Replacements', queues.replacements, (r) => {
             const label = r.matchId
                 ? display.matchLabel(r.matchId)
@@ -463,20 +521,24 @@ async function renderCommandCenter() {
                 : escapeHtml(label);
             const meta = [r.roleToFill, friendlyQueueStatus(r.status)].filter(Boolean).join(' · ');
             return renderCommandCenterItem(link, meta, queueStatusTone(r.status));
-        }, 'No replacement requests found.')
+        }, 'No replacement requests.', { theme: 'replacements' })
         + renderCommandCenterPanel('ph-prohibit', 'Blocked matches', queues.blockedMatches, (m) => {
             const canResolve = typeof authService !== 'undefined'
                 && authService.hasAdminCapability
                 && (authService.hasAdminCapability('admin.matching.resolve_blocked')
                     || authService.hasAdminCapability('admin.matching.persist'));
             const resolveBtn = canResolve && !(authService.isReadOnlyAdmin && authService.isReadOnlyAdmin())
-                ? ' <button type="button" class="btn btn-outline btn-sm matching-resolve-blocked" data-match-id="'
-                + escapeHtml(m.id) + '" data-requires-persist>Clear blocked</button>'
+                ? '<button type="button" class="btn btn-outline btn-sm matching-resolve-blocked" data-match-id="'
+                + escapeHtml(m.id) + '" data-requires-persist>Clear</button>'
                 : '';
             const label = display.matchLabel(m.id) || friendlyMatchType(m.matchType);
             const titleHtml = renderCommandCenterLink(matchRoute + m.id, label) + resolveBtn;
             return renderCommandCenterItem(titleHtml, friendlyQueueStatus(m.status), 'warning');
-        }, 'No blocked matches right now.')
+        }, 'No blocked matches.', { theme: 'blocked' })
+        + '</div></div>'
+        + '<div class="matching-cc-zone">'
+        + '<h3 class="matching-cc-zone-title">Run history</h3>'
+        + '<div class="matching-cc-grid matching-cc-grid--history">'
         + renderCommandCenterPanel('ph-floppy-disk', 'Persist runs', queues.matchingRuns, (r) => {
             const label = display.opportunityTitle(r.opportunityId) || 'Opportunity';
             const meta = [
@@ -485,7 +547,7 @@ async function renderCommandCenter() {
                 r.createdCount != null ? r.createdCount + ' created' : ''
             ].filter(Boolean).join(' · ');
             return renderCommandCenterItem(escapeHtml(label), meta, 'neutral');
-        }, 'No matching persist runs yet.')
+        }, 'No persist runs yet.', { theme: 'persist' })
         + renderCommandCenterPanel('ph-eye', 'Preview runs', queues.previewRuns, (r) => {
             const when = r.createdAt ? new Date(r.createdAt).toLocaleString([], {
                 month: 'short',
@@ -495,8 +557,8 @@ async function renderCommandCenter() {
             }) : 'Recent run';
             const meta = (r.totalMatchesFound || 0) + ' matches found';
             return renderCommandCenterItem(escapeHtml(when), meta, 'info');
-        }, 'Run a preview report to see history here.', 'matching-cc-panel--wide')
-        + '</div>';
+        }, 'Run a preview to see history.', { theme: 'preview' })
+        + '</div></div>';
 
     lifecycleEl.querySelectorAll('.matching-cc-link').forEach(link => {
         link.addEventListener('click', function (e) {
@@ -652,6 +714,45 @@ async function initAdminMatching() {
     };
     document.addEventListener('visibilitychange', matchingVisibilityHandler);
     if (typeof applyAuditorReadOnlyAdmin === 'function') applyAuditorReadOnlyAdmin();
+    setupMatchingPageNav();
+}
+
+function setupMatchingPageNav() {
+    const pageRoot = document.querySelector('.admin-matching-page');
+    if (!pageRoot) return;
+
+    const links = Array.from(pageRoot.querySelectorAll('.matching-jump-link'));
+    const sections = links
+        .map(function (link) {
+            const href = link.getAttribute('href');
+            if (!href || href.charAt(0) !== '#') return null;
+            return document.getElementById(href.slice(1));
+        })
+        .filter(Boolean);
+
+    if (!sections.length || typeof IntersectionObserver === 'undefined') return;
+
+    function setActiveSection(id) {
+        links.forEach(function (link) {
+            const isActive = link.getAttribute('href') === '#' + id;
+            link.classList.toggle('is-active', isActive);
+            if (isActive) link.setAttribute('aria-current', 'location');
+            else link.removeAttribute('aria-current');
+        });
+    }
+
+    const observer = new IntersectionObserver(function (entries) {
+        const visible = entries
+            .filter(function (entry) { return entry.isIntersecting; })
+            .sort(function (a, b) { return b.intersectionRatio - a.intersectionRatio; });
+        if (visible[0] && visible[0].target.id) setActiveSection(visible[0].target.id);
+    }, {
+        root: null,
+        rootMargin: '-30% 0px -55% 0px',
+        threshold: [0.12, 0.35, 0.6]
+    });
+
+    sections.forEach(function (section) { observer.observe(section); });
 }
 
 /**

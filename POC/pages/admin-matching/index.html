@@ -2,20 +2,33 @@
     <div id="page-context-header-mount"></div>
 
     <div class="matching-page-toolbar">
-        <p class="matching-page-toolbar-label">Jump to</p>
-        <nav class="matching-jump-nav" aria-label="Matching Center sections">
-            <a href="#matching-snapshot" class="matching-jump-link">Snapshot</a>
-            <a href="#matching-command-center" class="matching-jump-link">Command center</a>
+        <ol class="matching-workflow-steps" aria-label="Matching workflow">
+            <li class="matching-workflow-step">
+                <span class="matching-workflow-step-num" aria-hidden="true">1</span>
+                <span class="matching-workflow-step-label">Run preview</span>
+            </li>
+            <li class="matching-workflow-step">
+                <span class="matching-workflow-step-num" aria-hidden="true">2</span>
+                <span class="matching-workflow-step-label">Review matches</span>
+            </li>
+            <li class="matching-workflow-step">
+                <span class="matching-workflow-step-num" aria-hidden="true">3</span>
+                <span class="matching-workflow-step-label">Save when ready</span>
+            </li>
+        </ol>
+        <nav class="matching-jump-nav" aria-label="Page sections">
+            <a href="#matching-snapshot" class="matching-jump-link">Status</a>
+            <a href="#matching-command-center" class="matching-jump-link">Queues</a>
             <a href="#matching-results" class="matching-jump-link">Results</a>
-            <a href="#matching-types-guide" class="matching-jump-link">Match types</a>
+            <a href="#matching-types-guide" class="matching-jump-link">Help</a>
         </nav>
     </div>
 
     <div class="page-body matching-page-body">
         <section id="matching-snapshot" class="matching-control-panel" aria-labelledby="matching-control-title">
             <div class="matching-control-copy">
-                <h2 id="matching-control-title" class="matching-section-title">Current run</h2>
-                <p class="matching-section-desc">The report scans published posts only. Results stay in preview until you explicitly persist.</p>
+                <h2 id="matching-control-title" class="matching-section-title">Run status</h2>
+                <p class="matching-section-desc">Preview only scans published posts. Nothing is saved until you choose Save in Results.</p>
             </div>
             <div class="matching-control-meta" aria-label="Report run status">
                 <div class="matching-meta-item matching-meta-item--status">
@@ -40,139 +53,139 @@
             </div>
         </section>
 
-        <section id="matching-command-center" class="dashboard-section matching-command-center-section ac-section-card" aria-labelledby="matching-cc-title">
-            <div class="matching-section-heading">
-                <div class="matching-section-heading-main">
-                    <span class="matching-section-icon" aria-hidden="true"><i class="ph-duotone ph-squares-four"></i></span>
-                    <div>
-                        <h2 id="matching-cc-title" class="matching-section-title">Command center</h2>
-                        <p class="matching-section-desc">Lifecycle queues and preview history. Saving matches is explicit per opportunity or via bulk save below.</p>
-                    </div>
+        <section id="matching-command-center" class="dashboard-section matching-command-center-section" aria-labelledby="matching-cc-title">
+            <header class="matching-cc-header">
+                <div class="matching-cc-header-copy">
+                    <h2 id="matching-cc-title" class="matching-section-title">Lifecycle queues</h2>
+                    <p class="matching-section-desc">Open negotiations, invitations, and blocked matches. Click a name to open the match.</p>
                 </div>
-            </div>
+            </header>
             <div id="matching-cc-preview-meta" class="matching-cc-preview-meta" hidden></div>
             <div id="matching-cc-lifecycle" class="matching-cc-lifecycle" aria-live="polite"></div>
         </section>
 
-        <section id="matching-results" class="dashboard-section matching-report-section ac-section-card" aria-labelledby="matching-report-title">
-            <div class="matching-section-heading">
-                <div class="matching-section-heading-main">
-                    <span class="matching-section-icon" aria-hidden="true"><i class="ph-duotone ph-chart-bar"></i></span>
-                    <div>
-                        <h2 id="matching-report-title" class="matching-section-title">Results</h2>
-                        <p class="matching-section-desc">Summary first, then drill into opportunities and match rows by type.</p>
-                    </div>
+        <section id="matching-results" class="dashboard-section matching-results-section" aria-labelledby="matching-report-title">
+            <header class="matching-results-header">
+                <div>
+                    <h2 id="matching-report-title" class="matching-section-title">Preview results</h2>
+                    <p class="matching-section-desc">Review suggested matches below, then save the ones you want to persist.</p>
                 </div>
-            </div>
+            </header>
 
             <div id="matching-run-loading" class="matching-loading" hidden>
                 <span class="spinner" aria-hidden="true"></span>
-                <span>Analyzing opportunities…</span>
+                <span>Running preview…</span>
             </div>
             <div id="matching-run-error" class="matching-error" hidden></div>
 
             <div id="matching-report-block" class="report-block matching-report-block" hidden>
                 <div class="matching-report-header">
                     <div>
-                        <h3 class="matching-overview-title">What changed in this run</h3>
-                        <p class="matching-report-kicker">Quick read of published posts and active match types.</p>
+                        <h3 class="matching-overview-title">This run at a glance</h3>
+                        <p class="matching-report-kicker">Published posts scanned and match types with results.</p>
                     </div>
                     <div id="matching-report-summary" class="matching-summary-strip" aria-label="Matching run summary"></div>
                 </div>
 
-                <div class="matching-report-grid">
-                    <div class="matching-report-panel matching-report-panel--analytics">
-                        <div class="matching-panel-header">
-                            <h3 class="matching-panel-title">
-                                <i class="ph-duotone ph-database" aria-hidden="true"></i>
-                                Saved outcomes
-                            </h3>
-                            <p class="matching-panel-hint">Persisted matches, deals, and lifecycle metrics grouped by pipeline stage.</p>
-                        </div>
-                        <div id="matching-admin-analytics" class="matching-analytics-groups"></div>
-                    </div>
-
+                <div class="matching-results-highlight">
                     <div class="matching-report-panel matching-report-panel--preview">
                         <div class="matching-panel-header">
-                            <h3 class="matching-panel-title">
-                                <i class="ph-duotone ph-magnifying-glass" aria-hidden="true"></i>
-                                Found now
-                            </h3>
-                            <p class="matching-panel-hint">Counts from the latest preview run (no post_matches created until you save).</p>
+                            <span class="matching-step-badge">Step 2</span>
+                            <div>
+                                <h3 class="matching-panel-title">Matches found</h3>
+                                <p class="matching-panel-hint">From the latest preview — not saved yet.</p>
+                            </div>
                         </div>
                         <div class="stats-grid matching-overview-grid matching-preview-grid" id="matching-stats-grid"></div>
                     </div>
                 </div>
 
-                <div class="matching-table-section">
-                    <div class="matching-panel-header">
+                <div class="matching-action-zone matching-action-zone--review">
+                    <div class="matching-action-zone-head">
+                        <span class="matching-step-badge">Step 2</span>
                         <div>
-                            <h3 class="matching-section-title">Opportunities to review</h3>
-                            <p class="matching-section-desc">Select published opportunities, then save matches for each (creates post_matches and notifies participants).</p>
-                        </div>
-                    </div>
-                    <div id="matching-bulk-persist-bar" class="matching-bulk-persist-bar" hidden>
-                        <span id="matching-bulk-selection-count" class="matching-bulk-selection-count">0 selected</span>
-                        <button type="button" id="matching-bulk-persist-btn" class="btn btn-secondary matching-bulk-persist-btn" data-requires-persist title="Calls persistPostMatches for each selected published opportunity">
-                            <i class="ph-duotone ph-floppy-disk" aria-hidden="true"></i>
-                            Save selected opportunities
-                        </button>
-                    </div>
-                    <div id="matching-per-opportunity-table" class="matching-summary-table-wrap"></div>
-                </div>
-
-                <div class="matching-table-section">
-                    <div class="matching-panel-header">
-                        <div>
-                            <h3 class="matching-section-title">Match list</h3>
-                            <p class="matching-section-desc">Rich match cards from the preview run — same layout as the user matches pipeline. Filter by type or expand detail sections below.</p>
+                            <h3 class="matching-section-title">Review matches</h3>
+                            <p class="matching-section-desc">Filter by type. Cards use the same layout as the user matches page.</p>
                         </div>
                     </div>
                     <div id="matching-summary-tabs" class="matching-match-type-tabs" role="tablist"></div>
                     <div id="matching-summary-table" class="matching-summary-table-wrap"></div>
                 </div>
 
-                <div class="matching-detail-section" data-match-type="one-way" id="matching-detail-one-way" hidden>
-                    <h4 class="matching-type-section-title"><span class="matching-match-type-badge">Need/Offer</span> Need/Offer matching</h4>
-                    <h5 class="matching-subsection-title">Need to Offers</h5>
-                    <div id="matching-one-way-need-to-offers" class="matching-type-content"></div>
-                    <h5 class="matching-subsection-title">Offer to Needs</h5>
-                    <div id="matching-one-way-offer-to-needs" class="matching-type-content"></div>
-                </div>
-                <div class="matching-detail-section" data-match-type="two-way" id="matching-detail-two-way" hidden>
-                    <h4 class="matching-type-section-title"><span class="matching-match-type-badge matching-match-type-badge--barter">Barter</span> Barter matching</h4>
-                    <div id="matching-two-way" class="matching-type-content"></div>
-                </div>
-                <div class="matching-detail-section" data-match-type="consortium" id="matching-detail-consortium" hidden>
-                    <h4 class="matching-type-section-title"><span class="matching-match-type-badge matching-match-type-badge--group">Group</span> Consortium formation</h4>
-                    <div id="matching-consortium" class="matching-type-content"></div>
-                </div>
-                <div class="matching-detail-section" data-match-type="circular" id="matching-detail-circular" hidden>
-                    <h4 class="matching-type-section-title"><span class="matching-match-type-badge matching-match-type-badge--cycle">Cycle</span> Circular exchange</h4>
-                    <div id="matching-circular" class="matching-type-content"></div>
+                <div class="matching-action-zone matching-action-zone--save" id="matching-save-zone">
+                    <div class="matching-action-zone-head">
+                        <span class="matching-step-badge matching-step-badge--save">Step 3</span>
+                        <div>
+                            <h3 class="matching-section-title">Save matches</h3>
+                            <p class="matching-section-desc">Select opportunities and save to create post_matches and notify participants.</p>
+                        </div>
+                    </div>
+                    <div id="matching-bulk-persist-bar" class="matching-bulk-persist-bar" hidden>
+                        <span id="matching-bulk-selection-count" class="matching-bulk-selection-count">0 selected</span>
+                        <button type="button" id="matching-bulk-persist-btn" class="btn btn-primary matching-bulk-persist-btn" data-requires-persist title="Persist matches for each selected opportunity">
+                            <i class="ph-duotone ph-floppy-disk" aria-hidden="true"></i>
+                            Save selected
+                        </button>
+                    </div>
+                    <div id="matching-per-opportunity-table" class="matching-summary-table-wrap"></div>
                 </div>
 
-                <details id="matching-one-way-diagnostics" class="matching-diagnostics-panel" hidden>
-                    <summary class="matching-diagnostics-summary">
-                        <i class="ph-duotone ph-wrench" aria-hidden="true"></i>
+                <section class="matching-saved-section" aria-labelledby="matching-saved-title">
+                    <div class="matching-saved-header">
+                        <div>
+                            <h3 id="matching-saved-title" class="matching-section-title">Saved matches</h3>
+                            <p class="matching-section-desc">Persisted post_matches and downstream outcomes in your data store — not the preview above.</p>
+                        </div>
+                    </div>
+                    <div id="matching-admin-analytics-kpis" class="matching-saved-kpis" aria-label="Saved match summary"></div>
+                    <div id="matching-admin-analytics" class="matching-saved-details"></div>
+                </section>
+
+                <details class="matching-fold-panel">
+                    <summary class="matching-fold-summary">
+                        <i class="ph ph-list-bullets" aria-hidden="true"></i>
+                        Breakdown by match type
+                    </summary>
+                    <div class="matching-fold-body">
+                        <div class="matching-detail-section" data-match-type="one-way" id="matching-detail-one-way" hidden>
+                            <h4 class="matching-type-section-title"><span class="matching-match-type-badge">Need/Offer</span> Need/Offer matching</h4>
+                            <h5 class="matching-subsection-title">Need to Offers</h5>
+                            <div id="matching-one-way-need-to-offers" class="matching-type-content"></div>
+                            <h5 class="matching-subsection-title">Offer to Needs</h5>
+                            <div id="matching-one-way-offer-to-needs" class="matching-type-content"></div>
+                        </div>
+                        <div class="matching-detail-section" data-match-type="two-way" id="matching-detail-two-way" hidden>
+                            <h4 class="matching-type-section-title"><span class="matching-match-type-badge matching-match-type-badge--barter">Barter</span> Barter matching</h4>
+                            <div id="matching-two-way" class="matching-type-content"></div>
+                        </div>
+                        <div class="matching-detail-section" data-match-type="consortium" id="matching-detail-consortium" hidden>
+                            <h4 class="matching-type-section-title"><span class="matching-match-type-badge matching-match-type-badge--group">Group</span> Consortium formation</h4>
+                            <div id="matching-consortium" class="matching-type-content"></div>
+                        </div>
+                        <div class="matching-detail-section" data-match-type="circular" id="matching-detail-circular" hidden>
+                            <h4 class="matching-type-section-title"><span class="matching-match-type-badge matching-match-type-badge--cycle">Cycle</span> Circular exchange</h4>
+                            <div id="matching-circular" class="matching-type-content"></div>
+                        </div>
+                    </div>
+                </details>
+
+                <details id="matching-one-way-diagnostics" class="matching-fold-panel matching-diagnostics-panel" hidden>
+                    <summary class="matching-fold-summary">
+                        <i class="ph ph-wrench" aria-hidden="true"></i>
                         One-way diagnostics (admin)
                     </summary>
-                    <div id="matching-one-way-diagnostics-body" class="matching-diagnostics-body"></div>
+                    <div id="matching-one-way-diagnostics-body" class="matching-diagnostics-body matching-fold-body"></div>
                 </details>
             </div>
         </section>
 
-        <section id="matching-types-guide" class="dashboard-section workflow-overview ac-section-card" aria-labelledby="matching-models-title">
-            <div class="matching-section-heading">
-                <div class="matching-section-heading-main">
-                    <span class="matching-section-icon" aria-hidden="true"><i class="ph-duotone ph-book-open-text"></i></span>
-                    <div>
-                        <h2 id="matching-models-title" class="matching-section-title">Match types</h2>
-                        <p class="matching-section-desc">What each result type means in plain language.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="workflow-cards ds-stagger">
+        <details id="matching-types-guide" class="matching-fold-panel matching-help-panel">
+            <summary class="matching-fold-summary">
+                <i class="ph ph-question" aria-hidden="true"></i>
+                What do the match types mean?
+            </summary>
+            <div class="matching-fold-body">
+                <div class="workflow-cards ds-stagger">
                 <article class="workflow-card">
                     <span class="workflow-card-icon" aria-hidden="true"><i class="ph-duotone ph-arrows-left-right"></i></span>
                     <h3 class="workflow-card-title">Need-offer</h3>
@@ -194,6 +207,7 @@
                     <p class="workflow-card-desc">Multi-party exchange chains with link scores and chain balance.</p>
                 </article>
             </div>
-        </section>
+            </div>
+        </details>
     </div>
 </div>

@@ -9,6 +9,7 @@ import {
     assertMatchOwner,
     assertNotReadOnlyAdmin,
     assertReplacementOwnerOrAdmin,
+    auditLogMatchesDealOrOpportunity,
     buildLifecycleAuditDetails,
     hasRecentDuplicateNotification,
     isAuditorRole,
@@ -77,5 +78,68 @@ describe('matching-lifecycle-permissions', () => {
     it('isAuditorRole identifies auditor', () => {
         expect(isAuditorRole('auditor')).toBe(true);
         expect(isAuditorRole('admin')).toBe(false);
+    });
+
+    it('auditLogMatchesDealOrOpportunity matches deal entity logs', () => {
+        const log = { entityType: 'deal', entityId: 'd1', action: 'deal_closed' };
+        expect(auditLogMatchesDealOrOpportunity(log, { dealId: 'd1' })).toBe(true);
+        expect(auditLogMatchesDealOrOpportunity(log, { dealId: 'd2' })).toBe(false);
+    });
+
+    it('auditLogMatchesDealOrOpportunity matches opportunity entity logs', () => {
+        const log = { entityType: 'opportunity', entityId: 'o1', action: 'opportunity_created' };
+        expect(auditLogMatchesDealOrOpportunity(log, { opportunityId: 'o1' })).toBe(true);
+        expect(auditLogMatchesDealOrOpportunity(log, { opportunityId: 'o2' })).toBe(false);
+    });
+
+    it('auditLogMatchesDealOrOpportunity matches details linkage', () => {
+        const inviteLog = {
+            entityType: 'match',
+            entityId: 'm1',
+            details: { opportunityId: 'o1', matchId: 'm1' }
+        };
+        expect(auditLogMatchesDealOrOpportunity(inviteLog, { opportunityId: 'o1' })).toBe(true);
+
+        const dealDetailsLog = {
+            entityType: 'match',
+            entityId: 'm2',
+            details: { dealId: 'd1', opportunityIds: ['o9', 'o1'] }
+        };
+        expect(auditLogMatchesDealOrOpportunity(dealDetailsLog, { dealId: 'd1' })).toBe(true);
+        expect(auditLogMatchesDealOrOpportunity(dealDetailsLog, { opportunityId: 'o1' })).toBe(true);
+        expect(auditLogMatchesDealOrOpportunity(dealDetailsLog, { opportunityIds: ['o9'] })).toBe(true);
+    });
+
+    it('auditLogMatchesDealOrOpportunity matches related entity ids', () => {
+        const contractLog = {
+            entityType: 'contract',
+            entityId: 'c1',
+            details: { dealId: 'd1' }
+        };
+        expect(
+            auditLogMatchesDealOrOpportunity(contractLog, {
+                dealId: 'd1',
+                contractId: 'c1'
+            })
+        ).toBe(true);
+
+        const matchLog = {
+            entityType: 'post_match',
+            entityId: 'pm1',
+            details: { opportunityId: 'o1', matchId: 'pm1' }
+        };
+        expect(
+            auditLogMatchesDealOrOpportunity(matchLog, {
+                matchId: 'pm1',
+                opportunityIds: ['o1', 'o2']
+            })
+        ).toBe(true);
+    });
+
+    it('auditLogMatchesDealOrOpportunity excludes unrelated logs', () => {
+        const log = { entityType: 'user', entityId: 'u1', details: { summary: 'login' } };
+        expect(auditLogMatchesDealOrOpportunity(log, { dealId: 'd1', opportunityId: 'o1' })).toBe(false);
+        expect(auditLogMatchesDealOrOpportunity(null, { dealId: 'd1' })).toBe(false);
+        expect(auditLogMatchesDealOrOpportunity(log, {})).toBe(false);
     });
 });

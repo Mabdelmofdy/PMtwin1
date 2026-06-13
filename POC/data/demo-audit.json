@@ -1,0 +1,201 @@
+{
+  "domain": "audit",
+  "version": "2.0",
+  "description": "E2E workflow audit entries tied to seed deals and opportunities (scripts/seed-e2e-workflow.js).",
+  "data": [
+    {
+      "id": "demo-audit-opp-001",
+      "userId": "seed-user-001",
+      "action": "opportunity_created",
+      "entityType": "opportunity",
+      "entityId": "seed-opp-001",
+      "details": { "title": "Sustainable tower design — architect need", "summary": "Opportunity published" },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-02-10T08:00:00.000Z"
+    },
+    {
+      "id": "demo-audit-app-001",
+      "userId": "seed-user-002",
+      "action": "application_submitted",
+      "entityType": "application",
+      "entityId": "seed-app-001",
+      "details": { "opportunityId": "seed-opp-001", "summary": "Application submitted" },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-02-12T10:00:00.000Z"
+    },
+    {
+      "id": "demo-audit-neg-001",
+      "userId": "seed-user-002",
+      "action": "negotiation_started",
+      "entityType": "negotiation",
+      "entityId": "seed-neg-01",
+      "details": {
+        "opportunityId": "seed-opp-001",
+        "applicationId": "seed-app-001",
+        "matchId": "demo-pm-oneway-01",
+        "summary": "Negotiation opened"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-03-10T09:00:00.000Z"
+    },
+    {
+      "id": "demo-audit-match-001",
+      "userId": "seed-user-001",
+      "action": "match_confirmed",
+      "entityType": "post_match",
+      "entityId": "demo-pm-oneway-01",
+      "details": {
+        "opportunityId": "seed-opp-001",
+        "sourceOpportunityId": "seed-opp-001",
+        "summary": "Match confirmed"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-03-12T09:00:00.000Z"
+    },
+    {
+      "id": "demo-audit-deal-001",
+      "userId": "seed-user-001",
+      "action": "deal_created_from_match",
+      "entityType": "deal",
+      "entityId": "seed-deal-oneway-01",
+      "details": {
+        "dealId": "seed-deal-oneway-01",
+        "matchId": "demo-pm-oneway-01",
+        "opportunityId": "seed-opp-001",
+        "sourceOpportunityId": "seed-opp-001",
+        "opportunityIds": ["seed-opp-001", "seed-opp-002"],
+        "summary": "Deal created from confirmed match"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-03-15T09:00:00.000Z"
+    },
+    {
+      "id": "demo-audit-contract-001",
+      "userId": "seed-user-001",
+      "action": "contract_signed",
+      "entityType": "contract",
+      "entityId": "seed-contract-oneway-01",
+      "details": { "dealId": "seed-deal-oneway-01", "summary": "Contract signed by need owner" },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-03-18T12:00:00.000Z"
+    },
+    {
+      "id": "demo-audit-deal-002",
+      "userId": "seed-user-001",
+      "action": "deal_completed",
+      "entityType": "deal",
+      "entityId": "seed-deal-oneway-01",
+      "details": { "dealId": "seed-deal-oneway-01", "summary": "Deal completed" },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-05-20T16:00:00.000Z"
+    },
+    {
+      "id": "demo-audit-opp-014",
+      "userId": "seed-co-corp-005",
+      "action": "opportunity_created",
+      "entityType": "opportunity",
+      "entityId": "seed-opp-014",
+      "details": { "title": "Highway package consortium lead", "summary": "Opportunity published" },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-02-14T08:00:00.000Z"
+    },
+    {
+      "id": "demo-audit-neg-004",
+      "userId": "seed-co-corp-005",
+      "action": "negotiation_started",
+      "entityType": "negotiation",
+      "entityId": "seed-neg-04",
+      "details": {
+        "opportunityId": "seed-opp-014",
+        "matchId": "demo-pm-consortium-01",
+        "summary": "Consortium negotiation opened"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-03-08T09:00:00.000Z"
+    },
+    {
+      "id": "demo-audit-deal-003",
+      "userId": "seed-co-corp-005",
+      "action": "deal_created_from_match",
+      "entityType": "deal",
+      "entityId": "seed-deal-consortium-01",
+      "details": {
+        "dealId": "seed-deal-consortium-01",
+        "matchId": "demo-pm-consortium-01",
+        "opportunityId": "seed-opp-014",
+        "sourceOpportunityId": "seed-opp-014",
+        "opportunityIds": ["seed-opp-014", "seed-opp-015"],
+        "summary": "Consortium deal created"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-03-15T09:00:00.000Z"
+    },
+    {
+      "id": "demo-audit-contract-002",
+      "userId": "seed-user-011",
+      "action": "contract_signed",
+      "entityType": "contract",
+      "entityId": "seed-contract-consortium-01",
+      "details": { "dealId": "seed-deal-consortium-01", "summary": "Consortium contract signed" },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-03-18T12:00:00.000Z"
+    },
+    {
+      "id": "demo-audit-deal-004",
+      "userId": "seed-co-corp-005",
+      "action": "deal_execution_started",
+      "entityType": "deal",
+      "entityId": "seed-deal-consortium-01",
+      "details": { "dealId": "seed-deal-consortium-01", "summary": "Deal entered execution" },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-03-19T09:00:00.000Z"
+    },
+    {
+      "id": "demo-audit-opp-039",
+      "userId": "seed-co-corp-005",
+      "action": "opportunity_created",
+      "entityType": "opportunity",
+      "entityId": "seed-opp-039",
+      "details": { "title": "Wind farm consortium lead", "summary": "Opportunity published" },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-02-18T08:00:00.000Z"
+    },
+    {
+      "id": "demo-audit-deal-005",
+      "userId": "seed-co-corp-005",
+      "action": "deal_created_from_match",
+      "entityType": "deal",
+      "entityId": "seed-deal-exchange-01",
+      "details": {
+        "dealId": "seed-deal-exchange-01",
+        "matchId": "demo-pm-consortium-wind",
+        "opportunityId": "seed-opp-039",
+        "sourceOpportunityId": "seed-opp-039",
+        "opportunityIds": ["seed-opp-039", "seed-opp-035"],
+        "summary": "Wind consortium deal created"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-03-15T09:00:00.000Z"
+    },
+    {
+      "id": "demo-audit-contract-003",
+      "userId": "seed-user-013",
+      "action": "contract_signed",
+      "entityType": "contract",
+      "entityId": "seed-contract-exchange-01",
+      "details": { "dealId": "seed-deal-exchange-01", "summary": "Wind consortium contract signed" },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-03-18T12:00:00.000Z"
+    },
+    {
+      "id": "demo-audit-login-001",
+      "userId": "seed-admin-001",
+      "action": "user_logged_in",
+      "entityType": "user",
+      "entityId": "seed-admin-001",
+      "details": { "summary": "Admin login" },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-06-13T08:00:00.000Z"
+    }
+  ]
+}

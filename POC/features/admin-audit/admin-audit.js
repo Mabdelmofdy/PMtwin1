@@ -34,27 +34,75 @@ function showAuditMessage(text, variant) {
     }
 }
 
-/** Read entityType / entityId from URL query, e.g. /admin/audit?entityType=deal&entityId=abc */
+/** Read audit scope from URL query (hash or history mode). */
 function readAuditQueryFromHash() {
-    const qs = window.location.search || '';
-    if (!qs) return { entityType: '', entityId: '' };
+    const r = window.router;
+    const qs =
+        r && r.useHash && typeof r.getHashQueryString === 'function'
+            ? r.getHashQueryString()
+            : window.location.search || '';
+    if (!qs) {
+        return { entityType: '', entityId: '', dealId: '', opportunityId: '' };
+    }
     try {
         const sp = new URLSearchParams(qs.startsWith('?') ? qs.slice(1) : qs);
         return {
             entityType: (sp.get('entityType') || '').trim(),
-            entityId: (sp.get('entityId') || '').trim()
+            entityId: (sp.get('entityId') || '').trim(),
+            dealId: (sp.get('dealId') || '').trim(),
+            opportunityId: (sp.get('opportunityId') || '').trim()
         };
     } catch {
-        return { entityType: '', entityId: '' };
+        return { entityType: '', entityId: '', dealId: '', opportunityId: '' };
     }
 }
 
 function applyAuditFiltersFromUrl() {
-    const { entityType, entityId } = readAuditQueryFromHash();
+    const { entityType, entityId, dealId, opportunityId } = readAuditQueryFromHash();
     const et = document.getElementById('filter-entity-type');
-    if (et && entityType) et.value = entityType;
     const eid = document.getElementById('filter-entity-id');
-    if (eid && entityId) eid.value = entityId;
+    if (dealId || opportunityId) {
+        if (et) et.value = dealId ? 'deal' : 'opportunity';
+        if (eid) eid.value = dealId || opportunityId || '';
+    } else {
+        if (et) et.value = entityType || '';
+        if (eid) eid.value = entityId || '';
+    }
+}
+
+/** Build composite deal/opportunity scope, enriching from the deal record when available. */
+async function buildAuditDealScope(urlScope) {
+    const scope = {
+        dealId: urlScope.dealId || undefined,
+        opportunityId: urlScope.opportunityId || undefined,
+        opportunityIds: []
+    };
+    if (!scope.dealId && !scope.opportunityId) return null;
+
+    if (scope.opportunityId) scope.opportunityIds.push(scope.opportunityId);
+
+    if (scope.dealId && dataService && typeof dataService.getDealById === 'function') {
+        const deal = await dataService.getDealById(scope.dealId);
+        if (deal) {
+            scope.matchId = deal.matchId || undefined;
+            scope.contractId = deal.contractId || undefined;
+            scope.applicationId = deal.applicationId || undefined;
+            scope.negotiationId = deal.negotiationId || undefined;
+            const oppIds = Array.isArray(deal.opportunityIds)
+                ? deal.opportunityIds
+                : deal.opportunityId
+                  ? [deal.opportunityId]
+                  : [];
+            oppIds.forEach(id => {
+                if (id && !scope.opportunityIds.includes(id)) scope.opportunityIds.push(id);
+            });
+            if (!scope.opportunityId && deal.opportunityId) {
+                scope.opportunityId = deal.opportunityId;
+            }
+        }
+    }
+
+    return scope;
 }
 
 function mountAuditPageHeader() {
@@ -87,13 +135,19 @@ async function initAdminAudit() {
 }
 
 function setupHashQuerySync() {
+    if (setupHashQuerySync._bound) return;
+    setupHashQuerySync._bound = true;
     const onUrlChange = () => {
-        const p = window.router && typeof window.router.getCurrentPath === 'function' ? window.router.getCurrentPath() : '';
+        const p =
+            window.router && typeof window.router.getCurrentPath === 'function'
+                ? window.router.getCurrentPath()
+                : '';
         if (p !== CONFIG.ROUTES.ADMIN_AUDIT) return;
         applyAuditFiltersFromUrl();
         loadAuditLogs();
     };
     window.addEventListener('popstate', onUrlChange);
+    window.addEventListener('hashchange', onUrlChange);
 }
 
 function setupViewSwitcher() {
@@ -292,13 +346,22 @@ async function loadAuditLogs() {
     setAuditLogsCount(0, true);
 
     try {
+        const urlScope = readAuditQueryFromHash();
+        const hasUrlScope = urlScope.dealId || urlScope.opportunityId;
+
         const filters = {
             userId: document.getElementById('filter-user')?.value || undefined,
-            entityType: document.getElementById('filter-entity-type')?.value || undefined,
-            entityId: document.getElementById('filter-entity-id')?.value || undefined,
             startDate: document.getElementById('filter-start-date')?.value || undefined,
             endDate: document.getElementById('filter-end-date')?.value || undefined
         };
+
+        if (hasUrlScope) {
+            const dealScope = await buildAuditDealScope(urlScope);
+            if (dealScope) filters.dealScope = dealScope;
+        } else {
+            filters.entityType = document.getElementById('filter-entity-type')?.value || undefined;
+            filters.entityId = document.getElementById('filter-entity-id')?.value || undefined;
+        }
 
         Object.keys(filters).forEach(key => {
             if (filters[key] === undefined || filters[key] === '') delete filters[key];
@@ -495,7 +558,15 @@ function resetAuditFilters() {
         if (el.tagName === 'SELECT') el.selectedIndex = 0;
         else el.value = '';
     });
-    loadAuditLogs();
+    const auditRoute =
+        typeof CONFIG !== 'undefined' && CONFIG.ROUTES && CONFIG.ROUTES.ADMIN_AUDIT
+            ? CONFIG.ROUTES.ADMIN_AUDIT
+            : '/admin/audit';
+    if (window.router && typeof window.router.navigate === 'function') {
+        window.router.navigate(auditRoute);
+    } else {
+        loadAuditLogs();
+    }
 }
 
 function setupFilters() {

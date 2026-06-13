@@ -41,6 +41,7 @@ import {
     assertAdminMatchingPersist,
     assertAdminMatchingRead,
     buildLifecycleAuditDetails,
+    auditLogMatchesDealOrOpportunity,
     hasRecentDuplicateNotification,
     notificationDedupeKey
 } from "../../services/matching/matching-lifecycle-permissions.js";
@@ -358,6 +359,15 @@ class DataService {
                     const reviews = this.storage.get(CONFIG.STORAGE_KEYS.REVIEWS) || [];
                     this.storage.set(CONFIG.STORAGE_KEYS.REVIEWS, mergeById(reviews, json.data));
                     console.log(`Merged ${json.data.length} demo reviews`);
+                }
+            }
+            const demoAuditRes = await fetch(`${base}demo-audit.json`);
+            if (demoAuditRes.ok) {
+                const json = await demoAuditRes.json();
+                if (json.data && json.data.length) {
+                    const audit = this.storage.get(CONFIG.STORAGE_KEYS.AUDIT) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.AUDIT, mergeById(audit, json.data));
+                    console.log(`Merged ${json.data.length} demo audit logs`);
                 }
             }
         } catch (e) {
@@ -5532,15 +5542,38 @@ class DataService {
     
     async getAuditLogs(filters = {}) {
         let logs = this.storage.get(CONFIG.STORAGE_KEYS.AUDIT) || [];
-        
+        const dealScope = filters.dealScope || null;
+        const hasDealOppScope =
+            dealScope ||
+            filters.dealId ||
+            filters.opportunityId ||
+            filters.matchId ||
+            filters.contractId ||
+            filters.applicationId ||
+            filters.negotiationId ||
+            (Array.isArray(filters.opportunityIds) && filters.opportunityIds.length);
+
         if (filters.userId) {
             logs = logs.filter(l => l.userId === filters.userId);
         }
-        if (filters.entityType) {
-            logs = logs.filter(l => l.entityType === filters.entityType);
-        }
-        if (filters.entityId) {
-            logs = logs.filter(l => l.entityId === filters.entityId);
+        if (hasDealOppScope) {
+            const scope = dealScope || {
+                dealId: filters.dealId,
+                opportunityId: filters.opportunityId,
+                opportunityIds: filters.opportunityIds,
+                matchId: filters.matchId,
+                contractId: filters.contractId,
+                applicationId: filters.applicationId,
+                negotiationId: filters.negotiationId
+            };
+            logs = logs.filter(l => auditLogMatchesDealOrOpportunity(l, scope));
+        } else {
+            if (filters.entityType) {
+                logs = logs.filter(l => l.entityType === filters.entityType);
+            }
+            if (filters.entityId) {
+                logs = logs.filter(l => l.entityId === filters.entityId);
+            }
         }
         if (filters.startDate) {
             const start = new Date(filters.startDate);
@@ -5552,7 +5585,7 @@ class DataService {
             end.setHours(23, 59, 59, 999);
             logs = logs.filter(l => new Date(l.timestamp) <= end);
         }
-        
+
         return logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     }
 

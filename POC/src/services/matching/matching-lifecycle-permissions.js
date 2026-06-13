@@ -103,6 +103,71 @@ export function buildLifecycleAuditDetails(details = {}, ctx = {}) {
     return merged;
 }
 
+function _normScopeId(value) {
+    return value != null && String(value).trim() ? String(value).trim() : '';
+}
+
+function _collectOpportunityScopeIds(scope = {}) {
+    const ids = new Set();
+    const primary = _normScopeId(scope.opportunityId);
+    if (primary) ids.add(primary);
+    (Array.isArray(scope.opportunityIds) ? scope.opportunityIds : []).forEach(id => {
+        const v = _normScopeId(id);
+        if (v) ids.add(v);
+    });
+    return ids;
+}
+
+/**
+ * Whether an audit log belongs to a deal and/or linked opportunity scope.
+ * @param {object} log
+ * @param {{
+ *   dealId?: string,
+ *   opportunityId?: string,
+ *   opportunityIds?: string[],
+ *   matchId?: string,
+ *   contractId?: string,
+ *   applicationId?: string,
+ *   negotiationId?: string
+ * }} scope
+ */
+export function auditLogMatchesDealOrOpportunity(log, scope = {}) {
+    if (!log) return false;
+    const dId = _normScopeId(scope.dealId);
+    const mId = _normScopeId(scope.matchId);
+    const cId = _normScopeId(scope.contractId);
+    const aId = _normScopeId(scope.applicationId);
+    const nId = _normScopeId(scope.negotiationId);
+    const oppIds = _collectOpportunityScopeIds(scope);
+    if (!dId && !mId && !cId && !aId && !nId && oppIds.size === 0) return false;
+
+    if (dId && log.entityType === 'deal' && log.entityId === dId) return true;
+    if (mId && (log.entityType === 'match' || log.entityType === 'post_match') && log.entityId === mId) {
+        return true;
+    }
+    if (cId && log.entityType === 'contract' && log.entityId === cId) return true;
+    if (aId && log.entityType === 'application' && log.entityId === aId) return true;
+    if (nId && log.entityType === 'negotiation' && log.entityId === nId) return true;
+    for (const oId of oppIds) {
+        if (log.entityType === 'opportunity' && log.entityId === oId) return true;
+    }
+
+    const d = log.details;
+    if (!d || typeof d !== 'object') return false;
+
+    if (dId && d.dealId === dId) return true;
+    if (mId && d.matchId === mId) return true;
+    if (cId && d.contractId === cId) return true;
+    if (aId && d.applicationId === aId) return true;
+    if (nId && d.negotiationId === nId) return true;
+    for (const oId of oppIds) {
+        if (d.opportunityId === oId) return true;
+        if (d.sourceOpportunityId === oId) return true;
+        if (Array.isArray(d.opportunityIds) && d.opportunityIds.includes(oId)) return true;
+    }
+    return false;
+}
+
 export function notificationDedupeKey(type, entityType, entityId) {
     return `${type || ''}:${entityType || ''}:${entityId || ''}`;
 }
