@@ -24,13 +24,19 @@ function initResetPassword(params) {
 
         const newPassword = document.getElementById('new-password').value;
         const confirmPassword = document.getElementById('confirm-password').value;
-        if (newPassword !== confirmPassword) {
+        if (typeof window.validatePasswordReset === 'function') {
+            const check = window.validatePasswordReset({ newPassword, confirmPassword });
+            if (!check.isValid) {
+                errorEl.textContent = check.errors[0] || 'Invalid password.';
+                errorEl.style.display = 'block';
+                return;
+            }
+        } else if (newPassword !== confirmPassword) {
             errorEl.textContent = 'Passwords do not match.';
             errorEl.style.display = 'block';
             return;
-        }
-        if (newPassword.length < 6) {
-            errorEl.textContent = 'Password must be at least 6 characters.';
+        } else if (newPassword.length < 8) {
+            errorEl.textContent = 'Password must be at least 8 characters.';
             errorEl.style.display = 'block';
             return;
         }

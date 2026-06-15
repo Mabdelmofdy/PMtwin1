@@ -386,6 +386,8 @@ class LayoutService {
         const marketplaceLinks = [];
         if (!isAuditor) marketplaceLinks.push({ route: CONFIG.ROUTES.ADMIN_OPPORTUNITIES, label: 'Opportunities', icon: 'ph-duotone ph-briefcase' });
         marketplaceLinks.push({ route: CONFIG.ROUTES.ADMIN_MATCHING, label: 'Matching', icon: 'ph-duotone ph-graph' });
+        marketplaceLinks.push({ route: CONFIG.ROUTES.ADMIN_NEGOTIATIONS, label: 'Negotiations', icon: 'ph-duotone ph-scales' });
+        marketplaceLinks.push({ route: CONFIG.ROUTES.ADMIN_DISPUTES, label: 'Disputes', icon: 'ph-duotone ph-warning-circle' });
         marketplaceLinks.push({ route: CONFIG.ROUTES.ADMIN_CONSORTIUM, label: 'Consortium', icon: 'ph-duotone ph-users-three' });
         renderAdminGroup('Marketplace', marketplaceLinks);
 

@@ -1238,6 +1238,10 @@ html:has(.admin-matching-page) {
     background: #7c3aed;
 }
 
+.admin-matching-page .matching-cc-summary-chip--disputes .matching-cc-summary-value {
+    background: #dc2626;
+}
+
 .admin-matching-page .matching-cc-summary-chip--invitations .matching-cc-summary-value {
     background: #2563eb;
 }
@@ -1314,6 +1318,11 @@ html:has(.admin-matching-page) {
 .admin-matching-page .matching-cc-panel--negotiations {
     --cc-accent: #7c3aed;
     --cc-accent-soft: #ede9fe;
+}
+
+.admin-matching-page .matching-cc-panel--disputes {
+    --cc-accent: #dc2626;
+    --cc-accent-soft: #fee2e2;
 }
 
 .admin-matching-page .matching-cc-panel--replacements {

@@ -357,6 +357,7 @@ function renderCommandCenterItem(titleHtml, metaText, metaTone) {
 function renderCommandCenterSummary(queues) {
     const chips = [
         { label: 'Negotiations', count: (queues.negotiations || []).length, tone: 'negotiations' },
+        { label: 'Disputes', count: (queues.disputes || []).length, tone: 'disputes' },
         { label: 'Invitations', count: (queues.invitations || []).length, tone: 'invitations' },
         { label: 'Replacements', count: (queues.replacements || []).length, tone: 'replacements' },
         { label: 'Blocked', count: (queues.blockedMatches || []).length, tone: 'blocked' },
@@ -507,11 +508,26 @@ async function renderCommandCenter() {
             const label = n.matchId
                 ? display.matchLabel(n.matchId)
                 : (n.applicationId ? display.applicationLabel(n.applicationId) : 'Application');
-            const link = n.matchId
-                ? renderCommandCenterLink(matchRoute + n.matchId, label)
-                : escapeHtml(label);
+            const adminRoute = '/admin/negotiations/' + (n.id || '');
+            const link = n.id
+                ? renderCommandCenterLink(adminRoute, label)
+                : (n.matchId
+                    ? renderCommandCenterLink(matchRoute + n.matchId, label)
+                    : escapeHtml(label));
             return renderCommandCenterItem(link, friendlyQueueStatus(n.status), queueStatusTone(n.status));
         }, 'No open negotiations.', { theme: 'negotiations' })
+        + renderCommandCenterPanel('ph-warning-circle', 'Disputes', queues.disputes, (d) => {
+            const label = d.opportunityId
+                ? display.opportunityTitle(d.opportunityId)
+                : ('Dispute ' + (d.id || '').slice(-6));
+            const adminRoute = (d.negotiationId
+                ? '/admin/negotiations/' + d.negotiationId
+                : (CONFIG.ROUTES.ADMIN_DISPUTES || '/admin/disputes'));
+            const link = renderCommandCenterLink(adminRoute, label);
+            const cat = d.category ? String(d.category).replace(/_/g, ' ') : '';
+            const meta = [cat, friendlyQueueStatus(d.status)].filter(Boolean).join(' · ');
+            return renderCommandCenterItem(link, meta, 'danger');
+        }, 'No active disputes.', { theme: 'disputes' })
         + renderCommandCenterPanel('ph-arrows-counter-clockwise', 'Replacements', queues.replacements, (r) => {
             const label = r.matchId
                 ? display.matchLabel(r.matchId)

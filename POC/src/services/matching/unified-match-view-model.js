@@ -360,14 +360,14 @@
 
         if (!expired && status !== 'declined' && status !== 'expired' && !vm.dealId && !vm.negotiationCancelled) {
             if (vm.hasActiveNegotiation) {
-                push('negotiate', 'Continue Negotiation', 'secondary', '/matches/' + vm.id + '#negotiation', true);
+                push('negotiate', 'Continue Negotiation', 'secondary', '/matches/' + vm.id + '?section=negotiation', true);
             } else if (!vm.hasAgreedNegotiation) {
-                push('negotiate', 'Start Negotiation', 'secondary', '/matches/' + vm.id + '#negotiation', true);
+                push('negotiate', 'Start Negotiation', 'secondary', '/matches/' + vm.id + '?section=negotiation', true);
             }
         }
 
         if (vm.hasAgreedNegotiation && !vm.dealId && !expired) {
-            push('create_deal_from_negotiation', 'Create Deal', 'primary', '/matches/' + vm.id + '#negotiation', true);
+            push('create_deal_from_negotiation', 'Create Deal', 'primary', '/matches/' + vm.id + '?section=negotiation', true);
         }
 
         if (!expired && vm.canInviteToApply && !vm.hasActiveInvitation) {
@@ -380,13 +380,13 @@
 
         if (vm.replacementEligible && !expired) {
             if (vm.pendingReplacementInvitation) {
-                push('accept_replacement', 'Accept Replacement', 'primary', '/matches/' + vm.id + '#replacement', true);
+                push('accept_replacement', 'Accept Replacement', 'primary', '/matches/' + vm.id + '?section=replacement', true);
             }
             if (vm.canSuggestReplacement) {
-                push('suggest_replacement', 'Suggest Replacement', 'secondary', '/matches/' + vm.id + '#replacement', true);
+                push('suggest_replacement', 'Suggest Replacement', 'secondary', '/matches/' + vm.id + '?section=replacement', true);
             }
             if (vm.canManageReplacement) {
-                push('manage_replacement', 'Manage Replacement', 'secondary', '/matches/' + vm.id + '#replacement', true);
+                push('manage_replacement', 'Manage Replacement', 'secondary', '/matches/' + vm.id + '?section=replacement', true);
             }
         }
 
@@ -687,7 +687,7 @@
                     ? nlc.getNegotiationStatusLabel(status)
                     : (vm.hasAgreedNegotiation ? 'Terms Agreed' : 'Negotiation Open');
                 if (vm.hasActiveNegotiation || vm.hasAgreedNegotiation) {
-                    vm.negotiationRoute = '/matches/' + vm.id + '#negotiation';
+                    vm.negotiationRoute = '/matches/' + vm.id + '?section=negotiation';
                 }
             }
         }

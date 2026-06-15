@@ -367,6 +367,7 @@
         const empty = {
             invitations: [],
             negotiations: [],
+            disputes: [],
             replacements: [],
             blockedMatches: [],
             matchingRuns: [],
@@ -377,6 +378,7 @@
         const [
             invitations,
             negotiations,
+            disputes,
             replacements,
             postMatches,
             matchingRuns,
@@ -384,6 +386,7 @@
         ] = await Promise.all([
             typeof dataService.getOpportunityInvitations === 'function' ? dataService.getOpportunityInvitations() : [],
             typeof dataService.getNegotiations === 'function' ? dataService.getNegotiations() : [],
+            typeof dataService.getDisputes === 'function' ? dataService.getDisputes() : [],
             typeof dataService.getReplacementRequests === 'function' ? dataService.getReplacementRequests() : [],
             typeof dataService.getPostMatches === 'function' ? dataService.getPostMatches() : [],
             typeof dataService.getMatchingRuns === 'function' ? dataService.getMatchingRuns() : [],
@@ -435,6 +438,19 @@
                 updatedAt: n.updatedAt || n.createdAt
             }));
 
+        const activeDisputeStatuses = ['raised', 'under_review', 'mediation'];
+        const disputeQueue = disputes
+            .filter(d => activeDisputeStatuses.includes((d.status || '').toLowerCase()))
+            .slice(0, 25)
+            .map(d => ({
+                id: d.id,
+                negotiationId: d.negotiationId,
+                opportunityId: d.opportunityId,
+                category: d.category,
+                status: d.status,
+                raisedAt: d.raisedAt || d.createdAt
+            }));
+
         const replacementQueue = replacements
             .filter(r => {
                 const s = (r.status || '').toLowerCase();
@@ -473,6 +489,7 @@
         return {
             invitations: invitationQueue,
             negotiations: negotiationQueue,
+            disputes: disputeQueue,
             replacements: replacementQueue,
             blockedMatches,
             matchingRuns: runHistory,

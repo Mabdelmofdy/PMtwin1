@@ -1,0 +1,107 @@
+<div class="page-container ao-page admin-negotiations-page">
+    <div id="page-context-header-mount"></div>
+    <div class="page-body ao-body">
+
+        <section class="ao-hero" aria-label="Negotiation overview">
+            <div class="ao-hero-main">
+                <span class="ao-hero-eyebrow">Platform total</span>
+                <span class="ao-hero-value" id="an-stat-total">0</span>
+                <span class="ao-hero-caption">value negotiations</span>
+            </div>
+            <div class="ao-hero-stats">
+                <button type="button" class="ao-pill ao-pill--progress" data-an-jump="active">
+                    <span class="ao-pill-dot"></span>
+                    <span class="ao-pill-value" id="an-stat-active">0</span>
+                    <span class="ao-pill-label">Active</span>
+                </button>
+                <button type="button" class="ao-pill ao-pill--draft" data-an-jump="stalled">
+                    <span class="ao-pill-dot"></span>
+                    <span class="ao-pill-value" id="an-stat-stalled">0</span>
+                    <span class="ao-pill-label">Stalled</span>
+                </button>
+                <button type="button" class="ao-pill ao-pill--warning" data-an-jump="expiring">
+                    <span class="ao-pill-dot"></span>
+                    <span class="ao-pill-value" id="an-stat-expiring">0</span>
+                    <span class="ao-pill-label">Expiring</span>
+                </button>
+                <button type="button" class="ao-pill ao-pill--danger" data-an-jump="disputed">
+                    <span class="ao-pill-dot"></span>
+                    <span class="ao-pill-value" id="an-stat-disputes">0</span>
+                    <span class="ao-pill-label">Disputes</span>
+                </button>
+                <button type="button" class="ao-pill ao-pill--live" data-an-jump="agreed_no_deal">
+                    <span class="ao-pill-dot"></span>
+                    <span class="ao-pill-value" id="an-stat-agreed-nodeal">0</span>
+                    <span class="ao-pill-label">Agreed, no deal</span>
+                </button>
+            </div>
+        </section>
+
+        <section class="an-metrics" aria-label="Negotiation health metrics">
+            <div class="an-metric-card">
+                <span class="an-metric-label">Avg rounds to agree</span>
+                <span class="an-metric-value" id="an-metric-rounds">—</span>
+            </div>
+            <div class="an-metric-card">
+                <span class="an-metric-label">Avg days to agree</span>
+                <span class="an-metric-value" id="an-metric-days">—</span>
+            </div>
+            <div class="an-metric-card">
+                <span class="an-metric-label">Agreed → deal conversion</span>
+                <span class="an-metric-value" id="an-metric-conversion">—</span>
+            </div>
+        </section>
+
+        <section class="ao-toolbar" aria-label="Filters">
+            <div class="ao-tabs" role="tablist" aria-label="Negotiation queue filter">
+                <button type="button" class="ao-tab is-active" data-an-queue="" role="tab" aria-selected="true">
+                    All <span class="ao-tab-count" id="an-chip-all">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-an-queue="active" role="tab" aria-selected="false">
+                    Active <span class="ao-tab-count" id="an-chip-active">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-an-queue="stalled" role="tab" aria-selected="false">
+                    Stalled <span class="ao-tab-count" id="an-chip-stalled">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-an-queue="expiring" role="tab" aria-selected="false">
+                    Expiring <span class="ao-tab-count" id="an-chip-expiring">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-an-queue="disputed" role="tab" aria-selected="false">
+                    Disputes <span class="ao-tab-count" id="an-chip-disputed">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-an-queue="agreed" role="tab" aria-selected="false">
+                    Agreed <span class="ao-tab-count" id="an-chip-agreed">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-an-queue="agreed_no_deal" role="tab" aria-selected="false">
+                    No deal yet <span class="ao-tab-count" id="an-chip-agreed-nodeal">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-an-queue="terminal" role="tab" aria-selected="false">
+                    Ended <span class="ao-tab-count" id="an-chip-terminal">0</span>
+                </button>
+            </div>
+            <div class="ao-controls">
+                <div class="ao-search">
+                    <i class="ph-duotone ph-magnifying-glass" aria-hidden="true"></i>
+                    <input type="text" id="an-filter-search" class="ao-search-input" placeholder="Search opportunity, party, or ID" aria-label="Search negotiations">
+                </div>
+                <select id="an-filter-sort" class="ao-select" aria-label="Sort">
+                    <option value="activity">Latest activity</option>
+                    <option value="oldest">Oldest first</option>
+                    <option value="expiring">Expiring soon</option>
+                </select>
+            </div>
+        </section>
+
+        <section class="ao-listing" aria-labelledby="an-list-title">
+            <header class="ao-listing-head">
+                <div>
+                    <h2 id="an-list-title" class="ao-listing-title">All negotiations</h2>
+                    <p id="an-list-meta" class="ao-listing-meta">Loading…</p>
+                </div>
+            </header>
+            <div id="an-list" class="ao-list">
+                <div class="spinner"></div>
+            </div>
+        </section>
+    </div>
+</div>

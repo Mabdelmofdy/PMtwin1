@@ -721,8 +721,20 @@ function validateRegStep(step) {
             if (!country) { showRegFieldError('reg-address-country', 'Country is required'); return false; }
             const password = document.getElementById('reg-password')?.value;
             const confirm = document.getElementById('reg-confirm-password')?.value;
-            if (!password || password.length < 6) { showRegFieldError('reg-password', 'Password must be at least 6 characters'); return false; }
-            if (password !== confirm) { showRegFieldError('reg-confirm-password', 'Passwords do not match'); return false; }
+            if (typeof window.validateRegistrationStep === 'function') {
+                const check = window.validateRegistrationStep({ email, password, confirmPassword: confirm });
+                if (!check.isValid) {
+                    const msg = check.fieldErrors.password || check.fieldErrors.confirmPassword || check.fieldErrors.email || check.errors[0];
+                    showRegFieldError(check.fieldErrors.email ? 'reg-email' : (check.fieldErrors.confirmPassword ? 'reg-confirm-password' : 'reg-password'), msg);
+                    return false;
+                }
+            } else if (!password || password.length < 8) {
+                showRegFieldError('reg-password', 'Password must be at least 8 characters');
+                return false;
+            } else if (password !== confirm) {
+                showRegFieldError('reg-confirm-password', 'Passwords do not match');
+                return false;
+            }
             return true;
         }
         if (step === 3) {
@@ -768,8 +780,20 @@ function validateRegStep(step) {
             if (!country) { showRegFieldError('reg-ind-address-country', 'Country is required'); return false; }
             const password = document.getElementById('reg-ind-password')?.value;
             const confirm = document.getElementById('reg-ind-confirm-password')?.value;
-            if (!password || password.length < 6) { showRegFieldError('reg-ind-password', 'Password must be at least 6 characters'); return false; }
-            if (password !== confirm) { showRegFieldError('reg-ind-confirm-password', 'Passwords do not match'); return false; }
+            if (typeof window.validateRegistrationStep === 'function') {
+                const check = window.validateRegistrationStep({ email, password, confirmPassword: confirm });
+                if (!check.isValid) {
+                    const msg = check.fieldErrors.password || check.fieldErrors.confirmPassword || check.fieldErrors.email || check.errors[0];
+                    showRegFieldError(check.fieldErrors.email ? 'reg-ind-email' : (check.fieldErrors.confirmPassword ? 'reg-ind-confirm-password' : 'reg-ind-password'), msg);
+                    return false;
+                }
+            } else if (!password || password.length < 8) {
+                showRegFieldError('reg-ind-password', 'Password must be at least 8 characters');
+                return false;
+            } else if (password !== confirm) {
+                showRegFieldError('reg-ind-confirm-password', 'Passwords do not match');
+                return false;
+            }
             const indType = regState.individualType;
             if (indType === 'professional') {
                 const spec = document.getElementById('reg-specialty')?.value?.trim();

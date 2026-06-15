@@ -184,7 +184,7 @@ function setupMatchesFilters() {
                             : null;
                         await dataService.startNegotiationFromMatch(matchId, user.id, opportunityId ? { opportunityId } : {});
                     }
-                    if (window.router?.navigate) window.router.navigate('/matches/' + matchId + '#negotiation');
+                    if (window.router?.navigate) window.router.navigate('/matches/' + matchId + '?section=negotiation');
                 } catch (err) {
                     console.error('[matches] Start/continue negotiation failed:', { matchId, userId: user.id, err });
                     alert((err && err.message) ? err.message : 'Could not start negotiation.');

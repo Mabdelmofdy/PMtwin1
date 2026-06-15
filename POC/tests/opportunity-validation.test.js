@@ -1,20 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import vm from 'node:vm';
-
-function loadValidator() {
-    const srcPath = resolve(process.cwd(), 'src/services/opportunities/opportunity-validation.js');
-    const code = readFileSync(srcPath, 'utf8');
-    const sandbox = { globalThis: {} };
-    sandbox.window = sandbox.globalThis;
-    vm.createContext(sandbox);
-    vm.runInContext(code, sandbox);
-    return sandbox.globalThis.validateOpportunityForm;
-}
+import { loadValidationSandbox } from './validation-test-helper.js';
 
 describe('opportunity-validation', () => {
-    const validateOpportunityForm = loadValidator();
+    const validateOpportunityForm = loadValidationSandbox().validateOpportunityForm;
 
     it('blocks negative cash amount', () => {
         const result = validateOpportunityForm({ exchangeMode: 'cash', cashAmount: -10 });
@@ -38,6 +26,12 @@ describe('opportunity-validation', () => {
         expect(resultReversed.fieldErrors.budgetMax).toBeTruthy();
     });
 
+    it('blocks negative budget max', () => {
+        const result = validateOpportunityForm({ budgetMin: 0, budgetMax: -1 });
+        expect(result.isValid).toBe(false);
+        expect(result.fieldErrors.budgetMax).toBeTruthy();
+    });
+
     it('blocks invalid equity and profit percentages', () => {
         const equityResult = validateOpportunityForm({ equityPercentage: 120 });
         const profitResult = validateOpportunityForm({ profitSharePercentage: -5 });
@@ -56,5 +50,32 @@ describe('opportunity-validation', () => {
         expect(result.isValid).toBe(false);
         expect(result.fieldErrors.endDate).toBeTruthy();
         expect(result.fieldErrors.applicationDeadline).toBeTruthy();
+    });
+
+    it('blocks past dates when disallowPastDates is enabled', () => {
+        const today = loadValidationSandbox().validationPrimitives.getTodayIsoDate();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const y = yesterday.getFullYear();
+        const m = String(yesterday.getMonth() + 1).padStart(2, '0');
+        const d = String(yesterday.getDate()).padStart(2, '0');
+        const past = `${y}-${m}-${d}`;
+
+        const result = validateOpportunityForm(
+            { startDate: past, applicationDeadline: past, endDate: past },
+            { disallowPastDates: true }
+        );
+        expect(result.isValid).toBe(false);
+        expect(result.fieldErrors.startDate).toBeTruthy();
+        expect(today).toBeTruthy();
+    });
+
+    it('allows past dates when disallowPastDates is not set', () => {
+        const result = validateOpportunityForm({
+            startDate: '2020-06-01',
+            endDate: '2020-12-31',
+            applicationDeadline: '2020-05-01'
+        });
+        expect(result.isValid).toBe(true);
     });
 });

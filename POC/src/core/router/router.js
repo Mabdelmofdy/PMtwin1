@@ -70,19 +70,40 @@ class Router {
      * @returns {{ normalizedPath: string, query: string }}
      */
     parseHashPathAndQuery(path) {
-        let p = path;
-        if (p.includes('#')) {
-            p = p.split('#')[1] || '';
-        }
+        let p = path || '';
         if (p.startsWith('#')) {
             p = p.substring(1);
         }
+
+        // App route anchor: /matches/abc#negotiation → /matches/abc?section=negotiation
+        let anchorSection = '';
+        if (p.includes('#')) {
+            const hashIdx = p.indexOf('#');
+            const beforeHash = p.substring(0, hashIdx);
+            const afterHash = p.substring(hashIdx + 1);
+            const looksLikeRouteAnchor = beforeHash.startsWith('/')
+                && afterHash
+                && !afterHash.startsWith('/')
+                && !afterHash.includes('?');
+            if (looksLikeRouteAnchor) {
+                p = beforeHash;
+                anchorSection = afterHash;
+            } else {
+                p = afterHash || beforeHash;
+            }
+        }
+
         let query = '';
         if (p.includes('?')) {
             const qIdx = p.indexOf('?');
             query = p.substring(qIdx);
             p = p.substring(0, qIdx);
         }
+
+        if (anchorSection) {
+            query = this._appendQueryParam(query, 'section', anchorSection);
+        }
+
         if (!p.startsWith('/')) {
             p = '/' + p;
         }
@@ -91,6 +112,21 @@ class Router {
         }
         const normalizedPath = p || '/';
         return { normalizedPath, query };
+    }
+
+    _appendQueryParam(query, key, value) {
+        const params = new URLSearchParams(query.startsWith('?') ? query.substring(1) : (query || ''));
+        params.set(key, value);
+        const serialized = params.toString();
+        return serialized ? '?' + serialized : '';
+    }
+
+    /** Named section from hash query (`?section=negotiation`), or empty string. */
+    getHashSection() {
+        const q = this.getHashQueryString();
+        if (!q) return '';
+        const params = new URLSearchParams(q.startsWith('?') ? q.substring(1) : q);
+        return params.get('section') || '';
     }
 
     /** Query portion of current URL (`?a=1`), or empty string. */

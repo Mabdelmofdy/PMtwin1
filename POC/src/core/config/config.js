@@ -47,6 +47,8 @@ const CONFIG = {
         CONTRACTS: 'pmtwin_contracts',
         DEALS: 'pmtwin_deals',
         NEGOTIATIONS: 'pmtwin_negotiations',
+        DISPUTES: 'pmtwin_disputes',
+        NOTIFICATION_DELIVERY_LOG: 'pmtwin_notification_delivery_log',
         REVIEWS: 'pmtwin_reviews',
         SYSTEM_SETTINGS: 'pmtwin_system_settings',
         LOOKUPS_OVERRIDE: 'pmtwin_lookups_override',
@@ -334,6 +336,8 @@ const CONFIG = {
         NEGOTIATION: {
             MAX_ROUNDS: 10,
             EXPIRE_DAYS: 14,
+            STALL_DAYS: 5,
+            EXPIRING_SOON_HOURS: 48,
             STATUS: {
                 OPEN: 'open',
                 COUNTER_OFFERED: 'counter_offered',
@@ -341,7 +345,20 @@ const CONFIG = {
                 FAILED: 'failed',
                 EXPIRED: 'expired',
                 CANCELLED: 'cancelled'
-            }
+            },
+            DISPUTE_FREEZE_FORMAL_OFFERS: true
+        },
+        DISPUTE: {
+            STATUS: {
+                RAISED: 'raised',
+                UNDER_REVIEW: 'under_review',
+                MEDIATION: 'mediation',
+                RESOLVED: 'resolved',
+                ESCALATED: 'escalated',
+                WITHDRAWN: 'withdrawn'
+            },
+            CATEGORIES: ['value_mismatch', 'scope_disagreement', 'payment_terms', 'bad_faith', 'other'],
+            SLA_HOURS: 48
         },
         // Opportunity–candidate matching: extra weight for value compatibility (budget + exchange mode)
         VALUE_COMPATIBILITY_MAX_POINTS: 15,
@@ -386,6 +403,9 @@ const CONFIG = {
         ADMIN_SKILLS: '/admin/skills',
         ADMIN_DEALS: '/admin/deals',
         ADMIN_DEAL_DETAIL: '/admin/deals/:id',
+        ADMIN_NEGOTIATIONS: '/admin/negotiations',
+        ADMIN_NEGOTIATION_DETAIL: '/admin/negotiations/:id',
+        ADMIN_DISPUTES: '/admin/disputes',
         ADMIN_CONTRACTS: '/admin/contracts',
         ADMIN_CONTRACT_DETAIL: '/admin/contracts/:id',
         ADMIN_CONSORTIUM: '/admin/consortium',
@@ -395,6 +415,7 @@ const CONFIG = {
         MATCH_DETAIL: '/matches/:id',
         DEALS: '/deals',
         DEAL_DETAIL: '/deals/:id',
+        NEGOTIATION_DETAIL: '/negotiations/:id',
         COLLABORATION_WIZARD: '/collaboration-wizard',
         KNOWLEDGE_BASE: '/knowledge-base',
         COLLABORATION_MODELS: '/collaboration-models',

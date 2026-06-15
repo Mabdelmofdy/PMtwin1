@@ -269,6 +269,29 @@
             primaryAction: { label: 'View audit trail', route: R.ADMIN_AUDIT || '/admin/audit' },
             secondaryAction: { label: 'Opportunities', route: R.ADMIN_OPPORTUNITIES || '/admin/opportunities' }
         },
+        adminNegotiations: {
+            label: 'Admin Workspace',
+            title: 'Negotiation command center',
+            description:
+                'Monitor value negotiations across the platform: stalled deals, expiring terms, agreed-without-deal leaks, and full discussion history.',
+            primaryAction: { label: 'Dispute queue', route: R.ADMIN_DISPUTES || '/admin/disputes' },
+            secondaryAction: { label: 'Matching center', route: R.ADMIN_MATCHING || '/admin/matching' }
+        },
+        adminDisputes: {
+            label: 'Admin Workspace',
+            title: 'Dispute resolution queue',
+            description:
+                'Triage negotiation disputes: review party positions, assign mediation, resolve outcomes, and export records for compliance.',
+            primaryAction: { label: 'All negotiations', route: R.ADMIN_NEGOTIATIONS || '/admin/negotiations' },
+            secondaryAction: { label: 'Audit trail', route: R.ADMIN_AUDIT || '/admin/audit' }
+        },
+        adminNegotiationDetail: {
+            label: 'Admin Workspace',
+            title: 'Negotiation monitor',
+            description: 'Read-only oversight of terms, formal proposals, discussion messages, and internal admin notes.',
+            primaryAction: { label: 'All negotiations', route: R.ADMIN_NEGOTIATIONS || '/admin/negotiations' },
+            secondaryAction: { label: 'Audit trail', route: R.ADMIN_AUDIT || '/admin/audit' }
+        },
         adminContracts: {
             label: 'Admin Workspace',
             title: 'Contract registry',

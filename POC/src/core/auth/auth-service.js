@@ -126,6 +126,17 @@ class AuthService {
         if (existingUser) {
             throw new Error('User with this email already exists');
         }
+
+        if (typeof window !== 'undefined' && typeof window.validateRegistrationStep === 'function') {
+            const check = window.validateRegistrationStep({
+                email: userData.email,
+                password: userData.password,
+                confirmPassword: userData.confirmPassword || userData.password
+            });
+            if (!check.isValid) {
+                throw new Error(check.errors[0] || 'Invalid registration data');
+            }
+        }
         
         // Hash password (simple encoding for POC - NOT secure for production)
         const passwordHash = this.encodePassword(userData.password);
@@ -184,6 +195,17 @@ class AuthService {
         const existingCompany = await this.dataService.getCompanyByEmail(payload.email);
         if (existingCompany) {
             throw new Error('A company with this email already exists');
+        }
+
+        if (typeof window !== 'undefined' && typeof window.validateRegistrationStep === 'function') {
+            const check = window.validateRegistrationStep({
+                email: payload.email,
+                password: payload.password,
+                confirmPassword: payload.confirmPassword || payload.password
+            });
+            if (!check.isValid) {
+                throw new Error(check.errors[0] || 'Invalid registration data');
+            }
         }
         
         const passwordHash = this.encodePassword(payload.password);
@@ -501,6 +523,16 @@ class AuthService {
     async changePassword(currentPassword, newPassword) {
         const user = this.currentUser;
         if (!user || !user.id) throw new Error('You must be logged in to change your password.');
+        if (typeof window !== 'undefined' && typeof window.validatePasswordChange === 'function') {
+            const check = window.validatePasswordChange({
+                currentPassword,
+                newPassword,
+                confirmPassword: newPassword
+            });
+            if (!check.isValid) {
+                throw new Error(check.errors[0] || 'Invalid password');
+            }
+        }
         const currentHash = this.encodePassword(currentPassword);
         if (currentHash !== user.passwordHash) throw new Error('Current password is incorrect.');
         const passwordHash = this.encodePassword(newPassword);
@@ -529,6 +561,15 @@ class AuthService {
     async resetPassword(token, newPassword) {
         const entry = await this.dataService.getResetTokenByToken(token);
         if (!entry) throw new Error('Invalid or expired reset link. Please request a new one.');
+        if (typeof window !== 'undefined' && typeof window.validatePasswordReset === 'function') {
+            const check = window.validatePasswordReset({
+                newPassword,
+                confirmPassword: newPassword
+            });
+            if (!check.isValid) {
+                throw new Error(check.errors[0] || 'Invalid password');
+            }
+        }
         const user = await this.dataService.getUserOrCompanyByEmail(entry.email);
         if (!user) throw new Error('Account not found.');
         const passwordHash = this.encodePassword(newPassword);

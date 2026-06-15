@@ -6,7 +6,7 @@
     {
       "id": "demo-pm-oneway-01",
       "matchType": "one_way",
-      "status": "confirmed",
+      "status": "pending",
       "matchScore": 0.975,
       "runId": "seed-run-001",
       "participants": [
@@ -14,15 +14,15 @@
           "userId": "seed-user-001",
           "opportunityId": "seed-opp-001",
           "role": "need_owner",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
+          "participantStatus": "pending",
+          "respondedAt": null
         },
         {
           "userId": "seed-user-002",
           "opportunityId": "seed-opp-002",
           "role": "offer_provider",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
+          "participantStatus": "pending",
+          "respondedAt": null
         }
       ],
       "payload": {
@@ -41,12 +41,10 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-13T11:50:33.251Z",
-      "updatedAt": "2026-05-20T16:00:00.000Z",
-      "expiresAt": "2026-06-27T11:50:33.252Z",
-      "isReplacement": false,
-      "dealId": "seed-deal-oneway-01",
-      "negotiationId": "seed-neg-01"
+      "createdAt": "2026-06-15T07:07:15.702Z",
+      "updatedAt": "2026-06-15T07:07:15.703Z",
+      "expiresAt": "2026-06-29T07:07:15.703Z",
+      "isReplacement": false
     },
     {
       "id": "demo-pm-oneway-02",
@@ -86,15 +84,15 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-13T11:50:33.272Z",
-      "updatedAt": "2026-06-13T11:50:33.272Z",
-      "expiresAt": "2026-06-27T11:50:33.272Z",
+      "createdAt": "2026-06-15T07:07:15.750Z",
+      "updatedAt": "2026-06-15T07:07:15.750Z",
+      "expiresAt": "2026-06-29T07:07:15.750Z",
       "isReplacement": false
     },
     {
       "id": "demo-pm-barter-01",
       "matchType": "two_way",
-      "status": "confirmed",
+      "status": "pending",
       "matchScore": 0.975,
       "runId": "seed-run-010",
       "participants": [
@@ -102,29 +100,29 @@
           "userId": "seed-user-008",
           "opportunityId": "seed-opp-010",
           "role": "need_owner",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
+          "participantStatus": "pending",
+          "respondedAt": null
         },
         {
           "userId": "seed-user-008",
           "opportunityId": "seed-opp-011",
           "role": "offer_provider",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
+          "participantStatus": "pending",
+          "respondedAt": null
         },
         {
           "userId": "seed-user-009",
           "opportunityId": "seed-opp-012",
           "role": "need_owner",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
+          "participantStatus": "pending",
+          "respondedAt": null
         },
         {
           "userId": "seed-user-009",
           "opportunityId": "seed-opp-013",
           "role": "offer_provider",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
+          "participantStatus": "pending",
+          "respondedAt": null
         }
       ],
       "payload": {
@@ -142,11 +140,10 @@
         "scoreBtoA": 0.975,
         "valueEquivalence": "~1.0 × ([G] Barter need B — Architect services)"
       },
-      "createdAt": "2026-06-13T11:50:33.273Z",
-      "updatedAt": "2026-03-12T15:00:00.000Z",
-      "expiresAt": "2026-06-27T11:50:33.273Z",
-      "isReplacement": false,
-      "negotiationId": "seed-neg-02"
+      "createdAt": "2026-06-15T07:07:15.753Z",
+      "updatedAt": "2026-06-15T07:07:15.754Z",
+      "expiresAt": "2026-06-29T07:07:15.754Z",
+      "isReplacement": false
     },
     {
       "id": "demo-pm-oneway-03",
@@ -186,9 +183,9 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-13T11:50:33.274Z",
-      "updatedAt": "2026-06-13T11:50:33.274Z",
-      "expiresAt": "2026-06-27T11:50:33.274Z",
+      "createdAt": "2026-06-15T07:07:15.756Z",
+      "updatedAt": "2026-06-15T07:07:15.756Z",
+      "expiresAt": "2026-06-29T07:07:15.756Z",
       "isReplacement": false
     },
     {
@@ -229,9 +226,9 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-13T11:50:33.282Z",
-      "updatedAt": "2026-06-13T11:50:33.282Z",
-      "expiresAt": "2026-06-27T11:50:33.282Z",
+      "createdAt": "2026-06-15T07:07:15.769Z",
+      "updatedAt": "2026-06-15T07:07:15.769Z",
+      "expiresAt": "2026-06-29T07:07:15.769Z",
       "isReplacement": false
     },
     {
@@ -317,9 +314,9 @@
         ],
         "chainBalance": null
       },
-      "createdAt": "2026-06-13T11:50:33.284Z",
-      "updatedAt": "2026-06-13T11:50:33.284Z",
-      "expiresAt": "2026-06-27T11:50:33.284Z",
+      "createdAt": "2026-06-15T07:07:15.771Z",
+      "updatedAt": "2026-06-15T07:07:15.771Z",
+      "expiresAt": "2026-06-29T07:07:15.771Z",
       "isReplacement": false
     },
     {
@@ -360,9 +357,9 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-13T11:50:33.285Z",
-      "updatedAt": "2026-06-13T11:50:33.285Z",
-      "expiresAt": "2026-06-27T11:50:33.285Z",
+      "createdAt": "2026-06-15T07:07:15.771Z",
+      "updatedAt": "2026-06-15T07:07:15.771Z",
+      "expiresAt": "2026-06-29T07:07:15.771Z",
       "isReplacement": false
     },
     {
@@ -403,15 +400,15 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-13T11:50:33.287Z",
-      "updatedAt": "2026-06-13T11:50:33.287Z",
-      "expiresAt": "2026-06-27T11:50:33.287Z",
+      "createdAt": "2026-06-15T07:07:15.774Z",
+      "updatedAt": "2026-06-15T07:07:15.774Z",
+      "expiresAt": "2026-06-29T07:07:15.774Z",
       "isReplacement": false
     },
     {
       "id": "demo-pm-oneway-07",
       "matchType": "one_way",
-      "status": "confirmed",
+      "status": "pending",
       "matchScore": 0.975,
       "runId": "seed-run-026",
       "participants": [
@@ -419,15 +416,15 @@
           "userId": "seed-user-001",
           "opportunityId": "seed-opp-026",
           "role": "need_owner",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
+          "participantStatus": "pending",
+          "respondedAt": null
         },
         {
           "userId": "seed-user-002",
           "opportunityId": "seed-opp-027",
           "role": "offer_provider",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
+          "participantStatus": "pending",
+          "respondedAt": null
         }
       ],
       "payload": {
@@ -446,16 +443,15 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-13T11:50:33.293Z",
-      "updatedAt": "2026-03-12T15:00:00.000Z",
-      "expiresAt": "2026-06-27T11:50:33.293Z",
-      "isReplacement": false,
-      "negotiationId": "seed-neg-05"
+      "createdAt": "2026-06-15T07:07:15.783Z",
+      "updatedAt": "2026-06-15T07:07:15.783Z",
+      "expiresAt": "2026-06-29T07:07:15.783Z",
+      "isReplacement": false
     },
     {
       "id": "demo-pm-oneway-08",
       "matchType": "one_way",
-      "status": "confirmed",
+      "status": "pending",
       "matchScore": 0.975,
       "runId": "seed-run-028",
       "participants": [
@@ -463,15 +459,15 @@
           "userId": "seed-co-corp-004",
           "opportunityId": "seed-opp-028",
           "role": "need_owner",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
+          "participantStatus": "pending",
+          "respondedAt": null
         },
         {
           "userId": "seed-user-009",
           "opportunityId": "seed-opp-040",
           "role": "offer_provider",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
+          "participantStatus": "pending",
+          "respondedAt": null
         }
       ],
       "payload": {
@@ -490,11 +486,10 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-13T11:50:33.295Z",
-      "updatedAt": "2026-03-12T15:00:00.000Z",
-      "expiresAt": "2026-06-27T11:50:33.295Z",
-      "isReplacement": false,
-      "negotiationId": "seed-neg-06"
+      "createdAt": "2026-06-15T07:07:15.786Z",
+      "updatedAt": "2026-06-15T07:07:15.786Z",
+      "expiresAt": "2026-06-29T07:07:15.786Z",
+      "isReplacement": false
     },
     {
       "id": "demo-pm-oneway-09",
@@ -534,9 +529,9 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-13T11:50:33.297Z",
-      "updatedAt": "2026-06-13T11:50:33.297Z",
-      "expiresAt": "2026-06-27T11:50:33.297Z",
+      "createdAt": "2026-06-15T07:07:15.791Z",
+      "updatedAt": "2026-06-15T07:07:15.791Z",
+      "expiresAt": "2026-06-29T07:07:15.791Z",
       "isReplacement": false
     },
     {
@@ -577,15 +572,15 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-13T11:50:33.272Z",
-      "updatedAt": "2026-06-13T11:50:33.272Z",
-      "expiresAt": "2026-06-27T11:50:33.272Z",
+      "createdAt": "2026-06-15T07:07:15.751Z",
+      "updatedAt": "2026-06-15T07:07:15.751Z",
+      "expiresAt": "2026-06-29T07:07:15.751Z",
       "isReplacement": false
     },
     {
       "id": "demo-pm-oneway-11",
       "matchType": "one_way",
-      "status": "confirmed",
+      "status": "pending",
       "matchScore": 0.775,
       "runId": "seed-run-005",
       "participants": [
@@ -593,15 +588,15 @@
           "userId": "seed-co-corp-002",
           "opportunityId": "seed-opp-005",
           "role": "need_owner",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
+          "participantStatus": "pending",
+          "respondedAt": null
         },
         {
           "userId": "seed-user-008",
           "opportunityId": "seed-opp-011",
           "role": "offer_provider",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
+          "participantStatus": "pending",
+          "respondedAt": null
         }
       ],
       "payload": {
@@ -620,11 +615,10 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-13T11:50:33.266Z",
-      "updatedAt": "2026-03-12T15:00:00.000Z",
-      "expiresAt": "2026-06-27T11:50:33.266Z",
-      "isReplacement": false,
-      "negotiationId": "seed-neg-03"
+      "createdAt": "2026-06-15T07:07:15.731Z",
+      "updatedAt": "2026-06-15T07:07:15.731Z",
+      "expiresAt": "2026-06-29T07:07:15.731Z",
+      "isReplacement": false
     },
     {
       "id": "demo-pm-oneway-12",
@@ -664,9 +658,9 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-13T11:50:33.262Z",
-      "updatedAt": "2026-06-13T11:50:33.262Z",
-      "expiresAt": "2026-06-27T11:50:33.262Z",
+      "createdAt": "2026-06-15T07:07:15.724Z",
+      "updatedAt": "2026-06-15T07:07:15.724Z",
+      "expiresAt": "2026-06-29T07:07:15.724Z",
       "isReplacement": false
     },
     {
@@ -707,15 +701,15 @@
         },
         "valueAnalysis": null
       },
-      "createdAt": "2026-06-13T11:50:33.262Z",
-      "updatedAt": "2026-06-13T11:50:33.262Z",
-      "expiresAt": "2026-06-27T11:50:33.262Z",
+      "createdAt": "2026-06-15T07:07:15.724Z",
+      "updatedAt": "2026-06-15T07:07:15.724Z",
+      "expiresAt": "2026-06-29T07:07:15.724Z",
       "isReplacement": false
     },
     {
       "id": "demo-pm-consortium-01",
       "matchType": "consortium",
-      "status": "confirmed",
+      "status": "pending",
       "matchScore": 0.588,
       "runId": "seed-run-014",
       "participants": [
@@ -723,15 +717,15 @@
           "userId": "seed-co-corp-005",
           "opportunityId": "seed-opp-014",
           "role": "consortium_lead",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
+          "participantStatus": "pending",
+          "respondedAt": null
         },
         {
           "userId": "seed-user-011",
           "opportunityId": "seed-opp-015",
           "role": "consortium_member",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
+          "participantStatus": "pending",
+          "respondedAt": null
         }
       ],
       "payload": {
@@ -746,52 +740,10 @@
         ],
         "valueBalance": null
       },
-      "createdAt": "2026-06-13T11:50:33.280Z",
-      "updatedAt": "2026-03-18T12:00:00.000Z",
-      "expiresAt": "2026-06-27T11:50:33.280Z",
-      "isReplacement": false,
-      "dealId": "seed-deal-consortium-01",
-      "negotiationId": "seed-neg-04"
-    },
-    {
-      "id": "demo-pm-consortium-wind",
-      "matchType": "consortium",
-      "status": "confirmed",
-      "matchScore": 1.1,
-      "runId": "seed-run-039",
-      "participants": [
-        {
-          "userId": "seed-co-corp-005",
-          "opportunityId": "seed-opp-039",
-          "role": "consortium_lead",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
-        },
-        {
-          "userId": "seed-user-013",
-          "opportunityId": "seed-opp-035",
-          "role": "consortium_member",
-          "participantStatus": "accepted",
-          "respondedAt": "2026-03-01T09:00:00.000Z"
-        }
-      ],
-      "payload": {
-        "leadNeedId": "seed-opp-039",
-        "needOpportunityId": "seed-opp-039",
-        "roles": [
-          {
-            "role": "EPC contractor",
-            "opportunityId": "seed-opp-035",
-            "userId": "seed-user-013"
-          }
-        ]
-      },
-      "createdAt": "2026-03-01T09:00:00.000Z",
-      "updatedAt": "2026-03-18T12:00:00.000Z",
-      "expiresAt": "2026-06-24T09:00:00.000Z",
-      "isReplacement": false,
-      "dealId": "seed-deal-exchange-01",
-      "negotiationId": "seed-neg-07"
+      "createdAt": "2026-06-15T07:07:15.764Z",
+      "updatedAt": "2026-06-15T07:07:15.764Z",
+      "expiresAt": "2026-06-29T07:07:15.764Z",
+      "isReplacement": false
     }
   ]
 }

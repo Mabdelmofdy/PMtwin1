@@ -1,0 +1,108 @@
+<div class="page-container ao-page admin-disputes-page">
+    <div id="page-context-header-mount"></div>
+    <div class="page-body ao-body">
+
+        <section class="ao-hero" aria-label="Dispute overview">
+            <div class="ao-hero-main">
+                <span class="ao-hero-eyebrow">Platform total</span>
+                <span class="ao-hero-value" id="ads-stat-total">0</span>
+                <span class="ao-hero-caption">negotiation disputes</span>
+            </div>
+            <div class="ao-hero-stats">
+                <button type="button" class="ao-pill ao-pill--progress" data-ads-jump="active">
+                    <span class="ao-pill-dot"></span>
+                    <span class="ao-pill-value" id="ads-stat-active">0</span>
+                    <span class="ao-pill-label">Active</span>
+                </button>
+                <button type="button" class="ao-pill ao-pill--warning" data-ads-jump="needs_review">
+                    <span class="ao-pill-dot"></span>
+                    <span class="ao-pill-value" id="ads-stat-needs-review">0</span>
+                    <span class="ao-pill-label">Needs review</span>
+                </button>
+                <button type="button" class="ao-pill ao-pill--purple" data-ads-jump="mediation">
+                    <span class="ao-pill-dot"></span>
+                    <span class="ao-pill-value" id="ads-stat-mediation">0</span>
+                    <span class="ao-pill-label">Mediation</span>
+                </button>
+                <button type="button" class="ao-pill ao-pill--live" data-ads-jump="resolved">
+                    <span class="ao-pill-dot"></span>
+                    <span class="ao-pill-value" id="ads-stat-resolved">0</span>
+                    <span class="ao-pill-label">Resolved</span>
+                </button>
+                <button type="button" class="ao-pill ao-pill--danger" data-ads-jump="sla_breached">
+                    <span class="ao-pill-dot"></span>
+                    <span class="ao-pill-value" id="ads-stat-sla">0</span>
+                    <span class="ao-pill-label">SLA breach</span>
+                </button>
+            </div>
+        </section>
+
+        <section class="an-metrics" aria-label="Dispute health metrics">
+            <div class="an-metric-card">
+                <span class="an-metric-label">Avg days to resolve</span>
+                <span class="an-metric-value" id="ads-metric-days">—</span>
+            </div>
+            <div class="an-metric-card">
+                <span class="an-metric-label">Resolution rate</span>
+                <span class="an-metric-value" id="ads-metric-rate">—</span>
+            </div>
+            <div class="an-metric-card">
+                <span class="an-metric-label">Escalated externally</span>
+                <span class="an-metric-value" id="ads-metric-escalated">0</span>
+            </div>
+        </section>
+
+        <section class="ao-toolbar" aria-label="Filters">
+            <div class="ao-tabs" role="tablist" aria-label="Dispute queue filter">
+                <button type="button" class="ao-tab is-active" data-ads-queue="" role="tab" aria-selected="true">
+                    All <span class="ao-tab-count" id="ads-chip-all">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-ads-queue="active" role="tab" aria-selected="false">
+                    Active <span class="ao-tab-count" id="ads-chip-active">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-ads-queue="needs_review" role="tab" aria-selected="false">
+                    Needs review <span class="ao-tab-count" id="ads-chip-needs-review">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-ads-queue="sla_breached" role="tab" aria-selected="false">
+                    SLA breach <span class="ao-tab-count" id="ads-chip-sla">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-ads-queue="under_review" role="tab" aria-selected="false">
+                    Under review <span class="ao-tab-count" id="ads-chip-under-review">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-ads-queue="mediation" role="tab" aria-selected="false">
+                    Mediation <span class="ao-tab-count" id="ads-chip-mediation">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-ads-queue="resolved" role="tab" aria-selected="false">
+                    Resolved <span class="ao-tab-count" id="ads-chip-resolved">0</span>
+                </button>
+                <button type="button" class="ao-tab" data-ads-queue="terminal" role="tab" aria-selected="false">
+                    Closed <span class="ao-tab-count" id="ads-chip-terminal">0</span>
+                </button>
+            </div>
+            <div class="ao-controls">
+                <div class="ao-search">
+                    <i class="ph-duotone ph-magnifying-glass" aria-hidden="true"></i>
+                    <input type="text" id="ads-filter-search" class="ao-search-input" placeholder="Search opportunity, party, or ID" aria-label="Search disputes">
+                </div>
+                <select id="ads-filter-sort" class="ao-select" aria-label="Sort">
+                    <option value="activity">Latest activity</option>
+                    <option value="oldest">Oldest first</option>
+                    <option value="raised">Recently raised</option>
+                </select>
+                <button type="button" class="btn btn-outline btn-sm" id="ads-export-csv">Export CSV</button>
+            </div>
+        </section>
+
+        <section class="ao-listing" aria-labelledby="ads-list-title">
+            <header class="ao-listing-head">
+                <div>
+                    <h2 id="ads-list-title" class="ao-listing-title">All disputes</h2>
+                    <p id="ads-list-meta" class="ao-listing-meta">Loading…</p>
+                </div>
+            </header>
+            <div id="ads-list" class="ao-list">
+                <div class="spinner"></div>
+            </div>
+        </section>
+    </div>
+</div>

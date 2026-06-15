@@ -259,6 +259,48 @@ describe('DataService negotiation lifecycle', () => {
         expect(ds._resolveNegotiationOpportunityId(match, 'provider-1')).toBe('need-b');
     });
 
+    it('creates deal from accepted application when linked negotiation is not agreed', async () => {
+        ds.storage.set(CONFIG.STORAGE_KEYS.OPPORTUNITIES, [
+            { id: 'need-1', creatorId: 'owner-1', title: 'Need', status: 'published', exchangeMode: 'cash' }
+        ]);
+        ds.storage.set(CONFIG.STORAGE_KEYS.POST_MATCHES, [{
+            id: 'match-1',
+            status: CONFIG.POST_MATCH_STATUS.CONFIRMED,
+            matchType: 'one_way',
+            participants: [
+                { userId: 'owner-1', role: 'need_owner' },
+                { userId: 'provider-1', role: 'offer_provider' }
+            ],
+            payload: { needOpportunityId: 'need-1' }
+        }]);
+        ds.storage.set(CONFIG.STORAGE_KEYS.APPLICATIONS, [{
+            id: 'app-1',
+            opportunityId: 'need-1',
+            applicantId: 'provider-1',
+            status: CONFIG.APPLICATION_STATUS.ACCEPTED,
+            matchId: 'match-1',
+            negotiationId: 'neg-open',
+            proposal: 'Ready to deliver'
+        }]);
+        ds.storage.set(CONFIG.STORAGE_KEYS.NEGOTIATIONS, [{
+            id: 'neg-open',
+            opportunityId: 'need-1',
+            matchId: 'match-1',
+            applicationId: 'app-1',
+            status: CONFIG.MATCHING.NEGOTIATION.STATUS.OPEN,
+            parties: [
+                { userId: 'owner-1', role: 'need_owner' },
+                { userId: 'provider-1', role: 'offer_provider' }
+            ],
+            rounds: []
+        }]);
+
+        const deal = await ds.createDealFromApplication('app-1', 'owner-1');
+        expect(deal.applicationId).toBe('app-1');
+        expect(deal.matchId).toBe('match-1');
+        expect(deal.negotiationId).toBeNull();
+    });
+
     it('allows any match participant to create deal from agreed negotiation', async () => {
         ds.storage.set(CONFIG.STORAGE_KEYS.OPPORTUNITIES, [
             { id: 'need-1', creatorId: 'owner-1', title: 'Need', status: 'published' },

@@ -236,7 +236,13 @@ class OpportunityFormService {
                 `;
                 break;
                 
-            case 'date':
+            case 'date': {
+                const todayMin = (typeof window !== 'undefined'
+                    && window.validationPrimitives
+                    && typeof window.validationPrimitives.getTodayIsoDate === 'function')
+                    ? window.validationPrimitives.getTodayIsoDate()
+                    : '';
+                const minAttr = todayMin ? `min="${todayMin}"` : '';
                 fieldHTML = `
                     <input 
                         type="date" 
@@ -245,11 +251,19 @@ class OpportunityFormService {
                         class="form-input" 
                         value="${value || ''}"
                         ${requiredAttr}
+                        ${minAttr}
                     >
                 `;
                 break;
+            }
                 
-            case 'date-range':
+            case 'date-range': {
+                const todayMin = (typeof window !== 'undefined'
+                    && window.validationPrimitives
+                    && typeof window.validationPrimitives.getTodayIsoDate === 'function')
+                    ? window.validationPrimitives.getTodayIsoDate()
+                    : '';
+                const minAttr = todayMin ? `min="${todayMin}"` : '';
                 fieldHTML = `
                     <div class="date-range">
                         <input 
@@ -259,6 +273,7 @@ class OpportunityFormService {
                             class="form-input" 
                             value="${value?.start || ''}"
                             ${requiredAttr}
+                            ${minAttr}
                         >
                         <span>to</span>
                         <input 
@@ -268,10 +283,12 @@ class OpportunityFormService {
                             class="form-input" 
                             value="${value?.end || ''}"
                             ${requiredAttr}
+                            ${minAttr}
                         >
                     </div>
                 `;
                 break;
+            }
                 
             case 'select':
                 const selectOptions = this.getOptions(attribute);

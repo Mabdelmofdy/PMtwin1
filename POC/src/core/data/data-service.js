@@ -21,6 +21,21 @@ import {
     allRequiredParticipantsAgreed
 } from "../../services/matching/negotiation-lifecycle.js";
 import {
+    mergeProposalTerms,
+    getEffectiveTerms
+} from "../../services/matching/negotiation-terms.js";
+import {
+    isActiveDispute,
+    negotiationFormalActionsFrozen,
+    DISPUTE_STATUS,
+    RESOLUTION_OUTCOMES
+} from "../../services/matching/dispute-lifecycle.js";
+import {
+    getNotificationPrefs,
+    shouldDeliverEmail,
+    appendDeliveryLog
+} from "../../services/notifications/notification-delivery.js";
+import {
     isTerminalInvitationStatus,
     shouldExpireInvitation,
     computeDefaultInvitationExpiresAt
@@ -45,6 +60,24 @@ import {
     hasRecentDuplicateNotification,
     notificationDedupeKey
 } from "../../services/matching/matching-lifecycle-permissions.js";
+
+function _runWindowValidator(fnName, data, options) {
+    const fn = typeof window !== 'undefined' ? window[fnName] : null;
+    if (typeof fn !== 'function') return;
+    const result = fn(data, options);
+    if (result && !result.isValid) {
+        throw new Error(result.errors[0] || 'Validation failed');
+    }
+}
+
+function _opportunityUpdateTouchesDates(updates) {
+    if (!updates || typeof updates !== 'object') return false;
+    const dateKeys = ['startDate', 'endDate', 'applicationDeadline'];
+    if (dateKeys.some((key) => updates[key] !== undefined)) return true;
+    if (updates.attributes && dateKeys.some((key) => updates.attributes[key] !== undefined)) return true;
+    if (updates.timeline) return true;
+    return false;
+}
 
 /**
  * Data Service
@@ -314,6 +347,15 @@ class DataService {
                     const negotiations = this.storage.get(CONFIG.STORAGE_KEYS.NEGOTIATIONS) || [];
                     this.storage.set(CONFIG.STORAGE_KEYS.NEGOTIATIONS, mergeById(negotiations, json.data));
                     console.log(`Merged ${json.data.length} demo negotiations`);
+                }
+            }
+            const demoDisputesRes = await fetch(`${base}demo-disputes.json`);
+            if (demoDisputesRes.ok) {
+                const json = await demoDisputesRes.json();
+                if (json.data && json.data.length) {
+                    const disputes = this.storage.get(CONFIG.STORAGE_KEYS.DISPUTES) || [];
+                    this.storage.set(CONFIG.STORAGE_KEYS.DISPUTES, mergeById(disputes, json.data));
+                    console.log(`Merged ${json.data.length} demo disputes`);
                 }
             }
             const demoAppReqsRes = await fetch(`${base}demo-application-requirements.json`);
@@ -667,6 +709,7 @@ class DataService {
             'sessions': CONFIG.STORAGE_KEYS.SESSIONS,
             'contracts': CONFIG.STORAGE_KEYS.CONTRACTS,
             'negotiations': CONFIG.STORAGE_KEYS.NEGOTIATIONS,
+            'disputes': CONFIG.STORAGE_KEYS.DISPUTES,
             'reviews': CONFIG.STORAGE_KEYS.REVIEWS,
             'subscription_plans': CONFIG.STORAGE_KEYS.SUBSCRIPTION_PLANS,
             'subscriptions': CONFIG.STORAGE_KEYS.SUBSCRIPTIONS
@@ -926,6 +969,7 @@ class DataService {
     async createOpportunity(opportunityData, options = {}) {
         this._assertPortalCanMutate(options);
         this._assertNotAuditorWrite(options);
+        _runWindowValidator('validateOpportunityData', opportunityData, { disallowPastDates: true });
         const opportunities = await this.getOpportunities();
         const newOpportunity = {
             id: this.generateId(),
@@ -964,6 +1008,11 @@ class DataService {
         if (updates && updates.status != null && updates.status !== previousStatus) {
             enforceTransition('opportunity', opportunities[index], updates.status);
         }
+
+        const mergedForValidation = { ...opportunities[index], ...updates };
+        _runWindowValidator('validateOpportunityData', mergedForValidation, {
+            disallowPastDates: _opportunityUpdateTouchesDates(updates)
+        });
         
         opportunities[index] = {
             ...opportunities[index],
@@ -1083,6 +1132,7 @@ class DataService {
     
     async createApplication(applicationData, options = {}) {
         this._assertPortalCanMutate(options);
+        _runWindowValidator('validateApplication', applicationData, { requireProposal: false });
         const applications = await this.getApplications();
         const applicantId = applicationData.applicantId;
         let companyId = options.companyId || applicationData.applicantCompanyId || null;
@@ -2400,6 +2450,18 @@ class DataService {
         const index = applications.findIndex(a => a.id === id);
         if (index === -1) return null;
 
+        if (updates) {
+            const merged = { ...applications[index], ...updates };
+            const appValue = merged.application_value || {};
+            _runWindowValidator('validateApplication', {
+                proposal: merged.proposal,
+                estimatedDurationDays: merged.estimatedDurationDays,
+                offeredValue: appValue.offered_value ?? appValue.requested_value,
+                bidAmount: merged.responses?.taskBidAmount,
+                availabilityDate: merged.availabilityDate
+            }, { requireProposal: false });
+        }
+
         applications[index] = {
             ...applications[index],
             ...updates,
@@ -2943,6 +3005,10 @@ class DataService {
             enforceTransition('contract', current, updates.status);
         }
 
+        if (updates) {
+            _runWindowValidator('validateContract', updates, { requireScope: false });
+        }
+
         let updated = {
             ...current,
             ...updates,
@@ -3267,11 +3333,18 @@ class DataService {
         }
 
         const built = buildDealPayloadFromApplication(application, opp);
+        const agreedStatus = CONFIG.MATCHING.NEGOTIATION.STATUS.AGREED;
         let negotiationId = built.negotiationId || null;
+        if (negotiationId) {
+            const linkedNeg = await this.getNegotiationById(negotiationId);
+            if (!linkedNeg || (linkedNeg.status || '').toLowerCase() !== agreedStatus) {
+                negotiationId = null;
+            }
+        }
         if (!negotiationId) {
             const negs = await this.getNegotiationsByApplicationId(applicationId);
             const agreed = (negs || []).find(n =>
-                (n.status || '').toLowerCase() === CONFIG.MATCHING.NEGOTIATION.STATUS.AGREED
+                (n.status || '').toLowerCase() === agreedStatus
             );
             negotiationId = agreed?.id || null;
         }
@@ -3520,6 +3593,10 @@ class DataService {
         const index = deals.findIndex(d => d.id === id);
         if (index === -1) return null;
 
+        if (updates) {
+            _runWindowValidator('validateDealUpdate', updates);
+        }
+
         if (updates && updates.status != null && updates.status !== deals[index].status) {
             enforceTransition('deal', deals[index], updates.status);
         }
@@ -3631,6 +3708,11 @@ class DataService {
             parties: negotiationData.parties || [],
             status,
             initialTerms: negotiationData.initialTerms || null,
+            currentTerms: negotiationData.currentTerms != null
+                ? negotiationData.currentTerms
+                : (negotiationData.initialTerms || null),
+            discussionThread: negotiationData.discussionThread || [],
+            adminNotes: negotiationData.adminNotes || [],
             rounds: negotiationData.rounds || [],
             agreedTerms: negotiationData.agreedTerms || null,
             expiresAt: (negotiationData.expiresAt != null && negotiationData.expiresAt !== '')
@@ -3671,6 +3753,20 @@ class DataService {
         if (!parties.some(p => p.userId === userId)) {
             throw new Error('You are not a participant in this negotiation.');
         }
+    }
+
+    _negotiationWorkspaceLink(negotiation) {
+        if (!negotiation || !negotiation.id) return '/pipeline/matches';
+        return '/negotiations/' + negotiation.id;
+    }
+
+    _proposalHasTermChanges(proposal) {
+        if (!proposal || typeof proposal !== 'object') return false;
+        return Object.keys(proposal).some((key) => {
+            if (key === 'exchangeMode') return false;
+            const val = proposal[key];
+            return val !== undefined && val !== null && val !== '';
+        });
     }
 
     _buildInitialTermsFromApplication(application) {
@@ -3801,7 +3897,7 @@ class DataService {
                     type: 'negotiation_started',
                     title: 'Negotiation started',
                     message: 'A participant started negotiating terms on your opportunity match.',
-                    link: '/matches/' + matchId,
+                    link: this._negotiationWorkspaceLink(negotiation),
                     read: false
                 });
             } catch (e) {
@@ -3877,7 +3973,7 @@ class DataService {
                     type: 'negotiation_started',
                     title: 'Negotiation started',
                     message: 'Negotiation has started on an application for your opportunity.',
-                    link: '/opportunities/' + application.opportunityId,
+                    link: this._negotiationWorkspaceLink(negotiation),
                     read: false
                 });
             } catch (e) {
@@ -3908,6 +4004,39 @@ class DataService {
         if (!isActiveNegotiation(negotiation)) {
             throw new Error('This negotiation is no longer active.');
         }
+        await this._assertNegotiationFormalActionsAllowed(negotiation);
+
+        const proposalPayload = proposal || {};
+        const hasTermChanges = this._proposalHasTermChanges(proposalPayload);
+        const msg = (message || '').trim();
+
+        if (!hasTermChanges && msg) {
+            const discussionThread = [...(negotiation.discussionThread || [])];
+            discussionThread.push({
+                id: this.generateId(),
+                by: actorUserId,
+                at: new Date().toISOString(),
+                body: msg,
+                type: 'message'
+            });
+            const updated = await this.updateNegotiation(negotiationId, { discussionThread });
+            const otherIds = (negotiation.parties || []).map(p => p.userId).filter(id => id !== actorUserId);
+            for (const uid of otherIds) {
+                try {
+                    await this.createNotification({
+                        userId: uid,
+                        type: 'negotiation_message',
+                        title: 'New negotiation message',
+                        message: msg.slice(0, 120),
+                        link: this._negotiationWorkspaceLink(negotiation),
+                        read: false
+                    });
+                } catch (e) {
+                    void e;
+                }
+            }
+            return updated;
+        }
 
         const maxRounds = CONFIG.MATCHING.NEGOTIATION.MAX_ROUNDS || 10;
         const rounds = [...(negotiation.rounds || [])];
@@ -3915,15 +4044,27 @@ class DataService {
             throw new Error('Maximum negotiation rounds reached.');
         }
 
+        await this._assertNegotiationFormalActionsAllowed(negotiation);
+
+        if (hasTermChanges) {
+            _runWindowValidator('validateNegotiationProposal', proposalPayload);
+        }
+
         rounds.push({
             by: actorUserId,
             at: new Date().toISOString(),
-            proposal: proposal || {},
-            message: message || ''
+            proposal: proposalPayload,
+            message: msg
         });
+
+        const baseTerms = getEffectiveTerms(negotiation);
+        const currentTerms = hasTermChanges
+            ? mergeProposalTerms(baseTerms, proposalPayload)
+            : baseTerms;
 
         const updated = await this.updateNegotiation(negotiationId, {
             rounds,
+            currentTerms,
             status: CONFIG.MATCHING.NEGOTIATION.STATUS.COUNTER_OFFERED
         });
 
@@ -3934,8 +4075,8 @@ class DataService {
                     userId: uid,
                     type: 'negotiation_countered',
                     title: 'New negotiation proposal',
-                    message: message || 'A counter-proposal was submitted.',
-                    link: negotiation.matchId ? '/matches/' + negotiation.matchId : '/opportunities/' + negotiation.opportunityId,
+                    message: msg || 'A counter-proposal was submitted.',
+                    link: this._negotiationWorkspaceLink(negotiation),
                     read: false
                 });
             } catch (e) {
@@ -3972,6 +4113,7 @@ class DataService {
         if (!isActiveNegotiation(negotiation)) {
             throw new Error('This negotiation is no longer active.');
         }
+        await this._assertNegotiationFormalActionsAllowed(negotiation);
         if (hasParticipantAgreed(negotiation, actorUserId)) {
             return negotiation;
         }
@@ -4017,6 +4159,7 @@ class DataService {
         const updated = await this.updateNegotiation(negotiationId, {
             status: agreedStatus,
             agreedTerms: terms,
+            currentTerms: terms,
             finalAgreedSnapshot,
             agreedBy,
             participantAgreements,
@@ -4033,7 +4176,7 @@ class DataService {
                     entityId: negotiationId,
                     title: 'Terms agreed',
                     message: 'Negotiation terms have been agreed. You can create a deal workspace next.',
-                    link: negotiation.matchId ? '/matches/' + negotiation.matchId : '/opportunities/' + negotiation.opportunityId,
+                    link: this._negotiationWorkspaceLink(negotiation),
                     read: false
                 });
             } catch (e) {
@@ -4068,6 +4211,7 @@ class DataService {
         if (isTerminalNegotiation(negotiation)) {
             throw new Error('This negotiation has already ended.');
         }
+        await this._assertNegotiationFormalActionsAllowed(negotiation);
 
         const updated = await this.updateNegotiation(negotiationId, {
             status: CONFIG.MATCHING.NEGOTIATION.STATUS.CANCELLED,
@@ -4084,7 +4228,7 @@ class DataService {
                     type: 'negotiation_cancelled',
                     title: 'Negotiation cancelled',
                     message: 'The negotiation was cancelled. You can start a new negotiation when ready.',
-                    link: negotiation.matchId ? '/matches/' + negotiation.matchId : '/opportunities/' + negotiation.opportunityId,
+                    link: this._negotiationWorkspaceLink(negotiation),
                     read: false
                 });
             } catch (e) {
@@ -4232,6 +4376,442 @@ class DataService {
         ).length;
         const dealsFromNegotiations = deals.filter(d => d.negotiationId).length;
         return { openNegotiations, agreedNegotiations, cancelledNegotiations, dealsFromNegotiations };
+    }
+
+    async getAdminNegotiationAnalytics() {
+        const negotiations = await this.getNegotiations();
+        const deals = await this.getDeals();
+        const disputes = await this.getDisputes();
+        const cc = typeof window !== 'undefined' ? window.AdminNegotiationCommandCenter : null;
+        if (cc && typeof cc.buildAdminNegotiationAnalytics === 'function') {
+            const stallDays = CONFIG.MATCHING.NEGOTIATION.STALL_DAYS || 5;
+            const expiringHours = CONFIG.MATCHING.NEGOTIATION.EXPIRING_SOON_HOURS || 48;
+            return cc.buildAdminNegotiationAnalytics(negotiations, deals, { stallDays, expiringHours, disputes });
+        }
+        return this.getNegotiationMatchingAnalytics();
+    }
+
+    async adminExtendNegotiationExpiry(negotiationId, actorUserId, extraDays = 7) {
+        const actor = await this.getUserById(actorUserId);
+        assertNotReadOnlyAdmin(actor?.role || null);
+        const auth = (typeof window !== 'undefined' && window.authService) ? window.authService : null;
+        if (!auth || !auth.canAccessAdmin()) {
+            throw new Error('Admin access required.');
+        }
+        const negotiation = await this.getNegotiationById(negotiationId);
+        if (!negotiation) throw new Error('Negotiation not found.');
+        if (!isActiveNegotiation(negotiation)) {
+            throw new Error('Only active negotiations can be extended.');
+        }
+        const days = Number(extraDays);
+        if (!Number.isFinite(days) || days < 1 || days > 30) {
+            throw new Error('Extension must be between 1 and 30 days.');
+        }
+        const baseMs = negotiation.expiresAt
+            ? new Date(negotiation.expiresAt).getTime()
+            : Date.now();
+        const newExpiry = new Date(baseMs + days * 86400000).toISOString();
+        const updated = await this.updateNegotiation(negotiationId, { expiresAt: newExpiry });
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'admin_negotiation_extended',
+                entityType: 'negotiation',
+                entityId: negotiationId,
+                details: { extraDays: days, expiresAt: newExpiry }
+            });
+        } catch (e) {
+            void e;
+        }
+        return updated;
+    }
+
+    async adminAddNegotiationNote(negotiationId, actorUserId, note) {
+        const actor = await this.getUserById(actorUserId);
+        assertNotReadOnlyAdmin(actor?.role || null);
+        const auth = (typeof window !== 'undefined' && window.authService) ? window.authService : null;
+        if (!auth || !auth.canAccessAdmin()) {
+            throw new Error('Admin access required.');
+        }
+        const text = (note || '').trim();
+        if (!text) throw new Error('Note cannot be empty.');
+        const negotiation = await this.getNegotiationById(negotiationId);
+        if (!negotiation) throw new Error('Negotiation not found.');
+        const adminNotes = [
+            ...(negotiation.adminNotes || []),
+            { by: actorUserId, at: new Date().toISOString(), note: text }
+        ];
+        return this.updateNegotiation(negotiationId, { adminNotes });
+    }
+
+    // Dispute operations (negotiation value disputes — Phase 3)
+    async getDisputes() {
+        return this.storage.get(CONFIG.STORAGE_KEYS.DISPUTES) || [];
+    }
+
+    async getDisputeById(id) {
+        const list = await this.getDisputes();
+        return list.find(d => d.id === id) || null;
+    }
+
+    async getDisputesByNegotiationId(negotiationId) {
+        const list = await this.getDisputes();
+        return list.filter(d => d.negotiationId === negotiationId);
+    }
+
+    async updateDispute(id, updates) {
+        const list = await this.getDisputes();
+        const index = list.findIndex(d => d.id === id);
+        if (index === -1) return null;
+        list[index] = {
+            ...list[index],
+            ...updates,
+            updatedAt: new Date().toISOString()
+        };
+        this.storage.set(CONFIG.STORAGE_KEYS.DISPUTES, list);
+        return list[index];
+    }
+
+    async _getActiveDisputeForNegotiation(negotiation) {
+        if (!negotiation) return null;
+        if (negotiation.disputeId) {
+            const linked = await this.getDisputeById(negotiation.disputeId);
+            if (linked && isActiveDispute(linked)) return linked;
+        }
+        const list = await this.getDisputesByNegotiationId(negotiation.id);
+        return list.find(d => isActiveDispute(d)) || null;
+    }
+
+    async _assertNegotiationFormalActionsAllowed(negotiation) {
+        const freeze = CONFIG.MATCHING.NEGOTIATION.DISPUTE_FREEZE_FORMAL_OFFERS !== false;
+        if (!freeze) return;
+        const dispute = await this._getActiveDisputeForNegotiation(negotiation);
+        if (dispute && negotiationFormalActionsFrozen(dispute)) {
+            throw new Error('Formal negotiation actions are frozen while a dispute is active. Discussion messages are still allowed.');
+        }
+    }
+
+    async raiseNegotiationDispute(negotiationId, actorUserId, { category, description } = {}) {
+        this._assertPortalCanMutate();
+        const negotiation = await this.getNegotiationById(negotiationId);
+        if (!negotiation) throw new Error('Negotiation not found.');
+        assertNotReadOnlyAdmin(await this._getActorRole(actorUserId));
+        await this.assertNegotiationParticipant(negotiation, actorUserId);
+
+        const status = (negotiation.status || '').toLowerCase();
+        const allowedStatuses = ['open', 'counter_offered', 'agreed'];
+        if (!allowedStatuses.includes(status)) {
+            throw new Error('Disputes can only be raised during active or agreed negotiations.');
+        }
+
+        const existing = await this._getActiveDisputeForNegotiation(negotiation);
+        if (existing) throw new Error('An active dispute already exists for this negotiation.');
+
+        _runWindowValidator('validateRaiseDispute', { category, description });
+
+        const now = new Date().toISOString();
+        const dispute = {
+            id: this.generateId(),
+            negotiationId,
+            opportunityId: negotiation.opportunityId || null,
+            raisedBy: actorUserId,
+            raisedAt: now,
+            category: (category || 'other').toLowerCase(),
+            description: String(description || '').trim(),
+            status: DISPUTE_STATUS.RAISED,
+            assignedAdminId: null,
+            resolution: null,
+            thread: [{
+                id: this.generateId(),
+                by: actorUserId,
+                at: now,
+                body: String(description || '').trim(),
+                visibleToParties: true
+            }],
+            createdAt: now,
+            updatedAt: now
+        };
+
+        const list = await this.getDisputes();
+        list.push(dispute);
+        this.storage.set(CONFIG.STORAGE_KEYS.DISPUTES, list);
+
+        await this.updateNegotiation(negotiationId, { disputeId: dispute.id });
+
+        const otherIds = (negotiation.parties || []).map(p => p.userId).filter(id => id !== actorUserId);
+        const workspaceLink = this._negotiationWorkspaceLink(negotiation);
+        for (const uid of otherIds) {
+            try {
+                await this.notifyUser(uid, {
+                    type: 'negotiation_dispute_raised',
+                    title: 'Dispute raised',
+                    message: 'A party raised a dispute on your negotiation. Formal proposals are paused until resolved.',
+                    link: workspaceLink
+                });
+            } catch (e) {
+                void e;
+            }
+        }
+
+        try {
+            await this._notifyAdminUsers({
+                type: 'negotiation_dispute_raised',
+                title: 'New negotiation dispute',
+                message: 'A dispute was raised and needs admin review.',
+                link: (CONFIG.ROUTES.ADMIN_NEGOTIATION_DETAIL || '/admin/negotiations/:id').replace(':id', negotiationId)
+            });
+        } catch (e) {
+            void e;
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'dispute_raised',
+                entityType: 'dispute',
+                entityId: dispute.id,
+                details: { negotiationId, category: dispute.category }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return dispute;
+    }
+
+    async withdrawNegotiationDispute(disputeId, actorUserId) {
+        this._assertPortalCanMutate();
+        const dispute = await this.getDisputeById(disputeId);
+        if (!dispute) throw new Error('Dispute not found.');
+        if (!isActiveDispute(dispute)) throw new Error('This dispute is no longer active.');
+        if (dispute.raisedBy !== actorUserId) {
+            throw new Error('Only the party who raised the dispute can withdraw it.');
+        }
+
+        const updated = await this.updateDispute(disputeId, {
+            status: DISPUTE_STATUS.WITHDRAWN,
+            resolution: {
+                outcome: 'withdrawn',
+                notes: 'Withdrawn by raising party.',
+                resolvedAt: new Date().toISOString(),
+                resolvedBy: actorUserId
+            }
+        });
+
+        const negotiation = await this.getNegotiationById(dispute.negotiationId);
+        if (negotiation && negotiation.disputeId === disputeId) {
+            await this.updateNegotiation(negotiation.id, { disputeId: null });
+        }
+
+        if (negotiation) {
+            const otherIds = (negotiation.parties || []).map(p => p.userId).filter(id => id !== actorUserId);
+            for (const uid of otherIds) {
+                try {
+                    await this.notifyUser(uid, {
+                        type: 'dispute_withdrawn',
+                        title: 'Dispute withdrawn',
+                        message: 'The dispute on your negotiation was withdrawn. Formal proposals can resume.',
+                        link: this._negotiationWorkspaceLink(negotiation)
+                    });
+                } catch (e) {
+                    void e;
+                }
+            }
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'dispute_withdrawn',
+                entityType: 'dispute',
+                entityId: disputeId,
+                details: { negotiationId: dispute.negotiationId }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return updated;
+    }
+
+    async addDisputeMessage(disputeId, actorUserId, body, options = {}) {
+        const dispute = await this.getDisputeById(disputeId);
+        if (!dispute) throw new Error('Dispute not found.');
+        if (!isActiveDispute(dispute)) throw new Error('This dispute is no longer active.');
+
+        const text = (body || '').trim();
+        if (!text) throw new Error('Message cannot be empty.');
+
+        const negotiation = await this.getNegotiationById(dispute.negotiationId);
+        const auth = (typeof window !== 'undefined' && window.authService) ? window.authService : null;
+        const isAdmin = auth && auth.canAccessAdmin && auth.canAccessAdmin();
+        const isParticipant = negotiation
+            && (negotiation.parties || []).some(p => p.userId === actorUserId);
+
+        if (!isAdmin && !isParticipant) {
+            throw new Error('You cannot post to this dispute thread.');
+        }
+        if (!isAdmin) {
+            assertNotReadOnlyAdmin(await this._getActorRole(actorUserId));
+            this._assertPortalCanMutate(options);
+        } else {
+            assertNotReadOnlyAdmin(await this._getActorRole(actorUserId));
+        }
+
+        const thread = [...(dispute.thread || [])];
+        thread.push({
+            id: this.generateId(),
+            by: actorUserId,
+            at: new Date().toISOString(),
+            body: text,
+            visibleToParties: options.adminOnly ? false : true
+        });
+
+        return this.updateDispute(disputeId, { thread });
+    }
+
+    async adminAssignDisputeReview(disputeId, actorUserId, status) {
+        const actor = await this.getUserById(actorUserId);
+        assertNotReadOnlyAdmin(actor?.role || null);
+        const auth = (typeof window !== 'undefined' && window.authService) ? window.authService : null;
+        if (!auth || !auth.canAccessAdmin()) throw new Error('Admin access required.');
+
+        const dispute = await this.getDisputeById(disputeId);
+        if (!dispute) throw new Error('Dispute not found.');
+        if (!isActiveDispute(dispute)) throw new Error('Dispute is not active.');
+
+        const next = (status || DISPUTE_STATUS.UNDER_REVIEW).toLowerCase();
+        if (![DISPUTE_STATUS.UNDER_REVIEW, DISPUTE_STATUS.MEDIATION].includes(next)) {
+            throw new Error('Invalid review status.');
+        }
+
+        const updated = await this.updateDispute(disputeId, {
+            status: next,
+            assignedAdminId: actorUserId
+        });
+
+        const negotiation = await this.getNegotiationById(dispute.negotiationId);
+        if (negotiation) {
+            const label = next === DISPUTE_STATUS.MEDIATION ? 'moved to mediation' : 'under admin review';
+            for (const p of (negotiation.parties || [])) {
+                try {
+                    await this.notifyUser(p.userId, {
+                        type: 'dispute_assigned',
+                        title: 'Dispute update',
+                        message: 'Your negotiation dispute is now ' + label + '.',
+                        link: this._negotiationWorkspaceLink(negotiation)
+                    });
+                } catch (e) {
+                    void e;
+                }
+            }
+        }
+
+        return updated;
+    }
+
+    async adminResolveDispute(disputeId, actorUserId, { outcome, notes, amendedTerms, extraDays } = {}) {
+        const actor = await this.getUserById(actorUserId);
+        assertNotReadOnlyAdmin(actor?.role || null);
+        const auth = (typeof window !== 'undefined' && window.authService) ? window.authService : null;
+        if (!auth || !auth.canAccessAdmin()) throw new Error('Admin access required.');
+
+        const dispute = await this.getDisputeById(disputeId);
+        if (!dispute) throw new Error('Dispute not found.');
+        if (!isActiveDispute(dispute)) throw new Error('Dispute is not active.');
+
+        _runWindowValidator('validateResolveDispute', { outcome, notes });
+
+        const resolvedAt = new Date().toISOString();
+        const resolution = {
+            outcome: (outcome || '').toLowerCase(),
+            notes: (notes || '').trim(),
+            resolvedAt,
+            resolvedBy: actorUserId,
+            amendedTerms: amendedTerms || null,
+            extraDays: extraDays != null ? Number(extraDays) : null
+        };
+
+        const negotiation = await this.getNegotiationById(dispute.negotiationId);
+        let terminalStatus = DISPUTE_STATUS.RESOLVED;
+
+        if (resolution.outcome === RESOLUTION_OUTCOMES.ESCALATE_EXTERNAL) {
+            terminalStatus = DISPUTE_STATUS.ESCALATED;
+        } else if (resolution.outcome === RESOLUTION_OUTCOMES.FORCE_CLOSE && negotiation) {
+            await this.updateNegotiation(negotiation.id, {
+                status: CONFIG.MATCHING.NEGOTIATION.STATUS.FAILED,
+                disputeId: null
+            });
+        } else if (resolution.outcome === RESOLUTION_OUTCOMES.AMEND_TERMS && negotiation && amendedTerms) {
+            const merged = mergeProposalTerms(getEffectiveTerms(negotiation), amendedTerms);
+            await this.updateNegotiation(negotiation.id, {
+                currentTerms: merged,
+                status: CONFIG.MATCHING.NEGOTIATION.STATUS.COUNTER_OFFERED,
+                participantAgreements: [],
+                agreedBy: [],
+                disputeId: null
+            });
+        } else if (resolution.outcome === RESOLUTION_OUTCOMES.EXTEND_DEADLINE && negotiation) {
+            const days = Number(extraDays) || 7;
+            const baseMs = negotiation.expiresAt
+                ? new Date(negotiation.expiresAt).getTime()
+                : Date.now();
+            await this.updateNegotiation(negotiation.id, {
+                expiresAt: new Date(baseMs + days * 86400000).toISOString(),
+                disputeId: null
+            });
+        } else if (negotiation) {
+            await this.updateNegotiation(negotiation.id, { disputeId: null });
+        }
+
+        const updated = await this.updateDispute(disputeId, {
+            status: terminalStatus,
+            resolution
+        });
+
+        if (negotiation) {
+            const partyIds = (negotiation.parties || []).map(p => p.userId);
+            for (const uid of partyIds) {
+                try {
+                    await this.notifyUser(uid, {
+                        type: 'dispute_resolved',
+                        title: 'Dispute resolved',
+                        message: (notes || 'An admin resolved the negotiation dispute.').slice(0, 120),
+                        link: this._negotiationWorkspaceLink(negotiation)
+                    });
+                } catch (e) {
+                    void e;
+                }
+            }
+        }
+
+        try {
+            await this.createAuditLog({
+                userId: actorUserId,
+                action: 'dispute_resolved',
+                entityType: 'dispute',
+                entityId: disputeId,
+                details: { outcome: resolution.outcome, negotiationId: dispute.negotiationId }
+            });
+        } catch (e) {
+            void e;
+        }
+
+        return updated;
+    }
+
+    async getAdminDisputeAnalytics() {
+        const disputes = await this.getDisputes();
+        const active = disputes.filter(d => isActiveDispute(d));
+        return {
+            total: disputes.length,
+            active: active.length,
+            raised: disputes.filter(d => (d.status || '') === DISPUTE_STATUS.RAISED).length,
+            underReview: disputes.filter(d => (d.status || '') === DISPUTE_STATUS.UNDER_REVIEW).length,
+            mediation: disputes.filter(d => (d.status || '') === DISPUTE_STATUS.MEDIATION).length,
+            resolved: disputes.filter(d => (d.status || '') === DISPUTE_STATUS.RESOLVED).length,
+            escalated: disputes.filter(d => (d.status || '') === DISPUTE_STATUS.ESCALATED).length
+        };
     }
 
     // Review Operations (post-completion reputation)
@@ -5128,6 +5708,75 @@ class DataService {
     }
 
     // Notification Operations
+    async getNotificationDeliveryLog() {
+        return this.storage.get(CONFIG.STORAGE_KEYS.NOTIFICATION_DELIVERY_LOG) || [];
+    }
+
+    async _trySimulatedEmail(userId, { type, title, message, link, notificationId } = {}) {
+        const prefs = getNotificationPrefs(this.storage, CONFIG.STORAGE_KEYS.SYSTEM_SETTINGS);
+        if (!shouldDeliverEmail(prefs, type)) return null;
+
+        const entity = await this.getUserOrCompanyById(userId);
+        const email = entity?.email;
+        if (!email || !String(email).includes('@')) return null;
+
+        return appendDeliveryLog(this.storage, CONFIG.STORAGE_KEYS.NOTIFICATION_DELIVERY_LOG, {
+            id: this.generateId(),
+            channel: 'email',
+            status: 'simulated',
+            to: email,
+            userId,
+            type: type || 'notification',
+            title: title || '',
+            message: message || '',
+            link: link || null,
+            notificationId: notificationId || null,
+            sentAt: new Date().toISOString()
+        });
+    }
+
+    /**
+     * In-app notification plus simulated email when admin settings allow it.
+     */
+    async notifyUser(userId, { type, title, message, link } = {}) {
+        if (!userId) return null;
+        const notification = await this.createNotification({
+            userId,
+            type: type || 'notification',
+            title: title || 'Notification',
+            message: message || '',
+            link: link || null,
+            read: false
+        });
+        try {
+            await this._trySimulatedEmail(userId, {
+                type: type || 'notification',
+                title,
+                message,
+                link,
+                notificationId: notification.id
+            });
+        } catch (e) {
+            void e;
+        }
+        return notification;
+    }
+
+    async _notifyAdminUsers(spec) {
+        const users = await this.getUsers();
+        const adminRoles = [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR];
+        const adminIds = (users || [])
+            .filter(u => u && adminRoles.includes(u.role))
+            .map(u => u.id);
+        for (const uid of adminIds) {
+            try {
+                await this.notifyUser(uid, spec);
+            } catch (e) {
+                void e;
+            }
+        }
+    }
+
     async getNotifications(userId) {
         const notifications = this.storage.get(CONFIG.STORAGE_KEYS.NOTIFICATIONS) || [];
         return notifications.filter(n => n.userId === userId);

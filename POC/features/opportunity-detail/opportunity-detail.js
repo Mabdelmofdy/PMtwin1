@@ -8,7 +8,38 @@ let currentWizardStep = 1;
 let hasDetailedResponses = false;
 let hasTaskBidding = false;
 let isEditMode = false;
+let applicationCanEdit = false;
+let applicationCanReapply = false;
 let opportunityApplicationsCanManage = true;
+
+const EDITABLE_APPLICATION_STATUSES = ['pending', 'reviewing', 'shortlisted', 'in_negotiation'];
+const REAPPLY_APPLICATION_STATUSES = ['rejected', 'withdrawn'];
+
+function isEditableApplicationStatus(status) {
+    return EDITABLE_APPLICATION_STATUSES.includes(status);
+}
+
+function resolveUserApplicationForOpportunity(applications, opportunityId, userId) {
+    const userApps = applications
+        .filter(app => app.opportunityId === opportunityId && app.applicantId === userId)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    if (!userApps.length) {
+        return { application: null, canEdit: false, canReapply: false };
+    }
+
+    const active = userApps.find(app => isEditableApplicationStatus(app.status));
+    if (active) {
+        return { application: active, canEdit: true, canReapply: false };
+    }
+
+    const latest = userApps[0];
+    return {
+        application: latest,
+        canEdit: false,
+        canReapply: REAPPLY_APPLICATION_STATUSES.includes(latest.status)
+    };
+}
 
 const APPLY_INVITE_SESSION_KEY = 'pmtwin_apply_invite';
 
@@ -151,12 +182,16 @@ async function loadOpportunity(id) {
         const canManageApplications = isOwner || canAdminManageOpportunityApplications();
         const canApply = user && !isOwner && (opportunity.status === 'published' || opportunity.status === 'in_negotiation') && !(authService.isPendingApproval && authService.isPendingApproval());
         
-        // Check if user has already applied
+        // Check if user has already applied (prefer active application over a rejected/withdrawn one)
         if (canApply) {
             const allApplications = await dataService.getApplications();
-            currentApplication = allApplications.find(
-                app => app.opportunityId === opportunity.id && app.applicantId === user.id
-            );
+            const resolved = resolveUserApplicationForOpportunity(allApplications, opportunity.id, user.id);
+            currentApplication = resolved.application;
+            applicationCanEdit = resolved.canEdit;
+            applicationCanReapply = resolved.canReapply;
+        } else {
+            applicationCanEdit = false;
+            applicationCanReapply = false;
         }
         
         // Determine which steps are needed
@@ -419,26 +454,67 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply, 
     
     // Show apply section or already applied
     if (canApply) {
-        if (currentApplication) {
-            isEditMode = true;
-            document.getElementById('already-applied-section').style.display = 'block';
-            document.getElementById('applied-date').textContent = 
+        const appliedSection = document.getElementById('already-applied-section');
+        const applySection = document.getElementById('apply-section');
+        const appliedHeading = appliedSection?.querySelector('h3');
+        const editBtn = document.getElementById('btn-edit-application');
+        const applyBtn = document.getElementById('btn-start-apply');
+
+        if (currentApplication && !applicationCanReapply) {
+            isEditMode = applicationCanEdit;
+            if (appliedSection) appliedSection.style.display = 'block';
+            document.getElementById('applied-date').textContent =
                 new Date(currentApplication.createdAt).toLocaleDateString();
-            document.getElementById('applied-status').textContent = currentApplication.status;
-            document.getElementById('applied-status').className = 
-                `badge ${getApplicationStatusBadgeClass(currentApplication.status)}`;
-            
-            // Setup edit button
-            document.getElementById('btn-edit-application').addEventListener('click', () => {
-                startApplicationWizard();
-            });
+            const statusLabel = getApplicationStatusLabel(currentApplication.status);
+            const statusEl = document.getElementById('applied-status');
+            statusEl.textContent = statusLabel;
+            statusEl.className = `badge ${getApplicationStatusBadgeClass(currentApplication.status)}`;
+
+            if (appliedHeading) {
+                if (currentApplication.status === 'accepted') {
+                    appliedHeading.textContent = 'Application accepted';
+                } else {
+                    appliedHeading.textContent = "You've already applied";
+                }
+            }
+
+            if (editBtn) {
+                editBtn.style.display = applicationCanEdit ? '' : 'none';
+                if (applicationCanEdit) {
+                    editBtn.addEventListener('click', () => {
+                        startApplicationWizard();
+                    });
+                }
+            }
+        } else if (currentApplication && applicationCanReapply) {
+            isEditMode = false;
+            if (appliedSection) appliedSection.style.display = 'block';
+            document.getElementById('applied-date').textContent =
+                new Date(currentApplication.createdAt).toLocaleDateString();
+            const statusEl = document.getElementById('applied-status');
+            statusEl.textContent = getApplicationStatusLabel(currentApplication.status);
+            statusEl.className = `badge ${getApplicationStatusBadgeClass(currentApplication.status)}`;
+            if (appliedHeading) {
+                appliedHeading.textContent = currentApplication.status === 'withdrawn'
+                    ? 'Previous application withdrawn'
+                    : 'Previous application rejected';
+            }
+            if (editBtn) editBtn.style.display = 'none';
+            if (applySection) applySection.style.display = 'block';
+            if (applyBtn) {
+                applyBtn.innerHTML = '<i class="ph-duotone ph-paper-plane-tilt"></i> Apply Again';
+                applyBtn.addEventListener('click', () => {
+                    startApplicationWizard({ reapply: true });
+                });
+            }
         } else {
-            document.getElementById('apply-section').style.display = 'block';
-            
-            // Setup apply button
-            document.getElementById('btn-start-apply').addEventListener('click', () => {
-                startApplicationWizard();
-            });
+            isEditMode = false;
+            if (applySection) applySection.style.display = 'block';
+            if (applyBtn) {
+                applyBtn.addEventListener('click', () => {
+                    startApplicationWizard();
+                });
+            }
         }
     } else if (authService.isPendingApproval && authService.isPendingApproval() && !isOwner && (opportunity.status === 'published' || opportunity.status === 'in_negotiation')) {
         // Pending user: show apply section with disabled button and tooltip
@@ -1261,14 +1337,23 @@ function formatModelDetailValue(value, key) {
     return String(value);
 }
 
-async function startApplicationWizard() {
+async function startApplicationWizard(options = {}) {
+    const reapply = !!options.reapply || applicationCanReapply;
+    if (reapply) {
+        isEditMode = false;
+    } else if (currentApplication && !applicationCanEdit) {
+        alert('This application can no longer be edited.');
+        return;
+    }
+
     currentWizardStep = 1;
     
     document.getElementById('wizard-steps').style.display = 'flex';
     document.getElementById('wizard-nav').style.display = 'flex';
     
-    generateDetailedResponses(currentOpportunity, currentApplication);
-    generateTaskBidding(currentOpportunity, currentApplication);
+    const formApplication = isEditMode && currentApplication ? currentApplication : null;
+    generateDetailedResponses(currentOpportunity, formApplication);
+    generateTaskBidding(currentOpportunity, formApplication);
     
     if (isEditMode && currentApplication) {
         await populateApplicationForm(currentApplication);
@@ -1587,6 +1672,21 @@ async function submitApplication() {
 
     const durationDays = estimatedDurationDays != null && !isNaN(estimatedDurationDays) ? estimatedDurationDays : taskBids?.taskBidDuration;
     const oppEnd = currentOpportunity?.attributes?.endDate || currentOpportunity?.exchangeData?.endDate;
+
+    if (typeof window.validateApplication === 'function') {
+        const check = window.validateApplication({
+            proposal,
+            estimatedDurationDays: durationDays,
+            offeredValue: offeredValue ? parseFloat(String(offeredValue).replace(/,/g, '')) : null,
+            bidAmount: taskBids?.taskBidAmount,
+            availabilityDate: availabilityDateVal
+        });
+        if (!check.isValid) {
+            alert(check.errors[0] || 'Please correct invalid application fields.');
+            return;
+        }
+    }
+
     let deadlineCompatibility = null;
     if (availabilityDateVal && durationDays && oppEnd) {
         const start = new Date(availabilityDateVal);
@@ -1597,6 +1697,10 @@ async function submitApplication() {
     
     try {
         if (isEditMode && currentApplication) {
+            if (!applicationCanEdit) {
+                alert('This application can no longer be edited.');
+                return;
+            }
             const updateData = {
                 proposal,
                 responses: {
@@ -3059,6 +3163,10 @@ function setupApplicationDetailTabs(viewRoot) {
 
 function setupApplicationDetailActions(container, applicationId, applicantId, currentStatus) {
     const actionable = ['pending', 'reviewing', 'shortlisted', 'in_negotiation'].includes(currentStatus);
+    const addRequirementBlock = container.querySelector('.app-detail-add-requirement');
+    if (addRequirementBlock) {
+        addRequirementBlock.style.display = actionable ? '' : 'none';
+    }
     const footer = container.querySelector('.application-details-footer');
     if (footer) {
         footer.style.display = actionable ? '' : 'none';
@@ -3281,7 +3389,7 @@ async function updateApplicationStatus(applicationId, status) {
         await loadApplications(currentOpportunity.id);
     } catch (error) {
         console.error('Error updating application status:', error);
-        alert('Failed to update application status.');
+        alert((error && error.message) ? error.message : 'Failed to update application status.');
     }
 }
 

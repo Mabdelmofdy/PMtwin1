@@ -49,7 +49,7 @@ async function initMatchDetail(params) {
 
         await renderMatchDetail(postMatch, user.id);
         setupMatchDetailActions(matchId, user.id);
-        scrollMatchDetailToHash();
+        scrollMatchDetailToSection();
     } catch (e) {
         console.error('Match detail load error:', e);
         if (loadingEl) loadingEl.style.display = 'none';
@@ -516,6 +516,13 @@ async function renderMatchNegotiationSection(vm, postMatch, currentUserId) {
         const valRaw = body.querySelector('#negotiation-proposal-value')?.value;
         const proposal = {};
         if (valRaw !== '' && valRaw != null) proposal.value = Number(valRaw);
+        if (typeof window.validateNegotiationProposal === 'function') {
+            const check = window.validateNegotiationProposal(proposal);
+            if (!check.isValid) {
+                setMatchActionFeedback(check.errors[0] || 'Invalid proposal value.', 'danger');
+                return;
+            }
+        }
         try {
             await dataService.addNegotiationProposal(negotiation.id, currentUserId, { proposal, message: msg });
             const match = await dataService.getPostMatchById(postMatch.id);
@@ -562,7 +569,7 @@ async function renderMatchNegotiationSection(vm, postMatch, currentUserId) {
         }
     });
 
-    if (window.location.hash === '#negotiation') {
+    if (getMatchDetailSection() === 'negotiation') {
         panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
@@ -792,7 +799,7 @@ async function renderMatchReplacementSection(vm, postMatch, currentUserId) {
         });
     });
 
-    if (window.location.hash === '#replacement') {
+    if (getMatchDetailSection() === 'replacement') {
         panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
@@ -846,7 +853,7 @@ function renderMatchDetailLifecycleSections(vm, postMatch) {
     if (vm?.hasNegotiation) {
         negHtml = '<p><span class="badge badge--info">' + escapeHtml(vm.negotiationStatusLabel || getNegotiationLabel(vm.negotiationStatus)) + '</span></p>';
         if (vm.hasActiveNegotiation) {
-            negHtml += '<p class="text-gray-600 mt-1"><a href="#negotiation" class="text-primary font-medium">Continue in Value Negotiation</a></p>';
+            negHtml += '<p class="text-gray-600 mt-1"><a href="#" data-route="/matches/' + escapeHtml(vm.id) + '?section=negotiation" class="text-primary font-medium">Continue in Value Negotiation</a></p>';
         } else if (vm.hasAgreedNegotiation && !vm.dealId) {
             negHtml += '<p class="text-gray-600 mt-1">Ready to create deal workspace.</p>';
         }
@@ -855,7 +862,7 @@ function renderMatchDetailLifecycleSections(vm, postMatch) {
     let replHtml = '';
     if (vm?.replacementEligible && (vm.replacementBadge || vm.activeReplacementRequest)) {
         replHtml = '<p><span class="badge badge--warning">' + escapeHtml(vm.replacementBadge || getReplacementStatusLabel(vm.activeReplacementRequest?.status)) + '</span></p>';
-        replHtml += '<p class="text-gray-600 mt-1"><a href="#replacement" class="text-primary font-medium">Open replacement inbox</a></p>';
+        replHtml += '<p class="text-gray-600 mt-1"><a href="#" data-route="/matches/' + escapeHtml(vm.id) + '?section=replacement" class="text-primary font-medium">Open replacement inbox</a></p>';
     }
 
     setBlock('match-detail-invitation-wrap', 'match-detail-invitation-body', !!(vm?.hasInvitation), invHtml);
@@ -926,11 +933,20 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
-function scrollMatchDetailToHash() {
-    const hash = window.location.hash;
-    if (!hash) return;
+function getMatchDetailSection() {
+    if (window.router && typeof window.router.getHashSection === 'function') {
+        return window.router.getHashSection();
+    }
+    const q = window.location.search || '';
+    if (!q) return '';
+    return new URLSearchParams(q.startsWith('?') ? q.substring(1) : q).get('section') || '';
+}
+
+function scrollMatchDetailToSection() {
+    const section = getMatchDetailSection();
+    if (!section) return;
     requestAnimationFrame(() => {
-        if (hash === '#negotiation') {
+        if (section === 'negotiation') {
             const panel = document.getElementById('match-detail-negotiation-panel');
             if (panel && panel.style.display !== 'none') {
                 panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -939,7 +955,7 @@ function scrollMatchDetailToHash() {
             document.getElementById('btn-start-negotiation')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
-        if (hash === '#replacement') {
+        if (section === 'replacement') {
             document.getElementById('match-detail-replacement-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     });
@@ -1057,10 +1073,9 @@ function setupMatchDetailActions(matchId, userId) {
             e.preventDefault();
             const panel = document.getElementById('match-detail-replacement-panel');
             if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            if (window.history?.replaceState) {
-                window.history.replaceState(null, '', window.location.pathname + window.location.search + '#replacement');
-            } else {
-                window.location.hash = 'replacement';
+            if (window.router?.navigate && typeof window.router.getCurrentPath === 'function') {
+                const currentPath = window.router.getCurrentPath();
+                window.router.navigate(currentPath + '?section=replacement');
             }
             return;
         }

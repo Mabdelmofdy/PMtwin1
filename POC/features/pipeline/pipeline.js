@@ -906,15 +906,17 @@ function setupPipelineMatchListActions() {
         btn.disabled = true;
         try {
             if (action === 'negotiate') {
-                const existing = await dataService.getActiveNegotiationForMatch(matchId);
-                if (!existing) {
+                let neg = await dataService.getActiveNegotiationForMatch(matchId);
+                if (!neg) {
                     const match = await dataService.getPostMatchById(matchId);
                     const opportunityId = match && typeof dataService._resolveNegotiationOpportunityId === 'function'
                         ? dataService._resolveNegotiationOpportunityId(match, user.id)
                         : null;
-                    await dataService.startNegotiationFromMatch(matchId, user.id, opportunityId ? { opportunityId } : {});
+                    neg = await dataService.startNegotiationFromMatch(matchId, user.id, opportunityId ? { opportunityId } : {});
                 }
-                if (window.router?.navigate) window.router.navigate('/matches/' + matchId + '#negotiation');
+                if (window.router?.navigate && neg?.id) {
+                    window.router.navigate('/negotiations/' + neg.id);
+                }
                 return;
             }
             if (action === 'invite_apply') {

@@ -95,6 +95,18 @@ loadScript('src/core/config/config.js').then(async () => {
     // Load core services
     await loadScript('src/core/storage/storage-service.js');
     await loadScript('src/core/events/event-bus.js', { type: 'module' });
+    await loadScript('src/core/validation/validation-primitives.js');
+    await loadScript('src/business-logic/models/opportunity-models.js');
+    await loadScript('src/core/validation/model-field-validator.js');
+    await loadScript('src/core/validation/opportunity-validator.js');
+    await loadScript('src/core/validation/auth-validator.js');
+    await loadScript('src/core/validation/profile-validator.js');
+    await loadScript('src/core/validation/application-validator.js');
+    await loadScript('src/core/validation/deal-validator.js');
+    await loadScript('src/core/validation/contract-validator.js');
+    await loadScript('src/core/validation/negotiation-validator.js');
+    await loadScript('src/core/validation/dispute-validator.js');
+    await loadScript('src/core/validation/admin-validator.js');
     await loadScript('src/core/data/data-service.js', { type: 'module' });
     await loadScript('src/core/auth/auth-service.js');
     await loadScript('src/core/vetting/vetting-actions.js');
@@ -123,7 +135,6 @@ loadScript('src/core/config/config.js').then(async () => {
     await loadScript('src/utils/admin-readonly-guard.js');
     
     // Load business logic
-    await loadScript('src/business-logic/models/opportunity-models.js');
     await loadScript('src/business-logic/exchange/exchange-rules.js');
     await loadScript('src/business-logic/exchange/equivalence-calculator.js');
     
@@ -141,6 +152,12 @@ loadScript('src/core/config/config.js').then(async () => {
     await loadScript('src/services/matching/matching-models.js');
     await loadScript('src/services/matching/matching-service.js');
     await loadScript('src/services/matching/unified-match-view-model.js');
+    await loadScript('src/services/matching/negotiation-terms.js', { type: 'module' });
+    await loadScript('src/services/matching/dispute-lifecycle.js', { type: 'module' });
+    await loadScript('src/services/matching/admin-negotiation-command-center.js');
+    await loadScript('src/services/matching/admin-dispute-command-center.js');
+    await loadScript('src/services/notifications/notification-delivery.js', { type: 'module' });
+    await loadScript('src/services/matching/negotiation-transcript-export.js', { type: 'module' });
     await loadScript('src/services/matching/matching-readiness.js', { type: 'module' });
     await loadScript('src/services/matching/matching-readiness-ui.js');
     await loadScript('src/services/opportunities/opportunity-service.js');
@@ -518,6 +535,10 @@ function initializeRoutes() {
     router.register(CONFIG.ROUTES.DEAL_DETAIL, authGuard.protect(async (params) => {
         await loadPage('deal-detail', params);
     }));
+
+    router.register(CONFIG.ROUTES.NEGOTIATION_DETAIL, authGuard.protect(async (params) => {
+        await loadPage('negotiation-detail', params);
+    }));
     
     // People routes (accessible to all users)
     router.register('/people', authGuard.protect(async () => {
@@ -652,6 +673,30 @@ function initializeRoutes() {
             return;
         }
         await loadPage('admin-matching');
+    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
+
+    router.register(CONFIG.ROUTES.ADMIN_NEGOTIATIONS, authGuard.protect(async () => {
+        if (!authService.canAccessAdmin()) {
+            router.navigate(CONFIG.ROUTES.DASHBOARD);
+            return;
+        }
+        await loadPage('admin-negotiations');
+    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
+
+    router.register(CONFIG.ROUTES.ADMIN_NEGOTIATION_DETAIL, authGuard.protect(async (params) => {
+        if (!authService.canAccessAdmin()) {
+            router.navigate(CONFIG.ROUTES.DASHBOARD);
+            return;
+        }
+        await loadPage('admin-negotiation-detail', params);
+    }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
+
+    router.register(CONFIG.ROUTES.ADMIN_DISPUTES, authGuard.protect(async () => {
+        if (!authService.canAccessAdmin()) {
+            router.navigate(CONFIG.ROUTES.DASHBOARD);
+            return;
+        }
+        await loadPage('admin-disputes');
     }, [CONFIG.ROLES.ADMIN, CONFIG.ROLES.MODERATOR, CONFIG.ROLES.AUDITOR]));
 
     router.register(CONFIG.ROUTES.ADMIN_DEALS, authGuard.protect(async () => {
@@ -823,6 +868,15 @@ async function loadPage(pageName, params = {}) {
                 await loadScript('src/utils/post-match-analytics.js');
                 await loadScript('src/services/matching/admin-matching-one-way-diagnostics.js');
                 await loadScript('src/services/matching/admin-matching-command-center.js');
+            }
+            if (pageName === 'admin-negotiations' || pageName === 'admin-negotiation-detail') {
+                await loadScript('src/services/matching/admin-negotiation-command-center.js');
+            }
+            if (pageName === 'admin-disputes') {
+                await loadScript('src/services/matching/admin-dispute-command-center.js');
+            }
+            if (pageName === 'negotiation-detail' || pageName === 'admin-negotiation-detail') {
+                await loadScript('src/services/matching/negotiation-transcript-export.js', { type: 'module' });
             }
             await loadScript(scriptPath);
             const functionName = pageName.split('-').map((word, index) =>

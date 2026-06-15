@@ -145,6 +145,12 @@ function getFilterRange() {
     if (preset === 'custom') {
         const s = document.getElementById('pa-filter-start')?.value;
         const e = document.getElementById('pa-filter-end')?.value;
+        if (s && e && typeof window.validateDateRangeFilter === 'function') {
+            const check = window.validateDateRangeFilter(s, e);
+            if (!check.isValid) {
+                console.warn(check.errors[0] || 'Invalid custom date range');
+            }
+        }
         start = s ? startOfDay(new Date(s + 'T00:00:00')) : startOfDay(new Date(now.getTime() - 7 * 864e5));
         end = e ? endOfDay(new Date(e + 'T00:00:00')) : endOfDay(now);
     } else if (preset === 'today') {

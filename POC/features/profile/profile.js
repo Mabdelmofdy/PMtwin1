@@ -1617,10 +1617,26 @@ function showChangePasswordModal() {
         const current = (modal.querySelector('#change-pwd-current').value || '').trim();
         const newPwd = (modal.querySelector('#change-pwd-new').value || '').trim();
         const confirmPwd = (modal.querySelector('#change-pwd-confirm').value || '').trim();
-        if (!current) { showError('Please enter your current password.'); return; }
-        if (!newPwd) { showError('Please enter a new password.'); return; }
-        if (newPwd.length < 4) { showError('New password must be at least 4 characters.'); return; }
-        if (newPwd !== confirmPwd) { showError('New password and confirmation do not match.'); return; }
+        if (typeof window.validatePasswordChange === 'function') {
+            const check = window.validatePasswordChange({
+                currentPassword: current,
+                newPassword: newPwd,
+                confirmPassword: confirmPwd
+            });
+            if (!check.isValid) {
+                showError(check.errors[0] || 'Invalid password.');
+                return;
+            }
+        } else if (!current) {
+            showError('Please enter your current password.');
+            return;
+        } else if (!newPwd) {
+            showError('Please enter a new password.');
+            return;
+        } else if (newPwd !== confirmPwd) {
+            showError('New password and confirmation do not match.');
+            return;
+        }
         try {
             await authService.changePassword(current, newPwd);
             close();
@@ -3014,6 +3030,18 @@ async function saveSection(section, userId) {
     try {
         const partial = await collectSectionData(section);
         const merged = { ...(user.profile || {}), ...partial };
+        if (typeof window.validateProfile === 'function') {
+            const check = window.validateProfile({
+                yearsExperience: merged.yearsExperience,
+                hourlyRate: merged.hourlyRate,
+                financialCapacity: merged.financialCapacity,
+                matchingMinScore: merged.matchingMinScore
+            });
+            if (!check.isValid) {
+                alert(check.errors[0] || 'Please correct invalid profile fields.');
+                return;
+            }
+        }
         if (user.profile?.type) merged.type = user.profile.type;
         if (user.profile?.interview) merged.interview = user.profile.interview;
         await dataService.updateUser(userId, { profile: merged });
@@ -3162,6 +3190,15 @@ function setupCompanyForm(userId) {
                 documents: await collectVettingCaseStudyDocuments('company-vettingCaseStudy-documents')
             }
         };
+        if (typeof window.validateProfile === 'function') {
+            const check = window.validateProfile({
+                financialCapacity: profileData.financialCapacity
+            });
+            if (!check.isValid) {
+                alert(check.errors[0] || 'Please correct invalid profile fields.');
+                return;
+            }
+        }
         try {
             const user = authService.getCurrentUser();
             const merged = { ...(user?.profile || {}), ...profileData };
@@ -3194,7 +3231,14 @@ function setupInlinePhotoControls() {
             fileEl.value = '';
             return;
         }
-        if (f.size > 2.5 * 1024 * 1024) {
+        if (typeof window.validateProfile === 'function') {
+            const check = window.validateProfile({}, { photoFile: f });
+            if (!check.isValid) {
+                alert(check.errors[0] || 'Invalid profile photo.');
+                fileEl.value = '';
+                return;
+            }
+        } else if (f.size > 2.5 * 1024 * 1024) {
             alert('Please choose an image under 2.5 MB.');
             fileEl.value = '';
             return;

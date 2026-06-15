@@ -92,7 +92,7 @@ const ADMIN_SETTINGS_DEFAULTS = {
     },
     notifications: {
         channels: { inApp: true, email: false, sms: false },
-        events: { matches: true, deals: true, contracts: true, system: true, marketing: false },
+        events: { matches: true, deals: true, contracts: true, negotiations: true, system: true, marketing: false },
         digest: 'instant',
         digestHour: 9
     },
@@ -524,6 +524,13 @@ function initSecurityPanel() {
                 socialLogin: getCheck('social-login-enabled')
             }
         };
+        if (typeof window.validateAdminSettings === 'function') {
+            const check = window.validateAdminSettings(patch);
+            if (!check.isValid) {
+                await notifyError(check.errors[0] || 'Invalid security settings.');
+                return;
+            }
+        }
         persistSettings(patch);
         CONFIG.SESSION_DURATION = patch.security.sessionDurationMs;
         CONFIG.AUTH = CONFIG.AUTH || {};
@@ -738,6 +745,13 @@ function initWorkflowPanel() {
                 consortiumReplacementAllowedStages: stages
             }
         };
+        if (typeof window.validateAdminSettings === 'function') {
+            const check = window.validateAdminSettings(patch);
+            if (!check.isValid) {
+                await notifyError(check.errors[0] || 'Invalid workflow settings.');
+                return;
+            }
+        }
         persistSettings(patch);
         applyWorkflowToConfig(patch.workflow);
         await notifySuccess('Workflow settings saved.');
@@ -939,6 +953,7 @@ function initNotificationsPanel() {
     setCheck('event-matches', n.events.matches);
     setCheck('event-deals', n.events.deals);
     setCheck('event-contracts', n.events.contracts);
+    setCheck('event-negotiations', n.events.negotiations !== false);
     setCheck('event-system', n.events.system);
     setCheck('event-marketing', n.events.marketing);
     setVal('digest-frequency', n.digest);
@@ -960,6 +975,7 @@ function initNotificationsPanel() {
                     matches: getCheck('event-matches'),
                     deals: getCheck('event-deals'),
                     contracts: getCheck('event-contracts'),
+                    negotiations: getCheck('event-negotiations'),
                     system: getCheck('event-system'),
                     marketing: getCheck('event-marketing')
                 },

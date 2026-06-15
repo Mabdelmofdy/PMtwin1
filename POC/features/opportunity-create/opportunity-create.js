@@ -17,30 +17,260 @@ const CANONICAL_PROFESSIONAL_ROLES = [
 /** When set, submit updates this opportunity instead of creating a new one (loaded from /opportunities/:id/edit). */
 let wizardEditOpportunityId = null;
 let allLocations = [];
-/** Index of last used demo scenario so each fill prefers a different one when possible. */
+/** Index of last used demo scenario so each fill prefers a different archetype when possible. */
 let lastDemoDatasetIndex = -1;
 
+function demoPick(arr) {
+    if (!arr || !arr.length) return undefined;
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function demoRandInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function demoShuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function demoPickN(arr, n) {
+    return demoShuffle(arr).slice(0, Math.min(n, arr.length));
+}
+
+function demoRefSuffix() {
+    const d = new Date();
+    return `${String(d.getFullYear()).slice(2)}${String(d.getMonth() + 1).padStart(2, '0')}-${demoRandInt(100, 999)}`;
+}
+
+function demoVaryAmount(baseStr, variancePct = 0.22) {
+    const base = parseFloat(String(baseStr).replace(/,/g, '')) || 0;
+    if (!base) return baseStr;
+    const factor = 1 + (Math.random() * 2 - 1) * variancePct;
+    return String(Math.round(base * factor));
+}
+
+function demoVaryBudgetRange(minStr, maxStr) {
+    const min = parseFloat(minStr) || 0;
+    const max = parseFloat(maxStr) || min;
+    const factorMin = 0.82 + Math.random() * 0.35;
+    const factorMax = 0.82 + Math.random() * 0.35;
+    const newMin = Math.round(min * factorMin);
+    const newMax = Math.round(max * factorMax);
+    return {
+        min: String(Math.min(newMin, newMax)),
+        max: String(Math.max(newMin, newMax))
+    };
+}
+
+function deepCloneDemo(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
+/** Display labels and defaults per demo location key. */
+const DEMO_LOCATION_META = {
+    riyadh: { label: 'Riyadh, Saudi Arabia', city: 'Riyadh', country: 'Saudi Arabia', currency: 'SAR', workModes: ['On-Site', 'Hybrid'] },
+    jeddah: { label: 'Jeddah, Saudi Arabia', city: 'Jeddah', country: 'Saudi Arabia', currency: 'SAR', workModes: ['On-Site', 'Hybrid'] },
+    dammam: { label: 'Dammam, Saudi Arabia', city: 'Dammam', country: 'Saudi Arabia', currency: 'SAR', workModes: ['On-Site', 'Hybrid'] },
+    dubai: { label: 'Dubai, UAE', city: 'Dubai', country: 'UAE', currency: 'AED', workModes: ['Hybrid', 'On-Site'] },
+    'abu-dhabi': { label: 'Abu Dhabi, UAE', city: 'Abu Dhabi', country: 'UAE', currency: 'AED', workModes: ['Hybrid', 'On-Site'] },
+    doha: { label: 'Doha, Qatar', city: 'Doha', country: 'Qatar', currency: 'USD', workModes: ['On-Site', 'Hybrid'] },
+    muscat: { label: 'Muscat, Oman', city: 'Muscat', country: 'Oman', currency: 'USD', workModes: ['On-Site', 'Hybrid'] },
+    cairo: { label: 'Cairo, Egypt', city: 'Cairo', country: 'Egypt', currency: 'USD', workModes: ['Hybrid', 'Remote'] },
+    alexandria: { label: 'Alexandria, Egypt', city: 'Alexandria', country: 'Egypt', currency: 'USD', workModes: ['Hybrid', 'On-Site'] },
+    'kuwait-city': { label: 'Kuwait City, Kuwait', city: 'Kuwait City', country: 'Kuwait', currency: 'KWD', workModes: ['On-Site', 'Hybrid'] },
+    manama: { label: 'Manama, Bahrain', city: 'Manama', country: 'Bahrain', currency: 'USD', workModes: ['On-Site', 'Hybrid'] },
+    remote: { label: 'Remote / GCC-wide', city: 'Remote', country: 'Remote', currency: 'USD', workModes: ['Remote'] }
+};
+
+const DEMO_ON_SITE_LOCATION_KEYS = Object.keys(DEMO_LOCATION_META).filter((k) => k !== 'remote');
+
+const DEMO_SKILL_EXTRAS = [
+    'BIM', 'Digital Twin', 'Cost Control', 'Value Engineering', 'HSE',
+    'Contract Administration', 'Quantity Surveying', 'Lean Construction', 'GIS', 'Prefabrication'
+];
+
+const DEMO_INTEREST_EXTRAS = [
+    'Smart Cities', 'Modular Construction', 'Net Zero', 'Public-Private Partnership', 'Design-Build'
+];
+
+function getDemoLocationMeta(locationKey) {
+    return DEMO_LOCATION_META[locationKey] || DEMO_LOCATION_META.riyadh;
+}
+
+function replaceDemoLocationText(text, fromMeta, toMeta) {
+    if (!text || typeof text !== 'string') return text;
+    let out = text;
+    const pairs = [
+        [fromMeta.label, toMeta.label],
+        [fromMeta.city, toMeta.city],
+        [fromMeta.country, toMeta.country]
+    ];
+    pairs.forEach(([from, to]) => {
+        if (!from || !to || from === to) return;
+        const escaped = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        out = out.replace(new RegExp(escaped, 'gi'), to);
+    });
+    return out;
+}
+
 /**
- * Picks a random demo scenario (never the same as the previous fill when multiple exist).
+ * Applies fresh random variation to a cloned demo archetype so every fill feels unique.
+ */
+function randomizeDemoDataset(base) {
+    const d = deepCloneDemo(base);
+    const prevKey = (d.step1 && d.step1.locationKey) || 'riyadh';
+    const prevMeta = getDemoLocationMeta(prevKey);
+    const prefersRemote = prevKey === 'remote';
+    const locationKey = prefersRemote && Math.random() < 0.4
+        ? 'remote'
+        : demoPick(DEMO_ON_SITE_LOCATION_KEYS);
+    const meta = getDemoLocationMeta(locationKey);
+    const ref = demoRefSuffix();
+
+    if (d.step1) {
+        d.step1.locationKey = locationKey;
+        d.step1.locationRequirement = demoPick(meta.workModes);
+        d.step1.startDate = demoDateOffset(demoRandInt(7, 28));
+        d.step1.applicationDeadline = demoDateOffset(demoRandInt(30, 65));
+        d.step1.endDate = demoDateOffset(demoRandInt(90, 365));
+        if (d.step1.title) {
+            let title = replaceDemoLocationText(d.step1.title, prevMeta, meta);
+            title = title.replace(/\s*\[[\d-]+\]\s*$/, '').trim();
+            d.step1.title = `${title} [${ref}]`;
+        }
+        if (d.step1.description) {
+            d.step1.description = replaceDemoLocationText(d.step1.description, prevMeta, meta);
+        }
+    }
+
+    if (d.step3) {
+        if (Array.isArray(d.step3.skills) && d.step3.skills.length) {
+            const merged = demoShuffle([...d.step3.skills, ...demoPickN(DEMO_SKILL_EXTRAS, 2)]);
+            d.step3.skills = merged.slice(0, demoRandInt(3, Math.min(6, merged.length)));
+        }
+        if (Array.isArray(d.step3.coreSkills) && d.step3.skills) {
+            d.step3.coreSkills = d.step3.skills.slice(0, demoRandInt(1, Math.min(2, d.step3.skills.length)));
+        }
+        if (Array.isArray(d.step3.interests)) {
+            const merged = demoShuffle([...d.step3.interests, ...demoPickN(DEMO_INTEREST_EXTRAS, 1)]);
+            d.step3.interests = merged.slice(0, demoRandInt(2, Math.min(4, merged.length)));
+        }
+        if (Array.isArray(d.step3.certifications) && d.step3.certifications.length) {
+            d.step3.certifications = demoPickN(d.step3.certifications, demoRandInt(1, d.step3.certifications.length));
+        }
+    }
+
+    if (d.step4 && d.step4.modelFields) {
+        const mf = d.step4.modelFields;
+        Object.keys(mf).forEach((key) => {
+            const lk = key.toLowerCase();
+            if (typeof mf[key] === 'string' && (lk.includes('location') || lk === 'projectlocation' || lk === 'deliverylocation')) {
+                mf[key] = meta.label;
+            }
+            if (key === 'duration' || key === 'projectDuration') {
+                mf[key] = String(demoRandInt(45, 240));
+            }
+            if (key === 'quantityNeeded') {
+                mf[key] = String(demoRandInt(400, 3500));
+            }
+            if (key === 'targetPrice' || key === 'currentMarketPrice' || key === 'prizeContractValue' || key === 'projectValue' || key === 'initialCapital') {
+                mf[key] = demoVaryAmount(mf[key], 0.18);
+            }
+            if (key === 'requiredMembers' || key === 'participantsNeeded' || key === 'numberOfWinners') {
+                mf[key] = String(demoRandInt(2, 6));
+            }
+            if (key === 'startDate' || key === 'tenderDeadline' || key === 'submissionDeadline' || key === 'announcementDate' || key === 'deliveryTimeline') {
+                mf[key] = demoDateOffset(demoRandInt(14, 120));
+            }
+            if (key === 'locationRequirement') {
+                mf[key] = d.step1.locationRequirement;
+            }
+        });
+        if (mf.budget && typeof mf.budget === 'object') {
+            const br = demoVaryBudgetRange(mf.budget.min, mf.budget.max);
+            mf.budget = { min: br.min, max: br.max };
+        }
+    }
+
+    if (Array.isArray(d.step4MultiTasks)) {
+        d.step4MultiTasks = d.step4MultiTasks.map((task, i) => ({
+            ...task,
+            duration: String(demoRandInt(30, 150)),
+            notes: task.notes ? `${task.notes} (Package ${i + 1}, ref ${ref}).` : `Work package ${i + 1} — ref ${ref}.`
+        }));
+    }
+
+    if (d.step5) {
+        const br = demoVaryBudgetRange(d.step5.budgetMin, d.step5.budgetMax);
+        d.step5.budgetMin = br.min;
+        d.step5.budgetMax = br.max;
+        if (d.step5.exchangeMode === 'cash' && d.step5.currency != null) {
+            d.step5.currency = meta.currency;
+        }
+        if (d.step5.modeFields) {
+            const mf5 = d.step5.modeFields;
+            if (mf5['cash-amount']) mf5['cash-amount'] = demoVaryAmount(mf5['cash-amount']);
+            if (mf5['equity-percentage']) mf5['equity-percentage'] = String(demoRandInt(15, 49));
+            if (mf5['equity-company-valuation']) mf5['equity-company-valuation'] = demoVaryAmount(mf5['equity-company-valuation'], 0.25);
+            if (mf5['profit-share-percentage']) mf5['profit-share-percentage'] = String(demoRandInt(8, 25));
+            if (mf5['expected-profit']) mf5['expected-profit'] = demoVaryAmount(mf5['expected-profit']);
+            if (mf5['barter-value']) mf5['barter-value'] = `Equivalent to ${demoVaryAmount('35000')} ${meta.currency === 'SAR' ? 'SAR' : 'USD'}`;
+        }
+    }
+
+    return d;
+}
+
+/**
+ * Picks a random demo archetype and randomizes details (never repeats the same archetype twice in a row).
  */
 function pickRandomDemoDataset() {
     const n = DEMO_DATASETS.length;
-    if (n <= 1) return DEMO_DATASETS[0];
+    if (n <= 1) return randomizeDemoDataset(DEMO_DATASETS[0]);
     let idx;
     do {
         idx = Math.floor(Math.random() * n);
     } while (idx === lastDemoDatasetIndex);
     lastDemoDatasetIndex = idx;
-    return DEMO_DATASETS[idx];
+    return randomizeDemoDataset(DEMO_DATASETS[idx]);
+}
+
+/** ISO date offset helper for demo key-date fields. */
+function demoDateOffset(days) {
+    return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 }
 
 /**
+ * Demo location presets mapped to locations.json ids (GCC + Egypt + remote).
+ * locationKey: riyadh | jeddah | dammam | dubai | abu-dhabi | doha | muscat | cairo | alexandria | kuwait-city | manama | remote
+ */
+const DEMO_LOCATION_PRESETS = {
+    riyadh: { countryId: 'sa', regionId: 'riyadh', cityId: 'riyadh-city', districtIndex: 0 },
+    jeddah: { countryId: 'sa', regionId: 'makkah', cityId: 'jeddah', districtIndex: 0 },
+    dammam: { countryId: 'sa', regionId: 'eastern-province', cityId: 'dammam', districtIndex: 0 },
+    dubai: { countryId: 'uae', regionId: 'dubai-emirate', cityId: 'dubai', districtIndex: 0 },
+    'abu-dhabi': { countryId: 'uae', regionId: 'abu-dhabi-emirate', cityId: 'abu-dhabi', districtIndex: 0 },
+    doha: { countryId: 'qa', regionId: 'doha-region', cityId: 'doha', districtIndex: 0 },
+    muscat: { countryId: 'om', regionId: 'muscat-region', cityId: 'muscat', districtIndex: 0 },
+    cairo: { countryId: 'eg', regionId: 'cairo-governorate', cityId: 'cairo', districtIndex: null },
+    alexandria: { countryId: 'eg', regionId: 'alexandria-governorate', cityId: 'alexandria', districtIndex: null },
+    'kuwait-city': { countryId: 'kw', regionId: 'kuwait-region', cityId: 'kuwait-city', districtIndex: 0 },
+    manama: { countryId: 'bh', regionId: 'bahrain-region', cityId: 'manama', districtIndex: 0 },
+    remote: { countryId: 'remote', regionId: null, cityId: null, districtIndex: null }
+};
+
+/**
  * Demo datasets for "Fill Demo Data" – each use loads a random scenario from this list.
- * step1: title, description, locationKey ('riyadh' | 'jeddah' | 'remote').
- * step2: intent ('request' | 'offer').
- * step3: skills, sectors, interests (arrays).
+ * step1: title, description, locationKey, locationRequirement, startDate, applicationDeadline, endDate.
+ * step2: intent ('request' | 'offer' | 'hybrid').
+ * step3: skills, sectors, interests, certifications, targetRole (arrays / string).
  * step4: category, subModel, modelFields (object key -> value for dynamic Step 4 fields).
- * step5: budgetMin, budgetMax, exchangeMode, currency, modeFields, agreement.
+ * step5: budgetMin, budgetMax, exchangeMode, currency, modeFields (kebab-case field ids), agreement.
  * step6: status.
  */
 const DEMO_DATASETS = [
@@ -48,8 +278,12 @@ const DEMO_DATASETS = [
         projectType: 'single',
         step1: {
             title: 'Structural Engineering Services for Commercial Building Project',
-            description: 'We are seeking an experienced structural engineer to provide design and consultation services for a new 5-story commercial building in Riyadh. The project involves reinforced concrete design, foundation analysis, and construction supervision.',
-            locationKey: 'riyadh'
+            description: 'We are seeking an experienced structural engineer to provide design and consultation services for a new 5-story commercial building in Riyadh, Saudi Arabia. The project involves reinforced concrete design, foundation analysis, and construction supervision.',
+            locationKey: 'riyadh',
+            locationRequirement: 'Hybrid',
+            startDate: demoDateOffset(14),
+            applicationDeadline: demoDateOffset(28),
+            endDate: demoDateOffset(120)
         },
         step2: { intent: 'request' },
         step3: {
@@ -81,10 +315,10 @@ const DEMO_DATASETS = [
             exchangeMode: 'cash',
             currency: 'SAR',
             modeFields: {
-                cashAmount: '60000',
-                cashPaymentTerms: 'milestone_based',
-                cashMilestones: '30% upon contract signing, 40% at design completion, 30% upon final delivery.',
-                exchangeTermsSummary: 'Payment in SAR. Invoicing monthly. 5% retention released 30 days after project completion.'
+                'cash-amount': '60000',
+                'cash-payment-terms': 'milestone_based',
+                'cash-milestones': '30% upon contract signing, 40% at design completion, 30% upon final delivery.',
+                'exchange-terms-summary': 'Payment in SAR. Invoicing monthly. 5% retention released 30 days after project completion.'
             },
             agreement: true
         },
@@ -94,8 +328,12 @@ const DEMO_DATASETS = [
         projectType: 'multi',
         step1: {
             title: 'Regional Rollout — Multi-Site Deployment Program',
-            description: 'Program-wide engagement covering multiple sites under one umbrella contract. Work packages may be staffed independently while sharing governance and reporting.',
-            locationKey: 'riyadh'
+            description: 'Program-wide engagement covering multiple sites across Muscat and Oman under one umbrella contract. Work packages may be staffed independently while sharing governance and reporting.',
+            locationKey: 'muscat',
+            locationRequirement: 'On-Site',
+            startDate: demoDateOffset(21),
+            applicationDeadline: demoDateOffset(45),
+            endDate: demoDateOffset(200)
         },
         step2: { intent: 'request' },
         step3: {
@@ -129,12 +367,12 @@ const DEMO_DATASETS = [
             budgetMin: '800000',
             budgetMax: '1200000',
             exchangeMode: 'cash',
-            currency: 'SAR',
+            currency: 'USD',
             modeFields: {
-                cashAmount: '1000000',
-                cashPaymentTerms: 'milestone_based',
-                cashMilestones: 'Per work package milestones aligned to program gates.',
-                exchangeTermsSummary: 'SAR. Milestones tied to each work package completion.'
+                'cash-amount': '1000000',
+                'cash-payment-terms': 'milestone_based',
+                'cash-milestones': 'Per work package milestones aligned to program gates.',
+                'exchange-terms-summary': 'USD. Milestones tied to each work package completion.'
             },
             agreement: true
         },
@@ -144,8 +382,12 @@ const DEMO_DATASETS = [
         projectType: 'multi',
         step1: {
             title: 'Strategic JV Partnership – Construction & Engineering',
-            description: 'We offer a long-term strategic joint venture in construction and engineering. Seeking a partner for equity participation, shared governance, and expansion across the GCC.',
-            locationKey: 'jeddah'
+            description: 'We offer a long-term strategic joint venture in construction and engineering based in Dubai, UAE. Seeking a partner for equity participation, shared governance, and expansion across the GCC.',
+            locationKey: 'dubai',
+            locationRequirement: 'Hybrid',
+            startDate: demoDateOffset(30),
+            applicationDeadline: demoDateOffset(60),
+            endDate: demoDateOffset(365)
         },
         step2: { intent: 'offer' },
         step3: {
@@ -189,12 +431,13 @@ const DEMO_DATASETS = [
             budgetMin: '100000',
             budgetMax: '500000',
             exchangeMode: 'equity',
-            currency: null,
+            currency: 'AED',
             modeFields: {
-                equityPercentage: '40',
-                equityVesting: '2_years',
-                equityContribution: 'Join our JV: 40% equity for expertise and regional presence. Vesting over 2 years.',
-                exchangeTermsSummary: 'Equity subject to shareholder agreement. Board seat optional.'
+                'equity-percentage': '40',
+                'equity-company-valuation': '25000000',
+                'equity-vesting': '2_years',
+                'equity-contribution': 'Join our JV: 40% equity for expertise and regional presence. Vesting over 2 years.',
+                'exchange-terms-summary': 'Equity subject to shareholder agreement. Board seat optional.'
             },
             agreement: true
         },
@@ -204,8 +447,12 @@ const DEMO_DATASETS = [
         projectType: 'multi',
         step1: {
             title: 'Consortium – Large-Scale Infrastructure Tender',
-            description: 'Request for consortium members for a major infrastructure tender. Profit-sharing and scope division by trade. Lead member role available.',
-            locationKey: 'riyadh'
+            description: 'Request for consortium members for a major infrastructure tender in Doha, Qatar. Profit-sharing and scope division by trade. Lead member role available.',
+            locationKey: 'doha',
+            locationRequirement: 'On-Site',
+            startDate: demoDateOffset(10),
+            applicationDeadline: demoDateOffset(45),
+            endDate: demoDateOffset(1095)
         },
         step2: { intent: 'request' },
         step3: {
@@ -222,7 +469,7 @@ const DEMO_DATASETS = [
                 projectType: 'Infrastructure',
                 projectValue: '150000000',
                 projectDuration: '36',
-                projectLocation: 'Riyadh Region',
+                projectLocation: 'Doha, Qatar',
                 leadMember: true,
                 requiredMembers: '4',
                 memberRoles: [
@@ -257,7 +504,7 @@ const DEMO_DATASETS = [
                 'profit-split': '60-40',
                 'expected-profit': '500000',
                 'profit-distribution': '60-40 profit split after costs, distributed quarterly.',
-                exchangeTermsSummary: 'Profit share calculated after project costs. Quarterly distributions.'
+                'exchange-terms-summary': 'Profit share calculated after project costs. Quarterly distributions.'
             },
             agreement: true
         },
@@ -267,8 +514,12 @@ const DEMO_DATASETS = [
         projectType: 'single',
         step1: {
             title: 'Consulting Services Offer – Barter or Hybrid',
-            description: 'We offer project management and sustainability consulting. Open to barter (office space, software licenses) or hybrid compensation.',
-            locationKey: 'remote'
+            description: 'We offer project management and sustainability consulting across the GCC. Open to barter (office space, software licenses) or hybrid compensation. Work can be delivered remotely.',
+            locationKey: 'remote',
+            locationRequirement: 'Remote',
+            startDate: demoDateOffset(7),
+            applicationDeadline: demoDateOffset(21),
+            endDate: demoDateOffset(97)
         },
         step2: { intent: 'offer' },
         step3: {
@@ -301,10 +552,10 @@ const DEMO_DATASETS = [
             exchangeMode: 'barter',
             currency: null,
             modeFields: {
-                barterOffer: 'We offer project management and sustainability consulting (reports, workshops).',
-                barterNeed: 'Office space or software licenses (e.g. BIM, PM tools) in exchange.',
-                barterValue: 'Equivalent to 35K SAR',
-                exchangeTermsSummary: 'Barter value approximate. Open to partial cash top-up if needed.'
+                'barter-offer': 'We offer project management and sustainability consulting (reports, workshops).',
+                'barter-need': 'Office space or software licenses (e.g. BIM, PM tools) in exchange.',
+                'barter-value': 'Equivalent to 35K SAR',
+                'exchange-terms-summary': 'Barter value approximate. Open to partial cash top-up if needed.'
             },
             agreement: true
         },
@@ -313,9 +564,13 @@ const DEMO_DATASETS = [
     {
         projectType: 'multi',
         step1: {
-            title: 'Bulk Steel Purchase – Consortium for Riyadh Projects',
-            description: 'Organizing a bulk purchase of structural steel for multiple construction projects in Riyadh. Seeking 4–6 participants to achieve volume discount. Lead organizer; delivery to central depot.',
-            locationKey: 'riyadh'
+            title: 'Bulk Steel Purchase – Consortium for Jeddah Projects',
+            description: 'Organizing a bulk purchase of structural steel for multiple construction projects in Jeddah, Saudi Arabia. Seeking 4–6 participants to achieve volume discount. Lead organizer; delivery to central depot.',
+            locationKey: 'jeddah',
+            locationRequirement: 'On-Site',
+            startDate: demoDateOffset(14),
+            applicationDeadline: demoDateOffset(35),
+            endDate: demoDateOffset(104)
         },
         step2: { intent: 'request' },
         step3: {
@@ -336,7 +591,7 @@ const DEMO_DATASETS = [
                 currentMarketPrice: '3500',
                 expectedSavings: '8',
                 deliveryTimeline: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                deliveryLocation: 'Riyadh Industrial Area – Central Depot',
+                deliveryLocation: 'Jeddah Industrial Area – Central Depot',
                 paymentStructure: 'Escrow',
                 participantsNeeded: '5',
                 minimumOrder: '200',
@@ -351,10 +606,10 @@ const DEMO_DATASETS = [
             exchangeMode: 'cash',
             currency: 'SAR',
             modeFields: {
-                cashAmount: '6400000',
-                cashPaymentTerms: '30% deposit, 70% on delivery',
-                cashMilestones: '30% upon order placement, 70% on delivery to depot.',
-                exchangeTermsSummary: 'Payment in SAR. Escrow through platform. Centralized pickup within 14 days of delivery.'
+                'cash-amount': '6400000',
+                'cash-payment-terms': 'milestone_based',
+                'cash-milestones': '30% upon order placement, 70% on delivery to depot.',
+                'exchange-terms-summary': 'Payment in SAR. Escrow through platform. Centralized pickup within 14 days of delivery.'
             },
             agreement: true
         },
@@ -364,8 +619,12 @@ const DEMO_DATASETS = [
         projectType: 'single',
         step1: {
             title: 'Innovation Contest – Sustainable Construction Solutions',
-            description: 'Open innovation contest for sustainable construction solutions. Winner receives 500K SAR and pilot opportunity. Open to companies and professionals. Submission deadline 60 days.',
-            locationKey: 'riyadh'
+            description: 'Open innovation contest for sustainable construction solutions in Cairo, Egypt. Winner receives 500K EGP equivalent prize and pilot opportunity. Open to companies and professionals. Submission deadline 60 days.',
+            locationKey: 'cairo',
+            locationRequirement: 'Hybrid',
+            startDate: demoDateOffset(7),
+            applicationDeadline: demoDateOffset(60),
+            endDate: demoDateOffset(180)
         },
         step2: { intent: 'request' },
         step3: {
@@ -409,12 +668,12 @@ const DEMO_DATASETS = [
             budgetMin: '400000',
             budgetMax: '600000',
             exchangeMode: 'cash',
-            currency: 'SAR',
+            currency: 'USD',
             modeFields: {
-                cashAmount: '500000',
-                cashPaymentTerms: 'Upon Completion',
-                cashMilestones: 'Prize: 1st 300K, 2nd 150K, 3rd 50K SAR.',
-                exchangeTermsSummary: 'Winners receive cash prizes. First place also receives pilot contract opportunity.'
+                'cash-amount': '500000',
+                'cash-payment-terms': 'upon_completion',
+                'cash-milestones': 'Prize: 1st 300K, 2nd 150K, 3rd 50K USD equivalent.',
+                'exchange-terms-summary': 'Winners receive cash prizes. First place also receives pilot contract opportunity.'
             },
             agreement: true
         },
@@ -668,11 +927,12 @@ async function initOpportunityCreate(params = {}) {
         await loadScript('src/services/opportunities/opportunity-form-service.js');
     }
     if (!window.validateOpportunityForm) {
-        await loadScript('src/services/opportunities/opportunity-validation.js');
+        await loadScript('src/core/validation/opportunity-validator.js');
     }
     
     await initializeForm();
     applyNumericInputConstraints();
+    applyDateInputConstraints();
     setupRealtimeValidationClearing();
     setupWizardNavigation();
     setupFormHandlers();
@@ -714,6 +974,34 @@ function applyNumericInputConstraints() {
     setAttr('profit-duration', { min: '1', step: '1' });
     setAttr('duration', { min: '1', step: '1' });
     setAttr('durationDays', { min: '1', step: '1' });
+}
+
+function getTodayIsoDateForInputs() {
+    return (window.validationPrimitives && typeof window.validationPrimitives.getTodayIsoDate === 'function')
+        ? window.validationPrimitives.getTodayIsoDate()
+        : new Date().toISOString().slice(0, 10);
+}
+
+function applyDateInputConstraints() {
+    const today = getTodayIsoDateForInputs();
+    ['attr-startDate', 'attr-applicationDeadline', 'attr-endDate'].forEach((id) => {
+        setAttrMin(id, today);
+    });
+    applyDynamicDateInputConstraints();
+}
+
+function applyDynamicDateInputConstraints(root) {
+    const today = getTodayIsoDateForInputs();
+    const scope = root || document.getElementById('dynamic-fields');
+    if (!scope) return;
+    scope.querySelectorAll('input[type="date"]').forEach((el) => {
+        el.setAttribute('min', today);
+    });
+}
+
+function setAttrMin(id, minValue) {
+    const el = document.getElementById(id);
+    if (el && minValue) el.setAttribute('min', minValue);
 }
 
 async function loadDataFiles() {
@@ -1219,7 +1507,7 @@ function setupWizardNavigation() {
             clearValidationUI();
             const sharedValidator = window.validateOpportunityForm;
             if (sharedValidator) {
-                const result = sharedValidator(collectOpportunityValidationState());
+                const result = sharedValidator(collectOpportunityValidationState(), getCreateValidationOptions());
                 if (!result.isValid) {
                     renderValidationErrors(result.fieldErrors);
                     showError(result.errors[0] || 'Please correct invalid values before saving draft.');
@@ -1493,6 +1781,12 @@ function clearFieldValidationUIByField(field) {
 }
 
 function mapValidationKeyToFieldId(key) {
+    const bare = String(key || '').replace(/^modelAttributes\./, '');
+    const dynamicContainer = document.getElementById('dynamic-fields');
+    if (dynamicContainer) {
+        const dynamicEl = document.getElementById(bare);
+        if (dynamicEl && dynamicContainer.contains(dynamicEl)) return bare;
+    }
     const map = {
         cashAmount: 'cash-amount',
         durationDays: 'profit-duration',
@@ -1504,7 +1798,31 @@ function mapValidationKeyToFieldId(key) {
         applicationDeadline: 'attr-applicationDeadline',
         endDate: 'attr-endDate'
     };
-    return map[key] || key;
+    if (map[bare] && document.getElementById(map[bare])) return map[bare];
+    return bare;
+}
+
+function collectStep5ModelAttributes() {
+    const formService = window.opportunityFormService;
+    const modelType = document.getElementById('model-type')?.value;
+    const subModelType = document.getElementById('submodel-type')?.value;
+    if (!formService || !modelType || !subModelType) {
+        return { modelType, subModelType, modelAttributes: {} };
+    }
+    const form = document.getElementById('opportunity-form');
+    const allData = form ? formService.collectFormData(form) : {};
+    const paymentFieldKeys = ['paymentTerms', 'exchangeType', 'barterOffer'];
+    const attributes = formService.getAttributes(modelType, subModelType)
+        .filter((a) => !paymentFieldKeys.includes(a.key));
+    const modelAttributes = {};
+    attributes.forEach((attr) => {
+        if (allData[attr.key] !== undefined) modelAttributes[attr.key] = allData[attr.key];
+        if (attr.type === 'date-range') {
+            if (allData[`${attr.key}_start`] !== undefined) modelAttributes[`${attr.key}_start`] = allData[`${attr.key}_start`];
+            if (allData[`${attr.key}_end`] !== undefined) modelAttributes[`${attr.key}_end`] = allData[`${attr.key}_end`];
+        }
+    });
+    return { modelType, subModelType, modelAttributes };
 }
 
 function renderValidationErrors(fieldErrors) {
@@ -1542,6 +1860,7 @@ function setupRealtimeValidationClearing() {
 function collectOpportunityValidationState() {
     const mode = document.getElementById('exchange-mode')?.value || '';
     const getVal = (id) => document.getElementById(id)?.value?.trim();
+    const { modelType, subModelType, modelAttributes } = collectStep5ModelAttributes();
     return {
         exchangeMode: mode,
         cashAmount: getVal('cash-amount'),
@@ -1552,7 +1871,19 @@ function collectOpportunityValidationState() {
         profitSharePercentage: getVal('profit-share-percentage'),
         startDate: getVal('attr-startDate'),
         applicationDeadline: getVal('attr-applicationDeadline'),
-        endDate: getVal('attr-endDate')
+        endDate: getVal('attr-endDate'),
+        modelAttributes,
+        modelKey: modelType,
+        subModelKey: subModelType
+    };
+}
+
+function getCreateValidationOptions() {
+    const { modelType, subModelType } = collectStep5ModelAttributes();
+    return {
+        disallowPastDates: true,
+        modelKey: modelType || undefined,
+        subModelKey: subModelType || undefined
     };
 }
 
@@ -1593,7 +1924,7 @@ function validateCurrentStep() {
             }
             const sharedValidator = window.validateOpportunityForm;
             if (sharedValidator) {
-                const result = sharedValidator(collectOpportunityValidationState());
+                const result = sharedValidator(collectOpportunityValidationState(), getCreateValidationOptions());
                 if (result.fieldErrors.startDate || result.fieldErrors.applicationDeadline || result.fieldErrors.endDate) {
                     renderValidationErrors(result.fieldErrors);
                     showError(result.errors[0] || 'Please correct invalid date fields.');
@@ -1693,12 +2024,26 @@ function validateCurrentStep() {
                     return false;
                 }
             }
+            if (typeof window.validateModelAttributes === 'function' && modelType && subModelType) {
+                const { modelAttributes } = collectStep5ModelAttributes();
+                const modelValidation = window.validateModelAttributes(
+                    modelAttributes,
+                    modelType,
+                    subModelType,
+                    { disallowPastDates: true }
+                );
+                if (!modelValidation.isValid) {
+                    renderValidationErrors(modelValidation.fieldErrors);
+                    showError(modelValidation.errors[0] || 'Please correct invalid model fields before continuing.');
+                    return false;
+                }
+            }
             break;
         }
         case 6: {
             const sharedValidator = window.validateOpportunityForm;
             if (sharedValidator) {
-                const result = sharedValidator(collectOpportunityValidationState());
+                const result = sharedValidator(collectOpportunityValidationState(), getCreateValidationOptions());
                 if (!result.isValid) {
                     renderValidationErrors(result.fieldErrors);
                     showError(result.errors[0] || 'Please correct invalid values before continuing.');
@@ -3853,7 +4198,7 @@ function setupExchangeModeSelection() {
         }
         fieldsContainer.innerHTML = html;
         applyNumericInputConstraints();
-        applyNumericInputConstraints();
+        applyDateInputConstraints();
         fieldsContainer.querySelectorAll('input:not([type="checkbox"]):not([type="hidden"]), select, textarea').forEach(el => {
             el.classList.add('occ-vx-control');
         });
@@ -4087,6 +4432,7 @@ async function fillDemoData(dataset) {
         if (!d.skipLocation) {
             fillDemoLocation(d.step1 && d.step1.locationKey);
         }
+        fillDemoStep1Extras(d.step1);
         
         // Step 2: Intent
         const intent = (d.step2 && d.step2.intent) || 'request';
@@ -4202,30 +4548,59 @@ async function fillDemoData(dataset) {
 
 /**
  * Resolves country, region, city (and optional district) from locationKey.
- * @param {string} [locationKey] - 'riyadh' | 'jeddah' | 'remote'; default 'riyadh'.
+ * @param {string} [locationKey] - preset key from DEMO_LOCATION_PRESETS; default 'riyadh'.
  * @returns {{ country: object, region: object|null, city: object|null, district: string|null }}
  */
 function resolveDemoLocation(locationKey) {
     const locations = getLocationsData();
     if (!locations || !locations.countries) return { country: null, region: null, city: null, district: null };
     const key = (locationKey || 'riyadh').toLowerCase();
-    if (key === 'remote') {
+    const preset = DEMO_LOCATION_PRESETS[key] || DEMO_LOCATION_PRESETS.riyadh;
+    if (preset.countryId === 'remote') {
         const country = locations.countries.find(c => c.id === 'remote');
         return { country: country || null, region: null, city: null, district: null };
     }
-    const sa = locations.countries.find(c => c.id === 'sa');
-    if (!sa) return { country: null, region: null, city: null, district: null };
-    if (key === 'jeddah') {
-        const region = sa.regions && sa.regions.find(r => r.id === 'makkah');
-        const city = region && region.cities && region.cities.find(c => c.id === 'jeddah');
-        const district = city && city.districts && city.districts.length > 0 ? city.districts[0] : null;
-        return { country: sa, region: region || null, city: city || null, district };
+    const country = locations.countries.find(c => c.id === preset.countryId);
+    if (!country) return { country: null, region: null, city: null, district: null };
+    const region = preset.regionId && country.regions
+        ? country.regions.find(r => r.id === preset.regionId)
+        : null;
+    const city = region && preset.cityId && region.cities
+        ? region.cities.find(c => c.id === preset.cityId)
+        : null;
+    let district = null;
+    if (city && city.districts && city.districts.length > 0) {
+        const idx = preset.districtIndex != null ? preset.districtIndex : 0;
+        district = city.districts[idx] || city.districts[0];
     }
-    // riyadh (default)
-    const region = sa.regions && sa.regions.find(r => r.id === 'riyadh');
-    const city = region && region.cities && region.cities.find(c => c.id === 'riyadh-city');
-    const district = city && city.districts && city.districts.length > 0 ? city.districts[0] : null;
-    return { country: sa, region: region || null, city: city || null, district };
+    return { country, region, city, district };
+}
+
+/** Fill Step 2 optional fields: location requirement and key dates. */
+function fillDemoStep1Extras(step1) {
+    if (!step1) return;
+    const locReqEl = document.getElementById('location-requirement');
+    if (locReqEl && step1.locationRequirement) {
+        locReqEl.value = step1.locationRequirement;
+        locReqEl.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    [
+        ['attr-startDate', step1.startDate],
+        ['attr-applicationDeadline', step1.applicationDeadline],
+        ['attr-endDate', step1.endDate]
+    ].forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el && val) {
+            el.value = val;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    });
+}
+
+function applyDemoMapCoords(city) {
+    if (!city || city.lat == null || city.lng == null) return;
+    updateMapPinInputs(city.lat, city.lng);
+    centerMapOnCity(city.id);
 }
 
 async function fillDemoLocation(locationKey) {
@@ -4251,7 +4626,11 @@ async function fillDemoLocation(locationKey) {
                     }
                 }
             }
-            if (!region || !city) return;
+            if (!region || !city) {
+                if (country.id === 'remote') return;
+                applyDemoMapCoords(city);
+                return;
+            }
             setTimeout(() => {
                 const regionSearch = document.getElementById('location-region-search');
                 const regionInput = document.getElementById('location-region');
@@ -4288,6 +4667,7 @@ async function fillDemoLocation(locationKey) {
                                     }
                                 }
                             }
+                            applyDemoMapCoords(city);
                             if (!district) return;
                             setTimeout(() => {
                                 const districtSearch = document.getElementById('location-district-search');
@@ -4553,6 +4933,7 @@ function renderDynamicFields(modelKey, subModelKey, preserveValues = false) {
     formService.setupConditionalFields(form);
     updateMultiProjectTasksUI();
     formService.wireDynamicBehaviours(form);
+    applyDynamicDateInputConstraints(container);
 
     // Initialize rich text editors for newly rendered fields (use container's step, e.g. step-4)
     const stepEl = container ? container.closest('.wizard-step-content') : null;
@@ -4623,7 +5004,7 @@ function setupFormHandlers() {
         clearValidationUI();
         const sharedValidator = window.validateOpportunityForm;
         if (sharedValidator) {
-            const result = sharedValidator(collectOpportunityValidationState());
+            const result = sharedValidator(collectOpportunityValidationState(), getCreateValidationOptions());
             if (!result.isValid) {
                 renderValidationErrors(result.fieldErrors);
                 showError(result.errors[0] || 'Please correct invalid fields before saving.');

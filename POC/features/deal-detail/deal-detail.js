@@ -275,6 +275,16 @@ async function openDealWorkspaceTermsModal(deal, opts) {
             let agreedValue = vt.agreedValue;
             if (cashStr !== '') {
                 const n = Number(cashStr);
+                if (typeof window.validateDealTerms === 'function') {
+                    const check = window.validateDealTerms({ cashAmount: n });
+                    if (!check.isValid) {
+                        setErr(check.errors[0] || 'Invalid cash amount.');
+                        return { ok: false };
+                    }
+                } else if (!Number.isNaN(n) && n < 0) {
+                    setErr('Cash amount cannot be negative.');
+                    return { ok: false };
+                }
                 if (!Number.isNaN(n)) {
                     agreedValue = {
                         ...(typeof agreed === 'object' ? agreed : {}),

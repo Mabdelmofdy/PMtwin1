@@ -887,6 +887,16 @@ function showEditContractModal(contractId, ctx) {
                     const profitShareVal =
                         profitShareInput && profitShareInput.value != null ? String(profitShareInput.value).trim() : '';
                     const milestonesSnapshot = collectMilestonesSnapshotFromModal(modal);
+                    if (typeof window.validateContract === 'function') {
+                        const check = window.validateContract({
+                            scope: scopeVal,
+                            milestones: milestonesSnapshot
+                        });
+                        if (!check.isValid) {
+                            alert(check.errors[0] || 'Invalid contract data.');
+                            return;
+                        }
+                    }
                     modalService.close();
                     await saveContractEdit(contractId, {
                         scope: scopeVal,

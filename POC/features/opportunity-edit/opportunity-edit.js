@@ -81,6 +81,16 @@ async function editLoadDataFiles() {
     }
 }
 
+function editApplyDateInputConstraints() {
+    const today = (window.validationPrimitives && typeof window.validationPrimitives.getTodayIsoDate === 'function')
+        ? window.validationPrimitives.getTodayIsoDate()
+        : new Date().toISOString().slice(0, 10);
+    ['attr-startDate', 'attr-applicationDeadline', 'attr-endDate'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.setAttribute('min', today);
+    });
+}
+
 async function editLoadOpportunity(opportunityId) {
     const loadingDiv = document.getElementById('edit-loading');
     const formDiv = document.getElementById('opportunity-edit-form');
@@ -111,6 +121,7 @@ async function editLoadOpportunity(opportunityId) {
         
         // Populate form
         await editPopulateForm(opportunity);
+        editApplyDateInputConstraints();
         
         // Setup form handlers
         editSetupFormHandlers();
@@ -1254,6 +1265,34 @@ function editSetupFormHandlers() {
             
             if (!formData.title) {
                 throw new Error('Title is required');
+            }
+
+            const validationState = {
+                exchangeMode: formData.exchangeMode,
+                cashAmount: formData.cashAmount,
+                budgetMin: formData.budgetRange_min,
+                budgetMax: formData.budgetRange_max,
+                equityPercentage: document.getElementById('profit-share-percentage')?.value
+                    || document.getElementById('equity-percentage')?.value
+                    || formData.equityPercentage,
+                profitSharePercentage: document.getElementById('profit-share-percentage')?.value,
+                durationDays: formData.durationDays || formData.duration,
+                startDate: document.getElementById('attr-startDate')?.value?.trim(),
+                endDate: document.getElementById('attr-endDate')?.value?.trim(),
+                applicationDeadline: document.getElementById('attr-applicationDeadline')?.value?.trim(),
+                modelAttributes: formData,
+                modelKey: editingOpportunity?.modelKey || editingOpportunity?.collaborationModel,
+                subModelKey: editingOpportunity?.subModelKey || editingOpportunity?.subModel
+            };
+            if (typeof window.validateOpportunityForm === 'function') {
+                const validation = window.validateOpportunityForm(validationState, {
+                    modelKey: validationState.modelKey,
+                    subModelKey: validationState.subModelKey,
+                    disallowPastDates: true
+                });
+                if (!validation.isValid) {
+                    throw new Error(validation.errors[0] || 'Please correct invalid fields before saving.');
+                }
             }
             
             // Collect exchange mode data

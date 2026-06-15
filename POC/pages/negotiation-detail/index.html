@@ -1,0 +1,573 @@
+<div class="page-container negotiation-detail-page">
+    <div id="negotiation-loading" class="negotiation-detail-loading">
+        <div class="spinner"></div>
+        <p>Loading negotiation workspace…</p>
+    </div>
+    <div id="negotiation-error" class="negotiation-detail-error" style="display: none;">
+        <h2>Negotiation not found</h2>
+        <p id="negotiation-error-message">This negotiation does not exist or you do not have access.</p>
+        <a href="#" data-route="/pipeline/matches" class="btn btn-primary">Back to Pipeline</a>
+    </div>
+    <div id="negotiation-content" class="negotiation-detail-content" style="display: none;">
+        <a href="#" id="negotiation-back-link" data-route="/pipeline/matches" class="negotiation-detail-back">
+            <i class="ph-duotone ph-arrow-left" aria-hidden="true"></i> Back
+        </a>
+
+        <header class="negotiation-detail-hero" aria-labelledby="negotiation-title">
+            <div class="negotiation-detail-hero__accent" aria-hidden="true"></div>
+            <div id="negotiation-flash" class="negotiation-flash" style="display:none" aria-live="polite"></div>
+            <div class="negotiation-detail-hero__main">
+                <div class="negotiation-detail-hero__title-row">
+                    <span class="negotiation-detail-hero__icon" aria-hidden="true"><i class="ph-duotone ph-scales"></i></span>
+                    <div>
+                        <h1 id="negotiation-title" class="negotiation-detail-hero__title">Value negotiation</h1>
+                        <p id="negotiation-subtitle" class="negotiation-detail-hero__subtitle">—</p>
+                    </div>
+                </div>
+                <div class="negotiation-detail-hero__pills">
+                    <span id="negotiation-status-badge" class="badge">—</span>
+                    <span id="negotiation-dispute-pill" class="negotiation-detail-pill negotiation-detail-pill--danger" style="display:none">—</span>
+                    <span id="negotiation-exchange-pill" class="negotiation-detail-pill">—</span>
+                    <span id="negotiation-expires-pill" class="negotiation-detail-pill negotiation-detail-pill--muted">—</span>
+                    <span id="negotiation-rounds-pill" class="negotiation-detail-pill negotiation-detail-pill--muted">—</span>
+                </div>
+            </div>
+        </header>
+
+        <div id="negotiation-dispute-banner" class="negotiation-dispute-banner" style="display:none" role="status" aria-live="polite"></div>
+
+        <div class="negotiation-detail-layout">
+            <div class="negotiation-detail-layout__main">
+                <section id="negotiation-dispute-section" class="negotiation-card negotiation-card--dispute" style="display:none" aria-labelledby="negotiation-dispute-heading">
+                    <div class="negotiation-card__head">
+                        <h2 id="negotiation-dispute-heading" class="negotiation-card__title">
+                            <i class="ph-duotone ph-warning-circle" aria-hidden="true"></i> Dispute
+                        </h2>
+                        <p id="negotiation-dispute-lead" class="negotiation-card__lead">—</p>
+                    </div>
+                    <div id="negotiation-dispute-body"></div>
+                </section>
+
+                <section class="negotiation-card" aria-labelledby="negotiation-terms-heading">
+                    <div class="negotiation-card__head">
+                        <h2 id="negotiation-terms-heading" class="negotiation-card__title">
+                            <i class="ph-duotone ph-file-text" aria-hidden="true"></i> Current terms sheet
+                        </h2>
+                        <p class="negotiation-card__lead">Working terms for this negotiation. Formal proposals update this sheet.</p>
+                    </div>
+                    <div id="negotiation-terms-sheet" class="negotiation-terms-sheet"></div>
+                </section>
+
+                <section class="negotiation-card" aria-labelledby="negotiation-discussion-heading">
+                    <div class="negotiation-card__head">
+                        <h2 id="negotiation-discussion-heading" class="negotiation-card__title">
+                            <i class="ph-duotone ph-chat-text" aria-hidden="true"></i> Discussion
+                        </h2>
+                        <p class="negotiation-card__lead">Informal messages between parties (not formal counter-offers).</p>
+                    </div>
+                    <div id="negotiation-discussion-list" class="negotiation-discussion-list"></div>
+                </section>
+
+                <section class="negotiation-card" aria-labelledby="negotiation-rounds-heading">
+                    <div class="negotiation-card__head">
+                        <h2 id="negotiation-rounds-heading" class="negotiation-card__title">
+                            <i class="ph-duotone ph-chats-circle" aria-hidden="true"></i> Proposal history
+                        </h2>
+                        <p class="negotiation-card__lead">Formal counter-offers and messages from each party.</p>
+                    </div>
+                    <div id="negotiation-rounds-list" class="negotiation-rounds-list"></div>
+                </section>
+
+                <section id="negotiation-proposal-section" class="negotiation-card negotiation-card--proposal" aria-labelledby="negotiation-proposal-heading">
+                    <div class="negotiation-card__head">
+                        <h2 id="negotiation-proposal-heading" class="negotiation-card__title">
+                            <i class="ph-duotone ph-paper-plane-tilt" aria-hidden="true"></i> Submit counter-proposal
+                        </h2>
+                        <p class="negotiation-card__lead">Send a structured counter-offer. Leave fields blank to keep current values.</p>
+                    </div>
+                    <form id="negotiation-proposal-form" class="negotiation-proposal-form"></form>
+                    <div class="negotiation-proposal-actions">
+                        <button type="submit" form="negotiation-proposal-form" class="btn btn-outline" id="btn-negotiation-send-proposal">Send proposal</button>
+                        <button type="button" class="btn btn-primary" id="btn-negotiation-agree">Agree to current terms</button>
+                        <button type="button" class="btn btn-outline text-gray-600" id="btn-negotiation-cancel">Cancel negotiation</button>
+                    </div>
+                </section>
+
+                <section id="negotiation-post-agree-section" class="negotiation-card negotiation-card--success" style="display:none" aria-labelledby="negotiation-agreed-heading">
+                    <div class="negotiation-card__head">
+                        <h2 id="negotiation-agreed-heading" class="negotiation-card__title">
+                            <i class="ph-duotone ph-check-circle" aria-hidden="true"></i> Terms agreed
+                        </h2>
+                        <p class="negotiation-card__lead">All required parties have agreed. Create a deal workspace to continue.</p>
+                    </div>
+                    <div id="negotiation-agreed-summary"></div>
+                    <div class="negotiation-proposal-actions">
+                        <button type="button" class="btn btn-primary" id="btn-negotiation-create-deal">Create deal workspace</button>
+                    </div>
+                </section>
+            </div>
+
+            <aside class="negotiation-detail-layout__aside" aria-labelledby="negotiation-context-heading">
+                <div class="negotiation-aside-card">
+                    <h2 id="negotiation-context-heading" class="negotiation-aside-card__title">
+                        <i class="ph-duotone ph-link" aria-hidden="true"></i> Context
+                    </h2>
+                    <dl id="negotiation-context-dl" class="negotiation-context-dl"></dl>
+                </div>
+                <div class="negotiation-aside-card">
+                    <h2 class="negotiation-aside-card__title">
+                        <i class="ph-duotone ph-users" aria-hidden="true"></i> Parties
+                    </h2>
+                    <ul id="negotiation-parties-list" class="negotiation-parties-list"></ul>
+                </div>
+                <div class="negotiation-aside-card">
+                    <h2 class="negotiation-aside-card__title">
+                        <i class="ph-duotone ph-export" aria-hidden="true"></i> Export
+                    </h2>
+                    <p class="negotiation-card__lead" style="margin-bottom:0.65rem">Download a transcript of this negotiation.</p>
+                    <div class="negotiation-dispute-actions">
+                        <button type="button" class="btn btn-outline btn-sm" id="btn-negotiation-export-json">JSON</button>
+                        <button type="button" class="btn btn-outline btn-sm" id="btn-negotiation-export-csv">Timeline CSV</button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+
+<style>
+.negotiation-detail-page {
+    --neg-detail-max: min(1120px, 100%);
+}
+
+.negotiation-detail-loading,
+.negotiation-detail-error {
+    text-align: center;
+    padding: 3rem 1.25rem;
+    color: var(--text-secondary, #64748b);
+}
+
+.negotiation-detail-error h2 {
+    margin: 0 0 0.5rem;
+    color: var(--text-primary, #0f172a);
+}
+
+.negotiation-detail-content {
+    max-width: var(--neg-detail-max);
+    margin: 0 auto;
+    padding-bottom: 2.5rem;
+}
+
+.negotiation-detail-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 1.25rem;
+    color: var(--primary-color, #0369a1);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.negotiation-detail-back:hover { text-decoration: underline; }
+
+.negotiation-detail-hero {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 14px;
+    padding: 1.35rem 1.5rem 1.5rem 1.65rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.negotiation-detail-hero__accent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #7c3aed 0%, #0369a1 100%);
+}
+
+.negotiation-detail-hero__title-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.negotiation-detail-hero__icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(124, 58, 237, 0.12);
+    color: #7c3aed;
+    font-size: 1.35rem;
+}
+
+.negotiation-detail-hero__title {
+    margin: 0;
+    font-size: clamp(1.25rem, 2.5vw, 1.6rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+}
+
+.negotiation-detail-hero__subtitle {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary, #64748b);
+}
+
+.negotiation-detail-hero__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.negotiation-detail-pill {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-primary, #334155);
+}
+
+.negotiation-detail-pill--muted {
+    color: var(--text-secondary, #64748b);
+    font-weight: 500;
+}
+
+.negotiation-detail-pill--danger {
+    color: #b91c1c;
+    background: #fef2f2;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid #fecaca;
+}
+
+.negotiation-dispute-banner {
+    margin-bottom: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    background: #fff7ed;
+    border: 1px solid #fdba74;
+    color: #9a3412;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.negotiation-card--dispute {
+    border-color: #fecaca;
+    background: linear-gradient(180deg, #fff 0%, #fffbfb 100%);
+}
+
+.negotiation-dispute-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.8125rem;
+    color: #64748b;
+}
+
+.negotiation-dispute-meta strong { color: #334155; }
+
+.negotiation-dispute-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+}
+
+.negotiation-dispute-msg {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+    background: #fafbfc;
+    font-size: 0.875rem;
+}
+
+.negotiation-dispute-msg__head {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-bottom: 0.3rem;
+}
+
+.negotiation-dispute-raise-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-top: 0.5rem;
+}
+
+.negotiation-dispute-raise-form label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.negotiation-dispute-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.negotiation-flash {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.negotiation-flash--success { background: #ecfdf5; border: 1px solid #6ee7b7; color: #065f46; }
+.negotiation-flash--danger { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+.negotiation-flash--info { background: #eff6ff; border: 1px solid #93c5fd; color: #1e3a8a; }
+
+.negotiation-detail-layout {
+    display: grid;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (min-width: 960px) {
+    .negotiation-detail-layout {
+        grid-template-columns: minmax(0, 1fr) min(320px, 34%);
+    }
+}
+
+.negotiation-card {
+    background: #fff;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 12px;
+    padding: 1.25rem 1.35rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.negotiation-card--proposal { border-color: rgba(124, 58, 237, 0.25); }
+.negotiation-card--success { border-color: rgba(16, 185, 129, 0.35); background: linear-gradient(180deg, #ecfdf5 0%, #fff 40%); }
+
+.negotiation-card__title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.negotiation-card__lead {
+    margin: 0.4rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--text-secondary, #64748b);
+    line-height: 1.5;
+}
+
+.negotiation-terms-sheet {
+    margin-top: 1rem;
+    display: grid;
+    gap: 0;
+}
+
+.negotiation-terms-row {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.875rem;
+}
+
+.negotiation-terms-row:last-child { border-bottom: none; }
+
+.negotiation-terms-row dt {
+    margin: 0;
+    font-weight: 600;
+    color: var(--text-secondary, #64748b);
+}
+
+.negotiation-terms-row dd {
+    margin: 0;
+    font-weight: 600;
+    color: var(--text-primary, #0f172a);
+}
+
+.negotiation-rounds-list {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.negotiation-discussion-list {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.negotiation-discussion-item {
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid #0369a1;
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+    background: #f8fafc;
+    font-size: 0.875rem;
+}
+
+.negotiation-discussion-item__meta {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+}
+
+.negotiation-rounds-list {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.negotiation-round {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    background: #fafbfc;
+}
+
+.negotiation-round__head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.35rem;
+    margin-bottom: 0.5rem;
+}
+
+.negotiation-round__who {
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.negotiation-round__meta {
+    font-size: 0.75rem;
+    color: var(--text-secondary, #94a3b8);
+}
+
+.negotiation-round__message {
+    margin: 0.35rem 0 0;
+    font-size: 0.875rem;
+    color: var(--text-primary, #334155);
+    line-height: 1.5;
+}
+
+.negotiation-round__deltas {
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.8125rem;
+}
+
+.negotiation-round__deltas li {
+    color: var(--text-secondary, #475569);
+}
+
+.negotiation-round__deltas strong { color: #7c3aed; }
+
+.negotiation-proposal-form {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.negotiation-field label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary, #64748b);
+    margin-bottom: 0.3rem;
+}
+
+.negotiation-field input,
+.negotiation-field textarea,
+.negotiation-field select {
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.875rem;
+}
+
+.negotiation-proposal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.negotiation-aside-card {
+    background: #fff;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1rem;
+    position: sticky;
+    top: 1rem;
+}
+
+.negotiation-aside-card__title {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.negotiation-context-dl {
+    margin: 0;
+    display: grid;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+}
+
+.negotiation-context-dl div {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: 0.5rem;
+}
+
+.negotiation-context-dl dt { margin: 0; color: #94a3b8; font-weight: 600; }
+.negotiation-context-dl dd { margin: 0; font-weight: 600; }
+.negotiation-context-dl a { color: var(--primary-color, #0369a1); text-decoration: none; }
+.negotiation-context-dl a:hover { text-decoration: underline; }
+
+.negotiation-parties-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.negotiation-parties-list li {
+    padding: 0.55rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.8125rem;
+}
+
+.negotiation-parties-list li:last-child { border-bottom: none; }
+
+.negotiation-party-name { font-weight: 700; display: block; }
+.negotiation-party-role { color: #64748b; font-size: 0.75rem; }
+.negotiation-party-agreed { color: #059669; font-size: 0.75rem; font-weight: 600; }
+</style>
