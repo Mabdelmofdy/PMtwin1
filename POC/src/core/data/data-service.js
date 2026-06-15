@@ -20,6 +20,7 @@ import {
     hasParticipantAgreed,
     allRequiredParticipantsAgreed
 } from "../../services/matching/negotiation-lifecycle.js";
+import { isApplicationInNegotiation } from "../../utils/applications.js";
 import {
     mergeProposalTerms,
     getEffectiveTerms
@@ -3253,7 +3254,18 @@ class DataService {
                 : null;
             const postMatch = sourcePostMatch || await this.getPostMatchById(matchId);
             if (!postMatch || (postMatch.status || '') !== CONFIG.POST_MATCH_STATUS.CONFIRMED) {
-                throw new Error('A deal can only be created from a confirmed match.');
+                const activeNeg = await this.getActiveNegotiationForMatch(matchId);
+                if (activeNeg) {
+                    throw new Error('Negotiation is still open. Agree to terms before creating a deal workspace.');
+                }
+                if (applicationId) {
+                    const appNegs = await this.getNegotiationsByApplicationId(applicationId);
+                    const activeAppNeg = (appNegs || []).find(n => isActiveNegotiation(n));
+                    if (activeAppNeg) {
+                        throw new Error('Negotiation is still open. Agree to terms before creating a deal workspace.');
+                    }
+                }
+                throw new Error('A deal can only be created from a confirmed match. Accept the match before creating a deal.');
             }
         }
 
@@ -3791,7 +3803,10 @@ class DataService {
             }
         }
         if (negotiation.applicationId) {
-            await this.updateApplication(negotiation.applicationId, { negotiationId: negotiation.id });
+            await this.updateApplication(negotiation.applicationId, {
+                negotiationId: negotiation.id,
+                status: CONFIG.APPLICATION_STATUS.IN_NEGOTIATION
+            });
         }
     }
 
@@ -3934,13 +3949,26 @@ class DataService {
 
         const existingList = await this.getNegotiationsByApplicationId(applicationId);
         const existing = (existingList || []).find(n => isActiveNegotiation(n));
-        if (existing) return existing;
+        if (existing) {
+            await this.updateApplication(applicationId, {
+                negotiationId: existing.id,
+                status: CONFIG.APPLICATION_STATUS.IN_NEGOTIATION
+            });
+            return existing;
+        }
 
         if (application.matchId) {
-            return this.startNegotiationFromMatch(application.matchId, actorUserId, {
+            const neg = await this.startNegotiationFromMatch(application.matchId, actorUserId, {
                 applicationId,
                 opportunityId: application.opportunityId
             });
+            if (neg && !isApplicationInNegotiation(application, neg)) {
+                await this.updateApplication(applicationId, {
+                    negotiationId: neg.id,
+                    status: CONFIG.APPLICATION_STATUS.IN_NEGOTIATION
+                });
+            }
+            return neg;
         }
 
         const parties = [];
@@ -3959,7 +3987,10 @@ class DataService {
             rounds: []
         });
 
-        await this.updateApplication(applicationId, { negotiationId: negotiation.id });
+        await this.updateApplication(applicationId, {
+            negotiationId: negotiation.id,
+            status: CONFIG.APPLICATION_STATUS.IN_NEGOTIATION
+        });
 
         if (opp && (opp.status || '') === CONFIG.OPPORTUNITY_STATUS.PUBLISHED) {
             await this.updateOpportunity(application.opportunityId, { status: CONFIG.OPPORTUNITY_STATUS.IN_NEGOTIATION });

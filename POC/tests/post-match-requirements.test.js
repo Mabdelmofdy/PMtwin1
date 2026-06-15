@@ -204,6 +204,18 @@ describe('6–7. Deal creation requires confirmed post_match', () => {
             .rejects.toThrow(/confirmed match/i);
     });
 
+    it('6b. pending match with open negotiation explains negotiation is still open', async () => {
+        ds.storage.set(CONFIG.STORAGE_KEYS.NEGOTIATIONS, [{
+            id: 'neg-open',
+            matchId: 'pm-pending',
+            status: CONFIG.MATCHING.NEGOTIATION.STATUS.OPEN,
+            parties: [{ userId: 'u1', role: 'need_owner' }],
+            rounds: []
+        }]);
+        await expect(ds.assertDealCreationSource({ matchId: 'pm-pending' }))
+            .rejects.toThrow(/negotiation is still open/i);
+    });
+
     it('7. confirmed match allows deal creation', async () => {
         await expect(ds.assertDealCreationSource({ matchId: 'pm-confirmed' }))
             .resolves.toBeUndefined();

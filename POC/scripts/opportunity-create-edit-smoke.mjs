@@ -349,7 +349,7 @@ async function runValidationSuite(page) {
         await ensureCategorySubmodel(p);
         await forceGoToStep(p, 4);
         await setField(p, 'duration', '-3');
-    }, 'profit-duration', '1 day');
+    }, 'duration', '1 day');
 
     await runValidationScenario(page, 'invalid-date-range', async (p) => {
         await forceGoToStep(p, 2);

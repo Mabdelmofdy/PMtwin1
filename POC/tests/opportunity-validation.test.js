@@ -16,6 +16,11 @@ describe('opportunity-validation', () => {
         expect(result.fieldErrors.durationDays).toBeTruthy();
     });
 
+    it('ignores non-numeric duration values (e.g. profit-sharing terms)', () => {
+        const result = validateOpportunityForm({ durationDays: 'project' });
+        expect(result.isValid).toBe(true);
+    });
+
     it('blocks invalid budget ranges', () => {
         const resultNegative = validateOpportunityForm({ budgetMin: -1, budgetMax: 10 });
         expect(resultNegative.isValid).toBe(false);

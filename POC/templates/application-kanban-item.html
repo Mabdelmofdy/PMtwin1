@@ -37,6 +37,12 @@
     <div class="kanban-item-footer">
         <span class="kanban-item-footer-hint"><i class="ph-duotone ph-arrow-square-out" aria-hidden="true"></i><span>Open listing</span></span>
         <div class="kanban-item-footer-actions">
+            {{#if showNegotiationLink}}
+            <button type="button" class="btn btn-outline btn-sm kanban-item-action" data-negotiation-route="{{negotiationRoute}}" title="{{negotiationStatusLabel}}">Open negotiation</button>
+            {{/if}}
+            {{#if showCreateDealLink}}
+            <button type="button" class="btn btn-primary btn-sm kanban-item-action" data-create-deal-negotiation="{{negotiationId}}">Create deal</button>
+            {{/if}}
             {{#if showWithdraw}}
             <button type="button" class="kanban-btn-withdraw kanban-item-action" data-id="{{id}}">Withdraw</button>
             {{/if}}

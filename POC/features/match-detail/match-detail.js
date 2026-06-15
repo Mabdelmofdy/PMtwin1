@@ -284,6 +284,11 @@ async function renderMatchDetail(postMatch, currentUserId) {
         btnNegotiation.disabled = !showNeg;
         const negAction = (vm?.availableActions || []).find(a => a.id === 'negotiate');
         if (negAction?.label) btnNegotiation.textContent = negAction.label;
+        if (vm?.hasActiveNegotiation && vm?.negotiationId) {
+            btnNegotiation.dataset.negotiationRoute = '/negotiations/' + vm.negotiationId;
+        } else {
+            delete btnNegotiation.dataset.negotiationRoute;
+        }
     }
     const btnCreateDeal = actionsEl.querySelector('#btn-create-deal-match');
     if (btnCreateDeal) {
@@ -461,6 +466,16 @@ async function renderMatchNegotiationSection(vm, postMatch, currentUserId) {
 
     const showPanel = !!(negotiation || vm?.hasActiveNegotiation || vm?.hasAgreedNegotiation);
     panel.style.display = showPanel ? '' : 'none';
+    const linkOpenDetails = document.getElementById('link-open-negotiation-details');
+    if (linkOpenDetails) {
+        if (negotiation?.id) {
+            linkOpenDetails.style.display = '';
+            linkOpenDetails.setAttribute('data-route', '/negotiations/' + negotiation.id);
+        } else {
+            linkOpenDetails.style.display = 'none';
+            linkOpenDetails.removeAttribute('data-route');
+        }
+    }
     if (!negotiation) {
         body.innerHTML = '<p class="text-gray-500">No negotiation yet. Use <strong>Start Negotiation</strong> in Next Actions.</p>';
         return;
@@ -545,7 +560,14 @@ async function renderMatchNegotiationSection(vm, postMatch, currentUserId) {
     });
 
     bind('#btn-negotiation-cancel', async () => {
-        if (!confirm('Cancel this negotiation?')) return;
+        const ok = window.modalService
+            ? await window.modalService.confirm(
+                'Are you sure you want to cancel this negotiation?',
+                'Cancel negotiation',
+                { confirmText: 'Yes, cancel', cancelText: 'Keep negotiating', type: 'warning' }
+            )
+            : window.confirm('Cancel this negotiation?');
+        if (!ok) return;
         try {
             await dataService.cancelNegotiation(negotiation.id, currentUserId);
             const match = await dataService.getPostMatchById(postMatch.id);
@@ -853,10 +875,22 @@ function renderMatchDetailLifecycleSections(vm, postMatch) {
     if (vm?.hasNegotiation) {
         negHtml = '<p><span class="badge badge--info">' + escapeHtml(vm.negotiationStatusLabel || getNegotiationLabel(vm.negotiationStatus)) + '</span></p>';
         if (vm.hasActiveNegotiation) {
-            negHtml += '<p class="text-gray-600 mt-1"><a href="#" data-route="/matches/' + escapeHtml(vm.id) + '?section=negotiation" class="text-primary font-medium">Continue in Value Negotiation</a></p>';
+            const negRoute = vm.negotiationId
+                ? '/negotiations/' + escapeHtml(vm.negotiationId)
+                : '/matches/' + escapeHtml(vm.id) + '?section=negotiation';
+            negHtml += '<p class="text-gray-600 mt-1"><a href="#" data-route="' + negRoute + '" class="btn btn-outline btn-sm">Open negotiation</a></p>';
         } else if (vm.hasAgreedNegotiation && !vm.dealId) {
-            negHtml += '<p class="text-gray-600 mt-1">Ready to create deal workspace.</p>';
+            negHtml += '<p class="text-gray-600 mt-1">Terms agreed — create your deal workspace.</p>';
+            if (vm.negotiationId) {
+                negHtml += '<button type="button" class="btn btn-primary btn-sm mt-1" id="btn-progress-create-deal-negotiation" data-negotiation-id="'
+                    + escapeHtml(vm.negotiationId) + '">Create Deal</button>';
+            }
         }
+    }
+
+    const nestNegotiationUnderApplication = !!(vm?.hasApplication && vm?.hasNegotiation);
+    if (nestNegotiationUnderApplication && appHtml) {
+        appHtml += '<div class="mt-2 pl-2 border-l-2 border-gray-200 application-negotiation-nested">' + negHtml + '</div>';
     }
 
     let replHtml = '';
@@ -867,7 +901,7 @@ function renderMatchDetailLifecycleSections(vm, postMatch) {
 
     setBlock('match-detail-invitation-wrap', 'match-detail-invitation-body', !!(vm?.hasInvitation), invHtml);
     setBlock('match-detail-application-wrap', 'match-detail-application-body', !!(vm?.hasApplication), appHtml);
-    setBlock('match-detail-negotiation-wrap', 'match-detail-negotiation-body', !!(vm?.hasNegotiation), negHtml);
+    setBlock('match-detail-negotiation-wrap', 'match-detail-negotiation-body', !!(vm?.hasNegotiation && !nestNegotiationUnderApplication), negHtml);
     setBlock('match-detail-replacement-wrap', 'match-detail-replacement-body', !!(vm?.replacementEligible && replHtml), replHtml);
     setBlock('match-detail-deal-wrap', 'match-detail-deal-body', !!(vm?.dealId), dealHtml);
 
@@ -1038,6 +1072,26 @@ function setupMatchDetailActions(matchId, userId) {
         const startNegBtn = e.target.closest('#btn-start-negotiation');
         const createDealMatchBtn = e.target.closest('#btn-create-deal-match');
         const createDealNegBtn = e.target.closest('#btn-create-deal-negotiation');
+        const progressCreateDealBtn = e.target.closest('#btn-progress-create-deal-negotiation');
+        if (progressCreateDealBtn) {
+            e.preventDefault();
+            progressCreateDealBtn.disabled = true;
+            try {
+                const negId = progressCreateDealBtn.getAttribute('data-negotiation-id');
+                if (!negId) throw new Error('No agreed negotiation found.');
+                const deal = await dataService.createDealFromNegotiation(negId, userId);
+                if (deal && window.router?.navigate) window.router.navigate('/deals/' + deal.id);
+                else {
+                    const match = await dataService.getPostMatchById(matchId);
+                    if (match) await renderMatchDetail(match, userId);
+                }
+            } catch (err) {
+                console.error('[match-detail] Create deal from negotiation (progress) failed:', { matchId, userId, err });
+                setMatchActionFeedback((err && err.message) ? err.message : 'Could not create deal.', 'danger');
+            }
+            progressCreateDealBtn.disabled = false;
+            return;
+        }
         if (createDealMatchBtn) {
             e.preventDefault();
             createDealMatchBtn.disabled = true;
@@ -1105,6 +1159,11 @@ function setupMatchDetailActions(matchId, userId) {
         }
         if (startNegBtn) {
             e.preventDefault();
+            const negRoute = startNegBtn.dataset.negotiationRoute;
+            if (negRoute && window.router?.navigate) {
+                window.router.navigate(negRoute);
+                return;
+            }
             startNegBtn.disabled = true;
             try {
                 const matchForNeg = await dataService.getPostMatchById(matchId);

@@ -33,9 +33,11 @@
             P().assertPositive(cashAmountNum, 'cashAmount', 'Cash Amount', ctx);
         }
 
-        const durationNum = P().toNumber(state.durationDays);
-        if (state.durationDays !== undefined || state.duration !== undefined) {
-            if (durationNum === null || Number.isNaN(durationNum) || durationNum < 1) {
+        const durationRaw = state.durationDays ?? state.duration;
+        if (durationRaw !== undefined && durationRaw !== '') {
+            const durationNum = P().toNumber(durationRaw);
+            // Only validate numeric day-count fields; categorical durations (e.g. profit-sharing terms) are validated elsewhere.
+            if (Number.isFinite(durationNum) && durationNum < 1) {
                 ctx.addFieldError('durationDays', 'Duration must be at least 1 day.');
             }
         }

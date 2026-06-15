@@ -2367,6 +2367,29 @@ function collectTaskBids() {
     return bids;
 }
 
+function buildApplicationNegotiationHtml(app) {
+    const isInNeg = window.applicationUtils && typeof window.applicationUtils.isApplicationInNegotiation === 'function'
+        ? window.applicationUtils.isApplicationInNegotiation(app, app.negotiation)
+        : (app.status === 'in_negotiation' || !!app.negotiationId);
+    if (!isInNeg) return '';
+
+    const nlc = window.negotiationLifecycle;
+    const negStatus = (app.negotiation && app.negotiation.status) || 'open';
+    const statusLabel = nlc && typeof nlc.getNegotiationStatusLabel === 'function'
+        ? nlc.getNegotiationStatusLabel(negStatus)
+        : 'In negotiation';
+    const negId = app.negotiationId || (app.negotiation && app.negotiation.id);
+    const linkHtml = negId
+        ? `<a href="#" data-route="/negotiations/${escapeHtml(negId)}" class="btn btn-outline btn-sm mt-2">Open negotiation</a>`
+        : '';
+
+    return `<div class="application-negotiation-subsection mt-2 p-2 border border-gray-200 rounded bg-gray-50">
+        <p class="text-xs font-semibold text-gray-700 mb-1">Negotiation</p>
+        <span class="badge badge-info">${escapeHtml(statusLabel)}</span>
+        ${linkHtml}
+    </div>`;
+}
+
 async function loadApplications(opportunityId, options = {}) {
     const applicationsList = document.getElementById('applications-list');
     const applicationsCount = document.getElementById('applications-count');
@@ -2390,11 +2413,20 @@ async function loadApplications(opportunityId, options = {}) {
             return;
         }
         
-        // Load applicant info
+        // Load applicant info and linked negotiations
         const applicationsWithUsers = await Promise.all(
             opportunityApplications.map(async (app) => {
                 const applicant = await dataService.getUserOrCompanyById(app.applicantId);
-                return { ...app, applicant };
+                let negotiation = null;
+                if (app.negotiationId && typeof dataService.getNegotiationById === 'function') {
+                    negotiation = await dataService.getNegotiationById(app.negotiationId);
+                } else if (typeof dataService.getNegotiationsByApplicationId === 'function') {
+                    const byApp = await dataService.getNegotiationsByApplicationId(app.id);
+                    negotiation = (byApp || []).sort((a, b) =>
+                        new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0)
+                    )[0] || null;
+                }
+                return { ...app, applicant, negotiation };
             })
         );
         
@@ -2430,7 +2462,7 @@ async function loadApplications(opportunityId, options = {}) {
                 actionsHtml += `<button type="button" class="btn btn-danger btn-sm btn-reject-application" data-application-id="${escapeHtml(app.id)}">Reject</button>`;
             }
             actionsHtml += '</div>';
-            const negotiationLine = app.status === 'in_negotiation' ? '<p class="text-xs text-gray-500 mt-1">Negotiation: In progress</p>' : '';
+            const negotiationLine = buildApplicationNegotiationHtml(app);
             const vs = app.applicant?.profile?.verificationStatus;
             const verificationBadge = vs === 'professional_verified' ? '<span class="badge badge-success verification-badge ml-1">Verified Professional</span>' : vs === 'consultant_verified' ? '<span class="badge badge-success verification-badge ml-1">Verified Consultant</span>' : vs === 'company_verified' ? '<span class="badge badge-success verification-badge ml-1">Verified Company</span>' : '';
             const av = app.application_value;
@@ -2485,7 +2517,16 @@ async function loadApplications(opportunityId, options = {}) {
                 const newStatus = select.value;
                 if (!applicationId || !newStatus) return;
                 try {
-                    await dataService.updateApplication(applicationId, { status: newStatus });
+                    if (newStatus === 'in_negotiation') {
+                        const user = authService.getCurrentUser();
+                        if (user && typeof dataService.startNegotiationFromApplication === 'function') {
+                            await dataService.startNegotiationFromApplication(applicationId, user.id);
+                        } else {
+                            await dataService.updateApplication(applicationId, { status: newStatus });
+                        }
+                    } else {
+                        await dataService.updateApplication(applicationId, { status: newStatus });
+                    }
                     await loadApplications(opportunityId, { manage: canManage });
                     if (newStatus === 'in_negotiation' && applicantId) {
                         await ensureConnectionAndOpenChat(applicantId);
@@ -3219,7 +3260,11 @@ function setupApplicationDetailActions(container, applicationId, applicantId, cu
                 if (typeof modalService !== 'undefined') modalService.close();
                 if (typeof router !== 'undefined' && router.navigate) router.navigate('/people/' + appApplicantId);
             } else if (action === 'reject' && actionable && appId) {
-                if (!confirm('Reject this application? The applicant will be notified.')) return;
+                const ok = await confirmApplicationAction(
+                    'Reject this application? The applicant will be notified.',
+                    { title: 'Reject application', confirmText: 'Reject', cancelText: 'Cancel', type: 'warning' }
+                );
+                if (!ok) return;
                 try {
                     await dataService.updateApplication(appId, { status: 'rejected' });
                     await dataService.createNotification({
@@ -3347,12 +3392,39 @@ async function ensureConnectionAndOpenChat(applicantId) {
     }
 }
 
+async function showOpportunityError(message, title = 'Unable to continue') {
+    if (window.modalService && typeof window.modalService.error === 'function') {
+        await window.modalService.error(message, title);
+    } else {
+        alert(message);
+    }
+}
+
+async function confirmApplicationAction(message, options = {}) {
+    const {
+        title = 'Confirmation',
+        confirmText = 'Confirm',
+        cancelText = 'Cancel',
+        type = 'info'
+    } = options;
+    if (window.modalService && typeof window.modalService.confirm === 'function') {
+        return window.modalService.confirm(message, title, { confirmText, cancelText, type });
+    }
+    return window.confirm(message);
+}
+
 async function updateApplicationStatus(applicationId, status) {
     const confirmMsg =
         status === 'accepted'
             ? 'Accept this application and create a draft Deal Workspace for this collaboration?'
             : `Are you sure you want to ${status} this application?`;
-    if (!confirm(confirmMsg)) return;
+    const ok = await confirmApplicationAction(confirmMsg, {
+        title: status === 'accepted' ? 'Accept application' : 'Update application',
+        confirmText: status === 'accepted' ? 'Accept & create deal' : 'Confirm',
+        cancelText: 'Cancel',
+        type: status === 'accepted' ? 'info' : 'warning'
+    });
+    if (!ok) return;
     
     try {
         await dataService.updateApplication(applicationId, { status });
@@ -3389,7 +3461,9 @@ async function updateApplicationStatus(applicationId, status) {
         await loadApplications(currentOpportunity.id);
     } catch (error) {
         console.error('Error updating application status:', error);
-        alert((error && error.message) ? error.message : 'Failed to update application status.');
+        const msg = (error && error.message) ? error.message : 'Failed to update application status.';
+        const title = /negotiation is still open/i.test(msg) ? 'Negotiation in progress' : 'Cannot create deal';
+        await showOpportunityError(msg, title);
     }
 }
 

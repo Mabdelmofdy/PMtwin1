@@ -284,6 +284,8 @@ async function displayRecentApplications(applications) {
         const matchHtml = valueScorePct != null
             ? `<span class="dash-match-pill">${valueScorePct}% compatibility</span>`
             : '';
+        const reviewRoute = getApplicantApplicationReviewRoute(app);
+        const reviewLabel = status === 'in_negotiation' ? 'Open negotiation' : 'Review application';
         return `<article class="dash-recent-app">
             <div class="dash-recent-app-main">
                 <h3 class="dash-recent-app-title">${escDash(oppTitle)}</h3>
@@ -294,7 +296,7 @@ async function displayRecentApplications(applications) {
                 <div class="dash-recent-app-meta">${escDash(dateStr)}</div>
             </div>
             <div class="dash-recent-app-actions">
-                <a href="#" data-route="/pipeline/applications" class="btn btn-primary btn-sm">Review application</a>
+                <a href="#" data-route="${escDash(reviewRoute)}" class="btn btn-primary btn-sm">${escDash(reviewLabel)}</a>
             </div>
         </article>`;
     }).join('');
@@ -1047,17 +1049,19 @@ async function loadApplicationsReceived(userId) {
                 pending: 1,
                 reviewing: 2,
                 shortlisted: 3,
-                accepted: 4,
-                rejected: 5,
-                withdrawn: 6
+                in_negotiation: 4,
+                accepted: 5,
+                rejected: 6,
+                withdrawn: 7
             };
             const priorityRank = {
-                shortlisted: 1,
-                reviewing: 2,
-                pending: 3,
-                accepted: 4,
-                rejected: 5,
-                withdrawn: 6
+                in_negotiation: 1,
+                shortlisted: 2,
+                reviewing: 3,
+                pending: 4,
+                accepted: 5,
+                rejected: 6,
+                withdrawn: 7
             };
             let visible = enriched.filter(app => statusFilter === 'all' || normalizeApplicationStatus(app.status) === statusFilter);
             visible = visible.sort((a, b) => {
@@ -1083,6 +1087,8 @@ async function loadApplicationsReceived(userId) {
                 const statusBadgeClass = sb ? sb.getStatusBadgeClass(status, 'application') : 'badge--neutral';
                 const statusText = sb ? sb.getStatusLabel(status, 'application') : formatApplicationStatus(status);
                 const formattedDate = formatDashboardDate(app.createdAt);
+                const reviewRoute = getOwnerApplicationReviewRoute(app);
+                const reviewLabel = status === 'in_negotiation' ? 'Open negotiation' : 'Review';
                 return `<div class="company-compact-item applications-item">
                     <div class="company-avatar company-avatar--soft">${escDash((app.applicantName || '?')[0])}</div>
                     <div class="company-compact-main">
@@ -1094,7 +1100,7 @@ async function loadApplicationsReceived(userId) {
                         <div class="company-compact-meta company-project-title">${escDash(app.opportunityTitle)}</div>
                         <div class="company-compact-date">${formattedDate}</div>
                     </div>
-                    <a href="#" data-route="/pipeline" class="company-review-link">Review</a>
+                    <a href="#" data-route="${escDash(reviewRoute)}" class="company-review-link">${escDash(reviewLabel)}</a>
                 </div>`;
             }).join('');
         };
@@ -1110,6 +1116,28 @@ async function loadApplicationsReceived(userId) {
 
 function normalizeApplicationStatus(status) {
     return String(status || 'pending').toLowerCase();
+}
+
+function getApplicantApplicationReviewRoute(app) {
+    const status = normalizeApplicationStatus(app.status);
+    if (status === 'in_negotiation' && app.negotiationId) {
+        return `/negotiations/${app.negotiationId}`;
+    }
+    if (status === 'in_negotiation') {
+        return '/pipeline/applications?stage=in_negotiation';
+    }
+    return '/pipeline/applications';
+}
+
+function getOwnerApplicationReviewRoute(app) {
+    const status = normalizeApplicationStatus(app.status);
+    if (status === 'in_negotiation' && app.negotiationId) {
+        return `/negotiations/${app.negotiationId}`;
+    }
+    if (app.opportunityId) {
+        return `/opportunities/${app.opportunityId}`;
+    }
+    return '/pipeline';
 }
 
 function formatApplicationStatus(status) {

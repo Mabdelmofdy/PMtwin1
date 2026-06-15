@@ -31,6 +31,15 @@ function editSetLocationsData(data) {
     window.opportunityFormData.locationsData = data;
 }
 
+function pickNumericDurationDays(...candidates) {
+    for (const raw of candidates) {
+        if (raw === undefined || raw === null || raw === '') continue;
+        const num = Number(raw);
+        if (Number.isFinite(num)) return raw;
+    }
+    return undefined;
+}
+
 async function initOpportunityEdit(params) {
     const opportunityId = params?.id;
     
@@ -1276,7 +1285,7 @@ function editSetupFormHandlers() {
                     || document.getElementById('equity-percentage')?.value
                     || formData.equityPercentage,
                 profitSharePercentage: document.getElementById('profit-share-percentage')?.value,
-                durationDays: formData.durationDays || formData.duration,
+                durationDays: pickNumericDurationDays(formData.durationDays, formData.duration),
                 startDate: document.getElementById('attr-startDate')?.value?.trim(),
                 endDate: document.getElementById('attr-endDate')?.value?.trim(),
                 applicationDeadline: document.getElementById('attr-applicationDeadline')?.value?.trim(),

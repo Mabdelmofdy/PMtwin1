@@ -359,15 +359,18 @@
         }
 
         if (!expired && status !== 'declined' && status !== 'expired' && !vm.dealId && !vm.negotiationCancelled) {
-            if (vm.hasActiveNegotiation) {
-                push('negotiate', 'Continue Negotiation', 'secondary', '/matches/' + vm.id + '?section=negotiation', true);
+            if (vm.hasActiveNegotiation && vm.negotiationId) {
+                push('negotiate', 'Open negotiation', 'secondary', '/negotiations/' + vm.negotiationId, true);
             } else if (!vm.hasAgreedNegotiation) {
                 push('negotiate', 'Start Negotiation', 'secondary', '/matches/' + vm.id + '?section=negotiation', true);
             }
         }
 
         if (vm.hasAgreedNegotiation && !vm.dealId && !expired) {
-            push('create_deal_from_negotiation', 'Create Deal', 'primary', '/matches/' + vm.id + '?section=negotiation', true);
+            const dealRoute = vm.negotiationId
+                ? '/negotiations/' + vm.negotiationId
+                : '/matches/' + vm.id + '?section=negotiation';
+            push('create_deal_from_negotiation', 'Create Deal', 'primary', dealRoute, true);
         }
 
         if (!expired && vm.canInviteToApply && !vm.hasActiveInvitation) {
@@ -410,7 +413,7 @@
             return 'Suggest a replacement provider for the owner to review.';
         }
         if (vm.hasAgreedNegotiation && !vm.dealId) return 'Terms agreed — create your deal workspace.';
-        if (vm.hasActiveNegotiation) return 'Continue negotiation on terms.';
+        if (vm.hasActiveNegotiation) return 'Open negotiation to discuss terms.';
         if (vm.negotiationCancelled) return 'Negotiation was cancelled. You can start again when ready.';
         if (vm.canRespond) return 'Review this match and accept or decline.';
         if (vm.status === 'confirmed' && !vm.dealId) return 'All participants accepted — use Start Deal';
@@ -601,9 +604,6 @@
             && userCanInviteToApply(match, currentUserId, vm.internalMatchType);
 
         vm.messageRoute = resolveMatchMessageRoute(match.participants, currentUserId);
-        if (vm.messageRoute) {
-            vm.negotiationRoute = vm.messageRoute;
-        }
 
         if (vm.sourceType === 'legacy_match') {
             await enrichLegacyCard(vm, match, currentUserId, ds, opportunitiesById);
@@ -676,6 +676,10 @@
                 vm.negotiationId = negotiation.id;
                 vm.negotiationStatus = negotiation.status;
                 vm.hasNegotiation = true;
+                if (negotiation.applicationId && !vm.applicationId) {
+                    vm.applicationId = negotiation.applicationId;
+                    vm.hasApplication = true;
+                }
                 const nlc = global.negotiationLifecycle;
                 const status = (negotiation.status || '').toLowerCase();
                 vm.hasActiveNegotiation = nlc
@@ -686,9 +690,7 @@
                 vm.negotiationStatusLabel = nlc
                     ? nlc.getNegotiationStatusLabel(status)
                     : (vm.hasAgreedNegotiation ? 'Terms Agreed' : 'Negotiation Open');
-                if (vm.hasActiveNegotiation || vm.hasAgreedNegotiation) {
-                    vm.negotiationRoute = '/matches/' + vm.id + '?section=negotiation';
-                }
+                vm.negotiationRoute = '/negotiations/' + negotiation.id;
             }
         }
 

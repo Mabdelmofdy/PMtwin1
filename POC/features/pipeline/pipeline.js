@@ -43,6 +43,13 @@ const APPLICATION_STAGE_KEYS = APPLICATION_STAGE_NAV.map(s => s.key);
 let pipelineApplicationBuckets = null;
 let pipelineSelectedAppStage = 'pending';
 
+function isAppInNegotiationBucket(app) {
+    if (window.applicationUtils && typeof window.applicationUtils.isApplicationInNegotiation === 'function') {
+        return window.applicationUtils.isApplicationInNegotiation(app, app.negotiation);
+    }
+    return (app.status || '') === 'in_negotiation';
+}
+
 const APP_PIPELINE_STATUS_LABELS = {
     pending: 'Pending',
     reviewing: 'Reviewing',
@@ -105,7 +112,7 @@ function updatePipelineOpportunityStats(draft, published, inProgress, closed) {
 function updatePipelineApplicationStats(appsWithOpps) {
     const total = appsWithOpps.length;
     const open = appsWithOpps.filter(a =>
-        ['pending', 'reviewing', 'shortlisted', 'in_negotiation'].includes(a.status)
+        ['pending', 'reviewing', 'shortlisted'].includes(a.status) || isAppInNegotiationBucket(a)
     ).length;
     const terminal = appsWithOpps.filter(a =>
         a.status === 'accepted' || a.status === 'rejected' || a.status === 'withdrawn'
@@ -225,6 +232,19 @@ async function renderApplicationCardsInto(container, items) {
             ? getIntentBadgeClass(intent, item.opportunity?.modelType)
             : (intent === 'offer' ? 'badge-info' : 'badge-primary');
         const showWithdraw = ['pending', 'reviewing', 'shortlisted'].includes(item.status);
+        const inNegotiation = isAppInNegotiationBucket(item);
+        const negId = item.negotiationId || (item.negotiation && item.negotiation.id);
+        const nlc = window.negotiationLifecycle;
+        const negStatus = ((item.negotiation && item.negotiation.status) || 'open').toLowerCase();
+        const negotiationStatusLabel = nlc && typeof nlc.getNegotiationStatusLabel === 'function'
+            ? nlc.getNegotiationStatusLabel(negStatus)
+            : 'In negotiation';
+        const isNegActive = nlc
+            ? nlc.isActiveNegotiation(item.negotiation || { status: negStatus })
+            : ['open', 'counter_offered'].includes(negStatus);
+        const isNegAgreed = negStatus === 'agreed';
+        const showNegotiationLink = !!negId && (inNegotiation || isNegActive || isNegAgreed);
+        const showCreateDealLink = !!negId && isNegAgreed && !item.dealId;
         const opp = item.opportunity || {};
         const titleFull = opp.title || 'Unknown Opportunity';
         const loc = (opp.location || opp.locationCity || opp.locationRegion || '').trim();
@@ -250,7 +270,12 @@ async function renderApplicationCardsInto(container, items) {
             createdDate: new Date(item.createdAt).toLocaleDateString(),
             intentLabel,
             intentBadgeClass,
-            showWithdraw
+            showWithdraw,
+            showNegotiationLink,
+            showCreateDealLink,
+            negotiationId: negId || '',
+            negotiationRoute: negId ? '/negotiations/' + negId : '',
+            negotiationStatusLabel
         };
         return templateRenderer.render(template, data);
     }).join('');
@@ -273,6 +298,39 @@ async function renderApplicationCardsInto(container, items) {
             if (application && application.opportunity) {
                 router.navigate(`/opportunities/${application.opportunity.id}`);
             }
+        });
+    });
+    container.querySelectorAll('[data-negotiation-route]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const route = btn.getAttribute('data-negotiation-route');
+            if (route) router.navigate(route);
+        });
+    });
+    container.querySelectorAll('[data-create-deal-negotiation]').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const negId = btn.getAttribute('data-create-deal-negotiation');
+            const user = authService.getCurrentUser();
+            if (!negId || !user) return;
+            btn.disabled = true;
+            try {
+                const deal = await dataService.createDealFromNegotiation(negId, user.id);
+                if (deal && window.router?.navigate) {
+                    window.router.navigate('/deals/' + deal.id);
+                } else {
+                    await loadApplicationsPipeline();
+                }
+            } catch (err) {
+                console.error('[pipeline] Create deal from negotiation failed:', err);
+                const msg = (err && err.message) ? err.message : 'Could not create deal.';
+                if (window.modalService?.error) {
+                    await window.modalService.error(msg, 'Cannot create deal');
+                } else {
+                    alert(msg);
+                }
+            }
+            btn.disabled = false;
         });
     });
     container.querySelectorAll('.kanban-btn-withdraw').forEach(btn => {
@@ -610,7 +668,25 @@ async function initPipeline(params = {}) {
     setupTabs();
     setupIntentSegment('tab-opportunities');
     setupIntentSegment('tab-applications');
-    initApplicationStageFromStorage();
+
+    const stageFromParams = params.stage;
+    const stageFromQuery = (() => {
+        try {
+            const query = window.router && typeof window.router.getHashQueryString === 'function'
+                ? window.router.getHashQueryString()
+                : '';
+            return new URLSearchParams(query.startsWith('?') ? query.substring(1) : query).get('stage');
+        } catch (e) {
+            return null;
+        }
+    })();
+    const stage = stageFromParams || stageFromQuery;
+    if (stage && APPLICATION_STAGE_KEYS.includes(stage)) {
+        setStoredApplicationStage(stage);
+    } else {
+        initApplicationStageFromStorage();
+    }
+
     initOpportunityStageFromStorage();
     setupApplicationStageNav();
     setupApplicationSidebarDropZones();
@@ -739,7 +815,11 @@ async function loadApplicationsPipeline() {
         let appsWithOpps = await Promise.all(
             userApplications.map(async (app) => {
                 const opportunity = await dataService.getOpportunityById(app.opportunityId);
-                return { ...app, opportunity };
+                let negotiation = null;
+                if (app.negotiationId && typeof dataService.getNegotiationById === 'function') {
+                    negotiation = await dataService.getNegotiationById(app.negotiationId);
+                }
+                return { ...app, opportunity, negotiation };
             })
         );
 
@@ -751,10 +831,10 @@ async function loadApplicationsPipeline() {
         updatePipelineApplicationStats(appsWithOpps);
 
         const buckets = {
-            pending: appsWithOpps.filter(a => a.status === 'pending'),
-            reviewing: appsWithOpps.filter(a => a.status === 'reviewing'),
-            shortlisted: appsWithOpps.filter(a => a.status === 'shortlisted'),
-            in_negotiation: appsWithOpps.filter(a => a.status === 'in_negotiation'),
+            pending: appsWithOpps.filter(a => a.status === 'pending' && !isAppInNegotiationBucket(a)),
+            reviewing: appsWithOpps.filter(a => a.status === 'reviewing' && !isAppInNegotiationBucket(a)),
+            shortlisted: appsWithOpps.filter(a => a.status === 'shortlisted' && !isAppInNegotiationBucket(a)),
+            in_negotiation: appsWithOpps.filter(a => isAppInNegotiationBucket(a)),
             accepted: appsWithOpps.filter(a => a.status === 'accepted'),
             rejected: appsWithOpps.filter(a => a.status === 'rejected' || a.status === 'withdrawn')
         };
@@ -906,16 +986,50 @@ function setupPipelineMatchListActions() {
         btn.disabled = true;
         try {
             if (action === 'negotiate') {
-                let neg = await dataService.getActiveNegotiationForMatch(matchId);
+                let neg = null;
+                const match = await dataService.getPostMatchById(matchId);
+                if (match?.negotiationId) {
+                    const byId = await dataService.getNegotiationById(match.negotiationId);
+                    const nlc = window.negotiationLifecycle;
+                    const isActive = nlc
+                        ? nlc.isActiveNegotiation(byId)
+                        : ['open', 'counter_offered'].includes((byId?.status || '').toLowerCase());
+                    if (isActive) neg = byId;
+                }
+                if (!neg && typeof dataService.getActiveNegotiationForMatch === 'function') {
+                    neg = await dataService.getActiveNegotiationForMatch(matchId);
+                }
                 if (!neg) {
-                    const match = await dataService.getPostMatchById(matchId);
                     const opportunityId = match && typeof dataService._resolveNegotiationOpportunityId === 'function'
                         ? dataService._resolveNegotiationOpportunityId(match, user.id)
                         : null;
                     neg = await dataService.startNegotiationFromMatch(matchId, user.id, opportunityId ? { opportunityId } : {});
+                    if (!neg?.id) {
+                        const refreshed = await dataService.getPostMatchById(matchId);
+                        if (refreshed?.negotiationId) {
+                            neg = await dataService.getNegotiationById(refreshed.negotiationId);
+                        }
+                    }
                 }
                 if (window.router?.navigate && neg?.id) {
                     window.router.navigate('/negotiations/' + neg.id);
+                }
+                return;
+            }
+            if (action === 'create_deal_from_negotiation') {
+                let negId = null;
+                const match = await dataService.getPostMatchById(matchId);
+                negId = match?.negotiationId || null;
+                if (!negId && typeof dataService.getNegotiationsByMatchId === 'function') {
+                    const list = await dataService.getNegotiationsByMatchId(matchId);
+                    negId = (list || []).find(n => (n.status || '') === 'agreed')?.id || null;
+                }
+                if (!negId) throw new Error('No agreed negotiation found for this match.');
+                const deal = await dataService.createDealFromNegotiation(negId, user.id);
+                if (deal && window.router?.navigate) {
+                    window.router.navigate('/deals/' + deal.id);
+                } else {
+                    await loadPipelineMatchesTabContent();
                 }
                 return;
             }
@@ -947,7 +1061,7 @@ function setupPipelineMatchListActions() {
 
 function renderPipelineMatchActionsHtml(vm, esc) {
     const actions = (vm.availableActions || []).filter(a =>
-        ['accept', 'decline', 'negotiate', 'invite_apply'].includes(a.id) && a.enabled !== false && !vm.isExpired
+        ['accept', 'decline', 'negotiate', 'invite_apply', 'create_deal_from_negotiation'].includes(a.id) && a.enabled !== false && !vm.isExpired
     );
     return actions.map(action =>
         '<button type="button" class="btn btn-sm ' + (action.kind === 'primary' ? 'btn-primary' : 'btn-outline') + '" data-pipeline-action="' + esc(action.id) + '" data-match-id="' + esc(vm.id) + '">' + esc(action.label) + '</button>'

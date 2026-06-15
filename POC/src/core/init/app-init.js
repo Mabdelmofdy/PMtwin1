@@ -131,6 +131,7 @@ loadScript('src/core/config/config.js').then(async () => {
     await loadScript('src/utils/seed-storage-indicator.js');
     await loadScript('src/utils/motion-utils.js');
     await loadScript('src/utils/deal-contract-flow.js');
+    await loadScript('src/utils/applications.js');
     await loadScript('src/utils/post-match-list-actions.js');
     await loadScript('src/utils/admin-readonly-guard.js');
     

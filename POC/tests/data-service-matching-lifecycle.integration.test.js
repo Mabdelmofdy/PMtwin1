@@ -349,3 +349,65 @@ describe('DataService negotiation lifecycle', () => {
             .toEqual(['owner-1', 'provider-1']);
     });
 });
+
+describe('DataService startNegotiationFromApplication', () => {
+    let ds;
+
+    beforeEach(() => {
+        ds = new DataService();
+        ds.storage = createMemoryStorage();
+        ds.storage.initialize({
+            [CONFIG.STORAGE_KEYS.APPLICATIONS]: [],
+            [CONFIG.STORAGE_KEYS.NEGOTIATIONS]: [],
+            [CONFIG.STORAGE_KEYS.NOTIFICATIONS]: [],
+            [CONFIG.STORAGE_KEYS.AUDIT]: []
+        });
+        seedUsers(ds);
+        seedOpportunity(ds);
+    });
+
+    it('sets application status to in_negotiation when negotiation starts', async () => {
+        ds.storage.set(CONFIG.STORAGE_KEYS.APPLICATIONS, [{
+            id: 'app-1',
+            opportunityId: 'opp-1',
+            applicantId: 'provider-1',
+            status: CONFIG.APPLICATION_STATUS.PENDING,
+            proposal: 'My proposal'
+        }]);
+
+        const neg = await ds.startNegotiationFromApplication('app-1', 'owner-1');
+        expect(neg.id).toBeTruthy();
+
+        const app = await ds.getApplicationById('app-1');
+        expect(app.negotiationId).toBe(neg.id);
+        expect(app.status).toBe(CONFIG.APPLICATION_STATUS.IN_NEGOTIATION);
+    });
+
+    it('syncs status when an active negotiation already exists', async () => {
+        ds.storage.set(CONFIG.STORAGE_KEYS.APPLICATIONS, [{
+            id: 'app-1',
+            opportunityId: 'opp-1',
+            applicantId: 'provider-1',
+            status: CONFIG.APPLICATION_STATUS.PENDING,
+            proposal: 'My proposal'
+        }]);
+        ds.storage.set(CONFIG.STORAGE_KEYS.NEGOTIATIONS, [{
+            id: 'neg-existing',
+            applicationId: 'app-1',
+            opportunityId: 'opp-1',
+            status: CONFIG.MATCHING.NEGOTIATION.STATUS.OPEN,
+            parties: [
+                { userId: 'owner-1', role: 'need_owner' },
+                { userId: 'provider-1', role: 'offer_provider' }
+            ],
+            rounds: []
+        }]);
+
+        const neg = await ds.startNegotiationFromApplication('app-1', 'owner-1');
+        expect(neg.id).toBe('neg-existing');
+
+        const app = await ds.getApplicationById('app-1');
+        expect(app.status).toBe(CONFIG.APPLICATION_STATUS.IN_NEGOTIATION);
+        expect(app.negotiationId).toBe('neg-existing');
+    });
+});

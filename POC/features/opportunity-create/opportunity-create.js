@@ -1789,7 +1789,7 @@ function mapValidationKeyToFieldId(key) {
     }
     const map = {
         cashAmount: 'cash-amount',
-        durationDays: 'profit-duration',
+        durationDays: document.getElementById('durationDays') ? 'durationDays' : 'duration',
         budgetMin: 'budgetRange_min',
         budgetMax: 'budgetRange_max',
         equityPercentage: 'equity-percentage',
@@ -1857,6 +1857,16 @@ function setupRealtimeValidationClearing() {
     form.addEventListener('change', handler);
 }
 
+function getNumericDurationDaysFromForm() {
+    for (const id of ['durationDays', 'duration']) {
+        const raw = document.getElementById(id)?.value?.trim();
+        if (!raw) continue;
+        const num = Number(raw);
+        if (Number.isFinite(num)) return raw;
+    }
+    return undefined;
+}
+
 function collectOpportunityValidationState() {
     const mode = document.getElementById('exchange-mode')?.value || '';
     const getVal = (id) => document.getElementById(id)?.value?.trim();
@@ -1864,7 +1874,7 @@ function collectOpportunityValidationState() {
     return {
         exchangeMode: mode,
         cashAmount: getVal('cash-amount'),
-        durationDays: getVal('durationDays') || getVal('duration') || getVal('profit-duration'),
+        durationDays: getNumericDurationDaysFromForm(),
         budgetMin: getVal('budgetRange_min'),
         budgetMax: getVal('budgetRange_max'),
         equityPercentage: getVal('equity-percentage'),

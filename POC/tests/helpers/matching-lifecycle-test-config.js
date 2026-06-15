@@ -17,6 +17,7 @@ export function createTestConfig() {
         },
         APPLICATION_STATUS: {
             PENDING: 'pending',
+            IN_NEGOTIATION: 'in_negotiation',
             ACCEPTED: 'accepted'
         },
         OPPORTUNITY_STATUS: {

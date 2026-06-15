@@ -498,7 +498,14 @@ function bindNegotiationActions(negotiationId, currentUserId) {
     });
 
     bindClick('btn-negotiation-cancel', async () => {
-        if (!confirm('Cancel this negotiation?')) return;
+        const ok = window.modalService
+            ? await window.modalService.confirm(
+                'Are you sure you want to cancel this negotiation?',
+                'Cancel negotiation',
+                { confirmText: 'Yes, cancel', cancelText: 'Keep negotiating', type: 'warning' }
+            )
+            : window.confirm('Cancel this negotiation?');
+        if (!ok) return;
         try {
             await dataService.cancelNegotiation(negotiationId, currentUserId);
             setNegotiationFlash('Negotiation cancelled.', 'info');

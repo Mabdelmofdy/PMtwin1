@@ -176,18 +176,44 @@ function setupMatchesFilters() {
                 if (!matchId || !user) return;
                 negotiate.disabled = true;
                 try {
-                    const existing = await dataService.getActiveNegotiationForMatch(matchId);
-                    if (!existing) {
-                        const match = await dataService.getPostMatchById(matchId);
+                    let negId = null;
+                    const match = await dataService.getPostMatchById(matchId);
+                    if (match?.negotiationId) {
+                        const neg = await dataService.getNegotiationById(match.negotiationId);
+                        const nlc = window.negotiationLifecycle;
+                        const isActive = nlc
+                            ? nlc.isActiveNegotiation(neg)
+                            : ['open', 'counter_offered'].includes((neg?.status || '').toLowerCase());
+                        if (isActive) negId = neg.id;
+                    }
+                    if (!negId && typeof dataService.getActiveNegotiationForMatch === 'function') {
+                        const active = await dataService.getActiveNegotiationForMatch(matchId);
+                        if (active?.id) negId = active.id;
+                    }
+                    if (!negId) {
                         const opportunityId = match && typeof dataService._resolveNegotiationOpportunityId === 'function'
                             ? dataService._resolveNegotiationOpportunityId(match, user.id)
                             : null;
-                        await dataService.startNegotiationFromMatch(matchId, user.id, opportunityId ? { opportunityId } : {});
+                        const started = await dataService.startNegotiationFromMatch(matchId, user.id, opportunityId ? { opportunityId } : {});
+                        negId = started?.id || null;
+                        if (!negId) {
+                            const refreshed = await dataService.getPostMatchById(matchId);
+                            negId = refreshed?.negotiationId || null;
+                        }
                     }
-                    if (window.router?.navigate) window.router.navigate('/matches/' + matchId + '?section=negotiation');
+                    if (negId && window.router?.navigate) {
+                        window.router.navigate('/negotiations/' + negId);
+                    } else {
+                        throw new Error('Could not open negotiation workspace.');
+                    }
                 } catch (err) {
                     console.error('[matches] Start/continue negotiation failed:', { matchId, userId: user.id, err });
-                    alert((err && err.message) ? err.message : 'Could not start negotiation.');
+                    const msg = (err && err.message) ? err.message : 'Could not start negotiation.';
+                    if (window.modalService?.error) {
+                        await window.modalService.error(msg, 'Negotiation');
+                    } else {
+                        alert(msg);
+                    }
                 }
                 negotiate.disabled = false;
                 return;
@@ -254,7 +280,13 @@ function setupMatchesFilters() {
                     }
                 } catch (err) {
                     console.error('[matches] Create deal failed:', { matchId, action, userId: user.id, err });
-                    alert((err && err.message) ? err.message : 'Could not create deal.');
+                    const msg = (err && err.message) ? err.message : 'Could not create deal.';
+                    const title = /negotiation is still open/i.test(msg) ? 'Negotiation in progress' : 'Cannot create deal';
+                    if (window.modalService?.error) {
+                        await window.modalService.error(msg, title);
+                    } else {
+                        alert(msg);
+                    }
                 }
                 createDealBtn.disabled = false;
                 return;
