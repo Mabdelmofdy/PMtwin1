@@ -3,6 +3,32 @@
  */
 import { isActiveNegotiation } from '../services/matching/negotiation-lifecycle.js';
 
+const TERMINAL_OPPORTUNITY_STATUSES = new Set([
+    'contracted', 'in_execution', 'completed', 'closed', 'cancelled', 'draft'
+]);
+
+/**
+ * Whether a user can submit a new application to an opportunity.
+ * @param {object|null|undefined} opportunity
+ * @param {object|null|undefined} user
+ * @param {{ application?: object|null, canReapply?: boolean, hasDeal?: boolean }} [context]
+ */
+export function canUserApplyToOpportunity(opportunity, user, context = {}) {
+    if (!user || !opportunity) return false;
+    if (opportunity.creatorId === user.id) return false;
+    const status = (opportunity.status || '').toLowerCase();
+    if (TERMINAL_OPPORTUNITY_STATUSES.has(status)) return false;
+    if (!['published', 'in_negotiation'].includes(status)) return false;
+    if (context.hasDeal) return false;
+    const application = context.application;
+    if (application) {
+        const appStatus = (application.status || '').toLowerCase();
+        if (context.canReapply && ['rejected', 'withdrawn'].includes(appStatus)) return true;
+        return false;
+    }
+    return true;
+}
+
 /**
  * Whether an application should appear in the "In negotiation" Applications bucket.
  * @param {object|null|undefined} app
@@ -19,6 +45,7 @@ export function isApplicationInNegotiation(app, negotiation = null) {
 
 if (typeof window !== 'undefined') {
     window.applicationUtils = {
-        isApplicationInNegotiation
+        isApplicationInNegotiation,
+        canUserApplyToOpportunity
     };
 }

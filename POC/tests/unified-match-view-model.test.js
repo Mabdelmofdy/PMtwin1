@@ -124,4 +124,53 @@ describe('unified-match-view-model', () => {
         const actions = umv.getAvailableActions(vm);
         expect(actions.some(a => a.id === 'message' && a.route === '/messages/member')).toBe(true);
     });
+
+    it('routes open negotiation action to match detail negotiation section', () => {
+        const vm = umv.buildUnifiedMatchViewModel({
+            id: 'pm-neg',
+            matchType: 'one_way',
+            status: 'pending',
+            matchScore: 0.8,
+            participants: [
+                { userId: 'u1', role: 'need_owner', participantStatus: 'accepted' },
+                { userId: 'u2', role: 'offer_provider', participantStatus: 'accepted' }
+            ],
+            payload: {}
+        }, { currentUserId: 'u1' });
+        vm.hasActiveNegotiation = true;
+        vm.hasAgreedNegotiation = false;
+        vm.negotiationId = 'neg-open-1';
+        vm.negotiationCancelled = false;
+        vm.isExpired = false;
+        const actions = umv.getAvailableActions(vm);
+        const negotiate = actions.find(a => a.id === 'negotiate');
+        expect(negotiate?.label).toBe('Continue in Value Negotiation');
+        expect(negotiate?.route).toBe('/matches/pm-neg?section=negotiation');
+    });
+
+    it('includes Create Deal for agreed negotiation without deal', () => {
+        const vm = umv.buildUnifiedMatchViewModel({
+            id: 'pm-agreed',
+            matchType: 'one_way',
+            status: 'pending',
+            matchScore: 0.8,
+            participants: [
+                { userId: 'u1', role: 'need_owner', participantStatus: 'accepted' },
+                { userId: 'u2', role: 'offer_provider', participantStatus: 'accepted' }
+            ],
+            payload: {}
+        }, { currentUserId: 'u2' });
+        vm.hasActiveNegotiation = false;
+        vm.hasAgreedNegotiation = true;
+        vm.negotiationId = 'neg-agreed-1';
+        vm.negotiationCancelled = false;
+        vm.isExpired = false;
+        vm.dealId = null;
+        const actions = umv.getAvailableActions(vm);
+        expect(actions.some(a =>
+            a.id === 'create_deal_from_negotiation'
+            && a.label === 'Create Deal'
+            && a.route === '/matches/pm-agreed?section=negotiation'
+        )).toBe(true);
+    });
 });

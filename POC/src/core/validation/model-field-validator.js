@@ -4,6 +4,9 @@
 (function (global) {
     const P = () => global.validationPrimitives;
 
+    /** Model attributes collected on Step 6 (value exchange), not Step 5 model details. */
+    const EXCHANGE_DEFERRED_ATTRIBUTE_KEYS = ['paymentTerms', 'exchangeType', 'barterOffer'];
+
     function getModelAttributes(modelKey, subModelKey) {
         const models = global.OPPORTUNITY_MODELS;
         if (!models || !modelKey || !subModelKey) return [];
@@ -27,7 +30,9 @@
 
     function validateModelAttributes(attributes, modelKey, subModelKey, options = {}) {
         const ctx = P().createResult();
-        const schema = getModelAttributes(modelKey, subModelKey);
+        const excludeKeys = new Set(options.excludeKeys || []);
+        const schema = getModelAttributes(modelKey, subModelKey)
+            .filter((field) => !excludeKeys.has(field.key));
         const data = attributes || {};
 
         schema.forEach((field) => {
@@ -35,6 +40,33 @@
             const key = field.key;
             const label = field.label || key;
             const value = data[key];
+
+            if (field.type === 'currency-range') {
+                const range = typeof value === 'object' && value !== null ? value : {};
+                const minRaw = range.min ?? data[`${key}_min`];
+                const maxRaw = range.max ?? data[`${key}_max`];
+                const minEmpty = P().isEmptyValue(minRaw);
+                const maxEmpty = P().isEmptyValue(maxRaw);
+                if (field.required && (minEmpty || maxEmpty)) {
+                    ctx.addFieldError(key, `${label} is required.`);
+                    return;
+                }
+                if (minEmpty && maxEmpty) return;
+
+                const minNum = P().toNumber(minRaw);
+                const maxNum = P().toNumber(maxRaw);
+                if (!minEmpty) {
+                    P().assertNonNegative(minNum, `${key}_min`, `${label} minimum`, ctx);
+                }
+                if (!maxEmpty) {
+                    P().assertNonNegative(maxNum, `${key}_max`, `${label} maximum`, ctx);
+                }
+                if (!minEmpty && !maxEmpty && minNum !== null && maxNum !== null
+                    && !Number.isNaN(minNum) && !Number.isNaN(maxNum) && maxNum < minNum) {
+                    ctx.addFieldError(`${key}_max`, `${label} maximum must be greater than or equal to minimum.`);
+                }
+                return;
+            }
 
             if (field.required && P().isEmptyValue(value)) {
                 ctx.addFieldError(key, `${label} is required.`);
@@ -52,6 +84,8 @@
                     P().assertMin(num, field.min, key, label, ctx);
                 } else if (field.type === 'currency') {
                     P().assertNonNegative(num, key, label, ctx);
+                } else if (field.type === 'number' && /duration/i.test(`${key}${label}`)) {
+                    P().assertMin(num, 1, key, label, ctx);
                 }
             }
 
@@ -98,4 +132,5 @@
     }
 
     global.validateModelAttributes = validateModelAttributes;
+    global.EXCHANGE_DEFERRED_ATTRIBUTE_KEYS = EXCHANGE_DEFERRED_ATTRIBUTE_KEYS;
 })(typeof window !== 'undefined' ? window : globalThis);

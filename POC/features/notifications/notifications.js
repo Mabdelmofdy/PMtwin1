@@ -297,10 +297,10 @@ async function loadNotifications() {
             })
             .join('');
 
-        // Click on card (excluding buttons and title link) navigates and marks read
+        // Click on card navigates and marks read
         container.querySelectorAll('.notification-item[data-route]').forEach(item => {
             item.addEventListener('click', (e) => {
-                if (e.target.closest('button') || e.target.closest('a.notification-link')) return;
+                if (e.target.closest('button')) return;
                 const route = item.getAttribute('data-route');
                 const notifId = item.getAttribute('data-id');
                 if (route) void openNotification(notifId, route);

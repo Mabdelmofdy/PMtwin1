@@ -163,6 +163,26 @@
       "estimatedDurationDays": 45,
       "createdAt": "2026-03-05T10:00:00.000Z",
       "updatedAt": "2026-03-05T10:00:00.000Z"
+    },
+    {
+      "id": "seed-app-010",
+      "opportunityId": "seed-opp-026",
+      "applicantId": "seed-user-002",
+      "status": "in_negotiation",
+      "matchId": "demo-pm-oneway-07",
+      "matchType": "one_way",
+      "negotiationId": "seed-neg-05",
+      "proposal": "Barter counter-offer: CAD production delivery with QA pass in exchange for PM support (~90K SAR equivalent).",
+      "application_value": {
+        "exchangeMode": "barter",
+        "barterValue": 90000,
+        "currency": "SAR"
+      },
+      "responses": {},
+      "availabilityDate": "2026-03-01",
+      "estimatedDurationDays": 42,
+      "createdAt": "2026-03-05T10:00:00.000Z",
+      "updatedAt": "2026-03-08T11:00:00.000Z"
     }
   ]
 }

@@ -361,7 +361,11 @@ async function initContractDetail(params) {
         const opportunity = await dataService.getOpportunityById(contract.opportunityId);
         const partyUsers = await Promise.all(parties.map(p => dataService.getUserOrCompanyById(p.userId)));
         const myParty = parties.find(p => p.userId === user.id);
-        const myRole = (myParty && myParty.role) ? (myParty.role.charAt(0).toUpperCase() + myParty.role.slice(1)) : (isAdminView ? 'Admin (view only)' : 'Participant');
+        const myRole = (myParty && myParty.role)
+            ? (typeof formatParticipantRole === 'function'
+                ? formatParticipantRole(myParty.role, 'Participant')
+                : myParty.role)
+            : (isAdminView ? 'Admin (view only)' : 'Participant');
         const scopeDisplay = contract.scope || (opportunity && opportunity.title) || '—';
 
         loadingEl.style.display = 'none';

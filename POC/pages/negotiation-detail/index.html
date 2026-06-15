@@ -482,6 +482,126 @@
 
 .negotiation-round__deltas strong { color: #7c3aed; }
 
+.negotiation-round--clickable {
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.negotiation-round--clickable:hover,
+.negotiation-round--clickable:focus-visible {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15);
+    outline: none;
+}
+
+.negotiation-round__open-hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #7c3aed;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.negotiation-round__more {
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.negotiation-round-detail-meta {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.875rem;
+}
+
+.negotiation-round-detail-meta p { margin: 0.25rem 0; }
+
+.negotiation-round-detail-role {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.negotiation-round-detail-section {
+    margin-bottom: 1rem;
+}
+
+.negotiation-round-detail-section__title {
+    margin: 0 0 0.35rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #64748b;
+}
+
+.negotiation-round-detail-section__lead {
+    margin: 0 0 0.5rem;
+    font-size: 0.8125rem;
+    color: #94a3b8;
+}
+
+.negotiation-round-detail-dl {
+    margin: 0;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.negotiation-round-detail-dl > div {
+    display: grid;
+    grid-template-columns: minmax(7rem, 38%) 1fr;
+    gap: 0.5rem 0.75rem;
+    padding: 0.45rem 0.6rem;
+    background: #f8fafc;
+    border-radius: 6px;
+    font-size: 0.875rem;
+}
+
+.negotiation-round-detail-dl dt {
+    font-weight: 600;
+    color: #475569;
+}
+
+.negotiation-round-detail-dl dd {
+    margin: 0;
+    color: #0f172a;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.negotiation-round-detail-message {
+    margin: 0;
+    padding: 0.65rem 0.85rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.negotiation-round-detail-deltas {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.875rem;
+}
+
+.negotiation-round-detail-deltas li {
+    padding: 0.35rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.negotiation-round-detail-empty {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #94a3b8;
+}
+
+.modal-dialog--negotiation-round {
+    max-width: min(520px, 92vw);
+}
+
 .negotiation-proposal-form {
     margin-top: 1rem;
     display: flex;

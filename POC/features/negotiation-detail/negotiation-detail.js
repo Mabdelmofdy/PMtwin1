@@ -354,19 +354,188 @@ async function renderDiscussionList(ds, negotiation, currentUserId) {
     el.innerHTML = items.join('');
 }
 
-async function renderRoundsList(ds, negotiation, postMatch, currentUserId) {
+const negotiationRoundsDetailCache = new Map();
+
+function buildDetailDlRows(rows) {
+    if (!rows.length) {
+        return '<p class="negotiation-round-detail-empty">No data recorded.</p>';
+    }
+    return '<dl class="negotiation-round-detail-dl">'
+        + rows.map(([label, value]) =>
+            '<div><dt>' + escapeHtml(label) + '</dt><dd>' + escapeHtml(value) + '</dd></div>'
+        ).join('')
+        + '</dl>';
+}
+
+function buildProposalDetailRows(proposal, exchangeMode) {
+    const api = getTermsApi();
+    if (!proposal || !Object.keys(proposal).length) return [];
+    if (typeof api.getTermSheetRows === 'function') {
+        return api.getTermSheetRows(proposal, exchangeMode).map((row) => [row.label, row.value]);
+    }
+    return Object.entries(proposal).map(([key, value]) => [key, value == null ? '—' : String(value)]);
+}
+
+async function buildApplicationDetailRows(ds, application) {
+    if (!application) return [];
+    const rows = [];
+    const applicant = application.applicantId && typeof ds.getUserOrCompanyById === 'function'
+        ? await ds.getUserOrCompanyById(application.applicantId)
+        : null;
+    const applicantName = applicant?.profile?.name || applicant?.profile?.companyName || application.applicantId;
+    if (applicantName) rows.push(['Applicant', applicantName]);
+    const av = application.application_value || {};
+    const value = av.amount ?? av.requestedValue ?? av.offeredValue;
+    const currency = av.currency || av.requestedCurrency || 'SAR';
+    if (value != null) rows.push(['Requested value', Number(value).toLocaleString() + ' ' + currency]);
+    if (application.proposal) rows.push(['Proposal summary', application.proposal]);
+    if (application.coverLetter) rows.push(['Cover letter', application.coverLetter]);
+    if (application.availabilityDate) rows.push(['Availability', application.availabilityDate]);
+    if (application.estimatedDurationDays != null) {
+        rows.push(['Estimated duration', application.estimatedDurationDays + ' days']);
+    }
+    if (application.status) rows.push(['Application status', application.status.replace(/_/g, ' ')]);
+    return rows;
+}
+
+async function showNegotiationRoundDetailModal(context) {
+    const {
+        negotiation,
+        roundIndex,
+        round,
+        display,
+        deltas,
+        effectiveTerms,
+        exchangeMode
+    } = context;
+    const api = getTermsApi();
+    const when = round.at ? new Date(round.at).toLocaleString() : '—';
+    const proposalRows = buildProposalDetailRows(round.proposal, exchangeMode);
+    const effectiveRows = typeof api.getTermSheetRows === 'function'
+        ? api.getTermSheetRows(effectiveTerms, exchangeMode).map((row) => [row.label, row.value])
+        : [];
+
+    let applicationSection = '';
+    if (negotiation.applicationId && typeof dataService.getApplicationById === 'function') {
+        const application = await dataService.getApplicationById(negotiation.applicationId);
+        const showAppContext = application && (
+            roundIndex === 0 || round.by === application.applicantId
+        );
+        if (showAppContext) {
+            const appRows = await buildApplicationDetailRows(dataService, application);
+            if (appRows.length) {
+                applicationSection = ''
+                    + '<section class="negotiation-round-detail-section">'
+                    + '<h4 class="negotiation-round-detail-section__title">Linked application</h4>'
+                    + '<p class="negotiation-round-detail-section__lead">Original data from the applicant who submitted this application.</p>'
+                    + buildDetailDlRows(appRows)
+                    + '</section>';
+            }
+        }
+    }
+
+    const deltaSection = deltas.length
+        ? '<section class="negotiation-round-detail-section">'
+            + '<h4 class="negotiation-round-detail-section__title">Changes from previous round</h4>'
+            + '<ul class="negotiation-round-detail-deltas">'
+            + deltas.map((d) =>
+                '<li><strong>' + escapeHtml(d.label) + ':</strong> ' + escapeHtml(d.from) + ' → ' + escapeHtml(d.to) + '</li>'
+            ).join('')
+            + '</ul></section>'
+        : '';
+
+    const messageSection = round.message
+        ? '<section class="negotiation-round-detail-section">'
+            + '<h4 class="negotiation-round-detail-section__title">Message</h4>'
+            + '<p class="negotiation-round-detail-message">' + escapeHtml(round.message) + '</p>'
+            + '</section>'
+        : '';
+
+    const bodyHtml = ''
+        + '<div class="negotiation-round-detail-meta">'
+        + '<p><strong>Sent by:</strong> ' + escapeHtml(display.name) + (display.isYou ? ' (You)' : '')
+        + ' <span class="negotiation-round-detail-role">(' + escapeHtml(display.roleLabel) + ')</span></p>'
+        + '<p><strong>Sent at:</strong> ' + escapeHtml(when) + '</p>'
+        + '</div>'
+        + applicationSection
+        + '<section class="negotiation-round-detail-section">'
+        + '<h4 class="negotiation-round-detail-section__title">Terms proposed in this round</h4>'
+        + buildDetailDlRows(proposalRows)
+        + '</section>'
+        + messageSection
+        + deltaSection
+        + '<section class="negotiation-round-detail-section">'
+        + '<h4 class="negotiation-round-detail-section__title">Effective terms after this round</h4>'
+        + buildDetailDlRows(effectiveRows)
+        + '</section>';
+
+    const title = 'Round ' + (roundIndex + 1) + ' · ' + display.name;
+    if (window.modalService && typeof window.modalService.showCustom === 'function') {
+        await window.modalService.showCustom(bodyHtml, title, {
+            confirmText: 'Close',
+            modalClass: 'modal-dialog--negotiation-round'
+        });
+    } else {
+        window.alert(display.name + ' — ' + (round.message || proposalRows.map((r) => r.join(': ')).join('\n')));
+    }
+}
+
+function setupNegotiationRoundsListInteraction() {
+    const el = document.getElementById('negotiation-rounds-list');
+    if (!el || el.dataset.roundInteractionBound) return;
+    el.dataset.roundInteractionBound = '1';
+
+    const openRound = async (card) => {
+        const negId = el.dataset.negotiationId;
+        const idx = parseInt(card.getAttribute('data-round-index'), 10);
+        if (!negId || Number.isNaN(idx)) return;
+        const cache = negotiationRoundsDetailCache.get(negId);
+        if (!cache || !cache.rounds[idx]) return;
+        const roundCtx = cache.rounds[idx];
+        await showNegotiationRoundDetailModal({
+            negotiation: cache.negotiation,
+            roundIndex: idx,
+            round: roundCtx.round,
+            display: roundCtx.display,
+            deltas: roundCtx.deltas,
+            effectiveTerms: roundCtx.effectiveTerms,
+            exchangeMode: cache.exchangeMode,
+            currentUserId: cache.currentUserId
+        });
+    };
+
+    el.addEventListener('click', (e) => {
+        const card = e.target.closest('[data-round-index]');
+        if (!card) return;
+        e.preventDefault();
+        void openRound(card);
+    });
+
+    el.addEventListener('keydown', (e) => {
+        const card = e.target.closest('[data-round-index]');
+        if (!card || (e.key !== 'Enter' && e.key !== ' ')) return;
+        e.preventDefault();
+        void openRound(card);
+    });
+}
+
+async function renderRoundsList(ds, negotiation, postMatch, currentUserId, exchangeMode) {
     const el = document.getElementById('negotiation-rounds-list');
     if (!el) return;
     const rounds = negotiation.rounds || [];
     const api = getTermsApi();
 
+    el.dataset.negotiationId = negotiation.id;
+
     if (!rounds.length) {
         el.innerHTML = '<p class="text-gray-500">No formal proposals yet.</p>';
+        negotiationRoundsDetailCache.delete(negotiation.id);
         return;
     }
 
     let prevTerms = { ...(negotiation.initialTerms || {}) };
     const htmlParts = [];
+    const roundCacheEntries = [];
 
     for (let i = 0; i < rounds.length; i++) {
         const round = rounds[i];
@@ -380,32 +549,47 @@ async function renderRoundsList(ds, negotiation, postMatch, currentUserId) {
         const deltas = typeof api.computeTermDeltas === 'function'
             ? api.computeTermDeltas(prevTerms, nextTerms)
             : [];
+        roundCacheEntries.push({
+            round,
+            display,
+            deltas,
+            effectiveTerms: { ...nextTerms }
+        });
         prevTerms = nextTerms;
 
         const when = round.at ? new Date(round.at).toLocaleString() : '';
-        const deltaHtml = deltas.length
-            ? '<ul class="negotiation-round__deltas">' + deltas.map((d) =>
+        const deltaPreview = deltas.length
+            ? '<ul class="negotiation-round__deltas">' + deltas.slice(0, 2).map((d) =>
                 '<li><strong>' + escapeHtml(d.label) + ':</strong> ' + escapeHtml(d.from) + ' → ' + escapeHtml(d.to) + '</li>'
-            ).join('') + '</ul>'
+            ).join('') + (deltas.length > 2 ? '<li class="negotiation-round__more">+' + (deltas.length - 2) + ' more…</li>' : '') + '</ul>'
             : '';
-        const msgHtml = round.message
-            ? '<p class="negotiation-round__message">' + escapeHtml(round.message) + '</p>'
+        const msgPreview = round.message
+            ? '<p class="negotiation-round__message">' + escapeHtml(round.message.length > 120 ? round.message.slice(0, 120) + '…' : round.message) + '</p>'
             : '';
 
         htmlParts.push(
-            '<article class="negotiation-round">'
+            '<article class="negotiation-round negotiation-round--clickable" data-round-index="' + i + '" role="button" tabindex="0" aria-label="View full details for round ' + (i + 1) + '">'
             + '<div class="negotiation-round__head">'
             + '<span class="negotiation-round__who">Round ' + (i + 1) + ' · ' + escapeHtml(display.name)
             + (display.isYou ? ' (You)' : '') + '</span>'
             + '<span class="negotiation-round__meta">' + escapeHtml(display.roleLabel) + (when ? ' · ' + escapeHtml(when) : '') + '</span>'
             + '</div>'
-            + msgHtml
-            + deltaHtml
+            + msgPreview
+            + deltaPreview
+            + '<p class="negotiation-round__open-hint"><i class="ph-duotone ph-arrows-out" aria-hidden="true"></i> Click to view full proposal</p>'
             + '</article>'
         );
     }
 
+    negotiationRoundsDetailCache.set(negotiation.id, {
+        negotiation,
+        exchangeMode,
+        currentUserId,
+        rounds: roundCacheEntries
+    });
+
     el.innerHTML = htmlParts.join('');
+    setupNegotiationRoundsListInteraction();
 }
 
 async function renderContextAside(ds, negotiation, opportunity, postMatch) {
@@ -647,7 +831,7 @@ async function renderNegotiationDetail(negotiation, currentUserId) {
     const frozen = isFormalActionsFrozen(activeDispute);
     await renderDisputeSection(negotiation, currentUserId, activeDispute);
     await renderDiscussionList(dataService, negotiation, currentUserId);
-    await renderRoundsList(dataService, negotiation, postMatch, currentUserId);
+    await renderRoundsList(dataService, negotiation, postMatch, currentUserId, exchangeMode);
     await renderContextAside(dataService, negotiation, opportunity, postMatch);
     await renderPartiesList(dataService, negotiation, currentUserId);
 

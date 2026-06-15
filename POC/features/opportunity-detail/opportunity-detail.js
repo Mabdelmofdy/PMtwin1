@@ -115,6 +115,54 @@ async function initOpportunityDetail(params) {
     }
     
     await loadOpportunity(opportunityId);
+    setupOpportunityDetailRefreshListener(opportunityId);
+}
+
+// The data-refresh listeners live on `window` (which survives SPA navigations),
+// so they must be bound exactly once. `#content` is replaced on every page load,
+// so its dataset guard would reset and leak a new handler each navigation.
+let oppDetailRefreshOpportunityId = null;
+function setupOpportunityDetailRefreshListener(opportunityId) {
+    oppDetailRefreshOpportunityId = opportunityId;
+    if (window.__oppDetailRefreshBound) return;
+    window.__oppDetailRefreshBound = true;
+    const refresh = () => {
+        if (oppDetailRefreshOpportunityId) void loadOpportunity(oppDetailRefreshOpportunityId);
+    };
+    ['pmtwin:opportunities-updated', 'pmtwin:applications-updated', 'pmtwin:deals-updated', 'pmtwin:data-changed']
+        .forEach((eventName) => window.addEventListener(eventName, refresh));
+}
+
+/**
+ * Attach `handler` for `event` to an element, first stripping any previously
+ * attached listeners by replacing the node with a clone of itself. Guards
+ * against duplicate handlers when a section re-renders within the same page
+ * (e.g. a data-refresh event re-running renderComprehensiveView on the same DOM).
+ * @returns {HTMLElement|null} the fresh node, or null when not found.
+ */
+function bindListenerFresh(elementId, event, handler) {
+    const el = document.getElementById(elementId);
+    if (!el || !el.parentNode) return el || null;
+    const fresh = el.cloneNode(true);
+    el.parentNode.replaceChild(fresh, el);
+    fresh.addEventListener(event, handler);
+    return fresh;
+}
+
+function scrollOpportunityDetailSection(canViewApplications = false) {
+    const section = (typeof router !== 'undefined' && router.getHashSection)
+        ? router.getHashSection()
+        : '';
+    if (section === 'applications') {
+        // Only honor the `?section=applications` deep link for viewers allowed to
+        // see the list (owner/admin); never reveal it to other users.
+        if (!canViewApplications) return;
+        const el = document.getElementById('applications-section');
+        if (el) {
+            el.style.display = 'block';
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
 }
 
 function loadScript(src) {
@@ -137,6 +185,13 @@ async function loadOpportunity(id) {
     const loadingDiv = document.getElementById('loading');
     const contentDiv = document.getElementById('content');
     
+    // Reset module-level state so a previous (applicant) visit cannot leak into
+    // this load (e.g. owner opening an opp after viewing one they applied to).
+    currentApplication = null;
+    applicationCanEdit = false;
+    applicationCanReapply = false;
+    isEditMode = false;
+
     try {
         const opportunity = await dataService.getOpportunityById(id);
         
@@ -180,10 +235,10 @@ async function loadOpportunity(id) {
         const isOwner = user && opportunity.creatorId === user.id;
         const canViewApplications = isOwner || canAdminViewOpportunityApplications();
         const canManageApplications = isOwner || canAdminManageOpportunityApplications();
-        const canApply = user && !isOwner && (opportunity.status === 'published' || opportunity.status === 'in_negotiation') && !(authService.isPendingApproval && authService.isPendingApproval());
+        const existingDeal = user ? await dataService.getDealByOpportunityId(opportunity.id) : null;
+        const canApplyBase = user && !isOwner && !(authService.isPendingApproval && authService.isPendingApproval());
         
-        // Check if user has already applied (prefer active application over a rejected/withdrawn one)
-        if (canApply) {
+        if (user && !isOwner) {
             const allApplications = await dataService.getApplications();
             const resolved = resolveUserApplicationForOpportunity(allApplications, opportunity.id, user.id);
             currentApplication = resolved.application;
@@ -193,12 +248,21 @@ async function loadOpportunity(id) {
             applicationCanEdit = false;
             applicationCanReapply = false;
         }
+
+        const canApplyHelper = window.applicationUtils?.canUserApplyToOpportunity;
+        const canApply = canApplyHelper
+            ? canApplyHelper(opportunity, user, {
+                application: currentApplication,
+                canReapply: applicationCanReapply,
+                hasDeal: !!existingDeal
+            })
+            : (canApplyBase && !existingDeal && (!currentApplication || applicationCanReapply));
         
         // Determine which steps are needed
         determineWizardSteps(opportunity);
         
         // Render comprehensive view
-        await renderComprehensiveView(opportunity, creator, isOwner, canApply, canViewApplications);
+        await renderComprehensiveView(opportunity, creator, isOwner, canApply, canViewApplications, existingDeal);
         
         // Load applications for owner or admin moderators (use opportunity.id so canonical id matches application records)
         if (canViewApplications) {
@@ -217,6 +281,7 @@ async function loadOpportunity(id) {
         
         loadingDiv.style.display = 'none';
         contentDiv.style.display = 'block';
+        scrollOpportunityDetailSection(canViewApplications);
         
     } catch (error) {
         console.error('Error loading opportunity:', error);
@@ -305,7 +370,14 @@ function determineWizardSteps(opportunity) {
     if (step6NumberEl) step6NumberEl.textContent = hasTaskBidding ? '6' : '5';
 }
 
-async function renderComprehensiveView(opportunity, creator, isOwner, canApply, canViewApplications) {
+async function renderComprehensiveView(opportunity, creator, isOwner, canApply, canViewApplications, existingDeal = null) {
+    // Reset application-related section visibility up front so a prior render or
+    // permission change cannot leave a stale panel showing.
+    ['applications-section', 'apply-section', 'already-applied-section'].forEach((sectionId) => {
+        const el = document.getElementById(sectionId);
+        if (el) el.style.display = 'none';
+    });
+
     document.getElementById('opportunity-title').textContent = opportunity.title || 'Untitled Opportunity';
     const heroMeta = document.getElementById('opportunity-hero-meta');
     if (heroMeta) {
@@ -457,8 +529,6 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply, 
         const appliedSection = document.getElementById('already-applied-section');
         const applySection = document.getElementById('apply-section');
         const appliedHeading = appliedSection?.querySelector('h3');
-        const editBtn = document.getElementById('btn-edit-application');
-        const applyBtn = document.getElementById('btn-start-apply');
 
         if (currentApplication && !applicationCanReapply) {
             isEditMode = applicationCanEdit;
@@ -478,14 +548,10 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply, 
                 }
             }
 
-            if (editBtn) {
-                editBtn.style.display = applicationCanEdit ? '' : 'none';
-                if (applicationCanEdit) {
-                    editBtn.addEventListener('click', () => {
-                        startApplicationWizard();
-                    });
-                }
-            }
+            const editBtn = bindListenerFresh('btn-edit-application', 'click', () => {
+                startApplicationWizard();
+            });
+            if (editBtn) editBtn.style.display = applicationCanEdit ? '' : 'none';
         } else if (currentApplication && applicationCanReapply) {
             isEditMode = false;
             if (appliedSection) appliedSection.style.display = 'block';
@@ -499,22 +565,21 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply, 
                     ? 'Previous application withdrawn'
                     : 'Previous application rejected';
             }
+            const editBtn = document.getElementById('btn-edit-application');
             if (editBtn) editBtn.style.display = 'none';
             if (applySection) applySection.style.display = 'block';
+            const applyBtn = bindListenerFresh('btn-start-apply', 'click', () => {
+                startApplicationWizard({ reapply: true });
+            });
             if (applyBtn) {
                 applyBtn.innerHTML = '<i class="ph-duotone ph-paper-plane-tilt"></i> Apply Again';
-                applyBtn.addEventListener('click', () => {
-                    startApplicationWizard({ reapply: true });
-                });
             }
         } else {
             isEditMode = false;
             if (applySection) applySection.style.display = 'block';
-            if (applyBtn) {
-                applyBtn.addEventListener('click', () => {
-                    startApplicationWizard();
-                });
-            }
+            bindListenerFresh('btn-start-apply', 'click', () => {
+                startApplicationWizard();
+            });
         }
     } else if (authService.isPendingApproval && authService.isPendingApproval() && !isOwner && (opportunity.status === 'published' || opportunity.status === 'in_negotiation')) {
         // Pending user: show apply section with disabled button and tooltip
@@ -525,6 +590,41 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply, 
             applyBtn.disabled = true;
             applyBtn.setAttribute('title', 'Action disabled until your account is approved.');
             applyBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        }
+    } else if (currentApplication || existingDeal) {
+        const appliedSection = document.getElementById('already-applied-section');
+        const applySection = document.getElementById('apply-section');
+        if (applySection) applySection.style.display = 'none';
+        if (appliedSection) {
+            appliedSection.style.display = 'block';
+            const appliedHeading = appliedSection.querySelector('h3');
+            if (appliedHeading) {
+                if (existingDeal) {
+                    appliedHeading.textContent = 'Deal in progress';
+                } else if (currentApplication?.status === 'accepted') {
+                    appliedHeading.textContent = 'Application accepted';
+                } else {
+                    appliedHeading.textContent = "You've already applied";
+                }
+            }
+            const dateEl = document.getElementById('applied-date');
+            if (dateEl && currentApplication?.createdAt) {
+                dateEl.textContent = new Date(currentApplication.createdAt).toLocaleDateString();
+            } else if (dateEl && existingDeal?.createdAt) {
+                dateEl.textContent = new Date(existingDeal.createdAt).toLocaleDateString();
+            }
+            const statusEl = document.getElementById('applied-status');
+            if (statusEl) {
+                if (existingDeal) {
+                    statusEl.textContent = 'Matched';
+                    statusEl.className = 'badge badge--success';
+                } else if (currentApplication) {
+                    statusEl.textContent = getApplicationStatusLabel(currentApplication.status);
+                    statusEl.className = `badge ${getApplicationStatusBadgeClass(currentApplication.status)}`;
+                }
+            }
+            const editBtn = document.getElementById('btn-edit-application');
+            if (editBtn) editBtn.style.display = 'none';
         }
     }
     
@@ -1363,36 +1463,29 @@ async function startApplicationWizard(options = {}) {
 }
 
 function setupWizardNavigation() {
-    const btnPrev = document.getElementById('btn-prev');
-    const btnNext = document.getElementById('btn-next');
-    const btnCancel = document.getElementById('btn-cancel');
-    const btnSubmit = document.getElementById('btn-submit');
-    const btnDemoFill = document.getElementById('btn-demo-fill');
-    
-    btnPrev.addEventListener('click', () => {
+    // Bind fresh each time so re-rendering the detail view (e.g. after a
+    // data-refresh event) cannot stack duplicate wizard handlers.
+    bindListenerFresh('btn-prev', 'click', () => {
         goToWizardStep(getPreviousStep());
     });
-    
-    btnNext.addEventListener('click', () => {
+
+    bindListenerFresh('btn-next', 'click', () => {
         if (validateCurrentStep()) {
             goToWizardStep(getNextStep());
         }
     });
-    
-    btnCancel.addEventListener('click', () => {
+
+    bindListenerFresh('btn-cancel', 'click', () => {
         if (confirm('Are you sure you want to cancel? Your progress will be lost.')) {
             goToWizardStep(1);
             document.getElementById('wizard-steps').style.display = 'none';
             document.getElementById('wizard-nav').style.display = 'none';
         }
     });
-    
-    btnSubmit.addEventListener('click', submitApplication);
-    
-    // Demo Fill button
-    if (btnDemoFill) {
-        btnDemoFill.addEventListener('click', fillDemoData);
-    }
+
+    bindListenerFresh('btn-submit', 'click', submitApplication);
+
+    bindListenerFresh('btn-demo-fill', 'click', fillDemoData);
 }
 
 function getNextStep() {
@@ -1464,12 +1557,19 @@ function goToWizardStep(step) {
         }
         if (currentApplication && currentApplication.application_value) {
             const av = currentApplication.application_value;
+            const appUtils = window.opportunityApplicationsUtils;
+            const n = appUtils ? appUtils.normalizeApplicationValue(av) : null;
             const offeredEl = document.getElementById('application-offered-value');
             const requestedEl = document.getElementById('application-requested-value');
             const currencyEl = document.getElementById('application-requested-currency');
-            if (offeredEl) offeredEl.value = typeof av.offered_value === 'string' ? av.offered_value : (av.offered_value && av.offered_value.description) || '';
-            if (requestedEl && av.requested_value != null) requestedEl.value = av.requested_value;
-            if (currencyEl && av.currency) currencyEl.value = av.currency;
+            const offeredRaw = n ? n.offeredValue : av.offered_value;
+            const requestedRaw = n
+                ? (n.requestedNumber != null ? n.requestedNumber : n.requestedValue)
+                : av.requested_value;
+            const currencyRaw = n ? n.currency : av.currency;
+            if (offeredEl) offeredEl.value = typeof offeredRaw === 'string' ? offeredRaw : (offeredRaw && offeredRaw.description) || '';
+            if (requestedEl && requestedRaw != null) requestedEl.value = requestedRaw;
+            if (currencyEl && currencyRaw) currencyEl.value = currencyRaw;
         }
     }
     
@@ -1790,7 +1890,7 @@ async function submitApplication() {
                 type: 'application_received',
                 title: 'New Application',
                 message: `You received a new application for "${currentOpportunity.title}"`,
-                link: `/opportunities/${currentOpportunity.id}`
+                link: `/opportunities/${currentOpportunity.id}?section=applications`
             });
 
             await dataService.createNotification({
@@ -1803,8 +1903,8 @@ async function submitApplication() {
             
             alert('Application submitted successfully!');
         }
-        
-        location.reload();
+
+        await loadOpportunity(currentOpportunity.id);
         
     } catch (error) {
         console.error('Error submitting application:', error);
@@ -2371,22 +2471,27 @@ function buildApplicationNegotiationHtml(app) {
     const isInNeg = window.applicationUtils && typeof window.applicationUtils.isApplicationInNegotiation === 'function'
         ? window.applicationUtils.isApplicationInNegotiation(app, app.negotiation)
         : (app.status === 'in_negotiation' || !!app.negotiationId);
-    if (!isInNeg) return '';
+    const negId = app.negotiationId || (app.negotiation && app.negotiation.id);
+    const negStatus = ((app.negotiation && app.negotiation.status) || 'open').toLowerCase();
+    const isAgreed = negStatus === 'agreed';
+    if (!isInNeg && !(negId && isAgreed)) return '';
 
     const nlc = window.negotiationLifecycle;
-    const negStatus = (app.negotiation && app.negotiation.status) || 'open';
     const statusLabel = nlc && typeof nlc.getNegotiationStatusLabel === 'function'
         ? nlc.getNegotiationStatusLabel(negStatus)
-        : 'In negotiation';
-    const negId = app.negotiationId || (app.negotiation && app.negotiation.id);
+        : (isAgreed ? 'Terms agreed' : 'In negotiation');
     const linkHtml = negId
         ? `<a href="#" data-route="/negotiations/${escapeHtml(negId)}" class="btn btn-outline btn-sm mt-2">Open negotiation</a>`
+        : '';
+    const createDealHtml = isAgreed && !app.dealId && negId
+        ? `<button type="button" class="btn btn-primary btn-sm mt-2 btn-create-deal-from-negotiation" data-negotiation-id="${escapeHtml(negId)}">Create deal</button>`
         : '';
 
     return `<div class="application-negotiation-subsection mt-2 p-2 border border-gray-200 rounded bg-gray-50">
         <p class="text-xs font-semibold text-gray-700 mb-1">Negotiation</p>
         <span class="badge badge-info">${escapeHtml(statusLabel)}</span>
         ${linkHtml}
+        ${createDealHtml}
     </div>`;
 }
 
@@ -2397,14 +2502,20 @@ async function loadApplications(opportunityId, options = {}) {
 
     if (!applicationsList || !applicationsCount) return;
 
+    const appUtils = window.opportunityApplicationsUtils;
+
     try {
         const allApplications = await dataService.getApplications();
-        let opportunityApplications = allApplications.filter(a => a.opportunityId === opportunityId);
-        opportunityApplications.sort((a, b) => {
-            const scoreA = a.application_value?.value_score != null ? a.application_value.value_score : -1;
-            const scoreB = b.application_value?.value_score != null ? b.application_value.value_score : -1;
-            return scoreB - scoreA;
-        });
+        const filtered = appUtils
+            ? appUtils.filterApplicationsForOpportunity(allApplications, opportunityId)
+            : allApplications.filter(a => a.opportunityId === opportunityId);
+        const opportunityApplications = appUtils
+            ? appUtils.sortApplicationsByValueScore(filtered)
+            : [...filtered].sort((a, b) => {
+                const scoreA = a.application_value?.value_score != null ? a.application_value.value_score : -1;
+                const scoreB = b.application_value?.value_score != null ? b.application_value.value_score : -1;
+                return scoreB - scoreA;
+            });
         
         applicationsCount.textContent = opportunityApplications.length;
         
@@ -2466,10 +2577,13 @@ async function loadApplications(opportunityId, options = {}) {
             const vs = app.applicant?.profile?.verificationStatus;
             const verificationBadge = vs === 'professional_verified' ? '<span class="badge badge-success verification-badge ml-1">Verified Professional</span>' : vs === 'consultant_verified' ? '<span class="badge badge-success verification-badge ml-1">Verified Consultant</span>' : vs === 'company_verified' ? '<span class="badge badge-success verification-badge ml-1">Verified Company</span>' : '';
             const av = app.application_value;
-            const valueScorePct = av?.value_score != null ? Math.round(av.value_score * 100) : null;
+            const avNorm = appUtils ? appUtils.normalizeApplicationValue(av) : null;
+            const valueScorePct = avNorm ? avNorm.valueScorePct : (av?.value_score != null ? Math.round(av.value_score * 100) : null);
             const valueScoreHtml = valueScorePct != null ? `<span class="badge badge-info ml-1" title="Value compatibility">Value: ${valueScorePct}%</span>` : '';
-            const valueAmount = av?.requestedValue != null ? `${Number(av.requestedValue).toLocaleString()} ${(av.requestedCurrency || 'SAR')}` : (av?.offeredValue != null ? `${Number(av.offeredValue).toLocaleString()} ${(av.requestedCurrency || av.currency || 'SAR')}` : null);
-            const valueAmountHtml = valueAmount ? `<span class="text-sm text-gray-600 ml-1">${valueAmount}</span>` : '';
+            const valueAmount = avNorm
+                ? appUtils.formatApplicationValueAmount(av)
+                : (av?.requestedValue != null ? `${Number(av.requestedValue).toLocaleString()} ${(av.requestedCurrency || 'SAR')}` : (av?.offeredValue != null ? `${Number(av.offeredValue).toLocaleString()} ${(av.requestedCurrency || av.currency || 'SAR')}` : null));
+            const valueAmountHtml = valueAmount ? `<span class="text-sm text-gray-600 ml-1">${escapeHtml(valueAmount)}</span>` : '';
             const matchTypeLabel = app.matchType && window.unifiedMatchViewModel
                 ? window.unifiedMatchViewModel.getMatchTypeLabel(app.matchType)
                 : '';
@@ -2478,7 +2592,7 @@ async function loadApplications(opportunityId, options = {}) {
             const fromMatchBadge = app.matchId ? '<span class="badge badge-secondary ml-1">From Match</span>' : '';
             const replacementBadge = (app.replacementRequestId || app.invitationKind === 'replacement')
                 ? '<span class="badge badge-warning ml-1">Replacement invite</span>' : '';
-            const lowValueBadge = av?.lowValueMatch ? '<span class="badge badge-warning ml-1" title="Applicant requested value is more than 30% below opportunity expected value">Low Value Match</span>' : '';
+            const lowValueBadge = (avNorm ? avNorm.lowValueMatch : av?.lowValueMatch) ? '<span class="badge badge-warning ml-1" title="Applicant requested value is more than 30% below opportunity expected value">Low Value Match</span>' : '';
             const breakdown = av?.value_breakdown;
             const budgetPct = breakdown && (breakdown.budgetFit != null || breakdown.budget != null) ? Math.round((breakdown.budgetFit != null ? breakdown.budgetFit : breakdown.budget) * 100) : null;
             const modePct = breakdown && (breakdown.exchangeModeFit != null || breakdown.mode != null) ? Math.round((breakdown.exchangeModeFit != null ? breakdown.exchangeModeFit : breakdown.mode) * 100) : null;
@@ -2573,6 +2687,37 @@ async function loadApplications(opportunityId, options = {}) {
                 updateApplicationStatus(btn.dataset.applicationId, 'rejected');
             });
         });
+        applicationsList.querySelectorAll('.btn-create-deal-from-negotiation').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const negId = btn.dataset.negotiationId;
+                const user = authService.getCurrentUser();
+                if (!negId || !user) return;
+                const ok = await confirmApplicationAction(
+                    'Create a deal workspace from the agreed negotiation terms?',
+                    { confirmText: 'Create deal', title: 'Create deal' }
+                );
+                if (!ok) return;
+                btn.disabled = true;
+                try {
+                    const deal = await dataService.createDealFromNegotiation(negId, user.id);
+                    if (deal && window.router?.navigate) {
+                        window.router.navigate('/deals/' + deal.id);
+                    } else {
+                        await loadApplications(opportunityId, { manage: canManage });
+                    }
+                } catch (err) {
+                    console.error('Error creating deal from negotiation:', err);
+                    const msg = (err && err.message) ? err.message : 'Could not create deal.';
+                    if (window.modalService?.error) {
+                        await window.modalService.error(msg, 'Cannot create deal');
+                    } else {
+                        alert(msg);
+                    }
+                }
+                btn.disabled = false;
+            });
+        });
 
         // View application click: show detail modal (button or card click)
         applicationsList.querySelectorAll('.btn-view-application').forEach(btn => {
@@ -2630,12 +2775,14 @@ async function loadMatchingSection(opportunityId) {
         const provider = (pm.participants || []).find(p => p.role === 'offer_provider');
         const providerId = provider?.userId;
         if (!providerId) continue;
-        if (providerId.startsWith('user-pro-')) {
-            const candidate = await dataService.getUserById(providerId);
-            professionalsWithProfiles.push({ match: pm, candidate });
-        } else if (providerId.startsWith('user-company-')) {
-            const candidate = await dataService.getCompanyById(providerId);
+        const candidate = await dataService.getUserOrCompanyById(providerId);
+        if (!candidate) continue;
+        const isCompany = candidate.role === CONFIG.ROLES.COMPANY
+            || !!(await dataService.getCompanyById(providerId));
+        if (isCompany) {
             companiesWithProfiles.push({ match: pm, candidate });
+        } else {
+            professionalsWithProfiles.push({ match: pm, candidate });
         }
     }
 
@@ -2822,13 +2969,18 @@ function buildApplicationDetailContent(data) {
     const reputationPct = breakdown.reputation != null ? Math.round(Number(breakdown.reputation) * 100) : null;
 
     const av = application.application_value || {};
-    const valueScorePct = av.value_score != null ? Math.round(av.value_score * 100) : null;
-    const requestedVal = av.requestedValue != null ? av.requestedValue : av.requested_value;
+    const avNorm = window.opportunityApplicationsUtils
+        ? window.opportunityApplicationsUtils.normalizeApplicationValue(av)
+        : null;
+    const valueScorePct = avNorm ? avNorm.valueScorePct : (av.value_score != null ? Math.round(av.value_score * 100) : null);
+    const requestedVal = avNorm
+        ? (avNorm.requestedNumber != null ? avNorm.requestedNumber : avNorm.requestedValue)
+        : (av.requestedValue != null ? av.requestedValue : av.requested_value);
     const requestedStr =
         requestedVal != null
-            ? `${typeof requestedVal === 'number' ? requestedVal.toLocaleString() : String(requestedVal)} ${escapeHtml(av.requestedCurrency || av.currency || 'SAR')}`
+            ? `${typeof requestedVal === 'number' ? requestedVal.toLocaleString() : String(requestedVal)} ${escapeHtml((avNorm ? avNorm.currency : (av.requestedCurrency || av.currency)) || 'SAR')}`
             : null;
-    const offeredVal = av.offeredValue != null ? av.offeredValue : av.offered_value;
+    const offeredVal = avNorm ? avNorm.offeredValue : (av.offeredValue != null ? av.offeredValue : av.offered_value);
     const offeredStr =
         offeredVal != null && String(offeredVal).trim() !== ''
             ? typeof offeredVal === 'number'

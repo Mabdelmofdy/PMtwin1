@@ -278,17 +278,13 @@ async function renderMatchDetail(postMatch, currentUserId) {
         declineBtn.style.display = actionIds.has('decline') && !expired ? '' : 'none';
         declineBtn.disabled = expired;
     }
-    if (btnNegotiation) {
+        if (btnNegotiation) {
         const showNeg = actionIds.has('negotiate') && !expired;
         btnNegotiation.style.display = showNeg ? '' : 'none';
         btnNegotiation.disabled = !showNeg;
         const negAction = (vm?.availableActions || []).find(a => a.id === 'negotiate');
         if (negAction?.label) btnNegotiation.textContent = negAction.label;
-        if (vm?.hasActiveNegotiation && vm?.negotiationId) {
-            btnNegotiation.dataset.negotiationRoute = '/negotiations/' + vm.negotiationId;
-        } else {
-            delete btnNegotiation.dataset.negotiationRoute;
-        }
+        delete btnNegotiation.dataset.negotiationRoute;
     }
     const btnCreateDeal = actionsEl.querySelector('#btn-create-deal-match');
     if (btnCreateDeal) {
@@ -470,7 +466,7 @@ async function renderMatchNegotiationSection(vm, postMatch, currentUserId) {
     if (linkOpenDetails) {
         if (negotiation?.id) {
             linkOpenDetails.style.display = '';
-            linkOpenDetails.setAttribute('data-route', '/negotiations/' + negotiation.id);
+            linkOpenDetails.setAttribute('data-route', '/matches/' + postMatch.id + '?section=negotiation');
         } else {
             linkOpenDetails.style.display = 'none';
             linkOpenDetails.removeAttribute('data-route');
@@ -875,9 +871,7 @@ function renderMatchDetailLifecycleSections(vm, postMatch) {
     if (vm?.hasNegotiation) {
         negHtml = '<p><span class="badge badge--info">' + escapeHtml(vm.negotiationStatusLabel || getNegotiationLabel(vm.negotiationStatus)) + '</span></p>';
         if (vm.hasActiveNegotiation) {
-            const negRoute = vm.negotiationId
-                ? '/negotiations/' + escapeHtml(vm.negotiationId)
-                : '/matches/' + escapeHtml(vm.id) + '?section=negotiation';
+            const negRoute = '/matches/' + escapeHtml(vm.id) + '?section=negotiation';
             negHtml += '<p class="text-gray-600 mt-1"><a href="#" data-route="' + negRoute + '" class="btn btn-outline btn-sm">Open negotiation</a></p>';
         } else if (vm.hasAgreedNegotiation && !vm.dealId) {
             negHtml += '<p class="text-gray-600 mt-1">Terms agreed — create your deal workspace.</p>';
@@ -1159,23 +1153,29 @@ function setupMatchDetailActions(matchId, userId) {
         }
         if (startNegBtn) {
             e.preventDefault();
-            const negRoute = startNegBtn.dataset.negotiationRoute;
-            if (negRoute && window.router?.navigate) {
-                window.router.navigate(negRoute);
-                return;
-            }
             startNegBtn.disabled = true;
             try {
                 const matchForNeg = await dataService.getPostMatchById(matchId);
-                const opportunityId = matchForNeg && typeof dataService._resolveNegotiationOpportunityId === 'function'
-                    ? dataService._resolveNegotiationOpportunityId(matchForNeg, userId)
-                    : null;
-                await dataService.startNegotiationFromMatch(matchId, userId, opportunityId ? { opportunityId } : {});
-                const match = await dataService.getPostMatchById(matchId);
-                if (match) await renderMatchDetail(match, userId);
-                setMatchActionFeedback('Negotiation started. Continue in the Value Negotiation section.', 'success');
-                const panel = document.getElementById('match-detail-negotiation-panel');
-                if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                let negId = matchForNeg?.negotiationId || null;
+                if (!negId && typeof dataService.getActiveNegotiationForMatch === 'function') {
+                    const active = await dataService.getActiveNegotiationForMatch(matchId);
+                    negId = active?.id || null;
+                }
+                if (!negId) {
+                    const opportunityId = matchForNeg && typeof dataService._resolveNegotiationOpportunityId === 'function'
+                        ? dataService._resolveNegotiationOpportunityId(matchForNeg, userId)
+                        : null;
+                    await dataService.startNegotiationFromMatch(matchId, userId, opportunityId ? { opportunityId } : {});
+                }
+                if (window.router?.navigate) {
+                    window.router.navigate('/matches/' + matchId + '?section=negotiation');
+                } else {
+                    const match = await dataService.getPostMatchById(matchId);
+                    if (match) await renderMatchDetail(match, userId);
+                    setMatchActionFeedback('Negotiation started. Continue in the Value Negotiation section.', 'success');
+                    const panel = document.getElementById('match-detail-negotiation-panel');
+                    if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             } catch (err) {
                 console.error('[match-detail] Start negotiation failed:', { matchId, userId, err });
                 setMatchActionFeedback((err && err.message) ? err.message : 'Could not start negotiation.', 'danger');

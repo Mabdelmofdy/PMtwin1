@@ -29,7 +29,8 @@ function setupDashboardRefreshListener(user, isCompanyView) {
             console.error('Dashboard refresh failed:', err);
         }
     };
-    ['pmtwin:notifications-updated', 'pmtwin:messages-updated', 'pmtwin:post-matches-updated', 'pmtwin:deals-updated', 'pmtwin:data-changed']
+    ['pmtwin:notifications-updated', 'pmtwin:messages-updated', 'pmtwin:post-matches-updated', 'pmtwin:deals-updated', 'pmtwin:data-changed',
+        'pmtwin:opportunities-updated', 'pmtwin:applications-updated']
         .forEach((eventName) => window.addEventListener(eventName, () => { void refresh(); }));
 }
 
@@ -268,7 +269,11 @@ async function displayRecentApplications(applications) {
     const appsWithOpps = await Promise.all(
         applications.map(async (app) => {
             const opportunity = await dataService.getOpportunityById(app.opportunityId);
-            return { ...app, opportunity };
+            let negotiation = null;
+            if (app.negotiationId && typeof dataService.getNegotiationById === 'function') {
+                negotiation = await dataService.getNegotiationById(app.negotiationId);
+            }
+            return { ...app, opportunity, negotiation };
         })
     );
 
@@ -284,8 +289,7 @@ async function displayRecentApplications(applications) {
         const matchHtml = valueScorePct != null
             ? `<span class="dash-match-pill">${valueScorePct}% compatibility</span>`
             : '';
-        const reviewRoute = getApplicantApplicationReviewRoute(app);
-        const reviewLabel = status === 'in_negotiation' ? 'Open negotiation' : 'Review application';
+        const cta = getApplicationDashboardAction(app);
         return `<article class="dash-recent-app">
             <div class="dash-recent-app-main">
                 <h3 class="dash-recent-app-title">${escDash(oppTitle)}</h3>
@@ -296,7 +300,7 @@ async function displayRecentApplications(applications) {
                 <div class="dash-recent-app-meta">${escDash(dateStr)}</div>
             </div>
             <div class="dash-recent-app-actions">
-                <a href="#" data-route="${escDash(reviewRoute)}" class="btn btn-primary btn-sm">${escDash(reviewLabel)}</a>
+                <a href="#" data-route="${escDash(cta.route)}" class="btn btn-primary btn-sm">${escDash(cta.label)}</a>
             </div>
         </article>`;
     }).join('');
@@ -1035,10 +1039,15 @@ async function loadApplicationsReceived(userId) {
         const enriched = await Promise.all(received.map(async (app) => {
             const applicant = await dataService.getUserOrCompanyById(app.applicantId);
             const opp = allOpps.find(o => o.id === app.opportunityId);
+            let negotiation = null;
+            if (app.negotiationId && typeof dataService.getNegotiationById === 'function') {
+                negotiation = await dataService.getNegotiationById(app.negotiationId);
+            }
             return {
                 ...app,
                 applicantName: applicant?.profile?.name || app.applicantId,
-                opportunityTitle: opp?.title || app.opportunityId
+                opportunityTitle: opp?.title || app.opportunityId,
+                negotiation
             };
         }));
 
@@ -1087,8 +1096,7 @@ async function loadApplicationsReceived(userId) {
                 const statusBadgeClass = sb ? sb.getStatusBadgeClass(status, 'application') : 'badge--neutral';
                 const statusText = sb ? sb.getStatusLabel(status, 'application') : formatApplicationStatus(status);
                 const formattedDate = formatDashboardDate(app.createdAt);
-                const reviewRoute = getOwnerApplicationReviewRoute(app);
-                const reviewLabel = status === 'in_negotiation' ? 'Open negotiation' : 'Review';
+                const cta = getApplicationDashboardAction(app);
                 return `<div class="company-compact-item applications-item">
                     <div class="company-avatar company-avatar--soft">${escDash((app.applicantName || '?')[0])}</div>
                     <div class="company-compact-main">
@@ -1100,7 +1108,7 @@ async function loadApplicationsReceived(userId) {
                         <div class="company-compact-meta company-project-title">${escDash(app.opportunityTitle)}</div>
                         <div class="company-compact-date">${formattedDate}</div>
                     </div>
-                    <a href="#" data-route="${escDash(reviewRoute)}" class="company-review-link">${escDash(reviewLabel)}</a>
+                    <a href="#" data-route="${escDash(cta.route)}" class="company-review-link">${escDash(cta.label)}</a>
                 </div>`;
             }).join('');
         };
@@ -1118,21 +1126,31 @@ function normalizeApplicationStatus(status) {
     return String(status || 'pending').toLowerCase();
 }
 
-function getApplicantApplicationReviewRoute(app) {
+function getApplicationDashboardAction(app) {
+    const negStatus = (app.negotiation?.status || '').toLowerCase();
+    const negId = app.negotiationId || app.negotiation?.id;
+    if (negId) {
+        return {
+            route: `/negotiations/${negId}`,
+            label: negStatus === 'agreed' && !app.dealId ? 'Create deal' : 'Open negotiation'
+        };
+    }
     const status = normalizeApplicationStatus(app.status);
-    if (status === 'in_negotiation' && app.negotiationId) {
-        return `/negotiations/${app.negotiationId}`;
-    }
     if (status === 'in_negotiation') {
-        return '/pipeline/applications?stage=in_negotiation';
+        return { route: '/pipeline/applications?stage=in_negotiation', label: 'Open negotiation' };
     }
-    return '/pipeline/applications';
+    return { route: '/pipeline/applications', label: 'Review application' };
+}
+
+function getApplicantApplicationReviewRoute(app) {
+    const cta = getApplicationDashboardAction(app);
+    return cta.route;
 }
 
 function getOwnerApplicationReviewRoute(app) {
-    const status = normalizeApplicationStatus(app.status);
-    if (status === 'in_negotiation' && app.negotiationId) {
-        return `/negotiations/${app.negotiationId}`;
+    const negId = app.negotiationId || app.negotiation?.id;
+    if (negId) {
+        return `/negotiations/${negId}`;
     }
     if (app.opportunityId) {
         return `/opportunities/${app.opportunityId}`;

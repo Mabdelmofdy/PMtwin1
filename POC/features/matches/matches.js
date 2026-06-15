@@ -60,7 +60,8 @@ function setupMatchesRefreshListener() {
             showMatchesError('refresh', err);
         });
     };
-    ['pmtwin:post-matches-updated', 'pmtwin:deals-updated', 'pmtwin:data-changed'].forEach((eventName) => {
+    ['pmtwin:post-matches-updated', 'pmtwin:deals-updated', 'pmtwin:data-changed',
+        'pmtwin:opportunities-updated', 'pmtwin:applications-updated'].forEach((eventName) => {
         window.addEventListener(eventName, refreshMatches);
     });
 }
@@ -201,8 +202,8 @@ function setupMatchesFilters() {
                             negId = refreshed?.negotiationId || null;
                         }
                     }
-                    if (negId && window.router?.navigate) {
-                        window.router.navigate('/negotiations/' + negId);
+                    if (window.router?.navigate) {
+                        window.router.navigate('/matches/' + matchId + '?section=negotiation');
                     } else {
                         throw new Error('Could not open negotiation workspace.');
                     }

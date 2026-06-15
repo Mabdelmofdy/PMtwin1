@@ -230,6 +230,16 @@
             } else if (offerProvider?.userId === currentUserId) {
                 result.viewerId = payload.offerOpportunityId || offerProvider.opportunityId || null;
                 result.counterpartId = payload.needOpportunityId || needOwner?.opportunityId || null;
+            } else {
+                const myPart = (match.participants || []).find(p => p.userId === currentUserId);
+                if (myPart?.opportunityId) {
+                    result.viewerId = myPart.opportunityId;
+                    if (myPart.opportunityId === payload.needOpportunityId) {
+                        result.counterpartId = payload.offerOpportunityId || null;
+                    } else if (myPart.opportunityId === payload.offerOpportunityId) {
+                        result.counterpartId = payload.needOpportunityId || null;
+                    }
+                }
             }
             return result;
         }
@@ -360,24 +370,21 @@
 
         if (!expired && status !== 'declined' && status !== 'expired' && !vm.dealId && !vm.negotiationCancelled) {
             if (vm.hasActiveNegotiation && vm.negotiationId) {
-                push('negotiate', 'Open negotiation', 'secondary', '/negotiations/' + vm.negotiationId, true);
+                push('negotiate', 'Continue in Value Negotiation', 'secondary', '/matches/' + vm.id + '?section=negotiation', true);
             } else if (!vm.hasAgreedNegotiation) {
                 push('negotiate', 'Start Negotiation', 'secondary', '/matches/' + vm.id + '?section=negotiation', true);
             }
         }
 
         if (vm.hasAgreedNegotiation && !vm.dealId && !expired) {
-            const dealRoute = vm.negotiationId
-                ? '/negotiations/' + vm.negotiationId
-                : '/matches/' + vm.id + '?section=negotiation';
-            push('create_deal_from_negotiation', 'Create Deal', 'primary', dealRoute, true);
+            push('create_deal_from_negotiation', 'Create Deal', 'primary', '/matches/' + vm.id + '?section=negotiation', true);
         }
 
         if (!expired && vm.canInviteToApply && !vm.hasActiveInvitation) {
             push('invite_apply', 'Invite to Apply', 'secondary', '/matches/' + vm.id, true);
         }
 
-        if (status === 'confirmed' && !vm.dealId && !expired) {
+        if (status === 'confirmed' && !vm.dealId && !expired && !vm.hasActiveNegotiation) {
             push('create_deal', 'Start Deal', 'primary', '/matches/' + vm.id, true);
         }
 

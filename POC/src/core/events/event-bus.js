@@ -9,6 +9,8 @@ export const PMTWIN_EVENTS = {
     POST_MATCHES_UPDATED: 'pmtwin:post-matches-updated',
     DEALS_UPDATED: 'pmtwin:deals-updated',
     CONTRACTS_UPDATED: 'pmtwin:contracts-updated',
+    OPPORTUNITIES_UPDATED: 'pmtwin:opportunities-updated',
+    APPLICATIONS_UPDATED: 'pmtwin:applications-updated',
     DATA_CHANGED: 'pmtwin:data-changed'
 };
 

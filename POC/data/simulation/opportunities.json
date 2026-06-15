@@ -59,8 +59,8 @@
           "LEED Certification"
         ]
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -160,8 +160,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -258,8 +258,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -358,8 +358,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -452,8 +452,8 @@
           "BIM"
         ]
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -543,8 +543,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Revit"
@@ -628,8 +628,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Civil Engineer"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Site Planning",
@@ -721,8 +721,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Site Planning"
@@ -803,8 +803,8 @@
         "tenderDeadline": "2026-06-01",
         "locationRequirement": "On-Site"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "General Consulting",
@@ -891,8 +891,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "MEP"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "100000"
@@ -987,8 +987,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "100000"
@@ -1079,8 +1079,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Architect"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "100000"
@@ -1175,8 +1175,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "100000"
@@ -1275,8 +1275,8 @@
         ],
         "targetRole": "Project Management"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Project Management",
@@ -1369,8 +1369,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Architect",
@@ -1465,8 +1465,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Civil Engineer",
@@ -1554,8 +1554,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Excavator"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Excavator",
@@ -1644,8 +1644,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Office space",
@@ -1729,8 +1729,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Office space"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Office space",
@@ -1819,8 +1819,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Accounting",
@@ -1904,8 +1904,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Accounting"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Accounting",
@@ -1994,8 +1994,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Excavator",
@@ -2080,8 +2080,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Structural Engineer"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Structural Analysis",
@@ -2168,8 +2168,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Project Management"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Project Management",
@@ -2261,8 +2261,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "HVAC Design",
@@ -2352,8 +2352,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "CAD Technician"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "85000"
@@ -2451,8 +2451,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "85000"
@@ -2546,8 +2546,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Joint Venture Partner"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "General Contracting",
@@ -2640,8 +2640,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "SPV Sponsor"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Infrastructure Development",
@@ -2731,8 +2731,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Strategic Partner"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "General Contracting",
@@ -2822,8 +2822,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "MEP Partner"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "MEP Services",
@@ -2913,8 +2913,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Mentor"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "12000"
@@ -3013,8 +3013,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "12000"
@@ -3110,8 +3110,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Steel Supplier"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "200000"
@@ -3209,8 +3209,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Tower Crane Operation",
@@ -3304,8 +3304,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "95000"
@@ -3399,8 +3399,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Legal Consultant"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "45000"
@@ -3494,8 +3494,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Architect"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Architectural Design",
@@ -3595,8 +3595,8 @@
         ],
         "targetRole": "Project Management"
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "Infrastructure Development",
@@ -3690,8 +3690,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T08:12:28.324Z",
-      "updatedAt": "2026-06-15T08:12:28.324Z",
+      "createdAt": "2026-06-15T10:46:57.138Z",
+      "updatedAt": "2026-06-15T10:46:57.138Z",
       "normalized": {
         "skills": [
           "General Contracting",

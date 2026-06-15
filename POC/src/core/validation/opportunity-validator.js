@@ -11,7 +11,7 @@
             ...s,
             budgetMin: s.budgetMin ?? budgetRange.min,
             budgetMax: s.budgetMax ?? budgetRange.max,
-            durationDays: s.durationDays ?? s.duration,
+            durationDays: s.durationDays ?? s.duration ?? s.attributes?.duration ?? s.modelData?.duration,
             cashAmount: s.cashAmount ?? s.exchangeData?.cashAmount,
             equityPercentage: s.equityPercentage ?? s.exchangeData?.equityPercentage,
             profitSharePercentage: s.profitSharePercentage ?? s.exchangeData?.profitSharePercentage
@@ -84,11 +84,17 @@
         }
 
         if (options.modelKey && options.subModelKey && state.modelAttributes) {
+            const deferredKeys = options.excludeModelKeys
+                || global.EXCHANGE_DEFERRED_ATTRIBUTE_KEYS
+                || ['paymentTerms', 'exchangeType', 'barterOffer'];
             const modelResult = global.validateModelAttributes(
                 state.modelAttributes,
                 options.modelKey,
                 options.subModelKey,
-                { disallowPastDates: !!options.disallowPastDates }
+                {
+                    disallowPastDates: !!options.disallowPastDates,
+                    excludeKeys: deferredKeys
+                }
             );
             if (!modelResult.isValid) {
                 Object.entries(modelResult.fieldErrors).forEach(([field, message]) => {
@@ -106,7 +112,8 @@
         const state = {
             exchangeMode: opp.exchangeMode || exchange.exchangeMode,
             cashAmount: exchange.cashAmount ?? opp.cashAmount,
-            durationDays: opp.durationDays ?? opp.duration ?? opp.estimatedDurationDays,
+            durationDays: opp.durationDays ?? opp.duration ?? opp.estimatedDurationDays
+                ?? opp.attributes?.duration ?? opp.modelData?.duration ?? opp.scope?.duration,
             budgetMin: opp.budgetMin ?? opp.budgetRange?.min,
             budgetMax: opp.budgetMax ?? opp.budgetRange?.max,
             equityPercentage: exchange.equityPercentage ?? opp.equityPercentage,
@@ -115,8 +122,8 @@
             endDate: opp.endDate ?? opp.timeline?.endDate,
             applicationDeadline: opp.applicationDeadline ?? opp.timeline?.applicationDeadline,
             modelAttributes: opp.modelAttributes || opp.attributes,
-            modelKey: opp.modelKey || opp.collaborationModel,
-            subModelKey: opp.subModelKey || opp.subModel
+            modelKey: opp.modelKey || opp.collaborationModel || opp.modelType,
+            subModelKey: opp.subModelKey || opp.subModel || opp.subModelType
         };
         return validateOpportunityForm(state, {
             modelKey: state.modelKey,

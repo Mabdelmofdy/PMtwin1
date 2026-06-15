@@ -16,6 +16,12 @@ const CANONICAL_PROFESSIONAL_ROLES = [
 ];
 /** When set, submit updates this opportunity instead of creating a new one (loaded from /opportunities/:id/edit). */
 let wizardEditOpportunityId = null;
+
+/** Model fields rendered and validated on Step 6 (value exchange), not Step 5. */
+function getDeferredExchangeFieldKeys() {
+    return window.EXCHANGE_DEFERRED_ATTRIBUTE_KEYS || ['paymentTerms', 'exchangeType', 'barterOffer'];
+}
+
 let allLocations = [];
 /** Index of last used demo scenario so each fill prefers a different archetype when possible. */
 let lastDemoDatasetIndex = -1;
@@ -135,9 +141,10 @@ function randomizeDemoDataset(base) {
     if (d.step1) {
         d.step1.locationKey = locationKey;
         d.step1.locationRequirement = demoPick(meta.workModes);
-        d.step1.startDate = demoDateOffset(demoRandInt(7, 28));
-        d.step1.applicationDeadline = demoDateOffset(demoRandInt(30, 65));
-        d.step1.endDate = demoDateOffset(demoRandInt(90, 365));
+        const startDays = demoRandInt(14, 45);
+        const deadlineDays = demoRandInt(3, startDays - 1);
+        const endDays = demoRandInt(startDays + 30, 365);
+        Object.assign(d.step1, buildDemoStep1Dates(startDays, deadlineDays, endDays));
         if (d.step1.title) {
             let title = replaceDemoLocationText(d.step1.title, prevMeta, meta);
             title = title.replace(/\s*\[[\d-]+\]\s*$/, '').trim();
@@ -246,6 +253,42 @@ function demoDateOffset(days) {
 }
 
 /**
+ * Build step1 dates that pass validation: application deadline on or before start; end after start.
+ */
+function buildDemoStep1Dates(startDays, deadlineDays, endDays) {
+    const start = Math.max(1, startDays);
+    const deadline = Math.max(1, Math.min(deadlineDays, start - 1));
+    const end = Math.max(start + 1, endDays);
+    return {
+        startDate: demoDateOffset(start),
+        applicationDeadline: demoDateOffset(deadline),
+        endDate: demoDateOffset(end)
+    };
+}
+
+/** Coerce step1 dates into a valid order (deadline ≤ start < end). */
+function normalizeDemoStep1Dates(step1) {
+    if (!step1) return;
+    const toOffset = (iso) => {
+        if (!iso) return null;
+        return Math.round((new Date(iso).getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+    };
+    let startOff = toOffset(step1.startDate) ?? 14;
+    let deadlineOff = toOffset(step1.applicationDeadline) ?? 7;
+    let endOff = toOffset(step1.endDate) ?? startOff + 90;
+    if (deadlineOff >= startOff) {
+        startOff = deadlineOff + 7;
+    }
+    if (endOff <= startOff) {
+        endOff = startOff + 90;
+    }
+    const coherent = buildDemoStep1Dates(startOff, deadlineOff, endOff);
+    step1.startDate = coherent.startDate;
+    step1.applicationDeadline = coherent.applicationDeadline;
+    step1.endDate = coherent.endDate;
+}
+
+/**
  * Demo location presets mapped to locations.json ids (GCC + Egypt + remote).
  * locationKey: riyadh | jeddah | dammam | dubai | abu-dhabi | doha | muscat | cairo | alexandria | kuwait-city | manama | remote
  */
@@ -281,9 +324,7 @@ const DEMO_DATASETS = [
             description: 'We are seeking an experienced structural engineer to provide design and consultation services for a new 5-story commercial building in Riyadh, Saudi Arabia. The project involves reinforced concrete design, foundation analysis, and construction supervision.',
             locationKey: 'riyadh',
             locationRequirement: 'Hybrid',
-            startDate: demoDateOffset(14),
-            applicationDeadline: demoDateOffset(28),
-            endDate: demoDateOffset(120)
+            ...buildDemoStep1Dates(14, 7, 120)
         },
         step2: { intent: 'request' },
         step3: {
@@ -331,9 +372,7 @@ const DEMO_DATASETS = [
             description: 'Program-wide engagement covering multiple sites across Muscat and Oman under one umbrella contract. Work packages may be staffed independently while sharing governance and reporting.',
             locationKey: 'muscat',
             locationRequirement: 'On-Site',
-            startDate: demoDateOffset(21),
-            applicationDeadline: demoDateOffset(45),
-            endDate: demoDateOffset(200)
+            ...buildDemoStep1Dates(21, 10, 200)
         },
         step2: { intent: 'request' },
         step3: {
@@ -385,9 +424,7 @@ const DEMO_DATASETS = [
             description: 'We offer a long-term strategic joint venture in construction and engineering based in Dubai, UAE. Seeking a partner for equity participation, shared governance, and expansion across the GCC.',
             locationKey: 'dubai',
             locationRequirement: 'Hybrid',
-            startDate: demoDateOffset(30),
-            applicationDeadline: demoDateOffset(60),
-            endDate: demoDateOffset(365)
+            ...buildDemoStep1Dates(30, 14, 365)
         },
         step2: { intent: 'offer' },
         step3: {
@@ -450,9 +487,7 @@ const DEMO_DATASETS = [
             description: 'Request for consortium members for a major infrastructure tender in Doha, Qatar. Profit-sharing and scope division by trade. Lead member role available.',
             locationKey: 'doha',
             locationRequirement: 'On-Site',
-            startDate: demoDateOffset(10),
-            applicationDeadline: demoDateOffset(45),
-            endDate: demoDateOffset(1095)
+            ...buildDemoStep1Dates(10, 5, 1095)
         },
         step2: { intent: 'request' },
         step3: {
@@ -517,9 +552,7 @@ const DEMO_DATASETS = [
             description: 'We offer project management and sustainability consulting across the GCC. Open to barter (office space, software licenses) or hybrid compensation. Work can be delivered remotely.',
             locationKey: 'remote',
             locationRequirement: 'Remote',
-            startDate: demoDateOffset(7),
-            applicationDeadline: demoDateOffset(21),
-            endDate: demoDateOffset(97)
+            ...buildDemoStep1Dates(14, 7, 97)
         },
         step2: { intent: 'offer' },
         step3: {
@@ -568,9 +601,7 @@ const DEMO_DATASETS = [
             description: 'Organizing a bulk purchase of structural steel for multiple construction projects in Jeddah, Saudi Arabia. Seeking 4–6 participants to achieve volume discount. Lead organizer; delivery to central depot.',
             locationKey: 'jeddah',
             locationRequirement: 'On-Site',
-            startDate: demoDateOffset(14),
-            applicationDeadline: demoDateOffset(35),
-            endDate: demoDateOffset(104)
+            ...buildDemoStep1Dates(14, 7, 104)
         },
         step2: { intent: 'request' },
         step3: {
@@ -622,9 +653,7 @@ const DEMO_DATASETS = [
             description: 'Open innovation contest for sustainable construction solutions in Cairo, Egypt. Winner receives 500K EGP equivalent prize and pilot opportunity. Open to companies and professionals. Submission deadline 60 days.',
             locationKey: 'cairo',
             locationRequirement: 'Hybrid',
-            startDate: demoDateOffset(7),
-            applicationDeadline: demoDateOffset(60),
-            endDate: demoDateOffset(180)
+            ...buildDemoStep1Dates(75, 60, 180)
         },
         step2: { intent: 'request' },
         step3: {
@@ -868,6 +897,7 @@ function applyEditModeHero() {
 }
 
 async function hydrateWizardForEdit(opportunityId) {
+    applyEditModeHero();
     const user = authService.getCurrentUser();
     const opp = await dataService.getOpportunityById(opportunityId);
     if (!opp) {
@@ -880,10 +910,9 @@ async function hydrateWizardForEdit(opportunityId) {
         wizardEditOpportunityId = null;
         return;
     }
-    applyEditModeHero();
     const dataset = opportunityToEditWizardDataset(opp);
     await fillDemoData(dataset);
-    await new Promise((r) => setTimeout(r, 850));
+    await new Promise((r) => setTimeout(r, dataset.editHydrate ? 700 : 0));
     wizardApplyLocationQuick(opp);
     const latEl = document.getElementById('latitude');
     const lngEl = document.getElementById('longitude');
@@ -892,10 +921,12 @@ async function hydrateWizardForEdit(opportunityId) {
     updateScopeLabels();
     const successDiv = document.getElementById('form-success');
     if (successDiv) successDiv.classList.add('hidden');
+    goToStep(2);
 }
 
 async function initOpportunityCreate(params = {}) {
     wizardEditOpportunityId = null;
+    currentStep = 1;
     // Read-only demo: pending users can view but not submit
     if (authService.isPendingApproval && authService.isPendingApproval()) {
         const form = document.getElementById('opportunity-form');
@@ -956,7 +987,10 @@ async function initOpportunityCreate(params = {}) {
             console.error('Edit hydrate:', err);
             showError(err.message || 'Could not load this opportunity into the wizard.');
             wizardEditOpportunityId = null;
+            goToStep(1);
         }
+    } else {
+        goToStep(1);
     }
 }
 
@@ -1786,6 +1820,14 @@ function mapValidationKeyToFieldId(key) {
     if (dynamicContainer) {
         const dynamicEl = document.getElementById(bare);
         if (dynamicEl && dynamicContainer.contains(dynamicEl)) return bare;
+        if (bare.endsWith('_min') || bare.endsWith('_max')) {
+            const rangeEl = document.getElementById(bare);
+            if (rangeEl && dynamicContainer.contains(rangeEl)) return bare;
+        }
+        const rangeMinId = `${bare}_min`;
+        if (document.getElementById(rangeMinId) && dynamicContainer.contains(document.getElementById(rangeMinId))) {
+            return rangeMinId;
+        }
     }
     const map = {
         cashAmount: 'cash-amount',
@@ -1811,7 +1853,7 @@ function collectStep5ModelAttributes() {
     }
     const form = document.getElementById('opportunity-form');
     const allData = form ? formService.collectFormData(form) : {};
-    const paymentFieldKeys = ['paymentTerms', 'exchangeType', 'barterOffer'];
+    const paymentFieldKeys = getDeferredExchangeFieldKeys();
     const attributes = formService.getAttributes(modelType, subModelType)
         .filter((a) => !paymentFieldKeys.includes(a.key));
     const modelAttributes = {};
@@ -1897,6 +1939,29 @@ function getCreateValidationOptions() {
     };
 }
 
+function validateDurationFields() {
+    const checkNumericField = (el) => {
+        if (!el) return null;
+        const raw = el.value?.trim();
+        if (!raw) return null;
+        const num = Number(raw);
+        if (Number.isFinite(num) && num < 1) {
+            return 'Duration must be at least 1 day.';
+        }
+        return null;
+    };
+    for (const id of ['durationDays', 'duration']) {
+        const err = checkNumericField(document.getElementById(id));
+        if (err) return err;
+    }
+    const taskDurations = document.querySelectorAll('[data-task-duration]');
+    for (const el of taskDurations) {
+        const err = checkNumericField(el);
+        if (err) return err;
+    }
+    return null;
+}
+
 function validateCurrentStep() {
     const errorDiv = document.getElementById('form-error');
     errorDiv.classList.add('hidden');
@@ -1966,6 +2031,11 @@ function validateCurrentStep() {
                 scopeInput?.focus();
                 return false;
             }
+            const durationErr = validateDurationFields();
+            if (durationErr) {
+                showError(durationErr);
+                return false;
+            }
             break;
         }
         case 5: {
@@ -1982,7 +2052,7 @@ function validateCurrentStep() {
             }
             const formService = window.opportunityFormService;
             if (formService) {
-                const paymentFieldKeys = ['paymentTerms', 'exchangeType', 'barterOffer'];
+                const paymentFieldKeys = getDeferredExchangeFieldKeys();
                 const attrs = formService.getAttributes(modelType, subModelType).filter(a => !paymentFieldKeys.includes(a.key));
                 const form = document.getElementById('opportunity-form');
                 for (const attr of attrs) {
@@ -2040,7 +2110,10 @@ function validateCurrentStep() {
                     modelAttributes,
                     modelType,
                     subModelType,
-                    { disallowPastDates: true }
+                    {
+                        disallowPastDates: true,
+                        excludeKeys: getDeferredExchangeFieldKeys()
+                    }
                 );
                 if (!modelValidation.isValid) {
                     renderValidationErrors(modelValidation.fieldErrors);
@@ -4589,6 +4662,7 @@ function resolveDemoLocation(locationKey) {
 /** Fill Step 2 optional fields: location requirement and key dates. */
 function fillDemoStep1Extras(step1) {
     if (!step1) return;
+    normalizeDemoStep1Dates(step1);
     const locReqEl = document.getElementById('location-requirement');
     if (locReqEl && step1.locationRequirement) {
         locReqEl.value = step1.locationRequirement;
@@ -4873,7 +4947,7 @@ function renderDynamicFields(modelKey, subModelKey, preserveValues = false) {
     if (!container || !formService) return;
     
     const allAttributes = formService.getAttributes(modelKey, subModelKey);
-    const paymentFieldKeys = ['paymentTerms', 'exchangeType', 'barterOffer'];
+    const paymentFieldKeys = getDeferredExchangeFieldKeys();
     const attributes = allAttributes.filter(a => !paymentFieldKeys.includes(a.key));
     
     // If preserving values, collect current field values before re-rendering

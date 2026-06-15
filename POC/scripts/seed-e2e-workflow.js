@@ -250,6 +250,15 @@ function applyLifecycle() {
             application_value: { exchangeMode: 'barter', barterValue: 45000, currency: 'SAR' },
             responses: {}, availabilityDate: '2026-03-12', estimatedDurationDays: 45,
             createdAt: T.appAt, updatedAt: T.appAt
+        },
+        // Stage C: task-based barter application under negotiation (CAD production need)
+        {
+            id: 'seed-app-010', opportunityId: 'seed-opp-026', applicantId: 'seed-user-002',
+            status: 'in_negotiation', matchId: barterTaskId, matchType: 'one_way', negotiationId: 'seed-neg-05',
+            proposal: 'Barter counter-offer: CAD production delivery with QA pass in exchange for PM support (~90K SAR equivalent).',
+            application_value: { exchangeMode: 'barter', barterValue: 90000, currency: 'SAR' },
+            responses: {}, availabilityDate: '2026-03-01', estimatedDurationDays: 42,
+            createdAt: T.appAt, updatedAt: T.negStart
         }
     ];
     writeEnvelope('demo-applications.json', {
@@ -327,7 +336,7 @@ function applyLifecycle() {
             createdAt: T.negStart, updatedAt: T.negEnd
         },
         {
-            id: 'seed-neg-05', opportunityId: 'seed-opp-026', matchId: barterTaskId, applicationId: null,
+            id: 'seed-neg-05', opportunityId: 'seed-opp-026', matchId: barterTaskId, applicationId: 'seed-app-010',
             parties: [
                 { userId: 'seed-user-001', role: 'need_owner' },
                 { userId: 'seed-user-002', role: 'offer_provider' }

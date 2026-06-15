@@ -132,6 +132,24 @@ async function initOpportunities() {
     }
 
     await loadOpportunities();
+    setupOpportunitiesRefreshListener();
+}
+
+function setupOpportunitiesRefreshListener() {
+    const root = document.getElementById('opportunities-list')?.closest('section')
+        || document.getElementById('opportunities-panel-wrap');
+    if (!root || root.dataset.opportunitiesRefreshBound) return;
+    root.dataset.opportunitiesRefreshBound = '1';
+    const refresh = async () => {
+        const user = authService.getCurrentUser();
+        if (user) {
+            const allApplications = await dataService.getApplications();
+            userApplications = allApplications.filter((app) => app.applicantId === user.id);
+        }
+        await loadOpportunities();
+    };
+    ['pmtwin:opportunities-updated', 'pmtwin:applications-updated', 'pmtwin:deals-updated', 'pmtwin:data-changed']
+        .forEach((eventName) => window.addEventListener(eventName, () => { void refresh(); }));
 }
 
 function renderOppEmpty(opts) {
@@ -165,11 +183,15 @@ async function loadOpportunities() {
     try {
         const raw = await dataService.getOpportunities();
         const user = authService.getCurrentUser();
+        const allDeals = user ? await dataService.getDeals() : [];
 
         const allCategorized = raw.map((opp) => {
             const isOwner = user && opp.creatorId === user.id;
             const application = userApplications.find((app) => app.opportunityId === opp.id);
             const hasApplied = !!application;
+            const hasDeal = user && allDeals.some((d) =>
+                d.opportunityId === opp.id || (Array.isArray(d.opportunityIds) && d.opportunityIds.includes(opp.id))
+            );
 
             let category = 'available';
             if (isOwner) {
@@ -183,6 +205,7 @@ async function loadOpportunities() {
                 category,
                 isOwner,
                 hasApplied,
+                hasDeal,
                 applicationStatus: application?.status || null,
                 applicationId: application?.id || null
             };
@@ -279,8 +302,13 @@ async function loadOpportunities() {
 
         const html = list
             .map((opp) => {
-                const canApply =
-                    user && !opp.isOwner && (opp.status === 'published' || opp.status === 'in_negotiation') && !opp.hasApplied;
+                const canApplyHelper = window.applicationUtils?.canUserApplyToOpportunity;
+                const canApply = canApplyHelper
+                    ? canApplyHelper(opp, user, {
+                        application: userApplications.find((a) => a.opportunityId === opp.id),
+                        hasDeal: opp.hasDeal
+                    })
+                    : (user && !opp.isOwner && (opp.status === 'published' || opp.status === 'in_negotiation') && !opp.hasApplied && !opp.hasDeal);
 
                 const sb = window.statusBadgeSystem;
                 const data = {

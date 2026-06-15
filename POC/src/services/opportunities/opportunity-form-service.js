@@ -560,28 +560,47 @@ class OpportunityFormService {
             }
         }
         
+        // Merge suffixed range fields (e.g. budget_min + budget_max -> budget)
+        const mergedRangeKeys = new Set();
+        Object.keys(data).forEach((key) => {
+            if (key.endsWith('_min')) {
+                const base = key.slice(0, -4);
+                const maxKey = `${base}_max`;
+                if (!Object.prototype.hasOwnProperty.call(data, maxKey)) return;
+                const minVal = data[key];
+                const maxVal = data[maxKey];
+                const hasMin = minVal !== '' && minVal != null;
+                const hasMax = maxVal !== '' && maxVal != null;
+                if (hasMin || hasMax) {
+                    data[base] = {
+                        min: hasMin ? parseFloat(minVal) : null,
+                        max: hasMax ? parseFloat(maxVal) : null
+                    };
+                }
+                mergedRangeKeys.add(key);
+                mergedRangeKeys.add(maxKey);
+            } else if (key.endsWith('_start')) {
+                const base = key.slice(0, -6);
+                const endKey = `${base}_end`;
+                if (!Object.prototype.hasOwnProperty.call(data, endKey)) return;
+                const startVal = data[key];
+                const endVal = data[endKey];
+                const hasStart = startVal !== '' && startVal != null;
+                const hasEnd = endVal !== '' && endVal != null;
+                if (hasStart || hasEnd) {
+                    data[base] = {
+                        start: hasStart ? startVal : null,
+                        end: hasEnd ? endVal : null
+                    };
+                }
+                mergedRangeKeys.add(key);
+                mergedRangeKeys.add(endKey);
+            }
+        });
+        mergedRangeKeys.forEach((key) => delete data[key]);
+
         // Handle special field types
         Object.keys(data).forEach(key => {
-            // Currency ranges
-            if (data[`${key}_min`] && data[`${key}_max`]) {
-                data[key] = {
-                    min: parseFloat(data[`${key}_min`]),
-                    max: parseFloat(data[`${key}_max`])
-                };
-                delete data[`${key}_min`];
-                delete data[`${key}_max`];
-            }
-            
-            // Date ranges
-            if (data[`${key}_start`] && data[`${key}_end`]) {
-                data[key] = {
-                    start: data[`${key}_start`],
-                    end: data[`${key}_end`]
-                };
-                delete data[`${key}_start`];
-                delete data[`${key}_end`];
-            }
-            
             // Tags (comma-separated strings)
             if (typeof data[key] === 'string' && data[key].includes(',')) {
                 const tags = data[key].split(',').map(t => t.trim()).filter(t => t);

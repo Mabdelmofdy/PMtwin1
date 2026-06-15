@@ -91,7 +91,7 @@ class DataService {
         this.storage = window.storageService || storageService;
         this.initialized = false;
         this.SEED_DATA_VERSION_KEY = 'pmtwin_seed_version';
-        this.CURRENT_SEED_VERSION = '2.2.1'; // clamp inflated post_match scores; refreshed demo-post-matches
+        this.CURRENT_SEED_VERSION = '2.2.3'; // re-aligned e2e lifecycle (statuses/deals) + seed-app-010
     }
     
     /**
@@ -1027,9 +1027,14 @@ class DataService {
         if (isNewlyPublished) {
             const ms = window.matchingService || (typeof matchingService !== 'undefined' ? matchingService : null);
             if (ms && typeof ms.persistPostMatches === 'function') {
-                ms.persistPostMatches(id, { source: 'publish' }).catch(err => console.warn('Post-match persistence after publish:', err));
+                try {
+                    await ms.persistPostMatches(id, { source: 'publish' });
+                } catch (err) {
+                    console.warn('Post-match persistence after publish:', err);
+                }
             }
         }
+        emitDataChange(PMTWIN_EVENTS.OPPORTUNITIES_UPDATED, { opportunityId: id });
         return updated;
     }
     
@@ -1175,6 +1180,14 @@ class DataService {
 
         if (invitation) {
             await this.linkApplicationToInvitation(invitation, newApplication, options);
+        }
+
+        emitDataChange(PMTWIN_EVENTS.APPLICATIONS_UPDATED, {
+            applicationId: newApplication.id,
+            opportunityId: newApplication.opportunityId
+        });
+        if (newApplication.opportunityId) {
+            emitDataChange(PMTWIN_EVENTS.OPPORTUNITIES_UPDATED, { opportunityId: newApplication.opportunityId });
         }
 
         return newApplication;
@@ -2469,7 +2482,15 @@ class DataService {
             updatedAt: new Date().toISOString()
         };
         this.storage.set(CONFIG.STORAGE_KEYS.APPLICATIONS, applications);
-        return applications[index];
+        const updated = applications[index];
+        emitDataChange(PMTWIN_EVENTS.APPLICATIONS_UPDATED, {
+            applicationId: id,
+            opportunityId: updated.opportunityId
+        });
+        if (updated.opportunityId) {
+            emitDataChange(PMTWIN_EVENTS.OPPORTUNITIES_UPDATED, { opportunityId: updated.opportunityId });
+        }
+        return updated;
     }
 
     async getApplicationsByOpportunityId(opportunityId) {
@@ -3284,6 +3305,43 @@ class DataService {
         }
     }
 
+    async _syncOpportunityStatusFromDeal(deal) {
+        if (!deal) return;
+        const oppIds = Array.isArray(deal.opportunityIds) && deal.opportunityIds.length
+            ? [...new Set(deal.opportunityIds)]
+            : (deal.opportunityId ? [deal.opportunityId] : []);
+        if (!oppIds.length) return;
+
+        const dealStatus = (deal.status || '').toLowerCase();
+        let targetStatus = null;
+        if (dealStatus === CONFIG.DEAL_STATUS.COMPLETED || dealStatus === 'completed') {
+            targetStatus = CONFIG.OPPORTUNITY_STATUS.COMPLETED;
+        } else if (dealStatus === CONFIG.DEAL_STATUS.CLOSED || dealStatus === 'closed') {
+            targetStatus = CONFIG.OPPORTUNITY_STATUS.CLOSED;
+        } else if ([CONFIG.DEAL_STATUS.EXECUTION, 'execution', CONFIG.DEAL_STATUS.ACTIVE, 'active'].includes(dealStatus)) {
+            targetStatus = CONFIG.OPPORTUNITY_STATUS.IN_EXECUTION;
+        } else if ([CONFIG.DEAL_STATUS.DRAFT, 'draft', CONFIG.DEAL_STATUS.NEGOTIATING, 'negotiating',
+            CONFIG.DEAL_STATUS.REVIEW, 'review', CONFIG.DEAL_STATUS.SIGNING, 'signing'].includes(dealStatus)) {
+            targetStatus = CONFIG.OPPORTUNITY_STATUS.CONTRACTED;
+        }
+
+        if (!targetStatus) return;
+
+        for (const oppId of oppIds) {
+            try {
+                const opp = await this.getOpportunityById(oppId);
+                if (!opp) continue;
+                const current = (opp.status || '').toLowerCase();
+                const skip = [CONFIG.OPPORTUNITY_STATUS.COMPLETED, CONFIG.OPPORTUNITY_STATUS.CLOSED,
+                    CONFIG.OPPORTUNITY_STATUS.CANCELLED].includes(current);
+                if (skip) continue;
+                await this.updateOpportunity(oppId, { status: targetStatus });
+            } catch (e) {
+                void e;
+            }
+        }
+    }
+
     async linkEntitiesAfterDealCreated(deal, options = {}) {
         if (!deal || !deal.id) return deal;
         const actorUserId = options.actorUserId || 'system';
@@ -3320,6 +3378,8 @@ class DataService {
         } catch (e) {
             void e;
         }
+
+        await this._syncOpportunityStatusFromDeal(deal);
 
         return deal;
     }
@@ -3442,6 +3502,10 @@ class DataService {
             signedAt: null
         }));
 
+        const actorRelativeOppId = actor
+            ? this._resolveNegotiationOpportunityId(postMatch, actor)
+            : null;
+
         const deal = await this.createDeal({
             matchId,
             matchType,
@@ -3449,7 +3513,7 @@ class DataService {
             title: 'Deal – ' + matchId,
             participants: dealParticipants,
             opportunityIds,
-            opportunityId: primaryOpportunityId,
+            opportunityId: actorRelativeOppId || primaryOpportunityId,
             payload: consortiumPayload,
             roleSlots,
             sourcePostMatch: postMatch,
@@ -3597,6 +3661,7 @@ class DataService {
         };
         deals.push(newDeal);
         this.storage.set(CONFIG.STORAGE_KEYS.DEALS, deals);
+        emitDataChange(PMTWIN_EVENTS.DEALS_UPDATED, { dealId: newDeal.id });
         return newDeal;
     }
 
@@ -3622,8 +3687,10 @@ class DataService {
             updatedAt: new Date().toISOString()
         };
         this.storage.set(CONFIG.STORAGE_KEYS.DEALS, deals);
+        const updated = deals[index];
+        await this._syncOpportunityStatusFromDeal(updated);
         emitDataChange(PMTWIN_EVENTS.DEALS_UPDATED, { dealId: id });
-        return deals[index];
+        return updated;
     }
 
     async addDealMilestone(dealId, milestoneData) {

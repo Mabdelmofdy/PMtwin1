@@ -77,7 +77,6 @@
         }
       ],
       "status": "counter_offered",
-      "disputeId": "seed-dispute-01",
       "initialTerms": {
         "value": 100000,
         "currency": "SAR",
@@ -198,7 +197,7 @@
       "id": "seed-neg-05",
       "opportunityId": "seed-opp-026",
       "matchId": "demo-pm-oneway-07",
-      "applicationId": null,
+      "applicationId": "seed-app-010",
       "parties": [
         {
           "userId": "seed-user-001",

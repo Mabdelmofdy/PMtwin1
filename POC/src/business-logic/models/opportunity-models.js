@@ -14,7 +14,7 @@ const OPPORTUNITY_MODELS = {
                     { key: 'taskTitle', label: 'Task Title', type: 'text', required: true, maxLength: 100 },
                     { key: 'taskType', label: 'Task Type', type: 'select', required: true, options: ['Design', 'Engineering', 'Consultation', 'Review', 'Analysis', 'Other'] },
                     { key: 'detailedScope', label: 'Detailed Scope', type: 'textarea', required: true, maxLength: 2000 },
-                    { key: 'duration', label: 'Duration (days)', type: 'number', required: true },
+                    { key: 'duration', label: 'Duration (days)', type: 'number', required: true, min: 1 },
                     { key: 'requiredSkills', label: 'Required Skills', type: 'tags', required: true },
                     { key: 'experienceLevel', label: 'Experience Level', type: 'select', required: true, options: ['Junior', 'Mid-Level', 'Senior', 'Expert'] },
                     { key: 'locationRequirement', label: 'Location Requirement', type: 'select', required: false, options: ['Remote', 'On-Site', 'Hybrid'] },
