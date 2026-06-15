@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { MapPin, Plus } from 'lucide-react'
 import { dataStore } from '@/lib/data-store'
 import { formatDate, truncate } from '@/lib/format'
@@ -154,56 +154,6 @@ export function OpportunityCreatePage() {
           ))}
         </CardContent>
       </Card>
-    </div>
-  )
-}
-
-export function OpportunityDetailPage() {
-  const { id } = useParams()
-  const opp = id ? dataStore.getOpportunityById(id) : undefined
-  if (!opp) {
-    return <p className="text-muted-foreground">Opportunity not found.</p>
-  }
-  const skills = opp.scope?.coreSkills ?? opp.attributes?.coreSkills ?? []
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        label="Opportunity"
-        title={opp.title}
-        description={opp.location}
-        actions={
-          <>
-            <StatusBadge status={opp.status} />
-            <Button variant="outline" className="cursor-pointer" asChild>
-              <Link to={`/opportunities/${opp.id}/edit`}>Edit</Link>
-            </Button>
-          </>
-        }
-      />
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-4 lg:col-span-2">
-          <Card>
-            <CardHeader><CardTitle>Description</CardTitle></CardHeader>
-            <CardContent className="text-sm text-muted-foreground">{opp.description}</CardContent>
-          </Card>
-          <Card>
-            <CardHeader><CardTitle>Core skills</CardTitle></CardHeader>
-            <CardContent className="flex flex-wrap gap-2">
-              {skills.map((s: string) => (
-                <span key={s} className="rounded-md bg-muted px-2 py-1 text-xs">{s}</span>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-        <Card>
-          <CardHeader><CardTitle>Exchange</CardTitle></CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <p><span className="text-muted-foreground">Mode:</span> {opp.exchangeMode}</p>
-            <p><span className="text-muted-foreground">Model:</span> {opp.modelType}</p>
-            <p><span className="text-muted-foreground">Intent:</span> {opp.intent}</p>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   )
 }

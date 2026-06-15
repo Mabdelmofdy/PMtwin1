@@ -149,3 +149,6 @@ export function NegotiationDetailPage() {
           </CardContent>
         </Card>
       </div>
+    </div>
+  )
+}

@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { Zap } from 'lucide-react'
 import { APP_NAME } from '@/config/navigation'
+import { useAuth } from '@/providers/auth-provider'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -12,6 +13,7 @@ const publicLinks = [
 ] as const
 
 export function PublicLayout() {
+  const { isAuthenticated } = useAuth()
   return (
     <div className="min-h-svh bg-background">
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
@@ -42,12 +44,20 @@ export function PublicLayout() {
             ))}
           </nav>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="cursor-pointer" asChild>
-              <Link to="/login">Sign in</Link>
-            </Button>
-            <Button size="sm" className="cursor-pointer" asChild>
-              <Link to="/register">Get started</Link>
-            </Button>
+            {isAuthenticated ? (
+              <Button size="sm" className="cursor-pointer" asChild>
+                <Link to="/dashboard">Dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" className="cursor-pointer" asChild>
+                  <Link to="/login">Sign in</Link>
+                </Button>
+                <Button size="sm" className="cursor-pointer" asChild>
+                  <Link to="/register">Get started</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>

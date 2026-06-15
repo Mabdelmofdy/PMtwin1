@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AppShell } from '@/components/layout/app-shell'
 import { PublicLayout } from '@/components/layout/public-layout'
 import { DashboardPage } from '@/pages/dashboard-page'
@@ -18,11 +19,11 @@ import {
 } from '@/pages/public/auth-pages'
 import {
   OpportunityCreatePage,
-  OpportunityDetailPage,
   OpportunityEditPage,
   OpportunityMapPage,
   OpportunitiesPage,
 } from '@/pages/workspace/opportunities-pages'
+import { OpportunityDetailPage } from '@/pages/workspace/opportunity-detail-page'
 import {
   MatchDetailPage,
   MatchesPage,
@@ -85,7 +86,13 @@ export function AppRoutes() {
       </Route>
 
       {/* Authenticated portal + admin (shared shell) */}
-      <Route element={<AppShell />}>
+      <Route
+        element={
+          <ProtectedRoute>
+            <AppShell />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/company-dashboard" element={<DashboardPage />} />
 

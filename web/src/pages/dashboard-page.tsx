@@ -31,7 +31,7 @@ function StatCard({
 
 export function DashboardPage() {
   const { user } = useAuth()
-  const firstName = user.profile.name.split(' ')[0]
+  const firstName = (user?.profile?.name ?? 'there').split(' ')[0]
   const opps = dataStore.getOpportunities()
   const matches = dataStore.getPostMatches()
   const published = opps.filter((o) => o.status === 'published').length
@@ -63,7 +63,13 @@ export function DashboardPage() {
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard label="Published opportunities" value={String(published)} hint={`${opps.length} total in marketplace`} />
         <StatCard label="Post-matches" value={String(matches.length)} hint={`${highMatches} above 90% fit`} />
-        <StatCard label="Unread alerts" value={String(dataStore.getNotifications().filter((n) => !n.read).length)} hint="From notification feed" />
+        {user ? (
+          <StatCard
+            label="Unread alerts"
+            value={String(dataStore.getNotifications(user.id).filter((n) => !n.read).length)}
+            hint="From notification feed"
+          />
+        ) : null}
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">

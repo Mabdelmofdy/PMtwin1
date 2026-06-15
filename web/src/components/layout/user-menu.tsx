@@ -29,7 +29,8 @@ function getInitials(name: string) {
 export function UserMenu() {
   const { user, signOut } = useAuth()
   const { theme, setTheme } = useTheme()
-  const displayName = user.profile.name || user.email
+  if (!user) return null
+  const displayName = user.profile?.name || user.email
 
   return (
     <DropdownMenu>

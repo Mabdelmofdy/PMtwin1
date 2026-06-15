@@ -21,7 +21,7 @@ import {
 export function CommandMenu() {
   const { open, setOpen } = useCommandMenu()
   const navigate = useNavigate()
-  const { user, signOut } = useAuth()
+  const { canAccessAdmin, isCompanyUser, signOut } = useAuth()
 
   const runCommand = (href: string) => {
     setOpen(false)
@@ -44,7 +44,7 @@ export function CommandMenu() {
             {group.items.map((item) => {
               const Icon = item.icon
               const href =
-                item.href === '/dashboard' && user.isCompanyUser
+                item.href === '/dashboard' && isCompanyUser
                   ? '/company-dashboard'
                   : item.href
               return (
@@ -108,7 +108,7 @@ export function CommandMenu() {
           </CommandItem>
         </CommandGroup>
 
-        {user.canAccessAdmin ? (
+        {canAccessAdmin ? (
           <>
             <CommandSeparator />
             {adminNavigationGroups.map((group) => (

@@ -83,7 +83,7 @@ function StageSidebar({
   counts,
   onSelect,
   onDrop,
-  dropPrefix,
+  dropPrefix: _dropPrefix,
   disabled,
 }: {
   stages: ReadonlyArray<{ key: string; label: string; hint?: string }>

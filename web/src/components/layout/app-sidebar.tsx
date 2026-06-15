@@ -37,10 +37,11 @@ function getInitials(name: string) {
 
 export function AppSidebar() {
   const { pathname } = useLocation()
-  const { user, signOut } = useAuth()
-  const displayName = user.profile.name || user.email
+  const { user, signOut, isCompanyUser, canAccessAdmin } = useAuth()
+  if (!user) return null
+  const displayName = user.profile?.name || user.email
   const isAdminArea = pathname.startsWith('/admin')
-  const dashboardHref = user.isCompanyUser ? '/company-dashboard' : '/dashboard'
+  const dashboardHref = isCompanyUser ? '/company-dashboard' : '/dashboard'
 
   const navGroups = isAdminArea
     ? adminNavigationGroups
@@ -51,7 +52,7 @@ export function AppSidebar() {
             ? {
                 ...item,
                 href: dashboardHref,
-                title: user.isCompanyUser ? 'Company Dashboard' : 'Dashboard',
+                title: isCompanyUser ? 'Company Dashboard' : 'Dashboard',
               }
             : item,
         ),
@@ -160,7 +161,7 @@ export function AppSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        ) : user.canAccessAdmin ? (
+        ) : canAccessAdmin ? (
           <>
             <SidebarSeparator className="mx-0" />
             <SidebarGroup>

@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Bell, CheckCheck } from 'lucide-react'
-import { mockNotifications, type AppNotification } from '@/lib/mock-user'
+import { dataStore } from '@/lib/data-store'
+import { useAuth } from '@/providers/auth-provider'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -29,7 +30,7 @@ function NotificationItem({
   notification,
   onMarkRead,
 }: {
-  notification: AppNotification
+  notification: ReturnType<typeof dataStore.getNotifications>[number]
   onMarkRead: (id: string) => void
 }) {
   const content = (
@@ -43,7 +44,7 @@ function NotificationItem({
       <div className="min-w-0 flex-1 space-y-1">
         <p className="text-sm font-medium leading-snug">{notification.title}</p>
         <p className="line-clamp-2 text-xs text-muted-foreground">
-          {notification.description}
+          {notification.message}
         </p>
         <p className="text-[11px] text-muted-foreground">
           {formatRelativeTime(notification.createdAt)}
@@ -67,10 +68,10 @@ function NotificationItem({
     </div>
   )
 
-  if (notification.href) {
+  if (notification.link) {
     return (
       <Link
-        to={notification.href}
+        to={notification.link}
         className="group block cursor-pointer rounded-lg transition-colors hover:bg-muted/60"
       >
         {content}
@@ -86,9 +87,11 @@ function NotificationItem({
 }
 
 export function NotificationCenter() {
+  const { user } = useAuth()
   const [open, setOpen] = useState(false)
-  const [notifications, setNotifications] =
-    useState<AppNotification[]>(mockNotifications)
+  const [notifications, setNotifications] = useState(
+    () => dataStore.getNotifications(user?.id),
+  )
 
   const unreadCount = useMemo(
     () => notifications.filter((n) => !n.read).length,
