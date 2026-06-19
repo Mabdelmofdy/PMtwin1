@@ -22,11 +22,22 @@ export function createTestConfig() {
         },
         OPPORTUNITY_STATUS: {
             PUBLISHED: 'published',
-            IN_NEGOTIATION: 'in_negotiation'
+            IN_NEGOTIATION: 'in_negotiation',
+            CONTRACTED: 'contracted',
+            IN_EXECUTION: 'in_execution',
+            COMPLETED: 'completed',
+            CLOSED: 'closed',
+            CANCELLED: 'cancelled'
         },
         DEAL_STATUS: {
             NEGOTIATING: 'negotiating',
-            DRAFT: 'draft'
+            DRAFT: 'draft',
+            REVIEW: 'review',
+            SIGNING: 'signing',
+            ACTIVE: 'active',
+            EXECUTION: 'execution',
+            COMPLETED: 'completed',
+            CLOSED: 'closed'
         },
         POST_MATCH_STATUS: {
             CONFIRMED: 'confirmed',

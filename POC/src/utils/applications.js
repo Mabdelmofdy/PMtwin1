@@ -7,6 +7,25 @@ const TERMINAL_OPPORTUNITY_STATUSES = new Set([
     'contracted', 'in_execution', 'completed', 'closed', 'cancelled', 'draft'
 ]);
 
+const BLOCKING_APPLICATION_STATUSES = new Set([
+    'pending', 'reviewing', 'shortlisted', 'in_negotiation', 'accepted'
+]);
+
+/**
+ * Returns an existing non-terminal application that blocks a new submission.
+ * @param {Array} applications
+ * @param {string} opportunityId
+ * @param {string} applicantId
+ */
+export function findBlockingApplication(applications, opportunityId, applicantId) {
+    return (applications || []).find(
+        (app) =>
+            app.opportunityId === opportunityId &&
+            app.applicantId === applicantId &&
+            BLOCKING_APPLICATION_STATUSES.has((app.status || '').toLowerCase())
+    ) || null;
+}
+
 /**
  * Whether a user can submit a new application to an opportunity.
  * @param {object|null|undefined} opportunity
@@ -46,6 +65,7 @@ export function isApplicationInNegotiation(app, negotiation = null) {
 if (typeof window !== 'undefined') {
     window.applicationUtils = {
         isApplicationInNegotiation,
-        canUserApplyToOpportunity
+        canUserApplyToOpportunity,
+        findBlockingApplication
     };
 }

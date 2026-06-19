@@ -2,7 +2,8 @@ import { enforceTransition } from "/core/workflow/workflow-engine.js";
 import { PMTWIN_EVENTS, emitDataChange } from "../events/event-bus.js";
 import {
     createDealFromMatch as buildDealPayloadFromMatch,
-    buildDealPayloadFromApplication
+    buildDealPayloadFromApplication,
+    collectOpportunityIdsFromPostMatch
 } from "../../utils/deals.js";
 import {
     canCreateDealFromApplication,
@@ -20,7 +21,7 @@ import {
     hasParticipantAgreed,
     allRequiredParticipantsAgreed
 } from "../../services/matching/negotiation-lifecycle.js";
-import { isApplicationInNegotiation } from "../../utils/applications.js";
+import { findBlockingApplication, isApplicationInNegotiation } from "../../utils/applications.js";
 import {
     mergeProposalTerms,
     getEffectiveTerms
@@ -1156,6 +1157,21 @@ class DataService {
                 isReplacementApplication: !!options.isReplacementApplication
             })
             : null;
+
+        if (
+            !options.isReplacementApplication &&
+            applicantId &&
+            applicationData.opportunityId
+        ) {
+            const blocking = findBlockingApplication(
+                applications,
+                applicationData.opportunityId,
+                applicantId
+            );
+            if (blocking) {
+                throw new Error('You have already submitted an application for this opportunity.');
+            }
+        }
 
         const payload = { ...applicationData };
         if (invitation) {
@@ -3305,11 +3321,55 @@ class DataService {
         }
     }
 
+    async _resolveOpportunityIdsForDeal(deal) {
+        if (!deal) return [];
+        const oppIds = Array.isArray(deal.opportunityIds) && deal.opportunityIds.length
+            ? [...deal.opportunityIds]
+            : (deal.opportunityId ? [deal.opportunityId] : []);
+        if (deal.matchId) {
+            try {
+                const postMatch = await this.getPostMatchById(deal.matchId);
+                const fromMatch = collectOpportunityIdsFromPostMatch(postMatch);
+                for (const id of fromMatch) {
+                    if (id) oppIds.push(id);
+                }
+            } catch (e) {
+                void e;
+            }
+        }
+        return [...new Set(oppIds.filter(Boolean))];
+    }
+
+    async _findPostMatchForApplication(application, opportunity) {
+        if (!application || !opportunity) return null;
+        const applicantId = application.applicantId;
+        const creatorId = opportunity.creatorId;
+        const oppId = opportunity.id;
+        if (!applicantId || !creatorId || !oppId) return null;
+
+        const matches = await this.getPostMatches();
+        return matches.find((pm) => {
+            const payload = pm.payload || {};
+            const userIds = (pm.participants || []).map((p) => p.userId).filter(Boolean);
+            const includesBothUsers = userIds.includes(applicantId) && userIds.includes(creatorId);
+            if (pm.matchType === 'one_way') {
+                const touchesOpp =
+                    payload.needOpportunityId === oppId || payload.offerOpportunityId === oppId;
+                return touchesOpp && includesBothUsers;
+            }
+            if (pm.matchType === 'two_way') {
+                const sideA = payload.sideA || {};
+                const sideB = payload.sideB || {};
+                const linkedIds = [sideA.needId, sideA.offerId, sideB.needId, sideB.offerId].filter(Boolean);
+                return linkedIds.includes(oppId) && userIds.includes(applicantId);
+            }
+            return false;
+        }) || null;
+    }
+
     async _syncOpportunityStatusFromDeal(deal) {
         if (!deal) return;
-        const oppIds = Array.isArray(deal.opportunityIds) && deal.opportunityIds.length
-            ? [...new Set(deal.opportunityIds)]
-            : (deal.opportunityId ? [deal.opportunityId] : []);
+        const oppIds = await this._resolveOpportunityIdsForDeal(deal);
         if (!oppIds.length) return;
 
         const dealStatus = (deal.status || '').toLowerCase();
@@ -3318,11 +3378,13 @@ class DataService {
             targetStatus = CONFIG.OPPORTUNITY_STATUS.COMPLETED;
         } else if (dealStatus === CONFIG.DEAL_STATUS.CLOSED || dealStatus === 'closed') {
             targetStatus = CONFIG.OPPORTUNITY_STATUS.CLOSED;
-        } else if ([CONFIG.DEAL_STATUS.EXECUTION, 'execution', CONFIG.DEAL_STATUS.ACTIVE, 'active'].includes(dealStatus)) {
+        } else if ([CONFIG.DEAL_STATUS.EXECUTION, 'execution', CONFIG.DEAL_STATUS.ACTIVE, 'active', CONFIG.DEAL_STATUS.DELIVERY, 'delivery'].includes(dealStatus)) {
             targetStatus = CONFIG.OPPORTUNITY_STATUS.IN_EXECUTION;
-        } else if ([CONFIG.DEAL_STATUS.DRAFT, 'draft', CONFIG.DEAL_STATUS.NEGOTIATING, 'negotiating',
-            CONFIG.DEAL_STATUS.REVIEW, 'review', CONFIG.DEAL_STATUS.SIGNING, 'signing'].includes(dealStatus)) {
+        } else if ([CONFIG.DEAL_STATUS.SIGNING, 'signing'].includes(dealStatus)) {
             targetStatus = CONFIG.OPPORTUNITY_STATUS.CONTRACTED;
+        } else if ([CONFIG.DEAL_STATUS.DRAFT, 'draft', CONFIG.DEAL_STATUS.NEGOTIATING, 'negotiating',
+            CONFIG.DEAL_STATUS.REVIEW, 'review'].includes(dealStatus)) {
+            targetStatus = CONFIG.OPPORTUNITY_STATUS.IN_NEGOTIATION;
         }
 
         if (!targetStatus) return;
@@ -3361,6 +3423,25 @@ class DataService {
         }
         if (deal.applicationId) {
             await this.updateApplication(deal.applicationId, { dealId: deal.id }).catch(() => null);
+        }
+
+        if (matchId) {
+            try {
+                const postMatch = await this.getPostMatchById(matchId);
+                const relatedOppIds = collectOpportunityIdsFromPostMatch(postMatch);
+                const participantIds = (deal.participants || []).map((p) => p.userId).filter(Boolean);
+                if (relatedOppIds.length && participantIds.length) {
+                    const applications = await this.getApplications();
+                    for (const app of applications) {
+                        if (!app || app.dealId === deal.id) continue;
+                        if (!relatedOppIds.includes(app.opportunityId)) continue;
+                        if (!participantIds.includes(app.applicantId)) continue;
+                        await this.updateApplication(app.id, { dealId: deal.id }).catch(() => null);
+                    }
+                }
+            } catch (e) {
+                void e;
+            }
         }
 
         try {
@@ -3405,6 +3486,41 @@ class DataService {
         }
 
         const built = buildDealPayloadFromApplication(application, opp);
+        let matchId = built.matchId || null;
+        let opportunityIds = [...(built.opportunityIds || [opp.id])];
+        let matchType = 'one_way';
+
+        if (matchId) {
+            const postMatch = await this.getPostMatchById(matchId);
+            if (postMatch) {
+                matchType = postMatch.matchType || matchType;
+                opportunityIds = [...new Set([
+                    ...opportunityIds,
+                    ...collectOpportunityIdsFromPostMatch(postMatch)
+                ])];
+            }
+        } else {
+            const resolvedMatch = await this._findPostMatchForApplication(application, opp);
+            if (resolvedMatch) {
+                matchId = resolvedMatch.id;
+                matchType = resolvedMatch.matchType || matchType;
+                opportunityIds = [...new Set([
+                    ...opportunityIds,
+                    ...collectOpportunityIdsFromPostMatch(resolvedMatch)
+                ])];
+                await this.updateApplication(applicationId, { matchId }).catch(() => null);
+            }
+        }
+
+        if (matchId) {
+            const existingByMatch = await this.getDealByMatchId(matchId);
+            if (existingByMatch) {
+                await this.linkEntitiesAfterDealCreated(existingByMatch, { actorUserId });
+                await this.updateApplication(applicationId, { dealId: existingByMatch.id }).catch(() => null);
+                return existingByMatch;
+            }
+        }
+
         const agreedStatus = CONFIG.MATCHING.NEGOTIATION.STATUS.AGREED;
         let negotiationId = built.negotiationId || null;
         if (negotiationId) {
@@ -3423,10 +3539,11 @@ class DataService {
 
         const deal = await this.createDeal({
             applicationId: built.applicationId,
-            matchId: built.matchId,
+            matchId,
+            matchType,
             negotiationId,
             opportunityId: built.opportunityId,
-            opportunityIds: built.opportunityIds,
+            opportunityIds,
             status: CONFIG.DEAL_STATUS.DRAFT,
             title: 'Deal – ' + (opp.title || application.id),
             participants: built.participants.map(p => ({

@@ -149,6 +149,121 @@ describe('DataService invitation lifecycle', () => {
         expect(updated.status).toBe('accepted');
         expect(updated.applicationId).toBe(app.id);
     });
+
+    it('rejects duplicate application from same applicant', async () => {
+        ds.storage.set(CONFIG.STORAGE_KEYS.APPLICATIONS, []);
+        await ds.createApplication({
+            opportunityId: 'opp-1',
+            applicantId: 'provider-1',
+            proposal: 'First submission'
+        });
+        await expect(
+            ds.createApplication({
+                opportunityId: 'opp-1',
+                applicantId: 'provider-1',
+                proposal: 'Duplicate submission'
+            })
+        ).rejects.toThrow('already submitted');
+        const apps = await ds.getApplications();
+        expect(apps).toHaveLength(1);
+    });
+
+    it('allows new application after previous was rejected', async () => {
+        ds.storage.set(CONFIG.STORAGE_KEYS.APPLICATIONS, [
+            {
+                id: 'app-old',
+                opportunityId: 'opp-1',
+                applicantId: 'provider-1',
+                status: 'rejected',
+                createdAt: '2026-01-01T00:00:00.000Z',
+                updatedAt: '2026-01-01T00:00:00.000Z'
+            }
+        ]);
+        const app = await ds.createApplication({
+            opportunityId: 'opp-1',
+            applicantId: 'provider-1',
+            proposal: 'Reapply'
+        });
+        expect(app.id).toBeTruthy();
+        const apps = await ds.getApplications();
+        expect(apps).toHaveLength(2);
+    });
+
+    it('reuses existing deal for second application on the same match', async () => {
+        ds.storage.set(CONFIG.STORAGE_KEYS.OPPORTUNITIES, [
+            { id: 'need-1', creatorId: 'owner-1', title: 'Need', status: 'in_negotiation' },
+            { id: 'offer-1', creatorId: 'provider-1', title: 'Offer', status: 'in_negotiation' }
+        ]);
+        ds.storage.set(CONFIG.STORAGE_KEYS.POST_MATCHES, [{
+            id: 'match-1',
+            status: CONFIG.POST_MATCH_STATUS.CONFIRMED,
+            matchType: 'one_way',
+            participants: [
+                { userId: 'owner-1', role: 'need_owner' },
+                { userId: 'provider-1', role: 'offer_provider' }
+            ],
+            payload: { needOpportunityId: 'need-1', offerOpportunityId: 'offer-1' }
+        }]);
+        ds.storage.set(CONFIG.STORAGE_KEYS.APPLICATIONS, [
+            {
+                id: 'app-need',
+                opportunityId: 'need-1',
+                applicantId: 'provider-1',
+                status: CONFIG.APPLICATION_STATUS.ACCEPTED,
+                matchId: 'match-1',
+                proposal: 'Need side'
+            },
+            {
+                id: 'app-offer',
+                opportunityId: 'offer-1',
+                applicantId: 'owner-1',
+                status: CONFIG.APPLICATION_STATUS.ACCEPTED,
+                matchId: 'match-1',
+                proposal: 'Offer side'
+            }
+        ]);
+        ds.storage.set(CONFIG.STORAGE_KEYS.DEALS, []);
+
+        const firstDeal = await ds.createDealFromApplication('app-need', 'owner-1');
+        const secondDeal = await ds.createDealFromApplication('app-offer', 'provider-1');
+
+        expect(secondDeal.id).toBe(firstDeal.id);
+        const deals = await ds.getDeals();
+        expect(deals).toHaveLength(1);
+        expect(deals[0].opportunityIds).toEqual(expect.arrayContaining(['need-1', 'offer-1']));
+
+        const needOpp = await ds.getOpportunityById('need-1');
+        const offerOpp = await ds.getOpportunityById('offer-1');
+        expect(needOpp.status).toBe('in_negotiation');
+        expect(offerOpp.status).toBe('in_negotiation');
+    });
+
+    it('sets contracted only when deal enters signing', async () => {
+        ds.storage.set(CONFIG.STORAGE_KEYS.OPPORTUNITIES, [
+            { id: 'need-1', creatorId: 'owner-1', title: 'Need', status: 'in_negotiation' }
+        ]);
+        ds.storage.set(CONFIG.STORAGE_KEYS.APPLICATIONS, [{
+            id: 'app-1',
+            opportunityId: 'need-1',
+            applicantId: 'provider-1',
+            status: CONFIG.APPLICATION_STATUS.ACCEPTED,
+            proposal: 'Ready'
+        }]);
+        ds.storage.set(CONFIG.STORAGE_KEYS.DEALS, []);
+
+        const deal = await ds.createDealFromApplication('app-1', 'owner-1');
+        let opp = await ds.getOpportunityById('need-1');
+        expect(opp.status).toBe('in_negotiation');
+
+        await ds._syncOpportunityStatusFromDeal({
+            ...deal,
+            status: CONFIG.DEAL_STATUS.SIGNING,
+            opportunityId: 'need-1',
+            opportunityIds: ['need-1']
+        });
+        opp = await ds.getOpportunityById('need-1');
+        expect(opp.status).toBe('contracted');
+    });
 });
 
 describe('DataService negotiation lifecycle', () => {

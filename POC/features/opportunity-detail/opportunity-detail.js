@@ -11,6 +11,7 @@ let isEditMode = false;
 let applicationCanEdit = false;
 let applicationCanReapply = false;
 let opportunityApplicationsCanManage = true;
+let applicationSubmitInFlight = false;
 
 const EDITABLE_APPLICATION_STATUSES = ['pending', 'reviewing', 'shortlisted', 'in_negotiation'];
 const REAPPLY_APPLICATION_STATUSES = ['rejected', 'withdrawn'];
@@ -1442,7 +1443,7 @@ async function startApplicationWizard(options = {}) {
     if (reapply) {
         isEditMode = false;
     } else if (currentApplication && !applicationCanEdit) {
-        alert('This application can no longer be edited.');
+        alert('You have already submitted an application for this opportunity.');
         return;
     }
 
@@ -1732,7 +1733,22 @@ function populateReview() {
     }
 }
 
+function setSubmitButtonBusy(busy) {
+    const btnSubmit = document.getElementById('btn-submit');
+    if (!btnSubmit) return;
+    btnSubmit.disabled = busy;
+    if (busy) {
+        btnSubmit.setAttribute('aria-busy', 'true');
+        btnSubmit.classList.add('opacity-75', 'cursor-not-allowed');
+    } else {
+        btnSubmit.removeAttribute('aria-busy');
+        btnSubmit.classList.remove('opacity-75', 'cursor-not-allowed');
+    }
+}
+
 async function submitApplication() {
+    if (applicationSubmitInFlight) return;
+
     const user = authService.getCurrentUser();
     if (!user) {
         alert('You must be logged in to apply');
@@ -1794,7 +1810,22 @@ async function submitApplication() {
         const oppEndDate = new Date(oppEnd);
         deadlineCompatibility = end <= oppEndDate ? 'full' : (start <= oppEndDate ? 'partial' : 'no');
     }
+
+    if (!isEditMode) {
+        const allApps = await dataService.getApplications();
+        const findBlocking = window.applicationUtils?.findBlockingApplication;
+        const blocking = typeof findBlocking === 'function'
+            ? findBlocking(allApps, currentOpportunity.id, user.id)
+            : null;
+        if (blocking) {
+            alert('You have already submitted an application for this opportunity.');
+            return;
+        }
+    }
     
+    applicationSubmitInFlight = true;
+    setSubmitButtonBusy(true);
+
     try {
         if (isEditMode && currentApplication) {
             if (!applicationCanEdit) {
@@ -1858,10 +1889,23 @@ async function submitApplication() {
                 const postMatches = await dataService.getPostMatchesForUser(user.id);
                 const match = postMatches.find(pm => {
                     const p = pm.payload || {};
-                    return pm.matchType === 'one_way' && p.needOpportunityId === currentOpportunity.id;
+                    if (pm.matchType === 'one_way') {
+                        return p.needOpportunityId === currentOpportunity.id
+                            || p.offerOpportunityId === currentOpportunity.id;
+                    }
+                    if (pm.matchType === 'two_way') {
+                        const sideA = p.sideA || {};
+                        const sideB = p.sideB || {};
+                        return [sideA.needId, sideA.offerId, sideB.needId, sideB.offerId]
+                            .includes(currentOpportunity.id);
+                    }
+                    return false;
                 });
                 if (match) {
-                    const updates = { matchType: match.matchType || 'one_way' };
+                    const updates = {
+                        matchId: match.id,
+                        matchType: match.matchType || 'one_way'
+                    };
                     if (match.matchScore != null) updates.matchScore = match.matchScore;
                     const reasons = match.matchReasons || [];
                     if (reasons.length) {
@@ -1908,7 +1952,11 @@ async function submitApplication() {
         
     } catch (error) {
         console.error('Error submitting application:', error);
-        alert('Failed to submit application. Please try again.');
+        const message = error?.message || 'Failed to submit application. Please try again.';
+        alert(message);
+    } finally {
+        applicationSubmitInFlight = false;
+        setSubmitButtonBusy(false);
     }
 }
 
@@ -3585,7 +3633,6 @@ async function updateApplicationStatus(applicationId, status) {
         if (status === 'accepted') {
             const user = authService.getCurrentUser();
             const newDeal = await dataService.createDealFromApplication(applicationId, user?.id);
-            await dataService.updateOpportunity(currentOpportunity.id, { status: 'contracted' });
             try {
                 sessionStorage.setItem(
                     'pmtwin_deal_flash',

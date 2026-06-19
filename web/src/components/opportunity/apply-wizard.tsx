@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { dataStore } from '@/lib/data-store'
 import { Button } from '@/components/ui/button'
@@ -20,13 +20,18 @@ export function ApplyWizard({
   const [proposal, setProposal] = useState('')
   const [amount, setAmount] = useState('')
   const [currency, setCurrency] = useState('SAR')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const isSubmittingRef = useRef(false)
 
   const submit = () => {
+    if (isSubmittingRef.current) return
     if (!proposal.trim()) {
       toast.error('Please add a proposal summary.')
       return
     }
-    dataStore.createApplication({
+    isSubmittingRef.current = true
+    setIsSubmitting(true)
+    const created = dataStore.createApplication({
       opportunityId,
       applicantId,
       status: 'pending',
@@ -36,6 +41,12 @@ export function ApplyWizard({
         currency,
       },
     })
+    isSubmittingRef.current = false
+    setIsSubmitting(false)
+    if (!created) {
+      toast.error('You have already submitted an application for this opportunity.')
+      return
+    }
     toast.success('Application submitted')
     onSubmitted()
   }
@@ -123,8 +134,12 @@ export function ApplyWizard({
               Continue
             </Button>
           ) : (
-            <Button className="cursor-pointer" onClick={submit}>
-              Submit application
+            <Button
+              className="cursor-pointer"
+              disabled={isSubmitting}
+              onClick={submit}
+            >
+              {isSubmitting ? 'Submitting…' : 'Submit application'}
             </Button>
           )}
         </div>

@@ -41,6 +41,12 @@ function collectOppIds(payload, matchType) {
     return [...new Set(oppIds.filter(Boolean))];
 }
 
+/** Collect opportunity IDs from a post-match record without status validation. */
+export function collectOpportunityIdsFromPostMatch(postMatch) {
+    if (postMatch == null || !isPlainObject(postMatch)) return [];
+    return collectOppIds(postMatch.payload, postMatch.matchType || "one_way");
+}
+
 /**
  * Validates postMatch and builds the deal payload. Throws on invalid input or non-confirmed status.
  * @param {object} postMatch - Post match object (must have id, status === requiredStatus)

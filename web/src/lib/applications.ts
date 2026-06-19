@@ -110,6 +110,29 @@ const EDITABLE_APPLICATION_STATUSES = [
 ]
 const REAPPLY_APPLICATION_STATUSES = ['rejected', 'withdrawn']
 
+const BLOCKING_APPLICATION_STATUSES = new Set([
+  'pending',
+  'reviewing',
+  'shortlisted',
+  'in_negotiation',
+  'accepted',
+])
+
+export function findBlockingApplication(
+  applications: Application[],
+  opportunityId: string,
+  applicantId: string,
+) {
+  return (
+    applications.find(
+      (a) =>
+        a.opportunityId === opportunityId &&
+        a.applicantId === applicantId &&
+        BLOCKING_APPLICATION_STATUSES.has((a.status || '').toLowerCase()),
+    ) ?? null
+  )
+}
+
 export function resolveUserApplication(
   applications: Application[],
   opportunityId: string,

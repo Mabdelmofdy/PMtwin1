@@ -14,6 +14,7 @@ import usersBase from '@poc-data/users.json'
 import companiesBase from '@poc-data/companies.json'
 import siteContent from '@poc-data/site-content.json'
 import type { Application } from '@/lib/applications'
+import { findBlockingApplication } from '@/lib/applications'
 import { notifyDataStore } from '@/hooks/use-data-store'
 
 const OVERRIDES_KEY = 'pmtwin_web_overrides'
@@ -203,6 +204,13 @@ export const dataStore = {
   },
 
   createApplication(data: Omit<Application, 'id' | 'createdAt' | 'updatedAt'>) {
+    const existing = this.getApplications()
+    if (
+      findBlockingApplication(existing, data.opportunityId, data.applicantId)
+    ) {
+      return null
+    }
+
     const overrides = readOverrides()
     const application: Application = {
       ...data,
