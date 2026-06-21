@@ -1,0 +1,5 @@
+export { matchingService } from './matching-service.ts'
+export { dealService } from './deal-service.ts'
+export { negotiationService } from './negotiation-service.ts'
+export { contractService } from './contract-service.ts'
+export { notificationService } from './notification-service.ts'
