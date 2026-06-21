@@ -1,0 +1,8 @@
+export { opportunitiesApi } from '@/api/opportunities.ts'
+export { dealsApi } from '@/api/deals.ts'
+export { negotiationsApi } from '@/api/negotiations.ts'
+export { matchesApi } from '@/api/matches.ts'
+export { notificationsApi } from '@/api/notifications.ts'
+export { contractsApi } from '@/api/contracts.ts'
+export { peopleApi } from '@/api/people.ts'
+export { adminApi } from '@/api/admin.ts'

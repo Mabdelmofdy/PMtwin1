@@ -79,7 +79,22 @@ export function loadNotifications(): AppNotification[] {
 }
 
 export function loadDeals(): Deal[] {
-  return rows(demoDeals as DataEnvelope<Deal>)
+  const fromJson = rows(demoDeals as DataEnvelope<Deal>)
+  if (fromJson.length > 0) return fromJson
+
+  // Bootstrap display deals from seed negotiations when demo-deals.json is empty.
+  // Static at module load — not regenerated on repository reads.
+  return loadNegotiations().map((n) => ({
+    id: n.id,
+    negotiationId: n.id,
+    opportunityId: n.opportunityId ?? '',
+    title: `Deal from ${n.id}`,
+    status: n.status ?? 'pending',
+    parties: n.parties ?? [],
+    terms: n.agreedTerms ?? n.initialTerms,
+    createdAt: n.createdAt ?? n.updatedAt ?? new Date().toISOString(),
+    updatedAt: n.updatedAt ?? n.createdAt ?? new Date().toISOString(),
+  }))
 }
 
 export function loadPendingUsers(): PendingUser[] {

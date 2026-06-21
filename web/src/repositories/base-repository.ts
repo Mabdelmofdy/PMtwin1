@@ -3,11 +3,19 @@ import { OVERRIDES_KEY } from '@/types/storage.ts'
 import { notifyDataStore } from '@/hooks/use-data-store.ts'
 
 export abstract class BaseRepository<T extends { id: string }> {
+  protected readonly storage: IStorageAdapter
+  protected readonly entityKey: keyof Overrides
+  protected readonly loadSeed: () => T[]
+
   constructor(
-    protected readonly storage: IStorageAdapter,
-    protected readonly entityKey: keyof Overrides,
-    protected readonly loadSeed: () => T[],
-  ) {}
+    storage: IStorageAdapter,
+    entityKey: keyof Overrides,
+    loadSeed: () => T[],
+  ) {
+    this.storage = storage
+    this.entityKey = entityKey
+    this.loadSeed = loadSeed
+  }
 
   protected readOverrides(): Overrides {
     return this.storage.get<Overrides>(OVERRIDES_KEY) ?? {}
