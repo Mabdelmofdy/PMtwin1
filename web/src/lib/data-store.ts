@@ -1,283 +1,152 @@
-type DataEnvelope<T> = { data: T[] }
+/**
+ * @deprecated Use `@/api/*` modules or `@/repositories` instead.
+ * Backward-compatibility facade delegating to the repository layer.
+ */
+import type {
+  Application,
+  AppNotification,
+  AuditEntry,
+  Company,
+  Negotiation,
+  Opportunity,
+  PendingUser,
+  PersonProfile,
+  PlatformUser,
+  PostMatch,
+} from '@/types/domain.ts'
+import {
+  applicationRepository,
+  auditRepository,
+  companyRepository,
+  negotiationRepository,
+  notificationRepository,
+  opportunityRepository,
+  postMatchRepository,
+  userRepository,
+} from '@/repositories/index.ts'
+import { dealsApi } from '@/api/deals.ts'
+import { loadPendingUsers, loadSiteContent } from '@/infrastructure/seed/seed-loader.ts'
+import { negotiationService } from '@/services/negotiation-service.ts'
 
-import opportunitiesBase from '@poc-data/opportunities.json'
-import demoOpportunities from '@poc-data/demo-40-opportunities.json'
-import postMatches from '@poc-data/demo-post-matches.json'
-import demoNotifications from '@poc-data/demo-notifications.json'
-import demoApplications from '@poc-data/demo-applications.json'
-import demoNegotiations from '@poc-data/demo-negotiations.json'
-import demoPendingUsers from '@poc-data/demo-pending-users.json'
-import demoAudit from '@poc-data/demo-audit.json'
-import seedUsers from '@poc-data/seed-controlled-users.json'
-import demoCompanies from '@poc-data/demo-companies.json'
-import usersBase from '@poc-data/users.json'
-import companiesBase from '@poc-data/companies.json'
-import siteContent from '@poc-data/site-content.json'
-import type { Application } from '@/lib/applications'
-import { findBlockingApplication } from '@/lib/applications'
-import { notifyDataStore } from '@/hooks/use-data-store'
-
-const OVERRIDES_KEY = 'pmtwin_web_overrides'
-
-type Overrides = {
-  applications?: Record<string, Partial<Application>>
-  opportunities?: Record<string, Partial<Opportunity>>
-  newApplications?: Application[]
+export type {
+  Application,
+  AppNotification,
+  AuditEntry,
+  Company,
+  Negotiation,
+  Opportunity,
+  PendingUser,
+  PersonProfile,
+  PlatformUser,
+  PostMatch,
 }
-
-function readOverrides(): Overrides {
-  try {
-    const raw = localStorage.getItem(OVERRIDES_KEY)
-    return raw ? (JSON.parse(raw) as Overrides) : {}
-  } catch {
-    return {}
-  }
-}
-
-function writeOverrides(overrides: Overrides) {
-  localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides))
-  notifyDataStore()
-}
-
-function rows<T>(envelope: DataEnvelope<T>): T[] {
-  return envelope.data ?? []
-}
-
-function mergeById<T extends { id: string }>(...sets: T[][]): T[] {
-  const map = new Map<string, T>()
-  for (const set of sets) {
-    for (const item of set) map.set(item.id, item)
-  }
-  return Array.from(map.values())
-}
-
-export type Opportunity = {
-  id: string
-  title: string
-  description?: string
-  status: string
-  creatorId?: string
-  location?: string
-  exchangeMode?: string
-  modelType?: string
-  intent?: string
-  scope?: { coreSkills?: string[] }
-  attributes?: { coreSkills?: string[] }
-  updatedAt?: string
-  createdAt?: string
-}
-
-export type PostMatch = {
-  id: string
-  matchType: string
-  status: string
-  matchScore: number
-  participants?: Array<{
-    userId: string
-    role: string
-    participantStatus: string
-  }>
-  payload?: {
-    breakdown?: Record<string, number>
-  }
-  createdAt?: string
-}
-
-export type AppNotification = {
-  id: string
-  userId: string
-  title: string
-  message: string
-  link?: string
-  read: boolean
-  createdAt: string
-}
-
-export type { Application }
-
-export type Negotiation = {
-  id: string
-  status?: string
-  updatedAt?: string
-}
-
-export type PersonProfile = {
-  name?: string
-  headline?: string
-  type?: string
-  location?: string
-  bio?: string
-  description?: string
-  skills?: string[]
-}
-
-export type PlatformUser = {
-  id: string
-  email: string
-  passwordHash?: string
-  role: string
-  status: string
-  isPublic?: boolean
-  createdAt?: string
-  profile?: PersonProfile
-}
-
-export type Company = PlatformUser
-
-export type AuditEntry = {
-  id: string
-  action: string
-  userId?: string
-  timestamp?: string
-}
-
-export type PendingUser = PlatformUser
 
 export const dataStore = {
+  /** @deprecated Use opportunitiesApi.list() */
   getOpportunities(): Opportunity[] {
-    const base = mergeById(
-      rows(opportunitiesBase as DataEnvelope<Opportunity>),
-      rows(demoOpportunities as DataEnvelope<Opportunity>),
-    )
-    const overrides = readOverrides().opportunities ?? {}
-    return base.map((o) => ({ ...o, ...overrides[o.id] }))
+    return opportunityRepository.getAll()
   },
 
+  /** @deprecated Use opportunitiesApi.get() */
   getOpportunityById(id: string) {
-    return this.getOpportunities().find((o) => o.id === id)
+    return opportunityRepository.getById(id)
   },
 
+  /** @deprecated Use opportunitiesApi.update() */
   updateOpportunity(id: string, patch: Partial<Opportunity>) {
-    const overrides = readOverrides()
-    overrides.opportunities = {
-      ...overrides.opportunities,
-      [id]: { ...overrides.opportunities?.[id], ...patch, updatedAt: new Date().toISOString() },
-    }
-    writeOverrides(overrides)
+    opportunityRepository.update(id, patch)
   },
 
+  /** @deprecated Use matchesApi.list() */
   getPostMatches(): PostMatch[] {
-    return rows(postMatches as DataEnvelope<PostMatch>)
+    return postMatchRepository.getAll()
   },
 
+  /** @deprecated Use matchesApi.get() */
   getPostMatchById(id: string) {
-    return this.getPostMatches().find((m) => m.id === id)
+    return postMatchRepository.getById(id)
   },
 
+  /** @deprecated Use notificationsApi.list() */
   getNotifications(userId?: string): AppNotification[] {
     const uid = userId ?? 'seed-user-001'
-    return rows(demoNotifications as DataEnvelope<AppNotification>).filter(
-      (n) => n.userId === uid,
-    )
+    return notificationRepository.getByUserId(uid)
   },
 
+  /** @deprecated Use applicationRepository.getAll() */
   getApplications(): Application[] {
-    const base = rows(demoApplications as DataEnvelope<Application>)
-    const overrides = readOverrides()
-    const patched = base.map((a) => ({
-      ...a,
-      ...overrides.applications?.[a.id],
-    }))
-    return [...patched, ...(overrides.newApplications ?? [])]
+    return applicationRepository.getAll()
   },
 
+  /** @deprecated Use negotiationService.transitionApplicationStatus() */
   updateApplication(id: string, patch: Partial<Application>) {
-    const overrides = readOverrides()
-    const isNew = overrides.newApplications?.some((a) => a.id === id)
-    if (isNew) {
-      overrides.newApplications = overrides.newApplications!.map((a) =>
-        a.id === id
-          ? { ...a, ...patch, updatedAt: new Date().toISOString() }
-          : a,
-      )
-    } else {
-      overrides.applications = {
-        ...overrides.applications,
-        [id]: {
-          ...overrides.applications?.[id],
-          ...patch,
-          updatedAt: new Date().toISOString(),
-        },
-      }
-    }
-    writeOverrides(overrides)
+    applicationRepository.update(id, patch)
   },
 
-  createApplication(data: Omit<Application, 'id' | 'createdAt' | 'updatedAt'>) {
-    const existing = this.getApplications()
-    if (
-      findBlockingApplication(existing, data.opportunityId, data.applicantId)
-    ) {
-      return null
-    }
-
-    const overrides = readOverrides()
-    const application: Application = {
-      ...data,
-      id: `app-${Date.now()}`,
-      status: data.status || 'pending',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
-    overrides.newApplications = [...(overrides.newApplications ?? []), application]
-    writeOverrides(overrides)
-    return application
+  /** @deprecated Use negotiationService.submitApplication() */
+  createApplication(
+    data: Omit<Application, 'id' | 'createdAt' | 'updatedAt'>,
+  ) {
+    return negotiationService.submitApplication(data)
   },
 
+  /** @deprecated Use negotiationsApi.list() */
   getNegotiations(): Negotiation[] {
-    return rows(demoNegotiations as DataEnvelope<Negotiation>)
+    return negotiationRepository.getAll()
   },
 
+  /** @deprecated Use negotiationsApi.get() */
   getNegotiationById(id: string) {
-    return this.getNegotiations().find((n) => n.id === id)
+    return negotiationRepository.getById(id)
   },
 
+  /** @deprecated Use peopleApi.listUsers() */
   getUsers(): PlatformUser[] {
-    return mergeById(
-      rows(usersBase as DataEnvelope<PlatformUser>),
-      rows(seedUsers as DataEnvelope<PlatformUser>),
-    )
+    return userRepository.getAll()
   },
 
+  /** @deprecated Use peopleApi.get() */
   getUserById(id: string) {
-    return this.getUsers().find((u) => u.id === id)
+    return userRepository.getById(id)
   },
 
+  /** @deprecated Use peopleApi.listCompanies() */
   getCompanies(): Company[] {
-    return mergeById(
-      rows(companiesBase as DataEnvelope<Company>),
-      rows(demoCompanies as DataEnvelope<Company>),
-    )
+    return companyRepository.getAll()
   },
 
+  /** @deprecated Use peopleApi.get() */
   getCompanyById(id: string) {
-    return this.getCompanies().find((c) => c.id === id)
+    return companyRepository.getById(id)
   },
 
+  /** @deprecated Use peopleApi.listAll() */
   getPeople(): PlatformUser[] {
-    return [...this.getUsers(), ...this.getCompanies()]
+    return [...userRepository.getAll(), ...companyRepository.getAll()]
   },
 
+  /** @deprecated Use peopleApi.get() */
   getPersonById(id: string): PlatformUser | undefined {
-    return this.getUserById(id) ?? this.getCompanyById(id)
+    return userRepository.getById(id) ?? companyRepository.getById(id)
   },
 
+  /** @deprecated Use adminApi.getPendingUsers() */
   getPendingUsers(): PendingUser[] {
-    return rows(demoPendingUsers as DataEnvelope<PendingUser>)
+    return loadPendingUsers()
   },
 
+  /** @deprecated Use adminApi.getAuditLog() */
   getAuditLog(): AuditEntry[] {
-    return rows(demoAudit as DataEnvelope<AuditEntry>)
+    return auditRepository.getAll()
   },
 
+  /** @deprecated Use adminApi.getSiteContent() */
   getSiteContent() {
-    return siteContent as Record<
-      string,
-      {
-        label: string
-        route: string
-        sections: Record<string, { label: string; html: string }>
-      }
-    >
+    return loadSiteContent()
+  },
+
+  /** @deprecated Use dealsApi.list() */
+  getDeals() {
+    return dealsApi.list()
   },
 }
