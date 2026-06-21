@@ -179,6 +179,16 @@ Or manually clear localStorage:
   - Authentication status
   - App configuration
 
+### Console: "message channel closed" or Adobe font warnings
+These are **not PMTwin bugs**. Your browser console shows which extension is responsible:
+
+- `chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/...` → **Adobe Acrobat** (also logs `express-utils.js` and slow-font warnings)
+- `(index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response...` → same class of extension messaging noise
+
+**Fix:** open `chrome://extensions`, disable **Adobe Acrobat: PDF edit, convert, sign tools** (and any other PDF/password-manager extensions), then hard-refresh. Or develop in an Incognito window with extensions off.
+
+DevTools filter to hide the noise: `-message channel -chrome-extension`
+
 ### Scripts Not Loading
 - Check browser console for 404 errors
 - Verify file paths are correct

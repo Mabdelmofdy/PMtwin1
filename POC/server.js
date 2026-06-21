@@ -83,14 +83,6 @@ function serveFile(filePath, res, options = {}) {
         }
       }
 
-      if (!html.includes('extension-noise-filter.js')) {
-        html = html.replace(
-          /<head(\s[^>]*)?>/i,
-          '$&\n    <script src="src/core/init/extension-noise-filter.js"></script>'
-        );
-        htmlChanged = true;
-      }
-
       if (htmlChanged) {
         body = Buffer.from(html, 'utf8');
       }

@@ -174,6 +174,42 @@ loadScript('src/core/config/config.js').then(async () => {
 });
 
 /**
+ * One-time hint when browser extensions pollute the console (not fixable from page JS).
+ */
+function logExtensionConsoleNotice() {
+    if (sessionStorage.getItem('pmtwin_extension_console_notice')) return;
+    sessionStorage.setItem('pmtwin_extension_console_notice', '1');
+
+    const knownExtensions = {
+        efaidnbmnnnibpcajpcglclefindmkaj: 'Adobe Acrobat (PDF)'
+    };
+    const detected = [];
+    try {
+        const entries = performance.getEntriesByType('resource');
+        entries.forEach((entry) => {
+            const match = entry.name.match(/^chrome-extension:\/\/([^/]+)/);
+            if (match && knownExtensions[match[1]] && !detected.includes(knownExtensions[match[1]])) {
+                detected.push(knownExtensions[match[1]]);
+            }
+        });
+    } catch (e) { /* ignore */ }
+
+    if (detected.length) {
+        console.info(
+            '[PMTwin] Console errors from ' + detected.join(', ') +
+            ' are caused by that browser extension, not this app. Disable it at chrome://extensions ' +
+            '(or use Incognito) to remove "message channel closed" noise.'
+        );
+        return;
+    }
+
+    console.info(
+        '[PMTwin] "Message channel closed" errors in the console come from a browser extension, not this app. ' +
+        'Disable extensions at chrome://extensions or filter the console with: -message channel'
+    );
+}
+
+/**
  * Initialize application
  */
 async function initializeApp() {
@@ -205,6 +241,7 @@ async function initializeApp() {
         setupGlobalNavigation();
         
         console.log('PMTwin application initialized');
+        logExtensionConsoleNotice();
     } catch (error) {
         console.error('Error initializing application:', error);
     }
