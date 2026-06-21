@@ -7,6 +7,18 @@
     <!-- SPA: correct base for deep links (e.g. /POC/admin) so scripts and assets resolve under the app folder -->
     <script>
     (function () {
+        // Browser extensions (password managers, Grammarly, etc.) often reject with this
+        // message when their content-script channel closes; it is not from PMTwin code.
+        var extensionNoise = /message channel closed|Extension context invalidated|Receiving end does not exist/;
+        window.addEventListener('unhandledrejection', function (event) {
+            var reason = event.reason;
+            var message = reason && reason.message ? reason.message : String(reason || '');
+            if (extensionNoise.test(message)) {
+                event.preventDefault();
+            }
+        });
+    })();
+    (function () {
         var path = window.location.pathname.replace(/[?#].*$/, '');
         if (document.querySelector('meta[name="pmtwin-spa-server"]')) {
             var mountMeta = document.querySelector('meta[name="pmtwin-mount"]');
