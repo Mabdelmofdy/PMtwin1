@@ -5,19 +5,8 @@
     <!-- Explicit CSP so favicons and CDN assets work; avoids strict default-src 'none' from some dev servers / previews. -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.quilljs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com https://cdn.quilljs.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://unpkg.com data:; img-src 'self' data: https: blob:; connect-src 'self' https: wss: ws:; frame-src 'self' https:; worker-src 'self' blob:">
     <!-- SPA: correct base for deep links (e.g. /POC/admin) so scripts and assets resolve under the app folder -->
+    <script src="src/core/init/extension-noise-filter.js"></script>
     <script>
-    (function () {
-        // Browser extensions (password managers, Grammarly, etc.) often reject with this
-        // message when their content-script channel closes; it is not from PMTwin code.
-        var extensionNoise = /message channel closed|Extension context invalidated|Receiving end does not exist/;
-        window.addEventListener('unhandledrejection', function (event) {
-            var reason = event.reason;
-            var message = reason && reason.message ? reason.message : String(reason || '');
-            if (extensionNoise.test(message)) {
-                event.preventDefault();
-            }
-        });
-    })();
     (function () {
         var path = window.location.pathname.replace(/[?#].*$/, '');
         if (document.querySelector('meta[name="pmtwin-spa-server"]')) {

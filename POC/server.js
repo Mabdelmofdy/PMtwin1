@@ -65,10 +65,13 @@ function serveFile(filePath, res, options = {}) {
     let body = data;
     // Match index.html meta CSP so devtools / favicon loads are not blocked when only HTTP headers apply.
     if (mimeType === 'text/html') {
+      let html = data.toString('utf8');
+      let htmlChanged = false;
+
       if (options.injectSpaMeta) {
-        let html = data.toString('utf8');
         if (!html.includes('name="pmtwin-spa-server"')) {
           html = html.replace(/<head(\s[^>]*)?>/i, '$&\n    <meta name="pmtwin-spa-server" content="1">');
+          htmlChanged = true;
         }
         const mountBase = options.mountBase || '/';
         if (!html.includes('name="pmtwin-mount"')) {
@@ -76,9 +79,22 @@ function serveFile(filePath, res, options = {}) {
             /(<meta name="pmtwin-spa-server"[^>]*>)/i,
             `$1\n    <meta name="pmtwin-mount" content="${mountBase}">`
           );
+          htmlChanged = true;
         }
+      }
+
+      if (!html.includes('extension-noise-filter.js')) {
+        html = html.replace(
+          /<head(\s[^>]*)?>/i,
+          '$&\n    <script src="src/core/init/extension-noise-filter.js"></script>'
+        );
+        htmlChanged = true;
+      }
+
+      if (htmlChanged) {
         body = Buffer.from(html, 'utf8');
       }
+      headers['Cache-Control'] = 'no-cache, must-revalidate';
       headers['Content-Security-Policy'] = [
         "default-src 'self'",
         "base-uri 'self'",
