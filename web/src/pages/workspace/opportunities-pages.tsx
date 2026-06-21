@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MapPin, Plus } from 'lucide-react'
-import { dataStore } from '@/lib/data-store'
+import { opportunitiesApi } from '@/api/opportunities.ts'
 import { formatDate, truncate } from '@/lib/format'
 import { PageHeader, StatusBadge } from '@/components/shared/page-primitives'
 import { Button } from '@/components/ui/button'
@@ -19,7 +19,7 @@ export function OpportunitiesPage() {
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('all')
   const opportunities = useMemo(() => {
-    return dataStore.getOpportunities().filter((o) => {
+    return opportunitiesApi.list().filter((o) => {
       const matchesSearch =
         !search ||
         o.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -113,7 +113,7 @@ export function OpportunityMapPage() {
           <p className="text-center text-sm text-muted-foreground">Map integration placeholder — wire to map service</p>
         </div>
         <div className="space-y-2 overflow-y-auto rounded-xl border border-border/60 p-4">
-          {dataStore.getOpportunities().slice(0, 8).map((o) => (
+          {opportunitiesApi.list().slice(0, 8).map((o) => (
             <Link key={o.id} to={`/opportunities/${o.id}`} className="block cursor-pointer rounded-lg p-2 text-sm transition-colors hover:bg-muted/50">
               <p className="font-medium">{truncate(o.title, 48)}</p>
               <p className="text-xs text-muted-foreground">{o.location}</p>

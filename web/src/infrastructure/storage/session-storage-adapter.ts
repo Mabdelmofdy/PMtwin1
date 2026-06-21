@@ -4,7 +4,12 @@ export class SessionStorageAdapter implements IStorageAdapter {
   get<T>(key: string): T | null {
     try {
       const raw = window.sessionStorage.getItem(key)
-      return raw ? (JSON.parse(raw) as T) : null
+      if (!raw) return null
+      try {
+        return JSON.parse(raw) as T
+      } catch {
+        return raw as unknown as T
+      }
     } catch {
       return null
     }

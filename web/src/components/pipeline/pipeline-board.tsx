@@ -5,11 +5,13 @@ import {
   APP_STAGE_TO_STATUS,
   APPLICATION_STATUS_LABELS,
   OPP_STAGE_TO_STATUS,
-  bucketApplicationsForPipeline,
-  bucketOpportunitiesForPipeline,
   type Application,
 } from '@/lib/applications'
-import { dataStore, type Opportunity } from '@/lib/data-store'
+import type { Opportunity } from '@/types/domain.ts'
+import { opportunitiesApi } from '@/api/opportunities.ts'
+import { applicationRepository } from '@/repositories/index.ts'
+import { dealService } from '@/services/deal-service.ts'
+import { negotiationService } from '@/services/negotiation-service.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
 import { StatusBadge } from '@/components/shared/page-primitives'
@@ -157,13 +159,13 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
   const [intentFilter, setIntentFilter] = useState<'' | 'request' | 'offer'>('')
 
   const opportunities = useMemo(
-    () => dataStore.getOpportunities(),
+    () => opportunitiesApi.list(),
     [version],
   )
   const applications = useMemo(() => {
-    return dataStore.getApplications().map((app) => ({
+    return applicationRepository.getAll().map((app) => ({
       ...app,
-      opportunity: dataStore.getOpportunityById(app.opportunityId),
+      opportunity: opportunitiesApi.get(app.opportunityId),
     }))
   }, [version])
 
@@ -171,7 +173,11 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
 
   const oppBuckets = useMemo(
     () =>
-      bucketOpportunitiesForPipeline(opportunities, userId, intentFilter),
+      dealService.bucketOpportunitiesForPipeline(
+        opportunities,
+        userId,
+        intentFilter,
+      ),
     [opportunities, userId, intentFilter],
   )
 
@@ -181,7 +187,7 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
   )
 
   const appBuckets = useMemo(
-    () => bucketApplicationsForPipeline(userApps, intentFilter),
+    () => negotiationService.bucketApplicationsForPipeline(userApps, intentFilter),
     [userApps, intentFilter],
   )
 
@@ -189,7 +195,7 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
     if (payload.type !== 'opportunity') return
     const status = OPP_STAGE_TO_STATUS[stageKey]
     if (!status) return
-    dataStore.updateOpportunity(payload.id, { status })
+    dealService.updateOpportunityStatus(payload.id, status)
     toast.success('Opportunity moved')
   }
 
@@ -197,7 +203,7 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
     if (payload.type !== 'application') return
     const status = APP_STAGE_TO_STATUS[stageKey]
     if (!status) return
-    dataStore.updateApplication(payload.id, { status })
+    negotiationService.updateApplicationStatus(payload.id, status)
     toast.success('Application moved')
   }
 

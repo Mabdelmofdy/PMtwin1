@@ -1,17 +1,12 @@
 import { Link, useParams } from 'react-router-dom'
-import { dataStore } from '@/lib/data-store'
+import { dealsApi } from '@/api/deals.ts'
 import { formatDate } from '@/lib/format'
 import { EmptyState, PageHeader, StatusBadge } from '@/components/shared/page-primitives'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function DealsPage() {
-  const deals = dataStore.getNegotiations().map((n) => ({
-    id: n.id,
-    title: `Deal from ${n.id}`,
-    status: n.status ?? 'pending',
-    updatedAt: n.updatedAt,
-  }))
+  const deals = dealsApi.list()
   if (!deals.length) {
     return (
       <div className="space-y-6">

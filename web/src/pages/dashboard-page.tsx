@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Briefcase, Heart, Users } from 'lucide-react'
 import { useAuth } from '@/providers/auth-provider'
-import { dataStore } from '@/lib/data-store'
+import { opportunitiesApi } from '@/api/opportunities.ts'
+import { matchesApi } from '@/api/matches.ts'
+import { notificationsApi } from '@/api/notifications.ts'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -32,8 +34,8 @@ function StatCard({
 export function DashboardPage() {
   const { user } = useAuth()
   const firstName = (user?.profile?.name ?? 'there').split(' ')[0]
-  const opps = dataStore.getOpportunities()
-  const matches = dataStore.getPostMatches()
+  const opps = opportunitiesApi.list()
+  const matches = matchesApi.list()
   const published = opps.filter((o) => o.status === 'published').length
   const highMatches = matches.filter((m) => m.matchScore >= 0.9).length
 
@@ -66,7 +68,7 @@ export function DashboardPage() {
         {user ? (
           <StatCard
             label="Unread alerts"
-            value={String(dataStore.getNotifications(user.id).filter((n) => !n.read).length)}
+            value={String(notificationsApi.unreadCount(user.id))}
             hint="From notification feed"
           />
         ) : null}

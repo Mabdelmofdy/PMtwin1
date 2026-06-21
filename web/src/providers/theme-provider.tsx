@@ -17,6 +17,8 @@ type ThemeProviderState = {
   toggleTheme: () => void
 }
 
+import { localStorageAdapter } from '@/infrastructure/storage/local-storage-adapter.ts'
+
 const STORAGE_KEY = 'pm-twin-theme'
 
 const ThemeProviderContext = createContext<ThemeProviderState | null>(null)
@@ -43,7 +45,7 @@ export function ThemeProvider({
 }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window === 'undefined') return defaultTheme
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null
+    const stored = localStorageAdapter.get<Theme>(STORAGE_KEY)
     return stored ?? defaultTheme
   })
 
@@ -54,7 +56,7 @@ export function ThemeProvider({
 
   const setTheme = useCallback((next: Theme) => {
     setThemeState(next)
-    localStorage.setItem(STORAGE_KEY, next)
+    localStorageAdapter.set(STORAGE_KEY, next)
   }, [])
 
   const toggleTheme = useCallback(() => {

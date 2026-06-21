@@ -1,13 +1,12 @@
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
-import type { Application } from '@/lib/applications'
+import type { Application } from '@/types/domain.ts'
 import {
   APPLICATION_STATUS_LABELS,
   TRANSITIONABLE_APPLICATION_STATUSES,
-  formatApplicationValueAmount,
-  normalizeApplicationValue,
 } from '@/lib/applications'
-import { dataStore } from '@/lib/data-store'
+import { matchingService } from '@/services/matching-service.ts'
+import { negotiationService } from '@/services/negotiation-service.ts'
 import { formatDate } from '@/lib/format'
 import { StatusBadge } from '@/components/shared/page-primitives'
 import { Button } from '@/components/ui/button'
@@ -34,17 +33,17 @@ export function ApplicationsPanel({
   opportunityClosed: boolean
 }) {
   const handleStatusChange = (appId: string, status: string) => {
-    dataStore.updateApplication(appId, { status })
+    negotiationService.transitionApplicationStatus(appId, status)
     toast.success('Application status updated')
   }
 
   const handleReject = (appId: string) => {
-    dataStore.updateApplication(appId, { status: 'rejected' })
+    negotiationService.rejectApplication(appId)
     toast.success('Application rejected')
   }
 
   const handleAccept = (appId: string) => {
-    dataStore.updateApplication(appId, { status: 'accepted' })
+    negotiationService.acceptApplication(appId)
     toast.success('Application accepted')
   }
 
@@ -68,8 +67,8 @@ export function ApplicationsPanel({
       </CardHeader>
       <CardContent className="space-y-4">
         {applications.map((app) => {
-          const av = normalizeApplicationValue(app.application_value)
-          const amount = formatApplicationValueAmount(app.application_value)
+          const av = matchingService.normalizeApplicationValue(app.application_value)
+          const amount = matchingService.formatApplicationValueAmount(app.application_value)
           const actionable =
             canManage &&
             !opportunityClosed &&

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { dataStore } from '@/lib/data-store'
+import { negotiationService } from '@/services/negotiation-service.ts'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -31,7 +31,7 @@ export function ApplyWizard({
     }
     isSubmittingRef.current = true
     setIsSubmitting(true)
-    const created = dataStore.createApplication({
+    const created = negotiationService.submitApplication({
       opportunityId,
       applicantId,
       status: 'pending',

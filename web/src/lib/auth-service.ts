@@ -1,15 +1,12 @@
-import type { PlatformUser } from '@/lib/data-store'
-import { dataStore } from '@/lib/data-store'
+import type { PlatformUser } from '@/types/domain.ts'
+import type { AuthSession, AccountType } from '@/types/domain.ts'
+import { peopleApi } from '@/api/people.ts'
+import { localStorageAdapter } from '@/infrastructure/storage/local-storage-adapter.ts'
+import { sessionStorageAdapter } from '@/infrastructure/storage/session-storage-adapter.ts'
 
 const SESSION_KEY = 'pmtwin_web_session'
 
-export type AccountType = 'auto' | 'individual' | 'company'
-
-export type AuthSession = {
-  token: string
-  userId: string
-  rememberMe: boolean
-}
+export type { AccountType, AuthSession }
 
 function encodePassword(password: string) {
   return btoa(password)
@@ -20,22 +17,18 @@ function generateToken() {
 }
 
 function readSession(): AuthSession | null {
-  try {
-    const raw =
-      localStorage.getItem(SESSION_KEY) ||
-      sessionStorage.getItem(SESSION_KEY)
-    return raw ? (JSON.parse(raw) as AuthSession) : null
-  } catch {
-    return null
-  }
+  return (
+    localStorageAdapter.get<AuthSession>(SESSION_KEY) ??
+    sessionStorageAdapter.get<AuthSession>(SESSION_KEY)
+  )
 }
 
 function writeSession(session: AuthSession | null) {
-  sessionStorage.removeItem(SESSION_KEY)
-  localStorage.removeItem(SESSION_KEY)
+  sessionStorageAdapter.remove(SESSION_KEY)
+  localStorageAdapter.remove(SESSION_KEY)
   if (!session) return
-  const target = session.rememberMe ? localStorage : sessionStorage
-  target.setItem(SESSION_KEY, JSON.stringify(session))
+  const target = session.rememberMe ? localStorageAdapter : sessionStorageAdapter
+  target.set(SESSION_KEY, session)
 }
 
 export const authService = {
@@ -52,17 +45,17 @@ export const authService = {
 
     let user: PlatformUser | undefined
     if (accountType === 'company') {
-      user = dataStore
-        .getCompanies()
+      user = peopleApi
+        .listCompanies()
         .find((c) => c.email.toLowerCase() === normalized)
     } else if (accountType === 'individual') {
-      user = dataStore
-        .getUsers()
+      user = peopleApi
+        .listUsers()
         .find((u) => u.email.toLowerCase() === normalized)
     } else {
       user =
-        dataStore.getUsers().find((u) => u.email.toLowerCase() === normalized) ??
-        dataStore.getCompanies().find((c) => c.email.toLowerCase() === normalized)
+        peopleApi.listUsers().find((u) => u.email.toLowerCase() === normalized) ??
+        peopleApi.listCompanies().find((c) => c.email.toLowerCase() === normalized)
     }
 
     if (!user || user.passwordHash !== passwordHash) {
@@ -91,7 +84,7 @@ export const authService = {
   restoreSession(): PlatformUser | null {
     const session = readSession()
     if (!session) return null
-    const user = dataStore.getPersonById(session.userId)
+    const user = peopleApi.get(session.userId)
     if (!user) {
       writeSession(null)
       return null

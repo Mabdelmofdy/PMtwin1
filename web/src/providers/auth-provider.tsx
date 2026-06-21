@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { PlatformUser } from '@/lib/data-store'
+import type { PlatformUser } from '@/types/domain.ts'
 import { authService, type AccountType } from '@/lib/auth-service'
 
 type AuthContextValue = {

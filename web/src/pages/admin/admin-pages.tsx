@@ -1,5 +1,10 @@
 import { Link, useParams } from 'react-router-dom'
-import { dataStore } from '@/lib/data-store'
+import { adminApi } from '@/api/admin.ts'
+import { dealsApi } from '@/api/deals.ts'
+import { matchesApi } from '@/api/matches.ts'
+import { negotiationsApi } from '@/api/negotiations.ts'
+import { opportunitiesApi } from '@/api/opportunities.ts'
+import { peopleApi } from '@/api/people.ts'
 import { formatDate } from '@/lib/format'
 import { PageHeader, StatCard, StatusBadge } from '@/components/shared/page-primitives'
 import { Button } from '@/components/ui/button'
@@ -58,9 +63,9 @@ function AdminTablePage({
 }
 
 export function AdminDashboardPage() {
-  const opps = dataStore.getOpportunities().length
-  const users = dataStore.getUsers().length
-  const matches = dataStore.getPostMatches().length
+  const opps = opportunitiesApi.list().length
+  const users = peopleApi.listUsers().length
+  const matches = matchesApi.list().length
   return (
     <div className="space-y-6">
       <PageHeader label="Admin" title="Command center" description="Platform KPIs, queues, and quick actions." />
@@ -68,7 +73,7 @@ export function AdminDashboardPage() {
         <StatCard label="Opportunities" value={opps} />
         <StatCard label="Users" value={users} />
         <StatCard label="Post-matches" value={matches} />
-        <StatCard label="Pending vetting" value={dataStore.getPendingUsers().length} />
+        <StatCard label="Pending vetting" value={adminApi.getPendingUsers().length} />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
@@ -81,7 +86,7 @@ export function AdminDashboardPage() {
         <Card>
           <CardHeader><CardTitle>Recent activity</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
-            {dataStore.getAuditLog().slice(0, 5).map((a) => (
+            {adminApi.getAuditLog().slice(0, 5).map((a) => (
               <p key={a.id}>{a.action} — {formatDate(a.timestamp)}</p>
             ))}
           </CardContent>
@@ -97,7 +102,7 @@ export function AdminReportsPage() {
       <PageHeader title="Reports" description="Platform analytics and export tools." />
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard label="New users (30d)" value="12" hint="Demo metric" />
-        <StatCard label="Published opps" value={dataStore.getOpportunities().filter((o) => o.status === 'published').length} />
+        <StatCard label="Published opps" value={opportunitiesApi.list().filter((o) => o.status === 'published').length} />
         <StatCard label="Match rate" value="78%" hint="Demo metric" />
       </div>
     </div>
@@ -119,7 +124,7 @@ export function AdminHealthPage() {
 }
 
 export function AdminUsersPage() {
-  const users = [...dataStore.getUsers(), ...dataStore.getCompanies()]
+  const users = peopleApi.listAll()
   return (
     <AdminTablePage
       title="Users"
@@ -133,7 +138,7 @@ export function AdminUsersPage() {
 
 export function AdminUserDetailPage() {
   const { id } = useParams()
-  const user = id ? dataStore.getPersonById(id) : undefined
+  const user = id ? peopleApi.get(id) : undefined
   return (
     <div className="space-y-6">
       <PageHeader title={user?.profile?.name ?? 'User detail'} description={user?.email} />
@@ -143,7 +148,7 @@ export function AdminUserDetailPage() {
 }
 
 export function AdminVettingPage() {
-  const pending = dataStore.getPendingUsers()
+  const pending = adminApi.getPendingUsers()
   return (
     <AdminTablePage
       label="Queue"
@@ -156,7 +161,7 @@ export function AdminVettingPage() {
 }
 
 export function AdminOpportunitiesPage() {
-  const opps = dataStore.getOpportunities()
+  const opps = opportunitiesApi.list()
   return (
     <AdminTablePage
       title="Opportunities"
@@ -176,14 +181,14 @@ export function AdminMatchingPage() {
         title="Recent matches"
         description=""
         columns={['ID', 'Type', 'Score', 'Status']}
-        rows={dataStore.getPostMatches().slice(0, 10).map((m) => [m.id, m.matchType, `${Math.round(m.matchScore * 100)}%`, <StatusBadge key={m.id} status={m.status} />])}
+        rows={matchesApi.list().slice(0, 10).map((m) => [m.id, m.matchType, `${Math.round(m.matchScore * 100)}%`, <StatusBadge key={m.id} status={m.status} />])}
       />
     </div>
   )
 }
 
 export function AdminNegotiationsPage() {
-  const negs = dataStore.getNegotiations()
+  const negs = negotiationsApi.list()
   return (
     <AdminTablePage
       title="Negotiations"
@@ -204,7 +209,16 @@ export function AdminDisputesPage() {
 }
 
 export function AdminDealsPage() {
-  return <AdminTablePage title="Deals" description="All platform deals." columns={['ID', 'Status']} rows={dataStore.getNegotiations().map((n) => [n.id, n.status ?? 'pending'])} rowLink={(i) => `/admin/deals/${dataStore.getNegotiations()[i].id}`} />
+  const deals = dealsApi.list()
+  return (
+    <AdminTablePage
+      title="Deals"
+      description="All platform deals."
+      columns={['ID', 'Status']}
+      rows={deals.map((d) => [d.id, d.status ?? 'pending'])}
+      rowLink={(i) => `/admin/deals/${deals[i].id}`}
+    />
+  )
 }
 
 export function AdminContractsPage() {
@@ -212,11 +226,18 @@ export function AdminContractsPage() {
 }
 
 export function AdminConsortiumPage() {
-  return <AdminTablePage title="Consortium" description="Consortium deals subset." columns={['Match', 'Type']} rows={dataStore.getPostMatches().filter((m) => m.matchType.includes('consortium')).map((m) => [m.id, m.matchType])} />
+  return (
+    <AdminTablePage
+      title="Consortium"
+      description="Consortium deals subset."
+      columns={['Match', 'Type']}
+      rows={matchesApi.list().filter((m) => m.matchType.includes('consortium')).map((m) => [m.id, m.matchType])}
+    />
+  )
 }
 
 export function AdminAuditPage() {
-  const logs = dataStore.getAuditLog()
+  const logs = adminApi.getAuditLog()
   return (
     <AdminTablePage
       title="Audit log"

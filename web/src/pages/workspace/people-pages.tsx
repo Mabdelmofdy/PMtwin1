@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
-import { dataStore } from '@/lib/data-store'
+import { peopleApi } from '@/api/people.ts'
+import { notificationsApi } from '@/api/notifications.ts'
 import { formatRelativeTime } from '@/lib/format'
 import { PageHeader } from '@/components/shared/page-primitives'
 import { Button } from '@/components/ui/button'
@@ -7,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 
 export function PeoplePage() {
-  const people = dataStore.getPeople().filter((p) => p.isPublic !== false)
+  const people = peopleApi.listAll().filter((p) => p.isPublic !== false)
   return (
     <div className="space-y-6">
       <PageHeader label="Directory" title="Find" description="Search professionals and companies." />
@@ -37,7 +38,7 @@ export function PeoplePage() {
 
 export function PersonProfilePage() {
   const { id } = useParams()
-  const person = id ? dataStore.getPersonById(id) : undefined
+  const person = id ? peopleApi.get(id) : undefined
   if (!person) return <p className="text-muted-foreground">Profile not found.</p>
   const skills = 'skills' in (person.profile ?? {}) ? person.profile?.skills ?? [] : []
   return (
@@ -102,7 +103,7 @@ export function MessagesPage() {
 }
 
 export function NotificationsPage() {
-  const notifications = dataStore.getNotifications()
+  const notifications = notificationsApi.list('seed-user-001')
   return (
     <div className="space-y-6">
       <PageHeader title="Notifications" description="Alerts for matches, applications, deals, and messages." />
@@ -123,7 +124,7 @@ export function NotificationsPage() {
 }
 
 export function ProfilePage() {
-  const user = dataStore.getUsers()[1] ?? dataStore.getUsers()[0]
+  const user = peopleApi.listUsers()[1] ?? peopleApi.listUsers()[0]
   return (
     <div className="space-y-6">
       <PageHeader title="Profile" description="Your public profile and vetting status." />

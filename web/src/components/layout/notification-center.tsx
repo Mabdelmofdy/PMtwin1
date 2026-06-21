@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Bell, CheckCheck } from 'lucide-react'
-import { dataStore } from '@/lib/data-store'
+import type { AppNotification } from '@/types/domain.ts'
+import { notificationsApi } from '@/api/notifications.ts'
+import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -30,7 +32,7 @@ function NotificationItem({
   notification,
   onMarkRead,
 }: {
-  notification: ReturnType<typeof dataStore.getNotifications>[number]
+  notification: AppNotification
   onMarkRead: (id: string) => void
 }) {
   const content = (
@@ -88,9 +90,11 @@ function NotificationItem({
 
 export function NotificationCenter() {
   const { user } = useAuth()
+  const version = useDataStoreVersion()
   const [open, setOpen] = useState(false)
-  const [notifications, setNotifications] = useState(
-    () => dataStore.getNotifications(user?.id),
+  const notifications = useMemo(
+    () => notificationsApi.list(user?.id ?? 'seed-user-001'),
+    [user?.id, version],
   )
 
   const unreadCount = useMemo(
@@ -99,13 +103,11 @@ export function NotificationCenter() {
   )
 
   const markRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    )
+    notificationsApi.markRead(id)
   }
 
   const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+    if (user?.id) notificationsApi.markAllRead(user.id)
   }
 
   return (

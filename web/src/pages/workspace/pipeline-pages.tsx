@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import { dataStore } from '@/lib/data-store'
+import { matchesApi } from '@/api/matches.ts'
+import { negotiationsApi } from '@/api/negotiations.ts'
 import { formatDate, formatPercent } from '@/lib/format'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { PageHeader, StatCard, StatusBadge } from '@/components/shared/page-primitives'
@@ -14,7 +15,7 @@ export function PipelinePage() {
   const navigate = useNavigate()
   const activeTab = tab ?? 'opportunities'
   const version = useDataStoreVersion()
-  const matches = dataStore.getPostMatches()
+  const matches = matchesApi.list()
 
   return (
     <div className="space-y-6">
@@ -70,7 +71,7 @@ export function PipelinePage() {
 }
 
 export function MatchesPage() {
-  const matches = dataStore.getPostMatches()
+  const matches = matchesApi.list()
   return (
     <div className="space-y-6">
       <PageHeader label="Matching" title="Matches" description="AI-ranked post-matches for your opportunities." />
@@ -96,7 +97,7 @@ export function MatchesPage() {
 
 export function MatchDetailPage() {
   const { id } = useParams()
-  const match = id ? dataStore.getPostMatchById(id) : undefined
+  const match = id ? matchesApi.get(id) : undefined
   if (!match) return <p className="text-muted-foreground">Match not found.</p>
   return (
     <div className="space-y-6">
@@ -129,7 +130,7 @@ export function MatchDetailPage() {
 
 export function NegotiationDetailPage() {
   const { id } = useParams()
-  const neg = id ? dataStore.getNegotiationById(id) : undefined
+  const neg = id ? negotiationsApi.get(id) : undefined
   return (
     <div className="space-y-6">
       <PageHeader

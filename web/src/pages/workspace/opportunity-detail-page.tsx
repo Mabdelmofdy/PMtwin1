@@ -1,12 +1,10 @@
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import {
-  canUserApplyToOpportunity,
-  filterApplicationsForOpportunity,
-  resolveUserApplication,
-  sortApplicationsByValueScore,
-} from '@/lib/applications'
-import { dataStore } from '@/lib/data-store'
+import { opportunitiesApi } from '@/api/opportunities.ts'
+import { peopleApi } from '@/api/people.ts'
+import { applicationRepository } from '@/repositories/index.ts'
+import { matchingService } from '@/services/matching-service.ts'
+import { negotiationService } from '@/services/negotiation-service.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
 import { ApplicationsPanel } from '@/components/opportunity/applications-panel'
@@ -22,8 +20,8 @@ export function OpportunityDetailPage() {
   const { user, isPendingApproval } = useAuth()
   const [showWizard, setShowWizard] = useState(false)
 
-  const opp = id ? dataStore.getOpportunityById(id) : undefined
-  const applications = useMemo(() => dataStore.getApplications(), [version])
+  const opp = id ? opportunitiesApi.get(id) : undefined
+  const applications = useMemo(() => applicationRepository.getAll(), [version])
 
   if (!opp) {
     return <p className="text-muted-foreground">Opportunity not found.</p>
@@ -31,22 +29,22 @@ export function OpportunityDetailPage() {
 
   const isOwner = user?.id === opp.creatorId
   const { application, canEdit, canReapply } = user
-    ? resolveUserApplication(applications, opp.id, user.id)
+    ? negotiationService.resolveUserApplication(applications, opp.id, user.id)
     : { application: undefined, canEdit: false, canReapply: false }
 
   const canApply = user
-    ? canUserApplyToOpportunity(opp, user, {
+    ? negotiationService.canUserApplyToOpportunity(opp, user, {
         application,
         canReapply,
         hasDeal: !!application?.dealId,
       })
     : false
 
-  const oppApplications = sortApplicationsByValueScore(
-    filterApplicationsForOpportunity(applications, opp.id),
+  const oppApplications = matchingService.sortApplicationsByValueScore(
+    matchingService.getFilteredApplications(opp.id),
   ).map((app) => ({
     ...app,
-    applicant: dataStore.getPersonById(app.applicantId),
+    applicant: peopleApi.get(app.applicantId),
   }))
 
   const opportunityClosed = [
@@ -58,7 +56,7 @@ export function OpportunityDetailPage() {
   ].includes(opp.status)
 
   const skills = opp.scope?.coreSkills ?? opp.attributes?.coreSkills ?? []
-  const creator = opp.creatorId ? dataStore.getPersonById(opp.creatorId) : undefined
+  const creator = opp.creatorId ? peopleApi.get(opp.creatorId) : undefined
 
   return (
     <div className="space-y-6">
