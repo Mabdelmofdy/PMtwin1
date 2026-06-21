@@ -92,7 +92,7 @@ class DataService {
         this.storage = window.storageService || storageService;
         this.initialized = false;
         this.SEED_DATA_VERSION_KEY = 'pmtwin_seed_version';
-        this.CURRENT_SEED_VERSION = '2.2.3'; // re-aligned e2e lifecycle (statuses/deals) + seed-app-010
+        this.CURRENT_SEED_VERSION = '2.2.4'; // application dedupe, deal sync, contracted status lifecycle
     }
     
     /**

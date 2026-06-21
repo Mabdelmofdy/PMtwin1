@@ -3,6 +3,7 @@ import type {
   AppNotification,
   AuditEntry,
   Company,
+  Contract,
   Deal,
   Negotiation,
   Opportunity,
@@ -11,6 +12,12 @@ import type {
   PostMatch,
   SiteContentPage,
 } from '@/types/domain.ts'
+import {
+  normalizeApplications,
+  normalizeContracts,
+  normalizeDeals,
+  normalizeNegotiations,
+} from '@/domain/normalizers.ts'
 
 import opportunitiesBase from '@poc-data/opportunities.json'
 import demoOpportunities from '@poc-data/demo-40-opportunities.json'
@@ -26,6 +33,7 @@ import usersBase from '@poc-data/users.json'
 import companiesBase from '@poc-data/companies.json'
 import siteContent from '@poc-data/site-content.json'
 import demoDeals from '@poc-data/demo-deals.json'
+import demoContracts from '@poc-data/demo-contracts.json'
 
 type DataEnvelope<T> = { data: T[] }
 
@@ -63,7 +71,9 @@ export function loadCompanies(): Company[] {
 }
 
 export function loadApplications(): Application[] {
-  return rows(demoApplications as DataEnvelope<Application>)
+  return normalizeApplications(
+    rows(demoApplications as DataEnvelope<Application>),
+  )
 }
 
 export function loadPostMatches(): PostMatch[] {
@@ -71,7 +81,9 @@ export function loadPostMatches(): PostMatch[] {
 }
 
 export function loadNegotiations(): Negotiation[] {
-  return rows(demoNegotiations as DataEnvelope<Negotiation>)
+  return normalizeNegotiations(
+    rows(demoNegotiations as DataEnvelope<Negotiation>),
+  )
 }
 
 export function loadNotifications(): AppNotification[] {
@@ -79,22 +91,11 @@ export function loadNotifications(): AppNotification[] {
 }
 
 export function loadDeals(): Deal[] {
-  const fromJson = rows(demoDeals as DataEnvelope<Deal>)
-  if (fromJson.length > 0) return fromJson
+  return normalizeDeals(rows(demoDeals as DataEnvelope<Deal>))
+}
 
-  // Bootstrap display deals from seed negotiations when demo-deals.json is empty.
-  // Static at module load — not regenerated on repository reads.
-  return loadNegotiations().map((n) => ({
-    id: n.id,
-    negotiationId: n.id,
-    opportunityId: n.opportunityId ?? '',
-    title: `Deal from ${n.id}`,
-    status: n.status ?? 'pending',
-    parties: n.parties ?? [],
-    terms: n.agreedTerms ?? n.initialTerms,
-    createdAt: n.createdAt ?? n.updatedAt ?? new Date().toISOString(),
-    updatedAt: n.updatedAt ?? n.createdAt ?? new Date().toISOString(),
-  }))
+export function loadContracts(): Contract[] {
+  return normalizeContracts(rows(demoContracts as DataEnvelope<Contract>))
 }
 
 export function loadPendingUsers(): PendingUser[] {

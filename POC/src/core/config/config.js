@@ -6,7 +6,7 @@
 const CONFIG = {
     // Application Info
     APP_NAME: 'PMTwin',
-    APP_VERSION: '1.2.0',
+    APP_VERSION: '1.2.1',
     APP_DESCRIPTION: 'Construction Collaboration Platform',
     
     // Base path for loading resources

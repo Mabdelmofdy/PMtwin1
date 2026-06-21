@@ -23,7 +23,7 @@ export class NegotiationRepository extends BaseRepository<Negotiation> {
 
   getByParty(userId: string): Negotiation[] {
     return this.getAll().filter((n) =>
-      n.parties?.some((p) => p.userId === userId),
+      (n.participants ?? n.parties)?.some((p) => p.userId === userId),
     )
   }
 

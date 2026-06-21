@@ -1,10 +1,14 @@
 import type { Contract } from '@/types/domain.ts'
-import type { IStorageAdapter } from '@/types/storage.ts'
+import type { IStorageAdapter, Overrides } from '@/types/storage.ts'
 import { BaseRepository } from './base-repository.ts'
 
 export class ContractRepository extends BaseRepository<Contract> {
   constructor(storage: IStorageAdapter, loadSeed: () => Contract[]) {
-    super(storage, 'deals', loadSeed)
+    super(storage, 'contracts' as keyof Overrides, loadSeed)
+  }
+
+  override getAll(): Contract[] {
+    return this.loadSeed()
   }
 
   create(

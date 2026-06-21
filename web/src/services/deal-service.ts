@@ -23,13 +23,23 @@ export const dealService = {
       .find((d) => d.negotiationId === negotiationId)
     if (existing) return existing
 
+    const participants = negotiation.participants ?? negotiation.parties ?? []
+    const commercialTerms =
+      negotiation.commercialTerms ??
+      negotiation.agreedTerms ??
+      negotiation.initialTerms
+
     const deal = dealRepository.create({
       negotiationId,
       opportunityId: negotiation.opportunityId ?? '',
+      matchId: negotiation.matchId ?? null,
+      applicationId: negotiation.applicationId ?? null,
       title: `Deal from ${negotiationId}`,
       status: 'active',
-      parties: negotiation.parties ?? [],
-      terms: negotiation.agreedTerms ?? negotiation.initialTerms,
+      participants,
+      parties: participants,
+      commercialTerms,
+      terms: commercialTerms,
     })
     return deal
   },

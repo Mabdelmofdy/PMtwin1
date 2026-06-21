@@ -1,4 +1,5 @@
-export type { Application, ApplicationValue } from '@/types/domain.ts'
+export type { Application } from '@/types/domain.ts'
+export type { ApplicationValue } from '@/types/commercial-terms.ts'
 
 export const APPLICATION_STATUS_LABELS: Record<string, string> = {
   pending: 'Pending',

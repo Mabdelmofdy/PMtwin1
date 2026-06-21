@@ -17,6 +17,8 @@ export type Overrides = {
   deals?: Record<string, Record<string, unknown>>
   newDeals?: Array<{ id: string } & Record<string, unknown>>
   negotiations?: Record<string, Record<string, unknown>>
+  contracts?: Record<string, Record<string, unknown>>
+  newContracts?: Array<{ id: string } & Record<string, unknown>>
 }
 
 export const OVERRIDES_KEY = 'pmtwin_web_overrides'

@@ -8,6 +8,7 @@ import {
   loadNegotiations,
   loadNotifications,
   loadDeals,
+  loadContracts,
   loadPendingUsers,
   loadAuditLog,
 } from '@/infrastructure/seed/seed-loader.ts'
@@ -60,7 +61,7 @@ export const negotiationRepository = new NegotiationRepository(
 
 export const contractRepository = new ContractRepository(
   localStorageAdapter,
-  () => [],
+  loadContracts,
 )
 
 export const notificationRepository = new NotificationRepository(
@@ -86,4 +87,4 @@ export {
   AuditRepository,
 }
 
-export { loadPendingUsers, loadAuditLog }
+export { loadPendingUsers, loadAuditLog, loadContracts }

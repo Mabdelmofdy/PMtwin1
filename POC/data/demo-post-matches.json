@@ -744,6 +744,47 @@
       "updatedAt": "2026-06-15T10:46:57.423Z",
       "expiresAt": "2026-06-29T10:46:57.423Z",
       "isReplacement": false
+    },
+    {
+      "id": "demo-pm-consortium-wind",
+      "matchType": "consortium",
+      "status": "confirmed",
+      "matchScore": 0.612,
+      "runId": "seed-run-wind",
+      "participants": [
+        {
+          "userId": "seed-co-corp-005",
+          "opportunityId": "seed-opp-039",
+          "role": "consortium_lead",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-03-08T11:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-013",
+          "opportunityId": "seed-opp-035",
+          "role": "consortium_member",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-03-12T15:00:00.000Z"
+        }
+      ],
+      "payload": {
+        "leadNeedId": "seed-opp-039",
+        "roles": [
+          {
+            "role": "EPC contractor",
+            "opportunityId": "seed-opp-035",
+            "userId": "seed-user-013",
+            "score": 0.612
+          }
+        ],
+        "valueBalance": null
+      },
+      "createdAt": "2026-03-05T10:00:00.000Z",
+      "updatedAt": "2026-03-12T15:00:00.000Z",
+      "expiresAt": "2026-03-26T10:00:00.000Z",
+      "isReplacement": false,
+      "dealId": "seed-deal-exchange-01",
+      "negotiationId": "seed-neg-07"
     }
   ]
 }
