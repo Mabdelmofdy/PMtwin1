@@ -2,6 +2,7 @@ import type { Command, CommandResult } from '@pm-twin/commands'
 import {
   buildCommandRbacFailureResult,
   evaluateCommandRbac,
+  type CommandRbacEntitySnapshot,
 } from '@/domain/rbac/command-rbac.ts'
 import {
   getCommandPermissionActor,
@@ -68,6 +69,9 @@ export type DefaultCommandGatewayDeps = {
   readonly contractHandler: ContractCommandHandler
   readonly idempotencyStore?: InMemoryIdempotencyStore
   readonly resolveCommandPermissionActor?: () => CommandPermissionActor | null
+  readonly resolveOpportunityForCommandRbac?: (
+    aggregateId: string,
+  ) => CommandRbacEntitySnapshot | null | undefined
   readonly enforceCommandRbac?: boolean
 }
 
@@ -80,6 +84,9 @@ export class DefaultCommandGateway implements CommandGateway {
   private readonly contractHandler: ContractCommandHandler
   private readonly idempotencyStore: InMemoryIdempotencyStore
   private readonly resolveCommandPermissionActor: () => CommandPermissionActor | null
+  private readonly resolveOpportunityForCommandRbac: (
+    aggregateId: string,
+  ) => CommandRbacEntitySnapshot | null | undefined
   private readonly enforceCommandRbac: boolean
 
   constructor(deps: DefaultCommandGatewayDeps) {
@@ -93,6 +100,8 @@ export class DefaultCommandGateway implements CommandGateway {
       deps.idempotencyStore ?? new InMemoryIdempotencyStore()
     this.resolveCommandPermissionActor =
       deps.resolveCommandPermissionActor ?? getCommandPermissionActor
+    this.resolveOpportunityForCommandRbac =
+      deps.resolveOpportunityForCommandRbac ?? (() => undefined)
     this.enforceCommandRbac = deps.enforceCommandRbac !== false
   }
 
@@ -101,6 +110,13 @@ export class DefaultCommandGateway implements CommandGateway {
       const rbac = evaluateCommandRbac(
         command,
         this.resolveCommandPermissionActor(),
+        command.commandType === 'TransitionOpportunityStatus'
+          ? {
+              opportunity: this.resolveOpportunityForCommandRbac(
+                command.aggregateId,
+              ),
+            }
+          : undefined,
       )
       if (!rbac.allowed) {
         return buildCommandRbacFailureResult(command, rbac)

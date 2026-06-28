@@ -1,4 +1,12 @@
-import type { Application, Opportunity, AuditEntry, PostMatch, Negotiation } from './domain.ts'
+import type {
+  Application,
+  Company,
+  Opportunity,
+  AuditEntry,
+  PostMatch,
+  Negotiation,
+  PlatformUser,
+} from './domain.ts'
 
 export interface IStorageAdapter {
   get<T>(key: string): T | null
@@ -9,6 +17,8 @@ export interface IStorageAdapter {
 
 export type Overrides = {
   applications?: Record<string, Partial<Application>>
+  users?: Record<string, Partial<PlatformUser>>
+  companies?: Record<string, Partial<Company>>
   opportunities?: Record<string, Partial<Opportunity>>
   newApplications?: Application[]
   notifications?: Record<string, Partial<{ read: boolean }>>

@@ -26,6 +26,10 @@ export abstract class BaseRepository<T extends { id: string }> {
     notifyDataStore()
   }
 
+  getEntityKey(): keyof Overrides {
+    return this.entityKey
+  }
+
   getAll(): T[] {
     return this.loadSeed()
   }

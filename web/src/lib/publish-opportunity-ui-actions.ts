@@ -35,6 +35,16 @@ export type PublishOpportunityUiActionResult =
       readonly opportunityReadiness?: OpportunityReadinessResult
     }
 
+export type PublishOrchestrationDeps = {
+  readonly transitionOpportunityStatus?: (
+    opportunityId: string,
+    targetStatus: string,
+  ) => CommandResult
+  readonly runPublishMatching?: (
+    opportunityId: string,
+  ) => PublishMatchingResult
+}
+
 function formatCommandErrors(result: CommandResult): string {
   if (result.errors && result.errors.length > 0) {
     return result.errors.join('\n')
@@ -42,40 +52,11 @@ function formatCommandErrors(result: CommandResult): string {
   return PUBLISH_READINESS_BLOCKED_MESSAGE
 }
 
-export function publishOpportunityUiAction(
+/** Transition to published and run matching after readiness gate has passed. */
+export function executePublishOpportunityOrchestration(
   opportunityId: string,
-  context: {
-    readonly profile?: object | null
-    readonly profileKind: ProfileKind
-    readonly opportunity?: object | null
-  },
-  deps?: {
-    readonly transitionOpportunityStatus?: (
-      opportunityId: string,
-      targetStatus: string,
-    ) => CommandResult
-    readonly runPublishMatching?: (
-      opportunityId: string,
-    ) => PublishMatchingResult
-  },
+  deps?: PublishOrchestrationDeps,
 ): PublishOpportunityUiActionResult {
-  const gate = evaluatePublishReadiness({
-    profile: context.profile,
-    profileKind: context.profileKind,
-    opportunity: context.opportunity,
-  })
-
-  if (!gate.allowed) {
-    return {
-      success: false,
-      code: PUBLISH_READINESS_BLOCKED_CODE,
-      message: PUBLISH_READINESS_BLOCKED_MESSAGE,
-      details: formatPublishReadinessDetailLines(gate),
-      profileReadiness: gate.profileReadiness,
-      opportunityReadiness: gate.opportunityReadiness,
-    }
-  }
-
   const transitionOpportunityStatus =
     deps?.transitionOpportunityStatus ??
     opportunityCommandService.transitionOpportunityStatus.bind(
@@ -105,6 +86,35 @@ export function publishOpportunityUiAction(
     skippedDuplicatesCount: matching.skippedDuplicatesCount,
     matchingErrors: matching.matchingErrors,
   }
+}
+
+export function publishOpportunityUiAction(
+  opportunityId: string,
+  context: {
+    readonly profile?: object | null
+    readonly profileKind: ProfileKind
+    readonly opportunity?: object | null
+  },
+  deps?: PublishOrchestrationDeps,
+): PublishOpportunityUiActionResult {
+  const gate = evaluatePublishReadiness({
+    profile: context.profile,
+    profileKind: context.profileKind,
+    opportunity: context.opportunity,
+  })
+
+  if (!gate.allowed) {
+    return {
+      success: false,
+      code: PUBLISH_READINESS_BLOCKED_CODE,
+      message: PUBLISH_READINESS_BLOCKED_MESSAGE,
+      details: formatPublishReadinessDetailLines(gate),
+      profileReadiness: gate.profileReadiness,
+      opportunityReadiness: gate.opportunityReadiness,
+    }
+  }
+
+  return executePublishOpportunityOrchestration(opportunityId, deps)
 }
 
 export function saveOpportunityDraftFields(

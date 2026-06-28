@@ -1,10 +1,11 @@
 import type { AuditEntry } from '@/types/domain.ts'
 import type { IStorageAdapter } from '@/types/storage.ts'
+import { REPOSITORY_ENTITY_KEYS } from './repository-entity-keys.ts'
 import { BaseRepository } from './base-repository.ts'
 
 export class AuditRepository extends BaseRepository<AuditEntry> {
   constructor(storage: IStorageAdapter, loadSeed: () => AuditEntry[]) {
-    super(storage, 'applications', loadSeed)
+    super(storage, REPOSITORY_ENTITY_KEYS.audit, loadSeed)
   }
 
   override getAll(): AuditEntry[] {

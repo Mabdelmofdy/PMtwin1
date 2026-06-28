@@ -64,4 +64,84 @@ describe('evaluateCommandRbac', () => {
     assert.equal(failure.aggregateId, 'pm-1')
     assert.ok(failure.errors?.length)
   })
+
+  it('owner can publish own opportunity', () => {
+    const result = evaluateCommandRbac(
+      {
+        commandType: 'TransitionOpportunityStatus',
+        aggregateId: 'opp-1',
+        clientRequestId: 'req-owner',
+        targetStatus: 'published',
+      },
+      { userId: 'user-1', userRole: 'professional' },
+      { opportunity: { creatorId: 'user-1', status: 'draft' } },
+    )
+
+    assert.equal(result.allowed, true)
+    assert.ok(result.matchedPolicies.includes('command-rbac:owner-publish'))
+  })
+
+  it('non-owner cannot publish', () => {
+    const result = evaluateCommandRbac(
+      {
+        commandType: 'TransitionOpportunityStatus',
+        aggregateId: 'opp-1',
+        clientRequestId: 'req-non-owner',
+        targetStatus: 'published',
+      },
+      { userId: 'user-other', userRole: 'company_owner' },
+      { opportunity: { creatorId: 'user-1', status: 'draft' } },
+    )
+
+    assert.equal(result.allowed, false)
+    assert.match(result.reason ?? '', /Only the opportunity owner or an admin can publish/i)
+  })
+
+  it('admin can publish', () => {
+    const result = evaluateCommandRbac(
+      {
+        commandType: 'TransitionOpportunityStatus',
+        aggregateId: 'opp-1',
+        clientRequestId: 'req-admin',
+        targetStatus: 'published',
+      },
+      { userId: 'admin-1', userRole: 'admin' },
+      { opportunity: { creatorId: 'user-1', status: 'draft' } },
+    )
+
+    assert.equal(result.allowed, true)
+    assert.ok(result.matchedPolicies.includes('command-rbac:admin-publish'))
+  })
+
+  it('non-publish transitions follow existing rules', () => {
+    const result = evaluateCommandRbac(
+      {
+        commandType: 'TransitionOpportunityStatus',
+        aggregateId: 'opp-1',
+        clientRequestId: 'req-matched',
+        targetStatus: 'matched',
+      },
+      null,
+      { opportunity: { creatorId: 'user-other', status: 'published' } },
+    )
+
+    assert.equal(result.allowed, true)
+    assert.ok(result.matchedPolicies.includes('command-rbac:transition-non-publish'))
+  })
+
+  it('publish requires authentication', () => {
+    const result = evaluateCommandRbac(
+      {
+        commandType: 'TransitionOpportunityStatus',
+        aggregateId: 'opp-1',
+        clientRequestId: 'req-auth',
+        targetStatus: 'published',
+      },
+      null,
+      { opportunity: { creatorId: 'user-1', status: 'draft' } },
+    )
+
+    assert.equal(result.allowed, false)
+    assert.match(result.reason ?? '', /Authentication required/i)
+  })
 })

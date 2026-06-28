@@ -106,4 +106,82 @@ describe('DefaultCommandGateway RBAC', () => {
       'accepted',
     )
   })
+
+  it('denied publish command does not mutate opportunity repository', () => {
+    const readyDraftOpportunity = {
+      id: 'opp-ready-draft',
+      title: 'Architect need',
+      description: 'Seeking a senior architect for a mixed-use tower delivery.',
+      creatorId: 'user-1',
+      intent: 'need',
+      status: 'draft',
+      modelType: 'project_based',
+      location: 'Riyadh, Saudi Arabia',
+      scope: {
+        sectors: ['Construction', 'Architecture'],
+        requiredSkills: ['BIM', 'Sustainable Design', 'LEED Certification'],
+      },
+      attributes: {
+        targetRole: 'Architect',
+        startDate: '2026-03-01',
+        tenderDeadline: '2026-06-01',
+      },
+      normalized: {
+        requiredServices: ['Architectural Design', 'BIM Coordination'],
+      },
+      exchangeData: {
+        budgetRange: { min: 150_000, max: 400_000, currency: 'SAR' },
+      },
+      preferredPartnerType: 'company',
+      attachments: [{ name: 'design-brief.pdf' }],
+      complianceRequirements: ['Saudi Building Code'],
+      deliveryMilestones: [{ title: 'Concept design', dueDate: '2026-04-01' }],
+    }
+
+    const stack = createCommandGatewayTestStack({
+      users: [
+        {
+          id: 'user-1',
+          email: 'owner@pmtwin.test',
+          role: 'professional',
+          status: 'active',
+          profile: {
+            name: 'Owner',
+            title: 'Architect',
+            skills: ['BIM'],
+            services: ['Design'],
+            location: 'Riyadh',
+            preferredWorkMode: 'On-Site',
+            caseStudies: [{ title: 'Tower' }],
+            yearsExperience: 8,
+            certifications: ['LEED AP BD+C'],
+            previousProjects: [{ title: 'Project' }],
+          },
+        },
+      ],
+      opportunities: [readyDraftOpportunity],
+      commandPermissionActor: {
+        userId: 'user-other',
+        userRole: 'company_owner',
+      },
+    })
+
+    const result = stack.gateway.execute({
+      commandType: 'TransitionOpportunityStatus',
+      aggregateId: 'opp-ready-draft',
+      clientRequestId: 'req-rbac-publish-deny',
+      targetStatus: 'published',
+    })
+
+    assert.equal(result.success, false)
+    assert.ok(
+      result.errors?.some((error) =>
+        /Only the opportunity owner or an admin can publish/i.test(error),
+      ),
+    )
+    assert.equal(
+      stack.opportunityRepository.getById('opp-ready-draft')?.status,
+      'draft',
+    )
+  })
 })

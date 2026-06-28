@@ -4,6 +4,7 @@ import type { Opportunity, PlatformUser } from '@/types/domain.ts'
 import {
   createCommandGatewayTestStack,
   type CommandGatewayTestStack,
+  TEST_ADMIN_ACTOR,
 } from '@/commands/test-helpers/command-gateway-test-stack.ts'
 import {
   CONTRACT_LIFECYCLE_DRAG_MESSAGE,
@@ -126,6 +127,125 @@ describe('OpportunityCommandHandler', () => {
     )
   })
 
+  it('owner can publish own opportunity', () => {
+    const ownerStack = createCommandGatewayTestStack({
+      users: [readyCreator],
+      opportunities: [readyDraftOpportunity],
+      commandPermissionActor: {
+        userId: 'user-1',
+        userRole: 'professional',
+      },
+    })
+
+    const result = ownerStack.gateway.execute({
+      commandType: 'TransitionOpportunityStatus',
+      aggregateId: 'opp-ready-draft',
+      clientRequestId: 'req-owner-publish',
+      targetStatus: 'published',
+    })
+
+    assert.equal(result.success, true)
+    assert.equal(
+      ownerStack.opportunityRepository.getById('opp-ready-draft')?.status,
+      'published',
+    )
+  })
+
+  it('non-owner cannot publish', () => {
+    const ownerStack = createCommandGatewayTestStack({
+      users: [readyCreator],
+      opportunities: [readyDraftOpportunity],
+      commandPermissionActor: {
+        userId: 'user-other',
+        userRole: 'company_owner',
+      },
+    })
+
+    const result = ownerStack.gateway.execute({
+      commandType: 'TransitionOpportunityStatus',
+      aggregateId: 'opp-ready-draft',
+      clientRequestId: 'req-non-owner-publish',
+      targetStatus: 'published',
+    })
+
+    assert.equal(result.success, false)
+    assert.ok(
+      result.errors?.some((error) =>
+        /Only the opportunity owner or an admin can publish/i.test(error),
+      ),
+    )
+    assert.equal(
+      ownerStack.opportunityRepository.getById('opp-ready-draft')?.status,
+      'draft',
+    )
+  })
+
+  it('admin can publish', () => {
+    const adminStack = createCommandGatewayTestStack({
+      users: [readyCreator],
+      opportunities: [readyDraftOpportunity],
+      commandPermissionActor: TEST_ADMIN_ACTOR,
+    })
+
+    const result = adminStack.gateway.execute({
+      commandType: 'TransitionOpportunityStatus',
+      aggregateId: 'opp-ready-draft',
+      clientRequestId: 'req-admin-publish',
+      targetStatus: 'published',
+    })
+
+    assert.equal(result.success, true)
+    assert.equal(
+      adminStack.opportunityRepository.getById('opp-ready-draft')?.status,
+      'published',
+    )
+  })
+
+  it('denied publish does not transition status', () => {
+    const result = stack.gateway.execute({
+      commandType: 'TransitionOpportunityStatus',
+      aggregateId: 'opp-draft',
+      clientRequestId: 'req-denied-publish',
+      targetStatus: 'published',
+    })
+
+    assert.equal(result.success, false)
+    assert.equal(
+      stack.opportunityRepository.getById('opp-draft')?.status,
+      'draft',
+    )
+  })
+
+  it('non-publish transitions follow existing rules without publish RBAC', () => {
+    const ownerStack = createCommandGatewayTestStack({
+      users: [readyCreator],
+      opportunities: [
+        {
+          ...readyDraftOpportunity,
+          id: 'opp-published-transition',
+          status: 'published',
+        },
+      ],
+      commandPermissionActor: {
+        userId: 'user-other',
+        userRole: 'professional',
+      },
+    })
+
+    const result = ownerStack.gateway.execute({
+      commandType: 'TransitionOpportunityStatus',
+      aggregateId: 'opp-published-transition',
+      clientRequestId: 'req-non-publish-transition',
+      targetStatus: 'matched',
+    })
+
+    assert.equal(result.success, true)
+    assert.equal(
+      ownerStack.opportunityRepository.getById('opp-published-transition')?.status,
+      'matched',
+    )
+  })
+
   it('invalid transition rejects', () => {
     const result = stack.gateway.execute({
       commandType: 'TransitionOpportunityStatus',
@@ -172,24 +292,47 @@ describe('pipelineOpportunityDrop command routing', () => {
     commandService = createOpportunityCommandService({ gateway: stack.gateway })
   })
 
-  it('pipeline drag uses opportunity command service when readiness passes', () => {
+  it('pipeline drag uses opportunity command service and triggers matching when readiness passes', () => {
+    let matchingCalled = false
     const result = pipelineOpportunityDrop('opp-ready-draft', 'published', {
       readOpportunity: (id) => stack.opportunityRepository.getById(id),
+      resolvePublishReadinessContext: (opportunity) => ({
+        profile: readyCreator.profile,
+        profileKind: 'individual',
+        opportunity,
+      }),
       transitionOpportunityStatus: (id, status) =>
         commandService.transitionOpportunityStatus(id, status),
+      runPublishMatching: (id) => {
+        matchingCalled = true
+        return {
+          discoveredMatchesCount: 1,
+          skippedDuplicatesCount: 0,
+          matchingErrors: [],
+          postMatchIds: ['pm-test'],
+        }
+      },
     })
 
     assert.equal(result.success, true)
+    assert.equal(matchingCalled, true)
     assert.equal(
       stack.opportunityRepository.getById('opp-ready-draft')?.status,
       'published',
     )
+    if (result.success) {
+      assert.equal(result.matching?.discoveredMatchesCount, 1)
+    }
   })
 
   it('pipeline drag blocks publish when readiness fails', () => {
     const blockedStack = createCommandGatewayTestStack({
       users: [readyCreator],
       opportunities: [opportunityFixture('opp-1', 'draft')],
+      commandPermissionActor: {
+        userId: 'user-1',
+        userRole: 'company_owner',
+      },
     })
     const blockedService = createOpportunityCommandService({
       gateway: blockedStack.gateway,
@@ -197,6 +340,11 @@ describe('pipelineOpportunityDrop command routing', () => {
 
     const result = pipelineOpportunityDrop('opp-1', 'published', {
       readOpportunity: (id) => blockedStack.opportunityRepository.getById(id),
+      resolvePublishReadinessContext: (opportunity) => ({
+        profile: readyCreator.profile,
+        profileKind: 'individual',
+        opportunity,
+      }),
       transitionOpportunityStatus: (id, status) =>
         blockedService.transitionOpportunityStatus(id, status),
     })

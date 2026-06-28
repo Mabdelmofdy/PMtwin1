@@ -1,13 +1,11 @@
 import {
   applicationRepository,
   auditRepository,
-  companyRepository,
   contractRepository,
   dealRepository,
   negotiationRepository,
   opportunityRepository,
   postMatchRepository,
-  userRepository,
 } from '@/repositories/index.ts'
 import { ApplicationCommandHandler } from '@/commands/handlers/application-command-handler.ts'
 import { ContractCommandHandler } from '@/commands/handlers/contract-command-handler.ts'
@@ -17,6 +15,7 @@ import { OpportunityCommandHandler } from '@/commands/handlers/opportunity-comma
 import { PostMatchCommandHandler } from '@/commands/handlers/post-match-command-handler.ts'
 import { DefaultCommandGateway } from '@/commands/default-command-gateway.ts'
 import { getCommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
+import { resolvePublishReadinessContextForOpportunity } from '@/lib/resolve-publish-readiness-context.ts'
 
 let gatewayInstance: DefaultCommandGateway | null = null
 
@@ -28,21 +27,8 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
   const opportunityHandler = new OpportunityCommandHandler({
     opportunityRepository,
     auditRepository,
-    resolvePublishReadinessContext: (opportunity) => {
-      const creatorId = opportunity.creatorId
-      if (!creatorId) {
-        return { profile: null, profileKind: 'individual' }
-      }
-      const creator =
-        userRepository.getById(creatorId) ?? companyRepository.getById(creatorId)
-      if (!creator) {
-        return { profile: null, profileKind: 'individual' }
-      }
-      return {
-        profile: creator.profile,
-        profileKind: creator.profile?.type === 'company' ? 'company' : 'individual',
-      }
-    },
+    resolvePublishReadinessContext: (opportunity) =>
+      resolvePublishReadinessContextForOpportunity(opportunity),
   })
   const postMatchHandler = new PostMatchCommandHandler({
     postMatchRepository,
@@ -75,6 +61,14 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
     dealHandler,
     contractHandler,
     resolveCommandPermissionActor: getCommandPermissionActor,
+    resolveOpportunityForCommandRbac: (aggregateId) => {
+      const opportunity = opportunityRepository.getById(aggregateId)
+      if (!opportunity) return undefined
+      return {
+        creatorId: opportunity.creatorId,
+        status: opportunity.status,
+      }
+    },
   })
 }
 

@@ -154,6 +154,14 @@ export function createCommandGatewayTestStack(
       options.commandPermissionActor === null
         ? null
         : (options.commandPermissionActor ?? TEST_ADMIN_ACTOR),
+    resolveOpportunityForCommandRbac: (aggregateId) => {
+      const opportunity = opportunityRepository.getById(aggregateId)
+      if (!opportunity) return undefined
+      return {
+        creatorId: opportunity.creatorId,
+        status: opportunity.status,
+      }
+    },
   })
 
   return {
