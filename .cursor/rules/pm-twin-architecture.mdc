@@ -8,23 +8,32 @@ alwaysApply: true
 ## Project Context
 
 - B2B marketplace connecting Project Managers, consultants, and companies in Saudi Arabia
-- Current state: Sophisticated browser-based POC with business logic in localStorage-backed JavaScript
+- **Active runtime:** `web/` (React SPA, command gateway, repositories)
+- **Shared logic:** `packages/` (`lifecycle`, `commands`, `matching`)
+- **POC/:** Legacy reference, seed source (`POC/data/`), scripts, regression harness — **frozen for new product logic**
 - Target: SaaS-ready platform serving 100,000+ concurrent users
 - Architecture authority chain: Domain Blueprint → Command Architecture → Unified Lifecycle Engine → This sprint
+- Runtime ownership: see `docs/runtime-ownership.md`
 
 ## Critical Constraints
 
-1. NEVER implement backend logic in POC/ folder — POC is legacy runtime only
+1. NEVER implement backend logic in POC/ folder — POC is legacy reference only (Phase 10.3 freeze)
 2. NEVER import TypeScript from web/ into POC/ or JavaScript from POC/ into web/
-3. ALL lifecycle state names MUST come from @pm-twin/lifecycle registry (manifest.json)
-4. NO direct localStorage mutations outside of data-service.js (to be replaced in Phase 2)
-5. ALL new code must pass: lint → type-check → unit test → build
+3. NEVER import POC/src from web/ — seed JSON only via @seed-data alias
+4. ALL lifecycle state names MUST come from @pm-twin/lifecycle registry (manifest.json)
+5. ALL new product behavior MUST go through web command gateway + packages/* — not POC/src
+6. Web persistence: repositories → pmtwin_web_overrides (not POC data-service.js)
+7. ALL new code must pass: lint → type-check → unit test → build
 
 ## File Authority Matrix
 
 | Path | Authority | Can Import From |
 |------|-----------|-----------------|
 | packages/lifecycle/ | SOURCE OF TRUTH | Nothing (zero-dependency) |
-| web/src/ | Consumer | packages/lifecycle/, node_modules |
-| POC/src/ | Legacy (read-only Phase 1) | packages/lifecycle/ (static serve only) |
+| packages/commands/ | Command contracts | packages/lifecycle (types only) |
+| packages/matching/ | Matching engine | packages/lifecycle (if needed) |
+| web/src/ | **Active runtime** | packages/*, @seed-data (JSON only), node_modules |
+| POC/data/ | Physical seed source | N/A (static JSON) |
+| POC/src/ | Legacy (frozen — no new product logic) | packages/lifecycle/ (static serve only) |
+| POC/scripts/ | Seed/harness tooling | POC/data, packages (optional) |
 | docs/adr/ | Immutable after approval | Nothing |

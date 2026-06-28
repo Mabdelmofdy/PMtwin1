@@ -26,7 +26,21 @@ After this overview, open [full-user-journey.md](full-user-journey.md) or [journ
 
 ### Tips
 
-- PMTwin today runs as a browser-based proof-of-concept: data stays in the browser unless you integrate a real API later.
+- **Active runtime** is `web/` (React). Seed JSON lives in `POC/data/` and is loaded via `@seed-data`.
+- Legacy `POC/` MPA is frozen — see [runtime-ownership.md](runtime-ownership.md).
+
+---
+
+## Runtime ownership
+
+| Component | Role |
+|-----------|------|
+| `web/` | Active product runtime |
+| `packages/` | Shared lifecycle, commands, matching |
+| `@seed-data` | Immutable seed abstraction → `POC/data/` |
+| `POC/` | Reference, seed source, scripts, regression tests only |
+
+Full rules: [runtime-ownership.md](runtime-ownership.md) · [architecture/runtime-boundaries.md](architecture/runtime-boundaries.md)
 
 ---
 
@@ -43,6 +57,8 @@ Companies, professionals, and consultants all use the same core ideas: post an *
 ---
 
 ## Architecture summary
+
+The **active runtime** is the React app in `web/`. The diagram below describes the **legacy POC** client layout (retained for reference).
 
 ```mermaid
 flowchart TB

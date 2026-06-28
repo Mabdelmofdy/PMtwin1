@@ -1,4 +1,4 @@
-declare module '@poc-data/*.json' {
+declare module '@seed-data/*.json' {
   const value: {
     domain?: string
     version?: string

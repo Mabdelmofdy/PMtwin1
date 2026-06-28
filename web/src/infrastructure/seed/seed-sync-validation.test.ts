@@ -1,6 +1,6 @@
 /**
  * Phase D — Web seed sync validation against POC PostMatch-first dataset.
- * Ensures seed-loader imports and read models work with lifecycle-aligned POC/data.
+ * Ensures seed-loader imports and read models work with lifecycle-aligned seed data.
  */
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'

@@ -1,6 +1,6 @@
 import type { CanonicalData, MatchingConfig } from '@pm-twin/matching'
 import { EMPTY_CANONICAL_DATA, withMatchingDefaults } from '@pm-twin/matching'
-import skillCanonicalJson from '@poc-data/skill-canonical.json'
+import skillCanonicalJson from '@seed-data/skill-canonical.json'
 
 type SkillCanonicalJson = {
   readonly skillSynonyms?: CanonicalData['skillSynonyms']

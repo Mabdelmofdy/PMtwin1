@@ -1,0 +1,45 @@
+---
+description: Runtime ownership and POC freeze rules (Phase 10.3)
+alwaysApply: true
+---
+
+# Runtime Ownership (Phase 10.3)
+
+## Active runtime
+
+- **`web/`** is the sole active product runtime.
+- **`packages/`** owns shared pure business logic (`lifecycle`, `commands`, `matching`).
+- **`POC/`** is legacy reference, physical seed source, scripts, and regression harness only.
+
+Authority: `docs/runtime-ownership.md`
+
+## Seed abstraction
+
+- Web imports seed JSON via **`@seed-data`** (resolves to `POC/data/` at build time until extraction).
+- Do **not** reintroduce `@poc-data` or import from `POC/src` in `web/`.
+- Seed JSON is immutable at runtime; mutations go to `pmtwin_web_overrides` only.
+
+## POC freeze (mandatory)
+
+In **`POC/src/`** do NOT add:
+
+1. New business logic or product features
+2. New lifecycle logic (use `@pm-twin/lifecycle` + web command handlers)
+3. New matching logic (use `@pm-twin/matching` + web matching-service)
+
+Allowed in POC: `POC/data/` seed edits, `POC/scripts/`, `POC/tests/`, `POC/docs/`, minimal regression fixes.
+
+## New product behavior
+
+Implement only through:
+
+1. `web/` command gateway + handlers + repositories
+2. `packages/*` for shared pure logic
+3. `web/` services and UI
+
+Never implement new product behavior in `POC/src/`.
+
+## Cross-runtime imports
+
+- NEVER import TypeScript from `web/` into `POC/` or JavaScript from `POC/` into `web/`.
+- NEVER add runtime dependency from `web/` → `POC/src`.

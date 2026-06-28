@@ -15,12 +15,12 @@ PM-Twin is a **B2B construction collaboration marketplace** for Saudi Arabia and
 
 ## Current maturity level
 
-**Advanced proof-of-concept with emerging target architecture.** The repository is in a deliberate **dual-runtime transition**:
+**Advanced proof-of-concept with target SaaS architecture.** As of Phase 10.3, **`web/` is the active runtime**; `POC/` is legacy reference, seed source, and regression harness (frozen for new product logic).
 
 | Runtime | Role | Maturity |
 |---------|------|----------|
-| `POC/` | Primary working system today (40+ MPA pages, ~1,450-line matching engine) | Feature-rich, client-only |
-| `web/` | Target SaaS frontend (React 19, TypeScript, repository + command layers) | Partially wired; strongest on PostMatch → Deal → Contract |
+| `web/` | **Active runtime** — React SPA, repository + command gateway | Primary target; PostMatch → Deal → Contract strongest |
+| `POC/` | Legacy reference MPA, seed JSON, scripts, regression tests | Feature-rich historical impl.; **no new product logic** |
 | `packages/lifecycle/` | Canonical state vocabulary (ADR-001) | Source of truth, zero-dep |
 | `packages/commands/` | Command DTO contracts (ADR-002) | Types only; execution in `web/` |
 
@@ -57,7 +57,7 @@ There is **no backend server, database, or real API**. All persistence is `local
 | No server-side persistence or auth — all data bypassable via DevTools | Critical |
 | Base64 password encoding in both runtimes | Critical |
 | Web admin routes accessible to any authenticated user | Critical |
-| Dual-runtime drift (POC imperative vs web command paths) | High |
+| Dual-runtime drift (POC imperative vs web command paths) | Medium — mitigated by POC freeze (Phase 10.3); implement new work in web only |
 | RBAC advisory-only in web; not enforced at command boundary | High |
 | No E2E tests despite Playwright in devDependencies | High |
 | Lifecycle FSM not uniformly enforced (deal/negotiation handlers) | Medium |
@@ -70,7 +70,7 @@ There is **no backend server, database, or real API**. All persistence is `local
 | **Domain Architecture** | 7.0 | Well-modeled entities, relationships, docs; legacy field proliferation |
 | **Lifecycle Architecture** | 6.0 | Canonical registry exists; uneven enforcement across runtimes |
 | **Command Architecture** | 5.5 | 20/26 commands wired; negotiation/deal transitions bypassed |
-| **UI Architecture** | 4.5 | Modern React SPA; POC still primary; zero component tests |
+| **UI Architecture** | 5.0 | Modern React SPA is active runtime; POC frozen; component tests still minimal |
 | **Test Coverage** | 5.5 | 632 tests total; no E2E; lifecycle package under-covered |
 | **Backend Readiness** | 1.0 | No PostgreSQL, Prisma, REST API, or JWT |
 | **Security Readiness** | 1.5 | Client-only auth, reversible passwords, no CSRF/XSS hardening |

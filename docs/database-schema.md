@@ -24,7 +24,10 @@ Design SQL tables to mirror entities and relationships when you leave localStora
 
 ### Tips
 
+- **Web runtime** uses `pmtwin_web_overrides` and `pmtwin_web_session`. Legacy POC keys are documented below for reference and migration.
 - Sessions in POC also use **sessionStorage** for the active login—see notes in the tables.
+
+> **Runtime ownership:** Active app is `web/`. See [runtime-ownership.md](runtime-ownership.md).
 
 ---
 

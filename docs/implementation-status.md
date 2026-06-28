@@ -25,7 +25,8 @@ Prioritize ⚠️ and ❌ items against your release goals.
 
 ### Tips
 
-- Status can change with any PR—treat this as a snapshot to refresh periodically.
+- Status reflects codebase snapshots. **Active runtime is `web/`** — prefer web command paths for new work. See [runtime-ownership.md](runtime-ownership.md).
+- POC rows describe the legacy reference app where still applicable.
 
 ---
 

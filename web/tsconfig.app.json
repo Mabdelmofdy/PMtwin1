@@ -24,7 +24,7 @@
     "paths": {
       "*": ["./*"],
       "@/*": ["./src/*"],
-      "@poc-data/*": ["../POC/data/*"]
+      "@seed-data/*": ["../POC/data/*"]
     }
   },
   "include": ["src"],

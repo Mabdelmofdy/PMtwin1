@@ -6,7 +6,10 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const dataDir = join(__dirname, '../../POC/data')
+
+/** Physical seed root — neutral name; relocates in Phase 10.3. */
+const SEED_DATA_ROOT = join(__dirname, '../../POC/data')
+const dataDir = SEED_DATA_ROOT
 
 function loadJson(name) {
   const raw = JSON.parse(readFileSync(join(dataDir, name), 'utf8'))
