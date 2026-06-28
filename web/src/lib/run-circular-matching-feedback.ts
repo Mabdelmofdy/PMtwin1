@@ -9,6 +9,13 @@ export type CircularMatchingSuccessResult = Extract<
 export function showCircularMatchingFeedback(
   result: CircularMatchingSuccessResult,
 ): void {
+  if (result.auditWarning) {
+    toast.warning(result.auditWarning, {
+      description: buildCircularMatchingSummary(result),
+    })
+    return
+  }
+
   if (result.matchingErrors.length > 0) {
     toast.warning('Circular matching completed with errors.', {
       description: buildCircularMatchingSummary(result),
@@ -18,7 +25,7 @@ export function showCircularMatchingFeedback(
 
   if (result.discoveredMatchesCount === 0) {
     toast.success('Circular matching complete.', {
-      description: 'No circular chains discovered in the published pool.',
+      description: buildCircularMatchingSummary(result),
     })
     return
   }
@@ -29,11 +36,13 @@ export function showCircularMatchingFeedback(
 }
 
 function buildCircularMatchingSummary(result: CircularMatchingSuccessResult): string {
-  const parts: string[] = []
+  const parts: string[] = [`Run ${result.runId}`]
 
   if (result.discoveredMatchesCount > 0) {
     const noun = result.discoveredMatchesCount === 1 ? 'match' : 'matches'
     parts.push(`${result.discoveredMatchesCount} circular ${noun} discovered`)
+  } else {
+    parts.push('no circular chains discovered')
   }
 
   if (result.skippedDuplicatesCount > 0) {

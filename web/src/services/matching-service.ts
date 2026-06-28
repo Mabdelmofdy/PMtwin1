@@ -10,6 +10,7 @@ import {
   opportunityRepository,
   postMatchRepository,
   applicationRepository,
+  auditRepository,
 } from '@/repositories/index.ts'
 import {
   discoverInputStrongKey,
@@ -24,6 +25,12 @@ import {
   type DiscoverOneWayPostMatchInput,
   type DiscoverPostMatchInput,
 } from '@/services/post-match-command-service.ts'
+import type { MatchingRunStatus } from '@/domain/matching-run-audit/types.ts'
+import {
+  recordMatchingRunAudit,
+  resolveMatchingRunStatus,
+  type RecordMatchingRunAuditInput,
+} from '@/services/matching/matching-run-audit.ts'
 
 export type DiscoverNeedOfferMatchInput = {
   readonly needOpportunityId: string
@@ -70,18 +77,24 @@ export type PublishMatchingDeps = {
 }
 
 export type CircularMatchingResult = {
+  readonly runId: string
   readonly discoveredMatchesCount: number
   readonly skippedDuplicatesCount: number
   readonly matchingErrors: readonly string[]
+  readonly status: MatchingRunStatus
+  readonly auditWarning?: string
 }
 
 export type CircularMatchingDeps = {
+  readonly actorId?: string
+  readonly actorRole?: string | null
   readonly listPublishedOpportunities?: () => readonly Opportunity[]
   readonly discoverPostMatch?: (input: DiscoverPostMatchInput) => CommandResult
   readonly findActiveDuplicateByStrongKey?: (strongKey: string) => PostMatch | undefined
   readonly runMatching?: typeof runMatchingForPost
   readonly getMatchingEngineContext?: typeof getMatchingEngineContext
   readonly engineOptions?: MatchEngineOptions
+  readonly recordMatchingRunAudit?: (input: RecordMatchingRunAuditInput) => void
 }
 
 function createPostMatchId(): string {
@@ -162,6 +175,56 @@ function createPublishRunId(): string {
 
 function isDuplicateDiscoverError(errors: readonly string[] | undefined): boolean {
   return (errors ?? []).some((error) => error.includes('Active PostMatch already exists'))
+}
+
+function writeCircularMatchingRunAudit(
+  deps: CircularMatchingDeps | undefined,
+  input: Omit<RecordMatchingRunAuditInput, 'runType'>,
+): string | undefined {
+  try {
+    const record =
+      deps?.recordMatchingRunAudit
+      ?? ((auditInput) => {
+        recordMatchingRunAudit(auditRepository, auditInput)
+      })
+    record({ ...input, runType: 'circular' })
+    return undefined
+  } catch {
+    return 'Matching results were saved, but the audit record could not be written.'
+  }
+}
+
+function finalizeCircularMatchingResult(
+  deps: CircularMatchingDeps | undefined,
+  startedAt: string,
+  runId: string,
+  discoveredMatchesCount: number,
+  skippedDuplicatesCount: number,
+  matchingErrors: readonly string[],
+  status: MatchingRunStatus,
+  failureReason?: string,
+): CircularMatchingResult {
+  const auditWarning = writeCircularMatchingRunAudit(deps, {
+    runId,
+    actorId: deps?.actorId,
+    actorRole: deps?.actorRole,
+    startedAt,
+    completedAt: new Date().toISOString(),
+    discoveredMatchesCount,
+    skippedDuplicatesCount,
+    matchingErrors,
+    status,
+    failureReason,
+  })
+
+  return {
+    runId,
+    discoveredMatchesCount,
+    skippedDuplicatesCount,
+    matchingErrors,
+    status,
+    auditWarning,
+  }
 }
 
 function runPublishMatchingForOpportunity(
@@ -266,103 +329,126 @@ function runPublishMatchingForOpportunity(
 function runCircularMatchingForPublishedOpportunities(
   deps?: CircularMatchingDeps,
 ): CircularMatchingResult {
-  const empty: CircularMatchingResult = {
-    discoveredMatchesCount: 0,
-    skippedDuplicatesCount: 0,
-    matchingErrors: [],
-  }
-
-  const listPublishedOpportunities =
-    deps?.listPublishedOpportunities
-    ?? (() => opportunityRepository.getAll().filter((opp) => opp.status === 'published'))
-  const discoverPostMatch =
-    deps?.discoverPostMatch
-    ?? postMatchCommandService.discoverPostMatch.bind(postMatchCommandService)
-  const findActiveDuplicateByStrongKey =
-    deps?.findActiveDuplicateByStrongKey
-    ?? ((strongKey) => postMatchRepository.findActiveDuplicateByStrongKey(strongKey))
-  const runMatching = deps?.runMatching ?? runMatchingForPost
-  const resolveEngineContext = deps?.getMatchingEngineContext ?? getMatchingEngineContext
-
-  const publishedPool = listPublishedOpportunities()
-  if (publishedPool.length === 0) {
-    return empty
-  }
-
-  const opportunityById = new Map(publishedPool.map((opp) => [opp.id, opp]))
-  const posts = opportunitiesToPosts(publishedPool)
-  const postById = new Map(
-    posts.filter((post) => post.id).map((post) => [post.id as string, post]),
-  )
-  const { canonical, config } = resolveEngineContext()
+  const startedAt = new Date().toISOString()
   const runId = createPublishRunId()
-  const seenStrongKeys = new Set<string>()
-  const matchingErrors: string[] = []
-  let discoveredMatchesCount = 0
-  let skippedDuplicatesCount = 0
 
-  const anchorsByCreator = new Map<string, Opportunity>()
-  for (const opportunity of publishedPool) {
-    if (opportunity.creatorId && !anchorsByCreator.has(opportunity.creatorId)) {
-      anchorsByCreator.set(opportunity.creatorId, opportunity)
-    }
-  }
+  try {
+    const listPublishedOpportunities =
+      deps?.listPublishedOpportunities
+      ?? (() => opportunityRepository.getAll().filter((opp) => opp.status === 'published'))
+    const discoverPostMatch =
+      deps?.discoverPostMatch
+      ?? postMatchCommandService.discoverPostMatch.bind(postMatchCommandService)
+    const findActiveDuplicateByStrongKey =
+      deps?.findActiveDuplicateByStrongKey
+      ?? ((strongKey) => postMatchRepository.findActiveDuplicateByStrongKey(strongKey))
+    const runMatching = deps?.runMatching ?? runMatchingForPost
+    const resolveEngineContext = deps?.getMatchingEngineContext ?? getMatchingEngineContext
 
-  for (const anchorOpportunity of anchorsByCreator.values()) {
-    const engineResults = runMatching({
-      anchorPost: opportunityToPost(anchorOpportunity),
-      opportunities: posts,
-      canonical,
-      config,
-      options: deps?.engineOptions ?? { model: 'circular', minCycleLength: 3 },
-    })
-
-    const discoverContext = {
-      anchorOpportunity,
-      opportunityById,
-      postById,
-      runId,
-      createAggregateId: createPostMatchId,
+    const publishedPool = listPublishedOpportunities()
+    if (publishedPool.length === 0) {
+      return finalizeCircularMatchingResult(
+        deps,
+        startedAt,
+        runId,
+        0,
+        0,
+        [],
+        'completed',
+      )
     }
 
-    for (const result of engineResults as ModelRunResult[]) {
-      if (result.model !== 'circular') continue
+    const opportunityById = new Map(publishedPool.map((opp) => [opp.id, opp]))
+    const posts = opportunitiesToPosts(publishedPool)
+    const postById = new Map(
+      posts.filter((post) => post.id).map((post) => [post.id as string, post]),
+    )
+    const { canonical, config } = resolveEngineContext()
+    const seenStrongKeys = new Set<string>()
+    const matchingErrors: string[] = []
+    let discoveredMatchesCount = 0
+    let skippedDuplicatesCount = 0
 
-      const commands = modelRunResultToDiscoverCommands(result, discoverContext, posts)
-      for (const command of commands) {
-        if (command.matchType !== 'circular') continue
-
-        const strongKey = discoverInputStrongKey(command)
-        if (strongKey) {
-          if (seenStrongKeys.has(strongKey) || findActiveDuplicateByStrongKey(strongKey)) {
-            skippedDuplicatesCount += 1
-            continue
-          }
-          seenStrongKeys.add(strongKey)
-        }
-
-        const commandResult = discoverPostMatch(command)
-        if (!commandResult.success) {
-          if (isDuplicateDiscoverError(commandResult.errors)) {
-            skippedDuplicatesCount += 1
-            if (strongKey) seenStrongKeys.add(strongKey)
-            continue
-          }
-          matchingErrors.push(
-            ...(commandResult.errors ?? [`DiscoverPostMatch failed for ${command.aggregateId}`]),
-          )
-          continue
-        }
-
-        discoveredMatchesCount += 1
+    const anchorsByCreator = new Map<string, Opportunity>()
+    for (const opportunity of publishedPool) {
+      if (opportunity.creatorId && !anchorsByCreator.has(opportunity.creatorId)) {
+        anchorsByCreator.set(opportunity.creatorId, opportunity)
       }
     }
-  }
 
-  return {
-    discoveredMatchesCount,
-    skippedDuplicatesCount,
-    matchingErrors,
+    for (const anchorOpportunity of anchorsByCreator.values()) {
+      const engineResults = runMatching({
+        anchorPost: opportunityToPost(anchorOpportunity),
+        opportunities: posts,
+        canonical,
+        config,
+        options: deps?.engineOptions ?? { model: 'circular', minCycleLength: 3 },
+      })
+
+      const discoverContext = {
+        anchorOpportunity,
+        opportunityById,
+        postById,
+        runId,
+        createAggregateId: createPostMatchId,
+      }
+
+      for (const result of engineResults as ModelRunResult[]) {
+        if (result.model !== 'circular') continue
+
+        const commands = modelRunResultToDiscoverCommands(result, discoverContext, posts)
+        for (const command of commands) {
+          if (command.matchType !== 'circular') continue
+
+          const strongKey = discoverInputStrongKey(command)
+          if (strongKey) {
+            if (seenStrongKeys.has(strongKey) || findActiveDuplicateByStrongKey(strongKey)) {
+              skippedDuplicatesCount += 1
+              continue
+            }
+            seenStrongKeys.add(strongKey)
+          }
+
+          const commandResult = discoverPostMatch(command)
+          if (!commandResult.success) {
+            if (isDuplicateDiscoverError(commandResult.errors)) {
+              skippedDuplicatesCount += 1
+              if (strongKey) seenStrongKeys.add(strongKey)
+              continue
+            }
+            matchingErrors.push(
+              ...(commandResult.errors ?? [`DiscoverPostMatch failed for ${command.aggregateId}`]),
+            )
+            continue
+          }
+
+          discoveredMatchesCount += 1
+        }
+      }
+    }
+
+    return finalizeCircularMatchingResult(
+      deps,
+      startedAt,
+      runId,
+      discoveredMatchesCount,
+      skippedDuplicatesCount,
+      matchingErrors,
+      resolveMatchingRunStatus(matchingErrors),
+    )
+  } catch (error) {
+    const failureReason =
+      error instanceof Error ? error.message : 'Circular matching run failed'
+    return finalizeCircularMatchingResult(
+      deps,
+      startedAt,
+      runId,
+      0,
+      0,
+      [failureReason],
+      'failed',
+      failureReason,
+    )
   }
 }
 

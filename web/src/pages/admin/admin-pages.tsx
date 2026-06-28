@@ -15,6 +15,10 @@ import { buildMatchingQualityAnalytics } from '@/domain/matching-quality/index.t
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { formatDate } from '@/lib/format'
 import {
+  parseMatchingRunAuditDetails,
+  isMatchingRunAuditEntry,
+} from '@/services/matching/matching-run-audit.ts'
+import {
   showCircularMatchingAccessDenied,
   showCircularMatchingFeedback,
 } from '@/lib/run-circular-matching-feedback.ts'
@@ -297,13 +301,26 @@ export function AdminMatchingPage() {
   const version = useDataStoreVersion()
   const [isRunning, setIsRunning] = useState(false)
   const matches = useMemo(() => matchesApi.list(), [version])
+  const matchingRuns = useMemo(
+    () =>
+      adminApi
+        .getAuditLog()
+        .filter(isMatchingRunAuditEntry)
+        .map((entry) => parseMatchingRunAuditDetails(entry))
+        .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
+        .slice(0, 10),
+    [version],
+  )
 
   function handleRunCircularMatching() {
     if (isRunning) return
     setIsRunning(true)
 
     try {
-      const result = runCircularMatchingUiAction({ userRole: user?.role })
+      const result = runCircularMatchingUiAction({
+        userId: user?.id,
+        userRole: user?.role,
+      })
       if (!result.success) {
         showCircularMatchingAccessDenied(result.message)
         return
@@ -330,6 +347,23 @@ export function AdminMatchingPage() {
           {isRunning ? 'Running circular matching…' : 'Run circular matching'}
         </Button>
       </div>
+      <AdminTablePage
+        title="Recent matching runs"
+        description="Audit trail for manual circular matching jobs."
+        columns={['Run ID', 'Status', 'Discovered', 'Skipped', 'Errors', 'Completed']}
+        rows={
+          matchingRuns.length
+            ? matchingRuns.map((run) => [
+                run.runId,
+                run.status,
+                String(run.discoveredMatchesCount),
+                String(run.skippedDuplicatesCount),
+                String(run.matchingErrorsCount),
+                formatDate(run.completedAt),
+              ])
+            : [['—', 'No matching runs yet', '—', '—', '—', '—']]
+        }
+      />
       <AdminTablePage
         title="Recent matches"
         description=""

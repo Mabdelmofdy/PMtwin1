@@ -13,9 +13,15 @@ export type RunCircularMatchingUiActionResult =
     }
 
 export function runCircularMatchingUiAction(
-  actor: { readonly userRole?: string | null },
+  actor: {
+    readonly userId?: string
+    readonly userRole?: string | null
+  },
   deps?: {
-    readonly runCircularMatching?: () => CircularMatchingResult
+    readonly runCircularMatching?: (actor: {
+      readonly userId?: string
+      readonly userRole?: string | null
+    }) => CircularMatchingResult
   },
 ): RunCircularMatchingUiActionResult {
   if (!canAccessAdminForRole(actor.userRole)) {
@@ -28,8 +34,12 @@ export function runCircularMatchingUiAction(
 
   const runCircularMatching =
     deps?.runCircularMatching
-    ?? matchingService.runCircularMatchingForPublishedOpportunities.bind(matchingService)
+    ?? ((currentActor) =>
+      matchingService.runCircularMatchingForPublishedOpportunities({
+        actorId: currentActor.userId,
+        actorRole: currentActor.userRole,
+      }))
 
-  const result = runCircularMatching()
+  const result = runCircularMatching(actor)
   return { success: true, ...result }
 }
