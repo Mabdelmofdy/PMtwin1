@@ -69,6 +69,21 @@ export type PublishMatchingDeps = {
   readonly engineOptions?: MatchEngineOptions
 }
 
+export type CircularMatchingResult = {
+  readonly discoveredMatchesCount: number
+  readonly skippedDuplicatesCount: number
+  readonly matchingErrors: readonly string[]
+}
+
+export type CircularMatchingDeps = {
+  readonly listPublishedOpportunities?: () => readonly Opportunity[]
+  readonly discoverPostMatch?: (input: DiscoverPostMatchInput) => CommandResult
+  readonly findActiveDuplicateByStrongKey?: (strongKey: string) => PostMatch | undefined
+  readonly runMatching?: typeof runMatchingForPost
+  readonly getMatchingEngineContext?: typeof getMatchingEngineContext
+  readonly engineOptions?: MatchEngineOptions
+}
+
 function createPostMatchId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return `pm-${crypto.randomUUID()}`
@@ -248,6 +263,109 @@ function runPublishMatchingForOpportunity(
   }
 }
 
+function runCircularMatchingForPublishedOpportunities(
+  deps?: CircularMatchingDeps,
+): CircularMatchingResult {
+  const empty: CircularMatchingResult = {
+    discoveredMatchesCount: 0,
+    skippedDuplicatesCount: 0,
+    matchingErrors: [],
+  }
+
+  const listPublishedOpportunities =
+    deps?.listPublishedOpportunities
+    ?? (() => opportunityRepository.getAll().filter((opp) => opp.status === 'published'))
+  const discoverPostMatch =
+    deps?.discoverPostMatch
+    ?? postMatchCommandService.discoverPostMatch.bind(postMatchCommandService)
+  const findActiveDuplicateByStrongKey =
+    deps?.findActiveDuplicateByStrongKey
+    ?? ((strongKey) => postMatchRepository.findActiveDuplicateByStrongKey(strongKey))
+  const runMatching = deps?.runMatching ?? runMatchingForPost
+  const resolveEngineContext = deps?.getMatchingEngineContext ?? getMatchingEngineContext
+
+  const publishedPool = listPublishedOpportunities()
+  if (publishedPool.length === 0) {
+    return empty
+  }
+
+  const opportunityById = new Map(publishedPool.map((opp) => [opp.id, opp]))
+  const posts = opportunitiesToPosts(publishedPool)
+  const postById = new Map(
+    posts.filter((post) => post.id).map((post) => [post.id as string, post]),
+  )
+  const { canonical, config } = resolveEngineContext()
+  const runId = createPublishRunId()
+  const seenStrongKeys = new Set<string>()
+  const matchingErrors: string[] = []
+  let discoveredMatchesCount = 0
+  let skippedDuplicatesCount = 0
+
+  const anchorsByCreator = new Map<string, Opportunity>()
+  for (const opportunity of publishedPool) {
+    if (opportunity.creatorId && !anchorsByCreator.has(opportunity.creatorId)) {
+      anchorsByCreator.set(opportunity.creatorId, opportunity)
+    }
+  }
+
+  for (const anchorOpportunity of anchorsByCreator.values()) {
+    const engineResults = runMatching({
+      anchorPost: opportunityToPost(anchorOpportunity),
+      opportunities: posts,
+      canonical,
+      config,
+      options: deps?.engineOptions ?? { model: 'circular', minCycleLength: 3 },
+    })
+
+    const discoverContext = {
+      anchorOpportunity,
+      opportunityById,
+      postById,
+      runId,
+      createAggregateId: createPostMatchId,
+    }
+
+    for (const result of engineResults as ModelRunResult[]) {
+      if (result.model !== 'circular') continue
+
+      const commands = modelRunResultToDiscoverCommands(result, discoverContext, posts)
+      for (const command of commands) {
+        if (command.matchType !== 'circular') continue
+
+        const strongKey = discoverInputStrongKey(command)
+        if (strongKey) {
+          if (seenStrongKeys.has(strongKey) || findActiveDuplicateByStrongKey(strongKey)) {
+            skippedDuplicatesCount += 1
+            continue
+          }
+          seenStrongKeys.add(strongKey)
+        }
+
+        const commandResult = discoverPostMatch(command)
+        if (!commandResult.success) {
+          if (isDuplicateDiscoverError(commandResult.errors)) {
+            skippedDuplicatesCount += 1
+            if (strongKey) seenStrongKeys.add(strongKey)
+            continue
+          }
+          matchingErrors.push(
+            ...(commandResult.errors ?? [`DiscoverPostMatch failed for ${command.aggregateId}`]),
+          )
+          continue
+        }
+
+        discoveredMatchesCount += 1
+      }
+    }
+  }
+
+  return {
+    discoveredMatchesCount,
+    skippedDuplicatesCount,
+    matchingErrors,
+  }
+}
+
 function normalizeApplicationValue(rawValue?: ApplicationValue | null) {
   const av = rawValue || {}
   const requestedValue =
@@ -294,6 +412,7 @@ export const matchingService = {
   discoverNeedOfferMatch,
   resolveDiscoverMatchScore,
   runPublishMatchingForOpportunity,
+  runCircularMatchingForPublishedOpportunities,
 
   getHighMatches(threshold = 0.9): PostMatch[] {
     return postMatchRepository

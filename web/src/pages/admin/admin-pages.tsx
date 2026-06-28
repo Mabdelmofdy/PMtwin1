@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 import { adminApi } from '@/api/admin.ts'
 import { dealsApi } from '@/api/deals.ts'
 import { matchesApi } from '@/api/matches.ts'
@@ -13,6 +14,12 @@ import {
 import { buildMatchingQualityAnalytics } from '@/domain/matching-quality/index.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { formatDate } from '@/lib/format'
+import {
+  showCircularMatchingAccessDenied,
+  showCircularMatchingFeedback,
+} from '@/lib/run-circular-matching-feedback.ts'
+import { runCircularMatchingUiAction } from '@/lib/run-circular-matching-ui-action.ts'
+import { useAuth } from '@/providers/auth-provider.tsx'
 import { PageHeader, StatCard, StatusBadge } from '@/components/shared/page-primitives'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -286,15 +293,48 @@ export function AdminOpportunitiesPage() {
 }
 
 export function AdminMatchingPage() {
+  const { user } = useAuth()
+  const version = useDataStoreVersion()
+  const [isRunning, setIsRunning] = useState(false)
+  const matches = useMemo(() => matchesApi.list(), [version])
+
+  function handleRunCircularMatching() {
+    if (isRunning) return
+    setIsRunning(true)
+
+    try {
+      const result = runCircularMatchingUiAction({ userRole: user?.role })
+      if (!result.success) {
+        showCircularMatchingAccessDenied(result.message)
+        return
+      }
+      showCircularMatchingFeedback(result)
+    } catch (error) {
+      toast.error('Circular matching failed.', {
+        description: error instanceof Error ? error.message : 'Unexpected error',
+      })
+    } finally {
+      setIsRunning(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader title="Matching engine" description="Run matching, review queues, and diagnostics." />
-      <Button className="cursor-pointer">Run matching job</Button>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          className="cursor-pointer"
+          disabled={isRunning}
+          onClick={handleRunCircularMatching}
+        >
+          {isRunning ? 'Running circular matching…' : 'Run circular matching'}
+        </Button>
+      </div>
       <AdminTablePage
         title="Recent matches"
         description=""
         columns={['ID', 'Type', 'Score', 'Status']}
-        rows={matchesApi.list().slice(0, 10).map((m) => [m.id, m.matchType, `${Math.round(m.matchScore * 100)}%`, <StatusBadge key={m.id} status={m.status} />])}
+        rows={matches.slice(0, 10).map((m) => [m.id, m.matchType, `${Math.round(m.matchScore * 100)}%`, <StatusBadge key={m.id} status={m.status} />])}
       />
     </div>
   )
