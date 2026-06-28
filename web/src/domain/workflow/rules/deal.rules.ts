@@ -19,7 +19,7 @@ function isOwnerOrAdmin(context: WorkflowContext): boolean {
 
 export const dealRules: WorkflowRule[] = [
   (_from, to, context) => {
-    if (to === 'active' && !isOwnerOrAdmin(context)) {
+    if (to === 'executing' && !isOwnerOrAdmin(context)) {
       return deny('Activating a deal typically requires owner or admin role')
     }
     return allow()

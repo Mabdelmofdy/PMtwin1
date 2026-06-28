@@ -2,15 +2,36 @@
  * Negotiation lifecycle helpers (Phase 5) — friendly labels and status rules.
  */
 
-const ACTIVE_NEGOTIATION_STATUSES = ['open', 'counter_offered'];
-const TERMINAL_NEGOTIATION_STATUSES = ['agreed', 'failed', 'expired', 'cancelled'];
+/** ADR-001 read aliases when PmTwinLifecycle is not loaded (e.g. Vitest harness). */
+const LEGACY_NEGOTIATION_ALIASES = {
+    open: 'active',
+    counter_offered: 'countered',
+    failed: 'cancelled'
+};
+
+function toCanonical(status) {
+    const lifecycle = typeof window !== 'undefined' ? window.PmTwinLifecycle : null;
+    if (lifecycle && typeof lifecycle.toCanonical === 'function') {
+        const canonical = lifecycle.toCanonical('negotiation', status);
+        if (canonical) return canonical;
+    }
+    const s = (status || '').toLowerCase();
+    return LEGACY_NEGOTIATION_ALIASES[s] || s;
+}
+
+function canonicalNegotiationStatus(status) {
+    return toCanonical(status);
+}
+
+const ACTIVE_NEGOTIATION_STATUSES = ['active', 'countered'];
+const TERMINAL_NEGOTIATION_STATUSES = ['agreed', 'expired', 'cancelled'];
 
 function isActiveNegotiation(negotiation) {
-    return negotiation && ACTIVE_NEGOTIATION_STATUSES.includes((negotiation.status || '').toLowerCase());
+    return negotiation && ACTIVE_NEGOTIATION_STATUSES.includes(toCanonical(negotiation.status));
 }
 
 function isTerminalNegotiation(negotiation) {
-    return negotiation && TERMINAL_NEGOTIATION_STATUSES.includes((negotiation.status || '').toLowerCase());
+    return negotiation && TERMINAL_NEGOTIATION_STATUSES.includes(toCanonical(negotiation.status));
 }
 
 function getNegotiationStatusLabel(status) {
@@ -127,6 +148,8 @@ function buildFinalAgreedSnapshot({
 export {
     ACTIVE_NEGOTIATION_STATUSES,
     TERMINAL_NEGOTIATION_STATUSES,
+    LEGACY_NEGOTIATION_ALIASES,
+    canonicalNegotiationStatus,
     isActiveNegotiation,
     isTerminalNegotiation,
     getNegotiationStatusLabel,
@@ -143,6 +166,8 @@ if (typeof window !== 'undefined') {
     window.negotiationLifecycle = {
         ACTIVE_NEGOTIATION_STATUSES,
         TERMINAL_NEGOTIATION_STATUSES,
+        LEGACY_NEGOTIATION_ALIASES,
+        canonicalNegotiationStatus,
         isActiveNegotiation,
         isTerminalNegotiation,
         getNegotiationStatusLabel,

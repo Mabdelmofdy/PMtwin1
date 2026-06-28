@@ -3,6 +3,14 @@
  * Internal/storage status strings stay lowercase snake_case; UI uses friendly labels.
  */
 (function (global) {
+    function toCanonical(entityType, status) {
+        const lifecycle = global.PmTwinLifecycle;
+        if (lifecycle && typeof lifecycle.toCanonical === 'function') {
+            return lifecycle.toCanonical(entityType, status);
+        }
+        return status;
+    }
+
     const CONTEXTS = {
         VETTING: 'vetting',
         PROFILE: 'profile',
@@ -27,6 +35,14 @@
         const s = normalizeStatus(status);
         if (!s) return '—';
         return s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    }
+
+    function canonicalMatchStatusForDisplay(status) {
+        const s = normalizeStatus(status);
+        const canonical = toCanonical('match', s);
+        const resolved = canonical || s;
+        if (resolved === 'pending') return 'discovered';
+        return resolved;
     }
 
     /** Default variant when context does not override */
@@ -117,10 +133,11 @@
         }
 
         if (ctx === 'match') {
-            if (s === 'pending') return 'warning';
+            const s = canonicalMatchStatusForDisplay(status);
+            if (s === 'discovered') return 'warning';
             if (s === 'accepted' || s === 'confirmed') return 'success';
             if (s === 'declined') return 'danger';
-            if (s === 'expired') return 'neutral';
+            if (s === 'expired' || s === 'superseded') return 'neutral';
         }
 
         if (ctx === 'system') {
@@ -214,13 +231,15 @@
         }
 
         if (ctx === 'match') {
-            if (!s) return 'Pending Response';
+            const s = canonicalMatchStatusForDisplay(status);
+            if (!s) return 'Discovered';
             const labels = {
-                pending: 'Pending Response',
+                discovered: 'Discovered',
                 accepted: 'Accepted',
-                declined: 'Declined',
                 confirmed: 'Confirmed',
+                declined: 'Declined',
                 expired: 'Expired',
+                superseded: 'Superseded',
                 converted_to_deal: 'Converted to Deal'
             };
             return labels[s] || humanize(s);

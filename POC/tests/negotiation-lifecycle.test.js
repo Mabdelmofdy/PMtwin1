@@ -10,8 +10,25 @@ import {
 describe('negotiation-lifecycle', () => {
     it('detects active negotiations', () => {
         expect(nlc.isActiveNegotiation({ status: 'open' })).toBe(true);
+        expect(nlc.isActiveNegotiation({ status: 'active' })).toBe(true);
         expect(nlc.isActiveNegotiation({ status: 'counter_offered' })).toBe(true);
+        expect(nlc.canonicalNegotiationStatus('counter_offered')).toBe('countered');
         expect(nlc.isActiveNegotiation({ status: 'agreed' })).toBe(false);
+        expect(nlc.isActiveNegotiation({ status: 'cancelled' })).toBe(false);
+        expect(nlc.isActiveNegotiation({ status: 'expired' })).toBe(false);
+    });
+
+    it('maps legacy open to active at helper boundary', () => {
+        expect(nlc.canonicalNegotiationStatus('open')).toBe('active');
+        expect(nlc.canonicalNegotiationStatus('active')).toBe('active');
+    });
+
+    it('keeps terminal negotiations non-active', () => {
+        expect(nlc.isTerminalNegotiation({ status: 'agreed' })).toBe(true);
+        expect(nlc.isTerminalNegotiation({ status: 'cancelled' })).toBe(true);
+        expect(nlc.isTerminalNegotiation({ status: 'expired' })).toBe(true);
+        expect(nlc.isTerminalNegotiation({ status: 'failed' })).toBe(true);
+        expect(nlc.isActiveNegotiation({ status: 'failed' })).toBe(false);
     });
 
     it('maps friendly status labels', () => {

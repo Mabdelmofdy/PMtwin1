@@ -78,6 +78,26 @@ export {
   resolveCommercialTerms,
 } from '@/domain/normalized/field-utils.ts'
 
+export {
+  computePostMatchStrongKey,
+  computePostMatchStrongKeyFromMatch,
+  collectPostMatchOpportunityIds,
+} from '@/domain/normalized/post-match-strong-key.ts'
+export type { PostMatchStrongKeyInput } from '@/domain/normalized/post-match-strong-key.ts'
+
+export {
+  discoverPostMatchStrongKey,
+  validateDiscoverPostMatchCommand,
+} from '@/domain/normalized/post-match-discover-validation.ts'
+
+export {
+  isDiscoverCircularPostMatch,
+  isDiscoverConsortiumPostMatch,
+  isDiscoverOneWayPostMatch,
+  isDiscoverTwoWayPostMatch,
+} from '@/domain/normalized/post-match-topology-guards.ts'
+export type { OpportunityIntent, OpportunityIntentStored } from '@/types/enums.ts'
+
 export type { LegacyRaw } from '@/domain/normalized/field-utils.ts'
 
 export * from '@/domain/normalized/validation/index.ts'

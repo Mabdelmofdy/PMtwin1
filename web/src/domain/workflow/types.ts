@@ -1,13 +1,76 @@
 /**
  * Workflow engine types — decision layer only; no runtime enforcement.
+ * All status identifiers use ADR-001 canonical names.
  */
 
 export type WorkflowEntityType =
   | 'application'
   | 'opportunity'
+  | 'match'
   | 'negotiation'
   | 'deal'
   | 'contract'
+
+export type ApplicationStatus =
+  | 'submitted'
+  | 'reviewing'
+  | 'shortlisted'
+  | 'negotiating'
+  | 'accepted'
+  | 'rejected'
+  | 'withdrawn'
+
+export type OpportunityStatus =
+  | 'draft'
+  | 'published'
+  | 'matched'
+  | 'negotiating'
+  | 'contracted'
+  | 'executing'
+  | 'completed'
+  | 'cancelled'
+
+export type MatchStatus =
+  | 'discovered'
+  | 'accepted'
+  | 'confirmed'
+  | 'declined'
+  | 'expired'
+  | 'superseded'
+
+export type NegotiationStatus =
+  | 'active'
+  | 'countered'
+  | 'agreed'
+  | 'expired'
+  | 'cancelled'
+
+export type DealStatus =
+  | 'draft'
+  | 'review'
+  | 'signing'
+  | 'executing'
+  | 'completed'
+  | 'cancelled'
+
+export type ContractStatus =
+  | 'draft'
+  | 'pending_signature'
+  | 'active'
+  | 'completed'
+  | 'terminated'
+
+export type WorkflowEntityStatusMap = {
+  application: ApplicationStatus
+  opportunity: OpportunityStatus
+  match: MatchStatus
+  negotiation: NegotiationStatus
+  deal: DealStatus
+  contract: ContractStatus
+}
+
+export type WorkflowStatus<T extends WorkflowEntityType> =
+  WorkflowEntityStatusMap[T]
 
 export type WorkflowUserRole = 'user' | 'company_owner' | 'admin' | string
 
@@ -52,7 +115,7 @@ export type WorkflowRule = (
 export type WorkflowDefinition = {
   entityType: WorkflowEntityType
   name: string
-  /** Canonical state identifiers for this workflow */
+  /** Canonical ADR-001 state identifiers for this workflow */
   states: readonly string[]
   /** States with no outgoing transitions in the canonical model */
   terminalStates: readonly string[]

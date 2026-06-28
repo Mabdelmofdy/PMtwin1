@@ -27,7 +27,7 @@ export const applicationRules: WorkflowRule[] = [
     return allow()
   },
   (from, to) => {
-    if (to === 'accepted' && !['negotiation', 'shortlisted'].includes(from)) {
+    if (to === 'accepted' && !['negotiating', 'shortlisted'].includes(from)) {
       return deny('Acceptance typically follows negotiation or shortlist')
     }
     return allow()

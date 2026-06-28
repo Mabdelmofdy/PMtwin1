@@ -37,6 +37,26 @@ export {
   resolveRole,
 } from '@/domain/rbac/core/policy-engine.ts'
 
+export { canAccessAdminForRole } from '@/domain/rbac/admin-access.ts'
+export {
+  evaluateAdminRouteAccess,
+  type AdminRouteAccessDecision,
+} from '@/domain/rbac/admin-route-access.ts'
+export {
+  ADMIN_ONLY_COMMAND_TYPES,
+  COMMAND_REQUIRED_CAPABILITY,
+  evaluateCommandRbac,
+  buildCommandRbacFailureResult,
+  type CommandCapability,
+  type CommandRbacEvaluation,
+} from '@/domain/rbac/command-rbac.ts'
+export {
+  getCommandPermissionActor,
+  setCommandPermissionActor,
+  resetCommandPermissionActorForTests,
+  type CommandPermissionActor,
+} from '@/domain/rbac/context/command-permission-context.ts'
+
 export {
   evaluateEntityPolicy,
   evaluateApplicationPolicy,

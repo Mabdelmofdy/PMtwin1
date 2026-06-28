@@ -1,10 +1,17 @@
 import { Link, useParams } from 'react-router-dom'
+import { useMemo } from 'react'
 import { adminApi } from '@/api/admin.ts'
 import { dealsApi } from '@/api/deals.ts'
 import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { peopleApi } from '@/api/people.ts'
+import {
+  buildReadinessAnalytics,
+  createCreatorProfileResolver,
+} from '@/domain/readiness-analytics/index.ts'
+import { buildMatchingQualityAnalytics } from '@/domain/matching-quality/index.ts'
+import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { formatDate } from '@/lib/format'
 import { PageHeader, StatCard, StatusBadge } from '@/components/shared/page-primitives'
 import { Button } from '@/components/ui/button'
@@ -63,9 +70,38 @@ function AdminTablePage({
 }
 
 export function AdminDashboardPage() {
+  const version = useDataStoreVersion()
   const opps = opportunitiesApi.list().length
   const users = peopleApi.listUsers().length
   const matches = matchesApi.list().length
+  const readinessAnalytics = useMemo(() => {
+    const profiles = peopleApi.listAll().map((person) => ({
+      profile: person.profile,
+      profileKind: person.profile?.type === 'company' ? 'company' as const : 'individual' as const,
+    }))
+
+    return buildReadinessAnalytics({
+      profiles,
+      opportunities: opportunitiesApi.list(),
+      resolveProfileForOpportunity: createCreatorProfileResolver((id) => peopleApi.get(id)),
+    })
+  }, [version])
+
+  const matchingQuality = useMemo(() => {
+    const profiles = peopleApi.listAll().map((person) => ({
+      profile: person.profile,
+      profileKind: person.profile?.type === 'company' ? 'company' as const : 'individual' as const,
+    }))
+
+    return buildMatchingQualityAnalytics({
+      profiles,
+      opportunities: opportunitiesApi.list(),
+      matches: matchesApi.list(),
+      negotiations: negotiationsApi.list(),
+      deals: dealsApi.list(),
+    })
+  }, [version])
+
   return (
     <div className="space-y-6">
       <PageHeader label="Admin" title="Command center" description="Platform KPIs, queues, and quick actions." />
@@ -75,6 +111,83 @@ export function AdminDashboardPage() {
         <StatCard label="Post-matches" value={matches} />
         <StatCard label="Pending vetting" value={adminApi.getPendingUsers().length} />
       </div>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">Matching Readiness Overview</h2>
+          <p className="text-sm text-muted-foreground">
+            Readiness quality across profiles and opportunities using current domain evaluators.
+          </p>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Card className="border-border/60">
+            <CardHeader>
+              <CardTitle className="text-base">Profiles</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3 sm:grid-cols-2">
+              <StatCard label="Total profiles" value={readinessAnalytics.profiles.total} />
+              <StatCard label="Average score" value={`${Math.round(readinessAnalytics.profiles.averageScore)}%`} />
+              <StatCard label="Ready" value={readinessAnalytics.profiles.ready} />
+              <StatCard label="Needs review" value={readinessAnalytics.profiles.needsReview} />
+              <StatCard label="Incomplete" value={readinessAnalytics.profiles.incomplete} />
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/60">
+            <CardHeader>
+              <CardTitle className="text-base">Opportunities</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3 sm:grid-cols-2">
+              <StatCard label="Total opportunities" value={readinessAnalytics.opportunities.total} />
+              <StatCard label="Average score" value={`${Math.round(readinessAnalytics.opportunities.averageScore)}%`} />
+              <StatCard label="Ready" value={readinessAnalytics.opportunities.ready} />
+              <StatCard label="Needs review" value={readinessAnalytics.opportunities.needsReview} />
+              <StatCard label="Incomplete" value={readinessAnalytics.opportunities.incomplete} />
+              <StatCard label="Draft" value={readinessAnalytics.opportunities.draft} />
+              <StatCard label="Publish blocked" value={readinessAnalytics.opportunities.publishBlocked} />
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">Matching Quality Metrics</h2>
+          <p className="text-sm text-muted-foreground">
+            Outcome quality across readiness scores, match scores, and collaboration funnel conversion.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <StatCard
+            label="Average profile readiness"
+            value={`${Math.round(matchingQuality.averageProfileReadiness)}%`}
+          />
+          <StatCard
+            label="Average opportunity readiness"
+            value={`${Math.round(matchingQuality.averageOpportunityReadiness)}%`}
+          />
+          <StatCard
+            label="Average match score"
+            value={`${Math.round(matchingQuality.averageMatchScore)}%`}
+          />
+          <StatCard
+            label="Match acceptance rate"
+            value={`${Math.round(matchingQuality.acceptanceRate)}%`}
+            hint={`${matchingQuality.acceptedMatches} of ${matchingQuality.totalMatches} matches`}
+          />
+          <StatCard
+            label="Negotiation rate"
+            value={`${Math.round(matchingQuality.negotiationRate)}%`}
+            hint={`${matchingQuality.negotiationsStarted} negotiations from ${matchingQuality.acceptedMatches} accepted`}
+          />
+          <StatCard
+            label="Deal conversion rate"
+            value={`${Math.round(matchingQuality.dealConversionRate)}%`}
+            hint={`${matchingQuality.dealsCreated} deals from ${matchingQuality.negotiationsStarted} negotiations`}
+          />
+        </div>
+      </section>
+
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader><CardTitle>Quick actions</CardTitle></CardHeader>

@@ -25,6 +25,7 @@ import {
   userRepository,
 } from '@/repositories/index.ts'
 import { dealsApi } from '@/api/deals.ts'
+import { assertNoLifecycleStatusInPatch } from '@/lib/lifecycle-status-guard.ts'
 import { loadPendingUsers, loadSiteContent } from '@/infrastructure/seed/seed-loader.ts'
 import { negotiationService } from '@/services/negotiation-service.ts'
 
@@ -54,6 +55,7 @@ export const dataStore = {
 
   /** @deprecated Use opportunitiesApi.update() */
   updateOpportunity(id: string, patch: Partial<Opportunity>) {
+    assertNoLifecycleStatusInPatch(patch)
     opportunityRepository.update(id, patch)
   },
 
@@ -80,6 +82,7 @@ export const dataStore = {
 
   /** @deprecated Use negotiationService.transitionApplicationStatus() */
   updateApplication(id: string, patch: Partial<Application>) {
+    assertNoLifecycleStatusInPatch(patch)
     applicationRepository.update(id, patch)
   },
 

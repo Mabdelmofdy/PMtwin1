@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/protected-route'
+import { AdminRouteGuard, AccessDeniedPage } from '@/components/auth/admin-route-guard'
 import { AppShell } from '@/components/layout/app-shell'
 import { PublicLayout } from '@/components/layout/public-layout'
 import { DashboardPage } from '@/pages/dashboard-page'
@@ -33,6 +34,8 @@ import {
 import {
   ContractDetailPage,
   ContractsPage,
+} from '@/pages/workspace/contracts-pages'
+import {
   DealDetailPage,
   DealRatePage,
   DealsPage,
@@ -127,31 +130,34 @@ export function AppRoutes() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
 
-        {/* Admin */}
-        <Route path="/admin" element={<AdminDashboardPage />} />
-        <Route path="/admin/reports" element={<AdminReportsPage />} />
-        <Route path="/admin/health" element={<AdminHealthPage />} />
-        <Route path="/admin/users" element={<AdminUsersPage />} />
-        <Route path="/admin/people" element={<AdminUsersPage />} />
-        <Route path="/admin/users/:id" element={<AdminUserDetailPage />} />
-        <Route path="/admin/people/:id" element={<AdminUserDetailPage />} />
-        <Route path="/admin/vetting" element={<AdminVettingPage />} />
-        <Route path="/admin/opportunities" element={<AdminOpportunitiesPage />} />
-        <Route path="/admin/matching" element={<AdminMatchingPage />} />
-        <Route path="/admin/negotiations" element={<AdminNegotiationsPage />} />
-        <Route path="/admin/negotiations/:id" element={<AdminNegotiationDetailPage />} />
-        <Route path="/admin/disputes" element={<AdminDisputesPage />} />
-        <Route path="/admin/deals" element={<AdminDealsPage />} />
-        <Route path="/admin/deals/:id" element={<DealDetailPage />} />
-        <Route path="/admin/contracts" element={<AdminContractsPage />} />
-        <Route path="/admin/contracts/:id" element={<ContractDetailPage />} />
-        <Route path="/admin/consortium" element={<AdminConsortiumPage />} />
-        <Route path="/admin/audit" element={<AdminAuditPage />} />
-        <Route path="/admin/settings" element={<AdminSettingsPage />} />
-        <Route path="/admin/skills" element={<AdminSkillsPage />} />
-        <Route path="/admin/collaboration-models" element={<AdminCollaborationModelsPage />} />
-        <Route path="/admin/site-content" element={<AdminSiteContentPage />} />
-        <Route path="/admin/subscriptions" element={<AdminSubscriptionsPage />} />
+        <Route path="/access-denied" element={<AccessDeniedPage />} />
+
+        <Route element={<AdminRouteGuard />}>
+          <Route path="/admin" element={<AdminDashboardPage />} />
+          <Route path="/admin/reports" element={<AdminReportsPage />} />
+          <Route path="/admin/health" element={<AdminHealthPage />} />
+          <Route path="/admin/users" element={<AdminUsersPage />} />
+          <Route path="/admin/people" element={<AdminUsersPage />} />
+          <Route path="/admin/users/:id" element={<AdminUserDetailPage />} />
+          <Route path="/admin/people/:id" element={<AdminUserDetailPage />} />
+          <Route path="/admin/vetting" element={<AdminVettingPage />} />
+          <Route path="/admin/opportunities" element={<AdminOpportunitiesPage />} />
+          <Route path="/admin/matching" element={<AdminMatchingPage />} />
+          <Route path="/admin/negotiations" element={<AdminNegotiationsPage />} />
+          <Route path="/admin/negotiations/:id" element={<AdminNegotiationDetailPage />} />
+          <Route path="/admin/disputes" element={<AdminDisputesPage />} />
+          <Route path="/admin/deals" element={<AdminDealsPage />} />
+          <Route path="/admin/deals/:id" element={<DealDetailPage />} />
+          <Route path="/admin/contracts" element={<AdminContractsPage />} />
+          <Route path="/admin/contracts/:id" element={<ContractDetailPage />} />
+          <Route path="/admin/consortium" element={<AdminConsortiumPage />} />
+          <Route path="/admin/audit" element={<AdminAuditPage />} />
+          <Route path="/admin/settings" element={<AdminSettingsPage />} />
+          <Route path="/admin/skills" element={<AdminSkillsPage />} />
+          <Route path="/admin/collaboration-models" element={<AdminCollaborationModelsPage />} />
+          <Route path="/admin/site-content" element={<AdminSiteContentPage />} />
+          <Route path="/admin/subscriptions" element={<AdminSubscriptionsPage />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

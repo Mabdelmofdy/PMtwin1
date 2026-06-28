@@ -2,6 +2,10 @@ import type { Deal } from '@/types/domain.ts'
 import type { IStorageAdapter } from '@/types/storage.ts'
 import { BaseRepository } from './base-repository.ts'
 
+function resolvePostMatchId(deal: Deal): string | undefined {
+  return deal.postMatchId ?? deal.matchId ?? undefined
+}
+
 export class DealRepository extends BaseRepository<Deal> {
   constructor(storage: IStorageAdapter, loadSeed: () => Deal[]) {
     super(storage, 'deals', loadSeed)
@@ -17,6 +21,14 @@ export class DealRepository extends BaseRepository<Deal> {
     const patched = base.map((d) => ({ ...d, ...patchMap[d.id] }))
     const newDeals = (overrides.newDeals ?? []) as Deal[]
     return [...patched, ...newDeals]
+  }
+
+  findByPostMatchId(postMatchId: string): Deal | undefined {
+    return this.getAll().find((deal) => resolvePostMatchId(deal) === postMatchId)
+  }
+
+  findByNegotiationId(negotiationId: string): Deal | undefined {
+    return this.getAll().find((deal) => deal.negotiationId === negotiationId)
   }
 
   create(data: Omit<Deal, 'id' | 'createdAt' | 'updatedAt'>): Deal {

@@ -1,13 +1,13 @@
 {
   "domain": "negotiations",
-  "version": "2.0",
-  "description": "E2E workflow negotiations tied to the 40 seed opportunities (scripts/seed-e2e-workflow.js).",
+  "version": "3.1",
+  "description": "PostMatch-first negotiations with lifecycle alignment (apply-seed-postmatch-first.js)",
   "data": [
     {
       "id": "seed-neg-01",
       "opportunityId": "seed-opp-001",
       "matchId": "demo-pm-oneway-01",
-      "applicationId": "seed-app-001",
+      "applicationId": null,
       "parties": [
         {
           "userId": "seed-user-001",
@@ -112,7 +112,7 @@
       "id": "seed-neg-03",
       "opportunityId": "seed-opp-005",
       "matchId": "demo-pm-oneway-11",
-      "applicationId": "seed-app-002",
+      "applicationId": null,
       "parties": [
         {
           "userId": "seed-co-corp-002",
@@ -123,7 +123,7 @@
           "role": "offer_provider"
         }
       ],
-      "status": "open",
+      "status": "active",
       "initialTerms": {
         "value": 150000,
         "currency": "SAR",
@@ -197,7 +197,7 @@
       "id": "seed-neg-05",
       "opportunityId": "seed-opp-026",
       "matchId": "demo-pm-oneway-07",
-      "applicationId": "seed-app-010",
+      "applicationId": null,
       "parties": [
         {
           "userId": "seed-user-001",
@@ -255,7 +255,7 @@
           "role": "offer_provider"
         }
       ],
-      "status": "open",
+      "status": "active",
       "initialTerms": {
         "equityPercentage": 45,
         "exchangeMode": "equity",
@@ -321,6 +321,125 @@
         "duration": "24 months",
         "profitDistribution": "Annual distribution after O&M costs"
       },
+      "createdAt": "2026-03-08T11:00:00.000Z",
+      "updatedAt": "2026-03-12T15:00:00.000Z"
+    },
+    {
+      "id": "seed-neg-08",
+      "opportunityId": "seed-opp-007",
+      "matchId": "demo-pm-oneway-15",
+      "applicationId": null,
+      "parties": [
+        {
+          "userId": "seed-co-corp-001",
+          "role": "need_owner"
+        },
+        {
+          "userId": "seed-user-012",
+          "role": "offer_provider"
+        }
+      ],
+      "status": "active",
+      "initialTerms": {
+        "value": 420000,
+        "currency": "SAR",
+        "duration": "5 months"
+      },
+      "rounds": [
+        {
+          "by": "seed-user-012",
+          "at": "2026-03-08T11:00:00.000Z",
+          "proposal": {
+            "value": 420000
+          },
+          "message": "Full civil scope: site planning, drainage and road design."
+        }
+      ],
+      "agreedTerms": null,
+      "expiresAt": "2026-06-24T09:00:00.000Z",
+      "createdAt": "2026-03-08T11:00:00.000Z",
+      "updatedAt": "2026-03-08T11:00:00.000Z"
+    },
+    {
+      "id": "seed-neg-09",
+      "opportunityId": "seed-opp-031",
+      "matchId": "demo-pm-oneway-18",
+      "applicationId": null,
+      "parties": [
+        {
+          "userId": "seed-user-006",
+          "role": "need_owner"
+        },
+        {
+          "userId": "seed-co-corp-003",
+          "role": "offer_provider"
+        }
+      ],
+      "status": "active",
+      "initialTerms": {
+        "profitSplit": "70-30",
+        "exchangeMode": "profit_sharing",
+        "duration": "12 months"
+      },
+      "rounds": [
+        {
+          "by": "seed-co-corp-003",
+          "at": "2026-03-08T11:00:00.000Z",
+          "proposal": {
+            "profitSplit": "70-30"
+          },
+          "message": "MEP supply partnership with profit-sharing on joint commercial projects."
+        }
+      ],
+      "agreedTerms": null,
+      "expiresAt": "2026-06-24T09:00:00.000Z",
+      "createdAt": "2026-03-08T11:00:00.000Z",
+      "updatedAt": "2026-03-08T11:00:00.000Z"
+    },
+    {
+      "id": "seed-neg-10",
+      "opportunityId": "seed-opp-037",
+      "matchId": "demo-pm-oneway-19",
+      "applicationId": null,
+      "parties": [
+        {
+          "userId": "seed-co-corp-004",
+          "role": "need_owner"
+        },
+        {
+          "userId": "seed-user-014",
+          "role": "offer_provider"
+        }
+      ],
+      "status": "counter_offered",
+      "initialTerms": {
+        "exchangeMode": "barter",
+        "barterValue": 45000,
+        "currency": "SAR",
+        "duration": "6 weeks"
+      },
+      "rounds": [
+        {
+          "by": "seed-co-corp-004",
+          "at": "2026-03-08T11:00:00.000Z",
+          "proposal": {
+            "barterValue": 45000,
+            "exchangeMode": "barter"
+          },
+          "message": "Legal contract review in exchange for technical consulting hours."
+        },
+        {
+          "by": "seed-user-014",
+          "at": "2026-03-12T15:00:00.000Z",
+          "proposal": {
+            "barterValue": 50000,
+            "exchangeMode": "barter"
+          },
+          "message": "Counter: formwork logistics scope adds ~5K SAR equivalent."
+        }
+      ],
+      "agreedTerms": null,
+      "expiresAt": "2026-06-24T09:00:00.000Z",
       "createdAt": "2026-03-08T11:00:00.000Z",
       "updatedAt": "2026-03-12T15:00:00.000Z"
     }

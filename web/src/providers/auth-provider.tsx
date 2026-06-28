@@ -9,6 +9,7 @@ import {
 } from 'react'
 import type { PlatformUser } from '@/types/domain.ts'
 import { authService, type AccountType } from '@/lib/auth-service'
+import { setCommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
 
 type AuthContextValue = {
   user: PlatformUser | null
@@ -36,6 +37,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(restored)
     setIsLoading(false)
   }, [])
+
+  useEffect(() => {
+    if (user) {
+      setCommandPermissionActor({ userId: user.id, userRole: user.role })
+    } else {
+      setCommandPermissionActor(null)
+    }
+  }, [user])
 
   const login = useCallback(
     async (

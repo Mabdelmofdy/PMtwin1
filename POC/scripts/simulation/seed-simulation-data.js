@@ -155,16 +155,7 @@ function wipeBrowserSeedData() {
         dataset: 'demo40',
         description: 'Cleared by controlled seeder — canonical dataset lives in opportunities.json'
     });
-    writeJsonEnvelope(path.join(DATA_DIR, 'demo-post-matches.json'), 'post_matches', [], {
-        description: 'Cleared by controlled seeder'
-    });
-    writeJsonEnvelope(path.join(DATA_DIR, 'demo-deals.json'), 'deals', [], {
-        description: 'Cleared by controlled seeder'
-    });
-    writeJsonEnvelope(path.join(DATA_DIR, 'demo-contracts.json'), 'contracts', [], {
-        description: 'Cleared by controlled seeder'
-    });
-    console.log('Wiped browser seed files in', DATA_DIR);
+    console.log('Wiped browser seed opportunities in', DATA_DIR);
 }
 
 function seedUserId(n) {
@@ -1047,6 +1038,13 @@ function mainControlled() {
     });
     if (seedMatches.status !== 0) {
         console.warn('seed-post-matches.js exited with code', seedMatches.status);
+    }
+    const applyOverlay = spawnSync(process.execPath, [path.join(__dirname, '..', 'apply-seed-postmatch-first.js')], {
+        cwd: path.join(__dirname, '..', '..'),
+        stdio: 'inherit'
+    });
+    if (applyOverlay.status !== 0) {
+        console.warn('apply-seed-postmatch-first.js exited with code', applyOverlay.status);
     }
 }
 

@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { findBlockingApplication, isApplicationInNegotiation } from '../src/utils/applications.js';
+import {
+    findBlockingApplication,
+    isApplicationInNegotiation,
+    opportunityAcceptsApplications,
+    canUserApplyToOpportunity
+} from '../src/utils/applications.js';
 
 describe('applications utils', () => {
     it('findBlockingApplication returns active application for same opportunity', () => {
@@ -35,5 +40,27 @@ describe('applications utils', () => {
             { status: 'reviewing', negotiationId: 'neg-1' },
             { id: 'neg-1', status: 'agreed' }
         )).toBe(false);
+    });
+
+    it('opportunityAcceptsApplications allows needs and hybrid only', () => {
+        expect(opportunityAcceptsApplications({ intent: 'request' })).toBe(true);
+        expect(opportunityAcceptsApplications({ intent: 'hybrid' })).toBe(true);
+        expect(opportunityAcceptsApplications({ intent: 'offer' })).toBe(false);
+        expect(opportunityAcceptsApplications(null)).toBe(false);
+    });
+
+    it('canUserApplyToOpportunity rejects pure offers such as seed-opp-004', () => {
+        const offer = {
+            id: 'seed-opp-004',
+            intent: 'offer',
+            status: 'published',
+            creatorId: 'seed-user-002'
+        };
+        const user = { id: 'seed-user-001' };
+        expect(canUserApplyToOpportunity(offer, user)).toBe(false);
+        expect(canUserApplyToOpportunity(
+            { ...offer, intent: 'request' },
+            user
+        )).toBe(true);
     });
 });

@@ -3,6 +3,14 @@
  * Implements matching algorithm for opportunities and candidates
  */
 
+function toCanonicalMatchStatus(status) {
+    const lifecycle = typeof window !== 'undefined' ? window.PmTwinLifecycle : null;
+    if (lifecycle && typeof lifecycle.toCanonical === 'function') {
+        return lifecycle.toCanonical('match', status);
+    }
+    return status;
+}
+
 class MatchingService {
     constructor() {
         this.dataService = window.dataService || dataService;
@@ -873,13 +881,21 @@ class MatchingService {
         }
     }
 
-    _postMatchDedupeProbe(matchType, payload, participants = []) {
-        return { matchType, payload: payload || {}, participants: participants || [] };
+    _postMatchDedupeProbe(matchType, payload, participants = [], extras = {}) {
+        return {
+            matchType,
+            needOpportunityId: extras.needOpportunityId,
+            offerOpportunityId: extras.offerOpportunityId,
+            payload: payload || {},
+            participants: participants || []
+        };
     }
 
-    _strongKeyForPersist(ds, matchType, payload, participants) {
+    _strongKeyForPersist(ds, matchType, payload, participants, extras = {}) {
         if (ds && typeof ds.getPostMatchStrongKey === 'function') {
-            return ds.getPostMatchStrongKey(this._postMatchDedupeProbe(matchType, payload, participants));
+            return ds.getPostMatchStrongKey(
+                this._postMatchDedupeProbe(matchType, payload, participants, extras)
+            );
         }
         return null;
     }
@@ -888,7 +904,16 @@ class MatchingService {
      * createPostMatch with in-run + storage dedupe (used by all persist paths).
      */
     async _createPostMatchForPersist(ds, data, seenKeysInRun) {
-        const key = this._strongKeyForPersist(ds, data.matchType, data.payload, data.participants);
+        const key = this._strongKeyForPersist(
+            ds,
+            data.matchType,
+            data.payload,
+            data.participants,
+            {
+                needOpportunityId: data.needOpportunityId,
+                offerOpportunityId: data.offerOpportunityId
+            }
+        );
         if (key && seenKeysInRun && seenKeysInRun.has(key)) {
             return null;
         }
@@ -926,17 +951,21 @@ class MatchingService {
                 { userId: needOpp.creatorId, opportunityId: needId, role: 'need_owner', participantStatus: 'pending', respondedAt: null },
                 { userId: offerOpp.creatorId, opportunityId: offerId, role: 'offer_provider', participantStatus: 'pending', respondedAt: null }
             ];
+            const breakdown = m.breakdown || m.scoreBreakdown || {};
             const payload = {
                 needOpportunityId: needId,
                 offerOpportunityId: offerId,
-                breakdown: m.breakdown || m.scoreBreakdown || {},
+                breakdown,
                 valueAnalysis: m.valueAnalysis || null
             };
             const postMatch = await this._createPostMatchForPersist(ds, {
                 matchType: 'one_way',
-                status: CONFIG.POST_MATCH_STATUS.PENDING,
+                status: CONFIG.POST_MATCH_STATUS.DISCOVERED,
                 matchScore: m.matchScore,
                 runId,
+                needOpportunityId: needId,
+                offerOpportunityId: offerId,
+                matchCriteria: breakdown,
                 participants,
                 payload
             }, this._persistSeenKeysInRun);
@@ -1027,7 +1056,7 @@ class MatchingService {
             };
             const postMatch = await this._createPostMatchForPersist(ds, {
                 matchType: 'two_way',
-                status: CONFIG.POST_MATCH_STATUS.PENDING,
+                status: CONFIG.POST_MATCH_STATUS.DISCOVERED,
                 matchScore: m.matchScore,
                 runId,
                 participants,
@@ -1065,7 +1094,7 @@ class MatchingService {
             };
             const postMatch = await this._createPostMatchForPersist(ds, {
                 matchType: 'consortium',
-                status: CONFIG.POST_MATCH_STATUS.PENDING,
+                status: CONFIG.POST_MATCH_STATUS.DISCOVERED,
                 matchScore: m.matchScore,
                 runId,
                 participants,
@@ -1202,7 +1231,7 @@ class MatchingService {
             };
             const postMatch = await this._createPostMatchForPersist(ds, {
                 matchType: 'circular',
-                status: CONFIG.POST_MATCH_STATUS.PENDING,
+                status: CONFIG.POST_MATCH_STATUS.DISCOVERED,
                 matchScore: m.matchScore,
                 runId,
                 participants,

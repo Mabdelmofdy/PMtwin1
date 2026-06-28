@@ -1,0 +1,1 @@
+{"version":3,"file":"detect-model.d.ts","sourceRoot":"","sources":["../../src/routing/detect-model.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,iBAAiB,EAAE,MAAM,0BAA0B,CAAA;AACjE,OAAO,KAAK,EAAE,eAAe,EAAE,MAAM,yBAAyB,CAAA;AAE9D,wBAAgB,mBAAmB,CAAC,WAAW,EAAE,eAAe,GAAG,iBAAiB,EAAE,CAkBrF"}

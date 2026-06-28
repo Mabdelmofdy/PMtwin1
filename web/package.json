@@ -5,13 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "type-check": "tsc -b",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test": "node scripts/run-command-tests.mjs",
     "validate:domain": "npx vite-node --config vite.config.ts scripts/validate-domain-health.ts",
     "validate:domain:strict": "npx vite-node --config vite.config.ts scripts/validate-domain-health.ts --strict"
   },
   "dependencies": {
+    "@pm-twin/commands": "file:../packages/commands",
+    "@pm-twin/lifecycle": "file:../packages/lifecycle",
+    "@pm-twin/matching": "file:../packages/matching",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
     "@tailwindcss/vite": "^4.3.1",
@@ -45,6 +50,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "typescript": "~6.0.2",
+    "tsx": "^4.20.3",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12"
   }

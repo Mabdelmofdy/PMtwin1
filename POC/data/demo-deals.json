@@ -1,15 +1,18 @@
 {
   "domain": "deals",
-  "version": "2.0",
-  "description": "E2E workflow deals tied to the 40 seed opportunities (scripts/seed-e2e-workflow.js).",
+  "version": "2.1",
+  "description": "PostMatch-first deals with lifecycle alignment (apply-seed-postmatch-first.js)",
   "data": [
     {
       "id": "seed-deal-oneway-01",
       "matchId": "demo-pm-oneway-01",
-      "applicationId": "seed-app-001",
+      "applicationId": null,
       "negotiationId": "seed-neg-01",
       "opportunityId": "seed-opp-001",
-      "opportunityIds": ["seed-opp-001", "seed-opp-002"],
+      "opportunityIds": [
+        "seed-opp-001",
+        "seed-opp-002"
+      ],
       "matchType": "one_way",
       "status": "completed",
       "title": "Architect package — sustainable tower design",
@@ -30,15 +33,13 @@
       "payload": null,
       "roleSlots": null,
       "scope": "Full architectural design package: BIM, 3D visualization, sustainable design, LEED support.",
-      "timeline": { "start": "2026-03-20", "end": "2026-05-20" },
+      "timeline": {
+        "start": "2026-03-20",
+        "end": "2026-05-20"
+      },
       "exchangeMode": "cash",
       "valueTerms": {
         "agreedValue": 250000,
-        "paymentSchedule": "30% on start, 40% at midpoint, 30% on completion"
-      },
-      "commercialTerms": {
-        "amount": 250000,
-        "currency": "SAR",
         "paymentSchedule": "30% on start, 40% at midpoint, 30% on completion"
       },
       "deliverables": "Concept, schematic and detailed design with BIM model.",
@@ -78,7 +79,10 @@
       "applicationId": null,
       "negotiationId": "seed-neg-04",
       "opportunityId": "seed-opp-014",
-      "opportunityIds": ["seed-opp-014", "seed-opp-015"],
+      "opportunityIds": [
+        "seed-opp-014",
+        "seed-opp-015"
+      ],
       "matchType": "consortium",
       "status": "execution",
       "title": "Highway package consortium",
@@ -108,16 +112,13 @@
       },
       "roleSlots": null,
       "scope": "Highway design-and-build package delivered by a led consortium (PM lead, architect, civil).",
-      "timeline": { "start": "2026-03-20", "end": "2027-09-20" },
+      "timeline": {
+        "start": "2026-03-20",
+        "end": "2027-09-20"
+      },
       "exchangeMode": "cash",
       "valueTerms": {
         "agreedValue": 15000000,
-        "paymentSchedule": "Milestone-based across design and works"
-      },
-      "commercialTerms": {
-        "amount": 15000000,
-        "currency": "SAR",
-        "duration": "18 months",
         "paymentSchedule": "Milestone-based across design and works"
       },
       "deliverables": "Design package, civil works, program management.",
@@ -157,7 +158,10 @@
       "applicationId": null,
       "negotiationId": "seed-neg-07",
       "opportunityId": "seed-opp-039",
-      "opportunityIds": ["seed-opp-039", "seed-opp-035"],
+      "opportunityIds": [
+        "seed-opp-039",
+        "seed-opp-035"
+      ],
       "matchType": "consortium",
       "status": "execution",
       "title": "Wind farm consortium — profit-sharing",
@@ -187,15 +191,14 @@
       },
       "roleSlots": null,
       "scope": "Wind farm package delivered by a profit-sharing consortium (lead PM, equipment/O&M partner).",
-      "timeline": { "start": "2026-04-01", "end": "2028-03-31" },
+      "timeline": {
+        "start": "2026-04-01",
+        "end": "2028-03-31"
+      },
       "exchangeMode": "profit_sharing",
       "valueTerms": {
         "profitSplit": "65-35",
         "profitDistribution": "Annual distribution after O&M costs"
-      },
-      "commercialTerms": {
-        "profitSplit": 65,
-        "duration": "24 months"
       },
       "deliverables": "Wind farm EPC coordination, equipment provision, and O&M framework.",
       "milestones": [

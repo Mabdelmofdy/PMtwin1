@@ -1,30 +1,48 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
+import {
+  formatCanonicalStatusLabel,
+  resolveCanonicalStatus,
+  type StatusEntity,
+} from '@/lib/status-display.ts'
 import { formatStatus } from '@/lib/format'
 
 const statusStyles: Record<string, string> = {
   published: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
   active: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
+  executing: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
   pending: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
+  pending_signature: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
   draft: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
+  review: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
+  signing: 'bg-sky-500/10 text-sky-700 dark:text-sky-400',
   in_negotiation: 'bg-sky-500/10 text-sky-700 dark:text-sky-400',
+  negotiating: 'bg-sky-500/10 text-sky-700 dark:text-sky-400',
+  matched: 'bg-sky-500/10 text-sky-700 dark:text-sky-400',
   contracted: 'bg-violet-500/10 text-violet-700 dark:text-violet-400',
   completed: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
   closed: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
   cancelled: 'bg-red-500/10 text-red-700 dark:text-red-400',
+  terminated: 'bg-red-500/10 text-red-700 dark:text-red-400',
   accepted: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
   rejected: 'bg-red-500/10 text-red-700 dark:text-red-400',
+  agreed: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
 }
 
 export function StatusBadge({
   status,
+  entity,
   className,
 }: {
   status: string
+  entity?: StatusEntity
   className?: string
 }) {
+  const displayStatus = entity
+    ? resolveCanonicalStatus(entity, status)
+    : status
   const style =
-    statusStyles[status] ??
+    statusStyles[displayStatus] ??
     'bg-muted text-muted-foreground'
 
   return (
@@ -35,7 +53,9 @@ export function StatusBadge({
         className,
       )}
     >
-      {formatStatus(status)}
+      {entity
+        ? formatCanonicalStatusLabel(entity, status)
+        : formatStatus(status)}
     </span>
   )
 }

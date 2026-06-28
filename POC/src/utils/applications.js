@@ -12,6 +12,17 @@ const BLOCKING_APPLICATION_STATUSES = new Set([
 ]);
 
 /**
+ * Whether an opportunity can receive inbound applications.
+ * Needs (and hybrid posts with a need side) accept applications; pure Offers do not.
+ * @param {object|null|undefined} opportunity
+ */
+export function opportunityAcceptsApplications(opportunity) {
+    if (!opportunity) return false;
+    const intent = (opportunity.intent || 'request').toLowerCase();
+    return intent === 'request' || intent === 'hybrid';
+}
+
+/**
  * Returns an existing non-terminal application that blocks a new submission.
  * @param {Array} applications
  * @param {string} opportunityId
@@ -34,6 +45,7 @@ export function findBlockingApplication(applications, opportunityId, applicantId
  */
 export function canUserApplyToOpportunity(opportunity, user, context = {}) {
     if (!user || !opportunity) return false;
+    if (!opportunityAcceptsApplications(opportunity)) return false;
     if (opportunity.creatorId === user.id) return false;
     const status = (opportunity.status || '').toLowerCase();
     if (TERMINAL_OPPORTUNITY_STATUSES.has(status)) return false;
@@ -65,6 +77,7 @@ export function isApplicationInNegotiation(app, negotiation = null) {
 if (typeof window !== 'undefined') {
     window.applicationUtils = {
         isApplicationInNegotiation,
+        opportunityAcceptsApplications,
         canUserApplyToOpportunity,
         findBlockingApplication
     };

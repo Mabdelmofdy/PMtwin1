@@ -12,6 +12,7 @@ import {
   resolveCommercialTerms,
   type LegacyRaw,
 } from '@/domain/normalized/field-utils.ts'
+import { toCanonicalIntent } from '@/domain/intent.ts'
 import type {
   NormalizedApplication,
   NormalizedAuditLog,
@@ -20,6 +21,7 @@ import type {
   NormalizedDeal,
   NormalizedDealMilestone,
   NormalizedMatch,
+  NormalizedMatchPayload,
   NormalizedNegotiation,
   NormalizedNegotiationRound,
   NormalizedNotification,
@@ -182,7 +184,7 @@ export function normalizeOpportunity(
     location: pickOptionalString(r, ['location']),
     exchangeMode: pickOptionalString(r, ['exchangeMode']),
     modelType: pickOptionalString(r, ['modelType']),
-    intent: pickOptionalString(r, ['intent']),
+    intent: toCanonicalIntent(pickOptionalString(r, ['intent'])),
     scope: scope
       ? {
           coreSkills: Array.isArray(scope.coreSkills)
@@ -240,6 +242,32 @@ export function normalizeApplication(
   return wrapNormalizedWithValidation(data, validateApplication, options)
 }
 
+function resolvePostMatchOneWayFields(
+  r: LegacyRaw,
+  payloadRaw: LegacyRaw | undefined,
+): {
+  needOpportunityId?: string
+  offerOpportunityId?: string
+  matchCriteria?: Record<string, number>
+} {
+  const needOpportunityId =
+    pickOptionalString(r, ['needOpportunityId']) ??
+    (payloadRaw
+      ? pickOptionalString(payloadRaw, ['needOpportunityId'])
+      : undefined)
+  const offerOpportunityId =
+    pickOptionalString(r, ['offerOpportunityId']) ??
+    (payloadRaw
+      ? pickOptionalString(payloadRaw, ['offerOpportunityId'])
+      : undefined)
+  const matchCriteria =
+    pickFirst<Record<string, number>>(r, ['matchCriteria']) ??
+    (payloadRaw
+      ? pickFirst<Record<string, number>>(payloadRaw, ['breakdown'])
+      : undefined)
+  return { needOpportunityId, offerOpportunityId, matchCriteria }
+}
+
 /**
  * Normalize a legacy PostMatch / match record to canonical Match.
  * Accepts post_matches storage, legacy matches, or audit entity payloads.
@@ -257,11 +285,13 @@ export function normalizePostMatch(
   const createdAt = pickTimestamp(r, 'createdAt')
   const updatedAt = pickTimestamp(r, 'updatedAt') || createdAt
   const payloadRaw = pickFirst<LegacyRaw>(r, ['payload'])
+  const oneWayFields = resolvePostMatchOneWayFields(r, payloadRaw)
   const data: NormalizedMatch = {
     id: pickString(r, ['id']),
     matchType: pickString(r, ['matchType']) || 'one_way',
     status: pickString(r, ['status']) || 'pending',
     matchScore: Number(pickFirst<number>(r, ['matchScore']) ?? 0),
+    ...oneWayFields,
     ...pickTenantFields(r),
     runId: pickOptionalString(r, ['runId']),
     participants: pickParticipants(r),
@@ -272,6 +302,27 @@ export function normalizePostMatch(
           leadNeedId: pickOptionalString(payloadRaw, ['leadNeedId']),
           breakdown: pickFirst<Record<string, number>>(payloadRaw, ['breakdown']),
           valueAnalysis: payloadRaw.valueAnalysis,
+          sideA: pickFirst<NormalizedMatchPayload['sideA']>(payloadRaw, ['sideA']),
+          sideB: pickFirst<NormalizedMatchPayload['sideB']>(payloadRaw, ['sideB']),
+          scoreAtoB: pickFirst<number>(payloadRaw, ['scoreAtoB']),
+          scoreBtoA: pickFirst<number>(payloadRaw, ['scoreBtoA']),
+          valueEquivalence: pickFirst<string | null>(payloadRaw, [
+            'valueEquivalence',
+          ]),
+          roles: pickFirst<NormalizedMatchPayload['roles']>(payloadRaw, [
+            'roles',
+          ]),
+          valueBalance: payloadRaw.valueBalance,
+          cycle: pickFirst<string[]>(payloadRaw, ['cycle']),
+          links: pickFirst<NormalizedMatchPayload['links']>(payloadRaw, [
+            'links',
+            'linkScores',
+          ]),
+          linkScores: pickFirst<NormalizedMatchPayload['linkScores']>(
+            payloadRaw,
+            ['linkScores'],
+          ),
+          chainBalance: payloadRaw.chainBalance,
         }
       : undefined,
     expiresAt: pickOptionalString(r, ['expiresAt']),

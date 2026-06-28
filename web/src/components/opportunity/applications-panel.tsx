@@ -23,14 +23,22 @@ type ApplicationWithApplicant = Application & {
   applicant?: { profile?: { name?: string }; email?: string }
 }
 
+export const APPLICATIONS_LEGACY_SECTION_TITLE =
+  'Direct applications (legacy / hiring)'
+
+export const APPLICATIONS_LEGACY_EMPTY_MESSAGE =
+  'No direct applications. Collaboration runs through PostMatches — review matches above to accept, negotiate, and create deals.'
+
 export function ApplicationsPanel({
   applications,
   canManage,
   opportunityClosed,
+  variant = 'legacy',
 }: {
   applications: ApplicationWithApplicant[]
   canManage: boolean
   opportunityClosed: boolean
+  variant?: 'legacy' | 'default'
 }) {
   const handleStatusChange = (appId: string, status: string) => {
     negotiationService.transitionApplicationStatus(appId, status)
@@ -47,23 +55,39 @@ export function ApplicationsPanel({
     toast.success('Application accepted')
   }
 
+  const sectionTitle =
+    variant === 'legacy'
+      ? APPLICATIONS_LEGACY_SECTION_TITLE
+      : `Applications (${applications.length})`
+
   if (applications.length === 0) {
     return (
-      <Card>
+      <Card className="border-border/50 bg-muted/10">
         <CardHeader>
-          <CardTitle>Applications (0)</CardTitle>
+          <CardTitle className="text-base text-muted-foreground">{sectionTitle}</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          No applications yet. Published opportunities will receive applicant proposals here.
+          {variant === 'legacy'
+            ? APPLICATIONS_LEGACY_EMPTY_MESSAGE
+            : 'No applications yet. Published opportunities will receive applicant proposals here.'}
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <Card>
+    <Card className="border-border/50 bg-muted/10">
       <CardHeader>
-        <CardTitle>Applications ({applications.length})</CardTitle>
+        <CardTitle className="text-base text-muted-foreground">
+          {variant === 'legacy'
+            ? `${APPLICATIONS_LEGACY_SECTION_TITLE} (${applications.length})`
+            : sectionTitle}
+        </CardTitle>
+        {variant === 'legacy' ? (
+          <p className="text-xs text-muted-foreground">
+            Optional hiring path — does not replace PostMatch → Negotiation → Deal.
+          </p>
+        ) : null}
       </CardHeader>
       <CardContent className="space-y-4">
         {applications.map((app) => {

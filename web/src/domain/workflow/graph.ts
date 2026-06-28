@@ -41,6 +41,7 @@ export function buildAllWorkflowGraphs(): Record<
   return {
     application: buildWorkflowGraph('application'),
     opportunity: buildWorkflowGraph('opportunity'),
+    match: buildWorkflowGraph('match'),
     negotiation: buildWorkflowGraph('negotiation'),
     deal: buildWorkflowGraph('deal'),
     contract: buildWorkflowGraph('contract'),

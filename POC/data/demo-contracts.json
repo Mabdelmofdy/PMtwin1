@@ -1,18 +1,21 @@
 {
   "domain": "contracts",
-  "version": "2.0",
-  "description": "E2E workflow contracts tied to seed deals (scripts/seed-e2e-workflow.js).",
+  "version": "2.1",
+  "description": "PostMatch-first contracts with lifecycle alignment (apply-seed-postmatch-first.js)",
   "data": [
     {
       "id": "seed-contract-oneway-01",
       "dealId": "seed-deal-oneway-01",
       "opportunityId": "seed-opp-001",
-      "opportunityIds": ["seed-opp-001", "seed-opp-002"],
+      "opportunityIds": [
+        "seed-opp-001",
+        "seed-opp-002"
+      ],
       "matchId": "demo-pm-oneway-01",
-      "applicationId": "seed-app-001",
+      "applicationId": null,
       "negotiationId": "seed-neg-01",
       "invitationId": null,
-      "participants": [
+      "parties": [
         {
           "userId": "seed-user-001",
           "role": "need_owner",
@@ -29,18 +32,11 @@
       "agreedValue": 250000,
       "duration": "4 months",
       "paymentSchedule": "30% on start, 40% at midpoint, 30% on completion",
-      "commercialTerms": {
-        "amount": 250000,
-        "currency": "SAR",
-        "duration": "4 months",
-        "paymentSchedule": "30% on start, 40% at midpoint, 30% on completion"
-      },
       "equityVesting": null,
       "profitShare": null,
       "milestonesSnapshot": null,
       "status": "completed",
       "signedAt": "2026-03-18T12:00:00.000Z",
-      "version": 1,
       "createdAt": "2026-03-18T12:00:00.000Z",
       "updatedAt": "2026-05-20T16:00:00.000Z"
     },
@@ -48,12 +44,15 @@
       "id": "seed-contract-consortium-01",
       "dealId": "seed-deal-consortium-01",
       "opportunityId": "seed-opp-014",
-      "opportunityIds": ["seed-opp-014", "seed-opp-015"],
+      "opportunityIds": [
+        "seed-opp-014",
+        "seed-opp-015"
+      ],
       "matchId": "demo-pm-consortium-01",
       "applicationId": null,
       "negotiationId": "seed-neg-04",
       "invitationId": null,
-      "participants": [
+      "parties": [
         {
           "userId": "seed-co-corp-005",
           "role": "consortium_lead",
@@ -70,18 +69,11 @@
       "agreedValue": 15000000,
       "duration": "18 months",
       "paymentSchedule": "Milestone-based across design and works",
-      "commercialTerms": {
-        "amount": 15000000,
-        "currency": "SAR",
-        "duration": "18 months",
-        "paymentSchedule": "Milestone-based across design and works"
-      },
       "equityVesting": null,
       "profitShare": null,
       "milestonesSnapshot": null,
       "status": "active",
       "signedAt": "2026-03-18T12:00:00.000Z",
-      "version": 1,
       "createdAt": "2026-03-18T12:00:00.000Z",
       "updatedAt": "2026-03-18T12:00:00.000Z"
     },
@@ -89,12 +81,15 @@
       "id": "seed-contract-exchange-01",
       "dealId": "seed-deal-exchange-01",
       "opportunityId": "seed-opp-039",
-      "opportunityIds": ["seed-opp-039", "seed-opp-035"],
+      "opportunityIds": [
+        "seed-opp-039",
+        "seed-opp-035"
+      ],
       "matchId": "demo-pm-consortium-wind",
       "applicationId": null,
       "negotiationId": "seed-neg-07",
       "invitationId": null,
-      "participants": [
+      "parties": [
         {
           "userId": "seed-co-corp-005",
           "role": "consortium_lead",
@@ -111,16 +106,11 @@
       "agreedValue": null,
       "duration": "24 months",
       "paymentSchedule": null,
-      "commercialTerms": {
-        "profitSplit": 65,
-        "duration": "24 months"
-      },
       "equityVesting": null,
       "profitShare": "65-35",
       "milestonesSnapshot": null,
       "status": "active",
       "signedAt": "2026-03-18T12:00:00.000Z",
-      "version": 1,
       "createdAt": "2026-03-18T12:00:00.000Z",
       "updatedAt": "2026-03-18T12:00:00.000Z"
     }

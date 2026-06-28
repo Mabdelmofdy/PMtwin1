@@ -1,0 +1,17 @@
+---
+description: Git conventions and KSA regulatory compliance for PMTwin
+alwaysApply: true
+---
+
+# Git Conventions
+
+- Branch naming: feat/ADR-001-lifecycle, fix/POC-status-alias, docs/api-contract
+- Commit messages: `feat(lifecycle): add toCanonical for match entity` (Conventional Commits)
+- PR template: Link to ADR, list test cases, include screenshot for UI changes
+
+# KSA Compliance Notes
+
+- All user data must be processed per PDPL (Personal Data Protection Law)
+- VAT calculation (15%) must be explicit in all financial fields
+- Arabic RTL support required in all UI components
+- Date formats: Hijri support preferred, Gregorian required

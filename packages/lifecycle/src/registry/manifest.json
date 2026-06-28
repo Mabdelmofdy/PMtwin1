@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "adr": "ADR-001",
+  "entities": {
+    "opportunity": {
+      "canonicalStates": [
+        "draft",
+        "published",
+        "matched",
+        "negotiating",
+        "contracted",
+        "executing",
+        "completed",
+        "cancelled"
+      ],
+      "aliasesFile": "aliases/opportunity.json"
+    },
+    "application": {
+      "canonicalStates": [
+        "submitted",
+        "reviewing",
+        "shortlisted",
+        "negotiating",
+        "accepted",
+        "rejected",
+        "withdrawn"
+      ],
+      "aliasesFile": "aliases/application.json"
+    },
+    "match": {
+      "canonicalStates": [
+        "discovered",
+        "accepted",
+        "confirmed",
+        "declined",
+        "expired",
+        "superseded"
+      ],
+      "aliasesFile": "aliases/match.json"
+    },
+    "negotiation": {
+      "canonicalStates": [
+        "active",
+        "countered",
+        "agreed",
+        "expired",
+        "cancelled"
+      ],
+      "aliasesFile": "aliases/negotiation.json"
+    },
+    "deal": {
+      "canonicalStates": [
+        "draft",
+        "review",
+        "signing",
+        "executing",
+        "completed",
+        "cancelled"
+      ],
+      "aliasesFile": "aliases/deal.json"
+    },
+    "contract": {
+      "canonicalStates": [
+        "draft",
+        "pending_signature",
+        "active",
+        "completed",
+        "terminated"
+      ],
+      "aliasesFile": "aliases/contract.json"
+    }
+  }
+}

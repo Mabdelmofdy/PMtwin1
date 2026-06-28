@@ -146,10 +146,14 @@ export function resolveDealChain(dealId: string | undefined | null): DealChain {
       if (linked) contract = normalizeContract(linked)
     }
 
-    if (match?.payload?.needOpportunityId) {
+    if (match?.needOpportunityId) {
+      opportunityIds.add(match.needOpportunityId)
+    } else if (match?.payload?.needOpportunityId) {
       opportunityIds.add(match.payload.needOpportunityId)
     }
-    if (match?.payload?.offerOpportunityId) {
+    if (match?.offerOpportunityId) {
+      opportunityIds.add(match.offerOpportunityId)
+    } else if (match?.payload?.offerOpportunityId) {
       opportunityIds.add(match.payload.offerOpportunityId)
     }
     if (negotiation?.opportunityId) opportunityIds.add(negotiation.opportunityId)

@@ -152,6 +152,70 @@ function setupOpportunitiesRefreshListener() {
         .forEach((eventName) => window.addEventListener(eventName, () => { void refresh(); }));
 }
 
+function toMatchScorePercent(score) {
+    if (score == null || Number.isNaN(Number(score))) return null;
+    return Math.min(100, Math.round(Number(score) * 100));
+}
+
+function collectOpportunityIdsFromPostMatch(pm) {
+    const ids = [];
+    const p = pm.payload || {};
+    if (pm.matchType === 'one_way') {
+        if (p.needOpportunityId) ids.push(p.needOpportunityId);
+        if (p.offerOpportunityId) ids.push(p.offerOpportunityId);
+    } else if (pm.matchType === 'two_way') {
+        const sideA = p.sideA || {};
+        const sideB = p.sideB || {};
+        [sideA.needId, sideA.offerId, sideB.needId, sideB.offerId].forEach((id) => {
+            if (id) ids.push(id);
+        });
+    } else if (pm.matchType === 'consortium') {
+        if (p.leadNeedId) ids.push(p.leadNeedId);
+        (p.roles || []).forEach((r) => {
+            if (r.opportunityId) ids.push(r.opportunityId);
+        });
+    } else if (pm.matchType === 'circular') {
+        (p.links || []).forEach((l) => {
+            if (l.needId) ids.push(l.needId);
+            if (l.offerId) ids.push(l.offerId);
+        });
+    }
+    (pm.participants || []).forEach((part) => {
+        if (part.opportunityId) ids.push(part.opportunityId);
+    });
+    return [...new Set(ids)];
+}
+
+function buildMatchScoreByOpportunityId(postMatches, userId, opportunitiesById) {
+    const scores = new Map();
+    const umv = window.unifiedMatchViewModel;
+
+    for (const pm of postMatches) {
+        const score = pm.matchScore != null ? Number(pm.matchScore) : null;
+        if (score == null || Number.isNaN(score)) continue;
+
+        let counterpartIds = [];
+        if (umv && typeof umv.resolveViewerOpportunityIds === 'function') {
+            const { counterpartId } = umv.resolveViewerOpportunityIds(pm, userId, pm.matchType);
+            if (counterpartId) counterpartIds = [counterpartId];
+        }
+
+        if (!counterpartIds.length) {
+            counterpartIds = collectOpportunityIdsFromPostMatch(pm).filter((oppId) => {
+                const opp = opportunitiesById[oppId];
+                return opp && opp.creatorId !== userId;
+            });
+        }
+
+        counterpartIds.forEach((oppId) => {
+            const prev = scores.get(oppId);
+            if (prev == null || score > prev) scores.set(oppId, score);
+        });
+    }
+
+    return scores;
+}
+
 function renderOppEmpty(opts) {
     const iconClass = opts.iconClass || 'ph-duotone ph-briefcase';
     return (
@@ -291,10 +355,19 @@ async function loadOpportunities() {
             return;
         }
 
-        if (user) {
-            list.forEach(opp => {
-                opp.matchScore = null;
-                opp.matchScorePercent = null;
+        if (user && dataService.getPostMatchesForUser) {
+            const postMatches = await dataService.getPostMatchesForUser(user.id);
+            const oppsById = Object.fromEntries(list.map((o) => [o.id, o]));
+            const scoreMap = buildMatchScoreByOpportunityId(postMatches, user.id, oppsById);
+            list.forEach((opp) => {
+                if (opp.isOwner) {
+                    opp.matchScore = null;
+                    opp.matchScorePercent = null;
+                    return;
+                }
+                const raw = scoreMap.get(opp.id);
+                opp.matchScore = raw ?? null;
+                opp.matchScorePercent = raw != null ? toMatchScorePercent(raw) : null;
             });
         }
 

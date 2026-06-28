@@ -2,19 +2,20 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
-  APP_STAGE_TO_STATUS,
   APPLICATION_STATUS_LABELS,
-  OPP_STAGE_TO_STATUS,
   type Application,
 } from '@/lib/applications'
 import type { Opportunity } from '@/types/domain.ts'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { applicationRepository } from '@/repositories/index.ts'
+import { pipelineApplicationDrop } from '@/lib/pipeline-application-drop.ts'
+import { pipelineOpportunityDrop } from '@/lib/pipeline-opportunity-drop.ts'
 import { dealService } from '@/services/deal-service.ts'
 import { negotiationService } from '@/services/negotiation-service.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
 import { StatusBadge } from '@/components/shared/page-primitives'
+import type { StatusEntity } from '@/lib/status-display.ts'
 import { cn } from '@/lib/utils'
 
 const OPP_STAGES = [
@@ -40,6 +41,7 @@ function KanbanCard({
   title,
   subtitle,
   status,
+  statusEntity,
   href,
   dragType,
   disabled,
@@ -48,6 +50,7 @@ function KanbanCard({
   title: string
   subtitle?: string
   status?: string
+  statusEntity?: StatusEntity
   href: string
   dragType: 'opportunity' | 'application'
   disabled?: boolean
@@ -73,7 +76,13 @@ function KanbanCard({
         {subtitle ? (
           <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
         ) : null}
-        {status ? <StatusBadge status={status} className="mt-2" /> : null}
+        {status ? (
+          <StatusBadge
+            status={status}
+            entity={statusEntity}
+            className="mt-2"
+          />
+        ) : null}
       </Link>
     </div>
   )
@@ -193,17 +202,21 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
 
   const handleOppDrop = (stageKey: string, payload: { id: string; type: string }) => {
     if (payload.type !== 'opportunity') return
-    const status = OPP_STAGE_TO_STATUS[stageKey]
-    if (!status) return
-    dealService.updateOpportunityStatus(payload.id, status)
+    const result = pipelineOpportunityDrop(payload.id, stageKey)
+    if (!result.success) {
+      toast.error(result.message)
+      return
+    }
     toast.success('Opportunity moved')
   }
 
   const handleAppDrop = (stageKey: string, payload: { id: string; type: string }) => {
     if (payload.type !== 'application') return
-    const status = APP_STAGE_TO_STATUS[stageKey]
-    if (!status) return
-    negotiationService.updateApplicationStatus(payload.id, status)
+    const result = pipelineApplicationDrop(payload.id, stageKey)
+    if (!result.success) {
+      toast.error(result.message)
+      return
+    }
     toast.success('Application moved')
   }
 
@@ -263,6 +276,7 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
                   title={item.title}
                   subtitle={item.location}
                   status={item.status}
+                  statusEntity="opportunity"
                   href={`/opportunities/${item.id}`}
                   dragType="opportunity"
                   disabled={isPendingApproval}

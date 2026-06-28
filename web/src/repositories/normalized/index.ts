@@ -19,6 +19,7 @@ import type {
   NormalizedOpportunity,
   NormalizedUser,
 } from '@/domain/normalized/types.ts'
+import { assertNoLifecycleStatusInPatch } from '@/lib/lifecycle-status-guard.ts'
 import {
   applicationRepository,
   dealRepository,
@@ -53,6 +54,7 @@ export const opportunityRepositoryNormalized = {
 
   /** Pass-through update — persists legacy shape via underlying repository. */
   update(id: string, patch: Parameters<typeof opportunityRepository.update>[1]): void {
+    assertNoLifecycleStatusInPatch(patch)
     opportunityRepository.update(id, patch)
   },
 }
@@ -86,6 +88,7 @@ export const applicationRepositoryNormalized = {
     id: string,
     patch: Parameters<typeof applicationRepository.update>[1],
   ): void {
+    assertNoLifecycleStatusInPatch(patch)
     applicationRepository.update(id, patch)
   },
 
@@ -110,6 +113,7 @@ export const dealRepositoryNormalized = {
 
   /** Pass-through mutations — storage remains legacy format. */
   update(id: string, patch: Parameters<typeof dealRepository.update>[1]): void {
+    assertNoLifecycleStatusInPatch(patch)
     dealRepository.update(id, patch)
   },
 

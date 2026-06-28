@@ -1,4 +1,11 @@
+import type {
+  AcceptApplicationCommand,
+  RejectApplicationCommand,
+  SubmitApplicationCommand,
+  TransitionApplicationStatusCommand,
+} from '@pm-twin/commands'
 import type { Application } from '@/types/domain.ts'
+import { getApplicationCommandGateway } from '@/commands/application-command-gateway.ts'
 import { applicationRepository } from '@/repositories/index.ts'
 
 const TERMINAL_OPPORTUNITY_STATUSES = new Set([
@@ -26,6 +33,25 @@ const EDITABLE_APPLICATION_STATUSES = [
 ]
 
 const REAPPLY_APPLICATION_STATUSES = ['rejected', 'withdrawn']
+
+function createClientRequestId(prefix: string): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `${prefix}-${crypto.randomUUID()}`
+  }
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
+function executeApplicationCommand(
+  command:
+    | Omit<TransitionApplicationStatusCommand, 'clientRequestId'>
+    | Omit<AcceptApplicationCommand, 'clientRequestId'>
+    | Omit<RejectApplicationCommand, 'clientRequestId'>,
+): void {
+  getApplicationCommandGateway().execute({
+    ...command,
+    clientRequestId: createClientRequestId(command.commandType),
+  })
+}
 
 export const negotiationService = {
   canUserApplyToOpportunity(
@@ -94,29 +120,46 @@ export const negotiationService = {
   submitApplication(
     data: Omit<Application, 'id' | 'createdAt' | 'updatedAt'>,
   ): Application | null {
-    const existing = applicationRepository.getAll()
-    if (
-      this.findBlockingApplication(
-        existing,
-        data.opportunityId,
-        data.applicantId,
-      )
-    ) {
+    const { opportunityId, applicantId, ...payload } = data
+    const clientRequestId = createClientRequestId('submit-application')
+    const gateway = getApplicationCommandGateway()
+    const command: SubmitApplicationCommand = {
+      commandType: 'SubmitApplication',
+      aggregateId: opportunityId,
+      clientRequestId,
+      opportunityId,
+      applicantId,
+      payload,
+    }
+    const result = gateway.execute(command)
+
+    if (!result.success) {
       return null
     }
-    return applicationRepository.create(data)
+
+    return applicationRepository.getById(result.aggregateId) ?? null
   },
 
   transitionApplicationStatus(appId: string, newStatus: string): void {
-    applicationRepository.update(appId, { status: newStatus })
+    executeApplicationCommand({
+      commandType: 'TransitionApplicationStatus',
+      aggregateId: appId,
+      targetStatus: newStatus,
+    })
   },
 
   acceptApplication(appId: string): void {
-    applicationRepository.update(appId, { status: 'accepted' })
+    executeApplicationCommand({
+      commandType: 'AcceptApplication',
+      aggregateId: appId,
+    })
   },
 
   rejectApplication(appId: string): void {
-    applicationRepository.update(appId, { status: 'rejected' })
+    executeApplicationCommand({
+      commandType: 'RejectApplication',
+      aggregateId: appId,
+    })
   },
 
   bucketApplicationsForPipeline(
@@ -151,6 +194,10 @@ export const negotiationService = {
   },
 
   updateApplicationStatus(id: string, status: string): void {
-    applicationRepository.update(id, { status })
+    executeApplicationCommand({
+      commandType: 'TransitionApplicationStatus',
+      aggregateId: id,
+      targetStatus: status,
+    })
   },
 }

@@ -3,6 +3,8 @@
  * These interfaces use canonical naming only; legacy fields are mapped via adapters.
  */
 
+import type { OpportunityIntent } from '@/types/enums.ts'
+
 export type NormalizedCommercialTerms = {
   amount?: number
   currency?: string
@@ -92,7 +94,8 @@ export type NormalizedOpportunity = {
   location?: string
   exchangeMode?: string
   modelType?: string
-  intent?: string
+  /** Canonical intent — legacy `request` normalized to `need` on read. */
+  intent?: OpportunityIntent
   scope?: { coreSkills?: string[]; sectors?: string[] }
   attributes?: {
     coreSkills?: string[]
@@ -149,6 +152,42 @@ export type NormalizedMatchPayload = {
   leadNeedId?: string
   breakdown?: Record<string, number>
   valueAnalysis?: unknown
+  sideA?: {
+    userId: string
+    needId: string
+    offerId: string
+  }
+  sideB?: {
+    userId: string
+    needId: string
+    offerId: string
+  }
+  scoreAtoB?: number
+  scoreBtoA?: number
+  valueEquivalence?: string | null
+  roles?: Array<{
+    role: string
+    opportunityId: string
+    userId: string
+    score?: number
+  }>
+  valueBalance?: unknown
+  cycle?: string[]
+  links?: Array<{
+    fromCreatorId: string
+    toCreatorId: string
+    needId: string
+    offerId: string
+    score: number
+  }>
+  linkScores?: Array<{
+    fromCreatorId: string
+    toCreatorId: string
+    needId: string
+    offerId: string
+    score: number
+  }>
+  chainBalance?: unknown
 }
 
 export type NormalizedMatch = {
@@ -156,6 +195,9 @@ export type NormalizedMatch = {
   matchType: string
   status: NormalizedMatchStatus
   matchScore: number
+  needOpportunityId?: string
+  offerOpportunityId?: string
+  matchCriteria?: Record<string, number>
   tenantId?: string
   organizationId?: string
   runId?: string

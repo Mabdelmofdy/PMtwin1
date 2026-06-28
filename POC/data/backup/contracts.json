@@ -11,7 +11,7 @@
       "scope": "Sustainability Consultant - LEED Certification",
       "paymentMode": "cash",
       "duration": "18",
-      "status": "pending",
+      "status": "pending_signature",
       "milestones": [],
       "signedAt": null,
       "createdAt": "2026-01-22T14:00:00.000Z",
@@ -29,7 +29,7 @@
       "status": "active",
       "milestones": [
         {"id": "m1", "title": "Order placement", "dueDate": "2026-04-15", "status": "completed", "completedAt": "2026-04-10T12:00:00.000Z"},
-        {"id": "m2", "title": "Delivery", "dueDate": "2026-05-01", "status": "pending"}
+        {"id": "m2", "title": "Delivery", "dueDate": "2026-05-01", "status": "pending_signature"}
       ],
       "signedAt": null,
       "createdAt": "2026-01-18T11:00:00.000Z",

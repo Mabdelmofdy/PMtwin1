@@ -1,0 +1,24 @@
+---
+description: Canonical lifecycle status names and legacy alias mappings
+globs: packages/lifecycle/**,web/**,POC/**
+alwaysApply: false
+---
+
+# Status Vocabulary (Canonical — ONLY these names in new code)
+
+- Opportunity: draft → published → matched → negotiating → contracted → executing → completed → cancelled
+- Application: submitted → reviewing → shortlisted → negotiating → accepted → rejected → withdrawn
+- Match: discovered → accepted → confirmed → declined → expired → superseded
+- Negotiation: active → countered → agreed → expired → cancelled
+- Deal: draft → review → signing → executing → completed → cancelled
+- Contract: draft → pending_signature → active → completed → terminated
+
+## Legacy Aliases (for read-only conversion ONLY)
+
+- pending → discovered (match)
+- open → active (negotiation)
+- in_negotiation → negotiating (opportunity)
+- counter_offered → countered (negotiation)
+- closed → completed (opportunity/deal)
+
+Do not introduce legacy alias names in new code. Use aliases only when reading or converting legacy POC data.

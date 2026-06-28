@@ -40,7 +40,9 @@ export function createTestConfig() {
             CLOSED: 'closed'
         },
         POST_MATCH_STATUS: {
+            DISCOVERED: 'discovered',
             CONFIRMED: 'confirmed',
+            ACCEPTED: 'accepted',
             PENDING: 'pending',
             EXPIRED: 'expired',
             DECLINED: 'declined'

@@ -1,0 +1,1 @@
+{"version":3,"file":"location.d.ts","sourceRoot":"","sources":["../../src/normalize/location.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,oBAAoB,EAAE,MAAM,uBAAuB,CAAA;AACjE,OAAO,KAAK,EAAE,eAAe,EAAE,MAAM,yBAAyB,CAAA;AAE9D,wBAAgB,iBAAiB,CAC/B,WAAW,EAAE,eAAe,EAC5B,iBAAiB,GAAE,oBAAyB,GAC3C,MAAM,CAyBR"}

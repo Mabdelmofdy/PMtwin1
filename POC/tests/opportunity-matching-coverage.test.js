@@ -47,6 +47,7 @@ function createDataService(published) {
 
 let opportunities;
 let published;
+let matchableForCoverage;
 let byId;
 let matchingService;
 let hardConstraints;
@@ -62,6 +63,8 @@ function roleOf(id) {
 beforeAll(async () => {
     opportunities = loadEnvelope(path.join(POC_ROOT, 'data', 'opportunities.json'));
     published = opportunities.filter(o => (o.status || '') === 'published');
+    // Lifecycle-aligned seed keeps few opps published; normalize status for coverage simulation only.
+    matchableForCoverage = opportunities.map(o => ({ ...o, status: 'published' }));
     byId = Object.fromEntries(opportunities.map(o => [o.id, o]));
 
     const { bootstrap } = require(path.join(POC_ROOT, 'scripts', 'simulation', 'bootstrap-matching.js'));
@@ -69,14 +72,14 @@ beforeAll(async () => {
     matchingService = svc.matchingService;
     hardConstraints = global.hardConstraints;
 
-    const ds = createDataService(published);
+    const ds = createDataService(matchableForCoverage);
     global.dataService = ds;
     if (global.window) global.window.dataService = ds;
     matchingService.dataService = ds;
     matchingService.notifyPostMatch = async () => {};
     global.CONFIG.POST_MATCH_STATUS = { PENDING: 'pending', CONFIRMED: 'confirmed', DECLINED: 'declined', EXPIRED: 'expired' };
 
-    for (const opp of published) {
+    for (const opp of matchableForCoverage) {
         await matchingService.persistPostMatches(opp.id, { source: 'test' });
     }
     matches = await ds.getPostMatches();

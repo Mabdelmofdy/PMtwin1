@@ -9,10 +9,12 @@ const MATCHES_TABS = [
     { id: 'two_way', label: 'Barter' },
     { id: 'consortium', label: 'Consortium' },
     { id: 'circular', label: 'Circular' },
-    { id: 'pending', label: 'Pending' },
+    { id: 'discovered', label: 'Discovered' },
+    { id: 'accepted', label: 'Accepted' },
     { id: 'confirmed', label: 'Confirmed' },
     { id: 'declined', label: 'Declined' },
-    { id: 'expired', label: 'Expired' }
+    { id: 'expired', label: 'Expired' },
+    { id: 'superseded', label: 'Superseded' }
 ];
 
 let matchesPageState = {
@@ -39,6 +41,7 @@ async function initMatches() {
             e.preventDefault();
             document.getElementById('matches-filters')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
+        initMatchesTabFromStorage();
         ensureMatchesTabsMarkup();
         setupMatchesTabs();
         setupMatchesFilters();
@@ -75,9 +78,9 @@ function ensureMatchesTabsMarkup() {
     const container = document.getElementById('matches-subtabs');
     if (!container || container.querySelector('[data-matches-tab]')) return;
     container.classList.add('matches-segmented--scroll');
-    container.innerHTML = MATCHES_TABS.map((tab, index) => {
-        const active = index === 0 ? ' active' : '';
-        const selected = index === 0 ? 'true' : 'false';
+    container.innerHTML = MATCHES_TABS.map((tab) => {
+        const active = tab.id === matchesPageState.tab ? ' active' : '';
+        const selected = tab.id === matchesPageState.tab ? 'true' : 'false';
         return `<button type="button" class="matches-segment${active}" role="tab" data-matches-tab="${tab.id}" aria-selected="${selected}">`
             + `<span class="matches-segment__inner"><span class="matches-segment__label">${tab.label}</span>`
             + `<span class="matches-segment__count" id="matches-count-${tab.id}" hidden></span></span></button>`;
@@ -130,6 +133,11 @@ function setupMatchesTabs() {
         const btn = e.target.closest('[data-matches-tab]');
         if (!btn) return;
         matchesPageState.tab = btn.getAttribute('data-matches-tab') || MATCHES_TAB_ALL;
+        try {
+            sessionStorage.setItem('matches-tab', matchesPageState.tab);
+        } catch (err) {
+            void err;
+        }
         container.querySelectorAll('.matches-segment').forEach(b => {
             const active = b === btn;
             b.classList.toggle('active', active);
@@ -146,6 +154,9 @@ function setupMatchesFilters() {
     const clearBtn = document.getElementById('matches-clear-filters');
 
     const onChange = () => {
+        if (statusEl?.value === 'pending') {
+            statusEl.value = 'discovered';
+        }
         matchesPageState.status = statusEl?.value || '';
         matchesPageState.quality = qualityEl?.value || '';
         matchesPageState.hasDeal = dealEl?.value || '';
@@ -154,6 +165,10 @@ function setupMatchesFilters() {
     statusEl?.addEventListener('change', onChange);
     qualityEl?.addEventListener('change', onChange);
     dealEl?.addEventListener('change', onChange);
+    if (statusEl?.value === 'pending') {
+        statusEl.value = 'discovered';
+    }
+    matchesPageState.status = statusEl?.value || '';
     clearBtn?.addEventListener('click', (e) => {
         e.preventDefault();
         matchesPageState.status = '';
@@ -333,16 +348,53 @@ function setupMatchesFilters() {
     }
 }
 
+function normalizeMatchFilterStatus(status) {
+    const umv = getUmv();
+    if (umv && typeof umv.normalizeAggregateMatchStatus === 'function') {
+        return umv.normalizeAggregateMatchStatus(status);
+    }
+    const raw = String(status || '').toLowerCase();
+    return raw === 'pending' ? 'discovered' : raw;
+}
+
+function normalizeMatchFilterTabId(tabId) {
+    const umv = getUmv();
+    if (umv && typeof umv.normalizePostMatchTabId === 'function') {
+        return umv.normalizePostMatchTabId(tabId);
+    }
+    const raw = String(tabId || '').toLowerCase();
+    if (raw === 'pending') return 'discovered';
+    return raw;
+}
+
+function initMatchesTabFromStorage() {
+    try {
+        const stored = sessionStorage.getItem('matches-tab');
+        const normalized = normalizeMatchFilterTabId(stored);
+        if (normalized && MATCHES_TABS.some((tab) => tab.id === normalized)) {
+            matchesPageState.tab = normalized;
+        }
+        if (stored === 'pending' && normalized === 'discovered') {
+            sessionStorage.setItem('matches-tab', 'discovered');
+        }
+    } catch (err) {
+        void err;
+    }
+}
+
 function filterViewModels(viewModels) {
     const tab = matchesPageState.tab;
     return viewModels.filter(vm => {
-        if (tab === 'pending' && vm.status !== 'pending') return false;
-        if (tab === 'confirmed' && vm.status !== 'confirmed') return false;
-        if (tab === 'declined' && vm.status !== 'declined') return false;
-        if (tab === 'expired' && vm.status !== 'expired') return false;
+        const vmStatus = normalizeMatchFilterStatus(vm.status);
+        if (tab === 'discovered' && vmStatus !== 'discovered') return false;
+        if (tab === 'accepted' && vmStatus !== 'accepted') return false;
+        if (tab === 'confirmed' && vmStatus !== 'confirmed') return false;
+        if (tab === 'declined' && vmStatus !== 'declined') return false;
+        if (tab === 'expired' && vmStatus !== 'expired') return false;
+        if (tab === 'superseded' && vmStatus !== 'superseded') return false;
         if (['one_way', 'two_way', 'consortium', 'circular'].includes(tab) && vm.matchType !== tab) return false;
 
-        if (matchesPageState.status && vm.status !== matchesPageState.status) return false;
+        if (matchesPageState.status && vmStatus !== normalizeMatchFilterStatus(matchesPageState.status)) return false;
         if (matchesPageState.quality && vm.matchQuality !== matchesPageState.quality) return false;
         if (matchesPageState.hasDeal === 'yes' && !vm.hasDeal) return false;
         if (matchesPageState.hasDeal === 'no' && vm.hasDeal) return false;

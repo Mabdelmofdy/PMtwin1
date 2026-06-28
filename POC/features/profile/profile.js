@@ -3381,15 +3381,24 @@ async function loadProfileStats(userId) {
         const postMatches = dataService.getPostMatchesForUser
             ? await dataService.getPostMatchesForUser(userId)
             : [];
-        const pendingMatches = postMatches.filter(pm => (pm.status || '').toLowerCase() === 'pending').length;
-        const confirmedMatches = postMatches.filter(pm => (pm.status || '').toLowerCase() === 'confirmed').length;
-        const declinedMatches = postMatches.filter(pm => (pm.status || '').toLowerCase() === 'declined').length;
-        const expiredMatches = postMatches.filter(pm => (pm.status || '').toLowerCase() === 'expired').length;
-        const matchesReceived = pendingMatches + confirmedMatches;
+        const canonicalPostMatchStatus = (pm) => {
+            const raw = (pm.status || '').toLowerCase();
+            const umv = window.unifiedMatchViewModel;
+            if (umv && typeof umv.normalizeAggregateMatchStatus === 'function') {
+                return umv.normalizeAggregateMatchStatus(raw);
+            }
+            return raw === 'pending' ? 'discovered' : raw;
+        };
+        const discoveredMatches = postMatches.filter(pm => canonicalPostMatchStatus(pm) === 'discovered').length;
+        const acceptedMatches = postMatches.filter(pm => canonicalPostMatchStatus(pm) === 'accepted').length;
+        const confirmedMatches = postMatches.filter(pm => canonicalPostMatchStatus(pm) === 'confirmed').length;
+        const declinedMatches = postMatches.filter(pm => canonicalPostMatchStatus(pm) === 'declined').length;
+        const expiredMatches = postMatches.filter(pm => canonicalPostMatchStatus(pm) === 'expired').length;
+        const matchesReceived = discoveredMatches + acceptedMatches + confirmedMatches;
         document.getElementById('stat-matches-received').textContent = matchesReceived;
         const breakdownEl = document.getElementById('stat-matches-breakdown');
         if (breakdownEl) {
-            breakdownEl.textContent = `Pending ${pendingMatches} · Confirmed ${confirmedMatches} · Declined ${declinedMatches} · Expired ${expiredMatches}`;
+            breakdownEl.textContent = `Discovered ${discoveredMatches} · Accepted ${acceptedMatches} · Confirmed ${confirmedMatches} · Declined ${declinedMatches} · Expired ${expiredMatches}`;
         }
 
         const contracts = typeof dataService.getContracts === 'function'

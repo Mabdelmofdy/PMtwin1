@@ -2,6 +2,14 @@
  * Deal lifecycle helpers (Phase 7) — source validation and friendly labels.
  */
 
+function toCanonical(entityType, status) {
+    const lifecycle = typeof window !== 'undefined' ? window.PmTwinLifecycle : null;
+    if (lifecycle && typeof lifecycle.toCanonical === 'function') {
+        return lifecycle.toCanonical(entityType, status);
+    }
+    return (status || '').toLowerCase();
+}
+
 const DEAL_SOURCE = {
     MATCH: 'match',
     APPLICATION: 'application',
@@ -26,17 +34,17 @@ function getDealSourceLabel(deal) {
 
 function canCreateDealFromMatch(postMatch, requiredStatus) {
     if (!postMatch || !postMatch.id) return false;
-    return (postMatch.status || '') === (requiredStatus || 'confirmed');
+    return toCanonical('match', postMatch.status) === toCanonical('match', requiredStatus || 'confirmed');
 }
 
 function canCreateDealFromApplication(application) {
     if (!application || !application.id) return false;
-    return (application.status || '').toLowerCase() === 'accepted';
+    return toCanonical('application', application.status) === 'accepted';
 }
 
 function canCreateDealFromNegotiation(negotiation) {
     if (!negotiation || !negotiation.id) return false;
-    return (negotiation.status || '').toLowerCase() === 'agreed';
+    return toCanonical('negotiation', negotiation.status) === 'agreed';
 }
 
 export {

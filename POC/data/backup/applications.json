@@ -22,7 +22,7 @@
       "id": "app-002",
       "opportunityId": "opp-002",
       "applicantId": "user-pro-003",
-      "status": "pending",
+      "status": "submitted",
       "coverLetter": "As a PMP-certified project manager with extensive experience in infrastructure projects, I bring strong structural coordination skills. While my background is in project management, I have worked closely with structural teams on multiple metro projects.",
       "attachments": [],
       "responses": {
@@ -38,7 +38,7 @@
       "id": "app-003",
       "opportunityId": "opp-004",
       "applicantId": "user-pro-002",
-      "status": "pending",
+      "status": "submitted",
       "coverLetter": "I am excited to participate in this design competition. My portfolio includes award-winning sustainable designs that blend modern architecture with cultural heritage. I have experience with LEED Platinum projects and am passionate about net-zero design.",
       "attachments": [],
       "responses": {

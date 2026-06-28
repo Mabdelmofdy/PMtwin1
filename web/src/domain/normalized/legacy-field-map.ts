@@ -49,6 +49,14 @@ export const LEGACY_FIELD_MAP = {
       counter_offered: 'counter_offered',
     },
   } as const,
+
+  /** Legacy opportunity intent → canonical (ADR-002). */
+  opportunityIntent: {
+    request: 'need',
+    need: 'need',
+    offer: 'offer',
+    hybrid: 'hybrid',
+  } as const,
 } as const
 
 export type LegacyFieldMap = typeof LEGACY_FIELD_MAP

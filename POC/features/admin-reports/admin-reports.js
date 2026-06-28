@@ -416,7 +416,7 @@ function exportSummaryCSV() {
         { Metric: 'Opportunities', Value: s.kpi.opportunities },
         { Metric: 'Applications', Value: s.kpi.applications },
         { Metric: 'Post matches', Value: s.kpi.matches },
-        { Metric: 'Pending post matches', Value: s.kpi.pendingMatches },
+        { Metric: 'Discovered post matches', Value: s.kpi.discoveredMatches },
         { Metric: 'Confirmed post matches', Value: s.kpi.confirmedMatches },
         { Metric: 'Declined post matches', Value: s.kpi.declinedMatches },
         { Metric: 'Expired post matches', Value: s.kpi.expiredMatches },
@@ -457,7 +457,7 @@ function renderKpiCards(snap) {
         { key: 'opps', label: 'Opportunities', value: k.opportunities, trend: t.opportunities, hint: 'New posts matching filters.', icon: 'ph-briefcase', route: CONFIG?.ROUTES?.ADMIN_OPPORTUNITIES },
         { key: 'apps', label: 'Applications', value: k.applications, trend: t.applications, hint: 'Offers submitted on filtered opportunities.', icon: 'ph-paper-plane-tilt', route: CONFIG?.ROUTES?.ADMIN_APPLICATIONS },
         { key: 'matches', label: 'Post matches', value: k.matches, trend: t.matches, hint: 'Need/Offer post_matches generated.', icon: 'ph-git-merge', route: CONFIG?.ROUTES?.ADMIN_MATCHING },
-        { key: 'matches-pending', label: 'Pending matches', value: k.pendingMatches, trend: t.pendingMatches, hint: 'Pending post_matches waiting for participant response.', icon: 'ph-hourglass', route: CONFIG?.ROUTES?.ADMIN_MATCHING },
+        { key: 'matches-discovered', label: 'Discovered matches', value: k.discoveredMatches, trend: t.discoveredMatches, hint: 'Discovered post_matches waiting for participant response.', icon: 'ph-hourglass', route: CONFIG?.ROUTES?.ADMIN_MATCHING },
         { key: 'matches-confirmed', label: 'Confirmed matches', value: k.confirmedMatches, trend: t.confirmedMatches, hint: 'Confirmed post_matches.', icon: 'ph-check-circle', route: CONFIG?.ROUTES?.ADMIN_MATCHING },
         { key: 'matches-declined', label: 'Declined matches', value: k.declinedMatches, trend: t.declinedMatches, hint: 'Declined post_matches.', icon: 'ph-x-circle', route: CONFIG?.ROUTES?.ADMIN_MATCHING },
         { key: 'matches-expired', label: 'Expired matches', value: k.expiredMatches, trend: t.expiredMatches, hint: 'Expired post_matches.', icon: 'ph-timer', route: CONFIG?.ROUTES?.ADMIN_MATCHING },
@@ -769,14 +769,25 @@ async function buildSnapshot(range, prevRange, region, userType, category, oppSt
     const newCompaniesRange = companies.filter(c => inRange(c.createdAt, range.start, range.end)).length;
     const newCompaniesPrev = companies.filter(c => inRange(c.createdAt, prevRange.start, prevRange.end)).length;
 
-    const pendingMatches = matchesF.filter(m => (m.status || '').toLowerCase() === 'pending').length;
-    const confirmedMatches = matchesF.filter(m => (m.status || '').toLowerCase() === 'confirmed').length;
-    const declinedMatches = matchesF.filter(m => (m.status || '').toLowerCase() === 'declined').length;
-    const expiredMatches = matchesF.filter(m => (m.status || '').toLowerCase() === 'expired').length;
-    const prevPendingMatches = prevMatches.filter(m => (m.status || '').toLowerCase() === 'pending').length;
-    const prevConfirmedMatches = prevMatches.filter(m => (m.status || '').toLowerCase() === 'confirmed').length;
-    const prevDeclinedMatches = prevMatches.filter(m => (m.status || '').toLowerCase() === 'declined').length;
-    const prevExpiredMatches = prevMatches.filter(m => (m.status || '').toLowerCase() === 'expired').length;
+    const canonicalMatchStatus = (m) => {
+        const raw = (m.status || '').toLowerCase();
+        const umv = window.unifiedMatchViewModel;
+        if (umv && typeof umv.normalizeAggregateMatchStatus === 'function') {
+            return umv.normalizeAggregateMatchStatus(raw);
+        }
+        return raw === 'pending' ? 'discovered' : raw;
+    };
+
+    const discoveredMatches = matchesF.filter(m => canonicalMatchStatus(m) === 'discovered').length;
+    const acceptedMatches = matchesF.filter(m => canonicalMatchStatus(m) === 'accepted').length;
+    const confirmedMatches = matchesF.filter(m => canonicalMatchStatus(m) === 'confirmed').length;
+    const declinedMatches = matchesF.filter(m => canonicalMatchStatus(m) === 'declined').length;
+    const expiredMatches = matchesF.filter(m => canonicalMatchStatus(m) === 'expired').length;
+    const prevDiscoveredMatches = prevMatches.filter(m => canonicalMatchStatus(m) === 'discovered').length;
+    const prevAcceptedMatches = prevMatches.filter(m => canonicalMatchStatus(m) === 'accepted').length;
+    const prevConfirmedMatches = prevMatches.filter(m => canonicalMatchStatus(m) === 'confirmed').length;
+    const prevDeclinedMatches = prevMatches.filter(m => canonicalMatchStatus(m) === 'declined').length;
+    const prevExpiredMatches = prevMatches.filter(m => canonicalMatchStatus(m) === 'expired').length;
 
     const kpi = {
         usersTotal: countAccounts(users, companies, userType),
@@ -785,7 +796,8 @@ async function buildSnapshot(range, prevRange, region, userType, category, oppSt
         opportunities: oppsF.length,
         applications: appsF.length,
         matches: matchesF.length,
-        pendingMatches,
+        discoveredMatches,
+        acceptedMatches,
         confirmedMatches,
         declinedMatches,
         expiredMatches,
@@ -818,7 +830,8 @@ async function buildSnapshot(range, prevRange, region, userType, category, oppSt
         opportunities: { cur: kpi.opportunities, prev: prevOpps.length },
         applications: { cur: kpi.applications, prev: prevApps.length },
         matches: { cur: kpi.matches, prev: prevMatches.length },
-        pendingMatches: { cur: pendingMatches, prev: prevPendingMatches },
+        discoveredMatches: { cur: discoveredMatches, prev: prevDiscoveredMatches },
+        acceptedMatches: { cur: acceptedMatches, prev: prevAcceptedMatches },
         confirmedMatches: { cur: confirmedMatches, prev: prevConfirmedMatches },
         declinedMatches: { cur: declinedMatches, prev: prevDeclinedMatches },
         expiredMatches: { cur: expiredMatches, prev: prevExpiredMatches },

@@ -1,4 +1,4 @@
-import type { Application, Opportunity } from './domain.ts'
+import type { Application, Opportunity, AuditEntry, PostMatch, Negotiation } from './domain.ts'
 
 export interface IStorageAdapter {
   get<T>(key: string): T | null
@@ -17,8 +17,12 @@ export type Overrides = {
   deals?: Record<string, Record<string, unknown>>
   newDeals?: Array<{ id: string } & Record<string, unknown>>
   negotiations?: Record<string, Record<string, unknown>>
+  newNegotiations?: Negotiation[]
+  postMatches?: Record<string, Partial<PostMatch>>
+  newPostMatches?: PostMatch[]
   contracts?: Record<string, Record<string, unknown>>
   newContracts?: Array<{ id: string } & Record<string, unknown>>
+  newAuditEntries?: AuditEntry[]
 }
 
 export const OVERRIDES_KEY = 'pmtwin_web_overrides'

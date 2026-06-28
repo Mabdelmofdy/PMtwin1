@@ -2,6 +2,7 @@ import {
   getWorkflowDefinition,
   WORKFLOW_DEFINITIONS,
 } from '@/domain/workflow/definitions/index.ts'
+import { getFsm } from '@/domain/workflow/lifecycle-bridge.ts'
 import { toCanonicalStatus } from '@/domain/workflow/legacy-map.ts'
 import { evaluateEntityRules } from '@/domain/workflow/rules/index.ts'
 import type {
@@ -27,8 +28,9 @@ function isDefinedState(
   canonical: string,
 ): boolean {
   if (!canonical) return false
-  const def = getWorkflowDefinition(entityType)
-  return def.states.includes(canonical)
+  const fsm = getFsm(entityType)
+  if (!fsm) return false
+  return fsm.states.includes(canonical)
 }
 
 function isTransitionInGraph(

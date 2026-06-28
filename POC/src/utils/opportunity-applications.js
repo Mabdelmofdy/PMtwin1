@@ -111,9 +111,14 @@
             isOwner = false,
             canViewApplications = false,
             canApply = false,
+            acceptsApplications = true,
             currentApplication = null,
             existingDeal = null
         } = ctx;
+
+        if (!acceptsApplications) {
+            return { showApplicationsList: false, showApplyCta: false, showAlreadyApplied: false };
+        }
 
         const showApplicationsList = !!(isOwner || canViewApplications);
         // Owners never see the applicant-facing apply/already-applied panels.

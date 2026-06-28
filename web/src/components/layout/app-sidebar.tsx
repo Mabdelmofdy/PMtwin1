@@ -40,7 +40,7 @@ export function AppSidebar() {
   const { user, signOut, isCompanyUser, canAccessAdmin } = useAuth()
   if (!user) return null
   const displayName = user.profile?.name || user.email
-  const isAdminArea = pathname.startsWith('/admin')
+  const isAdminArea = pathname.startsWith('/admin') && canAccessAdmin
   const dashboardHref = isCompanyUser ? '/company-dashboard' : '/dashboard'
 
   const navGroups = isAdminArea

@@ -16,10 +16,10 @@
     {
       "id": "demo-audit-app-001",
       "userId": "seed-user-002",
-      "action": "application_submitted",
-      "entityType": "application",
-      "entityId": "seed-app-001",
-      "details": { "opportunityId": "seed-opp-001", "summary": "Application submitted" },
+      "action": "match_discovered",
+      "entityType": "post_match",
+      "entityId": "demo-pm-oneway-01",
+      "details": { "opportunityId": "seed-opp-001", "summary": "Post-match discovered for architect need" },
       "ipAddress": "127.0.0.1",
       "timestamp": "2026-02-12T10:00:00.000Z"
     },
@@ -31,9 +31,8 @@
       "entityId": "seed-neg-01",
       "details": {
         "opportunityId": "seed-opp-001",
-        "applicationId": "seed-app-001",
         "matchId": "demo-pm-oneway-01",
-        "summary": "Negotiation opened"
+        "summary": "Negotiation opened from post-match"
       },
       "ipAddress": "127.0.0.1",
       "timestamp": "2026-03-10T09:00:00.000Z"

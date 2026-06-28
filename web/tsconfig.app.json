@@ -27,5 +27,6 @@
       "@poc-data/*": ["../POC/data/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
 }

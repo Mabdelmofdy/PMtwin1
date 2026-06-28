@@ -9,6 +9,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@pm-twin/commands': path.resolve(__dirname, '../packages/commands/src/index.ts'),
+      '@pm-twin/lifecycle': path.resolve(__dirname, '../packages/lifecycle/src/index.js'),
+      '@pm-twin/matching': path.resolve(__dirname, '../packages/matching/dist/index.js'),
       '@poc-data': path.resolve(__dirname, '../POC/data'),
     },
   },

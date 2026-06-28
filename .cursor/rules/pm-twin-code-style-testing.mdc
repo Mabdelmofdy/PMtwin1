@@ -1,0 +1,19 @@
+---
+description: TypeScript code style and testing requirements for packages/ and web/
+globs: packages/**,web/**
+alwaysApply: false
+---
+
+# Code Style
+
+- TypeScript strict mode everywhere in web/
+- Pure functions in packages/lifecycle/ (no I/O, no DOM, no storage)
+- Explicit return types on all public functions
+- No `any` type — use `unknown` with type guards
+- Prefer `readonly` arrays and objects
+
+# Testing Requirements
+
+- packages/lifecycle/: 100% branch coverage required
+- web/src/: Component tests for all UI components, integration tests for API client
+- NO tests in POC/ (legacy — frozen)

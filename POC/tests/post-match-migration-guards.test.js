@@ -51,10 +51,12 @@ function buildConfig() {
         },
         APPLICATION_STATUS: { ACCEPTED: 'accepted' },
         POST_MATCH_STATUS: {
+            DISCOVERED: 'discovered',
             PENDING: 'pending',
             CONFIRMED: 'confirmed',
             DECLINED: 'declined',
-            EXPIRED: 'expired'
+            EXPIRED: 'expired',
+            ACCEPTED: 'accepted'
         },
         POST_MATCH_PARTICIPANT_STATUS: {
             PENDING: 'pending',
@@ -288,11 +290,10 @@ describe('post_match payload and expiry safeguards', () => {
         });
     });
 
-    it('adds default expiry to new pending post_matches', async () => {
+    it('adds default expiry to new discovered post_matches', async () => {
         const before = Date.now();
         const created = await ds.createPostMatch({
             matchType: 'one_way',
-            status: CONFIG.POST_MATCH_STATUS.PENDING,
             participants: [
                 { userId: 'u1', participantStatus: 'pending' },
                 { userId: 'u2', participantStatus: 'pending' }
@@ -300,6 +301,7 @@ describe('post_match payload and expiry safeguards', () => {
             payload: { needOpportunityId: 'need-1', offerOpportunityId: 'offer-1' }
         });
         expect(created).toBeTruthy();
+        expect(created.status).toBe(CONFIG.POST_MATCH_STATUS.DISCOVERED);
         expect(created.expiresAt).toBeTruthy();
         const expiryMs = new Date(created.expiresAt).getTime();
         const days = (expiryMs - before) / 86400000;
@@ -309,22 +311,22 @@ describe('post_match payload and expiry safeguards', () => {
     it('uses 14-day default when DEFAULT_MATCH_EXPIRY_DAYS is not configured', () => {
         const prev = CONFIG.MATCHING.DEFAULT_MATCH_EXPIRY_DAYS;
         delete CONFIG.MATCHING.DEFAULT_MATCH_EXPIRY_DAYS;
-        const iso = ds.getDefaultPostMatchExpiresAt(CONFIG.POST_MATCH_STATUS.PENDING);
+        const iso = ds.getDefaultPostMatchExpiresAt(CONFIG.POST_MATCH_STATUS.DISCOVERED);
         CONFIG.MATCHING.DEFAULT_MATCH_EXPIRY_DAYS = prev;
         expect(iso).toBeTruthy();
         const days = (new Date(iso).getTime() - Date.now()) / 86400000;
         expect(days).toBeCloseTo(14, 0);
     });
 
-    it('does not set expiresAt on non-pending post_matches', () => {
+    it('does not set expiresAt on non-discovered post_matches', () => {
         expect(ds.getDefaultPostMatchExpiresAt(CONFIG.POST_MATCH_STATUS.CONFIRMED)).toBeNull();
     });
 
-    it('expires pending post_match on read when expiresAt is in the past', async () => {
+    it('expires discovered post_match on read when expiresAt is in the past', async () => {
         ds.storage.set(CONFIG.STORAGE_KEYS.POST_MATCHES, [{
             id: 'pm-expired',
             matchType: 'one_way',
-            status: 'pending',
+            status: 'discovered',
             participants: [{ userId: 'u1', participantStatus: 'pending' }],
             payload: { needOpportunityId: 'need-1', offerOpportunityId: 'offer-1' },
             expiresAt: '2020-01-01T00:00:00.000Z',
@@ -336,7 +338,7 @@ describe('post_match payload and expiry safeguards', () => {
         expect(match.status).toBe('expired');
     });
 
-    it('expires pending post_matches via getPostMatchesForUser on read', async () => {
+    it('expires legacy pending post_matches via getPostMatchesForUser on read', async () => {
         ds.storage.set(CONFIG.STORAGE_KEYS.POST_MATCHES, [{
             id: 'pm-user-exp',
             matchType: 'one_way',

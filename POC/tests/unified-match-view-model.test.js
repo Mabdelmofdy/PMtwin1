@@ -44,7 +44,7 @@ describe('unified-match-view-model', () => {
         const vm = umv.buildUnifiedMatchViewModel({
             id: 'pm-1',
             matchType: 'one_way',
-            status: 'pending',
+            status: 'discovered',
             matchScore: 0.88,
             participants: [
                 { userId: 'u1', role: 'need_owner', participantStatus: 'pending' },
@@ -59,6 +59,8 @@ describe('unified-match-view-model', () => {
 
         expect(vm.matchTypeLabel).toBe('Need/Offer');
         expect(vm.matchScorePercent).toBe(88);
+        expect(vm.status).toBe('discovered');
+        expect(vm.statusLabel).toBe('Discovered');
         expect(vm.sourceType).toBe('post_match');
         expect(vm.availableActions.some(a => a.id === 'view_details')).toBe(true);
     });

@@ -21,7 +21,7 @@ import {
     hasParticipantAgreed,
     allRequiredParticipantsAgreed
 } from "../../services/matching/negotiation-lifecycle.js";
-import { findBlockingApplication, isApplicationInNegotiation } from "../../utils/applications.js";
+import { findBlockingApplication, isApplicationInNegotiation, opportunityAcceptsApplications } from "../../utils/applications.js";
 import {
     mergeProposalTerms,
     getEffectiveTerms
@@ -43,6 +43,15 @@ import {
     computeDefaultInvitationExpiresAt
 } from "../../services/matching/opportunity-invitation-lifecycle.js";
 import { normalizeAuditAction } from "../../services/matching/lifecycle-constants.js";
+import {
+    assertAllowedMatchTransition,
+    canonicalMatchStatus,
+    isBlockingDiscoverDuplicateStatus,
+    isExpirableMatchStatus,
+    isTerminalMatchStatus,
+    normalizePostMatchForRead,
+    resolveAggregateStatusAfterAccept,
+} from "../../services/matching/post-match-lifecycle.js";
 import {
     isReplacementEligibleMatchType,
     buildReplacementSlotKey,
@@ -1140,6 +1149,12 @@ class DataService {
     async createApplication(applicationData, options = {}) {
         this._assertPortalCanMutate(options);
         _runWindowValidator('validateApplication', applicationData, { requireProposal: false });
+        if (applicationData.opportunityId) {
+            const targetOpp = await this.getOpportunityById(applicationData.opportunityId);
+            if (targetOpp && !opportunityAcceptsApplications(targetOpp)) {
+                throw new Error('Applications can only be submitted to Need opportunities.');
+            }
+        }
         const applications = await this.getApplications();
         const applicantId = applicationData.applicantId;
         let companyId = options.companyId || applicationData.applicantCompanyId || null;
@@ -3273,7 +3288,7 @@ class DataService {
 
     async getDealByMatchId(matchId) {
         const deals = await this.getDeals();
-        return deals.find(d => d.matchId === matchId) || null;
+        return deals.find(d => d.matchId === matchId || d.postMatchId === matchId) || null;
     }
 
     async assertDealCreationSource(dealData) {
@@ -3602,6 +3617,8 @@ class DataService {
         const payload = buildDealPayloadFromMatch(postMatch, CONFIG.POST_MATCH_STATUS.CONFIRMED);
 
         const { matchId, matchType, participants, opportunityIds, primaryOpportunityId, payload: consortiumPayload, roleSlots } = payload;
+        const needOpportunityId = postMatch.needOpportunityId || postMatch.payload?.needOpportunityId || null;
+        const offerOpportunityId = postMatch.offerOpportunityId || postMatch.payload?.offerOpportunityId || null;
         const actor = actorUserId || participants[0]?.userId;
         if (actor) {
             assertMatchParticipant(postMatch, actor);
@@ -3624,6 +3641,9 @@ class DataService {
             : null;
 
         const deal = await this.createDeal({
+            postMatchId: matchId,
+            needOpportunityId,
+            offerOpportunityId,
             matchId,
             matchType,
             status: CONFIG.DEAL_STATUS.DRAFT,
@@ -3753,6 +3773,9 @@ class DataService {
         const milestones = (dealData.milestones || []).map(m => this.normalizeMilestone(m));
         const newDeal = {
             id: this.generateId(),
+            postMatchId: dealData.postMatchId || dealData.matchId || null,
+            needOpportunityId: dealData.needOpportunityId || null,
+            offerOpportunityId: dealData.offerOpportunityId || null,
             matchId: dealData.matchId || null,
             applicationId: dealData.applicationId || null,
             opportunityId: dealData.opportunityId || (dealData.opportunityIds && dealData.opportunityIds[0]) || null,
@@ -3890,7 +3913,7 @@ class DataService {
 
     async getNegotiationsByMatchId(matchId) {
         const list = await this.getNegotiations();
-        return list.filter(n => n.matchId === matchId);
+        return list.filter(n => n.matchId === matchId || n.postMatchId === matchId);
     }
 
     async createNegotiation(negotiationData) {
@@ -3899,6 +3922,9 @@ class DataService {
         const newNegotiation = {
             id: this.generateId(),
             opportunityId: negotiationData.opportunityId,
+            postMatchId: negotiationData.postMatchId || negotiationData.matchId || null,
+            needOpportunityId: negotiationData.needOpportunityId || null,
+            offerOpportunityId: negotiationData.offerOpportunityId || null,
             matchId: negotiationData.matchId || null,
             applicationId: negotiationData.applicationId,
             parties: negotiationData.parties || [],
@@ -4050,11 +4076,23 @@ class DataService {
         }
         if (!matchRecord) throw new Error('Match not found.');
 
+        if (postMatch && (postMatch.status || '') !== CONFIG.POST_MATCH_STATUS.CONFIRMED) {
+            throw new Error('Negotiation can only start from a confirmed PostMatch.');
+        }
+
         assertMatchParticipant(matchRecord, actorUserId);
         const participants = matchRecord.participants || [];
 
         const existing = await this.getActiveNegotiationForMatch(matchId);
         if (existing) return existing;
+
+        const payload = matchRecord.payload || {};
+        const needOpportunityId = postMatch
+            ? (postMatch.needOpportunityId || payload.needOpportunityId || null)
+            : (payload.needOpportunityId || null);
+        const offerOpportunityId = postMatch
+            ? (postMatch.offerOpportunityId || payload.offerOpportunityId || null)
+            : (payload.offerOpportunityId || null);
 
         const opportunityId = this._resolveNegotiationOpportunityId(matchRecord, actorUserId, options);
         if (!opportunityId) throw new Error('Could not resolve opportunity for this negotiation.');
@@ -4073,10 +4111,13 @@ class DataService {
 
         const negotiation = await this.createNegotiation({
             opportunityId,
+            postMatchId: postMatch ? matchId : null,
+            needOpportunityId,
+            offerOpportunityId,
             matchId,
             applicationId,
             parties,
-            status: CONFIG.MATCHING.NEGOTIATION.STATUS.OPEN,
+            status: 'active',
             initialTerms,
             rounds: []
         });
@@ -4475,11 +4516,15 @@ class DataService {
             throw new Error('Agree to terms before creating a deal.');
         }
 
-        const matchId = negotiation.matchId || negotiation.finalAgreedSnapshot?.matchId || null;
+        const matchId = negotiation.postMatchId || negotiation.matchId || negotiation.finalAgreedSnapshot?.matchId || null;
+        let postMatch = null;
         if (matchId) {
-            const postMatch = await this.getPostMatchById(matchId);
+            postMatch = await this.getPostMatchById(matchId);
             if (postMatch) {
                 assertMatchParticipant(postMatch, actorUserId);
+                if ((postMatch.status || '') !== CONFIG.POST_MATCH_STATUS.CONFIRMED) {
+                    throw new Error('Deal can only be created from a confirmed PostMatch.');
+                }
             }
         } else {
             const opp = negotiation.opportunityId
@@ -4515,15 +4560,31 @@ class DataService {
         const agreedValue = valueFromSnapshot.agreedValue
             || (agreed.value != null ? { amount: agreed.value, currency: agreed.currency || 'SAR' } : null);
 
+        const postMatchPayload = postMatch?.payload || {};
+        const needOpportunityId = negotiation.needOpportunityId
+            || postMatch?.needOpportunityId
+            || postMatchPayload.needOpportunityId
+            || null;
+        const offerOpportunityId = negotiation.offerOpportunityId
+            || postMatch?.offerOpportunityId
+            || postMatchPayload.offerOpportunityId
+            || null;
+        const dealStatus = postMatch
+            ? CONFIG.DEAL_STATUS.DRAFT
+            : CONFIG.DEAL_STATUS.NEGOTIATING;
+
         const deal = await this.createDeal({
             negotiationId,
+            postMatchId: postMatch ? matchId : null,
+            needOpportunityId,
+            offerOpportunityId,
             matchId: negotiation.matchId || snapshot.matchId || null,
             applicationId: negotiation.applicationId || snapshot.applicationId || null,
             opportunityId: negotiation.opportunityId,
             opportunityIds: snapshot.opportunityIds?.length
                 ? snapshot.opportunityIds
                 : (negotiation.opportunityId ? [negotiation.opportunityId] : []),
-            status: CONFIG.DEAL_STATUS.NEGOTIATING,
+            status: dealStatus,
             title: 'Deal – negotiation ' + negotiationId.slice(-6),
             participants,
             valueTerms: {
@@ -5153,11 +5214,14 @@ class DataService {
     }
 
     // --- PostMatch operations (canonical: pmtwin_post_matches / CONFIG.STORAGE_KEYS.POST_MATCHES) ---
+    //
+    // ADR-002 write-path: new records persist status `discovered`. Legacy localStorage rows may
+    // still store `pending`; reads normalize via toCanonical('match', …) so migration can be deferred.
 
     // PostMatch Operations (user-facing post-to-post match discovery)
     getDefaultPostMatchExpiresAt(status) {
-        const nextStatus = status || CONFIG.POST_MATCH_STATUS.PENDING;
-        if (nextStatus !== CONFIG.POST_MATCH_STATUS.PENDING) return null;
+        const canonical = canonicalMatchStatus(status || CONFIG.POST_MATCH_STATUS.DISCOVERED);
+        if (canonical !== 'discovered') return null;
         const configured = CONFIG.MATCHING && CONFIG.MATCHING.DEFAULT_MATCH_EXPIRY_DAYS;
         const parsed = Number(configured);
         const days = Number.isFinite(parsed) && parsed > 0 ? parsed : 14;
@@ -5172,13 +5236,11 @@ class DataService {
         const expired = [];
         for (let i = 0; i < list.length; i++) {
             const m = list[i];
-            if (!m || (m.status || '') !== CONFIG.POST_MATCH_STATUS.PENDING) continue;
-            // Fast path: if no expiresAt, nothing to do.
+            if (!m || !isExpirableMatchStatus(m.status)) continue;
             if (!m.expiresAt) continue;
             const t = new Date(m.expiresAt).getTime();
             if (Number.isNaN(t) || t >= now) continue;
-            // PENDING and past expiresAt -> transition to EXPIRED and persist.
-            enforceTransition('post_match', m, CONFIG.POST_MATCH_STATUS.EXPIRED);
+            assertAllowedMatchTransition(m.status, CONFIG.POST_MATCH_STATUS.EXPIRED);
             list[i] = {
                 ...m,
                 status: CONFIG.POST_MATCH_STATUS.EXPIRED,
@@ -5230,9 +5292,10 @@ class DataService {
         return list;
     }
 
-    /** All post_match records (expires pending rows first). */
+    /** All post_match records (expires discovered/accepted rows first). */
     async getPostMatches() {
-        return this.expirePendingPostMatches();
+        const list = await this.expirePendingPostMatches();
+        return list.map((m) => normalizePostMatchForRead(m));
     }
 
     /** Single post_match by id. */
@@ -5294,7 +5357,7 @@ class DataService {
      * - Missing postMatch -> returned unchanged
      * - Not expired by status/time -> returned unchanged
      * - Already EXPIRED -> returned unchanged
-     * - PENDING + expired -> enforceTransition + updatePostMatch to EXPIRED
+     * - discovered/accepted (incl. legacy pending) + expired -> transition to EXPIRED
      * - Other statuses + expired -> returned unchanged (no implicit state change)
      * @param {object} postMatch
      * @returns {Promise<object|null>} updated postMatch (or original if no change / not found)
@@ -5303,15 +5366,15 @@ class DataService {
         if (!postMatch || !postMatch.id) return postMatch || null;
         if (!this.isExpired(postMatch)) return postMatch;
 
-        const currentStatus = (postMatch.status || '');
+        const currentStatus = postMatch.status || '';
         if (currentStatus === CONFIG.POST_MATCH_STATUS.EXPIRED) return postMatch;
 
-        if (currentStatus === CONFIG.POST_MATCH_STATUS.PENDING) {
-            enforceTransition('post_match', postMatch, CONFIG.POST_MATCH_STATUS.EXPIRED);
-            return this.updatePostMatch(postMatch.id, { status: CONFIG.POST_MATCH_STATUS.EXPIRED });
+        if (isExpirableMatchStatus(currentStatus)) {
+            assertAllowedMatchTransition(currentStatus, CONFIG.POST_MATCH_STATUS.EXPIRED);
+            const updated = await this.updatePostMatch(postMatch.id, { status: CONFIG.POST_MATCH_STATUS.EXPIRED });
+            return normalizePostMatchForRead(updated);
         }
 
-        // For non-pending matches that happen to be past expiresAt, leave as-is.
         return postMatch;
     }
 
@@ -5473,8 +5536,8 @@ class DataService {
         const payload = record.payload || {};
 
         if (type === 'one_way') {
-            const needId = payload.needOpportunityId;
-            const offerId = payload.offerOpportunityId;
+            const needId = record.needOpportunityId || payload.needOpportunityId;
+            const offerId = record.offerOpportunityId || payload.offerOpportunityId;
             if (!needId || !offerId) return null;
             return `one_way:${needId}:${offerId}`;
         }
@@ -5519,18 +5582,53 @@ class DataService {
         return null;
     }
 
-    async createPostMatch(data) {
-        const list = await this.getPostMatches();
+    _resolveCreatePostMatchStatus(data, isReplacement) {
+        const raw = data.status || CONFIG.POST_MATCH_STATUS.DISCOVERED;
+        if (raw === CONFIG.POST_MATCH_STATUS.PENDING || raw === 'pending') {
+            return CONFIG.POST_MATCH_STATUS.DISCOVERED;
+        }
+        if (isReplacement) {
+            return raw;
+        }
+        if (raw === CONFIG.POST_MATCH_STATUS.DISCOVERED || raw === 'discovered') {
+            return CONFIG.POST_MATCH_STATUS.DISCOVERED;
+        }
+        return raw;
+    }
+
+    _buildAdr002PostMatchRecord(data) {
+        const payload = { ...(data.payload != null ? data.payload : {}) };
+        const needOpportunityId = data.needOpportunityId || payload.needOpportunityId || undefined;
+        const offerOpportunityId = data.offerOpportunityId || payload.offerOpportunityId || undefined;
+        const breakdownSource = data.matchCriteria || payload.breakdown || {};
+        const matchCriteria = (breakdownSource && typeof breakdownSource === 'object')
+            ? { ...breakdownSource }
+            : {};
+
+        if (needOpportunityId) {
+            payload.needOpportunityId = needOpportunityId;
+        }
+        if (offerOpportunityId) {
+            payload.offerOpportunityId = offerOpportunityId;
+        }
+        if (Object.keys(matchCriteria).length) {
+            payload.breakdown = { ...matchCriteria };
+        }
+
         const isReplacement = !!data.isReplacement;
-        const status = data.status || CONFIG.POST_MATCH_STATUS.PENDING;
-        const newRecord = {
+        const status = this._resolveCreatePostMatchStatus(data, isReplacement);
+
+        return {
             id: this.generateId(),
             matchType: data.matchType || 'one_way',
             status,
             matchScore: data.matchScore != null ? data.matchScore : 0,
+            needOpportunityId,
+            offerOpportunityId,
+            matchCriteria: Object.keys(matchCriteria).length ? matchCriteria : undefined,
             runId: data.runId || null,
             participants: Array.isArray(data.participants) ? data.participants : [],
-            payload: data.payload != null ? data.payload : {},
+            payload,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             expiresAt: (data.expiresAt != null && data.expiresAt !== '')
@@ -5541,6 +5639,27 @@ class DataService {
             replacementRole: data.replacementRole || null,
             replacementPayload: data.replacementPayload || null
         };
+    }
+
+    _isActiveDiscoverDuplicate(existing, candidate) {
+        if (!existing || existing.isReplacement) {
+            return false;
+        }
+        const strongKey = this._postMatchStrongKey(candidate);
+        if (strongKey && this._postMatchStrongKey(existing) === strongKey) {
+            return isBlockingDiscoverDuplicateStatus(existing.status);
+        }
+        const signature = this._postMatchSignature(candidate);
+        if (signature && this._postMatchSignature(existing) === signature) {
+            return isBlockingDiscoverDuplicateStatus(existing.status);
+        }
+        return false;
+    }
+
+    async createPostMatch(data) {
+        const list = await this.getPostMatches();
+        const newRecord = this._buildAdr002PostMatchRecord(data);
+        const isReplacement = !!newRecord.isReplacement;
         if (newRecord.matchType === 'two_way') {
             const sideA = newRecord.payload.sideA || {};
             const sideB = newRecord.payload.sideB || {};
@@ -5551,14 +5670,8 @@ class DataService {
             if (!links.length || links.some(l => !l.fromCreatorId || !l.toCreatorId || !l.needId || !l.offerId || l.score == null)) return null;
         }
         if (!isReplacement) {
-            const strongKey = this._postMatchStrongKey(newRecord);
-            if (strongKey) {
-                const duplicateStrong = list.some(m => !m.isReplacement && this._postMatchStrongKey(m) === strongKey);
-                if (duplicateStrong) return null;
-            }
-            const sig = this._postMatchSignature(newRecord);
-            const duplicateSig = list.some(m => !m.isReplacement && this._postMatchSignature(m) === sig);
-            if (duplicateSig) return null;
+            const duplicateActive = list.some((m) => this._isActiveDiscoverDuplicate(m, newRecord));
+            if (duplicateActive) return null;
         } else {
             const dup = list.some(m => m.isReplacement && m.replacementDealId === newRecord.replacementDealId &&
                 (m.participants || []).some(p => p.userId === (newRecord.participants && newRecord.participants[0] && newRecord.participants[0].userId)));
@@ -5567,6 +5680,8 @@ class DataService {
         list.push(newRecord);
         this.storage.set(CONFIG.STORAGE_KEYS.POST_MATCHES, list);
         const flatOppIds = [
+            newRecord.needOpportunityId,
+            newRecord.offerOpportunityId,
             newRecord.payload && newRecord.payload.leadNeedId,
             newRecord.payload && newRecord.payload.needOpportunityId,
             newRecord.payload && newRecord.payload.offerOpportunityId,
@@ -5608,13 +5723,15 @@ class DataService {
         return list[index];
     }
 
-    /** Update participant status on a post_match (accept/decline); may confirm or decline the match. */
+    /** Update participant status on a post_match (accept/decline); may accept, confirm, or decline the match. */
     async updatePostMatchStatus(matchId, userId, newStatus, options = {}) {
         this._assertPortalCanMutate(options);
         const match = await this.getPostMatchById(matchId);
         if (!match || !match.participants) return null;
-        if ((match.status || '') === CONFIG.POST_MATCH_STATUS.EXPIRED) return match;
-        if ((match.status || '') !== CONFIG.POST_MATCH_STATUS.PENDING) return match;
+        if (isTerminalMatchStatus(match.status)) return match;
+
+        const currentCanonical = canonicalMatchStatus(match.status);
+        if (currentCanonical !== 'discovered' && currentCanonical !== 'accepted') return match;
 
         assertMatchParticipant(match, userId);
 
@@ -5627,18 +5744,28 @@ class DataService {
                 ? { ...p, participantStatus: newStatus, respondedAt: new Date().toISOString() }
                 : { ...p }
         );
-        const allAccepted = participants.every(p => (p.participantStatus || '').toLowerCase() === 'accepted');
-        const anyDeclined = participants.some(p => (p.participantStatus || '').toLowerCase() === 'declined');
-        const status = anyDeclined
-            ? CONFIG.POST_MATCH_STATUS.DECLINED
-            : (allAccepted ? CONFIG.POST_MATCH_STATUS.CONFIRMED : CONFIG.POST_MATCH_STATUS.PENDING);
 
-        if (status !== match.status) {
-            enforceTransition('post_match', match, status);
+        const participantDeclined = (newStatus || '').toLowerCase() === CONFIG.POST_MATCH_PARTICIPANT_STATUS.DECLINED;
+        const participantAccepted = (newStatus || '').toLowerCase() === CONFIG.POST_MATCH_PARTICIPANT_STATUS.ACCEPTED;
+
+        let aggregateStatus;
+        if (participantDeclined) {
+            aggregateStatus = CONFIG.POST_MATCH_STATUS.DECLINED;
+        } else if (participantAccepted) {
+            aggregateStatus = resolveAggregateStatusAfterAccept(match, participants);
+        } else {
+            return match;
         }
 
-        const updated = await this.updatePostMatch(matchId, { participants, status });
+        const updates = { participants };
+        if (aggregateStatus && aggregateStatus !== match.status) {
+            assertAllowedMatchTransition(match.status, aggregateStatus);
+            updates.status = aggregateStatus;
+        }
+
+        const updated = await this.updatePostMatch(matchId, updates);
         if (!updated) return updated;
+        const normalized = normalizePostMatchForRead(updated);
 
         if (!alreadySet) {
             const action = newStatus === CONFIG.POST_MATCH_PARTICIPANT_STATUS.DECLINED ? 'match_declined' : 'match_accepted';
@@ -5652,7 +5779,7 @@ class DataService {
                     action,
                     entityType: 'match',
                     entityId: matchId,
-                    details: { matchType: match.matchType, status }
+                    details: { matchType: match.matchType, status: normalized.status }
                 });
             } catch (e) {
                 void e;
@@ -5679,7 +5806,7 @@ class DataService {
             }
         }
 
-        if (updated.status === CONFIG.POST_MATCH_STATUS.CONFIRMED && match.status !== CONFIG.POST_MATCH_STATUS.CONFIRMED) {
+        if (normalized.status === CONFIG.POST_MATCH_STATUS.CONFIRMED && match.status !== CONFIG.POST_MATCH_STATUS.CONFIRMED) {
             try {
                 await this.createAuditLog({
                     userId,
@@ -5712,8 +5839,8 @@ class DataService {
                 }
             }
         }
-        emitDataChange(PMTWIN_EVENTS.POST_MATCHES_UPDATED, { matchId, status: updated.status });
-        return updated;
+        emitDataChange(PMTWIN_EVENTS.POST_MATCHES_UPDATED, { matchId, status: normalized.status });
+        return normalized;
     }
 
     async declinePostMatch(matchId, userId) {

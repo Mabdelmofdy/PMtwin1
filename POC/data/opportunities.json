@@ -8,7 +8,7 @@
       "description": "[A] Architect need — full coreSkills match",
       "creatorId": "seed-user-001",
       "intent": "request",
-      "status": "published",
+      "status": "completed",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -59,8 +59,8 @@
           "LEED Certification"
         ]
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-05-20T16:00:00.000Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -115,7 +115,7 @@
       "description": "[A] Architect offer — strict match pair",
       "creatorId": "seed-user-002",
       "intent": "offer",
-      "status": "published",
+      "status": "completed",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -160,8 +160,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-05-20T16:00:00.000Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -258,8 +258,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -313,7 +313,7 @@
       "description": "[C] Civil Engineer offer — role incompatible with Architect need",
       "creatorId": "seed-user-002",
       "intent": "offer",
-      "status": "published",
+      "status": "matched",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -358,8 +358,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -409,7 +409,7 @@
       "description": "[D] Architect need — BIM core skill required",
       "creatorId": "seed-co-corp-002",
       "intent": "request",
-      "status": "published",
+      "status": "in_negotiation",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -452,8 +452,8 @@
           "BIM"
         ]
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "BIM",
@@ -543,8 +543,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "Revit"
@@ -588,7 +588,7 @@
       "description": "[E] Civil Engineer need — four required services",
       "creatorId": "seed-co-corp-001",
       "intent": "request",
-      "status": "published",
+      "status": "in_negotiation",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -628,8 +628,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Civil Engineer"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "Site Planning",
@@ -679,7 +679,7 @@
       "description": "[E] Civil Engineer offer — 25% service overlap",
       "creatorId": "seed-user-006",
       "intent": "offer",
-      "status": "published",
+      "status": "matched",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -721,8 +721,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "Site Planning"
@@ -803,8 +803,8 @@
         "tenderDeadline": "2026-06-01",
         "locationRequirement": "On-Site"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "General Consulting",
@@ -850,7 +850,7 @@
       "description": "[G] Barter need A — MEP services",
       "creatorId": "seed-user-008",
       "intent": "request",
-      "status": "published",
+      "status": "in_negotiation",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -891,8 +891,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "MEP"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "100000"
@@ -942,7 +942,7 @@
       "description": "[G] Barter offer A — Architect services",
       "creatorId": "seed-user-008",
       "intent": "offer",
-      "status": "published",
+      "status": "in_negotiation",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -987,8 +987,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "100000"
@@ -1038,7 +1038,7 @@
       "description": "[G] Barter need B — Architect services",
       "creatorId": "seed-user-009",
       "intent": "request",
-      "status": "published",
+      "status": "in_negotiation",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -1079,8 +1079,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Architect"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "100000"
@@ -1130,7 +1130,7 @@
       "description": "[G] Barter offer B — MEP services",
       "creatorId": "seed-user-009",
       "intent": "offer",
-      "status": "published",
+      "status": "in_negotiation",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -1175,8 +1175,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "100000"
@@ -1226,7 +1226,7 @@
       "description": "[G] Consortium lead — highway package",
       "creatorId": "seed-co-corp-005",
       "intent": "request",
-      "status": "published",
+      "status": "in_execution",
       "modelType": "project_based",
       "subModelType": "consortium",
       "location": "Riyadh, Saudi Arabia",
@@ -1275,8 +1275,8 @@
         ],
         "targetRole": "Project Management"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-03-18T12:00:00.000Z",
       "normalized": {
         "skills": [
           "Project Management",
@@ -1324,7 +1324,7 @@
       "description": "[G] Consortium partner — Architect",
       "creatorId": "seed-user-011",
       "intent": "offer",
-      "status": "published",
+      "status": "contracted",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -1369,8 +1369,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-03-18T12:00:00.000Z",
       "normalized": {
         "skills": [
           "Architect",
@@ -1420,7 +1420,7 @@
       "description": "[G] Consortium partner — Civil Engineer",
       "creatorId": "seed-user-012",
       "intent": "offer",
-      "status": "published",
+      "status": "in_negotiation",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -1465,8 +1465,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "Civil Engineer",
@@ -1516,7 +1516,7 @@
       "description": "[G] Circular A needs Excavator",
       "creatorId": "seed-user-013",
       "intent": "request",
-      "status": "published",
+      "status": "matched",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -1554,8 +1554,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Excavator"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "Excavator",
@@ -1601,7 +1601,7 @@
       "description": "[G] Circular A offers Office space",
       "creatorId": "seed-user-013",
       "intent": "offer",
-      "status": "published",
+      "status": "matched",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -1644,8 +1644,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "Office space",
@@ -1691,7 +1691,7 @@
       "description": "[G] Circular B needs Office space",
       "creatorId": "seed-user-014",
       "intent": "request",
-      "status": "published",
+      "status": "matched",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -1729,8 +1729,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Office space"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "Office space",
@@ -1776,7 +1776,7 @@
       "description": "[G] Circular B offers Accounting",
       "creatorId": "seed-user-014",
       "intent": "offer",
-      "status": "published",
+      "status": "matched",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -1819,8 +1819,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "Accounting",
@@ -1866,7 +1866,7 @@
       "description": "[G] Circular C needs Accounting",
       "creatorId": "seed-user-015",
       "intent": "request",
-      "status": "published",
+      "status": "matched",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -1904,8 +1904,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Accounting"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "Accounting",
@@ -1951,7 +1951,7 @@
       "description": "[G] Circular C offers Excavator",
       "creatorId": "seed-user-015",
       "intent": "offer",
-      "status": "published",
+      "status": "matched",
       "modelType": "project_based",
       "subModelType": "project",
       "location": "Riyadh, Saudi Arabia",
@@ -1994,8 +1994,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "Excavator",
@@ -2041,7 +2041,7 @@
       "description": "Filler need — Structural Engineer",
       "creatorId": "seed-co-corp-001",
       "intent": "request",
-      "status": "published",
+      "status": "matched",
       "modelType": "strategic_partnership",
       "subModelType": "joint_venture",
       "location": "Riyadh, Saudi Arabia",
@@ -2080,8 +2080,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Structural Engineer"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "Structural Analysis",
@@ -2129,7 +2129,7 @@
       "description": "Filler need — Project Management",
       "creatorId": "seed-co-corp-002",
       "intent": "request",
-      "status": "published",
+      "status": "matched",
       "modelType": "resource_pooling",
       "subModelType": "shared_resources",
       "location": "Riyadh, Saudi Arabia",
@@ -2168,8 +2168,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Project Management"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "Project Management",
@@ -2217,7 +2217,7 @@
       "description": "Filler offer — MEP",
       "creatorId": "seed-co-corp-003",
       "intent": "offer",
-      "status": "published",
+      "status": "in_negotiation",
       "modelType": "hiring",
       "subModelType": "professional_hiring",
       "location": "Riyadh, Saudi Arabia",
@@ -2261,8 +2261,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "HVAC Design",
@@ -2310,7 +2310,7 @@
       "description": "[H] Task-based need — CAD production (barter)",
       "creatorId": "seed-user-001",
       "intent": "request",
-      "status": "published",
+      "status": "in_negotiation",
       "modelType": "project_based",
       "subModelType": "task_based",
       "location": "Riyadh, Saudi Arabia",
@@ -2352,8 +2352,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "CAD Technician"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "85000"
@@ -2405,7 +2405,7 @@
       "description": "[H] Task-based offer — CAD production (barter)",
       "creatorId": "seed-user-002",
       "intent": "offer",
-      "status": "published",
+      "status": "in_negotiation",
       "modelType": "project_based",
       "subModelType": "task_based",
       "location": "Riyadh, Saudi Arabia",
@@ -2451,8 +2451,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "85000"
@@ -2504,7 +2504,7 @@
       "description": "[H] Project JV lead — mixed-use tower (equity)",
       "creatorId": "seed-co-corp-004",
       "intent": "request",
-      "status": "published",
+      "status": "in_negotiation",
       "modelType": "project_based",
       "subModelType": "project_jv",
       "location": "Riyadh, Saudi Arabia",
@@ -2546,8 +2546,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Joint Venture Partner"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "General Contracting",
@@ -2640,8 +2640,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "SPV Sponsor"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "Infrastructure Development",
@@ -2731,8 +2731,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Strategic Partner"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "General Contracting",
@@ -2780,7 +2780,7 @@
       "description": "[H] Strategic alliance — preferred MEP supplier (profit-sharing)",
       "creatorId": "seed-user-006",
       "intent": "request",
-      "status": "published",
+      "status": "in_negotiation",
       "modelType": "strategic_partnership",
       "subModelType": "strategic_alliance",
       "location": "Riyadh, Saudi Arabia",
@@ -2822,8 +2822,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "MEP Partner"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "MEP Services",
@@ -2871,7 +2871,7 @@
       "description": "[H] Mentorship need — junior PM coaching (barter)",
       "creatorId": "seed-user-007",
       "intent": "request",
-      "status": "published",
+      "status": "matched",
       "modelType": "strategic_partnership",
       "subModelType": "mentorship",
       "location": "Riyadh, Saudi Arabia",
@@ -2913,8 +2913,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Mentor"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "12000"
@@ -2966,7 +2966,7 @@
       "description": "[H] Mentorship offer — senior PM coaching (barter)",
       "creatorId": "seed-user-017",
       "intent": "offer",
-      "status": "published",
+      "status": "matched",
       "modelType": "strategic_partnership",
       "subModelType": "mentorship",
       "location": "Riyadh, Saudi Arabia",
@@ -3013,8 +3013,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "12000"
@@ -3110,8 +3110,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Steel Supplier"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "200000"
@@ -3163,7 +3163,7 @@
       "description": "[H] Equipment sharing offer — tower crane co-ownership (equity)",
       "creatorId": "seed-user-013",
       "intent": "offer",
-      "status": "published",
+      "status": "contracted",
       "modelType": "resource_pooling",
       "subModelType": "equipment_sharing",
       "location": "Riyadh, Saudi Arabia",
@@ -3209,8 +3209,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-03-18T12:00:00.000Z",
       "normalized": {
         "skills": [
           "Tower Crane Operation",
@@ -3258,7 +3258,7 @@
       "description": "[H] Resource sharing offer — surplus formwork (barter)",
       "creatorId": "seed-user-014",
       "intent": "offer",
-      "status": "published",
+      "status": "in_negotiation",
       "modelType": "resource_pooling",
       "subModelType": "resource_sharing",
       "location": "Riyadh, Saudi Arabia",
@@ -3304,8 +3304,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "95000"
@@ -3357,7 +3357,7 @@
       "description": "[H] Consultant hiring — legal contract review (barter)",
       "creatorId": "seed-co-corp-004",
       "intent": "request",
-      "status": "published",
+      "status": "in_negotiation",
       "modelType": "hiring",
       "subModelType": "consultant_hiring",
       "location": "Riyadh, Saudi Arabia",
@@ -3399,8 +3399,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Legal Consultant"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "value_exchange": {
         "mode": "barter",
         "estimated_value": "45000"
@@ -3494,8 +3494,8 @@
         "locationRequirement": "On-Site",
         "targetRole": "Architect"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "Architectural Design",
@@ -3543,7 +3543,7 @@
       "description": "[H] Consortium lead — wind farm package (profit-sharing)",
       "creatorId": "seed-co-corp-005",
       "intent": "request",
-      "status": "published",
+      "status": "in_execution",
       "modelType": "project_based",
       "subModelType": "consortium",
       "location": "Riyadh, Saudi Arabia",
@@ -3595,8 +3595,8 @@
         ],
         "targetRole": "Project Management"
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-03-18T12:00:00.000Z",
       "normalized": {
         "skills": [
           "Infrastructure Development",
@@ -3644,7 +3644,7 @@
       "description": "[H] Project JV partner offer — mixed-use tower (equity)",
       "creatorId": "seed-user-009",
       "intent": "offer",
-      "status": "published",
+      "status": "in_negotiation",
       "modelType": "project_based",
       "subModelType": "project_jv",
       "location": "Riyadh, Saudi Arabia",
@@ -3690,8 +3690,8 @@
           "end": "2026-12-31"
         }
       },
-      "createdAt": "2026-06-15T10:46:57.138Z",
-      "updatedAt": "2026-06-15T10:46:57.138Z",
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z",
       "normalized": {
         "skills": [
           "General Contracting",

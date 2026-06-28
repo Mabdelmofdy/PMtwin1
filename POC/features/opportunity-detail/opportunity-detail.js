@@ -234,12 +234,15 @@ async function loadOpportunity(id) {
         const creator = await dataService.getUserOrCompanyById(opportunity.creatorId);
         
         const isOwner = user && opportunity.creatorId === user.id;
-        const canViewApplications = isOwner || canAdminViewOpportunityApplications();
-        const canManageApplications = isOwner || canAdminManageOpportunityApplications();
+        const acceptsApplications = window.applicationUtils?.opportunityAcceptsApplications
+            ? window.applicationUtils.opportunityAcceptsApplications(opportunity)
+            : ((opportunity.intent || 'request') !== 'offer');
+        const canViewApplications = acceptsApplications && (isOwner || canAdminViewOpportunityApplications());
+        const canManageApplications = acceptsApplications && (isOwner || canAdminManageOpportunityApplications());
         const existingDeal = user ? await dataService.getDealByOpportunityId(opportunity.id) : null;
         const canApplyBase = user && !isOwner && !(authService.isPendingApproval && authService.isPendingApproval());
         
-        if (user && !isOwner) {
+        if (user && !isOwner && acceptsApplications) {
             const allApplications = await dataService.getApplications();
             const resolved = resolveUserApplicationForOpportunity(allApplications, opportunity.id, user.id);
             currentApplication = resolved.application;

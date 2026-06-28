@@ -3,6 +3,8 @@ import { peopleApi } from '@/api/people.ts'
 import { notificationsApi } from '@/api/notifications.ts'
 import { formatRelativeTime } from '@/lib/format'
 import { PageHeader } from '@/components/shared/page-primitives'
+import { ProfileReadinessCard } from '@/components/readiness/profile-readiness-card.tsx'
+import { useAuth } from '@/providers/auth-provider'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -124,17 +126,27 @@ export function NotificationsPage() {
 }
 
 export function ProfilePage() {
-  const user = peopleApi.listUsers()[1] ?? peopleApi.listUsers()[0]
+  const { user, isCompanyUser } = useAuth()
+  const profileKind = isCompanyUser ? 'company' : 'individual'
+
   return (
     <div className="space-y-6">
       <PageHeader title="Profile" description="Your public profile and vetting status." />
-      <Card>
-        <CardHeader><CardTitle>{user?.profile?.name}</CardTitle></CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>{user?.profile?.bio}</p>
-          <p>{user?.profile?.location}</p>
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          <Card id="profile-details">
+            <CardHeader><CardTitle>{user?.profile?.name}</CardTitle></CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+              <p>{user?.profile?.bio}</p>
+              <p>{user?.profile?.location}</p>
+            </CardContent>
+          </Card>
+        </div>
+        <ProfileReadinessCard
+          profile={user?.profile}
+          profileKind={profileKind}
+        />
+      </div>
     </div>
   )
 }

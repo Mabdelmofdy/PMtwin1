@@ -34,14 +34,40 @@
     };
 
     const STATUS_LABELS = {
-        pending: 'Pending Response',
+        discovered: 'Discovered',
         accepted: 'Accepted',
         confirmed: 'Confirmed',
         declined: 'Declined',
         expired: 'Expired',
+        superseded: 'Superseded',
         converted_to_deal: 'Converted to Deal',
-        clarification_requested: 'Waiting for Updates'
+        pending: 'Discovered'
     };
+
+    function normalizePostMatchTabId(tabId) {
+        const raw = safeStr(tabId, '').toLowerCase();
+        if (!raw) return raw;
+        if (raw === 'pending') return 'discovered';
+        return raw;
+    }
+
+    function normalizeAggregateMatchStatus(status) {
+        const raw = safeStr(status, 'discovered').toLowerCase();
+        const lifecycle = typeof window !== 'undefined' ? window.PmTwinLifecycle : null;
+        if (lifecycle && typeof lifecycle.toCanonical === 'function') {
+            return lifecycle.toCanonical('match', raw) || raw;
+        }
+        const pending = (typeof CONFIG !== 'undefined' && CONFIG.POST_MATCH_STATUS?.PENDING) || 'pending';
+        if (raw === pending) {
+            return (typeof CONFIG !== 'undefined' && CONFIG.POST_MATCH_STATUS?.DISCOVERED) || 'discovered';
+        }
+        return raw;
+    }
+
+    function isRespondableMatchStatus(status) {
+        const raw = normalizeAggregateMatchStatus(status);
+        return raw === 'discovered' || raw === 'accepted';
+    }
 
     function safeStr(v, fallback = '') {
         if (v == null) return fallback;
@@ -95,7 +121,7 @@
     }
 
     function getStatusLabel(status, context = {}) {
-        const raw = safeStr(status, 'pending').toLowerCase();
+        const raw = normalizeAggregateMatchStatus(status);
         const match = context.match;
         const currentUserId = context.currentUserId;
         const hasDeal = !!(context.dealId || match?.dealId);
@@ -107,7 +133,7 @@
                 if (currentUserAccepted(match, currentUserId)) {
                     return 'Waiting for Others';
                 }
-                return 'Pending Response';
+                return STATUS_LABELS.accepted;
             }
         }
 
@@ -426,7 +452,9 @@
         if (vm.status === 'confirmed' && !vm.dealId) return 'All participants accepted — use Start Deal';
         if (vm.statusLabel === 'Waiting for Others') return 'Waiting for all participants to accept';
         if (vm.status === 'declined') return 'This match was declined';
-        if (vm.status === 'pending') return 'Waiting for all participants to accept';
+        if (vm.status === 'pending' || vm.status === 'discovered' || vm.status === 'accepted') {
+            return 'Waiting for all participants to accept';
+        }
         return 'View match details';
     }
 
@@ -446,7 +474,7 @@
                 ? (match.payload?.leadNeedId || primaryOpportunityId)
                 : (match.payload?.needOpportunityId || opportunityIds[0] || null));
 
-        const status = safeStr(match.status, 'pending').toLowerCase();
+        const status = normalizeAggregateMatchStatus(match.status);
         const participants = match.participants || [];
         const currentUserId = context.currentUserId || null;
         const ds = context.dataService || global.dataService;
@@ -601,7 +629,7 @@
 
         const myPart = (match.participants || []).find(p => p.userId === currentUserId);
         const myStatus = myPart?.participantStatus || 'pending';
-        const isPending = vm.status === 'pending';
+        const isPending = isRespondableMatchStatus(vm.status);
         vm.canRespond = !vm.isExpired && isPending && myStatus === 'pending' && !!currentUserId
             && (match.participants || []).some(p => p.userId === currentUserId);
 
@@ -1015,6 +1043,8 @@
         getOpportunityTypeLabel,
         getMatchTypeLabel,
         getStatusLabel,
+        normalizeAggregateMatchStatus,
+        normalizePostMatchTabId,
         getMatchQuality,
         getAvailableActions,
         resolveMatchMessageRoute,

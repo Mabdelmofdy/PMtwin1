@@ -1,4 +1,8 @@
 import type { Deal } from '@/types/domain.ts'
+import {
+  assertNoLifecycleStatusInPatch,
+  rejectLifecycleStatusBypass,
+} from '@/lib/lifecycle-status-guard.ts'
 import { dealService } from '@/services/deal-service.ts'
 
 export const dealsApi = {
@@ -6,11 +10,12 @@ export const dealsApi = {
   get: (id: string) => dealService.getDealById(id),
   createFromNegotiation: (negotiationId: string) =>
     dealService.createDealFromNegotiation(negotiationId),
-  updateStatus: (id: string, status: string) =>
-    dealService.updateDealStatus(id, status),
+  updateStatus: (_id: string, _status: string) => {
+    rejectLifecycleStatusBypass()
+  },
   update: (id: string, patch: Partial<Deal>) => {
-    if (patch.status) {
-      dealService.updateDealStatus(id, patch.status)
-    }
+    assertNoLifecycleStatusInPatch(patch)
+    void id
+    void patch
   },
 }

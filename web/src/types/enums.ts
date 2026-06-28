@@ -1,5 +1,11 @@
 /** Canonical + legacy seed values — screens must accept both until data migration. */
 
+/** Canonical opportunity intent (ADR-002). */
+export type OpportunityIntent = 'need' | 'offer' | 'hybrid'
+
+/** Stored intent during migration — legacy `request` maps to canonical `need`. */
+export type OpportunityIntentStored = OpportunityIntent | 'request'
+
 export type OpportunityStatus =
   | 'draft'
   | 'published'

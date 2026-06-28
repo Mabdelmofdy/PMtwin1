@@ -11,6 +11,7 @@ import type {
   MatchType,
   NegotiationStatus,
   NotificationType,
+  OpportunityIntentStored,
   OpportunityStatus,
   UserRole,
 } from '@/types/enums.ts'
@@ -31,6 +32,8 @@ export type {
   MatchType,
   NegotiationStatus,
   NotificationType,
+  OpportunityIntent,
+  OpportunityIntentStored,
   OpportunityStatus,
   UserRole,
 } from '@/types/enums.ts'
@@ -82,7 +85,8 @@ export type Opportunity = TenantScoped & {
   location?: string
   exchangeMode?: string
   modelType?: string
-  intent?: string
+  /** Canonical `need` | `offer` | `hybrid`, or legacy `request` (→ need on read). */
+  intent?: OpportunityIntentStored
   scope?: { coreSkills?: string[]; sectors?: string[] }
   attributes?: { coreSkills?: string[]; startDate?: string; tenderDeadline?: string }
   updatedAt?: string
@@ -107,26 +111,96 @@ export type Application = TenantScoped & {
   updatedAt?: string
 }
 
+export type PostMatchBarterSide = {
+  userId: string
+  needId: string
+  offerId: string
+}
+
+export type PostMatchConsortiumRole = {
+  role: string
+  opportunityId: string
+  userId: string
+  score?: number
+}
+
+export type PostMatchCircularLink = {
+  fromCreatorId: string
+  toCreatorId: string
+  needId: string
+  offerId: string
+  score: number
+}
+
+export type PostMatchOneWayPayload = {
+  needOpportunityId: string
+  offerOpportunityId: string
+  breakdown?: Record<string, number>
+  valueAnalysis?: unknown
+}
+
+export type PostMatchTwoWayPayload = {
+  sideA: PostMatchBarterSide
+  sideB: PostMatchBarterSide
+  scoreAtoB?: number
+  scoreBtoA?: number
+  valueEquivalence?: string | null
+}
+
+export type PostMatchConsortiumPayload = {
+  leadNeedId: string
+  roles: PostMatchConsortiumRole[]
+  valueBalance?: unknown
+}
+
+export type PostMatchCircularPayload = {
+  cycle: string[]
+  links: PostMatchCircularLink[]
+  linkScores?: PostMatchCircularLink[]
+  chainBalance?: unknown
+}
+
+export type PostMatchPayload = {
+  needOpportunityId?: string
+  offerOpportunityId?: string
+  breakdown?: Record<string, number>
+  valueAnalysis?: unknown
+  sideA?: PostMatchBarterSide
+  sideB?: PostMatchBarterSide
+  scoreAtoB?: number
+  scoreBtoA?: number
+  valueEquivalence?: string | null
+  leadNeedId?: string
+  roles?: PostMatchConsortiumRole[]
+  valueBalance?: unknown
+  cycle?: string[]
+  links?: PostMatchCircularLink[]
+  linkScores?: PostMatchCircularLink[]
+  chainBalance?: unknown
+}
+
 export type PostMatch = TenantScoped & {
   id: string
   matchType: MatchType | string
   status: string
   matchScore: number
+  /** Promoted from payload for one_way matches (ADR-002 / ADR-MATCH-001). */
+  needOpportunityId?: string
+  /** Promoted from payload for one_way matches (ADR-002 / ADR-MATCH-001). */
+  offerOpportunityId?: string
+  /** Scoring breakdown; alias of payload.breakdown when promoted on read. */
+  matchCriteria?: Record<string, number>
   runId?: string
   participants: Participant[]
-  payload?: {
-    needOpportunityId?: string
-    offerOpportunityId?: string
-    leadNeedId?: string
-    breakdown?: Record<string, number>
-    valueAnalysis?: unknown
-  }
+  payload?: PostMatchPayload
   createdAt?: string
   updatedAt?: string
   expiresAt?: string
   isReplacement?: boolean
   dealId?: string
   negotiationId?: string
+  /** Set when superseded by a newer PostMatch (ADR-002). */
+  replacementPostMatchId?: string
 }
 
 export type AppNotification = TenantScoped & {
@@ -152,6 +226,11 @@ export type NegotiationRound = {
 export type Negotiation = TenantScoped & {
   id: string
   opportunityId?: string
+  /** Canonical PostMatch link (ADR-002). */
+  postMatchId?: string
+  needOpportunityId?: string
+  offerOpportunityId?: string
+  /** @deprecated Prefer postMatchId — legacy seed field */
   matchId?: string
   applicationId?: string | null
   participants?: Participant[]
@@ -186,6 +265,11 @@ export type Deal = TenantScoped & {
   negotiationId: string
   opportunityId: string
   opportunityIds?: string[]
+  /** Canonical PostMatch link (ADR-002). */
+  postMatchId?: string
+  needOpportunityId?: string
+  offerOpportunityId?: string
+  /** @deprecated Prefer postMatchId — legacy seed field */
   matchId?: string | null
   applicationId?: string | null
   matchType?: MatchType | string

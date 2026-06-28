@@ -9,4 +9,8 @@ export const contractService = {
   getContractById(id: string): Contract | undefined {
     return contractRepository.getById(id)
   },
+
+  getContractsByDealId(dealId: string): Contract[] {
+    return contractRepository.findByDealId(dealId)
+  },
 }

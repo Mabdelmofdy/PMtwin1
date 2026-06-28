@@ -325,7 +325,23 @@ async function fetchUserPostMatches(userId) {
 }
 
 function normalizePostMatchStatus(pm) {
-    return String(pm?.status || 'pending').toLowerCase();
+    const raw = String(pm?.status || 'discovered').toLowerCase();
+    const umv = window.unifiedMatchViewModel;
+    if (umv && typeof umv.normalizeAggregateMatchStatus === 'function') {
+        return umv.normalizeAggregateMatchStatus(raw);
+    }
+    if (raw === (CONFIG.POST_MATCH_STATUS?.PENDING || 'pending')) {
+        return CONFIG.POST_MATCH_STATUS?.DISCOVERED || 'discovered';
+    }
+    return raw;
+}
+
+function getPostMatchStatusDisplayLabel(pm) {
+    const key = normalizePostMatchStatus(pm);
+    if (window.statusBadgeSystem && typeof window.statusBadgeSystem.getStatusLabel === 'function') {
+        return window.statusBadgeSystem.getStatusLabel(key, 'match');
+    }
+    return key.charAt(0).toUpperCase() + key.slice(1);
 }
 
 function isPostMatchInactive(pm) {
@@ -349,7 +365,10 @@ function allParticipantsAccepted(pm) {
 function userNeedsMatchAction(pm, userId) {
     if (isPostMatchExpired(pm)) return false;
     const st = normalizePostMatchStatus(pm);
-    if (st !== 'pending' && st !== (CONFIG.POST_MATCH_STATUS?.PENDING || 'pending')) return false;
+    const discovered = CONFIG.POST_MATCH_STATUS?.DISCOVERED || 'discovered';
+    const pending = CONFIG.POST_MATCH_STATUS?.PENDING || 'pending';
+    const accepted = CONFIG.POST_MATCH_STATUS?.ACCEPTED || 'accepted';
+    if (st !== discovered && st !== pending && st !== accepted) return false;
     const me = (pm.participants || []).find(p => p.userId === userId);
     return !!me && (me.participantStatus || 'pending') === 'pending';
 }
@@ -392,7 +411,7 @@ async function renderDashboardMatchBucketRow(pm, userId) {
     const label = await getPostMatchDashboardLabel(pm, userId);
     const score = toMatchScorePercent(pm.matchScore);
     const typeLabel = getMatchTypeLabel(pm.matchType);
-    const statusLabel = normalizePostMatchStatus(pm);
+    const statusLabel = getPostMatchStatusDisplayLabel(pm);
     return `<a href="#" data-route="/matches/${escDash(pm.id)}" class="dashboard-match-bucket-chip">
         <div class="dashboard-match-bucket-chip__main">
             <div class="dashboard-match-bucket-chip__label">${escDash(label)}</div>
@@ -411,7 +430,7 @@ async function renderDashboardBuckets(buckets, userId) {
         return;
     }
     const sections = [
-        { key: 'actionRequired', title: 'Pending — action required', items: buckets.actionRequired.slice(0, 3) },
+        { key: 'actionRequired', title: 'Discovered — action required', items: buckets.actionRequired.slice(0, 3) },
         { key: 'readyForDeal', title: 'Ready to start a deal', items: buckets.readyForDeal.slice(0, 3) },
         { key: 'confirmed', title: 'Confirmed matches', items: buckets.confirmed.slice(0, 3) },
         { key: 'topByScore', title: 'Top matches', items: buckets.topByScore.slice(0, 3) }

@@ -182,9 +182,10 @@ const CONFIG = {
         CANCELLED: 'cancelled'
     },
 
-    // PostMatch status (user-facing match discovery)
+    // PostMatch status (ADR-002 match entity — new writes use discovered)
     POST_MATCH_STATUS: {
-        PENDING: 'pending',
+        DISCOVERED: 'discovered',
+        PENDING: 'pending', // legacy storage alias; reads normalize to discovered
         ACCEPTED: 'accepted',
         DECLINED: 'declined',
         CONFIRMED: 'confirmed',

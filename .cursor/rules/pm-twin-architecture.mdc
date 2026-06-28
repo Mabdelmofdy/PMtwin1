@@ -1,0 +1,30 @@
+---
+description: PMTwin architecture authority, constraints, and file import boundaries
+alwaysApply: true
+---
+
+# PMTwin Architecture Resolution
+
+## Project Context
+
+- B2B marketplace connecting Project Managers, consultants, and companies in Saudi Arabia
+- Current state: Sophisticated browser-based POC with business logic in localStorage-backed JavaScript
+- Target: SaaS-ready platform serving 100,000+ concurrent users
+- Architecture authority chain: Domain Blueprint → Command Architecture → Unified Lifecycle Engine → This sprint
+
+## Critical Constraints
+
+1. NEVER implement backend logic in POC/ folder — POC is legacy runtime only
+2. NEVER import TypeScript from web/ into POC/ or JavaScript from POC/ into web/
+3. ALL lifecycle state names MUST come from @pm-twin/lifecycle registry (manifest.json)
+4. NO direct localStorage mutations outside of data-service.js (to be replaced in Phase 2)
+5. ALL new code must pass: lint → type-check → unit test → build
+
+## File Authority Matrix
+
+| Path | Authority | Can Import From |
+|------|-----------|-----------------|
+| packages/lifecycle/ | SOURCE OF TRUTH | Nothing (zero-dependency) |
+| web/src/ | Consumer | packages/lifecycle/, node_modules |
+| POC/src/ | Legacy (read-only Phase 1) | packages/lifecycle/ (static serve only) |
+| docs/adr/ | Immutable after approval | Nothing |

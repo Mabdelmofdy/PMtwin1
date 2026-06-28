@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { toCanonicalIntent } from '@/domain/intent.ts'
 import {
   CommercialTermsSchema,
   IdSchema,
@@ -50,7 +51,10 @@ export const OpportunitySchema = z
     location: z.string().optional(),
     exchangeMode: z.string().optional(),
     modelType: z.string().optional(),
-    intent: z.string().optional(),
+    intent: z
+      .string()
+      .optional()
+      .transform((v) => toCanonicalIntent(v)),
     scope: z
       .object({
         coreSkills: z.array(z.string()).optional(),
@@ -97,6 +101,9 @@ export const MatchSchema = z
     matchType: z.string().optional().transform((v) => v ?? 'one_way'),
     status: StatusSchema,
     matchScore: z.number().optional().transform((v) => v ?? 0),
+    needOpportunityId: z.string().optional(),
+    offerOpportunityId: z.string().optional(),
+    matchCriteria: z.record(z.string(), z.number()).optional(),
     tenantId: z.string().optional(),
     organizationId: z.string().optional(),
     runId: z.string().optional(),
@@ -108,6 +115,58 @@ export const MatchSchema = z
         leadNeedId: z.string().optional(),
         breakdown: z.record(z.string(), z.number()).optional(),
         valueAnalysis: z.unknown().optional(),
+        sideA: z
+          .object({
+            userId: z.string(),
+            needId: z.string(),
+            offerId: z.string(),
+          })
+          .optional(),
+        sideB: z
+          .object({
+            userId: z.string(),
+            needId: z.string(),
+            offerId: z.string(),
+          })
+          .optional(),
+        scoreAtoB: z.number().optional(),
+        scoreBtoA: z.number().optional(),
+        valueEquivalence: z.union([z.string(), z.null()]).optional(),
+        roles: z
+          .array(
+            z.object({
+              role: z.string(),
+              opportunityId: z.string(),
+              userId: z.string(),
+              score: z.number().optional(),
+            }),
+          )
+          .optional(),
+        valueBalance: z.unknown().optional(),
+        cycle: z.array(z.string()).optional(),
+        links: z
+          .array(
+            z.object({
+              fromCreatorId: z.string(),
+              toCreatorId: z.string(),
+              needId: z.string(),
+              offerId: z.string(),
+              score: z.number(),
+            }),
+          )
+          .optional(),
+        linkScores: z
+          .array(
+            z.object({
+              fromCreatorId: z.string(),
+              toCreatorId: z.string(),
+              needId: z.string(),
+              offerId: z.string(),
+              score: z.number(),
+            }),
+          )
+          .optional(),
+        chainBalance: z.unknown().optional(),
       })
       .passthrough()
       .optional(),

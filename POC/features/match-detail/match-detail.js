@@ -95,7 +95,9 @@ function getStatusBadgeClass(status) {
 }
 
 function formatStatusLabel(status) {
-    return window.statusBadgeSystem ? window.statusBadgeSystem.getStatusLabel(status, 'match') : (status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : 'Pending');
+    return window.statusBadgeSystem
+        ? window.statusBadgeSystem.getStatusLabel(status, 'match')
+        : (status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : 'Discovered');
 }
 
 function getOneWayViewerRole(postMatch, currentUserId) {
@@ -131,7 +133,7 @@ async function renderMatchDetail(postMatch, currentUserId) {
         : (scorePct + '%');
     const statusEl = document.getElementById('match-detail-status');
     const sb = window.statusBadgeSystem;
-    const st = postMatch.status || 'pending';
+    const st = postMatch.status || CONFIG.POST_MATCH_STATUS?.DISCOVERED || 'discovered';
     statusEl.textContent = vm?.statusLabel || (sb ? sb.getStatusLabel(st, 'match') : formatStatusLabel(st));
     statusEl.className = 'badge ' + (sb ? sb.getStatusBadgeClass(st, 'match') : 'badge--neutral');
 
@@ -347,7 +349,11 @@ async function renderMatchDetail(postMatch, currentUserId) {
         setMatchActionFeedback('Deal already exists. Open your deal workspace to continue.', 'success');
     } else if (matchStatus === CONFIG.POST_MATCH_STATUS.DECLINED) {
         setMatchActionFeedback('This match was declined', 'danger');
-    } else if (matchStatus === CONFIG.POST_MATCH_STATUS.PENDING) {
+    } else if (
+        matchStatus === CONFIG.POST_MATCH_STATUS.DISCOVERED
+        || matchStatus === CONFIG.POST_MATCH_STATUS.PENDING
+        || matchStatus === CONFIG.POST_MATCH_STATUS.ACCEPTED
+    ) {
         setMatchActionFeedback('Waiting for all participants to accept', 'info');
     } else if (matchStatus === CONFIG.POST_MATCH_STATUS.CONFIRMED) {
         setMatchActionFeedback('All participants have accepted. Use Start Deal to open your deal workspace.', 'success');

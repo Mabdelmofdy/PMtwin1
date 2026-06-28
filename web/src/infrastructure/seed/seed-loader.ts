@@ -95,7 +95,7 @@ export function loadDeals(): Deal[] {
 }
 
 export function loadContracts(): Contract[] {
-  return normalizeContracts(rows(demoContracts as DataEnvelope<Contract>))
+  return normalizeContracts(rows(demoContracts as unknown as DataEnvelope<Contract>))
 }
 
 export function loadPendingUsers(): PendingUser[] {

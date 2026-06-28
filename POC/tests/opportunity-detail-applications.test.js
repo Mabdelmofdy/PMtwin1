@@ -91,9 +91,8 @@ describe('opportunity-applications helpers — formatApplicationValueAmount', ()
 
 describe('opportunity-applications helpers — filter & sort', () => {
     it('filters applications to a single opportunity', () => {
-        const result = utils.filterApplicationsForOpportunity(demoApplications, 'seed-opp-007');
-        expect(result).toHaveLength(2);
-        expect(result.every((a) => a.opportunityId === 'seed-opp-007')).toBe(true);
+        const result = utils.filterApplicationsForOpportunity(demoApplications, 'seed-opp-001');
+        expect(result).toHaveLength(0);
     });
 
     it('returns empty array for unknown opportunity or bad input', () => {
@@ -142,6 +141,17 @@ describe('opportunity-applications helpers — section visibility', () => {
         const v = utils.resolveApplicationSectionVisibility({ isOwner: false, canViewApplications: true });
         expect(v.showApplicationsList).toBe(true);
     });
+
+    it('hides all application UI for pure offers (e.g. seed-opp-004)', () => {
+        const v = utils.resolveApplicationSectionVisibility({
+            isOwner: true,
+            canViewApplications: true,
+            acceptsApplications: false
+        });
+        expect(v.showApplicationsList).toBe(false);
+        expect(v.showApplyCta).toBe(false);
+        expect(v.showAlreadyApplied).toBe(false);
+    });
 });
 
 describe('opportunity-detail feature — static guards', () => {
@@ -172,16 +182,19 @@ describe('opportunity-detail feature — static guards', () => {
     });
 });
 
-describe('opportunity-detail data — regression for negotiation-only need (seed-opp-026)', () => {
-    it('seed-opp-026 has exactly one application from seed-user-002', () => {
-        const apps = utils.filterApplicationsForOpportunity(demoApplications, 'seed-opp-026');
-        expect(apps).toHaveLength(1);
-        expect(apps[0].applicantId).toBe('seed-user-002');
-        expect(apps[0].status).toBe('in_negotiation');
+describe('opportunity-detail data — PostMatch-first seed (Phase B)', () => {
+    const postMatches = require(path.join(__dirname, '..', 'data', 'demo-post-matches.json')).data;
+
+    it('demo-applications.json is empty (canonical flow via post-matches)', () => {
+        expect(demoApplications).toHaveLength(0);
     });
 
-    it('seed-opp-026 application value renders a barter amount', () => {
-        const apps = utils.filterApplicationsForOpportunity(demoApplications, 'seed-opp-026');
-        expect(utils.formatApplicationValueAmount(apps[0].application_value)).toBe('90,000 SAR');
+    it('seed-opp-026 is linked to a post-match for barter negotiation demo', () => {
+        const linked = postMatches.filter((pm) =>
+            (pm.participants || []).some((p) => p.opportunityId === 'seed-opp-026')
+            || pm.payload?.needOpportunityId === 'seed-opp-026'
+        );
+        expect(linked.length).toBeGreaterThan(0);
+        expect(linked.some((pm) => pm.id === 'demo-pm-oneway-07')).toBe(true);
     });
 });

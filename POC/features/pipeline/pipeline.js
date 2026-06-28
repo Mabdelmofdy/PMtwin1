@@ -67,10 +67,12 @@ const PIPELINE_MATCHES_TABS = [
     { id: 'two_way', label: 'Barter' },
     { id: 'consortium', label: 'Consortium' },
     { id: 'circular', label: 'Circular' },
-    { id: 'pending', label: 'Pending' },
+    { id: 'discovered', label: 'Discovered' },
+    { id: 'accepted', label: 'Accepted' },
     { id: 'confirmed', label: 'Confirmed' },
     { id: 'declined', label: 'Declined' },
-    { id: 'expired', label: 'Expired' }
+    { id: 'expired', label: 'Expired' },
+    { id: 'superseded', label: 'Superseded' }
 ];
 const PIPELINE_MATCH_TYPE_ORDER = ['one_way', 'two_way', 'consortium', 'circular'];
 
@@ -856,9 +858,25 @@ async function loadApplicationsPipeline() {
 
 function initPipelineMatchesFilterFromStorage() {
     try {
-        const v = sessionStorage.getItem('pipeline-matches-tab');
-        if (v && PIPELINE_MATCHES_TABS.some(t => t.id === v)) pipelineMatchesFilterTab = v;
+        const stored = sessionStorage.getItem('pipeline-matches-tab');
+        const normalized = normalizePipelineMatchTabId(stored);
+        if (normalized && PIPELINE_MATCHES_TABS.some(t => t.id === normalized)) {
+            pipelineMatchesFilterTab = normalized;
+        }
+        if (stored === 'pending' && normalized === 'discovered') {
+            sessionStorage.setItem('pipeline-matches-tab', 'discovered');
+        }
     } catch (e) { /* ignore */ }
+}
+
+function normalizePipelineMatchTabId(tabId) {
+    const umv = window.unifiedMatchViewModel;
+    if (umv && typeof umv.normalizePostMatchTabId === 'function') {
+        return umv.normalizePostMatchTabId(tabId);
+    }
+    const raw = String(tabId || '').toLowerCase();
+    if (raw === 'pending') return 'discovered';
+    return raw;
 }
 
 function ensurePipelineMatchesSubtabsMarkup() {
@@ -894,13 +912,25 @@ function setupPipelineMatchesSubtabs() {
     });
 }
 
+function normalizePipelineMatchStatus(status) {
+    const umv = window.unifiedMatchViewModel;
+    if (umv && typeof umv.normalizeAggregateMatchStatus === 'function') {
+        return umv.normalizeAggregateMatchStatus(status);
+    }
+    const raw = String(status || '').toLowerCase();
+    return raw === 'pending' ? 'discovered' : raw;
+}
+
 function filterPipelineMatchesViewModels(viewModels) {
     const tab = pipelineMatchesFilterTab;
     return viewModels.filter(vm => {
-        if (tab === 'pending' && vm.status !== 'pending') return false;
-        if (tab === 'confirmed' && vm.status !== 'confirmed') return false;
-        if (tab === 'declined' && vm.status !== 'declined') return false;
-        if (tab === 'expired' && vm.status !== 'expired') return false;
+        const vmStatus = normalizePipelineMatchStatus(vm.status);
+        if (tab === 'discovered' && vmStatus !== 'discovered') return false;
+        if (tab === 'accepted' && vmStatus !== 'accepted') return false;
+        if (tab === 'confirmed' && vmStatus !== 'confirmed') return false;
+        if (tab === 'declined' && vmStatus !== 'declined') return false;
+        if (tab === 'expired' && vmStatus !== 'expired') return false;
+        if (tab === 'superseded' && vmStatus !== 'superseded') return false;
         if (['one_way', 'two_way', 'consortium', 'circular'].includes(tab) && vm.matchType !== tab) return false;
         return true;
     });
@@ -1071,10 +1101,10 @@ function renderPipelineMatchActionsHtml(vm, esc) {
 function updatePipelineMatchHeaderStatsFromRaw(rawMatches) {
     const list = Array.isArray(rawMatches) ? rawMatches : [];
     const total = list.length;
-    const pending = list.filter(m => (m.status || '').toLowerCase() === 'pending').length;
-    const confirmed = list.filter(m => (m.status || '').toLowerCase() === 'confirmed').length;
+    const discovered = list.filter(m => normalizePipelineMatchStatus(m.status) === 'discovered').length;
+    const confirmed = list.filter(m => normalizePipelineMatchStatus(m.status) === 'confirmed').length;
     setPipelineStat('pipeline-stat-match-total', total);
-    setPipelineStat('pipeline-stat-match-pending', pending);
+    setPipelineStat('pipeline-stat-match-pending', discovered);
     setPipelineStat('pipeline-stat-match-confirmed', confirmed);
 }
 

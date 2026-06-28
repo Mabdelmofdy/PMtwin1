@@ -1,11 +1,21 @@
-import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useMemo, useState, useEffect } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import { MapPin, Plus } from 'lucide-react'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { formatDate, truncate } from '@/lib/format'
+import { OpportunityReadinessCard, PublishReadinessAlert } from '@/components/readiness'
+import { useAuth } from '@/providers/auth-provider'
+import {
+  publishOpportunityUiAction,
+  resolveProfileKindFromUser,
+  saveOpportunityDraftFields,
+} from '@/lib/publish-opportunity-ui-actions.ts'
+import { showPublishSuccessFeedback } from '@/lib/publish-opportunity-feedback.ts'
 import { PageHeader, StatusBadge } from '@/components/shared/page-primitives'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -127,12 +137,153 @@ export function OpportunityMapPage() {
 
 const wizardSteps = ['Type', 'Scope', 'Exchange', 'Skills', 'Timeline', 'Review', 'Publish']
 
+type OpportunityDraft = {
+  title: string
+  intent: 'need' | 'offer'
+  description: string
+  location: string
+  modelType: string
+  targetRole: string
+  sector: string
+  skills: string
+  services: string
+  startDate: string
+}
+
+const initialDraft: OpportunityDraft = {
+  title: '',
+  intent: 'need',
+  description: '',
+  location: '',
+  modelType: 'project_based',
+  targetRole: '',
+  sector: '',
+  skills: '',
+  services: '',
+  startDate: '',
+}
+
+function splitCsv(value: string): string[] {
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function buildOpportunityDraftInput(draft: OpportunityDraft): Record<string, unknown> {
+  const skills = splitCsv(draft.skills)
+  const services = splitCsv(draft.services)
+  const sectors = draft.sector ? [draft.sector] : []
+
+  return {
+    title: draft.title,
+    intent: draft.intent,
+    description: draft.description,
+    location: draft.location,
+    modelType: draft.modelType,
+    scope: {
+      sectors,
+      ...(draft.intent === 'need'
+        ? { requiredSkills: skills }
+        : { offeredSkills: skills }),
+    },
+    attributes: {
+      targetRole: draft.targetRole,
+      startDate: draft.startDate || undefined,
+    },
+    normalized: {
+      ...(draft.intent === 'need'
+        ? { requiredServices: services }
+        : { offeredServices: services }),
+    },
+  }
+}
+
 export function OpportunityCreatePage() {
+  return <OpportunityWizardPage mode="create" />
+}
+
+function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
+  const { id } = useParams()
+  const opportunityId = mode === 'edit' ? id : undefined
+  const { user } = useAuth()
+  const [draft, setDraft] = useState<OpportunityDraft>(initialDraft)
+  const [publishDetails, setPublishDetails] = useState<readonly string[] | null>(null)
+  const existingOpportunity = opportunityId ? opportunitiesApi.get(opportunityId) : undefined
+
+  useEffect(() => {
+    if (!existingOpportunity) return
+    setDraft({
+      title: existingOpportunity.title ?? '',
+      intent: existingOpportunity.intent === 'offer' ? 'offer' : 'need',
+      description: existingOpportunity.description ?? '',
+      location: existingOpportunity.location ?? '',
+      modelType: existingOpportunity.modelType ?? 'project_based',
+      targetRole:
+        (existingOpportunity as { attributes?: { targetRole?: string } }).attributes?.targetRole ?? '',
+      sector: existingOpportunity.scope?.sectors?.[0] ?? '',
+      skills: (
+        existingOpportunity.scope?.coreSkills ??
+        existingOpportunity.attributes?.coreSkills ??
+        []
+      ).join(', '),
+      services: '',
+      startDate: existingOpportunity.attributes?.startDate ?? '',
+    })
+  }, [existingOpportunity])
+
+  const opportunityDraft = useMemo(() => {
+    const built = buildOpportunityDraftInput(draft)
+    return opportunityId ? { ...existingOpportunity, ...built, id: opportunityId } : built
+  }, [draft, existingOpportunity, opportunityId])
+
+  const updateDraft = <K extends keyof OpportunityDraft>(key: K, value: OpportunityDraft[K]) => {
+    setDraft((current) => ({ ...current, [key]: value }))
+    setPublishDetails(null)
+  }
+
+  const handleSaveDraft = () => {
+    if (!opportunityId) {
+      sessionStorage.setItem('pmtwin.opportunity-draft', JSON.stringify(draft))
+      toast.success('Draft saved locally. Open an existing draft opportunity to persist changes.')
+      return
+    }
+
+    saveOpportunityDraftFields(opportunityId, opportunityDraft as Partial<import('@/types/domain.ts').Opportunity>)
+    toast.success('Draft saved')
+  }
+
+  const handlePublish = () => {
+    if (!user) {
+      toast.error('Sign in to publish opportunities.')
+      return
+    }
+    if (!opportunityId) {
+      toast.error('Publishing requires an existing draft opportunity record.')
+      return
+    }
+
+    const result = publishOpportunityUiAction(opportunityId, {
+      profile: user.profile,
+      profileKind: resolveProfileKindFromUser(user),
+      opportunity: opportunityDraft,
+    })
+
+    if (!result.success) {
+      setPublishDetails(result.details ?? [result.message])
+      toast.error(result.message)
+      return
+    }
+
+    setPublishDetails(null)
+    showPublishSuccessFeedback(result)
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
         label="Create"
-        title="Post an opportunity"
+        title={mode === 'edit' ? 'Edit opportunity' : 'Post an opportunity'}
         description="7-step wizard — type, scope, exchange mode, skills, timeline, review, publish."
       />
       <div className="flex gap-1 overflow-x-auto pb-2">
@@ -142,22 +293,136 @@ export function OpportunityCreatePage() {
           </span>
         ))}
       </div>
-      <Card className="border-border/60">
-        <CardHeader>
-          <CardTitle>Step 1 — Collaboration type</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-3 sm:grid-cols-2">
-          {['Need (request)', 'Offer (provide)'].map((t) => (
-            <button key={t} type="button" className="cursor-pointer rounded-xl border border-border/60 p-4 text-left hover:border-primary/40">
-              {t}
-            </button>
-          ))}
-        </CardContent>
-      </Card>
+      {publishDetails ? <PublishReadinessAlert details={publishDetails} /> : null}
+      <div className="grid gap-6 xl:grid-cols-3">
+        <div className="space-y-6 xl:col-span-2">
+          <Card className="border-border/60">
+            <CardHeader>
+              <CardTitle>Step 1 — Collaboration type</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3 sm:grid-cols-2">
+              {([
+                ['need', 'Need (request)'],
+                ['offer', 'Offer (provide)'],
+              ] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`cursor-pointer rounded-xl border p-4 text-left transition-colors hover:border-primary/40 ${draft.intent === value ? 'border-primary bg-primary/5' : 'border-border/60'}`}
+                  onClick={() => updateDraft('intent', value)}
+                >
+                  {label}
+                </button>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/60">
+            <CardHeader>
+              <CardTitle>Draft details</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm font-medium" htmlFor="opp-draft-title">Title</label>
+                <Input
+                  id="opp-draft-title"
+                  value={draft.title}
+                  onChange={(event) => updateDraft('title', event.target.value)}
+                  placeholder="Opportunity title"
+                />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm font-medium" htmlFor="opp-draft-description">Description</label>
+                <Textarea
+                  id="opp-draft-description"
+                  value={draft.description}
+                  onChange={(event) => updateDraft('description', event.target.value)}
+                  placeholder="Describe scope and expectations"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="opp-draft-sector">Category / sector</label>
+                <Input
+                  id="opp-draft-sector"
+                  value={draft.sector}
+                  onChange={(event) => updateDraft('sector', event.target.value)}
+                  placeholder="Construction"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="opp-draft-role">Target role</label>
+                <Input
+                  id="opp-draft-role"
+                  value={draft.targetRole}
+                  onChange={(event) => updateDraft('targetRole', event.target.value)}
+                  placeholder="Architect"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="opp-draft-skills">Skills (comma-separated)</label>
+                <Input
+                  id="opp-draft-skills"
+                  value={draft.skills}
+                  onChange={(event) => updateDraft('skills', event.target.value)}
+                  placeholder="BIM, Sustainable Design"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="opp-draft-services">Services (comma-separated)</label>
+                <Input
+                  id="opp-draft-services"
+                  value={draft.services}
+                  onChange={(event) => updateDraft('services', event.target.value)}
+                  placeholder="Design Review"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="opp-draft-location">Location</label>
+                <Input
+                  id="opp-draft-location"
+                  value={draft.location}
+                  onChange={(event) => updateDraft('location', event.target.value)}
+                  placeholder="Riyadh, Saudi Arabia"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="opp-draft-start">Start date</label>
+                <Input
+                  id="opp-draft-start"
+                  type="date"
+                  value={draft.startDate}
+                  onChange={(event) => updateDraft('startDate', event.target.value)}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-4">
+          <OpportunityReadinessCard
+            opportunity={opportunityDraft}
+            opportunityId={opportunityId}
+            suppressCta
+          />
+          <div className="flex flex-col gap-2">
+            <Button type="button" variant="outline" className="cursor-pointer" onClick={handleSaveDraft}>
+              Save draft
+            </Button>
+            <Button type="button" className="cursor-pointer" onClick={handlePublish}>
+              Publish for matching
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Save draft is always allowed. Publish requires profile and opportunity readiness to be complete.
+            {!opportunityId ? ' Create flow stores draft fields locally until you edit an existing draft opportunity.' : null}
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
 
 export function OpportunityEditPage() {
-  return <OpportunityCreatePage />
+  return <OpportunityWizardPage mode="edit" />
 }
+

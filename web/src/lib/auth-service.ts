@@ -1,3 +1,4 @@
+import { canAccessAdminForRole } from '@/domain/rbac/admin-access.ts'
 import type { PlatformUser } from '@/types/domain.ts'
 import type { AuthSession, AccountType } from '@/types/domain.ts'
 import { peopleApi } from '@/api/people.ts'
@@ -101,7 +102,7 @@ export const authService = {
   },
 
   canAccessAdmin(user: PlatformUser) {
-    return ['admin', 'moderator', 'auditor'].includes(user.role)
+    return canAccessAdminForRole(user.role)
   },
 
   isPendingApproval(user: PlatformUser) {

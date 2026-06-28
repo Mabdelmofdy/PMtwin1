@@ -92,6 +92,9 @@ loadScript('src/core/config/config.js').then(async () => {
         window.CONFIG.BASE_PATH = APP_BASE_PATH;
     }
     
+    // ADR-001 lifecycle registry (static bundle from @pm-twin/lifecycle)
+    await loadScript('src/core/lifecycle/lifecycle-registry.js', { type: 'module' });
+
     // Load core services
     await loadScript('src/core/storage/storage-service.js');
     await loadScript('src/core/events/event-bus.js', { type: 'module' });

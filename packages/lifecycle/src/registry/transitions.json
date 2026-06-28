@@ -1,0 +1,69 @@
+{
+  "application": {
+    "terminalStates": ["accepted", "rejected", "withdrawn"],
+    "transitions": {
+      "submitted": ["reviewing", "rejected", "withdrawn"],
+      "reviewing": ["shortlisted", "rejected", "withdrawn"],
+      "shortlisted": ["negotiating", "rejected", "withdrawn"],
+      "negotiating": ["accepted", "rejected", "withdrawn"],
+      "accepted": [],
+      "rejected": [],
+      "withdrawn": []
+    }
+  },
+  "opportunity": {
+    "terminalStates": ["completed", "cancelled"],
+    "transitions": {
+      "draft": ["published", "cancelled"],
+      "published": ["matched", "negotiating", "cancelled"],
+      "matched": ["negotiating", "contracted", "cancelled"],
+      "negotiating": ["contracted", "cancelled"],
+      "contracted": ["executing", "cancelled"],
+      "executing": ["completed", "cancelled"],
+      "completed": [],
+      "cancelled": []
+    }
+  },
+  "match": {
+    "terminalStates": ["confirmed", "declined", "expired", "superseded"],
+    "transitions": {
+      "discovered": ["accepted", "declined", "expired"],
+      "accepted": ["confirmed", "declined", "expired", "superseded"],
+      "confirmed": [],
+      "declined": [],
+      "expired": [],
+      "superseded": []
+    }
+  },
+  "negotiation": {
+    "terminalStates": ["agreed", "expired", "cancelled"],
+    "transitions": {
+      "active": ["countered", "agreed", "expired", "cancelled"],
+      "countered": ["active", "agreed", "expired", "cancelled"],
+      "agreed": [],
+      "expired": [],
+      "cancelled": []
+    }
+  },
+  "deal": {
+    "terminalStates": ["completed", "cancelled"],
+    "transitions": {
+      "draft": ["review", "cancelled"],
+      "review": ["signing", "cancelled"],
+      "signing": ["executing", "cancelled"],
+      "executing": ["completed", "cancelled"],
+      "completed": [],
+      "cancelled": []
+    }
+  },
+  "contract": {
+    "terminalStates": ["completed", "terminated"],
+    "transitions": {
+      "draft": ["pending_signature", "terminated"],
+      "pending_signature": ["active", "terminated"],
+      "active": ["completed", "terminated"],
+      "completed": [],
+      "terminated": []
+    }
+  }
+}

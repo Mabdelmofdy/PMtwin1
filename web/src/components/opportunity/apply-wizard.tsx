@@ -11,10 +11,12 @@ export function ApplyWizard({
   opportunityId,
   applicantId,
   onSubmitted,
+  legacy = false,
 }: {
   opportunityId: string
   applicantId: string
   onSubmitted: () => void
+  legacy?: boolean
 }) {
   const [step, setStep] = useState(1)
   const [proposal, setProposal] = useState('')
@@ -52,9 +54,16 @@ export function ApplyWizard({
   }
 
   return (
-    <Card className="border-primary/20">
+    <Card className={legacy ? 'border-border/50 bg-muted/10' : 'border-primary/20'}>
       <CardHeader>
-        <CardTitle>Apply to this opportunity</CardTitle>
+        <CardTitle>
+          {legacy ? 'Legacy direct application' : 'Apply to this opportunity'}
+        </CardTitle>
+        {legacy ? (
+          <p className="text-xs text-muted-foreground">
+            Optional hiring path — PostMatch remains the primary collaboration route.
+          </p>
+        ) : null}
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex gap-2 text-xs">
