@@ -223,6 +223,7 @@ Cursor rule: `.cursor/rules/pm-twin-architecture.mdc`
 ## Related documentation
 
 - [architecture/runtime-boundaries.md](architecture/runtime-boundaries.md) — import matrix and write-path detail
+- [adr/ADR-105-domain-event-catalog.md](adr/ADR-105-domain-event-catalog.md) — domain event catalog (Backend Foundation)
 - [implementation-status.md](implementation-status.md) — feature checklist (refresh separately)
 - Phase 10.1 audit — runtime dependency inventory (conversation / internal audit)
 
