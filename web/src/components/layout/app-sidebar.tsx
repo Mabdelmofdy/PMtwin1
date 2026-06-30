@@ -24,10 +24,16 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar'
 import { PmNavBadge } from '@/components/ui/pm-badge'
-import { Button } from '@/components/ui/button'
+import { PmButton } from '@/components/ui/pm-button'
+import { pmInteraction } from '@/tokens'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { cn } from '@/lib/utils'
 
 const navButtonClass =
-  'cursor-pointer transition-colors data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:shadow-[inset_2px_0_0_0_var(--primary)]'
+  cn(
+    pmInteraction.navItem,
+    'cursor-pointer transition-colors data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:shadow-[inset_2px_0_0_0_var(--primary)] rtl:data-[active=true]:shadow-[inset_-2px_0_0_0_var(--primary)]',
+  )
 
 export function AppSidebar() {
   const { pathname } = useLocation()
@@ -53,12 +59,12 @@ export function AppSidebar() {
       }))
 
   return (
-    <Sidebar collapsible="icon" variant="inset" className="border-r border-sidebar-border/80">
+    <Sidebar collapsible="icon" variant="inset" className="border-e border-sidebar-border/80">
       <SidebarHeader className="gap-2 border-b border-sidebar-border/60 p-2">
         <WorkspaceSwitcher />
-        <div className="flex items-center gap-2 rounded-lg border border-sidebar-border/60 bg-sidebar-accent/30 px-2.5 py-2 text-xs group-data-[collapsible=icon]:hidden">
+        <div className={cn(pmTypography.caption, 'flex items-center gap-2 rounded-lg border border-sidebar-border/60 bg-sidebar-accent/30 px-2.5 py-2 group-data-[collapsible=icon]:hidden')}>
           <span className="truncate font-medium">{displayName}</span>
-          <PmNavBadge className="ml-auto uppercase">{user.role}</PmNavBadge>
+          <PmNavBadge className="ms-auto uppercase">{user.role}</PmNavBadge>
         </div>
       </SidebarHeader>
 
@@ -148,16 +154,16 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border/60 p-2">
-        <Button
+        <PmButton
           variant="ghost"
           className="w-full cursor-pointer justify-start gap-2 text-muted-foreground hover:text-foreground group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
           onClick={signOut}
         >
           <LogOut className="size-4" aria-hidden />
-          <span className="text-sm group-data-[collapsible=icon]:sr-only">
+          <span className={cn(pmTypography.bodySm, 'group-data-[collapsible=icon]:sr-only')}>
             Sign out ({getUserInitials(displayName)})
           </span>
-        </Button>
+        </PmButton>
       </SidebarFooter>
 
       <SidebarRail />

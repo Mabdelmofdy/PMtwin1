@@ -24,6 +24,7 @@ import {
   PmInspectorLayout,
   PmPageLayout,
   PmSectionHeader,
+  countActiveDeals,
 } from '@/components/layout/pm-layout-index'
 import {
   PmFormReadonly,
@@ -40,9 +41,11 @@ import {
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
 import {
+  PmBadge,
   PmButton,
   PmEmptyState,
   PmPageHeader,
+  PmPageHeroMetric,
   PmSurface,
   PmWorkflowBadge,
 } from '@/components/ui/pm-index'
@@ -101,6 +104,7 @@ export function DealsPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
   const deals = dealsApi.list()
+  const activeDeals = countActiveDeals(deals)
 
   const filtered = useMemo(() => {
     return deals.filter((d) => {
@@ -142,8 +146,10 @@ export function DealsPage() {
       <PmPageLayout
         header={
           <PmPageHeader
+            label="Collaboration"
             title="Deals"
-            description="Collaboration deals from accepted matches and applications."
+            description="Collaboration deals from accepted PostMatches and negotiations."
+            metric={<PmPageHeroMetric value={0} label="Active" />}
           />
         }
       >
@@ -164,8 +170,16 @@ export function DealsPage() {
     <PmPageLayout
       header={
         <PmPageHeader
+          label="Collaboration"
           title="Deals"
           description="Track collaboration deals through lifecycle stages."
+          metric={<PmPageHeroMetric value={activeDeals} label="Active" />}
+          badges={
+            <>
+              <PmBadge tone="muted">{deals.length} total</PmBadge>
+              <PmBadge tone="primary">{activeDeals} active</PmBadge>
+            </>
+          }
         />
       }
     >
@@ -177,6 +191,7 @@ export function DealsPage() {
         caption="Deals"
         toolbar={
           <PmTableToolbar
+            className="pm-toolbar-surface rounded-xl px-4 py-3"
             search={
               <PmTableSearch
                 placeholder="Search deals…"
@@ -286,12 +301,14 @@ export function DealDetailPage() {
           label="Deal"
           title={model.deal.title}
           description={`Created ${formatDate(model.deal.createdAt)} · Updated ${formatDate(model.deal.updatedAt)}`}
-          actions={
-            <>
-              <DealStageActions deal={model.deal} />
-              <PmWorkflowBadge status={model.status} entity="deal" />
-            </>
+          metric={
+            <PmPageHeroMetric
+              value={model.participants.length}
+              label="Participants"
+            />
           }
+          badges={<PmWorkflowBadge status={model.status} entity="deal" />}
+          actions={<DealStageActions deal={model.deal} />}
         />
       }
     >

@@ -27,7 +27,7 @@ export function PmDetailLayout({
   inspectorClassName,
 }: PmDetailLayoutProps) {
   return (
-    <div data-slot="pm-detail-layout" className={cn('space-y-6', className)}>
+    <div data-slot="pm-detail-layout" className={cn('min-w-0 space-y-6', className)}>
       <div className={pmLayoutGrid.detail}>
         <div className={cn(pmLayoutGrid.detailMain, mainClassName)}>
           {main}

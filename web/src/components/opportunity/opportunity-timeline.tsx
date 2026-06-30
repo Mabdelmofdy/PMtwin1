@@ -1,3 +1,4 @@
+import { ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { PmSurface } from '@/components/ui/pm-surface'
@@ -33,19 +34,20 @@ export function OpportunityTimeline({
   return (
     <div className={cn('space-y-4', className)} data-slot="opportunity-timeline">
       <PmSurface variant="muted" className="px-4 py-3">
-        <p className={cn(pmTypography.caption, 'mb-2 uppercase tracking-wide text-muted-foreground')}>
+        <p className={cn(pmTypography.overline, 'mb-2 text-muted-foreground')}>
           Canonical collaboration path
         </p>
-        <ol className="flex flex-wrap items-center gap-1 text-sm" aria-label="Collaboration path">
+        <ol className={cn('flex flex-wrap items-center gap-1', pmTypography.bodySm)} aria-label="Collaboration path">
           {COLLABORATION_FLOW_STEPS.map((step, index) => {
             const isActive = index === activeIndex
             const isPast = index < activeIndex
             return (
               <li key={step} className="flex items-center gap-1">
                 {index > 0 ? (
-                  <span className="px-1 text-muted-foreground" aria-hidden>
-                    →
-                  </span>
+                  <ChevronRight
+                    className="size-3.5 shrink-0 text-muted-foreground rtl:rotate-180"
+                    aria-hidden
+                  />
                 ) : null}
                 <span
                   className={cn(
@@ -78,7 +80,7 @@ export function OpportunityTimeline({
                   )}
                   aria-hidden
                 />
-                <div className="min-w-0 flex-1 border-l border-border/40 pl-3 last:border-0">
+                <div className="min-w-0 flex-1 border-s border-border/40 ps-3 last:border-0">
                   <p className={cn(pmTypography.label)}>{event.label}</p>
                   {event.description ? (
                     <p className={cn(pmTypography.caption, 'text-muted-foreground')}>

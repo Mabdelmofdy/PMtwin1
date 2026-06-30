@@ -27,7 +27,7 @@ export function OpportunitySummaryCard({
           {opportunity.description}
         </p>
       ) : (
-        <p className="text-sm text-muted-foreground">No description provided.</p>
+        <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>No description provided.</p>
       )}
       <dl className={cn(pmTypography.caption, 'mt-4 grid gap-2 sm:grid-cols-2')}>
         {opportunity.location ? (

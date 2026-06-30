@@ -2,6 +2,7 @@ import type { ComponentProps, ReactNode } from 'react'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmResponsive } from '@/tokens'
 import {
   resolveWizardProgress,
   resolveWizardStepStatus,
@@ -82,7 +83,7 @@ export function PmFormStepper({
         className={cn(
           'flex gap-2',
           orientation === 'horizontal'
-            ? 'flex-row flex-wrap'
+            ? cn('flex-row flex-wrap sm:flex-nowrap', pmResponsive.scrollX)
             : 'flex-col',
         )}
       >
@@ -106,7 +107,7 @@ export function PmFormStepper({
                 onClick={() => navigable && onStepClick(step.id)}
                 aria-current={status === 'active' ? 'step' : undefined}
                 className={cn(
-                  'flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left transition-colors',
+                  'flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-start transition-colors',
                   pmMotionSafe,
                   navigable && 'cursor-pointer hover:border-border-strong',
                   !navigable && 'cursor-default',
@@ -130,7 +131,7 @@ export function PmFormStepper({
                   <span className={cn(pmTypography.label, 'block truncate')}>
                     {step.label}
                     {step.optional ? (
-                      <span className="ml-1 font-normal text-muted-foreground">
+                      <span className="ms-1 font-normal text-muted-foreground">
                         (optional)
                       </span>
                     ) : null}

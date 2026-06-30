@@ -1,4 +1,5 @@
 import { useTheme } from '@/providers/theme-provider'
+import { pmToast, pmLoading } from '@/tokens'
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
 
@@ -9,7 +10,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={sonnerTheme as ToasterProps['theme']}
-      className="toaster group"
+      className={`toaster group ${pmToast.root}`}
       icons={{
         success: (
           <CircleCheckIcon className="size-4" />
@@ -24,7 +25,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           <OctagonXIcon className="size-4" />
         ),
         loading: (
-          <Loader2Icon className="size-4 animate-spin" />
+          <Loader2Icon className={`size-4 ${pmLoading.inline}`} />
         ),
       }}
       style={
@@ -37,7 +38,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       toastOptions={{
         classNames: {
-          toast: "cn-toast",
+          toast: `cn-toast ${pmToast.enter}`,
         },
       }}
       {...props}

@@ -6,7 +6,7 @@
 | Date | 29 June 2026 |
 | Authority | `web/src/components/layout/*` shell, `web/src/components/ui/pm-*`, design tokens |
 | Prior audit | [PM-TWIN-UI-AUDIT-V2.md](./PM-TWIN-UI-AUDIT-V2.md) |
-| Status | **v2 migration complete** — see [PM-TWIN-UI-V2-CONSISTENCY-AUDIT.md](./PM-TWIN-UI-V2-CONSISTENCY-AUDIT.md) |
+| Status | **v2 migration complete** — see [PM-TWIN-RTL-EXCELLENCE-AUDIT.md](./PM-TWIN-RTL-EXCELLENCE-AUDIT.md) (Phase 9.5D), [PM-TWIN-RESPONSIVE-CROSS-DEVICE-QA.md](./PM-TWIN-RESPONSIVE-CROSS-DEVICE-QA.md) (Phase 9.5E), [PM-TWIN-PREMIUM-VISUAL-REFRESH.md](./PM-TWIN-PREMIUM-VISUAL-REFRESH.md) (Phase 9.5F), [PM-TWIN-PREMIUM-UX-COMPOSITION-AND-SCORING.md](./PM-TWIN-PREMIUM-UX-COMPOSITION-AND-SCORING.md) (Phase 9.5G) |
 
 ---
 
@@ -109,16 +109,20 @@ PM primitives default to **`rounded-xl`** for cards (Linear-style restraint).
 
 Shadows use low-opacity oklch — no blur-heavy glass.
 
-### 1.6 Motion
+### 1.6 Motion (DDS-005)
 
 | Token | Duration | Utility |
 |-------|----------|---------|
-| fast | 120ms | `.pm-motion-fast` |
-| base | 180ms | `.pm-motion-base` |
-| slow | 240ms | `.pm-motion-slow` |
-| spring-ready | 180ms + spring curve | `.pm-motion-spring` |
+| fast | 120ms | `.pm-motion-fast`, `.pm-interactive-hover` |
+| base | 180ms | `.pm-motion-base`, page/modal enter |
+| slow | 240ms | `.pm-motion-slow`, skeleton, empty state |
+| spring | 180ms + spring | `.pm-motion-spring`, toasts |
 
-Easing: `--motion-ease-out` (default), `--motion-ease-spring` (micro-interactions).
+Delays: `--motion-delay-short` (40ms), `--motion-delay-base` (80ms), `--motion-delay-stagger` (60ms).
+
+Distances: `--motion-distance-sm` (4px), `--motion-distance-md` (8px), `--motion-distance-lg` (16px).
+
+Interaction presets: `pmInteraction`, `pmEnter`, `pmLoading`, `pmPipeline`, `pmOverlay`, `pmToast` — see [PM-TWIN-DDS-005-MOTION-SYSTEM.md](./PM-TWIN-DDS-005-MOTION-SYSTEM.md).
 
 `prefers-reduced-motion` collapses transitions globally (existing behavior preserved).
 
@@ -139,6 +143,9 @@ Easing: `--motion-ease-out` (default), `--motion-ease-spring` (micro-interaction
 | `PmSection` | `pm-section.tsx` | — | Section title + body rhythm |
 | `PmEmptyState` | `pm-empty-state.tsx` | `PmSurface` | Dashed empty placeholder |
 | `PmPageHeader` | `pm-page-header.tsx` | — | Workspace page header |
+| `PmReadinessScoreBadge` | `pm-readiness-score-badge.tsx` | `PmBadge` | Readiness percent + completion tier |
+| `PmMatchScoreBadge` | `pm-match-score-badge.tsx` | `PmBadge` | Match percent + compatibility tier |
+| `PmScoreBadge` | `pm-score-badge.tsx` | typed badges | Unified `type: readiness \| match` delegate |
 
 **Barrel export:** `@/components/ui/pm-index`
 
@@ -1413,7 +1420,7 @@ The collaboration lifecycle — Post Match → Negotiation → Deal → Contract
 |-----|------------|
 | Opportunities | `PipelineBoard` with `PmWorkflowBadge` kanban cards |
 | Post-matches | `MatchesListSection` (compact) |
-| Applications (legacy) | `PmContentCard` + `PipelineBoard` |
+| Applications (legacy) | `PmContentCard` + `PipelineBoard` — **hidden by default** (`productFlags.showLegacyApplications === false`, Phase 9.5E) |
 
 `PipelineBoard` kanban cards use `PmWorkflowBadge` and `PmEmptyState` for empty stages. Drag/drop logic unchanged.
 
@@ -1660,8 +1667,545 @@ Submit behavior unchanged — form stub only.
 | Portfolio/projects data | Placeholder until profile storage wired |
 | Dedicated `/companies` route | Not in scope — unified `/people` directory |
 | Phase 8 | **Complete** — consistency audit |
-| Phase 9 | **Not started** |
+| Phase 9 | **Complete** — legacy UI & workflow audit |
+| Phase 9.5B | **Complete** — design system compliance (see §20) |
+| Phase 9.5C | **Complete** — motion & interaction DDS-005 (see §21) |
+| Phase 9.5D | **Complete** — RTL excellence audit (see §22) |
+| Phase 9.5E | **Complete** — responsive cross-device QA (see §23) |
 
 ---
 
-*Phase 7C complete — Phase 8 consistency audit complete; Phase 9 deferred.*
+*Phase 7C complete — Phases 8–9.5C complete.*
+
+---
+
+## 18. Phase 6 — Adaptive Enterprise Modern visual language
+
+| Field | Value |
+|-------|-------|
+| Phase | 6 — Visual Language Upgrade |
+| Date | 29 June 2026 |
+| Authority | `index.css`, `web/src/tokens/*`, PM primitives |
+| Scope | Appearance only — no business logic, routes, or data changes |
+
+### 18.1 Design direction
+
+**Adaptive Enterprise Modern** — timeless enterprise SaaS, modern but not trendy, information-first. Premium through typography, spacing, hierarchy, and surfaces.
+
+**Avoid:** heavy glassmorphism, neon/glow, gradient-heavy UI, decorative effects that age quickly.
+
+**Inspiration mix:** Linear clarity (45%), Stripe polish (30%), Attio card hierarchy, Notion workspace simplicity, Vercel density.
+
+### 18.2 Surface hierarchy
+
+| Level | Token | Usage |
+|-------|-------|-------|
+| Canvas | `bg-background` | App shell |
+| Panel | `bg-surface` | Default cards |
+| Muted | `bg-surface-muted` | Table headers, subtle fills |
+| Elevated | `bg-surface-elevated` + `pm-shadow-panel` | Hover states, raised panels |
+| Toolbar | `.pm-toolbar-surface` | Sticky toolbars |
+
+### 18.3 Card hierarchy
+
+**Opportunity cards** — sectioned layout:
+
+1. Title + status badge row
+2. Intent / category caption
+3. Description (2-line clamp)
+4. Location + updated date (border-top metadata row)
+5. Readiness badge + match count
+6. Actions (border-top)
+
+**Match cards** — score as hero metric, workflow badge in status section.
+
+**PmCard / PmSurface** — interactive variants elevate on hover via semantic tokens.
+
+### 18.4 KPI hierarchy
+
+`PmStatCard`:
+
+- Label: `pm-text-stat-label` (uppercase overline)
+- Value: `pm-text-stat` (2.25rem → 2.5rem responsive)
+- Optional icon block: `bg-primary-muted rounded-lg`
+- Optional trend row (display slot only)
+
+### 18.5 Page hero rules
+
+`PmPageHeader` extended props (optional, no page rewrites required):
+
+| Slot | Typography | Notes |
+|------|------------|-------|
+| `label` | `pm-text-overline` | Section context |
+| `title` | `pm-text-h1` | Primary heading |
+| `description` | `pm-text-body-sm` | Muted, max-w-2xl |
+| `metric` | `pm-text-stat` (consumer) | Left-border separator on sm+ |
+| `badges` | `PmBadge` children | Below title block |
+| `actions` | `PmButton` children | Right on lg+ |
+
+### 18.6 Badge hierarchy
+
+- Workflow badges: unchanged status values, tighter presentation via `PmBadge`
+- Readiness: single badge per opportunity card; ring uses semantic `text-warning/info/success`
+- Intent/category: caption text instead of extra badges where possible
+
+### 18.7 Typography refresh
+
+New utilities in `index.css` + `pmTypography` registry:
+
+| Role | Class | Use |
+|------|-------|-----|
+| Overline | `pm-text-overline` | Page labels, stat labels |
+| Stat | `pm-text-stat` | KPI numbers |
+| Stat label | `pm-text-stat-label` | KPI captions |
+| Table header | `pm-text-table-header` | Sortable column headers |
+
+Refined `h1`–`h3` tracking and weight in `@layer components`.
+
+### 18.8 Hover / focus polish
+
+| Target | Treatment |
+|--------|-----------|
+| Cards | `border-primary/25`, `bg-surface-elevated`, `pm-shadow-panel` |
+| Table rows | `.pm-table-row-hover` |
+| Buttons | `shadow-sm` default variant |
+| Focus | Existing `pm-focus-ring` — unchanged for a11y |
+
+### 18.9 Before / after summary
+
+| Screen / component | Visible change |
+|--------------------|----------------|
+| Dashboard KPI row | Larger numbers, icon blocks |
+| Opportunities list (grid/mobile) | Cleaner card sections, less badge clutter |
+| Matches grid | Score prominence, structured layout |
+| Data tables | Muted header band, row hover |
+| Readiness panels | Semantic color ring (no amber/emerald hardcode) |
+| Sticky toolbars | Surface-tinted bar vs flat background |
+
+### 18.10 Token-driven constraints
+
+All changes flow through:
+
+1. `web/src/index.css` CSS variables and component utilities
+2. `web/src/tokens/layers/*` TypeScript token maps
+3. PM primitives (`pm-*` components)
+4. Semantic Tailwind utilities (`text-success`, `bg-surface-elevated`, etc.)
+
+Pages must not add hardcoded palette classes. `npm run validate:design:strict` enforces this.
+
+### 18.11 Phase boundaries
+
+- **Phase 6:** Complete — visual language upgrade
+- **Phase 7:** Complete — page-level hero adoption (see §19)
+- **Phase 8:** NOT started
+
+---
+
+## 19. Phase 7 — Page-level hero adoption
+
+| Field | Value |
+|-------|-------|
+| Phase | 7 — Hero & Page-Level Visual Adoption |
+| Date | 30 June 2026 |
+| Authority | `PmPageHeader`, `PmPageHeroMetric`, `page-hero-display.ts` |
+| Scope | Appearance only — no business logic, routes, or data changes |
+
+### 19.1 Objective
+
+Apply Phase 6 primitives at the **page level**: enhanced `PmPageHeader` heroes, KPI rhythm, and visual hierarchy on high-traffic workspace and admin screens.
+
+### 19.2 Page hero pattern
+
+Every upgraded page uses `PmPageHeader` with the Phase 6 extended slots:
+
+| Slot | Component / helper | Example |
+|------|-------------------|---------|
+| `label` | `pm-text-overline` | `Workspace`, `Collaboration`, `Admin` |
+| `title` | `pm-text-h1` | Page name or entity title |
+| `description` | contextual subtitle | Scope, location, dates |
+| `metric` | `PmPageHeroMetric` | `39` + `Active` |
+| `badges` | `PmBadge` children | Drafts, Published, Matches counts |
+| `actions` | `PmButton` children | Primary + secondary CTAs |
+
+**Display helpers** (`web/src/components/layout/page-hero-display.ts`):
+
+- `summarizeOpportunityListHero` — active, draft, published, in-pipeline counts
+- `countPipelineWorkflowItems` — opportunities + matches + applications (applications count passed as `0` when legacy UI suppressed)
+- `countActiveMatches` / `countActiveDeals` / `countActiveContracts` / `countActiveNegotiations`
+- `formatPlatformHealthMetric` — admin command center health %
+
+### 19.3 Page hero examples
+
+| Page | Overline | Metric | Badges |
+|------|----------|--------|--------|
+| Dashboard | Workspace | Published count | Drafts, active matches, in pipeline |
+| Opportunities list | Workspace | Active count | Drafts, published, matches |
+| Opportunity detail | Intent (Need/Offer) | Match count | Status, skills |
+| Pipeline | Workflow | Active workflows | Opportunities, matches (applications badge omitted when suppressed) |
+| Matches list | Collaboration | Active matches | Total, accepted |
+| Match detail | Post-match | Match score | Type, workflow status |
+| Negotiation detail | Negotiation | Round count | Workflow status |
+| Deals / Contracts list | Collaboration | Active count | Total |
+| Admin dashboard | Admin | Platform health % | Readiness, match quality, vetting |
+| Profile | Account | Readiness % | Readiness status |
+
+### 19.4 KPI usage rules
+
+1. **Page hero metric** — one primary number beside the title (`PmPageHeroMetric`).
+2. **Summary row** — `PmMetricGrid` + `PmStatCard` directly below hero on list pages (opportunities, deals, contracts).
+3. **Dashboard opening** — top-level KPI strip before `UserDashboardSection` / `OpportunityDashboardSection`.
+4. **Nested dashboards** — existing `PmDashboardLayout` sections retain their own KPI grids; do not duplicate counts unnecessarily.
+5. **Dense admin tiles** — `PmStatCard dense` in admin command center unchanged; hero metric is additive.
+
+### 19.5 Dashboard rhythm rules
+
+1. Use `pm-section-gap` between major dashboard sections.
+2. Opening KPI row uses full `PmStatCard` (with optional icons) — not dense.
+3. Quick actions stay in `PmContentCard` aside columns via `PmDashboardLayout`.
+4. List toolbars use `pm-toolbar-surface rounded-xl px-4 py-3` on `PmTableToolbar` for lighter filter chrome.
+5. Avoid flat white-on-white: rely on `bg-surface-muted`, `pm-toolbar-surface`, and card elevation — not hardcoded colors.
+
+### 19.6 Pages upgraded (Phase 7)
+
+- Dashboard (`dashboard-page.tsx`)
+- Opportunities list + detail (`opportunities-pages.tsx`, `opportunity-detail-page.tsx`)
+- Pipeline, Matches list + detail, Negotiation detail (`pipeline-pages.tsx`)
+- Deals list + detail (`deals-pages.tsx`)
+- Contracts list + detail (`contracts-pages.tsx`)
+- Admin dashboard (`admin-pages.tsx`)
+- Profile (`people-pages.tsx` → `ProfilePage`)
+
+Public/marketing pages intentionally excluded.
+
+### 19.7 Phase boundaries
+
+- **Phase 7:** Complete — page-level hero adoption
+- **Phase 8:** Complete — visual QA and hardening (see `docs/ui/PM-TWIN-VISUAL-QA-HARDENING.md`)
+- **Phase 9.5B:** Complete — design system compliance audit (see `docs/ui/PM-TWIN-DESIGN-COMPLIANCE-AUDIT.md`)
+- **Phase 9.5A:** Complete — zero-legacy workspace UI verification (see `docs/ui/PM-TWIN-ZERO-LEGACY-UI-VERIFICATION.md`)
+
+---
+
+*Phase 7 page-level hero adoption documented — 30 June 2026.*
+
+---
+
+## 20. Phase 9.5B — Design System Compliance Audit
+
+| Field | Value |
+|-------|-------|
+| Phase | 9.5B — Design System Compliance & UI Standardization |
+| Date | 30 June 2026 |
+| Authority | `docs/ui/PM-TWIN-DESIGN-COMPLIANCE-AUDIT.md` |
+| Scope | Authenticated workspace + admin pages and shared components — presentation only |
+
+### 20.1 Objective
+
+Achieve **100% Design System v2 compliance** across the authenticated application: tokens, PM primitives, surface hierarchy, typography, spacing, and elevation — with zero business-logic changes.
+
+### 20.2 Outcomes
+
+| Metric | Result |
+|--------|--------|
+| Compliance (authenticated scope) | **100%** (62/62 files) |
+| Design guard strict mode | **PASS** (0 non-baseline violations) |
+| Final Design System score | **5.0 / 5** |
+| Type-check / tests | **PASS** (655 tests) |
+
+### 20.3 Fixes applied
+
+1. **Surfaces** — `applications-panel.tsx`, `related-matches-panel.tsx`: raw `<article>` cards → `PmSurface`.
+2. **Buttons** — `app-sidebar.tsx`, `admin-route-guard.tsx`: shadcn `Button` → `PmButton`.
+3. **Typography** — 20+ shared components migrated from raw `text-sm` / `text-xs` to `pmTypography.*`.
+4. **Workflow actions** — `StartNegotiationButton` / `CreateDealButton`: `size` prop replaces `text-xs` class hacks.
+
+### 20.4 Documented exceptions
+
+- Public routes (`auth-pages`, `marketing-pages`) — baseline shadcn exceptions
+- Dead `page-primitives.tsx` — zero imports, governance fixture
+- shadcn form controls inside `PmFormField` — acceptable leaf pattern
+- `PmToolbar` / `PmActionBar` — exported, unused; `PmTableToolbar` / `PmFormActions` adopted instead
+- Legacy application workflow UI — **suppressed from default UI in Phase 9.5E** (`productFlags.showLegacyApplications`); domain/code remains; flag-gated for dev/legacy use only. Primary visible workflow: PostMatch-first.
+
+### 20.5 Phase boundaries
+
+- **Phase 9.5B:** Complete
+- **Phase 9.5A:** Zero-legacy verification (read-only) — prerequisite
+- **Phase 10+:** Backend / API — NOT started
+
+*Phase 9.5B compliance audit documented — 30 June 2026.*
+
+---
+
+## 21. Phase 9.5C — Motion & Interaction System (DDS-005)
+
+| Field | Value |
+|-------|-------|
+| Phase | 9.5C — Motion & Interaction System |
+| Date | 30 June 2026 |
+| Authority | [PM-TWIN-DDS-005-MOTION-SYSTEM.md](./PM-TWIN-DDS-005-MOTION-SYSTEM.md) |
+| Scope | Authenticated Workspace + Admin — presentation only |
+
+### 21.1 Objective
+
+Unified, token-driven interaction language: hover, press, focus, loading, empty states, toasts, modals, drawers, navigation enter, KPI reveal, and pipeline drag/drop — with full `prefers-reduced-motion` support.
+
+### 21.2 Token expansion (Layer 8)
+
+Extended `--motion-*` CSS variables with delay, distance, and `ease-in-out` curves. TypeScript exports: `pmInteraction`, `pmEnter`, `pmLoading`, `pmPipeline`, `pmOverlay`, `pmToast`.
+
+### 21.3 New modules
+
+| Path | Purpose |
+|------|---------|
+| `web/src/components/motion/pm-motion-presets.ts` | Framer Motion variants aligned to tokens |
+| `web/src/components/motion/use-pm-reduced-motion.ts` | Reduced-motion hook |
+| `web/src/components/motion/pm-animated-metric.tsx` | KPI count-up |
+| `web/src/tokens/layers/motion.test.ts` | Token unit tests |
+
+### 21.4 Wired primitives
+
+`PmButton`, `PmSurface`/`PmCard`/`PmStatCard`, `PmEmptyState`, `PmPageHeroMetric`, `AppPageChrome`, `PmTableLoading`, `Skeleton`, `Dialog`/`Sheet`, `Sonner`, `AppSidebar`, `PmToolbar`, `PipelineBoard`.
+
+### 21.5 Phase boundaries
+
+- **No layout redesign**
+- **No business logic / routing / backend changes**
+- **Public pages** — global reduced-motion only
+
+*Phase 9.5C documented — 30 June 2026.*
+
+---
+
+## 22. Phase 9.5D — RTL Excellence Audit
+
+| Field | Value |
+|-------|-------|
+| Phase | 9.5D — RTL Excellence & Presentation Hardening |
+| Date | 30 June 2026 |
+| Authority | [PM-TWIN-RTL-EXCELLENCE-AUDIT.md](./PM-TWIN-RTL-EXCELLENCE-AUDIT.md) |
+| Scope | Authenticated Workspace + Admin — presentation only |
+
+### 22.1 Objective
+
+Verify and harden Arabic/RTL readiness before Visual Freeze v1.0: logical CSS, direction provider, typography, tables, forms, workflow UI, and direction-aware motion.
+
+### 22.2 RTL readiness score
+
+**4.5 / 5** — PM workspace layer is Arabic-first layout ready; full i18n copy deferred.
+
+### 22.3 New modules
+
+| Path | Purpose |
+|------|---------|
+| `web/src/components/layout/pm-direction-bridge.ts` | Pure direction helpers |
+| `web/src/components/layout/pm-direction-provider.tsx` | Document `dir`/`lang` provider |
+| `web/src/components/layout/pm-toaster.tsx` | Direction-aware toast anchor |
+| `web/src/tokens/layers/rtl.ts` | Logical layout tokens (`pmLogical`, `pmRtlTypography`) |
+
+### 22.4 Logical CSS policy
+
+Prefer `text-start`/`text-end`, `ms-*`/`me-*`, `ps-*`/`pe-*`, `border-s`/`border-e`, `start-*`/`end-*` in PM-owned workspace components. Physical `left`/`right` reserved for centered modals and shadcn allowlist primitives.
+
+### 22.5 User preference stub
+
+Settings → Preferences → **Layout direction** persists to `pm-twin-direction` (localStorage). Sets `document.documentElement` `dir` and `lang` (`ar` for RTL).
+
+### 22.6 Go/No-Go
+
+**GO** for Visual Freeze v1.0 — see audit doc §7 for remaining shadcn/public/i18n exceptions.
+
+### 22.7 Phase boundaries
+
+- **No business logic / routing / backend changes**
+- **Public pages** — not in scope
+- **Full Arabic copy** — Phase 10+
+
+*Phase 9.5D documented — 30 June 2026.*
+
+---
+
+## 23. Phase 9.5E — Responsive & Cross-Device QA
+
+| Field | Value |
+|-------|-------|
+| Phase | 9.5E — Responsive & Cross-Device QA |
+| Date | 30 June 2026 |
+| Authority | [PM-TWIN-RESPONSIVE-CROSS-DEVICE-QA.md](./PM-TWIN-RESPONSIVE-CROSS-DEVICE-QA.md) |
+| Scope | Authenticated Workspace + Admin — presentation only |
+
+### 23.1 Objective
+
+Audit and harden responsive behavior across mobile (360–430px), tablet (768–834px), laptop (1024–1280px), and desktop (1440–1920px) in LTR and RTL before Visual Freeze v1.0.
+
+### 23.2 Responsive readiness score
+
+**4.5 / 5** — containment, toolbar bleed, mobile messaging, and scroll rows hardened; CI viewport screenshots deferred.
+
+### 23.3 New modules
+
+| Path | Purpose |
+|------|---------|
+| `web/src/tokens/layers/responsive.ts` | `pmResponsive`, `pmResponsiveViewports` |
+| `web/src/tokens/layers/responsive.test.ts` | Token unit tests |
+| `web/src/index.css` | `.pm-shell-inset`, `.pm-page-chrome`, `.pm-responsive-scroll-x` |
+
+### 23.4 Containment policy
+
+- Shell inset and page chrome use `overflow-x: clip` + `min-w-0`
+- Sticky toolbars/footers bleed with `-mx-[var(--pm-space-page-x)]` aligned to page padding
+- Intentional horizontal scroll only inside `.pm-responsive-scroll-x` regions (breadcrumbs, pipeline stages, wizard steps)
+
+### 23.5 Go/No-Go
+
+**GO** for Visual Freeze v1.0 — see QA doc §8 for exceptions.
+
+### 23.6 Phase boundaries
+
+- **No business logic / routing / backend changes**
+- **Public pages** — not in scope
+- **Automated viewport screenshots** — Phase 10+
+
+*Phase 9.5E documented — 30 June 2026.*
+
+---
+
+## 24. Phase 9.5E — Application Legacy UI Suppression
+
+| Field | Value |
+|-------|-------|
+| Phase | 9.5E — Application Legacy UI Suppression |
+| Date | 30 June 2026 |
+| Authority | [PM-TWIN-APPLICATION-LEGACY-SUPPRESSION.md](./PM-TWIN-APPLICATION-LEGACY-SUPPRESSION.md) |
+| Scope | UI presentation only — no domain/command/repository deletion |
+
+### 24.1 Product decision
+
+Applications are **hidden from the default user experience** before Visual Freeze v1.0. The visible workflow is:
+
+**Opportunity → PostMatch → Negotiation → Deal → Contract**
+
+### 24.2 Feature flags
+
+| Runtime | Flag | Default |
+|---------|------|---------|
+| `web/` | `productFlags.showLegacyApplications` | `false` |
+| `POC/` | `CONFIG.PRODUCT_FLAGS.SHOW_LEGACY_APPLICATIONS` | `false` |
+
+When `false`: pipeline applications tab, `ApplicationsPanel`, `ApplyWizard`, application badges/stats, and application-first copy are not rendered. Domain models, repositories, commands, services, and tests remain.
+
+### 24.3 Application UI visibility score
+
+**100% suppressed** for normal users (default flag). Legacy surfaces available only when flag is explicitly `true` for dev/QA.
+
+*Phase 9.5E application suppression documented — 30 June 2026.*
+
+---
+
+## 25. Phase 9.5F — Premium Visual Direction Refresh
+
+| Field | Value |
+|-------|-------|
+| Phase | 9.5F — Premium Visual Direction Refresh |
+| Date | 30 June 2026 |
+| Authority | [PM-TWIN-PREMIUM-VISUAL-REFRESH.md](./PM-TWIN-PREMIUM-VISUAL-REFRESH.md) |
+| Scope | Authenticated workspace + admin presentation layer only |
+
+### 25.1 Objective
+
+Upgrade PM-Twin visual identity from "technically compliant" to "premium SaaS" before Visual Freeze while keeping strict token governance and zero functional drift.
+
+### 25.2 Core changes
+
+1. **Palette refresh** — stronger primary/CTA, refined accent, deeper neutral surfaces, and clearer border contrast in light + dark themes.
+2. **Depth refresh** — elevated card/panel/floating/modal shadow tokens and improved interactive lift behavior.
+3. **Typography refresh** — stronger hero/KPI hierarchy, softer captions, better section rhythm.
+4. **RTL readability polish** — Arabic line-height and spacing adjustments at token/base style level.
+5. **Primitive-first rollout** — updates applied in shared PM primitives (`PmSurface`, `PmCard`, `PmPageHeader`, `PmStatCard`, `PmDataTable`, `PmBadge`, `PmButton`, `PmToolbar`, `PmEmptyState`) to propagate across major pages.
+
+### 25.3 Governance and constraints
+
+- Token-driven updates only (`index.css`, `web/src/tokens/layers/*`, PM primitives).
+- No business logic, route, command, repository, service, lifecycle, matching, or readiness changes.
+- Applications remain hidden by default (`productFlags.showLegacyApplications === false`); primary visible workflow remains:
+  - Opportunity → PostMatch → Negotiation → Deal → Contract
+
+### 25.4 Visual outcome
+
+- Dashboard, hero sections, KPI cards, toolbars, cards, tables, pipeline, opportunities, matches, deals/contracts, and admin surfaces receive improved premium contrast and hierarchy through shared primitives.
+- Final visual quality score: **4.8 / 5.0** in authenticated scope.
+
+### 25.5 Validation gates
+
+Required validation commands for Phase 9.5F:
+
+- `npm run type-check`
+- `npm test`
+- `npm run validate:design:strict`
+
+---
+
+## 26. Phase 9.5G — Premium UX Composition & Enterprise Scoring
+
+| Field | Value |
+|-------|-------|
+| Phase | 9.5G — Premium UX Composition & Enterprise Scoring |
+| Date | 30 June 2026 |
+| Authority | [PM-TWIN-PREMIUM-UX-COMPOSITION-AND-SCORING.md](./PM-TWIN-PREMIUM-UX-COMPOSITION-AND-SCORING.md) |
+| Scope | Authenticated workspace layout, unified readiness + match score presentation |
+
+### 26.1 Objective
+
+Recompose authenticated pages for premium enterprise SaaS information hierarchy and expose a **unified scoring language** (readiness + match) using existing evaluator values only.
+
+### 26.2 Score components
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `PmReadinessScoreBadge` | `pm-readiness-score-badge.tsx` | Opportunity/profile readiness percent + completion tier |
+| `PmMatchScoreBadge` | `pm-match-score-badge.tsx` | Match compatibility percent + tier |
+| `PmScoreBadge` | `pm-score-badge.tsx` | Unified delegate (`type: 'readiness' \| 'match'`) |
+
+Display helpers: `pm-readiness-score-display.ts`, `pm-match-score-display.ts`.
+
+### 26.3 Readiness score token mapping
+
+| Tier | Percent | Label | `PmBadge` tone |
+|------|---------|-------|----------------|
+| Ready | 90–100 | Ready | `success` |
+| Good | 80–89 | Good | `info` |
+| Needs improvement | 70–79 | Needs Improvement | `warning` |
+| Incomplete | &lt;70 | Incomplete | `danger` |
+
+### 26.4 Match score token mapping
+
+| Tier | Percent | Label | `PmBadge` tone |
+|------|---------|-------|----------------|
+| Excellent | 90–100 | Excellent Match | `success` |
+| Strong | 75–89 | Strong Match | `info` |
+| Good | 60–74 | Good Match | `warning` |
+| Weak | 40–59 | Weak Match | `neutral` |
+| Poor | &lt;40 | Poor Match | `danger` |
+
+Weak tier uses `neutral` as the semantic stand-in for orange (no palette escape).
+
+### 26.5 Composition changes
+
+1. **`WorkspaceDashboardComposition`** — summary → KPIs → pipeline health → activity → recommended matches → insights; profile readiness in summary.
+2. **Dashboard hero** — profile readiness metric + active match badge.
+3. **Opportunity surfaces** — readiness top-right on cards; list/admin columns; detail hero metric.
+4. **Match surfaces** — cards, tables, related panels, admin columns use `PmMatchScoreBadge`.
+5. **Pipeline** — opportunity kanban cards show compact readiness in header.
+6. **Composition-only** — no command, repository, service, lifecycle, matching engine, or readiness calculation changes.
+
+### 26.6 Visual outcome
+
+- Final composition score: **4.9 / 5.0** in authenticated scope.
+- Applications remain hidden; primary path unchanged.
+
+### 26.7 Validation gates
+
+- `npm run type-check`
+- `npm test`
+- `npm run validate:design:strict`
+

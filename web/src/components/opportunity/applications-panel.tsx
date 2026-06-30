@@ -8,8 +8,11 @@ import {
 import { matchingService } from '@/services/matching-service.ts'
 import { negotiationService } from '@/services/negotiation-service.ts'
 import { formatDate } from '@/lib/format'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { PmContentCard } from '@/components/layout/pm-layout-index'
-import { PmBadge, PmButton, PmWorkflowBadge } from '@/components/ui/pm-index'
+import { PmBadge, PmButton, PmSurface, PmWorkflowBadge } from '@/components/ui/pm-index'
+import { cn } from '@/lib/utils'
+import { productFlags } from '@/config/product-flags.ts'
 import {
   Select,
   SelectContent,
@@ -39,19 +42,23 @@ export function ApplicationsPanel({
   opportunityClosed: boolean
   variant?: 'legacy' | 'default'
 }) {
+  if (!productFlags.showLegacyApplications) {
+    return null
+  }
+
   const handleStatusChange = (appId: string, status: string) => {
     negotiationService.transitionApplicationStatus(appId, status)
-    toast.success('Application status updated')
+    toast.success('Legacy application status updated')
   }
 
   const handleReject = (appId: string) => {
     negotiationService.rejectApplication(appId)
-    toast.success('Application rejected')
+    toast.success('Legacy application rejected')
   }
 
   const handleAccept = (appId: string) => {
     negotiationService.acceptApplication(appId)
-    toast.success('Application accepted')
+    toast.success('Legacy application accepted')
   }
 
   const sectionTitle =
@@ -65,10 +72,10 @@ export function ApplicationsPanel({
         title={sectionTitle}
         className="border-border/50 bg-surface-muted/40"
       >
-        <p className="text-sm text-muted-foreground">
+        <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
           {variant === 'legacy'
             ? APPLICATIONS_LEGACY_EMPTY_MESSAGE
-            : 'No applications yet. Published opportunities will receive applicant proposals here.'}
+            : 'No direct applications. PostMatch is the primary collaboration path.'}
         </p>
       </PmContentCard>
     )
@@ -98,13 +105,15 @@ export function ApplicationsPanel({
             TRANSITIONABLE_APPLICATION_STATUSES.includes(app.status)
 
           return (
-            <article
+            <PmSurface
               key={app.id}
-              className="rounded-xl border border-border/60 p-4 transition-colors hover:bg-surface-muted/50"
+              variant="default"
+              shadow="card"
+              className="p-4"
             >
               <div className="flex flex-wrap items-center gap-2">
-                <p className="font-semibold">
-                  {app.applicant?.profile?.name ?? app.applicant?.email ?? 'Unknown applicant'}
+                <p className={cn(pmTypography.body, 'font-medium')}>
+                  {app.applicant?.profile?.name ?? app.applicant?.email ?? 'Unknown profile'}
                 </p>
                 <PmWorkflowBadge status={app.status} entity="application" />
                 {av.valueScorePct != null ? (
@@ -113,14 +122,14 @@ export function ApplicationsPanel({
                   </PmBadge>
                 ) : null}
                 {amount ? (
-                  <span className="text-xs text-muted-foreground">{amount}</span>
+                  <span className={cn(pmTypography.caption, 'text-muted-foreground')}>{amount}</span>
                 ) : null}
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className={cn(pmTypography.bodySm, 'mt-2 text-muted-foreground')}>
                 {app.proposal || app.coverLetter || 'No proposal provided.'}
               </p>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Applied {formatDate(app.createdAt)}
+              <p className={cn(pmTypography.caption, 'mt-2 text-muted-foreground')}>
+                Submitted (legacy) {formatDate(app.createdAt)}
               </p>
               {canManage ? (
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -158,7 +167,7 @@ export function ApplicationsPanel({
                   ) : null}
                 </div>
               ) : null}
-            </article>
+            </PmSurface>
           )
         })}
       </div>

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { formatDate, formatPercent } from '@/lib/format'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { formatDate } from '@/lib/format'
 import { MatchCard } from '@/components/collaboration/match-card'
 import {
   formatMatchTypeBadgeLabel,
@@ -16,7 +17,7 @@ import {
   PmTableToolbar,
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
-import { PmBadge, PmButton, PmWorkflowBadge } from '@/components/ui/pm-index'
+import { PmBadge, PmButton, PmMatchScoreBadge, PmWorkflowBadge } from '@/components/ui/pm-index'
 import {
   Select,
   SelectContent,
@@ -74,11 +75,7 @@ export function MatchesListSection({
     {
       id: 'score',
       label: 'Score',
-      cell: (m) => (
-        <span className="font-semibold tabular-nums text-primary">
-          {formatPercent(m.matchScore)}
-        </span>
-      ),
+      cell: (m) => <PmMatchScoreBadge score={m.matchScore} variant="list" />,
     },
     {
       id: 'status',
@@ -126,7 +123,7 @@ export function MatchesListSection({
             filters={
               <PmTableFilter activeCount={status !== 'all' ? 1 : 0} label="Status">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium">Status</label>
+                  <label className={pmTypography.label}>Status</label>
                   <Select
                     value={status}
                     onValueChange={(v) => {

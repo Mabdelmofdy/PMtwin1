@@ -58,12 +58,22 @@ export {
   pmMotionVars,
   pmMotion,
   pmMotionDuration,
+  pmMotionDelay,
+  pmMotionDistance,
   pmMotionEasing,
+  pmInteraction,
+  pmEnter,
+  pmLoading,
+  pmPipeline,
+  pmOverlay,
+  pmToast,
   pmReducedMotionPolicy,
   type PmMotionSpeed,
 } from '@/tokens/layers/motion'
 export { pmIconSize, pmIconSpacing, type PmIconSize } from '@/tokens/layers/icon'
 export { pmChartVars, pmChartSemanticMapping, type PmChartVar } from '@/tokens/layers/chart'
+export { pmLogicalAlign, pmLogical, pmRtlTypography, type DocumentDirection } from '@/tokens/layers/rtl'
+export { pmResponsive, pmResponsiveViewports, type PmResponsiveViewportGroup } from '@/tokens/layers/responsive'
 
 /** @deprecated Use pmElevation — alias for backward compatibility. */
 export { pmElevation as pmShadow } from '@/tokens/layers/elevation'

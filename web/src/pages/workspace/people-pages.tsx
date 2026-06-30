@@ -1,5 +1,6 @@
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { peopleApi } from '@/api/people.ts'
+import { notificationsApi } from '@/api/notifications.ts'
 import { useAuth } from '@/providers/auth-provider'
 import { PeopleListSection } from '@/components/user/people-list-section'
 import { MessagesView } from '@/components/user/messages-view'
@@ -11,10 +12,14 @@ import {
   PublicProfileView,
   resolveCompanyIds,
 } from '@/components/user/public-profile-view'
+import { MOCK_MESSAGE_THREADS } from '@/components/user/user-display'
 import { PmPageLayout } from '@/components/layout/pm-layout-index'
-import { PmPageHeader } from '@/components/ui/pm-index'
+import { PmBadge, PmButton, PmPageHeader, PmPageHeroMetric, PmReadinessScoreBadge } from '@/components/ui/pm-index'
+import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
 
 export function PeoplePage() {
+  const profileCount = peopleApi.listAll().length
+
   return (
     <PmPageLayout
       header={
@@ -22,6 +27,7 @@ export function PeoplePage() {
           label="Directory"
           title="Find"
           description="Search professionals and companies."
+          metric={<PmPageHeroMetric value={profileCount} label="Profiles" />}
         />
       }
     >
@@ -34,6 +40,7 @@ export function PersonProfilePage() {
   const { id } = useParams()
   const person = id ? peopleApi.get(id) : undefined
   const companyIds = resolveCompanyIds()
+  const skillsCount = (person?.profile as { skills?: string[] } | undefined)?.skills?.length ?? 0
 
   if (!person) {
     return (
@@ -50,6 +57,11 @@ export function PersonProfilePage() {
           label="Public profile"
           title={person.profile?.name ?? person.email}
           description={person.profile?.headline}
+          metric={
+            skillsCount > 0 ? (
+              <PmPageHeroMetric value={skillsCount} label="Skills" />
+            ) : undefined
+          }
         />
       }
     >
@@ -60,13 +72,25 @@ export function PersonProfilePage() {
 
 export function MessagesPage() {
   const { id } = useParams()
+  const unreadTotal = MOCK_MESSAGE_THREADS.reduce((sum, t) => sum + t.unread, 0)
 
   return (
     <PmPageLayout
       header={
         <PmPageHeader
+          label="Inbox"
           title="Messages"
           description="Direct conversations with your network."
+          metric={
+            <PmPageHeroMetric value={MOCK_MESSAGE_THREADS.length} label="Threads" />
+          }
+          badges={
+            unreadTotal > 0 ? (
+              <PmBadge tone="primary">{unreadTotal} unread</PmBadge>
+            ) : (
+              <PmBadge tone="muted">All read</PmBadge>
+            )
+          }
         />
       }
     >
@@ -76,12 +100,24 @@ export function MessagesPage() {
 }
 
 export function NotificationsPage() {
+  const { user } = useAuth()
+  const userId = user?.id ?? 'seed-user-001'
+  const notifications = notificationsApi.list(userId)
+  const unreadCount = notifications.filter((n) => !n.read).length
+
   return (
     <PmPageLayout
       header={
         <PmPageHeader
+          label="Alerts"
           title="Notifications"
-          description="Alerts for matches, applications, deals, and messages."
+          description="Alerts for matches, deals, negotiations, and messages."
+          metric={<PmPageHeroMetric value={unreadCount} label="Unread" />}
+          badges={
+            <PmBadge tone={unreadCount > 0 ? 'warning' : 'success'}>
+              {notifications.length} total
+            </PmBadge>
+          }
         />
       }
     >
@@ -93,13 +129,35 @@ export function NotificationsPage() {
 export function ProfilePage() {
   const { user, isCompanyUser } = useAuth()
   const profileKind = isCompanyUser ? 'company' : 'individual'
+  const readiness = user?.profile
+    ? resolveProfileReadiness(user.profile, profileKind)
+    : null
 
   return (
     <PmPageLayout
       header={
         <PmPageHeader
-          title="Profile"
-          description="Your public profile and vetting status."
+          label="Account"
+          title={user?.profile?.name ?? 'Profile'}
+          description="Your public profile, readiness score, and vetting status."
+          metric={
+            readiness ? (
+              <PmPageHeroMetric
+                value={`${Math.round(readiness.score)}%`}
+                label="Readiness"
+              />
+            ) : undefined
+          }
+          badges={
+            readiness ? (
+              <PmReadinessScoreBadge score={readiness.score} variant="default" showLabel />
+            ) : undefined
+          }
+          actions={
+            <PmButton variant="outline" size="sm" asChild>
+              <Link to="/settings">Settings</Link>
+            </PmButton>
+          }
         />
       }
     >
@@ -117,6 +175,7 @@ export function SettingsPage() {
     <PmPageLayout
       header={
         <PmPageHeader
+          label="Account"
           title="Settings"
           description="Account security and notification preferences."
         />

@@ -8,8 +8,10 @@ import {
   userMenuLinks,
 } from '@/config/navigation'
 import { useCommandMenu } from '@/providers/command-menu-provider'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { useAuth } from '@/providers/auth-provider'
 import { readRecentPages } from '@/components/layout/recent-pages'
+import { cn } from '@/lib/utils'
 import {
   CommandDialog,
   CommandEmpty,
@@ -53,9 +55,9 @@ export function CommandMenu() {
       <CommandInput placeholder="Search pages, actions, settings…" />
       <CommandList>
         <CommandEmpty>
-          <div className="py-6 text-center text-sm text-muted-foreground">
+          <div className={cn('py-6 text-center', pmTypography.bodySm, 'text-muted-foreground')}>
             <p>No results found.</p>
-            <p className="mt-1 text-xs">Try a page name, action, or keyword from navigation.</p>
+            <p className={cn('mt-1', pmTypography.caption)}>Try a page name, action, or keyword from navigation.</p>
           </div>
         </CommandEmpty>
 
@@ -188,7 +190,7 @@ export function CommandMenu() {
         </CommandGroup>
       </CommandList>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/50 px-3 py-2 text-xs text-muted-foreground">
+      <div className={cn('flex flex-wrap items-center justify-between gap-2 border-t border-border/50 px-3 py-2', pmTypography.caption)}>
         <span>↑↓ Navigate · Enter Select · Esc Close</span>
         <CommandShortcut>Ctrl+K</CommandShortcut>
       </div>

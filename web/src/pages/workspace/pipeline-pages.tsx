@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
@@ -23,7 +23,7 @@ import {
   canShowNegotiationTransition,
   transitionNegotiationStatusUiAction,
 } from '@/lib/negotiation-ui-actions.ts'
-import { dealRepository } from '@/repositories/index.ts'
+import { dealRepository, applicationRepository } from '@/repositories/index.ts'
 import { PipelineBoard } from '@/components/pipeline/pipeline-board'
 import { MatchesListSection } from '@/components/collaboration/matches-list-section'
 import { CollaborationTimeline } from '@/components/collaboration/collaboration-timeline'
@@ -37,8 +37,11 @@ import {
   PmContentCard,
   PmDetailLayout,
   PmInspectorLayout,
+  PmMetricGrid,
   PmPageLayout,
   PmSectionHeader,
+  countActiveMatches,
+  countPipelineWorkflowItems,
 } from '@/components/layout/pm-layout-index'
 import {
   PmFormReadonly,
@@ -49,13 +52,17 @@ import {
   PmBadge,
   PmButton,
   PmEmptyState,
+  PmMatchScoreBadge,
   PmPageHeader,
+  PmPageHeroMetric,
   PmStatCard,
+  PmSurface,
   PmWorkflowBadge,
 } from '@/components/ui/pm-index'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Negotiation, PostMatch } from '@/types/domain.ts'
 import type { CollaborationTimelineEvent } from '@/components/collaboration/collaboration-timeline'
+import { productFlags } from '@/config/product-flags.ts'
 
 function resolveMatchNegotiation(match: PostMatch): Negotiation | undefined {
   if (match.negotiationId) {
@@ -65,18 +72,43 @@ function resolveMatchNegotiation(match: PostMatch): Negotiation | undefined {
   return linked[0]
 }
 
-const PIPELINE_TABS = [
+const PIPELINE_TAB_DEFS = [
   { value: 'opportunities', label: 'Opportunities' },
   { value: 'matches', label: 'Post-matches' },
   { value: 'applications', label: 'Applications (legacy)' },
 ] as const
 
+/** Visible pipeline tabs — applications tab omitted when legacy UI is suppressed. */
+export function getVisiblePipelineTabs(showLegacyApplications: boolean) {
+  return showLegacyApplications
+    ? PIPELINE_TAB_DEFS
+    : PIPELINE_TAB_DEFS.filter((t) => t.value !== 'applications')
+}
+
 export function PipelinePage() {
   const { tab } = useParams()
   const navigate = useNavigate()
-  const activeTab = tab ?? 'opportunities'
+  const showLegacyApplications = productFlags.showLegacyApplications
+  const pipelineTabs = getVisiblePipelineTabs(showLegacyApplications)
+  const activeTab =
+    !showLegacyApplications && tab === 'applications' ? 'opportunities' : (tab ?? 'opportunities')
   const version = useDataStoreVersion()
+  const opportunities = opportunitiesApi.list()
   const matches = matchesApi.list()
+  const applications = applicationRepository.getAll()
+  const applicationCount = showLegacyApplications ? applications.length : 0
+  const workflowCount = countPipelineWorkflowItems(
+    opportunities.length,
+    matches.length,
+    applicationCount,
+  )
+  const activeMatches = countActiveMatches(matches)
+
+  useEffect(() => {
+    if (!showLegacyApplications && tab === 'applications') {
+      navigate('/pipeline', { replace: true })
+    }
+  }, [showLegacyApplications, tab, navigate])
 
   return (
     <PmPageLayout
@@ -84,7 +116,19 @@ export function PipelinePage() {
         <PmPageHeader
           label="Workflow"
           title="Pipeline"
-          description="Track opportunities and PostMatches through negotiation, deal, and contract. Applications are a legacy hiring path."
+          description="Track opportunities and PostMatches through negotiation, deal, and contract."
+          metric={
+            <PmPageHeroMetric value={workflowCount} label="Active workflows" />
+          }
+          badges={
+            <>
+              <PmBadge tone="primary">{opportunities.length} opportunities</PmBadge>
+              <PmBadge tone="info">{activeMatches} matches</PmBadge>
+              {showLegacyApplications ? (
+                <PmBadge tone="muted">{applications.length} applications</PmBadge>
+              ) : null}
+            </>
+          }
         />
       }
     >
@@ -94,27 +138,31 @@ export function PipelinePage() {
           navigate(v === 'opportunities' ? '/pipeline' : `/pipeline/${v}`)
         }
       >
-        <TabsList>
-          {PIPELINE_TABS.map((t) => (
-            <TabsTrigger key={t.value} value={t.value} className="cursor-pointer">
-              {t.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="pm-toolbar-surface rounded-xl px-4 py-3">
+          <TabsList>
+            {pipelineTabs.map((t) => (
+              <TabsTrigger key={t.value} value={t.value} className="cursor-pointer">
+                {t.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
         <TabsContent value="opportunities" className="mt-4">
           <PipelineBoard mode="opportunities" key={`opp-${version}`} />
         </TabsContent>
         <TabsContent value="matches" className="mt-4">
           <MatchesListSection matches={matches} compact />
         </TabsContent>
-        <TabsContent value="applications" className="mt-4">
-          <PmContentCard
-            title="Legacy applications"
-            description="Primary collaboration runs through Post-matches."
-          >
-            <PipelineBoard mode="applications" key={`app-${version}`} />
-          </PmContentCard>
-        </TabsContent>
+        {showLegacyApplications ? (
+          <TabsContent value="applications" className="mt-4">
+            <PmContentCard
+              title="Legacy applications"
+              description="Primary collaboration runs through Post-matches."
+            >
+              <PipelineBoard mode="applications" key={`app-${version}`} />
+            </PmContentCard>
+          </TabsContent>
+        ) : null}
       </Tabs>
     </PmPageLayout>
   )
@@ -122,6 +170,7 @@ export function PipelinePage() {
 
 export function MatchesPage() {
   const matches = matchesApi.list()
+  const activeMatches = countActiveMatches(matches)
 
   return (
     <PmPageLayout
@@ -130,9 +179,29 @@ export function MatchesPage() {
           label="Collaboration"
           title="Post-matches"
           description="Ranked matches for your opportunities — accept, negotiate, create deals, then contracts."
+          metric={
+            <PmPageHeroMetric value={activeMatches} label="Active" />
+          }
+          badges={
+            <>
+              <PmBadge tone="primary">{matches.length} total</PmBadge>
+              <PmBadge tone="success">
+                {matches.filter((m) => m.status === 'accepted' || m.status === 'confirmed').length} accepted
+              </PmBadge>
+            </>
+          }
         />
       }
     >
+      <PmMetricGrid columns={3} className="mb-6">
+        <PmStatCard label="Active" value={activeMatches} dense />
+        <PmStatCard label="Total" value={matches.length} dense />
+        <PmStatCard
+          label="Accepted"
+          value={matches.filter((m) => m.status === 'accepted' || m.status === 'confirmed').length}
+          dense
+        />
+      </PmMetricGrid>
       <MatchesListSection matches={matches} />
     </PmPageLayout>
   )
@@ -236,8 +305,20 @@ export function MatchDetailPage() {
     <PmPageLayout
       header={
         <PmPageHeader
+          label="Post-match"
           title={`Match ${model.scoreLabel}`}
           description={`${model.matchTypeLabel} · ${model.canonicalStatus}`}
+          metric={
+            <PmPageHeroMetric value={model.scoreLabel} label="Match score" />
+          }
+          badges={
+            <>
+              <PmBadge tone={resolveMatchTypeTone(match.matchType)} uppercase>
+                {formatMatchTypeBadgeLabel(match.matchType)}
+              </PmBadge>
+              <PmWorkflowBadge status={match.status} entity="match" />
+            </>
+          }
           actions={
             <>
               {model.canAct && actions.showAccept ? (
@@ -276,11 +357,15 @@ export function MatchDetailPage() {
       }
     >
       <div className="flex flex-wrap items-center gap-2">
-        <PmBadge tone={resolveMatchTypeTone(match.matchType)} uppercase>
-          {formatMatchTypeBadgeLabel(match.matchType)}
-        </PmBadge>
-        <PmWorkflowBadge status={match.status} entity="match" />
+        {negotiation ? (
+          <PmBadge tone="info">Negotiation linked</PmBadge>
+        ) : null}
+        {deal ? (
+          <PmBadge tone="success">Deal linked</PmBadge>
+        ) : null}
       </div>
+
+      <PmMatchScoreBadge score={match.matchScore} variant="hero" className="mb-4" />
 
       {!model.isParticipant && user ? (
         <p className="text-sm text-muted-foreground">
@@ -465,11 +550,18 @@ export function NegotiationDetailPage() {
     <PmPageLayout
       header={
         <PmPageHeader
+          label="Negotiation"
           title={`Negotiation ${neg.id}`}
           description="Terms sheet, rounds timeline, and proposal form."
+          metric={
+            <PmPageHeroMetric
+              value={neg.rounds?.length ?? 0}
+              label="Rounds"
+            />
+          }
+          badges={<PmWorkflowBadge status={neg.status} entity="negotiation" />}
           actions={
             <>
-              <PmWorkflowBadge status={neg.status} entity="negotiation" />
               <AgreeNegotiationButton negotiation={neg} />
               <CancelNegotiationButton negotiation={neg} />
               <CreateDealButton negotiation={neg} />
@@ -504,11 +596,13 @@ export function NegotiationDetailPage() {
             {neg.rounds && neg.rounds.length > 0 ? (
               <ul className="mt-4 space-y-2 text-sm">
                 {neg.rounds.map((round, index) => (
-                  <li key={`${round.at}-${index}`} className="rounded-lg border border-border/60 p-3">
-                    <p className="font-medium">Round {index + 1}</p>
-                    <p className="text-muted-foreground">
-                      {round.by} · {formatDate(round.at)}
-                    </p>
+                  <li key={`${round.at}-${index}`}>
+                    <PmSurface variant="default" shadow="card" className="p-3">
+                      <p className="font-medium">Round {index + 1}</p>
+                      <p className="text-muted-foreground">
+                        {round.by} · {formatDate(round.at)}
+                      </p>
+                    </PmSurface>
                   </li>
                 ))}
               </ul>

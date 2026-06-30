@@ -134,11 +134,6 @@ export const BASELINE_EXCEPTION_KEYS = new Set([
   'components/shared/page-primitives.tsx:31:TAILWIND_PALETTE',
   'components/shared/page-primitives.tsx:32:TAILWIND_PALETTE',
   'components/shared/page-primitives.tsx:33:TAILWIND_PALETTE',
-  // Readiness visuals — migrate to semantic tokens in future UI phase
-  'components/readiness/readiness-list.tsx:17:TAILWIND_PALETTE',
-  'components/readiness/readiness-score-ring.tsx:6:TAILWIND_PALETTE',
-  'components/readiness/readiness-score-ring.tsx:7:TAILWIND_PALETTE',
-  'components/readiness/readiness-score-ring.tsx:8:TAILWIND_PALETTE',
   // Token-var shadows outside ui/ — acceptable until component token pass
   'components/data/pm-data-table.tsx:285:SHADOW_ARBITRARY',
   'components/layout/app-sidebar.tsx:30:SHADOW_ARBITRARY',

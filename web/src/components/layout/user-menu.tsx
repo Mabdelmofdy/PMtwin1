@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 import { userMenuLinks } from '@/config/navigation'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { useAuth } from '@/providers/auth-provider'
 import { getUserInitials } from '@/components/layout/workspace-display'
+import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { PmButton } from '@/components/ui/pm-button'
 import { PmNavBadge } from '@/components/ui/pm-badge'
@@ -31,7 +33,7 @@ export function UserMenu() {
           aria-label="Open profile menu"
         >
           <Avatar className="size-8 ring-2 ring-border/60">
-            <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+            <AvatarFallback className={cn(pmTypography.badge, 'bg-primary/10 font-semibold text-primary')}>
               {getUserInitials(displayName)}
             </AvatarFallback>
           </Avatar>
@@ -41,10 +43,10 @@ export function UserMenu() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-medium leading-none">{displayName}</p>
+              <p className={pmTypography.label}>{displayName}</p>
               <PmNavBadge className="uppercase">{user.role}</PmNavBadge>
             </div>
-            <p className="text-xs text-muted-foreground">{user.email}</p>
+            <p className={pmTypography.caption}>{user.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

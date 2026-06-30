@@ -13,8 +13,9 @@ import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { formatMatchTypeLabel } from '@/components/shared/pm-design-tokens'
 import { PmBadge } from '@/components/ui/pm-badge'
 import { PmButton } from '@/components/ui/pm-button'
+import { PmMatchScoreBadge } from '@/components/ui/pm-match-score-badge'
 import { PmContentCard } from '@/components/layout/pm-layout-panels'
-import { PmEmptyState } from '@/components/ui/pm-index'
+import { PmEmptyState, PmSurface } from '@/components/ui/pm-index'
 
 const MATCH_TYPE_TONE = {
   one_way: 'info',
@@ -110,23 +111,25 @@ export function RelatedMatchesPanel({
             const actionPending = pendingAction?.startsWith(`${card.match.id}:`)
 
             return (
-              <article
+              <PmSurface
                 key={card.match.id}
-                className="rounded-xl border border-border/60 p-4 transition-colors hover:bg-surface-muted/50"
+                variant="default"
+                shadow="card"
+                className="p-4"
               >
-                <div className="flex flex-wrap items-center gap-2">
-                  <PmBadge
-                    tone={MATCH_TYPE_TONE[matchTypeKey as keyof typeof MATCH_TYPE_TONE] ?? 'neutral'}
-                    uppercase
-                  >
-                    {formatMatchTypeLabel(matchTypeKey)}
-                  </PmBadge>
-                  <PmBadge tone="neutral" size="sm">
-                    {card.statusLabel}
-                  </PmBadge>
-                  <PmBadge tone="primary" size="sm">
-                    Score {card.scoreLabel}
-                  </PmBadge>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <PmBadge
+                      tone={MATCH_TYPE_TONE[matchTypeKey as keyof typeof MATCH_TYPE_TONE] ?? 'neutral'}
+                      uppercase
+                    >
+                      {formatMatchTypeLabel(matchTypeKey)}
+                    </PmBadge>
+                    <PmBadge tone="neutral" size="sm">
+                      {card.statusLabel}
+                    </PmBadge>
+                  </div>
+                  <PmMatchScoreBadge score={card.match.matchScore} variant="pipeline" />
                 </div>
 
                 {card.relatedOpportunities.length > 0 ? (
@@ -134,7 +137,7 @@ export function RelatedMatchesPanel({
                     <p className={cn(pmTypography.caption, 'font-medium text-muted-foreground')}>
                       Related opportunities
                     </p>
-                    <ul className="space-y-1 text-sm">
+                    <ul className={cn('space-y-1', pmTypography.bodySm)}>
                       {card.relatedOpportunities.map((item) => (
                         <li key={`${card.match.id}-${item.id}-${item.label}`}>
                           <span className="text-muted-foreground">{item.label}:</span>{' '}
@@ -159,7 +162,7 @@ export function RelatedMatchesPanel({
                     <p className={cn(pmTypography.caption, 'font-medium text-muted-foreground')}>
                       Participants
                     </p>
-                    <ul className="space-y-0.5 text-sm text-muted-foreground">
+                    <ul className={cn('space-y-0.5', pmTypography.bodySm, 'text-muted-foreground')}>
                       {card.participants.map((participant) => (
                         <li key={`${card.match.id}-${participant.userId}`}>
                           {participant.role.replace(/_/g, ' ')} — {participant.displayName}
@@ -202,7 +205,7 @@ export function RelatedMatchesPanel({
                     <StartNegotiationButton
                       match={card.match}
                       variant="default"
-                      className="h-8 px-3 text-xs"
+                      size="sm"
                     />
                   ) : null}
 
@@ -218,7 +221,7 @@ export function RelatedMatchesPanel({
                     <CreateDealButton
                       negotiation={card.actions.negotiation}
                       variant="default"
-                      className="h-8 px-3 text-xs"
+                      size="sm"
                     />
                   ) : null}
 
@@ -228,7 +231,7 @@ export function RelatedMatchesPanel({
                     </PmButton>
                   ) : null}
                 </div>
-              </article>
+              </PmSurface>
             )
           })}
         </div>

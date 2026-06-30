@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { cn } from '@/lib/utils'
-import { pmLayout, pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmInteraction, pmLayout, pmTypography, pmResponsive } from '@/tokens'
 import { pmSticky } from '@/components/shared/pm-layout-tokens'
 
 export type PmStickyHeaderProps = ComponentProps<'div'> & {
@@ -93,17 +93,17 @@ export function PmToolbar({
       role="toolbar"
       className={cn(
         'flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between',
-        sticky && pmSticky.toolbar,
+        sticky && cn('pm-toolbar-surface sticky top-14 z-10 rounded-xl px-3 py-3', pmResponsive.toolbarBleed),
         className,
       )}
       {...props}
     >
-      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+      <div className={cn('flex min-w-0 flex-1 flex-wrap items-center gap-2', pmInteraction.toolbarAction)}>
         {leading}
         {children}
       </div>
       {trailing ? (
-        <div className="flex shrink-0 flex-wrap items-center gap-2">{trailing}</div>
+        <div className={cn('flex shrink-0 flex-wrap items-center gap-2', pmInteraction.toolbarAction)}>{trailing}</div>
       ) : null}
     </div>
   )
@@ -130,14 +130,14 @@ export function PmActionBar({
       data-slot="pm-action-bar"
       className={cn(
         'flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between',
-        sticky && pmSticky.actionFooter,
+        sticky && cn(pmSticky.actionFooter, 'border-border/70 pm-shadow-card'),
         className,
       )}
       {...props}
     >
       <div className="flex flex-wrap items-center gap-2">{leading ?? children}</div>
       {trailing ? (
-        <div className="flex flex-wrap items-center justify-end gap-2">{trailing}</div>
+        <div className="flex flex-wrap items-center justify-end gap-2 sm:ms-auto">{trailing}</div>
       ) : null}
     </div>
   )

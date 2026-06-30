@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils'
 import { PmBadge } from '@/components/ui/pm-badge'
+import { PmReadinessScoreBadge } from '@/components/ui/pm-readiness-score-badge'
 import { PmButton } from '@/components/ui/pm-button'
 import { PmContentCard } from '@/components/layout/pm-layout-panels'
 import { resolvePublishVisualState } from '@/components/opportunity/opportunity-display'
@@ -45,9 +46,7 @@ export function OpportunityPublishPanel({
       >
         <div className="flex flex-wrap items-center gap-2">
           <PmBadge tone={copy.tone}>{copy.label}</PmBadge>
-          <PmBadge tone="outline" size="sm">
-            Readiness {readiness.score}%
-          </PmBadge>
+          <PmReadinessScoreBadge score={readiness.score} variant="compact" />
         </div>
 
         {publishDetails ? (

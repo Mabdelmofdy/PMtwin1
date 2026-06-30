@@ -13,6 +13,23 @@ function toMatchScorePercent(score) {
     return Math.min(100, Math.round((Number(score) || 0) * 100));
 }
 
+function legacyApplicationUiVisible() {
+    return !!(typeof CONFIG !== 'undefined'
+        && CONFIG.PRODUCT_FLAGS
+        && CONFIG.PRODUCT_FLAGS.SHOW_LEGACY_APPLICATIONS === true);
+}
+
+function hideLegacyApplicationDashboardSurfaces() {
+    if (legacyApplicationUiVisible()) return;
+    document.querySelectorAll('.dash-stat-card[data-route="/pipeline/applications"]').forEach((el) => {
+        el.style.display = 'none';
+    });
+    const recentAppSection = document.getElementById('recent-applications')?.closest('section');
+    if (recentAppSection) recentAppSection.style.display = 'none';
+    const appsReceived = document.getElementById('applications-received-section');
+    if (appsReceived) appsReceived.style.display = 'none';
+}
+
 function setupDashboardRefreshListener(user, isCompanyView) {
     if (window.__pmtwinDashboardRefreshBound) return;
     window.__pmtwinDashboardRefreshBound = true;
@@ -24,7 +41,7 @@ function setupDashboardRefreshListener(user, isCompanyView) {
         try {
             await loadDashboardData(currentUser.id);
             await loadPostMatchDashboard(currentUser.id, isCompany);
-            if (isCompany) loadApplicationsReceived(currentUser.id);
+            if (isCompany && legacyApplicationUiVisible()) loadApplicationsReceived(currentUser.id);
         } catch (err) {
             console.error('Dashboard refresh failed:', err);
         }
@@ -43,6 +60,7 @@ async function initDashboard(params) {
 
     const isCompanyView = params?.view === 'company';
     setupDashboardRefreshListener(user, isCompanyView);
+    hideLegacyApplicationDashboardSurfaces();
     const dashboardPage = document.querySelector('.dashboard-page');
     if (dashboardPage) {
         dashboardPage.classList.toggle('dashboard-page--company', isCompanyView);
@@ -56,7 +74,7 @@ async function initDashboard(params) {
                 label: 'Company Workspace',
                 title: 'Company Dashboard',
                 description:
-                    'Post opportunities, review applicants, and connect with matched professionals for projects, BIM, and delivery.',
+                    'Post opportunities, review Post-matches, and connect with matched professionals for projects, BIM, and delivery.',
                 primaryAction: {
                     label: 'Post Opportunity',
                     route: CONFIG.ROUTES.OPPORTUNITY_CREATE,
@@ -75,7 +93,7 @@ async function initDashboard(params) {
                 descriptionHtml:
                     'Welcome back, <span class="page-context-header__accent">' +
                     escDash(name) +
-                    '</span>. Track opportunities, applications, and post-to-post matches.',
+                    '</span>. Track opportunities, Post-matches, and pipeline progress.',
                 primaryAction: {
                     label: 'Create opportunity',
                     route: CONFIG.ROUTES.OPPORTUNITY_CREATE,
@@ -138,7 +156,7 @@ async function initDashboard(params) {
 
     const isCompany = isCompanyView || (authService.isCompanyUser && authService.isCompanyUser());
     await loadPostMatchDashboard(user.id, isCompany);
-    if (isCompany) {
+    if (isCompany && legacyApplicationUiVisible()) {
         loadApplicationsReceived(user.id);
     }
 
@@ -160,10 +178,14 @@ async function loadDashboardData(userId) {
         const userOpportunities = allOpportunities.filter(o => o.creatorId === userId);
         document.getElementById('stat-opportunities').textContent = userOpportunities.length;
         
-        // Load applications
-        const allApplications = await dataService.getApplications();
-        const userApplications = allApplications.filter(a => a.applicantId === userId);
-        document.getElementById('stat-applications').textContent = userApplications.length;
+        // Load applications (legacy UI only)
+        if (legacyApplicationUiVisible()) {
+            const allApplications = await dataService.getApplications();
+            const userApplications = allApplications.filter(a => a.applicantId === userId);
+            const statApplicationsEl = document.getElementById('stat-applications');
+            if (statApplicationsEl) statApplicationsEl.textContent = userApplications.length;
+            await displayRecentApplications(userApplications.slice(0, 5));
+        }
         
         // Load matches (post_matches only)
         const postMatchesForUser = await fetchUserPostMatches(userId);
@@ -186,9 +208,6 @@ async function loadDashboardData(userId) {
         // Display recent opportunities
         await displayRecentOpportunities(userOpportunities.slice(0, 5));
         
-        // Display recent applications
-        await displayRecentApplications(userApplications.slice(0, 5));
-
         // Sample opportunities to explore (when user has no applications, or always show if any)
         const sampleOpps = allOpportunities.filter(o => o.isSample === true && o.status === 'published');
         const sampleSection = document.getElementById('sample-opportunities-dashboard');
@@ -688,15 +707,25 @@ async function buildPostMatchViewModel(postMatch, currentUserId) {
         if (isNeedOwner) {
             primaryActionLabel = 'View Provider';
             primaryActionRoute = '/opportunities/' + offerOpportunityId;
-            secondaryActionLabel = 'Invite to Apply';
-            secondaryActionRoute = '/opportunities/' + offerOpportunityId;
+            if (legacyApplicationUiVisible()) {
+                secondaryActionLabel = 'Invite to Apply';
+                secondaryActionRoute = '/opportunities/' + offerOpportunityId;
+            } else {
+                secondaryActionLabel = 'View Offer';
+                secondaryActionRoute = '/opportunities/' + offerOpportunityId;
+            }
             tertiaryActionLabel = 'Message Provider';
             tertiaryActionRoute = '/messages/' + otherUserId;
         } else {
             primaryActionLabel = 'View Opportunity';
             primaryActionRoute = '/opportunities/' + needOpportunityId;
-            secondaryActionLabel = 'Apply to Opportunity';
-            secondaryActionRoute = '/opportunities/' + needOpportunityId;
+            if (legacyApplicationUiVisible()) {
+                secondaryActionLabel = 'Apply to Opportunity';
+                secondaryActionRoute = '/opportunities/' + needOpportunityId;
+            } else {
+                secondaryActionLabel = 'View Need';
+                secondaryActionRoute = '/opportunities/' + needOpportunityId;
+            }
             tertiaryActionLabel = 'Message Owner';
             tertiaryActionRoute = '/messages/' + otherUserId;
         }

@@ -27,6 +27,7 @@ import {
   PmInspectorLayout,
   PmPageLayout,
   PmSectionHeader,
+  countActiveContracts,
 } from '@/components/layout/pm-layout-index'
 import {
   PmFormReadonly,
@@ -43,9 +44,11 @@ import {
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
 import {
+  PmBadge,
   PmButton,
   PmEmptyState,
   PmPageHeader,
+  PmPageHeroMetric,
   PmSurface,
   PmWorkflowBadge,
 } from '@/components/ui/pm-index'
@@ -104,6 +107,7 @@ export function ContractsPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
   const contracts = contractsApi.list()
+  const activeContracts = countActiveContracts(contracts)
 
   const filtered = useMemo(() => {
     return contracts.filter((c) => {
@@ -150,8 +154,10 @@ export function ContractsPage() {
       <PmPageLayout
         header={
           <PmPageHeader
+            label="Collaboration"
             title="Contracts"
             description="Agreements linked to deals and opportunities."
+            metric={<PmPageHeroMetric value={0} label="Active" />}
           />
         }
       >
@@ -172,8 +178,16 @@ export function ContractsPage() {
     <PmPageLayout
       header={
         <PmPageHeader
+          label="Collaboration"
           title="Contracts"
           description="Agreements linked to deals and opportunities."
+          metric={<PmPageHeroMetric value={activeContracts} label="Active" />}
+          badges={
+            <>
+              <PmBadge tone="muted">{contracts.length} total</PmBadge>
+              <PmBadge tone="primary">{activeContracts} active</PmBadge>
+            </>
+          }
         />
       }
     >
@@ -185,6 +199,7 @@ export function ContractsPage() {
         caption="Contracts"
         toolbar={
           <PmTableToolbar
+            className="pm-toolbar-surface rounded-xl px-4 py-3"
             search={
               <PmTableSearch
                 placeholder="Search contract or deal ID…"
@@ -288,7 +303,13 @@ export function ContractDetailPage() {
           label="Contract"
           title={`Contract ${model.contractId}`}
           description={`Created ${formatDate(model.contract.createdAt)} · Updated ${formatDate(model.contract.updatedAt)}`}
-          actions={<PmWorkflowBadge status={model.status} entity="contract" />}
+          metric={
+            <PmPageHeroMetric
+              value={model.parties.length}
+              label="Parties"
+            />
+          }
+          badges={<PmWorkflowBadge status={model.status} entity="contract" />}
         />
       }
     >

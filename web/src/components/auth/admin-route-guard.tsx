@@ -1,8 +1,10 @@
 import { Link, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/providers/auth-provider'
 import { evaluateAdminRouteAccess } from '@/domain/rbac/admin-route-access.ts'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { PmButton } from '@/components/ui/pm-button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 export function AdminRouteGuard() {
   const { isAuthenticated, isLoading, user } = useAuth()
@@ -46,19 +48,19 @@ export function AccessDeniedPage() {
 
   return (
     <div className="mx-auto flex max-w-lg flex-col items-center gap-4 px-6 py-16 text-center">
-      <h1 className="text-2xl font-semibold tracking-tight">Access denied</h1>
-      <p className="text-sm text-muted-foreground">
+      <h1 className={pmTypography.h1}>Access denied</h1>
+      <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
         You do not have permission to view this area. Admin access requires an
         authorized platform role.
       </p>
       {from ? (
-        <p className="text-xs text-muted-foreground">
-          Blocked path: <span className="font-mono">{from}</span>
+        <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
+          Blocked path: <span className={pmTypography.mono}>{from}</span>
         </p>
       ) : null}
-      <Button className="cursor-pointer" asChild>
+      <PmButton className="cursor-pointer" asChild>
         <Link to="/dashboard">Back to dashboard</Link>
-      </Button>
+      </PmButton>
     </div>
   )
 }

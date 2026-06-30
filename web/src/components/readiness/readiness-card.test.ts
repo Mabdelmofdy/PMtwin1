@@ -4,7 +4,9 @@ import {
   buildReadinessCardViewModel,
   formatReadinessScore,
   formatReadinessStatusLabel,
+  getReadinessStatusTone,
   getReadinessSummaryMessage,
+  getReadinessToneTextClass,
   READINESS_READY_MESSAGE,
 } from '@/components/readiness/readiness-display.ts'
 import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card.tsx'
@@ -44,6 +46,15 @@ describe('readiness display helpers', () => {
     assert.equal(formatReadinessStatusLabel('incomplete'), 'Incomplete')
     assert.equal(formatReadinessStatusLabel('needs_review'), 'Needs Review')
     assert.equal(formatReadinessStatusLabel('ready_for_matching'), 'Ready for Matching')
+  })
+
+  it('maps readiness status to semantic tone text classes', () => {
+    assert.equal(getReadinessStatusTone('incomplete'), 'incomplete')
+    assert.equal(getReadinessStatusTone('needs_review'), 'needs_review')
+    assert.equal(getReadinessStatusTone('ready_for_matching'), 'ready')
+    assert.equal(getReadinessToneTextClass('incomplete'), 'text-warning')
+    assert.equal(getReadinessToneTextClass('needs_review'), 'text-info')
+    assert.equal(getReadinessToneTextClass('ready'), 'text-success')
   })
 
   it('builds card view model with score and status', () => {

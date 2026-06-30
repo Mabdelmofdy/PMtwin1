@@ -42,7 +42,7 @@ export function PmTableBulkActions({
           type="button"
           variant="ghost"
           size="sm"
-          className="ml-auto gap-1.5 text-muted-foreground"
+          className="ms-auto gap-1.5 text-muted-foreground"
           onClick={onClearSelection}
           aria-label="Clear selection"
         >

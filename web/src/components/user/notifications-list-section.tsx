@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
 
 type ReadFilter = 'all' | 'unread' | 'read'
@@ -96,17 +97,14 @@ export function NotificationsListSection() {
     return (
       <PmEmptyState
         title="No notifications"
-        description="Alerts for matches, applications, deals, and messages will appear here."
+        description="Alerts for matches, deals, negotiations, and messages will appear here."
       />
     )
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <PmBadge tone={unreadCount > 0 ? 'warning' : 'success'} size="sm">
-          {unreadCount} unread
-        </PmBadge>
+      <div className="flex justify-end">
         {unreadCount > 0 ? (
           <PmButton size="sm" variant="outline" onClick={handleMarkAllRead}>
             <CheckCheck className="size-4" aria-hidden />
@@ -123,10 +121,11 @@ export function NotificationsListSection() {
         caption="Notifications"
         toolbar={
           <PmTableToolbar
+            className="pm-toolbar-surface rounded-xl px-4 py-3"
             filters={
               <PmTableFilter activeCount={readFilter !== 'all' ? 1 : 0} label="Filter">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium">Read state</label>
+                  <label className={cn(pmTypography.bodySm, 'font-medium')}>Read state</label>
                   <Select value={readFilter} onValueChange={(v) => setReadFilter(v as ReadFilter)}>
                     <SelectTrigger className="w-full">
                       <SelectValue />
@@ -172,10 +171,10 @@ export function NotificationsListSection() {
                         <Icon className="size-4" aria-hidden />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className={cn('text-sm font-medium', !n.read && 'text-foreground')}>
+                        <p className={cn(pmTypography.bodySm, 'font-medium', !n.read && 'text-foreground')}>
                           {n.title}
                         </p>
-                        <p className="line-clamp-2 text-xs text-muted-foreground">{n.message}</p>
+                        <p className={cn('line-clamp-2', pmTypography.caption, 'text-muted-foreground')}>{n.message}</p>
                         <p className="mt-1 text-[11px] text-muted-foreground">
                           {formatNotificationTime(n.createdAt)}
                         </p>

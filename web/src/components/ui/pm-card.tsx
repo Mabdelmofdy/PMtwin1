@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react'
 import { cn } from '@/lib/utils'
-import { pmLayout, pmMotion } from '@/components/shared/pm-design-tokens'
+import { pmInteraction, pmLayout, pmMotion } from '@/tokens'
 import { PmSurface, type PmSurfaceVariant } from '@/components/ui/pm-surface'
 import {
   Card,
@@ -40,9 +40,13 @@ export function PmCard({
       <Card
         data-slot="pm-card"
         className={cn(
-          'rounded-xl border-border/60 ring-0 pm-shadow-card',
+          'rounded-2xl border-border/70 ring-0 pm-shadow-card',
           variant === 'interactive' &&
-            cn(pmMotion.base, 'transition-[box-shadow,border-color]', 'hover:border-primary/30 hover:pm-shadow-panel'),
+            cn(
+              pmMotion.base,
+              pmInteraction.card,
+              'hover:-translate-y-0.5 hover:border-primary/30 hover:bg-surface-elevated hover:pm-shadow-panel',
+            ),
           className,
         )}
         {...props}

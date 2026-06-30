@@ -152,7 +152,7 @@
             label: 'Marketplace',
             title: 'Opportunities',
             description:
-                'Browse needs and offers, filter by intent and model, or jump to the map. Your drafts and applications are one shortcut away.',
+                'Browse needs and offers, filter by intent and model, or jump to the map. Your drafts and Post-matches are one shortcut away.',
             primaryAction: { label: 'Create opportunity', route: R.OPPORTUNITY_CREATE || '/opportunities/create' },
             secondaryAction: { label: 'My drafts', id: 'page-cta-opportunities-drafts', type: 'button' }
         },
@@ -182,7 +182,7 @@
         notifications: {
             label: 'Updates',
             title: 'Notifications',
-            description: 'Stay updated on applications, matches, messages, and project activity.',
+            description: 'Stay updated on Post-matches, deals, and messages.',
             primaryAction: { label: 'Mark All as Read', id: 'mark-all-read', type: 'button' },
             secondaryAction: { label: 'Notification Settings', route: R.SETTINGS || '/settings' }
         },

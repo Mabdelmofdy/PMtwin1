@@ -16,6 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
 import {
   formatNotificationTime,
   groupNotifications,
@@ -44,15 +45,15 @@ function NotificationItem({
       </span>
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-start gap-2">
-          <p className="flex-1 text-sm font-medium leading-snug">{notification.title}</p>
+          <p className={cn(pmTypography.label, 'flex-1 leading-snug')}>{notification.title}</p>
           {!notification.read ? (
             <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" aria-hidden />
           ) : null}
         </div>
-        <p className="line-clamp-2 text-xs text-muted-foreground">
+        <p className={cn(pmTypography.caption, 'line-clamp-2')}>
           {notification.message}
         </p>
-        <p className="text-[11px] text-muted-foreground">
+        <p className={pmTypography.caption}>
           {formatNotificationTime(notification.createdAt)}
         </p>
       </div>
@@ -139,7 +140,10 @@ export function NotificationCenter() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 exit={{ scale: 0 }}
-                className="absolute -top-0.5 -right-0.5 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground"
+                className={cn(
+                  'absolute -top-0.5 -end-0.5 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 font-semibold text-primary-foreground',
+                  pmTypography.badge,
+                )}
               >
                 {unreadCount > 9 ? '9+' : unreadCount}
               </motion.span>
@@ -150,7 +154,7 @@ export function NotificationCenter() {
       <PopoverContent align="end" className="w-[min(24rem,calc(100vw-2rem))] p-0" sideOffset={8}>
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-semibold">Notifications</h2>
+            <h2 className={cn(pmTypography.bodySm, 'font-semibold')}>Notifications</h2>
             {unreadCount > 0 ? (
               <PmNavBadge>{unreadCount} new</PmNavBadge>
             ) : null}
@@ -159,7 +163,7 @@ export function NotificationCenter() {
             <PmButton
               variant="ghost"
               size="xs"
-              className="cursor-pointer text-xs"
+              className={cn('cursor-pointer', pmTypography.caption)}
               onClick={markAllRead}
             >
               Mark all read
@@ -180,7 +184,7 @@ export function NotificationCenter() {
             <div className="space-y-3 p-2">
               {groups.map((group) => (
                 <section key={group.key}>
-                  <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <p className={cn(pmTypography.overline, 'px-2 py-1 text-muted-foreground')}>
                     {group.label}
                   </p>
                   <div className="space-y-0.5">

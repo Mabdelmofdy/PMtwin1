@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom'
-import { Paperclip } from 'lucide-react'
+import { ArrowLeft, Paperclip } from 'lucide-react'
 import { MOCK_MESSAGE_THREADS } from '@/components/user/user-display'
 import { PmContentCard } from '@/components/layout/pm-layout-index'
 import { PmSplitLayout } from '@/components/layout/pm-split-layout'
 import { PmBadge, PmButton, PmEmptyState } from '@/components/ui/pm-index'
 import { Input } from '@/components/ui/input'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
 
 export type MessagesViewProps = {
@@ -17,6 +18,8 @@ export function MessagesView({ activeThreadId }: MessagesViewProps) {
 
   return (
     <PmSplitLayout
+      listClassName={activeThreadId ? 'max-lg:hidden' : undefined}
+      detailClassName={!activeThreadId ? 'max-lg:hidden' : undefined}
       listLabel="Conversations"
       detailLabel="Message thread"
       list={
@@ -33,7 +36,7 @@ export function MessagesView({ activeThreadId }: MessagesViewProps) {
               >
                 <div className="min-w-0">
                   <p className="font-medium">{thread.name}</p>
-                  <p className="truncate text-xs text-muted-foreground">{thread.preview}</p>
+                  <p className={cn('truncate', pmTypography.caption, 'text-muted-foreground')}>{thread.preview}</p>
                 </div>
                 {thread.unread > 0 ? (
                   <PmBadge tone="primary" size="sm">
@@ -53,22 +56,31 @@ export function MessagesView({ activeThreadId }: MessagesViewProps) {
         >
           {activeThread ? (
             <>
+              <Link
+                to="/messages"
+                className={cn(
+                  'mb-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground lg:hidden',
+                )}
+              >
+                <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden />
+                Back to inbox
+              </Link>
               <div className="flex-1 space-y-3 overflow-y-auto py-2">
-                <div className="rounded-lg bg-surface-muted px-3 py-2 text-sm text-muted-foreground">
+                <div className={cn('rounded-lg bg-surface-muted px-3 py-2', pmTypography.bodySm, 'text-muted-foreground')}>
                   Thread {activeThread.id} — message history placeholder
                 </div>
-                <p className="text-xs text-muted-foreground italic">
+                <p className={cn(pmTypography.caption, 'text-muted-foreground', 'italic')}>
                   Typing indicator placeholder…
                 </p>
               </div>
               <div className="mt-auto space-y-2 border-t border-border/60 pt-4">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className={cn('flex items-center gap-2', pmTypography.caption, 'text-muted-foreground')}>
                   <Paperclip className="size-3.5" aria-hidden />
                   Attachments placeholder
                 </div>
-                <div className="flex gap-2">
-                  <Input placeholder="Write a message…" className="flex-1" />
-                  <PmButton>Send</PmButton>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Input placeholder="Write a message…" className="min-w-0 flex-1" />
+                  <PmButton className="w-full sm:w-auto">Send</PmButton>
                 </div>
               </div>
             </>

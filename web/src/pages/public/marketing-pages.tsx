@@ -192,8 +192,8 @@ export function WorkflowPage() {
     { n: 3, title: 'Dashboard', body: 'Your hub for opportunities, matches, and notifications.', href: '/dashboard' },
     { n: 4, title: 'Opportunities', body: 'Publish needs or offers and manage lifecycle.', href: '/opportunities' },
     { n: 5, title: 'Matching', body: 'System matches needs, offers, and consortium roles.', href: '/admin/matching' },
-    { n: 6, title: 'Negotiation', body: 'Applicants negotiate value, scope, and timing.', href: '/pipeline' },
-    { n: 7, title: 'Contract', body: 'Accepted applications become contract records.', href: '/contracts' },
+    { n: 6, title: 'Negotiation', body: 'Parties negotiate value, scope, and timing after a PostMatch.', href: '/pipeline' },
+    { n: 7, title: 'Contract', body: 'Agreed deals become signed contract records.', href: '/contracts' },
     { n: 8, title: 'Execution', body: 'Deliver scope and close opportunities.', href: '/deals' },
   ]
   return (

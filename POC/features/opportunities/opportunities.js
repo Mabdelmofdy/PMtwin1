@@ -5,6 +5,27 @@
 let userApplications = [];
 let opportunitiesSearchTimer = null;
 
+function legacyApplicationUiVisible() {
+    return !!(typeof CONFIG !== 'undefined'
+        && CONFIG.PRODUCT_FLAGS
+        && CONFIG.PRODUCT_FLAGS.SHOW_LEGACY_APPLICATIONS === true);
+}
+
+function hideLegacyApplicationOpportunitiesSurfaces() {
+    if (legacyApplicationUiVisible()) return;
+    const appliedQuick = document.getElementById('opp-quick-applied');
+    if (appliedQuick) appliedQuick.style.display = 'none';
+    const categoryFilter = document.getElementById('filter-category');
+    if (categoryFilter && categoryFilter.value === 'applied') categoryFilter.value = '';
+    const appliedOption = document.querySelector('#filter-category option[value="applied"]');
+    if (appliedOption) appliedOption.remove();
+    const lead = document.querySelector('.opp-toolbar__lead');
+    if (lead) {
+        lead.textContent =
+            'Published needs and offers from the network. Use the shortcuts for yours or open listings—then narrow with filters or the map.';
+    }
+}
+
 function scheduleOpportunitiesSearch() {
     clearTimeout(opportunitiesSearchTimer);
     opportunitiesSearchTimer = setTimeout(() => loadOpportunities(), 320);
@@ -49,89 +70,112 @@ function formatOpportunityStatus(status) {
 }
 
 async function initOpportunities() {
-    const headerMount = document.getElementById('page-context-header-mount');
-    if (headerMount && window.pageContextHeader && window.pageContextHeader.PRESETS) {
-        window.pageContextHeader.mount(headerMount, window.pageContextHeader.PRESETS.opportunities);
-    }
-    const draftsCta = document.getElementById('page-cta-opportunities-drafts');
-    if (draftsCta) {
-        draftsCta.addEventListener('click', (e) => {
-            e.preventDefault();
-            const cat = document.getElementById('filter-category');
-            const st = document.getElementById('filter-status');
-            if (cat) cat.value = 'mine';
-            if (st) st.value = 'draft';
-            syncOppQuickButtons();
-            loadOpportunities();
-            document.getElementById('opportunities-panel-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-    }
-
-    const user = authService.getCurrentUser();
-    if (user) {
-        const allApplications = await dataService.getApplications();
-        userApplications = allApplications.filter((app) => app.applicantId === user.id);
-    }
-
-    document.querySelectorAll('[data-opp-cat]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const v = btn.getAttribute('data-opp-cat');
-            const sel = document.getElementById('filter-category');
-            if (sel) sel.value = v === 'all' ? '' : v;
-            syncOppQuickButtons();
-            loadOpportunities();
-        });
-    });
-
-    const clearFiltersBtn = document.getElementById('clear-filters');
-    const categoryFilter = document.getElementById('filter-category');
-
-    if (clearFiltersBtn) {
-        clearFiltersBtn.addEventListener('click', () => {
-            document.getElementById('filter-model').value = '';
-            document.getElementById('filter-status').value = '';
-            document.getElementById('filter-search').value = '';
-            const intentFilter = document.getElementById('filter-intent');
-            if (intentFilter) intentFilter.value = '';
-            if (categoryFilter) categoryFilter.value = '';
-            syncOppQuickButtons();
-            loadOpportunities();
-        });
-    }
-
-    if (categoryFilter) {
-        categoryFilter.addEventListener('change', () => {
-            syncOppQuickButtons();
-            loadOpportunities();
-        });
-    }
-
-    ['filter-model', 'filter-status', 'filter-intent'].forEach((id) => {
-        document.getElementById(id)?.addEventListener('change', () => loadOpportunities());
-    });
-
-    const searchInput = document.getElementById('filter-search');
-    if (searchInput) {
-        searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
+    try {
+        hideLegacyApplicationOpportunitiesSurfaces();
+        const headerMount = document.getElementById('page-context-header-mount');
+        if (headerMount && window.pageContextHeader && window.pageContextHeader.PRESETS) {
+            window.pageContextHeader.mount(headerMount, window.pageContextHeader.PRESETS.opportunities);
+        }
+        const draftsCta = document.getElementById('page-cta-opportunities-drafts');
+        if (draftsCta) {
+            draftsCta.addEventListener('click', (e) => {
                 e.preventDefault();
-                clearTimeout(opportunitiesSearchTimer);
+                const cat = document.getElementById('filter-category');
+                const st = document.getElementById('filter-status');
+                if (cat) cat.value = 'mine';
+                if (st) st.value = 'draft';
+                syncOppQuickButtons();
                 loadOpportunities();
+                document.getElementById('opportunities-panel-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+
+        const user = authService.getCurrentUser();
+        if (user) {
+            try {
+                const allApplications = await dataService.getApplications();
+                userApplications = allApplications.filter((app) => app.applicantId === user.id);
+            } catch (appErr) {
+                console.warn('Opportunities: could not load applications (legacy path); continuing without them.', appErr);
+                userApplications = [];
             }
-        });
-        searchInput.addEventListener('input', () => scheduleOpportunitiesSearch());
-    }
+        }
 
-    if (authService.isPendingApproval && authService.isPendingApproval()) {
-        document.querySelectorAll('a[data-route="/opportunities/create"]').forEach((link) => {
-            link.removeAttribute('data-route');
-            link.href = '#';
-            link.setAttribute('title', 'Action disabled until your account is approved.');
-            link.classList.add('opacity-75', 'cursor-not-allowed', 'pointer-events-none');
+        document.querySelectorAll('[data-opp-cat]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const v = btn.getAttribute('data-opp-cat');
+                if (!legacyApplicationUiVisible() && v === 'applied') return;
+                const sel = document.getElementById('filter-category');
+                if (sel) sel.value = v === 'all' ? '' : v;
+                syncOppQuickButtons();
+                loadOpportunities();
+            });
         });
-    }
 
-    await loadOpportunities();
+        const clearFiltersBtn = document.getElementById('clear-filters');
+        const categoryFilter = document.getElementById('filter-category');
+
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', () => {
+                document.getElementById('filter-model').value = '';
+                document.getElementById('filter-status').value = '';
+                document.getElementById('filter-search').value = '';
+                const intentFilter = document.getElementById('filter-intent');
+                if (intentFilter) intentFilter.value = '';
+                if (categoryFilter) categoryFilter.value = '';
+                syncOppQuickButtons();
+                loadOpportunities();
+            });
+        }
+
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', () => {
+                syncOppQuickButtons();
+                loadOpportunities();
+            });
+        }
+
+        ['filter-model', 'filter-status', 'filter-intent'].forEach((id) => {
+            document.getElementById(id)?.addEventListener('change', () => loadOpportunities());
+        });
+
+        const searchInput = document.getElementById('filter-search');
+        if (searchInput) {
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    clearTimeout(opportunitiesSearchTimer);
+                    loadOpportunities();
+                }
+            });
+            searchInput.addEventListener('input', () => scheduleOpportunitiesSearch());
+        }
+
+        if (authService.isPendingApproval && authService.isPendingApproval()) {
+            document.querySelectorAll('a[data-route="/opportunities/create"]').forEach((link) => {
+                link.removeAttribute('data-route');
+                link.href = '#';
+                link.setAttribute('title', 'Action disabled until your account is approved.');
+                link.classList.add('opacity-75', 'cursor-not-allowed', 'pointer-events-none');
+            });
+        }
+
+        await loadOpportunities();
+    } catch (error) {
+        console.error('Error initializing opportunities page:', error);
+        const container = document.getElementById('opportunities-list');
+        const summaryEl = document.getElementById('opportunities-summary');
+        if (summaryEl) summaryEl.textContent = '';
+        if (container) {
+            container.innerHTML = renderOppEmpty({
+                title: 'Could not load opportunities',
+                bodyHtml: 'Something went wrong while loading this page. Please try again.',
+                iconClass: 'ph-duotone ph-warning-circle',
+                actionsHtml: '<button type="button" class="btn btn-secondary btn-sm" id="opp-retry-btn">Try again</button>'
+            });
+            document.getElementById('opp-retry-btn')?.addEventListener('click', () => initOpportunities());
+        }
+    }
     setupOpportunitiesRefreshListener();
 }
 
@@ -260,7 +304,7 @@ async function loadOpportunities() {
             let category = 'available';
             if (isOwner) {
                 category = 'mine';
-            } else if (hasApplied) {
+            } else if (hasApplied && legacyApplicationUiVisible()) {
                 category = 'applied';
             }
 
@@ -310,7 +354,11 @@ async function loadOpportunities() {
             );
         }
         if (categoryFilterVal) {
-            list = list.filter((o) => o.category === categoryFilterVal);
+            if (!legacyApplicationUiVisible() && categoryFilterVal === 'applied') {
+                list = [];
+            } else {
+                list = list.filter((o) => o.category === categoryFilterVal);
+            }
         }
 
         list.sort((a, b) => {
@@ -356,19 +404,23 @@ async function loadOpportunities() {
         }
 
         if (user && dataService.getPostMatchesForUser) {
-            const postMatches = await dataService.getPostMatchesForUser(user.id);
-            const oppsById = Object.fromEntries(list.map((o) => [o.id, o]));
-            const scoreMap = buildMatchScoreByOpportunityId(postMatches, user.id, oppsById);
-            list.forEach((opp) => {
-                if (opp.isOwner) {
-                    opp.matchScore = null;
-                    opp.matchScorePercent = null;
-                    return;
-                }
-                const raw = scoreMap.get(opp.id);
-                opp.matchScore = raw ?? null;
-                opp.matchScorePercent = raw != null ? toMatchScorePercent(raw) : null;
-            });
+            try {
+                const postMatches = await dataService.getPostMatchesForUser(user.id);
+                const oppsById = Object.fromEntries(list.map((o) => [o.id, o]));
+                const scoreMap = buildMatchScoreByOpportunityId(postMatches, user.id, oppsById);
+                list.forEach((opp) => {
+                    if (opp.isOwner) {
+                        opp.matchScore = null;
+                        opp.matchScorePercent = null;
+                        return;
+                    }
+                    const raw = scoreMap.get(opp.id);
+                    opp.matchScore = raw ?? null;
+                    opp.matchScorePercent = raw != null ? toMatchScorePercent(raw) : null;
+                });
+            } catch (matchErr) {
+                console.warn('Opportunities: could not load match scores; listing without scores.', matchErr);
+            }
         }
 
         const template = await templateLoader.load('opportunity-card');
@@ -376,16 +428,20 @@ async function loadOpportunities() {
         const html = list
             .map((opp) => {
                 const canApplyHelper = window.applicationUtils?.canUserApplyToOpportunity;
-                const canApply = canApplyHelper
-                    ? canApplyHelper(opp, user, {
-                        application: userApplications.find((a) => a.opportunityId === opp.id),
-                        hasDeal: opp.hasDeal
-                    })
-                    : (user && !opp.isOwner && (opp.status === 'published' || opp.status === 'in_negotiation') && !opp.hasApplied && !opp.hasDeal);
+                const legacyAppsUi = legacyApplicationUiVisible();
+                const canApply = legacyAppsUi
+                    ? (canApplyHelper
+                        ? canApplyHelper(opp, user, {
+                            application: userApplications.find((a) => a.opportunityId === opp.id),
+                            hasDeal: opp.hasDeal
+                        })
+                        : (user && !opp.isOwner && (opp.status === 'published' || opp.status === 'in_negotiation') && !opp.hasApplied && !opp.hasDeal))
+                    : false;
 
                 const sb = window.statusBadgeSystem;
                 const data = {
                     ...opp,
+                    hasApplied: legacyAppsUi && opp.hasApplied,
                     intentLabel: opp.intent === 'offer' ? 'OFFER' : 'NEED',
                     intentBadgeClass:
                         typeof getIntentBadgeClass === 'function'
@@ -408,12 +464,12 @@ async function loadOpportunities() {
                     categoryLabel: getCategoryLabel(opp.category),
                     categoryIcon: getCategoryIcon(opp.category),
                     showCategoryBadge: opp.category !== 'available',
-                    applicationStatusLabel: opp.hasApplied
+                    applicationStatusLabel: legacyAppsUi && opp.hasApplied
                         ? sb
                             ? sb.getStatusLabel(opp.applicationStatus, 'application')
                             : formatApplicationStatus(opp.applicationStatus)
                         : '',
-                    applicationStatusClass: opp.hasApplied ? getApplicationStatusClass(opp.applicationStatus) : '',
+                    applicationStatusClass: legacyAppsUi && opp.hasApplied ? getApplicationStatusClass(opp.applicationStatus) : '',
                     matchScorePercent: opp.matchScorePercent
                 };
                 return templateRenderer.render(template, data);
@@ -454,7 +510,7 @@ function updateCategoryCounts(counts) {
     const availableCount = document.getElementById('count-available');
 
     if (mineCount) mineCount.textContent = counts.mine;
-    if (appliedCount) appliedCount.textContent = counts.applied;
+    if (appliedCount) appliedCount.textContent = legacyApplicationUiVisible() ? counts.applied : '0';
     if (availableCount) availableCount.textContent = counts.available;
 }
 

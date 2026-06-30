@@ -18,7 +18,7 @@ import { OpportunitySummaryCard } from '@/components/opportunity/opportunity-sum
 import { RelatedMatchesPanel } from '@/components/opportunity/related-matches-panel'
 import { OpportunityPublishExperience, OpportunityPublishPanel } from '@/components/opportunity/opportunity-publish-experience'
 import { ApplyWizard } from '@/components/opportunity/apply-wizard'
-import { OpportunityReadinessCard } from '@/components/readiness'
+import { OpportunityReadinessCard, resolveOpportunityReadiness } from '@/components/readiness'
 import { formatDate } from '@/lib/format'
 import { resolveCanonicalStatus } from '@/lib/status-display.ts'
 import {
@@ -33,6 +33,7 @@ import {
   PmContentCard,
   PmDetailLayout,
   PmInspectorLayout,
+  PmMetricGrid,
   PmPageLayout,
 } from '@/components/layout/pm-layout-index'
 import {
@@ -40,11 +41,13 @@ import {
   PmFormReadonlyField,
   PmFormReadonlySection,
 } from '@/components/forms/pm-form-index'
-import { PmBadge, PmButton, PmPageHeader } from '@/components/ui/pm-index'
+import { PmBadge, PmButton, PmEmptyState, PmMatchScoreBadge, PmPageHeader, PmPageHeroMetric, PmReadinessScoreBadge, PmStatCard } from '@/components/ui/pm-index'
+import { formatReadinessScorePercent } from '@/components/ui/pm-readiness-score-display'
 import { OpportunityStatusBadge } from '@/components/opportunity/opportunity-status-badge'
 import { formatOpportunityIntent } from '@/components/opportunity/opportunity-display'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
+import { productFlags } from '@/config/product-flags.ts'
 
 function resolveCollaborationActiveStep(
   matches: ReturnType<typeof buildOpportunityMatchesReadModel>['matches'],
@@ -89,9 +92,15 @@ export function OpportunityDetailPage() {
       <PmPageLayout
         header={<PmPageHeader title="Opportunity not found" description="This record may have been removed." />}
       >
-        <PmContentCard>
-          <p className="text-muted-foreground">Opportunity not found.</p>
-        </PmContentCard>
+        <PmEmptyState
+          title="Opportunity not found"
+          description="This record may have been removed or the link is invalid."
+          action={
+            <PmButton size="sm" variant="outline" asChild>
+              <Link to="/opportunities">Back to opportunities</Link>
+            </PmButton>
+          }
+        />
       </PmPageLayout>
     )
   }
@@ -130,6 +139,9 @@ export function OpportunityDetailPage() {
     relatedMatchesModel?.matches ?? [],
   )
   const hasMatches = (relatedMatchesModel?.matches.length ?? 0) > 0
+  const topMatch = relatedMatchesModel?.matches[0]?.match
+  const topMatchScore = topMatch?.matchScore
+  const opportunityReadiness = resolveOpportunityReadiness(opp)
   const canPublishDraft =
     isOwner &&
     !isPendingApproval &&
@@ -218,9 +230,26 @@ export function OpportunityDetailPage() {
           label={formatOpportunityIntent(opp.intent)}
           title={opp.title}
           description={[opp.location, creator?.profile?.name].filter(Boolean).join(' · ')}
-          actions={
+          metric={
+            <PmPageHeroMetric
+              value={formatReadinessScorePercent(opportunityReadiness.score)}
+              label="Readiness"
+              animate={false}
+            />
+          }
+          badges={
             <>
               <OpportunityStatusBadge status={opp.status} />
+              {topMatchScore != null ? (
+                <PmMatchScoreBadge score={topMatchScore} variant="compact" showLabel />
+              ) : null}
+              {skills.length > 0 ? (
+                <PmBadge tone="muted">{skills.length} skills</PmBadge>
+              ) : null}
+            </>
+          }
+          actions={
+            <>
               <PmButton variant="outline" asChild>
                 <Link to="/matches">View matches</Link>
               </PmButton>
@@ -235,6 +264,60 @@ export function OpportunityDetailPage() {
       }
     >
       <CollaborationFlowStrip activeStep={collaborationStep} />
+
+      {topMatchScore != null ? (
+        <PmMatchScoreBadge score={topMatchScore} variant="hero" className="mb-2" />
+      ) : (
+        <PmReadinessScoreBadge
+          score={opportunityReadiness.score}
+          variant="hero"
+          className="mb-2"
+        />
+      )}
+
+      <PmMetricGrid columns={3} className="mb-2">
+        <PmStatCard
+          label="Related matches"
+          value={relatedMatchesModel?.matches.length ?? 0}
+          hint="Ranked by compatibility"
+          dense
+        />
+        <PmStatCard
+          label="Workflow step"
+          value={collaborationStep}
+          hint="Current collaboration stage"
+          dense
+        />
+        <PmStatCard
+          label="Skills listed"
+          value={skills.length}
+          hint="Scope capabilities"
+          dense
+        />
+      </PmMetricGrid>
+
+      {(hasMatches || canPublishDraft) ? (
+        <PmContentCard title="Primary action" className="mb-2">
+          <p className="text-sm text-muted-foreground">
+            {hasMatches
+              ? 'Work through your matches in order: respond, negotiate terms, then create a deal.'
+              : 'Publish this opportunity to discover PostMatches, then negotiate and create a deal.'}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <PmButton
+              variant={hasMatches ? 'default' : 'outline'}
+              asChild
+            >
+              <Link to={hasMatches ? `/matches/${relatedMatchesModel!.matches[0]!.match.id}` : '/matches'}>
+                {hasMatches ? 'Open top match' : 'View matches'}
+              </Link>
+            </PmButton>
+            <PmButton variant="outline" asChild>
+              <Link to="/pipeline/matches">Pipeline: Post-matches</Link>
+            </PmButton>
+          </div>
+        </PmContentCard>
+      ) : null}
 
       {isPendingApproval ? (
         <PmContentCard className="border-warning/30 bg-warning/5">
@@ -292,7 +375,7 @@ export function OpportunityDetailPage() {
               </PmFormReadonlySection>
             </PmFormReadonly>
 
-            {isOwner ? (
+            {isOwner && productFlags.showLegacyApplications ? (
               <ApplicationsPanel
                 applications={oppApplications}
                 canManage={!isPendingApproval}
@@ -319,27 +402,16 @@ export function OpportunityDetailPage() {
 
             <PmContentCard title="Next steps">
               <p className="text-sm text-muted-foreground">
-                {hasMatches
-                  ? 'Work through your matches in order: respond, negotiate terms, then create a deal.'
-                  : 'Publish this opportunity to discover PostMatches, then negotiate and create a deal.'}
+                Use the primary action above or jump directly to readiness and publish controls.
               </p>
               <div className="mt-3 flex flex-col gap-2">
-                <PmButton
-                  variant={hasMatches ? 'default' : 'outline'}
-                  className="w-full"
-                  asChild
-                >
-                  <Link to={hasMatches ? `/matches/${relatedMatchesModel!.matches[0]!.match.id}` : '/matches'}>
-                    {hasMatches ? 'Open top match' : 'View matches'}
-                  </Link>
-                </PmButton>
                 <PmButton variant="outline" className="w-full" asChild>
-                  <Link to="/pipeline/matches">Pipeline: Post-matches</Link>
+                  <Link to="/matches">All matches</Link>
                 </PmButton>
               </div>
             </PmContentCard>
 
-            {!isOwner && application && !canApply ? (
+            {productFlags.showLegacyApplications && !isOwner && application && !canApply ? (
               <PmContentCard title="Direct application (legacy)">
                 <PmBadge tone="neutral" size="sm" className="mb-2">
                   {application.status}
@@ -359,13 +431,13 @@ export function OpportunityDetailPage() {
                     className="mt-3"
                     onClick={() => setShowWizard(true)}
                   >
-                    Edit application
+                    Edit legacy application
                   </PmButton>
                 ) : null}
               </PmContentCard>
             ) : null}
 
-            {!isOwner && canApply && !isPendingApproval ? (
+            {productFlags.showLegacyApplications && !isOwner && canApply && !isPendingApproval ? (
               showWizard ? (
                 <ApplyWizard
                   opportunityId={opp.id}

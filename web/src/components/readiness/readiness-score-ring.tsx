@@ -1,33 +1,35 @@
 import { cn } from '@/lib/utils'
-import { getReadinessStatusTone } from '@/components/readiness/readiness-display.ts'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { resolveReadinessScoreDisplay } from '@/components/ui/pm-readiness-score-display'
 import type { ReadinessStatus } from '@/components/readiness/readiness-display.ts'
 
-const toneRingStyles: Record<ReturnType<typeof getReadinessStatusTone>, string> = {
-  incomplete: 'text-amber-600 dark:text-amber-400',
-  needs_review: 'text-sky-600 dark:text-sky-400',
-  ready: 'text-emerald-600 dark:text-emerald-400',
-}
+const TONE_TEXT_CLASS = {
+  success: 'text-success',
+  info: 'text-info',
+  warning: 'text-warning',
+  danger: 'text-danger',
+} as const
 
 export function ReadinessScoreRing({
   score,
-  status,
+  status: _status,
   className,
 }: {
   score: number
   status: ReadinessStatus
   className?: string
 }) {
-  const clamped = Math.max(0, Math.min(100, score))
-  const tone = getReadinessStatusTone(status)
+  const display = resolveReadinessScoreDisplay(score)
+  const toneClass = TONE_TEXT_CLASS[display.tone as keyof typeof TONE_TEXT_CLASS] ?? 'text-foreground'
   const radius = 36
   const circumference = 2 * Math.PI * radius
-  const offset = circumference - (clamped / 100) * circumference
+  const offset = circumference - (display.percent / 100) * circumference
 
   return (
     <div
       className={cn('relative inline-flex size-24 items-center justify-center', className)}
       role="img"
-      aria-label={`Readiness score ${Math.round(clamped)} percent`}
+      aria-label={`Readiness score ${display.percent} percent`}
     >
       <svg className="size-full -rotate-90" viewBox="0 0 96 96" aria-hidden>
         <circle
@@ -49,11 +51,11 @@ export function ReadinessScoreRing({
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          className={toneRingStyles[tone]}
+          className={toneClass}
         />
       </svg>
-      <span className={cn('absolute text-xl font-semibold tracking-tight', toneRingStyles[tone])}>
-        {Math.round(clamped)}%
+      <span className={cn('absolute', pmTypography.stat, 'text-xl', toneClass)}>
+        {display.percent}%
       </span>
     </div>
   )

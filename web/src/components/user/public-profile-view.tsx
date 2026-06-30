@@ -62,7 +62,7 @@ export function PublicProfileView({ person, companyIds }: PublicProfileViewProps
         main={
           <>
             <PmContentCard title="Summary">
-              <p className="text-sm text-muted-foreground">{bio}</p>
+              <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>{bio}</p>
             </PmContentCard>
 
             {skills.length > 0 ? (
@@ -78,7 +78,7 @@ export function PublicProfileView({ person, companyIds }: PublicProfileViewProps
             ) : null}
 
             <PmContentCard title="Portfolio & projects">
-              <p className="text-sm text-muted-foreground">
+              <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
                 Portfolio and project highlights will appear here when wired to profile data.
               </p>
             </PmContentCard>
@@ -98,7 +98,7 @@ export function PublicProfileView({ person, companyIds }: PublicProfileViewProps
 
             {isCompany ? (
               <PmContentCard title="Company">
-                <p className="text-sm text-muted-foreground">
+                <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
                   {person.profile?.description ?? 'Company profile details.'}
                 </p>
               </PmContentCard>

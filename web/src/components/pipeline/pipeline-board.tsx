@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -15,7 +16,10 @@ import { negotiationService } from '@/services/negotiation-service.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
 import { PmWorkflowBadge } from '@/components/ui/pm-workflow-badge'
-import { PmEmptyState } from '@/components/ui/pm-empty-state'
+import { PmEmptyState, PmSurface } from '@/components/ui/pm-index'
+import { PmReadinessScoreBadge } from '@/components/ui/pm-readiness-score-badge'
+import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
+import { pmPipeline, pmTypography, pmResponsive } from '@/tokens'
 import type { StatusEntity } from '@/lib/status-display.ts'
 import { cn } from '@/lib/utils'
 
@@ -46,6 +50,7 @@ function KanbanCard({
   href,
   dragType,
   disabled,
+  headerBadge,
 }: {
   id: string
   title: string
@@ -55,9 +60,13 @@ function KanbanCard({
   href: string
   dragType: 'opportunity' | 'application'
   disabled?: boolean
+  headerBadge?: ReactNode
 }) {
   return (
-    <div
+    <PmSurface
+      variant="default"
+      shadow="card"
+      interactive={!disabled}
       draggable={!disabled}
       onDragStart={(e) => {
         if (disabled) return
@@ -68,14 +77,20 @@ function KanbanCard({
         e.dataTransfer.effectAllowed = 'move'
       }}
       className={cn(
-        'rounded-lg border border-border/60 p-3 shadow-sm transition-shadow hover:shadow-md',
+        'p-3',
+        pmPipeline.drag,
         disabled ? 'opacity-60' : 'cursor-grab active:cursor-grabbing',
       )}
     >
       <Link to={href} className="block cursor-pointer" draggable={false}>
-        <p className="line-clamp-2 text-sm font-medium">{title}</p>
+        <div className="flex items-start justify-between gap-2">
+          <p className={cn(pmTypography.bodySm, 'line-clamp-2 min-w-0 flex-1 font-medium')}>
+            {title}
+          </p>
+          {headerBadge ? <div className="shrink-0">{headerBadge}</div> : null}
+        </div>
         {subtitle ? (
-          <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
+          <p className={cn(pmTypography.caption, 'mt-1 text-muted-foreground')}>{subtitle}</p>
         ) : null}
         {status ? (
           <PmWorkflowBadge
@@ -85,7 +100,7 @@ function KanbanCard({
           />
         ) : null}
       </Link>
-    </div>
+    </PmSurface>
   )
 }
 
@@ -110,10 +125,10 @@ function StageSidebar({
 
   return (
     <aside className="w-full shrink-0 lg:w-56">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <p className={cn(pmTypography.overline, 'mb-2 text-muted-foreground')}>
         Status
       </p>
-      <nav className="flex flex-row gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
+      <nav className={cn('flex flex-row gap-2 lg:flex-col lg:overflow-visible', pmResponsive.scrollX)}>
         {stages.map((stage) => (
           <button
             key={stage.key}
@@ -143,15 +158,17 @@ function StageSidebar({
               }
             }}
             className={cn(
-              'flex min-w-[9rem] cursor-pointer items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition-colors',
+              pmTypography.bodySm,
+              pmPipeline.dropZone,
+              'flex min-w-[9rem] cursor-pointer items-center justify-between rounded-lg border px-3 py-2 text-start',
               selected === stage.key
                 ? 'border-primary/40 bg-primary/10 text-foreground'
                 : 'border-border/60 hover:bg-muted/50',
-              dragOver === stage.key && 'border-primary bg-primary/5',
+              dragOver === stage.key && pmPipeline.dropActive,
             )}
           >
             <span>{stage.label}</span>
-            <span className="rounded-full bg-muted px-2 py-0.5 text-xs tabular-nums">
+            <span className={cn(pmTypography.caption, 'rounded-full bg-muted px-2 py-0.5 tabular-nums')}>
               {counts[stage.key] ?? 0}
             </span>
           </button>
@@ -235,7 +252,8 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
               key={intent || 'all'}
               type="button"
               className={cn(
-                'cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors',
+                pmTypography.badge,
+                'cursor-pointer rounded-full px-3 py-1 font-medium transition-colors',
                 intentFilter === intent
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted text-muted-foreground hover:text-foreground',
@@ -258,10 +276,10 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
           />
           <div className="min-h-[12rem] flex-1 space-y-3">
             <div>
-              <h3 className="font-semibold">
+              <h3 className={pmTypography.h3}>
                 {OPP_STAGES.find((s) => s.key === oppStage)?.label}
               </h3>
-              <p className="text-sm text-muted-foreground">
+              <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
                 Drag cards onto a stage in the sidebar to update status.
               </p>
             </div>
@@ -283,6 +301,13 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
                   href={`/opportunities/${item.id}`}
                   dragType="opportunity"
                   disabled={isPendingApproval}
+                  headerBadge={
+                    <PmReadinessScoreBadge
+                      score={resolveOpportunityReadiness(item).score}
+                      variant="compact"
+                      showLabel={false}
+                    />
+                  }
                 />
               ))
             )}
@@ -307,7 +332,8 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
             key={intent || 'all'}
             type="button"
             className={cn(
-              'cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors',
+              pmTypography.badge,
+              'cursor-pointer rounded-full px-3 py-1 font-medium transition-colors',
               intentFilter === intent
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-muted text-muted-foreground hover:text-foreground',
@@ -330,16 +356,16 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
         />
         <div className="min-h-[12rem] flex-1 space-y-3">
           <div>
-            <h3 className="font-semibold">
+            <h3 className={pmTypography.h3}>
               {APP_STAGES.find((s) => s.key === appStage)?.label}
             </h3>
-            <p className="text-sm text-muted-foreground">
-              {APPLICATION_STATUS_LABELS[appStage] ?? appStage} applications
+            <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
+              {APPLICATION_STATUS_LABELS[appStage] ?? appStage} legacy applications
             </p>
           </div>
           {items.length === 0 ? (
             <PmEmptyState
-              title="No applications in this stage"
+              title="No legacy applications in this stage"
               description={APPLICATION_STATUS_LABELS[appStage] ?? appStage}
               size="compact"
             />

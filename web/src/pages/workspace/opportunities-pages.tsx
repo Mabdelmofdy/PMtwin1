@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Map, Plus } from 'lucide-react'
 import { opportunitiesApi } from '@/api/opportunities.ts'
@@ -36,8 +36,8 @@ import {
   PmFormWizardStep,
   type PmFormStepperStep,
 } from '@/components/forms/pm-form-index'
-import { PmContentCard, PmPageLayout } from '@/components/layout/pm-layout-index'
-import { PmButton, PmPageHeader } from '@/components/ui/pm-index'
+import { PmContentCard, PmPageLayout, summarizeOpportunityListHero } from '@/components/layout/pm-layout-index'
+import { PmBadge, PmButton, PmEmptyState, PmPageHeader, PmPageHeroMetric, PmReadinessScoreBadge, PmSurface } from '@/components/ui/pm-index'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -47,7 +47,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useNavigate } from 'react-router-dom'
+import { matchesApi } from '@/api/matches.ts'
+import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
 
 const WIZARD_STEPS: readonly PmFormStepperStep[] = [
   { id: 'type', label: 'Type', description: 'Need or offer' },
@@ -141,8 +142,12 @@ export function OpportunitiesPage() {
   const [pageSize, setPageSize] = useState(12)
   const navigate = useNavigate()
 
+  const allOpportunities = opportunitiesApi.list()
+  const heroSummary = summarizeOpportunityListHero(allOpportunities)
+  const totalMatches = matchesApi.list().length
+
   const opportunities = useMemo(() => {
-    return opportunitiesApi.list().filter((o) => {
+    return allOpportunities.filter((o) => {
       const matchesSearch =
         !search ||
         o.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -151,7 +156,7 @@ export function OpportunitiesPage() {
       const matchesScope = scope === 'all' || o.creatorId === user?.id
       return matchesSearch && matchesStatus && matchesScope
     })
-  }, [search, status, scope, user?.id])
+  }, [allOpportunities, search, status, scope, user?.id])
 
   const totalItems = opportunities.length
   const pageCount = Math.max(1, Math.ceil(totalItems / pageSize))
@@ -185,6 +190,16 @@ export function OpportunitiesPage() {
       cell: (o) => o.location ?? '—',
     },
     {
+      id: 'readiness',
+      label: 'Readiness',
+      cell: (o) => (
+        <PmReadinessScoreBadge
+          score={resolveOpportunityReadiness(o).score}
+          variant="list"
+        />
+      ),
+    },
+    {
       id: 'status',
       label: 'Status',
       cell: (o) => <OpportunityStatusBadge status={o.status} />,
@@ -200,9 +215,22 @@ export function OpportunitiesPage() {
     <PmPageLayout
       header={
         <PmPageHeader
-          label="Marketplace"
+          label="Workspace"
           title="Opportunities"
           description="Browse published needs and offers across the built environment."
+          metric={
+            <PmPageHeroMetric
+              value={heroSummary.activeCount}
+              label="Active"
+            />
+          }
+          badges={
+            <>
+              <PmBadge tone="muted">{heroSummary.draftCount} drafts</PmBadge>
+              <PmBadge tone="primary">{heroSummary.publishedCount} published</PmBadge>
+              <PmBadge tone="info">{totalMatches} matches</PmBadge>
+            </>
+          }
           actions={
             <>
               <PmButton variant="outline" asChild>
@@ -214,7 +242,7 @@ export function OpportunitiesPage() {
               <PmButton asChild>
                 <Link to="/opportunities/create">
                   <Plus className="size-4" aria-hidden />
-                  Post opportunity
+                  Create opportunity
                 </Link>
               </PmButton>
             </>
@@ -230,6 +258,7 @@ export function OpportunitiesPage() {
         caption="Opportunities"
         toolbar={
           <PmTableToolbar
+            className="pm-toolbar-surface rounded-xl px-4 py-3"
             search={
               <PmTableSearch
                 placeholder="Search title, location…"
@@ -315,7 +344,8 @@ export function OpportunitiesPage() {
 }
 
 export function OpportunityMapPage() {
-  const items = opportunitiesApi.list().slice(0, 8)
+  const allOpportunities = opportunitiesApi.list()
+  const items = allOpportunities.slice(0, 8)
 
   return (
     <PmPageLayout
@@ -324,6 +354,14 @@ export function OpportunityMapPage() {
           label="Geo browse"
           title="Opportunity map"
           description="Explore opportunities by location across the GCC."
+          metric={
+            <PmPageHeroMetric value={allOpportunities.length} label="Listings" />
+          }
+          actions={
+            <PmButton variant="outline" asChild>
+              <Link to="/opportunities">List view</Link>
+            </PmButton>
+          }
         />
       }
     >
@@ -333,23 +371,28 @@ export function OpportunityMapPage() {
           className="lg:col-span-2"
           noPadding
         >
-          <div className="flex min-h-[20rem] items-center justify-center bg-surface-muted p-8">
-            <p className="text-center text-sm text-muted-foreground">
-              Map integration placeholder — wire to map service
-            </p>
-          </div>
+          <PmEmptyState
+            title="Map coming soon"
+            description="Map integration placeholder — wire to map service when ready."
+            size="compact"
+            className="min-h-[20rem] border-0 bg-surface-muted shadow-none"
+          />
         </PmContentCard>
         <PmContentCard title="Nearby listings">
           <div className="space-y-2">
             {items.map((o) => (
-              <Link
+              <PmSurface
                 key={o.id}
-                to={`/opportunities/${o.id}`}
-                className="block rounded-lg p-2 text-sm transition-colors hover:bg-surface-muted"
+                variant="default"
+                shadow="card"
+                interactive
+                className="p-3"
               >
-                <p className="font-medium">{truncate(o.title, 48)}</p>
-                <p className="text-xs text-muted-foreground">{o.location}</p>
-              </Link>
+                <Link to={`/opportunities/${o.id}`} className="block text-sm">
+                  <p className="font-medium hover:text-primary">{truncate(o.title, 48)}</p>
+                  <p className="text-xs text-muted-foreground">{o.location}</p>
+                </Link>
+              </PmSurface>
             ))}
           </div>
         </PmContentCard>
@@ -475,6 +518,12 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         label="Create"
         title={mode === 'edit' ? 'Edit opportunity' : 'Post an opportunity'}
         description="7-step wizard — type, scope, exchange mode, skills, timeline, review, publish."
+        metric={
+          <PmPageHeroMetric
+            value={`${completedStepIds.length}/${WIZARD_STEPS.length}`}
+            label="Steps complete"
+          />
+        }
         bordered={false}
         className="mb-2"
       />
@@ -488,14 +537,23 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                 ['need', 'Need (request)'],
                 ['offer', 'Offer (provide)'],
               ] as const).map(([value, label]) => (
-                <button
+                <PmSurface
                   key={value}
-                  type="button"
-                  className={`cursor-pointer rounded-xl border p-4 text-left transition-colors hover:border-primary/40 ${draft.intent === value ? 'border-primary bg-primary/5 ring-1 ring-primary/20' : 'border-border/60'}`}
-                  onClick={() => updateDraft('intent', value)}
+                  variant={draft.intent === value ? 'elevated' : 'default'}
+                  shadow={draft.intent === value ? 'card' : 'none'}
+                  interactive
+                  className={
+                    draft.intent === value ? 'border-primary/40 ring-1 ring-primary/20' : undefined
+                  }
                 >
-                  <span className="font-medium">{label}</span>
-                </button>
+                  <button
+                    type="button"
+                    className="w-full cursor-pointer p-4 text-start"
+                    onClick={() => updateDraft('intent', value)}
+                  >
+                    <span className="font-medium">{label}</span>
+                  </button>
+                </PmSurface>
               ))}
             </PmFormGrid>
           </PmFormSection>

@@ -29,6 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { cn } from '@/lib/utils'
 import type { PlatformUser } from '@/types/domain.ts'
 
 export function PeopleListSection() {
@@ -97,6 +99,7 @@ export function PeopleListSection() {
       caption="People and companies"
       toolbar={
         <PmTableToolbar
+          className="pm-toolbar-surface rounded-xl px-4 py-3"
           search={
             <PmTableSearch
               placeholder="Search by name, skills, sector…"
@@ -110,7 +113,7 @@ export function PeopleListSection() {
           filters={
             <PmTableFilter activeCount={scope !== 'all' ? 1 : 0} label="Type">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Entity type</label>
+                <label className={cn(pmTypography.bodySm, 'font-medium')}>Entity type</label>
                 <Select
                   value={scope}
                   onValueChange={(v) => {

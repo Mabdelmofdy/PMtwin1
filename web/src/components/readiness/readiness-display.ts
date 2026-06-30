@@ -37,6 +37,18 @@ export function getReadinessStatusTone(
   return 'incomplete'
 }
 
+/** Semantic text utility for readiness visuals (DDS-006 token-driven). */
+export function getReadinessToneTextClass(
+  tone: ReturnType<typeof getReadinessStatusTone>,
+): string {
+  const map = {
+    incomplete: 'text-warning',
+    needs_review: 'text-info',
+    ready: 'text-success',
+  } as const
+  return map[tone]
+}
+
 export function hasReadinessGaps(result: ReadinessResult): boolean {
   return result.missingRequired.length > 0 || result.missingRecommended.length > 0
 }

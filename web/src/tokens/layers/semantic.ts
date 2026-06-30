@@ -47,12 +47,12 @@ export const pmTextTone = {
 
 /** Semantic status background patterns (badge / alert fills). */
 export const pmStatusBackground = {
-  success: 'bg-success/10 text-success',
-  warning: 'bg-warning/10 text-warning',
-  danger: 'bg-danger/10 text-danger',
-  info: 'bg-info/10 text-info',
-  neutral: 'bg-neutral/10 text-neutral',
-  primary: 'bg-primary/10 text-primary',
+  success: 'bg-success/14 text-success',
+  warning: 'bg-warning/14 text-warning',
+  danger: 'bg-danger/14 text-danger',
+  info: 'bg-info/14 text-info',
+  neutral: 'bg-neutral/14 text-neutral',
+  primary: 'bg-primary/14 text-primary',
 } as const
 
 export type PmSurfaceTone = keyof typeof pmSurfaceTone

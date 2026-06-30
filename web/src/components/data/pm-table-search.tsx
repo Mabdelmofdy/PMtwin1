@@ -23,13 +23,13 @@ export function PmTableSearch({
       className={cn('relative w-full min-w-0 sm:max-w-xs', containerClassName)}
     >
       <Search
-        className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+        className="pointer-events-none absolute top-1/2 start-3 size-4 -translate-y-1/2 text-muted-foreground"
         aria-hidden
       />
       <Input
         type="search"
         placeholder={placeholder}
-        className={cn('h-9 pl-9', className)}
+        className={cn('h-9 ps-9', className)}
         onChange={(e) => {
           onChange?.(e)
           onValueChange?.(e.target.value)

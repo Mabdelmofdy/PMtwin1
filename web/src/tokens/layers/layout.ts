@@ -54,7 +54,7 @@ export const pmShellDimensions = {
 
 export const pmLayoutGrid = {
   pageStack: 'flex flex-col pm-section-gap',
-  detail: 'grid gap-6 lg:grid-cols-3',
+  detail: 'grid min-w-0 gap-6 lg:grid-cols-3',
   detailMain: 'space-y-4 lg:col-span-2',
   detailInspector: 'space-y-4 lg:col-span-1',
   metrics: 'grid gap-4 sm:grid-cols-2 lg:grid-cols-4',
@@ -62,9 +62,9 @@ export const pmLayoutGrid = {
   dashboardBody: 'grid gap-6 xl:grid-cols-3',
   dashboardMain: 'space-y-6 xl:col-span-2',
   dashboardAside: 'space-y-6 xl:col-span-1',
-  split: 'grid min-h-0 gap-4 lg:grid-cols-[minmax(16rem,22rem)_1fr] lg:gap-6',
+  split: 'grid min-h-0 min-w-0 gap-4 lg:grid-cols-[minmax(16rem,22rem)_1fr] lg:gap-6',
   splitList: 'min-h-0 lg:max-h-[calc(100svh-12rem)]',
-  splitDetail: 'min-h-0',
+  splitDetail: 'min-h-0 min-w-0',
   wizard: 'grid gap-6 lg:grid-cols-[1fr_minmax(16rem,20rem)]',
   wizardMain: 'min-w-0 space-y-6',
   wizardAside: 'min-w-0 space-y-4',
@@ -72,12 +72,12 @@ export const pmLayoutGrid = {
 
 export const pmSticky = {
   toolbar:
-    'sticky top-14 z-10 -mx-4 border-b border-border/60 bg-background/90 px-4 py-3 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80 md:-mx-8 md:px-8',
+    'sticky top-14 z-10 -mx-[var(--pm-space-page-x)] border-b border-border/60 bg-background/90 px-[var(--pm-space-page-x)] py-3 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80',
   filters: 'sticky top-[calc(3.5rem+3.25rem)] z-[9] bg-background/95 py-2',
   inspectorHeader:
     'sticky top-14 z-[8] -mx-4 border-b border-border/40 bg-surface/95 px-4 py-3 backdrop-blur-sm lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:backdrop-blur-none',
   actionFooter:
-    'sticky bottom-0 z-10 -mx-4 mt-auto border-t border-border/60 bg-background/95 px-4 py-3 backdrop-blur-sm supports-[backdrop-filter]:bg-background/90 md:-mx-8 md:px-8',
+    'sticky bottom-0 z-10 -mx-[var(--pm-space-page-x)] mt-auto border-t border-border/60 bg-background/95 px-[var(--pm-space-page-x)] py-3 backdrop-blur-sm supports-[backdrop-filter]:bg-background/90',
 } as const
 
 export const pmContentWidth = {

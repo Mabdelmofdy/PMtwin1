@@ -316,3 +316,134 @@ web/src/theme/
 ---
 
 *DDS-004 updated 29 June 2026 — Phase 5 provider bridge complete; appearance unchanged.*
+
+---
+
+## 16. Phase 6 — Adaptive Enterprise Modern visual language
+
+**Date:** 29 June 2026  
+**Status:** Complete — first appearance-changing phase (tokens + PM primitives only).
+
+### 16.1 Design direction
+
+PM-Twin adopts **Adaptive Enterprise Modern**:
+
+| Principle | Implementation |
+|-----------|----------------|
+| Timeless enterprise SaaS | Neutral surfaces, restrained borders, no trend effects |
+| Information-first | Typography hierarchy over decoration |
+| Premium through spacing | `--pm-space-card`, hero gaps, section dividers |
+| Linear / Stripe / Attio clarity | Page hero, KPI stat scale, structured cards |
+| No glassmorphism / neon / gradient-heavy UI | Soft elevation tokens only |
+
+Inspiration: Linear clarity, Stripe dashboard polish, Attio card hierarchy, Notion workspace simplicity, Vercel density.
+
+### 16.2 Surface hierarchy
+
+| Layer | Token / utility | Role |
+|-------|-----------------|------|
+| Canvas | `--background` | App shell base |
+| Default panel | `--surface`, `bg-surface` | Cards, sections |
+| Muted panel | `--surface-muted` | Table headers, empty states |
+| Elevated panel | `--surface-elevated`, `pm-shadow-panel` | Interactive hover, raised cards |
+| Toolbar | `.pm-toolbar-surface` | Sticky page toolbars |
+
+Light/dark semantic values in `index.css` were refined for stronger canvas vs card contrast and softer shadows (`--pm-shadow-card`, `--pm-shadow-panel`).
+
+### 16.3 Card hierarchy
+
+| Component | Hierarchy |
+|-----------|-----------|
+| `PmCard` | Interactive hover → elevated surface + primary border tint |
+| `PmSurface` | `shadow="card"` default; interactive adds elevation on hover |
+| `OpportunityCard` | Title → intent meta → description → location/timeline → readiness/matches → actions |
+| `MatchCard` | Type title → date → score → workflow badge → actions |
+
+### 16.4 KPI hierarchy
+
+`PmStatCard` uses:
+
+- `pmTypography.statLabel` — overline-style label
+- `pmTypography.stat` — large metric (`--pm-text-stat` in CSS)
+- Optional `icon` block with `bg-primary-muted`
+- Optional `trend` row (display only — no calculation changes)
+
+`PmPageHeader` supports optional `metric` and `badges` props for hero KPIs without page logic changes.
+
+### 16.5 Badge hierarchy
+
+- `PmBadge` — tighter `sm` density, refined outline borders
+- `PmWorkflowBadge` — unchanged values; inherits badge polish
+- Readiness — `getReadinessToneTextClass()` maps to `text-warning` / `text-info` / `text-success`
+
+### 16.6 Page hero rules
+
+1. Overline label via `pmTypography.overline`
+2. Title `h1` with optional description (`bodySm`, muted)
+3. Optional inline metric separated by `border-l` on `sm+`
+4. Badges row below title block
+5. Actions right-aligned on `lg+`
+6. Bottom border `border-border/50 pb-6`
+
+### 16.7 Typography additions
+
+New token roles in `web/src/tokens/layers/typography.ts` and `index.css`:
+
+- `overline`, `stat`, `statLabel`, `tableHeader`
+
+### 16.8 Hover / focus polish
+
+- `.pm-table-row-hover` — subtle row hover for data tables
+- Card/surface interactive states use semantic elevation tokens
+- `PmButton` — `shadow-sm` on default variant
+- Focus rings unchanged — accessibility preserved
+
+### 16.9 Before / after notes
+
+| Area | Before | After |
+|------|--------|-------|
+| Page headers | Title + description only | Hero metric, badges, stronger spacing |
+| KPI cards | Uniform text scale | Large stat, icon block, label overline |
+| Opportunity cards | Badge-heavy, flat metadata | Sectioned layout, single readiness badge |
+| Tables | Generic row hover | Tokenized header + row hover |
+| Readiness ring | Hardcoded amber/emerald | Semantic tone classes |
+| Toolbars | `pmSticky.toolbar` blur | `pm-toolbar-surface` semantic fill |
+
+### 16.10 Token-driven constraints
+
+- All visual changes expressed through `index.css`, `web/src/tokens/*`, PM primitives, semantic utilities
+- No page-specific hardcoded colors
+- No business logic, routes, or data access changes
+- `validate:design:strict` must pass (readiness palette baseline removed)
+
+### 16.11 Files touched (Phase 6)
+
+```
+web/src/index.css
+web/src/tokens/layers/typography.ts
+web/src/tokens/layers/component.ts
+web/src/components/ui/pm-page-header.tsx
+web/src/components/ui/pm-stat-card.tsx
+web/src/components/ui/pm-card.tsx
+web/src/components/ui/pm-surface.tsx
+web/src/components/ui/pm-button.tsx
+web/src/components/ui/pm-badge.tsx
+web/src/components/opportunity/opportunity-card.tsx
+web/src/components/collaboration/match-card.tsx
+web/src/components/data/pm-data-table.tsx
+web/src/components/layout/pm-layout-chrome.tsx
+web/src/components/readiness/readiness-display.ts
+web/src/components/readiness/readiness-score-ring.tsx
+web/src/components/readiness/readiness-list.tsx
+scripts/design/design-governance-rules.mjs
+```
+
+### 16.12 Remaining work (Phase 7+)
+
+- [ ] Wire `metric` / `badges` on high-traffic page headers (optional adoption)
+- [ ] Marketing/public page token migration (baseline exceptions remain)
+- [ ] High contrast / compact theme CSS blocks (DDS-004 §15)
+
+---
+
+*DDS-004 updated 29 June 2026 — Phase 6 Adaptive Enterprise Modern visual language complete.*

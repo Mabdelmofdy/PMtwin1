@@ -25,7 +25,7 @@ export function AppHeader() {
     <header
       data-slot="app-header"
       className={cn(
-        'sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b border-border/60',
+        'sticky top-0 z-20 flex h-14 min-w-0 shrink-0 items-center gap-2 border-b border-border/60',
         'bg-background/90 px-3 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80',
         'md:gap-3 md:px-4',
       )}
@@ -63,7 +63,7 @@ export function AppHeader() {
         <GlobalSearch className="max-w-full" />
       </div>
 
-      <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
+      <div className="ms-auto flex items-center gap-0.5 sm:gap-1">
         <GlobalSearch variant="compact" className="md:hidden" />
         <QuickCreateMenu />
         <NotificationCenter />

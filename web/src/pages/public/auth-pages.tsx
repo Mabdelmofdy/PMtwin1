@@ -47,7 +47,7 @@ export function LoginPage() {
         <p className="text-sm font-medium text-primary">Welcome back</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Sign in to your workspace</h1>
         <p className="mt-4 text-muted-foreground">
-          Access opportunities, applications, pipeline, and contracts in one place.
+          Access opportunities, Post-matches, pipeline, and contracts in one place.
         </p>
         <div className="mt-6 space-y-2 rounded-xl border border-border/60 bg-muted/30 p-4 text-sm">
           <p className="font-medium">Demo credentials</p>

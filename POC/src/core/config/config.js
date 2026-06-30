@@ -22,6 +22,11 @@ const CONFIG = {
     SEED_TRACE: {
         enabled: false
     },
+
+    /** Phase 9.5E — legacy direct-application UI (default hidden before Visual Freeze). */
+    PRODUCT_FLAGS: {
+        SHOW_LEGACY_APPLICATIONS: false
+    },
     
     // Storage Keys
     STORAGE_KEYS: {
@@ -468,4 +473,16 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = CONFIG;
 } else {
     window.CONFIG = CONFIG;
+}
+
+/**
+ * Whether legacy direct-application workflow UI should render (Phase 9.5E).
+ * @returns {boolean}
+ */
+function isLegacyApplicationUiEnabled() {
+    return CONFIG.PRODUCT_FLAGS?.SHOW_LEGACY_APPLICATIONS === true;
+}
+
+if (typeof window !== 'undefined') {
+    window.isLegacyApplicationUiEnabled = isLegacyApplicationUiEnabled;
 }

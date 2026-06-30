@@ -23,6 +23,10 @@ export const pmTypography = {
   label: 'pm-text-label',
   badge: 'pm-text-badge',
   mono: 'pm-text-mono',
+  overline: 'pm-text-overline',
+  stat: 'pm-text-stat',
+  statLabel: 'pm-text-stat-label',
+  tableHeader: 'pm-text-table-header',
 } as const
 
 /** Responsive scaling policy — documented for theme evolution. */

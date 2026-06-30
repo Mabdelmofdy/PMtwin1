@@ -5,23 +5,23 @@ import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { Badge } from '@/components/ui/badge'
 
 const pmBadgeVariants = cva(
-  cn(pmTypography.badge, 'inline-flex items-center rounded-md px-2 py-0.5'),
+  cn(pmTypography.badge, 'inline-flex items-center rounded-md border border-transparent px-2 py-0.5'),
   {
     variants: {
       tone: {
-        default: 'bg-primary/10 text-primary',
+        default: 'bg-primary/14 text-primary',
         primary: 'bg-primary text-primary-foreground',
         secondary: 'bg-secondary text-secondary-foreground',
-        muted: 'bg-muted text-muted-foreground',
-        success: 'bg-success/10 text-success',
-        warning: 'bg-warning/10 text-warning',
-        danger: 'bg-danger/10 text-danger',
-        info: 'bg-info/10 text-info',
-        neutral: 'bg-neutral/10 text-neutral',
-        outline: 'border border-border bg-transparent text-foreground',
+        muted: 'bg-muted/85 text-muted-foreground',
+        success: 'bg-success/14 text-success',
+        warning: 'bg-warning/14 text-warning',
+        danger: 'bg-danger/14 text-danger',
+        info: 'bg-info/14 text-info',
+        neutral: 'bg-neutral/14 text-neutral',
+        outline: 'border-border/80 bg-transparent text-foreground',
       },
       size: {
-        sm: 'px-1.5 py-0 text-[10px]',
+        sm: 'px-1.5 py-px text-[10px] leading-4',
         md: 'px-2 py-0.5 text-xs',
         lg: 'px-2.5 py-1 text-xs',
       },

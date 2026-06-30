@@ -28,7 +28,7 @@ export function PublishReadinessAlert({
       {profileLines.length > 0 ? (
         <div className="mt-3">
           <p className={cn(pmTypography.caption, 'font-medium')}>Profile missing:</p>
-          <ul className="mt-1 list-disc space-y-1 pl-5 text-sm">
+          <ul className={cn('mt-1 list-disc space-y-1 ps-5', pmTypography.bodySm)}>
             {profileLines.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -38,7 +38,7 @@ export function PublishReadinessAlert({
       {opportunityLines.length > 0 ? (
         <div className="mt-3">
           <p className={cn(pmTypography.caption, 'font-medium')}>Opportunity missing:</p>
-          <ul className="mt-1 list-disc space-y-1 pl-5 text-sm">
+          <ul className={cn('mt-1 list-disc space-y-1 ps-5', pmTypography.bodySm)}>
             {opportunityLines.map((item) => (
               <li key={item}>{item}</li>
             ))}

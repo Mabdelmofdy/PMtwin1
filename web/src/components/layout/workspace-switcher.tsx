@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
 
 type WorkspaceSwitcherProps = {
@@ -65,11 +66,11 @@ export function WorkspaceSwitcher({
           <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Icon className="size-4" aria-hidden />
           </span>
-          <span className="grid min-w-0 flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
-            <span className="truncate text-sm font-semibold tracking-tight">
+          <span className="grid min-w-0 flex-1 text-start leading-tight group-data-[collapsible=icon]:hidden">
+            <span className={cn(pmTypography.bodySm, 'truncate font-semibold tracking-tight')}>
               {workspace.isAdmin ? `${APP_NAME} Admin` : APP_NAME}
             </span>
-            <span className="truncate text-xs text-muted-foreground">
+            <span className={cn(pmTypography.caption, 'truncate')}>
               {workspace.subtitle}
             </span>
           </span>
@@ -80,7 +81,7 @@ export function WorkspaceSwitcher({
         </PmButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
-        <DropdownMenuLabel className="text-xs text-muted-foreground">
+        <DropdownMenuLabel className={pmTypography.caption}>
           Workspaces
         </DropdownMenuLabel>
         <DropdownMenuItem className="cursor-pointer" asChild>
@@ -98,7 +99,7 @@ export function WorkspaceSwitcher({
           </DropdownMenuItem>
         ) : null}
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled className="text-xs text-muted-foreground">
+        <DropdownMenuItem disabled className={pmTypography.caption}>
           More workspaces — coming soon
         </DropdownMenuItem>
       </DropdownMenuContent>

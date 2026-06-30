@@ -10,7 +10,7 @@ import {
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
 import { PmPageLayout } from '@/components/layout/pm-layout-index'
-import { PmPageHeader } from '@/components/ui/pm-index'
+import { PmPageHeader, PmPageHeroMetric } from '@/components/ui/pm-index'
 
 export type AdminListPageProps<T> = {
   label?: string
@@ -29,6 +29,7 @@ export type AdminListPageProps<T> = {
   toolbarExtra?: ReactNode
   headerActions?: ReactNode
   showExport?: boolean
+  metricLabel?: string
 }
 
 /** Admin list scaffold — PmPageLayout + PmDataTable with UI-only search. */
@@ -49,6 +50,7 @@ export function AdminListPage<T>({
   toolbarExtra,
   headerActions,
   showExport = false,
+  metricLabel = 'In queue',
 }: AdminListPageProps<T>) {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
@@ -98,6 +100,7 @@ export function AdminListPage<T>({
           label={label}
           title={title}
           description={description}
+          metric={<PmPageHeroMetric value={data.length} label={metricLabel} />}
           actions={headerActions}
         />
       }
@@ -110,6 +113,7 @@ export function AdminListPage<T>({
         caption={title}
         toolbar={
           <PmTableToolbar
+            className="pm-toolbar-surface rounded-xl px-4 py-3"
             search={
               getSearchText ? (
                 <PmTableSearch

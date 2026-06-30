@@ -1,6 +1,7 @@
 import { Fragment } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { routeLabels } from '@/config/navigation'
+import { pmResponsive } from '@/tokens'
 import { resolveBreadcrumbHomeHref } from '@/components/layout/workspace-display'
 import { useAuth } from '@/providers/auth-provider'
 import {
@@ -44,7 +45,7 @@ export function PageBreadcrumbs({ className }: { className?: string }) {
 
   return (
     <Breadcrumb className={cn('min-w-0', className)}>
-      <BreadcrumbList className="flex-nowrap">
+      <BreadcrumbList className={cn('max-w-full flex-nowrap', pmResponsive.scrollX)}>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
             <Link

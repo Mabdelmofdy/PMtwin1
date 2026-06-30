@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { commandActions } from '@/config/navigation'
 import { PmButton } from '@/components/ui/pm-button'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { cn } from '@/lib/utils'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +29,7 @@ export function QuickCreateMenu() {
         </PmButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuLabel className="text-xs text-muted-foreground">
+        <DropdownMenuLabel className={cn(pmTypography.caption, 'text-muted-foreground')}>
           Quick create
         </DropdownMenuLabel>
         {commandActions.map((action) => {
@@ -42,7 +44,7 @@ export function QuickCreateMenu() {
           )
         })}
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled className="text-xs text-muted-foreground">
+        <DropdownMenuItem disabled className={cn(pmTypography.caption, 'text-muted-foreground')}>
           More actions — command palette
         </DropdownMenuItem>
         {primary ? (

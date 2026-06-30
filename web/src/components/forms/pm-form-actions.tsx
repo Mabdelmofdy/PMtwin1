@@ -75,7 +75,7 @@ export function PmFormActions({
         {children}
       </div>
 
-      <div className="flex flex-wrap items-center justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2 sm:ms-auto sm:justify-end">
         {onCancel ? (
           <PmButton
             type="button"

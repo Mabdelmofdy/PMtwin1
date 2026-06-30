@@ -7,7 +7,9 @@ import {
   PmFormReadonlySection,
   PmFormSection,
 } from '@/components/forms/pm-form-index'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { PmBadge } from '@/components/ui/pm-index'
+import { cn } from '@/lib/utils'
 import type { ProfileKind } from '@/domain/profile-readiness/types.ts'
 
 export type ProfileViewProps = {
@@ -58,18 +60,18 @@ export function ProfileView({ profile, profileKind, email }: ProfileViewProps) {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No skills listed yet.</p>
+              <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>No skills listed yet.</p>
             )}
           </PmFormSection>
 
           <PmFormSection title="Services & experience" description="Offered services and work history.">
-            <p className="text-sm text-muted-foreground">
+            <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
               Services and experience sections will populate from profile data when wired.
             </p>
           </PmFormSection>
 
           <PmFormSection title="Portfolio" description="Projects and case studies.">
-            <p className="text-sm text-muted-foreground">
+            <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
               Portfolio items will appear here when connected to profile storage.
             </p>
           </PmFormSection>

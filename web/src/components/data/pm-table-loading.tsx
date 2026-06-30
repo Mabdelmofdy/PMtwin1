@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
+import { pmLoading } from '@/tokens'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
@@ -44,7 +45,7 @@ export function PmTableLoading({
   return (
     <div
       data-slot="pm-table-loading"
-      className={cn('overflow-hidden rounded-xl border border-border/60', className)}
+      className={cn('overflow-hidden rounded-xl border border-border/60', pmLoading.section, className)}
       aria-busy="true"
       aria-label="Loading table data"
     >

@@ -669,7 +669,19 @@ async function initPipeline(params = {}) {
     setupPipelinePageHeaderActions();
     setupTabs();
     setupIntentSegment('tab-opportunities');
-    setupIntentSegment('tab-applications');
+
+    if (typeof window.isLegacyApplicationUiEnabled === 'function' && !window.isLegacyApplicationUiEnabled()) {
+        const appTab = document.getElementById('pipeline-tab-applications');
+        const appPanel = document.getElementById('tab-applications');
+        if (appTab) appTab.style.display = 'none';
+        if (appPanel) appPanel.style.display = 'none';
+        if (params.tab === 'applications') {
+            router.navigate('/pipeline');
+            params = { ...params, tab: 'opportunities' };
+        }
+    } else {
+        setupIntentSegment('tab-applications');
+    }
 
     const stageFromParams = params.stage;
     const stageFromQuery = (() => {
@@ -690,8 +702,10 @@ async function initPipeline(params = {}) {
     }
 
     initOpportunityStageFromStorage();
-    setupApplicationStageNav();
-    setupApplicationSidebarDropZones();
+    if (typeof window.isLegacyApplicationUiEnabled === 'function' && window.isLegacyApplicationUiEnabled()) {
+        setupApplicationStageNav();
+        setupApplicationSidebarDropZones();
+    }
     setupOpportunityStageNav();
     setupOpportunitySidebarDropZones();
     initPipelineMatchesFilterFromStorage();
@@ -701,9 +715,15 @@ async function initPipeline(params = {}) {
     let tabForHeader = 'opportunities';
     const tab = params.tab;
     if (tab === 'applications' || tab === 'opportunities' || tab === 'matches') {
-        const tabBtn = document.querySelector('.pipeline-board-tab[data-tab="' + tab + '"]');
-        if (tabBtn) tabBtn.click();
-        tabForHeader = tab;
+        if (tab === 'applications' && typeof window.isLegacyApplicationUiEnabled === 'function' && !window.isLegacyApplicationUiEnabled()) {
+            tabForHeader = 'opportunities';
+            const oppTabBtn = document.querySelector('.pipeline-board-tab[data-tab="opportunities"]');
+            if (oppTabBtn) oppTabBtn.click();
+        } else {
+            const tabBtn = document.querySelector('.pipeline-board-tab[data-tab="' + tab + '"]');
+            if (tabBtn) tabBtn.click();
+            tabForHeader = tab;
+        }
     } else {
         await loadPipelineData();
         const activeBtn = document.querySelector('.pipeline-board-tab.active.tab-btn');
@@ -745,6 +765,9 @@ function setupTabs() {
                 mountPipelinePageHeader('opportunities');
                 loadOpportunitiesPipeline();
             } else if (tabName === 'applications') {
+                if (typeof window.isLegacyApplicationUiEnabled === 'function' && !window.isLegacyApplicationUiEnabled()) {
+                    return;
+                }
                 mountPipelinePageHeader('applications');
                 loadApplicationsPipeline();
             } else if (tabName === 'matches') {

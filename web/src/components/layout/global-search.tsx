@@ -42,7 +42,7 @@ export function GlobalSearch({
     >
       <Search className="size-4 shrink-0" aria-hidden />
       <span className={cn(pmTypography.bodySm, 'truncate')}>Search or jump to…</span>
-      <kbd className="pointer-events-none ml-auto hidden rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] font-medium text-muted-foreground lg:inline-block">
+      <kbd className="pointer-events-none ms-auto hidden rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] font-medium text-muted-foreground lg:inline-block">
         Ctrl+K
       </kbd>
     </PmButton>

@@ -43,8 +43,10 @@ import {
   PmMetricGrid,
   PmPageLayout,
   PmSectionHeader,
+  formatPlatformHealthMetric,
 } from '@/components/layout/pm-layout-index'
-import { PmButton, PmPageHeader, PmStatCard } from '@/components/ui/pm-index'
+import { PmBadge, PmButton, PmPageHeader, PmPageHeroMetric, PmReadinessScoreBadge, PmStatCard, PmMatchScoreBadge } from '@/components/ui/pm-index'
+import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
 import { AdminStatusBadge } from '@/pages/admin/admin-display'
 
@@ -84,6 +86,10 @@ export function AdminDashboardPage() {
   }, [version])
 
   const auditEntries = adminApi.getAuditLog().slice(0, 5)
+  const platformHealth = formatPlatformHealthMetric(
+    readinessAnalytics.profiles.averageScore,
+    matchingQuality.averageMatchScore,
+  )
 
   return (
     <PmDashboardLayout
@@ -92,6 +98,22 @@ export function AdminDashboardPage() {
           label="Admin"
           title="Command center"
           description="Platform KPIs, queues, and quick actions."
+          metric={
+            <PmPageHeroMetric value={platformHealth} label="Platform health" />
+          }
+          badges={
+            <>
+              <PmBadge tone="success">
+                {Math.round(readinessAnalytics.profiles.averageScore)}% readiness
+              </PmBadge>
+              <PmBadge tone="info">
+                {Math.round(matchingQuality.averageMatchScore)}% match quality
+              </PmBadge>
+              {pendingVetting > 0 ? (
+                <PmBadge tone="warning">{pendingVetting} pending vetting</PmBadge>
+              ) : null}
+            </>
+          }
         />
       }
       metrics={
@@ -211,8 +233,10 @@ export function AdminReportsPage() {
     <PmPageLayout
       header={
         <PmPageHeader
+          label="Admin"
           title="Reports"
           description="Platform analytics and export tools."
+          metric={<PmPageHeroMetric value={publishedCount} label="Published opps" />}
         />
       }
     >
@@ -232,8 +256,11 @@ export function AdminHealthPage() {
     <PmPageLayout
       header={
         <PmPageHeader
+          label="Admin"
           title="System health"
           description="Service status and data store snapshot."
+          metric={<PmPageHeroMetric value={services.length} label="Services" />}
+          badges={<PmBadge tone="success">All operational</PmBadge>}
         />
       }
     >
@@ -352,6 +379,16 @@ export function AdminOpportunitiesPage() {
           cell: (o) => <AdminStatusBadge status={o.status} entity="opportunity" />,
         },
         { id: 'location', label: 'Location', cell: (o) => o.location },
+        {
+          id: 'readiness',
+          label: 'Readiness',
+          cell: (o) => (
+            <PmReadinessScoreBadge
+              score={resolveOpportunityReadiness(o).score}
+              variant="admin"
+            />
+          ),
+        },
         { id: 'updated', label: 'Updated', cell: (o) => formatDate(o.updatedAt) },
       ]}
     />
@@ -409,7 +446,7 @@ export function AdminMatchingPage() {
   const matchColumns: PmDataTableColumn<(typeof matches)[number]>[] = [
     { id: 'id', label: 'ID', cell: (m) => m.id },
     { id: 'type', label: 'Type', cell: (m) => m.matchType },
-    { id: 'score', label: 'Score', cell: (m) => `${Math.round(m.matchScore * 100)}%` },
+    { id: 'score', label: 'Score', cell: (m) => <PmMatchScoreBadge score={m.matchScore} variant="tooltip" /> },
     {
       id: 'status',
       label: 'Status',
@@ -421,8 +458,13 @@ export function AdminMatchingPage() {
     <PmPageLayout
       header={
         <PmPageHeader
+          label="Admin"
           title="Matching engine"
           description="Run matching, review queues, and diagnostics."
+          metric={<PmPageHeroMetric value={matches.length} label="Matches" />}
+          badges={
+            <PmBadge tone="muted">{matchingRuns.length} recent runs</PmBadge>
+          }
           actions={
             <PmButton disabled={isRunning} onClick={handleRunCircularMatching}>
               {isRunning ? 'Running circular matching…' : 'Run circular matching'}
@@ -461,7 +503,9 @@ export function AdminMatchingPage() {
             data={matches.slice(0, 10)}
             getRowId={(m) => m.id}
             caption="Recent matches"
-            toolbar={<PmTableToolbar />}
+            toolbar={
+              <PmTableToolbar className="pm-toolbar-surface rounded-xl px-4 py-3" />
+            }
             empty={<PmTableEmpty variant="no-data" title="No matches" />}
           />
         </section>

@@ -5,9 +5,11 @@ import { PmContentCard } from '@/components/layout/pm-layout-index'
 import { PmFormField } from '@/components/forms/pm-form-index'
 import { PmButton } from '@/components/ui/pm-button'
 import { PmBadge } from '@/components/ui/pm-badge'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
+import { productFlags } from '@/config/product-flags.ts'
 
 const STEPS = ['Proposal', 'Value', 'Review'] as const
 
@@ -15,11 +17,12 @@ export function ApplyWizard({
   opportunityId,
   applicantId,
   onSubmitted,
-  legacy = false,
+  legacy: _legacy = true,
 }: {
   opportunityId: string
   applicantId: string
   onSubmitted: () => void
+  /** Always legacy in current product — direct applications are secondary to PostMatch. */
   legacy?: boolean
 }) {
   const [step, setStep] = useState(1)
@@ -28,6 +31,10 @@ export function ApplyWizard({
   const [currency, setCurrency] = useState('SAR')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isSubmittingRef = useRef(false)
+
+  if (!productFlags.showLegacyApplications) {
+    return null
+  }
 
   const submit = () => {
     if (isSubmittingRef.current) return
@@ -50,22 +57,18 @@ export function ApplyWizard({
     isSubmittingRef.current = false
     setIsSubmitting(false)
     if (!created) {
-      toast.error('You have already submitted an application for this opportunity.')
+      toast.error('You have already submitted a legacy application for this opportunity.')
       return
     }
-    toast.success('Application submitted')
+    toast.success('Legacy application submitted')
     onSubmitted()
   }
 
   return (
     <PmContentCard
-      title={legacy ? 'Legacy direct application' : 'Apply to this opportunity'}
-      description={
-        legacy
-          ? 'Optional hiring path — PostMatch remains the primary collaboration route.'
-          : undefined
-      }
-      className={legacy ? 'border-border/50 bg-surface-muted/40' : 'border-primary/20'}
+      title="Legacy direct application"
+      description="Optional hiring path — PostMatch remains the primary collaboration route."
+      className="border-border/50 bg-surface-muted/40"
     >
       <div className="flex flex-wrap gap-2">
         {STEPS.map((label, i) => (
@@ -113,8 +116,8 @@ export function ApplyWizard({
       ) : null}
 
       {step === 3 ? (
-        <div className={cn('mt-4 space-y-2 rounded-lg bg-surface-muted p-4 text-sm')}>
-          <p className="font-medium">Review your application</p>
+        <div className={cn('mt-4 space-y-2 rounded-lg bg-surface-muted p-4', pmTypography.bodySm)}>
+          <p className="font-medium">Review your legacy application</p>
           <p className="text-muted-foreground">{proposal}</p>
           {amount ? (
             <p className="text-muted-foreground">
@@ -136,7 +139,7 @@ export function ApplyWizard({
           <PmButton onClick={() => setStep((s) => s + 1)}>Continue</PmButton>
         ) : (
           <PmButton disabled={isSubmitting} onClick={submit}>
-            {isSubmitting ? 'Submitting…' : 'Submit application'}
+            {isSubmitting ? 'Submitting…' : 'Submit legacy application'}
           </PmButton>
         )}
       </div>

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmRtlTypography } from '@/tokens'
 import { PmSurface } from '@/components/ui/pm-surface'
 import {
   Table,
@@ -251,7 +252,7 @@ export function PmDataTable<T>({
   const isEmpty = shouldShowTableEmpty(data.length, { loading, error: Boolean(error) })
 
   return (
-    <div data-slot="pm-data-table" className={cn('space-y-4', className)}>
+    <div data-slot="pm-data-table" className={cn('min-w-0 space-y-4', className)}>
       {toolbar}
       {(search || filters) && !toolbar ? (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
@@ -282,10 +283,10 @@ export function PmDataTable<T>({
             data-responsive="table"
           >
             <div className="relative max-h-[min(70svh,48rem)] overflow-auto">
-              <Table className={cn(densityClasses, stickyHeader && '[&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10 [&_thead]:bg-surface [&_thead]:shadow-[0_1px_0_0_var(--border)]')}>
+              <Table className={cn(pmRtlTypography.table, densityClasses, stickyHeader && '[&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10 [&_thead]:bg-surface [&_thead]:shadow-[0_1px_0_0_var(--border)]')}>
                 {caption ? <caption className="sr-only">{caption}</caption> : null}
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
+                <TableHeader className="bg-surface-muted/75">
+                  <TableRow className="hover:bg-transparent border-border/60">
                     {showSelection ? (
                       <TableHead className={cn(padding.head, 'w-10')}>
                         {selectionMode === 'multiple' ? (
@@ -318,7 +319,7 @@ export function PmDataTable<T>({
                           <button
                             type="button"
                             className={cn(
-                              pmTypography.label,
+                              pmTypography.tableHeader,
                               'inline-flex cursor-pointer items-center gap-1.5 pm-focus-ring rounded-sm',
                             )}
                             onClick={() => handleSortClick(col.id)}
@@ -331,14 +332,14 @@ export function PmDataTable<T>({
                             />
                           </button>
                         ) : (
-                          <span className={pmTypography.label}>
+                          <span className={pmTypography.tableHeader}>
                             {col.header ?? col.label}
                           </span>
                         )}
                       </TableHead>
                     ))}
                     {rowActions ? (
-                      <TableHead className={cn(padding.head, 'w-12 text-right')}>
+                      <TableHead className={cn(padding.head, 'w-12 text-end')}>
                         <span className="sr-only">Actions</span>
                       </TableHead>
                     ) : null}
@@ -353,6 +354,7 @@ export function PmDataTable<T>({
                         key={rowId}
                         data-state={selected ? 'selected' : undefined}
                         data-row-id={rowId}
+                        className="pm-table-row-hover border-border/50"
                       >
                         {showSelection ? (
                           <TableCell className={cn(padding.cell, 'w-10')}>
@@ -372,7 +374,7 @@ export function PmDataTable<T>({
                           </TableCell>
                         ))}
                         {rowActions ? (
-                          <TableCell className={cn(padding.cell, 'text-right')}>
+                          <TableCell className={cn(padding.cell, 'text-end')}>
                             {rowActions(row)}
                           </TableCell>
                         ) : null}
@@ -415,7 +417,7 @@ export function PmDataTable<T>({
               )
             })}
             {pagination ? (
-              <div className="overflow-hidden rounded-xl border border-border/60">
+              <div className="overflow-hidden rounded-2xl border border-border/70">
                 {pagination}
               </div>
             ) : null}

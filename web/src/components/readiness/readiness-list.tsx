@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { READINESS_READY_MESSAGE } from '@/components/readiness/readiness-display.ts'
 
 export function ReadinessList({
@@ -14,18 +15,18 @@ export function ReadinessList({
 }) {
   if (showReadyMessage) {
     return (
-      <p className={cn('text-sm font-medium text-emerald-700 dark:text-emerald-300', className)}>
+      <p className={cn(pmTypography.bodySm, 'font-medium text-success', className)}>
         {READINESS_READY_MESSAGE}
       </p>
     )
   }
 
   return (
-    <div className={cn('space-y-4 text-sm', className)}>
+    <div className={cn('space-y-4', pmTypography.bodySm, className)}>
       {missingRequired.length > 0 ? (
         <div>
           <p className="font-medium text-foreground">Missing Required:</p>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground" aria-label="Missing required fields">
+          <ul className="mt-2 list-disc space-y-1 ps-5 text-muted-foreground" aria-label="Missing required fields">
             {missingRequired.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -36,7 +37,7 @@ export function ReadinessList({
       {missingRecommended.length > 0 ? (
         <div>
           <p className="font-medium text-foreground">Missing Recommended:</p>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground" aria-label="Missing recommended fields">
+          <ul className="mt-2 list-disc space-y-1 ps-5 text-muted-foreground" aria-label="Missing recommended fields">
             {missingRecommended.map((item) => (
               <li key={item}>{item}</li>
             ))}

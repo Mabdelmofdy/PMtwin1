@@ -234,9 +234,10 @@ async function loadOpportunity(id) {
         const creator = await dataService.getUserOrCompanyById(opportunity.creatorId);
         
         const isOwner = user && opportunity.creatorId === user.id;
-        const acceptsApplications = window.applicationUtils?.opportunityAcceptsApplications
+        const legacyAppsUi = typeof window.isLegacyApplicationUiEnabled === 'function' && window.isLegacyApplicationUiEnabled();
+        const acceptsApplications = legacyAppsUi && window.applicationUtils?.opportunityAcceptsApplications
             ? window.applicationUtils.opportunityAcceptsApplications(opportunity)
-            : ((opportunity.intent || 'request') !== 'offer');
+            : (legacyAppsUi && ((opportunity.intent || 'request') !== 'offer'));
         const canViewApplications = acceptsApplications && (isOwner || canAdminViewOpportunityApplications());
         const canManageApplications = acceptsApplications && (isOwner || canAdminManageOpportunityApplications());
         const existingDeal = user ? await dataService.getDealByOpportunityId(opportunity.id) : null;
@@ -254,13 +255,13 @@ async function loadOpportunity(id) {
         }
 
         const canApplyHelper = window.applicationUtils?.canUserApplyToOpportunity;
-        const canApply = canApplyHelper
+        const canApply = legacyAppsUi && (canApplyHelper
             ? canApplyHelper(opportunity, user, {
                 application: currentApplication,
                 canReapply: applicationCanReapply,
                 hasDeal: !!existingDeal
             })
-            : (canApplyBase && !existingDeal && (!currentApplication || applicationCanReapply));
+            : (canApplyBase && !existingDeal && (!currentApplication || applicationCanReapply)));
         
         // Determine which steps are needed
         determineWizardSteps(opportunity);
@@ -375,6 +376,9 @@ function determineWizardSteps(opportunity) {
 }
 
 async function renderComprehensiveView(opportunity, creator, isOwner, canApply, canViewApplications, existingDeal = null) {
+    const legacyAppsUi = typeof window.isLegacyApplicationUiEnabled === 'function' && window.isLegacyApplicationUiEnabled();
+    const showApplyFlow = legacyAppsUi && canApply;
+    const showApplicationsList = legacyAppsUi && canViewApplications;
     // Reset application-related section visibility up front so a prior render or
     // permission change cannot leave a stale panel showing.
     ['applications-section', 'apply-section', 'already-applied-section'].forEach((sectionId) => {
@@ -529,7 +533,7 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply, 
     await renderModelDetails(opportunity);
     
     // Show apply section or already applied
-    if (canApply) {
+    if (showApplyFlow) {
         const appliedSection = document.getElementById('already-applied-section');
         const applySection = document.getElementById('apply-section');
         const appliedHeading = appliedSection?.querySelector('h3');
@@ -585,7 +589,7 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply, 
                 startApplicationWizard();
             });
         }
-    } else if (authService.isPendingApproval && authService.isPendingApproval() && !isOwner && (opportunity.status === 'published' || opportunity.status === 'in_negotiation')) {
+    } else if (legacyAppsUi && authService.isPendingApproval && authService.isPendingApproval() && !isOwner && (opportunity.status === 'published' || opportunity.status === 'in_negotiation')) {
         // Pending user: show apply section with disabled button and tooltip
         const applySection = document.getElementById('apply-section');
         const applyBtn = document.getElementById('btn-start-apply');
@@ -595,7 +599,7 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply, 
             applyBtn.setAttribute('title', 'Action disabled until your account is approved.');
             applyBtn.classList.add('opacity-75', 'cursor-not-allowed');
         }
-    } else if (currentApplication || existingDeal) {
+    } else if (legacyAppsUi && (currentApplication || existingDeal)) {
         const appliedSection = document.getElementById('already-applied-section');
         const applySection = document.getElementById('apply-section');
         if (applySection) applySection.style.display = 'none';
@@ -632,7 +636,7 @@ async function renderComprehensiveView(opportunity, creator, isOwner, canApply, 
         }
     }
     
-    if (canViewApplications) {
+    if (showApplicationsList) {
         document.getElementById('applications-section').style.display = 'block';
     }
     

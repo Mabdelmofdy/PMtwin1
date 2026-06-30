@@ -16,6 +16,7 @@ import {
   PmCardTitle,
 } from '@/components/ui/pm-card'
 import { PmButton } from '@/components/ui/pm-button'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
 
 const toneBorderStyles: Record<ReturnType<typeof getReadinessStatusTone>, string> = {
   incomplete: 'border-warning/30',
@@ -51,9 +52,9 @@ export function ReadinessCard({
       <PmCardContent className="space-y-4">
         <div className="flex items-center gap-4">
           <ReadinessScoreRing score={result.score} status={result.status} />
-          <div className="space-y-1 text-sm">
+          <div className={cn('space-y-1', pmTypography.bodySm)}>
             <p className="text-muted-foreground">Score</p>
-            <p className="text-2xl font-semibold tracking-tight">{viewModel.scoreLabel}</p>
+            <p className={pmTypography.stat}>{viewModel.scoreLabel}</p>
             <p>
               <span className="text-muted-foreground">Status:</span>{' '}
               <span className="font-medium">{viewModel.statusLabel}</span>

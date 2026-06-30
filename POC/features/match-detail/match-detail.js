@@ -317,7 +317,8 @@ async function renderMatchDetail(postMatch, currentUserId) {
     }
     const inviteBtn = actionsEl.querySelector('#btn-invite-apply');
     if (inviteBtn) {
-        const showInvite = actionIds.has('invite_apply') && !expired;
+        const legacyAppsUi = typeof window.isLegacyApplicationUiEnabled === 'function' && window.isLegacyApplicationUiEnabled();
+        const showInvite = legacyAppsUi && actionIds.has('invite_apply') && !expired;
         inviteBtn.style.display = showInvite ? '' : 'none';
         inviteBtn.disabled = !showInvite;
     }
@@ -858,7 +859,8 @@ function renderMatchDetailLifecycleSections(vm, postMatch) {
     }
 
     let appHtml = '';
-    if (vm?.hasApplication && vm?.applicationId) {
+    const legacyAppsUi = typeof window.isLegacyApplicationUiEnabled === 'function' && window.isLegacyApplicationUiEnabled();
+    if (legacyAppsUi && vm?.hasApplication && vm?.applicationId) {
         appHtml = '<p><span class="badge badge--success">Application Submitted</span></p>';
         if (vm.sourceOpportunityId) {
             appHtml += '<p class="mt-1"><a href="#" data-route="/opportunities/' + escapeHtml(vm.sourceOpportunityId) + '" class="text-primary font-medium">View opportunity applications</a></p>';
@@ -888,7 +890,7 @@ function renderMatchDetailLifecycleSections(vm, postMatch) {
         }
     }
 
-    const nestNegotiationUnderApplication = !!(vm?.hasApplication && vm?.hasNegotiation);
+    const nestNegotiationUnderApplication = !!(legacyAppsUi && vm?.hasApplication && vm?.hasNegotiation);
     if (nestNegotiationUnderApplication && appHtml) {
         appHtml += '<div class="mt-2 pl-2 border-l-2 border-gray-200 application-negotiation-nested">' + negHtml + '</div>';
     }
@@ -900,7 +902,7 @@ function renderMatchDetailLifecycleSections(vm, postMatch) {
     }
 
     setBlock('match-detail-invitation-wrap', 'match-detail-invitation-body', !!(vm?.hasInvitation), invHtml);
-    setBlock('match-detail-application-wrap', 'match-detail-application-body', !!(vm?.hasApplication), appHtml);
+    setBlock('match-detail-application-wrap', 'match-detail-application-body', !!(legacyAppsUi && vm?.hasApplication), appHtml);
     setBlock('match-detail-negotiation-wrap', 'match-detail-negotiation-body', !!(vm?.hasNegotiation && !nestNegotiationUnderApplication), negHtml);
     setBlock('match-detail-replacement-wrap', 'match-detail-replacement-body', !!(vm?.replacementEligible && replHtml), replHtml);
     setBlock('match-detail-deal-wrap', 'match-detail-deal-body', !!(vm?.dealId), dealHtml);

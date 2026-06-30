@@ -12,12 +12,14 @@ type StartNegotiationButtonProps = {
   readonly match: PostMatch | null | undefined
   readonly className?: string
   readonly variant?: 'default' | 'outline' | 'secondary'
+  readonly size?: 'default' | 'sm' | 'lg' | 'icon'
 }
 
 export function StartNegotiationButton({
   match,
   className,
   variant = 'default',
+  size = 'default',
 }: StartNegotiationButtonProps) {
   const navigate = useNavigate()
   const [pending, setPending] = useState(false)
@@ -47,6 +49,7 @@ export function StartNegotiationButton({
     <PmButton
       type="button"
       variant={variant}
+      size={size}
       className={className ?? 'cursor-pointer'}
       disabled={pending}
       onClick={handleStart}

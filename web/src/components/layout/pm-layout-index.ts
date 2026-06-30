@@ -34,3 +34,14 @@ export {
   pmContentWidth,
   resolveMetricColumns,
 } from '@/components/shared/pm-layout-tokens'
+export {
+  countActiveContracts,
+  countActiveDeals,
+  countActiveMatches,
+  countActiveNegotiations,
+  countActiveOpportunities,
+  countPipelineWorkflowItems,
+  formatPlatformHealthMetric,
+  summarizeOpportunityListHero,
+  type OpportunityListHeroSummary,
+} from '@/components/layout/page-hero-display'

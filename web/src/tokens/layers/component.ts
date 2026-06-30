@@ -16,13 +16,16 @@ export const pmComponentTokens = {
   button: {
     radius: pmRadius.lg,
     motion: pmMotion.fast,
+    hover: 'pm-interactive-hover',
+    press: 'pm-interactive-press',
     focus: pmLayoutRhythm.focusRing,
   },
   card: {
     radius: pmRadius.xl,
     padding: pmLayoutRhythm.cardPadding,
     elevation: pmElevation.card,
-    border: 'border-border/60',
+    border: 'border-border/70',
+    interactive: 'pm-interactive-card',
   },
   badge: {
     typography: pmTypography.badge,
@@ -36,13 +39,17 @@ export const pmComponentTokens = {
   table: {
     density: pmLayoutRhythm.tableDense,
     border: 'border-border',
+    rowHover: 'pm-table-row-hover',
   },
   dialog: {
     elevation: pmElevation.modal,
     radius: pmRadius.lg,
+    overlay: 'pm-overlay-modal',
+    content: 'pm-overlay-modal-content',
   },
   navigation: {
     itemMotion: pmMotion.fast,
+    itemInteraction: 'pm-nav-item',
     badgeTypography: pmTypography.badge,
   },
   tooltip: {
@@ -61,6 +68,20 @@ export const pmComponentTokens = {
   wizard: {
     gap: pmLayoutRhythm.formGap,
     stepTypography: pmTypography.label,
+  },
+  statCard: {
+    value: pmTypography.stat,
+    label: pmTypography.statLabel,
+    elevation: pmElevation.card,
+    iconSurface: 'bg-primary-muted text-primary',
+    reveal: 'pm-enter-hero',
+    interactive: 'pm-interactive-card',
+  },
+  pageHeader: {
+    title: pmTypography.h1,
+    overline: pmTypography.overline,
+    description: pmTypography.bodySm,
+    border: 'border-border/70',
   },
 } as const
 

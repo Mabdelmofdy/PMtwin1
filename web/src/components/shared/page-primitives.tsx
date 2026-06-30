@@ -1,5 +1,6 @@
 /**
- * Legacy page primitives — deprecated in Phase 8.
+ * Legacy page primitives — deprecated Phase 8, audited Phase 9.
+ * Zero active page imports; retained for design-governance regression tests only.
  * Prefer PmPageHeader, PmWorkflowBadge, PmEmptyState, PmStatCard from @/components/ui/pm-index.
  */
 import type { ReactNode } from 'react'

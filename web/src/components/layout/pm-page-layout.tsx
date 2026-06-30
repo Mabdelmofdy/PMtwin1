@@ -62,7 +62,7 @@ export function PmPageLayout({
   return (
     <div
       data-slot="pm-page-layout"
-      className={cn(pmLayoutGrid.pageStack, className)}
+      className={cn(pmLayoutGrid.pageStack, 'min-w-0', className)}
     >
       {header}
       {toolbar}
