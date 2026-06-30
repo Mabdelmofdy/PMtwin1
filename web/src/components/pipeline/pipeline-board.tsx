@@ -14,7 +14,8 @@ import { dealService } from '@/services/deal-service.ts'
 import { negotiationService } from '@/services/negotiation-service.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
-import { StatusBadge } from '@/components/shared/page-primitives'
+import { PmWorkflowBadge } from '@/components/ui/pm-workflow-badge'
+import { PmEmptyState } from '@/components/ui/pm-empty-state'
 import type { StatusEntity } from '@/lib/status-display.ts'
 import { cn } from '@/lib/utils'
 
@@ -67,7 +68,7 @@ function KanbanCard({
         e.dataTransfer.effectAllowed = 'move'
       }}
       className={cn(
-        'rounded-lg border border-border/60 bg-card p-3 shadow-sm transition-shadow hover:shadow-md',
+        'rounded-lg border border-border/60 p-3 shadow-sm transition-shadow hover:shadow-md',
         disabled ? 'opacity-60' : 'cursor-grab active:cursor-grabbing',
       )}
     >
@@ -77,7 +78,7 @@ function KanbanCard({
           <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
         ) : null}
         {status ? (
-          <StatusBadge
+          <PmWorkflowBadge
             status={status}
             entity={statusEntity}
             className="mt-2"
@@ -265,9 +266,11 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
               </p>
             </div>
             {items.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-border/80 p-8 text-center text-sm text-muted-foreground">
-                No opportunities in this stage.
-              </p>
+              <PmEmptyState
+                title="No opportunities in this stage"
+                description="Drag cards onto a stage in the sidebar to update status."
+                size="compact"
+              />
             ) : (
               items.map((item) => (
                 <KanbanCard
@@ -335,9 +338,11 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
             </p>
           </div>
           {items.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-border/80 p-8 text-center text-sm text-muted-foreground">
-              No applications in this stage.
-            </p>
+            <PmEmptyState
+              title="No applications in this stage"
+              description={APPLICATION_STATUS_LABELS[appStage] ?? appStage}
+              size="compact"
+            />
           ) : (
             items.map((item) => (
               <KanbanCard

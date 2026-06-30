@@ -1,6 +1,16 @@
 import { toCanonical } from '@pm-twin/lifecycle'
 import type { WorkflowEntityType } from '@/domain/workflow/types.ts'
-import { StatusBadge as StatusBadgeView } from '@/components/shared/page-primitives.tsx'
+import { PmWorkflowBadge } from '@/components/ui/pm-workflow-badge'
+import type { StatusEntity } from '@/lib/status-display'
+
+const WORKFLOW_TO_STATUS_ENTITY: Partial<Record<WorkflowEntityType, StatusEntity>> = {
+  opportunity: 'opportunity',
+  deal: 'deal',
+  contract: 'contract',
+  negotiation: 'negotiation',
+  match: 'match',
+  application: 'application',
+}
 
 export function normalizeStatus(
   entityType: WorkflowEntityType,
@@ -10,6 +20,7 @@ export function normalizeStatus(
   return toCanonical(entityType, status)
 }
 
+/** @deprecated Prefer PmWorkflowBadge directly — kept for workflow module consumers. */
 export function StatusBadge({
   entityType,
   status,
@@ -20,7 +31,13 @@ export function StatusBadge({
   className?: string
 }) {
   const canonical = normalizeStatus(entityType, status)
+  const entity = WORKFLOW_TO_STATUS_ENTITY[entityType]
+
   return (
-    <StatusBadgeView status={canonical || status} className={className} />
+    <PmWorkflowBadge
+      status={canonical || status}
+      entity={entity}
+      className={className}
+    />
   )
 }

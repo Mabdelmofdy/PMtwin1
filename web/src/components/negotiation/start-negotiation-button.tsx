@@ -6,7 +6,7 @@ import {
   canShowStartNegotiationFromPostMatch,
   startNegotiationFromPostMatchUiAction,
 } from '@/lib/start-negotiation-ui-actions.ts'
-import { Button } from '@/components/ui/button'
+import { PmButton } from '@/components/ui/pm-button'
 
 type StartNegotiationButtonProps = {
   readonly match: PostMatch | null | undefined
@@ -44,7 +44,7 @@ export function StartNegotiationButton({
   }
 
   return (
-    <Button
+    <PmButton
       type="button"
       variant={variant}
       className={className ?? 'cursor-pointer'}
@@ -52,6 +52,6 @@ export function StartNegotiationButton({
       onClick={handleStart}
     >
       {pending ? 'Starting negotiation…' : 'Start negotiation'}
-    </Button>
+    </PmButton>
   )
 }

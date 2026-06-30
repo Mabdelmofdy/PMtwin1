@@ -4,8 +4,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* =============================================================================
+ * PM-Twin Adaptive Token Architecture (DDS-002)
+ * Layer 1 Brand · Layer 2 Semantic · Layer 4 Layout · Layer 5 Typography
+ * Layer 6 Radius · Layer 7 Elevation · Layer 8 Motion
+ * TS registry: web/src/tokens/ | Governance: docs/design/DDS-002-TOKEN-ARCHITECTURE.md
+ * ============================================================================= */
+
 @theme inline {
   --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Segoe UI Mono", "Geist Mono", monospace;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -17,12 +27,16 @@
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-elevated: var(--surface-elevated);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-muted: var(--primary-muted);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -30,9 +44,21 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-neutral: var(--neutral);
+  --color-neutral-foreground: var(--neutral-foreground);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-focus-ring: var(--focus-ring);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -41,14 +67,34 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  --spacing-pm-page-x: var(--pm-space-page-x);
+  --spacing-pm-page-y: var(--pm-space-page-y);
+  --spacing-pm-section: var(--pm-space-section);
+  --spacing-pm-card: var(--pm-space-card);
+  --spacing-pm-form: var(--pm-space-form);
+  --spacing-pm-table-y: var(--pm-space-table-y);
+  --spacing-pm-table-x: var(--pm-space-table-x);
+
+  --shadow-pm-card: var(--shadow-card);
+  --shadow-pm-panel: var(--shadow-panel);
+  --shadow-pm-floating: var(--shadow-floating);
+  --shadow-pm-modal: var(--shadow-modal);
+
+  --ease-pm-out: var(--motion-ease-out);
+  --ease-pm-spring: var(--motion-ease-spring);
 }
 
-/* PM-Twin design tokens — light */
+/* Layer 1–2: Brand + Semantic (Enterprise Light theme) */
 :root {
   --radius: 0.5rem;
 
   --background: oklch(0.984 0.003 247.858);
   --foreground: oklch(0.129 0.042 264.695);
+
+  --surface: oklch(1 0 0);
+  --surface-muted: oklch(0.968 0.007 247.896);
+  --surface-elevated: oklch(1 0 0);
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
@@ -58,6 +104,7 @@
 
   --primary: oklch(0.488 0.105 240.5);
   --primary-foreground: oklch(0.985 0 0);
+  --primary-muted: oklch(0.488 0.105 240.5 / 12%);
 
   --secondary: oklch(0.968 0.007 247.896);
   --secondary-foreground: oklch(0.279 0.041 260.031);
@@ -70,9 +117,22 @@
 
   --destructive: oklch(0.577 0.245 27.325);
 
+  --success: oklch(0.527 0.154 150.069);
+  --success-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.666 0.157 58.318);
+  --warning-foreground: oklch(0.279 0.041 260.031);
+  --danger: oklch(0.577 0.245 27.325);
+  --danger-foreground: oklch(0.985 0 0);
+  --info: oklch(0.546 0.101 240.5);
+  --info-foreground: oklch(0.985 0 0);
+  --neutral: oklch(0.446 0.043 257.281);
+  --neutral-foreground: oklch(0.968 0.007 247.896);
+
   --border: oklch(0.929 0.013 255.508);
+  --border-strong: oklch(0.869 0.02 255.508);
   --input: oklch(0.929 0.013 255.508);
   --ring: oklch(0.488 0.105 240.5);
+  --focus-ring: oklch(0.488 0.105 240.5 / 40%);
 
   --sidebar: oklch(0.985 0.002 247.839);
   --sidebar-foreground: oklch(0.279 0.041 260.031);
@@ -82,11 +142,38 @@
   --sidebar-accent-foreground: oklch(0.129 0.042 264.695);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.488 0.105 240.5);
+
+  /* Layer 4: Layout spacing rhythm */
+  --pm-space-page-x: 1rem;
+  --pm-space-page-y: 1.5rem;
+  --pm-space-section: 1.5rem;
+  --pm-space-card: 1rem;
+  --pm-space-form: 1rem;
+  --pm-space-table-y: 0.75rem;
+  --pm-space-table-x: 0.75rem;
+
+  /* Layer 7: Elevation */
+  --shadow-card: 0 1px 2px oklch(0.129 0.042 264.695 / 4%), 0 1px 3px oklch(0.129 0.042 264.695 / 6%);
+  --shadow-panel: 0 2px 4px oklch(0.129 0.042 264.695 / 4%), 0 4px 12px oklch(0.129 0.042 264.695 / 6%);
+  --shadow-floating: 0 4px 8px oklch(0.129 0.042 264.695 / 5%), 0 8px 24px oklch(0.129 0.042 264.695 / 8%);
+  --shadow-modal: 0 8px 16px oklch(0.129 0.042 264.695 / 6%), 0 16px 48px oklch(0.129 0.042 264.695 / 12%);
+
+  /* Layer 8: Motion */
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --motion-slow: 240ms;
+  --motion-ease-out: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --motion-ease-spring: cubic-bezier(0.34, 1.2, 0.64, 1);
 }
 
+/* Layer 1–2: Brand + Semantic (Enterprise Dark theme) */
 .dark {
   --background: oklch(0.129 0.042 264.695);
   --foreground: oklch(0.984 0.003 247.858);
+
+  --surface: oklch(0.168 0.042 265.755);
+  --surface-muted: oklch(0.208 0.042 265.755);
+  --surface-elevated: oklch(0.198 0.042 265.755);
 
   --card: oklch(0.168 0.042 265.755);
   --card-foreground: oklch(0.984 0.003 247.858);
@@ -96,6 +183,7 @@
 
   --primary: oklch(0.62 0.12 240.5);
   --primary-foreground: oklch(0.985 0 0);
+  --primary-muted: oklch(0.62 0.12 240.5 / 16%);
 
   --secondary: oklch(0.208 0.042 265.755);
   --secondary-foreground: oklch(0.984 0.003 247.858);
@@ -108,9 +196,22 @@
 
   --destructive: oklch(0.704 0.191 22.216);
 
+  --success: oklch(0.696 0.17 152.535);
+  --success-foreground: oklch(0.129 0.042 264.695);
+  --warning: oklch(0.769 0.153 70.08);
+  --warning-foreground: oklch(0.129 0.042 264.695);
+  --danger: oklch(0.704 0.191 22.216);
+  --danger-foreground: oklch(0.985 0 0);
+  --info: oklch(0.714 0.12 240.5);
+  --info-foreground: oklch(0.129 0.042 264.695);
+  --neutral: oklch(0.704 0.04 256.788);
+  --neutral-foreground: oklch(0.208 0.042 265.755);
+
   --border: oklch(1 0 0 / 10%);
+  --border-strong: oklch(1 0 0 / 18%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.62 0.12 240.5);
+  --focus-ring: oklch(0.62 0.12 240.5 / 45%);
 
   --sidebar: oklch(0.168 0.042 265.755);
   --sidebar-foreground: oklch(0.984 0.003 247.858);
@@ -120,6 +221,20 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.62 0.12 240.5);
+
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 20%), 0 1px 3px oklch(0 0 0 / 24%);
+  --shadow-panel: 0 2px 4px oklch(0 0 0 / 22%), 0 4px 12px oklch(0 0 0 / 28%);
+  --shadow-floating: 0 4px 8px oklch(0 0 0 / 26%), 0 8px 24px oklch(0 0 0 / 32%);
+  --shadow-modal: 0 8px 16px oklch(0 0 0 / 30%), 0 16px 48px oklch(0 0 0 / 40%);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --pm-space-page-x: 2rem;
+    --pm-space-page-y: 2rem;
+    --pm-space-section: 2rem;
+    --pm-space-card: 1.25rem;
+  }
 }
 
 @layer base {
@@ -133,6 +248,7 @@
 
   body {
     @apply min-h-svh bg-background font-sans text-foreground antialiased;
+    font-family: var(--font-body);
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
@@ -141,6 +257,124 @@
   }
 }
 
+@layer components {
+  /* Layer 5: Typography */
+  .pm-text-display {
+    font-family: var(--font-heading);
+    @apply text-4xl font-semibold tracking-tight text-foreground md:text-5xl;
+  }
+
+  .pm-text-h1 {
+    font-family: var(--font-heading);
+    @apply text-2xl font-semibold tracking-tight text-foreground md:text-3xl;
+  }
+
+  .pm-text-h2 {
+    font-family: var(--font-heading);
+    @apply text-xl font-semibold tracking-tight text-foreground md:text-2xl;
+  }
+
+  .pm-text-h3 {
+    font-family: var(--font-heading);
+    @apply text-lg font-semibold tracking-tight text-foreground;
+  }
+
+  .pm-text-body {
+    font-family: var(--font-body);
+    @apply text-base leading-relaxed text-foreground;
+  }
+
+  .pm-text-body-sm {
+    font-family: var(--font-body);
+    @apply text-sm leading-relaxed text-foreground;
+  }
+
+  .pm-text-caption {
+    font-family: var(--font-body);
+    @apply text-xs leading-normal text-muted-foreground;
+  }
+
+  .pm-text-label {
+    font-family: var(--font-body);
+    @apply text-sm font-medium leading-none text-foreground;
+  }
+
+  .pm-text-badge {
+    font-family: var(--font-body);
+    @apply text-xs font-medium leading-none;
+  }
+
+  .pm-text-mono {
+    font-family: var(--font-mono);
+    @apply text-sm font-medium tabular-nums tracking-tight;
+  }
+
+  /* Layer 4: Layout rhythm utilities */
+  .pm-page-padding {
+    padding: var(--pm-space-page-y) var(--pm-space-page-x);
+  }
+
+  .pm-section-gap {
+    gap: var(--pm-space-section);
+  }
+
+  .pm-card-padding {
+    padding: var(--pm-space-card);
+  }
+
+  .pm-form-gap {
+    gap: var(--pm-space-form);
+  }
+
+  .pm-table-dense th,
+  .pm-table-dense td {
+    padding: var(--pm-space-table-y) var(--pm-space-table-x);
+  }
+
+  /* Layer 7: Elevation utilities */
+  .pm-shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .pm-shadow-panel {
+    box-shadow: var(--shadow-panel);
+  }
+
+  .pm-shadow-floating {
+    box-shadow: var(--shadow-floating);
+  }
+
+  .pm-shadow-modal {
+    box-shadow: var(--shadow-modal);
+  }
+
+  /* Layer 8: Motion utilities */
+  .pm-motion-fast {
+    transition-duration: var(--motion-fast);
+    transition-timing-function: var(--motion-ease-out);
+  }
+
+  .pm-motion-base {
+    transition-duration: var(--motion-base);
+    transition-timing-function: var(--motion-ease-out);
+  }
+
+  .pm-motion-slow {
+    transition-duration: var(--motion-slow);
+    transition-timing-function: var(--motion-ease-out);
+  }
+
+  .pm-motion-spring {
+    transition-duration: var(--motion-base);
+    transition-timing-function: var(--motion-ease-spring);
+  }
+
+  .pm-focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+}
+
+/* Layer 8: Reduced motion policy */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

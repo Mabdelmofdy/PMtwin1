@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { terminateContractUiAction } from '@/lib/terminate-contract-ui-actions.ts'
-import { Button } from '@/components/ui/button'
+import { PmButton } from '@/components/ui/pm-button'
 
 type TerminateContractButtonProps = {
   readonly contractId: string
@@ -31,7 +31,7 @@ export function TerminateContractButton({
   }
 
   return (
-    <Button
+    <PmButton
       type="button"
       variant="destructive"
       className={className ?? 'cursor-pointer'}
@@ -39,6 +39,6 @@ export function TerminateContractButton({
       onClick={handleTerminateContract}
     >
       {pending ? 'Terminating contract…' : 'Terminate contract'}
-    </Button>
+    </PmButton>
   )
 }

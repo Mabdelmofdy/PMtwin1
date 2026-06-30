@@ -5,7 +5,7 @@ import {
   cancelNegotiationUiAction,
   canShowCancelNegotiation,
 } from '@/lib/negotiation-ui-actions.ts'
-import { Button } from '@/components/ui/button'
+import { PmButton } from '@/components/ui/pm-button'
 
 type CancelNegotiationButtonProps = {
   readonly negotiation: Negotiation | null | undefined
@@ -39,7 +39,7 @@ export function CancelNegotiationButton({
   }
 
   return (
-    <Button
+    <PmButton
       type="button"
       variant={variant}
       className={className ?? 'cursor-pointer'}
@@ -47,6 +47,6 @@ export function CancelNegotiationButton({
       onClick={handleCancel}
     >
       {pending ? 'Cancelling…' : 'Cancel negotiation'}
-    </Button>
+    </PmButton>
   )
 }

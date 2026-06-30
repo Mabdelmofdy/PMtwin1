@@ -24,67 +24,37 @@ import {
 } from '@/lib/run-circular-matching-feedback.ts'
 import { runCircularMatchingUiAction } from '@/lib/run-circular-matching-ui-action.ts'
 import { useAuth } from '@/providers/auth-provider.tsx'
-import { PageHeader, StatCard, StatusBadge } from '@/components/shared/page-primitives'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-
-function AdminTablePage({
-  label,
-  title,
-  description,
-  columns,
-  rows,
-  rowLink,
-}: {
-  label?: string
-  title: string
-  description: string
-  columns: string[]
-  rows: (string | React.ReactNode)[][]
-  rowLink?: (index: number) => string
-}) {
-  return (
-    <div className="space-y-6">
-      <PageHeader label={label} title={title} description={description} />
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {columns.map((c) => <TableHead key={c}>{c}</TableHead>)}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((row, i) => (
-                <TableRow key={i} className={rowLink ? 'cursor-pointer' : undefined}>
-                  {row.map((cell, j) => (
-                    <TableCell key={j}>
-                      {rowLink && j === 0 ? <Link to={rowLink(i)} className="font-medium hover:text-primary">{cell}</Link> : cell}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
+  PmDataTable,
+  PmTableEmpty,
+  PmTableToolbar,
+  type PmDataTableColumn,
+} from '@/components/data/pm-data-index'
+import {
+  PmForm,
+  PmFormReadonly,
+  PmFormReadonlyField,
+  PmFormReadonlySection,
+  PmFormSection,
+} from '@/components/forms/pm-form-index'
+import {
+  PmContentCard,
+  PmDashboardLayout,
+  PmMetricGrid,
+  PmPageLayout,
+  PmSectionHeader,
+} from '@/components/layout/pm-layout-index'
+import { PmButton, PmPageHeader, PmStatCard } from '@/components/ui/pm-index'
+import { AdminListPage } from '@/pages/admin/admin-list-page'
+import { AdminStatusBadge } from '@/pages/admin/admin-display'
 
 export function AdminDashboardPage() {
   const version = useDataStoreVersion()
   const opps = opportunitiesApi.list().length
   const users = peopleApi.listUsers().length
   const matches = matchesApi.list().length
+  const pendingVetting = adminApi.getPendingUsers().length
+
   const readinessAnalytics = useMemo(() => {
     const profiles = peopleApi.listAll().map((person) => ({
       profile: person.profile,
@@ -113,149 +83,201 @@ export function AdminDashboardPage() {
     })
   }, [version])
 
+  const auditEntries = adminApi.getAuditLog().slice(0, 5)
+
   return (
-    <div className="space-y-6">
-      <PageHeader label="Admin" title="Command center" description="Platform KPIs, queues, and quick actions." />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Opportunities" value={opps} />
-        <StatCard label="Users" value={users} />
-        <StatCard label="Post-matches" value={matches} />
-        <StatCard label="Pending vetting" value={adminApi.getPendingUsers().length} />
+    <PmDashboardLayout
+      header={
+        <PmPageHeader
+          label="Admin"
+          title="Command center"
+          description="Platform KPIs, queues, and quick actions."
+        />
+      }
+      metrics={
+        <PmMetricGrid columns={4}>
+          <PmStatCard label="Opportunities" value={opps} dense />
+          <PmStatCard label="Users" value={users} dense />
+          <PmStatCard label="Post-matches" value={matches} dense />
+          <PmStatCard label="Pending vetting" value={pendingVetting} dense />
+        </PmMetricGrid>
+      }
+      quickActions={
+        <PmContentCard title="Quick actions">
+          <div className="flex flex-wrap gap-2">
+            <PmButton size="sm" asChild>
+              <Link to="/admin/vetting">Review vetting</Link>
+            </PmButton>
+            <PmButton size="sm" variant="outline" asChild>
+              <Link to="/admin/matching">Run matching</Link>
+            </PmButton>
+            <PmButton size="sm" variant="outline" asChild>
+              <Link to="/admin/audit">View audit log</Link>
+            </PmButton>
+          </div>
+        </PmContentCard>
+      }
+      recentActivity={
+        <PmContentCard title="Recent activity">
+          {auditEntries.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No recent audit entries.</p>
+          ) : (
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {auditEntries.map((a) => (
+                <li key={a.id}>
+                  {a.action} — {formatDate(a.timestamp)}
+                </li>
+              ))}
+            </ul>
+          )}
+        </PmContentCard>
+      }
+    >
+      <PmSectionHeader
+        title="Matching Readiness Overview"
+        description="Readiness quality across profiles and opportunities using current domain evaluators."
+      />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <PmContentCard title="Profiles">
+          <PmMetricGrid columns={3}>
+            <PmStatCard label="Total profiles" value={readinessAnalytics.profiles.total} dense />
+            <PmStatCard label="Average score" value={`${Math.round(readinessAnalytics.profiles.averageScore)}%`} dense />
+            <PmStatCard label="Ready" value={readinessAnalytics.profiles.ready} dense />
+            <PmStatCard label="Needs review" value={readinessAnalytics.profiles.needsReview} dense />
+            <PmStatCard label="Incomplete" value={readinessAnalytics.profiles.incomplete} dense />
+          </PmMetricGrid>
+        </PmContentCard>
+        <PmContentCard title="Opportunities">
+          <PmMetricGrid columns={3}>
+            <PmStatCard label="Total opportunities" value={readinessAnalytics.opportunities.total} dense />
+            <PmStatCard label="Average score" value={`${Math.round(readinessAnalytics.opportunities.averageScore)}%`} dense />
+            <PmStatCard label="Ready" value={readinessAnalytics.opportunities.ready} dense />
+            <PmStatCard label="Needs review" value={readinessAnalytics.opportunities.needsReview} dense />
+            <PmStatCard label="Incomplete" value={readinessAnalytics.opportunities.incomplete} dense />
+            <PmStatCard label="Draft" value={readinessAnalytics.opportunities.draft} dense />
+            <PmStatCard label="Publish blocked" value={readinessAnalytics.opportunities.publishBlocked} dense />
+          </PmMetricGrid>
+        </PmContentCard>
       </div>
 
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight">Matching Readiness Overview</h2>
-          <p className="text-sm text-muted-foreground">
-            Readiness quality across profiles and opportunities using current domain evaluators.
-          </p>
-        </div>
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Card className="border-border/60">
-            <CardHeader>
-              <CardTitle className="text-base">Profiles</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-3 sm:grid-cols-2">
-              <StatCard label="Total profiles" value={readinessAnalytics.profiles.total} />
-              <StatCard label="Average score" value={`${Math.round(readinessAnalytics.profiles.averageScore)}%`} />
-              <StatCard label="Ready" value={readinessAnalytics.profiles.ready} />
-              <StatCard label="Needs review" value={readinessAnalytics.profiles.needsReview} />
-              <StatCard label="Incomplete" value={readinessAnalytics.profiles.incomplete} />
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/60">
-            <CardHeader>
-              <CardTitle className="text-base">Opportunities</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-3 sm:grid-cols-2">
-              <StatCard label="Total opportunities" value={readinessAnalytics.opportunities.total} />
-              <StatCard label="Average score" value={`${Math.round(readinessAnalytics.opportunities.averageScore)}%`} />
-              <StatCard label="Ready" value={readinessAnalytics.opportunities.ready} />
-              <StatCard label="Needs review" value={readinessAnalytics.opportunities.needsReview} />
-              <StatCard label="Incomplete" value={readinessAnalytics.opportunities.incomplete} />
-              <StatCard label="Draft" value={readinessAnalytics.opportunities.draft} />
-              <StatCard label="Publish blocked" value={readinessAnalytics.opportunities.publishBlocked} />
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight">Matching Quality Metrics</h2>
-          <p className="text-sm text-muted-foreground">
-            Outcome quality across readiness scores, match scores, and collaboration funnel conversion.
-          </p>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <StatCard
-            label="Average profile readiness"
-            value={`${Math.round(matchingQuality.averageProfileReadiness)}%`}
-          />
-          <StatCard
-            label="Average opportunity readiness"
-            value={`${Math.round(matchingQuality.averageOpportunityReadiness)}%`}
-          />
-          <StatCard
-            label="Average match score"
-            value={`${Math.round(matchingQuality.averageMatchScore)}%`}
-          />
-          <StatCard
-            label="Match acceptance rate"
-            value={`${Math.round(matchingQuality.acceptanceRate)}%`}
-            hint={`${matchingQuality.acceptedMatches} of ${matchingQuality.totalMatches} matches`}
-          />
-          <StatCard
-            label="Negotiation rate"
-            value={`${Math.round(matchingQuality.negotiationRate)}%`}
-            hint={`${matchingQuality.negotiationsStarted} negotiations from ${matchingQuality.acceptedMatches} accepted`}
-          />
-          <StatCard
-            label="Deal conversion rate"
-            value={`${Math.round(matchingQuality.dealConversionRate)}%`}
-            hint={`${matchingQuality.dealsCreated} deals from ${matchingQuality.negotiationsStarted} negotiations`}
-          />
-        </div>
-      </section>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader><CardTitle>Quick actions</CardTitle></CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            <Button size="sm" className="cursor-pointer" asChild><Link to="/admin/vetting">Review vetting</Link></Button>
-            <Button size="sm" variant="outline" className="cursor-pointer" asChild><Link to="/admin/matching">Run matching</Link></Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle>Recent activity</CardTitle></CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
-            {adminApi.getAuditLog().slice(0, 5).map((a) => (
-              <p key={a.id}>{a.action} — {formatDate(a.timestamp)}</p>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+      <PmSectionHeader
+        title="Matching Quality Metrics"
+        description="Outcome quality across readiness scores, match scores, and collaboration funnel conversion."
+        className="mt-6"
+      />
+      <PmMetricGrid columns={3}>
+        <PmStatCard
+          label="Average profile readiness"
+          value={`${Math.round(matchingQuality.averageProfileReadiness)}%`}
+          dense
+        />
+        <PmStatCard
+          label="Average opportunity readiness"
+          value={`${Math.round(matchingQuality.averageOpportunityReadiness)}%`}
+          dense
+        />
+        <PmStatCard
+          label="Average match score"
+          value={`${Math.round(matchingQuality.averageMatchScore)}%`}
+          dense
+        />
+        <PmStatCard
+          label="Match acceptance rate"
+          value={`${Math.round(matchingQuality.acceptanceRate)}%`}
+          hint={`${matchingQuality.acceptedMatches} of ${matchingQuality.totalMatches} matches`}
+          dense
+        />
+        <PmStatCard
+          label="Negotiation rate"
+          value={`${Math.round(matchingQuality.negotiationRate)}%`}
+          hint={`${matchingQuality.negotiationsStarted} negotiations from ${matchingQuality.acceptedMatches} accepted`}
+          dense
+        />
+        <PmStatCard
+          label="Deal conversion rate"
+          value={`${Math.round(matchingQuality.dealConversionRate)}%`}
+          hint={`${matchingQuality.dealsCreated} deals from ${matchingQuality.negotiationsStarted} negotiations`}
+          dense
+        />
+      </PmMetricGrid>
+    </PmDashboardLayout>
   )
 }
 
 export function AdminReportsPage() {
+  const publishedCount = opportunitiesApi.list().filter((o) => o.status === 'published').length
+
   return (
-    <div className="space-y-6">
-      <PageHeader title="Reports" description="Platform analytics and export tools." />
-      <div className="grid gap-4 md:grid-cols-3">
-        <StatCard label="New users (30d)" value="12" hint="Demo metric" />
-        <StatCard label="Published opps" value={opportunitiesApi.list().filter((o) => o.status === 'published').length} />
-        <StatCard label="Match rate" value="78%" hint="Demo metric" />
-      </div>
-    </div>
+    <PmPageLayout
+      header={
+        <PmPageHeader
+          title="Reports"
+          description="Platform analytics and export tools."
+        />
+      }
+    >
+      <PmMetricGrid columns={3}>
+        <PmStatCard label="New users (30d)" value="12" hint="Demo metric" dense />
+        <PmStatCard label="Published opps" value={publishedCount} dense />
+        <PmStatCard label="Match rate" value="78%" hint="Demo metric" dense />
+      </PmMetricGrid>
+    </PmPageLayout>
   )
 }
 
 export function AdminHealthPage() {
+  const services = ['Data service', 'Matching engine', 'Notifications', 'Auth'] as const
+
   return (
-    <div className="space-y-6">
-      <PageHeader title="System health" description="Service status and data store snapshot." />
-      {['Data service', 'Matching engine', 'Notifications', 'Auth'].map((s) => (
-        <div key={s} className="flex items-center justify-between rounded-xl border border-border/60 px-4 py-3">
-          <span className="font-medium">{s}</span>
-          <StatusBadge status="active" />
-        </div>
-      ))}
-    </div>
+    <PmPageLayout
+      header={
+        <PmPageHeader
+          title="System health"
+          description="Service status and data store snapshot."
+        />
+      }
+    >
+      <PmContentCard title="Services" noPadding>
+        <ul className="divide-y divide-border/60">
+          {services.map((service) => (
+            <li
+              key={service}
+              className="flex items-center justify-between px-4 py-3 md:px-5"
+            >
+              <span className="font-medium">{service}</span>
+              <AdminStatusBadge status="active" />
+            </li>
+          ))}
+        </ul>
+      </PmContentCard>
+    </PmPageLayout>
   )
 }
 
 export function AdminUsersPage() {
   const users = peopleApi.listAll()
+
   return (
-    <AdminTablePage
+    <AdminListPage
       title="Users"
       description="Managed accounts after vetting."
-      columns={['Name', 'Email', 'Role', 'Status']}
-      rows={users.map((u) => [u.profile?.name ?? u.id, u.email, u.role, <StatusBadge key={u.id} status={u.status} />])}
-      rowLink={(i) => `/admin/users/${users[i].id}`}
+      data={users}
+      getRowId={(u) => u.id}
+      getRowHref={(u) => `/admin/users/${u.id}`}
+      getSearchText={(u) =>
+        [u.profile?.name, u.email, u.role, u.status].filter(Boolean).join(' ')
+      }
+      searchPlaceholder="Search users…"
+      columns={[
+        { id: 'name', label: 'Name', cell: (u) => u.profile?.name ?? u.id },
+        { id: 'email', label: 'Email', cell: (u) => u.email },
+        { id: 'role', label: 'Role', cell: (u) => u.role },
+        {
+          id: 'status',
+          label: 'Status',
+          cell: (u) => <AdminStatusBadge status={u.status} />,
+        },
+      ]}
     />
   )
 }
@@ -263,35 +285,75 @@ export function AdminUsersPage() {
 export function AdminUserDetailPage() {
   const { id } = useParams()
   const user = id ? peopleApi.get(id) : undefined
+
   return (
-    <div className="space-y-6">
-      <PageHeader title={user?.profile?.name ?? 'User detail'} description={user?.email} />
-      <Card><CardContent className="py-8 text-sm text-muted-foreground">Admin user inspector — documents, activity, decisions</CardContent></Card>
-    </div>
+    <PmPageLayout
+      header={
+        <PmPageHeader
+          title={user?.profile?.name ?? 'User detail'}
+          description={user?.email}
+        />
+      }
+    >
+      <PmFormReadonly>
+        <PmFormReadonlySection title="Account" description="Admin user inspector — documents, activity, decisions">
+          <PmFormReadonlyField label="User ID" value={user?.id} />
+          <PmFormReadonlyField label="Email" value={user?.email} />
+          <PmFormReadonlyField label="Role" value={user?.role} />
+          <PmFormReadonlyField label="Status">
+            {user?.status ? <AdminStatusBadge status={user.status} /> : null}
+          </PmFormReadonlyField>
+          <PmFormReadonlyField label="Created" value={user?.createdAt ? formatDate(user.createdAt) : null} />
+        </PmFormReadonlySection>
+      </PmFormReadonly>
+    </PmPageLayout>
   )
 }
 
 export function AdminVettingPage() {
   const pending = adminApi.getPendingUsers()
+
   return (
-    <AdminTablePage
+    <AdminListPage
       label="Queue"
       title="Vetting"
       description="Pre-approval user queue."
-      columns={['Name', 'Email', 'Submitted']}
-      rows={pending.length ? pending.map((u) => [u.profile?.name ?? u.id, u.email, formatDate(u.createdAt)]) : [['—', 'No pending users', '—']]}
+      data={pending}
+      getRowId={(u) => u.id}
+      getSearchText={(u) => [u.profile?.name, u.email].filter(Boolean).join(' ')}
+      searchPlaceholder="Search queue…"
+      emptyTitle="No pending users"
+      emptyDescription="The vetting queue is empty."
+      columns={[
+        { id: 'name', label: 'Name', cell: (u) => u.profile?.name ?? u.id },
+        { id: 'email', label: 'Email', cell: (u) => u.email },
+        { id: 'submitted', label: 'Submitted', cell: (u) => formatDate(u.createdAt) },
+      ]}
     />
   )
 }
 
 export function AdminOpportunitiesPage() {
   const opps = opportunitiesApi.list()
+
   return (
-    <AdminTablePage
+    <AdminListPage
       title="Opportunities"
       description="Platform opportunity oversight."
-      columns={['Title', 'Status', 'Location', 'Updated']}
-      rows={opps.slice(0, 20).map((o) => [o.title, <StatusBadge key={o.id} status={o.status} />, o.location, formatDate(o.updatedAt)])}
+      data={opps}
+      getRowId={(o) => o.id}
+      getSearchText={(o) => [o.title, o.status, o.location].filter(Boolean).join(' ')}
+      searchPlaceholder="Search opportunities…"
+      columns={[
+        { id: 'title', label: 'Title', cell: (o) => o.title },
+        {
+          id: 'status',
+          label: 'Status',
+          cell: (o) => <AdminStatusBadge status={o.status} entity="opportunity" />,
+        },
+        { id: 'location', label: 'Location', cell: (o) => o.location },
+        { id: 'updated', label: 'Updated', cell: (o) => formatDate(o.updatedAt) },
+      ]}
     />
   )
 }
@@ -335,127 +397,316 @@ export function AdminMatchingPage() {
     }
   }
 
+  const runColumns: PmDataTableColumn<(typeof matchingRuns)[number]>[] = [
+    { id: 'runId', label: 'Run ID', cell: (r) => r.runId },
+    { id: 'status', label: 'Status', cell: (r) => <AdminStatusBadge status={r.status} /> },
+    { id: 'discovered', label: 'Discovered', cell: (r) => String(r.discoveredMatchesCount) },
+    { id: 'skipped', label: 'Skipped', cell: (r) => String(r.skippedDuplicatesCount) },
+    { id: 'errors', label: 'Errors', cell: (r) => String(r.matchingErrorsCount) },
+    { id: 'completed', label: 'Completed', cell: (r) => formatDate(r.completedAt) },
+  ]
+
+  const matchColumns: PmDataTableColumn<(typeof matches)[number]>[] = [
+    { id: 'id', label: 'ID', cell: (m) => m.id },
+    { id: 'type', label: 'Type', cell: (m) => m.matchType },
+    { id: 'score', label: 'Score', cell: (m) => `${Math.round(m.matchScore * 100)}%` },
+    {
+      id: 'status',
+      label: 'Status',
+      cell: (m) => <AdminStatusBadge status={m.status} entity="match" />,
+    },
+  ]
+
   return (
-    <div className="space-y-6">
-      <PageHeader title="Matching engine" description="Run matching, review queues, and diagnostics." />
-      <div className="flex flex-wrap gap-2">
-        <Button
-          className="cursor-pointer"
-          disabled={isRunning}
-          onClick={handleRunCircularMatching}
-        >
-          {isRunning ? 'Running circular matching…' : 'Run circular matching'}
-        </Button>
+    <PmPageLayout
+      header={
+        <PmPageHeader
+          title="Matching engine"
+          description="Run matching, review queues, and diagnostics."
+          actions={
+            <PmButton disabled={isRunning} onClick={handleRunCircularMatching}>
+              {isRunning ? 'Running circular matching…' : 'Run circular matching'}
+            </PmButton>
+          }
+        />
+      }
+    >
+      <div className="space-y-8">
+        <section className="space-y-4">
+          <PmSectionHeader
+            title="Recent matching runs"
+            description="Audit trail for manual circular matching jobs."
+          />
+          <PmDataTable
+            density="compact"
+            columns={runColumns}
+            data={matchingRuns}
+            getRowId={(r) => r.runId}
+            caption="Recent matching runs"
+            empty={
+              <PmTableEmpty
+                variant="no-data"
+                title="No matching runs yet"
+                description="Run circular matching to populate the audit trail."
+              />
+            }
+          />
+        </section>
+
+        <section className="space-y-4">
+          <PmSectionHeader title="Recent matches" description="Latest post-match records." />
+          <PmDataTable
+            density="compact"
+            columns={matchColumns}
+            data={matches.slice(0, 10)}
+            getRowId={(m) => m.id}
+            caption="Recent matches"
+            toolbar={<PmTableToolbar />}
+            empty={<PmTableEmpty variant="no-data" title="No matches" />}
+          />
+        </section>
       </div>
-      <AdminTablePage
-        title="Recent matching runs"
-        description="Audit trail for manual circular matching jobs."
-        columns={['Run ID', 'Status', 'Discovered', 'Skipped', 'Errors', 'Completed']}
-        rows={
-          matchingRuns.length
-            ? matchingRuns.map((run) => [
-                run.runId,
-                run.status,
-                String(run.discoveredMatchesCount),
-                String(run.skippedDuplicatesCount),
-                String(run.matchingErrorsCount),
-                formatDate(run.completedAt),
-              ])
-            : [['—', 'No matching runs yet', '—', '—', '—', '—']]
-        }
-      />
-      <AdminTablePage
-        title="Recent matches"
-        description=""
-        columns={['ID', 'Type', 'Score', 'Status']}
-        rows={matches.slice(0, 10).map((m) => [m.id, m.matchType, `${Math.round(m.matchScore * 100)}%`, <StatusBadge key={m.id} status={m.status} />])}
-      />
-    </div>
+    </PmPageLayout>
   )
 }
 
 export function AdminNegotiationsPage() {
   const negs = negotiationsApi.list()
+
   return (
-    <AdminTablePage
+    <AdminListPage
       title="Negotiations"
       description="Negotiation command center."
-      columns={['ID', 'Status', 'Updated']}
-      rows={negs.map((n) => [n.id, <StatusBadge key={n.id} status={n.status ?? 'pending'} />, formatDate(n.updatedAt)])}
-      rowLink={(i) => `/admin/negotiations/${negs[i].id}`}
+      data={negs}
+      getRowId={(n) => n.id}
+      getRowHref={(n) => `/admin/negotiations/${n.id}`}
+      getSearchText={(n) => [n.id, n.status].filter(Boolean).join(' ')}
+      columns={[
+        { id: 'id', label: 'ID', cell: (n) => n.id },
+        {
+          id: 'status',
+          label: 'Status',
+          cell: (n) => (
+            <AdminStatusBadge status={n.status ?? 'pending'} entity="negotiation" />
+          ),
+        },
+        { id: 'updated', label: 'Updated', cell: (n) => formatDate(n.updatedAt) },
+      ]}
     />
   )
 }
 
 export function AdminNegotiationDetailPage() {
-  return <div className="space-y-6"><PageHeader title="Negotiation detail" description="Admin inspector with transcript export." /></div>
+  return (
+    <PmPageLayout
+      header={
+        <PmPageHeader
+          title="Negotiation detail"
+          description="Admin inspector with transcript export."
+        />
+      }
+    >
+      <PmContentCard>
+        <p className="text-sm text-muted-foreground">
+          Negotiation inspector — wire transcript export on migration.
+        </p>
+      </PmContentCard>
+    </PmPageLayout>
+  )
 }
 
 export function AdminDisputesPage() {
-  return <AdminTablePage title="Disputes" description="Dispute resolution queue." columns={['ID', 'Status']} rows={[['—', 'No disputes in seed']]} />
+  return (
+    <AdminListPage
+      title="Disputes"
+      description="Dispute resolution queue."
+      data={[] as { id: string; status: string }[]}
+      getRowId={(d) => d.id}
+      emptyTitle="No disputes in seed"
+      emptyDescription="Dispute queue is empty in the current dataset."
+      showPagination={false}
+      columns={[
+        { id: 'id', label: 'ID', cell: (d) => d.id },
+        { id: 'status', label: 'Status', cell: (d) => d.status },
+      ]}
+    />
+  )
 }
 
 export function AdminDealsPage() {
   const deals = dealsApi.list()
+
   return (
-    <AdminTablePage
+    <AdminListPage
       title="Deals"
       description="All platform deals."
-      columns={['ID', 'Status']}
-      rows={deals.map((d) => [d.id, d.status ?? 'pending'])}
-      rowLink={(i) => `/admin/deals/${deals[i].id}`}
+      data={deals}
+      getRowId={(d) => d.id}
+      getRowHref={(d) => `/admin/deals/${d.id}`}
+      getSearchText={(d) => [d.id, d.status].filter(Boolean).join(' ')}
+      columns={[
+        { id: 'id', label: 'ID', cell: (d) => d.id },
+        {
+          id: 'status',
+          label: 'Status',
+          cell: (d) => (
+            <AdminStatusBadge status={d.status ?? 'pending'} entity="deal" />
+          ),
+        },
+      ]}
     />
   )
 }
 
 export function AdminContractsPage() {
-  return <AdminTablePage title="Contracts" description="All platform contracts." columns={['ID', 'Status']} rows={[['—', 'No contracts in seed']]} />
+  return (
+    <AdminListPage
+      title="Contracts"
+      description="All platform contracts."
+      data={[] as { id: string; status: string }[]}
+      getRowId={(c) => c.id}
+      emptyTitle="No contracts in seed"
+      emptyDescription="Contract records will appear here when available."
+      showPagination={false}
+      columns={[
+        { id: 'id', label: 'ID', cell: (c) => c.id },
+        { id: 'status', label: 'Status', cell: (c) => c.status },
+      ]}
+    />
+  )
 }
 
 export function AdminConsortiumPage() {
+  const consortiumMatches = matchesApi.list().filter((m) =>
+    m.matchType.includes('consortium'),
+  )
+
   return (
-    <AdminTablePage
+    <AdminListPage
       title="Consortium"
       description="Consortium deals subset."
-      columns={['Match', 'Type']}
-      rows={matchesApi.list().filter((m) => m.matchType.includes('consortium')).map((m) => [m.id, m.matchType])}
+      data={consortiumMatches}
+      getRowId={(m) => m.id}
+      getSearchText={(m) => [m.id, m.matchType].join(' ')}
+      columns={[
+        { id: 'match', label: 'Match', cell: (m) => m.id },
+        { id: 'type', label: 'Type', cell: (m) => m.matchType },
+      ]}
     />
   )
 }
 
 export function AdminAuditPage() {
   const logs = adminApi.getAuditLog()
+
   return (
-    <AdminTablePage
+    <AdminListPage
       title="Audit log"
       description="Compliance and activity trail."
-      columns={['Action', 'Actor', 'Time']}
-      rows={logs.map((l) => [l.action, l.userId ?? '—', formatDate(l.timestamp)])}
+      data={logs}
+      getRowId={(l) => l.id}
+      getSearchText={(l) => [l.action, l.userId].filter(Boolean).join(' ')}
+      searchPlaceholder="Search audit log…"
+      columns={[
+        { id: 'action', label: 'Action', cell: (l) => l.action },
+        { id: 'actor', label: 'Actor', cell: (l) => l.userId ?? '—' },
+        { id: 'time', label: 'Time', cell: (l) => formatDate(l.timestamp) },
+      ]}
     />
   )
 }
 
 export function AdminSettingsPage() {
   return (
-    <div className="space-y-6">
-      <PageHeader title="Platform settings" description="General, branding, security, matching, and feature flags." />
-      <Card><CardContent className="py-8 text-sm text-muted-foreground">Vertical settings tabs — wire to system_settings</CardContent></Card>
-    </div>
+    <PmPageLayout
+      header={
+        <PmPageHeader
+          title="Platform settings"
+          description="General, branding, security, matching, and feature flags."
+        />
+      }
+    >
+      <PmForm onSubmit={(e) => e.preventDefault()} readOnly>
+        <PmFormSection
+          title="General"
+          description="Vertical settings tabs — wire to system_settings."
+        >
+          <p className="text-sm text-muted-foreground">
+            Settings form migration placeholder. Connect fields when backend wiring is ready.
+          </p>
+        </PmFormSection>
+        <PmFormSection title="Security" description="Authentication and access policies.">
+          <p className="text-sm text-muted-foreground">Read-only until settings API is connected.</p>
+        </PmFormSection>
+      </PmForm>
+    </PmPageLayout>
+  )
+}
+
+function AdminPlaceholderPage({
+  title,
+  description,
+}: {
+  title: string
+  description: string
+}) {
+  return (
+    <PmPageLayout
+      header={<PmPageHeader title={title} description={description} />}
+    >
+      <PmTableEmpty variant="no-data" title={`${title} — coming soon`} description={description} />
+    </PmPageLayout>
   )
 }
 
 export function AdminSkillsPage() {
-  return <PageHeader title="Skills catalog" description="Canonical skills and lookup editor." />
+  return (
+    <AdminPlaceholderPage
+      title="Skills catalog"
+      description="Canonical skills and lookup editor."
+    />
+  )
 }
 
 export function AdminCollaborationModelsPage() {
-  return <PageHeader title="Collaboration models" description="Enable and order platform collaboration models." />
+  return (
+    <AdminPlaceholderPage
+      title="Collaboration models"
+      description="Enable and order platform collaboration models."
+    />
+  )
 }
 
 export function AdminSiteContentPage() {
-  return <PageHeader title="Site content" description="CMS for public marketing pages." />
+  return (
+    <AdminPlaceholderPage
+      title="Site content"
+      description="CMS for public marketing pages."
+    />
+  )
 }
 
 export function AdminSubscriptionsPage() {
-  return <AdminTablePage title="Subscriptions" description="Plans and assignments (POC)." columns={['Plan', 'Status']} rows={[['Professional', 'Active'], ['Enterprise', 'Active']]} />
+  const rows = [
+    { id: 'professional', plan: 'Professional', status: 'Active' },
+    { id: 'enterprise', plan: 'Enterprise', status: 'Active' },
+  ] as const
+
+  return (
+    <AdminListPage
+      title="Subscriptions"
+      description="Plans and assignments (POC)."
+      data={rows}
+      getRowId={(r) => r.id}
+      showPagination={false}
+      columns={[
+        { id: 'plan', label: 'Plan', cell: (r) => r.plan },
+        {
+          id: 'status',
+          label: 'Status',
+          cell: (r) => <AdminStatusBadge status={r.status.toLowerCase()} />,
+        },
+      ]}
+    />
+  )
 }

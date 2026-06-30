@@ -5,7 +5,7 @@ import {
   agreeNegotiationUiAction,
   canShowAgreeNegotiation,
 } from '@/lib/negotiation-ui-actions.ts'
-import { Button } from '@/components/ui/button'
+import { PmButton } from '@/components/ui/pm-button'
 
 type AgreeNegotiationButtonProps = {
   readonly negotiation: Negotiation | null | undefined
@@ -41,7 +41,7 @@ export function AgreeNegotiationButton({
   }
 
   return (
-    <Button
+    <PmButton
       type="button"
       variant={variant}
       className={className ?? 'cursor-pointer'}
@@ -49,6 +49,6 @@ export function AgreeNegotiationButton({
       onClick={handleAgree}
     >
       {pending ? 'Agreeing…' : 'Agree terms'}
-    </Button>
+    </PmButton>
   )
 }

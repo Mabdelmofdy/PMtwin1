@@ -1,11 +1,15 @@
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { negotiationService } from '@/services/negotiation-service.ts'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { PmContentCard } from '@/components/layout/pm-layout-index'
+import { PmFormField } from '@/components/forms/pm-form-index'
+import { PmButton } from '@/components/ui/pm-button'
+import { PmBadge } from '@/components/ui/pm-badge'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { cn } from '@/lib/utils'
+
+const STEPS = ['Proposal', 'Value', 'Review'] as const
 
 export function ApplyWizard({
   opportunityId,
@@ -54,105 +58,88 @@ export function ApplyWizard({
   }
 
   return (
-    <Card className={legacy ? 'border-border/50 bg-muted/10' : 'border-primary/20'}>
-      <CardHeader>
-        <CardTitle>
-          {legacy ? 'Legacy direct application' : 'Apply to this opportunity'}
-        </CardTitle>
-        {legacy ? (
-          <p className="text-xs text-muted-foreground">
-            Optional hiring path — PostMatch remains the primary collaboration route.
-          </p>
-        ) : null}
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex gap-2 text-xs">
-          {['Proposal', 'Value', 'Review'].map((label, i) => (
-            <span
-              key={label}
-              className={`rounded-full px-3 py-1 font-medium ${
-                step === i + 1
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground'
-              }`}
-            >
-              {i + 1}. {label}
-            </span>
-          ))}
-        </div>
-
-        {step === 1 ? (
-          <div className="space-y-2">
-            <Label htmlFor="proposal">Proposal summary</Label>
-            <Textarea
-              id="proposal"
-              rows={5}
-              placeholder="Describe your approach, deliverables, and relevant experience…"
-              value={proposal}
-              onChange={(e) => setProposal(e.target.value)}
-            />
-          </div>
-        ) : null}
-
-        {step === 2 ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="amount">Requested value</Label>
-              <Input
-                id="amount"
-                type="number"
-                placeholder="250000"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="currency">Currency</Label>
-              <Input
-                id="currency"
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-              />
-            </div>
-          </div>
-        ) : null}
-
-        {step === 3 ? (
-          <div className="space-y-2 rounded-lg bg-muted/40 p-4 text-sm">
-            <p className="font-medium">Review your application</p>
-            <p className="text-muted-foreground">{proposal}</p>
-            {amount ? (
-              <p className="text-muted-foreground">
-                Value: {Number(amount).toLocaleString()} {currency}
-              </p>
-            ) : null}
-          </div>
-        ) : null}
-
-        <div className="flex justify-between gap-2">
-          <Button
-            variant="ghost"
-            className="cursor-pointer"
-            disabled={step === 1}
-            onClick={() => setStep((s) => s - 1)}
+    <PmContentCard
+      title={legacy ? 'Legacy direct application' : 'Apply to this opportunity'}
+      description={
+        legacy
+          ? 'Optional hiring path — PostMatch remains the primary collaboration route.'
+          : undefined
+      }
+      className={legacy ? 'border-border/50 bg-surface-muted/40' : 'border-primary/20'}
+    >
+      <div className="flex flex-wrap gap-2">
+        {STEPS.map((label, i) => (
+          <PmBadge
+            key={label}
+            tone={step === i + 1 ? 'primary' : 'muted'}
+            size="sm"
           >
-            Back
-          </Button>
-          {step < 3 ? (
-            <Button className="cursor-pointer" onClick={() => setStep((s) => s + 1)}>
-              Continue
-            </Button>
-          ) : (
-            <Button
-              className="cursor-pointer"
-              disabled={isSubmitting}
-              onClick={submit}
-            >
-              {isSubmitting ? 'Submitting…' : 'Submit application'}
-            </Button>
-          )}
+            {i + 1}. {label}
+          </PmBadge>
+        ))}
+      </div>
+
+      {step === 1 ? (
+        <PmFormField id="proposal" label="Proposal summary" className="mt-4">
+          <Textarea
+            id="proposal"
+            rows={5}
+            placeholder="Describe your approach, deliverables, and relevant experience…"
+            value={proposal}
+            onChange={(e) => setProposal(e.target.value)}
+          />
+        </PmFormField>
+      ) : null}
+
+      {step === 2 ? (
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <PmFormField id="amount" label="Requested value">
+            <Input
+              id="amount"
+              type="number"
+              placeholder="250000"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+          </PmFormField>
+          <PmFormField id="currency" label="Currency">
+            <Input
+              id="currency"
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+            />
+          </PmFormField>
         </div>
-      </CardContent>
-    </Card>
+      ) : null}
+
+      {step === 3 ? (
+        <div className={cn('mt-4 space-y-2 rounded-lg bg-surface-muted p-4 text-sm')}>
+          <p className="font-medium">Review your application</p>
+          <p className="text-muted-foreground">{proposal}</p>
+          {amount ? (
+            <p className="text-muted-foreground">
+              Value: {Number(amount).toLocaleString()} {currency}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      <div className="mt-4 flex justify-between gap-2">
+        <PmButton
+          variant="ghost"
+          disabled={step === 1}
+          onClick={() => setStep((s) => s - 1)}
+        >
+          Back
+        </PmButton>
+        {step < 3 ? (
+          <PmButton onClick={() => setStep((s) => s + 1)}>Continue</PmButton>
+        ) : (
+          <PmButton disabled={isSubmitting} onClick={submit}>
+            {isSubmitting ? 'Submitting…' : 'Submit application'}
+          </PmButton>
+        )}
+      </div>
+    </PmContentCard>
   )
 }

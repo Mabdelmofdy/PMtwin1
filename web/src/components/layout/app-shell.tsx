@@ -1,5 +1,5 @@
-import { Outlet } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { useEffect } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
 import {
   SidebarInset,
   SidebarProvider,
@@ -7,8 +7,28 @@ import {
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { AppHeader } from '@/components/layout/app-header'
 import { CommandMenu } from '@/components/layout/command-menu'
-import { ContentContainer } from '@/components/layout/content-container'
+import { AppPageChrome } from '@/components/layout/page-chrome'
 import { PageBreadcrumbs } from '@/components/layout/page-breadcrumbs'
+import { recordRecentPage } from '@/components/layout/recent-pages'
+import { resolveWorkspaceContext } from '@/components/layout/workspace-display'
+import { useAuth } from '@/providers/auth-provider'
+
+function RecentPageTracker() {
+  const { pathname } = useLocation()
+  const { isCompanyUser, canAccessAdmin } = useAuth()
+
+  useEffect(() => {
+    if (pathname === '/login' || pathname === '/register') return
+    const isAdminArea = pathname.startsWith('/admin') && canAccessAdmin
+    const { title } = resolveWorkspaceContext(pathname, {
+      isCompanyUser,
+      isAdminArea,
+    })
+    recordRecentPage(pathname, title)
+  }, [pathname, isCompanyUser, canAccessAdmin])
+
+  return null
+}
 
 export function AppShell() {
   return (
@@ -22,19 +42,14 @@ export function AppShell() {
           Skip to content
         </a>
         <AppHeader />
+        <RecentPageTracker />
         <main id="main-content" className="flex flex-1 flex-col">
-          <div className="border-b border-border/40 px-4 py-2 md:hidden">
+          <div className="border-b border-border/40 px-3 py-2 md:hidden">
             <PageBreadcrumbs />
           </div>
-          <ContentContainer>
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-            >
-              <Outlet />
-            </motion.div>
-          </ContentContainer>
+          <AppPageChrome>
+            <Outlet />
+          </AppPageChrome>
         </main>
       </SidebarInset>
       <CommandMenu />

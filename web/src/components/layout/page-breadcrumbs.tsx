@@ -1,6 +1,8 @@
 import { Fragment } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { routeLabels } from '@/config/navigation'
+import { resolveBreadcrumbHomeHref } from '@/components/layout/workspace-display'
+import { useAuth } from '@/providers/auth-provider'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,8 +11,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+import { cn } from '@/lib/utils'
 
-function buildCrumbs(pathname: string) {
+export function buildCrumbs(pathname: string) {
   const segments = pathname.split('/').filter(Boolean)
   if (segments.length === 0) {
     return [{ label: 'Dashboard', href: '/dashboard', isCurrent: true }]
@@ -29,21 +32,23 @@ function buildCrumbs(pathname: string) {
   })
 }
 
-export function PageBreadcrumbs() {
+export function PageBreadcrumbs({ className }: { className?: string }) {
   const { pathname } = useLocation()
+  const { isCompanyUser } = useAuth()
   const crumbs = buildCrumbs(pathname)
+  const homeHref = resolveBreadcrumbHomeHref(pathname, isCompanyUser)
 
   if (crumbs.length <= 1 && crumbs[0]?.isCurrent) {
     return null
   }
 
   return (
-    <Breadcrumb className="min-w-0">
-      <BreadcrumbList>
+    <Breadcrumb className={cn('min-w-0', className)}>
+      <BreadcrumbList className="flex-nowrap">
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
             <Link
-              to="/dashboard"
+              to={homeHref}
               className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
             >
               Home
@@ -55,14 +60,14 @@ export function PageBreadcrumbs() {
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               {crumb.isCurrent ? (
-                <BreadcrumbPage className="truncate font-medium">
+                <BreadcrumbPage className="max-w-[12rem] truncate font-medium sm:max-w-xs">
                   {crumb.label}
                 </BreadcrumbPage>
               ) : (
                 <BreadcrumbLink asChild>
                   <Link
                     to={crumb.href}
-                    className="cursor-pointer truncate transition-colors hover:text-foreground"
+                    className="max-w-[10rem] cursor-pointer truncate transition-colors hover:text-foreground sm:max-w-xs"
                   >
                     {crumb.label}
                   </Link>

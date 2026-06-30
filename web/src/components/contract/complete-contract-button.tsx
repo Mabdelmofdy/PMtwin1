@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { completeContractUiAction } from '@/lib/complete-contract-ui-actions.ts'
-import { Button } from '@/components/ui/button'
+import { PmButton } from '@/components/ui/pm-button'
 
 type CompleteContractButtonProps = {
   readonly contractId: string
@@ -33,7 +33,7 @@ export function CompleteContractButton({
   }
 
   return (
-    <Button
+    <PmButton
       type="button"
       variant={variant}
       className={className ?? 'cursor-pointer'}
@@ -41,6 +41,6 @@ export function CompleteContractButton({
       onClick={handleCompleteContract}
     >
       {pending ? 'Completing contract…' : 'Complete contract'}
-    </Button>
+    </PmButton>
   )
 }

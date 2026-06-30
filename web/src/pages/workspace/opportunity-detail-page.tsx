@@ -12,14 +12,13 @@ import { buildOpportunityMatchesReadModel } from '@/lib/opportunity-matches-read
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
 import { ApplicationsPanel } from '@/components/opportunity/applications-panel'
+import { OpportunityTimeline, type OpportunityTimelineEvent } from '@/components/opportunity/opportunity-timeline'
 import { CollaborationFlowStrip } from '@/components/opportunity/collaboration-flow-strip'
 import { OpportunitySummaryCard } from '@/components/opportunity/opportunity-summary-card'
 import { RelatedMatchesPanel } from '@/components/opportunity/related-matches-panel'
+import { OpportunityPublishExperience, OpportunityPublishPanel } from '@/components/opportunity/opportunity-publish-experience'
 import { ApplyWizard } from '@/components/opportunity/apply-wizard'
-import { OpportunityReadinessCard, PublishReadinessAlert } from '@/components/readiness'
-import { PageHeader, StatusBadge } from '@/components/shared/page-primitives'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { OpportunityReadinessCard } from '@/components/readiness'
 import { formatDate } from '@/lib/format'
 import { resolveCanonicalStatus } from '@/lib/status-display.ts'
 import {
@@ -30,6 +29,22 @@ import {
   RELATED_MATCHES_SECTION_ID,
   showPublishSuccessFeedback,
 } from '@/lib/publish-opportunity-feedback.ts'
+import {
+  PmContentCard,
+  PmDetailLayout,
+  PmInspectorLayout,
+  PmPageLayout,
+} from '@/components/layout/pm-layout-index'
+import {
+  PmFormReadonly,
+  PmFormReadonlyField,
+  PmFormReadonlySection,
+} from '@/components/forms/pm-form-index'
+import { PmBadge, PmButton, PmPageHeader } from '@/components/ui/pm-index'
+import { OpportunityStatusBadge } from '@/components/opportunity/opportunity-status-badge'
+import { formatOpportunityIntent } from '@/components/opportunity/opportunity-display'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { cn } from '@/lib/utils'
 
 function resolveCollaborationActiveStep(
   matches: ReturnType<typeof buildOpportunityMatchesReadModel>['matches'],
@@ -70,7 +85,15 @@ export function OpportunityDetailPage() {
   }, [opp?.id, user?.id, version])
 
   if (!opp) {
-    return <p className="text-muted-foreground">Opportunity not found.</p>
+    return (
+      <PmPageLayout
+        header={<PmPageHeader title="Opportunity not found" description="This record may have been removed." />}
+      >
+        <PmContentCard>
+          <p className="text-muted-foreground">Opportunity not found.</p>
+        </PmContentCard>
+      </PmPageLayout>
+    )
   }
 
   const isOwner = user?.id === opp.creatorId
@@ -112,6 +135,44 @@ export function OpportunityDetailPage() {
     !isPendingApproval &&
     (opp.status === 'draft' || resolveCanonicalStatus('opportunity', opp.status) === 'draft')
 
+  const timelineEvents = useMemo((): OpportunityTimelineEvent[] => {
+    const events: OpportunityTimelineEvent[] = [
+      {
+        id: 'updated',
+        label: 'Last updated',
+        timestamp: formatDate(opp.updatedAt),
+        status: 'active',
+      },
+    ]
+
+    if (opp.createdAt) {
+      events.unshift({
+        id: 'created',
+        label: 'Created',
+        timestamp: formatDate(opp.createdAt),
+        status: 'done',
+      })
+    }
+
+    if (hasMatches) {
+      events.push({
+        id: 'matched',
+        label: 'Matches discovered',
+        description: `${relatedMatchesModel!.matches.length} related matches`,
+        status: 'done',
+      })
+    } else {
+      events.push({
+        id: 'awaiting',
+        label: 'Awaiting matches',
+        description: 'Publish to run matching',
+        status: 'upcoming',
+      })
+    }
+
+    return events
+  }, [hasMatches, opp.createdAt, opp.updatedAt, relatedMatchesModel])
+
   useEffect(() => {
     if (!highlightRelatedMatches) return
 
@@ -151,205 +212,193 @@ export function OpportunityDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        label={opp.intent === 'offer' ? 'Offer' : 'Need'}
-        title={opp.title}
-        description={[opp.location, creator?.profile?.name].filter(Boolean).join(' · ')}
-        actions={
-          <>
-            <StatusBadge status={opp.status} />
-            <Button variant="outline" className="cursor-pointer" asChild>
-              <Link to="/matches">View matches</Link>
-            </Button>
-            {isOwner ? (
-              <Button variant="outline" className="cursor-pointer" asChild>
-                <Link to={`/opportunities/${opp.id}/edit`}>Edit</Link>
-              </Button>
-            ) : null}
-          </>
-        }
-      />
-
+    <PmPageLayout
+      header={
+        <PmPageHeader
+          label={formatOpportunityIntent(opp.intent)}
+          title={opp.title}
+          description={[opp.location, creator?.profile?.name].filter(Boolean).join(' · ')}
+          actions={
+            <>
+              <OpportunityStatusBadge status={opp.status} />
+              <PmButton variant="outline" asChild>
+                <Link to="/matches">View matches</Link>
+              </PmButton>
+              {isOwner ? (
+                <PmButton variant="outline" asChild>
+                  <Link to={`/opportunities/${opp.id}/edit`}>Edit</Link>
+                </PmButton>
+              ) : null}
+            </>
+          }
+        />
+      }
+    >
       <CollaborationFlowStrip activeStep={collaborationStep} />
 
       {isPendingApproval ? (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
-          Your account is pending approval. You can browse matches but cannot respond or move pipeline cards yet.
-        </div>
+        <PmContentCard className="border-warning/30 bg-warning/5">
+          <p className="text-sm text-warning">
+            Your account is pending approval. You can browse matches but cannot respond or move pipeline cards yet.
+          </p>
+        </PmContentCard>
       ) : null}
 
-      {publishDetails ? <PublishReadinessAlert details={publishDetails} /> : null}
+      <OpportunityPublishExperience publishDetails={publishDetails} />
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-4 lg:col-span-2">
-          <OpportunitySummaryCard
-            opportunity={opp}
-            creatorName={creator?.profile?.name}
-            skillCount={skills.length}
-          />
-
-          {relatedMatchesModel ? (
-            <RelatedMatchesPanel
-              model={relatedMatchesModel}
-              currentUserId={user?.id}
-              canAct={!isPendingApproval}
-              highlighted={highlightRelatedMatches}
-              sectionId={RELATED_MATCHES_SECTION_ID}
+      <PmDetailLayout
+        main={
+          <>
+            <OpportunitySummaryCard
+              opportunity={opp}
+              creatorName={creator?.profile?.name}
+              skillCount={skills.length}
             />
-          ) : null}
 
-          <Card>
-            <CardHeader><CardTitle>Full description</CardTitle></CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              {opp.description}
-            </CardContent>
-          </Card>
-          {skills.length > 0 ? (
-            <Card>
-              <CardHeader><CardTitle>Core skills</CardTitle></CardHeader>
-              <CardContent className="flex flex-wrap gap-2">
-                {skills.map((s: string) => (
-                  <span key={s} className="rounded-md bg-muted px-2 py-1 text-xs">{s}</span>
-                ))}
-              </CardContent>
-            </Card>
-          ) : null}
+            {relatedMatchesModel ? (
+              <RelatedMatchesPanel
+                model={relatedMatchesModel}
+                currentUserId={user?.id}
+                canAct={!isPendingApproval}
+                highlighted={highlightRelatedMatches}
+                sectionId={RELATED_MATCHES_SECTION_ID}
+              />
+            ) : null}
 
-          {isOwner ? (
-            <ApplicationsPanel
-              applications={oppApplications}
-              canManage={!isPendingApproval}
-              opportunityClosed={opportunityClosed}
-              variant="legacy"
-            />
-          ) : null}
-        </div>
+            <PmContentCard title="Requirements">
+              <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
+                {opp.description || 'No description provided.'}
+              </p>
+            </PmContentCard>
 
-        <div className="space-y-4">
-          {isOwner ? (
-            <OpportunityReadinessCard opportunity={opp} opportunityId={opp.id} />
-          ) : null}
+            {skills.length > 0 ? (
+              <PmContentCard title="Core skills">
+                <div className="flex flex-wrap gap-2">
+                  {skills.map((s: string) => (
+                    <PmBadge key={s} tone="neutral" size="sm">
+                      {s}
+                    </PmBadge>
+                  ))}
+                </div>
+              </PmContentCard>
+            ) : null}
 
-          {canPublishDraft ? (
-            <Card className="border-primary/20">
-              <CardHeader>
-                <CardTitle className="text-base">Publish for matching</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  Publishing makes this opportunity visible for matching once profile and opportunity readiness are complete.
-                </p>
-                <Button className="w-full cursor-pointer" onClick={handlePublish}>
-                  Publish for matching
-                </Button>
-              </CardContent>
-            </Card>
-          ) : null}
+            <PmFormReadonly>
+              <PmFormReadonlySection title="Budget & timeline" description="Commercial and schedule context.">
+                <PmFormReadonlyField label="Exchange mode" value={opp.exchangeMode} />
+                <PmFormReadonlyField label="Model type" value={opp.modelType} />
+                <PmFormReadonlyField label="Start date" value={opp.attributes?.startDate} />
+                <PmFormReadonlyField label="Updated" value={formatDate(opp.updatedAt)} />
+              </PmFormReadonlySection>
+            </PmFormReadonly>
 
-          <Card className="border-primary/20">
-            <CardHeader>
-              <CardTitle className="text-base">Next steps</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <p className="text-muted-foreground">
+            {isOwner ? (
+              <ApplicationsPanel
+                applications={oppApplications}
+                canManage={!isPendingApproval}
+                opportunityClosed={opportunityClosed}
+                variant="legacy"
+              />
+            ) : null}
+          </>
+        }
+        inspector={
+          <PmInspectorLayout header="Actions & readiness">
+            {isOwner ? (
+              <OpportunityReadinessCard opportunity={opp} opportunityId={opp.id} />
+            ) : null}
+
+            {canPublishDraft ? (
+              <OpportunityPublishPanel
+                opportunity={opp}
+                publishDetails={publishDetails}
+                onPublish={handlePublish}
+                showPublishButton
+              />
+            ) : null}
+
+            <PmContentCard title="Next steps">
+              <p className="text-sm text-muted-foreground">
                 {hasMatches
                   ? 'Work through your matches in order: respond, negotiate terms, then create a deal.'
                   : 'Publish this opportunity to discover PostMatches, then negotiate and create a deal.'}
               </p>
-              <div className="flex flex-col gap-2">
-                <Button
-                  className="w-full cursor-pointer"
+              <div className="mt-3 flex flex-col gap-2">
+                <PmButton
                   variant={hasMatches ? 'default' : 'outline'}
+                  className="w-full"
                   asChild
                 >
                   <Link to={hasMatches ? `/matches/${relatedMatchesModel!.matches[0]!.match.id}` : '/matches'}>
                     {hasMatches ? 'Open top match' : 'View matches'}
                   </Link>
-                </Button>
-                <Button variant="outline" className="w-full cursor-pointer" asChild>
+                </PmButton>
+                <PmButton variant="outline" className="w-full" asChild>
                   <Link to="/pipeline/matches">Pipeline: Post-matches</Link>
-                </Button>
+                </PmButton>
               </div>
-            </CardContent>
-          </Card>
+            </PmContentCard>
 
-          <Card>
-            <CardHeader><CardTitle>Exchange</CardTitle></CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <p><span className="text-muted-foreground">Mode:</span> {opp.exchangeMode}</p>
-              <p><span className="text-muted-foreground">Model:</span> {opp.modelType}</p>
-              <p><span className="text-muted-foreground">Updated:</span> {formatDate(opp.updatedAt)}</p>
-            </CardContent>
-          </Card>
-
-          {!isOwner && application && !canApply ? (
-            <Card className="border-border/50 bg-muted/10">
-              <CardHeader>
-                <CardTitle className="text-base text-muted-foreground">
-                  Direct application (legacy)
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <StatusBadge status={application.status} />
-                <p className="text-muted-foreground">
+            {!isOwner && application && !canApply ? (
+              <PmContentCard title="Direct application (legacy)">
+                <PmBadge tone="neutral" size="sm" className="mb-2">
+                  {application.status}
+                </PmBadge>
+                <p className="text-sm text-muted-foreground">
                   {application.status === 'accepted'
                     ? 'Your legacy application was accepted.'
                     : 'You submitted a direct application. PostMatch is the primary collaboration path.'}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Submitted {formatDate(application.createdAt)}
                 </p>
                 {canEdit && !isPendingApproval ? (
-                  <Button
-                    className="cursor-pointer"
+                  <PmButton
                     variant="outline"
                     size="sm"
+                    className="mt-3"
                     onClick={() => setShowWizard(true)}
                   >
                     Edit application
-                  </Button>
+                  </PmButton>
                 ) : null}
-              </CardContent>
-            </Card>
-          ) : null}
+              </PmContentCard>
+            ) : null}
 
-          {!isOwner && canApply && !isPendingApproval ? (
-            showWizard ? (
-              <ApplyWizard
-                opportunityId={opp.id}
-                applicantId={user!.id}
-                onSubmitted={() => setShowWizard(false)}
-                legacy
-              />
-            ) : (
-              <Card className="border-border/50 bg-muted/10">
-                <CardHeader>
-                  <CardTitle className="text-base text-muted-foreground">
-                    Direct application (legacy / hiring)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm text-muted-foreground">
-                  <p>
+            {!isOwner && canApply && !isPendingApproval ? (
+              showWizard ? (
+                <ApplyWizard
+                  opportunityId={opp.id}
+                  applicantId={user!.id}
+                  onSubmitted={() => setShowWizard(false)}
+                  legacy
+                />
+              ) : (
+                <PmContentCard title="Direct application (legacy / hiring)">
+                  <p className="text-sm text-muted-foreground">
                     PostMatch is the primary path: Opportunity → PostMatch → Negotiation → Deal → Contract.
                   </p>
-                  <p className="text-xs">
-                    Use direct application only for optional hiring-style proposals.
-                  </p>
-                  <Button
-                    className="w-full cursor-pointer"
+                  <PmButton
+                    className="mt-3 w-full"
                     variant="outline"
                     size="sm"
                     onClick={() => setShowWizard(true)}
                   >
                     {canReapply ? 'Re-submit legacy application' : 'Submit legacy application'}
-                  </Button>
-                </CardContent>
-              </Card>
-            )
-          ) : null}
-        </div>
-      </div>
-    </div>
+                  </PmButton>
+                </PmContentCard>
+              )
+            ) : null}
+          </PmInspectorLayout>
+        }
+        timeline={
+          <OpportunityTimeline
+            activeStep={collaborationStep}
+            events={timelineEvents}
+            title="Activity"
+          />
+        }
+      />
+    </PmPageLayout>
   )
 }

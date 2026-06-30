@@ -11,7 +11,9 @@
     "preview": "vite preview",
     "test": "node scripts/run-command-tests.mjs",
     "validate:domain": "npx vite-node --config vite.config.ts scripts/validate-domain-health.ts",
-    "validate:domain:strict": "npx vite-node --config vite.config.ts scripts/validate-domain-health.ts --strict"
+    "validate:domain:strict": "npx vite-node --config vite.config.ts scripts/validate-domain-health.ts --strict",
+    "validate:design": "node ../scripts/design/validate-design-governance.mjs",
+    "validate:design:strict": "node ../scripts/design/validate-design-governance.mjs --strict"
   },
   "dependencies": {
     "@pm-twin/commands": "file:../packages/commands",

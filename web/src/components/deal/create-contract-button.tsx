@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { CONTRACT_DETAIL_ROUTE_PREFIX } from '@/lib/deal-detail-read-model.ts'
 import { createContractFromDealUiAction } from '@/lib/create-contract-ui-actions.ts'
-import { Button } from '@/components/ui/button'
+import { PmButton } from '@/components/ui/pm-button'
 
 type CreateContractButtonProps = {
   readonly dealId: string
@@ -37,7 +37,7 @@ export function CreateContractButton({
   }
 
   return (
-    <Button
+    <PmButton
       type="button"
       variant={variant}
       className={className ?? 'cursor-pointer'}
@@ -45,6 +45,6 @@ export function CreateContractButton({
       onClick={handleCreateContract}
     >
       {pending ? 'Creating contract…' : 'Create contract'}
-    </Button>
+    </PmButton>
   )
 }

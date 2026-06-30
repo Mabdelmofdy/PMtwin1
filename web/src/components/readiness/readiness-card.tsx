@@ -1,6 +1,4 @@
 import { Link } from 'react-router-dom'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
   buildReadinessCardViewModel,
@@ -11,11 +9,18 @@ import type { ReadinessCta } from '@/components/readiness/readiness-ui-rules.ts'
 import { ReadinessList } from '@/components/readiness/readiness-list.tsx'
 import { ReadinessScoreRing } from '@/components/readiness/readiness-score-ring.tsx'
 import { ReadinessStatusBadge } from '@/components/readiness/readiness-status-badge.tsx'
+import {
+  PmCard,
+  PmCardContent,
+  PmCardHeader,
+  PmCardTitle,
+} from '@/components/ui/pm-card'
+import { PmButton } from '@/components/ui/pm-button'
 
 const toneBorderStyles: Record<ReturnType<typeof getReadinessStatusTone>, string> = {
-  incomplete: 'border-amber-500/30',
-  needs_review: 'border-sky-500/30',
-  ready: 'border-emerald-500/30',
+  incomplete: 'border-warning/30',
+  needs_review: 'border-info/30',
+  ready: 'border-success/30',
 }
 
 export function ReadinessCard({
@@ -33,14 +38,17 @@ export function ReadinessCard({
   const tone = getReadinessStatusTone(result.status)
 
   return (
-    <Card className={cn('border-border/60', toneBorderStyles[tone], className)}>
-      <CardHeader className="pb-3">
+    <PmCard
+      composed
+      className={cn('border-border/60', toneBorderStyles[tone], className)}
+    >
+      <PmCardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
-          <CardTitle className="text-base">{viewModel.title}</CardTitle>
+          <PmCardTitle className="text-base">{viewModel.title}</PmCardTitle>
           <ReadinessStatusBadge status={result.status} />
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      </PmCardHeader>
+      <PmCardContent className="space-y-4">
         <div className="flex items-center gap-4">
           <ReadinessScoreRing score={result.score} status={result.status} />
           <div className="space-y-1 text-sm">
@@ -60,11 +68,11 @@ export function ReadinessCard({
         />
 
         {cta ? (
-          <Button variant="outline" className="w-full cursor-pointer" asChild>
+          <PmButton variant="outline" className="w-full" asChild>
             <Link to={cta.href}>{cta.label}</Link>
-          </Button>
+          </PmButton>
         ) : null}
-      </CardContent>
-    </Card>
+      </PmCardContent>
+    </PmCard>
   )
 }

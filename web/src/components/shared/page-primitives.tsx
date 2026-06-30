@@ -1,3 +1,7 @@
+/**
+ * Legacy page primitives — deprecated in Phase 8.
+ * Prefer PmPageHeader, PmWorkflowBadge, PmEmptyState, PmStatCard from @/components/ui/pm-index.
+ */
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import {

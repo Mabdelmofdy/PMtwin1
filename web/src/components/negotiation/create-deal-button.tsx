@@ -6,7 +6,7 @@ import {
   canShowCreateDealFromNegotiation,
   createDealFromNegotiationUiAction,
 } from '@/lib/create-deal-ui-actions.ts'
-import { Button } from '@/components/ui/button'
+import { PmButton } from '@/components/ui/pm-button'
 
 type CreateDealButtonProps = {
   readonly negotiation: Negotiation | null | undefined
@@ -44,7 +44,7 @@ export function CreateDealButton({
   }
 
   return (
-    <Button
+    <PmButton
       type="button"
       variant={variant}
       className={className ?? 'cursor-pointer'}
@@ -52,6 +52,6 @@ export function CreateDealButton({
       onClick={handleCreateDeal}
     >
       {pending ? 'Creating deal…' : 'Create deal'}
-    </Button>
+    </PmButton>
   )
 }

@@ -6,8 +6,9 @@ import type { AppNotification } from '@/types/domain.ts'
 import { notificationsApi } from '@/api/notifications.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { PmButton } from '@/components/ui/pm-button'
+import { PmNavBadge } from '@/components/ui/pm-badge'
+import { PmEmptyState } from '@/components/ui/pm-empty-state'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -15,18 +16,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-
-function formatRelativeTime(iso: string) {
-  const date = new Date(iso)
-  const diffMs = Date.now() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60000)
-  if (diffMins < 1) return 'Just now'
-  if (diffMins < 60) return `${diffMins}m ago`
-  const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-  const diffDays = Math.floor(diffHours / 24)
-  return `${diffDays}d ago`
-}
+import {
+  formatNotificationTime,
+  groupNotifications,
+  resolveNotificationIcon,
+} from '@/components/layout/notification-display'
+import { cn } from '@/lib/utils'
 
 function NotificationItem({
   notification,
@@ -35,25 +30,34 @@ function NotificationItem({
   notification: AppNotification
   onMarkRead: (id: string) => void
 }) {
+  const Icon = resolveNotificationIcon(notification)
+
   const content = (
     <div className="flex gap-3 p-3">
       <span
-        className={`mt-1.5 size-2 shrink-0 rounded-full ${
-          notification.read ? 'bg-transparent' : 'bg-primary'
-        }`}
-        aria-hidden
-      />
+        className={cn(
+          'mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg',
+          notification.read ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-primary',
+        )}
+      >
+        <Icon className="size-4" aria-hidden />
+      </span>
       <div className="min-w-0 flex-1 space-y-1">
-        <p className="text-sm font-medium leading-snug">{notification.title}</p>
+        <div className="flex items-start gap-2">
+          <p className="flex-1 text-sm font-medium leading-snug">{notification.title}</p>
+          {!notification.read ? (
+            <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" aria-hidden />
+          ) : null}
+        </div>
         <p className="line-clamp-2 text-xs text-muted-foreground">
           {notification.message}
         </p>
         <p className="text-[11px] text-muted-foreground">
-          {formatRelativeTime(notification.createdAt)}
+          {formatNotificationTime(notification.createdAt)}
         </p>
       </div>
       {!notification.read ? (
-        <Button
+        <PmButton
           variant="ghost"
           size="icon-xs"
           className="shrink-0 cursor-pointer opacity-0 transition-opacity group-hover:opacity-100"
@@ -65,7 +69,7 @@ function NotificationItem({
           }}
         >
           <CheckCheck className="size-3.5" />
-        </Button>
+        </PmButton>
       ) : null}
     </div>
   )
@@ -74,7 +78,7 @@ function NotificationItem({
     return (
       <Link
         to={notification.link}
-        className="group block cursor-pointer rounded-lg transition-colors hover:bg-muted/60"
+        className="group block cursor-pointer rounded-lg transition-colors hover:bg-muted/50"
       >
         {content}
       </Link>
@@ -82,7 +86,7 @@ function NotificationItem({
   }
 
   return (
-    <div className="group rounded-lg transition-colors hover:bg-muted/60">
+    <div className="group rounded-lg transition-colors hover:bg-muted/50">
       {content}
     </div>
   )
@@ -102,6 +106,11 @@ export function NotificationCenter() {
     [notifications],
   )
 
+  const groups = useMemo(
+    () => groupNotifications(notifications),
+    [notifications],
+  )
+
   const markRead = (id: string) => {
     notificationsApi.markRead(id)
   }
@@ -113,7 +122,7 @@ export function NotificationCenter() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
+        <PmButton
           variant="ghost"
           size="icon-sm"
           className="relative cursor-pointer"
@@ -136,50 +145,61 @@ export function NotificationCenter() {
               </motion.span>
             ) : null}
           </AnimatePresence>
-        </Button>
+        </PmButton>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-96 p-0" sideOffset={8}>
+      <PopoverContent align="end" className="w-[min(24rem,calc(100vw-2rem))] p-0" sideOffset={8}>
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-semibold">Notifications</h2>
             {unreadCount > 0 ? (
-              <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
-                {unreadCount} new
-              </Badge>
+              <PmNavBadge>{unreadCount} new</PmNavBadge>
             ) : null}
           </div>
           {unreadCount > 0 ? (
-            <Button
+            <PmButton
               variant="ghost"
               size="xs"
               className="cursor-pointer text-xs"
               onClick={markAllRead}
             >
               Mark all read
-            </Button>
+            </PmButton>
           ) : null}
         </div>
         <Separator />
         <ScrollArea className="h-[min(24rem,60vh)]">
           {notifications.length === 0 ? (
-            <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-              You&apos;re all caught up.
-            </p>
+            <PmEmptyState
+              size="compact"
+              title="You're all caught up"
+              description="New matches, deals, and messages will appear here."
+              icon={<Bell className="size-5" aria-hidden />}
+              className="m-2 border-0 bg-transparent shadow-none"
+            />
           ) : (
-            <div className="p-1">
-              {notifications.map((notification) => (
-                <NotificationItem
-                  key={notification.id}
-                  notification={notification}
-                  onMarkRead={markRead}
-                />
+            <div className="space-y-3 p-2">
+              {groups.map((group) => (
+                <section key={group.key}>
+                  <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {group.label}
+                  </p>
+                  <div className="space-y-0.5">
+                    {group.items.map((notification) => (
+                      <NotificationItem
+                        key={notification.id}
+                        notification={notification}
+                        onMarkRead={markRead}
+                      />
+                    ))}
+                  </div>
+                </section>
               ))}
             </div>
           )}
         </ScrollArea>
         <Separator />
         <div className="p-2">
-          <Button
+          <PmButton
             variant="ghost"
             size="sm"
             className="w-full cursor-pointer"
@@ -188,7 +208,7 @@ export function NotificationCenter() {
             <Link to="/notifications" onClick={() => setOpen(false)}>
               View all notifications
             </Link>
-          </Button>
+          </PmButton>
         </div>
       </PopoverContent>
     </Popover>

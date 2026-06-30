@@ -8,41 +8,20 @@ import {
 } from '@/lib/post-match-ui-actions.ts'
 import { StartNegotiationButton } from '@/components/negotiation/start-negotiation-button.tsx'
 import { CreateDealButton } from '@/components/negotiation/create-deal-button.tsx'
-import { StatusBadge } from '@/components/shared/page-primitives'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { formatMatchTypeLabel } from '@/components/shared/pm-design-tokens'
+import { PmBadge } from '@/components/ui/pm-badge'
+import { PmButton } from '@/components/ui/pm-button'
+import { PmContentCard } from '@/components/layout/pm-layout-panels'
+import { PmEmptyState } from '@/components/ui/pm-index'
 
-const MATCH_TYPE_BADGE_STYLES: Record<string, string> = {
-  one_way: 'bg-sky-500/10 text-sky-700 dark:text-sky-400',
-  two_way: 'bg-violet-500/10 text-violet-700 dark:text-violet-400',
-  consortium: 'bg-amber-500/10 text-amber-800 dark:text-amber-300',
-  circular: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
-}
-
-function MatchTypeBadge({
-  matchType,
-  label,
-}: {
-  matchType: string
-  label: string
-}) {
-  const key = matchType.toLowerCase()
-  const style =
-    MATCH_TYPE_BADGE_STYLES[key] ??
-    'bg-muted text-muted-foreground'
-
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold uppercase tracking-wide',
-        style,
-      )}
-    >
-      {label}
-    </span>
-  )
-}
+const MATCH_TYPE_TONE = {
+  one_way: 'info',
+  two_way: 'primary',
+  consortium: 'warning',
+  circular: 'success',
+} as const
 
 type RelatedMatchesPanelProps = {
   readonly model: OpportunityMatchesReadModel
@@ -92,7 +71,7 @@ export function RelatedMatchesPanel({
   }
 
   const matchCountLabel = useMemo(
-    () => `Collaboration matches (${model.matches.length})`,
+    () => `Related matches (${model.matches.length})`,
     [model.matches.length],
   )
 
@@ -100,159 +79,160 @@ export function RelatedMatchesPanel({
     'Primary path: review matches, accept or decline, start negotiation, then create a deal and contract.'
 
   const panelClassName = cn(
-    'border-primary/25 shadow-sm ring-1 ring-primary/10',
-    highlighted && 'ring-2 ring-primary/60 shadow-md transition-shadow duration-500',
+    highlighted && 'ring-2 ring-primary/50 transition-shadow duration-500',
   )
 
   if (model.isEmpty) {
     return (
-      <Card id={sectionId} className={panelClassName}>
-        <CardHeader>
-          <CardTitle>Collaboration matches</CardTitle>
-          <p className="text-sm text-muted-foreground">{panelDescription}</p>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm text-muted-foreground">
-          <p>{model.emptyMessage}</p>
-          <Button size="sm" variant="outline" className="cursor-pointer" asChild>
-            <Link to="/matches">View all matches</Link>
-          </Button>
-        </CardContent>
-      </Card>
+      <div id={sectionId} className={panelClassName}>
+        <PmContentCard title="Related matches" description={panelDescription}>
+          <PmEmptyState
+            title="No matches yet"
+            description={model.emptyMessage}
+            size="compact"
+            action={
+              <PmButton size="sm" variant="outline" asChild>
+                <Link to="/matches">View all matches</Link>
+              </PmButton>
+            }
+          />
+        </PmContentCard>
+      </div>
     )
   }
 
   return (
-    <Card id={sectionId} className={panelClassName}>
-      <CardHeader>
-        <CardTitle>{matchCountLabel}</CardTitle>
-        <p className="text-sm text-muted-foreground">{panelDescription}</p>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {model.matches.map((card) => {
-          const matchTypeKey = card.match.matchType.toLowerCase()
-          const actionPending = pendingAction?.startsWith(`${card.match.id}:`)
+    <div id={sectionId} className={panelClassName}>
+      <PmContentCard title={matchCountLabel} description={panelDescription}>
+        <div className="space-y-4">
+          {model.matches.map((card) => {
+            const matchTypeKey = card.match.matchType.toLowerCase()
+            const actionPending = pendingAction?.startsWith(`${card.match.id}:`)
 
-          return (
-            <article
-              key={card.match.id}
-              className="rounded-xl border border-border/60 p-4 transition-colors hover:bg-muted/20"
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <MatchTypeBadge
-                  matchType={matchTypeKey}
-                  label={card.matchTypeLabel}
-                />
-                <StatusBadge status={card.match.status} entity="match" />
-                <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-                  Score {card.scoreLabel}
-                </span>
-              </div>
-
-              {card.relatedOpportunities.length > 0 ? (
-                <div className="mt-3 space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    Related opportunities
-                  </p>
-                  <ul className="space-y-1 text-sm">
-                    {card.relatedOpportunities.map((item) => (
-                      <li key={`${card.match.id}-${item.id}-${item.label}`}>
-                        <span className="text-muted-foreground">{item.label}:</span>{' '}
-                        {item.isCurrent ? (
-                          <span className="font-medium">{item.title}</span>
-                        ) : (
-                          <Link
-                            to={item.path}
-                            className="font-medium text-primary hover:underline"
-                          >
-                            {item.title}
-                          </Link>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-
-              {card.participants.length > 0 ? (
-                <div className="mt-3 space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    Participants
-                  </p>
-                  <ul className="space-y-0.5 text-sm text-muted-foreground">
-                    {card.participants.map((participant) => (
-                      <li key={`${card.match.id}-${participant.userId}`}>
-                        {participant.role.replace(/_/g, ' ')} — {participant.displayName}
-                        {participant.participantStatus
-                          ? ` (${participant.participantStatus})`
-                          : null}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" className="cursor-pointer" asChild>
-                  <Link to={card.detailPath}>View match</Link>
-                </Button>
-
-                {canAct && card.actions.showAccept ? (
-                  <Button
-                    size="sm"
-                    className="cursor-pointer"
-                    disabled={actionPending}
-                    onClick={() => handlePostMatchAction(card.match.id, 'accept')}
+            return (
+              <article
+                key={card.match.id}
+                className="rounded-xl border border-border/60 p-4 transition-colors hover:bg-surface-muted/50"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <PmBadge
+                    tone={MATCH_TYPE_TONE[matchTypeKey as keyof typeof MATCH_TYPE_TONE] ?? 'neutral'}
+                    uppercase
                   >
-                    Accept match
-                  </Button>
+                    {formatMatchTypeLabel(matchTypeKey)}
+                  </PmBadge>
+                  <PmBadge tone="neutral" size="sm">
+                    {card.statusLabel}
+                  </PmBadge>
+                  <PmBadge tone="primary" size="sm">
+                    Score {card.scoreLabel}
+                  </PmBadge>
+                </div>
+
+                {card.relatedOpportunities.length > 0 ? (
+                  <div className="mt-3 space-y-1">
+                    <p className={cn(pmTypography.caption, 'font-medium text-muted-foreground')}>
+                      Related opportunities
+                    </p>
+                    <ul className="space-y-1 text-sm">
+                      {card.relatedOpportunities.map((item) => (
+                        <li key={`${card.match.id}-${item.id}-${item.label}`}>
+                          <span className="text-muted-foreground">{item.label}:</span>{' '}
+                          {item.isCurrent ? (
+                            <span className="font-medium">{item.title}</span>
+                          ) : (
+                            <Link
+                              to={item.path}
+                              className="font-medium text-primary hover:underline"
+                            >
+                              {item.title}
+                            </Link>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 ) : null}
 
-                {canAct && card.actions.showDecline ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="cursor-pointer"
-                    disabled={actionPending}
-                    onClick={() => handlePostMatchAction(card.match.id, 'decline')}
-                  >
-                    Decline match
-                  </Button>
+                {card.participants.length > 0 ? (
+                  <div className="mt-3 space-y-1">
+                    <p className={cn(pmTypography.caption, 'font-medium text-muted-foreground')}>
+                      Participants
+                    </p>
+                    <ul className="space-y-0.5 text-sm text-muted-foreground">
+                      {card.participants.map((participant) => (
+                        <li key={`${card.match.id}-${participant.userId}`}>
+                          {participant.role.replace(/_/g, ' ')} — {participant.displayName}
+                          {participant.participantStatus
+                            ? ` (${participant.participantStatus})`
+                            : null}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 ) : null}
 
-                {canAct && card.actions.showStartNegotiation ? (
-                  <StartNegotiationButton
-                    match={card.match}
-                    variant="default"
-                    className="h-8 px-3 text-xs"
-                  />
-                ) : null}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <PmButton size="sm" variant="outline" asChild>
+                    <Link to={card.detailPath}>View match</Link>
+                  </PmButton>
 
-                {card.actions.showViewNegotiation && card.actions.negotiationId ? (
-                  <Button size="sm" variant="secondary" className="cursor-pointer" asChild>
-                    <Link to={`/negotiations/${card.actions.negotiationId}`}>
-                      View negotiation
-                    </Link>
-                  </Button>
-                ) : null}
+                  {canAct && card.actions.showAccept ? (
+                    <PmButton
+                      size="sm"
+                      disabled={actionPending}
+                      onClick={() => handlePostMatchAction(card.match.id, 'accept')}
+                    >
+                      Accept match
+                    </PmButton>
+                  ) : null}
 
-                {canAct && card.actions.showCreateDeal ? (
-                  <CreateDealButton
-                    negotiation={card.actions.negotiation}
-                    variant="default"
-                    className="h-8 px-3 text-xs"
-                  />
-                ) : null}
+                  {canAct && card.actions.showDecline ? (
+                    <PmButton
+                      size="sm"
+                      variant="outline"
+                      disabled={actionPending}
+                      onClick={() => handlePostMatchAction(card.match.id, 'decline')}
+                    >
+                      Decline match
+                    </PmButton>
+                  ) : null}
 
-                {card.actions.showViewDeal && card.actions.dealId ? (
-                  <Button size="sm" variant="secondary" className="cursor-pointer" asChild>
-                    <Link to={`/deals/${card.actions.dealId}`}>View deal</Link>
-                  </Button>
-                ) : null}
-              </div>
-            </article>
-          )
-        })}
-      </CardContent>
-    </Card>
+                  {canAct && card.actions.showStartNegotiation ? (
+                    <StartNegotiationButton
+                      match={card.match}
+                      variant="default"
+                      className="h-8 px-3 text-xs"
+                    />
+                  ) : null}
+
+                  {card.actions.showViewNegotiation && card.actions.negotiationId ? (
+                    <PmButton size="sm" variant="secondary" asChild>
+                      <Link to={`/negotiations/${card.actions.negotiationId}`}>
+                        View negotiation
+                      </Link>
+                    </PmButton>
+                  ) : null}
+
+                  {canAct && card.actions.showCreateDeal ? (
+                    <CreateDealButton
+                      negotiation={card.actions.negotiation}
+                      variant="default"
+                      className="h-8 px-3 text-xs"
+                    />
+                  ) : null}
+
+                  {card.actions.showViewDeal && card.actions.dealId ? (
+                    <PmButton size="sm" variant="secondary" asChild>
+                      <Link to={`/deals/${card.actions.dealId}`}>View deal</Link>
+                    </PmButton>
+                  ) : null}
+                </div>
+              </article>
+            )
+          })}
+        </div>
+      </PmContentCard>
+    </div>
   )
 }

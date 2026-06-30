@@ -8,9 +8,8 @@ import {
 import { matchingService } from '@/services/matching-service.ts'
 import { negotiationService } from '@/services/negotiation-service.ts'
 import { formatDate } from '@/lib/format'
-import { StatusBadge } from '@/components/shared/page-primitives'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { PmContentCard } from '@/components/layout/pm-layout-index'
+import { PmBadge, PmButton, PmWorkflowBadge } from '@/components/ui/pm-index'
 import {
   Select,
   SelectContent,
@@ -62,34 +61,34 @@ export function ApplicationsPanel({
 
   if (applications.length === 0) {
     return (
-      <Card className="border-border/50 bg-muted/10">
-        <CardHeader>
-          <CardTitle className="text-base text-muted-foreground">{sectionTitle}</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
+      <PmContentCard
+        title={sectionTitle}
+        className="border-border/50 bg-surface-muted/40"
+      >
+        <p className="text-sm text-muted-foreground">
           {variant === 'legacy'
             ? APPLICATIONS_LEGACY_EMPTY_MESSAGE
             : 'No applications yet. Published opportunities will receive applicant proposals here.'}
-        </CardContent>
-      </Card>
+        </p>
+      </PmContentCard>
     )
   }
 
   return (
-    <Card className="border-border/50 bg-muted/10">
-      <CardHeader>
-        <CardTitle className="text-base text-muted-foreground">
-          {variant === 'legacy'
-            ? `${APPLICATIONS_LEGACY_SECTION_TITLE} (${applications.length})`
-            : sectionTitle}
-        </CardTitle>
-        {variant === 'legacy' ? (
-          <p className="text-xs text-muted-foreground">
-            Optional hiring path — does not replace PostMatch → Negotiation → Deal.
-          </p>
-        ) : null}
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <PmContentCard
+      title={
+        variant === 'legacy'
+          ? `${APPLICATIONS_LEGACY_SECTION_TITLE} (${applications.length})`
+          : sectionTitle
+      }
+      description={
+        variant === 'legacy'
+          ? 'Optional hiring path — does not replace PostMatch → Negotiation → Deal.'
+          : undefined
+      }
+      className="border-border/50 bg-surface-muted/40"
+    >
+      <div className="space-y-4">
         {applications.map((app) => {
           const av = matchingService.normalizeApplicationValue(app.application_value)
           const amount = matchingService.formatApplicationValueAmount(app.application_value)
@@ -101,17 +100,17 @@ export function ApplicationsPanel({
           return (
             <article
               key={app.id}
-              className="rounded-xl border border-border/60 p-4 transition-colors hover:bg-muted/20"
+              className="rounded-xl border border-border/60 p-4 transition-colors hover:bg-surface-muted/50"
             >
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-semibold">
                   {app.applicant?.profile?.name ?? app.applicant?.email ?? 'Unknown applicant'}
                 </p>
-                <StatusBadge status={app.status} />
+                <PmWorkflowBadge status={app.status} entity="application" />
                 {av.valueScorePct != null ? (
-                  <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                  <PmBadge tone="primary" size="sm">
                     Value {av.valueScorePct}%
-                  </span>
+                  </PmBadge>
                 ) : null}
                 {amount ? (
                   <span className="text-xs text-muted-foreground">{amount}</span>
@@ -125,9 +124,9 @@ export function ApplicationsPanel({
               </p>
               {canManage ? (
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <Button size="sm" variant="outline" className="cursor-pointer" asChild>
+                  <PmButton size="sm" variant="outline" asChild>
                     <Link to={`/people/${app.applicantId}`}>View profile</Link>
-                  </Button>
+                  </PmButton>
                   {actionable ? (
                     <>
                       <Select
@@ -145,21 +144,16 @@ export function ApplicationsPanel({
                           ))}
                         </SelectContent>
                       </Select>
-                      <Button
-                        size="sm"
-                        className="cursor-pointer"
-                        onClick={() => handleAccept(app.id)}
-                      >
+                      <PmButton size="sm" onClick={() => handleAccept(app.id)}>
                         Accept
-                      </Button>
-                      <Button
+                      </PmButton>
+                      <PmButton
                         size="sm"
                         variant="destructive"
-                        className="cursor-pointer"
                         onClick={() => handleReject(app.id)}
                       >
                         Reject
-                      </Button>
+                      </PmButton>
                     </>
                   ) : null}
                 </div>
@@ -167,7 +161,7 @@ export function ApplicationsPanel({
             </article>
           )
         })}
-      </CardContent>
-    </Card>
+      </div>
+    </PmContentCard>
   )
 }

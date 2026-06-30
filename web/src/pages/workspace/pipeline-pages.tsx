@@ -6,6 +6,7 @@ import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { peopleApi } from '@/api/people.ts'
+import { dealsApi } from '@/api/deals.ts'
 import { formatDate, formatPercent } from '@/lib/format'
 import {
   acceptPostMatchUiAction,
@@ -14,7 +15,6 @@ import {
 import { buildMatchDetailReadModel } from '@/lib/match-detail-read-model.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
-import { PageHeader, StatCard, StatusBadge } from '@/components/shared/page-primitives'
 import { CreateDealButton } from '@/components/negotiation/create-deal-button.tsx'
 import { StartNegotiationButton } from '@/components/negotiation/start-negotiation-button.tsx'
 import { AgreeNegotiationButton } from '@/components/negotiation/agree-negotiation-button.tsx'
@@ -25,42 +25,37 @@ import {
 } from '@/lib/negotiation-ui-actions.ts'
 import { dealRepository } from '@/repositories/index.ts'
 import { PipelineBoard } from '@/components/pipeline/pipeline-board'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { MatchesListSection } from '@/components/collaboration/matches-list-section'
+import { CollaborationTimeline } from '@/components/collaboration/collaboration-timeline'
+import {
+  formatMatchTypeBadgeLabel,
+  resolveCollaborationStepFromMatch,
+  resolveCollaborationStepFromNegotiation,
+  resolveMatchTypeTone,
+} from '@/components/collaboration/collaboration-display'
+import {
+  PmContentCard,
+  PmDetailLayout,
+  PmInspectorLayout,
+  PmPageLayout,
+  PmSectionHeader,
+} from '@/components/layout/pm-layout-index'
+import {
+  PmFormReadonly,
+  PmFormReadonlyField,
+  PmFormReadonlySection,
+} from '@/components/forms/pm-form-index'
+import {
+  PmBadge,
+  PmButton,
+  PmEmptyState,
+  PmPageHeader,
+  PmStatCard,
+  PmWorkflowBadge,
+} from '@/components/ui/pm-index'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { cn } from '@/lib/utils'
 import type { Negotiation, PostMatch } from '@/types/domain.ts'
-
-const MATCH_TYPE_BADGE_STYLES: Record<string, string> = {
-  one_way: 'bg-sky-500/10 text-sky-700 dark:text-sky-400',
-  two_way: 'bg-violet-500/10 text-violet-700 dark:text-violet-400',
-  consortium: 'bg-amber-500/10 text-amber-800 dark:text-amber-300',
-  circular: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
-}
-
-function MatchTypeBadge({
-  matchType,
-  label,
-}: {
-  matchType: string
-  label: string
-}) {
-  const key = matchType.toLowerCase()
-  const style =
-    MATCH_TYPE_BADGE_STYLES[key] ??
-    'bg-muted text-muted-foreground'
-
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold uppercase tracking-wide',
-        style,
-      )}
-    >
-      {label}
-    </span>
-  )
-}
+import type { CollaborationTimelineEvent } from '@/components/collaboration/collaboration-timeline'
 
 function resolveMatchNegotiation(match: PostMatch): Negotiation | undefined {
   if (match.negotiationId) {
@@ -84,12 +79,15 @@ export function PipelinePage() {
   const matches = matchesApi.list()
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        label="Workflow"
-        title="Pipeline"
-        description="Track opportunities and PostMatches through negotiation, deal, and contract. Applications are a legacy hiring path."
-      />
+    <PmPageLayout
+      header={
+        <PmPageHeader
+          label="Workflow"
+          title="Pipeline"
+          description="Track opportunities and PostMatches through negotiation, deal, and contract. Applications are a legacy hiring path."
+        />
+      }
+    >
       <Tabs
         value={activeTab}
         onValueChange={(v) =>
@@ -107,64 +105,36 @@ export function PipelinePage() {
           <PipelineBoard mode="opportunities" key={`opp-${version}`} />
         </TabsContent>
         <TabsContent value="matches" className="mt-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            {matches.map((m) => (
-              <Link key={m.id} to={`/matches/${m.id}`} className="cursor-pointer">
-                <Card className="hover:border-primary/30 hover:shadow-md">
-                  <CardHeader className="flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-base">
-                      {m.matchType.replace(/_/g, ' ')}
-                    </CardTitle>
-                    <span className="text-lg font-semibold text-primary">
-                      {formatPercent(m.matchScore)}
-                    </span>
-                  </CardHeader>
-                  <CardContent className="flex items-center justify-between text-sm text-muted-foreground">
-                    <StatusBadge status={m.status} entity="match" />
-                    <span>{formatDate(m.createdAt)}</span>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
+          <MatchesListSection matches={matches} compact />
         </TabsContent>
         <TabsContent value="applications" className="mt-4">
-          <p className="mb-4 text-sm text-muted-foreground">
-            Legacy hiring applications — primary collaboration runs through Post-matches.
-          </p>
-          <PipelineBoard mode="applications" key={`app-${version}`} />
+          <PmContentCard
+            title="Legacy applications"
+            description="Primary collaboration runs through Post-matches."
+          >
+            <PipelineBoard mode="applications" key={`app-${version}`} />
+          </PmContentCard>
         </TabsContent>
       </Tabs>
-    </div>
+    </PmPageLayout>
   )
 }
 
 export function MatchesPage() {
   const matches = matchesApi.list()
+
   return (
-    <div className="space-y-6">
-      <PageHeader
-        label="Collaboration"
-        title="Post-matches"
-        description="Ranked matches for your opportunities — accept, negotiate, create deals, then contracts."
-      />
-      <div className="grid gap-4 md:grid-cols-2">
-        {matches.map((m) => (
-          <Link key={m.id} to={`/matches/${m.id}`} className="cursor-pointer">
-            <Card className="transition-all hover:border-primary/30 hover:shadow-md">
-              <CardHeader className="flex-row items-center justify-between pb-2">
-                <CardTitle className="text-base">{m.matchType.replace(/_/g, ' ')}</CardTitle>
-                <span className="text-lg font-semibold text-primary">{formatPercent(m.matchScore)}</span>
-              </CardHeader>
-              <CardContent className="flex items-center justify-between text-sm text-muted-foreground">
-                <StatusBadge status={m.status} />
-                <span>{formatDate(m.createdAt)}</span>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
-    </div>
+    <PmPageLayout
+      header={
+        <PmPageHeader
+          label="Collaboration"
+          title="Post-matches"
+          description="Ranked matches for your opportunities — accept, negotiate, create deals, then contracts."
+        />
+      }
+    >
+      <MatchesListSection matches={matches} />
+    </PmPageLayout>
   )
 }
 
@@ -211,62 +181,105 @@ export function MatchDetailPage() {
     )
   }
 
-  if (!match || !model) return <p className="text-muted-foreground">Match not found.</p>
+  if (!match || !model) {
+    return (
+      <PmPageLayout
+        header={<PmPageHeader title="Match" description="Post-match detail." />}
+      >
+        <PmEmptyState
+          title="Match not found"
+          description="This match may have been removed or the link is invalid."
+          action={
+            <PmButton size="sm" variant="outline" asChild>
+              <Link to="/matches">Back to matches</Link>
+            </PmButton>
+          }
+        />
+      </PmPageLayout>
+    )
+  }
 
   const negotiation = resolveMatchNegotiation(match)
+  const deal = dealRepository.findByPostMatchId(match.id)
   const { actions } = model
   const actionPending = pendingAction !== null
+  const collaborationStep = resolveCollaborationStepFromMatch({
+    hasDeal: Boolean(actions.showViewDeal || deal),
+    hasNegotiation: Boolean(actions.showViewNegotiation || negotiation),
+  })
+
+  const timelineEvents: CollaborationTimelineEvent[] = [
+    {
+      id: 'created',
+      label: 'Match discovered',
+      timestamp: formatDate(match.createdAt),
+      status: 'done',
+    },
+    {
+      id: 'status',
+      label: model.canonicalStatus.replace(/_/g, ' '),
+      description: `Score ${model.scoreLabel}`,
+      status: 'active',
+    },
+  ]
+
+  if (negotiation) {
+    timelineEvents.push({
+      id: 'negotiation',
+      label: 'Negotiation started',
+      description: negotiation.status,
+      status: actions.showViewDeal ? 'done' : 'upcoming',
+    })
+  }
 
   return (
-    <div className="space-y-6" key={`match-detail-${version}`}>
-      <PageHeader
-        title={`Match ${model.scoreLabel}`}
-        description={`${model.matchTypeLabel} · ${model.canonicalStatus}`}
-        actions={
-          <>
-            {model.canAct && actions.showAccept ? (
-              <Button
-                className="cursor-pointer"
-                disabled={actionPending}
-                onClick={() => runPostMatchAction('accept')}
-              >
-                {pendingAction === 'accept' ? 'Accepting…' : 'Accept'}
-              </Button>
-            ) : null}
-
-            {model.canAct && actions.showDecline ? (
-              <Button
-                variant="outline"
-                className="cursor-pointer"
-                disabled={actionPending}
-                onClick={() => runPostMatchAction('decline')}
-              >
-                {pendingAction === 'decline' ? 'Declining…' : 'Decline'}
-              </Button>
-            ) : null}
-
-            {model.canAct && actions.showStartNegotiation ? (
-              <StartNegotiationButton match={match} variant="default" />
-            ) : null}
-
-            {actions.showViewNegotiation && actions.negotiationId ? (
-              <Button variant="secondary" className="cursor-pointer" asChild>
-                <Link to={`/negotiations/${actions.negotiationId}`}>View negotiation</Link>
-              </Button>
-            ) : null}
-
-            {actions.showViewDeal && actions.dealId ? (
-              <Button variant="secondary" className="cursor-pointer" asChild>
-                <Link to={`/deals/${actions.dealId}`}>View deal</Link>
-              </Button>
-            ) : null}
-          </>
-        }
-      />
-
+    <PmPageLayout
+      header={
+        <PmPageHeader
+          title={`Match ${model.scoreLabel}`}
+          description={`${model.matchTypeLabel} · ${model.canonicalStatus}`}
+          actions={
+            <>
+              {model.canAct && actions.showAccept ? (
+                <PmButton
+                  disabled={actionPending}
+                  onClick={() => runPostMatchAction('accept')}
+                >
+                  {pendingAction === 'accept' ? 'Accepting…' : 'Accept'}
+                </PmButton>
+              ) : null}
+              {model.canAct && actions.showDecline ? (
+                <PmButton
+                  variant="outline"
+                  disabled={actionPending}
+                  onClick={() => runPostMatchAction('decline')}
+                >
+                  {pendingAction === 'decline' ? 'Declining…' : 'Decline'}
+                </PmButton>
+              ) : null}
+              {model.canAct && actions.showStartNegotiation ? (
+                <StartNegotiationButton match={match} variant="default" />
+              ) : null}
+              {actions.showViewNegotiation && actions.negotiationId ? (
+                <PmButton variant="secondary" asChild>
+                  <Link to={`/negotiations/${actions.negotiationId}`}>View negotiation</Link>
+                </PmButton>
+              ) : null}
+              {actions.showViewDeal && actions.dealId ? (
+                <PmButton variant="secondary" asChild>
+                  <Link to={`/deals/${actions.dealId}`}>View deal</Link>
+                </PmButton>
+              ) : null}
+            </>
+          }
+        />
+      }
+    >
       <div className="flex flex-wrap items-center gap-2">
-        <MatchTypeBadge matchType={match.matchType} label={model.matchTypeLabel} />
-        <StatusBadge status={match.status} entity="match" />
+        <PmBadge tone={resolveMatchTypeTone(match.matchType)} uppercase>
+          {formatMatchTypeBadgeLabel(match.matchType)}
+        </PmBadge>
+        <PmWorkflowBadge status={match.status} entity="match" />
       </div>
 
       {!model.isParticipant && user ? (
@@ -275,83 +288,115 @@ export function MatchDetailPage() {
         </p>
       ) : null}
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Skill match" value={formatPercent(match.payload?.breakdown?.skillMatch ?? 0)} />
-        <StatCard label="Timeline fit" value={formatPercent(match.payload?.breakdown?.timelineFit ?? 0)} />
-        <StatCard label="Location fit" value={formatPercent(match.payload?.breakdown?.locationFit ?? 0)} />
-      </div>
+      <PmDetailLayout
+        main={
+          <>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <PmStatCard
+                label="Skill match"
+                value={formatPercent(match.payload?.breakdown?.skillMatch ?? 0)}
+                dense
+              />
+              <PmStatCard
+                label="Timeline fit"
+                value={formatPercent(match.payload?.breakdown?.timelineFit ?? 0)}
+                dense
+              />
+              <PmStatCard
+                label="Location fit"
+                value={formatPercent(match.payload?.breakdown?.locationFit ?? 0)}
+                dense
+              />
+            </div>
 
-      {model.relatedOpportunities.length > 0 ? (
-        <Card>
-          <CardHeader><CardTitle>Related opportunities</CardTitle></CardHeader>
-          <CardContent>
-            <ul className="space-y-1 text-sm">
-              {model.relatedOpportunities.map((item) => (
-                <li key={`${item.id}-${item.label}`}>
-                  <span className="text-muted-foreground">{item.label}:</span>{' '}
-                  {item.isCurrent ? (
-                    <span className="font-medium">{item.title}</span>
-                  ) : (
-                    <Link
-                      to={item.path}
-                      className="font-medium text-primary hover:underline"
-                    >
-                      {item.title}
-                    </Link>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      ) : null}
+            {model.relatedOpportunities.length > 0 ? (
+              <PmContentCard title="Related opportunities">
+                <ul className="space-y-1 text-sm">
+                  {model.relatedOpportunities.map((item) => (
+                    <li key={`${item.id}-${item.label}`}>
+                      <span className="text-muted-foreground">{item.label}:</span>{' '}
+                      {item.isCurrent ? (
+                        <span className="font-medium">{item.title}</span>
+                      ) : (
+                        <Link
+                          to={item.path}
+                          className="font-medium text-primary hover:underline"
+                        >
+                          {item.title}
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </PmContentCard>
+            ) : null}
 
-      <Card>
-        <CardHeader><CardTitle>Participants</CardTitle></CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          {model.participants.map((participant) => (
-            <p key={participant.userId}>
-              {participant.role.replace(/_/g, ' ')} — {participant.displayName}
-              {participant.participantStatus
-                ? ` (${participant.participantStatus})`
-                : null}
-            </p>
-          ))}
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex-row items-center justify-between">
-          <CardTitle>Negotiation</CardTitle>
-          {negotiation ? (
-            <StatusBadge status={negotiation.status} />
-          ) : null}
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          {negotiation ? (
-            <>
-              <p className="text-muted-foreground">
-                Terms discussion for this confirmed match.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" className="cursor-pointer" asChild>
-                  <Link to={`/negotiations/${negotiation.id}`}>Open negotiation</Link>
-                </Button>
-                <AgreeNegotiationButton negotiation={negotiation} />
-                <CancelNegotiationButton negotiation={negotiation} />
-                <CreateDealButton negotiation={negotiation} variant="default" />
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="text-muted-foreground">
+            <PmContentCard title="Participants">
+              {model.participants.length > 0 ? (
+                <ul className="space-y-1 text-sm">
+                  {model.participants.map((participant) => (
+                    <li key={participant.userId}>
+                      {participant.role.replace(/_/g, ' ')} — {participant.displayName}
+                      {participant.participantStatus
+                        ? ` (${participant.participantStatus})`
+                        : null}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">No participants recorded.</p>
+              )}
+            </PmContentCard>
+          </>
+        }
+        inspector={
+          <PmInspectorLayout
+            header={
+              <PmSectionHeader
+                title="Negotiation"
+                description="Terms discussion for this match."
+              />
+            }
+            footer={
+              negotiation ? (
+                <div className="flex flex-col gap-2">
+                  <PmButton variant="outline" size="sm" asChild>
+                    <Link to={`/negotiations/${negotiation.id}`}>Open negotiation</Link>
+                  </PmButton>
+                  <AgreeNegotiationButton negotiation={negotiation} />
+                  <CancelNegotiationButton negotiation={negotiation} />
+                  <CreateDealButton negotiation={negotiation} variant="default" />
+                </div>
+              ) : (
+                <StartNegotiationButton match={match} className="w-full" />
+              )
+            }
+          >
+            {negotiation ? (
+              <PmFormReadonly>
+                <PmFormReadonlySection title="Status">
+                  <PmFormReadonlyField label="Negotiation">
+                    <PmWorkflowBadge status={negotiation.status} entity="negotiation" />
+                  </PmFormReadonlyField>
+                  <PmFormReadonlyField label="ID" value={negotiation.id} />
+                </PmFormReadonlySection>
+              </PmFormReadonly>
+            ) : (
+              <p className="text-sm text-muted-foreground">
                 No negotiation linked yet. Start negotiating terms before creating a deal.
               </p>
-              <StartNegotiationButton match={match} className="mt-2" />
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            )}
+          </PmInspectorLayout>
+        }
+        timeline={
+          <CollaborationTimeline
+            activeStep={collaborationStep}
+            events={timelineEvents}
+            title="Activity"
+          />
+        }
+      />
+    </PmPageLayout>
   )
 }
 
@@ -360,6 +405,11 @@ export function NegotiationDetailPage() {
   const version = useDataStoreVersion()
   const neg = id ? negotiationsApi.get(id) : undefined
   const [proposalPending, setProposalPending] = useState(false)
+
+  const linkedDeal = useMemo(() => {
+    if (!neg) return undefined
+    return dealsApi.list().find((d) => d.negotiationId === neg.id)
+  }, [neg, version])
 
   const canSubmitProposal = canShowNegotiationTransition(neg, 'countered')
   const canAcceptUpdatedProposal = canShowNegotiationTransition(neg, 'active')
@@ -382,57 +432,161 @@ export function NegotiationDetailPage() {
     )
   }
 
+  if (!neg) {
+    return (
+      <PmPageLayout
+        header={<PmPageHeader title="Negotiation" description="Value negotiation workspace." />}
+      >
+        <PmEmptyState
+          title="Negotiation not found"
+          description="This negotiation may have been removed or the link is invalid."
+        />
+      </PmPageLayout>
+    )
+  }
+
+  const collaborationStep = resolveCollaborationStepFromNegotiation(Boolean(linkedDeal))
+  const timelineEvents: CollaborationTimelineEvent[] = [
+    {
+      id: 'created',
+      label: 'Negotiation opened',
+      timestamp: neg.createdAt ? formatDate(neg.createdAt) : undefined,
+      status: 'done',
+    },
+    {
+      id: 'status',
+      label: 'Current status',
+      description: neg.status,
+      status: 'active',
+    },
+  ]
+
   return (
-    <div className="space-y-6" key={`negotiation-detail-${version}`}>
-      <PageHeader
-        title={neg ? `Negotiation ${neg.id}` : 'Negotiation'}
-        description={neg?.status ?? 'Value negotiation workspace'}
-        actions={
-          <>
-            <AgreeNegotiationButton negotiation={neg} />
-            <CancelNegotiationButton negotiation={neg} />
-            <CreateDealButton negotiation={neg} />
-          </>
+    <PmPageLayout
+      header={
+        <PmPageHeader
+          title={`Negotiation ${neg.id}`}
+          description="Terms sheet, rounds timeline, and proposal form."
+          actions={
+            <>
+              <PmWorkflowBadge status={neg.status} entity="negotiation" />
+              <AgreeNegotiationButton negotiation={neg} />
+              <CancelNegotiationButton negotiation={neg} />
+              <CreateDealButton negotiation={neg} />
+            </>
+          }
+        />
+      }
+    >
+      <div className="flex flex-wrap gap-2">
+        {neg.postMatchId ? (
+          <PmButton variant="outline" size="sm" asChild>
+            <Link to={`/matches/${neg.postMatchId}`}>View match</Link>
+          </PmButton>
+        ) : null}
+        {linkedDeal ? (
+          <PmButton variant="outline" size="sm" asChild>
+            <Link to={`/deals/${linkedDeal.id}`}>View deal</Link>
+          </PmButton>
+        ) : null}
+      </div>
+
+      <PmDetailLayout
+        main={
+          <PmContentCard
+            title="Discussion"
+            description="Terms sheet, rounds timeline, and proposal form."
+          >
+            <p className="text-sm text-muted-foreground">
+              Negotiation workspace for post-match collaboration. Use the inspector to agree,
+              cancel, or create a deal when terms are settled.
+            </p>
+            {neg.rounds && neg.rounds.length > 0 ? (
+              <ul className="mt-4 space-y-2 text-sm">
+                {neg.rounds.map((round, index) => (
+                  <li key={`${round.at}-${index}`} className="rounded-lg border border-border/60 p-3">
+                    <p className="font-medium">Round {index + 1}</p>
+                    <p className="text-muted-foreground">
+                      {round.by} · {formatDate(round.at)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </PmContentCard>
+        }
+        inspector={
+          <PmInspectorLayout
+            header={<PmSectionHeader title="Actions" />}
+            footer={
+              <div className="flex flex-col gap-2">
+                <AgreeNegotiationButton negotiation={neg} className="w-full" />
+                <CancelNegotiationButton negotiation={neg} className="w-full" variant="destructive" />
+                <CreateDealButton negotiation={neg} className="w-full" />
+                {canSubmitProposal ? (
+                  <PmButton
+                    type="button"
+                    className="w-full"
+                    disabled={proposalPending}
+                    onClick={() => handleProposalTransition('countered')}
+                  >
+                    {proposalPending ? 'Submitting…' : 'Submit proposal'}
+                  </PmButton>
+                ) : null}
+                {canAcceptUpdatedProposal ? (
+                  <PmButton
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={proposalPending}
+                    onClick={() => handleProposalTransition('active')}
+                  >
+                    {proposalPending ? 'Accepting…' : 'Accept updated proposal'}
+                  </PmButton>
+                ) : null}
+                <PmButton variant="outline" className="w-full" disabled>
+                  Escalate dispute
+                </PmButton>
+              </div>
+            }
+          >
+            <PmFormReadonly>
+              <PmFormReadonlySection title="Participants">
+                {(neg.participants ?? neg.parties ?? []).map((p) => (
+                  <PmFormReadonlyField
+                    key={p.userId}
+                    label={p.role.replace(/_/g, ' ')}
+                    value={p.userId}
+                  />
+                ))}
+              </PmFormReadonlySection>
+              {neg.commercialTerms ? (
+                <PmFormReadonlySection title="Current offer">
+                  <PmFormReadonlyField
+                    label="Currency"
+                    value={neg.commercialTerms.currency ?? '—'}
+                  />
+                  <PmFormReadonlyField
+                    label="Amount"
+                    value={
+                      neg.commercialTerms.amount != null
+                        ? String(neg.commercialTerms.amount)
+                        : '—'
+                    }
+                  />
+                </PmFormReadonlySection>
+              ) : null}
+            </PmFormReadonly>
+          </PmInspectorLayout>
+        }
+        timeline={
+          <CollaborationTimeline
+            activeStep={collaborationStep}
+            events={timelineEvents}
+            title="Negotiation history"
+          />
         }
       />
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader><CardTitle>Discussion</CardTitle></CardHeader>
-          <CardContent className="text-sm text-muted-foreground">Terms sheet, rounds timeline, and proposal form.</CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle>Actions</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            <AgreeNegotiationButton negotiation={neg} className="w-full" />
-            <CancelNegotiationButton negotiation={neg} className="w-full" variant="destructive" />
-            <CreateDealButton negotiation={neg} className="w-full" />
-            {canSubmitProposal ? (
-              <Button
-                type="button"
-                className="w-full cursor-pointer"
-                disabled={proposalPending}
-                onClick={() => handleProposalTransition('countered')}
-              >
-                {proposalPending ? 'Submitting…' : 'Submit proposal'}
-              </Button>
-            ) : null}
-            {canAcceptUpdatedProposal ? (
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full cursor-pointer"
-                disabled={proposalPending}
-                onClick={() => handleProposalTransition('active')}
-              >
-                {proposalPending ? 'Accepting…' : 'Accept updated proposal'}
-              </Button>
-            ) : null}
-            <Button variant="outline" className="w-full cursor-pointer" disabled>
-              Escalate dispute
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    </PmPageLayout>
   )
 }

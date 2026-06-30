@@ -1,4 +1,6 @@
 import { cn } from '@/lib/utils'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { PmSurface } from '@/components/ui/pm-surface'
 import { PUBLISH_READINESS_BLOCKED_MESSAGE } from '@/domain/publish-readiness/index.ts'
 
 export function PublishReadinessAlert({
@@ -14,18 +16,19 @@ export function PublishReadinessAlert({
   const opportunityLines = extractSection(details, 'Opportunity missing:')
 
   return (
-    <div
+    <PmSurface
+      variant="muted"
+      role="alert"
       className={cn(
-        'rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-100',
+        'border border-warning/30 bg-warning/10 px-4 py-3 text-warning',
         className,
       )}
-      role="alert"
     >
-      <p className="font-medium">{message}</p>
+      <p className={cn(pmTypography.label, 'text-warning')}>{message}</p>
       {profileLines.length > 0 ? (
         <div className="mt-3">
-          <p className="font-medium">Profile missing:</p>
-          <ul className="mt-1 list-disc space-y-1 pl-5">
+          <p className={cn(pmTypography.caption, 'font-medium')}>Profile missing:</p>
+          <ul className="mt-1 list-disc space-y-1 pl-5 text-sm">
             {profileLines.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -34,15 +37,15 @@ export function PublishReadinessAlert({
       ) : null}
       {opportunityLines.length > 0 ? (
         <div className="mt-3">
-          <p className="font-medium">Opportunity missing:</p>
-          <ul className="mt-1 list-disc space-y-1 pl-5">
+          <p className={cn(pmTypography.caption, 'font-medium')}>Opportunity missing:</p>
+          <ul className="mt-1 list-disc space-y-1 pl-5 text-sm">
             {opportunityLines.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
         </div>
       ) : null}
-    </div>
+    </PmSurface>
   )
 }
 

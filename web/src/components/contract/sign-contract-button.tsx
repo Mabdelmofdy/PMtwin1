@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { signContractUiAction } from '@/lib/sign-contract-ui-actions.ts'
-import { Button } from '@/components/ui/button'
+import { PmButton } from '@/components/ui/pm-button'
 
 type SignContractButtonProps = {
   readonly contractId: string
@@ -38,7 +38,7 @@ export function SignContractButton({
   }
 
   return (
-    <Button
+    <PmButton
       type="button"
       variant={variant}
       className={className ?? 'cursor-pointer'}
@@ -46,6 +46,6 @@ export function SignContractButton({
       onClick={handleSignContract}
     >
       {pending ? 'Signing contract…' : 'Sign contract'}
-    </Button>
+    </PmButton>
   )
 }

@@ -5,7 +5,7 @@ import {
   listDealTransitionOptions,
   transitionDealStatusUiAction,
 } from '@/lib/deal-transition-ui-actions.ts'
-import { Button } from '@/components/ui/button'
+import { PmButton } from '@/components/ui/pm-button'
 
 type DealStageActionsProps = {
   readonly deal: Deal | null | undefined
@@ -39,7 +39,7 @@ export function DealStageActions({ deal, className }: DealStageActionsProps) {
   return (
     <div className={className ?? 'flex flex-wrap gap-2'}>
       {options.map((option) => (
-        <Button
+        <PmButton
           key={option.targetStatus}
           type="button"
           variant={option.targetStatus === 'cancelled' ? 'outline' : 'default'}
@@ -50,7 +50,7 @@ export function DealStageActions({ deal, className }: DealStageActionsProps) {
           {pendingTarget === option.targetStatus
             ? 'Updating…'
             : option.label}
-        </Button>
+        </PmButton>
       ))}
     </div>
   )
