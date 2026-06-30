@@ -16,12 +16,20 @@ export const pmResponsive = {
     '-mx-[var(--pm-space-page-x)] px-[var(--pm-space-page-x)]',
 } as const
 
-/** Breakpoint widths used in QA matrix (documentation + tests). */
+/** Breakpoint widths used in production QA matrix (Phase 9.5H). */
 export const pmResponsiveViewports = {
-  mobile: [360, 390, 430] as const,
-  tablet: [768, 834] as const,
-  laptop: [1024, 1280] as const,
-  desktop: [1440, 1920] as const,
+  mobile: [360, 375, 390, 430] as const,
+  tablet: [768, 820, 834, 1024] as const,
+  laptop: [1280, 1366] as const,
+  desktop: [1440, 1600, 1920] as const,
 } as const
+
+/** All production QA widths in ascending order. */
+export const pmResponsiveProductionWidths = [
+  ...pmResponsiveViewports.mobile,
+  ...pmResponsiveViewports.tablet,
+  ...pmResponsiveViewports.laptop,
+  ...pmResponsiveViewports.desktop,
+] as const
 
 export type PmResponsiveViewportGroup = keyof typeof pmResponsiveViewports

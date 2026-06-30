@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { useTheme } from '@/providers/theme-provider'
 import { pmToast, pmLoading } from '@/tokens'
 import { Toaster as Sonner, type ToasterProps } from "sonner"
@@ -34,13 +35,16 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
           "--border-radius": "var(--radius)",
-        } as React.CSSProperties
+        } as CSSProperties
       }
       toastOptions={{
         classNames: {
           toast: `cn-toast ${pmToast.enter}`,
+          closeButton: 'pm-focus-ring',
         },
       }}
+      closeButton
+      visibleToasts={4}
       {...props}
     />
   )

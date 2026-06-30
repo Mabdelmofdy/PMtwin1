@@ -365,7 +365,12 @@ export function MatchDetailPage() {
         ) : null}
       </div>
 
-      <PmMatchScoreBadge score={match.matchScore} variant="hero" className="mb-4" />
+      <PmMatchScoreBadge
+        score={match.matchScore}
+        variant="hero"
+        className="mb-4"
+        breakdown={match.payload?.breakdown ?? match.matchCriteria}
+      />
 
       {!model.isParticipant && user ? (
         <p className="text-sm text-muted-foreground">

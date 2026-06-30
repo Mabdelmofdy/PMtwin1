@@ -577,6 +577,13 @@
     @apply outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
 
+  @media (forced-colors: active) {
+    .pm-focus-ring:focus-visible {
+      outline: 2px solid Highlight;
+      outline-offset: 2px;
+    }
+  }
+
   .pm-table-row-hover {
     transition-property: background-color;
     transition-duration: var(--motion-fast);
@@ -635,6 +642,13 @@
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
   max-width: 100%;
+}
+
+/* Layer 10: Score surfaces — prevent hero strip CLS / clipping (Phase 9.5H) */
+.pm-score-surface {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /* Layer 8: Reduced motion policy */

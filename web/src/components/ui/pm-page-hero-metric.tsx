@@ -41,11 +41,11 @@ export function PmPageHeroMetric({
   return (
     <motion.div
       data-slot="pm-page-hero-metric"
-      className={cn('space-y-0.5', !reducedMotion && pmEnter.hero, className)}
+      className={cn('min-w-0 max-w-full space-y-0.5', !reducedMotion && pmEnter.hero, className)}
       {...heroVariants}
     >
-      <p className={pmTypography.stat}>{value}</p>
-      <p className={pmTypography.statLabel}>{label}</p>
+      <p className={cn(pmTypography.stat, 'break-words')}>{value}</p>
+      <p className={cn(pmTypography.statLabel, 'truncate')}>{label}</p>
     </motion.div>
   )
 }

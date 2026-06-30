@@ -266,12 +266,21 @@ export function OpportunityDetailPage() {
       <CollaborationFlowStrip activeStep={collaborationStep} />
 
       {topMatchScore != null ? (
-        <PmMatchScoreBadge score={topMatchScore} variant="hero" className="mb-2" />
+        <PmMatchScoreBadge
+          score={topMatchScore}
+          variant="hero"
+          className="mb-2"
+          breakdown={topMatch?.payload?.breakdown ?? topMatch?.matchCriteria}
+        />
       ) : (
         <PmReadinessScoreBadge
           score={opportunityReadiness.score}
           variant="hero"
           className="mb-2"
+          explanation={{
+            missingRequired: opportunityReadiness.missingRequired,
+            missingRecommended: opportunityReadiness.missingRecommended,
+          }}
         />
       )}
 

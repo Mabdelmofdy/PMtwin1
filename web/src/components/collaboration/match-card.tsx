@@ -36,7 +36,11 @@ export function MatchCard({ match, className, showActions = true }: MatchCardPro
             {formatDate(match.createdAt)}
           </p>
         </div>
-        <PmMatchScoreBadge score={match.matchScore} variant="pipeline" />
+        <PmMatchScoreBadge
+          score={match.matchScore}
+          variant="pipeline"
+          breakdown={match.payload?.breakdown ?? match.matchCriteria}
+        />
       </div>
 
       <div className="mt-4 border-t border-border/50 pt-3">

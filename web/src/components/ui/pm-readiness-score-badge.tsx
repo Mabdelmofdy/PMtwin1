@@ -1,4 +1,4 @@
-import type { ComponentProps } from 'react'
+import type { ComponentProps, ReactElement } from 'react'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { PmBadge } from '@/components/ui/pm-badge'
@@ -7,11 +7,12 @@ import {
   resolveReadinessScoreDisplay,
   type ReadinessScoreDisplay,
 } from '@/components/ui/pm-readiness-score-display'
+import { buildScoreRegionLabel } from '@/components/ui/pm-score-a11y'
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+  buildReadinessExplanationLines,
+  type ReadinessScoreExplanation,
+} from '@/components/ui/pm-score-explanation'
+import { PmScoreTooltip } from '@/components/ui/pm-score-tooltip'
 
 export type PmReadinessScoreBadgeVariant =
   | 'compact'
@@ -29,16 +30,21 @@ export type PmReadinessScoreBadgeProps = {
   variant?: PmReadinessScoreBadgeVariant
   showLabel?: boolean
   className?: string
-  /** Pre-resolved display — skips recompute when parent already resolved. */
   display?: ReadinessScoreDisplay
+  explanation?: ReadinessScoreExplanation
+  explainable?: boolean
 } & Omit<ComponentProps<'div'>, 'children'>
 
-function ReadinessScoreTooltipContent({ display }: { display: ReadinessScoreDisplay }) {
+function wrapExplainable(
+  node: ReactElement,
+  lines: readonly string[],
+  explainable: boolean,
+  className?: string,
+) {
   return (
-    <div className="space-y-1 text-xs">
-      <p className="font-semibold">{display.percent}% readiness</p>
-      <p className="text-muted-foreground">Completion: {display.label}</p>
-    </div>
+    <PmScoreTooltip lines={lines} disabled={!explainable} className={className}>
+      {node}
+    </PmScoreTooltip>
   )
 }
 
@@ -49,63 +55,91 @@ export function PmReadinessScoreBadge({
   showLabel = true,
   className,
   display: displayProp,
+  explanation,
+  explainable,
   ...props
 }: PmReadinessScoreBadgeProps) {
   const display = displayProp ?? resolveReadinessScoreDisplay(score)
   const percentLabel = `${display.percent}%`
-
+  const explanationLines = buildReadinessExplanationLines(display, explanation)
   const resolvedVariant = variant === 'card' ? 'default' : variant
+  const shouldExplain =
+    explainable ??
+    (resolvedVariant === 'compact' ||
+      resolvedVariant === 'admin' ||
+      resolvedVariant === 'tooltip' ||
+      resolvedVariant === 'pipeline' ||
+      resolvedVariant === 'list')
+  const regionLabel = buildScoreRegionLabel('readiness', explanationLines)
 
   if (resolvedVariant === 'compact' || resolvedVariant === 'admin') {
-    return (
-      <PmBadge tone={display.tone} size="sm" className={className} {...props}>
+    const badge = (
+      <PmBadge
+        tone={display.tone}
+        size="sm"
+        className={cn('shrink-0 tabular-nums', className)}
+        {...props}
+      >
         {percentLabel}
       </PmBadge>
     )
+    return wrapExplainable(badge, explanationLines, shouldExplain)
   }
 
   if (resolvedVariant === 'list') {
-    return (
+    const content = (
       <span
         data-slot="pm-readiness-score-list"
-        className={cn('inline-flex items-center justify-end gap-2 tabular-nums', className)}
+        className={cn(
+          'inline-flex max-w-full flex-wrap items-center justify-end gap-1.5 tabular-nums sm:gap-2',
+          className,
+        )}
         {...props}
       >
-        <span className={cn(pmTypography.stat, 'text-base text-foreground')}>
+        <span className={cn(pmTypography.stat, 'text-sm text-foreground sm:text-base')}>
           {percentLabel}
         </span>
         {showLabel ? (
-          <PmBadge tone={display.tone} size="sm">
+          <PmBadge tone={display.tone} size="sm" className="max-w-full truncate">
             {display.label}
           </PmBadge>
         ) : null}
       </span>
     )
+    return wrapExplainable(content, explanationLines, shouldExplain)
   }
 
   if (resolvedVariant === 'pipeline') {
-    return (
+    const content = (
       <span
         data-slot="pm-readiness-score-pipeline"
-        className={cn('inline-flex flex-col items-end gap-0.5 tabular-nums', className)}
+        className={cn(
+          'inline-flex max-w-full shrink-0 flex-col items-end gap-0.5 tabular-nums',
+          className,
+        )}
         {...props}
       >
-        <span className={cn(pmTypography.stat, 'text-lg leading-none')}>{percentLabel}</span>
+        <span className={cn(pmTypography.stat, 'text-base leading-none sm:text-lg')}>
+          {percentLabel}
+        </span>
         {showLabel ? (
-          <PmBadge tone={display.tone} size="sm">
+          <PmBadge tone={display.tone} size="sm" className="max-w-[8rem] truncate">
             {display.label}
           </PmBadge>
         ) : null}
       </span>
     )
+    return wrapExplainable(content, explanationLines, shouldExplain)
   }
 
   if (resolvedVariant === 'dashboard') {
     return (
       <div
         data-slot="pm-readiness-score-dashboard"
+        role="region"
+        aria-label={regionLabel}
         className={cn(
-          'flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-surface-muted/60 px-4 py-3',
+          'pm-score-surface flex min-w-0 w-full items-center justify-between gap-3 rounded-xl border border-border/60 bg-surface-muted/60 px-4 py-3',
           className,
         )}
         {...props}
@@ -113,12 +147,14 @@ export function PmReadinessScoreBadge({
         <div className="min-w-0">
           <p className={cn(pmTypography.caption, 'text-muted-foreground')}>Readiness score</p>
           {showLabel ? (
-            <PmBadge tone={display.tone} size="sm" className="mt-1">
+            <PmBadge tone={display.tone} size="sm" className="mt-1 max-w-full truncate">
               {display.label}
             </PmBadge>
           ) : null}
         </div>
-        <p className={cn(pmTypography.stat, 'text-2xl md:text-[1.75rem]')}>{percentLabel}</p>
+        <p className={cn(pmTypography.stat, 'shrink-0 text-2xl md:text-[1.75rem]')}>
+          {percentLabel}
+        </p>
       </div>
     )
   }
@@ -127,25 +163,32 @@ export function PmReadinessScoreBadge({
     return (
       <div
         data-slot="pm-readiness-score-hero"
+        role="region"
+        aria-label={regionLabel}
         className={cn(
-          'flex flex-col gap-3 rounded-2xl border border-border/70 bg-gradient-to-b from-surface to-surface-muted/80 p-5 sm:flex-row sm:items-center sm:justify-between',
+          'pm-score-surface flex min-w-0 w-full flex-col gap-3 rounded-2xl border border-border/70 bg-gradient-to-b from-surface to-surface-muted/80 p-4 sm:p-5 sm:flex-row sm:items-center sm:justify-between',
           className,
         )}
         {...props}
       >
-        <div className="space-y-1">
+        <div className="min-w-0 space-y-1">
           <p className={pmTypography.overline}>Opportunity readiness</p>
           <div className="flex flex-wrap items-center gap-2">
-            <PmBadge tone={display.tone} size="lg">
+            <PmBadge tone={display.tone} size="lg" className="max-w-full truncate">
               {display.label}
             </PmBadge>
-            <span className={cn(pmTypography.caption, 'text-muted-foreground')}>
+            <span className={cn(pmTypography.caption, 'min-w-0 text-muted-foreground')}>
               How complete and ready this opportunity is
             </span>
           </div>
+          {explanation?.missingRequired?.length ? (
+            <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
+              Missing required: {explanation.missingRequired.join(', ')}
+            </p>
+          ) : null}
         </div>
         <div className="shrink-0 text-end">
-          <p className={cn(pmTypography.stat, 'text-4xl md:text-5xl')}>{percentLabel}</p>
+          <p className={cn(pmTypography.stat, 'text-3xl sm:text-4xl md:text-5xl')}>{percentLabel}</p>
           <p className={pmTypography.statLabel}>Readiness score</p>
         </div>
       </div>
@@ -153,42 +196,37 @@ export function PmReadinessScoreBadge({
   }
 
   if (resolvedVariant === 'tooltip') {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <PmBadge
-            tone={display.tone}
-            size="md"
-            className={cn('cursor-default tabular-nums', className)}
-            {...props}
-          >
-            {percentLabel}
-            {showLabel ? ` · ${display.label}` : null}
-          </PmBadge>
-        </TooltipTrigger>
-        <TooltipContent side="top" className="max-w-xs">
-          <ReadinessScoreTooltipContent display={display} />
-        </TooltipContent>
-      </Tooltip>
+    const badge = (
+      <PmBadge
+        tone={display.tone}
+        size="md"
+        className={cn('max-w-full cursor-default truncate tabular-nums', className)}
+        {...props}
+      >
+        {percentLabel}
+        {showLabel ? ` · ${display.label}` : null}
+      </PmBadge>
     )
+    return wrapExplainable(badge, explanationLines, shouldExplain)
   }
 
-  return (
+  const content = (
     <span
       data-slot="pm-readiness-score-badge"
-      className={cn('inline-flex flex-wrap items-center gap-2', className)}
+      className={cn('inline-flex max-w-full flex-wrap items-center gap-2', className)}
       {...props}
     >
-      <PmBadge tone={display.tone} size="md" className="tabular-nums">
+      <PmBadge tone={display.tone} size="md" className="shrink-0 tabular-nums">
         {percentLabel}
       </PmBadge>
       {showLabel ? (
-        <span className={cn(pmTypography.caption, 'text-muted-foreground')}>
+        <span className={cn(pmTypography.caption, 'min-w-0 text-muted-foreground')}>
           {display.label}
         </span>
       ) : null}
     </span>
   )
+  return wrapExplainable(content, explanationLines, shouldExplain)
 }
 
 export { formatReadinessScorePercent, resolveReadinessScoreDisplay }

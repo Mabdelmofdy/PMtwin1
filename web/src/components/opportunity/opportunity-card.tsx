@@ -50,7 +50,15 @@ export function OpportunityCard({
           ) : null}
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1.5">
-          <PmReadinessScoreBadge score={readiness.score} variant="compact" showLabel={false} />
+          <PmReadinessScoreBadge
+            score={readiness.score}
+            variant="compact"
+            showLabel={false}
+            explanation={{
+              missingRequired: readiness.missingRequired,
+              missingRecommended: readiness.missingRecommended,
+            }}
+          />
           <OpportunityStatusBadge status={opportunity.status} />
         </div>
       </div>

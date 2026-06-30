@@ -56,3 +56,14 @@ export {
   type ReadinessScoreDisplay,
 } from '@/components/ui/pm-readiness-score-display'
 export { PmScoreBadge, type PmScoreBadgeProps, type PmScoreBadgeType } from '@/components/ui/pm-score-badge'
+export {
+  buildMatchExplanationLines,
+  buildReadinessExplanationLines,
+  formatMatchBreakdownLines,
+  type ReadinessScoreExplanation,
+} from '@/components/ui/pm-score-explanation'
+export { PmScoreTooltip } from '@/components/ui/pm-score-tooltip'
+export {
+  buildScoreAriaLabel,
+  buildScoreRegionLabel,
+} from '@/components/ui/pm-score-a11y'

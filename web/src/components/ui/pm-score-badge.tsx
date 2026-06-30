@@ -4,6 +4,7 @@ import {
   PmReadinessScoreBadge,
   type PmReadinessScoreBadgeVariant,
 } from '@/components/ui/pm-readiness-score-badge'
+import type { ReadinessScoreExplanation } from '@/components/ui/pm-score-explanation'
 
 export type PmScoreBadgeType = 'readiness' | 'match'
 
@@ -17,6 +18,9 @@ export type PmScoreBadgeProps = {
   variant?: PmScoreBadgeVariant
   showLabel?: boolean
   className?: string
+  explanation?: ReadinessScoreExplanation
+  breakdown?: Record<string, number>
+  explainable?: boolean
 } & Omit<ComponentProps<'div'>, 'children'>
 
 /**
@@ -29,6 +33,9 @@ export function PmScoreBadge({
   variant = 'default',
   showLabel = true,
   className,
+  explanation,
+  breakdown,
+  explainable,
   ...props
 }: PmScoreBadgeProps) {
   if (type === 'readiness') {
@@ -38,6 +45,8 @@ export function PmScoreBadge({
         variant={variant as PmReadinessScoreBadgeVariant}
         showLabel={showLabel}
         className={className}
+        explanation={explanation}
+        explainable={explainable}
         {...props}
       />
     )
@@ -49,6 +58,8 @@ export function PmScoreBadge({
       variant={variant as PmMatchScoreBadgeVariant}
       showLabel={showLabel}
       className={className}
+      breakdown={breakdown}
+      explainable={explainable}
       {...props}
     />
   )

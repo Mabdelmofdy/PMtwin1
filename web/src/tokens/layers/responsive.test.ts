@@ -16,7 +16,7 @@ describe('responsive tokens', () => {
   })
 
   it('documents QA viewport matrix', () => {
-    assert.deepEqual(pmResponsiveViewports.mobile, [360, 390, 430])
-    assert.deepEqual(pmResponsiveViewports.desktop, [1440, 1920])
+    assert.deepEqual(pmResponsiveViewports.mobile, [360, 375, 390, 430])
+    assert.deepEqual(pmResponsiveViewports.desktop, [1440, 1600, 1920])
   })
 })

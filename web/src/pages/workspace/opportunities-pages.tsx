@@ -192,12 +192,19 @@ export function OpportunitiesPage() {
     {
       id: 'readiness',
       label: 'Readiness',
-      cell: (o) => (
-        <PmReadinessScoreBadge
-          score={resolveOpportunityReadiness(o).score}
-          variant="list"
-        />
-      ),
+      cell: (o) => {
+        const readiness = resolveOpportunityReadiness(o)
+        return (
+          <PmReadinessScoreBadge
+            score={readiness.score}
+            variant="list"
+            explanation={{
+              missingRequired: readiness.missingRequired,
+              missingRecommended: readiness.missingRecommended,
+            }}
+          />
+        )
+      },
     },
     {
       id: 'status',

@@ -129,7 +129,13 @@ export function RelatedMatchesPanel({
                       {card.statusLabel}
                     </PmBadge>
                   </div>
-                  <PmMatchScoreBadge score={card.match.matchScore} variant="pipeline" />
+                  <PmMatchScoreBadge
+                    score={card.match.matchScore}
+                    variant="pipeline"
+                    breakdown={
+                      card.match.payload?.breakdown ?? card.match.matchCriteria
+                    }
+                  />
                 </div>
 
                 {card.relatedOpportunities.length > 0 ? (

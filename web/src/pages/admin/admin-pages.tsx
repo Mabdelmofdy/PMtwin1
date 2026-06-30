@@ -382,12 +382,19 @@ export function AdminOpportunitiesPage() {
         {
           id: 'readiness',
           label: 'Readiness',
-          cell: (o) => (
-            <PmReadinessScoreBadge
-              score={resolveOpportunityReadiness(o).score}
-              variant="admin"
-            />
-          ),
+          cell: (o) => {
+            const readiness = resolveOpportunityReadiness(o)
+            return (
+              <PmReadinessScoreBadge
+                score={readiness.score}
+                variant="admin"
+                explanation={{
+                  missingRequired: readiness.missingRequired,
+                  missingRecommended: readiness.missingRecommended,
+                }}
+              />
+            )
+          },
         },
         { id: 'updated', label: 'Updated', cell: (o) => formatDate(o.updatedAt) },
       ]}
@@ -446,7 +453,13 @@ export function AdminMatchingPage() {
   const matchColumns: PmDataTableColumn<(typeof matches)[number]>[] = [
     { id: 'id', label: 'ID', cell: (m) => m.id },
     { id: 'type', label: 'Type', cell: (m) => m.matchType },
-    { id: 'score', label: 'Score', cell: (m) => <PmMatchScoreBadge score={m.matchScore} variant="tooltip" /> },
+    { id: 'score', label: 'Score', cell: (m) => (
+      <PmMatchScoreBadge
+        score={m.matchScore}
+        variant="tooltip"
+        breakdown={m.payload?.breakdown ?? m.matchCriteria}
+      />
+    ) },
     {
       id: 'status',
       label: 'Status',

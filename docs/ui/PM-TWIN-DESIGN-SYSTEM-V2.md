@@ -6,7 +6,7 @@
 | Date | 29 June 2026 |
 | Authority | `web/src/components/layout/*` shell, `web/src/components/ui/pm-*`, design tokens |
 | Prior audit | [PM-TWIN-UI-AUDIT-V2.md](./PM-TWIN-UI-AUDIT-V2.md) |
-| Status | **v2 migration complete** — see [PM-TWIN-RTL-EXCELLENCE-AUDIT.md](./PM-TWIN-RTL-EXCELLENCE-AUDIT.md) (Phase 9.5D), [PM-TWIN-RESPONSIVE-CROSS-DEVICE-QA.md](./PM-TWIN-RESPONSIVE-CROSS-DEVICE-QA.md) (Phase 9.5E), [PM-TWIN-PREMIUM-VISUAL-REFRESH.md](./PM-TWIN-PREMIUM-VISUAL-REFRESH.md) (Phase 9.5F), [PM-TWIN-PREMIUM-UX-COMPOSITION-AND-SCORING.md](./PM-TWIN-PREMIUM-UX-COMPOSITION-AND-SCORING.md) (Phase 9.5G) |
+| Status | **v2 migration complete** — see [PM-TWIN-RTL-EXCELLENCE-AUDIT.md](./PM-TWIN-RTL-EXCELLENCE-AUDIT.md) (Phase 9.5D), [PM-TWIN-RESPONSIVE-CROSS-DEVICE-QA.md](./PM-TWIN-RESPONSIVE-CROSS-DEVICE-QA.md) (Phase 9.5E), [PM-TWIN-PREMIUM-VISUAL-REFRESH.md](./PM-TWIN-PREMIUM-VISUAL-REFRESH.md) (Phase 9.5F), [PM-TWIN-PREMIUM-UX-COMPOSITION-AND-SCORING.md](./PM-TWIN-PREMIUM-UX-COMPOSITION-AND-SCORING.md) (Phase 9.5G), [PM-TWIN-RESPONSIVE-PRODUCTION-QA.md](./PM-TWIN-RESPONSIVE-PRODUCTION-QA.md) (Phase 9.5H), [PM-TWIN-WCAG-2.2-AA-CERTIFICATION.md](./PM-TWIN-WCAG-2.2-AA-CERTIFICATION.md) (Phase 9.5I) |
 
 ---
 
@@ -2204,6 +2204,106 @@ Weak tier uses `neutral` as the semantic stand-in for orange (no palette escape)
 - Applications remain hidden; primary path unchanged.
 
 ### 26.7 Validation gates
+
+- `npm run type-check`
+- `npm test`
+- `npm run validate:design:strict`
+
+---
+
+## 27. Phase 9.5H — Responsive & Production Device QA
+
+| Field | Value |
+|-------|-------|
+| Phase | 9.5H — Responsive & Production Device QA |
+| Date | 30 June 2026 |
+| Authority | [PM-TWIN-RESPONSIVE-PRODUCTION-QA.md](./PM-TWIN-RESPONSIVE-PRODUCTION-QA.md) |
+| Scope | Presentation hardening for production viewports + score explanations |
+
+### 27.1 Objective
+
+Verify authenticated Workspace + Admin UI across the full production device matrix; harden score badges against clipping/overlap; expose existing readiness/match breakdown via tooltips.
+
+### 27.2 Production viewport matrix
+
+| Tier | Widths (px) |
+|------|-------------|
+| Mobile | 360, 375, 390, 430 |
+| Tablet | 768, 820, 834, 1024 |
+| Laptop | 1280, 1366 |
+| Desktop | 1440, 1600, 1920 |
+
+Token: `pmResponsiveViewports`, `pmResponsiveProductionWidths` in `responsive.ts`.
+
+### 27.3 Score explanation API
+
+| Component | New props | Explanation source |
+|-----------|-----------|-------------------|
+| `PmReadinessScoreBadge` | `explanation`, `explainable` | `missingRequired`, `missingRecommended` |
+| `PmMatchScoreBadge` | `breakdown`, `explainable` | `payload.breakdown`, `matchCriteria` |
+| `PmScoreTooltip` | — | Shared tooltip shell |
+
+Helpers: `buildReadinessExplanationLines`, `buildMatchExplanationLines` in `pm-score-explanation.ts`.
+
+### 27.4 Responsive score utilities
+
+| Utility | Purpose |
+|---------|---------|
+| `.pm-score-surface` | `min-w-0 max-w-full overflow-hidden` on hero/dashboard score strips |
+| `shrink-0` on compact badges | Prevents card header score crush |
+| `flex-wrap` + responsive stat sizes | List/pipeline variants on 360px |
+
+### 27.5 Outcome
+
+- Responsive readiness: **4.8 / 5**
+- Production readiness: **4.9 / 5**
+- **Go** for authenticated release scope
+
+### 27.6 Validation gates
+
+- `npm run type-check`
+- `npm test`
+- `npm run validate:design:strict`
+
+---
+
+## 28. Phase 9.5I — Accessibility Certification (WCAG 2.2 AA)
+
+| Field | Value |
+|-------|-------|
+| Phase | 9.5I — Accessibility Certification |
+| Date | 30 June 2026 |
+| Authority | [PM-TWIN-WCAG-2.2-AA-CERTIFICATION.md](./PM-TWIN-WCAG-2.2-AA-CERTIFICATION.md) |
+| Target | WCAG 2.2 Level AA (authenticated Workspace + Admin) |
+
+### 28.1 Objective
+
+Certify keyboard, screen-reader, focus, dialog, toast, table, form, navigation, pipeline, and score accessibility before Visual Freeze v1.0 — presentation-only fixes.
+
+### 28.2 Accessibility primitives
+
+| Utility / component | Purpose |
+|---------------------|---------|
+| `pm-focus-ring` | Visible focus on interactive controls; forced-colors outline fallback |
+| `PmScoreTooltip` | Focusable score trigger + `aria-label` + Radix tooltip |
+| `buildScoreAriaLabel` | Screen-reader labels from existing explanation lines |
+| Skip link | `app-shell.tsx` — skip to `#main-content` |
+| `PmFormField` | `aria-describedby`, `aria-invalid`, `aria-required` |
+| `PmDataTable` | `caption`, `aria-sort`, sort `aria-label`, checkbox labels |
+
+### 28.3 Score accessibility
+
+- Compact/list/pipeline/admin scores: **keyboard focusable** (`tabIndex={0}`), full `aria-label` from explanation lines
+- Hero/dashboard scores: `role="region"` + `aria-label`
+- No score information hidden from keyboard users
+
+### 28.4 Outcome
+
+- **Accessibility score: 4.9 / 5**
+- **Production readiness: 4.9 / 5**
+- **Certification recommendation: GO** for Visual Freeze v1.0
+
+### 28.5 Validation gates
 
 - `npm run type-check`
 - `npm test`

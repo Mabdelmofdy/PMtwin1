@@ -323,6 +323,11 @@ export function PmDataTable<T>({
                               'inline-flex cursor-pointer items-center gap-1.5 pm-focus-ring rounded-sm',
                             )}
                             onClick={() => handleSortClick(col.id)}
+                            aria-label={`Sort by ${col.label}${
+                              sortColumnId === col.id
+                                ? `, ${sortDirection === 'asc' ? 'ascending' : 'descending'}`
+                                : ''
+                            }`}
                           >
                             {col.header ?? col.label}
                             <SortIcon

@@ -75,7 +75,13 @@ export function MatchesListSection({
     {
       id: 'score',
       label: 'Score',
-      cell: (m) => <PmMatchScoreBadge score={m.matchScore} variant="list" />,
+      cell: (m) => (
+        <PmMatchScoreBadge
+          score={m.matchScore}
+          variant="list"
+          breakdown={m.payload?.breakdown ?? m.matchCriteria}
+        />
+      ),
     },
     {
       id: 'status',

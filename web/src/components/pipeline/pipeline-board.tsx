@@ -68,6 +68,8 @@ function KanbanCard({
       shadow="card"
       interactive={!disabled}
       draggable={!disabled}
+      role="group"
+      aria-label={`${title}${subtitle ? `, ${subtitle}` : ''}. Open record or drag to another stage.`}
       onDragStart={(e) => {
         if (disabled) return
         e.dataTransfer.setData(
@@ -135,6 +137,8 @@ function StageSidebar({
             type="button"
             data-stage={stage.key}
             title={stage.hint}
+            aria-label={`${stage.label} stage, ${counts[stage.key] ?? 0} items`}
+            aria-current={selected === stage.key ? 'step' : undefined}
             disabled={disabled}
             onClick={() => onSelect(stage.key)}
             onDragOver={(e) => {
@@ -290,26 +294,33 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
                 size="compact"
               />
             ) : (
-              items.map((item) => (
-                <KanbanCard
-                  key={item.id}
-                  id={item.id}
-                  title={item.title}
-                  subtitle={item.location}
-                  status={item.status}
-                  statusEntity="opportunity"
-                  href={`/opportunities/${item.id}`}
-                  dragType="opportunity"
-                  disabled={isPendingApproval}
-                  headerBadge={
-                    <PmReadinessScoreBadge
-                      score={resolveOpportunityReadiness(item).score}
-                      variant="compact"
-                      showLabel={false}
-                    />
-                  }
-                />
-              ))
+              items.map((item) => {
+                const itemReadiness = resolveOpportunityReadiness(item)
+                return (
+                  <KanbanCard
+                    key={item.id}
+                    id={item.id}
+                    title={item.title}
+                    subtitle={item.location}
+                    status={item.status}
+                    statusEntity="opportunity"
+                    href={`/opportunities/${item.id}`}
+                    dragType="opportunity"
+                    disabled={isPendingApproval}
+                    headerBadge={
+                      <PmReadinessScoreBadge
+                        score={itemReadiness.score}
+                        variant="compact"
+                        showLabel={false}
+                        explanation={{
+                          missingRequired: itemReadiness.missingRequired,
+                          missingRecommended: itemReadiness.missingRecommended,
+                        }}
+                      />
+                    }
+                  />
+                )
+              })
             )}
           </div>
         </div>

@@ -98,7 +98,7 @@ export function PmPageHeader({
 
           {metric ? (
 
-            <div className="shrink-0 sm:border-s sm:border-border/70 sm:ps-6">
+            <div className="min-w-0 max-w-full shrink-0 sm:border-s sm:border-border/70 sm:ps-6">
 
               {metric}
 

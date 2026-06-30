@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useId } from 'react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { pmEnter, pmTypography } from '@/tokens'
@@ -25,10 +26,13 @@ export function PmEmptyState({
 }: PmEmptyStateProps) {
   const reducedMotion = usePmReducedMotion()
   const variants = pmEmptyStateVariants(reducedMotion)
+  const titleId = useId()
 
   return (
     <PmSurface
       data-slot="pm-empty-state"
+      role="status"
+      aria-labelledby={titleId}
       variant="muted"
       className={cn(
         'flex flex-col items-center justify-center border-dashed border-border/80 bg-gradient-to-b from-surface-muted to-surface text-center',
@@ -37,8 +41,9 @@ export function PmEmptyState({
         className,
       )}
     >
-      {icon ? <div className="mb-4 text-muted-foreground">{icon}</div> : null}
+      {icon ? <div className="mb-4 text-muted-foreground" aria-hidden>{icon}</div> : null}
       <motion.h2
+        id={titleId}
         className={size === 'default' ? pmTypography.h3 : pmTypography.label}
         {...variants.container}
       >
