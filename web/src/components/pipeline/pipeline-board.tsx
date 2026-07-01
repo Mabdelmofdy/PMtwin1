@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   APPLICATION_STATUS_LABELS,
@@ -8,6 +9,7 @@ import {
 } from '@/lib/applications'
 import type { Opportunity } from '@/types/domain.ts'
 import { opportunitiesApi } from '@/api/opportunities.ts'
+import { peopleApi } from '@/api/people.ts'
 import { applicationRepository } from '@/repositories/index.ts'
 import { pipelineApplicationDrop } from '@/lib/pipeline-application-drop.ts'
 import { pipelineOpportunityDrop } from '@/lib/pipeline-opportunity-drop.ts'
@@ -17,6 +19,7 @@ import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
 import { PmWorkflowBadge } from '@/components/ui/pm-workflow-badge'
 import { PmEmptyState, PmSurface } from '@/components/ui/pm-index'
+import { PmCardActions } from '@/components/ui/pm-more-actions'
 import { PmReadinessScoreBadge } from '@/components/ui/pm-readiness-score-badge'
 import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
 import { pmPipeline, pmTypography, pmResponsive } from '@/tokens'
@@ -45,22 +48,26 @@ function KanbanCard({
   id,
   title,
   subtitle,
+  ownerLabel,
   status,
   statusEntity,
   href,
   dragType,
   disabled,
   headerBadge,
+  editHref,
 }: {
   id: string
   title: string
   subtitle?: string
+  ownerLabel?: string
   status?: string
   statusEntity?: StatusEntity
   href: string
   dragType: 'opportunity' | 'application'
   disabled?: boolean
   headerBadge?: ReactNode
+  editHref?: string
 }) {
   return (
     <PmSurface
@@ -79,18 +86,23 @@ function KanbanCard({
         e.dataTransfer.effectAllowed = 'move'
       }}
       className={cn(
-        'p-3',
+        'flex flex-col p-3',
         pmPipeline.drag,
         disabled ? 'opacity-60' : 'cursor-grab active:cursor-grabbing',
       )}
     >
-      <Link to={href} className="block cursor-pointer" draggable={false}>
+      <div className="block min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <p className={cn(pmTypography.bodySm, 'line-clamp-2 min-w-0 flex-1 font-medium')}>
-            {title}
+            <Link to={href} className="hover:text-primary" draggable={false}>
+              {title}
+            </Link>
           </p>
           {headerBadge ? <div className="shrink-0">{headerBadge}</div> : null}
         </div>
+        {ownerLabel ? (
+          <p className={cn(pmTypography.caption, 'mt-1 text-muted-foreground')}>{ownerLabel}</p>
+        ) : null}
         {subtitle ? (
           <p className={cn(pmTypography.caption, 'mt-1 text-muted-foreground')}>{subtitle}</p>
         ) : null}
@@ -99,9 +111,19 @@ function KanbanCard({
             status={status}
             entity={statusEntity}
             className="mt-2"
+            size="sm"
           />
         ) : null}
-      </Link>
+      </div>
+      <PmCardActions
+        className="mt-3 border-t border-border/40 pt-2"
+        primary={{ label: 'Open', href, size: 'sm' }}
+        more={
+          editHref
+            ? [{ id: 'edit', label: 'Edit', href: editHref, icon: Pencil }]
+            : undefined
+        }
+      />
     </PmSurface>
   )
 }
@@ -296,17 +318,21 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
             ) : (
               items.map((item) => {
                 const itemReadiness = resolveOpportunityReadiness(item)
+                const owner = item.creatorId ? peopleApi.get(item.creatorId) : undefined
+                const isOwner = userId && item.creatorId === userId
                 return (
                   <KanbanCard
                     key={item.id}
                     id={item.id}
                     title={item.title}
                     subtitle={item.location}
+                    ownerLabel={owner?.profile?.name ? `Owner: ${owner.profile.name}` : undefined}
                     status={item.status}
                     statusEntity="opportunity"
                     href={`/opportunities/${item.id}`}
                     dragType="opportunity"
                     disabled={isPendingApproval}
+                    editHref={isOwner ? `/opportunities/${item.id}/edit` : undefined}
                     headerBadge={
                       <PmReadinessScoreBadge
                         score={itemReadiness.score}

@@ -11,10 +11,7 @@ import { TerminateContractButton } from '@/components/contract/terminate-contrac
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import {
   buildContractDetailReadModel,
-  CONTRACT_DETAIL_MUTATION_ACTIONS,
-  contractDetailLinkFallbackLabel,
   contractDetailShowsMutationActions,
-  type ContractDetailLink,
 } from '@/lib/contract-detail-read-model.ts'
 import { formatDate } from '@/lib/format'
 import { useAuth } from '@/providers/auth-provider'
@@ -49,32 +46,39 @@ import {
   PmEmptyState,
   PmPageHeader,
   PmPageHeroMetric,
+  PmMoreActions,
+  PmCardActions,
   PmSurface,
   PmWorkflowBadge,
+  PmWorkflowJourney,
+  type PmMoreActionItem,
+  type PmWorkflowJourneyStep,
 } from '@/components/ui/pm-index'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
 import type { Contract } from '@/types/domain.ts'
+import {
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu'
 
-function ContractDetailNavLink({
-  link,
-  fallbackLabel,
-}: {
-  link: ContractDetailLink | null
-  fallbackLabel: string
-}) {
-  if (!link) {
-    return (
-      <span className="text-sm text-muted-foreground">
-        {contractDetailLinkFallbackLabel(fallbackLabel)}
-      </span>
-    )
+function buildContractNavMoreItems(model: NonNullable<ReturnType<typeof buildContractDetailReadModel>>): PmMoreActionItem[] {
+  const items: PmMoreActionItem[] = []
+  if (model.links.deal) {
+    items.push({ id: 'deal', label: model.links.deal.label, href: model.links.deal.path })
   }
-  return (
-    <PmButton variant="outline" size="sm" asChild>
-      <Link to={link.path}>{link.label}</Link>
-    </PmButton>
-  )
+  if (model.links.match) {
+    items.push({ id: 'match', label: model.links.match.label, href: model.links.match.path })
+  }
+  if (model.links.negotiation) {
+    items.push({ id: 'negotiation', label: model.links.negotiation.label, href: model.links.negotiation.path })
+  }
+  if (model.links.needOpportunity) {
+    items.push({ id: 'need', label: model.links.needOpportunity.label, href: model.links.needOpportunity.path })
+  }
+  if (model.links.offerOpportunity) {
+    items.push({ id: 'offer', label: model.links.offerOpportunity.label, href: model.links.offerOpportunity.path })
+  }
+  return items
 }
 
 function ContractListCard({ contract }: { contract: Contract }) {
@@ -83,20 +87,20 @@ function ContractListCard({ contract }: { contract: Contract }) {
       <div className="flex items-start justify-between gap-2">
         <Link
           to={`/contracts/${contract.id}`}
-          className={cn(pmTypography.h3, 'hover:text-primary')}
+          className={cn(pmTypography.h3, 'truncate hover:text-primary')}
+          title={contract.id}
         >
           Contract {contract.id}
         </Link>
-        <PmWorkflowBadge status={contract.status} entity="contract" />
+        <PmWorkflowBadge status={contract.status} entity="contract" size="sm" />
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">
+      <p className={cn('mt-2', pmTypography.caption, 'text-muted-foreground')}>
         Deal {contract.dealId} · Updated {formatDate(contract.updatedAt)}
       </p>
-      <div className="mt-4 border-t border-border/40 pt-3">
-        <PmButton size="sm" asChild>
-          <Link to={`/contracts/${contract.id}`}>View contract</Link>
-        </PmButton>
-      </div>
+      <PmCardActions
+        className="mt-4"
+        primary={{ label: 'Open contract', href: `/contracts/${contract.id}` }}
+      />
     </PmSurface>
   )
 }
@@ -127,7 +131,7 @@ export function ContractsPage() {
       id: 'id',
       label: 'Contract',
       cell: (c) => (
-        <Link to={`/contracts/${c.id}`} className="font-medium hover:text-primary">
+        <Link to={`/contracts/${c.id}`} className={cn(pmTypography.mono, 'font-medium hover:text-primary')}>
           {c.id}
         </Link>
       ),
@@ -154,7 +158,7 @@ export function ContractsPage() {
       <PmPageLayout
         header={
           <PmPageHeader
-            label="Collaboration"
+            label="Workflow"
             title="Contracts"
             description="Agreements linked to deals and opportunities."
             metric={<PmPageHeroMetric value={0} label="Active" />}
@@ -178,7 +182,7 @@ export function ContractsPage() {
     <PmPageLayout
       header={
         <PmPageHeader
-          label="Collaboration"
+          label="Workflow"
           title="Contracts"
           description="Agreements linked to deals and opportunities."
           metric={<PmPageHeroMetric value={activeContracts} label="Active" />}
@@ -296,6 +300,47 @@ export function ContractDetailPage() {
     },
   ]
 
+  const contractWorkflowSteps: readonly PmWorkflowJourneyStep[] = [
+    {
+      id: 'match',
+      label: 'Match',
+      href: model.postMatchId ? `/matches/${model.postMatchId}` : undefined,
+      state: 'complete',
+    },
+    {
+      id: 'negotiation',
+      label: 'Negotiation',
+      href: model.negotiationId ? `/negotiations/${model.negotiationId}` : undefined,
+      state: 'complete',
+    },
+    {
+      id: 'deal',
+      label: 'Deal',
+      href: model.dealId ? `/deals/${model.dealId}` : undefined,
+      state: 'complete',
+    },
+    {
+      id: 'contract',
+      label: 'Contract',
+      status: model.status,
+      statusEntity: 'contract',
+      href: `/contracts/${model.contractId}`,
+      state: 'current',
+    },
+    {
+      id: 'execution',
+      label: 'Complete',
+      state: 'upcoming',
+    },
+  ]
+
+  const contractNavMore = buildContractNavMoreItems(model)
+  const showMutations = contractDetailShowsMutationActions({
+    canSign: model.canSign,
+    canComplete: model.canComplete,
+    canTerminate: model.canTerminate,
+  })
+
   return (
     <PmPageLayout
       header={
@@ -310,20 +355,24 @@ export function ContractDetailPage() {
             />
           }
           badges={<PmWorkflowBadge status={model.status} entity="contract" />}
+          actions={
+            model.canSign && user?.id ? (
+              <SignContractButton
+                contractId={model.contractId}
+                userId={user.id}
+              />
+            ) : contractNavMore.length > 0 ? (
+              <PmMoreActions items={contractNavMore} label="Related records" />
+            ) : undefined
+          }
         />
       }
     >
-      <div className="flex flex-wrap gap-2">
-        <ContractDetailNavLink link={model.links.deal} fallbackLabel="Back to Deal" />
-        <ContractDetailNavLink link={model.links.match} fallbackLabel="Back to Match" />
-        <ContractDetailNavLink link={model.links.negotiation} fallbackLabel="Back to Negotiation" />
-        <ContractDetailNavLink link={model.links.needOpportunity} fallbackLabel="Back to Need Opportunity" />
-        <ContractDetailNavLink link={model.links.offerOpportunity} fallbackLabel="Back to Offer Opportunity" />
-      </div>
-
       <PmDetailLayout
         main={
           <>
+            <PmWorkflowJourney steps={contractWorkflowSteps} compact label={false} />
+
             <PmContentCard title="Summary">
               <PmFormReadonly>
                 <PmFormReadonlySection>
@@ -340,7 +389,7 @@ export function ContractDetailPage() {
 
             <PmContentCard title="Parties & signatures">
               {model.parties.length ? (
-                <ul className="space-y-2 text-sm">
+                <ul className={cn('space-y-2', pmTypography.bodySm)}>
                   {model.parties.map((party) => (
                     <li key={`${party.userId}-${party.role}`}>
                       {party.displayName} · {party.role} ·{' '}
@@ -351,13 +400,13 @@ export function ContractDetailPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-muted-foreground">No parties recorded.</p>
+                <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>No parties recorded.</p>
               )}
             </PmContentCard>
 
             <PmContentCard title="Payment schedule & milestones">
               {model.milestones.length ? (
-                <ul className="space-y-2 text-sm">
+                <ul className={cn('space-y-2', pmTypography.bodySm)}>
                   {model.milestones.map((milestone) => (
                     <li key={milestone.id ?? milestone.title}>
                       {milestone.title}
@@ -369,14 +418,16 @@ export function ContractDetailPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-muted-foreground">No milestones recorded.</p>
+                <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>No milestones recorded.</p>
               )}
             </PmContentCard>
 
             <PmContentCard title="Attachments">
-              <p className="text-sm text-muted-foreground">
-                Attachment management is not wired in this MVP build.
-              </p>
+              <PmEmptyState
+                title="No attachments"
+                description="Attachment management is not wired in this MVP build."
+                size="compact"
+              />
             </PmContentCard>
           </>
         }
@@ -384,12 +435,8 @@ export function ContractDetailPage() {
           <PmInspectorLayout
             header={<PmSectionHeader title="Scope" />}
             footer={
-              contractDetailShowsMutationActions({
-                canSign: model.canSign,
-                canComplete: model.canComplete,
-                canTerminate: model.canTerminate,
-              }) ? (
-                <div className="flex flex-col gap-2">
+              showMutations ? (
+                <div className="flex w-full flex-col gap-2">
                   {model.canSign && user?.id ? (
                     <SignContractButton
                       contractId={model.contractId}
@@ -397,26 +444,37 @@ export function ContractDetailPage() {
                       className="w-full"
                     />
                   ) : null}
-                  {model.canComplete ? (
-                    <CompleteContractButton
-                      contractId={model.contractId}
+                  {(model.canComplete || model.canTerminate) ? (
+                    <PmMoreActions
+                      label="More contract actions"
                       className="w-full"
-                    />
-                  ) : null}
-                  {model.canTerminate ? (
-                    <TerminateContractButton
-                      contractId={model.contractId}
-                      className="w-full"
-                    />
-                  ) : null}
-                  {CONTRACT_DETAIL_MUTATION_ACTIONS.activate ? (
-                    <PmButton className="w-full">Activate contract</PmButton>
+                    >
+                        <>
+                          {model.canComplete ? (
+                            <DropdownMenuItem asChild>
+                              <CompleteContractButton
+                                contractId={model.contractId}
+                                className="w-full justify-start"
+                                variant="outline"
+                              />
+                            </DropdownMenuItem>
+                          ) : null}
+                          {model.canTerminate ? (
+                            <DropdownMenuItem asChild>
+                              <TerminateContractButton
+                                contractId={model.contractId}
+                                className="w-full justify-start"
+                              />
+                            </DropdownMenuItem>
+                          ) : null}
+                        </>
+                    </PmMoreActions>
                   ) : null}
                 </div>
               ) : undefined
             }
           >
-            <p className="text-sm text-muted-foreground">
+            <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
               {model.scope ?? 'No scope recorded.'}
             </p>
           </PmInspectorLayout>

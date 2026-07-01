@@ -67,3 +67,24 @@ export {
   buildScoreAriaLabel,
   buildScoreRegionLabel,
 } from '@/components/ui/pm-score-a11y'
+export {
+  PmMoreActions,
+  PmCardActions,
+  PmPageActions,
+  type PmMoreActionItem,
+  type PmMoreActionsProps,
+  type PmCardActionSlot,
+  type PmCardActionsProps,
+  type PmPageActionsProps,
+} from '@/components/ui/pm-more-actions'
+export {
+  PmWorkflowJourney,
+  type PmWorkflowJourneyProps,
+  type PmWorkflowJourneyStep,
+  type PmWorkflowJourneyStepState,
+} from '@/components/ui/pm-workflow-journey'
+export {
+  PmActionHub,
+  type PmActionHubItem,
+  type PmActionHubProps,
+} from '@/components/ui/pm-action-hub'

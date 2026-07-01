@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { peopleApi } from '@/api/people.ts'
 import { notificationsApi } from '@/api/notifications.ts'
 import { useAuth } from '@/providers/auth-provider'
@@ -14,7 +14,7 @@ import {
 } from '@/components/user/public-profile-view'
 import { MOCK_MESSAGE_THREADS } from '@/components/user/user-display'
 import { PmPageLayout } from '@/components/layout/pm-layout-index'
-import { PmBadge, PmButton, PmPageHeader, PmPageHeroMetric, PmReadinessScoreBadge } from '@/components/ui/pm-index'
+import { PmBadge, PmPageHeader, PmPageHeroMetric, PmPageActions } from '@/components/ui/pm-index'
 import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
 
 export function PeoplePage() {
@@ -24,9 +24,9 @@ export function PeoplePage() {
     <PmPageLayout
       header={
         <PmPageHeader
-          label="Directory"
-          title="Find"
-          description="Search professionals and companies."
+          label="Network"
+          title="People"
+          description="Search professionals and companies across the built environment."
           metric={<PmPageHeroMetric value={profileCount} label="Profiles" />}
         />
       }
@@ -40,7 +40,6 @@ export function PersonProfilePage() {
   const { id } = useParams()
   const person = id ? peopleApi.get(id) : undefined
   const companyIds = resolveCompanyIds()
-  const skillsCount = (person?.profile as { skills?: string[] } | undefined)?.skills?.length ?? 0
 
   if (!person) {
     return (
@@ -57,11 +56,6 @@ export function PersonProfilePage() {
           label="Public profile"
           title={person.profile?.name ?? person.email}
           description={person.profile?.headline}
-          metric={
-            skillsCount > 0 ? (
-              <PmPageHeroMetric value={skillsCount} label="Skills" />
-            ) : undefined
-          }
         />
       }
     >
@@ -109,7 +103,7 @@ export function NotificationsPage() {
     <PmPageLayout
       header={
         <PmPageHeader
-          label="Alerts"
+          label="Communication"
           title="Notifications"
           description="Alerts for matches, deals, negotiations, and messages."
           metric={<PmPageHeroMetric value={unreadCount} label="Unread" />}
@@ -148,15 +142,10 @@ export function ProfilePage() {
               />
             ) : undefined
           }
-          badges={
-            readiness ? (
-              <PmReadinessScoreBadge score={readiness.score} variant="default" showLabel />
-            ) : undefined
-          }
           actions={
-            <PmButton variant="outline" size="sm" asChild>
-              <Link to="/settings">Settings</Link>
-            </PmButton>
+            <PmPageActions
+              secondary={{ label: 'Settings', href: '/settings', variant: 'outline' }}
+            />
           }
         />
       }

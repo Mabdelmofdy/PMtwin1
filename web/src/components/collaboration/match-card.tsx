@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { formatDate } from '@/lib/format'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
-import { PmButton } from '@/components/ui/pm-button'
+import { PmCardActions } from '@/components/ui/pm-more-actions'
 import { PmSurface } from '@/components/ui/pm-surface'
 import { PmMatchScoreBadge } from '@/components/ui/pm-match-score-badge'
 import { PmWorkflowBadge } from '@/components/ui/pm-workflow-badge'
@@ -38,21 +38,21 @@ export function MatchCard({ match, className, showActions = true }: MatchCardPro
         </div>
         <PmMatchScoreBadge
           score={match.matchScore}
-          variant="pipeline"
+          variant="compact"
+          showLabel={false}
           breakdown={match.payload?.breakdown ?? match.matchCriteria}
         />
       </div>
 
-      <div className="mt-4 border-t border-border/50 pt-3">
-        <PmWorkflowBadge status={match.status} entity="match" />
+      <div className="mt-3">
+        <PmWorkflowBadge status={match.status} entity="match" size="sm" />
       </div>
 
       {showActions ? (
-        <div className="mt-4 flex flex-wrap gap-2 border-t border-border/50 pt-3">
-          <PmButton size="sm" asChild>
-            <Link to={href}>View match</Link>
-          </PmButton>
-        </div>
+        <PmCardActions
+          className="mt-4"
+          primary={{ label: 'Open match', href }}
+        />
       ) : null}
     </PmSurface>
   )

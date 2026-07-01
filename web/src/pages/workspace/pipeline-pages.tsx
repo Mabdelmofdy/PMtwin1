@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
@@ -37,7 +37,6 @@ import {
   PmContentCard,
   PmDetailLayout,
   PmInspectorLayout,
-  PmMetricGrid,
   PmPageLayout,
   PmSectionHeader,
   countActiveMatches,
@@ -52,17 +51,26 @@ import {
   PmBadge,
   PmButton,
   PmEmptyState,
-  PmMatchScoreBadge,
   PmPageHeader,
   PmPageHeroMetric,
+  PmPageActions,
   PmStatCard,
   PmSurface,
   PmWorkflowBadge,
+  PmWorkflowJourney,
+  type PmCardActionSlot,
+  type PmMoreActionItem,
+  type PmWorkflowJourneyStep,
 } from '@/components/ui/pm-index'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu'
 import type { Negotiation, PostMatch } from '@/types/domain.ts'
 import type { CollaborationTimelineEvent } from '@/components/collaboration/collaboration-timeline'
 import { productFlags } from '@/config/product-flags.ts'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { cn } from '@/lib/utils'
 
 function resolveMatchNegotiation(match: PostMatch): Negotiation | undefined {
   if (match.negotiationId) {
@@ -72,9 +80,111 @@ function resolveMatchNegotiation(match: PostMatch): Negotiation | undefined {
   return linked[0]
 }
 
+function buildMatchDetailHeaderActions(input: {
+  match: PostMatch
+  model: NonNullable<ReturnType<typeof buildMatchDetailReadModel>>
+  negotiation?: Negotiation
+  actionPending: boolean
+  onAcceptDecline: (action: 'accept' | 'decline') => void
+}): {
+  primary?: PmCardActionSlot
+  secondary?: PmCardActionSlot
+  more?: PmMoreActionItem[]
+  moreChildren?: ReactNode
+} {
+  const { match, model, negotiation, actionPending, onAcceptDecline } = input
+  const { actions } = model
+  const more: PmMoreActionItem[] = []
+
+  if (model.canAct && actions.showDecline) {
+    more.push({
+      id: 'decline',
+      label: 'Decline',
+      onSelect: () => onAcceptDecline('decline'),
+      disabled: actionPending,
+    })
+  }
+
+  if (actions.showViewNegotiation && actions.negotiationId) {
+    more.push({
+      id: 'view-negotiation',
+      label: 'View negotiation',
+      href: `/negotiations/${actions.negotiationId}`,
+    })
+  }
+
+  if (actions.showViewDeal && actions.dealId) {
+    more.push({
+      id: 'view-deal',
+      label: 'View deal',
+      href: `/deals/${actions.dealId}`,
+    })
+  }
+
+  if (negotiation) {
+    return {
+      primary: {
+        label: 'Agree terms',
+        render: () => <AgreeNegotiationButton negotiation={negotiation} />,
+      },
+      secondary: {
+        label: 'Open negotiation',
+        href: `/negotiations/${negotiation.id}`,
+        variant: 'outline',
+      },
+      more,
+      moreChildren: (
+        <>
+          <DropdownMenuItem asChild>
+            <CancelNegotiationButton negotiation={negotiation} variant="destructive" className="w-full justify-start" />
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <CreateDealButton negotiation={negotiation} variant="default" className="w-full justify-start" />
+          </DropdownMenuItem>
+        </>
+      ),
+    }
+  }
+
+  if (model.canAct && actions.showAccept) {
+    return {
+      primary: {
+        label: 'Accept',
+        onClick: () => onAcceptDecline('accept'),
+        loading: actionPending,
+      },
+      secondary: { label: 'View opportunities', href: '/opportunities', variant: 'outline' },
+      more,
+    }
+  }
+
+  if (model.canAct && actions.showStartNegotiation) {
+    return {
+      primary: {
+        label: 'Start negotiation',
+        render: () => <StartNegotiationButton match={match} variant="default" />,
+      },
+      secondary: { label: 'View opportunities', href: '/opportunities', variant: 'outline' },
+      more,
+    }
+  }
+
+  if (actions.showViewDeal && actions.dealId) {
+    return {
+      primary: { label: 'View deal', href: `/deals/${actions.dealId}` },
+      more,
+    }
+  }
+
+  return {
+    primary: { label: 'View match', href: `/matches/${match.id}` },
+    more,
+  }
+}
+
 const PIPELINE_TAB_DEFS = [
   { value: 'opportunities', label: 'Opportunities' },
-  { value: 'matches', label: 'Post-matches' },
+  { value: 'matches', label: 'Matches' },
   { value: 'applications', label: 'Applications (legacy)' },
 ] as const
 
@@ -115,8 +225,8 @@ export function PipelinePage() {
       header={
         <PmPageHeader
           label="Workflow"
-          title="Pipeline"
-          description="Track opportunities and PostMatches through negotiation, deal, and contract."
+          title="Workflow pipeline"
+          description="Track opportunities, matches, negotiations, deals, and contracts in one funnel."
           metric={
             <PmPageHeroMetric value={workflowCount} label="Active workflows" />
           }
@@ -176,9 +286,9 @@ export function MatchesPage() {
     <PmPageLayout
       header={
         <PmPageHeader
-          label="Collaboration"
-          title="Post-matches"
-          description="Ranked matches for your opportunities — accept, negotiate, create deals, then contracts."
+          label="Workflow"
+          title="Matches"
+          description="Ranked PostMatches for your opportunities — accept, negotiate, create deals, then contracts."
           metric={
             <PmPageHeroMetric value={activeMatches} label="Active" />
           }
@@ -193,15 +303,6 @@ export function MatchesPage() {
         />
       }
     >
-      <PmMetricGrid columns={3} className="mb-6">
-        <PmStatCard label="Active" value={activeMatches} dense />
-        <PmStatCard label="Total" value={matches.length} dense />
-        <PmStatCard
-          label="Accepted"
-          value={matches.filter((m) => m.status === 'accepted' || m.status === 'confirmed').length}
-          dense
-        />
-      </PmMetricGrid>
       <MatchesListSection matches={matches} />
     </PmPageLayout>
   )
@@ -301,13 +402,63 @@ export function MatchDetailPage() {
     })
   }
 
+  const headerActions = buildMatchDetailHeaderActions({
+    match,
+    model,
+    negotiation,
+    actionPending,
+    onAcceptDecline: runPostMatchAction,
+  })
+
+  const matchWorkflowSteps: readonly PmWorkflowJourneyStep[] = [
+    {
+      id: 'match',
+      label: 'Match',
+      status: match.status,
+      statusEntity: 'match',
+      href: `/matches/${match.id}`,
+      state: negotiation || deal ? 'complete' : 'current',
+    },
+    {
+      id: 'negotiation',
+      label: 'Negotiation',
+      status: negotiation?.status,
+      statusEntity: 'negotiation',
+      href: negotiation ? `/negotiations/${negotiation.id}` : undefined,
+      state: negotiation ? (deal ? 'complete' : 'current') : 'upcoming',
+    },
+    {
+      id: 'deal',
+      label: 'Deal',
+      status: deal?.status,
+      statusEntity: 'deal',
+      href: deal ? `/deals/${deal.id}` : undefined,
+      state: deal ? 'current' : 'upcoming',
+    },
+    {
+      id: 'contract',
+      label: 'Contract',
+      state: 'upcoming',
+    },
+    {
+      id: 'execution',
+      label: 'Complete',
+      state: 'upcoming',
+    },
+  ]
+
+  const matchTitle =
+    model.participants.length > 0
+      ? `${model.matchTypeLabel} · ${model.participants.map((p) => p.displayName).join(' & ')}`
+      : `${model.matchTypeLabel} match`
+
   return (
     <PmPageLayout
       header={
         <PmPageHeader
           label="Post-match"
-          title={`Match ${model.scoreLabel}`}
-          description={`${model.matchTypeLabel} · ${model.canonicalStatus}`}
+          title={matchTitle}
+          description={model.canonicalStatus.replace(/_/g, ' ')}
           metric={
             <PmPageHeroMetric value={model.scoreLabel} label="Match score" />
           }
@@ -320,67 +471,27 @@ export function MatchDetailPage() {
             </>
           }
           actions={
-            <>
-              {model.canAct && actions.showAccept ? (
-                <PmButton
-                  disabled={actionPending}
-                  onClick={() => runPostMatchAction('accept')}
-                >
-                  {pendingAction === 'accept' ? 'Accepting…' : 'Accept'}
-                </PmButton>
-              ) : null}
-              {model.canAct && actions.showDecline ? (
-                <PmButton
-                  variant="outline"
-                  disabled={actionPending}
-                  onClick={() => runPostMatchAction('decline')}
-                >
-                  {pendingAction === 'decline' ? 'Declining…' : 'Decline'}
-                </PmButton>
-              ) : null}
-              {model.canAct && actions.showStartNegotiation ? (
-                <StartNegotiationButton match={match} variant="default" />
-              ) : null}
-              {actions.showViewNegotiation && actions.negotiationId ? (
-                <PmButton variant="secondary" asChild>
-                  <Link to={`/negotiations/${actions.negotiationId}`}>View negotiation</Link>
-                </PmButton>
-              ) : null}
-              {actions.showViewDeal && actions.dealId ? (
-                <PmButton variant="secondary" asChild>
-                  <Link to={`/deals/${actions.dealId}`}>View deal</Link>
-                </PmButton>
-              ) : null}
-            </>
+            <PmPageActions
+              primary={headerActions.primary}
+              secondary={headerActions.secondary}
+              more={headerActions.more}
+              moreChildren={headerActions.moreChildren}
+            />
           }
         />
       }
     >
-      <div className="flex flex-wrap items-center gap-2">
-        {negotiation ? (
-          <PmBadge tone="info">Negotiation linked</PmBadge>
-        ) : null}
-        {deal ? (
-          <PmBadge tone="success">Deal linked</PmBadge>
-        ) : null}
-      </div>
-
-      <PmMatchScoreBadge
-        score={match.matchScore}
-        variant="hero"
-        className="mb-4"
-        breakdown={match.payload?.breakdown ?? match.matchCriteria}
-      />
-
-      {!model.isParticipant && user ? (
-        <p className="text-sm text-muted-foreground">
-          You are viewing this match in read-only mode — you are not a participant.
-        </p>
-      ) : null}
-
       <PmDetailLayout
         main={
           <>
+            <PmWorkflowJourney steps={matchWorkflowSteps} compact label={false} />
+
+            {!model.isParticipant && user ? (
+              <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
+                You are viewing this match in read-only mode — you are not a participant.
+              </p>
+            ) : null}
+
             <div className="grid gap-4 sm:grid-cols-3">
               <PmStatCard
                 label="Skill match"
@@ -401,7 +512,7 @@ export function MatchDetailPage() {
 
             {model.relatedOpportunities.length > 0 ? (
               <PmContentCard title="Related opportunities">
-                <ul className="space-y-1 text-sm">
+                <ul className={cn('space-y-1', pmTypography.bodySm)}>
                   {model.relatedOpportunities.map((item) => (
                     <li key={`${item.id}-${item.label}`}>
                       <span className="text-muted-foreground">{item.label}:</span>{' '}
@@ -423,7 +534,7 @@ export function MatchDetailPage() {
 
             <PmContentCard title="Participants">
               {model.participants.length > 0 ? (
-                <ul className="space-y-1 text-sm">
+                <ul className={cn('space-y-1', pmTypography.bodySm)}>
                   {model.participants.map((participant) => (
                     <li key={participant.userId}>
                       {participant.role.replace(/_/g, ' ')} — {participant.displayName}
@@ -434,7 +545,7 @@ export function MatchDetailPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-muted-foreground">No participants recorded.</p>
+                <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>No participants recorded.</p>
               )}
             </PmContentCard>
           </>
@@ -448,17 +559,10 @@ export function MatchDetailPage() {
               />
             }
             footer={
-              negotiation ? (
-                <div className="flex flex-col gap-2">
-                  <PmButton variant="outline" size="sm" asChild>
-                    <Link to={`/negotiations/${negotiation.id}`}>Open negotiation</Link>
-                  </PmButton>
-                  <AgreeNegotiationButton negotiation={negotiation} />
-                  <CancelNegotiationButton negotiation={negotiation} />
-                  <CreateDealButton negotiation={negotiation} variant="default" />
-                </div>
-              ) : (
-                <StartNegotiationButton match={match} className="w-full" />
+              negotiation ? undefined : (
+                <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
+                  Start negotiating terms to move this match forward.
+                </p>
               )
             }
           >
@@ -472,7 +576,7 @@ export function MatchDetailPage() {
                 </PmFormReadonlySection>
               </PmFormReadonly>
             ) : (
-              <p className="text-sm text-muted-foreground">
+              <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
                 No negotiation linked yet. Start negotiating terms before creating a deal.
               </p>
             )}
@@ -551,12 +655,54 @@ export function NegotiationDetailPage() {
     },
   ]
 
+  const linkedMatch = neg.postMatchId ? matchesApi.get(neg.postMatchId) : undefined
+  const negotiationTitle = linkedMatch
+    ? `Negotiation · ${formatMatchTypeBadgeLabel(linkedMatch.matchType)} match`
+    : `Negotiation ${neg.id}`
+
+  const negotiationWorkflowSteps: readonly PmWorkflowJourneyStep[] = [
+    {
+      id: 'match',
+      label: 'Match',
+      status: linkedMatch?.status,
+      statusEntity: 'match',
+      href: neg.postMatchId ? `/matches/${neg.postMatchId}` : undefined,
+      state: 'complete',
+    },
+    {
+      id: 'negotiation',
+      label: 'Negotiation',
+      status: neg.status,
+      statusEntity: 'negotiation',
+      href: `/negotiations/${neg.id}`,
+      state: linkedDeal ? 'complete' : 'current',
+    },
+    {
+      id: 'deal',
+      label: 'Deal',
+      status: linkedDeal?.status,
+      statusEntity: 'deal',
+      href: linkedDeal ? `/deals/${linkedDeal.id}` : undefined,
+      state: linkedDeal ? 'current' : 'upcoming',
+    },
+    {
+      id: 'contract',
+      label: 'Contract',
+      state: 'upcoming',
+    },
+    {
+      id: 'execution',
+      label: 'Complete',
+      state: 'upcoming',
+    },
+  ]
+
   return (
     <PmPageLayout
       header={
         <PmPageHeader
           label="Negotiation"
-          title={`Negotiation ${neg.id}`}
+          title={negotiationTitle}
           description="Terms sheet, rounds timeline, and proposal form."
           metric={
             <PmPageHeroMetric
@@ -566,45 +712,73 @@ export function NegotiationDetailPage() {
           }
           badges={<PmWorkflowBadge status={neg.status} entity="negotiation" />}
           actions={
-            <>
-              <AgreeNegotiationButton negotiation={neg} />
-              <CancelNegotiationButton negotiation={neg} />
-              <CreateDealButton negotiation={neg} />
-            </>
+            <PmPageActions
+              primary={{
+                label: 'Agree terms',
+                render: () => <AgreeNegotiationButton negotiation={neg} />,
+              }}
+              secondary={
+                neg.postMatchId
+                  ? { label: 'View match', href: `/matches/${neg.postMatchId}`, variant: 'outline' }
+                  : undefined
+              }
+              more={[
+                ...(linkedDeal
+                  ? [{ id: 'view-deal', label: 'View deal', href: `/deals/${linkedDeal.id}` }]
+                  : []),
+              ]}
+              moreChildren={
+                <>
+                  <DropdownMenuItem asChild>
+                    <CancelNegotiationButton
+                      negotiation={neg}
+                      variant="destructive"
+                      className="w-full justify-start"
+                    />
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <CreateDealButton negotiation={neg} className="w-full justify-start" />
+                  </DropdownMenuItem>
+                  {canSubmitProposal ? (
+                    <DropdownMenuItem
+                      disabled={proposalPending}
+                      onSelect={() => handleProposalTransition('countered')}
+                    >
+                      Submit proposal
+                    </DropdownMenuItem>
+                  ) : null}
+                  {canAcceptUpdatedProposal ? (
+                    <DropdownMenuItem
+                      disabled={proposalPending}
+                      onSelect={() => handleProposalTransition('active')}
+                    >
+                      Accept updated proposal
+                    </DropdownMenuItem>
+                  ) : null}
+                </>
+              }
+            />
           }
         />
       }
     >
-      <div className="flex flex-wrap gap-2">
-        {neg.postMatchId ? (
-          <PmButton variant="outline" size="sm" asChild>
-            <Link to={`/matches/${neg.postMatchId}`}>View match</Link>
-          </PmButton>
-        ) : null}
-        {linkedDeal ? (
-          <PmButton variant="outline" size="sm" asChild>
-            <Link to={`/deals/${linkedDeal.id}`}>View deal</Link>
-          </PmButton>
-        ) : null}
-      </div>
-
       <PmDetailLayout
         main={
-          <PmContentCard
-            title="Discussion"
-            description="Terms sheet, rounds timeline, and proposal form."
-          >
-            <p className="text-sm text-muted-foreground">
+          <>
+            <PmWorkflowJourney steps={negotiationWorkflowSteps} compact label={false} />
+
+            <PmContentCard title="Discussion">
+            <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
               Negotiation workspace for post-match collaboration. Use the inspector to agree,
               cancel, or create a deal when terms are settled.
             </p>
             {neg.rounds && neg.rounds.length > 0 ? (
-              <ul className="mt-4 space-y-2 text-sm">
+              <ul className={cn('mt-4 space-y-2', pmTypography.bodySm)}>
                 {neg.rounds.map((round, index) => (
                   <li key={`${round.at}-${index}`}>
                     <PmSurface variant="default" shadow="card" className="p-3">
-                      <p className="font-medium">Round {index + 1}</p>
-                      <p className="text-muted-foreground">
+                      <p className={pmTypography.h3}>Round {index + 1}</p>
+                      <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
                         {round.by} · {formatDate(round.at)}
                       </p>
                     </PmSurface>
@@ -613,42 +787,10 @@ export function NegotiationDetailPage() {
               </ul>
             ) : null}
           </PmContentCard>
+          </>
         }
         inspector={
-          <PmInspectorLayout
-            header={<PmSectionHeader title="Actions" />}
-            footer={
-              <div className="flex flex-col gap-2">
-                <AgreeNegotiationButton negotiation={neg} className="w-full" />
-                <CancelNegotiationButton negotiation={neg} className="w-full" variant="destructive" />
-                <CreateDealButton negotiation={neg} className="w-full" />
-                {canSubmitProposal ? (
-                  <PmButton
-                    type="button"
-                    className="w-full"
-                    disabled={proposalPending}
-                    onClick={() => handleProposalTransition('countered')}
-                  >
-                    {proposalPending ? 'Submitting…' : 'Submit proposal'}
-                  </PmButton>
-                ) : null}
-                {canAcceptUpdatedProposal ? (
-                  <PmButton
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    disabled={proposalPending}
-                    onClick={() => handleProposalTransition('active')}
-                  >
-                    {proposalPending ? 'Accepting…' : 'Accept updated proposal'}
-                  </PmButton>
-                ) : null}
-                <PmButton variant="outline" className="w-full" disabled>
-                  Escalate dispute
-                </PmButton>
-              </div>
-            }
-          >
+          <PmInspectorLayout header={<PmSectionHeader title="Participants & terms" />}>
             <PmFormReadonly>
               <PmFormReadonlySection title="Participants">
                 {(neg.participants ?? neg.parties ?? []).map((p) => (

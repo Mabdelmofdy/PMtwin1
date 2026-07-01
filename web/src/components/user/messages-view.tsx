@@ -23,19 +23,20 @@ export function MessagesView({ activeThreadId }: MessagesViewProps) {
       listLabel="Conversations"
       detailLabel="Message thread"
       list={
-        <PmContentCard title="Conversations" className="h-full border-0 shadow-none">
+        <PmContentCard title="Conversations" className="h-full">
           <div className="divide-y divide-border/60">
             {MOCK_MESSAGE_THREADS.map((thread) => (
               <Link
                 key={thread.id}
                 to={`/messages/${thread.id}`}
+                aria-current={activeThreadId === thread.id ? 'page' : undefined}
                 className={cn(
                   'flex items-start justify-between gap-2 px-2 py-3 transition-colors hover:bg-surface-muted/50',
                   activeThreadId === thread.id && 'bg-surface-muted/60',
                 )}
               >
                 <div className="min-w-0">
-                  <p className="font-medium">{thread.name}</p>
+                  <p className={cn(pmTypography.bodySm, 'font-medium')}>{thread.name}</p>
                   <p className={cn('truncate', pmTypography.caption, 'text-muted-foreground')}>{thread.preview}</p>
                 </div>
                 {thread.unread > 0 ? (

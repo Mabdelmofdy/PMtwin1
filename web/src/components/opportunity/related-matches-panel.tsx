@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { OpportunityMatchesReadModel } from '@/lib/opportunity-matches-read-model.ts'
@@ -14,6 +14,11 @@ import { formatMatchTypeLabel } from '@/components/shared/pm-design-tokens'
 import { PmBadge } from '@/components/ui/pm-badge'
 import { PmButton } from '@/components/ui/pm-button'
 import { PmMatchScoreBadge } from '@/components/ui/pm-match-score-badge'
+import {
+  PmCardActions,
+  type PmCardActionSlot,
+  type PmMoreActionItem,
+} from '@/components/ui/pm-more-actions'
 import { PmContentCard } from '@/components/layout/pm-layout-panels'
 import { PmEmptyState, PmSurface } from '@/components/ui/pm-index'
 
@@ -30,6 +35,123 @@ type RelatedMatchesPanelProps = {
   readonly canAct?: boolean
   readonly highlighted?: boolean
   readonly sectionId?: string
+}
+
+type MatchCardActionBundle = {
+  primary: PmCardActionSlot
+  secondary?: PmCardActionSlot
+  more?: PmMoreActionItem[]
+  moreChildren?: ReactNode
+}
+
+function buildMatchCardActions(
+  card: OpportunityMatchesReadModel['matches'][number],
+  canAct: boolean,
+  onAcceptDecline: (matchId: string, action: 'accept' | 'decline') => void,
+  actionPending: boolean,
+): MatchCardActionBundle {
+  const { actions } = card
+  const viewMatchSecondary: PmCardActionSlot = {
+    label: 'View match',
+    href: card.detailPath,
+    variant: 'outline',
+  }
+
+  const more: PmMoreActionItem[] = []
+
+  if (canAct && actions.showDecline) {
+    more.push({
+      id: 'decline',
+      label: 'Decline match',
+      onSelect: () => onAcceptDecline(card.match.id, 'decline'),
+      disabled: actionPending,
+    })
+  }
+
+  if (actions.showViewNegotiation && actions.negotiationId) {
+    more.push({
+      id: 'view-negotiation',
+      label: 'View negotiation',
+      href: `/negotiations/${actions.negotiationId}`,
+    })
+  }
+
+  if (actions.showViewDeal && actions.dealId) {
+    more.push({
+      id: 'view-deal',
+      label: 'View deal',
+      href: `/deals/${actions.dealId}`,
+    })
+  }
+
+  if (canAct && actions.showAccept) {
+    return {
+      primary: {
+        label: 'Accept match',
+        onClick: () => onAcceptDecline(card.match.id, 'accept'),
+        loading: actionPending,
+      },
+      secondary: viewMatchSecondary,
+      more,
+    }
+  }
+
+  if (canAct && actions.showStartNegotiation) {
+    return {
+      primary: {
+        label: 'Start negotiation',
+        render: () => (
+          <StartNegotiationButton match={card.match} variant="default" size="sm" />
+        ),
+      },
+      secondary: viewMatchSecondary,
+      more,
+    }
+  }
+
+  if (canAct && actions.showCreateDeal) {
+    return {
+      primary: {
+        label: 'Create deal',
+        render: () => (
+          <CreateDealButton
+            negotiation={card.actions.negotiation}
+            variant="default"
+            size="sm"
+          />
+        ),
+      },
+      secondary: viewMatchSecondary,
+      more,
+    }
+  }
+
+  if (actions.showViewNegotiation && actions.negotiationId) {
+    return {
+      primary: {
+        label: 'View negotiation',
+        href: `/negotiations/${actions.negotiationId}`,
+      },
+      secondary: viewMatchSecondary,
+      more: more.filter((item) => item.id !== 'view-negotiation'),
+    }
+  }
+
+  if (actions.showViewDeal && actions.dealId) {
+    return {
+      primary: {
+        label: 'View deal',
+        href: `/deals/${actions.dealId}`,
+      },
+      secondary: viewMatchSecondary,
+      more: more.filter((item) => item.id !== 'view-deal'),
+    }
+  }
+
+  return {
+    primary: { label: 'Open match', href: card.detailPath },
+    more,
+  }
 }
 
 export function RelatedMatchesPanel({
@@ -77,7 +199,7 @@ export function RelatedMatchesPanel({
   )
 
   const panelDescription =
-    'Primary path: review matches, accept or decline, start negotiation, then create a deal and contract.'
+    'Review ranked matches and take the next collaboration step.'
 
   const panelClassName = cn(
     highlighted && 'ring-2 ring-primary/50 transition-shadow duration-500',
@@ -109,6 +231,12 @@ export function RelatedMatchesPanel({
           {model.matches.map((card) => {
             const matchTypeKey = card.match.matchType.toLowerCase()
             const actionPending = pendingAction?.startsWith(`${card.match.id}:`)
+            const actionBundle = buildMatchCardActions(
+              card,
+              canAct,
+              handlePostMatchAction,
+              Boolean(actionPending),
+            )
 
             return (
               <PmSurface
@@ -118,125 +246,47 @@ export function RelatedMatchesPanel({
                 className="p-4"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <PmBadge
-                      tone={MATCH_TYPE_TONE[matchTypeKey as keyof typeof MATCH_TYPE_TONE] ?? 'neutral'}
-                      uppercase
-                    >
-                      {formatMatchTypeLabel(matchTypeKey)}
-                    </PmBadge>
-                    <PmBadge tone="neutral" size="sm">
-                      {card.statusLabel}
-                    </PmBadge>
+                  <div className="min-w-0 flex-1">
+                    <p className={cn(pmTypography.bodySm, 'line-clamp-2 font-medium')}>
+                      {card.relatedOpportunities
+                        .filter((item) => !item.isCurrent)
+                        .slice(0, 1)
+                        .map((item) => item.title)
+                        .join(' · ') || formatMatchTypeLabel(matchTypeKey)}
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <PmBadge
+                        tone={
+                          MATCH_TYPE_TONE[matchTypeKey as keyof typeof MATCH_TYPE_TONE] ??
+                          'neutral'
+                        }
+                        uppercase
+                        size="sm"
+                      >
+                        {formatMatchTypeLabel(matchTypeKey)}
+                      </PmBadge>
+                      <PmBadge tone="neutral" size="sm">
+                        {card.statusLabel}
+                      </PmBadge>
+                    </div>
                   </div>
                   <PmMatchScoreBadge
                     score={card.match.matchScore}
-                    variant="pipeline"
+                    variant="compact"
+                    showLabel={false}
                     breakdown={
                       card.match.payload?.breakdown ?? card.match.matchCriteria
                     }
                   />
                 </div>
 
-                {card.relatedOpportunities.length > 0 ? (
-                  <div className="mt-3 space-y-1">
-                    <p className={cn(pmTypography.caption, 'font-medium text-muted-foreground')}>
-                      Related opportunities
-                    </p>
-                    <ul className={cn('space-y-1', pmTypography.bodySm)}>
-                      {card.relatedOpportunities.map((item) => (
-                        <li key={`${card.match.id}-${item.id}-${item.label}`}>
-                          <span className="text-muted-foreground">{item.label}:</span>{' '}
-                          {item.isCurrent ? (
-                            <span className="font-medium">{item.title}</span>
-                          ) : (
-                            <Link
-                              to={item.path}
-                              className="font-medium text-primary hover:underline"
-                            >
-                              {item.title}
-                            </Link>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-
-                {card.participants.length > 0 ? (
-                  <div className="mt-3 space-y-1">
-                    <p className={cn(pmTypography.caption, 'font-medium text-muted-foreground')}>
-                      Participants
-                    </p>
-                    <ul className={cn('space-y-0.5', pmTypography.bodySm, 'text-muted-foreground')}>
-                      {card.participants.map((participant) => (
-                        <li key={`${card.match.id}-${participant.userId}`}>
-                          {participant.role.replace(/_/g, ' ')} — {participant.displayName}
-                          {participant.participantStatus
-                            ? ` (${participant.participantStatus})`
-                            : null}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <PmButton size="sm" variant="outline" asChild>
-                    <Link to={card.detailPath}>View match</Link>
-                  </PmButton>
-
-                  {canAct && card.actions.showAccept ? (
-                    <PmButton
-                      size="sm"
-                      disabled={actionPending}
-                      onClick={() => handlePostMatchAction(card.match.id, 'accept')}
-                    >
-                      Accept match
-                    </PmButton>
-                  ) : null}
-
-                  {canAct && card.actions.showDecline ? (
-                    <PmButton
-                      size="sm"
-                      variant="outline"
-                      disabled={actionPending}
-                      onClick={() => handlePostMatchAction(card.match.id, 'decline')}
-                    >
-                      Decline match
-                    </PmButton>
-                  ) : null}
-
-                  {canAct && card.actions.showStartNegotiation ? (
-                    <StartNegotiationButton
-                      match={card.match}
-                      variant="default"
-                      size="sm"
-                    />
-                  ) : null}
-
-                  {card.actions.showViewNegotiation && card.actions.negotiationId ? (
-                    <PmButton size="sm" variant="secondary" asChild>
-                      <Link to={`/negotiations/${card.actions.negotiationId}`}>
-                        View negotiation
-                      </Link>
-                    </PmButton>
-                  ) : null}
-
-                  {canAct && card.actions.showCreateDeal ? (
-                    <CreateDealButton
-                      negotiation={card.actions.negotiation}
-                      variant="default"
-                      size="sm"
-                    />
-                  ) : null}
-
-                  {card.actions.showViewDeal && card.actions.dealId ? (
-                    <PmButton size="sm" variant="secondary" asChild>
-                      <Link to={`/deals/${card.actions.dealId}`}>View deal</Link>
-                    </PmButton>
-                  ) : null}
-                </div>
+                <PmCardActions
+                  className="mt-4"
+                  primary={actionBundle.primary}
+                  secondary={actionBundle.secondary}
+                  more={actionBundle.more}
+                  moreChildren={actionBundle.moreChildren}
+                />
               </PmSurface>
             )
           })}

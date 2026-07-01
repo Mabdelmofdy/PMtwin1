@@ -45,7 +45,7 @@ import {
   PmSectionHeader,
   formatPlatformHealthMetric,
 } from '@/components/layout/pm-layout-index'
-import { PmBadge, PmButton, PmPageHeader, PmPageHeroMetric, PmReadinessScoreBadge, PmStatCard, PmMatchScoreBadge } from '@/components/ui/pm-index'
+import { PmBadge, PmButton, PmPageHeader, PmPageHeroMetric, PmMoreActions, PmReadinessScoreBadge, PmStatCard, PmMatchScoreBadge } from '@/components/ui/pm-index'
 import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
 import { AdminStatusBadge } from '@/pages/admin/admin-display'
@@ -126,16 +126,17 @@ export function AdminDashboardPage() {
       }
       quickActions={
         <PmContentCard title="Quick actions">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <PmButton size="sm" asChild>
-              <Link to="/admin/vetting">Review vetting</Link>
-            </PmButton>
-            <PmButton size="sm" variant="outline" asChild>
               <Link to="/admin/matching">Run matching</Link>
             </PmButton>
-            <PmButton size="sm" variant="outline" asChild>
-              <Link to="/admin/audit">View audit log</Link>
-            </PmButton>
+            <PmMoreActions
+              label="More admin actions"
+              items={[
+                { id: 'vetting', label: 'Review vetting', href: '/admin/vetting' },
+                { id: 'audit', label: 'View audit log', href: '/admin/audit' },
+              ]}
+            />
           </div>
         </PmContentCard>
       }

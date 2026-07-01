@@ -1,13 +1,4 @@
 import { Link } from 'react-router-dom'
-import {
-  Activity,
-  ArrowRight,
-  Briefcase,
-  Handshake,
-  Lightbulb,
-  Sparkles,
-  TrendingUp,
-} from 'lucide-react'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
@@ -16,35 +7,139 @@ import { notificationsApi } from '@/api/notifications.ts'
 import { MatchCard } from '@/components/collaboration/match-card'
 import { OpportunityCard } from '@/components/opportunity/opportunity-card'
 import { countOpportunityBuckets } from '@/components/opportunity/opportunity-display'
-import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
 import {
   PmContentCard,
   PmDashboardLayout,
-  PmMetricGrid,
   PmSectionHeader,
-  countActiveDeals,
   countActiveMatches,
-  countActiveNegotiations,
 } from '@/components/layout/pm-layout-index'
 import {
-  PmBadge,
+  PmActionHub,
+  type PmActionHubItem,
   PmButton,
-  PmMatchScoreBadge,
-  PmReadinessScoreBadge,
-  PmStatCard,
+  PmEmptyState,
+  PmPageActions,
   PmSurface,
+  PmWorkflowBadge,
 } from '@/components/ui/pm-index'
-import { MOCK_MESSAGE_THREADS } from '@/components/user/user-display'
 import { useAuth } from '@/providers/auth-provider'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
-import { formatRelativeTime } from '@/lib/format'
+import { formatDate, formatRelativeTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
-/** Premium dashboard body — section hierarchy for workspace home. */
+function DashboardMetricStrip({
+  published,
+  activeMatches,
+  negotiating,
+  drafts,
+}: {
+  published: number
+  activeMatches: number
+  negotiating: number
+  drafts: number
+}) {
+  const metrics = [
+    { label: 'Published', value: published },
+    { label: 'Active matches', value: activeMatches },
+    { label: 'Negotiating', value: negotiating },
+    { label: 'Drafts', value: drafts },
+  ]
+
+  return (
+    <PmSurface
+      data-slot="pm-dashboard-metric-strip"
+      variant="muted"
+      className="flex flex-wrap divide-y divide-border/50 sm:divide-x sm:divide-y-0"
+    >
+      {metrics.map((metric) => (
+        <div
+          key={metric.label}
+          className="flex min-w-[50%] flex-1 items-center justify-between gap-2 px-4 py-2.5 sm:min-w-0 sm:flex-col sm:items-start sm:py-3"
+        >
+          <span className={cn(pmTypography.statLabel, 'text-muted-foreground')}>
+            {metric.label}
+          </span>
+          <span className={cn(pmTypography.stat, 'tabular-nums')}>
+            {metric.value}
+          </span>
+        </div>
+      ))}
+    </PmSurface>
+  )
+}
+
+function buildNeedsActionItems(input: {
+  userId?: string
+  matches: ReturnType<typeof matchesApi.list>
+  negotiations: ReturnType<typeof negotiationsApi.list>
+  deals: ReturnType<typeof dealsApi.list>
+  opportunities: ReturnType<typeof opportunitiesApi.list>
+}): PmActionHubItem[] {
+  const { userId, matches, negotiations, deals, opportunities } = input
+  const items: PmActionHubItem[] = []
+
+  for (const match of matches.filter((m) => m.status === 'discovered').slice(0, 2)) {
+    items.push({
+      id: `match-${match.id}`,
+      title: 'Review new match',
+      context: 'A PostMatch is waiting for your response.',
+      status: match.status,
+      statusEntity: 'match',
+      matchScore: match.matchScore,
+      primary: { label: 'Open match', href: `/matches/${match.id}` },
+      secondary: { label: 'Pipeline', href: '/pipeline', variant: 'outline' },
+    })
+  }
+
+  for (const negotiation of negotiations
+    .filter((n) => n.status === 'active' || n.status === 'countered')
+    .slice(0, 2)) {
+    items.push({
+      id: `negotiation-${negotiation.id}`,
+      title: 'Respond to negotiation',
+      context: 'Terms need your review or counter.',
+      status: negotiation.status,
+      statusEntity: 'negotiation',
+      primary: { label: 'Open negotiation', href: `/negotiations/${negotiation.id}` },
+    })
+  }
+
+  for (const deal of deals
+    .filter((d) => d.status === 'review' || d.status === 'signing')
+    .slice(0, 2)) {
+    items.push({
+      id: `deal-${deal.id}`,
+      title: deal.title,
+      context: 'Deal requires your signature or review.',
+      status: deal.status,
+      statusEntity: 'deal',
+      primary: { label: 'Open deal', href: `/deals/${deal.id}` },
+    })
+  }
+
+  if (userId) {
+    for (const opp of opportunities
+      .filter((o) => o.creatorId === userId && o.status === 'draft')
+      .slice(0, 1)) {
+      items.push({
+        id: `opp-${opp.id}`,
+        title: opp.title,
+        context: 'Draft opportunity — publish to start matching.',
+        status: opp.status,
+        statusEntity: 'opportunity',
+        primary: { label: 'Open opportunity', href: `/opportunities/${opp.id}` },
+        secondary: { label: 'Edit', href: `/opportunities/${opp.id}/edit`, variant: 'outline' },
+      })
+    }
+  }
+
+  return items.slice(0, 5)
+}
+
+/** Action-first dashboard — attention, matches, active workflows, activity. */
 export function WorkspaceDashboardComposition() {
-  const { user, isCompanyUser } = useAuth()
+  const { user } = useAuth()
   const userId = user?.id
-  const profileKind = isCompanyUser ? 'company' : 'individual'
 
   const opportunities = opportunitiesApi.list()
   const matches = matchesApi.list()
@@ -52,10 +147,14 @@ export function WorkspaceDashboardComposition() {
   const deals = dealsApi.list()
   const buckets = countOpportunityBuckets(opportunities, userId)
   const activeMatches = countActiveMatches(matches)
-  const activeNegotiations = countActiveNegotiations(negotiations)
-  const activeDeals = countActiveDeals(deals)
   const notifications = userId ? notificationsApi.list(userId).slice(0, 5) : []
-  const unreadMessages = MOCK_MESSAGE_THREADS.reduce((sum, t) => sum + t.unread, 0)
+  const needsActionItems = buildNeedsActionItems({
+    userId,
+    matches,
+    negotiations,
+    deals,
+    opportunities,
+  })
 
   const recommendedMatches = [...matches]
     .sort((a, b) => b.matchScore - a.matchScore)
@@ -66,125 +165,42 @@ export function WorkspaceDashboardComposition() {
     .sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
     .slice(0, 3)
 
-  const readiness = user?.profile
-    ? resolveProfileReadiness(user.profile, profileKind)
-    : null
-
-  const pipelineHealthPercent =
-    opportunities.length > 0
-      ? Math.round(
-          ((activeMatches + activeNegotiations + activeDeals) /
-            Math.max(opportunities.length, 1)) *
-            100,
-        )
-      : 0
+  const activeWorkflowItems = [
+    ...negotiations
+      .filter((n) => n.status === 'active' || n.status === 'countered')
+      .slice(0, 3)
+      .map((n) => ({
+        id: n.id,
+        title: `Negotiation ${n.id}`,
+        status: n.status,
+        entity: 'negotiation' as const,
+        href: `/negotiations/${n.id}`,
+        updatedAt: n.updatedAt ?? n.createdAt,
+      })),
+    ...deals
+      .filter((d) => d.status !== 'completed' && d.status !== 'cancelled')
+      .slice(0, 3)
+      .map((d) => ({
+        id: d.id,
+        title: d.title,
+        status: d.status,
+        entity: 'deal' as const,
+        href: `/deals/${d.id}`,
+        updatedAt: d.updatedAt,
+      })),
+  ]
+    .sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
+    .slice(0, 4)
 
   return (
     <PmDashboardLayout
       metrics={
-        <PmMetricGrid columns={4}>
-          <PmStatCard
-            label="Published"
-            value={buckets.published}
-            hint="Live in marketplace"
-            icon={<Briefcase className="size-4" aria-hidden />}
-          />
-          <PmStatCard
-            label="Active matches"
-            value={activeMatches}
-            hint="Awaiting response"
-            icon={<Handshake className="size-4" aria-hidden />}
-          />
-          <PmStatCard
-            label="Negotiating"
-            value={buckets.negotiating}
-            hint="In collaboration"
-          />
-          <PmStatCard
-            label="Drafts"
-            value={buckets.drafts}
-            hint="Ready to publish"
-            icon={<Sparkles className="size-4" aria-hidden />}
-          />
-        </PmMetricGrid>
-      }
-      charts={
-        <PmContentCard
-          title="Pipeline health"
-          description="Workflow momentum across PostMatches, negotiations, and deals."
-          actions={
-            <PmButton size="sm" variant="outline" asChild>
-              <Link to="/pipeline">Open pipeline</Link>
-            </PmButton>
-          }
-        >
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <PmStatCard label="Opportunities" value={opportunities.length} dense />
-            <PmStatCard label="Active matches" value={activeMatches} dense />
-            <PmStatCard label="Negotiations" value={activeNegotiations} dense />
-            <PmStatCard label="Active deals" value={activeDeals} dense />
-          </div>
-          <div className="mt-4 flex items-center gap-3 rounded-xl border border-border/60 bg-surface-muted/50 px-4 py-3">
-            <TrendingUp className="size-4 shrink-0 text-primary" aria-hidden />
-            <div className="min-w-0 flex-1">
-              <p className={cn(pmTypography.label)}>Collaboration velocity</p>
-              <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
-                {pipelineHealthPercent}% of opportunities have active collaboration signals
-              </p>
-            </div>
-            <PmBadge tone={pipelineHealthPercent >= 50 ? 'success' : 'warning'}>
-              {pipelineHealthPercent}%
-            </PmBadge>
-          </div>
-        </PmContentCard>
-      }
-      quickActions={
-        <>
-          <PmContentCard title="Today's summary">
-            <ul className={cn('space-y-2', pmTypography.bodySm)}>
-              {readiness ? (
-                <li className="flex items-center justify-between gap-2">
-                  <span className="text-muted-foreground">Profile readiness</span>
-                  <PmReadinessScoreBadge score={readiness.score} variant="compact" />
-                </li>
-              ) : null}
-              <li className="flex items-center justify-between gap-2">
-                <span className="text-muted-foreground">Unread messages</span>
-                <PmBadge tone={unreadMessages > 0 ? 'primary' : 'muted'}>{unreadMessages}</PmBadge>
-              </li>
-              <li className="flex items-center justify-between gap-2">
-                <span className="text-muted-foreground">Notifications</span>
-                <PmBadge tone={notifications.some((n) => !n.read) ? 'info' : 'muted'}>
-                  {notifications.filter((n) => !n.read).length}
-                </PmBadge>
-              </li>
-              <li className="flex items-center justify-between gap-2">
-                <span className="text-muted-foreground">Top match score</span>
-                {recommendedMatches[0] ? (
-                  <PmMatchScoreBadge score={recommendedMatches[0].matchScore} variant="compact" />
-                ) : (
-                  <span className="text-muted-foreground">—</span>
-                )}
-              </li>
-            </ul>
-          </PmContentCard>
-          <PmContentCard title="Quick actions">
-            <div className="flex flex-col gap-2">
-              <PmButton size="sm" asChild>
-                <Link to="/opportunities/create">
-                  Post opportunity
-                  <ArrowRight className="size-4" aria-hidden />
-                </Link>
-              </PmButton>
-              <PmButton size="sm" variant="outline" asChild>
-                <Link to="/matches">View matches</Link>
-              </PmButton>
-              <PmButton size="sm" variant="outline" asChild>
-                <Link to="/people">Browse talent</Link>
-              </PmButton>
-            </div>
-          </PmContentCard>
-        </>
+        <DashboardMetricStrip
+          published={buckets.published}
+          activeMatches={activeMatches}
+          negotiating={buckets.negotiating}
+          drafts={buckets.drafts}
+        />
       }
       recentActivity={
         <PmContentCard
@@ -196,7 +212,16 @@ export function WorkspaceDashboardComposition() {
           }
         >
           {notifications.length === 0 ? (
-            <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>No recent alerts.</p>
+            <PmEmptyState
+              title="No recent alerts"
+              description="Notifications about matches, negotiations, and deals will appear here."
+              size="compact"
+              action={
+                <PmButton size="sm" variant="outline" asChild>
+                  <Link to="/pipeline">Open pipeline</Link>
+                </PmButton>
+              }
+            />
           ) : (
             <ul className={cn('space-y-3', pmTypography.bodySm)}>
               {notifications.map((n) => (
@@ -217,6 +242,16 @@ export function WorkspaceDashboardComposition() {
         </PmContentCard>
       }
     >
+      <PmActionHub
+        items={needsActionItems}
+        emptyAction={
+          <PmPageActions
+            primary={{ label: 'Post opportunity', href: '/opportunities/create' }}
+            secondary={{ label: 'Open pipeline', href: '/pipeline', variant: 'outline' }}
+          />
+        }
+      />
+
       <PmSectionHeader
         title="Recommended matches"
         description="Highest compatibility scores from your active opportunities."
@@ -227,11 +262,16 @@ export function WorkspaceDashboardComposition() {
         }
       />
       {recommendedMatches.length === 0 ? (
-        <PmSurface variant="muted" className="p-6">
-          <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-            Publish opportunities to discover ranked PostMatches.
-          </p>
-        </PmSurface>
+        <PmEmptyState
+          title="No matches yet"
+          description="Publish an opportunity to discover ranked PostMatches across the network."
+          size="compact"
+          action={
+            <PmButton size="sm" asChild>
+              <Link to="/opportunities/create">Post opportunity</Link>
+            </PmButton>
+          }
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {recommendedMatches.map((match) => (
@@ -241,8 +281,54 @@ export function WorkspaceDashboardComposition() {
       )}
 
       <PmSectionHeader
+        title="Active negotiations & deals"
+        description="Collaboration items in progress across the workflow."
+        actions={
+          <PmButton size="sm" variant="outline" asChild>
+            <Link to="/pipeline">Open pipeline</Link>
+          </PmButton>
+        }
+      />
+      {activeWorkflowItems.length === 0 ? (
+        <PmEmptyState
+          title="No active collaborations"
+          description="When negotiations or deals start, they will show up here for quick access."
+          size="compact"
+          action={
+            <PmButton size="sm" variant="outline" asChild>
+              <Link to="/matches">Browse matches</Link>
+            </PmButton>
+          }
+        />
+      ) : (
+        <div className="grid gap-3 md:grid-cols-2">
+          {activeWorkflowItems.map((item) => (
+            <PmSurface
+              key={`${item.entity}-${item.id}`}
+              variant="default"
+              shadow="card"
+              interactive
+              className="p-4"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <Link
+                  to={item.href}
+                  className={cn(pmTypography.bodySm, 'line-clamp-2 font-medium hover:text-primary')}
+                >
+                  {item.title}
+                </Link>
+                <PmWorkflowBadge status={item.status} entity={item.entity} size="sm" />
+              </div>
+              <p className={cn(pmTypography.caption, 'mt-2 text-muted-foreground')}>
+                Updated {formatDate(item.updatedAt)}
+              </p>
+            </PmSurface>
+          ))}
+        </div>
+      )}
+
+      <PmSectionHeader
         title="Recent opportunities"
-        className="mt-10"
         actions={
           <PmButton size="sm" variant="outline" asChild>
             <Link to="/opportunities">View all</Link>
@@ -250,60 +336,28 @@ export function WorkspaceDashboardComposition() {
         }
       />
       {recentOpportunities.length === 0 ? (
-        <PmSurface variant="muted" className="p-6">
-          <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>No recent opportunities.</p>
-        </PmSurface>
+        <PmEmptyState
+          title="No opportunities yet"
+          description="Post your first opportunity to start the collaboration workflow."
+          size="compact"
+          action={
+            <PmButton size="sm" asChild>
+              <Link to="/opportunities/create">Post opportunity</Link>
+            </PmButton>
+          }
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {recentOpportunities.map((opp) => (
-            <OpportunityCard key={opp.id} opportunity={opp} showActions />
+            <OpportunityCard
+              key={opp.id}
+              opportunity={opp}
+              showActions={false}
+              canEdit={userId === opp.creatorId}
+            />
           ))}
         </div>
       )}
-
-      <PmSectionHeader
-        title="Insights"
-        description="Profile and workspace signals to improve matching quality."
-        className="mt-10"
-        actions={
-          readiness ? (
-            <PmButton size="sm" variant="outline" asChild>
-              <Link to="/profile">Improve profile</Link>
-            </PmButton>
-          ) : undefined
-        }
-      />
-      <div className="grid gap-4 lg:grid-cols-2">
-        {readiness ? (
-          <PmContentCard title="Profile readiness">
-            <div className="flex items-start gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary-muted text-primary">
-                <Activity className="size-4" aria-hidden />
-              </div>
-              <div className="min-w-0 flex-1 space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <span className={pmTypography.label}>Completion score</span>
-                  <PmReadinessScoreBadge score={readiness.score} variant="compact" />
-                </div>
-                <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-                  Complete your profile to improve match quality and publish readiness.
-                </p>
-              </div>
-            </div>
-          </PmContentCard>
-        ) : null}
-        <PmContentCard title="Collaboration tip">
-          <div className="flex items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-surface-muted text-muted-foreground">
-              <Lightbulb className="size-4" aria-hidden />
-            </div>
-            <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-              Work through matches in order: respond to PostMatches, negotiate terms, create a deal,
-              then finalize the contract. Applications remain off the primary path.
-            </p>
-          </div>
-        </PmContentCard>
-      </div>
     </PmDashboardLayout>
   )
 }

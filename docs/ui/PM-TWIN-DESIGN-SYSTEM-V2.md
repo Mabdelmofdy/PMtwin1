@@ -6,7 +6,7 @@
 | Date | 29 June 2026 |
 | Authority | `web/src/components/layout/*` shell, `web/src/components/ui/pm-*`, design tokens |
 | Prior audit | [PM-TWIN-UI-AUDIT-V2.md](./PM-TWIN-UI-AUDIT-V2.md) |
-| Status | **v2 migration complete** — see [PM-TWIN-RTL-EXCELLENCE-AUDIT.md](./PM-TWIN-RTL-EXCELLENCE-AUDIT.md) (Phase 9.5D), [PM-TWIN-RESPONSIVE-CROSS-DEVICE-QA.md](./PM-TWIN-RESPONSIVE-CROSS-DEVICE-QA.md) (Phase 9.5E), [PM-TWIN-PREMIUM-VISUAL-REFRESH.md](./PM-TWIN-PREMIUM-VISUAL-REFRESH.md) (Phase 9.5F), [PM-TWIN-PREMIUM-UX-COMPOSITION-AND-SCORING.md](./PM-TWIN-PREMIUM-UX-COMPOSITION-AND-SCORING.md) (Phase 9.5G), [PM-TWIN-RESPONSIVE-PRODUCTION-QA.md](./PM-TWIN-RESPONSIVE-PRODUCTION-QA.md) (Phase 9.5H), [PM-TWIN-WCAG-2.2-AA-CERTIFICATION.md](./PM-TWIN-WCAG-2.2-AA-CERTIFICATION.md) (Phase 9.5I) |
+| Status | **v2 migration complete** — see [PM-TWIN-RTL-EXCELLENCE-AUDIT.md](./PM-TWIN-RTL-EXCELLENCE-AUDIT.md) (Phase 9.5D), [PM-TWIN-RESPONSIVE-CROSS-DEVICE-QA.md](./PM-TWIN-RESPONSIVE-CROSS-DEVICE-QA.md) (Phase 9.5E), [PM-TWIN-PREMIUM-VISUAL-REFRESH.md](./PM-TWIN-PREMIUM-VISUAL-REFRESH.md) (Phase 9.5F), [PM-TWIN-PREMIUM-UX-COMPOSITION-AND-SCORING.md](./PM-TWIN-PREMIUM-UX-COMPOSITION-AND-SCORING.md) (Phase 9.5G), [PM-TWIN-RESPONSIVE-PRODUCTION-QA.md](./PM-TWIN-RESPONSIVE-PRODUCTION-QA.md) (Phase 9.5H), [PM-TWIN-WCAG-2.2-AA-CERTIFICATION.md](./PM-TWIN-WCAG-2.2-AA-CERTIFICATION.md) (Phase 9.5I), [PM-TWIN-UX-SIMPLIFICATION-AUDIT.md](./PM-TWIN-UX-SIMPLIFICATION-AUDIT.md) (Phase 9.5J), [PM-TWIN-UX-ARCHITECTURE-AUDIT.md](./PM-TWIN-UX-ARCHITECTURE-AUDIT.md) (Phase 9.5K) |
 
 ---
 
@@ -2304,6 +2304,203 @@ Certify keyboard, screen-reader, focus, dialog, toast, table, form, navigation, 
 - **Certification recommendation: GO** for Visual Freeze v1.0
 
 ### 28.5 Validation gates
+
+- `npm run type-check`
+- `npm test`
+- `npm run validate:design:strict`
+
+---
+
+## 29. Phase 9.5J — UX Simplification & Card Action Reduction
+
+| Field | Value |
+|-------|-------|
+| Phase | 9.5J — UX Recovery Sprint |
+| Date | 1 July 2026 |
+| Authority | [PM-TWIN-UX-SIMPLIFICATION-AUDIT.md](./PM-TWIN-UX-SIMPLIFICATION-AUDIT.md) |
+
+### 29.1 Objective
+
+Reduce visual noise and action sprawl across authenticated pages. Improve composition, hierarchy, and density toward Linear / Stripe / Vercel quality — **presentation only**, no business-logic changes.
+
+### 29.2 Card Action Rule
+
+Every card must have:
+
+- **One primary action** — the single clearest next step (e.g. Open, Accept, Start negotiation)
+- **Optional one secondary action** — supporting navigation (e.g. View match)
+- **All other actions in More menu (⋯)** — Edit, Decline, Cancel, destructive actions
+
+**Bad:** View / Edit / Publish / Match / Share / Archive / Delete (all visible)
+
+**Good:** Primary: Open · Secondary: Start negotiation · More: Edit, Share, Archive, Delete
+
+### 29.3 Card Density Rule
+
+Cards are not mini detail pages. Show only:
+
+- Title
+- Type / status
+- Readiness or Match score (compact variant on dense surfaces)
+- 2–3 key metadata items
+- One primary action + More menu
+
+Move participants, long descriptions, and full breakdowns to detail pages.
+
+### 29.4 Page CTA Rule
+
+Each page header allows at most:
+
+- **One main CTA**
+- **One secondary CTA** (optional)
+
+Everything else goes into `PmMoreActions` or contextual menus. Use `PmPageActions` for header composition.
+
+### 29.5 More Menu Rule
+
+- Use `PmMoreActions` for kebab menus on cards and pages
+- Use `PmCardActions` for card footers (primary + secondary + More)
+- Destructive items: `variant: 'destructive'` with `separatorBefore: true`
+- Match `PmTableRowActions` visuals: ghost icon trigger, `MoreHorizontal`, Lucide icons
+- Custom lifecycle controls may use `render` slot or `DropdownMenuItem asChild`
+
+### 29.6 UX simplification rules
+
+| Rule | Guidance |
+|------|----------|
+| Dashboard | Answer “What needs my attention today?” — hero, 3–4 metrics, matches, active workflows, recent activity |
+| Opportunity detail | Answer “Is this ready and what is the next action?” — score strip, one primary action card, related matches |
+| Match detail | Answer “Is this match good and what should I do next?” — hero score, breakdown, one header primary + More |
+| Pipeline kanban | Compact cards: title, status, score, owner, Open + More |
+| Detail navigation | Collapse “Back to…” link rows into `PmMoreActions` |
+| Inspector panels | Do not duplicate header lifecycle buttons |
+| Enterprise scores | Keep `PmReadinessScoreBadge`, `PmMatchScoreBadge`, `PmScoreBadge`, `PmScoreTooltip`; prefer `compact` on cards, `hero` on detail strips only |
+| Applications | Remain hidden unless `showLegacyApplications` is explicitly enabled |
+
+### 29.7 New primitives
+
+| Component | Path |
+|-----------|------|
+| `PmMoreActions` | `web/src/components/ui/pm-more-actions.tsx` |
+| `PmCardActions` | same |
+| `PmPageActions` | same |
+
+Exported from `@/components/ui/pm-index`.
+
+### 29.8 Outcome
+
+- UX simplicity score: **4.4 / 5** (from 2.8 / 5)
+- No card exposes many visible buttons
+- Applications UI remains suppressed
+
+### 29.9 Validation gates
+
+- `npm run type-check`
+- `npm test`
+- `npm run validate:design:strict`
+
+---
+
+## 30. Phase 9.5K — UX Architecture Sprint
+
+| Field | Value |
+|-------|-------|
+| Phase | 9.5K — UX Architecture Sprint |
+| Date | 1 July 2026 |
+| Authority | [PM-TWIN-UX-ARCHITECTURE-AUDIT.md](./PM-TWIN-UX-ARCHITECTURE-AUDIT.md) |
+
+### 30.1 Objective
+
+Improve information architecture and page hierarchy — **presentation only**. Rebuild dashboard and opportunity detail around user action and workflow journey without changing business logic, routing, or data models.
+
+### 30.2 Workflow Journey Rule
+
+Use `PmWorkflowJourney` to show the canonical path:
+
+**Opportunity → Match → Negotiation → Deal → Contract → Complete**
+
+- Display props only — pages pass `status`, `statusEntity`, `state`, and optional `href`
+- No lifecycle logic inside the component
+- Compact semantic badges via `PmWorkflowBadge`
+- Replace duplicate collaboration strips where the journey component is clearer
+
+### 30.3 Action Hub Rule
+
+Use `PmActionHub` for attention-first surfaces (dashboard, opportunity detail recommended action):
+
+| Row field | Purpose |
+|-----------|---------|
+| Title | What needs doing |
+| Context | Why it matters (one line) |
+| Badge / score | Status or match score |
+| Primary action | One clear CTA |
+| Secondary / More | Optional supporting actions |
+
+Empty states must explain what is missing, why it matters, and offer one CTA.
+
+### 30.4 Empty State Rule
+
+Never show generic “No data” without direction. Every empty state includes:
+
+1. What is missing
+2. Why it matters
+3. One clear CTA (Post opportunity, Open pipeline, Browse matches, etc.)
+
+Use `PmEmptyState` with `size="compact"` in dashboard sections.
+
+### 30.5 Mobile Action Rule
+
+- Action hub rows stack vertically on small screens; actions align end without horizontal overflow
+- `PmCardActions` and `PmPageActions` use `flex-wrap` — primary + secondary + More never overflow horizontally
+- Workflow journey wraps to column on mobile (`flex-col sm:flex-row`)
+- Cards in dashboard grids use `md:grid-cols-2 xl:grid-cols-3`
+
+### 30.6 Dashboard architecture
+
+| Section | Purpose |
+|---------|---------|
+| Hero | “What needs attention” + Post opportunity / Open pipeline |
+| Metric strip | 4 compact KPIs — not full stat cards |
+| Needs your action | `PmActionHub` |
+| Recommended matches | Top scored PostMatches |
+| Active negotiations & deals | In-progress workflow items |
+| Recent opportunities | Title-link cards, no inline actions |
+| Recent activity | Notifications sidebar |
+
+### 30.7 Opportunity detail architecture
+
+| Section | Purpose |
+|---------|---------|
+| Hero | Title, readiness, status badges, one header primary + More |
+| Workflow journey | `PmWorkflowJourney` |
+| Recommended next action | `PmActionHub` (single item, no duplicate header CTA) |
+| Negotiation / deal / contract status | Compact status cards when data exists |
+| Related matches | Existing panel with Card Action Rule |
+| Activity | Collapsed `<details>` timeline |
+
+### 30.8 Navigation clarity (no route changes)
+
+- Sidebar: “Workflow pipeline”, “Matches”, group “Workflow stages”
+- Breadcrumbs: `routeLabels` updated for pipeline / matches
+- Page labels: Deals and Contracts use `label="Workflow"`
+
+### 30.9 New primitives
+
+| Component | Path |
+|-----------|------|
+| `PmWorkflowJourney` | `web/src/components/ui/pm-workflow-journey.tsx` |
+| `PmActionHub` | `web/src/components/ui/pm-action-hub.tsx` |
+
+Exported from `@/components/ui/pm-index`.
+
+### 30.10 Outcome
+
+- UX architecture score: **4.6 / 5** (from 4.4 / 5 post-9.5J)
+- Dashboard answers “what needs attention” in section order
+- Opportunity detail follows workflow journey without duplicate action paths
+- Applications UI remains suppressed
+
+### 30.11 Validation gates
 
 - `npm run type-check`
 - `npm test`

@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
+import { Pencil } from 'lucide-react'
 import { MapPin } from 'lucide-react'
-import { formatDate, truncate } from '@/lib/format'
+import { formatDate } from '@/lib/format'
 import { matchesApi } from '@/api/matches.ts'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
-import { PmButton } from '@/components/ui/pm-button'
+import { PmCardActions } from '@/components/ui/pm-more-actions'
 import { PmReadinessScoreBadge } from '@/components/ui/pm-readiness-score-badge'
 import { PmSurface } from '@/components/ui/pm-surface'
 import { OpportunityStatusBadge } from '@/components/opportunity/opportunity-status-badge'
@@ -16,6 +17,8 @@ export type OpportunityCardProps = {
   opportunity: Opportunity
   className?: string
   showActions?: boolean
+  /** When false, Edit is hidden from the More menu. */
+  canEdit?: boolean
 }
 
 /** Premium opportunity card for grid and mobile list layouts. */
@@ -23,6 +26,7 @@ export function OpportunityCard({
   opportunity,
   className,
   showActions = true,
+  canEdit = true,
 }: OpportunityCardProps) {
   const matchCount = matchesApi.getByOpportunity(opportunity.id).length
   const readiness = resolveOpportunityReadiness(opportunity)
@@ -63,16 +67,10 @@ export function OpportunityCard({
         </div>
       </div>
 
-      {opportunity.description ? (
-        <p className={cn(pmTypography.bodySm, 'mt-3 line-clamp-2 text-muted-foreground')}>
-          {truncate(opportunity.description, 120)}
-        </p>
-      ) : null}
-
       <div
         className={cn(
           pmTypography.caption,
-          'mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border/50 pt-3 text-muted-foreground',
+          'mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground',
         )}
       >
         <span className="inline-flex items-center gap-1.5">
@@ -80,25 +78,30 @@ export function OpportunityCard({
           {opportunity.location || '—'}
         </span>
         <span>Updated {formatDate(opportunity.updatedAt)}</span>
-      </div>
-
-      <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
         {matchCount > 0 ? (
-          <span className={cn(pmTypography.caption, 'text-muted-foreground')}>
+          <span>
             {matchCount} match{matchCount === 1 ? '' : 'es'}
           </span>
         ) : null}
       </div>
 
       {showActions ? (
-        <div className="mt-4 flex flex-wrap gap-2 border-t border-border/50 pt-3">
-          <PmButton size="sm" asChild>
-            <Link to={href}>View</Link>
-          </PmButton>
-          <PmButton size="sm" variant="outline" asChild>
-            <Link to={`/opportunities/${opportunity.id}/edit`}>Edit</Link>
-          </PmButton>
-        </div>
+        <PmCardActions
+          className="mt-4"
+          primary={{ label: 'Open', href }}
+          more={
+            canEdit
+              ? [
+                  {
+                    id: 'edit',
+                    label: 'Edit',
+                    href: `/opportunities/${opportunity.id}/edit`,
+                    icon: Pencil,
+                  },
+                ]
+              : undefined
+          }
+        />
       ) : null}
     </PmSurface>
   )

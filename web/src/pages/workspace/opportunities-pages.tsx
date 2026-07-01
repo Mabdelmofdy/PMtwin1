@@ -37,7 +37,9 @@ import {
   type PmFormStepperStep,
 } from '@/components/forms/pm-form-index'
 import { PmContentCard, PmPageLayout, summarizeOpportunityListHero } from '@/components/layout/pm-layout-index'
-import { PmBadge, PmButton, PmEmptyState, PmPageHeader, PmPageHeroMetric, PmReadinessScoreBadge, PmSurface } from '@/components/ui/pm-index'
+import { PmBadge, PmButton, PmEmptyState, PmPageHeader, PmPageHeroMetric, PmPageActions, PmReadinessScoreBadge, PmSurface } from '@/components/ui/pm-index'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -169,7 +171,7 @@ export function OpportunitiesPage() {
       label: 'Title',
       sortable: true,
       cell: (o) => (
-        <Link to={`/opportunities/${o.id}`} className="font-medium hover:text-primary">
+        <Link to={`/opportunities/${o.id}`} className={cn(pmTypography.bodySm, 'font-medium hover:text-primary')}>
           {o.title}
         </Link>
       ),
@@ -239,20 +241,33 @@ export function OpportunitiesPage() {
             </>
           }
           actions={
-            <>
-              <PmButton variant="outline" asChild>
-                <Link to="/opportunities/map">
-                  <Map className="size-4" aria-hidden />
-                  Map view
-                </Link>
-              </PmButton>
-              <PmButton asChild>
-                <Link to="/opportunities/create">
-                  <Plus className="size-4" aria-hidden />
-                  Create opportunity
-                </Link>
-              </PmButton>
-            </>
+            <PmPageActions
+              secondary={{
+                label: 'Map view',
+                href: '/opportunities/map',
+                variant: 'outline',
+                render: () => (
+                  <PmButton variant="outline" asChild>
+                    <Link to="/opportunities/map">
+                      <Map className="size-4" aria-hidden />
+                      Map view
+                    </Link>
+                  </PmButton>
+                ),
+              }}
+              primary={{
+                label: 'Create opportunity',
+                href: '/opportunities/create',
+                render: () => (
+                  <PmButton asChild>
+                    <Link to="/opportunities/create">
+                      <Plus className="size-4" aria-hidden />
+                      Create opportunity
+                    </Link>
+                  </PmButton>
+                ),
+              }}
+            />
           }
         />
       }
@@ -279,10 +294,9 @@ export function OpportunitiesPage() {
             filters={
               <PmTableFilter activeCount={status !== 'all' || scope !== 'all' ? 1 : 0} label="Filters">
                 <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium">Scope</label>
+                  <PmFormField id="opp-filter-scope" label="Scope">
                     <Select value={scope} onValueChange={(v) => setScope(v as 'all' | 'mine')}>
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger id="opp-filter-scope" className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -290,11 +304,10 @@ export function OpportunitiesPage() {
                         <SelectItem value="mine">My opportunities</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium">Status</label>
+                  </PmFormField>
+                  <PmFormField id="opp-filter-status" label="Status">
                     <Select value={status} onValueChange={setStatus}>
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger id="opp-filter-status" className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -304,7 +317,7 @@ export function OpportunitiesPage() {
                         <SelectItem value="in_negotiation">In negotiation</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
+                  </PmFormField>
                 </div>
               </PmTableFilter>
             }
@@ -372,7 +385,7 @@ export function OpportunityMapPage() {
         />
       }
     >
-      <div className="grid min-h-[24rem] gap-4 lg:grid-cols-3">
+      <div className="grid min-h-[22rem] gap-4 lg:grid-cols-3">
         <PmContentCard
           title="Map"
           className="lg:col-span-2"
@@ -382,11 +395,11 @@ export function OpportunityMapPage() {
             title="Map coming soon"
             description="Map integration placeholder — wire to map service when ready."
             size="compact"
-            className="min-h-[20rem] border-0 bg-surface-muted shadow-none"
+            className="min-h-[22rem]"
           />
         </PmContentCard>
         <PmContentCard title="Nearby listings">
-          <div className="space-y-2">
+          <div className="space-y-3">
             {items.map((o) => (
               <PmSurface
                 key={o.id}
@@ -395,9 +408,9 @@ export function OpportunityMapPage() {
                 interactive
                 className="p-3"
               >
-                <Link to={`/opportunities/${o.id}`} className="block text-sm">
-                  <p className="font-medium hover:text-primary">{truncate(o.title, 48)}</p>
-                  <p className="text-xs text-muted-foreground">{o.location}</p>
+                <Link to={`/opportunities/${o.id}`} className="block">
+                  <p className={cn(pmTypography.bodySm, 'font-medium hover:text-primary')}>{truncate(o.title, 48)}</p>
+                  <p className={cn(pmTypography.caption, 'text-muted-foreground')}>{o.location}</p>
                 </Link>
               </PmSurface>
             ))}

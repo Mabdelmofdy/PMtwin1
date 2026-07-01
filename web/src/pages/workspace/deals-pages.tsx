@@ -11,8 +11,6 @@ import { DealStageActions } from '@/components/deal/deal-stage-actions.tsx'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import {
   buildDealDetailReadModel,
-  dealDetailLinkFallbackLabel,
-  type DealDetailLink,
 } from '@/lib/deal-detail-read-model.ts'
 import { formatDate } from '@/lib/format'
 import { CollaborationTimeline } from '@/components/collaboration/collaboration-timeline'
@@ -46,32 +44,34 @@ import {
   PmEmptyState,
   PmPageHeader,
   PmPageHeroMetric,
+  PmMoreActions,
+  PmPageActions,
+  PmCardActions,
   PmSurface,
   PmWorkflowBadge,
+  PmWorkflowJourney,
+  type PmMoreActionItem,
+  type PmWorkflowJourneyStep,
 } from '@/components/ui/pm-index'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
 import type { Deal } from '@/types/domain.ts'
 
-function DealDetailNavLink({
-  link,
-  fallbackLabel,
-}: {
-  link: DealDetailLink | null
-  fallbackLabel: string
-}) {
-  if (!link) {
-    return (
-      <span className="text-sm text-muted-foreground">
-        {dealDetailLinkFallbackLabel(fallbackLabel)}
-      </span>
-    )
+function buildDealNavMoreItems(model: NonNullable<ReturnType<typeof buildDealDetailReadModel>>): PmMoreActionItem[] {
+  const items: PmMoreActionItem[] = []
+  if (model.links.match) {
+    items.push({ id: 'match', label: model.links.match.label, href: model.links.match.path })
   }
-  return (
-    <PmButton variant="outline" size="sm" asChild>
-      <Link to={link.path}>{link.label}</Link>
-    </PmButton>
-  )
+  if (model.links.negotiation) {
+    items.push({ id: 'negotiation', label: model.links.negotiation.label, href: model.links.negotiation.path })
+  }
+  if (model.links.needOpportunity) {
+    items.push({ id: 'need', label: model.links.needOpportunity.label, href: model.links.needOpportunity.path })
+  }
+  if (model.links.offerOpportunity) {
+    items.push({ id: 'offer', label: model.links.offerOpportunity.label, href: model.links.offerOpportunity.path })
+  }
+  return items
 }
 
 function DealListCard({ deal }: { deal: Deal }) {
@@ -84,16 +84,15 @@ function DealListCard({ deal }: { deal: Deal }) {
         >
           {deal.title}
         </Link>
-        <PmWorkflowBadge status={deal.status} entity="deal" />
+        <PmWorkflowBadge status={deal.status} entity="deal" size="sm" />
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">
+      <p className={cn('mt-2', pmTypography.caption, 'text-muted-foreground')}>
         Updated {formatDate(deal.updatedAt)}
       </p>
-      <div className="mt-4 border-t border-border/40 pt-3">
-        <PmButton size="sm" asChild>
-          <Link to={`/deals/${deal.id}`}>View deal</Link>
-        </PmButton>
-      </div>
+      <PmCardActions
+        className="mt-4"
+        primary={{ label: 'Open deal', href: `/deals/${deal.id}` }}
+      />
     </PmSurface>
   )
 }
@@ -124,7 +123,7 @@ export function DealsPage() {
       id: 'title',
       label: 'Title',
       cell: (d) => (
-        <Link to={`/deals/${d.id}`} className="font-medium hover:text-primary">
+        <Link to={`/deals/${d.id}`} className={cn(pmTypography.bodySm, 'font-medium hover:text-primary')}>
           {d.title}
         </Link>
       ),
@@ -146,7 +145,7 @@ export function DealsPage() {
       <PmPageLayout
         header={
           <PmPageHeader
-            label="Collaboration"
+            label="Workflow"
             title="Deals"
             description="Collaboration deals from accepted PostMatches and negotiations."
             metric={<PmPageHeroMetric value={0} label="Active" />}
@@ -170,7 +169,7 @@ export function DealsPage() {
     <PmPageLayout
       header={
         <PmPageHeader
-          label="Collaboration"
+          label="Workflow"
           title="Deals"
           description="Track collaboration deals through lifecycle stages."
           metric={<PmPageHeroMetric value={activeDeals} label="Active" />}
@@ -294,6 +293,46 @@ export function DealDetailPage() {
     })
   }
 
+  const dealWorkflowSteps: readonly PmWorkflowJourneyStep[] = [
+    {
+      id: 'match',
+      label: 'Match',
+      href: model.postMatchId ? `/matches/${model.postMatchId}` : undefined,
+      state: 'complete',
+    },
+    {
+      id: 'negotiation',
+      label: 'Negotiation',
+      status: model.negotiationStatus ?? undefined,
+      statusEntity: 'negotiation',
+      href: model.negotiationId ? `/negotiations/${model.negotiationId}` : undefined,
+      state: 'complete',
+    },
+    {
+      id: 'deal',
+      label: 'Deal',
+      status: model.status,
+      statusEntity: 'deal',
+      href: `/deals/${model.deal.id}`,
+      state: model.existingContract ? 'complete' : 'current',
+    },
+    {
+      id: 'contract',
+      label: 'Contract',
+      status: model.existingContract?.status,
+      statusEntity: 'contract',
+      href: model.contractLink?.path,
+      state: model.existingContract ? 'current' : 'upcoming',
+    },
+    {
+      id: 'execution',
+      label: 'Complete',
+      state: 'upcoming',
+    },
+  ]
+
+  const dealNavMore = buildDealNavMoreItems(model)
+
   return (
     <PmPageLayout
       header={
@@ -308,20 +347,25 @@ export function DealDetailPage() {
             />
           }
           badges={<PmWorkflowBadge status={model.status} entity="deal" />}
-          actions={<DealStageActions deal={model.deal} />}
+          actions={
+            model.existingContract && model.contractLink ? (
+              <PmButton asChild>
+                <Link to={model.contractLink.path}>{model.contractLink.label}</Link>
+              </PmButton>
+            ) : model.canCreateContract ? (
+              <CreateContractButton dealId={model.deal.id} />
+            ) : dealNavMore.length > 0 ? (
+              <PmMoreActions items={dealNavMore} label="Related records" />
+            ) : undefined
+          }
         />
       }
     >
-      <div className="flex flex-wrap gap-2">
-        <DealDetailNavLink link={model.links.match} fallbackLabel="Back to Match" />
-        <DealDetailNavLink link={model.links.negotiation} fallbackLabel="Back to Negotiation" />
-        <DealDetailNavLink link={model.links.needOpportunity} fallbackLabel="Back to Need Opportunity" />
-        <DealDetailNavLink link={model.links.offerOpportunity} fallbackLabel="Back to Offer Opportunity" />
-      </div>
-
       <PmDetailLayout
         main={
           <>
+            <PmWorkflowJourney steps={dealWorkflowSteps} compact label={false} />
+
             <PmContentCard title="Linked records">
               <PmFormReadonly>
                 <PmFormReadonlySection>
@@ -344,7 +388,7 @@ export function DealDetailPage() {
 
             <PmContentCard title="Participants">
               {model.participants.length ? (
-                <ul className="space-y-1 text-sm">
+                <ul className={cn('space-y-1', pmTypography.bodySm)}>
                   {model.participants.map((participant) => (
                     <li key={`${participant.userId}-${participant.role}`}>
                       {participant.displayName} · {participant.role}
@@ -353,19 +397,19 @@ export function DealDetailPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-muted-foreground">No participants recorded.</p>
+                <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>No participants recorded.</p>
               )}
             </PmContentCard>
 
             <PmContentCard title="Commercial terms">
               {model.commercialTermsLines.length ? (
-                <ul className="space-y-1 text-sm">
+                <ul className={cn('space-y-1', pmTypography.bodySm)}>
                   {model.commercialTermsLines.map((line) => (
                     <li key={line}>{line}</li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-muted-foreground">No commercial terms recorded yet.</p>
+                <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>No commercial terms recorded yet.</p>
               )}
             </PmContentCard>
           </>
@@ -419,13 +463,19 @@ export function DealRatePage() {
     <PmPageLayout
       header={
         <PmPageHeader
+          label="Workflow"
           title="Rate participants"
           description={`Post-deal review for deal ${id}`}
+          actions={
+            <PmPageActions
+              secondary={{ label: 'Back to deal', href: `/deals/${id}`, variant: 'outline' }}
+            />
+          }
         />
       }
     >
       <PmContentCard title="Rating criteria">
-        <p className="text-sm text-muted-foreground">
+        <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
           Communication · Quality · Timeliness · Collaboration
         </p>
         <PmButton className="mt-4">Submit review</PmButton>

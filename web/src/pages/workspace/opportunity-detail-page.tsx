@@ -1,26 +1,27 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
+import { contractsApi } from '@/api/contracts.ts'
 import { peopleApi } from '@/api/people.ts'
 import { applicationRepository, dealRepository } from '@/repositories/index.ts'
 import { matchingService } from '@/services/matching-service.ts'
 import { negotiationService } from '@/services/negotiation-service.ts'
-import { buildOpportunityMatchesReadModel } from '@/lib/opportunity-matches-read-model.ts'
+import { buildOpportunityMatchesReadModel, type OpportunityMatchCard } from '@/lib/opportunity-matches-read-model.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
 import { ApplicationsPanel } from '@/components/opportunity/applications-panel'
 import { OpportunityTimeline, type OpportunityTimelineEvent } from '@/components/opportunity/opportunity-timeline'
-import { CollaborationFlowStrip } from '@/components/opportunity/collaboration-flow-strip'
 import { OpportunitySummaryCard } from '@/components/opportunity/opportunity-summary-card'
 import { RelatedMatchesPanel } from '@/components/opportunity/related-matches-panel'
 import { OpportunityPublishExperience, OpportunityPublishPanel } from '@/components/opportunity/opportunity-publish-experience'
 import { ApplyWizard } from '@/components/opportunity/apply-wizard'
 import { OpportunityReadinessCard, resolveOpportunityReadiness } from '@/components/readiness'
 import { formatDate } from '@/lib/format'
-import { resolveCanonicalStatus } from '@/lib/status-display.ts'
+import { resolveCanonicalStatus, type StatusEntity } from '@/lib/status-display.ts'
 import {
   publishOpportunityUiAction,
   resolveProfileKindFromUser,
@@ -33,15 +34,15 @@ import {
   PmContentCard,
   PmDetailLayout,
   PmInspectorLayout,
-  PmMetricGrid,
   PmPageLayout,
+  PmSectionHeader,
 } from '@/components/layout/pm-layout-index'
 import {
   PmFormReadonly,
   PmFormReadonlyField,
   PmFormReadonlySection,
 } from '@/components/forms/pm-form-index'
-import { PmBadge, PmButton, PmEmptyState, PmMatchScoreBadge, PmPageHeader, PmPageHeroMetric, PmReadinessScoreBadge, PmStatCard } from '@/components/ui/pm-index'
+import { PmActionHub, PmBadge, PmButton, PmEmptyState, PmMatchScoreBadge, PmPageHeader, PmPageHeroMetric, PmPageActions, PmWorkflowJourney, type PmActionHubItem, type PmWorkflowJourneyStep } from '@/components/ui/pm-index'
 import { formatReadinessScorePercent } from '@/components/ui/pm-readiness-score-display'
 import { OpportunityStatusBadge } from '@/components/opportunity/opportunity-status-badge'
 import { formatOpportunityIntent } from '@/components/opportunity/opportunity-display'
@@ -58,6 +59,176 @@ function resolveCollaborationActiveStep(
   }
   if (matches.length > 0) return 'PostMatch'
   return 'Opportunity'
+}
+
+function resolveJourneyActiveIndex(
+  collaborationStep: ReturnType<typeof resolveCollaborationActiveStep>,
+  oppStatus: string,
+): number {
+  if (['completed', 'closed'].includes(oppStatus)) return 5
+  if (['in_execution', 'executing'].includes(oppStatus)) return 5
+  if (oppStatus === 'contracted') return 4
+  const stepIndex: Record<ReturnType<typeof resolveCollaborationActiveStep>, number> = {
+    Opportunity: 0,
+    PostMatch: 1,
+    Negotiation: 2,
+    Deal: 3,
+    Contract: 4,
+  }
+  return stepIndex[collaborationStep] ?? 0
+}
+
+function buildOpportunityWorkflowSteps(
+  opp: { id: string; status: string },
+  collaborationStep: ReturnType<typeof resolveCollaborationActiveStep>,
+  topCard?: OpportunityMatchCard,
+  dealStatus?: string,
+  contractStatus?: string,
+): readonly PmWorkflowJourneyStep[] {
+  const activeIndex = resolveJourneyActiveIndex(collaborationStep, opp.status)
+  const stepDefs: Array<{
+    id: string
+    label: string
+    status?: string
+    statusEntity?: StatusEntity
+    href?: string
+  }> = [
+    {
+      id: 'opportunity',
+      label: 'Opportunity',
+      status: opp.status,
+      statusEntity: 'opportunity',
+      href: `/opportunities/${opp.id}`,
+    },
+    {
+      id: 'match',
+      label: 'Match',
+      status: topCard?.match.status,
+      statusEntity: 'match',
+      href: topCard?.detailPath,
+    },
+    {
+      id: 'negotiation',
+      label: 'Negotiation',
+      status: topCard?.actions.negotiation?.status,
+      statusEntity: 'negotiation',
+      href: topCard?.actions.negotiationId
+        ? `/negotiations/${topCard.actions.negotiationId}`
+        : undefined,
+    },
+    {
+      id: 'deal',
+      label: 'Deal',
+      status: dealStatus,
+      statusEntity: 'deal',
+      href: topCard?.actions.dealId ? `/deals/${topCard.actions.dealId}` : undefined,
+    },
+    {
+      id: 'contract',
+      label: 'Contract',
+      status: contractStatus,
+      statusEntity: 'contract',
+    },
+    {
+      id: 'execution',
+      label: 'Complete',
+      status: ['completed', 'closed'].includes(opp.status) ? opp.status : undefined,
+      statusEntity: 'opportunity',
+    },
+  ]
+
+  return stepDefs.map((step, index) => ({
+    id: step.id,
+    label: step.label,
+    status: step.status,
+    statusEntity: step.statusEntity,
+    href: step.href,
+    state:
+      index < activeIndex
+        ? ('complete' as const)
+        : index === activeIndex
+          ? ('current' as const)
+          : ('upcoming' as const),
+  }))
+}
+
+function buildRecommendedActionItem(input: {
+  canPublishDraft: boolean
+  opportunityId: string
+  topCard?: OpportunityMatchCard
+}): PmActionHubItem | null {
+  const { canPublishDraft, opportunityId, topCard } = input
+
+  if (canPublishDraft) {
+    return {
+      id: 'publish',
+      title: 'Publish opportunity',
+      context: 'Publishing runs matching and surfaces PostMatches.',
+      status: 'draft',
+      statusEntity: 'opportunity',
+      primary: { label: 'Review readiness', href: `#${RELATED_MATCHES_SECTION_ID}` },
+      secondary: { label: 'Edit', href: `/opportunities/${opportunityId}/edit`, variant: 'outline' },
+    }
+  }
+
+  if (!topCard) return null
+
+  const { actions } = topCard
+  if (actions.showAccept) {
+    return {
+      id: 'accept-match',
+      title: 'Accept top match',
+      context: 'Respond to the highest-ranked PostMatch to advance the workflow.',
+      status: topCard.match.status,
+      statusEntity: 'match',
+      matchScore: topCard.match.matchScore,
+      primary: { label: 'Open match', href: topCard.detailPath },
+    }
+  }
+  if (actions.showStartNegotiation) {
+    return {
+      id: 'start-negotiation',
+      title: 'Start negotiation',
+      context: 'Move from match acceptance into term negotiation.',
+      status: topCard.match.status,
+      statusEntity: 'match',
+      matchScore: topCard.match.matchScore,
+      primary: { label: 'Open match', href: topCard.detailPath },
+    }
+  }
+  if (actions.showViewNegotiation && actions.negotiationId) {
+    return {
+      id: 'view-negotiation',
+      title: 'Review negotiation',
+      context: 'Terms are in progress — review or counter.',
+      status: actions.negotiation?.status ?? 'active',
+      statusEntity: 'negotiation',
+      primary: { label: 'Open negotiation', href: `/negotiations/${actions.negotiationId}` },
+      secondary: { label: 'View match', href: topCard.detailPath, variant: 'outline' },
+    }
+  }
+  if (actions.showCreateDeal || actions.showViewDeal) {
+    return {
+      id: 'view-deal',
+      title: actions.showCreateDeal ? 'Create deal' : 'Review deal',
+      context: 'Finalize commercial terms from the accepted negotiation.',
+      status: actions.negotiation?.status,
+      statusEntity: 'deal',
+      primary: actions.dealId
+        ? { label: 'Open deal', href: `/deals/${actions.dealId}` }
+        : { label: 'Open match', href: topCard.detailPath },
+    }
+  }
+
+  return {
+    id: 'review-match',
+    title: 'Review top match',
+    context: 'Compare compatibility and choose the next collaboration step.',
+    status: topCard.match.status,
+    statusEntity: 'match',
+    matchScore: topCard.match.matchScore,
+    primary: { label: 'Open match', href: topCard.detailPath },
+  }
 }
 
 export function OpportunityDetailPage() {
@@ -140,12 +311,31 @@ export function OpportunityDetailPage() {
   )
   const hasMatches = (relatedMatchesModel?.matches.length ?? 0) > 0
   const topMatch = relatedMatchesModel?.matches[0]?.match
+  const topMatchCard = relatedMatchesModel?.matches[0]
   const topMatchScore = topMatch?.matchScore
   const opportunityReadiness = resolveOpportunityReadiness(opp)
   const canPublishDraft =
     isOwner &&
     !isPendingApproval &&
     (opp.status === 'draft' || resolveCanonicalStatus('opportunity', opp.status) === 'draft')
+  const topDeal = topMatchCard?.actions.dealId
+    ? dealRepository.findByPostMatchId(topMatchCard.match.id)
+    : undefined
+  const topContract = topMatchCard?.actions.dealId
+    ? contractsApi.getByDealId(topMatchCard.actions.dealId)[0]
+    : undefined
+  const workflowSteps = buildOpportunityWorkflowSteps(
+    opp,
+    collaborationStep,
+    topMatchCard,
+    topDeal?.status,
+    topContract?.status,
+  )
+  const recommendedAction = buildRecommendedActionItem({
+    canPublishDraft,
+    opportunityId: opp.id,
+    topCard: topMatchCard,
+  })
 
   const timelineEvents = useMemo((): OpportunityTimelineEvent[] => {
     const events: OpportunityTimelineEvent[] = [
@@ -249,98 +439,59 @@ export function OpportunityDetailPage() {
             </>
           }
           actions={
-            <>
-              <PmButton variant="outline" asChild>
-                <Link to="/matches">View matches</Link>
-              </PmButton>
-              {isOwner ? (
-                <PmButton variant="outline" asChild>
-                  <Link to={`/opportunities/${opp.id}/edit`}>Edit</Link>
-                </PmButton>
-              ) : null}
-            </>
+            <PmPageActions
+              primary={
+                recommendedAction
+                  ? undefined
+                  : hasMatches
+                    ? {
+                        label: 'Open top match',
+                        href: `/matches/${relatedMatchesModel!.matches[0]!.match.id}`,
+                      }
+                    : canPublishDraft
+                      ? undefined
+                      : { label: 'View matches', href: '/matches', variant: 'outline' }
+              }
+              more={
+                isOwner
+                  ? [
+                      {
+                        id: 'edit',
+                        label: 'Edit opportunity',
+                        href: `/opportunities/${opp.id}/edit`,
+                        icon: Pencil,
+                      },
+                    ]
+                  : undefined
+              }
+            />
           }
         />
       }
     >
-      <CollaborationFlowStrip activeStep={collaborationStep} />
-
-      {topMatchScore != null ? (
-        <PmMatchScoreBadge
-          score={topMatchScore}
-          variant="hero"
-          className="mb-2"
-          breakdown={topMatch?.payload?.breakdown ?? topMatch?.matchCriteria}
-        />
-      ) : (
-        <PmReadinessScoreBadge
-          score={opportunityReadiness.score}
-          variant="hero"
-          className="mb-2"
-          explanation={{
-            missingRequired: opportunityReadiness.missingRequired,
-            missingRecommended: opportunityReadiness.missingRecommended,
-          }}
-        />
-      )}
-
-      <PmMetricGrid columns={3} className="mb-2">
-        <PmStatCard
-          label="Related matches"
-          value={relatedMatchesModel?.matches.length ?? 0}
-          hint="Ranked by compatibility"
-          dense
-        />
-        <PmStatCard
-          label="Workflow step"
-          value={collaborationStep}
-          hint="Current collaboration stage"
-          dense
-        />
-        <PmStatCard
-          label="Skills listed"
-          value={skills.length}
-          hint="Scope capabilities"
-          dense
-        />
-      </PmMetricGrid>
-
-      {(hasMatches || canPublishDraft) ? (
-        <PmContentCard title="Primary action" className="mb-2">
-          <p className="text-sm text-muted-foreground">
-            {hasMatches
-              ? 'Work through your matches in order: respond, negotiate terms, then create a deal.'
-              : 'Publish this opportunity to discover PostMatches, then negotiate and create a deal.'}
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <PmButton
-              variant={hasMatches ? 'default' : 'outline'}
-              asChild
-            >
-              <Link to={hasMatches ? `/matches/${relatedMatchesModel!.matches[0]!.match.id}` : '/matches'}>
-                {hasMatches ? 'Open top match' : 'View matches'}
-              </Link>
-            </PmButton>
-            <PmButton variant="outline" asChild>
-              <Link to="/pipeline/matches">Pipeline: Post-matches</Link>
-            </PmButton>
-          </div>
-        </PmContentCard>
-      ) : null}
-
-      {isPendingApproval ? (
-        <PmContentCard className="border-warning/30 bg-warning/5">
-          <p className="text-sm text-warning">
-            Your account is pending approval. You can browse matches but cannot respond or move pipeline cards yet.
-          </p>
-        </PmContentCard>
-      ) : null}
-
-      <OpportunityPublishExperience publishDetails={publishDetails} />
-
       <PmDetailLayout
         main={
           <>
+            <PmWorkflowJourney steps={workflowSteps} compact label={false} />
+
+            {recommendedAction ? (
+              <PmActionHub
+                title="Recommended next action"
+                description="The single most important step for this opportunity."
+                items={[recommendedAction]}
+              />
+            ) : null}
+
+            {isPendingApproval ? (
+              <PmContentCard className="border-warning/30 bg-warning/5">
+                <p className={cn(pmTypography.bodySm, 'text-warning')}>
+                  Your account is pending approval. You can browse matches but cannot respond or move pipeline cards yet.
+                </p>
+              </PmContentCard>
+            ) : null}
+
+            <OpportunityPublishExperience publishDetails={publishDetails} />
+
             <OpportunitySummaryCard
               opportunity={opp}
               creatorName={creator?.profile?.name}
@@ -395,7 +546,9 @@ export function OpportunityDetailPage() {
           </>
         }
         inspector={
-          <PmInspectorLayout header="Actions & readiness">
+          <PmInspectorLayout
+            header={<PmSectionHeader title="Actions & readiness" />}
+          >
             {isOwner ? (
               <OpportunityReadinessCard opportunity={opp} opportunityId={opp.id} />
             ) : null}
@@ -409,28 +562,17 @@ export function OpportunityDetailPage() {
               />
             ) : null}
 
-            <PmContentCard title="Next steps">
-              <p className="text-sm text-muted-foreground">
-                Use the primary action above or jump directly to readiness and publish controls.
-              </p>
-              <div className="mt-3 flex flex-col gap-2">
-                <PmButton variant="outline" className="w-full" asChild>
-                  <Link to="/matches">All matches</Link>
-                </PmButton>
-              </div>
-            </PmContentCard>
-
             {productFlags.showLegacyApplications && !isOwner && application && !canApply ? (
               <PmContentCard title="Direct application (legacy)">
                 <PmBadge tone="neutral" size="sm" className="mb-2">
                   {application.status}
                 </PmBadge>
-                <p className="text-sm text-muted-foreground">
+                <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
                   {application.status === 'accepted'
                     ? 'Your legacy application was accepted.'
                     : 'You submitted a direct application. PostMatch is the primary collaboration path.'}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className={cn('mt-1', pmTypography.caption, 'text-muted-foreground')}>
                   Submitted {formatDate(application.createdAt)}
                 </p>
                 {canEdit && !isPendingApproval ? (
@@ -456,7 +598,7 @@ export function OpportunityDetailPage() {
                 />
               ) : (
                 <PmContentCard title="Direct application (legacy / hiring)">
-                  <p className="text-sm text-muted-foreground">
+                  <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
                     PostMatch is the primary path: Opportunity → PostMatch → Negotiation → Deal → Contract.
                   </p>
                   <PmButton
@@ -476,7 +618,7 @@ export function OpportunityDetailPage() {
           <OpportunityTimeline
             activeStep={collaborationStep}
             events={timelineEvents}
-            title="Activity"
+            title="Activity & history"
           />
         }
       />
