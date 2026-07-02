@@ -129,6 +129,111 @@ function matchingOffer(
   } as Opportunity
 }
 
+const circularPublishUsers: PlatformUser[] = [
+  {
+    id: 'creator-a',
+    email: 'a@test.pmtwin',
+    role: 'professional',
+    status: 'active',
+    profile: readyProfile,
+  },
+  {
+    id: 'creator-b',
+    email: 'b@test.pmtwin',
+    role: 'professional',
+    status: 'active',
+    profile: readyProfile,
+  },
+  {
+    id: 'creator-c',
+    email: 'c@test.pmtwin',
+    role: 'professional',
+    status: 'active',
+    profile: readyProfile,
+  },
+]
+
+function circularPublishNeed(
+  id: string,
+  creatorId: string,
+  status: 'draft' | 'published' = 'published',
+): Opportunity {
+  const roleMap: Record<string, { role: string; skills: string[] }> = {
+    'creator-a': { role: 'Architect', skills: ['BIM', 'Revit'] },
+    'creator-b': { role: 'Civil Engineer', skills: ['Structural Analysis', 'SAP2000'] },
+    'creator-c': { role: 'Architect', skills: ['Project Management', 'Planning'] },
+  }
+  const { role, skills } = roleMap[creatorId] ?? { role: 'Architect', skills: ['BIM', 'Revit'] }
+  return {
+    id,
+    creatorId,
+    title: `Need ${id}`,
+    intent: 'need',
+    status,
+    modelType: 'project_based',
+    location: 'remote',
+    scope: { sectors: ['Construction'], requiredSkills: skills },
+    attributes: {
+      targetRole: role,
+      startDate: '2026-03-01',
+      tenderDeadline: '2026-06-01',
+      locationRequirement: 'remote',
+    },
+    normalized: { role, requiredServices: skills, skills, location: 'remote', modelType: 'project_based' },
+    exchangeData: { budgetRange: { min: 150_000, max: 400_000, currency: 'SAR' } },
+    preferredPartnerType: 'company',
+    attachments: [{ name: 'brief.pdf' }],
+    complianceRequirements: ['Saudi Building Code'],
+    deliveryMilestones: [{ title: 'Kickoff', dueDate: '2026-04-01' }],
+  } as Opportunity
+}
+
+function circularPublishOffer(
+  id: string,
+  creatorId: string,
+  status: 'draft' | 'published' = 'published',
+): Opportunity {
+  const roleMap: Record<string, { role: string; skills: string[] }> = {
+    'creator-a': { role: 'Architect', skills: ['Project Management', 'Planning'] },
+    'creator-b': { role: 'Architect', skills: ['BIM', 'Revit'] },
+    'creator-c': { role: 'Civil Engineer', skills: ['Structural Analysis', 'SAP2000'] },
+  }
+  const { role, skills } = roleMap[creatorId] ?? { role: 'Architect', skills: ['BIM', 'Revit'] }
+  return {
+    id,
+    creatorId,
+    title: `Offer ${id}`,
+    intent: 'offer',
+    status,
+    modelType: 'project_based',
+    location: 'remote',
+    scope: { sectors: ['Construction'], requiredSkills: skills },
+    attributes: {
+      targetRole: role,
+      startDate: '2026-03-01',
+      tenderDeadline: '2026-06-01',
+      locationRequirement: 'remote',
+    },
+    normalized: { role, offeredServices: skills, skills, location: 'remote', modelType: 'project_based' },
+    exchangeData: { budgetRange: { min: 120_000, max: 350_000, currency: 'SAR' } },
+    preferredPartnerType: 'company',
+    attachments: [{ name: 'portfolio.pdf' }],
+    complianceRequirements: ['Saudi Building Code'],
+    deliveryMilestones: [{ title: 'Delivery', dueDate: '2026-04-15' }],
+  } as Opportunity
+}
+
+function buildPublishCircularCyclePool(): Opportunity[] {
+  return [
+    circularPublishNeed('pub-need-a', 'creator-a'),
+    circularPublishOffer('pub-offer-a', 'creator-a'),
+    circularPublishNeed('pub-need-b', 'creator-b'),
+    circularPublishOffer('pub-offer-b', 'creator-b'),
+    circularPublishNeed('pub-need-c', 'creator-c'),
+    circularPublishOffer('pub-offer-c', 'creator-c'),
+  ]
+}
+
 const testUsers: PlatformUser[] = [
   {
     id: 'user-need',
@@ -160,8 +265,11 @@ const testUsers: PlatformUser[] = [
   },
 ]
 
-function createPublishStack(opportunities: Opportunity[]): CommandGatewayTestStack {
-  return createCommandGatewayTestStack({ opportunities, users: testUsers })
+function createPublishStack(
+  opportunities: Opportunity[],
+  users: PlatformUser[] = testUsers,
+): CommandGatewayTestStack {
+  return createCommandGatewayTestStack({ opportunities, users })
 }
 
 function publishDeps(stack: CommandGatewayTestStack) {
@@ -172,24 +280,28 @@ function publishDeps(stack: CommandGatewayTestStack) {
     gateway: stack.gateway,
   })
 
+  const matchingDeps = {
+    getOpportunityById: (id: string) => stack.opportunityRepository.getById(id),
+    listPublishedOpportunities: () =>
+      stack.opportunityRepository
+        .getAll()
+        .filter((opp) => opp.status === 'published'),
+    discoverPostMatch: postMatchService.discoverPostMatch.bind(postMatchService),
+    findActiveDuplicateByStrongKey: (strongKey: string) =>
+      stack.postMatchRepository.findActiveDuplicateByStrongKey(strongKey),
+    getMatchingEngineContext: () => ({
+      canonical: {},
+      config: engineConfig,
+    }),
+  }
+
   return {
     transitionOpportunityStatus: (id: string, status: string) =>
       opportunityCommandService.transitionOpportunityStatus(id, status),
     runPublishMatching: (opportunityId: string) =>
-      matchingService.runPublishMatchingForOpportunity(opportunityId, {
-        getOpportunityById: (id) => stack.opportunityRepository.getById(id),
-        listPublishedOpportunities: () =>
-          stack.opportunityRepository
-            .getAll()
-            .filter((opp) => opp.status === 'published'),
-        discoverPostMatch: postMatchService.discoverPostMatch.bind(postMatchService),
-        findActiveDuplicateByStrongKey: (strongKey) =>
-          stack.postMatchRepository.findActiveDuplicateByStrongKey(strongKey),
-        getMatchingEngineContext: () => ({
-          canonical: {},
-          config: engineConfig,
-        }),
-      }),
+      matchingService.runPublishMatchingForOpportunity(opportunityId, matchingDeps),
+    runCircularMatching: (opportunityId: string) =>
+      matchingService.runCircularMatchingForOpportunity(opportunityId, matchingDeps),
   }
 }
 
@@ -403,6 +515,125 @@ describe('publish matching wiring', () => {
     assert.equal(readModel.isEmpty, false)
     assert.ok(readModel.matches.length >= 1)
     assert.ok(readModel.matches.some((card) => card.match.matchType === 'one_way'))
+  })
+
+  it('ready need publish also runs circular matching on publish orchestration', () => {
+    const need = matchingNeed('need-circular-publish', 'user-need', 'draft')
+    const stack = createPublishStack([need])
+    let circularCalls = 0
+
+    const result = publishOpportunityUiAction(
+      need.id,
+      {
+        profile: readyProfile,
+        profileKind: 'individual',
+        opportunity: stack.opportunityRepository.getById(need.id),
+      },
+      {
+        transitionOpportunityStatus: () => ({
+          success: true,
+          aggregateId: need.id,
+          commandType: 'TransitionOpportunityStatus',
+        }),
+        runPublishMatching: () => ({
+          discoveredMatchesCount: 0,
+          skippedDuplicatesCount: 0,
+          matchingErrors: [],
+          postMatchIds: [],
+        }),
+        runCircularMatching: () => {
+          circularCalls += 1
+          return {
+            discoveredMatchesCount: 1,
+            skippedDuplicatesCount: 0,
+            matchingErrors: [],
+            postMatchIds: ['pm-circular'],
+          }
+        },
+      },
+    )
+
+    assert.equal(result.success, true)
+    if (!result.success) return
+    assert.equal(circularCalls, 1)
+    assert.equal(result.discoveredMatchesCount, 1)
+  })
+
+  it('publish succeeds when circular matching throws', () => {
+    const need = matchingNeed('need-circular-throw', 'user-need', 'draft')
+    const stack = createPublishStack([need])
+
+    const result = publishOpportunityUiAction(
+      need.id,
+      {
+        profile: readyProfile,
+        profileKind: 'individual',
+        opportunity: stack.opportunityRepository.getById(need.id),
+      },
+      {
+        transitionOpportunityStatus: () => ({
+          success: true,
+          aggregateId: need.id,
+          commandType: 'TransitionOpportunityStatus',
+        }),
+        runPublishMatching: () => ({
+          discoveredMatchesCount: 2,
+          skippedDuplicatesCount: 0,
+          matchingErrors: [],
+          postMatchIds: ['pm-1', 'pm-2'],
+        }),
+        runCircularMatching: () => {
+          throw new Error('Circular engine failure')
+        },
+      },
+    )
+
+    assert.equal(result.success, true)
+    if (!result.success) return
+    assert.equal(result.discoveredMatchesCount, 2)
+    assert.ok(result.matchingErrors.some((error) => error.includes('Circular engine failure')))
+  })
+
+  it('runCircularMatchingForOpportunity discovers circular matches on publish with cycle pool', () => {
+    const cyclePool = buildPublishCircularCyclePool()
+    const anchor = circularPublishNeed('pub-anchor', 'creator-a', 'draft')
+    const stack = createPublishStack([...cyclePool, anchor], [
+      ...testUsers,
+      ...circularPublishUsers,
+    ])
+    const deps = publishDeps(stack)
+    const postMatchService = createPostMatchCommandService({ gateway: stack.gateway })
+    const matchingDeps = {
+      getOpportunityById: (id: string) => stack.opportunityRepository.getById(id),
+      listPublishedOpportunities: () =>
+        stack.opportunityRepository.getAll().filter((opp) => opp.status === 'published'),
+      discoverPostMatch: postMatchService.discoverPostMatch.bind(postMatchService),
+      findActiveDuplicateByStrongKey: (strongKey: string) =>
+        stack.postMatchRepository.findActiveDuplicateByStrongKey(strongKey),
+      getMatchingEngineContext: () => ({ canonical: {}, config: engineConfig }),
+    }
+
+    const result = publishOpportunityUiAction(
+      anchor.id,
+      {
+        profile: readyProfile,
+        profileKind: 'individual',
+        opportunity: stack.opportunityRepository.getById(anchor.id),
+      },
+      deps,
+    )
+
+    assert.equal(result.success, true)
+    if (!result.success) return
+
+    const circularMatches = stack.postMatchRepository
+      .getAll()
+      .filter((match) => match.matchType === 'circular')
+    assert.ok(circularMatches.length >= 1, 'expected circular match from publish')
+
+    const second = matchingService.runCircularMatchingForOpportunity(anchor.id, matchingDeps)
+    assert.equal(second.discoveredMatchesCount, 0)
+    assert.ok(second.skippedDuplicatesCount >= 1)
   })
 })
 

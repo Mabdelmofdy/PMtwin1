@@ -76,18 +76,12 @@ export type OpportunityMatchesReadModelDeps = {
   readonly startNegotiationDeps?: StartNegotiationUiActionsDeps
 }
 
-const MATCH_TYPE_LABELS: Record<string, string> = {
-  one_way: 'One-way',
-  two_way: 'Two-way',
-  consortium: 'Consortium',
-  circular: 'Circular',
-}
+import { formatFrameworkMatchTypeLabel } from '@/config/need-offer-framework.ts'
 
 const BLOCKING_NEGOTIATION_STATUSES = new Set(['active', 'countered', 'agreed'])
 
 export function formatMatchTypeLabel(matchType: string): string {
-  const key = matchType.toLowerCase()
-  return MATCH_TYPE_LABELS[key] ?? matchType.replace(/_/g, ' ')
+  return formatFrameworkMatchTypeLabel(matchType)
 }
 
 function resolveParticipantDisplayName(

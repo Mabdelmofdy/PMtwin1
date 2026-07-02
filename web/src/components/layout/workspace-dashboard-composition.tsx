@@ -26,6 +26,7 @@ import { useAuth } from '@/providers/auth-provider'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { formatDate, formatRelativeTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
 
 function buildNeedsActionItems(input: {
   userId?: string
@@ -117,6 +118,14 @@ export function WorkspaceDashboardComposition() {
   const recommendedMatches = [...matches]
     .sort((a, b) => b.matchScore - a.matchScore)
     .slice(0, 3)
+
+  const matchTypeSummary = MATCHING_MODEL_KEYS.map((key) => ({
+    key,
+    label: MATCHING_MODELS[key].label,
+    count: matches.filter(
+      (match) => (match.matchType || 'one_way').toLowerCase() === key,
+    ).length,
+  }))
 
   const activeWorkflowItems = [
     ...negotiations
@@ -332,6 +341,27 @@ export function WorkspaceDashboardComposition() {
           Focus on one action at a time: complete your current stage, then move to the next stage in the collaboration chain.
         </p>
       </PmSurface>
+
+      <PmSectionHeader
+        title="My matching summary"
+        description="Matches grouped by Need/Offer framework topology models."
+        actions={
+          <PmButton size="sm" variant="outline" asChild>
+            <Link to="/matches">View all matches</Link>
+          </PmButton>
+        }
+      />
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {matchTypeSummary.map((entry) => (
+          <PmSurface key={entry.key} variant="default" shadow="card" className="p-4">
+            <p className={cn(pmTypography.caption, 'text-muted-foreground')}>{entry.label}</p>
+            <p className={cn(pmTypography.bodySm, 'mt-1 text-2xl font-semibold')}>{entry.count}</p>
+            <p className={cn(pmTypography.caption, 'mt-1 text-muted-foreground')}>
+              {MATCHING_MODELS[entry.key].subtitle}
+            </p>
+          </PmSurface>
+        ))}
+      </div>
 
       <PmSectionHeader
         title="Recommended from marketplace"

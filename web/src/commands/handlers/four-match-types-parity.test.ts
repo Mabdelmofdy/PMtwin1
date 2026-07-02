@@ -99,6 +99,89 @@ function accept(
   } as never)
 }
 
+function runFullMatchLifecycle(
+  stack: ReturnType<typeof buildStack>,
+  matchId: string,
+  acceptUserIds: readonly string[],
+) {
+  const {
+    postMatchHandler,
+    negotiationHandler,
+    dealHandler,
+    contractHandler,
+    postMatchRepository,
+    negotiationRepository,
+    dealRepository,
+    contractRepository,
+  } = stack
+
+  for (const userId of acceptUserIds) {
+    const acceptResult = accept(postMatchHandler, matchId, userId)
+    assert.equal(acceptResult.success, true, JSON.stringify(acceptResult.errors))
+  }
+  assert.equal(postMatchRepository.getById(matchId)?.status, 'confirmed')
+
+  const startResult = negotiationHandler.handle({
+    commandType: 'StartNegotiationFromPostMatch',
+    aggregateId: matchId,
+    clientRequestId: `req-start-${matchId}`,
+  } as never)
+  assert.equal(startResult.success, true, JSON.stringify(startResult.errors))
+  const negotiationId = startResult.aggregateId
+
+  const agreeResult = negotiationHandler.handle({
+    commandType: 'AgreeNegotiation',
+    aggregateId: negotiationId,
+    clientRequestId: `req-agree-${negotiationId}`,
+  } as never)
+  assert.equal(agreeResult.success, true, JSON.stringify(agreeResult.errors))
+
+  const dealResult = dealHandler.handle({
+    commandType: 'CreateDealFromPostMatch',
+    aggregateId: matchId,
+    clientRequestId: `req-deal-${matchId}`,
+    negotiationId,
+  } as never)
+  assert.equal(dealResult.success, true, JSON.stringify(dealResult.errors))
+  const dealId = dealResult.aggregateId
+  const deal = dealRepository.getById(dealId)
+  assert.ok(deal)
+
+  const contractResult = contractHandler.handle({
+    commandType: 'CreateContractFromDeal',
+    aggregateId: dealId,
+    clientRequestId: `req-contract-${dealId}`,
+    dealId,
+  } as never)
+  assert.equal(contractResult.success, true, JSON.stringify(contractResult.errors))
+
+  return {
+    negotiation: negotiationRepository.getById(negotiationId),
+    deal,
+    contract: contractRepository.getById(contractResult.aggregateId),
+  }
+}
+
+const circularDiscovered: PostMatch = {
+  id: 'pm-circular-e2e',
+  matchType: 'circular',
+  status: 'discovered',
+  matchScore: 0.66,
+  participants: [
+    { userId: 'c1', role: 'chain_participant', opportunityId: 'c1-offer', participantStatus: 'pending' },
+    { userId: 'c2', role: 'chain_participant', opportunityId: 'c2-offer', participantStatus: 'pending' },
+    { userId: 'c3', role: 'chain_participant', opportunityId: 'c3-offer', participantStatus: 'pending' },
+  ],
+  payload: {
+    cycle: ['c1', 'c2', 'c3'],
+    links: [
+      { fromCreatorId: 'c1', toCreatorId: 'c2', needId: 'c2-need', offerId: 'c1-offer', score: 0.7 },
+      { fromCreatorId: 'c2', toCreatorId: 'c3', needId: 'c3-need', offerId: 'c2-offer', score: 0.7 },
+      { fromCreatorId: 'c3', toCreatorId: 'c1', needId: 'c1-need', offerId: 'c3-offer', score: 0.7 },
+    ],
+  },
+}
+
 const twoWayMatch: PostMatch = {
   id: 'pm-two-way',
   matchType: 'two_way',
@@ -202,7 +285,49 @@ describe('four match types — multi-party confirm quorum', () => {
   })
 })
 
-describe('four match types — downstream flow for non-one_way', () => {
+describe('four match types — full lifecycle (Accept → Confirm → Negotiation → Deal → Contract)', () => {
+  it('runs complete lifecycle for two_way match', () => {
+    const stack = buildStack([structuredClone(twoWayMatch)])
+    const { negotiation, deal, contract } = runFullMatchLifecycle(
+      stack,
+      'pm-two-way',
+      ['A', 'B'],
+    )
+
+    assert.deepEqual(negotiation?.opportunityIds, [
+      'a-need',
+      'a-offer',
+      'b-need',
+      'b-offer',
+    ])
+    assert.equal(deal?.matchType, 'two_way')
+    assert.deepEqual(deal?.opportunityIds, ['a-need', 'a-offer', 'b-need', 'b-offer'])
+    assert.ok(contract)
+    assert.deepEqual(contract?.opportunityIds, deal?.opportunityIds)
+  })
+
+  it('runs complete lifecycle for circular match', () => {
+    const stack = buildStack([structuredClone(circularDiscovered)])
+    const { negotiation, deal, contract } = runFullMatchLifecycle(
+      stack,
+      'pm-circular-e2e',
+      ['c1', 'c2', 'c3'],
+    )
+
+    assert.deepEqual(negotiation?.opportunityIds, [
+      'c2-need',
+      'c1-offer',
+      'c3-need',
+      'c2-offer',
+      'c1-need',
+      'c3-offer',
+    ])
+    assert.equal(deal?.matchType, 'circular')
+    assert.ok((deal?.opportunityIds?.length ?? 0) >= 6)
+    assert.ok(contract)
+    assert.ok((contract?.opportunityIds?.length ?? 0) >= 6)
+  })
+
   it('runs PostMatch -> Negotiation -> Deal -> Contract for a consortium match', () => {
     const {
       negotiationHandler,

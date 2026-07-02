@@ -24,6 +24,9 @@ import {
 } from '@/components/ui/select'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { formatMatchTypeBadgeLabel } from '@/components/collaboration/collaboration-display'
+import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
+import { formatFrameworkMatchTypeSubtitle } from '@/config/need-offer-framework.ts'
+import { cn } from '@/lib/utils'
 import type { PostMatch } from '@/types/domain.ts'
 
 export type MatchesListSectionProps = {
@@ -93,9 +96,14 @@ export function MatchesListSection({
       hideable: true,
       defaultVisible: true,
       cell: (m) => (
-        <PmBadge tone="neutral" size="sm">
-          {formatMatchTypeBadgeLabel(m.matchType)}
-        </PmBadge>
+        <div className="flex flex-col gap-0.5">
+          <PmBadge tone="neutral" size="sm">
+            {formatMatchTypeBadgeLabel(m.matchType)}
+          </PmBadge>
+          <span className={cn(pmTypography.caption, 'text-muted-foreground')}>
+            {formatFrameworkMatchTypeSubtitle(m.matchType)}
+          </span>
+        </div>
       ),
     },
     {
@@ -168,11 +176,12 @@ export function MatchesListSection({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All types</SelectItem>
-                        <SelectItem value="one_way">One-way</SelectItem>
-                        <SelectItem value="two_way">Two-way</SelectItem>
-                        <SelectItem value="consortium">Consortium</SelectItem>
-                        <SelectItem value="circular">Circular</SelectItem>
+                        <SelectItem value="all">All models</SelectItem>
+                        {MATCHING_MODEL_KEYS.map((key) => (
+                          <SelectItem key={key} value={key}>
+                            {MATCHING_MODELS[key].label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>

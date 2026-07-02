@@ -81,32 +81,18 @@ function buildTwoWayTopology(
 
   const nodes: MatchTopologyNode[] = [
     {
-      id: 'a-need',
+      id: 'need-a',
       label: oppTitle(sideA?.needId, lookup),
       kind: 'need',
       href: sideA?.needId ? `/opportunities/${sideA.needId}` : undefined,
-      subtitle: 'A Need',
+      subtitle: 'Need A',
     },
     {
-      id: 'b-offer',
-      label: oppTitle(sideB?.offerId, lookup),
-      kind: 'offer',
-      href: sideB?.offerId ? `/opportunities/${sideB.offerId}` : undefined,
-      subtitle: 'B Offer',
-    },
-    {
-      id: 'b-need',
+      id: 'need-b',
       label: oppTitle(sideB?.needId, lookup),
       kind: 'need',
       href: sideB?.needId ? `/opportunities/${sideB.needId}` : undefined,
-      subtitle: 'B Need',
-    },
-    {
-      id: 'a-offer',
-      label: oppTitle(sideA?.offerId, lookup),
-      kind: 'offer',
-      href: sideA?.offerId ? `/opportunities/${sideA.offerId}` : undefined,
-      subtitle: 'A Offer',
+      subtitle: 'Need B',
     },
   ]
 
@@ -116,8 +102,7 @@ function buildTwoWayTopology(
     frameworkSubtitle: formatFrameworkMatchTypeSubtitle('two_way'),
     nodes,
     edges: [
-      { fromId: 'a-need', toId: 'b-offer', label: 'A Need ↔ B Offer', bidirectional: true },
-      { fromId: 'b-need', toId: 'a-offer', label: 'B Need ↔ A Offer', bidirectional: true },
+      { fromId: 'need-a', toId: 'need-b', label: 'Need A ↔ Need B', bidirectional: true },
     ],
   }
 }

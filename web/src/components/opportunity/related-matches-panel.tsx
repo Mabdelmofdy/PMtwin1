@@ -10,7 +10,8 @@ import { StartNegotiationButton } from '@/components/negotiation/start-negotiati
 import { CreateDealButton } from '@/components/negotiation/create-deal-button.tsx'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
-import { formatMatchTypeLabel } from '@/components/shared/pm-design-tokens'
+import { formatMatchTypeLabel } from '@/lib/opportunity-matches-read-model.ts'
+import { formatFrameworkMatchTypeSubtitle } from '@/config/need-offer-framework.ts'
 import { PmBadge } from '@/components/ui/pm-badge'
 import { PmButton } from '@/components/ui/pm-button'
 import { PmMatchScoreBadge } from '@/components/ui/pm-match-score-badge'
@@ -265,6 +266,9 @@ export function RelatedMatchesPanel({
                       >
                         {formatMatchTypeLabel(matchTypeKey)}
                       </PmBadge>
+                      <span className={cn(pmTypography.caption, 'text-muted-foreground')}>
+                        {formatFrameworkMatchTypeSubtitle(matchTypeKey)}
+                      </span>
                       <PmBadge tone="neutral" size="sm">
                         {card.statusLabel}
                       </PmBadge>

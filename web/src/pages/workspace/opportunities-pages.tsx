@@ -61,6 +61,14 @@ import {
   type OpportunityOwnershipFilter,
 } from '@/config/product-identity'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
+import {
+  MatchingModelsReferencePanel,
+  NeedOfferMirrorPanel,
+  UserJourneyStrip,
+  ValueExchangeModesPanel,
+} from '@/components/need-offer/need-offer-framework-panels'
+import { buildOpportunitySemanticReadModel } from '@/lib/need-offer-semantic-read-model.ts'
 
 const WIZARD_STEPS: readonly PmFormStepperStep[] = [
   { id: 'type', label: 'Type', description: 'Need or offer' },
@@ -78,11 +86,14 @@ type OpportunityDraft = {
   description: string
   location: string
   modelType: string
+  collaborationModel: string
+  paymentModes: string[]
   targetRole: string
   sector: string
   skills: string
   services: string
   startDate: string
+  tenderDeadline: string
 }
 
 const initialDraft: OpportunityDraft = {
@@ -91,11 +102,14 @@ const initialDraft: OpportunityDraft = {
   description: '',
   location: '',
   modelType: 'project_based',
+  collaborationModel: 'one_way',
+  paymentModes: ['cash'],
   targetRole: '',
   sector: '',
   skills: '',
   services: '',
   startDate: '',
+  tenderDeadline: '',
 }
 
 function splitCsv(value: string): string[] {
@@ -125,7 +139,14 @@ function buildOpportunityDraftInput(draft: OpportunityDraft): Record<string, unk
     attributes: {
       targetRole: draft.targetRole,
       startDate: draft.startDate || undefined,
+      tenderDeadline: draft.tenderDeadline || undefined,
+      ...(draft.intent === 'offer'
+        ? { availabilityDate: draft.startDate || undefined }
+        : {}),
     },
+    exchangeMode: draft.paymentModes[0],
+    paymentModes: draft.paymentModes,
+    subModelType: draft.collaborationModel,
     normalized: {
       ...(draft.intent === 'need'
         ? { requiredServices: services }
@@ -139,6 +160,7 @@ function resolveCompletedSteps(draft: OpportunityDraft): string[] {
   if (draft.intent) completed.push('type')
   if (draft.title && draft.description) completed.push('scope')
   if (draft.modelType) completed.push('exchange')
+  if (draft.collaborationModel) completed.push('exchange')
   if (draft.skills || draft.services) completed.push('skills')
   if (draft.location) completed.push('timeline')
   if (draft.title) completed.push('review')
@@ -456,6 +478,12 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       ).join(', '),
       services: '',
       startDate: existingOpportunity.attributes?.startDate ?? '',
+      tenderDeadline: existingOpportunity.attributes?.tenderDeadline ?? '',
+      collaborationModel:
+        (existingOpportunity as { subModelType?: string }).subModelType ?? 'one_way',
+      paymentModes:
+        (existingOpportunity as { paymentModes?: string[] }).paymentModes
+        ?? (existingOpportunity.exchangeMode ? [existingOpportunity.exchangeMode] : ['cash']),
     })
   }, [existingOpportunity])
 
@@ -463,6 +491,11 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
     const built = buildOpportunityDraftInput(draft)
     return opportunityId ? { ...existingOpportunity, ...built, id: opportunityId } : built
   }, [draft, existingOpportunity, opportunityId])
+
+  const semanticPreview = useMemo(
+    () => buildOpportunitySemanticReadModel(opportunityDraft as import('@/types/domain.ts').Opportunity),
+    [opportunityDraft],
+  )
 
   const completedStepIds = useMemo(() => resolveCompletedSteps(draft), [draft])
 
@@ -604,8 +637,26 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
 
       <OpportunityPublishExperience publishDetails={publishDetails} />
 
+      <UserJourneyStrip
+        activeStepId={
+          activeStepId === 'type'
+            ? 'post'
+            : activeStepId === 'exchange'
+              ? 'model'
+              : activeStepId === 'review'
+                ? 'attributes'
+                : activeStepId === 'publish'
+                  ? 'matching'
+                  : 'attributes'
+        }
+        compact
+      />
+
       <PmFormWizardStep stepId="type" activeStepId={activeStepId}>
-          <PmFormSection title="Collaboration type" description="Choose need or offer.">
+          <PmFormSection
+            title="Post type"
+            description="Need and Offer are first-class post types in the Need/Offer framework."
+          >
             <PmFormGrid columns={2}>
               {([
                 ['need', 'Need'],
@@ -678,8 +729,11 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         </PmFormWizardStep>
 
         <PmFormWizardStep stepId="exchange" activeStepId={activeStepId}>
-          <PmFormSection title="Exchange mode" description="How collaboration is structured.">
-            <PmFormField id="opp-model" label="Model type" required>
+          <PmFormSection
+            title="Matching model & exchange"
+            description="Select how this post participates in matching and value exchange."
+          >
+            <PmFormField id="opp-model" label="Sub-model (delivery type)" required>
               <Select value={draft.modelType} onValueChange={(v) => updateDraft('modelType', v)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -691,11 +745,59 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                 </SelectContent>
               </Select>
             </PmFormField>
+
+            <div className="mt-4 space-y-2">
+              <p className={cn(pmTypography.label)}>Matching model</p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {MATCHING_MODEL_KEYS.map((key) => {
+                  const model = MATCHING_MODELS[key]
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      className={cn(
+                        'rounded-lg border p-3 text-start',
+                        draft.collaborationModel === key
+                          ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/20'
+                          : 'border-border hover:border-primary/30',
+                      )}
+                      onClick={() => updateDraft('collaborationModel', key)}
+                    >
+                      <p className="font-medium">{model.label}</p>
+                      <p className={cn(pmTypography.caption, 'text-primary')}>{model.subtitle}</p>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <ValueExchangeModesPanel
+                selectedModes={draft.paymentModes}
+                selectable
+                onToggle={(modeKey) => {
+                  const has = draft.paymentModes.includes(modeKey)
+                  updateDraft(
+                    'paymentModes',
+                    has
+                      ? draft.paymentModes.filter((mode) => mode !== modeKey)
+                      : [...draft.paymentModes, modeKey],
+                  )
+                }}
+              />
+            </div>
           </PmFormSection>
         </PmFormWizardStep>
 
         <PmFormWizardStep stepId="skills" activeStepId={activeStepId}>
-          <PmFormSection title="Skills & services" description="Capabilities required or offered.">
+          <PmFormSection
+            title="Skills & services"
+            description={
+              draft.intent === 'need'
+                ? 'Required skills for this Need post.'
+                : 'Available skills for this Offer post.'
+            }
+          >
             <PmFormGrid columns={2}>
               <PmFormField id="opp-skills" label="Skills" help="Comma-separated">
                 <Input
@@ -716,35 +818,57 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         </PmFormWizardStep>
 
         <PmFormWizardStep stepId="timeline" activeStepId={activeStepId}>
-          <PmFormSection title="Timeline & location" description="Where and when work happens.">
+          <PmFormSection
+            title="Timeline & location"
+            description={
+              draft.intent === 'need'
+                ? 'Deadline and location requirements for the Need.'
+                : 'Availability and preferred location for the Offer.'
+            }
+          >
             <PmFormGrid columns={2}>
-              <PmFormField id="opp-location" label="Location">
+              <PmFormField id="opp-location" label={draft.intent === 'need' ? 'Location' : 'Preferred location'}>
                 <Input
                   value={draft.location}
                   onChange={(e) => updateDraft('location', e.target.value)}
                   placeholder="Riyadh, Saudi Arabia"
                 />
               </PmFormField>
-              <PmFormField id="opp-start" label="Start date">
+              <PmFormField id="opp-start" label={draft.intent === 'need' ? 'Start date' : 'Availability from'}>
                 <Input
                   type="date"
                   value={draft.startDate}
                   onChange={(e) => updateDraft('startDate', e.target.value)}
                 />
               </PmFormField>
+              {draft.intent === 'need' ? (
+                <PmFormField id="opp-deadline" label="Deadline">
+                  <Input
+                    type="date"
+                    value={draft.tenderDeadline}
+                    onChange={(e) => updateDraft('tenderDeadline', e.target.value)}
+                  />
+                </PmFormField>
+              ) : null}
             </PmFormGrid>
           </PmFormSection>
         </PmFormWizardStep>
 
         <PmFormWizardStep stepId="review" activeStepId={activeStepId}>
-          <PmFormSection title="Review" description="Confirm details before publishing." bordered>
+          <PmFormSection title="Review" description="Confirm framework-aligned details before publishing." bordered>
             <dl className="grid gap-3 text-sm sm:grid-cols-2">
               <div><dt className="text-muted-foreground">Title</dt><dd className="font-medium">{draft.title || '—'}</dd></div>
-              <div><dt className="text-muted-foreground">Intent</dt><dd className="font-medium">{formatOpportunityIntent(draft.intent)}</dd></div>
+              <div><dt className="text-muted-foreground">Post type</dt><dd className="font-medium">{formatOpportunityIntent(draft.intent)}</dd></div>
+              <div><dt className="text-muted-foreground">Matching model</dt><dd className="font-medium">{MATCHING_MODELS[draft.collaborationModel as keyof typeof MATCHING_MODELS]?.label ?? draft.collaborationModel}</dd></div>
+              <div><dt className="text-muted-foreground">Value exchange</dt><dd className="font-medium">{draft.paymentModes.join(', ') || '—'}</dd></div>
               <div><dt className="text-muted-foreground">Location</dt><dd className="font-medium">{draft.location || '—'}</dd></div>
-              <div><dt className="text-muted-foreground">Model</dt><dd className="font-medium">{draft.modelType}</dd></div>
+              <div><dt className="text-muted-foreground">Sub-model</dt><dd className="font-medium">{draft.modelType}</dd></div>
             </dl>
           </PmFormSection>
+          <div className="mt-4 grid gap-4">
+            <NeedOfferMirrorPanel semantic={semanticPreview} compact />
+            <MatchingModelsReferencePanel selectedModel={draft.collaborationModel} compact />
+          </div>
         </PmFormWizardStep>
 
         <PmFormWizardStep stepId="publish" activeStepId={activeStepId}>

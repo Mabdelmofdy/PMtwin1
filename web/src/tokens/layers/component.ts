@@ -100,6 +100,8 @@ export function resolveMatchTypeStyle(matchType: string): string {
   return pmMatchTypeStyles[key] ?? 'bg-neutral/10 text-neutral'
 }
 
+import { formatFrameworkMatchTypeLabel } from '@/config/need-offer-framework.ts'
+
 export function formatMatchTypeLabel(matchType: string): string {
-  return matchType.replace(/_/g, ' ')
+  return formatFrameworkMatchTypeLabel(matchType)
 }

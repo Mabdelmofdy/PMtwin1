@@ -12,6 +12,7 @@ import {
   createCreatorProfileResolver,
 } from '@/domain/readiness-analytics/index.ts'
 import { buildMatchingQualityAnalytics } from '@/domain/matching-quality/index.ts'
+import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { formatDate } from '@/lib/format'
 import {
@@ -222,6 +223,27 @@ export function AdminDashboardPage() {
           hint={`${matchingQuality.dealsCreated} deals from ${matchingQuality.negotiationsStarted} negotiations`}
           dense
         />
+      </PmMetricGrid>
+
+      <PmSectionHeader
+        title="Matching models (Need/Offer framework)"
+        description="Breakdown by topology model — One Way, Two-Way, Group Formation, Circular Exchange."
+        className="mt-6"
+      />
+      <PmMetricGrid columns={4}>
+        {MATCHING_MODEL_KEYS.map((key) => {
+          const entry = matchingQuality.byMatchType[key]
+          const model = MATCHING_MODELS[key]
+          return (
+            <PmStatCard
+              key={key}
+              label={model.label}
+              value={entry.total}
+              hint={`${entry.accepted} accepted · ${entry.confirmed} confirmed · ${model.subtitle}`}
+              dense
+            />
+          )
+        })}
       </PmMetricGrid>
     </PmDashboardLayout>
   )

@@ -9,13 +9,16 @@ import {
   type OpportunityMatchParticipantSummary,
 } from '@/lib/opportunity-matches-read-model.ts'
 import {
+  buildMatchTopologyReadModel,
+  type MatchTopologyReadModel,
+} from '@/lib/match-topology-read-model.ts'
+
+import {
   resolvePostMatchRelatedOpportunities,
   type RelatedOpportunityRef,
 } from '@/lib/post-match-related-opportunities.ts'
 
 const MATCH_ENTITY = 'match' as const
-
-/** Sentinel context id so related-opportunity resolver lists all linked opportunities. */
 export const MATCH_DETAIL_NEUTRAL_CONTEXT_ID = '__match_detail_neutral__'
 
 export type MatchDetailReadModel = {
@@ -28,6 +31,7 @@ export type MatchDetailReadModel = {
   readonly actions: OpportunityMatchCardActions
   readonly isParticipant: boolean
   readonly canAct: boolean
+  readonly topology: MatchTopologyReadModel
 }
 
 export type MatchDetailReadModelDeps = {
@@ -96,6 +100,11 @@ export function buildMatchDetailReadModel(
   const isParticipant = isParticipantOnMatch(match, deps.currentUserId)
   const canAct = deps.canAct !== false && Boolean(deps.currentUserId)
   const actions = buildMatchCardActions(match, deps)
+  const topology = buildMatchTopologyReadModel(
+    match,
+    deps.getOpportunity,
+    deps.getPersonName,
+  )
 
   return {
     match,
@@ -107,5 +116,6 @@ export function buildMatchDetailReadModel(
     actions,
     isParticipant,
     canAct,
+    topology,
   }
 }

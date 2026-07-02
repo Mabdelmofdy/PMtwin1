@@ -108,7 +108,7 @@ describe('buildOpportunityMatchesReadModel', () => {
     assert.equal(card.actions.showAccept, true)
     assert.equal(card.actions.showDecline, true)
     assert.equal(card.actions.showStartNegotiation, false)
-    assert.equal(card.matchTypeLabel, 'One-way')
+    assert.equal(card.matchTypeLabel, 'One Way Matching')
     assert.equal(card.relatedOpportunities[0]?.id, 'offer-1')
   })
 

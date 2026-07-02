@@ -55,6 +55,16 @@ import {
   findParticipantMatchForOpportunity,
   resolveOpportunityDetailVisibility,
 } from '@/lib/entity-view-visibility.ts'
+import {
+  MatchingModelsReferencePanel,
+  NeedOfferMirrorPanel,
+  UserJourneyStrip,
+  ValueExchangeModesPanel,
+} from '@/components/need-offer/need-offer-framework-panels'
+import {
+  buildOpportunitySemanticReadModel,
+  resolveOpportunityPaymentModes,
+} from '@/lib/need-offer-semantic-read-model.ts'
 
 function buildRecommendedActionItem(input: {
   canPublishDraft: boolean
@@ -196,6 +206,33 @@ export function OpportunityDetailPage() {
     relatedMatchesModel?.matches ?? [],
   )
   const hasMatches = (relatedMatchesModel?.matches.length ?? 0) > 0
+
+  const opportunitySemantic = useMemo(
+    () => (opp ? buildOpportunitySemanticReadModel(opp) : null),
+    [opp],
+  )
+
+  const opportunityPaymentModes = useMemo(
+    () => (opp ? resolveOpportunityPaymentModes(opp) : []),
+    [opp],
+  )
+
+  const journeyActiveStep = useMemo(() => {
+    if (!opp) return 'post'
+    const status = resolveCanonicalStatus('opportunity', opp.status)
+    if (status === 'draft') return 'attributes'
+    if (status === 'published' && !hasMatches) return 'matching'
+    if (hasMatches && !relatedMatchesModel?.matches.some((card) => card.actions.showViewNegotiation)) {
+      return 'comparison'
+    }
+    if (relatedMatchesModel?.matches.some((card) => card.actions.showViewNegotiation)) {
+      return 'negotiation'
+    }
+    if (relatedMatchesModel?.matches.some((card) => card.actions.showViewDeal)) {
+      return 'agreement'
+    }
+    return 'matching'
+  }, [opp, hasMatches, relatedMatchesModel])
 
   const timelineEvents = useMemo((): OpportunityTimelineEvent[] => {
     if (!opp || !visibility) return []
@@ -458,6 +495,20 @@ export function OpportunityDetailPage() {
 
             {visibility.showCollaborationWorkflow ? (
               <PmWorkflowJourney steps={workflowSteps} compact label={false} />
+            ) : null}
+
+            {visibility.showFullDescription && opportunitySemantic ? (
+              <>
+                <UserJourneyStrip activeStepId={journeyActiveStep} compact />
+                <NeedOfferMirrorPanel semantic={opportunitySemantic} />
+                <ValueExchangeModesPanel selectedModes={opportunityPaymentModes} />
+                <MatchingModelsReferencePanel
+                  selectedModel={
+                    (opp as { subModelType?: string }).subModelType ?? opp.modelType
+                  }
+                  compact
+                />
+              </>
             ) : null}
 
             <PmRelationshipChain

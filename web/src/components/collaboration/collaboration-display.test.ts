@@ -28,6 +28,6 @@ describe('collaboration-display', () => {
   it('maps match type tones and labels', () => {
     assert.equal(resolveMatchTypeTone('two_way'), 'primary')
     assert.equal(resolveMatchTypeTone('unknown'), 'neutral')
-    assert.equal(formatMatchTypeBadgeLabel('one_way'), 'One-way')
+    assert.equal(formatMatchTypeBadgeLabel('one_way'), 'One Way Matching')
   })
 })

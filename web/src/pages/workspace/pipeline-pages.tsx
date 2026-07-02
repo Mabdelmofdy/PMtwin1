@@ -91,6 +91,11 @@ import {
   resolveDefaultMatchView,
   type MatchPresentationView,
 } from '@/config/product-identity'
+import {
+  MatchTopologyDiagram,
+  UserJourneyStrip,
+} from '@/components/need-offer/need-offer-framework-panels'
+import { formatFrameworkMatchTypeSubtitle } from '@/config/need-offer-framework.ts'
 
 function resolveMatchNegotiation(match: PostMatch): Negotiation | undefined {
   if (match.negotiationId) {
@@ -604,6 +609,9 @@ export function MatchDetailPage() {
               <PmBadge tone={resolveMatchTypeTone(match.matchType)} uppercase>
                 {formatMatchTypeBadgeLabel(match.matchType)}
               </PmBadge>
+              <PmBadge tone="muted" size="sm">
+                {formatFrameworkMatchTypeSubtitle(match.matchType)}
+              </PmBadge>
               <PmWorkflowBadge status={match.status} entity="match" />
             </>
           }
@@ -623,16 +631,13 @@ export function MatchDetailPage() {
           <>
             <PmWorkflowJourney steps={matchWorkflowSteps} compact label={false} />
 
+            <UserJourneyStrip activeStepId="negotiation" compact />
+
+            <MatchTopologyDiagram topology={model.topology} />
+
             <PmRelationshipChain
               items={[
-                {
-                  label: 'Need',
-                  href: model.relatedOpportunities.find((item) => item.label === 'Need opportunity')?.path,
-                },
-                {
-                  label: 'Offer',
-                  href: model.relatedOpportunities.find((item) => item.label === 'Offer opportunity')?.path,
-                },
+                { label: 'Matching', href: '/matches' },
                 { label: 'Match', href: `/matches/${match.id}`, current: true },
                 {
                   label: negotiation ? 'Negotiation' : 'Negotiation (next)',

@@ -93,7 +93,7 @@ describe('buildMatchDetailReadModel', () => {
     assert.equal(model.actions.showAccept, true)
     assert.equal(model.actions.showDecline, true)
     assert.equal(model.actions.showStartNegotiation, false)
-    assert.equal(model.matchTypeLabel, 'One-way')
+    assert.equal(model.matchTypeLabel, 'One Way Matching')
     assert.equal(model.relatedOpportunities[0]?.id, 'offer-1')
   })
 
@@ -241,5 +241,92 @@ describe('buildMatchDetailReadModel', () => {
     assert.equal(model.actions.showViewDeal, true)
     assert.equal(model.actions.dealId, 'deal-1')
     assert.equal(model.actions.showStartNegotiation, false)
+  })
+})
+
+describe('buildMatchDetailReadModel — topology per match type', () => {
+  const lookup = (id: string) =>
+    ({
+      'need-1': opportunity('need-1', 'Need One'),
+      'offer-1': opportunity('offer-1', 'Offer One', 'offer'),
+      'a-need': opportunity('a-need', 'Need A'),
+      'b-need': opportunity('b-need', 'Need B'),
+      'lead-need': opportunity('lead-need', 'Lead Need'),
+      'role-1': opportunity('role-1', 'Architect Offer', 'offer'),
+    })[id]
+
+  it('exposes one_way Need → Offer topology', () => {
+    const model = buildMatchDetailReadModel(discoveredMatch(), {
+      ...baseDeps({
+        opportunities: [
+          opportunity('need-1', 'Need One'),
+          opportunity('offer-1', 'Offer One', 'offer'),
+        ],
+      }),
+      getOpportunity: lookup,
+    })
+    assert.equal(model.topology.topology, 'one_way')
+    assert.equal(model.topology.nodes.length, 2)
+    assert.equal(model.topology.edges[0]?.fromId, 'need')
+    assert.equal(model.topology.edges[0]?.toId, 'offer')
+  })
+
+  it('exposes two_way Need A ↔ Need B topology', () => {
+    const model = buildMatchDetailReadModel(
+      discoveredMatch({
+        matchType: 'two_way',
+        payload: {
+          sideA: { userId: 'A', needId: 'a-need', offerId: 'offer-a' },
+          sideB: { userId: 'B', needId: 'b-need', offerId: 'offer-b' },
+        },
+      }),
+      { ...baseDeps(), getOpportunity: lookup },
+    )
+    assert.equal(model.topology.topology, 'two_way')
+    assert.equal(model.topology.nodes[0]?.subtitle, 'Need A')
+    assert.equal(model.topology.nodes[1]?.subtitle, 'Need B')
+    assert.equal(model.topology.edges[0]?.bidirectional, true)
+  })
+
+  it('exposes consortium Lead + Roles topology', () => {
+    const model = buildMatchDetailReadModel(
+      discoveredMatch({
+        matchType: 'consortium',
+        payload: {
+          leadNeedId: 'lead-need',
+          roles: [{ role: 'Architect', opportunityId: 'role-1', userId: 'm1' }],
+        },
+      }),
+      { ...baseDeps(), getOpportunity: lookup },
+    )
+    assert.equal(model.topology.topology, 'consortium')
+    assert.equal(model.topology.nodes[0]?.kind, 'need')
+    assert.equal(model.topology.nodes[1]?.kind, 'offer')
+    assert.equal(model.topology.edges[0]?.fromId, 'lead-need')
+  })
+
+  it('exposes circular A → B → C → A topology', () => {
+    const model = buildMatchDetailReadModel(
+      discoveredMatch({
+        matchType: 'circular',
+        payload: {
+          cycle: ['c1', 'c2', 'c3'],
+          links: [
+            { fromCreatorId: 'c1', toCreatorId: 'c2', needId: 'b-need', offerId: 'offer-a', score: 0.7 },
+            { fromCreatorId: 'c2', toCreatorId: 'c3', needId: 'a-need', offerId: 'offer-b', score: 0.7 },
+            { fromCreatorId: 'c3', toCreatorId: 'c1', needId: 'need-1', offerId: 'offer-1', score: 0.7 },
+          ],
+        },
+      }),
+      {
+        ...baseDeps(),
+        getOpportunity: lookup,
+        getPersonName: (id) => (id === 'c1' ? 'Party A' : id === 'c2' ? 'Party B' : 'Party C'),
+      },
+    )
+    assert.equal(model.topology.topology, 'circular')
+    assert.equal(model.topology.nodes.length, 3)
+    assert.equal(model.topology.edges.length, 3)
+    assert.equal(model.topology.edges[2]?.toId, 'party-0')
   })
 })

@@ -56,8 +56,15 @@ export function formatMatchDisplayTitle(
   const matchType = (match.matchType || 'one_way').toLowerCase()
 
   if (matchType === 'two_way') {
-    const { needTitle, offerTitle } = resolveMatchNeedOfferTitles(match, getOpportunity)
-    return `Barter: ${offerTitle} \u21c4 ${needTitle}`
+    const sideA = match.payload?.sideA
+    const sideB = match.payload?.sideB
+    const needATitle = sideA?.needId
+      ? formatOpportunityDisplayTitle(getOpportunity(sideA.needId))
+      : formatOpportunityDisplayTitle(undefined)
+    const needBTitle = sideB?.needId
+      ? formatOpportunityDisplayTitle(getOpportunity(sideB.needId))
+      : formatOpportunityDisplayTitle(undefined)
+    return `Barter: ${needATitle} ↔ ${needBTitle}`
   }
 
   if (matchType === 'consortium') {

@@ -94,7 +94,7 @@ export function executePublishOpportunityOrchestration(
 
   // Circular matching runs as an additional creator-anchored pass on publish
   // (POC parity). It is best-effort and must never fail the publish action.
-  let circular: PublishMatchingResult = EMPTY_MATCHING_RESULT
+  let circular: PublishMatchingResult
   try {
     circular = runCircularMatching(opportunityId)
   } catch (error) {
@@ -157,7 +157,8 @@ export function saveOpportunityDraftFields(
   },
 ): void {
   const updateOpportunity = deps?.updateOpportunity ?? opportunitiesApi.update.bind(opportunitiesApi)
-  const { status: _status, ...draftFields } = patch
+  const draftFields = { ...patch }
+  delete (draftFields as { status?: string }).status
   updateOpportunity(opportunityId, draftFields)
 }
 

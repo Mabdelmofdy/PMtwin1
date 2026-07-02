@@ -273,7 +273,7 @@ describe('match detail read model — POC seed match types', () => {
 
   it('handles pending/discovered one_way match', () => {
     const model = modelFor(SEED.pendingPm)
-    assert.equal(model.matchTypeLabel, 'One-way')
+    assert.equal(model.matchTypeLabel, 'One Way Matching')
     assert.equal(model.canonicalStatus, 'discovered')
     assert.ok(model.relatedOpportunities.length >= 1)
   })
@@ -293,19 +293,19 @@ describe('match detail read model — POC seed match types', () => {
 
   it('handles two_way match topology', () => {
     const model = modelFor(SEED.twoWayPm)
-    assert.equal(model.matchTypeLabel, 'Two-way')
+    assert.equal(model.matchTypeLabel, 'Two-Way Dependency')
     assert.ok(model.relatedOpportunities.length >= 2)
   })
 
   it('handles consortium match topology', () => {
     const model = modelFor(SEED.consortiumPm)
-    assert.equal(model.matchTypeLabel, 'Consortium')
+    assert.equal(model.matchTypeLabel, 'Group Formation')
     assert.ok(model.relatedOpportunities.length >= 1)
   })
 
   it('handles circular match topology', () => {
     const model = modelFor(SEED.circularPm)
-    assert.equal(model.matchTypeLabel, 'Circular')
+    assert.equal(model.matchTypeLabel, 'Circular Exchange')
     assert.ok(model.relatedOpportunities.length >= 2)
   })
 })

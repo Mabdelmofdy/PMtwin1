@@ -35,7 +35,7 @@ describe('pm-design-tokens', () => {
   })
 
   it('formats match type labels for display', () => {
-    assert.equal(formatMatchTypeLabel('two_way'), 'two way')
-    assert.equal(formatMatchTypeLabel('consortium'), 'consortium')
+    assert.equal(formatMatchTypeLabel('two_way'), 'Two-Way Dependency')
+    assert.equal(formatMatchTypeLabel('consortium'), 'Group Formation')
   })
 })
