@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { formatDate } from '@/lib/format'
 import { formatMatchDisplayTitle } from '@/lib/match-display.ts'
-import { MatchCard } from '@/components/collaboration/match-card'
+import { MatchCard, MatchTypeChip } from '@/components/collaboration/match-card'
 import {
   PmDataTable,
   PmTableEmpty,
@@ -14,7 +14,13 @@ import {
   PmTableToolbar,
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
-import { PmBadge, PmButton, PmMatchScoreBadge, PmWorkflowBadge } from '@/components/ui/pm-index'
+import {
+  PmButton,
+  PmFilterChips,
+  PmMatchScoreBadge,
+  PmWorkflowBadge,
+  type PmFilterChip,
+} from '@/components/ui/pm-index'
 import {
   Select,
   SelectContent,
@@ -23,7 +29,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
-import { formatMatchTypeBadgeLabel } from '@/components/collaboration/collaboration-display'
 import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
 import { formatFrameworkMatchTypeSubtitle } from '@/config/need-offer-framework.ts'
 import { cn } from '@/lib/utils'
@@ -64,6 +69,36 @@ export function MatchesListSection({
   const safePage = Math.min(page, pageCount)
   const paged = filtered.slice((safePage - 1) * pageSize, safePage * pageSize)
 
+  const activeFilterChips: PmFilterChip[] = [
+    ...(status !== 'all'
+      ? [
+          {
+            id: 'status',
+            label: 'Status',
+            value: status.charAt(0).toUpperCase() + status.slice(1),
+            onRemove: () => {
+              setStatus('all')
+              setPage(1)
+            },
+          },
+        ]
+      : []),
+    ...(matchType !== 'all'
+      ? [
+          {
+            id: 'matchType',
+            label: 'Match type',
+            value:
+              MATCHING_MODELS[matchType as keyof typeof MATCHING_MODELS]?.label ?? matchType,
+            onRemove: () => {
+              setMatchType('all')
+              setPage(1)
+            },
+          },
+        ]
+      : []),
+  ]
+
   const columns: PmDataTableColumn<PostMatch>[] = [
     {
       id: 'pairing',
@@ -96,10 +131,8 @@ export function MatchesListSection({
       hideable: true,
       defaultVisible: true,
       cell: (m) => (
-        <div className="flex flex-col gap-0.5">
-          <PmBadge tone="neutral" size="sm">
-            {formatMatchTypeBadgeLabel(m.matchType)}
-          </PmBadge>
+        <div className="flex flex-col items-start gap-0.5">
+          <MatchTypeChip matchType={m.matchType} />
           <span className={cn(pmTypography.caption, 'text-muted-foreground')}>
             {formatFrameworkMatchTypeSubtitle(m.matchType)}
           </span>
@@ -188,7 +221,16 @@ export function MatchesListSection({
                 </div>
               </PmTableFilter>
             }
-          />
+          >
+            <PmFilterChips
+              chips={activeFilterChips}
+              onClearAll={() => {
+                setStatus('all')
+                setMatchType('all')
+                setPage(1)
+              }}
+            />
+          </PmTableToolbar>
         ) : undefined
       }
       rowActions={(m) => (

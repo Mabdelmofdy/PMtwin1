@@ -68,6 +68,13 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
+  --color-entity-mission: var(--entity-mission);
+  --color-entity-opportunity: var(--entity-opportunity);
+  --color-entity-match: var(--entity-match);
+  --color-entity-negotiation: var(--entity-negotiation);
+  --color-entity-deal: var(--entity-deal);
+  --color-entity-contract: var(--entity-contract);
+
   --spacing-pm-page-x: var(--pm-space-page-x);
   --spacing-pm-page-y: var(--pm-space-page-y);
   --spacing-pm-section: var(--pm-space-section);
@@ -142,6 +149,14 @@
   --sidebar-accent-foreground: oklch(0.24 0.033 261);
   --sidebar-border: oklch(0.908 0.014 256);
   --sidebar-ring: oklch(0.455 0.154 261);
+
+  /* Layer 2b: Entity tones — lifecycle identity colors (DS v2) */
+  --entity-mission: oklch(0.585 0.2 277);
+  --entity-opportunity: oklch(0.63 0.13 220);
+  --entity-match: oklch(0.58 0.19 292);
+  --entity-negotiation: oklch(0.7 0.15 74);
+  --entity-deal: oklch(0.6 0.14 160);
+  --entity-contract: oklch(0.5 0.04 257);
 
   /* Layer 4: Layout spacing rhythm */
   --pm-space-page-x: 1rem;
@@ -228,6 +243,14 @@
   --sidebar-accent-foreground: oklch(0.96 0.006 255);
   --sidebar-border: oklch(0.96 0.004 260 / 13%);
   --sidebar-ring: oklch(0.69 0.13 257);
+
+  /* Layer 2b: Entity tones — lifecycle identity colors (DS v2, dark) */
+  --entity-mission: oklch(0.7 0.16 277);
+  --entity-opportunity: oklch(0.75 0.12 220);
+  --entity-match: oklch(0.72 0.16 292);
+  --entity-negotiation: oklch(0.79 0.14 79);
+  --entity-deal: oklch(0.74 0.13 160);
+  --entity-contract: oklch(0.72 0.03 257);
 
   --shadow-card: 0 2px 6px oklch(0 0 0 / 20%), 0 10px 24px oklch(0 0 0 / 18%);
   --shadow-panel: 0 6px 14px oklch(0 0 0 / 22%), 0 18px 40px oklch(0 0 0 / 24%);

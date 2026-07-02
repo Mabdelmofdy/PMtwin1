@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/pm-index'
 import { useAuth } from '@/providers/auth-provider'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { resolveMatchTypeStyle } from '@/tokens'
 import { formatDate, formatRelativeTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
@@ -160,6 +161,8 @@ export function WorkspaceDashboardComposition() {
       .map((m) => ({
         id: `blocked-match-${m.id}`,
         label: 'Match needs replacement',
+        entity: 'match' as const,
+        status: m.status,
         href: `/matches/${m.id}`,
       })),
     ...negotiations
@@ -167,20 +170,11 @@ export function WorkspaceDashboardComposition() {
       .map((n) => ({
         id: `blocked-neg-${n.id}`,
         label: formatNegotiationDisplayTitle(n, opportunitiesApi.get),
+        entity: 'negotiation' as const,
+        status: n.status,
         href: `/negotiations/${n.id}`,
       })),
   ].slice(0, 4)
-
-  const recommendedAction =
-    needsActionItems[0]?.primary?.href
-      ? {
-          label: needsActionItems[0].primary.label,
-          href: needsActionItems[0].primary.href,
-        }
-      : {
-          label: 'Post opportunity',
-          href: '/opportunities/create',
-        }
 
   return (
     <PmDashboardLayout
@@ -188,11 +182,15 @@ export function WorkspaceDashboardComposition() {
         <PmStatsStrip
           data-slot="pm-dashboard-metric-strip"
           items={[
-            { label: 'My opportunities', value: opportunities.filter((o) => o.creatorId === userId).length },
-            { label: 'My matches', value: matches.length },
-            { label: 'My negotiations', value: negotiations.length },
-            { label: 'My deals', value: deals.length },
-            { label: 'My contracts', value: contracts.length },
+            {
+              label: 'My opportunities',
+              value: opportunities.filter((o) => o.creatorId === userId).length,
+              href: '/opportunities',
+            },
+            { label: 'My matches', value: matches.length, href: '/matches' },
+            { label: 'My negotiations', value: negotiations.length, href: '/negotiations' },
+            { label: 'My deals', value: deals.length, href: '/deals' },
+            { label: 'My contracts', value: contracts.length, href: '/contracts' },
           ]}
         />
       }
@@ -316,31 +314,27 @@ export function WorkspaceDashboardComposition() {
           }
         />
       ) : (
-        <ul className={cn('space-y-2', pmTypography.bodySm)}>
+        <ul className="space-y-2" role="list">
           {blockedItems.map((item) => (
             <li key={item.id}>
-              <Link to={item.href} className="font-medium text-primary hover:underline">
-                {item.label}
-              </Link>
+              <PmSurface
+                variant="default"
+                shadow="card"
+                interactive
+                className="flex flex-wrap items-center justify-between gap-2 p-3.5"
+              >
+                <Link
+                  to={item.href}
+                  className={cn(pmTypography.bodySm, 'min-w-0 flex-1 truncate font-medium hover:text-primary')}
+                >
+                  {item.label}
+                </Link>
+                <PmWorkflowBadge status={item.status} entity={item.entity} size="sm" />
+              </PmSurface>
             </li>
           ))}
         </ul>
       )}
-
-      <PmSectionHeader
-        title="Next action"
-        description="Single recommended step to keep execution moving."
-        actions={
-          <PmButton size="sm" asChild>
-            <Link to={recommendedAction.href}>{recommendedAction.label}</Link>
-          </PmButton>
-        }
-      />
-      <PmSurface variant="default" shadow="card" className="rounded-3xl p-5">
-        <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-          Focus on one action at a time: complete your current stage, then move to the next stage in the collaboration chain.
-        </p>
-      </PmSurface>
 
       <PmSectionHeader
         title="My matching summary"
@@ -354,8 +348,16 @@ export function WorkspaceDashboardComposition() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {matchTypeSummary.map((entry) => (
           <PmSurface key={entry.key} variant="default" shadow="card" className="p-4">
-            <p className={cn(pmTypography.caption, 'text-muted-foreground')}>{entry.label}</p>
-            <p className={cn(pmTypography.bodySm, 'mt-1 text-2xl font-semibold')}>{entry.count}</p>
+            <span
+              className={cn(
+                pmTypography.badge,
+                'inline-flex items-center rounded-md px-2 py-0.5',
+                resolveMatchTypeStyle(entry.key),
+              )}
+            >
+              {entry.label}
+            </span>
+            <p className={cn('mt-2 text-2xl font-semibold tabular-nums')}>{entry.count}</p>
             <p className={cn(pmTypography.caption, 'mt-1 text-muted-foreground')}>
               {MATCHING_MODELS[entry.key].subtitle}
             </p>

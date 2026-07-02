@@ -42,7 +42,22 @@ import {
   PmFormReadonlyField,
   PmFormReadonlySection,
 } from '@/components/forms/pm-form-index'
-import { PmActionHub, PmBadge, PmButton, PmEmptyState, PmMatchScoreBadge, PmPage, PmPageHeader, PmPageHeroMetric, PmPageActions, PmRelationshipChain, PmWorkflowJourney, buildOpportunityWorkflowSteps, resolveCollaborationActiveStepFromMatches, type PmActionHubItem } from '@/components/ui/pm-index'
+import {
+  PmActionHub,
+  PmBadge,
+  PmButton,
+  PmDisclosureSection,
+  PmEmptyState,
+  PmLifecycleMap,
+  PmMatchScoreBadge,
+  PmPage,
+  PmPageHeader,
+  PmPageHeroMetric,
+  PmPageActions,
+  buildOpportunityWorkflowSteps,
+  resolveCollaborationActiveStepFromMatches,
+  type PmActionHubItem,
+} from '@/components/ui/pm-index'
 import { formatReadinessScorePercent } from '@/components/ui/pm-readiness-score-display'
 import { OpportunityStatusBadge } from '@/components/opportunity/opportunity-status-badge'
 import { OpportunityIdentityBadges } from '@/components/opportunity/opportunity-identity'
@@ -494,50 +509,8 @@ export function OpportunityDetailPage() {
             ) : null}
 
             {visibility.showCollaborationWorkflow ? (
-              <PmWorkflowJourney steps={workflowSteps} compact label={false} />
+              <PmLifecycleMap steps={workflowSteps} />
             ) : null}
-
-            {visibility.showFullDescription && opportunitySemantic ? (
-              <>
-                <UserJourneyStrip activeStepId={journeyActiveStep} compact />
-                <NeedOfferMirrorPanel semantic={opportunitySemantic} />
-                <ValueExchangeModesPanel selectedModes={opportunityPaymentModes} />
-                <MatchingModelsReferencePanel
-                  selectedModel={
-                    (opp as { subModelType?: string }).subModelType ?? opp.modelType
-                  }
-                  compact
-                />
-              </>
-            ) : null}
-
-            <PmRelationshipChain
-              title="Relationship chain"
-              description="Follow this opportunity through each workflow stage."
-              items={[
-                { label: 'Opportunity', href: `/opportunities/${opp.id}`, current: true },
-                {
-                  label: topMatchCard ? 'Matches' : 'Matches (pending)',
-                  href: topMatchCard ? `/matches/${topMatchCard.match.id}` : '/matches',
-                },
-                {
-                  label: topMatchCard?.actions.negotiationId ? 'Negotiations' : 'Negotiations (next)',
-                  href: topMatchCard?.actions.negotiationId
-                    ? `/negotiations/${topMatchCard.actions.negotiationId}`
-                    : '/negotiations',
-                },
-                {
-                  label: topMatchCard?.actions.dealId ? 'Deals' : 'Deals (next)',
-                  href: topMatchCard?.actions.dealId
-                    ? `/deals/${topMatchCard.actions.dealId}`
-                    : '/deals',
-                },
-                {
-                  label: topContract ? 'Contracts' : 'Contracts (next)',
-                  href: topContract ? `/contracts/${topContract.id}` : '/contracts',
-                },
-              ]}
-            />
 
             {recommendedAction ? (
               <PmActionHub
@@ -629,6 +602,23 @@ export function OpportunityDetailPage() {
                   <PmFormReadonlyField label="Updated" value={formatDate(opp.updatedAt)} />
                 </PmFormReadonlySection>
               </PmFormReadonly>
+            ) : null}
+
+            {visibility.showFullDescription && opportunitySemantic ? (
+              <PmDisclosureSection
+                title="Need/Offer framework reference"
+                description="Semantic attributes, value exchange modes, and matching models for this post."
+              >
+                <UserJourneyStrip activeStepId={journeyActiveStep} compact />
+                <NeedOfferMirrorPanel semantic={opportunitySemantic} />
+                <ValueExchangeModesPanel selectedModes={opportunityPaymentModes} />
+                <MatchingModelsReferencePanel
+                  selectedModel={
+                    (opp as { subModelType?: string }).subModelType ?? opp.modelType
+                  }
+                  compact
+                />
+              </PmDisclosureSection>
             ) : null}
 
             {visibility.showLegacyApplications ? (

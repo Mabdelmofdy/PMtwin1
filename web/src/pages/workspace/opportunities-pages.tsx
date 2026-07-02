@@ -33,9 +33,10 @@ import {
   type PmFormStepperStep,
 } from '@/components/forms/pm-form-index'
 import { PmContentCard, summarizeOpportunityListHero } from '@/components/layout/pm-layout-index'
-import { PmBadge, PmButton, PmEmptyState, PmPage, PmPageHeader, PmPageHeroMetric, PmPageActions, PmSurface } from '@/components/ui/pm-index'
+import { PmBadge, PmButton, PmEmptyState, PmFilterChips, PmPage, PmPageHeader, PmPageHeroMetric, PmPageActions, PmSurface } from '@/components/ui/pm-index'
 import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmResponsive } from '@/tokens'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -298,7 +299,7 @@ export function OpportunitiesPage() {
             setPage(1)
           }}
         >
-          <TabsList>
+          <TabsList className={cn('max-w-full', pmResponsive.scrollX)}>
             {(Object.keys(OPPORTUNITY_OWNERSHIP_FILTER_LABELS) as OpportunityOwnershipFilter[]).map(
               (key) => (
                 <TabsTrigger key={key} value={key} className="cursor-pointer">
@@ -342,20 +343,66 @@ export function OpportunitiesPage() {
               </div>
             </PmTableFilter>
           }
-        />
+        >
+          <PmFilterChips
+            chips={
+              status !== 'all'
+                ? [
+                    {
+                      id: 'status',
+                      label: 'Status',
+                      value: status.charAt(0).toUpperCase() + status.slice(1),
+                      onRemove: () => {
+                        setStatus('all')
+                        setPage(1)
+                      },
+                    },
+                  ]
+                : []
+            }
+          />
+        </PmTableToolbar>
       </PmToolbarSurface>
 
       {paged.length === 0 ? (
-        <PmTableEmpty
-          variant="no-results"
-          title="No opportunities found"
-          description="Try adjusting search or filters, or post a new opportunity."
-          primaryAction={
-            <PmButton size="sm" asChild>
-              <Link to="/opportunities/create">Post opportunity</Link>
-            </PmButton>
-          }
-        />
+        search || status !== 'all' ? (
+          <PmTableEmpty
+            variant="no-results"
+            title="No opportunities match your filters"
+            description="Try adjusting search or filters, or post a new opportunity."
+            primaryAction={
+              <PmButton
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setSearch('')
+                  setStatus('all')
+                  setPage(1)
+                }}
+              >
+                Clear filters
+              </PmButton>
+            }
+          />
+        ) : (
+          <PmEmptyState
+            title={
+              isMarketplaceBrowse
+                ? 'No opportunities available yet'
+                : 'Post your first opportunity'
+            }
+            description={
+              isMarketplaceBrowse
+                ? 'Published needs and offers from the marketplace will appear here.'
+                : 'Describe what you need or offer — publishing runs matching and surfaces collaboration partners.'
+            }
+            action={
+              <PmButton size="sm" asChild>
+                <Link to="/opportunities/create">Post opportunity</Link>
+              </PmButton>
+            }
+          />
+        )
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {paged.map((o) => (

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { PmSurface } from '@/components/ui/pm-surface'
@@ -6,6 +7,8 @@ import { PmSurface } from '@/components/ui/pm-surface'
 export type PmStatsStripItem = {
   label: string
   value: ReactNode
+  /** Optional route — renders the metric as a navigable cell. */
+  href?: string
 }
 
 export type PmStatsStripProps = {
@@ -31,17 +34,39 @@ export function PmStatsStrip({
         className,
       )}
     >
-      {items.map((item) => (
-        <div
-          key={item.label}
-          className="flex min-w-[50%] flex-1 items-center justify-between gap-2 px-5 py-3 sm:min-w-0 sm:flex-col sm:items-start sm:gap-1 sm:py-4"
-        >
-          <span className={cn(pmTypography.statLabel, 'text-muted-foreground')}>
-            {item.label}
-          </span>
-          <span className={cn(pmTypography.stat, 'tabular-nums')}>{item.value}</span>
-        </div>
-      ))}
+      {items.map((item) => {
+        const cellClass =
+          'flex min-w-[50%] flex-1 items-center justify-between gap-2 px-5 py-3 sm:min-w-0 sm:flex-col sm:items-start sm:gap-1 sm:py-4'
+        const inner = (
+          <>
+            <span className={cn(pmTypography.statLabel, 'text-muted-foreground')}>
+              {item.label}
+            </span>
+            <span className={cn(pmTypography.stat, 'tabular-nums')}>{item.value}</span>
+          </>
+        )
+
+        if (item.href) {
+          return (
+            <Link
+              key={item.label}
+              to={item.href}
+              className={cn(
+                cellClass,
+                'cursor-pointer outline-none transition-colors hover:bg-surface-elevated/80 focus-visible:ring-2 focus-visible:ring-focus-ring',
+              )}
+            >
+              {inner}
+            </Link>
+          )
+        }
+
+        return (
+          <div key={item.label} className={cellClass}>
+            {inner}
+          </div>
+        )
+      })}
     </PmSurface>
   )
 }

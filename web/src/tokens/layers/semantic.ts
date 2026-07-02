@@ -55,6 +55,40 @@ export const pmStatusBackground = {
   primary: 'bg-primary/14 text-primary',
 } as const
 
+/**
+ * Entity tone utilities (DS v2) — lifecycle identity colors.
+ * CSS vars: --entity-* in index.css. Used by page headers, lifecycle maps, topology.
+ */
+export const pmEntityTone = {
+  mission: 'text-entity-mission',
+  opportunity: 'text-entity-opportunity',
+  match: 'text-entity-match',
+  negotiation: 'text-entity-negotiation',
+  deal: 'text-entity-deal',
+  contract: 'text-entity-contract',
+} as const
+
+/** Entity tone soft-surface backgrounds (headers, hero panels). */
+export const pmEntitySurface = {
+  mission: 'from-entity-mission/[0.11] via-surface to-surface/95',
+  opportunity: 'from-entity-opportunity/[0.13] via-surface to-surface/95',
+  match: 'from-entity-match/[0.12] via-surface to-surface/95',
+  negotiation: 'from-entity-negotiation/[0.11] via-surface to-surface/95',
+  deal: 'from-entity-deal/[0.12] via-surface to-surface/95',
+  contract: 'from-entity-contract/[0.16] via-surface to-surface/95',
+} as const
+
+/** Entity tone badge/chip fills. */
+export const pmEntityBackground = {
+  mission: 'bg-entity-mission/12 text-entity-mission',
+  opportunity: 'bg-entity-opportunity/12 text-entity-opportunity',
+  match: 'bg-entity-match/12 text-entity-match',
+  negotiation: 'bg-entity-negotiation/12 text-entity-negotiation',
+  deal: 'bg-entity-deal/12 text-entity-deal',
+  contract: 'bg-entity-contract/12 text-entity-contract',
+} as const
+
 export type PmSurfaceTone = keyof typeof pmSurfaceTone
 export type PmTextTone = keyof typeof pmTextTone
 export type PmStatusBackground = keyof typeof pmStatusBackground
+export type PmEntityTone = keyof typeof pmEntityTone

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmEntitySurface } from '@/tokens'
 
 
 
@@ -58,12 +59,12 @@ export function PmPageHeader({
 }: PmPageHeaderProps) {
   const toneClass = {
     default: 'from-surface via-surface/96 to-surface/90',
-    mission: 'from-indigo-500/[0.11] via-surface to-surface/95',
-    opportunity: 'from-cyan-500/[0.13] via-surface to-surface/95',
-    match: 'from-violet-500/[0.12] via-surface to-surface/95',
-    negotiation: 'from-amber-500/[0.11] via-surface to-surface/95',
-    deal: 'from-emerald-500/[0.12] via-surface to-surface/95',
-    contract: 'from-slate-500/[0.16] via-surface to-surface/95',
+    mission: pmEntitySurface.mission,
+    opportunity: pmEntitySurface.opportunity,
+    match: pmEntitySurface.match,
+    negotiation: pmEntitySurface.negotiation,
+    deal: pmEntitySurface.deal,
+    contract: pmEntitySurface.contract,
   }[tone]
   const purposeLabel = {
     default: 'My Workspace context',

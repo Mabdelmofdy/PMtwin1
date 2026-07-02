@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import {
   MATCHING_MODELS,
   MATCHING_MODEL_KEYS,
@@ -11,6 +10,7 @@ import {
 import type { OpportunitySemanticReadModel } from '@/lib/need-offer-semantic-read-model.ts'
 import type { MatchTopologyReadModel } from '@/lib/match-topology-read-model.ts'
 import { PmBadge } from '@/components/ui/pm-badge'
+import { PmTopologyGraph } from '@/components/ui/pm-topology-graph'
 import { PmContentCard } from '@/components/layout/pm-layout-panels'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
@@ -230,10 +230,6 @@ type MatchTopologyDiagramProps = {
 }
 
 export function MatchTopologyDiagram({ topology }: MatchTopologyDiagramProps) {
-  const isCircular = topology.topology === 'circular'
-  const isTwoWay = topology.topology === 'two_way'
-  const isConsortium = topology.topology === 'consortium'
-
   return (
     <PmContentCard
       title="Match topology"
@@ -244,112 +240,13 @@ export function MatchTopologyDiagram({ topology }: MatchTopologyDiagramProps) {
         </PmBadge>
       }
     >
-      {isTwoWay ? (
-        <div className="flex flex-wrap items-center justify-center gap-3 py-2">
-          {topology.nodes.map((node, index) => (
-            <div key={node.id} className="flex items-center gap-3">
-              <TopologyNode node={node} />
-              {index < topology.nodes.length - 1 ? (
-                <span className="text-lg text-primary" aria-hidden>
-                  ↔
-                </span>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      ) : isCircular ? (
-        <div className="flex flex-wrap items-center justify-center gap-2 py-2">
-          {topology.nodes.map((node, index) => (
-            <div key={node.id} className="flex items-center gap-2">
-              <TopologyNode node={node} />
-              {index < topology.nodes.length - 1 ? (
-                <span className="text-muted-foreground" aria-hidden>
-                  →
-                </span>
-              ) : (
-                <span className="text-muted-foreground" aria-hidden>
-                  →
-                </span>
-              )}
-            </div>
-          ))}
-          {topology.nodes.length > 0 ? (
-            <span className="w-full text-center text-xs text-muted-foreground">
-              closes back to {topology.nodes[0]?.label}
-            </span>
-          ) : null}
-        </div>
-      ) : isConsortium ? (
-        <div className="space-y-3">
-          {topology.nodes
-            .filter((node) => node.kind === 'need')
-            .map((lead) => (
-              <div key={lead.id} className="flex justify-center">
-                <TopologyNode node={lead} emphasized />
-              </div>
-            ))}
-          <div className="grid gap-2 sm:grid-cols-2">
-            {topology.nodes
-              .filter((node) => node.kind !== 'need')
-              .map((partner) => (
-                <TopologyNode key={partner.id} node={partner} />
-              ))}
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-wrap items-center justify-center gap-3 py-2">
-          {topology.nodes.map((node, index) => (
-            <div key={node.id} className="flex items-center gap-3">
-              <TopologyNode node={node} />
-              {index < topology.nodes.length - 1 ? (
-                <span className="text-lg text-primary" aria-hidden>
-                  →
-                </span>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      )}
+      <PmTopologyGraph
+        topology={topology.topology}
+        nodes={topology.nodes}
+        aria-label={`${topology.frameworkLabel} topology`}
+      />
     </PmContentCard>
   )
-}
-
-function TopologyNode({
-  node,
-  emphasized = false,
-}: {
-  readonly node: MatchTopologyReadModel['nodes'][number]
-  readonly emphasized?: boolean
-}) {
-  const tone =
-    node.kind === 'need' ? 'info' : node.kind === 'offer' ? 'success' : 'neutral'
-
-  const inner = (
-    <div
-      className={cn(
-        'min-w-[8rem] rounded-lg border p-3 text-center',
-        emphasized ? 'border-primary/40 bg-primary/5' : 'border-border/60 bg-background',
-      )}
-    >
-      {node.subtitle ? (
-        <p className={cn(pmTypography.caption, 'text-muted-foreground')}>{node.subtitle}</p>
-      ) : null}
-      <p className={cn(pmTypography.bodySm, 'font-medium')}>{node.label}</p>
-      <PmBadge tone={tone} size="sm" className="mt-2">
-        {node.kind === 'participant' ? 'Party' : node.kind}
-      </PmBadge>
-    </div>
-  )
-
-  if (node.href) {
-    return (
-      <Link to={node.href} className="hover:opacity-90">
-        {inner}
-      </Link>
-    )
-  }
-
-  return inner
 }
 
 export function FrameworkMatchTypeBadge({

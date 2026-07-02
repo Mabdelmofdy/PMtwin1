@@ -50,6 +50,49 @@ import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
 import { AdminStatusBadge } from '@/pages/admin/admin-display'
+import { pmTypography, resolveMatchTypeStyle } from '@/tokens'
+import { cn } from '@/lib/utils'
+
+type AdminFunnelStage = {
+  readonly id: string
+  readonly label: string
+  readonly count: number
+  readonly rate: number
+  readonly hint: string
+}
+
+/** Horizontal conversion funnel bars — presentation only. */
+function AdminFunnelBars({ stages }: { readonly stages: readonly AdminFunnelStage[] }) {
+  const maxCount = Math.max(1, ...stages.map((stage) => stage.count))
+
+  return (
+    <ol className="space-y-3" aria-label="Collaboration funnel">
+      {stages.map((stage) => {
+        const width = Math.max(4, Math.round((stage.count / maxCount) * 100))
+        return (
+          <li key={stage.id} className="space-y-1">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <span className={cn(pmTypography.label)}>{stage.label}</span>
+              <span className={cn(pmTypography.caption, 'text-muted-foreground')}>
+                {stage.count} · {stage.hint}
+              </span>
+            </div>
+            <div
+              className="h-2.5 w-full overflow-hidden rounded-full bg-muted"
+              role="img"
+              aria-label={`${stage.label}: ${stage.count}`}
+            >
+              <div
+                className="h-full rounded-full bg-primary transition-[width]"
+                style={{ width: `${width}%` }}
+              />
+            </div>
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
 
 export function AdminDashboardPage() {
   const version = useDataStoreVersion()
@@ -205,25 +248,44 @@ export function AdminDashboardPage() {
           value={`${Math.round(matchingQuality.averageMatchScore)}%`}
           dense
         />
-        <PmStatCard
-          label="Match acceptance rate"
-          value={`${Math.round(matchingQuality.acceptanceRate)}%`}
-          hint={`${matchingQuality.acceptedMatches} of ${matchingQuality.totalMatches} matches`}
-          dense
-        />
-        <PmStatCard
-          label="Negotiation rate"
-          value={`${Math.round(matchingQuality.negotiationRate)}%`}
-          hint={`${matchingQuality.negotiationsStarted} negotiations from ${matchingQuality.acceptedMatches} accepted`}
-          dense
-        />
-        <PmStatCard
-          label="Deal conversion rate"
-          value={`${Math.round(matchingQuality.dealConversionRate)}%`}
-          hint={`${matchingQuality.dealsCreated} deals from ${matchingQuality.negotiationsStarted} negotiations`}
-          dense
-        />
       </PmMetricGrid>
+      <PmContentCard
+        title="Collaboration funnel"
+        description="Conversion from discovered matches through negotiations to deals."
+      >
+        <AdminFunnelBars
+          stages={[
+            {
+              id: 'matches',
+              label: 'Matches',
+              count: matchingQuality.totalMatches,
+              rate: 100,
+              hint: 'All discovered matches',
+            },
+            {
+              id: 'accepted',
+              label: 'Accepted',
+              count: matchingQuality.acceptedMatches,
+              rate: matchingQuality.acceptanceRate,
+              hint: `${Math.round(matchingQuality.acceptanceRate)}% acceptance rate`,
+            },
+            {
+              id: 'negotiations',
+              label: 'Negotiations',
+              count: matchingQuality.negotiationsStarted,
+              rate: matchingQuality.negotiationRate,
+              hint: `${Math.round(matchingQuality.negotiationRate)}% of accepted matches`,
+            },
+            {
+              id: 'deals',
+              label: 'Deals',
+              count: matchingQuality.dealsCreated,
+              rate: matchingQuality.dealConversionRate,
+              hint: `${Math.round(matchingQuality.dealConversionRate)}% of negotiations`,
+            },
+          ]}
+        />
+      </PmContentCard>
 
       <PmSectionHeader
         title="Matching models (Need/Offer framework)"
@@ -239,7 +301,18 @@ export function AdminDashboardPage() {
               key={key}
               label={model.label}
               value={entry.total}
-              hint={`${entry.accepted} accepted · ${entry.confirmed} confirmed · ${model.subtitle}`}
+              hint={`${entry.accepted} accepted · ${entry.confirmed} confirmed`}
+              trend={
+                <span
+                  className={cn(
+                    pmTypography.badge,
+                    'inline-flex items-center rounded-md px-1.5 py-0.5',
+                    resolveMatchTypeStyle(key),
+                  )}
+                >
+                  {model.subtitle}
+                </span>
+              }
               dense
             />
           )

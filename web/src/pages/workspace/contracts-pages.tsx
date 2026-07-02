@@ -44,13 +44,12 @@ import {
   PmButton,
   PmEmptyState,
   PmEntityListCard,
+  PmLifecycleMap,
   PmPage,
   PmPageHeader,
   PmPageHeroMetric,
   PmMoreActions,
-  PmRelationshipChain,
   PmWorkflowBadge,
-  PmWorkflowJourney,
   buildContractWorkflowSteps,
   type PmMoreActionItem,
 } from '@/components/ui/pm-index'
@@ -414,25 +413,7 @@ export function ContractDetailPage() {
       <PmDetailLayout
         main={
           <>
-            <PmWorkflowJourney steps={contractWorkflowSteps} compact label={false} />
-
-            <PmRelationshipChain
-              items={[
-                {
-                  label: model.links.deal ? 'Deal' : 'Deal (origin)',
-                  href: model.links.deal?.path ?? '/deals',
-                },
-                {
-                  label: model.links.negotiation ? 'Negotiation' : 'Negotiation (linked)',
-                  href: model.links.negotiation?.path ?? '/negotiations',
-                },
-                {
-                  label: model.links.needOpportunity ? 'Original opportunity' : 'Original opportunity (linked)',
-                  href: model.links.needOpportunity?.path ?? '/opportunities',
-                },
-                { label: 'Contract', href: `/contracts/${model.contractId}`, current: true },
-              ]}
-            />
+            <PmLifecycleMap steps={contractWorkflowSteps} />
 
             <PmContentCard title="Summary">
               <PmFormReadonly>

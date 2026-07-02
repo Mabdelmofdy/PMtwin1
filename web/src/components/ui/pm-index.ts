@@ -84,6 +84,39 @@ export {
   type PmWorkflowJourneyStepState,
 } from '@/components/ui/pm-workflow-journey'
 export {
+  PmLifecycleMap,
+  type PmLifecycleMapProps,
+  type PmLifecycleMapStep,
+} from '@/components/ui/pm-lifecycle-map'
+export {
+  PmTimeline,
+  type PmTimelineEvent,
+  type PmTimelineEventStatus,
+  type PmTimelineProps,
+} from '@/components/ui/pm-timeline'
+export {
+  PmTopologyGraph,
+  type PmTopologyGraphNode,
+  type PmTopologyGraphProps,
+  type PmTopologyKind,
+  type PmTopologyNodeKind,
+} from '@/components/ui/pm-topology-graph'
+export {
+  PmFilterChips,
+  type PmFilterChip,
+  type PmFilterChipsProps,
+} from '@/components/ui/pm-filter-chips'
+export {
+  PmBoard,
+  PmBoardColumn,
+  type PmBoardColumnProps,
+  type PmBoardProps,
+} from '@/components/ui/pm-board'
+export {
+  PmDisclosureSection,
+  type PmDisclosureSectionProps,
+} from '@/components/ui/pm-disclosure-section'
+export {
   PmActionHub,
   type PmActionHubItem,
   type PmActionHubProps,

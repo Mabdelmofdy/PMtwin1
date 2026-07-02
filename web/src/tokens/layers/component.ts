@@ -64,6 +64,37 @@ export const pmComponentTokens = {
   timeline: {
     gap: pmLayoutRhythm.sectionGap,
     iconSize: pmIconSize.status,
+    markerDone: 'bg-success',
+    markerActive: 'bg-primary ring-4 ring-primary/20',
+    markerUpcoming: 'bg-muted-foreground/40',
+    rail: 'border-border/50',
+  },
+  lifecycle: {
+    stepCurrent: 'bg-primary/10 font-semibold text-primary ring-1 ring-primary/20',
+    stepComplete: 'text-foreground',
+    stepUpcoming: 'text-muted-foreground',
+    connector: 'text-muted-foreground/70',
+  },
+  topology: {
+    node: 'rounded-lg border border-border/60 bg-background',
+    nodeEmphasized: 'border-primary/40 bg-primary/5',
+    edge: 'text-primary',
+    edgeMuted: 'text-muted-foreground',
+  },
+  board: {
+    column: 'rounded-xl border border-border/60 bg-surface-muted/60',
+    columnHeader: pmTypography.label,
+    card: 'rounded-lg border border-border/70 bg-surface',
+    gap: pmLayoutRhythm.sectionGap,
+  },
+  filterChip: {
+    base: 'inline-flex items-center gap-1 rounded-full border border-border/70 bg-surface-muted/70 px-2.5 py-0.5',
+    typography: pmTypography.caption,
+    active: 'border-primary/40 bg-primary/8 text-primary',
+  },
+  actionPanel: {
+    gap: 'gap-2',
+    divider: 'border-t border-border/50 pt-3',
   },
   wizard: {
     gap: pmLayoutRhythm.formGap,

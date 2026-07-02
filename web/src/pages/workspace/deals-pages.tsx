@@ -42,14 +42,13 @@ import {
   PmButton,
   PmEmptyState,
   PmEntityListCard,
+  PmLifecycleMap,
   PmPage,
   PmPageHeader,
   PmPageHeroMetric,
   PmMoreActions,
   PmPageActions,
-  PmRelationshipChain,
   PmWorkflowBadge,
-  PmWorkflowJourney,
   buildDealWorkflowSteps,
   type PmMoreActionItem,
 } from '@/components/ui/pm-index'
@@ -382,21 +381,7 @@ export function DealDetailPage() {
       <PmDetailLayout
         main={
           <>
-            <PmWorkflowJourney steps={dealWorkflowSteps} compact label={false} />
-
-            <PmRelationshipChain
-              items={[
-                {
-                  label: model.links.negotiation ? 'Negotiation' : 'Negotiation (origin)',
-                  href: model.links.negotiation?.path ?? '/negotiations',
-                },
-                { label: 'Deal', href: `/deals/${model.deal.id}`, current: true },
-                {
-                  label: model.contractLink ? 'Contract' : 'Contract (next)',
-                  href: model.contractLink?.path ?? '/contracts',
-                },
-              ]}
-            />
+            <PmLifecycleMap steps={dealWorkflowSteps} />
 
             <PmContentCard title="Linked records">
               <PmFormReadonly>

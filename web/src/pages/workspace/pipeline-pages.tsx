@@ -27,12 +27,11 @@ import {
 import { dealRepository, applicationRepository } from '@/repositories/index.ts'
 import { PipelineBoard } from '@/components/pipeline/pipeline-board'
 import { MatchesListSection } from '@/components/collaboration/matches-list-section'
+import { MatchTypeChip } from '@/components/collaboration/match-card'
 import { CollaborationTimeline } from '@/components/collaboration/collaboration-timeline'
 import {
-  formatMatchTypeBadgeLabel,
   resolveCollaborationStepFromMatch,
   resolveCollaborationStepFromNegotiation,
-  resolveMatchTypeTone,
 } from '@/components/collaboration/collaboration-display'
 import {
   PmContentCard,
@@ -51,15 +50,15 @@ import {
   PmBadge,
   PmButton,
   PmEmptyState,
+  PmLifecycleMap,
   PmPage,
   PmPageHeader,
   PmPageHeroMetric,
   PmPageActions,
-  PmRelationshipChain,
   PmStatCard,
   PmSurface,
+  PmTimeline,
   PmWorkflowBadge,
-  PmWorkflowJourney,
   buildMatchWorkflowSteps,
   buildNegotiationWorkflowSteps,
   type PmCardActionSlot,
@@ -83,6 +82,7 @@ import {
   filterPostMatchesForViewer,
 } from '@/lib/entity-view-visibility.ts'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmResponsive } from '@/tokens'
 import { cn } from '@/lib/utils'
 import {
   MATCH_MARKETPLACE_VIEW_AVAILABLE,
@@ -91,10 +91,7 @@ import {
   resolveDefaultMatchView,
   type MatchPresentationView,
 } from '@/config/product-identity'
-import {
-  MatchTopologyDiagram,
-  UserJourneyStrip,
-} from '@/components/need-offer/need-offer-framework-panels'
+import { MatchTopologyDiagram } from '@/components/need-offer/need-offer-framework-panels'
 import { formatFrameworkMatchTypeSubtitle } from '@/config/need-offer-framework.ts'
 
 function resolveMatchNegotiation(match: PostMatch): Negotiation | undefined {
@@ -301,7 +298,7 @@ export function PipelinePage() {
         }
       >
         <PmToolbarSurface>
-          <TabsList>
+          <TabsList className={cn('max-w-full', pmResponsive.scrollX)}>
             {pipelineTabs.map((t) => (
               <TabsTrigger key={t.value} value={t.value} className="cursor-pointer">
                 {t.label}
@@ -419,7 +416,7 @@ export function MatchesPage() {
           value={matchView}
           onValueChange={(value) => setMatchView(value as MatchPresentationView)}
         >
-          <TabsList>
+          <TabsList className={cn('max-w-full', pmResponsive.scrollX)}>
             {(Object.keys(MATCH_VIEW_LABELS) as MatchPresentationView[]).map((key) => (
               <TabsTrigger
                 key={key}
@@ -606,9 +603,7 @@ export function MatchDetailPage() {
           }
           badges={
             <>
-              <PmBadge tone={resolveMatchTypeTone(match.matchType)} uppercase>
-                {formatMatchTypeBadgeLabel(match.matchType)}
-              </PmBadge>
+              <MatchTypeChip matchType={match.matchType} />
               <PmBadge tone="muted" size="sm">
                 {formatFrameworkMatchTypeSubtitle(match.matchType)}
               </PmBadge>
@@ -629,30 +624,9 @@ export function MatchDetailPage() {
       <PmDetailLayout
         main={
           <>
-            <PmWorkflowJourney steps={matchWorkflowSteps} compact label={false} />
-
-            <UserJourneyStrip activeStepId="negotiation" compact />
+            <PmLifecycleMap steps={matchWorkflowSteps} />
 
             <MatchTopologyDiagram topology={model.topology} />
-
-            <PmRelationshipChain
-              items={[
-                { label: 'Matching', href: '/matches' },
-                { label: 'Match', href: `/matches/${match.id}`, current: true },
-                {
-                  label: negotiation ? 'Negotiation' : 'Negotiation (next)',
-                  href: negotiation ? `/negotiations/${negotiation.id}` : '/negotiations',
-                },
-                {
-                  label: deal ? 'Deal' : 'Deal (next)',
-                  href: deal ? `/deals/${deal.id}` : '/deals',
-                },
-                {
-                  label: deal ? 'Contract (next)' : 'Contract (next)',
-                  href: '/contracts',
-                },
-              ]}
-            />
 
             <div className="grid gap-4 sm:grid-cols-3">
               <PmStatCard
@@ -1017,27 +991,7 @@ export function NegotiationDetailPage() {
       <PmDetailLayout
         main={
           <>
-            <PmWorkflowJourney steps={negotiationWorkflowSteps} compact label={false} />
-
-            <PmRelationshipChain
-              items={[
-                {
-                  label: 'Opportunity',
-                  href: linkedMatch?.needOpportunityId
-                    ? `/opportunities/${linkedMatch.needOpportunityId}`
-                    : '/opportunities',
-                },
-                {
-                  label: linkedMatch ? 'Match' : 'Match (origin)',
-                  href: linkedMatch ? `/matches/${linkedMatch.id}` : '/matches',
-                },
-                { label: 'Negotiation', href: `/negotiations/${neg.id}`, current: true },
-                {
-                  label: linkedDeal ? 'Deal' : 'Deal (next)',
-                  href: linkedDeal ? `/deals/${linkedDeal.id}` : '/deals',
-                },
-              ]}
-            />
+            <PmLifecycleMap steps={negotiationWorkflowSteps} />
 
             <PmContentCard title="Discussion">
             <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
@@ -1045,18 +999,19 @@ export function NegotiationDetailPage() {
               cancel, or create a deal when terms are settled.
             </p>
             {neg.rounds && neg.rounds.length > 0 ? (
-              <ul className={cn('mt-4 space-y-2', pmTypography.bodySm)}>
-                {neg.rounds.map((round, index) => (
-                  <li key={`${round.at}-${index}`}>
-                    <PmSurface variant="default" shadow="card" className="p-3">
-                      <p className={pmTypography.h3}>Round {index + 1}</p>
-                      <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
-                        {round.by} · {formatDate(round.at)}
-                      </p>
-                    </PmSurface>
-                  </li>
-                ))}
-              </ul>
+              <PmTimeline
+                bare
+                className="mt-4"
+                aria-label="Negotiation rounds"
+                events={neg.rounds.map((round, index) => ({
+                  id: `${round.at}-${index}`,
+                  label: `Round ${index + 1}`,
+                  description: round.by,
+                  timestamp: formatDate(round.at),
+                  status:
+                    index === (neg.rounds?.length ?? 0) - 1 ? ('active' as const) : ('done' as const),
+                }))}
+              />
             ) : null}
           </PmContentCard>
           </>

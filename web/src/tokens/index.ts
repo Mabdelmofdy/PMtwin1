@@ -17,9 +17,13 @@ export {
   pmSurfaceTone,
   pmTextTone,
   pmStatusBackground,
+  pmEntityTone,
+  pmEntitySurface,
+  pmEntityBackground,
   type PmSurfaceTone,
   type PmTextTone,
   type PmStatusBackground,
+  type PmEntityTone,
 } from '@/tokens/layers/semantic'
 export {
   pmComponentTokens,
