@@ -607,7 +607,7 @@ export function OpportunityDetailPage() {
             {visibility.showFullDescription && opportunitySemantic ? (
               <PmDisclosureSection
                 title="Need/Offer framework reference"
-                description="Semantic attributes, value exchange modes, and matching models for this post."
+                description="Advanced reference — semantic attributes, exchange modes, and matching models."
               >
                 <UserJourneyStrip activeStepId={journeyActiveStep} compact />
                 <NeedOfferMirrorPanel semantic={opportunitySemantic} />

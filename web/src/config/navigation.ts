@@ -70,6 +70,13 @@ export const mainNavigation: NavGroup[] = [
         keywords: ['my matches', 'assigned', 'collaboration'],
       },
       {
+        title: 'My Pipeline',
+        href: '/pipeline',
+        icon: GitBranch,
+        state: { domain: 'workspace' },
+        keywords: ['pipeline', 'workflow', 'board', 'kanban', 'progress'],
+      },
+      {
         title: 'My Negotiations',
         href: '/negotiations',
         icon: Scale,

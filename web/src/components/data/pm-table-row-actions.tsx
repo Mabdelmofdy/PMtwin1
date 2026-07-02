@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PmButton } from '@/components/ui/pm-button'
+import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +30,8 @@ export type PmTableRowActionsProps = {
   children?: ReactNode
   /** Custom trigger label for accessibility. */
   label?: string
+  /** Custom label for the view/open action (defaults to product vocabulary). */
+  viewLabel?: string
   className?: string
   align?: 'start' | 'center' | 'end'
 }
@@ -37,7 +40,7 @@ const actionConfig: Record<
   PmTableRowAction,
   { label: string; icon: typeof Eye; variant?: 'destructive' }
 > = {
-  view: { label: 'View', icon: Eye },
+  view: { label: PRODUCT_LANGUAGE.OPEN, icon: Eye },
   edit: { label: 'Edit', icon: Pencil },
   duplicate: { label: 'Duplicate', icon: Copy },
   delete: { label: 'Delete', icon: Trash2, variant: 'destructive' },
@@ -52,6 +55,7 @@ export function PmTableRowActions({
   hiddenActions = [],
   children,
   label = 'Row actions',
+  viewLabel,
   className,
   align = 'end',
 }: PmTableRowActionsProps) {
@@ -86,6 +90,8 @@ export function PmTableRowActions({
       <DropdownMenuContent align={align} className="w-40">
         {visibleActions.map((action, index) => {
           const { label: actionLabel, icon: Icon, variant } = actionConfig[action]
+          const displayLabel =
+            action === 'view' && viewLabel ? viewLabel : actionLabel
           const needsSeparator = action === 'delete' && index > 0
 
           return (
@@ -96,7 +102,7 @@ export function PmTableRowActions({
                 onSelect={() => handlers[action]?.()}
               >
                 <Icon className="size-4" />
-                {actionLabel}
+                {displayLabel}
               </DropdownMenuItem>
             </span>
           )

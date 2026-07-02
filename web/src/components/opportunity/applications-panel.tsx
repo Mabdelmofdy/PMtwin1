@@ -13,6 +13,7 @@ import { PmBadge, PmEmptyState, PmSurface, PmWorkflowBadge } from '@/components/
 import { PmCardActions } from '@/components/ui/pm-more-actions'
 import { cn } from '@/lib/utils'
 import { productFlags } from '@/config/product-flags.ts'
+import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import {
   Select,
   SelectContent,
@@ -68,10 +69,13 @@ export function ApplicationsPanel({
 
   if (applications.length === 0) {
     return (
-      <PmContentCard
-        title={sectionTitle}
-        className="border-border/50 bg-surface-muted/40"
-      >
+    <PmContentCard
+      title={sectionTitle}
+      className={cn(
+        'border-border/50 bg-surface-muted/40',
+        variant === 'legacy' && 'border-dashed opacity-80',
+      )}
+    >
         <PmEmptyState
           title={
             variant === 'legacy'
@@ -101,7 +105,10 @@ export function ApplicationsPanel({
           ? 'Optional hiring path — does not replace Match → Negotiation → Deal.'
           : undefined
       }
-      className="border-border/50 bg-surface-muted/40"
+      className={cn(
+        'border-border/50 bg-surface-muted/40',
+        variant === 'legacy' && 'border-dashed opacity-80',
+      )}
     >
       <div className="space-y-4">
         {applications.map((app) => {
@@ -145,12 +152,12 @@ export function ApplicationsPanel({
                   primary={
                     actionable
                       ? { label: 'Accept', onClick: () => handleAccept(app.id) }
-                      : { label: 'View profile', href: `/people/${app.applicantId}` }
+                      : { label: PRODUCT_LANGUAGE.OPEN_PROFILE, href: `/people/${app.applicantId}` }
                   }
                   secondary={
                     actionable
                       ? {
-                          label: 'View profile',
+                          label: PRODUCT_LANGUAGE.OPEN_PROFILE,
                           href: `/people/${app.applicantId}`,
                           variant: 'outline',
                         }

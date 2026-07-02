@@ -249,7 +249,7 @@ export function buildDealDetailReadModel(
     canCreateContract,
     contractLink: existingContract
       ? {
-          label: 'View contract',
+          label: 'Open contract',
           path: `${CONTRACT_DETAIL_ROUTE_PREFIX}/${existingContract.id}`,
         }
       : null,

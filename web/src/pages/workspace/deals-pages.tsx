@@ -39,6 +39,8 @@ import {
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
 import {
+  PmActionHub,
+  type PmActionHubItem,
   PmBadge,
   PmButton,
   PmEmptyState,
@@ -66,7 +68,67 @@ import {
   filterDealsForViewer,
 } from '@/lib/entity-view-visibility.ts'
 import { formatDealDisplayTitle } from '@/lib/entity-display-titles.ts'
+import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import { PmTechnicalDetails } from '@/components/ui/pm-technical-details.tsx'
+
+function buildDealRecommendedAction(
+  model: NonNullable<ReturnType<typeof buildDealDetailReadModel>>,
+  canMutate: boolean,
+): PmActionHubItem | null {
+  if (model.existingContract && model.contractLink) {
+    return {
+      id: 'open-contract',
+      title: 'Review contract',
+      context: 'Continue signing or execution in the contract workspace.',
+      status: model.existingContract.status,
+      statusEntity: 'contract',
+      primary: { label: model.contractLink.label, href: model.contractLink.path },
+      secondary: model.links.match
+        ? { label: PRODUCT_LANGUAGE.OPEN_MATCH, href: model.links.match.path, variant: 'outline' }
+        : undefined,
+    }
+  }
+
+  if (canMutate && model.canCreateContract) {
+    return {
+      id: 'create-contract',
+      title: 'Create contract',
+      context: 'Turn agreed deal terms into a signable contract.',
+      status: model.status,
+      statusEntity: 'deal',
+      primary: {
+        label: 'Create contract',
+        render: () => <CreateContractButton dealId={model.deal.id} />,
+      },
+      secondary: model.links.negotiation
+        ? {
+            label: PRODUCT_LANGUAGE.OPEN_NEGOTIATION,
+            href: model.links.negotiation.path,
+            variant: 'outline',
+          }
+        : undefined,
+    }
+  }
+
+  if (model.links.negotiation) {
+    return {
+      id: 'open-negotiation',
+      title: 'Review negotiation',
+      context: 'Trace commercial terms back to the originating negotiation.',
+      status: model.negotiationStatus ?? undefined,
+      statusEntity: 'negotiation',
+      primary: {
+        label: PRODUCT_LANGUAGE.OPEN_NEGOTIATION,
+        href: model.links.negotiation.path,
+      },
+      secondary: model.links.match
+        ? { label: PRODUCT_LANGUAGE.OPEN_MATCH, href: model.links.match.path, variant: 'outline' }
+        : undefined,
+    }
+  }
+
+  return null
+}
 
 function buildDealNavMoreItems(model: NonNullable<ReturnType<typeof buildDealDetailReadModel>>): PmMoreActionItem[] {
   const items: PmMoreActionItem[] = []
@@ -368,6 +430,7 @@ export function DealDetailPage() {
   })
 
   const dealNavMore = buildDealNavMoreItems(model)
+  const recommendedAction = buildDealRecommendedAction(model, canMutate)
 
   return (
     <PmPage
@@ -409,6 +472,36 @@ export function DealDetailPage() {
         main={
           <>
             <PmLifecycleMap steps={dealWorkflowSteps} />
+
+            {recommendedAction ? (
+              <PmActionHub
+                title="Recommended next step"
+                description="The most important action for this deal."
+                items={[recommendedAction]}
+              />
+            ) : null}
+
+            <PmContentCard title="Workflow links" className="border-border/60 bg-surface-muted/30">
+              <div className="flex flex-wrap gap-2">
+                {model.links.match ? (
+                  <PmButton size="sm" variant="outline" asChild>
+                    <Link to={model.links.match.path}>{PRODUCT_LANGUAGE.OPEN_MATCH}</Link>
+                  </PmButton>
+                ) : null}
+                {model.links.negotiation ? (
+                  <PmButton size="sm" variant="outline" asChild>
+                    <Link to={model.links.negotiation.path}>
+                      {PRODUCT_LANGUAGE.OPEN_NEGOTIATION}
+                    </Link>
+                  </PmButton>
+                ) : null}
+                {model.contractLink ? (
+                  <PmButton size="sm" variant="outline" asChild>
+                    <Link to={model.contractLink.path}>{PRODUCT_LANGUAGE.OPEN_CONTRACT}</Link>
+                  </PmButton>
+                ) : null}
+              </div>
+            </PmContentCard>
 
             <PmContentCard title="Linked records">
               <PmFormReadonly>

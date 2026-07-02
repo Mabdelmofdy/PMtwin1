@@ -162,7 +162,7 @@ export function AppSidebar() {
                     asChild
                   >
                     <Link to={dashboardHref}>
-                      <ArrowLeft className="size-4" aria-hidden />
+                      <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden />
                       <span>Back to My Workspace</span>
                     </Link>
                   </SidebarMenuButton>

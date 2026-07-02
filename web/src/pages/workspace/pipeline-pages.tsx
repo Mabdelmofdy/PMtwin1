@@ -48,6 +48,8 @@ import {
   PmFormReadonlySection,
 } from '@/components/forms/pm-form-index'
 import {
+  PmActionHub,
+  type PmActionHubItem,
   PmBadge,
   PmButton,
   PmCardActions,
@@ -95,6 +97,7 @@ import {
 } from '@/config/product-identity'
 import { MatchTopologyDiagram } from '@/components/need-offer/need-offer-framework-panels'
 import { formatFrameworkMatchTypeSubtitle } from '@/config/need-offer-framework.ts'
+import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 
 function resolveMatchNegotiation(match: PostMatch): Negotiation | undefined {
   if (match.negotiationId) {
@@ -177,7 +180,7 @@ function buildMatchDetailHeaderActions(input: {
         onClick: () => onAcceptDecline('accept'),
         loading: actionPending,
       },
-      secondary: { label: 'View opportunities', href: '/opportunities', variant: 'outline' },
+      secondary: { label: PRODUCT_LANGUAGE.OPEN_OPPORTUNITIES, href: '/opportunities', variant: 'outline' },
       more,
     }
   }
@@ -188,7 +191,7 @@ function buildMatchDetailHeaderActions(input: {
         label: 'Start negotiation',
         render: () => <StartNegotiationButton match={match} variant="default" />,
       },
-      secondary: { label: 'View opportunities', href: '/opportunities', variant: 'outline' },
+      secondary: { label: PRODUCT_LANGUAGE.OPEN_OPPORTUNITIES, href: '/opportunities', variant: 'outline' },
       more,
     }
   }
@@ -203,6 +206,126 @@ function buildMatchDetailHeaderActions(input: {
   return {
     primary: { label: 'Open match', href: `/matches/${match.id}` },
     more,
+  }
+}
+
+function buildMatchRecommendedAction(input: {
+  match: PostMatch
+  model: NonNullable<ReturnType<typeof buildMatchDetailReadModel>>
+  negotiation?: Negotiation
+  onAcceptDecline?: (action: 'accept' | 'decline') => void
+  actionPending?: boolean
+}): PmActionHubItem | null {
+  const { match, model, negotiation, onAcceptDecline, actionPending } = input
+  const { actions } = model
+
+  if (model.canAct && actions.showAccept && onAcceptDecline) {
+    return {
+      id: 'accept-match',
+      title: 'Accept match',
+      context: 'Respond to advance this collaboration.',
+      status: match.status,
+      statusEntity: 'match',
+      matchScore: match.matchScore,
+      primary: {
+        label: 'Accept',
+        onClick: () => onAcceptDecline('accept'),
+        loading: actionPending,
+      },
+      secondary: {
+        label: PRODUCT_LANGUAGE.OPEN_OPPORTUNITIES,
+        href: '/opportunities',
+        variant: 'outline',
+      },
+    }
+  }
+
+  if (model.canAct && actions.showStartNegotiation) {
+    return {
+      id: 'start-negotiation',
+      title: 'Start negotiation',
+      context: 'Move from match acceptance into term discussions.',
+      status: match.status,
+      statusEntity: 'match',
+      matchScore: match.matchScore,
+      primary: {
+        label: 'Start negotiation',
+        render: () => <StartNegotiationButton match={match} variant="default" />,
+      },
+    }
+  }
+
+  if (negotiation) {
+    return {
+      id: 'negotiation-active',
+      title: 'Review negotiation',
+      context: 'Terms are in progress — agree, counter, or create a deal.',
+      status: negotiation.status,
+      statusEntity: 'negotiation',
+      primary: { label: PRODUCT_LANGUAGE.OPEN_NEGOTIATION, href: `/negotiations/${negotiation.id}` },
+      secondary: actions.showViewDeal && actions.dealId
+        ? { label: PRODUCT_LANGUAGE.OPEN_DEAL, href: `/deals/${actions.dealId}`, variant: 'outline' }
+        : undefined,
+    }
+  }
+
+  if (actions.showViewDeal && actions.dealId) {
+    return {
+      id: 'open-deal',
+      title: 'Review deal',
+      context: 'Commercial terms are ready for review.',
+      status: match.status,
+      statusEntity: 'deal',
+      primary: { label: PRODUCT_LANGUAGE.OPEN_DEAL, href: `/deals/${actions.dealId}` },
+      secondary: actions.showViewNegotiation && actions.negotiationId
+        ? {
+            label: PRODUCT_LANGUAGE.OPEN_NEGOTIATION,
+            href: `/negotiations/${actions.negotiationId}`,
+            variant: 'outline',
+          }
+        : undefined,
+    }
+  }
+
+  return null
+}
+
+function buildNegotiationRecommendedAction(input: {
+  neg: Negotiation
+  linkedDeal?: { id: string; status: string }
+  canMutate: boolean
+}): PmActionHubItem | null {
+  const { neg, linkedDeal, canMutate } = input
+
+  if (linkedDeal) {
+    return {
+      id: 'open-deal',
+      title: 'Review linked deal',
+      context: 'Terms are settled — continue in the deal workspace.',
+      status: linkedDeal.status,
+      statusEntity: 'deal',
+      primary: { label: PRODUCT_LANGUAGE.OPEN_DEAL, href: `/deals/${linkedDeal.id}` },
+      secondary: neg.postMatchId
+        ? { label: PRODUCT_LANGUAGE.OPEN_MATCH, href: `/matches/${neg.postMatchId}`, variant: 'outline' }
+        : undefined,
+    }
+  }
+
+  if (!canMutate) return null
+
+  return {
+    id: 'agree-terms',
+    title: 'Agree terms',
+    context: 'Confirm terms or create a deal when ready.',
+    status: neg.status,
+    statusEntity: 'negotiation',
+    primary: {
+      label: 'Agree terms',
+      render: () => <AgreeNegotiationButton negotiation={neg} />,
+    },
+    secondary: neg.postMatchId
+      ? { label: PRODUCT_LANGUAGE.OPEN_MATCH, href: `/matches/${neg.postMatchId}`, variant: 'outline' }
+      : undefined,
   }
 }
 
@@ -591,6 +714,13 @@ export function MatchDetailPage() {
   })
 
   const matchTitle = formatMatchDisplayTitle(match, opportunitiesApi.get)
+  const recommendedAction = buildMatchRecommendedAction({
+    match,
+    model,
+    negotiation,
+    onAcceptDecline: runPostMatchAction,
+    actionPending,
+  })
 
   return (
     <PmPage
@@ -627,6 +757,36 @@ export function MatchDetailPage() {
         main={
           <>
             <PmLifecycleMap steps={matchWorkflowSteps} />
+
+            {recommendedAction ? (
+              <PmActionHub
+                title="Recommended next step"
+                description="The most important action for this match."
+                items={[recommendedAction]}
+              />
+            ) : null}
+
+            <PmContentCard title="Workflow links" className="border-border/60 bg-surface-muted/30">
+              <div className="flex flex-wrap gap-2">
+                {negotiation ? (
+                  <PmButton size="sm" variant="outline" asChild>
+                    <Link to={`/negotiations/${negotiation.id}`}>
+                      {PRODUCT_LANGUAGE.OPEN_NEGOTIATION}
+                    </Link>
+                  </PmButton>
+                ) : null}
+                {actions.showViewDeal && actions.dealId ? (
+                  <PmButton size="sm" variant="outline" asChild>
+                    <Link to={`/deals/${actions.dealId}`}>{PRODUCT_LANGUAGE.OPEN_DEAL}</Link>
+                  </PmButton>
+                ) : null}
+                {!negotiation && !(actions.showViewDeal && actions.dealId) ? (
+                  <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
+                    Accept the match or start negotiating to unlock the next workflow links.
+                  </p>
+                ) : null}
+              </div>
+            </PmContentCard>
 
             <PmContentCard title="Match status" className="border-border/60 bg-surface-muted/40">
               <div className="flex flex-wrap items-center gap-3">
@@ -951,6 +1111,11 @@ export function NegotiationDetailPage() {
 
   const negotiationTitle = formatNegotiationDisplayTitle(neg, opportunitiesApi.get)
   const linkedMatch = neg.postMatchId ? matchesApi.get(neg.postMatchId) : undefined
+  const recommendedNegotiationAction = buildNegotiationRecommendedAction({
+    neg,
+    linkedDeal,
+    canMutate,
+  })
 
   const negotiationWorkflowSteps = buildNegotiationWorkflowSteps({
     id: neg.id,
@@ -1028,7 +1193,7 @@ export function NegotiationDetailPage() {
             ) : neg.postMatchId ? (
               <PmPageActions
                 secondary={{
-                  label: 'View match',
+                  label: PRODUCT_LANGUAGE.OPEN_MATCH,
                   href: `/matches/${neg.postMatchId}`,
                   variant: 'outline',
                 }}
@@ -1042,6 +1207,29 @@ export function NegotiationDetailPage() {
         main={
           <>
             <PmLifecycleMap steps={negotiationWorkflowSteps} />
+
+            {recommendedNegotiationAction ? (
+              <PmActionHub
+                title="Recommended next step"
+                description="The most important action for this negotiation."
+                items={[recommendedNegotiationAction]}
+              />
+            ) : null}
+
+            <PmContentCard title="Workflow links" className="border-border/60 bg-surface-muted/30">
+              <div className="flex flex-wrap gap-2">
+                {neg.postMatchId ? (
+                  <PmButton size="sm" variant="outline" asChild>
+                    <Link to={`/matches/${neg.postMatchId}`}>{PRODUCT_LANGUAGE.OPEN_MATCH}</Link>
+                  </PmButton>
+                ) : null}
+                {linkedDeal ? (
+                  <PmButton size="sm" variant="outline" asChild>
+                    <Link to={`/deals/${linkedDeal.id}`}>{PRODUCT_LANGUAGE.OPEN_DEAL}</Link>
+                  </PmButton>
+                ) : null}
+              </div>
+            </PmContentCard>
 
             <PmContentCard title="Discussion">
             <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
@@ -1070,13 +1258,16 @@ export function NegotiationDetailPage() {
           <PmInspectorLayout header={<PmSectionHeader title="Participants & terms" />}>
             <PmFormReadonly>
               <PmFormReadonlySection title="Participants">
-                {(neg.participants ?? neg.parties ?? []).map((p) => (
-                  <PmFormReadonlyField
-                    key={p.userId}
-                    label={p.role.replace(/_/g, ' ')}
-                    value={p.userId}
-                  />
-                ))}
+                {(neg.participants ?? neg.parties ?? []).map((p) => {
+                  const displayName = peopleApi.get(p.userId)?.profile?.name
+                  return (
+                    <PmFormReadonlyField
+                      key={p.userId}
+                      label={p.role.replace(/_/g, ' ')}
+                      value={displayName ? `${displayName} (${p.userId})` : p.userId}
+                    />
+                  )
+                })}
               </PmFormReadonlySection>
               {neg.commercialTerms ? (
                 <PmFormReadonlySection title="Current offer">

@@ -180,7 +180,7 @@ export function MessagesPage() {
         <PmPageHeader
           label="Inbox"
           title="Messages"
-          description="Direct conversations with your network."
+          description="Direct conversations with your network. Messaging is in preview — sample threads illustrate the inbox experience."
           metric={
             <PmPageHeroMetric value={MOCK_MESSAGE_THREADS.length} label="Threads" />
           }

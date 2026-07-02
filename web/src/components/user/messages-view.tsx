@@ -68,12 +68,11 @@ export function MessagesView({ activeThreadId }: MessagesViewProps) {
                 Back to inbox
               </Link>
               <div className="flex-1 space-y-3 overflow-y-auto py-2">
-                <div className={cn('rounded-lg bg-surface-muted px-3 py-2', pmTypography.bodySm, 'text-muted-foreground')}>
-                  Message history will appear here once messaging is connected.
-                </div>
-                <p className={cn(pmTypography.caption, 'text-muted-foreground', 'italic')}>
-                  Typing indicator placeholder…
-                </p>
+                <PmEmptyState
+                  title="Messaging preview"
+                  description="Sample thread selected. Live message history will appear here once inbox is connected to your workspace."
+                  size="compact"
+                />
               </div>
               <div className="mt-auto space-y-2 border-t border-border/60 pt-4">
                 <div className={cn('flex items-center gap-2', pmTypography.caption, 'text-muted-foreground')}>
@@ -91,7 +90,7 @@ export function MessagesView({ activeThreadId }: MessagesViewProps) {
           ) : (
             <PmEmptyState
               title="Select a conversation"
-              description="Choose a thread from the list to view messages."
+              description="Messaging is in preview — choose a sample thread to see how conversations will appear once connected."
               size="compact"
             />
           )}

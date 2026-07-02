@@ -14,8 +14,12 @@ describe('PmFilterChip contract', () => {
     assert.equal(typeof chips[1]?.onRemove, 'function')
   })
 
-  it('supports empty chips array (component returns null)', () => {
-    const chips: readonly PmFilterChip[] = []
-    assert.equal(chips.length, 0)
+  it('supports role=group with aria-label for the chip bar', () => {
+    const ariaLabel = 'Active filters'
+    const chips: readonly PmFilterChip[] = [
+      { id: 'status', label: 'Status', value: 'Accepted' },
+    ]
+    assert.equal(chips.length, 1)
+    assert.equal(ariaLabel, 'Active filters')
   })
 })

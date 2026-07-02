@@ -33,6 +33,7 @@ import {
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
 import { formatFrameworkMatchTypeSubtitle } from '@/config/need-offer-framework.ts'
+import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import { cn } from '@/lib/utils'
 import type { PostMatch } from '@/types/domain.ts'
 
@@ -264,7 +265,7 @@ export function MatchesListSection({
             description={listEmpty.config.description}
             action={
               <PmButton size="sm" asChild>
-                <Link to="/opportunities">View opportunities</Link>
+                <Link to="/opportunities">{PRODUCT_LANGUAGE.OPEN_OPPORTUNITIES}</Link>
               </PmButton>
             }
           />

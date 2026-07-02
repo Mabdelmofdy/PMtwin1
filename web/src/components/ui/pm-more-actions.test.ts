@@ -29,8 +29,8 @@ describe('Card action rule priority', () => {
     if (actions.showAccept) return 'Accept match'
     if (actions.showStartNegotiation) return 'Start negotiation'
     if (actions.showCreateDeal) return 'Create deal'
-    if (actions.showViewNegotiation) return 'View negotiation'
-    if (actions.showViewDeal) return 'View deal'
+    if (actions.showViewNegotiation) return 'Open negotiation'
+    if (actions.showViewDeal) return 'Open deal'
     return 'Open match'
   }
 
@@ -40,7 +40,7 @@ describe('Card action rule priority', () => {
       resolvePrimaryLabel({ showStartNegotiation: true }),
       'Start negotiation',
     )
-    assert.equal(resolvePrimaryLabel({ showViewDeal: true }), 'View deal')
+    assert.equal(resolvePrimaryLabel({ showViewDeal: true }), 'Open deal')
     assert.equal(resolvePrimaryLabel({}), 'Open match')
   })
 })

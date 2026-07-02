@@ -99,7 +99,7 @@ export function PmTablePagination({
             onClick={() => onPageChange?.(page - 1)}
             aria-label="Previous page"
           >
-            <ChevronLeft className="size-4" />
+            <ChevronLeft className="size-4 rtl:rotate-180" />
           </PmButton>
           <span
             className={cn(pmTypography.caption, 'min-w-16 text-center tabular-nums')}
@@ -114,7 +114,7 @@ export function PmTablePagination({
             onClick={() => onPageChange?.(page + 1)}
             aria-label="Next page"
           >
-            <ChevronRight className="size-4" />
+            <ChevronRight className="size-4 rtl:rotate-180" />
           </PmButton>
         </div>
       </div>

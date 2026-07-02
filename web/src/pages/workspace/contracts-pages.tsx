@@ -41,6 +41,8 @@ import {
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
 import {
+  PmActionHub,
+  type PmActionHubItem,
   PmBadge,
   PmButton,
   PmEmptyState,
@@ -70,7 +72,53 @@ import {
 } from '@/lib/entity-view-visibility.ts'
 import { EntityAccessDenied } from '@/components/auth/entity-access-state'
 import { formatContractDisplayTitle } from '@/lib/entity-display-titles.ts'
+import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import { PmTechnicalDetails } from '@/components/ui/pm-technical-details.tsx'
+
+function buildContractRecommendedAction(
+  model: NonNullable<ReturnType<typeof buildContractDetailReadModel>>,
+  canMutate: boolean,
+  userId?: string,
+): PmActionHubItem | null {
+  if (canMutate && model.canSign && userId) {
+    return {
+      id: 'sign-contract',
+      title: 'Sign contract',
+      context: 'Your signature is required to activate this agreement.',
+      status: model.status,
+      statusEntity: 'contract',
+      primary: {
+        label: 'Sign contract',
+        render: () => (
+          <SignContractButton contractId={model.contractId} userId={userId} />
+        ),
+      },
+      secondary: model.links.deal
+        ? { label: PRODUCT_LANGUAGE.OPEN_DEAL, href: model.links.deal.path, variant: 'outline' }
+        : undefined,
+    }
+  }
+
+  if (model.links.deal) {
+    return {
+      id: 'open-deal',
+      title: 'Review source deal',
+      context: 'Commercial terms and participants live in the deal workspace.',
+      status: model.status,
+      statusEntity: 'contract',
+      primary: { label: PRODUCT_LANGUAGE.OPEN_DEAL, href: model.links.deal.path },
+      secondary: model.links.negotiation
+        ? {
+            label: PRODUCT_LANGUAGE.OPEN_NEGOTIATION,
+            href: model.links.negotiation.path,
+            variant: 'outline',
+          }
+        : undefined,
+    }
+  }
+
+  return null
+}
 
 function resolveContractListTitle(contract: Contract): string {
   const deal = contract.dealId ? dealsApi.get(contract.dealId) : undefined
@@ -391,6 +439,7 @@ export function ContractDetailPage() {
   })
 
   const contractNavMore = buildContractNavMoreItems(model)
+  const recommendedAction = buildContractRecommendedAction(model, canMutate, user?.id)
   const showMutations =
     canMutate &&
     contractDetailShowsMutationActions({
@@ -452,6 +501,36 @@ export function ContractDetailPage() {
           <>
             <PmLifecycleMap steps={contractWorkflowSteps} />
 
+            {recommendedAction ? (
+              <PmActionHub
+                title="Recommended next step"
+                description="The most important action for this contract."
+                items={[recommendedAction]}
+              />
+            ) : null}
+
+            <PmContentCard title="Workflow links" className="border-border/60 bg-surface-muted/30">
+              <div className="flex flex-wrap gap-2">
+                {model.links.deal ? (
+                  <PmButton size="sm" variant="outline" asChild>
+                    <Link to={model.links.deal.path}>{PRODUCT_LANGUAGE.OPEN_DEAL}</Link>
+                  </PmButton>
+                ) : null}
+                {model.links.match ? (
+                  <PmButton size="sm" variant="outline" asChild>
+                    <Link to={model.links.match.path}>{PRODUCT_LANGUAGE.OPEN_MATCH}</Link>
+                  </PmButton>
+                ) : null}
+                {model.links.negotiation ? (
+                  <PmButton size="sm" variant="outline" asChild>
+                    <Link to={model.links.negotiation.path}>
+                      {PRODUCT_LANGUAGE.OPEN_NEGOTIATION}
+                    </Link>
+                  </PmButton>
+                ) : null}
+              </div>
+            </PmContentCard>
+
             <PmContentCard title="Summary">
               <PmFormReadonly>
                 <PmFormReadonlySection>
@@ -509,8 +588,8 @@ export function ContractDetailPage() {
 
             <PmContentCard title="Attachments">
               <PmEmptyState
-                title="No attachments"
-                description="Attachment management is not wired in this MVP build."
+                title="No attachments yet"
+                description="File uploads are not available in this preview build. Attachments will appear here once document storage is connected."
                 size="compact"
               />
             </PmContentCard>

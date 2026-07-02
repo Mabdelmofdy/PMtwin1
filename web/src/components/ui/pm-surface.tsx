@@ -64,6 +64,8 @@ export function PmSurface({
 
             pmInteraction.card,
 
+            pmInteraction.focus,
+
             'hover:-translate-y-0.5 hover:border-border-strong hover:bg-surface-elevated hover:pm-shadow-panel',
 
           ),

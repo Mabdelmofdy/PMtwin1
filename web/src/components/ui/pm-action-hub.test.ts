@@ -22,8 +22,8 @@ describe('PmActionHubItem contract', () => {
       id: 'deal-1',
       title: 'Sign deal',
       primary: { label: 'Open deal', href: '/deals/1' },
-      secondary: { label: 'View pipeline', href: '/pipeline', variant: 'outline' as const },
-      more: [{ label: 'View match', href: '/matches/1' }],
+      secondary: { label: 'Open pipeline', href: '/pipeline', variant: 'outline' as const },
+      more: [{ label: 'Open match', href: '/matches/1' }],
     }
 
     assert.equal(item.more?.length, 1)
