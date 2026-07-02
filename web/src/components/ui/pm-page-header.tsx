@@ -95,7 +95,7 @@ export function PmPageHeader({
           {label ? (
             <p className={pmTypography.overline}>{label}</p>
           ) : null}
-          <p className={cn(pmTypography.caption, 'font-semibold uppercase tracking-[0.12em] text-muted-foreground/85')}>
+          <p className={cn(pmTypography.overline, 'text-muted-foreground/85')}>
             {purposeLabel}
           </p>
         </div>

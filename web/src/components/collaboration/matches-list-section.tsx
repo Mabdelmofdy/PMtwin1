@@ -12,10 +12,12 @@ import {
   PmTableRowActions,
   PmTableSearch,
   PmTableToolbar,
+  resolveListEmptyState,
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
 import {
   PmButton,
+  PmEmptyState,
   PmFilterChips,
   PmMatchScoreBadge,
   PmWorkflowBadge,
@@ -68,6 +70,22 @@ export function MatchesListSection({
   const pageCount = Math.max(1, Math.ceil(totalItems / pageSize))
   const safePage = Math.min(page, pageCount)
   const paged = filtered.slice((safePage - 1) * pageSize, safePage * pageSize)
+
+  const hasActiveFilters =
+    search.length > 0 || status !== 'all' || matchType !== 'all'
+  const listEmpty = resolveListEmptyState({
+    hasSourceData: matches.length > 0,
+    hasActiveFilters,
+    firstRun: {
+      title: 'No matches yet',
+      description:
+        'Matches appear when opportunities are published and the matching engine runs.',
+    },
+    filtered: {
+      title: 'No matches found',
+      description: 'Try adjusting search or filters.',
+    },
+  })
 
   const activeFilterChips: PmFilterChip[] = [
     ...(status !== 'all'
@@ -240,16 +258,43 @@ export function MatchesListSection({
         />
       )}
       empty={
-        <PmTableEmpty
-          variant="no-results"
-          title="No matches found"
-          description="Matches appear when opportunities are published and the matching engine runs."
-          primaryAction={
-            <PmButton size="sm" variant="outline" asChild>
-              <Link to="/opportunities">View opportunities</Link>
-            </PmButton>
-          }
-        />
+        listEmpty.branch === 'first-run' ? (
+          <PmEmptyState
+            title={listEmpty.config.title ?? 'No matches yet'}
+            description={listEmpty.config.description}
+            action={
+              <PmButton size="sm" asChild>
+                <Link to="/opportunities">View opportunities</Link>
+              </PmButton>
+            }
+          />
+        ) : listEmpty.branch === 'filtered' ? (
+          <PmTableEmpty
+            variant="no-results"
+            title={listEmpty.config.title}
+            description={listEmpty.config.description}
+            primaryAction={
+              <PmButton
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setSearch('')
+                  setStatus('all')
+                  setMatchType('all')
+                  setPage(1)
+                }}
+              >
+                Clear filters
+              </PmButton>
+            }
+          />
+        ) : (
+          <PmTableEmpty
+            variant="no-results"
+            title="No matches found"
+            description="Matches appear when opportunities are published and the matching engine runs."
+          />
+        )
       }
       pagination={
         totalItems > 0 ? (

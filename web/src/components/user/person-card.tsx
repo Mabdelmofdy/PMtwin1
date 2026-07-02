@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { PmBadge } from '@/components/ui/pm-badge'
-import { PmButton } from '@/components/ui/pm-button'
+import { PmCardActions } from '@/components/ui/pm-more-actions'
 import { PmSurface } from '@/components/ui/pm-surface'
 import {
   isCompanyEntity,
@@ -30,7 +30,7 @@ export function PersonCard({ person, companyIds, className }: PersonCardProps) {
       variant="default"
       shadow="card"
       interactive
-      className={cn('flex h-full flex-col p-4', className)}
+      className={cn('flex h-full flex-col p-4 md:p-5', className)}
       data-slot="person-card"
     >
       <div className="flex items-start justify-between gap-2">
@@ -64,11 +64,7 @@ export function PersonCard({ person, companyIds, className }: PersonCardProps) {
         </div>
       ) : null}
 
-      <div className="mt-4 border-t border-border/40 pt-3">
-        <PmButton size="sm" asChild>
-          <Link to={href}>View profile</Link>
-        </PmButton>
-      </div>
+      <PmCardActions className="mt-4" primary={{ label: 'Open profile', href }} />
     </PmSurface>
   )
 }

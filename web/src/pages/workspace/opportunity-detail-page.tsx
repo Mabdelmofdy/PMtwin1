@@ -133,7 +133,7 @@ function buildRecommendedActionItem(input: {
       status: actions.negotiation?.status ?? 'active',
       statusEntity: 'negotiation',
       primary: { label: 'Open negotiation', href: `/negotiations/${actions.negotiationId}` },
-      secondary: { label: 'View match', href: topCard.detailPath, variant: 'outline' },
+      secondary: { label: 'Open match', href: topCard.detailPath, variant: 'outline' },
     }
   }
   if (actions.showCreateDeal || actions.showViewDeal) {
@@ -481,7 +481,7 @@ export function OpportunityDetailPage() {
                         }
                       : canPublishDraft
                         ? undefined
-                        : { label: 'View matches', href: '/matches', variant: 'outline' }
+                        : { label: 'Open matches', href: '/matches', variant: 'outline' }
                 }
                 more={
                   isOwner
@@ -574,7 +574,7 @@ export function OpportunityDetailPage() {
             ) : null}
 
             {visibility.showFullDescription ? (
-              <PmContentCard title="Requirements">
+              <PmContentCard title="Requirements" className="border-border/60 bg-surface-muted/30">
                 <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
                   {opp.description || 'No description provided.'}
                 </p>
@@ -582,7 +582,7 @@ export function OpportunityDetailPage() {
             ) : null}
 
             {visibility.showFullDescription && skills.length > 0 ? (
-              <PmContentCard title="Core skills">
+              <PmContentCard title="Core skills" className="border-border/60 bg-surface-muted/30">
                 <div className="flex flex-wrap gap-2">
                   {skills.map((s: string) => (
                     <PmBadge key={s} tone="neutral" size="sm">
@@ -644,7 +644,7 @@ export function OpportunityDetailPage() {
                 opportunity={opp}
                 publishDetails={publishDetails}
                 onPublish={handlePublish}
-                showPublishButton
+                showPublishButton={!recommendedAction || recommendedAction.id !== 'publish'}
               />
             ) : null}
 

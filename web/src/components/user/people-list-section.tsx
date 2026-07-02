@@ -14,45 +14,41 @@ import {
 import {
   PmDataTable,
   PmTableEmpty,
-  PmTableFilter,
   PmTablePagination,
   PmTableRowActions,
-  PmTableSearch,
-  PmTableToolbar,
+  resolveListEmptyState,
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
-import { PmBadge } from '@/components/ui/pm-index'
-import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
-import { cn } from '@/lib/utils'
+import { PmBadge, PmButton, PmEmptyState } from '@/components/ui/pm-index'
 import type { PlatformUser } from '@/types/domain.ts'
 
 export type PeopleListSectionProps = {
   initialScope?: PeopleScopeFilter
+  search: string
+  scope: PeopleScopeFilter
+  onSearchChange: (value: string) => void
+  onScopeChange: (scope: PeopleScopeFilter) => void
 }
 
-export function PeopleListSection({ initialScope = 'all' }: PeopleListSectionProps) {
+export function PeopleListSection({
+  initialScope = 'all',
+  search,
+  scope,
+  onSearchChange,
+  onScopeChange,
+}: PeopleListSectionProps) {
   const location = useLocation()
   const navPeopleScope = (location.state as { peopleScope?: PeopleScopeFilter } | null)?.peopleScope
   const navigate = useNavigate()
-  const [search, setSearch] = useState('')
-  const [scope, setScope] = useState<PeopleScopeFilter>(navPeopleScope ?? initialScope)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
 
   useEffect(() => {
     if (navPeopleScope) {
-      setScope(navPeopleScope)
+      onScopeChange(navPeopleScope)
       setPage(1)
     }
-  }, [location.key, navPeopleScope])
+  }, [location.key, navPeopleScope, onScopeChange])
 
   const companyIds = useMemo(
     () => new Set(peopleApi.listCompanies().map((c) => c.id)),
@@ -71,6 +67,20 @@ export function PeopleListSection({ initialScope = 'all' }: PeopleListSectionPro
   const pageCount = Math.max(1, Math.ceil(totalItems / pageSize))
   const safePage = Math.min(page, pageCount)
   const paged = filtered.slice((safePage - 1) * pageSize, safePage * pageSize)
+
+  const hasActiveFilters = search.length > 0 || scope !== 'all'
+  const listEmpty = resolveListEmptyState({
+    hasSourceData: filterPublicPeople(peopleApi.listAll()).length > 0,
+    hasActiveFilters,
+    firstRun: {
+      title: 'No people in directory yet',
+      description: 'Professionals and companies will appear here as they join the platform.',
+    },
+    filtered: {
+      title: 'No people found',
+      description: 'Try adjusting search or filters.',
+    },
+  })
 
   const columns: PmDataTableColumn<PlatformUser>[] = [
     {
@@ -111,45 +121,6 @@ export function PeopleListSection({ initialScope = 'all' }: PeopleListSectionPro
       data={paged}
       getRowId={(p) => p.id}
       caption="People and companies"
-      toolbar={
-        <PmToolbarSurface>
-          <PmTableToolbar
-            search={
-              <PmTableSearch
-                placeholder="Search by name, skills, sector…"
-                value={search}
-                onValueChange={(v) => {
-                  setSearch(v)
-                  setPage(1)
-                }}
-              />
-            }
-            filters={
-              <PmTableFilter activeCount={scope !== 'all' ? 1 : 0} label="Type">
-                <div className="space-y-1.5">
-                  <label className={cn(pmTypography.bodySm, 'font-medium')}>Entity type</label>
-                  <Select
-                    value={scope}
-                    onValueChange={(v) => {
-                      setScope(v as PeopleScopeFilter)
-                    setPage(1)
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="people">Professionals</SelectItem>
-                    <SelectItem value="companies">Companies</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </PmTableFilter>
-          }
-          />
-        </PmToolbarSurface>
-      }
       rowActions={(person) => (
         <PmTableRowActions
           onView={() => navigate(`/people/${person.id}`)}
@@ -157,11 +128,42 @@ export function PeopleListSection({ initialScope = 'all' }: PeopleListSectionPro
         />
       )}
       empty={
-        <PmTableEmpty
-          variant="no-results"
-          title="No people found"
-          description="Try adjusting search or filters."
-        />
+        listEmpty.branch === 'first-run' ? (
+          <PmEmptyState
+            title={listEmpty.config.title ?? 'No people in directory yet'}
+            description={listEmpty.config.description}
+            action={
+              <PmButton size="sm" variant="outline" asChild>
+                <Link to="/profile">Complete your profile</Link>
+              </PmButton>
+            }
+          />
+        ) : listEmpty.branch === 'filtered' ? (
+          <PmTableEmpty
+            variant="no-results"
+            title={listEmpty.config.title}
+            description={listEmpty.config.description}
+            primaryAction={
+              <PmButton
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  onSearchChange('')
+                  onScopeChange(initialScope)
+                  setPage(1)
+                }}
+              >
+                Clear filters
+              </PmButton>
+            }
+          />
+        ) : (
+          <PmTableEmpty
+            variant="no-results"
+            title="No people found"
+            description="Try adjusting search or filters."
+          />
+        )
       }
       pagination={
         totalItems > 0 ? (

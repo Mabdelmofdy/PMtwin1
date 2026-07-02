@@ -53,7 +53,7 @@ function buildMatchCardActions(
 ): MatchCardActionBundle {
   const { actions } = card
   const viewMatchSecondary: PmCardActionSlot = {
-    label: 'View match',
+    label: 'Open match',
     href: card.detailPath,
     variant: 'outline',
   }
@@ -72,7 +72,7 @@ function buildMatchCardActions(
   if (actions.showViewNegotiation && actions.negotiationId) {
     more.push({
       id: 'view-negotiation',
-      label: 'View negotiation',
+      label: 'Open negotiation',
       href: `/negotiations/${actions.negotiationId}`,
     })
   }
@@ -80,7 +80,7 @@ function buildMatchCardActions(
   if (actions.showViewDeal && actions.dealId) {
     more.push({
       id: 'view-deal',
-      label: 'View deal',
+      label: 'Open deal',
       href: `/deals/${actions.dealId}`,
     })
   }
@@ -130,7 +130,7 @@ function buildMatchCardActions(
   if (actions.showViewNegotiation && actions.negotiationId) {
     return {
       primary: {
-        label: 'View negotiation',
+        label: 'Open negotiation',
         href: `/negotiations/${actions.negotiationId}`,
       },
       secondary: viewMatchSecondary,
@@ -141,7 +141,7 @@ function buildMatchCardActions(
   if (actions.showViewDeal && actions.dealId) {
     return {
       primary: {
-        label: 'View deal',
+        label: 'Open deal',
         href: `/deals/${actions.dealId}`,
       },
       secondary: viewMatchSecondary,

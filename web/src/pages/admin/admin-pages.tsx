@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { adminApi } from '@/api/admin.ts'
@@ -45,7 +45,7 @@ import {
   PmSectionHeader,
   formatPlatformHealthMetric,
 } from '@/components/layout/pm-layout-index'
-import { PmBadge, PmButton, PmEmptyState, PmPage, PmPageHeader, PmPageHeroMetric, PmMoreActions, PmReadinessScoreBadge, PmStatCard, PmMatchScoreBadge } from '@/components/ui/pm-index'
+import { PmBadge, PmButton, PmEmptyState, PmPage, PmPageActions, PmPageHeader, PmPageHeroMetric, PmReadinessScoreBadge, PmStatCard, PmMatchScoreBadge } from '@/components/ui/pm-index'
 import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
@@ -170,18 +170,13 @@ export function AdminDashboardPage() {
       }
       quickActions={
         <PmContentCard title="Quick actions">
-          <div className="flex flex-wrap items-center gap-2">
-            <PmButton size="sm" asChild>
-              <Link to="/admin/matching">Run matching</Link>
-            </PmButton>
-            <PmMoreActions
-              label="More admin actions"
-              items={[
-                { id: 'vetting', label: 'Review vetting', href: '/admin/vetting' },
-                { id: 'audit', label: 'View audit log', href: '/admin/audit' },
-              ]}
-            />
-          </div>
+          <PmPageActions
+            primary={{ label: 'Run matching', href: '/admin/matching' }}
+            more={[
+              { id: 'vetting', label: 'Review vetting', href: '/admin/vetting' },
+              { id: 'audit', label: 'Open audit log', href: '/admin/audit' },
+            ]}
+          />
         </PmContentCard>
       }
       recentActivity={

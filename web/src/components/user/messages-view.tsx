@@ -3,6 +3,7 @@ import { ArrowLeft, Paperclip } from 'lucide-react'
 import { MOCK_MESSAGE_THREADS } from '@/components/user/user-display'
 import { PmContentCard } from '@/components/layout/pm-layout-index'
 import { PmSplitLayout } from '@/components/layout/pm-split-layout'
+import { PmFormField } from '@/components/forms/pm-form-index'
 import { PmBadge, PmButton, PmEmptyState } from '@/components/ui/pm-index'
 import { Input } from '@/components/ui/input'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
@@ -80,8 +81,10 @@ export function MessagesView({ activeThreadId }: MessagesViewProps) {
                   Attachments placeholder
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row">
-                  <Input placeholder="Write a message…" className="min-w-0 flex-1" />
-                  <PmButton className="w-full sm:w-auto">Send</PmButton>
+                  <PmFormField id="message-compose" label="Message" className="min-w-0 flex-1">
+                    <Input id="message-compose" placeholder="Write a message…" />
+                  </PmFormField>
+                  <PmButton className="w-full sm:w-auto sm:self-end">Send</PmButton>
                 </div>
               </div>
             </>

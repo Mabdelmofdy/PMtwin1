@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCheck } from 'lucide-react'
 import type { AppNotification } from '@/types/domain.ts'
 import { notificationsApi } from '@/api/notifications.ts'
 import { useAuth } from '@/providers/auth-provider'
@@ -14,29 +13,22 @@ import { PmContentCard } from '@/components/layout/pm-layout-index'
 import {
   PmDataTable,
   PmTableEmpty,
-  PmTableFilter,
-  PmTableToolbar,
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
-import { PmBadge, PmButton, PmEmptyState } from '@/components/ui/pm-index'
-import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { PmBadge, PmEmptyState } from '@/components/ui/pm-index'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
 
-type ReadFilter = 'all' | 'unread' | 'read'
+export type ReadFilter = 'all' | 'unread' | 'read'
 
-export function NotificationsListSection() {
+export type NotificationsListSectionProps = {
+  readFilter: ReadFilter
+}
+
+export function NotificationsListSection({ readFilter }: NotificationsListSectionProps) {
   const { user } = useAuth()
   const version = useDataStoreVersion()
   const userId = user?.id ?? 'seed-user-001'
-  const [readFilter, setReadFilter] = useState<ReadFilter>('all')
 
   const notifications = useMemo(
     () => notificationsApi.list(userId),
@@ -52,11 +44,6 @@ export function NotificationsListSection() {
   }, [notifications, readFilter])
 
   const groups = useMemo(() => groupNotifications(filtered), [filtered])
-  const unreadCount = notifications.filter((n) => !n.read).length
-
-  const handleMarkAllRead = () => {
-    notificationsApi.markAllRead(userId)
-  }
 
   const columns: PmDataTableColumn<AppNotification>[] = [
     {
@@ -104,91 +91,69 @@ export function NotificationsListSection() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-end">
-        {unreadCount > 0 ? (
-          <PmButton size="sm" variant="outline" onClick={handleMarkAllRead}>
-            <CheckCheck className="size-4" aria-hidden />
-            Mark all read
-          </PmButton>
-        ) : null}
+    <>
+      <div className="hidden lg:block">
+        <PmDataTable
+          density="compact"
+          columns={columns}
+          data={filtered}
+          getRowId={(n) => n.id}
+          caption="Notifications"
+          empty={
+            <PmTableEmpty
+              variant="no-results"
+              title="No notifications match this filter"
+              description="Try changing the read state filter."
+            />
+          }
+        />
       </div>
 
-      <PmDataTable
-        density="compact"
-        columns={columns}
-        data={filtered}
-        getRowId={(n) => n.id}
-        caption="Notifications"
-        toolbar={
-          <PmToolbarSurface>
-            <PmTableToolbar
-              filters={
-                <PmTableFilter activeCount={readFilter !== 'all' ? 1 : 0} label="Filter">
-                  <div className="space-y-1.5">
-                    <label className={cn(pmTypography.bodySm, 'font-medium')}>Read state</label>
-                    <Select value={readFilter} onValueChange={(v) => setReadFilter(v as ReadFilter)}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All</SelectItem>
-                        <SelectItem value="unread">Unread only</SelectItem>
-                        <SelectItem value="read">Read only</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </PmTableFilter>
-              }
-            />
-          </PmToolbarSurface>
-        }
-        empty={
+      <div className="space-y-4 lg:hidden">
+        {groups.length === 0 ? (
           <PmTableEmpty
             variant="no-results"
             title="No notifications match this filter"
             description="Try changing the read state filter."
           />
-        }
-      />
-
-      <div className="space-y-4 lg:hidden">
-        {groups.map((group) => (
-          <PmContentCard key={group.key} title={group.label}>
-            <ul className="divide-y divide-border/60">
-              {group.items.map((n) => {
-                const Icon = resolveNotificationIcon(n)
-                return (
-                  <li key={n.id}>
-                    <Link
-                      to={n.link ?? '/notifications'}
-                      className="flex gap-3 py-3 transition-colors hover:bg-surface-muted/40"
-                    >
-                      <span
-                        className={cn(
-                          'flex size-8 shrink-0 items-center justify-center rounded-lg',
-                          n.read ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-primary',
-                        )}
+        ) : (
+          groups.map((group) => (
+            <PmContentCard key={group.key} title={group.label}>
+              <ul className="divide-y divide-border/60">
+                {group.items.map((n) => {
+                  const Icon = resolveNotificationIcon(n)
+                  return (
+                    <li key={n.id}>
+                      <Link
+                        to={n.link ?? '/notifications'}
+                        className="flex gap-3 py-3 transition-colors hover:bg-surface-muted/40"
                       >
-                        <Icon className="size-4" aria-hidden />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className={cn(pmTypography.bodySm, 'font-medium', !n.read && 'text-foreground')}>
-                          {n.title}
-                        </p>
-                        <p className={cn('line-clamp-2', pmTypography.caption, 'text-muted-foreground')}>{n.message}</p>
-                        <p className="mt-1 text-[11px] text-muted-foreground">
-                          {formatNotificationTime(n.createdAt)}
-                        </p>
-                      </div>
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </PmContentCard>
-        ))}
+                        <span
+                          className={cn(
+                            'flex size-8 shrink-0 items-center justify-center rounded-lg',
+                            n.read ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-primary',
+                          )}
+                        >
+                          <Icon className="size-4" aria-hidden />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className={cn(pmTypography.bodySm, 'font-medium', !n.read && 'text-foreground')}>
+                            {n.title}
+                          </p>
+                          <p className={cn('line-clamp-2', pmTypography.caption, 'text-muted-foreground')}>{n.message}</p>
+                          <p className="mt-1 text-[11px] text-muted-foreground">
+                            {formatNotificationTime(n.createdAt)}
+                          </p>
+                        </div>
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            </PmContentCard>
+          ))
+        )}
       </div>
-    </div>
+    </>
   )
 }

@@ -30,7 +30,7 @@ export function PmStatsStrip({
       data-slot={dataSlot}
       variant="muted"
       className={cn(
-        'flex flex-wrap divide-y divide-border/45 rounded-3xl sm:divide-x sm:divide-y-0',
+        'flex flex-wrap divide-y divide-border/45 rounded-2xl sm:divide-x sm:divide-y-0',
         className,
       )}
     >

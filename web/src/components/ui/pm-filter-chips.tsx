@@ -1,6 +1,7 @@
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmIconSize } from '@/tokens'
 import { PmButton } from '@/components/ui/pm-button'
 
 export type PmFilterChip = {
@@ -56,7 +57,7 @@ export function PmFilterChips({
               aria-label={`Remove filter ${chip.label}: ${chip.value}`}
               className="flex size-4 cursor-pointer items-center justify-center rounded-full outline-none transition-colors hover:bg-primary/15 focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
-              <X className="size-3" aria-hidden />
+              <X className={pmIconSize.compact} aria-hidden />
             </button>
           ) : null}
         </span>

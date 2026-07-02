@@ -37,6 +37,7 @@ import {
   PmTableRowActions,
   PmTableSearch,
   PmTableToolbar,
+  resolveListEmptyState,
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
 import {
@@ -46,6 +47,7 @@ import {
   PmEntityListCard,
   PmLifecycleMap,
   PmPage,
+  PmPageActions,
   PmPageHeader,
   PmPageHeroMetric,
   PmMoreActions,
@@ -155,6 +157,19 @@ export function ContractsPage() {
   const safePage = Math.min(page, pageCount)
   const paged = filtered.slice((safePage - 1) * pageSize, safePage * pageSize)
 
+  const listEmpty = resolveListEmptyState({
+    hasSourceData: contracts.length > 0,
+    hasActiveFilters: search.length > 0,
+    firstRun: {
+      title: 'No contracts yet',
+      description: 'Contracts are created from deals in draft, review, or signing.',
+    },
+    filtered: {
+      title: 'No contracts match your search',
+      description: 'Try a different search term.',
+    },
+  })
+
   const columns: PmDataTableColumn<Contract>[] = [
     {
       id: 'title',
@@ -185,102 +200,108 @@ export function ContractsPage() {
     },
   ]
 
-  if (!contracts.length) {
-    return (
-      <PmPage
-        header={
-          <PmPageHeader
-            label="My Workspace"
-            title="My contracts"
-            description="Contracts assigned to you for signature and execution."
-            tone="contract"
-            metric={<PmPageHeroMetric value={0} label="Active" />}
-          />
-        }
-      >
-        <PmEmptyState
-          title="No contracts yet"
-          description="Contracts are created from deals in draft, review, or signing."
-          action={
-            <PmButton asChild>
-              <Link to="/deals">View deals</Link>
-            </PmButton>
-          }
-        />
-      </PmPage>
-    )
-  }
-
   return (
     <PmPage
       header={
         <PmPageHeader
           label="My Workspace"
           title="My contracts"
-          description="Agreements you own — pending signature, active, and completed."
+          description={
+            contracts.length
+              ? 'Agreements you own — pending signature, active, and completed.'
+              : 'Contracts assigned to you for signature and execution.'
+          }
           tone="contract"
           metric={<PmPageHeroMetric value={activeContracts} label="Active" />}
           badges={
-            <>
-              <PmBadge tone="muted">{contracts.length} total</PmBadge>
-              <PmBadge tone="primary">{activeContracts} active</PmBadge>
-            </>
+            contracts.length ? (
+              <>
+                <PmBadge tone="muted">{contracts.length} total</PmBadge>
+                <PmBadge tone="primary">{activeContracts} active</PmBadge>
+              </>
+            ) : undefined
           }
         />
       }
     >
-      <PmDataTable
-        density="comfortable"
-        columns={columns}
-        data={paged}
-        getRowId={(c) => c.id}
-        caption="Contracts"
-        toolbar={
-          <PmToolbarSurface>
-            <PmTableToolbar
-              search={
-                <PmTableSearch
-                  placeholder="Search contract or deal ID…"
-                  value={search}
-                  onValueChange={(v) => {
-                    setSearch(v)
-                    setPage(1)
-                  }}
-                />
-              }
+      {listEmpty.branch === 'first-run' ? (
+        <PmEmptyState
+          title={listEmpty.config.title ?? 'No contracts yet'}
+          description={listEmpty.config.description}
+          action={
+            <PmButton asChild>
+              <Link to="/deals">Open deals</Link>
+            </PmButton>
+          }
+        />
+      ) : (
+        <PmDataTable
+          density="comfortable"
+          columns={columns}
+          data={paged}
+          getRowId={(c) => c.id}
+          caption="Contracts"
+          toolbar={
+            <PmToolbarSurface>
+              <PmTableToolbar
+                search={
+                  <PmTableSearch
+                    placeholder="Search contract or deal ID…"
+                    value={search}
+                    onValueChange={(v) => {
+                      setSearch(v)
+                      setPage(1)
+                    }}
+                  />
+                }
+              />
+            </PmToolbarSurface>
+          }
+          rowActions={(c) => (
+            <PmTableRowActions
+              onView={() => navigate(`/contracts/${c.id}`)}
+              hiddenActions={['edit', 'delete', 'duplicate']}
             />
-          </PmToolbarSurface>
-        }
-        rowActions={(c) => (
-          <PmTableRowActions
-            onView={() => navigate(`/contracts/${c.id}`)}
-            hiddenActions={['edit', 'delete', 'duplicate']}
-          />
-        )}
-        empty={
-          <PmTableEmpty
-            variant="no-results"
-            title="No contracts match your search"
-            description="Try a different search term."
-          />
-        }
-        pagination={
-          totalItems > 0 ? (
-            <PmTablePagination
-              page={safePage}
-              pageSize={pageSize}
-              totalItems={totalItems}
-              pageSizeOptions={[12, 24, 48]}
-              onPageChange={setPage}
-              onPageSizeChange={(size) => {
-                setPageSize(size)
-                setPage(1)
-              }}
-            />
-          ) : undefined
-        }
-        renderMobileCard={(c) => <ContractListCard contract={c} />}
-      />
+          )}
+          empty={
+            listEmpty.branch === 'filtered' ? (
+              <PmTableEmpty
+                variant="no-results"
+                title={listEmpty.config.title}
+                description={listEmpty.config.description}
+                primaryAction={
+                  <PmButton
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setSearch('')
+                      setPage(1)
+                    }}
+                  >
+                    Clear search
+                  </PmButton>
+                }
+              />
+            ) : undefined
+          }
+          pagination={
+            totalItems > 0 ? (
+              <PmTablePagination
+                page={safePage}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                pageSizeOptions={[12, 24, 48]}
+                onPageChange={setPage}
+                onPageSizeChange={(size) => {
+                  setPageSize(size)
+                  setPage(1)
+                }}
+              />
+            ) : undefined
+          }
+          renderMobileCard={(c) => <ContractListCard contract={c} />}
+        />
+      )}
     </PmPage>
   )
 }
@@ -399,9 +420,25 @@ export function ContractDetailPage() {
           badges={<PmWorkflowBadge status={model.status} entity="contract" />}
           actions={
             canMutate && model.canSign && user?.id ? (
-              <SignContractButton
-                contractId={model.contractId}
-                userId={user.id}
+              <PmPageActions
+                primary={{
+                  label: 'Sign contract',
+                  render: () => (
+                    <SignContractButton
+                      contractId={model.contractId}
+                      userId={user.id}
+                    />
+                  ),
+                }}
+                more={
+                  contractNavMore.length > 0
+                    ? contractNavMore.map((item) => ({
+                        id: item.id,
+                        label: item.label,
+                        href: item.href,
+                      }))
+                    : undefined
+                }
               />
             ) : contractNavMore.length > 0 ? (
               <PmMoreActions items={contractNavMore} label="Related records" />
@@ -483,42 +520,28 @@ export function ContractDetailPage() {
           <PmInspectorLayout
             header={<PmSectionHeader title="Scope" />}
             footer={
-              showMutations ? (
-                <div className="flex w-full flex-col gap-2">
-                  {model.canSign && user?.id ? (
-                    <SignContractButton
-                      contractId={model.contractId}
-                      userId={user.id}
-                      className="w-full"
-                    />
-                  ) : null}
-                  {(model.canComplete || model.canTerminate) ? (
-                    <PmMoreActions
-                      label="More contract actions"
-                      className="w-full"
-                    >
-                        <>
-                          {model.canComplete ? (
-                            <DropdownMenuItem asChild>
-                              <CompleteContractButton
-                                contractId={model.contractId}
-                                className="w-full justify-start"
-                                variant="outline"
-                              />
-                            </DropdownMenuItem>
-                          ) : null}
-                          {model.canTerminate ? (
-                            <DropdownMenuItem asChild>
-                              <TerminateContractButton
-                                contractId={model.contractId}
-                                className="w-full justify-start"
-                              />
-                            </DropdownMenuItem>
-                          ) : null}
-                        </>
-                    </PmMoreActions>
-                  ) : null}
-                </div>
+              showMutations && (model.canComplete || model.canTerminate) ? (
+                <PmMoreActions label="More contract actions" className="w-full">
+                  <>
+                    {model.canComplete ? (
+                      <DropdownMenuItem asChild>
+                        <CompleteContractButton
+                          contractId={model.contractId}
+                          className="w-full justify-start"
+                          variant="outline"
+                        />
+                      </DropdownMenuItem>
+                    ) : null}
+                    {model.canTerminate ? (
+                      <DropdownMenuItem asChild>
+                        <TerminateContractButton
+                          contractId={model.contractId}
+                          className="w-full justify-start"
+                        />
+                      </DropdownMenuItem>
+                    ) : null}
+                  </>
+                </PmMoreActions>
               ) : undefined
             }
           >

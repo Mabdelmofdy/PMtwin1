@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { Application } from '@/types/domain.ts'
 import {
@@ -10,7 +9,8 @@ import { negotiationService } from '@/services/negotiation-service.ts'
 import { formatDate } from '@/lib/format'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { PmContentCard } from '@/components/layout/pm-layout-index'
-import { PmBadge, PmButton, PmSurface, PmWorkflowBadge } from '@/components/ui/pm-index'
+import { PmBadge, PmEmptyState, PmSurface, PmWorkflowBadge } from '@/components/ui/pm-index'
+import { PmCardActions } from '@/components/ui/pm-more-actions'
 import { cn } from '@/lib/utils'
 import { productFlags } from '@/config/product-flags.ts'
 import {
@@ -72,11 +72,19 @@ export function ApplicationsPanel({
         title={sectionTitle}
         className="border-border/50 bg-surface-muted/40"
       >
-        <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-          {variant === 'legacy'
-            ? APPLICATIONS_LEGACY_EMPTY_MESSAGE
-            : 'No direct applications. Matches are the primary collaboration path.'}
-        </p>
+        <PmEmptyState
+          title={
+            variant === 'legacy'
+              ? 'No direct applications'
+              : 'No direct applications'
+          }
+          description={
+            variant === 'legacy'
+              ? APPLICATIONS_LEGACY_EMPTY_MESSAGE
+              : 'No direct applications. Matches are the primary collaboration path.'
+          }
+          size="compact"
+        />
       </PmContentCard>
     )
   }
@@ -132,40 +140,62 @@ export function ApplicationsPanel({
                 Submitted (legacy) {formatDate(app.createdAt)}
               </p>
               {canManage ? (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <PmButton size="sm" variant="outline" asChild>
-                    <Link to={`/people/${app.applicantId}`}>View profile</Link>
-                  </PmButton>
-                  {actionable ? (
-                    <>
-                      <Select
-                        value={app.status}
-                        onValueChange={(v) => handleStatusChange(app.id, v)}
+                <PmCardActions
+                  className="mt-3"
+                  primary={
+                    actionable
+                      ? { label: 'Accept', onClick: () => handleAccept(app.id) }
+                      : { label: 'View profile', href: `/people/${app.applicantId}` }
+                  }
+                  secondary={
+                    actionable
+                      ? {
+                          label: 'View profile',
+                          href: `/people/${app.applicantId}`,
+                          variant: 'outline',
+                        }
+                      : undefined
+                  }
+                  more={
+                    actionable
+                      ? [
+                          {
+                            id: 'reject',
+                            label: 'Reject',
+                            onSelect: () => handleReject(app.id),
+                            variant: 'destructive',
+                          },
+                        ]
+                      : undefined
+                  }
+                  moreChildren={
+                    actionable ? (
+                      <div
+                        className="space-y-1.5 px-2 py-1.5"
+                        onClick={(event) => event.stopPropagation()}
+                        onKeyDown={(event) => event.stopPropagation()}
+                        role="presentation"
                       >
-                        <SelectTrigger className="h-8 w-40 cursor-pointer">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {TRANSITIONABLE_APPLICATION_STATUSES.map((s) => (
-                            <SelectItem key={s} value={s} className="cursor-pointer">
-                              {APPLICATION_STATUS_LABELS[s]}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <PmButton size="sm" onClick={() => handleAccept(app.id)}>
-                        Accept
-                      </PmButton>
-                      <PmButton
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleReject(app.id)}
-                      >
-                        Reject
-                      </PmButton>
-                    </>
-                  ) : null}
-                </div>
+                        <span className={pmTypography.label}>Update status</span>
+                        <Select
+                          value={app.status}
+                          onValueChange={(v) => handleStatusChange(app.id, v)}
+                        >
+                          <SelectTrigger className="h-8 w-full cursor-pointer">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {TRANSITIONABLE_APPLICATION_STATUSES.map((s) => (
+                              <SelectItem key={s} value={s} className="cursor-pointer">
+                                {APPLICATION_STATUS_LABELS[s]}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    ) : undefined
+                  }
+                />
               ) : null}
             </PmSurface>
           )

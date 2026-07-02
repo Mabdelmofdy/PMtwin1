@@ -29,7 +29,10 @@ export const pmTypography = {
   tableHeader: 'pm-text-table-header',
 } as const
 
-/** Responsive scaling policy — documented for theme evolution. */
+/**
+ * Responsive scaling policy — documented for theme evolution.
+ * Fixed at all breakpoints: body, bodySm, caption, label, badge, mono, stat, statLabel, overline, tableHeader.
+ */
 export const pmTypographyScale = {
   display: { base: '2.25rem', md: '3rem' },
   h1: { base: '1.5rem', md: '1.875rem' },
@@ -41,6 +44,10 @@ export const pmTypographyScale = {
   label: { base: '0.875rem', md: '0.875rem' },
   badge: { base: '0.75rem', md: '0.75rem' },
   mono: { base: '0.875rem', md: '0.875rem' },
+  stat: { base: '1.5rem', md: '1.75rem' },
+  statLabel: { base: '0.75rem', md: '0.75rem' },
+  overline: { base: '0.6875rem', md: '0.6875rem' },
+  tableHeader: { base: '0.75rem', md: '0.75rem' },
 } as const
 
 export const pmTypographyWeight = {

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import type { LucideIcon } from 'lucide-react'
 import { MoreHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { pmIconSize } from '@/tokens'
 import { PmButton } from '@/components/ui/pm-button'
 import {
   DropdownMenu,
@@ -56,7 +57,7 @@ export function PmMoreActions({
           className={cn('text-muted-foreground', className)}
           aria-label={label}
         >
-          <MoreHorizontal className="size-4" />
+          <MoreHorizontal className={pmIconSize.interactive} />
         </PmButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align} className="w-44">
@@ -83,7 +84,7 @@ export function PmMoreActions({
                   disabled={item.disabled}
                   onSelect={() => item.onSelect?.()}
                 >
-                  {Icon ? <Icon className="size-4" /> : null}
+                  {Icon ? <Icon className={pmIconSize.default} /> : null}
                   {item.label}
                 </DropdownMenuItem>
               )}

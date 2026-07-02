@@ -76,6 +76,7 @@ export function ApplyWizard({
             key={label}
             tone={step === i + 1 ? 'primary' : 'muted'}
             size="sm"
+            aria-current={step === i + 1 ? 'step' : undefined}
           >
             {i + 1}. {label}
           </PmBadge>

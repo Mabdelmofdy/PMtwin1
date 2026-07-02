@@ -35,6 +35,7 @@ import {
   PmTableRowActions,
   PmTableSearch,
   PmTableToolbar,
+  resolveListEmptyState,
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
 import {
@@ -132,6 +133,19 @@ export function DealsPage() {
   const safePage = Math.min(page, pageCount)
   const paged = filtered.slice((safePage - 1) * pageSize, safePage * pageSize)
 
+  const listEmpty = resolveListEmptyState({
+    hasSourceData: deals.length > 0,
+    hasActiveFilters: search.length > 0,
+    firstRun: {
+      title: 'No deals yet',
+      description: 'Deals appear when negotiations conclude successfully.',
+    },
+    filtered: {
+      title: 'No deals match your search',
+      description: 'Try a different search term.',
+    },
+  })
+
   const columns: PmDataTableColumn<Deal>[] = [
     {
       id: 'title',
@@ -154,102 +168,108 @@ export function DealsPage() {
     },
   ]
 
-  if (!deals.length) {
-    return (
-      <PmPage
-        header={
-          <PmPageHeader
-            label="My Workspace"
-            title="My deals"
-            description="Deals you are executing — review, sign, and track progress."
-            tone="deal"
-            metric={<PmPageHeroMetric value={0} label="Active" />}
-          />
-        }
-      >
-        <PmEmptyState
-          title="No deals yet"
-          description="Deals appear when negotiations conclude successfully."
-          action={
-            <PmButton asChild>
-              <Link to="/matches">View matches</Link>
-            </PmButton>
-          }
-        />
-      </PmPage>
-    )
-  }
-
   return (
     <PmPage
       header={
         <PmPageHeader
           label="My Workspace"
           title="My deals"
-          description="Track your active deals through signing and execution stages."
+          description={
+            deals.length
+              ? 'Track your active deals through signing and execution stages.'
+              : 'Deals you are executing — review, sign, and track progress.'
+          }
           tone="deal"
           metric={<PmPageHeroMetric value={activeDeals} label="Active" />}
           badges={
-            <>
-              <PmBadge tone="muted">{deals.length} total</PmBadge>
-              <PmBadge tone="primary">{activeDeals} active</PmBadge>
-            </>
+            deals.length ? (
+              <>
+                <PmBadge tone="muted">{deals.length} total</PmBadge>
+                <PmBadge tone="primary">{activeDeals} active</PmBadge>
+              </>
+            ) : undefined
           }
         />
       }
     >
-      <PmDataTable
-        density="comfortable"
-        columns={columns}
-        data={paged}
-        getRowId={(d) => d.id}
-        caption="Deals"
-        toolbar={
-          <PmToolbarSurface>
-            <PmTableToolbar
-              search={
-                <PmTableSearch
-                  placeholder="Search deals…"
-                  value={search}
-                  onValueChange={(v) => {
-                    setSearch(v)
-                    setPage(1)
-                  }}
-                />
-              }
+      {listEmpty.branch === 'first-run' ? (
+        <PmEmptyState
+          title={listEmpty.config.title ?? 'No deals yet'}
+          description={listEmpty.config.description}
+          action={
+            <PmButton asChild>
+              <Link to="/matches">Open matches</Link>
+            </PmButton>
+          }
+        />
+      ) : (
+        <PmDataTable
+          density="comfortable"
+          columns={columns}
+          data={paged}
+          getRowId={(d) => d.id}
+          caption="Deals"
+          toolbar={
+            <PmToolbarSurface>
+              <PmTableToolbar
+                search={
+                  <PmTableSearch
+                    placeholder="Search deals…"
+                    value={search}
+                    onValueChange={(v) => {
+                      setSearch(v)
+                      setPage(1)
+                    }}
+                  />
+                }
+              />
+            </PmToolbarSurface>
+          }
+          rowActions={(d) => (
+            <PmTableRowActions
+              onView={() => navigate(`/deals/${d.id}`)}
+              hiddenActions={['edit', 'delete', 'duplicate']}
             />
-          </PmToolbarSurface>
-        }
-        rowActions={(d) => (
-          <PmTableRowActions
-            onView={() => navigate(`/deals/${d.id}`)}
-            hiddenActions={['edit', 'delete', 'duplicate']}
-          />
-        )}
-        empty={
-          <PmTableEmpty
-            variant="no-results"
-            title="No deals match your search"
-            description="Try a different search term."
-          />
-        }
-        pagination={
-          totalItems > 0 ? (
-            <PmTablePagination
-              page={safePage}
-              pageSize={pageSize}
-              totalItems={totalItems}
-              pageSizeOptions={[12, 24, 48]}
-              onPageChange={setPage}
-              onPageSizeChange={(size) => {
-                setPageSize(size)
-                setPage(1)
-              }}
-            />
-          ) : undefined
-        }
-        renderMobileCard={(d) => <DealListCard deal={d} />}
-      />
+          )}
+          empty={
+            listEmpty.branch === 'filtered' ? (
+              <PmTableEmpty
+                variant="no-results"
+                title={listEmpty.config.title}
+                description={listEmpty.config.description}
+                primaryAction={
+                  <PmButton
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setSearch('')
+                      setPage(1)
+                    }}
+                  >
+                    Clear search
+                  </PmButton>
+                }
+              />
+            ) : undefined
+          }
+          pagination={
+            totalItems > 0 ? (
+              <PmTablePagination
+                page={safePage}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                pageSizeOptions={[12, 24, 48]}
+                onPageChange={setPage}
+                onPageSizeChange={(size) => {
+                  setPageSize(size)
+                  setPage(1)
+                }}
+              />
+            ) : undefined
+          }
+          renderMobileCard={(d) => <DealListCard deal={d} />}
+        />
+      )}
     </PmPage>
   )
 }
@@ -366,11 +386,18 @@ export function DealDetailPage() {
           badges={<PmWorkflowBadge status={model.status} entity="deal" />}
           actions={
             canMutate && model.existingContract && model.contractLink ? (
-              <PmButton asChild>
-                <Link to={model.contractLink.path}>{model.contractLink.label}</Link>
-              </PmButton>
+              <PmPageActions
+                primary={{ label: model.contractLink.label, href: model.contractLink.path }}
+                more={dealNavMore.length > 0 ? dealNavMore : undefined}
+              />
             ) : canMutate && model.canCreateContract ? (
-              <CreateContractButton dealId={model.deal.id} />
+              <PmPageActions
+                primary={{
+                  label: 'Create contract',
+                  render: () => <CreateContractButton dealId={model.deal.id} />,
+                }}
+                more={dealNavMore.length > 0 ? dealNavMore : undefined}
+              />
             ) : dealNavMore.length > 0 ? (
               <PmMoreActions items={dealNavMore} label="Related records" />
             ) : undefined
@@ -440,15 +467,6 @@ export function DealDetailPage() {
         inspector={
           <PmInspectorLayout
             header={<PmSectionHeader title="Lifecycle" />}
-            footer={
-              canMutate && model.existingContract && model.contractLink ? (
-                <PmButton variant="outline" className="w-full" asChild>
-                  <Link to={model.contractLink.path}>{model.contractLink.label}</Link>
-                </PmButton>
-              ) : canMutate && model.canCreateContract ? (
-                <CreateContractButton dealId={model.deal.id} className="w-full" />
-              ) : null
-            }
           >
             {canMutate ? (
               <DealStageActions

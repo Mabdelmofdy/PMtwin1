@@ -227,13 +227,15 @@ export function UserJourneyStrip({ activeStepId, compact = false }: UserJourneyS
 
 type MatchTopologyDiagramProps = {
   readonly topology: MatchTopologyReadModel
+  readonly className?: string
 }
 
-export function MatchTopologyDiagram({ topology }: MatchTopologyDiagramProps) {
+export function MatchTopologyDiagram({ topology, className }: MatchTopologyDiagramProps) {
   return (
     <PmContentCard
       title="Match topology"
       description={`${topology.frameworkLabel} — ${topology.frameworkSubtitle}`}
+      className={className}
       actions={
         <PmBadge tone="neutral" size="sm">
           {topology.frameworkLabel}

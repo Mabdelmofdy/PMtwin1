@@ -7,9 +7,10 @@ import {
   PmTableRowActions,
   PmTableSearch,
   PmTableToolbar,
+  resolveListEmptyState,
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
-import { PmPageHeader, PmPageHeroMetric, PmPage } from '@/components/ui/pm-index'
+import { PmPageHeader, PmPageHeroMetric, PmPage, PmButton, PmEmptyState } from '@/components/ui/pm-index'
 import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 
 export type AdminListPageProps<T> = {
@@ -69,6 +70,20 @@ export function AdminListPage<T>({
   const paged = showPagination
     ? filtered.slice((safePage - 1) * pageSize, safePage * pageSize)
     : filtered
+
+  const hasActiveSearch = Boolean(search.trim())
+  const listEmpty = resolveListEmptyState({
+    hasSourceData: data.length > 0,
+    hasActiveFilters: hasActiveSearch,
+    firstRun: {
+      title: emptyTitle,
+      description: emptyDescription,
+    },
+    filtered: {
+      title: 'No results match your search',
+      description: 'Try a different search term.',
+    },
+  })
 
   const tableColumns = useMemo(() => {
     if (!getRowHref) return columns
@@ -143,11 +158,37 @@ export function AdminListPage<T>({
           )
         }}
         empty={
-          <PmTableEmpty
-            variant="no-data"
-            title={emptyTitle}
-            description={emptyDescription}
-          />
+          listEmpty.branch === 'filtered' ? (
+            <PmTableEmpty
+              variant="no-results"
+              title={listEmpty.config.title}
+              description={listEmpty.config.description}
+              primaryAction={
+                <PmButton
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setSearch('')
+                    setPage(1)
+                  }}
+                >
+                  Clear search
+                </PmButton>
+              }
+            />
+          ) : listEmpty.branch === 'first-run' ? (
+            <PmEmptyState
+              title={listEmpty.config.title ?? emptyTitle}
+              description={listEmpty.config.description ?? emptyDescription}
+              size="compact"
+            />
+          ) : (
+            <PmTableEmpty
+              variant="no-data"
+              title={emptyTitle}
+              description={emptyDescription}
+            />
+          )
         }
         pagination={
           showPagination && totalItems > 0 ? (

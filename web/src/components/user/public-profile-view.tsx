@@ -38,7 +38,7 @@ export function PublicProfileView({ person, companyIds }: PublicProfileViewProps
               <PmBadge tone={isCompany ? 'primary' : 'info'}>
                 {isCompany ? 'Company' : 'Professional'}
               </PmBadge>
-              <h1 className={cn(pmTypography.h1)}>{name}</h1>
+              <p className={cn(pmTypography.h1)}>{name}</p>
               <p className={cn(pmTypography.body, 'max-w-2xl text-muted-foreground')}>
                 {headline}
               </p>

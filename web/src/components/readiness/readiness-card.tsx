@@ -9,12 +9,7 @@ import type { ReadinessCta } from '@/components/readiness/readiness-ui-rules.ts'
 import { ReadinessList } from '@/components/readiness/readiness-list.tsx'
 import { ReadinessScoreRing } from '@/components/readiness/readiness-score-ring.tsx'
 import { ReadinessStatusBadge } from '@/components/readiness/readiness-status-badge.tsx'
-import {
-  PmCard,
-  PmCardContent,
-  PmCardHeader,
-  PmCardTitle,
-} from '@/components/ui/pm-card'
+import { PmContentCard } from '@/components/layout/pm-layout-index'
 import { PmButton } from '@/components/ui/pm-button'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 
@@ -39,41 +34,34 @@ export function ReadinessCard({
   const tone = getReadinessStatusTone(result.status)
 
   return (
-    <PmCard
-      composed
+    <PmContentCard
+      title={viewModel.title}
       className={cn('border-border/60', toneBorderStyles[tone], className)}
+      actions={<ReadinessStatusBadge status={result.status} />}
     >
-      <PmCardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-3">
-          <PmCardTitle className="text-base">{viewModel.title}</PmCardTitle>
-          <ReadinessStatusBadge status={result.status} />
+      <div className="flex items-center gap-4">
+        <ReadinessScoreRing score={result.score} status={result.status} />
+        <div className={cn('space-y-1', pmTypography.bodySm)}>
+          <p className="text-muted-foreground">Score</p>
+          <p className={pmTypography.stat}>{viewModel.scoreLabel}</p>
+          <p>
+            <span className="text-muted-foreground">Status:</span>{' '}
+            <span className="font-medium">{viewModel.statusLabel}</span>
+          </p>
         </div>
-      </PmCardHeader>
-      <PmCardContent className="space-y-4">
-        <div className="flex items-center gap-4">
-          <ReadinessScoreRing score={result.score} status={result.status} />
-          <div className={cn('space-y-1', pmTypography.bodySm)}>
-            <p className="text-muted-foreground">Score</p>
-            <p className={pmTypography.stat}>{viewModel.scoreLabel}</p>
-            <p>
-              <span className="text-muted-foreground">Status:</span>{' '}
-              <span className="font-medium">{viewModel.statusLabel}</span>
-            </p>
-          </div>
-        </div>
+      </div>
 
-        <ReadinessList
-          missingRequired={viewModel.missingRequired}
-          missingRecommended={viewModel.missingRecommended}
-          showReadyMessage={viewModel.showReadyMessage}
-        />
+      <ReadinessList
+        missingRequired={viewModel.missingRequired}
+        missingRecommended={viewModel.missingRecommended}
+        showReadyMessage={viewModel.showReadyMessage}
+      />
 
-        {cta ? (
-          <PmButton variant="outline" className="w-full" asChild>
-            <Link to={cta.href}>{cta.label}</Link>
-          </PmButton>
-        ) : null}
-      </PmCardContent>
-    </PmCard>
+      {cta ? (
+        <PmButton variant="outline" className="w-full" asChild>
+          <Link to={cta.href}>{cta.label}</Link>
+        </PmButton>
+      ) : null}
+    </PmContentCard>
   )
 }

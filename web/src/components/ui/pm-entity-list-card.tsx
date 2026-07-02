@@ -31,7 +31,7 @@ export function PmEntityListCard({
       variant="default"
       shadow="card"
       interactive
-      className={cn('flex h-full flex-col gap-1 p-5', className)}
+      className={cn('flex h-full flex-col gap-1 p-4 md:p-5', className)}
     >
       <div className="flex items-start justify-between gap-2">
         <Link
@@ -45,7 +45,7 @@ export function PmEntityListCard({
       {meta ? (
         <p className={cn('mt-2 leading-relaxed', pmTypography.caption, 'text-muted-foreground')}>{meta}</p>
       ) : null}
-      <PmCardActions className="mt-5" primary={primary} secondary={secondary} />
+      <PmCardActions className="mt-4" primary={primary} secondary={secondary} />
     </PmSurface>
   )
 }

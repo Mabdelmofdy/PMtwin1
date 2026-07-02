@@ -16,8 +16,6 @@ import {
 
 } from '@/components/forms/pm-form-index'
 
-import { PmContentCard } from '@/components/layout/pm-layout-index'
-
 import { usePmDirection } from '@/components/layout/pm-direction-provider'
 
 import { Input } from '@/components/ui/input'
@@ -183,25 +181,16 @@ export function SettingsView() {
 
 
 
-      <PmContentCard title="Security" description="Password and session management.">
-
+      <PmFormSection title="Security" description="Password and session management.">
         <div className="space-y-3">
-
           <PmFormField id="current-password" label="Current password">
-
             <Input type="password" placeholder="Current password" />
-
           </PmFormField>
-
           <PmFormField id="new-password" label="New password">
-
             <Input type="password" placeholder="New password" />
-
           </PmFormField>
-
         </div>
-
-      </PmContentCard>
+      </PmFormSection>
 
 
 

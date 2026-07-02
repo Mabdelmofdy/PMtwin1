@@ -25,6 +25,7 @@ import {
   transitionNegotiationStatusUiAction,
 } from '@/lib/negotiation-ui-actions.ts'
 import { dealRepository, applicationRepository } from '@/repositories/index.ts'
+import { PmTableSearch, PmTableToolbar } from '@/components/data/pm-data-index'
 import { PipelineBoard } from '@/components/pipeline/pipeline-board'
 import { MatchesListSection } from '@/components/collaboration/matches-list-section'
 import { MatchTypeChip } from '@/components/collaboration/match-card'
@@ -49,6 +50,7 @@ import {
 import {
   PmBadge,
   PmButton,
+  PmCardActions,
   PmEmptyState,
   PmLifecycleMap,
   PmPage,
@@ -130,7 +132,7 @@ function buildMatchDetailHeaderActions(input: {
   if (actions.showViewNegotiation && actions.negotiationId) {
     more.push({
       id: 'view-negotiation',
-      label: 'View negotiation',
+      label: 'Open negotiation',
       href: `/negotiations/${actions.negotiationId}`,
     })
   }
@@ -138,7 +140,7 @@ function buildMatchDetailHeaderActions(input: {
   if (actions.showViewDeal && actions.dealId) {
     more.push({
       id: 'view-deal',
-      label: 'View deal',
+      label: 'Open deal',
       href: `/deals/${actions.dealId}`,
     })
   }
@@ -161,7 +163,7 @@ function buildMatchDetailHeaderActions(input: {
             <CancelNegotiationButton negotiation={negotiation} variant="destructive" className="w-full justify-start" />
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <CreateDealButton negotiation={negotiation} variant="default" className="w-full justify-start" />
+            <CreateDealButton negotiation={negotiation} variant="outline" className="w-full justify-start" />
           </DropdownMenuItem>
         </>
       ),
@@ -193,13 +195,13 @@ function buildMatchDetailHeaderActions(input: {
 
   if (actions.showViewDeal && actions.dealId) {
     return {
-      primary: { label: 'View deal', href: `/deals/${actions.dealId}` },
+      primary: { label: 'Open deal', href: `/deals/${actions.dealId}` },
       more,
     }
   }
 
   return {
-    primary: { label: 'View match', href: `/matches/${match.id}` },
+    primary: { label: 'Open match', href: `/matches/${match.id}` },
     more,
   }
 }
@@ -626,7 +628,15 @@ export function MatchDetailPage() {
           <>
             <PmLifecycleMap steps={matchWorkflowSteps} />
 
-            <MatchTopologyDiagram topology={model.topology} />
+            <PmContentCard title="Match status" className="border-border/60 bg-surface-muted/40">
+              <div className="flex flex-wrap items-center gap-3">
+                <PmWorkflowBadge status={match.status} entity="match" />
+                <MatchTypeChip matchType={match.matchType} />
+                <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
+                  {model.canonicalStatus.replace(/_/g, ' ')} · Score {model.scoreLabel}
+                </p>
+              </div>
+            </PmContentCard>
 
             <div className="grid gap-4 sm:grid-cols-3">
               <PmStatCard
@@ -646,8 +656,10 @@ export function MatchDetailPage() {
               />
             </div>
 
+            <MatchTopologyDiagram topology={model.topology} className="border-border/60 bg-surface-muted/30" />
+
             {model.relatedOpportunities.length > 0 ? (
-              <PmContentCard title="Related opportunities">
+              <PmContentCard title="Related opportunities" className="border-border/60 bg-surface-muted/30">
                 <ul className={cn('space-y-1', pmTypography.bodySm)}>
                   {model.relatedOpportunities.map((item) => (
                     <li key={`${item.id}-${item.label}`}>
@@ -668,7 +680,7 @@ export function MatchDetailPage() {
               </PmContentCard>
             ) : null}
 
-            <PmContentCard title="Participants">
+            <PmContentCard title="Participants" className="border-border/60 bg-surface-muted/30">
               {model.participants.length > 0 ? (
                 <ul className={cn('space-y-1', pmTypography.bodySm)}>
                   {model.participants.map((participant) => (
@@ -731,6 +743,7 @@ export function MatchDetailPage() {
 
 export function NegotiationsPage() {
   const { user, canAccessAdmin } = useAuth()
+  const [search, setSearch] = useState('')
   const allNegotiations = negotiationsApi.list()
   const viewer = useMemo(
     () =>
@@ -747,6 +760,13 @@ export function NegotiationsPage() {
     () => allNegotiations.filter((n) => canViewNegotiationDetail(n, viewer)),
     [allNegotiations, viewer],
   )
+  const filteredNegotiations = useMemo(() => {
+    if (!search.trim()) return negotiations
+    const q = search.toLowerCase()
+    return negotiations.filter((neg) =>
+      formatNegotiationDisplayTitle(neg, opportunitiesApi.get).toLowerCase().includes(q),
+    )
+  }, [negotiations, search])
   const activeCount = negotiations.filter(
     (n) => n.status === 'active' || n.status === 'countered',
   ).length
@@ -775,24 +795,48 @@ export function NegotiationsPage() {
           description="Negotiations begin after you accept a match and start term discussions."
           action={
             <PmButton asChild>
-              <Link to="/matches">View matches</Link>
+              <Link to="/matches">Open matches</Link>
             </PmButton>
           }
         />
       ) : (
+        <>
+          <PmToolbarSurface>
+            <PmTableToolbar
+              search={
+                <PmTableSearch
+                  placeholder="Search negotiations…"
+                  value={search}
+                  onValueChange={setSearch}
+                />
+              }
+            />
+          </PmToolbarSurface>
+          {filteredNegotiations.length === 0 ? (
+            <PmEmptyState
+              title="No negotiations match your search"
+              description="Try a different search term."
+              size="compact"
+              action={
+                <PmButton size="sm" variant="outline" onClick={() => setSearch('')}>
+                  Clear search
+                </PmButton>
+              }
+            />
+          ) : (
         <div className="grid gap-3 md:grid-cols-2">
-          {negotiations.map((neg) => (
+          {filteredNegotiations.map((neg) => (
             <PmSurface
               key={neg.id}
               variant="default"
               shadow="card"
               interactive
-              className="p-4"
+              className="flex h-full flex-col p-4 md:p-5"
             >
               <div className="flex items-start justify-between gap-2">
                 <Link
                   to={`/negotiations/${neg.id}`}
-                  className={cn(pmTypography.bodySm, 'line-clamp-2 font-medium hover:text-primary')}
+                  className={cn(pmTypography.h3, 'line-clamp-2 hover:text-primary')}
                 >
                   {formatNegotiationDisplayTitle(neg, opportunitiesApi.get)}
                 </Link>
@@ -801,9 +845,15 @@ export function NegotiationsPage() {
               <p className={cn(pmTypography.caption, 'mt-2 text-muted-foreground')}>
                 Updated {formatDate(neg.updatedAt ?? neg.createdAt)}
               </p>
+              <PmCardActions
+                className="mt-4"
+                primary={{ label: 'Open negotiation', href: `/negotiations/${neg.id}` }}
+              />
             </PmSurface>
           ))}
         </div>
+          )}
+        </>
       )}
     </PmPage>
   )
@@ -936,12 +986,12 @@ export function NegotiationDetailPage() {
                 }}
                 secondary={
                   neg.postMatchId
-                    ? { label: 'View match', href: `/matches/${neg.postMatchId}`, variant: 'outline' }
+                    ? { label: 'Open match', href: `/matches/${neg.postMatchId}`, variant: 'outline' }
                     : undefined
                 }
                 more={[
                   ...(linkedDeal
-                    ? [{ id: 'view-deal', label: 'View deal', href: `/deals/${linkedDeal.id}` }]
+                    ? [{ id: 'view-deal', label: 'Open deal', href: `/deals/${linkedDeal.id}` }]
                     : []),
                 ]}
                 moreChildren={

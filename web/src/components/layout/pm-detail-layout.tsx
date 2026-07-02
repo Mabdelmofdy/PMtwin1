@@ -75,13 +75,13 @@ export function PmInspectorLayout({
     <div
       data-slot="pm-inspector-layout"
       className={cn(
-        'flex flex-col gap-4 rounded-xl border border-border/60 bg-surface pm-shadow-card',
+        'flex flex-col gap-4 rounded-2xl border border-border/60 bg-surface pm-shadow-card',
         className,
       )}
     >
       {header ? (
         stickyHeader ? (
-          <PmStickyHeader className="rounded-t-xl lg:px-4 lg:pt-4">
+          <PmStickyHeader className="rounded-t-2xl lg:px-4 lg:pt-4">
             {header}
           </PmStickyHeader>
         ) : (

@@ -21,6 +21,7 @@ import {
   PmTablePagination,
   PmTableSearch,
   PmTableToolbar,
+  resolveListEmptyState,
 } from '@/components/data/pm-data-index'
 import {
   PmFormActions,
@@ -228,6 +229,38 @@ export function OpportunitiesPage() {
   const safePage = Math.min(page, pageCount)
   const paged = opportunities.slice((safePage - 1) * pageSize, safePage * pageSize)
 
+  const scopedSourceCount = useMemo(() => {
+    const viewer = buildViewerContext({
+      userId: user?.id,
+      role: user?.role,
+      status: user?.status,
+    })
+    return filterOpportunitiesByOwnershipFilter(
+      allOpportunities,
+      viewer,
+      ownershipFilter,
+      (creatorId) => peopleApi.get(creatorId)?.organizationId,
+      user?.organizationId,
+    ).length
+  }, [allOpportunities, ownershipFilter, user?.id, user?.role, user?.status, user?.organizationId])
+
+  const listEmpty = resolveListEmptyState({
+    hasSourceData: scopedSourceCount > 0,
+    hasActiveFilters: search.length > 0 || status !== 'all',
+    firstRun: {
+      title: isMarketplaceBrowse
+        ? 'No opportunities available yet'
+        : 'Post your first opportunity',
+      description: isMarketplaceBrowse
+        ? 'Published needs and offers from the marketplace will appear here.'
+        : 'Describe what you need or offer — publishing runs matching and surfaces collaboration partners.',
+    },
+    filtered: {
+      title: 'No opportunities match your filters',
+      description: 'Try adjusting search or filters, or post a new opportunity.',
+    },
+  })
+
   return (
     <PmPage
       header={
@@ -365,11 +398,28 @@ export function OpportunitiesPage() {
       </PmToolbarSurface>
 
       {paged.length === 0 ? (
-        search || status !== 'all' ? (
+        listEmpty.branch === 'first-run' ? (
+          <PmEmptyState
+            title={
+              (listEmpty.branch === 'first-run' ? listEmpty.config.title : undefined) ??
+              'Post your first opportunity'
+            }
+            description={
+              listEmpty.branch === 'first-run' ? listEmpty.config.description : undefined
+            }
+            action={
+              !isMarketplaceBrowse ? (
+                <PmButton size="sm" asChild>
+                  <Link to="/opportunities/create">Post opportunity</Link>
+                </PmButton>
+              ) : undefined
+            }
+          />
+        ) : listEmpty.branch === 'filtered' ? (
           <PmTableEmpty
             variant="no-results"
-            title="No opportunities match your filters"
-            description="Try adjusting search or filters, or post a new opportunity."
+            title={listEmpty.config.title}
+            description={listEmpty.config.description}
             primaryAction={
               <PmButton
                 size="sm"
@@ -384,25 +434,7 @@ export function OpportunitiesPage() {
               </PmButton>
             }
           />
-        ) : (
-          <PmEmptyState
-            title={
-              isMarketplaceBrowse
-                ? 'No opportunities available yet'
-                : 'Post your first opportunity'
-            }
-            description={
-              isMarketplaceBrowse
-                ? 'Published needs and offers from the marketplace will appear here.'
-                : 'Describe what you need or offer — publishing runs matching and surfaces collaboration partners.'
-            }
-            action={
-              <PmButton size="sm" asChild>
-                <Link to="/opportunities/create">Post opportunity</Link>
-              </PmButton>
-            }
-          />
-        )
+        ) : null
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {paged.map((o) => (
@@ -638,7 +670,8 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   }
 
   return (
-    <PmFormWizard
+    <PmPage>
+      <PmFormWizard
       stepper={{
         steps: WIZARD_STEPS,
         activeStepId,
@@ -928,6 +961,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
           </PmFormSection>
         </PmFormWizardStep>
     </PmFormWizard>
+    </PmPage>
   )
 }
 

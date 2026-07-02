@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
@@ -11,6 +12,7 @@ import {
   PmContentCard,
   PmDashboardLayout,
   PmSectionHeader,
+  countActiveMatches,
 } from '@/components/layout/pm-layout-index'
 import {
   PmActionHub,
@@ -18,6 +20,8 @@ import {
   PmButton,
   PmEmptyState,
   PmPageActions,
+  PmPageHeader,
+  PmPageHeroMetric,
   PmStatsStrip,
   PmSurface,
   PmWorkflowBadge,
@@ -26,9 +30,10 @@ import { useAuth } from '@/providers/auth-provider'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { resolveMatchTypeStyle } from '@/tokens'
 import { formatDate, formatRelativeTime } from '@/lib/format'
+import { formatReadinessScorePercent } from '@/components/ui/pm-readiness-score-display'
+import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
 import { cn } from '@/lib/utils'
 import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
-
 function buildNeedsActionItems(input: {
   userId?: string
   matches: ReturnType<typeof matchesApi.list>
@@ -99,11 +104,16 @@ function buildNeedsActionItems(input: {
 
 /** Action-first dashboard — attention, matches, active workflows, activity. */
 export function WorkspaceDashboardComposition() {
-  const { user } = useAuth()
+  const { user, isCompanyUser } = useAuth()
   const userId = user?.id
-
+  const firstName = (user?.profile?.name ?? 'there').split(' ')[0]
+  const profileKind = isCompanyUser ? 'company' : 'individual'
+  const readiness = user?.profile
+    ? resolveProfileReadiness(user.profile, profileKind)
+    : null
   const opportunities = opportunitiesApi.list()
   const matches = matchesApi.list()
+  const activeMatches = countActiveMatches(matches)
   const negotiations = negotiationsApi.list()
   const deals = dealsApi.list()
   const contracts = contractsApi.list()
@@ -178,8 +188,43 @@ export function WorkspaceDashboardComposition() {
 
   return (
     <PmDashboardLayout
-      metrics={
-        <PmStatsStrip
+      header={
+        <PmPageHeader
+          label="My Workspace"
+          title="My Workspace"
+          description={`Good morning, ${firstName} — review your tasks, workflow progress, and items pending action.`}
+          tone="mission"
+          metric={
+            readiness ? (
+              <PmPageHeroMetric
+                value={formatReadinessScorePercent(readiness.score)}
+                label="Profile readiness"
+                animate={false}
+              />
+            ) : (
+              <PmPageHeroMetric value={activeMatches} label="Active matches" />
+            )
+          }
+          actions={
+            <PmPageActions
+              primary={{
+                label: 'Post opportunity',
+                href: '/opportunities/create',
+                render: () => (
+                  <PmButton asChild>
+                    <Link to="/opportunities/create">
+                      Post opportunity
+                      <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
+                    </Link>
+                  </PmButton>
+                ),
+              }}
+              secondary={{ label: 'My pipeline', href: '/pipeline', variant: 'outline' }}
+            />
+          }
+        />
+      }
+      metrics={        <PmStatsStrip
           data-slot="pm-dashboard-metric-strip"
           items={[
             {
@@ -208,11 +253,6 @@ export function WorkspaceDashboardComposition() {
               title="No recent alerts"
               description="Notifications about matches, negotiations, and deals will appear here."
               size="compact"
-              action={
-                <PmButton size="sm" variant="outline" asChild>
-                  <Link to="/pipeline">Open pipeline</Link>
-                </PmButton>
-              }
             />
           ) : (
             <ul className={cn('space-y-3', pmTypography.bodySm)}>
@@ -238,14 +278,7 @@ export function WorkspaceDashboardComposition() {
         title="My tasks"
         description="Items that need your action to keep execution moving."
         items={needsActionItems}
-        emptyAction={
-          <PmPageActions
-            primary={{ label: 'Post opportunity', href: '/opportunities/create' }}
-            secondary={{ label: 'My pipeline', href: '/pipeline', variant: 'outline' }}
-          />
-        }
       />
-
       <PmSectionHeader
         title="My workflow"
         description="Progress, current stage, and next step across active entities."
@@ -260,11 +293,6 @@ export function WorkspaceDashboardComposition() {
           title="No active workflow items"
           description="Start by publishing or opening a match to move through the collaboration stages."
           size="compact"
-          action={
-            <PmButton size="sm" asChild>
-              <Link to="/pipeline">Open pipeline</Link>
-            </PmButton>
-          }
         />
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
@@ -274,14 +302,13 @@ export function WorkspaceDashboardComposition() {
               variant="default"
               shadow="card"
               interactive
-              className="p-4"
+              className="p-4 md:p-5"
             >
               <div className="flex items-start justify-between gap-2">
                 <Link
                   to={item.href}
-                  className={cn(pmTypography.bodySm, 'line-clamp-2 font-medium hover:text-primary')}
-                >
-                  {item.title}
+                  className={cn(pmTypography.h3, 'line-clamp-2 hover:text-primary')}
+                >                  {item.title}
                 </Link>
                 <PmWorkflowBadge status={item.status} entity={item.entity} size="sm" />
               </div>
@@ -307,11 +334,6 @@ export function WorkspaceDashboardComposition() {
           title="No blockers right now"
           description="Your workflow is moving. Keep monitoring negotiations and deals."
           size="compact"
-          action={
-            <PmButton size="sm" variant="outline" asChild>
-              <Link to="/pipeline">Open pipeline</Link>
-            </PmButton>
-          }
         />
       ) : (
         <ul className="space-y-2" role="list">
@@ -321,7 +343,7 @@ export function WorkspaceDashboardComposition() {
                 variant="default"
                 shadow="card"
                 interactive
-                className="flex flex-wrap items-center justify-between gap-2 p-3.5"
+                className="flex flex-wrap items-center justify-between gap-2 p-3.5 md:p-4"
               >
                 <Link
                   to={item.href}
@@ -339,15 +361,16 @@ export function WorkspaceDashboardComposition() {
       <PmSectionHeader
         title="My matching summary"
         description="Matches grouped by Need/Offer framework topology models."
+        className="opacity-90"
         actions={
-          <PmButton size="sm" variant="outline" asChild>
+          <PmButton size="sm" variant="ghost" asChild>
             <Link to="/matches">View all matches</Link>
           </PmButton>
         }
       />
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {matchTypeSummary.map((entry) => (
-          <PmSurface key={entry.key} variant="default" shadow="card" className="p-4">
+          <PmSurface key={entry.key} variant="muted" shadow="card" className="p-4 md:p-5">
             <span
               className={cn(
                 pmTypography.badge,
@@ -357,8 +380,7 @@ export function WorkspaceDashboardComposition() {
             >
               {entry.label}
             </span>
-            <p className={cn('mt-2 text-2xl font-semibold tabular-nums')}>{entry.count}</p>
-            <p className={cn(pmTypography.caption, 'mt-1 text-muted-foreground')}>
+            <p className={cn(pmTypography.stat, 'mt-2 tabular-nums')}>{entry.count}</p>            <p className={cn(pmTypography.caption, 'mt-1 text-muted-foreground')}>
               {MATCHING_MODELS[entry.key].subtitle}
             </p>
           </PmSurface>

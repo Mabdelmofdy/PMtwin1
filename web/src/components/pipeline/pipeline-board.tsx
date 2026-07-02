@@ -19,6 +19,7 @@ import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
 import { PmWorkflowBadge } from '@/components/ui/pm-workflow-badge'
 import { PmEmptyState, PmSurface } from '@/components/ui/pm-index'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PmCardActions } from '@/components/ui/pm-more-actions'
 import { PmReadinessScoreBadge } from '@/components/ui/pm-readiness-score-badge'
 import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
@@ -272,24 +273,24 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
 
     return (
       <div className="space-y-4">
-        <div className="flex flex-wrap gap-2">
-          {(['', 'request', 'offer'] as const).map((intent) => (
-            <button
-              key={intent || 'all'}
-              type="button"
-              className={cn(
-                pmTypography.badge,
-                'cursor-pointer rounded-full px-3 py-1 font-medium transition-colors',
-                intentFilter === intent
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:text-foreground',
-              )}
-              onClick={() => setIntentFilter(intent)}
-            >
-              {intent === '' ? 'All' : intent === 'request' ? 'Need' : 'Offer'}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          value={intentFilter || 'all'}
+          onValueChange={(value) =>
+            setIntentFilter(value === 'all' ? '' : (value as 'request' | 'offer'))
+          }
+        >
+          <TabsList className={cn('max-w-full', pmResponsive.scrollX)}>
+            <TabsTrigger value="all" className="cursor-pointer">
+              All
+            </TabsTrigger>
+            <TabsTrigger value="request" className="cursor-pointer">
+              Need
+            </TabsTrigger>
+            <TabsTrigger value="offer" className="cursor-pointer">
+              Offer
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
         <div className="flex flex-col gap-4 lg:flex-row">
           <StageSidebar
             stages={OPP_STAGES}
@@ -363,24 +364,24 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        {(['', 'request', 'offer'] as const).map((intent) => (
-          <button
-            key={intent || 'all'}
-            type="button"
-            className={cn(
-              pmTypography.badge,
-              'cursor-pointer rounded-full px-3 py-1 font-medium transition-colors',
-              intentFilter === intent
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground hover:text-foreground',
-            )}
-            onClick={() => setIntentFilter(intent)}
-          >
-            {intent === '' ? 'All' : intent === 'request' ? 'Need' : 'Offer'}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={intentFilter || 'all'}
+        onValueChange={(value) =>
+          setIntentFilter(value === 'all' ? '' : (value as 'request' | 'offer'))
+        }
+      >
+        <TabsList className={cn('max-w-full', pmResponsive.scrollX)}>
+          <TabsTrigger value="all" className="cursor-pointer">
+            All
+          </TabsTrigger>
+          <TabsTrigger value="request" className="cursor-pointer">
+            Need
+          </TabsTrigger>
+          <TabsTrigger value="offer" className="cursor-pointer">
+            Offer
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
       <div className="flex flex-col gap-4 lg:flex-row">
         <StageSidebar
           stages={APP_STAGES}
