@@ -14,6 +14,11 @@ import {
 import type { AuditEntry, Negotiation, PostMatch } from '@/types/domain.ts'
 import type { Participant } from '@/types/participant.ts'
 import { commercialTermsFromLegacyTerms } from '@/types/commercial-terms.ts'
+import { resolvePostMatchOpportunityIds } from '@/domain/normalized/post-match-opportunity-ids.ts'
+import {
+  emitParticipantNotifications,
+  type NotificationSink,
+} from '@/commands/handlers/lifecycle-notifications.ts'
 import type { AuditRepository } from '@/repositories/audit-repository.ts'
 import type { DealRepository } from '@/repositories/deal-repository.ts'
 import type { NegotiationRepository } from '@/repositories/negotiation-repository.ts'
@@ -28,6 +33,7 @@ export type DealCommandHandlerDeps = {
   readonly negotiationRepository: NegotiationRepository
   readonly postMatchRepository: PostMatchRepository
   readonly auditRepository?: AuditRepository | null
+  readonly notificationRepository?: NotificationSink | null
 }
 
 function failure(
@@ -54,14 +60,6 @@ function validateBaseCommand(command: Command): readonly string[] {
     errors.push('clientRequestId is required')
   }
   return errors
-}
-
-function resolveNeedOpportunityId(match: PostMatch): string | undefined {
-  return match.needOpportunityId ?? match.payload?.needOpportunityId
-}
-
-function resolveOfferOpportunityId(match: PostMatch): string | undefined {
-  return match.offerOpportunityId ?? match.payload?.offerOpportunityId
 }
 
 function resolveNegotiationPostMatchId(negotiation: Negotiation): string | undefined {
@@ -120,12 +118,14 @@ export class DealCommandHandler {
   private readonly negotiationRepository: NegotiationRepository
   private readonly postMatchRepository: PostMatchRepository
   private readonly auditRepository: AuditRepository | null
+  private readonly notificationRepository: NotificationSink | null
 
   constructor(deps: DealCommandHandlerDeps) {
     this.dealRepository = deps.dealRepository
     this.negotiationRepository = deps.negotiationRepository
     this.postMatchRepository = deps.postMatchRepository
     this.auditRepository = deps.auditRepository ?? null
+    this.notificationRepository = deps.notificationRepository ?? null
   }
 
   handle(command: Command): CommandResult {
@@ -337,13 +337,27 @@ export class DealCommandHandler {
       auditAction,
     } = input
 
+    const matchType = (postMatch.matchType || 'one_way').toLowerCase()
+    const resolved = resolvePostMatchOpportunityIds(postMatch)
     const needOpportunityId =
-      negotiation.needOpportunityId ?? resolveNeedOpportunityId(postMatch)
+      negotiation.needOpportunityId ?? resolved.needOpportunityId
     const offerOpportunityId =
-      negotiation.offerOpportunityId ?? resolveOfferOpportunityId(postMatch)
-    if (!needOpportunityId || !offerOpportunityId) {
+      negotiation.offerOpportunityId ?? resolved.offerOpportunityId
+    const opportunityIds =
+      negotiation.opportunityIds && negotiation.opportunityIds.length > 0
+        ? negotiation.opportunityIds
+        : resolved.opportunityIds
+
+    if (matchType === 'one_way') {
+      // Preserve one_way behavior exactly: require both need and offer.
+      if (!needOpportunityId || !offerOpportunityId) {
+        return failure(commandType, failureAggregateId, [
+          'PostMatch is missing needOpportunityId or offerOpportunityId',
+        ])
+      }
+    } else if (opportunityIds.length < 2) {
       return failure(commandType, failureAggregateId, [
-        'PostMatch is missing needOpportunityId or offerOpportunityId',
+        'PostMatch does not reference enough opportunities to create a deal',
       ])
     }
 
@@ -371,8 +385,8 @@ export class DealCommandHandler {
       needOpportunityId,
       offerOpportunityId,
       matchId: postMatchId,
-      opportunityId: needOpportunityId,
-      opportunityIds: [needOpportunityId, offerOpportunityId],
+      opportunityId: needOpportunityId ?? opportunityIds[0],
+      opportunityIds: [...opportunityIds],
       matchType: postMatch.matchType,
       title: `Deal – ${postMatchId}`,
       status: 'draft',
@@ -384,6 +398,16 @@ export class DealCommandHandler {
     })
 
     this.postMatchRepository.update(postMatchId, { dealId: deal.id })
+
+    emitParticipantNotifications(this.notificationRepository, {
+      participants,
+      type: 'deal_created_from_match',
+      title: 'Deal created',
+      message: 'A deal was created from your match.',
+      link: `/deals/${deal.id}`,
+      entityType: 'deal',
+      entityId: deal.id,
+    })
 
     this.appendAudit({
       action: auditAction,

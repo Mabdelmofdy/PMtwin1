@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useMemo, useState, useEffect } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { peopleApi } from '@/api/people.ts'
 import { PersonCard } from '@/components/user/person-card'
 import {
@@ -34,12 +34,25 @@ import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
 import type { PlatformUser } from '@/types/domain.ts'
 
-export function PeopleListSection() {
+export type PeopleListSectionProps = {
+  initialScope?: PeopleScopeFilter
+}
+
+export function PeopleListSection({ initialScope = 'all' }: PeopleListSectionProps) {
+  const location = useLocation()
+  const navPeopleScope = (location.state as { peopleScope?: PeopleScopeFilter } | null)?.peopleScope
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
-  const [scope, setScope] = useState<PeopleScopeFilter>('all')
+  const [scope, setScope] = useState<PeopleScopeFilter>(navPeopleScope ?? initialScope)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
+
+  useEffect(() => {
+    if (navPeopleScope) {
+      setScope(navPeopleScope)
+      setPage(1)
+    }
+  }, [location.key, navPeopleScope])
 
   const companyIds = useMemo(
     () => new Set(peopleApi.listCompanies().map((c) => c.id)),

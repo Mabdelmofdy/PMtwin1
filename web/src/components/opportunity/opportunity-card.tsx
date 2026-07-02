@@ -7,7 +7,6 @@ import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { PmCardActions } from '@/components/ui/pm-more-actions'
 import { PmReadinessScoreBadge } from '@/components/ui/pm-readiness-score-badge'
 import { PmSurface } from '@/components/ui/pm-surface'
-import { OpportunityStatusBadge } from '@/components/opportunity/opportunity-status-badge'
 import { OpportunityListLabels } from '@/components/opportunity/opportunity-list-labels'
 import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
 import type { Opportunity } from '@/types/domain.ts'
@@ -53,6 +52,7 @@ export function OpportunityCard({
         opportunity={opportunity}
         viewerUserId={viewerUserId}
         viewerOrganizationId={viewerOrganizationId}
+        showStatus
         className="mb-2"
       />
       <div className="flex items-start justify-between gap-3">
@@ -76,7 +76,6 @@ export function OpportunityCard({
               }}
             />
           ) : null}
-          <OpportunityStatusBadge status={opportunity.status} />
         </div>
       </div>
 

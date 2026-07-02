@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { useParams, useLocation } from 'react-router-dom'
 import { peopleApi } from '@/api/people.ts'
 import { notificationsApi } from '@/api/notifications.ts'
 import { useAuth } from '@/providers/auth-provider'
@@ -15,22 +15,38 @@ import {
 import { MOCK_MESSAGE_THREADS } from '@/components/user/user-display'
 import { PmBadge, PmPage, PmPageHeader, PmPageHeroMetric, PmPageActions } from '@/components/ui/pm-index'
 import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
+import { readProductNavState } from '@/config/product-identity'
 
 export function PeoplePage() {
+  const location = useLocation()
+  const navState = readProductNavState(location.state)
   const profileCount = peopleApi.listAll().length
+  const peopleScope = navState?.peopleScope
+  const title =
+    peopleScope === 'companies'
+      ? 'Browse companies'
+      : peopleScope === 'people'
+        ? 'Browse professionals'
+        : 'Discover'
+  const description =
+    peopleScope === 'companies'
+      ? 'Explore construction companies available on the marketplace.'
+      : peopleScope === 'people'
+        ? 'Explore professionals and talent available for collaboration.'
+        : 'Search and discover professionals and companies across the built environment.'
 
   return (
     <PmPage
       header={
         <PmPageHeader
-          label="Workspace"
-          title="Find"
-          description="Search professionals and companies across the built environment."
-          metric={<PmPageHeroMetric value={profileCount} label="Profiles" />}
+          label="Marketplace"
+          title={title}
+          description={description}
+          metric={<PmPageHeroMetric value={profileCount} label="Available profiles" />}
         />
       }
     >
-      <PeopleListSection />
+      <PeopleListSection initialScope={peopleScope ?? 'all'} />
     </PmPage>
   )
 }

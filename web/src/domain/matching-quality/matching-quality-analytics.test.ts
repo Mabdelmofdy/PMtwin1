@@ -91,6 +91,12 @@ describe('buildMatchingQualityAnalytics', () => {
       negotiationRate: 0,
       dealsCreated: 0,
       dealConversionRate: 0,
+      byMatchType: {
+        one_way: { total: 0, accepted: 0, confirmed: 0 },
+        two_way: { total: 0, accepted: 0, confirmed: 0 },
+        consortium: { total: 0, accepted: 0, confirmed: 0 },
+        circular: { total: 0, accepted: 0, confirmed: 0 },
+      },
     })
   })
 

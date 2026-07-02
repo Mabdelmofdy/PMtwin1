@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Map, Plus } from 'lucide-react'
 import { opportunitiesApi } from '@/api/opportunities.ts'
@@ -47,12 +47,20 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { matchesApi } from '@/api/matches.ts'
+import { peopleApi } from '@/api/people.ts'
 import { EntityAccessDenied } from '@/components/auth/entity-access-state'
 import {
   buildViewerContext,
   canEditOpportunity,
-  filterOpportunitiesForListScope,
 } from '@/lib/entity-view-visibility.ts'
+import {
+  filterOpportunitiesByOwnershipFilter,
+  OPPORTUNITY_OWNERSHIP_FILTER_LABELS,
+  readProductNavState,
+  resolveDefaultOpportunityOwnershipFilter,
+  type OpportunityOwnershipFilter,
+} from '@/config/product-identity'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const WIZARD_STEPS: readonly PmFormStepperStep[] = [
   { id: 'type', label: 'Type', description: 'Need or offer' },
@@ -139,15 +147,26 @@ function resolveCompletedSteps(draft: OpportunityDraft): string[] {
 
 export function OpportunitiesPage() {
   const { user } = useAuth()
+  const location = useLocation()
+  const navState = readProductNavState(location.state)
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('all')
-  const [scope, setScope] = useState<'all' | 'mine'>('all')
+  const [ownershipFilter, setOwnershipFilter] = useState<OpportunityOwnershipFilter>(() =>
+    resolveDefaultOpportunityOwnershipFilter(navState),
+  )
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
+
+  useEffect(() => {
+    setOwnershipFilter(resolveDefaultOpportunityOwnershipFilter(navState))
+    setPage(1)
+  }, [location.key, navState?.domain, navState?.ownershipScope])
 
   const allOpportunities = opportunitiesApi.list()
   const heroSummary = summarizeOpportunityListHero(allOpportunities)
   const totalMatches = matchesApi.list().length
+  const isMarketplaceBrowse =
+    ownershipFilter === 'marketplace' || navState?.domain === 'marketplace'
 
   const opportunities = useMemo(() => {
     const viewer = buildViewerContext({
@@ -155,7 +174,13 @@ export function OpportunitiesPage() {
       role: user?.role,
       status: user?.status,
     })
-    const scoped = filterOpportunitiesForListScope(allOpportunities, viewer, scope)
+    const scoped = filterOpportunitiesByOwnershipFilter(
+      allOpportunities,
+      viewer,
+      ownershipFilter,
+      (creatorId) => peopleApi.get(creatorId)?.organizationId,
+      user?.organizationId,
+    )
     return scoped.filter((o) => {
       const matchesSearch =
         !search ||
@@ -164,7 +189,16 @@ export function OpportunitiesPage() {
       const matchesStatus = status === 'all' || o.status === status
       return matchesSearch && matchesStatus
     })
-  }, [allOpportunities, search, status, scope, user?.id, user?.role, user?.status])
+  }, [
+    allOpportunities,
+    search,
+    status,
+    ownershipFilter,
+    user?.id,
+    user?.role,
+    user?.status,
+    user?.organizationId,
+  ])
 
   const totalItems = opportunities.length
   const pageCount = Math.max(1, Math.ceil(totalItems / pageSize))
@@ -175,9 +209,19 @@ export function OpportunitiesPage() {
     <PmPage
       header={
         <PmPageHeader
-          label="Workspace"
-          title="Opportunities"
-          description="Browse published needs and offers across the built environment."
+          label={isMarketplaceBrowse ? 'Marketplace' : 'My Workspace'}
+          title={
+            ownershipFilter === 'mine'
+              ? 'My opportunities'
+              : ownershipFilter === 'company'
+                ? 'Company opportunities'
+                : 'Browse opportunities'
+          }
+          description={
+            isMarketplaceBrowse
+              ? 'Explore available needs and offers across the construction marketplace.'
+              : 'Manage opportunities you own or your company is executing.'
+          }
           tone="opportunity"
           metric={
             <PmPageHeroMetric
@@ -224,11 +268,32 @@ export function OpportunitiesPage() {
         />
       }
     >
-      <PmToolbarSurface>
+      <PmToolbarSurface className="space-y-3">
+        <Tabs
+          value={ownershipFilter}
+          onValueChange={(value) => {
+            setOwnershipFilter(value as OpportunityOwnershipFilter)
+            setPage(1)
+          }}
+        >
+          <TabsList>
+            {(Object.keys(OPPORTUNITY_OWNERSHIP_FILTER_LABELS) as OpportunityOwnershipFilter[]).map(
+              (key) => (
+                <TabsTrigger key={key} value={key} className="cursor-pointer">
+                  {OPPORTUNITY_OWNERSHIP_FILTER_LABELS[key]}
+                </TabsTrigger>
+              ),
+            )}
+          </TabsList>
+        </Tabs>
         <PmTableToolbar
           search={
             <PmTableSearch
-              placeholder="Search title, location…"
+              placeholder={
+                isMarketplaceBrowse
+                  ? 'Search available opportunities…'
+                  : 'Search my opportunities…'
+              }
               value={search}
               onValueChange={(v) => {
                 setSearch(v)
@@ -237,19 +302,8 @@ export function OpportunitiesPage() {
             />
           }
           filters={
-            <PmTableFilter activeCount={status !== 'all' || scope !== 'all' ? 1 : 0} label="Filters">
+            <PmTableFilter activeCount={status !== 'all' ? 1 : 0} label="Filters">
               <div className="space-y-3">
-                <PmFormField id="opp-filter-scope" label="Scope">
-                  <Select value={scope} onValueChange={(v) => setScope(v as 'all' | 'mine')}>
-                    <SelectTrigger id="opp-filter-scope" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All opportunities</SelectItem>
-                      <SelectItem value="mine">My opportunities</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </PmFormField>
                 <PmFormField id="opp-filter-status" label="Status">
                   <Select value={status} onValueChange={setStatus}>
                     <SelectTrigger id="opp-filter-status" className="w-full">
@@ -320,9 +374,9 @@ export function OpportunityMapPage() {
     <PmPage
       header={
         <PmPageHeader
-          label="Geo browse"
+          label="Marketplace"
           title="Opportunity map"
-          description="Explore opportunities by location across the GCC."
+          description="Explore opportunities by location across the GCC. Map integration is in preview."
           tone="opportunity"
           metric={
             <PmPageHeroMetric value={allOpportunities.length} label="Listings" />

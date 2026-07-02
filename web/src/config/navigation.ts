@@ -6,11 +6,13 @@ import {
   Briefcase,
   Building2,
   ChartBar,
+  Compass,
   FileText,
   GitBranch,
   Handshake,
   Heart,
   Home,
+  Map as MapIcon,
   MessageCircle,
   Scale,
   Settings,
@@ -21,6 +23,7 @@ import {
   Users,
   Wrench,
 } from 'lucide-react'
+import type { ProductNavState } from '@/config/product-identity'
 
 export type NavItem = {
   title: string
@@ -28,6 +31,10 @@ export type NavItem = {
   icon: LucideIcon
   badge?: number
   keywords?: string[]
+  /** Route state for presentation defaults (does not change URLs). */
+  state?: ProductNavState
+  /** Unfinished surface — link works but UI shows Preview affordance. */
+  preview?: boolean
 }
 
 export type NavGroup = {
@@ -39,13 +46,49 @@ export const APP_NAME = 'PM-Twin'
 
 export const mainNavigation: NavGroup[] = [
   {
-    title: 'Workspace',
+    title: 'My Workspace',
     items: [
       {
         title: 'Dashboard',
         href: '/dashboard',
         icon: Home,
-        keywords: ['home', 'overview', 'workspace', 'attention'],
+        state: { domain: 'workspace' },
+        keywords: ['home', 'overview', 'my workspace', 'attention', 'tasks'],
+      },
+      {
+        title: 'My Opportunities',
+        href: '/opportunities',
+        icon: Briefcase,
+        state: { domain: 'workspace', ownershipScope: 'mine' },
+        keywords: ['my opportunities', 'owned', 'drafts', 'published'],
+      },
+      {
+        title: 'My Matches',
+        href: '/matches',
+        icon: Heart,
+        state: { domain: 'workspace', matchView: 'mine' },
+        keywords: ['my matches', 'assigned', 'collaboration'],
+      },
+      {
+        title: 'My Negotiations',
+        href: '/negotiations',
+        icon: Scale,
+        state: { domain: 'workspace' },
+        keywords: ['my negotiations', 'terms', 'counter', 'pending'],
+      },
+      {
+        title: 'My Deals',
+        href: '/deals',
+        icon: Handshake,
+        state: { domain: 'workspace' },
+        keywords: ['my deals', 'executing', 'agreements'],
+      },
+      {
+        title: 'My Contracts',
+        href: '/contracts',
+        icon: FileText,
+        state: { domain: 'workspace' },
+        keywords: ['my contracts', 'signing', 'legal'],
       },
     ],
   },
@@ -53,62 +96,48 @@ export const mainNavigation: NavGroup[] = [
     title: 'Marketplace',
     items: [
       {
-        title: 'Find',
+        title: 'Discover',
         href: '/people',
-        icon: Users,
-        keywords: ['people', 'talent', 'search'],
+        icon: Compass,
+        state: { domain: 'marketplace' },
+        keywords: ['discover', 'explore', 'search', 'directory'],
       },
       {
-        title: 'Opportunities',
+        title: 'Browse Opportunities',
         href: '/opportunities',
         icon: Briefcase,
-        keywords: ['jobs', 'projects', 'postings'],
+        state: { domain: 'marketplace', ownershipScope: 'marketplace' },
+        keywords: ['browse', 'available', 'latest', 'opportunities', 'needs', 'offers'],
       },
       {
-        title: 'Matches',
+        title: 'Browse Companies',
+        href: '/people',
+        icon: Building2,
+        state: { domain: 'marketplace', peopleScope: 'companies' },
+        keywords: ['companies', 'firms', 'organizations'],
+      },
+      {
+        title: 'Browse Professionals',
+        href: '/people',
+        icon: Users,
+        state: { domain: 'marketplace', peopleScope: 'people' },
+        keywords: ['professionals', 'talent', 'people', 'experts'],
+      },
+      {
+        title: 'Browse Matches',
         href: '/matches',
-        icon: Heart,
-        keywords: ['matching', 'postmatch', 'collaboration', 'recommendations'],
-      },
-    ],
-  },
-  {
-    title: 'Pipeline',
-    items: [
-      {
-        title: 'Pipeline',
-        href: '/pipeline',
-        icon: GitBranch,
-        keywords: ['pipeline', 'workflow', 'queue'],
+        icon: Sparkles,
+        state: { domain: 'marketplace', matchView: 'marketplace' },
+        preview: true,
+        keywords: ['matching', 'recommendations', 'trending'],
       },
       {
-        title: 'Matches',
-        href: '/matches',
-        icon: Heart,
-        keywords: ['matching', 'collaboration', 'recommendations'],
-      },
-      {
-        title: 'Negotiations',
-        href: '/negotiations',
-        icon: Scale,
-        keywords: ['negotiations', 'terms', 'counter', 'workflow'],
-      },
-    ],
-  },
-  {
-    title: 'Execution',
-    items: [
-      {
-        title: 'Deals',
-        href: '/deals',
-        icon: Handshake,
-        keywords: ['deals', 'agreements', 'workflow'],
-      },
-      {
-        title: 'Contracts',
-        href: '/contracts',
-        icon: FileText,
-        keywords: ['legal', 'documents', 'workflow'],
+        title: 'Map',
+        href: '/opportunities/map',
+        icon: MapIcon,
+        state: { domain: 'marketplace' },
+        preview: true,
+        keywords: ['map', 'geo', 'location', 'discover'],
       },
     ],
   },
@@ -196,7 +225,7 @@ export const commandActions = [
     title: 'Company Dashboard',
     href: '/company-dashboard',
     icon: Building2,
-    keywords: ['company', 'workspace'],
+    keywords: ['company', 'my workspace'],
   },
 ] as const
 
@@ -219,10 +248,10 @@ export function isNavActive(pathname: string, href: string) {
 }
 
 export const routeLabels: Record<string, string> = {
-  dashboard: 'Dashboard',
-  'company-dashboard': 'Company Dashboard',
+  dashboard: 'My Workspace',
+  'company-dashboard': 'Company Workspace',
   pipeline: 'Pipeline',
-  people: 'Find',
+  people: 'Discover',
   opportunities: 'Opportunities',
   create: 'Create',
   edit: 'Edit',
@@ -234,7 +263,7 @@ export const routeLabels: Record<string, string> = {
   contracts: 'Contracts',
   messages: 'Messages',
   notifications: 'Notifications',
-  profile: 'Profile',
+  profile: 'My Profile',
   settings: 'Settings',
   admin: 'Admin',
   reports: 'Reports',
@@ -258,7 +287,7 @@ export const routeLabels: Record<string, string> = {
   'site-content': 'Site Content',
   'knowledge-base': 'Knowledge Base',
   workflow: 'How it works',
-  find: 'Find',
+  find: 'Discover',
   login: 'Sign in',
   register: 'Register',
   'forgot-password': 'Forgot password',

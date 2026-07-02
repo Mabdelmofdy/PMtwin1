@@ -6,12 +6,30 @@ import { resolveCanonicalStatus } from '@/lib/status-display.ts'
 import type {
   BuildMatchingQualityAnalyticsInput,
   MatchingQualityResult,
+  MatchTypeBreakdownEntry,
+  MatchTypeKey,
 } from '@/domain/matching-quality/types.ts'
 
 const MATCH_ENTITY = 'match' as const
 
 /** Negative terminal outcomes excluded from the match funnel denominator. */
 const MATCH_EXCLUDED_FROM_TOTAL = new Set(['declined', 'expired', 'superseded'])
+
+const MATCH_TYPE_KEYS: readonly MatchTypeKey[] = [
+  'one_way',
+  'two_way',
+  'consortium',
+  'circular',
+]
+
+function emptyMatchTypeBreakdown(): Record<MatchTypeKey, MatchTypeBreakdownEntry> {
+  return {
+    one_way: { total: 0, accepted: 0, confirmed: 0 },
+    two_way: { total: 0, accepted: 0, confirmed: 0 },
+    consortium: { total: 0, accepted: 0, confirmed: 0 },
+    circular: { total: 0, accepted: 0, confirmed: 0 },
+  }
+}
 
 const EMPTY_RESULT: MatchingQualityResult = {
   averageProfileReadiness: 0,
@@ -24,6 +42,13 @@ const EMPTY_RESULT: MatchingQualityResult = {
   negotiationRate: 0,
   dealsCreated: 0,
   dealConversionRate: 0,
+  byMatchType: emptyMatchTypeBreakdown(),
+}
+
+function resolveMatchTypeKey(match: object): MatchTypeKey {
+  const raw = (match as { matchType?: string }).matchType
+  const key = (raw ?? 'one_way').toLowerCase() as MatchTypeKey
+  return MATCH_TYPE_KEYS.includes(key) ? key : 'one_way'
 }
 
 function roundAverage(value: number): number {
@@ -111,18 +136,38 @@ function summarizeOpportunityReadiness(
   return average(scores)
 }
 
+function isConfirmedMatchStatus(status: string | undefined): boolean {
+  return resolveCanonicalStatus(MATCH_ENTITY, status) === 'confirmed'
+}
+
 function summarizeMatchMetrics(matches: BuildMatchingQualityAnalyticsInput['matches']) {
   let totalMatches = 0
   let acceptedMatches = 0
   const scores: number[] = []
+  const byMatchType = emptyMatchTypeBreakdown()
 
   for (const match of matches) {
     const status = (match as { status?: string }).status
+    const typeKey = resolveMatchTypeKey(match)
     if (isMatchIncludedInTotal(status)) {
       totalMatches += 1
+      byMatchType[typeKey] = {
+        ...byMatchType[typeKey],
+        total: byMatchType[typeKey].total + 1,
+      }
     }
     if (isAcceptedMatchStatus(status)) {
       acceptedMatches += 1
+      byMatchType[typeKey] = {
+        ...byMatchType[typeKey],
+        accepted: byMatchType[typeKey].accepted + 1,
+      }
+    }
+    if (isConfirmedMatchStatus(status)) {
+      byMatchType[typeKey] = {
+        ...byMatchType[typeKey],
+        confirmed: byMatchType[typeKey].confirmed + 1,
+      }
     }
 
     const score = resolveStoredMatchScore(match)
@@ -136,6 +181,7 @@ function summarizeMatchMetrics(matches: BuildMatchingQualityAnalyticsInput['matc
     acceptedMatches,
     acceptanceRate: ratePercent(acceptedMatches, totalMatches),
     averageMatchScore: average(scores),
+    byMatchType,
   }
 }
 
@@ -207,5 +253,6 @@ export function buildMatchingQualityAnalytics(
     negotiationRate: negotiationMetrics.negotiationRate,
     dealsCreated: dealMetrics.dealsCreated,
     dealConversionRate: dealMetrics.dealConversionRate,
+    byMatchType: matchMetrics.byMatchType,
   }
 }

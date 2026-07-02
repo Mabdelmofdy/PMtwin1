@@ -43,7 +43,7 @@ export function UserDashboardSection() {
     <PmDashboardLayout
       header={
         <PmSectionHeader
-          title="Your workspace"
+          title="My Workspace"
           description="Recent activity across opportunities, collaboration, and alerts."
         />
       }

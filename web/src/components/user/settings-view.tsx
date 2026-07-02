@@ -105,7 +105,7 @@ export function SettingsView() {
 
 
 
-      <PmFormSection title="Preferences" description="Workspace and locale preferences.">
+      <PmFormSection title="Preferences" description="My Workspace and locale preferences.">
 
         <PmFormField id="layout-direction" label="Layout direction">
 

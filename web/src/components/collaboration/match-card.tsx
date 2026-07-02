@@ -3,7 +3,10 @@ import { ArrowDown } from 'lucide-react'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { formatDate } from '@/lib/format'
 import { formatMatchTypeBadgeLabel } from '@/components/collaboration/collaboration-display'
-import { resolveMatchNeedOfferTitles } from '@/lib/match-display.ts'
+import {
+  formatMatchDisplayTitle,
+  resolveMatchNeedOfferTitles,
+} from '@/lib/match-display.ts'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { PmCardActions } from '@/components/ui/pm-more-actions'
 import { PmBadge } from '@/components/ui/pm-badge'
@@ -19,10 +22,12 @@ export type MatchCardProps = {
   showActions?: boolean
 }
 
-/** Match card — need/offer pairing as primary identity; topology as secondary metadata. */
+/** Match card — one_way keeps need/offer pairing; other topologies show a structure label. */
 export function MatchCard({ match, className, showActions = true }: MatchCardProps) {
   const href = `/matches/${match.id}`
+  const isOneWay = (match.matchType || 'one_way').toLowerCase() === 'one_way'
   const pairing = resolveMatchNeedOfferTitles(match, (id) => opportunitiesApi.get(id))
+  const displayTitle = formatMatchDisplayTitle(match, (id) => opportunitiesApi.get(id))
 
   return (
     <PmSurface
@@ -35,15 +40,23 @@ export function MatchCard({ match, className, showActions = true }: MatchCardPro
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1 space-y-2">
           <Link to={href} className="block min-w-0 hover:text-primary">
-            <p className={cn(pmTypography.caption, 'font-medium text-info')}>Need</p>
-            <p className={cn(pmTypography.bodySm, 'line-clamp-2 font-semibold')}>
-              {pairing.needTitle}
-            </p>
-            <ArrowDown className="my-1 size-3.5 text-muted-foreground" aria-hidden />
-            <p className={cn(pmTypography.caption, 'font-medium text-success')}>Offer</p>
-            <p className={cn(pmTypography.bodySm, 'line-clamp-2 font-semibold')}>
-              {pairing.offerTitle}
-            </p>
+            {isOneWay ? (
+              <>
+                <p className={cn(pmTypography.caption, 'font-medium text-info')}>Need</p>
+                <p className={cn(pmTypography.bodySm, 'line-clamp-2 font-semibold')}>
+                  {pairing.needTitle}
+                </p>
+                <ArrowDown className="my-1 size-3.5 text-muted-foreground" aria-hidden />
+                <p className={cn(pmTypography.caption, 'font-medium text-success')}>Offer</p>
+                <p className={cn(pmTypography.bodySm, 'line-clamp-2 font-semibold')}>
+                  {pairing.offerTitle}
+                </p>
+              </>
+            ) : (
+              <p className={cn(pmTypography.bodySm, 'line-clamp-3 font-semibold')}>
+                {displayTitle}
+              </p>
+            )}
           </Link>
           <PmBadge tone="neutral" size="sm" uppercase>
             {formatMatchTypeBadgeLabel(match.matchType)}

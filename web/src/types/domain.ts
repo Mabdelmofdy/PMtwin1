@@ -230,6 +230,8 @@ export type Negotiation = TenantScoped & {
   postMatchId?: string
   needOpportunityId?: string
   offerOpportunityId?: string
+  /** All opportunities referenced by the source match (topology-aware). */
+  opportunityIds?: string[]
   /** @deprecated Prefer postMatchId — legacy seed field */
   matchId?: string
   applicationId?: string | null

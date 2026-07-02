@@ -52,7 +52,7 @@ import { cn } from '@/lib/utils'
 import { productFlags } from '@/config/product-flags.ts'
 import {
   buildViewerContext,
-  findParticipantOneWayMatchForOpportunity,
+  findParticipantMatchForOpportunity,
   resolveOpportunityDetailVisibility,
 } from '@/lib/entity-view-visibility.ts'
 
@@ -176,7 +176,7 @@ export function OpportunityDetailPage() {
 
   const participantMatch = useMemo(() => {
     if (!opp?.id) return undefined
-    return findParticipantOneWayMatchForOpportunity(opp.id, postMatchesForOpp, viewer)
+    return findParticipantMatchForOpportunity(opp.id, postMatchesForOpp, viewer)
   }, [opp?.id, postMatchesForOpp, viewer])
 
   const relatedMatchesModel = useMemo(() => {

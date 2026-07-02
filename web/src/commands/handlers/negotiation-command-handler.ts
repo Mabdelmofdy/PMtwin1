@@ -12,9 +12,14 @@ import {
   isTerminal,
   toCanonical,
 } from '@pm-twin/lifecycle'
-import type { AuditEntry, Negotiation, PostMatch } from '@/types/domain.ts'
+import type { AuditEntry, Negotiation } from '@/types/domain.ts'
 import type { NegotiationTerms } from '@/types/commercial-terms.ts'
 import type { Participant } from '@/types/participant.ts'
+import { resolvePostMatchOpportunityIds } from '@/domain/normalized/post-match-opportunity-ids.ts'
+import {
+  emitParticipantNotifications,
+  type NotificationSink,
+} from '@/commands/handlers/lifecycle-notifications.ts'
 import type { AuditRepository } from '@/repositories/audit-repository.ts'
 import type { NegotiationRepository } from '@/repositories/negotiation-repository.ts'
 import type { PostMatchRepository } from '@/repositories/post-match-repository.ts'
@@ -29,6 +34,7 @@ export type NegotiationCommandHandlerDeps = {
   readonly negotiationRepository: NegotiationRepository
   readonly postMatchRepository: PostMatchRepository
   readonly auditRepository?: AuditRepository | null
+  readonly notificationRepository?: NotificationSink | null
 }
 
 function failure(
@@ -57,12 +63,15 @@ function validateBaseCommand(command: Command): readonly string[] {
   return errors
 }
 
-function resolveNeedOpportunityId(match: PostMatch): string | undefined {
-  return match.needOpportunityId ?? match.payload?.needOpportunityId
+const NEGOTIATION_OPEN_MESSAGES: Readonly<Record<string, string>> = {
+  one_way: 'Negotiation opened from confirmed Need/Offer match.',
+  two_way: 'Negotiation opened from confirmed barter match.',
+  consortium: 'Negotiation opened from confirmed consortium match.',
+  circular: 'Negotiation opened from confirmed circular exchange match.',
 }
 
-function resolveOfferOpportunityId(match: PostMatch): string | undefined {
-  return match.offerOpportunityId ?? match.payload?.offerOpportunityId
+function buildNegotiationOpenMessage(matchType: string): string {
+  return NEGOTIATION_OPEN_MESSAGES[matchType] ?? NEGOTIATION_OPEN_MESSAGES.one_way
 }
 
 function isActiveNegotiationStatus(status: string | undefined): boolean {
@@ -127,11 +136,13 @@ export class NegotiationCommandHandler {
   private readonly negotiationRepository: NegotiationRepository
   private readonly postMatchRepository: PostMatchRepository
   private readonly auditRepository: AuditRepository | null
+  private readonly notificationRepository: NotificationSink | null
 
   constructor(deps: NegotiationCommandHandlerDeps) {
     this.negotiationRepository = deps.negotiationRepository
     this.postMatchRepository = deps.postMatchRepository
     this.auditRepository = deps.auditRepository ?? null
+    this.notificationRepository = deps.notificationRepository ?? null
   }
 
   handle(command: Command): CommandResult {
@@ -183,11 +194,20 @@ export class NegotiationCommandHandler {
       ])
     }
 
-    const needOpportunityId = resolveNeedOpportunityId(postMatch)
-    const offerOpportunityId = resolveOfferOpportunityId(postMatch)
-    if (!needOpportunityId || !offerOpportunityId) {
+    const matchType = (postMatch.matchType || 'one_way').toLowerCase()
+    const { opportunityIds, needOpportunityId, offerOpportunityId } =
+      resolvePostMatchOpportunityIds(postMatch)
+
+    if (matchType === 'one_way') {
+      // Preserve one_way behavior exactly: require both need and offer.
+      if (!needOpportunityId || !offerOpportunityId) {
+        return failure(command.commandType, postMatchId, [
+          'PostMatch is missing needOpportunityId or offerOpportunityId',
+        ])
+      }
+    } else if (opportunityIds.length < 2) {
       return failure(command.commandType, postMatchId, [
-        'PostMatch is missing needOpportunityId or offerOpportunityId',
+        'PostMatch does not reference enough opportunities to start a negotiation',
       ])
     }
 
@@ -206,23 +226,34 @@ export class NegotiationCommandHandler {
       ])
     }
 
-    const opportunityId = needOpportunityId
+    const opportunityId = needOpportunityId ?? opportunityIds[0]
     const negotiation = this.negotiationRepository.create({
       opportunityId,
       postMatchId,
       needOpportunityId,
       offerOpportunityId,
+      opportunityIds: [...opportunityIds],
       matchId: postMatchId,
       participants,
       status: 'active',
       rounds: [],
       initialTerms: {
-        message: 'Negotiation opened from confirmed Need/Offer match.',
+        message: buildNegotiationOpenMessage(matchType),
       } as NegotiationTerms,
     })
 
     this.postMatchRepository.update(postMatchId, {
       negotiationId: negotiation.id,
+    })
+
+    emitParticipantNotifications(this.notificationRepository, {
+      participants,
+      type: 'negotiation_started',
+      title: 'Negotiation started',
+      message: 'A negotiation has started from your confirmed match.',
+      link: `/matches/${postMatchId}`,
+      entityType: 'negotiation',
+      entityId: negotiation.id,
     })
 
     this.appendAudit({

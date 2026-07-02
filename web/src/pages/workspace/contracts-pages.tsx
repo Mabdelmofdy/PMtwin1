@@ -191,9 +191,9 @@ export function ContractsPage() {
       <PmPage
         header={
           <PmPageHeader
-            label="Workflow"
-            title="Contracts"
-            description="Agreements linked to deals and opportunities."
+            label="My Workspace"
+            title="My contracts"
+            description="Contracts assigned to you for signature and execution."
             tone="contract"
             metric={<PmPageHeroMetric value={0} label="Active" />}
           />
@@ -216,9 +216,9 @@ export function ContractsPage() {
     <PmPage
       header={
         <PmPageHeader
-          label="Workflow"
-          title="Contracts"
-          description="Agreements linked to deals and opportunities."
+          label="My Workspace"
+          title="My contracts"
+          description="Agreements you own — pending signature, active, and completed."
           tone="contract"
           metric={<PmPageHeroMetric value={activeContracts} label="Active" />}
           badges={

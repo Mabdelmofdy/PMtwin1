@@ -38,7 +38,7 @@ export function resolveWorkspaceContext(
 
   if (pathname === '/dashboard' || pathname === '/company-dashboard') {
     return {
-      title: options.isCompanyUser ? 'Company workspace' : 'Workspace',
+      title: options.isCompanyUser ? 'Company workspace' : 'My Workspace',
       subtitle: APP_NAME,
       homeHref: dashboardHref,
       isAdmin: false,

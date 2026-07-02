@@ -145,11 +145,11 @@ export function resolveOpportunityOwnershipScope(input: {
 export function formatOpportunityOwnershipLabel(scope: OpportunityOwnershipScope): string {
   switch (scope) {
     case 'mine':
-      return 'My opportunity'
+      return 'Mine'
     case 'company':
-      return 'Company opportunity'
+      return 'Company'
     case 'marketplace':
-      return 'Marketplace opportunity'
+      return 'Marketplace'
   }
 }
 

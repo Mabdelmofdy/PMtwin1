@@ -17,6 +17,10 @@ import {
 import type { AuditEntry, Contract, Deal } from '@/types/domain.ts'
 import type { Participant } from '@/types/participant.ts'
 import { normalizeParticipants } from '@/types/participant.ts'
+import {
+  emitParticipantNotifications,
+  type NotificationSink,
+} from '@/commands/handlers/lifecycle-notifications.ts'
 import type { AuditRepository } from '@/repositories/audit-repository.ts'
 import type { ContractRepository } from '@/repositories/contract-repository.ts'
 import type { DealRepository } from '@/repositories/deal-repository.ts'
@@ -39,6 +43,7 @@ export type ContractCommandHandlerDeps = {
   readonly opportunityRepository?: OpportunityRepository
   readonly postMatchRepository?: PostMatchRepository
   readonly auditRepository?: AuditRepository | null
+  readonly notificationRepository?: NotificationSink | null
   readonly lifecycleOrchestrator?: LifecycleOrchestrator
 }
 
@@ -154,12 +159,14 @@ export class ContractCommandHandler {
   private readonly contractRepository: ContractRepository
   private readonly dealRepository: DealRepository
   private readonly auditRepository: AuditRepository | null
+  private readonly notificationRepository: NotificationSink | null
   private readonly lifecycleOrchestrator: LifecycleOrchestrator
 
   constructor(deps: ContractCommandHandlerDeps) {
     this.contractRepository = deps.contractRepository
     this.dealRepository = deps.dealRepository
     this.auditRepository = deps.auditRepository ?? null
+    this.notificationRepository = deps.notificationRepository ?? null
     this.lifecycleOrchestrator =
       deps.lifecycleOrchestrator ??
       createLifecycleOrchestrator({
@@ -260,9 +267,15 @@ export class ContractCommandHandler {
       command.needOpportunityId ?? deal.needOpportunityId ?? undefined
     const offerOpportunityId =
       command.offerOpportunityId ?? deal.offerOpportunityId ?? undefined
-    const opportunityIds = [needOpportunityId, offerOpportunityId].filter(
+    const primaryOpportunityIds = [needOpportunityId, offerOpportunityId].filter(
       (id): id is string => Boolean(id),
     )
+    // Prefer the deal's full (topology-aware) opportunity list so multi-party
+    // contracts (barter/consortium/circular) carry every referenced opportunity.
+    const opportunityIds =
+      deal.opportunityIds && deal.opportunityIds.length > 0
+        ? deal.opportunityIds
+        : primaryOpportunityIds
 
     const contract = this.contractRepository.create({
       dealId,
@@ -277,6 +290,16 @@ export class ContractCommandHandler {
       commercialTerms: deal.commercialTerms,
       terms: deal.terms,
       status: 'draft',
+    })
+
+    emitParticipantNotifications(this.notificationRepository, {
+      participants,
+      type: 'contract_created',
+      title: 'Contract created',
+      message: 'A contract was created from your deal.',
+      link: `/contracts/${contract.id}`,
+      entityType: 'contract',
+      entityId: contract.id,
     })
 
     this.appendAudit({

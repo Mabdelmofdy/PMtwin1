@@ -71,7 +71,7 @@ export function AppSidebar() {
             ? {
                 ...item,
                 href: dashboardHref,
-                title: isCompanyUser ? 'Company Dashboard' : 'Dashboard',
+                title: isCompanyUser ? 'Company Dashboard' : 'My Workspace',
               }
             : item,
         ),
@@ -84,7 +84,7 @@ export function AppSidebar() {
         <div className={cn('group-data-[collapsible=icon]:hidden')}>
           <div className="rounded-2xl border border-sidebar-border/55 bg-sidebar-accent/45 px-3 py-3">
             <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground/85">
-              Workspace profile
+              My profile
             </p>
             <div className="mt-1.5 flex items-start gap-2">
               <div className="min-w-0">
@@ -113,17 +113,29 @@ export function AppSidebar() {
                   const Icon = item.icon
                   const active = isNavActive(pathname, item.href)
                   const badge = resolveNavBadge(item.href)
+                  const itemKey = `${group.title}-${item.title}`
+                  const linkHref =
+                    item.href === '/dashboard' ? dashboardHref : item.href
                   return (
-                    <SidebarMenuItem key={item.href}>
+                    <SidebarMenuItem key={itemKey}>
                       <SidebarMenuButton
                         isActive={active}
                         tooltip={item.title}
                         className={navButtonClass}
                         asChild
                       >
-                        <Link to={item.href} className="min-h-10">
+                        <Link
+                          to={linkHref}
+                          state={item.state}
+                          className="min-h-10"
+                        >
                           <Icon className="size-4 shrink-0 text-sidebar-foreground/75 transition-colors group-data-[active=true]/menu-button:text-sidebar-primary-foreground" aria-hidden />
                           <span className="truncate">{item.title}</span>
+                          {item.preview ? (
+                            <PmNavBadge className="ms-auto shrink-0 text-[10px] uppercase tracking-wide">
+                              Preview
+                            </PmNavBadge>
+                          ) : null}
                         </Link>
                       </SidebarMenuButton>
                       {badge ? (
@@ -145,13 +157,13 @@ export function AppSidebar() {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    tooltip="Back to workspace"
+                    tooltip="Back to My Workspace"
                     className={navButtonClass}
                     asChild
                   >
                     <Link to={dashboardHref}>
                       <ArrowLeft className="size-4" aria-hidden />
-                      <span>Back to workspace</span>
+                      <span>Back to My Workspace</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

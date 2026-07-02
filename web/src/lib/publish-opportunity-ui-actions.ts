@@ -43,6 +43,16 @@ export type PublishOrchestrationDeps = {
   readonly runPublishMatching?: (
     opportunityId: string,
   ) => PublishMatchingResult
+  readonly runCircularMatching?: (
+    opportunityId: string,
+  ) => PublishMatchingResult
+}
+
+const EMPTY_MATCHING_RESULT: PublishMatchingResult = {
+  discoveredMatchesCount: 0,
+  skippedDuplicatesCount: 0,
+  matchingErrors: [],
+  postMatchIds: [],
 }
 
 function formatCommandErrors(result: CommandResult): string {
@@ -76,15 +86,34 @@ export function executePublishOpportunityOrchestration(
   const runPublishMatching =
     deps?.runPublishMatching
     ?? matchingService.runPublishMatchingForOpportunity.bind(matchingService)
+  const runCircularMatching =
+    deps?.runCircularMatching
+    ?? matchingService.runCircularMatchingForOpportunity.bind(matchingService)
 
   const matching = runPublishMatching(opportunityId)
+
+  // Circular matching runs as an additional creator-anchored pass on publish
+  // (POC parity). It is best-effort and must never fail the publish action.
+  let circular: PublishMatchingResult = EMPTY_MATCHING_RESULT
+  try {
+    circular = runCircularMatching(opportunityId)
+  } catch (error) {
+    circular = {
+      ...EMPTY_MATCHING_RESULT,
+      matchingErrors: [
+        error instanceof Error ? error.message : 'Circular matching failed',
+      ],
+    }
+  }
 
   return {
     success: true,
     published: true,
-    discoveredMatchesCount: matching.discoveredMatchesCount,
-    skippedDuplicatesCount: matching.skippedDuplicatesCount,
-    matchingErrors: matching.matchingErrors,
+    discoveredMatchesCount:
+      matching.discoveredMatchesCount + circular.discoveredMatchesCount,
+    skippedDuplicatesCount:
+      matching.skippedDuplicatesCount + circular.skippedDuplicatesCount,
+    matchingErrors: [...matching.matchingErrors, ...circular.matchingErrors],
   }
 }
 

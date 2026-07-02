@@ -29,6 +29,10 @@ import {
 } from '@/domain/normalized/post-match-discover-validation.ts'
 import type { AuditRepository } from '@/repositories/audit-repository.ts'
 import type { PostMatchRepository } from '@/repositories/post-match-repository.ts'
+import {
+  emitParticipantNotifications,
+  type NotificationSink,
+} from '@/commands/handlers/lifecycle-notifications.ts'
 
 /** Canonical lifecycle entity key — never use `post_match`. */
 export const POST_MATCH_ENTITY_TYPE = 'match' as const
@@ -36,6 +40,7 @@ export const POST_MATCH_ENTITY_TYPE = 'match' as const
 export type PostMatchCommandHandlerDeps = {
   readonly postMatchRepository: PostMatchRepository
   readonly auditRepository?: AuditRepository | null
+  readonly notificationRepository?: NotificationSink | null
 }
 
 function failure(
@@ -161,6 +166,15 @@ function isOneWayQuorumMet(participants: readonly Participant[]): boolean {
   )
 }
 
+function allParticipantsAccepted(participants: readonly Participant[]): boolean {
+  return (
+    participants.length > 0 &&
+    participants.every((participant) =>
+      isParticipantStatus(participant, 'accepted'),
+    )
+  )
+}
+
 function resolveAggregateStatusAfterAccept(
   postMatch: PostMatch,
   participants: readonly Participant[],
@@ -171,6 +185,12 @@ function resolveAggregateStatusAfterAccept(
 
   const matchType = (postMatch.matchType || 'one_way').toLowerCase()
   if (matchType === 'one_way' && isOneWayQuorumMet(participants)) {
+    return 'confirmed'
+  }
+
+  // Multi-party parity (two_way, consortium, circular): confirm once every
+  // participant has accepted, mirroring the POC lifecycle rule.
+  if (allParticipantsAccepted(participants)) {
     return 'confirmed'
   }
 
@@ -279,10 +299,12 @@ function pickDiscoverRecord(command: DiscoverPostMatchCommand): PostMatch {
 export class PostMatchCommandHandler {
   private readonly postMatchRepository: PostMatchRepository
   private readonly auditRepository: AuditRepository | null
+  private readonly notificationRepository: NotificationSink | null
 
   constructor(deps: PostMatchCommandHandlerDeps) {
     this.postMatchRepository = deps.postMatchRepository
     this.auditRepository = deps.auditRepository ?? null
+    this.notificationRepository = deps.notificationRepository ?? null
   }
 
   handle(command: Command): CommandResult {
@@ -343,6 +365,16 @@ export class PostMatchCommandHandler {
     }
 
     const created = this.postMatchRepository.create(pickDiscoverRecord(command))
+
+    emitParticipantNotifications(this.notificationRepository, {
+      participants: created.participants,
+      type: 'new_match_found',
+      title: 'New match found',
+      message: 'A new match was discovered for you.',
+      link: `/matches/${created.id}`,
+      entityType: 'post_match',
+      entityId: created.id,
+    })
 
     this.appendAudit({
       action: 'post_match.discovered',
@@ -422,6 +454,29 @@ export class PostMatchCommandHandler {
 
     this.postMatchRepository.update(command.aggregateId, patch)
 
+    if (patch.status === 'confirmed') {
+      emitParticipantNotifications(this.notificationRepository, {
+        participants,
+        type: 'match_confirmed',
+        title: 'Match confirmed',
+        message: 'All participants accepted. This match is confirmed.',
+        link: `/matches/${command.aggregateId}`,
+        entityType: 'post_match',
+        entityId: command.aggregateId,
+      })
+    } else {
+      emitParticipantNotifications(this.notificationRepository, {
+        participants,
+        excludeUserId: command.userId,
+        type: 'match_accepted',
+        title: 'Match accepted',
+        message: 'A participant accepted the match.',
+        link: `/matches/${command.aggregateId}`,
+        entityType: 'post_match',
+        entityId: command.aggregateId,
+      })
+    }
+
     this.appendAudit({
       action:
         patch.status === 'confirmed'
@@ -474,6 +529,17 @@ export class PostMatchCommandHandler {
       command.userId,
       'declined',
     )
+
+    emitParticipantNotifications(this.notificationRepository, {
+      participants,
+      excludeUserId: command.userId,
+      type: 'match_declined',
+      title: 'Match declined',
+      message: 'A participant declined the match.',
+      link: `/matches/${command.aggregateId}`,
+      entityType: 'post_match',
+      entityId: command.aggregateId,
+    })
 
     return this.applyStatusTransition(
       command,

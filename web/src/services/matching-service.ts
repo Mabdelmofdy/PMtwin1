@@ -452,6 +452,113 @@ function runCircularMatchingForPublishedOpportunities(
   }
 }
 
+/**
+ * Creator-anchored circular pass for a single freshly published opportunity.
+ * Mirrors the POC behavior of persisting cycles that include the publishing
+ * creator. Best-effort: intended to be called after publish matching.
+ */
+function runCircularMatchingForOpportunity(
+  opportunityId: string,
+  deps?: PublishMatchingDeps,
+): PublishMatchingResult {
+  const empty: PublishMatchingResult = {
+    discoveredMatchesCount: 0,
+    skippedDuplicatesCount: 0,
+    matchingErrors: [],
+    postMatchIds: [],
+  }
+
+  const getOpportunityById =
+    deps?.getOpportunityById ?? ((id) => opportunityRepository.getById(id))
+  const listPublishedOpportunities =
+    deps?.listPublishedOpportunities
+    ?? (() => opportunityRepository.getAll().filter((opp) => opp.status === 'published'))
+  const discoverPostMatch =
+    deps?.discoverPostMatch
+    ?? postMatchCommandService.discoverPostMatch.bind(postMatchCommandService)
+  const findActiveDuplicateByStrongKey =
+    deps?.findActiveDuplicateByStrongKey
+    ?? ((strongKey) => postMatchRepository.findActiveDuplicateByStrongKey(strongKey))
+  const runMatching = deps?.runMatching ?? runMatchingForPost
+  const resolveEngineContext = deps?.getMatchingEngineContext ?? getMatchingEngineContext
+
+  const anchorOpportunity = getOpportunityById(opportunityId)
+  if (!anchorOpportunity || anchorOpportunity.status !== 'published') {
+    return empty
+  }
+
+  const publishedPool = listPublishedOpportunities()
+  const opportunityById = new Map(publishedPool.map((opp) => [opp.id, opp]))
+  const posts = opportunitiesToPosts(publishedPool)
+  const postById = new Map(
+    posts.filter((post) => post.id).map((post) => [post.id as string, post]),
+  )
+  const { canonical, config } = resolveEngineContext()
+  const runId = createPublishRunId()
+  const seenStrongKeys = new Set<string>()
+  const matchingErrors: string[] = []
+  const postMatchIds: string[] = []
+  let discoveredMatchesCount = 0
+  let skippedDuplicatesCount = 0
+
+  const engineResults = runMatching({
+    anchorPost: opportunityToPost(anchorOpportunity),
+    opportunities: posts,
+    canonical,
+    config,
+    options: deps?.engineOptions ?? { model: 'circular', minCycleLength: 3 },
+  })
+
+  const discoverContext = {
+    anchorOpportunity,
+    opportunityById,
+    postById,
+    runId,
+    createAggregateId: createPostMatchId,
+  }
+
+  for (const result of engineResults as ModelRunResult[]) {
+    if (result.model !== 'circular') continue
+
+    const commands = modelRunResultToDiscoverCommands(result, discoverContext, posts)
+    for (const command of commands) {
+      if (command.matchType !== 'circular') continue
+
+      const strongKey = discoverInputStrongKey(command)
+      if (strongKey) {
+        if (seenStrongKeys.has(strongKey) || findActiveDuplicateByStrongKey(strongKey)) {
+          skippedDuplicatesCount += 1
+          continue
+        }
+        seenStrongKeys.add(strongKey)
+      }
+
+      const commandResult = discoverPostMatch(command)
+      if (!commandResult.success) {
+        if (isDuplicateDiscoverError(commandResult.errors)) {
+          skippedDuplicatesCount += 1
+          if (strongKey) seenStrongKeys.add(strongKey)
+          continue
+        }
+        matchingErrors.push(
+          ...(commandResult.errors ?? [`DiscoverPostMatch failed for ${command.aggregateId}`]),
+        )
+        continue
+      }
+
+      discoveredMatchesCount += 1
+      postMatchIds.push(command.aggregateId)
+    }
+  }
+
+  return {
+    discoveredMatchesCount,
+    skippedDuplicatesCount,
+    matchingErrors,
+    postMatchIds,
+  }
+}
+
 function normalizeApplicationValue(rawValue?: ApplicationValue | null) {
   const av = rawValue || {}
   const requestedValue =
@@ -498,6 +605,7 @@ export const matchingService = {
   discoverNeedOfferMatch,
   resolveDiscoverMatchScore,
   runPublishMatchingForOpportunity,
+  runCircularMatchingForOpportunity,
   runCircularMatchingForPublishedOpportunities,
 
   getHighMatches(threshold = 0.9): PostMatch[] {

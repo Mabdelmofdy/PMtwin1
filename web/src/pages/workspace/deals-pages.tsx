@@ -160,9 +160,9 @@ export function DealsPage() {
       <PmPage
         header={
           <PmPageHeader
-            label="Workflow"
-            title="Deals"
-            description="Collaboration deals from accepted matches and negotiations."
+            label="My Workspace"
+            title="My deals"
+            description="Deals you are executing — review, sign, and track progress."
             tone="deal"
             metric={<PmPageHeroMetric value={0} label="Active" />}
           />
@@ -185,9 +185,9 @@ export function DealsPage() {
     <PmPage
       header={
         <PmPageHeader
-          label="Workflow"
-          title="Deals"
-          description="Track collaboration deals through lifecycle stages."
+          label="My Workspace"
+          title="My deals"
+          description="Track your active deals through signing and execution stages."
           tone="deal"
           metric={<PmPageHeroMetric value={activeDeals} label="Active" />}
           badges={

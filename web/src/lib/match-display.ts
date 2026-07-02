@@ -45,10 +45,39 @@ export function resolveMatchNeedOfferTitles(
   }
 }
 
+/**
+ * Topology-aware match title. `one_way` keeps its exact Need -> Offer pairing;
+ * the other three types get a structure-appropriate label.
+ */
 export function formatMatchDisplayTitle(
   match: PostMatch,
   getOpportunity: OpportunityLookup,
 ): string {
+  const matchType = (match.matchType || 'one_way').toLowerCase()
+
+  if (matchType === 'two_way') {
+    const { needTitle, offerTitle } = resolveMatchNeedOfferTitles(match, getOpportunity)
+    return `Barter: ${offerTitle} \u21c4 ${needTitle}`
+  }
+
+  if (matchType === 'consortium') {
+    const leadId = match.payload?.leadNeedId
+    const leadTitle = leadId
+      ? formatOpportunityDisplayTitle(getOpportunity(leadId))
+      : formatOpportunityDisplayTitle(undefined)
+    const roleCount = match.payload?.roles?.length ?? 0
+    return `Consortium: ${leadTitle} + ${roleCount} ${roleCount === 1 ? 'role' : 'roles'}`
+  }
+
+  if (matchType === 'circular') {
+    const partyCount =
+      match.payload?.cycle?.length ??
+      match.payload?.links?.length ??
+      match.participants?.length ??
+      0
+    return `Circular exchange: ${partyCount} parties`
+  }
+
   const { needTitle, offerTitle } = resolveMatchNeedOfferTitles(match, getOpportunity)
   return formatMatchPairingLabel(needTitle, offerTitle)
 }

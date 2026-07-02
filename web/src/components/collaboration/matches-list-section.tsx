@@ -41,6 +41,7 @@ export function MatchesListSection({
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('all')
+  const [matchType, setMatchType] = useState('all')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(compact ? 8 : 12)
 
@@ -49,9 +50,11 @@ export function MatchesListSection({
       const pairing = formatMatchDisplayTitle(m, (id) => opportunitiesApi.get(id)).toLowerCase()
       const matchesSearch = !search || pairing.includes(search.toLowerCase())
       const matchesStatus = status === 'all' || m.status === status
-      return matchesSearch && matchesStatus
+      const matchesType =
+        matchType === 'all' || (m.matchType || 'one_way').toLowerCase() === matchType
+      return matchesSearch && matchesStatus && matchesType
     })
-  }, [matches, search, status])
+  }, [matches, search, status, matchType])
 
   const totalItems = filtered.length
   const pageCount = Math.max(1, Math.ceil(totalItems / pageSize))
@@ -123,28 +126,56 @@ export function MatchesListSection({
               />
             }
             filters={
-              <PmTableFilter activeCount={status !== 'all' ? 1 : 0} label="Status">
-                <div className="space-y-1.5">
-                  <label className={pmTypography.label}>Status</label>
-                  <Select
-                    value={status}
-                    onValueChange={(v) => {
-                      setStatus(v)
-                      setPage(1)
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All statuses</SelectItem>
-                      <SelectItem value="discovered">Discovered</SelectItem>
-                      <SelectItem value="accepted">Accepted</SelectItem>
-                      <SelectItem value="confirmed">Confirmed</SelectItem>
-                      <SelectItem value="declined">Declined</SelectItem>
-                      <SelectItem value="expired">Expired</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <PmTableFilter
+                activeCount={
+                  (status !== 'all' ? 1 : 0) + (matchType !== 'all' ? 1 : 0)
+                }
+                label="Filters"
+              >
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <label className={pmTypography.label}>Status</label>
+                    <Select
+                      value={status}
+                      onValueChange={(v) => {
+                        setStatus(v)
+                        setPage(1)
+                      }}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All statuses</SelectItem>
+                        <SelectItem value="discovered">Discovered</SelectItem>
+                        <SelectItem value="accepted">Accepted</SelectItem>
+                        <SelectItem value="confirmed">Confirmed</SelectItem>
+                        <SelectItem value="declined">Declined</SelectItem>
+                        <SelectItem value="expired">Expired</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className={pmTypography.label}>Match type</label>
+                    <Select
+                      value={matchType}
+                      onValueChange={(v) => {
+                        setMatchType(v)
+                        setPage(1)
+                      }}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All types</SelectItem>
+                        <SelectItem value="one_way">One-way</SelectItem>
+                        <SelectItem value="two_way">Two-way</SelectItem>
+                        <SelectItem value="consortium">Consortium</SelectItem>
+                        <SelectItem value="circular">Circular</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </PmTableFilter>
             }

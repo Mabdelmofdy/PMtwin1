@@ -66,7 +66,7 @@ export function PmPageHeader({
     contract: 'from-slate-500/[0.16] via-surface to-surface/95',
   }[tone]
   const purposeLabel = {
-    default: 'Workspace context',
+    default: 'My Workspace context',
     mission: 'Mission control',
     opportunity: 'Entity identity',
     match: 'Relationship review',

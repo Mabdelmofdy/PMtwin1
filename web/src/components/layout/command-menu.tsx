@@ -6,6 +6,7 @@ import {
   commandActions,
   mainNavigation,
   userMenuLinks,
+  type NavItem,
 } from '@/config/navigation'
 import { useCommandMenu } from '@/providers/command-menu-provider'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
@@ -39,9 +40,9 @@ export function CommandMenu() {
     [open],
   )
 
-  const runCommand = (href: string) => {
+  const runCommand = (href: string, state?: NavItem['state']) => {
     setOpen(false)
-    navigate(href)
+    navigate(href, state ? { state } : undefined)
   }
 
   return (
@@ -90,13 +91,16 @@ export function CommandMenu() {
                   : item.href
               return (
                 <CommandItem
-                  key={item.href}
+                  key={`${group.title}-${item.title}`}
                   className="cursor-pointer"
-                  onSelect={() => runCommand(href)}
+                  onSelect={() => runCommand(href, item.state)}
                   keywords={item.keywords}
                 >
                   <Icon className="size-4" aria-hidden />
                   <span>{item.title}</span>
+                  {item.preview ? (
+                    <CommandShortcut>Preview</CommandShortcut>
+                  ) : null}
                 </CommandItem>
               )
             })}

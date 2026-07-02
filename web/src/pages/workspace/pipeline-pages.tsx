@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
@@ -84,6 +84,13 @@ import {
 } from '@/lib/entity-view-visibility.ts'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
+import {
+  MATCH_MARKETPLACE_VIEW_AVAILABLE,
+  MATCH_VIEW_LABELS,
+  readProductNavState,
+  resolveDefaultMatchView,
+  type MatchPresentationView,
+} from '@/config/product-identity'
 
 function resolveMatchNegotiation(match: PostMatch): Negotiation | undefined {
   if (match.negotiationId) {
@@ -319,7 +326,12 @@ export function PipelinePage() {
 }
 
 export function MatchesPage() {
+  const location = useLocation()
+  const navState = readProductNavState(location.state)
   const { user, canAccessAdmin } = useAuth()
+  const [matchView, setMatchView] = useState<MatchPresentationView>(() =>
+    resolveDefaultMatchView(navState),
+  )
   const allMatches = matchesApi.list()
   const viewer = useMemo(
     () =>
@@ -341,35 +353,100 @@ export function MatchesPage() {
     }
     return ids
   }, [user?.id])
-  const matches = useMemo(
+  const myMatches = useMemo(
     () => filterPostMatchesForViewer(allMatches, viewer, { ownedOpportunityIds }),
     [allMatches, viewer, ownedOpportunityIds],
   )
-  const activeMatches = countActiveMatches(matches)
+  const recommendedMatches = useMemo(
+    () =>
+      [...myMatches]
+        .filter((match) => match.status === 'discovered' || match.status === 'accepted')
+        .sort((a, b) => b.matchScore - a.matchScore),
+    [myMatches],
+  )
+  const displayedMatches =
+    matchView === 'recommended'
+      ? recommendedMatches
+      : matchView === 'marketplace' && !MATCH_MARKETPLACE_VIEW_AVAILABLE
+        ? []
+        : myMatches
+  const activeMatches = countActiveMatches(myMatches)
+  const isMarketplaceBrowse = navState?.domain === 'marketplace' || matchView === 'marketplace'
+
+  useEffect(() => {
+    setMatchView(resolveDefaultMatchView(navState))
+  }, [location.key, navState?.domain, navState?.matchView])
 
   return (
     <PmPage
       header={
         <PmPageHeader
-          label="Workflow"
-          title="Matches"
-          description="Ranked matches for your opportunities — accept, negotiate, create deals, then contracts."
+          label={isMarketplaceBrowse ? 'Marketplace' : 'My Workspace'}
+          title={
+            matchView === 'recommended'
+              ? 'Recommended matches'
+              : matchView === 'marketplace'
+                ? 'Browse matches'
+                : 'My matches'
+          }
+          description={
+            isMarketplaceBrowse
+              ? 'Discover ranked collaboration pairings across the marketplace.'
+              : 'Matches assigned to you — review, accept, and progress to negotiations.'
+          }
           tone="match"
           metric={
-            <PmPageHeroMetric value={activeMatches} label="Active" />
+            <PmPageHeroMetric value={activeMatches} label="Needs action" />
           }
           badges={
             <>
-              <PmBadge tone="primary">{matches.length} total</PmBadge>
+              <PmBadge tone="primary">{myMatches.length} assigned</PmBadge>
               <PmBadge tone="success">
-                {matches.filter((m) => m.status === 'accepted' || m.status === 'confirmed').length} accepted
+                {myMatches.filter((m) => m.status === 'accepted' || m.status === 'confirmed').length} accepted
               </PmBadge>
             </>
           }
         />
       }
     >
-      <MatchesListSection matches={matches} />
+      <PmToolbarSurface className="space-y-3">
+        <Tabs
+          value={matchView}
+          onValueChange={(value) => setMatchView(value as MatchPresentationView)}
+        >
+          <TabsList>
+            {(Object.keys(MATCH_VIEW_LABELS) as MatchPresentationView[]).map((key) => (
+              <TabsTrigger
+                key={key}
+                value={key}
+                className="cursor-pointer"
+                disabled={key === 'marketplace' && !MATCH_MARKETPLACE_VIEW_AVAILABLE}
+              >
+                {MATCH_VIEW_LABELS[key]}
+                {key === 'marketplace' && !MATCH_MARKETPLACE_VIEW_AVAILABLE ? (
+                  <PmBadge tone="muted" size="sm" className="ms-1.5">
+                    Preview
+                  </PmBadge>
+                ) : null}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      </PmToolbarSurface>
+
+      {matchView === 'marketplace' && !MATCH_MARKETPLACE_VIEW_AVAILABLE ? (
+        <PmEmptyState
+          title="Marketplace match browse — preview"
+          description="Cross-marketplace match discovery is not available yet. Use My Matches or Recommended Matches for your assigned collaborations."
+          action={
+            <PmButton size="sm" variant="outline" onClick={() => setMatchView('mine')}>
+              View my matches
+            </PmButton>
+          }
+        />
+      ) : (
+        <MatchesListSection matches={displayedMatches} />
+      )}
     </PmPage>
   )
 }
@@ -699,9 +776,9 @@ export function NegotiationsPage() {
     <PmPage
       header={
         <PmPageHeader
-          label="Workflow"
-          title="Negotiations"
-          description="Review and respond to collaboration terms across your matches."
+          label="My Workspace"
+          title="My active negotiations"
+          description="Respond to terms and counters on negotiations assigned to you."
           tone="negotiation"
           metric={<PmPageHeroMetric value={activeCount} label="Active" />}
           badges={

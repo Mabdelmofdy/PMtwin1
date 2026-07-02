@@ -4,6 +4,7 @@ import {
   contractRepository,
   dealRepository,
   negotiationRepository,
+  notificationRepository,
   opportunityRepository,
   postMatchRepository,
 } from '@/repositories/index.ts'
@@ -33,17 +34,20 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
   const postMatchHandler = new PostMatchCommandHandler({
     postMatchRepository,
     auditRepository,
+    notificationRepository,
   })
   const negotiationHandler = new NegotiationCommandHandler({
     negotiationRepository,
     postMatchRepository,
     auditRepository,
+    notificationRepository,
   })
   const dealHandler = new DealCommandHandler({
     dealRepository,
     negotiationRepository,
     postMatchRepository,
     auditRepository,
+    notificationRepository,
   })
   const contractHandler = new ContractCommandHandler({
     contractRepository,
@@ -51,6 +55,7 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
     opportunityRepository,
     postMatchRepository,
     auditRepository,
+    notificationRepository,
   })
 
   return new DefaultCommandGateway({

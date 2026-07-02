@@ -28,9 +28,9 @@ export function DashboardPage() {
     <PmPage
       header={
         <PmPageHeader
-          label="Workspace"
-          title="What needs attention"
-          description={`Good morning, ${firstName} — review urgent workflow steps, matches, and pipeline progress.`}
+          label="My Workspace"
+          title="My Workspace"
+          description={`Good morning, ${firstName} — review your tasks, workflow progress, and items pending action.`}
           tone="mission"
           metric={
             readiness ? (
@@ -57,7 +57,7 @@ export function DashboardPage() {
                   </PmButton>
                 ),
               }}
-              secondary={{ label: 'Open pipeline', href: '/pipeline', variant: 'outline' }}
+              secondary={{ label: 'My pipeline', href: '/pipeline', variant: 'outline' }}
             />
           }
         />

@@ -179,17 +179,17 @@ export function WorkspaceDashboardComposition() {
         <PmStatsStrip
           data-slot="pm-dashboard-metric-strip"
           items={[
-            { label: 'Opportunities', value: opportunities.length },
-            { label: 'Matches', value: matches.length },
-            { label: 'Negotiations', value: negotiations.length },
-            { label: 'Deals', value: deals.length },
-            { label: 'Contracts', value: contracts.length },
+            { label: 'My opportunities', value: opportunities.filter((o) => o.creatorId === userId).length },
+            { label: 'My matches', value: matches.length },
+            { label: 'My negotiations', value: negotiations.length },
+            { label: 'My deals', value: deals.length },
+            { label: 'My contracts', value: contracts.length },
           ]}
         />
       }
       recentActivity={
         <PmContentCard
-          title="Recent activity"
+          title="My notifications"
           actions={
             <PmButton size="sm" variant="ghost" asChild>
               <Link to="/notifications">View all</Link>
@@ -228,20 +228,20 @@ export function WorkspaceDashboardComposition() {
       }
     >
       <PmActionHub
-        title="What needs my attention"
-        description="Critical tasks blocking workflow progression right now."
+        title="My tasks"
+        description="Items that need your action to keep execution moving."
         items={needsActionItems}
         emptyAction={
           <PmPageActions
             primary={{ label: 'Post opportunity', href: '/opportunities/create' }}
-            secondary={{ label: 'Open pipeline', href: '/pipeline', variant: 'outline' }}
+            secondary={{ label: 'My pipeline', href: '/pipeline', variant: 'outline' }}
           />
         }
       />
 
       <PmSectionHeader
-        title="Progress across active entities"
-        description="Identity -> Progress -> Current stage -> Next step."
+        title="My workflow"
+        description="Progress, current stage, and next step across active entities."
         actions={
           <PmButton size="sm" variant="outline" asChild>
             <Link to="/pipeline">Open pipeline</Link>
@@ -287,8 +287,8 @@ export function WorkspaceDashboardComposition() {
       )}
 
       <PmSectionHeader
-        title="Blocked items"
-        description="Items waiting on partner response or reset decision."
+        title="Blocked — needs decision"
+        description="Items waiting on partner response or your reset decision."
         actions={
           <PmButton size="sm" variant="outline" asChild>
             <Link to="/pipeline">Review blockers</Link>
@@ -319,8 +319,8 @@ export function WorkspaceDashboardComposition() {
       )}
 
       <PmSectionHeader
-        title="Recommended actions"
-        description="Single next step to keep execution moving."
+        title="Next action"
+        description="Single recommended step to keep execution moving."
         actions={
           <PmButton size="sm" asChild>
             <Link to={recommendedAction.href}>{recommendedAction.label}</Link>
@@ -334,17 +334,20 @@ export function WorkspaceDashboardComposition() {
       </PmSurface>
 
       <PmSectionHeader
-        title="Recent activity"
+        title="Recommended from marketplace"
+        description="Top-ranked matches to explore — browse the marketplace for more."
         actions={
           <PmButton size="sm" variant="outline" asChild>
-            <Link to="/notifications">View all</Link>
+            <Link to="/matches" state={{ domain: 'marketplace', matchView: 'recommended' }}>
+              Browse matches
+            </Link>
           </PmButton>
         }
       />
       {recommendedMatches.length === 0 ? (
         <PmEmptyState
-          title="No recent match activity"
-          description="Published opportunities and matches will appear here as activity increases."
+          title="No marketplace recommendations yet"
+          description="Published marketplace opportunities will surface recommended matches here."
           size="compact"
           action={
             <PmButton size="sm" variant="outline" asChild>

@@ -5,6 +5,7 @@
 
 import { resolveCanonicalStatus } from '@/lib/status-display.ts'
 import { normalizeParticipants } from '@/types/participant.ts'
+import { resolvePostMatchOpportunityIds } from '@/domain/normalized/post-match-opportunity-ids.ts'
 import type {
   Contract,
   Deal,
@@ -126,6 +127,24 @@ export function findParticipantOneWayMatchForOpportunity(
   })
 }
 
+/**
+ * Topology-agnostic variant: surfaces a participant match of ANY type
+ * (one_way, two_way, consortium, circular) that references the opportunity.
+ */
+export function findParticipantMatchForOpportunity(
+  opportunityId: string,
+  postMatches: readonly PostMatch[],
+  viewer: ViewerContext,
+): PostMatch | undefined {
+  if (!viewer.userId) return undefined
+  return postMatches.find((match) => {
+    if (!isParticipantOnEntity(match, viewer.userId)) return false
+    return resolvePostMatchOpportunityIds(match).opportunityIds.includes(
+      opportunityId,
+    )
+  })
+}
+
 export function isMatchParticipant(match: PostMatch, viewer: ViewerContext): boolean {
   return isParticipantOnEntity(match, viewer.userId)
 }
@@ -157,7 +176,7 @@ export function resolveOpportunityDetailVisibility(
 ): OpportunityDetailVisibility {
   const owner = isOpportunityOwner(opportunity, viewer)
   const adminStaff = Boolean(viewer.canAccessAdmin)
-  const participantMatch = findParticipantOneWayMatchForOpportunity(
+  const participantMatch = findParticipantMatchForOpportunity(
     opportunity.id,
     options.postMatches ?? [],
     viewer,

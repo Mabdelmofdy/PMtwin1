@@ -52,7 +52,7 @@ export function AppHeader() {
 
       <div className="hidden min-w-0 flex-1 items-center gap-3 md:flex">
         <div className="hidden min-w-0 xl:block">
-          <p className={cn(pmTypography.caption, 'leading-none')}>Workspace</p>
+          <p className={cn(pmTypography.caption, 'leading-none')}>My Workspace</p>
           <p className={cn(pmTypography.label, 'truncate')}>{workspace.title}</p>
         </div>
         <Separator orientation="vertical" className="hidden h-5 xl:block" />

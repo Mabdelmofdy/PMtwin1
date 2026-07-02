@@ -74,6 +74,6 @@ describe('opportunity-display', () => {
       }),
       'marketplace',
     )
-    assert.equal(formatOpportunityOwnershipLabel('marketplace'), 'Marketplace opportunity')
+    assert.equal(formatOpportunityOwnershipLabel('marketplace'), 'Marketplace')
   })
 })
