@@ -19,6 +19,7 @@ import {
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
 import { PmBadge, PmButton, PmEmptyState } from '@/components/ui/pm-index'
+import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 import {
   Select,
   SelectContent,
@@ -120,26 +121,27 @@ export function NotificationsListSection() {
         getRowId={(n) => n.id}
         caption="Notifications"
         toolbar={
-          <PmTableToolbar
-            className="pm-toolbar-surface rounded-xl px-4 py-3"
-            filters={
-              <PmTableFilter activeCount={readFilter !== 'all' ? 1 : 0} label="Filter">
-                <div className="space-y-1.5">
-                  <label className={cn(pmTypography.bodySm, 'font-medium')}>Read state</label>
-                  <Select value={readFilter} onValueChange={(v) => setReadFilter(v as ReadFilter)}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="unread">Unread only</SelectItem>
-                      <SelectItem value="read">Read only</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </PmTableFilter>
-            }
-          />
+          <PmToolbarSurface>
+            <PmTableToolbar
+              filters={
+                <PmTableFilter activeCount={readFilter !== 'all' ? 1 : 0} label="Filter">
+                  <div className="space-y-1.5">
+                    <label className={cn(pmTypography.bodySm, 'font-medium')}>Read state</label>
+                    <Select value={readFilter} onValueChange={(v) => setReadFilter(v as ReadFilter)}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All</SelectItem>
+                        <SelectItem value="unread">Unread only</SelectItem>
+                        <SelectItem value="read">Read only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </PmTableFilter>
+              }
+            />
+          </PmToolbarSurface>
         }
         empty={
           <PmTableEmpty

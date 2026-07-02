@@ -1,11 +1,15 @@
 import { Link } from 'react-router-dom'
+import { ArrowDown } from 'lucide-react'
+import { opportunitiesApi } from '@/api/opportunities.ts'
 import { formatDate } from '@/lib/format'
+import { formatMatchTypeBadgeLabel } from '@/components/collaboration/collaboration-display'
+import { resolveMatchNeedOfferTitles } from '@/lib/match-display.ts'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { PmCardActions } from '@/components/ui/pm-more-actions'
+import { PmBadge } from '@/components/ui/pm-badge'
 import { PmSurface } from '@/components/ui/pm-surface'
 import { PmMatchScoreBadge } from '@/components/ui/pm-match-score-badge'
 import { PmWorkflowBadge } from '@/components/ui/pm-workflow-badge'
-import { formatMatchTypeBadgeLabel } from '@/components/collaboration/collaboration-display'
 import type { PostMatch } from '@/types/domain.ts'
 import { cn } from '@/lib/utils'
 
@@ -15,9 +19,10 @@ export type MatchCardProps = {
   showActions?: boolean
 }
 
-/** Premium post-match card for grid and mobile list layouts. */
+/** Match card — need/offer pairing as primary identity; topology as secondary metadata. */
 export function MatchCard({ match, className, showActions = true }: MatchCardProps) {
   const href = `/matches/${match.id}`
+  const pairing = resolveMatchNeedOfferTitles(match, (id) => opportunitiesApi.get(id))
 
   return (
     <PmSurface
@@ -28,13 +33,21 @@ export function MatchCard({ match, className, showActions = true }: MatchCardPro
       data-slot="match-card"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <Link to={href} className={cn(pmTypography.h3, 'line-clamp-2 hover:text-primary')}>
-            {formatMatchTypeBadgeLabel(match.matchType)}
+        <div className="min-w-0 flex-1 space-y-2">
+          <Link to={href} className="block min-w-0 hover:text-primary">
+            <p className={cn(pmTypography.caption, 'font-medium text-info')}>Need</p>
+            <p className={cn(pmTypography.bodySm, 'line-clamp-2 font-semibold')}>
+              {pairing.needTitle}
+            </p>
+            <ArrowDown className="my-1 size-3.5 text-muted-foreground" aria-hidden />
+            <p className={cn(pmTypography.caption, 'font-medium text-success')}>Offer</p>
+            <p className={cn(pmTypography.bodySm, 'line-clamp-2 font-semibold')}>
+              {pairing.offerTitle}
+            </p>
           </Link>
-          <p className={cn(pmTypography.caption, 'mt-1 text-muted-foreground')}>
-            {formatDate(match.createdAt)}
-          </p>
+          <PmBadge tone="neutral" size="sm" uppercase>
+            {formatMatchTypeBadgeLabel(match.matchType)}
+          </PmBadge>
         </div>
         <PmMatchScoreBadge
           score={match.matchScore}
@@ -44,15 +57,18 @@ export function MatchCard({ match, className, showActions = true }: MatchCardPro
         />
       </div>
 
-      <div className="mt-3">
+      <div
+        className={cn(
+          pmTypography.caption,
+          'mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground',
+        )}
+      >
+        <span>{formatDate(match.createdAt)}</span>
         <PmWorkflowBadge status={match.status} entity="match" size="sm" />
       </div>
 
       {showActions ? (
-        <PmCardActions
-          className="mt-4"
-          primary={{ label: 'Open match', href }}
-        />
+        <PmCardActions className="mt-4" primary={{ label: 'Open match', href }} />
       ) : null}
     </PmSurface>
   )

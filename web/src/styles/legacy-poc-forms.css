@@ -1,0 +1,114 @@
+/* POC form/button primitives for legacy public pages */
+
+:root {
+  --radius-button: 0.5rem;
+  --radius-md: 0.375rem;
+  --font-size-base: 1rem;
+  --font-family: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+}
+
+.btn {
+  display: inline-block;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-button);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+}
+
+.btn-secondary {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--border-color);
+}
+
+.btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-family: var(--font-family);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(3, 105, 161, 0.15);
+}
+
+.alert-error {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-lg);
+  background: #fef2f2;
+  color: var(--danger-color);
+  font-size: var(--font-size-sm);
+  border: 1px solid #fecaca;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge-secondary {
+  background: #f1f5f9;
+  color: var(--text-secondary);
+}
+
+.badge-success {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.badge-outline {
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+}
+
+.badge-info {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.modal-dialog.modal-dialog--demo-credentials {
+  max-width: min(720px, calc(100vw - 2rem));
+  max-height: min(88vh, 900px);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-dialog.modal-dialog--demo-credentials .modal-header,
+.modal-dialog.modal-dialog--demo-credentials .modal-footer {
+  flex-shrink: 0;
+}

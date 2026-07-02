@@ -67,7 +67,7 @@ export function ApplyWizard({
   return (
     <PmContentCard
       title="Legacy direct application"
-      description="Optional hiring path — PostMatch remains the primary collaboration route."
+      description="Optional hiring path — matches remain the primary collaboration route."
       className="border-border/50 bg-surface-muted/40"
     >
       <div className="flex flex-wrap gap-2">

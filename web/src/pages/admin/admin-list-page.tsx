@@ -9,8 +9,8 @@ import {
   PmTableToolbar,
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
-import { PmPageLayout } from '@/components/layout/pm-layout-index'
-import { PmPageHeader, PmPageHeroMetric } from '@/components/ui/pm-index'
+import { PmPageHeader, PmPageHeroMetric, PmPage } from '@/components/ui/pm-index'
+import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 
 export type AdminListPageProps<T> = {
   label?: string
@@ -32,7 +32,7 @@ export type AdminListPageProps<T> = {
   metricLabel?: string
 }
 
-/** Admin list scaffold — PmPageLayout + PmDataTable with UI-only search. */
+/** Admin list scaffold — PmPage + PmDataTable with UI-only search. */
 export function AdminListPage<T>({
   label,
   title,
@@ -94,7 +94,7 @@ export function AdminListPage<T>({
   }, [columns, getRowHref])
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label={label}
@@ -112,24 +112,25 @@ export function AdminListPage<T>({
         getRowId={getRowId}
         caption={title}
         toolbar={
-          <PmTableToolbar
-            className="pm-toolbar-surface rounded-xl px-4 py-3"
-            search={
-              getSearchText ? (
-                <PmTableSearch
-                  placeholder={searchPlaceholder}
-                  value={search}
-                  onValueChange={(v) => {
-                    setSearch(v)
-                    setPage(1)
-                  }}
-                />
-              ) : undefined
-            }
-            showExport={showExport}
-          >
-            {toolbarExtra}
-          </PmTableToolbar>
+          <PmToolbarSurface>
+            <PmTableToolbar
+              search={
+                getSearchText ? (
+                  <PmTableSearch
+                    placeholder={searchPlaceholder}
+                    value={search}
+                    onValueChange={(v) => {
+                      setSearch(v)
+                      setPage(1)
+                    }}
+                  />
+                ) : undefined
+              }
+              showExport={showExport}
+            >
+              {toolbarExtra}
+            </PmTableToolbar>
+          </PmToolbarSurface>
         }
         rowActions={(row) => {
           const href = getRowHref?.(row)
@@ -163,6 +164,6 @@ export function AdminListPage<T>({
           ) : undefined
         }
       />
-    </PmPageLayout>
+    </PmPage>
   )
 }

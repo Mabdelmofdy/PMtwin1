@@ -68,7 +68,7 @@ export function MessagesView({ activeThreadId }: MessagesViewProps) {
               </Link>
               <div className="flex-1 space-y-3 overflow-y-auto py-2">
                 <div className={cn('rounded-lg bg-surface-muted px-3 py-2', pmTypography.bodySm, 'text-muted-foreground')}>
-                  Thread {activeThread.id} — message history placeholder
+                  Message history will appear here once messaging is connected.
                 </div>
                 <p className={cn(pmTypography.caption, 'text-muted-foreground', 'italic')}>
                   Typing indicator placeholder…

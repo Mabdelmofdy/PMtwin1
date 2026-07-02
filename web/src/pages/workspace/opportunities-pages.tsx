@@ -1,13 +1,12 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Map, Plus } from 'lucide-react'
 import { opportunitiesApi } from '@/api/opportunities.ts'
-import { formatDate, truncate } from '@/lib/format'
+import { truncate } from '@/lib/format'
 import { OpportunityReadinessCard } from '@/components/readiness'
 import { OpportunityPublishExperience } from '@/components/opportunity/opportunity-publish-experience'
 import { OpportunityCard } from '@/components/opportunity/opportunity-card'
-import { OpportunityStatusBadge } from '@/components/opportunity/opportunity-status-badge'
 import { formatOpportunityIntent } from '@/components/opportunity/opportunity-display'
 import { useAuth } from '@/providers/auth-provider'
 import {
@@ -17,14 +16,11 @@ import {
 } from '@/lib/publish-opportunity-ui-actions.ts'
 import { showPublishSuccessFeedback } from '@/lib/publish-opportunity-feedback.ts'
 import {
-  PmDataTable,
   PmTableEmpty,
   PmTableFilter,
   PmTablePagination,
-  PmTableRowActions,
   PmTableSearch,
   PmTableToolbar,
-  type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
 import {
   PmFormActions,
@@ -36,8 +32,9 @@ import {
   PmFormWizardStep,
   type PmFormStepperStep,
 } from '@/components/forms/pm-form-index'
-import { PmContentCard, PmPageLayout, summarizeOpportunityListHero } from '@/components/layout/pm-layout-index'
-import { PmBadge, PmButton, PmEmptyState, PmPageHeader, PmPageHeroMetric, PmPageActions, PmReadinessScoreBadge, PmSurface } from '@/components/ui/pm-index'
+import { PmContentCard, summarizeOpportunityListHero } from '@/components/layout/pm-layout-index'
+import { PmBadge, PmButton, PmEmptyState, PmPage, PmPageHeader, PmPageHeroMetric, PmPageActions, PmSurface } from '@/components/ui/pm-index'
+import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
@@ -50,7 +47,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { matchesApi } from '@/api/matches.ts'
-import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
+import { EntityAccessDenied } from '@/components/auth/entity-access-state'
+import {
+  buildViewerContext,
+  canEditOpportunity,
+  filterOpportunitiesForListScope,
+} from '@/lib/entity-view-visibility.ts'
 
 const WIZARD_STEPS: readonly PmFormStepperStep[] = [
   { id: 'type', label: 'Type', description: 'Need or offer' },
@@ -142,91 +144,41 @@ export function OpportunitiesPage() {
   const [scope, setScope] = useState<'all' | 'mine'>('all')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
-  const navigate = useNavigate()
 
   const allOpportunities = opportunitiesApi.list()
   const heroSummary = summarizeOpportunityListHero(allOpportunities)
   const totalMatches = matchesApi.list().length
 
   const opportunities = useMemo(() => {
-    return allOpportunities.filter((o) => {
+    const viewer = buildViewerContext({
+      userId: user?.id,
+      role: user?.role,
+      status: user?.status,
+    })
+    const scoped = filterOpportunitiesForListScope(allOpportunities, viewer, scope)
+    return scoped.filter((o) => {
       const matchesSearch =
         !search ||
         o.title.toLowerCase().includes(search.toLowerCase()) ||
         o.location?.toLowerCase().includes(search.toLowerCase())
       const matchesStatus = status === 'all' || o.status === status
-      const matchesScope = scope === 'all' || o.creatorId === user?.id
-      return matchesSearch && matchesStatus && matchesScope
+      return matchesSearch && matchesStatus
     })
-  }, [allOpportunities, search, status, scope, user?.id])
+  }, [allOpportunities, search, status, scope, user?.id, user?.role, user?.status])
 
   const totalItems = opportunities.length
   const pageCount = Math.max(1, Math.ceil(totalItems / pageSize))
   const safePage = Math.min(page, pageCount)
   const paged = opportunities.slice((safePage - 1) * pageSize, safePage * pageSize)
 
-  const columns: PmDataTableColumn<(typeof opportunities)[number]>[] = [
-    {
-      id: 'title',
-      label: 'Title',
-      sortable: true,
-      cell: (o) => (
-        <Link to={`/opportunities/${o.id}`} className={cn(pmTypography.bodySm, 'font-medium hover:text-primary')}>
-          {o.title}
-        </Link>
-      ),
-    },
-    {
-      id: 'intent',
-      label: 'Intent',
-      cell: (o) => formatOpportunityIntent(o.intent),
-    },
-    {
-      id: 'category',
-      label: 'Category',
-      cell: (o) => o.scope?.sectors?.[0] ?? '—',
-    },
-    {
-      id: 'location',
-      label: 'Location',
-      cell: (o) => o.location ?? '—',
-    },
-    {
-      id: 'readiness',
-      label: 'Readiness',
-      cell: (o) => {
-        const readiness = resolveOpportunityReadiness(o)
-        return (
-          <PmReadinessScoreBadge
-            score={readiness.score}
-            variant="list"
-            explanation={{
-              missingRequired: readiness.missingRequired,
-              missingRecommended: readiness.missingRecommended,
-            }}
-          />
-        )
-      },
-    },
-    {
-      id: 'status',
-      label: 'Status',
-      cell: (o) => <OpportunityStatusBadge status={o.status} />,
-    },
-    {
-      id: 'updated',
-      label: 'Updated',
-      cell: (o) => formatDate(o.updatedAt),
-    },
-  ]
-
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Workspace"
           title="Opportunities"
           description="Browse published needs and offers across the built environment."
+          tone="opportunity"
           metric={
             <PmPageHeroMetric
               value={heroSummary.activeCount}
@@ -272,94 +224,91 @@ export function OpportunitiesPage() {
         />
       }
     >
-      <PmDataTable
-        density="compact"
-        columns={columns}
-        data={paged}
-        getRowId={(o) => o.id}
-        caption="Opportunities"
-        toolbar={
-          <PmTableToolbar
-            className="pm-toolbar-surface rounded-xl px-4 py-3"
-            search={
-              <PmTableSearch
-                placeholder="Search title, location…"
-                value={search}
-                onValueChange={(v) => {
-                  setSearch(v)
-                  setPage(1)
-                }}
-              />
-            }
-            filters={
-              <PmTableFilter activeCount={status !== 'all' || scope !== 'all' ? 1 : 0} label="Filters">
-                <div className="space-y-3">
-                  <PmFormField id="opp-filter-scope" label="Scope">
-                    <Select value={scope} onValueChange={(v) => setScope(v as 'all' | 'mine')}>
-                      <SelectTrigger id="opp-filter-scope" className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All opportunities</SelectItem>
-                        <SelectItem value="mine">My opportunities</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </PmFormField>
-                  <PmFormField id="opp-filter-status" label="Status">
-                    <Select value={status} onValueChange={setStatus}>
-                      <SelectTrigger id="opp-filter-status" className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All statuses</SelectItem>
-                        <SelectItem value="published">Published</SelectItem>
-                        <SelectItem value="draft">Draft</SelectItem>
-                        <SelectItem value="in_negotiation">In negotiation</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </PmFormField>
-                </div>
-              </PmTableFilter>
-            }
-          />
-        }
-        rowActions={(o) => (
-          <PmTableRowActions
-            onView={() => navigate(`/opportunities/${o.id}`)}
-            onEdit={() => navigate(`/opportunities/${o.id}/edit`)}
-            hiddenActions={['delete', 'duplicate']}
-          />
-        )}
-        empty={
-          <PmTableEmpty
-            variant="no-results"
-            title="No opportunities found"
-            description="Try adjusting search or filters, or post a new opportunity."
-            primaryAction={
-              <PmButton size="sm" asChild>
-                <Link to="/opportunities/create">Post opportunity</Link>
-              </PmButton>
-            }
-          />
-        }
-        pagination={
-          totalItems > 0 ? (
-            <PmTablePagination
-              page={safePage}
-              pageSize={pageSize}
-              totalItems={totalItems}
-              pageSizeOptions={[12, 24, 48]}
-              onPageChange={setPage}
-              onPageSizeChange={(size) => {
-                setPageSize(size)
+      <PmToolbarSurface>
+        <PmTableToolbar
+          search={
+            <PmTableSearch
+              placeholder="Search title, location…"
+              value={search}
+              onValueChange={(v) => {
+                setSearch(v)
                 setPage(1)
               }}
             />
-          ) : undefined
-        }
-        renderMobileCard={(o) => <OpportunityCard opportunity={o} />}
-      />
-    </PmPageLayout>
+          }
+          filters={
+            <PmTableFilter activeCount={status !== 'all' || scope !== 'all' ? 1 : 0} label="Filters">
+              <div className="space-y-3">
+                <PmFormField id="opp-filter-scope" label="Scope">
+                  <Select value={scope} onValueChange={(v) => setScope(v as 'all' | 'mine')}>
+                    <SelectTrigger id="opp-filter-scope" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All opportunities</SelectItem>
+                      <SelectItem value="mine">My opportunities</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </PmFormField>
+                <PmFormField id="opp-filter-status" label="Status">
+                  <Select value={status} onValueChange={setStatus}>
+                    <SelectTrigger id="opp-filter-status" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All statuses</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="negotiating">Negotiating</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </PmFormField>
+              </div>
+            </PmTableFilter>
+          }
+        />
+      </PmToolbarSurface>
+
+      {paged.length === 0 ? (
+        <PmTableEmpty
+          variant="no-results"
+          title="No opportunities found"
+          description="Try adjusting search or filters, or post a new opportunity."
+          primaryAction={
+            <PmButton size="sm" asChild>
+              <Link to="/opportunities/create">Post opportunity</Link>
+            </PmButton>
+          }
+        />
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {paged.map((o) => (
+            <OpportunityCard
+              key={o.id}
+              opportunity={o}
+              canEdit={user?.id === o.creatorId}
+              showOwnerInsights={user?.id === o.creatorId}
+              viewerUserId={user?.id}
+              viewerOrganizationId={user?.organizationId}
+            />
+          ))}
+        </div>
+      )}
+
+      {totalItems > 0 ? (
+        <PmTablePagination
+          page={safePage}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          pageSizeOptions={[12, 24, 48]}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size)
+            setPage(1)
+          }}
+        />
+      ) : null}
+    </PmPage>
   )
 }
 
@@ -368,12 +317,13 @@ export function OpportunityMapPage() {
   const items = allOpportunities.slice(0, 8)
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Geo browse"
           title="Opportunity map"
           description="Explore opportunities by location across the GCC."
+          tone="opportunity"
           metric={
             <PmPageHeroMetric value={allOpportunities.length} label="Listings" />
           }
@@ -417,7 +367,7 @@ export function OpportunityMapPage() {
           </div>
         </PmContentCard>
       </div>
-    </PmPageLayout>
+    </PmPage>
   )
 }
 
@@ -504,6 +454,55 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
     showPublishSuccessFeedback(result)
   }
 
+  if (mode === 'edit' && opportunityId) {
+    if (!existingOpportunity) {
+      return (
+        <PmPage
+          header={
+            <PmPageHeader
+              title="Opportunity not found"
+              description="This record may have been removed."
+            />
+          }
+        >
+          <PmEmptyState
+            title="Opportunity not found"
+            description="This record may have been removed or the link is invalid."
+            action={
+              <PmButton size="sm" variant="outline" asChild>
+                <Link to="/opportunities">Back to opportunities</Link>
+              </PmButton>
+            }
+          />
+        </PmPage>
+      )
+    }
+
+    const viewer = buildViewerContext({
+      userId: user?.id,
+      role: user?.role,
+      status: user?.status,
+    })
+    if (!canEditOpportunity(existingOpportunity, viewer)) {
+      return (
+        <PmPage
+          header={
+            <PmPageHeader
+              title="Access denied"
+              description="You do not have permission to edit this opportunity."
+            />
+          }
+        >
+          <EntityAccessDenied
+            description="Only the opportunity owner or platform admin can edit this record."
+            backHref={`/opportunities/${opportunityId}`}
+            backLabel="Back to opportunity"
+          />
+        </PmPage>
+      )
+    }
+  }
+
   return (
     <PmFormWizard
       stepper={{
@@ -538,6 +537,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         label="Create"
         title={mode === 'edit' ? 'Edit opportunity' : 'Post an opportunity'}
         description="7-step wizard — type, scope, exchange mode, skills, timeline, review, publish."
+        tone="opportunity"
         metric={
           <PmPageHeroMetric
             value={`${completedStepIds.length}/${WIZARD_STEPS.length}`}
@@ -554,8 +554,8 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
           <PmFormSection title="Collaboration type" description="Choose need or offer.">
             <PmFormGrid columns={2}>
               {([
-                ['need', 'Need (request)'],
-                ['offer', 'Offer (provide)'],
+                ['need', 'Need'],
+                ['offer', 'Offer'],
               ] as const).map(([value, label]) => (
                 <PmSurface
                   key={value}
@@ -572,6 +572,11 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                     onClick={() => updateDraft('intent', value)}
                   >
                     <span className="font-medium">{label}</span>
+                    <p className={cn(pmTypography.caption, 'mt-1 text-muted-foreground')}>
+                      {value === 'need'
+                        ? 'Post a need for services, skills, or project capacity.'
+                        : 'Offer your services, skills, or available capacity.'}
+                    </p>
                   </button>
                 </PmSurface>
               ))}

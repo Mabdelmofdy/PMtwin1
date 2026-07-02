@@ -22,6 +22,7 @@ import {
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
 import { PmBadge } from '@/components/ui/pm-index'
+import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 import {
   Select,
   SelectContent,
@@ -98,26 +99,26 @@ export function PeopleListSection() {
       getRowId={(p) => p.id}
       caption="People and companies"
       toolbar={
-        <PmTableToolbar
-          className="pm-toolbar-surface rounded-xl px-4 py-3"
-          search={
-            <PmTableSearch
-              placeholder="Search by name, skills, sector…"
-              value={search}
-              onValueChange={(v) => {
-                setSearch(v)
-                setPage(1)
-              }}
-            />
-          }
-          filters={
-            <PmTableFilter activeCount={scope !== 'all' ? 1 : 0} label="Type">
-              <div className="space-y-1.5">
-                <label className={cn(pmTypography.bodySm, 'font-medium')}>Entity type</label>
-                <Select
-                  value={scope}
-                  onValueChange={(v) => {
-                    setScope(v as PeopleScopeFilter)
+        <PmToolbarSurface>
+          <PmTableToolbar
+            search={
+              <PmTableSearch
+                placeholder="Search by name, skills, sector…"
+                value={search}
+                onValueChange={(v) => {
+                  setSearch(v)
+                  setPage(1)
+                }}
+              />
+            }
+            filters={
+              <PmTableFilter activeCount={scope !== 'all' ? 1 : 0} label="Type">
+                <div className="space-y-1.5">
+                  <label className={cn(pmTypography.bodySm, 'font-medium')}>Entity type</label>
+                  <Select
+                    value={scope}
+                    onValueChange={(v) => {
+                      setScope(v as PeopleScopeFilter)
                     setPage(1)
                   }}
                 >
@@ -133,7 +134,8 @@ export function PeopleListSection() {
               </div>
             </PmTableFilter>
           }
-        />
+          />
+        </PmToolbarSurface>
       }
       rowActions={(person) => (
         <PmTableRowActions

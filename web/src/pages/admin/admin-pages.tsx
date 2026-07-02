@@ -41,11 +41,11 @@ import {
   PmContentCard,
   PmDashboardLayout,
   PmMetricGrid,
-  PmPageLayout,
   PmSectionHeader,
   formatPlatformHealthMetric,
 } from '@/components/layout/pm-layout-index'
-import { PmBadge, PmButton, PmPageHeader, PmPageHeroMetric, PmMoreActions, PmReadinessScoreBadge, PmStatCard, PmMatchScoreBadge } from '@/components/ui/pm-index'
+import { PmBadge, PmButton, PmEmptyState, PmPage, PmPageHeader, PmPageHeroMetric, PmMoreActions, PmReadinessScoreBadge, PmStatCard, PmMatchScoreBadge } from '@/components/ui/pm-index'
+import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
 import { AdminStatusBadge } from '@/pages/admin/admin-display'
@@ -120,7 +120,7 @@ export function AdminDashboardPage() {
         <PmMetricGrid columns={4}>
           <PmStatCard label="Opportunities" value={opps} dense />
           <PmStatCard label="Users" value={users} dense />
-          <PmStatCard label="Post-matches" value={matches} dense />
+          <PmStatCard label="Matches" value={matches} dense />
           <PmStatCard label="Pending vetting" value={pendingVetting} dense />
         </PmMetricGrid>
       }
@@ -143,7 +143,7 @@ export function AdminDashboardPage() {
       recentActivity={
         <PmContentCard title="Recent activity">
           {auditEntries.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No recent audit entries.</p>
+            <PmEmptyState title="No recent audit entries" size="compact" />
           ) : (
             <ul className="space-y-2 text-sm text-muted-foreground">
               {auditEntries.map((a) => (
@@ -231,7 +231,7 @@ export function AdminReportsPage() {
   const publishedCount = opportunitiesApi.list().filter((o) => o.status === 'published').length
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Admin"
@@ -246,7 +246,7 @@ export function AdminReportsPage() {
         <PmStatCard label="Published opps" value={publishedCount} dense />
         <PmStatCard label="Match rate" value="78%" hint="Demo metric" dense />
       </PmMetricGrid>
-    </PmPageLayout>
+    </PmPage>
   )
 }
 
@@ -254,7 +254,7 @@ export function AdminHealthPage() {
   const services = ['Data service', 'Matching engine', 'Notifications', 'Auth'] as const
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Admin"
@@ -278,7 +278,7 @@ export function AdminHealthPage() {
           ))}
         </ul>
       </PmContentCard>
-    </PmPageLayout>
+    </PmPage>
   )
 }
 
@@ -315,7 +315,7 @@ export function AdminUserDetailPage() {
   const user = id ? peopleApi.get(id) : undefined
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           title={user?.profile?.name ?? 'User detail'}
@@ -334,7 +334,7 @@ export function AdminUserDetailPage() {
           <PmFormReadonlyField label="Created" value={user?.createdAt ? formatDate(user.createdAt) : null} />
         </PmFormReadonlySection>
       </PmFormReadonly>
-    </PmPageLayout>
+    </PmPage>
   )
 }
 
@@ -469,7 +469,7 @@ export function AdminMatchingPage() {
   ]
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Admin"
@@ -510,7 +510,7 @@ export function AdminMatchingPage() {
         </section>
 
         <section className="space-y-4">
-          <PmSectionHeader title="Recent matches" description="Latest post-match records." />
+          <PmSectionHeader title="Recent matches" description="Latest match records." />
           <PmDataTable
             density="compact"
             columns={matchColumns}
@@ -518,13 +518,15 @@ export function AdminMatchingPage() {
             getRowId={(m) => m.id}
             caption="Recent matches"
             toolbar={
-              <PmTableToolbar className="pm-toolbar-surface rounded-xl px-4 py-3" />
+              <PmToolbarSurface>
+                <PmTableToolbar />
+              </PmToolbarSurface>
             }
             empty={<PmTableEmpty variant="no-data" title="No matches" />}
           />
         </section>
       </div>
-    </PmPageLayout>
+    </PmPage>
   )
 }
 
@@ -556,7 +558,7 @@ export function AdminNegotiationsPage() {
 
 export function AdminNegotiationDetailPage() {
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           title="Negotiation detail"
@@ -569,7 +571,7 @@ export function AdminNegotiationDetailPage() {
           Negotiation inspector — wire transcript export on migration.
         </p>
       </PmContentCard>
-    </PmPageLayout>
+    </PmPage>
   )
 }
 
@@ -676,7 +678,7 @@ export function AdminAuditPage() {
 
 export function AdminSettingsPage() {
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           title="Platform settings"
@@ -697,7 +699,7 @@ export function AdminSettingsPage() {
           <p className="text-sm text-muted-foreground">Read-only until settings API is connected.</p>
         </PmFormSection>
       </PmForm>
-    </PmPageLayout>
+    </PmPage>
   )
 }
 
@@ -709,11 +711,11 @@ function AdminPlaceholderPage({
   description: string
 }) {
   return (
-    <PmPageLayout
+    <PmPage
       header={<PmPageHeader title={title} description={description} />}
     >
       <PmTableEmpty variant="no-data" title={`${title} — coming soon`} description={description} />
-    </PmPageLayout>
+    </PmPage>
   )
 }
 

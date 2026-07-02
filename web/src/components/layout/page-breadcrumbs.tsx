@@ -1,6 +1,6 @@
 import { Fragment } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { routeLabels } from '@/config/navigation'
+import { buildBreadcrumbLabels } from '@/lib/breadcrumb-display'
 import { pmResponsive } from '@/tokens'
 import { resolveBreadcrumbHomeHref } from '@/components/layout/workspace-display'
 import { useAuth } from '@/providers/auth-provider'
@@ -15,22 +15,7 @@ import {
 import { cn } from '@/lib/utils'
 
 export function buildCrumbs(pathname: string) {
-  const segments = pathname.split('/').filter(Boolean)
-  if (segments.length === 0) {
-    return [{ label: 'Dashboard', href: '/dashboard', isCurrent: true }]
-  }
-
-  return segments.map((segment, index) => {
-    const href = `/${segments.slice(0, index + 1).join('/')}`
-    const label =
-      routeLabels[segment] ??
-      segment.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-    return {
-      label,
-      href,
-      isCurrent: index === segments.length - 1,
-    }
-  })
+  return buildBreadcrumbLabels(pathname)
 }
 
 export function PageBreadcrumbs({ className }: { className?: string }) {

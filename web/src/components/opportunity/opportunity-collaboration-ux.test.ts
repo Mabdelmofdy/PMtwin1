@@ -19,8 +19,8 @@ describe('collaboration flow UX constants', () => {
     ])
   })
 
-  it('labels applications as legacy and points to PostMatches', () => {
+  it('labels applications as legacy and points to matches', () => {
     assert.match(APPLICATIONS_LEGACY_SECTION_TITLE, /legacy/i)
-    assert.match(APPLICATIONS_LEGACY_EMPTY_MESSAGE, /PostMatch/i)
+    assert.match(APPLICATIONS_LEGACY_EMPTY_MESSAGE, /matches/i)
   })
 })

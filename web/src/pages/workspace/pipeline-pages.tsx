@@ -15,6 +15,7 @@ import {
 import { buildMatchDetailReadModel } from '@/lib/match-detail-read-model.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
+import { EntityAccessDenied } from '@/components/auth/entity-access-state'
 import { CreateDealButton } from '@/components/negotiation/create-deal-button.tsx'
 import { StartNegotiationButton } from '@/components/negotiation/start-negotiation-button.tsx'
 import { AgreeNegotiationButton } from '@/components/negotiation/agree-negotiation-button.tsx'
@@ -37,7 +38,6 @@ import {
   PmContentCard,
   PmDetailLayout,
   PmInspectorLayout,
-  PmPageLayout,
   PmSectionHeader,
   countActiveMatches,
   countPipelineWorkflowItems,
@@ -51,24 +51,37 @@ import {
   PmBadge,
   PmButton,
   PmEmptyState,
+  PmPage,
   PmPageHeader,
   PmPageHeroMetric,
   PmPageActions,
+  PmRelationshipChain,
   PmStatCard,
   PmSurface,
   PmWorkflowBadge,
   PmWorkflowJourney,
+  buildMatchWorkflowSteps,
+  buildNegotiationWorkflowSteps,
   type PmCardActionSlot,
   type PmMoreActionItem,
-  type PmWorkflowJourneyStep,
 } from '@/components/ui/pm-index'
+import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
-import type { Negotiation, PostMatch } from '@/types/domain.ts'
 import type { CollaborationTimelineEvent } from '@/components/collaboration/collaboration-timeline'
+import type { Negotiation, PostMatch } from '@/types/domain.ts'
 import { productFlags } from '@/config/product-flags.ts'
+import { formatNegotiationDisplayTitle } from '@/lib/entity-display-titles.ts'
+import { formatMatchDisplayTitle } from '@/lib/match-display.ts'
+import {
+  buildViewerContext,
+  canMutateNegotiationDetail,
+  canViewMatchDetail,
+  canViewNegotiationDetail,
+  filterPostMatchesForViewer,
+} from '@/lib/entity-view-visibility.ts'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
 
@@ -198,14 +211,39 @@ export function getVisiblePipelineTabs(showLegacyApplications: boolean) {
 export function PipelinePage() {
   const { tab } = useParams()
   const navigate = useNavigate()
+  const { user, canAccessAdmin } = useAuth()
   const showLegacyApplications = productFlags.showLegacyApplications
   const pipelineTabs = getVisiblePipelineTabs(showLegacyApplications)
   const activeTab =
     !showLegacyApplications && tab === 'applications' ? 'opportunities' : (tab ?? 'opportunities')
   const version = useDataStoreVersion()
   const opportunities = opportunitiesApi.list()
-  const matches = matchesApi.list()
+  const allMatches = matchesApi.list()
   const applications = applicationRepository.getAll()
+  const viewer = useMemo(
+    () =>
+      buildViewerContext({
+        userId: user?.id,
+        role: user?.role,
+        status: user?.status,
+        canAccessAdmin,
+        profile: user?.profile,
+      }),
+    [user, canAccessAdmin],
+  )
+  const ownedOpportunityIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (const opp of opportunities) {
+      if (opp.creatorId && opp.creatorId === user?.id) {
+        ids.add(opp.id)
+      }
+    }
+    return ids
+  }, [opportunities, user?.id])
+  const matches = useMemo(
+    () => filterPostMatchesForViewer(allMatches, viewer, { ownedOpportunityIds }),
+    [allMatches, viewer, ownedOpportunityIds],
+  )
   const applicationCount = showLegacyApplications ? applications.length : 0
   const workflowCount = countPipelineWorkflowItems(
     opportunities.length,
@@ -221,12 +259,13 @@ export function PipelinePage() {
   }, [showLegacyApplications, tab, navigate])
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Workflow"
-          title="Workflow pipeline"
-          description="Track opportunities, matches, negotiations, deals, and contracts in one funnel."
+          title="Pipeline"
+          description="Track opportunity and match stages here, then continue to negotiations, deals, and contracts in their workflow sections."
+          tone="mission"
           metric={
             <PmPageHeroMetric value={workflowCount} label="Active workflows" />
           }
@@ -234,6 +273,7 @@ export function PipelinePage() {
             <>
               <PmBadge tone="primary">{opportunities.length} opportunities</PmBadge>
               <PmBadge tone="info">{activeMatches} matches</PmBadge>
+              <PmBadge tone="muted">{'Next: Negotiations -> Deals -> Contracts'}</PmBadge>
               {showLegacyApplications ? (
                 <PmBadge tone="muted">{applications.length} applications</PmBadge>
               ) : null}
@@ -248,7 +288,7 @@ export function PipelinePage() {
           navigate(v === 'opportunities' ? '/pipeline' : `/pipeline/${v}`)
         }
       >
-        <div className="pm-toolbar-surface rounded-xl px-4 py-3">
+        <PmToolbarSurface>
           <TabsList>
             {pipelineTabs.map((t) => (
               <TabsTrigger key={t.value} value={t.value} className="cursor-pointer">
@@ -256,7 +296,7 @@ export function PipelinePage() {
               </TabsTrigger>
             ))}
           </TabsList>
-        </div>
+        </PmToolbarSurface>
         <TabsContent value="opportunities" className="mt-4">
           <PipelineBoard mode="opportunities" key={`opp-${version}`} />
         </TabsContent>
@@ -267,28 +307,54 @@ export function PipelinePage() {
           <TabsContent value="applications" className="mt-4">
             <PmContentCard
               title="Legacy applications"
-              description="Primary collaboration runs through Post-matches."
+              description="Primary collaboration runs through matches."
             >
               <PipelineBoard mode="applications" key={`app-${version}`} />
             </PmContentCard>
           </TabsContent>
         ) : null}
       </Tabs>
-    </PmPageLayout>
+    </PmPage>
   )
 }
 
 export function MatchesPage() {
-  const matches = matchesApi.list()
+  const { user, canAccessAdmin } = useAuth()
+  const allMatches = matchesApi.list()
+  const viewer = useMemo(
+    () =>
+      buildViewerContext({
+        userId: user?.id,
+        role: user?.role,
+        status: user?.status,
+        canAccessAdmin,
+        profile: user?.profile,
+      }),
+    [user, canAccessAdmin],
+  )
+  const ownedOpportunityIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (const opp of opportunitiesApi.list()) {
+      if (opp.creatorId && opp.creatorId === user?.id) {
+        ids.add(opp.id)
+      }
+    }
+    return ids
+  }, [user?.id])
+  const matches = useMemo(
+    () => filterPostMatchesForViewer(allMatches, viewer, { ownedOpportunityIds }),
+    [allMatches, viewer, ownedOpportunityIds],
+  )
   const activeMatches = countActiveMatches(matches)
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Workflow"
           title="Matches"
-          description="Ranked PostMatches for your opportunities — accept, negotiate, create deals, then contracts."
+          description="Ranked matches for your opportunities — accept, negotiate, create deals, then contracts."
+          tone="match"
           metric={
             <PmPageHeroMetric value={activeMatches} label="Active" />
           }
@@ -304,16 +370,28 @@ export function MatchesPage() {
       }
     >
       <MatchesListSection matches={matches} />
-    </PmPageLayout>
+    </PmPage>
   )
 }
 
 export function MatchDetailPage() {
   const { id } = useParams()
-  const { user, isPendingApproval } = useAuth()
+  const { user, isPendingApproval, canAccessAdmin } = useAuth()
   const version = useDataStoreVersion()
   const match = id ? matchesApi.get(id) : undefined
   const [pendingAction, setPendingAction] = useState<'accept' | 'decline' | null>(null)
+
+  const viewer = useMemo(
+    () =>
+      buildViewerContext({
+        userId: user?.id,
+        role: user?.role,
+        status: user?.status,
+        canAccessAdmin,
+        profile: user?.profile,
+      }),
+    [user, canAccessAdmin],
+  )
 
   const model = useMemo(() => {
     if (!match) return null
@@ -353,8 +431,8 @@ export function MatchDetailPage() {
 
   if (!match || !model) {
     return (
-      <PmPageLayout
-        header={<PmPageHeader title="Match" description="Post-match detail." />}
+      <PmPage
+        header={<PmPageHeader title="Match" description="Match detail." />}
       >
         <PmEmptyState
           title="Match not found"
@@ -365,7 +443,19 @@ export function MatchDetailPage() {
             </PmButton>
           }
         />
-      </PmPageLayout>
+      </PmPage>
+    )
+  }
+
+  if (!canViewMatchDetail(match, viewer)) {
+    return (
+      <PmPage header={<PmPageHeader title="Access denied" description="Match detail." />}>
+        <EntityAccessDenied
+          description="Only match participants can access this workspace."
+          backHref="/matches"
+          backLabel="Back to matches"
+        />
+      </PmPage>
     )
   }
 
@@ -410,55 +500,25 @@ export function MatchDetailPage() {
     onAcceptDecline: runPostMatchAction,
   })
 
-  const matchWorkflowSteps: readonly PmWorkflowJourneyStep[] = [
-    {
-      id: 'match',
-      label: 'Match',
-      status: match.status,
-      statusEntity: 'match',
-      href: `/matches/${match.id}`,
-      state: negotiation || deal ? 'complete' : 'current',
-    },
-    {
-      id: 'negotiation',
-      label: 'Negotiation',
-      status: negotiation?.status,
-      statusEntity: 'negotiation',
-      href: negotiation ? `/negotiations/${negotiation.id}` : undefined,
-      state: negotiation ? (deal ? 'complete' : 'current') : 'upcoming',
-    },
-    {
-      id: 'deal',
-      label: 'Deal',
-      status: deal?.status,
-      statusEntity: 'deal',
-      href: deal ? `/deals/${deal.id}` : undefined,
-      state: deal ? 'current' : 'upcoming',
-    },
-    {
-      id: 'contract',
-      label: 'Contract',
-      state: 'upcoming',
-    },
-    {
-      id: 'execution',
-      label: 'Complete',
-      state: 'upcoming',
-    },
-  ]
+  const matchWorkflowSteps = buildMatchWorkflowSteps({
+    id: match.id,
+    status: match.status,
+    negotiation: negotiation
+      ? { id: negotiation.id, status: negotiation.status }
+      : undefined,
+    deal: deal ? { id: deal.id, status: deal.status } : undefined,
+  })
 
-  const matchTitle =
-    model.participants.length > 0
-      ? `${model.matchTypeLabel} · ${model.participants.map((p) => p.displayName).join(' & ')}`
-      : `${model.matchTypeLabel} match`
+  const matchTitle = formatMatchDisplayTitle(match, opportunitiesApi.get)
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
-          label="Post-match"
+          label="Match"
           title={matchTitle}
           description={model.canonicalStatus.replace(/_/g, ' ')}
+          tone="match"
           metric={
             <PmPageHeroMetric value={model.scoreLabel} label="Match score" />
           }
@@ -486,11 +546,31 @@ export function MatchDetailPage() {
           <>
             <PmWorkflowJourney steps={matchWorkflowSteps} compact label={false} />
 
-            {!model.isParticipant && user ? (
-              <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-                You are viewing this match in read-only mode — you are not a participant.
-              </p>
-            ) : null}
+            <PmRelationshipChain
+              items={[
+                {
+                  label: 'Need',
+                  href: model.relatedOpportunities.find((item) => item.label === 'Need opportunity')?.path,
+                },
+                {
+                  label: 'Offer',
+                  href: model.relatedOpportunities.find((item) => item.label === 'Offer opportunity')?.path,
+                },
+                { label: 'Match', href: `/matches/${match.id}`, current: true },
+                {
+                  label: negotiation ? 'Negotiation' : 'Negotiation (next)',
+                  href: negotiation ? `/negotiations/${negotiation.id}` : '/negotiations',
+                },
+                {
+                  label: deal ? 'Deal' : 'Deal (next)',
+                  href: deal ? `/deals/${deal.id}` : '/deals',
+                },
+                {
+                  label: deal ? 'Contract (next)' : 'Contract (next)',
+                  href: '/contracts',
+                },
+              ]}
+            />
 
             <div className="grid gap-4 sm:grid-cols-3">
               <PmStatCard
@@ -545,7 +625,7 @@ export function MatchDetailPage() {
                   ))}
                 </ul>
               ) : (
-                <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>No participants recorded.</p>
+                <PmEmptyState title="No participants recorded" size="compact" />
               )}
             </PmContentCard>
           </>
@@ -569,10 +649,9 @@ export function MatchDetailPage() {
             {negotiation ? (
               <PmFormReadonly>
                 <PmFormReadonlySection title="Status">
-                  <PmFormReadonlyField label="Negotiation">
+                  <PmFormReadonlyField label="Status">
                     <PmWorkflowBadge status={negotiation.status} entity="negotiation" />
                   </PmFormReadonlyField>
-                  <PmFormReadonlyField label="ID" value={negotiation.id} />
                 </PmFormReadonlySection>
               </PmFormReadonly>
             ) : (
@@ -590,15 +669,108 @@ export function MatchDetailPage() {
           />
         }
       />
-    </PmPageLayout>
+    </PmPage>
+  )
+}
+
+export function NegotiationsPage() {
+  const { user, canAccessAdmin } = useAuth()
+  const allNegotiations = negotiationsApi.list()
+  const viewer = useMemo(
+    () =>
+      buildViewerContext({
+        userId: user?.id,
+        role: user?.role,
+        status: user?.status,
+        canAccessAdmin,
+        profile: user?.profile,
+      }),
+    [user, canAccessAdmin],
+  )
+  const negotiations = useMemo(
+    () => allNegotiations.filter((n) => canViewNegotiationDetail(n, viewer)),
+    [allNegotiations, viewer],
+  )
+  const activeCount = negotiations.filter(
+    (n) => n.status === 'active' || n.status === 'countered',
+  ).length
+
+  return (
+    <PmPage
+      header={
+        <PmPageHeader
+          label="Workflow"
+          title="Negotiations"
+          description="Review and respond to collaboration terms across your matches."
+          tone="negotiation"
+          metric={<PmPageHeroMetric value={activeCount} label="Active" />}
+          badges={
+            <>
+              <PmBadge tone="muted">{negotiations.length} total</PmBadge>
+              <PmBadge tone="primary">{activeCount} active</PmBadge>
+            </>
+          }
+        />
+      }
+    >
+      {negotiations.length === 0 ? (
+        <PmEmptyState
+          title="No negotiations yet"
+          description="Negotiations begin after you accept a match and start term discussions."
+          action={
+            <PmButton asChild>
+              <Link to="/matches">View matches</Link>
+            </PmButton>
+          }
+        />
+      ) : (
+        <div className="grid gap-3 md:grid-cols-2">
+          {negotiations.map((neg) => (
+            <PmSurface
+              key={neg.id}
+              variant="default"
+              shadow="card"
+              interactive
+              className="p-4"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <Link
+                  to={`/negotiations/${neg.id}`}
+                  className={cn(pmTypography.bodySm, 'line-clamp-2 font-medium hover:text-primary')}
+                >
+                  {formatNegotiationDisplayTitle(neg, opportunitiesApi.get)}
+                </Link>
+                <PmWorkflowBadge status={neg.status} entity="negotiation" size="sm" />
+              </div>
+              <p className={cn(pmTypography.caption, 'mt-2 text-muted-foreground')}>
+                Updated {formatDate(neg.updatedAt ?? neg.createdAt)}
+              </p>
+            </PmSurface>
+          ))}
+        </div>
+      )}
+    </PmPage>
   )
 }
 
 export function NegotiationDetailPage() {
   const { id } = useParams()
+  const { user, canAccessAdmin } = useAuth()
   const version = useDataStoreVersion()
   const neg = id ? negotiationsApi.get(id) : undefined
   const [proposalPending, setProposalPending] = useState(false)
+
+  const viewer = useMemo(
+    () =>
+      buildViewerContext({
+        userId: user?.id,
+        role: user?.role,
+        status: user?.status,
+        canAccessAdmin,
+        profile: user?.profile,
+      }),
+    [user, canAccessAdmin],
+  )
 
   const linkedDeal = useMemo(() => {
     if (!neg) return undefined
@@ -628,16 +800,32 @@ export function NegotiationDetailPage() {
 
   if (!neg) {
     return (
-      <PmPageLayout
+      <PmPage
         header={<PmPageHeader title="Negotiation" description="Value negotiation workspace." />}
       >
         <PmEmptyState
           title="Negotiation not found"
           description="This negotiation may have been removed or the link is invalid."
         />
-      </PmPageLayout>
+      </PmPage>
     )
   }
+
+  if (!canViewNegotiationDetail(neg, viewer)) {
+    return (
+      <PmPage
+        header={<PmPageHeader title="Access denied" description="Value negotiation workspace." />}
+      >
+        <EntityAccessDenied
+          description="Only negotiation participants can access this workspace."
+          backHref="/pipeline"
+          backLabel="Back to pipeline"
+        />
+      </PmPage>
+    )
+  }
+
+  const canMutate = canMutateNegotiationDetail(neg, viewer)
 
   const collaborationStep = resolveCollaborationStepFromNegotiation(Boolean(linkedDeal))
   const timelineEvents: CollaborationTimelineEvent[] = [
@@ -655,55 +843,27 @@ export function NegotiationDetailPage() {
     },
   ]
 
+  const negotiationTitle = formatNegotiationDisplayTitle(neg, opportunitiesApi.get)
   const linkedMatch = neg.postMatchId ? matchesApi.get(neg.postMatchId) : undefined
-  const negotiationTitle = linkedMatch
-    ? `Negotiation · ${formatMatchTypeBadgeLabel(linkedMatch.matchType)} match`
-    : `Negotiation ${neg.id}`
 
-  const negotiationWorkflowSteps: readonly PmWorkflowJourneyStep[] = [
-    {
-      id: 'match',
-      label: 'Match',
-      status: linkedMatch?.status,
-      statusEntity: 'match',
-      href: neg.postMatchId ? `/matches/${neg.postMatchId}` : undefined,
-      state: 'complete',
-    },
-    {
-      id: 'negotiation',
-      label: 'Negotiation',
-      status: neg.status,
-      statusEntity: 'negotiation',
-      href: `/negotiations/${neg.id}`,
-      state: linkedDeal ? 'complete' : 'current',
-    },
-    {
-      id: 'deal',
-      label: 'Deal',
-      status: linkedDeal?.status,
-      statusEntity: 'deal',
-      href: linkedDeal ? `/deals/${linkedDeal.id}` : undefined,
-      state: linkedDeal ? 'current' : 'upcoming',
-    },
-    {
-      id: 'contract',
-      label: 'Contract',
-      state: 'upcoming',
-    },
-    {
-      id: 'execution',
-      label: 'Complete',
-      state: 'upcoming',
-    },
-  ]
+  const negotiationWorkflowSteps = buildNegotiationWorkflowSteps({
+    id: neg.id,
+    status: neg.status,
+    postMatchId: neg.postMatchId,
+    linkedMatch: linkedMatch ? { status: linkedMatch.status } : undefined,
+    linkedDeal: linkedDeal
+      ? { id: linkedDeal.id, status: linkedDeal.status }
+      : undefined,
+  })
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Negotiation"
           title={negotiationTitle}
           description="Terms sheet, rounds timeline, and proposal form."
+          tone="negotiation"
           metric={
             <PmPageHeroMetric
               value={neg.rounds?.length ?? 0}
@@ -712,52 +872,62 @@ export function NegotiationDetailPage() {
           }
           badges={<PmWorkflowBadge status={neg.status} entity="negotiation" />}
           actions={
-            <PmPageActions
-              primary={{
-                label: 'Agree terms',
-                render: () => <AgreeNegotiationButton negotiation={neg} />,
-              }}
-              secondary={
-                neg.postMatchId
-                  ? { label: 'View match', href: `/matches/${neg.postMatchId}`, variant: 'outline' }
-                  : undefined
-              }
-              more={[
-                ...(linkedDeal
-                  ? [{ id: 'view-deal', label: 'View deal', href: `/deals/${linkedDeal.id}` }]
-                  : []),
-              ]}
-              moreChildren={
-                <>
-                  <DropdownMenuItem asChild>
-                    <CancelNegotiationButton
-                      negotiation={neg}
-                      variant="destructive"
-                      className="w-full justify-start"
-                    />
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <CreateDealButton negotiation={neg} className="w-full justify-start" />
-                  </DropdownMenuItem>
-                  {canSubmitProposal ? (
-                    <DropdownMenuItem
-                      disabled={proposalPending}
-                      onSelect={() => handleProposalTransition('countered')}
-                    >
-                      Submit proposal
+            canMutate ? (
+              <PmPageActions
+                primary={{
+                  label: 'Agree terms',
+                  render: () => <AgreeNegotiationButton negotiation={neg} />,
+                }}
+                secondary={
+                  neg.postMatchId
+                    ? { label: 'View match', href: `/matches/${neg.postMatchId}`, variant: 'outline' }
+                    : undefined
+                }
+                more={[
+                  ...(linkedDeal
+                    ? [{ id: 'view-deal', label: 'View deal', href: `/deals/${linkedDeal.id}` }]
+                    : []),
+                ]}
+                moreChildren={
+                  <>
+                    <DropdownMenuItem asChild>
+                      <CancelNegotiationButton
+                        negotiation={neg}
+                        variant="destructive"
+                        className="w-full justify-start"
+                      />
                     </DropdownMenuItem>
-                  ) : null}
-                  {canAcceptUpdatedProposal ? (
-                    <DropdownMenuItem
-                      disabled={proposalPending}
-                      onSelect={() => handleProposalTransition('active')}
-                    >
-                      Accept updated proposal
+                    <DropdownMenuItem asChild>
+                      <CreateDealButton negotiation={neg} className="w-full justify-start" />
                     </DropdownMenuItem>
-                  ) : null}
-                </>
-              }
-            />
+                    {canSubmitProposal ? (
+                      <DropdownMenuItem
+                        disabled={proposalPending}
+                        onSelect={() => handleProposalTransition('countered')}
+                      >
+                        Submit proposal
+                      </DropdownMenuItem>
+                    ) : null}
+                    {canAcceptUpdatedProposal ? (
+                      <DropdownMenuItem
+                        disabled={proposalPending}
+                        onSelect={() => handleProposalTransition('active')}
+                      >
+                        Accept updated proposal
+                      </DropdownMenuItem>
+                    ) : null}
+                  </>
+                }
+              />
+            ) : neg.postMatchId ? (
+              <PmPageActions
+                secondary={{
+                  label: 'View match',
+                  href: `/matches/${neg.postMatchId}`,
+                  variant: 'outline',
+                }}
+              />
+            ) : undefined
           }
         />
       }
@@ -767,9 +937,29 @@ export function NegotiationDetailPage() {
           <>
             <PmWorkflowJourney steps={negotiationWorkflowSteps} compact label={false} />
 
+            <PmRelationshipChain
+              items={[
+                {
+                  label: 'Opportunity',
+                  href: linkedMatch?.needOpportunityId
+                    ? `/opportunities/${linkedMatch.needOpportunityId}`
+                    : '/opportunities',
+                },
+                {
+                  label: linkedMatch ? 'Match' : 'Match (origin)',
+                  href: linkedMatch ? `/matches/${linkedMatch.id}` : '/matches',
+                },
+                { label: 'Negotiation', href: `/negotiations/${neg.id}`, current: true },
+                {
+                  label: linkedDeal ? 'Deal' : 'Deal (next)',
+                  href: linkedDeal ? `/deals/${linkedDeal.id}` : '/deals',
+                },
+              ]}
+            />
+
             <PmContentCard title="Discussion">
             <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-              Negotiation workspace for post-match collaboration. Use the inspector to agree,
+              Negotiation workspace for match collaboration. Use the inspector to agree,
               cancel, or create a deal when terms are settled.
             </p>
             {neg.rounds && neg.rounds.length > 0 ? (
@@ -828,6 +1018,6 @@ export function NegotiationDetailPage() {
           />
         }
       />
-    </PmPageLayout>
+    </PmPage>
   )
 }

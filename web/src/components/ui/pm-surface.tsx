@@ -50,7 +50,7 @@ export function PmSurface({
 
       className={cn(
 
-        'rounded-2xl border border-border/70 bg-gradient-to-b from-surface to-surface/96',
+        'rounded-2xl border border-border/65 bg-gradient-to-b from-surface to-surface/97',
 
         pmSurfaceTone[variant],
 

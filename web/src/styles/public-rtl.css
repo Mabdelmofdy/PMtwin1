@@ -1,0 +1,47 @@
+/**
+ * Public marketing RTL smoke fixes — pairs with PmDirectionProvider.
+ * Full Arabic content is not shipped; these rules prevent layout breaks under dir="rtl".
+ */
+
+[dir='rtl'] .public-layout-main--flush,
+[dir='rtl'] .mkt-page,
+[dir='rtl'] .pm-auth-page {
+  text-align: start;
+}
+
+[dir='rtl'] .mkt-hero-actions,
+[dir='rtl'] .mkt-cta-band-actions,
+[dir='rtl'] .mkt-wizard-result-actions,
+[dir='rtl'] .wf-next-steps-actions {
+  justify-content: flex-start;
+}
+
+[dir='rtl'] .mkt-pricing-points,
+[dir='rtl'] .mkt-legal-article ul,
+[dir='rtl'] .reg-preview-notice ul {
+  padding-inline-start: 1.1rem;
+  padding-inline-end: 0;
+}
+
+[dir='rtl'] .mkt-card-top,
+[dir='rtl'] .mkt-wizard-nav,
+[dir='rtl'] .mkt-legal-footer-links {
+  flex-direction: row;
+}
+
+[dir='rtl'] .kb-faq-accordion-trigger {
+  text-align: start;
+}
+
+[dir='rtl'] .mkt-contact-options-grid,
+[dir='rtl'] .mkt-trust-grid,
+[dir='rtl'] .mkt-card-grid--models {
+  direction: rtl;
+}
+
+[dir='rtl'] .mkt-contact-options-grid > *,
+[dir='rtl'] .mkt-trust-grid > *,
+[dir='rtl'] .mkt-card-grid--models > * {
+  direction: rtl;
+  text-align: start;
+}

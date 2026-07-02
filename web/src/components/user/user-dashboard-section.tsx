@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { formatNegotiationDisplayTitle } from '@/lib/entity-display-titles.ts'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
@@ -120,7 +121,14 @@ export function UserDashboardSection() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {recentOpportunities.map((opp) => (
-            <OpportunityCard key={opp.id} opportunity={opp} showActions />
+            <OpportunityCard
+              key={opp.id}
+              opportunity={opp}
+              showActions
+              viewerUserId={userId}
+              showOwnerInsights={userId === opp.creatorId}
+              canEdit={userId === opp.creatorId}
+            />
           ))}
         </div>
       )}
@@ -171,7 +179,7 @@ export function UserDashboardSection() {
                     to={`/negotiations/${neg.id}`}
                     className="font-medium hover:text-primary"
                   >
-                    Negotiation {neg.id}
+                    {formatNegotiationDisplayTitle(neg, opportunitiesApi.get)}
                   </Link>
                   <PmWorkflowBadge status={neg.status} entity="negotiation" />
                   <span className={cn(pmTypography.caption, 'text-muted-foreground')}>

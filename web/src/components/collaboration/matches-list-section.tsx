@@ -1,12 +1,9 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { opportunitiesApi } from '@/api/opportunities.ts'
 import { formatDate } from '@/lib/format'
+import { formatMatchDisplayTitle } from '@/lib/match-display.ts'
 import { MatchCard } from '@/components/collaboration/match-card'
-import {
-  formatMatchTypeBadgeLabel,
-  resolveMatchTypeTone,
-} from '@/components/collaboration/collaboration-display'
 import {
   PmDataTable,
   PmTableEmpty,
@@ -25,6 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { formatMatchTypeBadgeLabel } from '@/components/collaboration/collaboration-display'
 import type { PostMatch } from '@/types/domain.ts'
 
 export type MatchesListSectionProps = {
@@ -33,7 +32,7 @@ export type MatchesListSectionProps = {
   compact?: boolean
 }
 
-/** Shared post-matches list — PmDataTable desktop + MatchCard mobile. */
+/** Shared matches list — PmDataTable desktop + MatchCard mobile. */
 export function MatchesListSection({
   matches,
   showToolbar = true,
@@ -47,11 +46,8 @@ export function MatchesListSection({
 
   const filtered = useMemo(() => {
     return matches.filter((m) => {
-      const typeLabel = m.matchType.replace(/_/g, ' ').toLowerCase()
-      const matchesSearch =
-        !search ||
-        typeLabel.includes(search.toLowerCase()) ||
-        m.id.toLowerCase().includes(search.toLowerCase())
+      const pairing = formatMatchDisplayTitle(m, (id) => opportunitiesApi.get(id)).toLowerCase()
+      const matchesSearch = !search || pairing.includes(search.toLowerCase())
       const matchesStatus = status === 'all' || m.status === status
       return matchesSearch && matchesStatus
     })
@@ -64,11 +60,11 @@ export function MatchesListSection({
 
   const columns: PmDataTableColumn<PostMatch>[] = [
     {
-      id: 'type',
-      label: 'Match type',
+      id: 'pairing',
+      label: 'Match',
       cell: (m) => (
         <Link to={`/matches/${m.id}`} className="font-medium hover:text-primary">
-          {formatMatchTypeBadgeLabel(m.matchType)}
+          {formatMatchDisplayTitle(m, (id) => opportunitiesApi.get(id))}
         </Link>
       ),
     },
@@ -90,12 +86,12 @@ export function MatchesListSection({
     },
     {
       id: 'typeBadge',
-      label: 'Topology',
+      label: 'Type',
       hideable: true,
-      defaultVisible: false,
+      defaultVisible: true,
       cell: (m) => (
-        <PmBadge tone={resolveMatchTypeTone(m.matchType)} size="sm" uppercase>
-          {m.matchType.replace(/_/g, ' ')}
+        <PmBadge tone="neutral" size="sm">
+          {formatMatchTypeBadgeLabel(m.matchType)}
         </PmBadge>
       ),
     },
@@ -112,13 +108,13 @@ export function MatchesListSection({
       columns={columns}
       data={paged}
       getRowId={(m) => m.id}
-      caption="Post-matches"
+      caption="Matches"
       toolbar={
         showToolbar ? (
           <PmTableToolbar
             search={
               <PmTableSearch
-                placeholder="Search match type or ID…"
+                placeholder="Search need, offer, or partner…"
                 value={search}
                 onValueChange={(v) => {
                   setSearch(v)
@@ -164,7 +160,7 @@ export function MatchesListSection({
       empty={
         <PmTableEmpty
           variant="no-results"
-          title="No post-matches found"
+          title="No matches found"
           description="Matches appear when opportunities are published and the matching engine runs."
           primaryAction={
             <PmButton size="sm" variant="outline" asChild>

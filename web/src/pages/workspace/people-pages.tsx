@@ -13,26 +13,25 @@ import {
   resolveCompanyIds,
 } from '@/components/user/public-profile-view'
 import { MOCK_MESSAGE_THREADS } from '@/components/user/user-display'
-import { PmPageLayout } from '@/components/layout/pm-layout-index'
-import { PmBadge, PmPageHeader, PmPageHeroMetric, PmPageActions } from '@/components/ui/pm-index'
+import { PmBadge, PmPage, PmPageHeader, PmPageHeroMetric, PmPageActions } from '@/components/ui/pm-index'
 import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
 
 export function PeoplePage() {
   const profileCount = peopleApi.listAll().length
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
-          label="Network"
-          title="People"
+          label="Workspace"
+          title="Find"
           description="Search professionals and companies across the built environment."
           metric={<PmPageHeroMetric value={profileCount} label="Profiles" />}
         />
       }
     >
       <PeopleListSection />
-    </PmPageLayout>
+    </PmPage>
   )
 }
 
@@ -43,14 +42,14 @@ export function PersonProfilePage() {
 
   if (!person) {
     return (
-      <PmPageLayout header={<PmPageHeader title="Profile" />}>
+      <PmPage header={<PmPageHeader title="Profile" />}>
         <PublicProfileNotFound />
-      </PmPageLayout>
+      </PmPage>
     )
   }
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Public profile"
@@ -60,7 +59,7 @@ export function PersonProfilePage() {
       }
     >
       <PublicProfileView person={person} companyIds={companyIds} />
-    </PmPageLayout>
+    </PmPage>
   )
 }
 
@@ -69,7 +68,7 @@ export function MessagesPage() {
   const unreadTotal = MOCK_MESSAGE_THREADS.reduce((sum, t) => sum + t.unread, 0)
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Inbox"
@@ -89,7 +88,7 @@ export function MessagesPage() {
       }
     >
       <MessagesView activeThreadId={id} />
-    </PmPageLayout>
+    </PmPage>
   )
 }
 
@@ -100,7 +99,7 @@ export function NotificationsPage() {
   const unreadCount = notifications.filter((n) => !n.read).length
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Communication"
@@ -116,7 +115,7 @@ export function NotificationsPage() {
       }
     >
       <NotificationsListSection />
-    </PmPageLayout>
+    </PmPage>
   )
 }
 
@@ -128,7 +127,7 @@ export function ProfilePage() {
     : null
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Account"
@@ -155,13 +154,13 @@ export function ProfilePage() {
         profileKind={profileKind}
         email={user?.email}
       />
-    </PmPageLayout>
+    </PmPage>
   )
 }
 
 export function SettingsPage() {
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Account"
@@ -171,6 +170,6 @@ export function SettingsPage() {
       }
     >
       <SettingsView />
-    </PmPageLayout>
+    </PmPage>
   )
 }

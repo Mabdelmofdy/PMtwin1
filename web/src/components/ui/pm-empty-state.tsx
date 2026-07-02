@@ -35,9 +35,9 @@ export function PmEmptyState({
       aria-labelledby={titleId}
       variant="muted"
       className={cn(
-        'flex flex-col items-center justify-center border-dashed border-border/80 bg-gradient-to-b from-surface-muted to-surface text-center',
+        'flex flex-col items-center justify-center border-dashed border-border/75 bg-gradient-to-b from-surface-muted/70 via-surface to-surface text-center',
         !reducedMotion && pmEnter.empty,
-        size === 'default' ? 'px-6 py-16' : 'px-4 py-10',
+        size === 'default' ? 'px-6 py-16' : 'px-5 py-11',
         className,
       )}
     >

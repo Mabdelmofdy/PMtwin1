@@ -94,6 +94,10 @@ export function isStyleAllowlisted(relPath) {
   if (relPath === 'components/shared/page-primitives.tsx') return true
   if (relPath.startsWith('tokens/')) return true
   if (relPath.startsWith('components/ui/')) return true
+  // Public marketing shell + routes — legacy POC visual language (Marketing sprint; out of workspace freeze)
+  if (relPath.startsWith('components/layout/public-')) return true
+  if (relPath.startsWith('components/marketing/')) return true
+  if (relPath.startsWith('pages/public/')) return true
   return false
 }
 

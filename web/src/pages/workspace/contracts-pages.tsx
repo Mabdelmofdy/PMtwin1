@@ -22,7 +22,6 @@ import {
   PmContentCard,
   PmDetailLayout,
   PmInspectorLayout,
-  PmPageLayout,
   PmSectionHeader,
   countActiveContracts,
 } from '@/components/layout/pm-layout-index'
@@ -44,22 +43,46 @@ import {
   PmBadge,
   PmButton,
   PmEmptyState,
+  PmEntityListCard,
+  PmPage,
   PmPageHeader,
   PmPageHeroMetric,
   PmMoreActions,
-  PmCardActions,
-  PmSurface,
+  PmRelationshipChain,
   PmWorkflowBadge,
   PmWorkflowJourney,
+  buildContractWorkflowSteps,
   type PmMoreActionItem,
-  type PmWorkflowJourneyStep,
 } from '@/components/ui/pm-index'
+import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
 import type { Contract } from '@/types/domain.ts'
 import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
+import {
+  buildViewerContext,
+  canMutateContractDetail,
+  canViewContractDetail,
+  filterContractsForViewer,
+} from '@/lib/entity-view-visibility.ts'
+import { EntityAccessDenied } from '@/components/auth/entity-access-state'
+import { formatContractDisplayTitle } from '@/lib/entity-display-titles.ts'
+import { PmTechnicalDetails } from '@/components/ui/pm-technical-details.tsx'
+
+function resolveContractListTitle(contract: Contract): string {
+  const deal = contract.dealId ? dealsApi.get(contract.dealId) : undefined
+  return formatContractDisplayTitle({
+    dealTitle: deal?.title,
+    needTitle: deal?.needOpportunityId
+      ? opportunitiesApi.get(deal.needOpportunityId)?.title
+      : null,
+    offerTitle: deal?.offerOpportunityId
+      ? opportunitiesApi.get(deal.offerOpportunityId)?.title
+      : null,
+  })
+}
 
 function buildContractNavMoreItems(model: NonNullable<ReturnType<typeof buildContractDetailReadModel>>): PmMoreActionItem[] {
   const items: PmMoreActionItem[] = []
@@ -82,42 +105,49 @@ function buildContractNavMoreItems(model: NonNullable<ReturnType<typeof buildCon
 }
 
 function ContractListCard({ contract }: { contract: Contract }) {
+  const title = resolveContractListTitle(contract)
+  const deal = contract.dealId ? dealsApi.get(contract.dealId) : undefined
   return (
-    <PmSurface variant="default" shadow="card" interactive className="flex h-full flex-col p-4">
-      <div className="flex items-start justify-between gap-2">
-        <Link
-          to={`/contracts/${contract.id}`}
-          className={cn(pmTypography.h3, 'truncate hover:text-primary')}
-          title={contract.id}
-        >
-          Contract {contract.id}
-        </Link>
-        <PmWorkflowBadge status={contract.status} entity="contract" size="sm" />
-      </div>
-      <p className={cn('mt-2', pmTypography.caption, 'text-muted-foreground')}>
-        Deal {contract.dealId} · Updated {formatDate(contract.updatedAt)}
-      </p>
-      <PmCardActions
-        className="mt-4"
-        primary={{ label: 'Open contract', href: `/contracts/${contract.id}` }}
-      />
-    </PmSurface>
+    <PmEntityListCard
+      title={title}
+      href={`/contracts/${contract.id}`}
+      badge={<PmWorkflowBadge status={contract.status} entity="contract" size="sm" />}
+      meta={`${deal?.title ?? 'Collaboration deal'} · Updated ${formatDate(contract.updatedAt)}`}
+      primary={{ label: 'Open contract', href: `/contracts/${contract.id}` }}
+    />
   )
 }
 
 export function ContractsPage() {
   const navigate = useNavigate()
+  const { user, canAccessAdmin } = useAuth()
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
-  const contracts = contractsApi.list()
+  const viewer = useMemo(
+    () =>
+      buildViewerContext({
+        userId: user?.id,
+        role: user?.role,
+        status: user?.status,
+        canAccessAdmin,
+        profile: user?.profile,
+      }),
+    [user, canAccessAdmin],
+  )
+  const contracts = useMemo(
+    () => filterContractsForViewer(contractsApi.list(), viewer),
+    [viewer],
+  )
   const activeContracts = countActiveContracts(contracts)
 
   const filtered = useMemo(() => {
     return contracts.filter((c) => {
       if (!search) return true
       const q = search.toLowerCase()
-      return c.id.toLowerCase().includes(q) || c.dealId.toLowerCase().includes(q)
+      const title = resolveContractListTitle(c).toLowerCase()
+      const dealTitle = c.dealId ? dealsApi.get(c.dealId)?.title?.toLowerCase() ?? '' : ''
+      return title.includes(q) || dealTitle.includes(q)
     })
   }, [contracts, search])
 
@@ -128,18 +158,21 @@ export function ContractsPage() {
 
   const columns: PmDataTableColumn<Contract>[] = [
     {
-      id: 'id',
+      id: 'title',
       label: 'Contract',
       cell: (c) => (
-        <Link to={`/contracts/${c.id}`} className={cn(pmTypography.mono, 'font-medium hover:text-primary')}>
-          {c.id}
+        <Link to={`/contracts/${c.id}`} className={cn(pmTypography.bodySm, 'font-medium hover:text-primary')}>
+          {resolveContractListTitle(c)}
         </Link>
       ),
     },
     {
       id: 'deal',
       label: 'Deal',
-      cell: (c) => c.dealId,
+      cell: (c) => {
+        const deal = c.dealId ? dealsApi.get(c.dealId) : undefined
+        return deal?.title ?? '—'
+      },
     },
     {
       id: 'status',
@@ -155,12 +188,13 @@ export function ContractsPage() {
 
   if (!contracts.length) {
     return (
-      <PmPageLayout
+      <PmPage
         header={
           <PmPageHeader
             label="Workflow"
             title="Contracts"
             description="Agreements linked to deals and opportunities."
+            tone="contract"
             metric={<PmPageHeroMetric value={0} label="Active" />}
           />
         }
@@ -174,17 +208,18 @@ export function ContractsPage() {
             </PmButton>
           }
         />
-      </PmPageLayout>
+      </PmPage>
     )
   }
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Workflow"
           title="Contracts"
           description="Agreements linked to deals and opportunities."
+          tone="contract"
           metric={<PmPageHeroMetric value={activeContracts} label="Active" />}
           badges={
             <>
@@ -202,19 +237,20 @@ export function ContractsPage() {
         getRowId={(c) => c.id}
         caption="Contracts"
         toolbar={
-          <PmTableToolbar
-            className="pm-toolbar-surface rounded-xl px-4 py-3"
-            search={
-              <PmTableSearch
-                placeholder="Search contract or deal ID…"
-                value={search}
-                onValueChange={(v) => {
-                  setSearch(v)
-                  setPage(1)
-                }}
-              />
-            }
-          />
+          <PmToolbarSurface>
+            <PmTableToolbar
+              search={
+                <PmTableSearch
+                  placeholder="Search contract or deal ID…"
+                  value={search}
+                  onValueChange={(v) => {
+                    setSearch(v)
+                    setPage(1)
+                  }}
+                />
+              }
+            />
+          </PmToolbarSurface>
         }
         rowActions={(c) => (
           <PmTableRowActions
@@ -246,14 +282,26 @@ export function ContractsPage() {
         }
         renderMobileCard={(c) => <ContractListCard contract={c} />}
       />
-    </PmPageLayout>
+    </PmPage>
   )
 }
 
 export function ContractDetailPage() {
   const version = useDataStoreVersion()
-  const { user } = useAuth()
+  const { user, canAccessAdmin } = useAuth()
   const { id } = useParams()
+
+  const viewer = useMemo(
+    () =>
+      buildViewerContext({
+        userId: user?.id,
+        role: user?.role,
+        status: user?.status,
+        canAccessAdmin,
+        profile: user?.profile,
+      }),
+    [user, canAccessAdmin],
+  )
 
   const model =
     id
@@ -274,16 +322,30 @@ export function ContractDetailPage() {
 
   if (!id || !model) {
     return (
-      <PmPageLayout
+      <PmPage
         header={<PmPageHeader title="Contract" description="Contract summary." />}
       >
         <PmEmptyState
           title="Contract not found"
           description="This contract may have been removed or the link is invalid."
         />
-      </PmPageLayout>
+      </PmPage>
     )
   }
+
+  if (!canViewContractDetail(model.contract, viewer)) {
+    return (
+      <PmPage header={<PmPageHeader title="Access denied" description="Contract summary." />}>
+        <EntityAccessDenied
+          description="Contract details are only visible to parties or authorized platform staff."
+          backHref="/contracts"
+          backLabel="Back to contracts"
+        />
+      </PmPage>
+    )
+  }
+
+  const canMutate = canMutateContractDetail(model.contract, viewer)
 
   const collaborationStep = resolveCollaborationStepFromContract()
   const timelineEvents: CollaborationTimelineEvent[] = [
@@ -300,54 +362,35 @@ export function ContractDetailPage() {
     },
   ]
 
-  const contractWorkflowSteps: readonly PmWorkflowJourneyStep[] = [
-    {
-      id: 'match',
-      label: 'Match',
-      href: model.postMatchId ? `/matches/${model.postMatchId}` : undefined,
-      state: 'complete',
-    },
-    {
-      id: 'negotiation',
-      label: 'Negotiation',
-      href: model.negotiationId ? `/negotiations/${model.negotiationId}` : undefined,
-      state: 'complete',
-    },
-    {
-      id: 'deal',
-      label: 'Deal',
-      href: model.dealId ? `/deals/${model.dealId}` : undefined,
-      state: 'complete',
-    },
-    {
-      id: 'contract',
-      label: 'Contract',
-      status: model.status,
-      statusEntity: 'contract',
-      href: `/contracts/${model.contractId}`,
-      state: 'current',
-    },
-    {
-      id: 'execution',
-      label: 'Complete',
-      state: 'upcoming',
-    },
-  ]
-
-  const contractNavMore = buildContractNavMoreItems(model)
-  const showMutations = contractDetailShowsMutationActions({
-    canSign: model.canSign,
-    canComplete: model.canComplete,
-    canTerminate: model.canTerminate,
+  const contractWorkflowSteps = buildContractWorkflowSteps({
+    contractId: model.contractId,
+    status: model.status,
+    postMatchId: model.postMatchId,
+    negotiationId: model.negotiationId,
+    dealId: model.dealId,
   })
 
+  const contractNavMore = buildContractNavMoreItems(model)
+  const showMutations =
+    canMutate &&
+    contractDetailShowsMutationActions({
+      canSign: model.canSign,
+      canComplete: model.canComplete,
+      canTerminate: model.canTerminate,
+    })
+
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Contract"
-          title={`Contract ${model.contractId}`}
+          title={formatContractDisplayTitle({
+            dealTitle: model.dealTitle,
+            needTitle: model.needTitle,
+            offerTitle: model.offerTitle,
+          })}
           description={`Created ${formatDate(model.contract.createdAt)} · Updated ${formatDate(model.contract.updatedAt)}`}
+          tone="contract"
           metric={
             <PmPageHeroMetric
               value={model.parties.length}
@@ -356,7 +399,7 @@ export function ContractDetailPage() {
           }
           badges={<PmWorkflowBadge status={model.status} entity="contract" />}
           actions={
-            model.canSign && user?.id ? (
+            canMutate && model.canSign && user?.id ? (
               <SignContractButton
                 contractId={model.contractId}
                 userId={user.id}
@@ -373,18 +416,42 @@ export function ContractDetailPage() {
           <>
             <PmWorkflowJourney steps={contractWorkflowSteps} compact label={false} />
 
+            <PmRelationshipChain
+              items={[
+                {
+                  label: model.links.deal ? 'Deal' : 'Deal (origin)',
+                  href: model.links.deal?.path ?? '/deals',
+                },
+                {
+                  label: model.links.negotiation ? 'Negotiation' : 'Negotiation (linked)',
+                  href: model.links.negotiation?.path ?? '/negotiations',
+                },
+                {
+                  label: model.links.needOpportunity ? 'Original opportunity' : 'Original opportunity (linked)',
+                  href: model.links.needOpportunity?.path ?? '/opportunities',
+                },
+                { label: 'Contract', href: `/contracts/${model.contractId}`, current: true },
+              ]}
+            />
+
             <PmContentCard title="Summary">
               <PmFormReadonly>
                 <PmFormReadonlySection>
-                  <PmFormReadonlyField label="Contract ID" value={model.contractId} />
-                  <PmFormReadonlyField label="Deal ID" value={model.dealId} />
                   <PmFormReadonlyField label="Deal" value={model.dealTitle} />
-                  <PmFormReadonlyField label="PostMatch ID" value={model.postMatchId} />
-                  <PmFormReadonlyField label="Negotiation ID" value={model.negotiationId} />
                   <PmFormReadonlyField label="Need" value={model.needTitle} />
                   <PmFormReadonlyField label="Offer" value={model.offerTitle} />
                 </PmFormReadonlySection>
               </PmFormReadonly>
+              <PmTechnicalDetails className="mt-4">
+                <PmFormReadonly>
+                  <PmFormReadonlySection>
+                    <PmFormReadonlyField label="Contract reference" value={model.contractId} />
+                    <PmFormReadonlyField label="Deal reference" value={model.dealId} />
+                    <PmFormReadonlyField label="Match reference" value={model.postMatchId} />
+                    <PmFormReadonlyField label="Negotiation reference" value={model.negotiationId} />
+                  </PmFormReadonlySection>
+                </PmFormReadonly>
+              </PmTechnicalDetails>
             </PmContentCard>
 
             <PmContentCard title="Parties & signatures">
@@ -400,7 +467,7 @@ export function ContractDetailPage() {
                   ))}
                 </ul>
               ) : (
-                <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>No parties recorded.</p>
+                <PmEmptyState title="No parties recorded" size="compact" />
               )}
             </PmContentCard>
 
@@ -418,7 +485,7 @@ export function ContractDetailPage() {
                   ))}
                 </ul>
               ) : (
-                <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>No milestones recorded.</p>
+                <PmEmptyState title="No milestones recorded" size="compact" />
               )}
             </PmContentCard>
 
@@ -487,6 +554,6 @@ export function ContractDetailPage() {
           />
         }
       />
-    </PmPageLayout>
+    </PmPage>
   )
 }

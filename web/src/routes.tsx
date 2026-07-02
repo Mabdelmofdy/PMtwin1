@@ -13,6 +13,13 @@ import {
   WorkflowPage,
 } from '@/pages/public/marketing-pages'
 import {
+  AboutPage,
+  ContactPage,
+  FeaturesPage,
+  PricingPage,
+} from '@/pages/public/commercial-pages'
+import { PrivacyPage, TermsPage } from '@/pages/public/legal-pages'
+import {
   ForgotPasswordPage,
   LoginPage,
   RegisterPage,
@@ -29,6 +36,7 @@ import {
   MatchDetailPage,
   MatchesPage,
   NegotiationDetailPage,
+  NegotiationsPage,
   PipelinePage,
 } from '@/pages/workspace/pipeline-pages'
 import {
@@ -82,6 +90,12 @@ export function AppRoutes() {
         <Route path="/knowledge-base" element={<KnowledgeBasePage />} />
         <Route path="/collaboration-wizard" element={<CollaborationWizardPage />} />
         <Route path="/collaboration-models" element={<CollaborationModelsPage />} />
+        <Route path="/features" element={<FeaturesPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -111,6 +125,7 @@ export function AppRoutes() {
         <Route path="/matches" element={<MatchesPage />} />
         <Route path="/matches/:id" element={<MatchDetailPage />} />
 
+        <Route path="/negotiations" element={<NegotiationsPage />} />
         <Route path="/negotiations/:id" element={<NegotiationDetailPage />} />
 
         <Route path="/deals" element={<DealsPage />} />

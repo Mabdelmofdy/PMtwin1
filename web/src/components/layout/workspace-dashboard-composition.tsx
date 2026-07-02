@@ -3,15 +3,14 @@ import { opportunitiesApi } from '@/api/opportunities.ts'
 import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
 import { dealsApi } from '@/api/deals.ts'
+import { contractsApi } from '@/api/contracts.ts'
 import { notificationsApi } from '@/api/notifications.ts'
 import { MatchCard } from '@/components/collaboration/match-card'
-import { OpportunityCard } from '@/components/opportunity/opportunity-card'
-import { countOpportunityBuckets } from '@/components/opportunity/opportunity-display'
+import { formatNegotiationDisplayTitle } from '@/lib/entity-display-titles.ts'
 import {
   PmContentCard,
   PmDashboardLayout,
   PmSectionHeader,
-  countActiveMatches,
 } from '@/components/layout/pm-layout-index'
 import {
   PmActionHub,
@@ -19,6 +18,7 @@ import {
   PmButton,
   PmEmptyState,
   PmPageActions,
+  PmStatsStrip,
   PmSurface,
   PmWorkflowBadge,
 } from '@/components/ui/pm-index'
@@ -26,47 +26,6 @@ import { useAuth } from '@/providers/auth-provider'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { formatDate, formatRelativeTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
-
-function DashboardMetricStrip({
-  published,
-  activeMatches,
-  negotiating,
-  drafts,
-}: {
-  published: number
-  activeMatches: number
-  negotiating: number
-  drafts: number
-}) {
-  const metrics = [
-    { label: 'Published', value: published },
-    { label: 'Active matches', value: activeMatches },
-    { label: 'Negotiating', value: negotiating },
-    { label: 'Drafts', value: drafts },
-  ]
-
-  return (
-    <PmSurface
-      data-slot="pm-dashboard-metric-strip"
-      variant="muted"
-      className="flex flex-wrap divide-y divide-border/50 sm:divide-x sm:divide-y-0"
-    >
-      {metrics.map((metric) => (
-        <div
-          key={metric.label}
-          className="flex min-w-[50%] flex-1 items-center justify-between gap-2 px-4 py-2.5 sm:min-w-0 sm:flex-col sm:items-start sm:py-3"
-        >
-          <span className={cn(pmTypography.statLabel, 'text-muted-foreground')}>
-            {metric.label}
-          </span>
-          <span className={cn(pmTypography.stat, 'tabular-nums')}>
-            {metric.value}
-          </span>
-        </div>
-      ))}
-    </PmSurface>
-  )
-}
 
 function buildNeedsActionItems(input: {
   userId?: string
@@ -82,7 +41,7 @@ function buildNeedsActionItems(input: {
     items.push({
       id: `match-${match.id}`,
       title: 'Review new match',
-      context: 'A PostMatch is waiting for your response.',
+      context: 'A match is waiting for your response.',
       status: match.status,
       statusEntity: 'match',
       matchScore: match.matchScore,
@@ -145,8 +104,7 @@ export function WorkspaceDashboardComposition() {
   const matches = matchesApi.list()
   const negotiations = negotiationsApi.list()
   const deals = dealsApi.list()
-  const buckets = countOpportunityBuckets(opportunities, userId)
-  const activeMatches = countActiveMatches(matches)
+  const contracts = contractsApi.list()
   const notifications = userId ? notificationsApi.list(userId).slice(0, 5) : []
   const needsActionItems = buildNeedsActionItems({
     userId,
@@ -160,18 +118,13 @@ export function WorkspaceDashboardComposition() {
     .sort((a, b) => b.matchScore - a.matchScore)
     .slice(0, 3)
 
-  const recentOpportunities = opportunities
-    .filter((o) => !userId || o.creatorId === userId)
-    .sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
-    .slice(0, 3)
-
   const activeWorkflowItems = [
     ...negotiations
       .filter((n) => n.status === 'active' || n.status === 'countered')
       .slice(0, 3)
       .map((n) => ({
         id: n.id,
-        title: `Negotiation ${n.id}`,
+        title: formatNegotiationDisplayTitle(n, opportunitiesApi.get),
         status: n.status,
         entity: 'negotiation' as const,
         href: `/negotiations/${n.id}`,
@@ -192,14 +145,46 @@ export function WorkspaceDashboardComposition() {
     .sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
     .slice(0, 4)
 
+  const blockedItems = [
+    ...matches
+      .filter((m) => m.status === 'declined' || m.status === 'expired')
+      .map((m) => ({
+        id: `blocked-match-${m.id}`,
+        label: 'Match needs replacement',
+        href: `/matches/${m.id}`,
+      })),
+    ...negotiations
+      .filter((n) => n.status === 'countered' || n.status === 'cancelled')
+      .map((n) => ({
+        id: `blocked-neg-${n.id}`,
+        label: formatNegotiationDisplayTitle(n, opportunitiesApi.get),
+        href: `/negotiations/${n.id}`,
+      })),
+  ].slice(0, 4)
+
+  const recommendedAction =
+    needsActionItems[0]?.primary?.href
+      ? {
+          label: needsActionItems[0].primary.label,
+          href: needsActionItems[0].primary.href,
+        }
+      : {
+          label: 'Post opportunity',
+          href: '/opportunities/create',
+        }
+
   return (
     <PmDashboardLayout
       metrics={
-        <DashboardMetricStrip
-          published={buckets.published}
-          activeMatches={activeMatches}
-          negotiating={buckets.negotiating}
-          drafts={buckets.drafts}
+        <PmStatsStrip
+          data-slot="pm-dashboard-metric-strip"
+          items={[
+            { label: 'Opportunities', value: opportunities.length },
+            { label: 'Matches', value: matches.length },
+            { label: 'Negotiations', value: negotiations.length },
+            { label: 'Deals', value: deals.length },
+            { label: 'Contracts', value: contracts.length },
+          ]}
         />
       }
       recentActivity={
@@ -243,6 +228,8 @@ export function WorkspaceDashboardComposition() {
       }
     >
       <PmActionHub
+        title="What needs my attention"
+        description="Critical tasks blocking workflow progression right now."
         items={needsActionItems}
         emptyAction={
           <PmPageActions
@@ -253,36 +240,8 @@ export function WorkspaceDashboardComposition() {
       />
 
       <PmSectionHeader
-        title="Recommended matches"
-        description="Highest compatibility scores from your active opportunities."
-        actions={
-          <PmButton size="sm" variant="outline" asChild>
-            <Link to="/matches">View all</Link>
-          </PmButton>
-        }
-      />
-      {recommendedMatches.length === 0 ? (
-        <PmEmptyState
-          title="No matches yet"
-          description="Publish an opportunity to discover ranked PostMatches across the network."
-          size="compact"
-          action={
-            <PmButton size="sm" asChild>
-              <Link to="/opportunities/create">Post opportunity</Link>
-            </PmButton>
-          }
-        />
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {recommendedMatches.map((match) => (
-            <MatchCard key={match.id} match={match} />
-          ))}
-        </div>
-      )}
-
-      <PmSectionHeader
-        title="Active negotiations & deals"
-        description="Collaboration items in progress across the workflow."
+        title="Progress across active entities"
+        description="Identity -> Progress -> Current stage -> Next step."
         actions={
           <PmButton size="sm" variant="outline" asChild>
             <Link to="/pipeline">Open pipeline</Link>
@@ -291,12 +250,12 @@ export function WorkspaceDashboardComposition() {
       />
       {activeWorkflowItems.length === 0 ? (
         <PmEmptyState
-          title="No active collaborations"
-          description="When negotiations or deals start, they will show up here for quick access."
+          title="No active workflow items"
+          description="Start by publishing or opening a match to move through the collaboration stages."
           size="compact"
           action={
-            <PmButton size="sm" variant="outline" asChild>
-              <Link to="/matches">Browse matches</Link>
+            <PmButton size="sm" asChild>
+              <Link to="/pipeline">Open pipeline</Link>
             </PmButton>
           }
         />
@@ -328,33 +287,75 @@ export function WorkspaceDashboardComposition() {
       )}
 
       <PmSectionHeader
-        title="Recent opportunities"
+        title="Blocked items"
+        description="Items waiting on partner response or reset decision."
         actions={
           <PmButton size="sm" variant="outline" asChild>
-            <Link to="/opportunities">View all</Link>
+            <Link to="/pipeline">Review blockers</Link>
           </PmButton>
         }
       />
-      {recentOpportunities.length === 0 ? (
+      {blockedItems.length === 0 ? (
         <PmEmptyState
-          title="No opportunities yet"
-          description="Post your first opportunity to start the collaboration workflow."
+          title="No blockers right now"
+          description="Your workflow is moving. Keep monitoring negotiations and deals."
           size="compact"
           action={
-            <PmButton size="sm" asChild>
-              <Link to="/opportunities/create">Post opportunity</Link>
+            <PmButton size="sm" variant="outline" asChild>
+              <Link to="/pipeline">Open pipeline</Link>
+            </PmButton>
+          }
+        />
+      ) : (
+        <ul className={cn('space-y-2', pmTypography.bodySm)}>
+          {blockedItems.map((item) => (
+            <li key={item.id}>
+              <Link to={item.href} className="font-medium text-primary hover:underline">
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <PmSectionHeader
+        title="Recommended actions"
+        description="Single next step to keep execution moving."
+        actions={
+          <PmButton size="sm" asChild>
+            <Link to={recommendedAction.href}>{recommendedAction.label}</Link>
+          </PmButton>
+        }
+      />
+      <PmSurface variant="default" shadow="card" className="rounded-3xl p-5">
+        <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
+          Focus on one action at a time: complete your current stage, then move to the next stage in the collaboration chain.
+        </p>
+      </PmSurface>
+
+      <PmSectionHeader
+        title="Recent activity"
+        actions={
+          <PmButton size="sm" variant="outline" asChild>
+            <Link to="/notifications">View all</Link>
+          </PmButton>
+        }
+      />
+      {recommendedMatches.length === 0 ? (
+        <PmEmptyState
+          title="No recent match activity"
+          description="Published opportunities and matches will appear here as activity increases."
+          size="compact"
+          action={
+            <PmButton size="sm" variant="outline" asChild>
+              <Link to="/matches">Open matches</Link>
             </PmButton>
           }
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {recentOpportunities.map((opp) => (
-            <OpportunityCard
-              key={opp.id}
-              opportunity={opp}
-              showActions={false}
-              canEdit={userId === opp.creatorId}
-            />
+          {recommendedMatches.map((match) => (
+            <MatchCard key={match.id} match={match} />
           ))}
         </div>
       )}

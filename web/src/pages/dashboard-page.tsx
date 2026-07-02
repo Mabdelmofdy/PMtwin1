@@ -3,10 +3,11 @@ import { ArrowRight } from 'lucide-react'
 import { useAuth } from '@/providers/auth-provider'
 import { matchesApi } from '@/api/matches.ts'
 import { WorkspaceDashboardComposition } from '@/components/layout/workspace-dashboard-composition'
-import { PmPageLayout, countActiveMatches } from '@/components/layout/pm-layout-index'
+import { countActiveMatches } from '@/components/layout/pm-layout-index'
 import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
 import {
   PmButton,
+  PmPage,
   PmPageActions,
   PmPageHeader,
   PmPageHeroMetric,
@@ -24,12 +25,13 @@ export function DashboardPage() {
     : null
 
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label="Workspace"
           title="What needs attention"
           description={`Good morning, ${firstName} — review urgent workflow steps, matches, and pipeline progress.`}
+          tone="mission"
           metric={
             readiness ? (
               <PmPageHeroMetric
@@ -62,6 +64,6 @@ export function DashboardPage() {
       }
     >
       <WorkspaceDashboardComposition />
-    </PmPageLayout>
+    </PmPage>
   )
 }

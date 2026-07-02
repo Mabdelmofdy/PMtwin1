@@ -4,6 +4,7 @@ import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { PmSurface } from '@/components/ui/pm-surface'
 import {
   COLLABORATION_FLOW_STEPS,
+  formatCollaborationFlowStepLabel,
   type CollaborationFlowStep,
 } from '@/components/opportunity/opportunity-collaboration-constants'
 
@@ -57,7 +58,7 @@ export function OpportunityTimeline({
                     !isActive && !isPast && 'text-muted-foreground',
                   )}
                 >
-                  {step}
+                  {formatCollaborationFlowStepLabel(step)}
                 </span>
               </li>
             )

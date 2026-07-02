@@ -65,6 +65,15 @@ export function evaluateNegotiationPolicy(
         'Only admins can terminate negotiations',
       )
 
+    case 'negotiation.view':
+      if (isParticipant(context)) {
+        return allow(`${POLICY_ID}:view-participant`)
+      }
+      return deny(
+        `${POLICY_ID}:view-denied`,
+        'Negotiation view requires participant role',
+      )
+
     default:
       return deny(
         `${POLICY_ID}:unknown-action`,

@@ -89,7 +89,14 @@ export function OpportunityDashboardSection() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {myRecent.map((opp) => (
-              <OpportunityCard key={opp.id} opportunity={opp} showActions />
+              <OpportunityCard
+                key={opp.id}
+                opportunity={opp}
+                showActions
+                viewerUserId={user?.id}
+                showOwnerInsights
+                canEdit
+              />
             ))}
           </div>
         )}

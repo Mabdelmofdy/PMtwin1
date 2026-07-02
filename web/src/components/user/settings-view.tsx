@@ -39,6 +39,7 @@ import {
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 
 import { useAuth } from '@/providers/auth-provider'
+import { formatUserRoleLabel } from '@/components/user/user-display'
 
 import { cn } from '@/lib/utils'
 
@@ -94,9 +95,7 @@ export function SettingsView() {
 
             <PmFormReadonlyField label="Email" value={user?.email} copyable />
 
-            <PmFormReadonlyField label="User ID" value={user?.id} copyable />
-
-            <PmFormReadonlyField label="Role" value={user?.role} />
+            <PmFormReadonlyField label="Account type" value={formatUserRoleLabel(user?.role)} />
 
           </PmFormReadonlySection>
 

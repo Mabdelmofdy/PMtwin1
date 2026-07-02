@@ -1,0 +1,42 @@
+/* POC legacy design tokens — maps variables used by ported public pages */
+
+:root {
+  --primary-color: #0369a1;
+  --primary-dark: #0284c7;
+  --primary-light: #0ea5e9;
+  --secondary-color: #334155;
+  --danger-color: #dc2626;
+  --success-color: #059669;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --portal-bg: #eef3f6;
+  --portal-sidebar-active-bg: #ecfeff;
+  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.06);
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-xs: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-sm: 0.5rem;
+}
+
+.public-layout-main--flush {
+  max-width: none;
+  padding: 0;
+}
+
+.legacy-poc-page a.btn,
+.legacy-poc-page a.pm-btn,
+.legacy-poc-page a.pm-text-link,
+.legacy-poc-page a.wf-btn-primary,
+.legacy-poc-page a.wf-btn-secondary,
+.legacy-poc-page .pm-login-row a,
+.legacy-poc-page .pm-auth-switch a {
+  text-decoration: none;
+}

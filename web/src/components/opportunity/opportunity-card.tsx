@@ -8,7 +8,7 @@ import { PmCardActions } from '@/components/ui/pm-more-actions'
 import { PmReadinessScoreBadge } from '@/components/ui/pm-readiness-score-badge'
 import { PmSurface } from '@/components/ui/pm-surface'
 import { OpportunityStatusBadge } from '@/components/opportunity/opportunity-status-badge'
-import { formatOpportunityIntent } from '@/components/opportunity/opportunity-display'
+import { OpportunityListLabels } from '@/components/opportunity/opportunity-list-labels'
 import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
 import type { Opportunity } from '@/types/domain.ts'
 import { cn } from '@/lib/utils'
@@ -19,6 +19,11 @@ export type OpportunityCardProps = {
   showActions?: boolean
   /** When false, Edit is hidden from the More menu. */
   canEdit?: boolean
+  /** Owner-only readiness score and match count (hidden for marketplace list viewers). */
+  showOwnerInsights?: boolean
+  /** Current signed-in user — drives ownership badges. */
+  viewerUserId?: string | null
+  viewerOrganizationId?: string | null
 }
 
 /** Premium opportunity card for grid and mobile list layouts. */
@@ -27,14 +32,14 @@ export function OpportunityCard({
   className,
   showActions = true,
   canEdit = true,
+  showOwnerInsights = false,
+  viewerUserId,
+  viewerOrganizationId,
 }: OpportunityCardProps) {
-  const matchCount = matchesApi.getByOpportunity(opportunity.id).length
-  const readiness = resolveOpportunityReadiness(opportunity)
+  const matchCount = showOwnerInsights ? matchesApi.getByOpportunity(opportunity.id).length : 0
+  const readiness = showOwnerInsights ? resolveOpportunityReadiness(opportunity) : null
   const category = opportunity.scope?.sectors?.[0]
   const href = `/opportunities/${opportunity.id}`
-  const metaLine = [formatOpportunityIntent(opportunity.intent), category]
-    .filter(Boolean)
-    .join(' · ')
 
   return (
     <PmSurface
@@ -44,25 +49,33 @@ export function OpportunityCard({
       className={cn('flex h-full flex-col p-4 md:p-5', className)}
       data-slot="opportunity-card"
     >
+      <OpportunityListLabels
+        opportunity={opportunity}
+        viewerUserId={viewerUserId}
+        viewerOrganizationId={viewerOrganizationId}
+        className="mb-2"
+      />
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <Link to={href} className={cn(pmTypography.h3, 'line-clamp-2 hover:text-primary')}>
             {opportunity.title}
           </Link>
-          {metaLine ? (
-            <p className={cn(pmTypography.caption, 'mt-1 text-muted-foreground')}>{metaLine}</p>
+          {category ? (
+            <p className={cn(pmTypography.caption, 'mt-1 text-muted-foreground')}>{category}</p>
           ) : null}
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1.5">
-          <PmReadinessScoreBadge
-            score={readiness.score}
-            variant="compact"
-            showLabel={false}
-            explanation={{
-              missingRequired: readiness.missingRequired,
-              missingRecommended: readiness.missingRecommended,
-            }}
-          />
+          {showOwnerInsights && readiness ? (
+            <PmReadinessScoreBadge
+              score={readiness.score}
+              variant="compact"
+              showLabel={false}
+              explanation={{
+                missingRequired: readiness.missingRequired,
+                missingRecommended: readiness.missingRecommended,
+              }}
+            />
+          ) : null}
           <OpportunityStatusBadge status={opportunity.status} />
         </div>
       </div>

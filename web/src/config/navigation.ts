@@ -12,6 +12,7 @@ import {
   Heart,
   Home,
   MessageCircle,
+  Scale,
   Settings,
   ShieldAlert,
   ShieldCheck,
@@ -46,23 +47,17 @@ export const mainNavigation: NavGroup[] = [
         icon: Home,
         keywords: ['home', 'overview', 'workspace', 'attention'],
       },
-      {
-        title: 'Workflow pipeline',
-        href: '/pipeline',
-        icon: GitBranch,
-        keywords: ['pipeline', 'stages', 'workflow', 'postmatch', 'negotiation', 'deal', 'contract'],
-      },
+    ],
+  },
+  {
+    title: 'Marketplace',
+    items: [
       {
         title: 'Find',
         href: '/people',
         icon: Users,
         keywords: ['people', 'talent', 'search'],
       },
-    ],
-  },
-  {
-    title: 'Opportunities',
-    items: [
       {
         title: 'Opportunities',
         href: '/opportunities',
@@ -78,13 +73,36 @@ export const mainNavigation: NavGroup[] = [
     ],
   },
   {
-    title: 'Workflow stages',
+    title: 'Pipeline',
+    items: [
+      {
+        title: 'Pipeline',
+        href: '/pipeline',
+        icon: GitBranch,
+        keywords: ['pipeline', 'workflow', 'queue'],
+      },
+      {
+        title: 'Matches',
+        href: '/matches',
+        icon: Heart,
+        keywords: ['matching', 'collaboration', 'recommendations'],
+      },
+      {
+        title: 'Negotiations',
+        href: '/negotiations',
+        icon: Scale,
+        keywords: ['negotiations', 'terms', 'counter', 'workflow'],
+      },
+    ],
+  },
+  {
+    title: 'Execution',
     items: [
       {
         title: 'Deals',
         href: '/deals',
         icon: Handshake,
-        keywords: ['negotiations', 'agreements', 'workflow'],
+        keywords: ['deals', 'agreements', 'workflow'],
       },
       {
         title: 'Contracts',
@@ -98,18 +116,16 @@ export const mainNavigation: NavGroup[] = [
     title: 'Communication',
     items: [
       {
-        title: 'Messages',
-        href: '/messages',
-        icon: MessageCircle,
-        badge: 3,
-        keywords: ['chat', 'inbox'],
-      },
-      {
         title: 'Notifications',
         href: '/notifications',
         icon: Bell,
-        badge: 5,
         keywords: ['alerts', 'updates'],
+      },
+      {
+        title: 'Messages',
+        href: '/messages',
+        icon: MessageCircle,
+        keywords: ['chat', 'inbox'],
       },
     ],
   },
@@ -205,17 +221,17 @@ export function isNavActive(pathname: string, href: string) {
 export const routeLabels: Record<string, string> = {
   dashboard: 'Dashboard',
   'company-dashboard': 'Company Dashboard',
-  pipeline: 'Workflow pipeline',
+  pipeline: 'Pipeline',
   people: 'Find',
   opportunities: 'Opportunities',
   create: 'Create',
   edit: 'Edit',
   map: 'Map',
   matches: 'Matches',
+  negotiations: 'Negotiations',
   deals: 'Deals',
   rate: 'Rate',
   contracts: 'Contracts',
-  negotiations: 'Negotiations',
   messages: 'Messages',
   notifications: 'Notifications',
   profile: 'Profile',
@@ -232,6 +248,12 @@ export const routeLabels: Record<string, string> = {
   skills: 'Skills',
   subscriptions: 'Subscriptions',
   'collaboration-models': 'Collaboration Models',
+  features: 'Features',
+  pricing: 'Pricing',
+  about: 'About',
+  contact: 'Contact',
+  privacy: 'Privacy',
+  terms: 'Terms',
   'collaboration-wizard': 'Collaboration Wizard',
   'site-content': 'Site Content',
   'knowledge-base': 'Knowledge Base',

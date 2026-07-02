@@ -148,7 +148,7 @@ function DefaultMobileCard<T>({
   return (
     <PmSurface
       variant="default"
-      className="p-4"
+      className="p-5"
       data-slot="pm-table-mobile-card"
       data-row-id={rowId}
     >
@@ -279,7 +279,7 @@ export function PmDataTable<T>({
           {/* Desktop / tablet table */}
           <PmSurface
             variant="default"
-            className="hidden overflow-hidden sm:block"
+            className="hidden overflow-hidden rounded-3xl sm:block"
             data-responsive="table"
           >
             <div className="relative max-h-[min(70svh,48rem)] overflow-auto">

@@ -29,7 +29,7 @@ export const APPLICATIONS_LEGACY_SECTION_TITLE =
   'Direct applications (legacy / hiring)'
 
 export const APPLICATIONS_LEGACY_EMPTY_MESSAGE =
-  'No direct applications. Collaboration runs through PostMatches — review matches above to accept, negotiate, and create deals.'
+  'No direct applications. Collaboration runs through matches — review matches above to accept, negotiate, and create deals.'
 
 export function ApplicationsPanel({
   applications,
@@ -75,7 +75,7 @@ export function ApplicationsPanel({
         <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
           {variant === 'legacy'
             ? APPLICATIONS_LEGACY_EMPTY_MESSAGE
-            : 'No direct applications. PostMatch is the primary collaboration path.'}
+            : 'No direct applications. Matches are the primary collaboration path.'}
         </p>
       </PmContentCard>
     )
@@ -90,7 +90,7 @@ export function ApplicationsPanel({
       }
       description={
         variant === 'legacy'
-          ? 'Optional hiring path — does not replace PostMatch → Negotiation → Deal.'
+          ? 'Optional hiring path — does not replace Match → Negotiation → Deal.'
           : undefined
       }
       className="border-border/50 bg-surface-muted/40"

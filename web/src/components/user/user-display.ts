@@ -57,3 +57,15 @@ export const MOCK_MESSAGE_THREADS = [
   { id: 't1', name: 'Khalid Al-Harbi', preview: 'Happy to walk through LOD 400…', unread: 2 },
   { id: 't2', name: 'Al-Riyadh Construction', preview: 'Contract draft attached', unread: 0 },
 ] as const
+
+const ROLE_LABELS: Record<string, string> = {
+  admin: 'Platform admin',
+  company: 'Company account',
+  individual: 'Professional',
+  user: 'Professional',
+}
+
+export function formatUserRoleLabel(role?: string | null): string {
+  if (!role) return 'Account'
+  return ROLE_LABELS[role] ?? role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+}

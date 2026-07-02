@@ -3,6 +3,11 @@ import { describe, it } from 'node:test'
 import {
   countOpportunityBuckets,
   formatOpportunityIntent,
+  resolveOpportunityIntentBadgeTone,
+  resolveOpportunityIntentKind,
+  resolveOpportunityOwnerBadgeTone,
+  resolveOpportunityOwnershipScope,
+  formatOpportunityOwnershipLabel,
   resolvePublishVisualState,
 } from '@/components/opportunity/opportunity-display.ts'
 
@@ -31,6 +36,44 @@ describe('opportunity-display', () => {
 
   it('formats intent labels', () => {
     assert.equal(formatOpportunityIntent('need'), 'Need')
+    assert.equal(formatOpportunityIntent('request'), 'Need')
     assert.equal(formatOpportunityIntent('offer'), 'Offer')
+  })
+
+  it('maps intent kinds to distinct badge tones', () => {
+    assert.equal(resolveOpportunityIntentKind('need'), 'need')
+    assert.equal(resolveOpportunityIntentKind('offer'), 'offer')
+    assert.equal(resolveOpportunityIntentBadgeTone('need'), 'info')
+    assert.equal(resolveOpportunityIntentBadgeTone('offer'), 'success')
+    assert.equal(resolveOpportunityIntentBadgeTone('hybrid'), 'warning')
+    assert.equal(resolveOpportunityOwnerBadgeTone(), 'primary')
+  })
+
+  it('resolves ownership scope for viewer', () => {
+    assert.equal(
+      resolveOpportunityOwnershipScope({
+        opportunity: { creatorId: 'u1', organizationId: 'org-1' },
+        viewerUserId: 'u1',
+        viewerOrganizationId: 'org-1',
+      }),
+      'mine',
+    )
+    assert.equal(
+      resolveOpportunityOwnershipScope({
+        opportunity: { creatorId: 'u2', organizationId: 'org-1' },
+        viewerUserId: 'u1',
+        viewerOrganizationId: 'org-1',
+      }),
+      'company',
+    )
+    assert.equal(
+      resolveOpportunityOwnershipScope({
+        opportunity: { creatorId: 'u9', organizationId: 'org-9' },
+        viewerUserId: 'u1',
+        viewerOrganizationId: 'org-1',
+      }),
+      'marketplace',
+    )
+    assert.equal(formatOpportunityOwnershipLabel('marketplace'), 'Marketplace opportunity')
   })
 })

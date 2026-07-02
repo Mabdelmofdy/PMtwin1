@@ -41,14 +41,14 @@ export function PmContentCard({
       {showHeader ? (
         <div
           className={cn(
-            'flex flex-col gap-2 border-b border-border/40 pb-4',
+            'flex flex-col gap-2.5 border-b border-border/45 pb-5',
             !noPadding && 'px-0',
           )}
         >
           {header ?? (
             <>
               {title ? (
-                <h3 className="pm-text-h3">{title}</h3>
+                <h3 className="pm-text-h3 tracking-tight">{title}</h3>
               ) : null}
               {description ? (
                 <p className="pm-text-caption">{description}</p>
@@ -60,9 +60,9 @@ export function PmContentCard({
           ) : null}
         </div>
       ) : null}
-      <div className={cn(showHeader && 'pt-4')}>{children}</div>
+      <div className={cn(showHeader && 'pt-5')}>{children}</div>
       {footer ? (
-        <div className="mt-4 border-t border-border/40 pt-4">{footer}</div>
+        <div className="mt-5 border-t border-border/40 pt-5">{footer}</div>
       ) : null}
     </PmCard>
   )

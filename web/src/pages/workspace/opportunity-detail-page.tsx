@@ -13,6 +13,7 @@ import { negotiationService } from '@/services/negotiation-service.ts'
 import { buildOpportunityMatchesReadModel, type OpportunityMatchCard } from '@/lib/opportunity-matches-read-model.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
+import { EntityAccessDenied, EntityLimitedViewBanner } from '@/components/auth/entity-access-state'
 import { ApplicationsPanel } from '@/components/opportunity/applications-panel'
 import { OpportunityTimeline, type OpportunityTimelineEvent } from '@/components/opportunity/opportunity-timeline'
 import { OpportunitySummaryCard } from '@/components/opportunity/opportunity-summary-card'
@@ -21,7 +22,7 @@ import { OpportunityPublishExperience, OpportunityPublishPanel } from '@/compone
 import { ApplyWizard } from '@/components/opportunity/apply-wizard'
 import { OpportunityReadinessCard, resolveOpportunityReadiness } from '@/components/readiness'
 import { formatDate } from '@/lib/format'
-import { resolveCanonicalStatus, type StatusEntity } from '@/lib/status-display.ts'
+import { resolveCanonicalStatus } from '@/lib/status-display.ts'
 import {
   publishOpportunityUiAction,
   resolveProfileKindFromUser,
@@ -34,7 +35,6 @@ import {
   PmContentCard,
   PmDetailLayout,
   PmInspectorLayout,
-  PmPageLayout,
   PmSectionHeader,
 } from '@/components/layout/pm-layout-index'
 import {
@@ -42,115 +42,19 @@ import {
   PmFormReadonlyField,
   PmFormReadonlySection,
 } from '@/components/forms/pm-form-index'
-import { PmActionHub, PmBadge, PmButton, PmEmptyState, PmMatchScoreBadge, PmPageHeader, PmPageHeroMetric, PmPageActions, PmWorkflowJourney, type PmActionHubItem, type PmWorkflowJourneyStep } from '@/components/ui/pm-index'
+import { PmActionHub, PmBadge, PmButton, PmEmptyState, PmMatchScoreBadge, PmPage, PmPageHeader, PmPageHeroMetric, PmPageActions, PmRelationshipChain, PmWorkflowJourney, buildOpportunityWorkflowSteps, resolveCollaborationActiveStepFromMatches, type PmActionHubItem } from '@/components/ui/pm-index'
 import { formatReadinessScorePercent } from '@/components/ui/pm-readiness-score-display'
 import { OpportunityStatusBadge } from '@/components/opportunity/opportunity-status-badge'
+import { OpportunityIdentityBadges } from '@/components/opportunity/opportunity-identity'
 import { formatOpportunityIntent } from '@/components/opportunity/opportunity-display'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
 import { productFlags } from '@/config/product-flags.ts'
-
-function resolveCollaborationActiveStep(
-  matches: ReturnType<typeof buildOpportunityMatchesReadModel>['matches'],
-): 'Opportunity' | 'PostMatch' | 'Negotiation' | 'Deal' | 'Contract' {
-  if (matches.some((card) => card.actions.showViewDeal)) return 'Deal'
-  if (matches.some((card) => card.actions.showViewNegotiation || card.actions.showCreateDeal)) {
-    return 'Negotiation'
-  }
-  if (matches.length > 0) return 'PostMatch'
-  return 'Opportunity'
-}
-
-function resolveJourneyActiveIndex(
-  collaborationStep: ReturnType<typeof resolveCollaborationActiveStep>,
-  oppStatus: string,
-): number {
-  if (['completed', 'closed'].includes(oppStatus)) return 5
-  if (['in_execution', 'executing'].includes(oppStatus)) return 5
-  if (oppStatus === 'contracted') return 4
-  const stepIndex: Record<ReturnType<typeof resolveCollaborationActiveStep>, number> = {
-    Opportunity: 0,
-    PostMatch: 1,
-    Negotiation: 2,
-    Deal: 3,
-    Contract: 4,
-  }
-  return stepIndex[collaborationStep] ?? 0
-}
-
-function buildOpportunityWorkflowSteps(
-  opp: { id: string; status: string },
-  collaborationStep: ReturnType<typeof resolveCollaborationActiveStep>,
-  topCard?: OpportunityMatchCard,
-  dealStatus?: string,
-  contractStatus?: string,
-): readonly PmWorkflowJourneyStep[] {
-  const activeIndex = resolveJourneyActiveIndex(collaborationStep, opp.status)
-  const stepDefs: Array<{
-    id: string
-    label: string
-    status?: string
-    statusEntity?: StatusEntity
-    href?: string
-  }> = [
-    {
-      id: 'opportunity',
-      label: 'Opportunity',
-      status: opp.status,
-      statusEntity: 'opportunity',
-      href: `/opportunities/${opp.id}`,
-    },
-    {
-      id: 'match',
-      label: 'Match',
-      status: topCard?.match.status,
-      statusEntity: 'match',
-      href: topCard?.detailPath,
-    },
-    {
-      id: 'negotiation',
-      label: 'Negotiation',
-      status: topCard?.actions.negotiation?.status,
-      statusEntity: 'negotiation',
-      href: topCard?.actions.negotiationId
-        ? `/negotiations/${topCard.actions.negotiationId}`
-        : undefined,
-    },
-    {
-      id: 'deal',
-      label: 'Deal',
-      status: dealStatus,
-      statusEntity: 'deal',
-      href: topCard?.actions.dealId ? `/deals/${topCard.actions.dealId}` : undefined,
-    },
-    {
-      id: 'contract',
-      label: 'Contract',
-      status: contractStatus,
-      statusEntity: 'contract',
-    },
-    {
-      id: 'execution',
-      label: 'Complete',
-      status: ['completed', 'closed'].includes(opp.status) ? opp.status : undefined,
-      statusEntity: 'opportunity',
-    },
-  ]
-
-  return stepDefs.map((step, index) => ({
-    id: step.id,
-    label: step.label,
-    status: step.status,
-    statusEntity: step.statusEntity,
-    href: step.href,
-    state:
-      index < activeIndex
-        ? ('complete' as const)
-        : index === activeIndex
-          ? ('current' as const)
-          : ('upcoming' as const),
-  }))
-}
+import {
+  buildViewerContext,
+  findParticipantOneWayMatchForOpportunity,
+  resolveOpportunityDetailVisibility,
+} from '@/lib/entity-view-visibility.ts'
 
 function buildRecommendedActionItem(input: {
   canPublishDraft: boolean
@@ -163,7 +67,7 @@ function buildRecommendedActionItem(input: {
     return {
       id: 'publish',
       title: 'Publish opportunity',
-      context: 'Publishing runs matching and surfaces PostMatches.',
+      context: 'Publishing runs matching and surfaces matches.',
       status: 'draft',
       statusEntity: 'opportunity',
       primary: { label: 'Review readiness', href: `#${RELATED_MATCHES_SECTION_ID}` },
@@ -178,7 +82,7 @@ function buildRecommendedActionItem(input: {
     return {
       id: 'accept-match',
       title: 'Accept top match',
-      context: 'Respond to the highest-ranked PostMatch to advance the workflow.',
+      context: 'Respond to the highest-ranked match to advance the workflow.',
       status: topCard.match.status,
       statusEntity: 'match',
       matchScore: topCard.match.matchScore,
@@ -234,7 +138,7 @@ function buildRecommendedActionItem(input: {
 export function OpportunityDetailPage() {
   const version = useDataStoreVersion()
   const { id } = useParams()
-  const { user, isPendingApproval } = useAuth()
+  const { user, isPendingApproval, canAccessAdmin } = useAuth()
   const [showWizard, setShowWizard] = useState(false)
   const [publishDetails, setPublishDetails] = useState<readonly string[] | null>(null)
   const [highlightRelatedMatches, setHighlightRelatedMatches] = useState(false)
@@ -245,8 +149,38 @@ export function OpportunityDetailPage() {
   )
   const applications = useMemo(() => applicationRepository.getAll(), [version])
 
+  const postMatchesForOpp = useMemo(
+    () => (opp?.id ? matchesApi.getByOpportunity(opp.id) : []),
+    [opp?.id, version],
+  )
+
+  const viewer = useMemo(
+    () =>
+      buildViewerContext({
+        userId: user?.id,
+        role: user?.role,
+        status: user?.status,
+        canAccessAdmin,
+        profile: user?.profile,
+      }),
+    [user, canAccessAdmin],
+  )
+
+  const visibility = useMemo(() => {
+    if (!opp) return null
+    return resolveOpportunityDetailVisibility(opp, viewer, {
+      postMatches: postMatchesForOpp,
+      showLegacyApplicationsFlag: productFlags.showLegacyApplications,
+    })
+  }, [opp, viewer, postMatchesForOpp])
+
+  const participantMatch = useMemo(() => {
+    if (!opp?.id) return undefined
+    return findParticipantOneWayMatchForOpportunity(opp.id, postMatchesForOpp, viewer)
+  }, [opp?.id, postMatchesForOpp, viewer])
+
   const relatedMatchesModel = useMemo(() => {
-    if (!opp?.id) return null
+    if (!opp?.id || !visibility?.showMatchingSection) return null
     return buildOpportunityMatchesReadModel(opp.id, {
       getPostMatchesByOpportunity: matchesApi.getByOpportunity,
       getOpportunity: opportunitiesApi.get,
@@ -256,11 +190,68 @@ export function OpportunityDetailPage() {
       getPersonName: (userId) => peopleApi.get(userId)?.profile?.name,
       currentUserId: user?.id ?? null,
     })
-  }, [opp?.id, user?.id, version])
+  }, [opp?.id, user?.id, version, visibility?.showMatchingSection])
+
+  const collaborationStep = resolveCollaborationActiveStepFromMatches(
+    relatedMatchesModel?.matches ?? [],
+  )
+  const hasMatches = (relatedMatchesModel?.matches.length ?? 0) > 0
+
+  const timelineEvents = useMemo((): OpportunityTimelineEvent[] => {
+    if (!opp || !visibility) return []
+    const events: OpportunityTimelineEvent[] = [
+      {
+        id: 'updated',
+        label: 'Last updated',
+        timestamp: formatDate(opp.updatedAt),
+        status: 'active',
+      },
+    ]
+
+    if (opp.createdAt) {
+      events.unshift({
+        id: 'created',
+        label: 'Created',
+        timestamp: formatDate(opp.createdAt),
+        status: 'done',
+      })
+    }
+
+    if (visibility.showMatchingSection && hasMatches) {
+      events.push({
+        id: 'matched',
+        label: 'Matches discovered',
+        description: `${relatedMatchesModel!.matches.length} related matches`,
+        status: 'done',
+      })
+    } else if (visibility.showMatchingSection) {
+      events.push({
+        id: 'awaiting',
+        label: 'Awaiting matches',
+        description: 'Publish to run matching',
+        status: 'upcoming',
+      })
+    }
+
+    return events
+  }, [hasMatches, opp, relatedMatchesModel, visibility])
+
+  useEffect(() => {
+    if (!highlightRelatedMatches) return
+
+    const section = document.getElementById(RELATED_MATCHES_SECTION_ID)
+    section?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+
+    const timer = window.setTimeout(() => {
+      setHighlightRelatedMatches(false)
+    }, 2400)
+
+    return () => window.clearTimeout(timer)
+  }, [highlightRelatedMatches, relatedMatchesModel?.matches.length])
 
   if (!opp) {
     return (
-      <PmPageLayout
+      <PmPage
         header={<PmPageHeader title="Opportunity not found" description="This record may have been removed." />}
       >
         <PmEmptyState
@@ -272,11 +263,29 @@ export function OpportunityDetailPage() {
             </PmButton>
           }
         />
-      </PmPageLayout>
+      </PmPage>
     )
   }
 
-  const isOwner = user?.id === opp.creatorId
+  if (!visibility) {
+    return null
+  }
+
+  if (visibility.access === 'denied') {
+    return (
+      <PmPage
+        header={<PmPageHeader title="Access denied" description="This opportunity is not available." />}
+      >
+        <EntityAccessDenied
+          description="Draft opportunities are only visible to their owner or platform staff."
+          backHref="/opportunities"
+          backLabel="Back to opportunities"
+        />
+      </PmPage>
+    )
+  }
+
+  const isOwner = visibility.access === 'owner'
   const { application, canEdit, canReapply } = user
     ? negotiationService.resolveUserApplication(applications, opp.id, user.id)
     : { application: undefined, canEdit: false, canReapply: false }
@@ -306,10 +315,6 @@ export function OpportunityDetailPage() {
 
   const skills = opp.scope?.coreSkills ?? opp.attributes?.coreSkills ?? []
   const creator = opp.creatorId ? peopleApi.get(opp.creatorId) : undefined
-  const collaborationStep = resolveCollaborationActiveStep(
-    relatedMatchesModel?.matches ?? [],
-  )
-  const hasMatches = (relatedMatchesModel?.matches.length ?? 0) > 0
   const topMatch = relatedMatchesModel?.matches[0]?.match
   const topMatchCard = relatedMatchesModel?.matches[0]
   const topMatchScore = topMatch?.matchScore
@@ -331,62 +336,13 @@ export function OpportunityDetailPage() {
     topDeal?.status,
     topContract?.status,
   )
-  const recommendedAction = buildRecommendedActionItem({
-    canPublishDraft,
-    opportunityId: opp.id,
-    topCard: topMatchCard,
-  })
-
-  const timelineEvents = useMemo((): OpportunityTimelineEvent[] => {
-    const events: OpportunityTimelineEvent[] = [
-      {
-        id: 'updated',
-        label: 'Last updated',
-        timestamp: formatDate(opp.updatedAt),
-        status: 'active',
-      },
-    ]
-
-    if (opp.createdAt) {
-      events.unshift({
-        id: 'created',
-        label: 'Created',
-        timestamp: formatDate(opp.createdAt),
-        status: 'done',
+  const recommendedAction = visibility.showRecommendedActions
+    ? buildRecommendedActionItem({
+        canPublishDraft,
+        opportunityId: opp.id,
+        topCard: topMatchCard,
       })
-    }
-
-    if (hasMatches) {
-      events.push({
-        id: 'matched',
-        label: 'Matches discovered',
-        description: `${relatedMatchesModel!.matches.length} related matches`,
-        status: 'done',
-      })
-    } else {
-      events.push({
-        id: 'awaiting',
-        label: 'Awaiting matches',
-        description: 'Publish to run matching',
-        status: 'upcoming',
-      })
-    }
-
-    return events
-  }, [hasMatches, opp.createdAt, opp.updatedAt, relatedMatchesModel])
-
-  useEffect(() => {
-    if (!highlightRelatedMatches) return
-
-    const section = document.getElementById(RELATED_MATCHES_SECTION_ID)
-    section?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-
-    const timer = window.setTimeout(() => {
-      setHighlightRelatedMatches(false)
-    }, 2400)
-
-    return () => window.clearTimeout(timer)
-  }, [highlightRelatedMatches, relatedMatchesModel?.matches.length])
+    : null
 
   const handlePublish = () => {
     if (!user) {
@@ -413,58 +369,82 @@ export function OpportunityDetailPage() {
     }
   }
 
+  const headerDescription = [
+    opp.location,
+    visibility.showCreatorName ? creator?.profile?.name : undefined,
+    visibility.access === 'teaser' ? opp.scope?.sectors?.[0] : undefined,
+  ]
+    .filter(Boolean)
+    .join(' · ')
+
   return (
-    <PmPageLayout
+    <PmPage
       header={
         <PmPageHeader
           label={formatOpportunityIntent(opp.intent)}
           title={opp.title}
-          description={[opp.location, creator?.profile?.name].filter(Boolean).join(' · ')}
+          description={headerDescription || undefined}
+          tone="opportunity"
           metric={
-            <PmPageHeroMetric
-              value={formatReadinessScorePercent(opportunityReadiness.score)}
-              label="Readiness"
-              animate={false}
-            />
+            visibility.showReadiness ? (
+              <PmPageHeroMetric
+                value={formatReadinessScorePercent(opportunityReadiness.score)}
+                label="Readiness"
+                animate={false}
+              />
+            ) : undefined
           }
           badges={
             <>
+              <OpportunityIdentityBadges
+                opportunity={opp}
+                viewerUserId={user?.id}
+                viewerOrganizationId={user?.organizationId}
+                creatorOrganizationId={
+                  opp.creatorId ? peopleApi.get(opp.creatorId)?.organizationId : undefined
+                }
+              />
               <OpportunityStatusBadge status={opp.status} />
-              {topMatchScore != null ? (
+              {visibility.showMatchScoreInHero && topMatchScore != null ? (
                 <PmMatchScoreBadge score={topMatchScore} variant="compact" showLabel />
               ) : null}
-              {skills.length > 0 ? (
+              {visibility.showParticipantMatchChip && participantMatch?.matchScore != null ? (
+                <PmMatchScoreBadge score={participantMatch.matchScore} variant="compact" showLabel />
+              ) : null}
+              {visibility.showFullDescription && skills.length > 0 ? (
                 <PmBadge tone="muted">{skills.length} skills</PmBadge>
               ) : null}
             </>
           }
           actions={
-            <PmPageActions
-              primary={
-                recommendedAction
-                  ? undefined
-                  : hasMatches
-                    ? {
-                        label: 'Open top match',
-                        href: `/matches/${relatedMatchesModel!.matches[0]!.match.id}`,
-                      }
-                    : canPublishDraft
-                      ? undefined
-                      : { label: 'View matches', href: '/matches', variant: 'outline' }
-              }
-              more={
-                isOwner
-                  ? [
-                      {
-                        id: 'edit',
-                        label: 'Edit opportunity',
-                        href: `/opportunities/${opp.id}/edit`,
-                        icon: Pencil,
-                      },
-                    ]
-                  : undefined
-              }
-            />
+            visibility.showOwnerActions ? (
+              <PmPageActions
+                primary={
+                  recommendedAction
+                    ? undefined
+                    : hasMatches
+                      ? {
+                          label: 'Open top match',
+                          href: `/matches/${relatedMatchesModel!.matches[0]!.match.id}`,
+                        }
+                      : canPublishDraft
+                        ? undefined
+                        : { label: 'View matches', href: '/matches', variant: 'outline' }
+                }
+                more={
+                  isOwner
+                    ? [
+                        {
+                          id: 'edit',
+                          label: 'Edit opportunity',
+                          href: `/opportunities/${opp.id}/edit`,
+                          icon: Pencil,
+                        },
+                      ]
+                    : undefined
+                }
+              />
+            ) : undefined
           }
         />
       }
@@ -472,7 +452,41 @@ export function OpportunityDetailPage() {
       <PmDetailLayout
         main={
           <>
-            <PmWorkflowJourney steps={workflowSteps} compact label={false} />
+            {visibility.access === 'teaser' ? (
+              <EntityLimitedViewBanner message="Limited preview — verify your account to see full opportunity details." />
+            ) : null}
+
+            {visibility.showCollaborationWorkflow ? (
+              <PmWorkflowJourney steps={workflowSteps} compact label={false} />
+            ) : null}
+
+            <PmRelationshipChain
+              title="Relationship chain"
+              description="Follow this opportunity through each workflow stage."
+              items={[
+                { label: 'Opportunity', href: `/opportunities/${opp.id}`, current: true },
+                {
+                  label: topMatchCard ? 'Matches' : 'Matches (pending)',
+                  href: topMatchCard ? `/matches/${topMatchCard.match.id}` : '/matches',
+                },
+                {
+                  label: topMatchCard?.actions.negotiationId ? 'Negotiations' : 'Negotiations (next)',
+                  href: topMatchCard?.actions.negotiationId
+                    ? `/negotiations/${topMatchCard.actions.negotiationId}`
+                    : '/negotiations',
+                },
+                {
+                  label: topMatchCard?.actions.dealId ? 'Deals' : 'Deals (next)',
+                  href: topMatchCard?.actions.dealId
+                    ? `/deals/${topMatchCard.actions.dealId}`
+                    : '/deals',
+                },
+                {
+                  label: topContract ? 'Contracts' : 'Contracts (next)',
+                  href: topContract ? `/contracts/${topContract.id}` : '/contracts',
+                },
+              ]}
+            />
 
             {recommendedAction ? (
               <PmActionHub
@@ -490,13 +504,40 @@ export function OpportunityDetailPage() {
               </PmContentCard>
             ) : null}
 
-            <OpportunityPublishExperience publishDetails={publishDetails} />
+            {visibility.showOwnerActions ? (
+              <OpportunityPublishExperience publishDetails={publishDetails} />
+            ) : null}
 
-            <OpportunitySummaryCard
-              opportunity={opp}
-              creatorName={creator?.profile?.name}
-              skillCount={skills.length}
-            />
+            {visibility.showFullDescription ? (
+              <OpportunitySummaryCard
+                opportunity={opp}
+                creatorName={visibility.showCreatorName ? creator?.profile?.name : undefined}
+                skillCount={skills.length}
+              />
+            ) : null}
+
+            {visibility.showParticipantMatchChip && participantMatch ? (
+              <PmContentCard title="Your match">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
+                      You are matched to this opportunity.
+                    </p>
+                    {participantMatch.matchScore != null ? (
+                      <PmMatchScoreBadge
+                        score={participantMatch.matchScore}
+                        variant="default"
+                        showLabel
+                        className="mt-2"
+                      />
+                    ) : null}
+                  </div>
+                  <PmButton size="sm" variant="outline" asChild>
+                    <Link to={`/matches/${participantMatch.id}`}>Open match</Link>
+                  </PmButton>
+                </div>
+              </PmContentCard>
+            ) : null}
 
             {relatedMatchesModel ? (
               <RelatedMatchesPanel
@@ -508,13 +549,15 @@ export function OpportunityDetailPage() {
               />
             ) : null}
 
-            <PmContentCard title="Requirements">
-              <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-                {opp.description || 'No description provided.'}
-              </p>
-            </PmContentCard>
+            {visibility.showFullDescription ? (
+              <PmContentCard title="Requirements">
+                <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
+                  {opp.description || 'No description provided.'}
+                </p>
+              </PmContentCard>
+            ) : null}
 
-            {skills.length > 0 ? (
+            {visibility.showFullDescription && skills.length > 0 ? (
               <PmContentCard title="Core skills">
                 <div className="flex flex-wrap gap-2">
                   {skills.map((s: string) => (
@@ -526,16 +569,18 @@ export function OpportunityDetailPage() {
               </PmContentCard>
             ) : null}
 
-            <PmFormReadonly>
-              <PmFormReadonlySection title="Budget & timeline" description="Commercial and schedule context.">
-                <PmFormReadonlyField label="Exchange mode" value={opp.exchangeMode} />
-                <PmFormReadonlyField label="Model type" value={opp.modelType} />
-                <PmFormReadonlyField label="Start date" value={opp.attributes?.startDate} />
-                <PmFormReadonlyField label="Updated" value={formatDate(opp.updatedAt)} />
-              </PmFormReadonlySection>
-            </PmFormReadonly>
+            {visibility.showBudgetAndTimeline ? (
+              <PmFormReadonly>
+                <PmFormReadonlySection title="Budget & timeline" description="Commercial and schedule context.">
+                  <PmFormReadonlyField label="Exchange mode" value={opp.exchangeMode} />
+                  <PmFormReadonlyField label="Model type" value={opp.modelType} />
+                  <PmFormReadonlyField label="Start date" value={opp.attributes?.startDate} />
+                  <PmFormReadonlyField label="Updated" value={formatDate(opp.updatedAt)} />
+                </PmFormReadonlySection>
+              </PmFormReadonly>
+            ) : null}
 
-            {isOwner && productFlags.showLegacyApplications ? (
+            {visibility.showLegacyApplications ? (
               <ApplicationsPanel
                 applications={oppApplications}
                 canManage={!isPendingApproval}
@@ -549,11 +594,11 @@ export function OpportunityDetailPage() {
           <PmInspectorLayout
             header={<PmSectionHeader title="Actions & readiness" />}
           >
-            {isOwner ? (
+            {visibility.showReadiness ? (
               <OpportunityReadinessCard opportunity={opp} opportunityId={opp.id} />
             ) : null}
 
-            {canPublishDraft ? (
+            {visibility.showOwnerActions && canPublishDraft ? (
               <OpportunityPublishPanel
                 opportunity={opp}
                 publishDetails={publishDetails}
@@ -570,7 +615,7 @@ export function OpportunityDetailPage() {
                 <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
                   {application.status === 'accepted'
                     ? 'Your legacy application was accepted.'
-                    : 'You submitted a direct application. PostMatch is the primary collaboration path.'}
+                    : 'You submitted a direct application. Matches are the primary collaboration path.'}
                 </p>
                 <p className={cn('mt-1', pmTypography.caption, 'text-muted-foreground')}>
                   Submitted {formatDate(application.createdAt)}
@@ -599,7 +644,7 @@ export function OpportunityDetailPage() {
               ) : (
                 <PmContentCard title="Direct application (legacy / hiring)">
                   <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-                    PostMatch is the primary path: Opportunity → PostMatch → Negotiation → Deal → Contract.
+                    Match is the primary path: Opportunity → Match → Negotiation → Deal → Contract.
                   </p>
                   <PmButton
                     className="mt-3 w-full"
@@ -622,6 +667,6 @@ export function OpportunityDetailPage() {
           />
         }
       />
-    </PmPageLayout>
+    </PmPage>
   )
 }
