@@ -2,7 +2,10 @@ import { useLocation } from 'react-router-dom'
 import { useAuth } from '@/providers/auth-provider'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
-import { PageBreadcrumbs } from '@/components/layout/page-breadcrumbs'
+import {
+  PageBreadcrumbs,
+  buildCrumbs,
+} from '@/components/layout/page-breadcrumbs'
 import { NotificationCenter } from '@/components/layout/notification-center'
 import { UserMenu } from '@/components/layout/user-menu'
 import { GlobalSearch } from '@/components/layout/global-search'
@@ -11,6 +14,22 @@ import { ThemeToggle } from '@/components/layout/theme-toggle'
 import { resolveWorkspaceContext } from '@/components/layout/workspace-display'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
+
+function HeaderContext({ title }: { title: string }) {
+  const { pathname } = useLocation()
+  const crumbs = buildCrumbs(pathname)
+  const hasCrumbs = !(crumbs.length <= 1 && crumbs[0]?.isCurrent)
+
+  if (hasCrumbs) {
+    return <PageBreadcrumbs className="min-w-0 max-w-[min(42vw,18rem)] lg:max-w-xs xl:max-w-md" />
+  }
+
+  return (
+    <p className={cn(pmTypography.label, 'truncate text-foreground/90')}>
+      {title}
+    </p>
+  )
+}
 
 export function AppHeader() {
   const { pathname } = useLocation()
@@ -25,50 +44,41 @@ export function AppHeader() {
     <header
       data-slot="app-header"
       className={cn(
-        'sticky top-0 z-20 flex h-14 min-w-0 shrink-0 items-center gap-2 border-b border-border/60',
-        'bg-background/90 px-3 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80',
-        'md:gap-3 md:px-4',
+        'sticky top-0 z-20 grid min-w-0 shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0',
+        'border-b border-border/45 bg-background/95 px-3 py-2 shadow-[0_1px_0_0_var(--border)]',
+        'backdrop-blur-md supports-[backdrop-filter]:bg-background/80 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_auto] md:px-5',
       )}
     >
-      <SidebarTrigger
-        className="cursor-pointer md:hidden"
-        aria-label="Open navigation menu"
-      />
-      <SidebarTrigger
-        className="hidden cursor-pointer lg:inline-flex"
-        aria-label="Toggle sidebar"
-      />
-
-      <div className="flex min-w-0 flex-col md:hidden">
-        <span className={cn(pmTypography.label, 'truncate leading-none')}>
-          {workspace.title}
-        </span>
-        <span className="truncate text-[11px] text-muted-foreground">
-          {workspace.subtitle}
-        </span>
-      </div>
-
-      <Separator orientation="vertical" className="mx-0.5 hidden h-5 md:block" />
-
-      <div className="hidden min-w-0 flex-1 items-center gap-3 md:flex">
-        <div className="hidden min-w-0 xl:block">
-          <p className={cn(pmTypography.caption, 'leading-none')}>My Workspace</p>
-          <p className={cn(pmTypography.label, 'truncate')}>{workspace.title}</p>
+      <div className="flex min-w-0 items-center gap-2.5">
+        <SidebarTrigger
+          className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
+          aria-label="Toggle navigation"
+        />
+        <Separator orientation="vertical" className="hidden h-5 shrink-0 md:block" />
+        <div className="hidden min-w-0 md:block">
+          <HeaderContext title={workspace.title} />
         </div>
-        <Separator orientation="vertical" className="hidden h-5 xl:block" />
-        <PageBreadcrumbs className="min-w-0 flex-1" />
+        <p className={cn(pmTypography.label, 'min-w-0 truncate md:hidden')}>
+          {workspace.title}
+        </p>
       </div>
 
-      <div className="hidden flex-1 justify-center px-2 md:flex lg:max-w-md xl:max-w-lg">
-        <GlobalSearch className="max-w-full" />
+      <div className="col-span-2 flex justify-center px-0.5 md:col-span-1 md:px-2">
+        <GlobalSearch className="hidden w-full max-w-[17.5rem] md:flex lg:max-w-sm xl:max-w-md" />
       </div>
 
-      <div className="ms-auto flex items-center gap-0.5 sm:gap-1">
+      <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
         <GlobalSearch variant="compact" className="md:hidden" />
         <QuickCreateMenu />
-        <NotificationCenter />
-        <ThemeToggle />
-        <UserMenu />
+        <div
+          className="flex items-center gap-0.5 rounded-xl border border-border/45 bg-muted/35 p-0.5 sm:gap-0"
+          role="toolbar"
+          aria-label="Account and preferences"
+        >
+          <NotificationCenter />
+          <ThemeToggle />
+          <UserMenu />
+        </div>
       </div>
     </header>
   )
