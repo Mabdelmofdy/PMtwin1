@@ -37,7 +37,6 @@ export type WorkflowActionKey =
   | 'create_deal_from_negotiation'
   | 'create_contract_from_deal'
   | 'sign_contract'
-  | 'activate_contract'
   | 'complete_contract'
 
 export type WorkflowEntityKind =

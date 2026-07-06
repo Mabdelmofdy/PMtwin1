@@ -361,22 +361,6 @@ function evaluateSignContract(context: WorkflowContext): WorkflowAction {
   })
 }
 
-function evaluateActivateContract(context: WorkflowContext): WorkflowAction {
-  const contract = context.contract
-  const status = canonicalEntityStatus(CONTRACT_ENTITY, contract?.status)
-  const visible = Boolean(contract?.id && status === 'signed')
-  const enabled = visible && userCanMutate(context)
-
-  return buildAction(context, 'activate_contract', {
-    visible,
-    enabled: Boolean(enabled),
-    visibilityReason: visible
-      ? 'Signed contract can be activated'
-      : 'Activate contract requires a signed contract',
-    aggregateId: contract?.id,
-  })
-}
-
 function evaluateCompleteContract(context: WorkflowContext): WorkflowAction {
   const contract = context.contract
   const status = canonicalEntityStatus(CONTRACT_ENTITY, contract?.status)
@@ -416,7 +400,6 @@ const ACTION_EVALUATORS: Record<WorkflowActionKey, ActionEvaluator> = {
   create_deal_from_negotiation: evaluateCreateDealFromNegotiation,
   create_contract_from_deal: evaluateCreateContractFromDeal,
   sign_contract: evaluateSignContract,
-  activate_contract: evaluateActivateContract,
   complete_contract: evaluateCompleteContract,
 }
 

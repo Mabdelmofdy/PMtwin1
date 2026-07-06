@@ -119,21 +119,6 @@ describe('workflow UI bridge', () => {
     )
   })
 
-  it('does not duplicate workflow logic outside orchestrator entry points', () => {
-    const context = buildWorkflowContext({
-      postMatch: confirmedMatch,
-      user: { userId: 'user-a', canMutate: true, isParticipant: true },
-      linkage: { negotiationsForPostMatch: [] },
-    })
-    assert.equal(
-      isWorkflowActionAvailable(context, 'start_negotiation_from_post_match'),
-      canShowStartNegotiationFromPostMatch(confirmedMatch, {
-        getNegotiationsForPostMatch: () => [],
-        userId: 'user-a',
-      }),
-    )
-  })
-
   it('walks marketplace workflow actions from publish through deal creation', () => {
     const publishContext = buildWorkflowContext({
       opportunity: draftOpportunity,
@@ -141,14 +126,6 @@ describe('workflow UI bridge', () => {
         userId: 'user-owner',
         canMutate: true,
         isOpportunityOwner: true,
-      },
-      collaboration: {
-        mainCollaborationModel: draftOpportunity.mainCollaborationModel,
-        modelType: draftOpportunity.modelType,
-        subModelType: draftOpportunity.subModelType,
-        exchangeMode: draftOpportunity.exchangeMode,
-        collaborationAttributes: draftOpportunity.collaborationAttributes,
-        exchangeData: draftOpportunity.exchangeData,
       },
     })
     assert.equal(

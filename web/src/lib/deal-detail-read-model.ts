@@ -11,7 +11,7 @@ import type {
   PostMatch,
 } from '@/types/domain.ts'
 import { normalizeParticipants } from '@/types/participant.ts'
-import { isTerminal, toCanonical } from '@pm-twin/lifecycle'
+import { isTerminal } from '@pm-twin/lifecycle'
 import { formatCommercialTermsDisplayLines } from '@/domain/collaboration/value-exchange-lifecycle.ts'
 import { formatCollaborationExchangeMode } from '@/lib/collaboration-taxonomy-display.ts'
 import {
@@ -80,8 +80,6 @@ const MISSING_TITLE_FALLBACK = 'Linked record unavailable'
 
 const DEAL_ENTITY = 'deal' as const
 const CONTRACT_ENTITY = 'contract' as const
-
-const DEAL_STATUSES_ALLOWING_CONTRACT = new Set(['draft', 'review', 'signing'])
 
 export const CONTRACT_DETAIL_ROUTE_PREFIX = '/contracts'
 

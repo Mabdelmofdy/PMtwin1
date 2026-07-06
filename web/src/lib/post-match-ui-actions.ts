@@ -1,5 +1,5 @@
 import type { CommandResult } from '@pm-twin/commands'
-import { isTerminal, toCanonical } from '@pm-twin/lifecycle'
+import { isTerminal } from '@pm-twin/lifecycle'
 import type { PostMatch } from '@/types/domain.ts'
 import { postMatchRepository } from '@/repositories/index.ts'
 import { postMatchCommandService } from '@/services/post-match-command-service.ts'
@@ -9,7 +9,6 @@ import {
 } from '@/domain/workflows/workflow-bridge.ts'
 
 const MATCH_ENTITY = 'match' as const
-const PARTICIPANT_RESPONDED_STATUSES = new Set(['accepted', 'declined'])
 
 export type PostMatchUiActionResult =
   | { readonly success: true; readonly status: string }
@@ -88,25 +87,6 @@ export function declinePostMatchUiAction(
     return { success: false, message: formatCommandErrors(result) }
   }
   return { success: true, status: readStatus(postMatchId, deps) }
-}
-
-function participantResponseStatus(
-  match: PostMatch,
-  userId: string,
-): string | undefined {
-  return match.participants.find((participant) => participant.userId === userId)
-    ?.participantStatus
-}
-
-function isParticipantPendingResponse(
-  match: PostMatch,
-  userId: string | null | undefined,
-): boolean {
-  if (!userId) return false
-  const participant = match.participants.find((p) => p.userId === userId)
-  if (!participant) return false
-  const status = (participant.participantStatus ?? 'pending').toLowerCase()
-  return !PARTICIPANT_RESPONDED_STATUSES.has(status)
 }
 
 /** Match statuses where accept/decline are no longer available to any participant. */

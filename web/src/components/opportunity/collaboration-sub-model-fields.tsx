@@ -151,7 +151,7 @@ export function CollaborationSubModelFields({
       {fields.map((field) => (
         <PmFormGridItem
           key={field.key}
-          span={field.type === 'textarea' ? 'full' : 'default'}
+          span={field.type === 'textarea' ? 'full' : 1}
           gridColumns={2}
         >
           <PmFormField

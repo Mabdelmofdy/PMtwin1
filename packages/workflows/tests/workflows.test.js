@@ -312,3 +312,32 @@ describe('getWorkflowNextActions', () => {
     )
   })
 })
+
+describe('activate_contract decision', () => {
+  it('is not exposed in the orchestrator because signing auto-activates contracts', async () => {
+    const workflows = await import('@pm-twin/workflows')
+    assert.equal('activate_contract' in workflows.WORKFLOW_ACTION_REGISTRY, false)
+  })
+})
+
+describe('WorkflowActionHook metadata', () => {
+  it('builds audit and notification metadata without side effects', async () => {
+    const { buildWorkflowActionHook } = await import('../dist/index.js')
+    const action = findWorkflowAction(
+      hiringContext(),
+      'start_negotiation_from_application',
+    )
+    assert.ok(action)
+    const hook = buildWorkflowActionHook({
+      context: hiringContext(),
+      action,
+      actorId: 'user-hiring',
+    })
+    assert.equal(hook.actionKey, 'start_negotiation_from_application')
+    assert.equal(hook.commandType, 'StartNegotiationFromApplication')
+    assert.equal(hook.entityType, 'application')
+    assert.equal(hook.auditAction, 'negotiation.started_from_application')
+    assert.equal(hook.notificationType, 'hiring.negotiation.started')
+    assert.equal(hook.actorId, 'user-hiring')
+  })
+})

@@ -91,11 +91,6 @@ const TERMINABLE_CONTRACT_STATUSES = new Set([
   'active',
 ])
 
-/** Phase 7.4+ — activate remains disabled until wired. */
-export const CONTRACT_DETAIL_MUTATION_ACTIONS = {
-  activate: false,
-} as const
-
 export type ContractDetailMutationVisibility = {
   readonly canSign?: boolean
   readonly canComplete?: boolean
@@ -108,8 +103,7 @@ export function contractDetailShowsMutationActions(
   return (
     Boolean(actions.canSign) ||
     Boolean(actions.canComplete) ||
-    Boolean(actions.canTerminate) ||
-    CONTRACT_DETAIL_MUTATION_ACTIONS.activate
+    Boolean(actions.canTerminate)
   )
 }
 
@@ -355,7 +349,9 @@ export function buildContractDetailReadModel(
         : null,
     },
     canSign: canSignContract(contract, options?.currentUserId),
-    canComplete: canCompleteContract(contract),
+    canComplete: canCompleteContract(contract, {
+      userId: options?.currentUserId,
+    }),
     canTerminate: canTerminateContract(contract),
   }
 }

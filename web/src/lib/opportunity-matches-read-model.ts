@@ -123,7 +123,7 @@ function buildMatchWorkflowContext(
           postMatchId: item.postMatchId ?? item.matchId,
         },
       ),
-      dealForNegotiation: deal ? toWorkflowEntitySnapshot(deal as Parameters<typeof toWorkflowEntitySnapshot>[0]) ?? null : null,
+      dealForNegotiation: deal ? toWorkflowEntitySnapshot(deal) ?? null : null,
     },
   })
 }

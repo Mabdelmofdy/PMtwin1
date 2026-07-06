@@ -129,7 +129,7 @@ export function validateWorkflowTransition(
   if (!workflow.allowedCommands.includes(definition.commandType)) {
     const hiringAllowed =
       primary === 'hiring'
-      && ['StartNegotiationFromApplication', 'CreateDealFromApplication', 'AgreeNegotiation', 'CreateContractFromDeal', 'SignContract', 'ActivateContract', 'CompleteContract'].includes(definition.commandType)
+      && ['StartNegotiationFromApplication', 'CreateDealFromApplication', 'AgreeNegotiation', 'CreateContractFromDeal', 'SignContract', 'CompleteContract'].includes(definition.commandType)
     const marketplaceAllowed =
       primary === 'marketplace'
       && workflow.allowedCommands.includes(definition.commandType)

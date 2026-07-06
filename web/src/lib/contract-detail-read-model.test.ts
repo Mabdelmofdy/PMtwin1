@@ -10,7 +10,6 @@ import {
   canSignContract,
   contractDetailLinkFallbackLabel,
   contractDetailShowsMutationActions,
-  CONTRACT_DETAIL_MUTATION_ACTIONS,
   resolveContractMilestones,
   resolveContractNeedOpportunityId,
   resolveContractPostMatchId,
@@ -226,8 +225,7 @@ describe('contract detail read model', () => {
     )
   })
 
-  it('does not expose activate action by default', () => {
-    assert.equal(CONTRACT_DETAIL_MUTATION_ACTIONS.activate, false)
+  it('does not expose mutation actions without eligible contract state', () => {
     assert.equal(contractDetailShowsMutationActions({}), false)
   })
 

@@ -57,3 +57,9 @@ export {
 } from './engine/next-actions.ts'
 
 export { validateWorkflowTransition } from './engine/validate-transition.ts'
+
+export type { WorkflowActionHook, BuildWorkflowActionHookInput } from './hooks/action-hooks.ts'
+export {
+  buildWorkflowActionHook,
+  buildWorkflowActionHooks,
+} from './hooks/action-hooks.ts'

@@ -1,4 +1,4 @@
-import type { WorkflowActionKey } from './types.ts'
+import type { WorkflowActionKey } from '../types.ts'
 
 export type WorkflowActionDefinition = {
   readonly key: WorkflowActionKey
@@ -95,13 +95,6 @@ export const WORKFLOW_ACTION_REGISTRY: Record<
     commandType: 'SignContract',
     requiredRole: 'participant',
     requiredPermission: 'contract:sign',
-  },
-  activate_contract: {
-    key: 'activate_contract',
-    label: 'Activate contract',
-    commandType: 'ActivateContract',
-    requiredRole: 'participant',
-    requiredPermission: 'contract:activate',
   },
   complete_contract: {
     key: 'complete_contract',

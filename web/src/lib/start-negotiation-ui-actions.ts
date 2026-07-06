@@ -1,11 +1,9 @@
-import { toCanonical } from '@pm-twin/lifecycle'
 import type { CommandResult } from '@pm-twin/commands'
 import type { Negotiation, PostMatch } from '@/types/domain.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
 import { negotiationCommandService } from '@/services/negotiation-command-service.ts'
 import {
   buildWorkflowContext,
-  findWorkflowAction,
   isWorkflowActionAvailable,
 } from '@/domain/workflows/workflow-bridge.ts'
 

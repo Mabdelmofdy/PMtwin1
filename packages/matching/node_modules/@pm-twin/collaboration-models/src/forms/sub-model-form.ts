@@ -13,7 +13,6 @@ export function resolveSubModelFormFields(
   if (!sub) return []
 
   const required = new Set(sub.requiredFields)
-  const recommended = new Set(sub.recommendedFields)
   const keys = new Set([...sub.requiredFields, ...sub.recommendedFields])
 
   return sub.attributes

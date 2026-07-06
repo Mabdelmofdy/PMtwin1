@@ -5,6 +5,7 @@ import { dealCommandService } from '@/services/deal-command-service.ts'
 import {
   buildWorkflowContext,
   isWorkflowActionAvailable,
+  toWorkflowEntitySnapshot,
 } from '@/domain/workflows/workflow-bridge.ts'
 
 export type CreateDealUiActionResult =
@@ -47,24 +48,46 @@ function buildNegotiationDealContext(
     postMatch: deps?.postMatch
       ? {
           id: deps.postMatch.id,
-          matchType: deps.postMatch.matchType,
+          matchType: deps.postMatch.matchType ?? 'one_way',
+          status: 'confirmed',
+          matchScore: 0,
+          participants: [],
         }
       : negotiation.postMatchId
-        ? { id: negotiation.postMatchId, matchType: undefined }
+        ? {
+            id: negotiation.postMatchId,
+            matchType: 'one_way',
+            status: 'confirmed',
+            matchScore: 0,
+            participants: [],
+          }
         : undefined,
     negotiation,
     application: negotiation.applicationId
-      ? { id: negotiation.applicationId, status: 'accepted', opportunityId: negotiation.opportunityId ?? '', applicantId: '' }
+      ? {
+          id: negotiation.applicationId,
+          status: 'accepted',
+          opportunityId: negotiation.opportunityId ?? '',
+          applicantId: '',
+        }
       : undefined,
     linkage: {
-      dealForNegotiation: findDeal(negotiation.id) ?? null,
+      dealForNegotiation: (() => {
+        const deal = findDeal(negotiation.id)
+        return deal ? toWorkflowEntitySnapshot(deal) ?? null : null
+      })(),
       legacyApplicationsEnabled: Boolean(negotiation.applicationId),
       negotiationsForApplication: negotiation.applicationId
-        ? [{
-            id: negotiation.id,
-            status: negotiation.status,
-            applicationId: negotiation.applicationId,
-          }]
+        ? [
+            toWorkflowEntitySnapshot({
+              id: negotiation.id,
+              status: negotiation.status,
+              applicationId: negotiation.applicationId,
+            }) ?? {
+              id: negotiation.id,
+              status: negotiation.status,
+            },
+          ]
         : undefined,
     },
   })

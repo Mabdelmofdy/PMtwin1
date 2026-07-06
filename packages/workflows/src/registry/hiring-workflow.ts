@@ -6,7 +6,6 @@ const HIRING_COMMANDS = [
   'CreateDealFromApplication',
   'CreateContractFromDeal',
   'SignContract',
-  'ActivateContract',
   'CompleteContract',
 ] as const
 
@@ -28,7 +27,6 @@ export const HIRING_WORKFLOW: WorkflowDefinition = {
     { from: 'negotiation', to: 'deal', action: 'create_deal_from_application', commandType: 'CreateDealFromApplication' },
     { from: 'deal', to: 'contract', action: 'create_contract_from_deal', commandType: 'CreateContractFromDeal' },
     { from: 'contract', to: 'completion', action: 'sign_contract', commandType: 'SignContract' },
-    { from: 'contract', to: 'completion', action: 'activate_contract', commandType: 'ActivateContract' },
     { from: 'contract', to: 'completion', action: 'complete_contract', commandType: 'CompleteContract' },
   ],
   allowedCommands: [...HIRING_COMMANDS],

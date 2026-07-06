@@ -22,11 +22,11 @@ export function toWorkflowEntitySnapshot(
     creatorId?: string
     applicantId?: string
     opportunityId?: string
-    postMatchId?: string
-    matchId?: string
-    applicationId?: string
-    negotiationId?: string
-    dealId?: string
+    postMatchId?: string | null
+    matchId?: string | null
+    applicationId?: string | null
+    negotiationId?: string | null
+    dealId?: string | null
     matchType?: string
     participants?: PostMatch['participants']
     commercialTerms?: Deal['commercialTerms']
@@ -39,11 +39,11 @@ export function toWorkflowEntitySnapshot(
     creatorId: entity.creatorId,
     applicantId: entity.applicantId,
     opportunityId: entity.opportunityId,
-    postMatchId: entity.postMatchId,
-    matchId: entity.matchId,
-    applicationId: entity.applicationId,
-    negotiationId: entity.negotiationId,
-    dealId: entity.dealId,
+    postMatchId: entity.postMatchId ?? undefined,
+    matchId: entity.matchId ?? undefined,
+    applicationId: entity.applicationId ?? undefined,
+    negotiationId: entity.negotiationId ?? undefined,
+    dealId: entity.dealId ?? undefined,
     matchType: entity.matchType,
     participants: entity.participants?.map((participant) => ({
       userId: participant.userId,
@@ -88,7 +88,7 @@ export type BuildWorkflowContextInput = {
   readonly user?: WorkflowUserContext
   readonly opportunity?: Opportunity | null
   readonly application?: Application | null
-  readonly postMatch?: PostMatch | null
+  readonly postMatch?: PostMatch | Pick<PostMatch, 'id' | 'status' | 'matchType' | 'participants'> | null
   readonly negotiation?: Negotiation | null
   readonly deal?: Deal | null
   readonly contract?: Contract | null
@@ -129,6 +129,9 @@ export {
   getWorkflowNextActions,
   isWorkflowActionAvailable,
   validateWorkflowTransition,
+  buildWorkflowActionHook,
+  buildWorkflowActionHooks,
   type WorkflowAction,
   type WorkflowActionKey,
+  type WorkflowActionHook,
 } from '@pm-twin/workflows'

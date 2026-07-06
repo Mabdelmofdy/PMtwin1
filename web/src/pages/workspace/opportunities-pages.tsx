@@ -80,7 +80,6 @@ import {
 import { CollaborationSubModelFields } from '@/components/opportunity/collaboration-sub-model-fields.tsx'
 import {
   formatCollaborationExchangeMode,
-  resolveOpportunityTaxonomyLabels,
 } from '@/lib/collaboration-taxonomy-display.ts'
 import { opportunityCommandService } from '@/services/opportunity-command-service.ts'
 import { buildValueExchangeDraftPayload } from '@/domain/collaboration/value-exchange-lifecycle.ts'

@@ -84,13 +84,6 @@ var WORKFLOW_ACTION_REGISTRY = {
     requiredRole: "participant",
     requiredPermission: "contract:sign"
   },
-  activate_contract: {
-    key: "activate_contract",
-    label: "Activate contract",
-    commandType: "ActivateContract",
-    requiredRole: "participant",
-    requiredPermission: "contract:activate"
-  },
   complete_contract: {
     key: "complete_contract",
     label: "Complete contract",
@@ -198,7 +191,6 @@ var HIRING_COMMANDS = [
   "CreateDealFromApplication",
   "CreateContractFromDeal",
   "SignContract",
-  "ActivateContract",
   "CompleteContract"
 ];
 var HIRING_WORKFLOW = {
@@ -219,7 +211,6 @@ var HIRING_WORKFLOW = {
     { from: "negotiation", to: "deal", action: "create_deal_from_application", commandType: "CreateDealFromApplication" },
     { from: "deal", to: "contract", action: "create_contract_from_deal", commandType: "CreateContractFromDeal" },
     { from: "contract", to: "completion", action: "sign_contract", commandType: "SignContract" },
-    { from: "contract", to: "completion", action: "activate_contract", commandType: "ActivateContract" },
     { from: "contract", to: "completion", action: "complete_contract", commandType: "CompleteContract" }
   ],
   allowedCommands: [...HIRING_COMMANDS],
@@ -244,7 +235,6 @@ var MARKETPLACE_COMMANDS = [
   "CreateDealFromNegotiation",
   "CreateContractFromDeal",
   "SignContract",
-  "ActivateContract",
   "CompleteContract"
 ];
 var MARKETPLACE_WORKFLOW = {
@@ -271,7 +261,6 @@ var MARKETPLACE_WORKFLOW = {
     { from: "negotiation", to: "deal", action: "create_deal_from_negotiation", commandType: "CreateDealFromNegotiation" },
     { from: "deal", to: "contract", action: "create_contract_from_deal", commandType: "CreateContractFromDeal" },
     { from: "contract", to: "completion", action: "sign_contract", commandType: "SignContract" },
-    { from: "contract", to: "completion", action: "activate_contract", commandType: "ActivateContract" },
     { from: "contract", to: "completion", action: "complete_contract", commandType: "CompleteContract" }
   ],
   allowedCommands: [...MARKETPLACE_COMMANDS],
@@ -1425,18 +1414,6 @@ function evaluateSignContract(context) {
     metadata: context.user.userId ? { userId: context.user.userId } : void 0
   });
 }
-function evaluateActivateContract(context) {
-  const contract = context.contract;
-  const status = canonicalEntityStatus(CONTRACT_ENTITY, contract?.status);
-  const visible = Boolean(contract?.id && status === "signed");
-  const enabled = visible && userCanMutate(context);
-  return buildAction(context, "activate_contract", {
-    visible,
-    enabled: Boolean(enabled),
-    visibilityReason: visible ? "Signed contract can be activated" : "Activate contract requires a signed contract",
-    aggregateId: contract?.id
-  });
-}
 function evaluateCompleteContract(context) {
   const contract = context.contract;
   const status = canonicalEntityStatus(CONTRACT_ENTITY, contract?.status);
@@ -1468,7 +1445,6 @@ var ACTION_EVALUATORS = {
   create_deal_from_negotiation: evaluateCreateDealFromNegotiation,
   create_contract_from_deal: evaluateCreateContractFromDeal,
   sign_contract: evaluateSignContract,
-  activate_contract: evaluateActivateContract,
   complete_contract: evaluateCompleteContract
 };
 function isActionAllowedForWorkflow(context, key) {
@@ -1592,7 +1568,7 @@ function validateWorkflowTransition(context, actionKey) {
   const workflow = getWorkflowDefinition(primary);
   const definition = getActionDefinition(actionKey);
   if (!workflow.allowedCommands.includes(definition.commandType)) {
-    const hiringAllowed = primary === "hiring" && ["StartNegotiationFromApplication", "CreateDealFromApplication", "AgreeNegotiation", "CreateContractFromDeal", "SignContract", "ActivateContract", "CompleteContract"].includes(definition.commandType);
+    const hiringAllowed = primary === "hiring" && ["StartNegotiationFromApplication", "CreateDealFromApplication", "AgreeNegotiation", "CreateContractFromDeal", "SignContract", "CompleteContract"].includes(definition.commandType);
     const marketplaceAllowed = primary === "marketplace" && workflow.allowedCommands.includes(definition.commandType);
     if (!hiringAllowed && !marketplaceAllowed) {
       errors.push(
@@ -1606,12 +1582,115 @@ function validateWorkflowTransition(context, actionKey) {
     warnings
   };
 }
+
+// src/hooks/action-hooks.ts
+var LIFECYCLE_ENTITY_BY_KIND = {
+  opportunity: "opportunity",
+  application: "application",
+  post_match: "match",
+  negotiation: "negotiation",
+  deal: "deal",
+  contract: "contract"
+};
+var ENTITY_KIND_BY_ACTION = {
+  publish_opportunity: "opportunity",
+  accept_match: "post_match",
+  decline_match: "post_match",
+  start_negotiation_from_post_match: "post_match",
+  start_negotiation_from_application: "application",
+  agree_negotiation: "negotiation",
+  cancel_negotiation: "negotiation",
+  create_deal_from_post_match: "post_match",
+  create_deal_from_application: "application",
+  create_deal_from_negotiation: "negotiation",
+  create_contract_from_deal: "deal",
+  sign_contract: "contract",
+  complete_contract: "contract"
+};
+var AUDIT_ACTION_BY_KEY = {
+  publish_opportunity: "opportunity.published",
+  accept_match: "match.accepted",
+  decline_match: "match.declined",
+  start_negotiation_from_post_match: "negotiation.started_from_match",
+  start_negotiation_from_application: "negotiation.started_from_application",
+  agree_negotiation: "negotiation.agreed",
+  cancel_negotiation: "negotiation.cancelled",
+  create_deal_from_post_match: "deal.created_from_match",
+  create_deal_from_application: "deal.created_from_application",
+  create_deal_from_negotiation: "deal.created_from_negotiation",
+  create_contract_from_deal: "contract.created",
+  sign_contract: "contract.signed",
+  complete_contract: "contract.completed"
+};
+var NOTIFICATION_TYPE_BY_KEY = {
+  publish_opportunity: "opportunity.published",
+  accept_match: "match.response",
+  decline_match: "match.response",
+  start_negotiation_from_post_match: "negotiation.started",
+  start_negotiation_from_application: "hiring.negotiation.started",
+  agree_negotiation: "negotiation.agreed",
+  create_deal_from_negotiation: "deal.created",
+  create_deal_from_application: "deal.created",
+  create_contract_from_deal: "contract.created",
+  sign_contract: "contract.signature_required",
+  complete_contract: "contract.completed"
+};
+function resolveEntitySnapshot(context, actionKey) {
+  switch (ENTITY_KIND_BY_ACTION[actionKey]) {
+    case "opportunity":
+      return context.opportunity;
+    case "application":
+      return context.application;
+    case "post_match":
+      return context.postMatch;
+    case "negotiation":
+      return context.negotiation;
+    case "deal":
+      return context.deal;
+    case "contract":
+      return context.contract;
+    default:
+      return void 0;
+  }
+}
+function buildWorkflowActionHook(input) {
+  const { context, action, afterState, actorId } = input;
+  const { primary } = resolveWorkflowKeys(context);
+  const entityKind = ENTITY_KIND_BY_ACTION[action.key];
+  const entity = resolveEntitySnapshot(context, action.key);
+  const entityId = action.aggregateId ?? entity?.id ?? "";
+  const definition = getActionDefinition(action.key);
+  const beforeState = entity?.status ? canonicalEntityStatus(LIFECYCLE_ENTITY_BY_KIND[entityKind], entity.status) : entity?.status;
+  return {
+    actionKey: action.key,
+    commandType: definition.commandType,
+    entityType: entityKind,
+    entityId,
+    workflowKey: action.workflowKey ?? primary,
+    beforeState,
+    afterState,
+    actorId: actorId ?? context.user.userId ?? null,
+    auditAction: AUDIT_ACTION_BY_KEY[action.key],
+    notificationType: NOTIFICATION_TYPE_BY_KEY[action.key]
+  };
+}
+function buildWorkflowActionHooks(context, actions, options) {
+  return actions.map(
+    (action) => buildWorkflowActionHook({
+      context,
+      action,
+      actorId: options?.actorId
+    })
+  );
+}
 export {
   COLLABORATION_WORKFLOW_DEFINITIONS,
   HIRING_WORKFLOW,
   MARKETPLACE_WORKFLOW,
   WORKFLOW_ACTION_REGISTRY,
   WORKFLOW_REGISTRY,
+  buildWorkflowActionHook,
+  buildWorkflowActionHooks,
   canEntityTransition,
   canonicalEntityStatus,
   findAgreedApplicationNegotiation,
