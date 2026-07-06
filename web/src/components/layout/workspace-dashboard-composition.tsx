@@ -190,9 +190,9 @@ export function WorkspaceDashboardComposition() {
     <PmDashboardLayout
       header={
         <PmPageHeader
-          label="My Workspace"
-          title="My Workspace"
-          description={`Good morning, ${firstName} — review your tasks, workflow progress, and items pending action.`}
+          label="Dashboard"
+          title={`Good morning, ${firstName}`}
+          description="Review your tasks, workflow progress, and items pending action."
           tone="mission"
           metric={
             readiness ? (

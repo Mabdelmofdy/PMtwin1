@@ -91,14 +91,17 @@ export function PmPageHeader({
         aria-hidden
       />
       <div className="min-w-0 space-y-2">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          {label ? (
-            <p className={pmTypography.overline}>{label}</p>
-          ) : null}
-          <p className={cn(pmTypography.overline, 'text-muted-foreground/85')}>
-            {purposeLabel}
-          </p>
-        </div>
+        {(label || tone !== 'default') ? (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            {label ? (
+              <p className={pmTypography.overline}>{label}</p>
+            ) : (
+              <p className={cn(pmTypography.overline, 'text-muted-foreground/85')}>
+                {purposeLabel}
+              </p>
+            )}
+          </div>
+        ) : null}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-6">
           <div className="min-w-0 space-y-1.5">
             <h1 className={cn(pmTypography.h1, 'break-words')}>{title}</h1>

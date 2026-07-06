@@ -25,6 +25,9 @@ export {
   type PmContentCardProps,
   type PmScrollablePanelProps,
 } from '@/components/layout/pm-layout-panels'
+export { PmBrowsePage, type PmBrowsePageProps } from '@/components/layout/pm-browse-page'
+export { PmBrowseToolbar, type PmBrowseToolbarProps } from '@/components/layout/pm-browse-toolbar'
+export { PM_RECOMMENDED_NEXT_STEP } from '@/components/layout/pm-recommended-next-step'
 
 export {
   pmBreakpoints,

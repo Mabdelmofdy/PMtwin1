@@ -33,9 +33,8 @@ import {
   PmFormWizardStep,
   type PmFormStepperStep,
 } from '@/components/forms/pm-form-index'
-import { PmContentCard, summarizeOpportunityListHero } from '@/components/layout/pm-layout-index'
+import { PmContentCard, PmBrowsePage, PmBrowseToolbar, summarizeOpportunityListHero } from '@/components/layout/pm-layout-index'
 import { PmBadge, PmButton, PmEmptyState, PmFilterChips, PmPage, PmPageHeader, PmPageHeroMetric, PmPageActions, PmSurface } from '@/components/ui/pm-index'
-import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { pmResponsive } from '@/tokens'
 import { cn } from '@/lib/utils'
@@ -262,7 +261,7 @@ export function OpportunitiesPage() {
   })
 
   return (
-    <PmPage
+    <PmBrowsePage
       header={
         <PmPageHeader
           label={isMarketplaceBrowse ? 'Marketplace' : 'My Workspace'}
@@ -323,80 +322,96 @@ export function OpportunitiesPage() {
           }
         />
       }
-    >
-      <PmToolbarSurface className="space-y-3">
-        <Tabs
-          value={ownershipFilter}
-          onValueChange={(value) => {
-            setOwnershipFilter(value as OpportunityOwnershipFilter)
-            setPage(1)
-          }}
-        >
-          <TabsList className={cn('max-w-full', pmResponsive.scrollX)}>
-            {(Object.keys(OPPORTUNITY_OWNERSHIP_FILTER_LABELS) as OpportunityOwnershipFilter[]).map(
-              (key) => (
-                <TabsTrigger key={key} value={key} className="cursor-pointer">
-                  {OPPORTUNITY_OWNERSHIP_FILTER_LABELS[key]}
-                </TabsTrigger>
-              ),
-            )}
-          </TabsList>
-        </Tabs>
-        <PmTableToolbar
-          search={
-            <PmTableSearch
-              placeholder={
-                isMarketplaceBrowse
-                  ? 'Search available opportunities…'
-                  : 'Search my opportunities…'
-              }
-              value={search}
-              onValueChange={(v) => {
-                setSearch(v)
-                setPage(1)
-              }}
-            />
-          }
-          filters={
-            <PmTableFilter activeCount={status !== 'all' ? 1 : 0} label="Filters">
-              <div className="space-y-3">
-                <PmFormField id="opp-filter-status" label="Status">
-                  <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger id="opp-filter-status" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All statuses</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="negotiating">Negotiating</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </PmFormField>
-              </div>
-            </PmTableFilter>
-          }
-        >
-          <PmFilterChips
-            chips={
-              status !== 'all'
-                ? [
-                    {
-                      id: 'status',
-                      label: 'Status',
-                      value: status.charAt(0).toUpperCase() + status.slice(1),
-                      onRemove: () => {
-                        setStatus('all')
-                        setPage(1)
-                      },
-                    },
-                  ]
-                : []
+      toolbar={
+        <PmBrowseToolbar>
+          <Tabs
+            value={ownershipFilter}
+            onValueChange={(value) => {
+              setOwnershipFilter(value as OpportunityOwnershipFilter)
+              setPage(1)
+            }}
+          >
+            <TabsList className={cn('max-w-full', pmResponsive.scrollX)}>
+              {(Object.keys(OPPORTUNITY_OWNERSHIP_FILTER_LABELS) as OpportunityOwnershipFilter[]).map(
+                (key) => (
+                  <TabsTrigger key={key} value={key} className="cursor-pointer">
+                    {OPPORTUNITY_OWNERSHIP_FILTER_LABELS[key]}
+                  </TabsTrigger>
+                ),
+              )}
+            </TabsList>
+          </Tabs>
+          <PmTableToolbar
+            search={
+              <PmTableSearch
+                placeholder={
+                  isMarketplaceBrowse
+                    ? 'Search available opportunities…'
+                    : 'Search my opportunities…'
+                }
+                value={search}
+                onValueChange={(v) => {
+                  setSearch(v)
+                  setPage(1)
+                }}
+              />
             }
+            filters={
+              <PmTableFilter activeCount={status !== 'all' ? 1 : 0} label="Filters">
+                <div className="space-y-3">
+                  <PmFormField id="opp-filter-status" label="Status">
+                    <Select value={status} onValueChange={setStatus}>
+                      <SelectTrigger id="opp-filter-status" className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All statuses</SelectItem>
+                        <SelectItem value="published">Published</SelectItem>
+                        <SelectItem value="draft">Draft</SelectItem>
+                        <SelectItem value="negotiating">Negotiating</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </PmFormField>
+                </div>
+              </PmTableFilter>
+            }
+          >
+            <PmFilterChips
+              chips={
+                status !== 'all'
+                  ? [
+                      {
+                        id: 'status',
+                        label: 'Status',
+                        value: status.charAt(0).toUpperCase() + status.slice(1),
+                        onRemove: () => {
+                          setStatus('all')
+                          setPage(1)
+                        },
+                      },
+                    ]
+                  : []
+              }
+            />
+          </PmTableToolbar>
+        </PmBrowseToolbar>
+      }
+      pagination={
+        totalItems > 0 ? (
+          <PmTablePagination
+            page={safePage}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            pageSizeOptions={[12, 24, 48]}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size)
+              setPage(1)
+            }}
           />
-        </PmTableToolbar>
-      </PmToolbarSurface>
-
+        ) : null
+      }
+    >
       {paged.length === 0 ? (
         listEmpty.branch === 'first-run' ? (
           <PmEmptyState
@@ -449,21 +464,7 @@ export function OpportunitiesPage() {
           ))}
         </div>
       )}
-
-      {totalItems > 0 ? (
-        <PmTablePagination
-          page={safePage}
-          pageSize={pageSize}
-          totalItems={totalItems}
-          pageSizeOptions={[12, 24, 48]}
-          onPageChange={setPage}
-          onPageSizeChange={(size) => {
-            setPageSize(size)
-            setPage(1)
-          }}
-        />
-      ) : null}
-    </PmPage>
+    </PmBrowsePage>
   )
 }
 

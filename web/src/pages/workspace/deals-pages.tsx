@@ -17,8 +17,11 @@ import { CollaborationTimeline } from '@/components/collaboration/collaboration-
 import { resolveCollaborationStepFromDeal } from '@/components/collaboration/collaboration-display'
 import type { CollaborationTimelineEvent } from '@/components/collaboration/collaboration-timeline'
 import {
+  PmBrowsePage,
+  PmBrowseToolbar,
   PmContentCard,
   PmDetailLayout,
+  PM_RECOMMENDED_NEXT_STEP,
   PmInspectorLayout,
   PmSectionHeader,
   countActiveDeals,
@@ -52,10 +55,10 @@ import {
   PmMoreActions,
   PmPageActions,
   PmWorkflowBadge,
+  PmWorkflowLinksCard,
   buildDealWorkflowSteps,
   type PmMoreActionItem,
 } from '@/components/ui/pm-index'
-import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
 import type { Deal } from '@/types/domain.ts'
@@ -231,7 +234,7 @@ export function DealsPage() {
   ]
 
   return (
-    <PmPage
+    <PmBrowsePage
       header={
         <PmPageHeader
           label="My Workspace"
@@ -253,6 +256,39 @@ export function DealsPage() {
           }
         />
       }
+      toolbar={
+        deals.length > 0 ? (
+          <PmBrowseToolbar>
+            <PmTableToolbar
+              search={
+                <PmTableSearch
+                  placeholder="Search deals…"
+                  value={search}
+                  onValueChange={(v) => {
+                    setSearch(v)
+                    setPage(1)
+                  }}
+                />
+              }
+            />
+          </PmBrowseToolbar>
+        ) : undefined
+      }
+      pagination={
+        totalItems > 0 ? (
+          <PmTablePagination
+            page={safePage}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            pageSizeOptions={[12, 24, 48]}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size)
+              setPage(1)
+            }}
+          />
+        ) : null
+      }
     >
       {listEmpty.branch === 'first-run' ? (
         <PmEmptyState
@@ -271,22 +307,6 @@ export function DealsPage() {
           data={paged}
           getRowId={(d) => d.id}
           caption="Deals"
-          toolbar={
-            <PmToolbarSurface>
-              <PmTableToolbar
-                search={
-                  <PmTableSearch
-                    placeholder="Search deals…"
-                    value={search}
-                    onValueChange={(v) => {
-                      setSearch(v)
-                      setPage(1)
-                    }}
-                  />
-                }
-              />
-            </PmToolbarSurface>
-          }
           rowActions={(d) => (
             <PmTableRowActions
               onView={() => navigate(`/deals/${d.id}`)}
@@ -314,25 +334,10 @@ export function DealsPage() {
               />
             ) : undefined
           }
-          pagination={
-            totalItems > 0 ? (
-              <PmTablePagination
-                page={safePage}
-                pageSize={pageSize}
-                totalItems={totalItems}
-                pageSizeOptions={[12, 24, 48]}
-                onPageChange={setPage}
-                onPageSizeChange={(size) => {
-                  setPageSize(size)
-                  setPage(1)
-                }}
-              />
-            ) : undefined
-          }
           renderMobileCard={(d) => <DealListCard deal={d} />}
         />
       )}
-    </PmPage>
+    </PmBrowsePage>
   )
 }
 
@@ -384,9 +389,8 @@ export function DealDetailPage() {
     return (
       <PmPage header={<PmPageHeader title="Access denied" description="Collaboration deal summary." />}>
         <EntityAccessDenied
+          entity="deal"
           description="Deal details are only visible to participants or authorized platform staff."
-          backHref="/deals"
-          backLabel="Back to deals"
         />
       </PmPage>
     )
@@ -431,6 +435,23 @@ export function DealDetailPage() {
 
   const dealNavMore = buildDealNavMoreItems(model)
   const recommendedAction = buildDealRecommendedAction(model, canMutate)
+  const dealWorkflowLinks = [
+    ...(model.links.match
+      ? [{ id: 'match', label: PRODUCT_LANGUAGE.OPEN_MATCH, href: model.links.match.path }]
+      : []),
+    ...(model.links.negotiation
+      ? [
+          {
+            id: 'negotiation',
+            label: PRODUCT_LANGUAGE.OPEN_NEGOTIATION,
+            href: model.links.negotiation.path,
+          },
+        ]
+      : []),
+    ...(model.contractLink
+      ? [{ id: 'contract', label: PRODUCT_LANGUAGE.OPEN_CONTRACT, href: model.contractLink.path }]
+      : []),
+  ]
 
   return (
     <PmPage
@@ -475,33 +496,13 @@ export function DealDetailPage() {
 
             {recommendedAction ? (
               <PmActionHub
-                title="Recommended next step"
-                description="The most important action for this deal."
+                title={PM_RECOMMENDED_NEXT_STEP.title}
+                description={PM_RECOMMENDED_NEXT_STEP.description('deal')}
                 items={[recommendedAction]}
               />
             ) : null}
 
-            <PmContentCard title="Workflow links" className="border-border/60 bg-surface-muted/30">
-              <div className="flex flex-wrap gap-2">
-                {model.links.match ? (
-                  <PmButton size="sm" variant="outline" asChild>
-                    <Link to={model.links.match.path}>{PRODUCT_LANGUAGE.OPEN_MATCH}</Link>
-                  </PmButton>
-                ) : null}
-                {model.links.negotiation ? (
-                  <PmButton size="sm" variant="outline" asChild>
-                    <Link to={model.links.negotiation.path}>
-                      {PRODUCT_LANGUAGE.OPEN_NEGOTIATION}
-                    </Link>
-                  </PmButton>
-                ) : null}
-                {model.contractLink ? (
-                  <PmButton size="sm" variant="outline" asChild>
-                    <Link to={model.contractLink.path}>{PRODUCT_LANGUAGE.OPEN_CONTRACT}</Link>
-                  </PmButton>
-                ) : null}
-              </div>
-            </PmContentCard>
+            <PmWorkflowLinksCard links={dealWorkflowLinks} />
 
             <PmContentCard title="Linked records">
               <PmFormReadonly>

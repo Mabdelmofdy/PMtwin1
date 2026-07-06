@@ -1,11 +1,17 @@
 import { Link } from 'react-router-dom'
 import { PmButton, PmEmptyState } from '@/components/ui/pm-index'
+import {
+  resolveEntityBrowseBackHref,
+  resolveEntityBrowseBackLabel,
+  type WorkflowEntityBrowseKey,
+} from '@/components/auth/entity-browse-routes'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
 
 type EntityAccessDeniedProps = {
   readonly title?: string
   readonly description?: string
+  readonly entity?: WorkflowEntityBrowseKey
   readonly backHref?: string
   readonly backLabel?: string
 }
@@ -13,19 +19,27 @@ type EntityAccessDeniedProps = {
 export function EntityAccessDenied({
   title = 'Access denied',
   description = 'You do not have permission to view this record.',
-  backHref = '/dashboard',
-  backLabel = 'Back to dashboard',
+  entity,
+  backHref,
+  backLabel,
 }: EntityAccessDeniedProps) {
+  const resolvedHref =
+    backHref ?? (entity ? resolveEntityBrowseBackHref(entity) : '/dashboard')
+  const resolvedLabel =
+    backLabel ?? (entity ? resolveEntityBrowseBackLabel(entity) : 'Back to dashboard')
+
   return (
-    <PmEmptyState
-      title={title}
-      description={description}
-      action={
-        <PmButton size="sm" variant="outline" asChild>
-          <Link to={backHref}>{backLabel}</Link>
-        </PmButton>
-      }
-    />
+    <div data-slot="pm-access-denied">
+      <PmEmptyState
+        title={title}
+        description={description}
+        action={
+          <PmButton size="sm" variant="outline" asChild>
+            <Link to={resolvedHref}>{resolvedLabel}</Link>
+          </PmButton>
+        }
+      />
+    </div>
   )
 }
 

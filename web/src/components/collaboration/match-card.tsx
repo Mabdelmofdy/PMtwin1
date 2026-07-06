@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { ArrowDown, ArrowLeftRight, ArrowRight, RefreshCw, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { opportunitiesApi } from '@/api/opportunities.ts'
-import { formatDate } from '@/lib/format'
+import { formatDate, truncate } from '@/lib/format'
 import { formatMatchTypeBadgeLabel } from '@/components/collaboration/collaboration-display'
 import {
   formatMatchDisplayTitle,
@@ -54,14 +54,28 @@ export type MatchCardProps = {
   match: PostMatch
   className?: string
   showActions?: boolean
+  /** Truncate long need/offer titles for dense browse grids (presentation only). */
+  shortenTitles?: boolean
 }
 
+const BROWSE_TITLE_MAX = 56
+
 /** Match card — one_way keeps need/offer pairing; other topologies show a structure label. */
-export function MatchCard({ match, className, showActions = true }: MatchCardProps) {
+export function MatchCard({
+  match,
+  className,
+  showActions = true,
+  shortenTitles = false,
+}: MatchCardProps) {
   const href = `/matches/${match.id}`
   const isOneWay = (match.matchType || 'one_way').toLowerCase() === 'one_way'
   const pairing = resolveMatchNeedOfferTitles(match, (id) => opportunitiesApi.get(id))
   const displayTitle = formatMatchDisplayTitle(match, (id) => opportunitiesApi.get(id))
+  const needTitle = shortenTitles ? truncate(pairing.needTitle, BROWSE_TITLE_MAX) : pairing.needTitle
+  const offerTitle = shortenTitles
+    ? truncate(pairing.offerTitle, BROWSE_TITLE_MAX)
+    : pairing.offerTitle
+  const structureTitle = shortenTitles ? truncate(displayTitle, BROWSE_TITLE_MAX) : displayTitle
 
   return (
     <PmSurface
@@ -78,21 +92,20 @@ export function MatchCard({ match, className, showActions = true }: MatchCardPro
               <>
                 <p className={cn(pmTypography.caption, 'font-medium text-info')}>Need</p>
                 <p className={cn(pmTypography.bodySm, 'line-clamp-2 font-semibold')}>
-                  {pairing.needTitle}
+                  {needTitle}
                 </p>
                 <ArrowDown className="my-1 size-3.5 text-muted-foreground" aria-hidden />
                 <p className={cn(pmTypography.caption, 'font-medium text-success')}>Offer</p>
                 <p className={cn(pmTypography.bodySm, 'line-clamp-2 font-semibold')}>
-                  {pairing.offerTitle}
+                  {offerTitle}
                 </p>
               </>
             ) : (
               <p className={cn(pmTypography.bodySm, 'line-clamp-3 font-semibold')}>
-                {displayTitle}
+                {structureTitle}
               </p>
             )}
           </Link>
-          <MatchTypeChip matchType={match.matchType} />
         </div>
         <PmMatchScoreBadge
           score={match.matchScore}
@@ -105,9 +118,10 @@ export function MatchCard({ match, className, showActions = true }: MatchCardPro
       <div
         className={cn(
           pmTypography.caption,
-          'mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground',
+          'mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground',
         )}
       >
+        <MatchTypeChip matchType={match.matchType} />
         <span>{formatDate(match.createdAt)}</span>
         <PmWorkflowBadge status={match.status} entity="match" size="sm" />
       </div>

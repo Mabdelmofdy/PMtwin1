@@ -241,6 +241,34 @@ Reference: `opportunities-pages.tsx` (~lines 367–405). Do not show "no results
 
 ---
 
+## UPX PR-A1 — Workflow detail primitives
+
+Workflow detail pages use **`PmWorkflowLinksCard`** (`@/components/ui/pm-index`) for related entity links.
+
+Recommended action hubs use **`PM_RECOMMENDED_NEXT_STEP`** from `@/components/layout/pm-layout-index` (`title` + `description(entity)`).
+
+Access denied recovery uses **`EntityAccessDenied`** with `entity` prop (`opportunity` | `match` | `negotiation` | `deal` | `contract`) for canonical browse `backHref` via `entity-browse-routes.ts`.
+
+---
+
+## UPX PR-A2 — Browse layout primitives
+
+Authenticated browse pages should compose **`PmBrowsePage`** (`@/components/layout/pm-layout-index`):
+
+| Slot | Content |
+|------|---------|
+| `header` | `PmPageHeader` + `PmPageActions` |
+| `summary` | Optional KPI strip or hero metrics (between header and toolbar) |
+| `toolbar` | **`PmBrowseToolbar`** — always passed to `PmPage` `toolbar` slot |
+| `children` | Table, card grid, or delegated list section |
+| `pagination` | `PmTablePagination` when paginated |
+
+**`PmBrowseToolbar`** wraps `PmToolbarSurface` with `data-slot="pm-browse-toolbar"` and default `space-y-3` for filter stacks.
+
+Page migrations to this scaffold happen in UPX Phase B — do not mix browse redesign into detail or workflow PRs.
+
+---
+
 ## Related documents
 
 - [PM-TWIN-DESIGN-SYSTEM-V2.md](./PM-TWIN-DESIGN-SYSTEM-V2.md) — token catalog & primitives

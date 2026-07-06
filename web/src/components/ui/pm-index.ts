@@ -144,3 +144,8 @@ export {
   type OpportunityMatchWorkflowContext,
   type OpportunityWorkflowContext,
 } from '@/components/ui/pm-workflow-journey-steps'
+export {
+  PmWorkflowLinksCard,
+  type PmWorkflowLink,
+  type PmWorkflowLinksCardProps,
+} from '@/components/ui/pm-workflow-links-card'

@@ -19,8 +19,11 @@ import { CollaborationTimeline } from '@/components/collaboration/collaboration-
 import { resolveCollaborationStepFromContract } from '@/components/collaboration/collaboration-display'
 import type { CollaborationTimelineEvent } from '@/components/collaboration/collaboration-timeline'
 import {
+  PmBrowsePage,
+  PmBrowseToolbar,
   PmContentCard,
   PmDetailLayout,
+  PM_RECOMMENDED_NEXT_STEP,
   PmInspectorLayout,
   PmSectionHeader,
   countActiveContracts,
@@ -54,10 +57,10 @@ import {
   PmPageHeroMetric,
   PmMoreActions,
   PmWorkflowBadge,
+  PmWorkflowLinksCard,
   buildContractWorkflowSteps,
   type PmMoreActionItem,
 } from '@/components/ui/pm-index'
-import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
 import type { Contract } from '@/types/domain.ts'
@@ -249,7 +252,7 @@ export function ContractsPage() {
   ]
 
   return (
-    <PmPage
+    <PmBrowsePage
       header={
         <PmPageHeader
           label="My Workspace"
@@ -271,6 +274,39 @@ export function ContractsPage() {
           }
         />
       }
+      toolbar={
+        contracts.length > 0 ? (
+          <PmBrowseToolbar>
+            <PmTableToolbar
+              search={
+                <PmTableSearch
+                  placeholder="Search contract or deal ID…"
+                  value={search}
+                  onValueChange={(v) => {
+                    setSearch(v)
+                    setPage(1)
+                  }}
+                />
+              }
+            />
+          </PmBrowseToolbar>
+        ) : undefined
+      }
+      pagination={
+        totalItems > 0 ? (
+          <PmTablePagination
+            page={safePage}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            pageSizeOptions={[12, 24, 48]}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size)
+              setPage(1)
+            }}
+          />
+        ) : null
+      }
     >
       {listEmpty.branch === 'first-run' ? (
         <PmEmptyState
@@ -289,22 +325,6 @@ export function ContractsPage() {
           data={paged}
           getRowId={(c) => c.id}
           caption="Contracts"
-          toolbar={
-            <PmToolbarSurface>
-              <PmTableToolbar
-                search={
-                  <PmTableSearch
-                    placeholder="Search contract or deal ID…"
-                    value={search}
-                    onValueChange={(v) => {
-                      setSearch(v)
-                      setPage(1)
-                    }}
-                  />
-                }
-              />
-            </PmToolbarSurface>
-          }
           rowActions={(c) => (
             <PmTableRowActions
               onView={() => navigate(`/contracts/${c.id}`)}
@@ -332,25 +352,10 @@ export function ContractsPage() {
               />
             ) : undefined
           }
-          pagination={
-            totalItems > 0 ? (
-              <PmTablePagination
-                page={safePage}
-                pageSize={pageSize}
-                totalItems={totalItems}
-                pageSizeOptions={[12, 24, 48]}
-                onPageChange={setPage}
-                onPageSizeChange={(size) => {
-                  setPageSize(size)
-                  setPage(1)
-                }}
-              />
-            ) : undefined
-          }
           renderMobileCard={(c) => <ContractListCard contract={c} />}
         />
       )}
-    </PmPage>
+    </PmBrowsePage>
   )
 }
 
@@ -405,9 +410,8 @@ export function ContractDetailPage() {
     return (
       <PmPage header={<PmPageHeader title="Access denied" description="Contract summary." />}>
         <EntityAccessDenied
+          entity="contract"
           description="Contract details are only visible to parties or authorized platform staff."
-          backHref="/contracts"
-          backLabel="Back to contracts"
         />
       </PmPage>
     )
@@ -440,6 +444,23 @@ export function ContractDetailPage() {
 
   const contractNavMore = buildContractNavMoreItems(model)
   const recommendedAction = buildContractRecommendedAction(model, canMutate, user?.id)
+  const contractWorkflowLinks = [
+    ...(model.links.deal
+      ? [{ id: 'deal', label: PRODUCT_LANGUAGE.OPEN_DEAL, href: model.links.deal.path }]
+      : []),
+    ...(model.links.match
+      ? [{ id: 'match', label: PRODUCT_LANGUAGE.OPEN_MATCH, href: model.links.match.path }]
+      : []),
+    ...(model.links.negotiation
+      ? [
+          {
+            id: 'negotiation',
+            label: PRODUCT_LANGUAGE.OPEN_NEGOTIATION,
+            href: model.links.negotiation.path,
+          },
+        ]
+      : []),
+  ]
   const showMutations =
     canMutate &&
     contractDetailShowsMutationActions({
@@ -503,33 +524,13 @@ export function ContractDetailPage() {
 
             {recommendedAction ? (
               <PmActionHub
-                title="Recommended next step"
-                description="The most important action for this contract."
+                title={PM_RECOMMENDED_NEXT_STEP.title}
+                description={PM_RECOMMENDED_NEXT_STEP.description('contract')}
                 items={[recommendedAction]}
               />
             ) : null}
 
-            <PmContentCard title="Workflow links" className="border-border/60 bg-surface-muted/30">
-              <div className="flex flex-wrap gap-2">
-                {model.links.deal ? (
-                  <PmButton size="sm" variant="outline" asChild>
-                    <Link to={model.links.deal.path}>{PRODUCT_LANGUAGE.OPEN_DEAL}</Link>
-                  </PmButton>
-                ) : null}
-                {model.links.match ? (
-                  <PmButton size="sm" variant="outline" asChild>
-                    <Link to={model.links.match.path}>{PRODUCT_LANGUAGE.OPEN_MATCH}</Link>
-                  </PmButton>
-                ) : null}
-                {model.links.negotiation ? (
-                  <PmButton size="sm" variant="outline" asChild>
-                    <Link to={model.links.negotiation.path}>
-                      {PRODUCT_LANGUAGE.OPEN_NEGOTIATION}
-                    </Link>
-                  </PmButton>
-                ) : null}
-              </div>
-            </PmContentCard>
+            <PmWorkflowLinksCard links={contractWorkflowLinks} />
 
             <PmContentCard title="Summary">
               <PmFormReadonly>

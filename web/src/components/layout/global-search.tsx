@@ -34,7 +34,7 @@ export function GlobalSearch({
       variant="outline"
       size="sm"
       className={cn(
-        'h-8 w-full max-w-md cursor-pointer justify-start gap-2 border-border/60 bg-surface-muted/40 text-muted-foreground hover:bg-surface-muted',
+        'h-9 w-full max-w-md cursor-pointer justify-start gap-2 rounded-xl border-border/50 bg-muted/30 text-muted-foreground shadow-none hover:border-border/70 hover:bg-muted/50',
         className,
       )}
       onClick={() => setOpen(true)}

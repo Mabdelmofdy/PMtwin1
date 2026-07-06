@@ -25,9 +25,13 @@ import {
   transitionNegotiationStatusUiAction,
 } from '@/lib/negotiation-ui-actions.ts'
 import { dealRepository, applicationRepository } from '@/repositories/index.ts'
-import { PmTableSearch, PmTableToolbar } from '@/components/data/pm-data-index'
+import { PmTableEmpty, PmTablePagination, PmTableSearch, PmTableToolbar, resolveListEmptyState } from '@/components/data/pm-data-index'
 import { PipelineBoard } from '@/components/pipeline/pipeline-board'
-import { MatchesListSection } from '@/components/collaboration/matches-list-section'
+import {
+  MatchesBrowseToolbar,
+  MatchesListSection,
+  useMatchesListFilters,
+} from '@/components/collaboration/matches-list-section'
 import { MatchTypeChip } from '@/components/collaboration/match-card'
 import { CollaborationTimeline } from '@/components/collaboration/collaboration-timeline'
 import {
@@ -35,8 +39,11 @@ import {
   resolveCollaborationStepFromNegotiation,
 } from '@/components/collaboration/collaboration-display'
 import {
+  PmBrowsePage,
+  PmBrowseToolbar,
   PmContentCard,
   PmDetailLayout,
+  PM_RECOMMENDED_NEXT_STEP,
   PmInspectorLayout,
   PmSectionHeader,
   countActiveMatches,
@@ -63,6 +70,7 @@ import {
   PmSurface,
   PmTimeline,
   PmWorkflowBadge,
+  PmWorkflowLinksCard,
   buildMatchWorkflowSteps,
   buildNegotiationWorkflowSteps,
   type PmCardActionSlot,
@@ -499,13 +507,20 @@ export function MatchesPage() {
         : myMatches
   const activeMatches = countActiveMatches(myMatches)
   const isMarketplaceBrowse = navState?.domain === 'marketplace' || matchView === 'marketplace'
+  const marketplacePreview =
+    matchView === 'marketplace' && !MATCH_MARKETPLACE_VIEW_AVAILABLE
+  const listFilters = useMatchesListFilters(displayedMatches)
 
   useEffect(() => {
     setMatchView(resolveDefaultMatchView(navState))
   }, [location.key, navState?.domain, navState?.matchView])
 
+  useEffect(() => {
+    listFilters.setPage(1)
+  }, [matchView, listFilters.setPage])
+
   return (
-    <PmPage
+    <PmBrowsePage
       header={
         <PmPageHeader
           label={isMarketplaceBrowse ? 'Marketplace' : 'My Workspace'}
@@ -535,33 +550,58 @@ export function MatchesPage() {
           }
         />
       }
+      toolbar={
+        <PmBrowseToolbar>
+          <Tabs
+            value={matchView}
+            onValueChange={(value) => setMatchView(value as MatchPresentationView)}
+          >
+            <TabsList className={cn('max-w-full', pmResponsive.scrollX)}>
+              {(Object.keys(MATCH_VIEW_LABELS) as MatchPresentationView[]).map((key) => (
+                <TabsTrigger
+                  key={key}
+                  value={key}
+                  className="cursor-pointer"
+                  disabled={key === 'marketplace' && !MATCH_MARKETPLACE_VIEW_AVAILABLE}
+                >
+                  {MATCH_VIEW_LABELS[key]}
+                  {key === 'marketplace' && !MATCH_MARKETPLACE_VIEW_AVAILABLE ? (
+                    <PmBadge tone="muted" size="sm" className="ms-1.5">
+                      Preview
+                    </PmBadge>
+                  ) : null}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+          {!marketplacePreview ? (
+            <MatchesBrowseToolbar
+              search={listFilters.search}
+              setSearch={listFilters.setSearch}
+              status={listFilters.status}
+              setStatus={listFilters.setStatus}
+              matchType={listFilters.matchType}
+              setMatchType={listFilters.setMatchType}
+              activeFilterChips={listFilters.activeFilterChips}
+              clearAllFilters={listFilters.clearAllFilters}
+            />
+          ) : null}
+        </PmBrowseToolbar>
+      }
+      pagination={
+        !marketplacePreview && listFilters.totalItems > 0 ? (
+          <PmTablePagination
+            page={listFilters.safePage}
+            pageSize={listFilters.pageSize}
+            totalItems={listFilters.totalItems}
+            pageSizeOptions={[12, 24, 48]}
+            onPageChange={listFilters.setPage}
+            onPageSizeChange={listFilters.setPageSize}
+          />
+        ) : null
+      }
     >
-      <PmToolbarSurface className="space-y-3">
-        <Tabs
-          value={matchView}
-          onValueChange={(value) => setMatchView(value as MatchPresentationView)}
-        >
-          <TabsList className={cn('max-w-full', pmResponsive.scrollX)}>
-            {(Object.keys(MATCH_VIEW_LABELS) as MatchPresentationView[]).map((key) => (
-              <TabsTrigger
-                key={key}
-                value={key}
-                className="cursor-pointer"
-                disabled={key === 'marketplace' && !MATCH_MARKETPLACE_VIEW_AVAILABLE}
-              >
-                {MATCH_VIEW_LABELS[key]}
-                {key === 'marketplace' && !MATCH_MARKETPLACE_VIEW_AVAILABLE ? (
-                  <PmBadge tone="muted" size="sm" className="ms-1.5">
-                    Preview
-                  </PmBadge>
-                ) : null}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-      </PmToolbarSurface>
-
-      {matchView === 'marketplace' && !MATCH_MARKETPLACE_VIEW_AVAILABLE ? (
+      {marketplacePreview ? (
         <PmEmptyState
           title="Marketplace match browse — preview"
           description="Cross-marketplace match discovery is not available yet. Use My Matches or Recommended Matches for your assigned collaborations."
@@ -572,9 +612,16 @@ export function MatchesPage() {
           }
         />
       ) : (
-        <MatchesListSection matches={displayedMatches} />
+        <MatchesListSection
+          matches={displayedMatches}
+          filters={listFilters}
+          showToolbar={false}
+          showPagination={false}
+          layout="cards"
+          shortenTitles
+        />
       )}
-    </PmPage>
+    </PmBrowsePage>
   )
 }
 
@@ -655,9 +702,8 @@ export function MatchDetailPage() {
     return (
       <PmPage header={<PmPageHeader title="Access denied" description="Match detail." />}>
         <EntityAccessDenied
+          entity="match"
           description="Only match participants can access this workspace."
-          backHref="/matches"
-          backLabel="Back to matches"
         />
       </PmPage>
     )
@@ -721,6 +767,20 @@ export function MatchDetailPage() {
     onAcceptDecline: runPostMatchAction,
     actionPending,
   })
+  const matchWorkflowLinks = [
+    ...(negotiation
+      ? [
+          {
+            id: 'negotiation',
+            label: PRODUCT_LANGUAGE.OPEN_NEGOTIATION,
+            href: `/negotiations/${negotiation.id}`,
+          },
+        ]
+      : []),
+    ...(actions.showViewDeal && actions.dealId
+      ? [{ id: 'deal', label: PRODUCT_LANGUAGE.OPEN_DEAL, href: `/deals/${actions.dealId}` }]
+      : []),
+  ]
 
   return (
     <PmPage
@@ -760,33 +820,16 @@ export function MatchDetailPage() {
 
             {recommendedAction ? (
               <PmActionHub
-                title="Recommended next step"
-                description="The most important action for this match."
+                title={PM_RECOMMENDED_NEXT_STEP.title}
+                description={PM_RECOMMENDED_NEXT_STEP.description('match')}
                 items={[recommendedAction]}
               />
             ) : null}
 
-            <PmContentCard title="Workflow links" className="border-border/60 bg-surface-muted/30">
-              <div className="flex flex-wrap gap-2">
-                {negotiation ? (
-                  <PmButton size="sm" variant="outline" asChild>
-                    <Link to={`/negotiations/${negotiation.id}`}>
-                      {PRODUCT_LANGUAGE.OPEN_NEGOTIATION}
-                    </Link>
-                  </PmButton>
-                ) : null}
-                {actions.showViewDeal && actions.dealId ? (
-                  <PmButton size="sm" variant="outline" asChild>
-                    <Link to={`/deals/${actions.dealId}`}>{PRODUCT_LANGUAGE.OPEN_DEAL}</Link>
-                  </PmButton>
-                ) : null}
-                {!negotiation && !(actions.showViewDeal && actions.dealId) ? (
-                  <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-                    Accept the match or start negotiating to unlock the next workflow links.
-                  </p>
-                ) : null}
-              </div>
-            </PmContentCard>
+            <PmWorkflowLinksCard
+              links={matchWorkflowLinks}
+              emptyMessage="Accept the match or start negotiating to unlock the next workflow links."
+            />
 
             <PmContentCard title="Match status" className="border-border/60 bg-surface-muted/40">
               <div className="flex flex-wrap items-center gap-3">
@@ -904,6 +947,8 @@ export function MatchDetailPage() {
 export function NegotiationsPage() {
   const { user, canAccessAdmin } = useAuth()
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(12)
   const allNegotiations = negotiationsApi.list()
   const viewer = useMemo(
     () =>
@@ -927,12 +972,31 @@ export function NegotiationsPage() {
       formatNegotiationDisplayTitle(neg, opportunitiesApi.get).toLowerCase().includes(q),
     )
   }, [negotiations, search])
+  const totalItems = filteredNegotiations.length
+  const pageCount = Math.max(1, Math.ceil(totalItems / pageSize))
+  const safePage = Math.min(page, pageCount)
+  const pagedNegotiations = filteredNegotiations.slice(
+    (safePage - 1) * pageSize,
+    safePage * pageSize,
+  )
   const activeCount = negotiations.filter(
     (n) => n.status === 'active' || n.status === 'countered',
   ).length
+  const listEmpty = resolveListEmptyState({
+    hasSourceData: negotiations.length > 0,
+    hasActiveFilters: search.length > 0,
+    firstRun: {
+      title: 'No negotiations yet',
+      description: 'Negotiations begin after you accept a match and start term discussions.',
+    },
+    filtered: {
+      title: 'No negotiations match your search',
+      description: 'Try a different search term.',
+    },
+  })
 
   return (
-    <PmPage
+    <PmBrowsePage
       header={
         <PmPageHeader
           label="My Workspace"
@@ -948,44 +1012,66 @@ export function NegotiationsPage() {
           }
         />
       }
-    >
-      {negotiations.length === 0 ? (
-        <PmEmptyState
-          title="No negotiations yet"
-          description="Negotiations begin after you accept a match and start term discussions."
-          action={
-            <PmButton asChild>
-              <Link to="/matches">Open matches</Link>
-            </PmButton>
-          }
-        />
-      ) : (
-        <>
-          <PmToolbarSurface>
+      toolbar={
+        negotiations.length > 0 ? (
+          <PmBrowseToolbar>
             <PmTableToolbar
               search={
                 <PmTableSearch
                   placeholder="Search negotiations…"
                   value={search}
-                  onValueChange={setSearch}
+                  onValueChange={(value) => {
+                    setSearch(value)
+                    setPage(1)
+                  }}
                 />
               }
             />
-          </PmToolbarSurface>
-          {filteredNegotiations.length === 0 ? (
-            <PmEmptyState
-              title="No negotiations match your search"
-              description="Try a different search term."
-              size="compact"
-              action={
-                <PmButton size="sm" variant="outline" onClick={() => setSearch('')}>
-                  Clear search
-                </PmButton>
-              }
-            />
-          ) : (
+          </PmBrowseToolbar>
+        ) : undefined
+      }
+      pagination={
+        totalItems > 0 ? (
+          <PmTablePagination
+            page={safePage}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            pageSizeOptions={[12, 24, 48]}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size)
+              setPage(1)
+            }}
+          />
+        ) : null
+      }
+    >
+      {pagedNegotiations.length === 0 ? (
+        listEmpty.branch === 'first-run' ? (
+          <PmEmptyState
+            title={listEmpty.config.title ?? 'No negotiations yet'}
+            description={listEmpty.config.description}
+            action={
+              <PmButton asChild>
+                <Link to="/matches">Open matches</Link>
+              </PmButton>
+            }
+          />
+        ) : listEmpty.branch === 'filtered' ? (
+          <PmTableEmpty
+            variant="no-results"
+            title={listEmpty.config.title}
+            description={listEmpty.config.description}
+            primaryAction={
+              <PmButton size="sm" variant="outline" onClick={() => setSearch('')}>
+                Clear search
+              </PmButton>
+            }
+          />
+        ) : null
+      ) : (
         <div className="grid gap-3 md:grid-cols-2">
-          {filteredNegotiations.map((neg) => (
+          {pagedNegotiations.map((neg) => (
             <PmSurface
               key={neg.id}
               variant="default"
@@ -1012,10 +1098,8 @@ export function NegotiationsPage() {
             </PmSurface>
           ))}
         </div>
-          )}
-        </>
       )}
-    </PmPage>
+    </PmBrowsePage>
   )
 }
 
@@ -1083,9 +1167,8 @@ export function NegotiationDetailPage() {
         header={<PmPageHeader title="Access denied" description="Value negotiation workspace." />}
       >
         <EntityAccessDenied
+          entity="negotiation"
           description="Only negotiation participants can access this workspace."
-          backHref="/pipeline"
-          backLabel="Back to pipeline"
         />
       </PmPage>
     )
@@ -1126,6 +1209,14 @@ export function NegotiationDetailPage() {
       ? { id: linkedDeal.id, status: linkedDeal.status }
       : undefined,
   })
+  const negotiationWorkflowLinks = [
+    ...(neg.postMatchId
+      ? [{ id: 'match', label: PRODUCT_LANGUAGE.OPEN_MATCH, href: `/matches/${neg.postMatchId}` }]
+      : []),
+    ...(linkedDeal
+      ? [{ id: 'deal', label: PRODUCT_LANGUAGE.OPEN_DEAL, href: `/deals/${linkedDeal.id}` }]
+      : []),
+  ]
 
   return (
     <PmPage
@@ -1210,26 +1301,13 @@ export function NegotiationDetailPage() {
 
             {recommendedNegotiationAction ? (
               <PmActionHub
-                title="Recommended next step"
-                description="The most important action for this negotiation."
+                title={PM_RECOMMENDED_NEXT_STEP.title}
+                description={PM_RECOMMENDED_NEXT_STEP.description('negotiation')}
                 items={[recommendedNegotiationAction]}
               />
             ) : null}
 
-            <PmContentCard title="Workflow links" className="border-border/60 bg-surface-muted/30">
-              <div className="flex flex-wrap gap-2">
-                {neg.postMatchId ? (
-                  <PmButton size="sm" variant="outline" asChild>
-                    <Link to={`/matches/${neg.postMatchId}`}>{PRODUCT_LANGUAGE.OPEN_MATCH}</Link>
-                  </PmButton>
-                ) : null}
-                {linkedDeal ? (
-                  <PmButton size="sm" variant="outline" asChild>
-                    <Link to={`/deals/${linkedDeal.id}`}>{PRODUCT_LANGUAGE.OPEN_DEAL}</Link>
-                  </PmButton>
-                ) : null}
-              </div>
-            </PmContentCard>
+            <PmWorkflowLinksCard links={negotiationWorkflowLinks} />
 
             <PmContentCard title="Discussion">
             <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>

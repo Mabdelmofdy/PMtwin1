@@ -1,11 +1,18 @@
 import { useParams, useLocation } from 'react-router-dom'
-import { useState } from 'react'
 import { peopleApi } from '@/api/people.ts'
 import { notificationsApi } from '@/api/notifications.ts'
 import { useAuth } from '@/providers/auth-provider'
-import { PeopleListSection } from '@/components/user/people-list-section'
+import {
+  PeopleBrowseToolbar,
+  PeopleListSection,
+  usePeopleListFilters,
+} from '@/components/user/people-list-section'
 import { MessagesView } from '@/components/user/messages-view'
-import { NotificationsListSection, type ReadFilter } from '@/components/user/notifications-list-section'
+import {
+  NotificationsBrowseToolbar,
+  NotificationsListSection,
+  useNotificationsListFilters,
+} from '@/components/user/notifications-list-section'
 import { ProfileView } from '@/components/user/profile-view'
 import { SettingsView } from '@/components/user/settings-view'
 import {
@@ -14,30 +21,15 @@ import {
   resolveCompanyIds,
 } from '@/components/user/public-profile-view'
 import { MOCK_MESSAGE_THREADS } from '@/components/user/user-display'
-import type { PeopleScopeFilter } from '@/components/user/user-display'
-import {
-  PmTableFilter,
-  PmTableSearch,
-  PmTableToolbar,
-} from '@/components/data/pm-data-index'
+import { PmTablePagination } from '@/components/data/pm-data-index'
 import {
   PmBadge,
-  PmFilterChips,
   PmPage,
   PmPageHeader,
   PmPageHeroMetric,
   PmPageActions,
 } from '@/components/ui/pm-index'
-import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
-import { cn } from '@/lib/utils'
+import { PmBrowsePage, PmBrowseToolbar } from '@/components/layout/pm-layout-index'
 import { readProductNavState } from '@/config/product-identity'
 import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
 
@@ -46,8 +38,7 @@ export function PeoplePage() {
   const navState = readProductNavState(location.state)
   const profileCount = peopleApi.listAll().length
   const peopleScope = navState?.peopleScope
-  const [search, setSearch] = useState('')
-  const [scope, setScope] = useState<PeopleScopeFilter>(peopleScope ?? 'all')
+  const listFilters = usePeopleListFilters(peopleScope ?? 'all')
   const title =
     peopleScope === 'companies'
       ? 'Browse companies'
@@ -61,14 +52,8 @@ export function PeoplePage() {
         ? 'Explore professionals and talent available for collaboration.'
         : 'Search and discover professionals and companies across the built environment.'
 
-  const scopeLabels: Record<PeopleScopeFilter, string> = {
-    all: 'All',
-    people: 'Professionals',
-    companies: 'Companies',
-  }
-
   return (
-    <PmPage
+    <PmBrowsePage
       header={
         <PmPageHeader
           label="Marketplace"
@@ -79,66 +64,37 @@ export function PeoplePage() {
         />
       }
       toolbar={
-        <PmToolbarSurface>
-          <PmTableToolbar
-            search={
-              <PmTableSearch
-                placeholder="Search by name, skills, sector…"
-                value={search}
-                onValueChange={setSearch}
-              />
-            }
-            filters={
-              <PmTableFilter activeCount={scope !== 'all' ? 1 : 0} label="Type">
-                <div className="space-y-1.5">
-                  <label className={cn(pmTypography.bodySm, 'font-medium')}>Entity type</label>
-                  <Select
-                    value={scope}
-                    onValueChange={(v) => setScope(v as PeopleScopeFilter)}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="people">Professionals</SelectItem>
-                      <SelectItem value="companies">Companies</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </PmTableFilter>
-            }
-          >
-            <PmFilterChips
-              chips={
-                scope !== 'all'
-                  ? [
-                      {
-                        id: 'scope',
-                        label: 'Type',
-                        value: scopeLabels[scope as Exclude<PeopleScopeFilter, never>],
-                        onRemove: () => setScope('all'),
-                      },
-                    ]
-                  : []
-              }
-              onClearAll={() => {
-                setSearch('')
-                setScope('all')
-              }}
-            />
-          </PmTableToolbar>
-        </PmToolbarSurface>
+        <PmBrowseToolbar>
+          <PeopleBrowseToolbar
+            search={listFilters.search}
+            setSearch={listFilters.setSearch}
+            scope={listFilters.scope}
+            setScope={listFilters.setScope}
+            activeFilterChips={listFilters.activeFilterChips}
+            clearAllFilters={listFilters.clearAllFilters}
+          />
+        </PmBrowseToolbar>
+      }
+      pagination={
+        listFilters.totalItems > 0 ? (
+          <PmTablePagination
+            page={listFilters.safePage}
+            pageSize={listFilters.pageSize}
+            totalItems={listFilters.totalItems}
+            pageSizeOptions={[12, 24, 48]}
+            onPageChange={listFilters.setPage}
+            onPageSizeChange={listFilters.setPageSize}
+          />
+        ) : null
       }
     >
       <PeopleListSection
+        filters={listFilters}
+        showToolbar={false}
+        showPagination={false}
         initialScope={peopleScope ?? 'all'}
-        search={search}
-        scope={scope}
-        onSearchChange={setSearch}
-        onScopeChange={setScope}
       />
-    </PmPage>
+    </PmBrowsePage>
   )
 }
 
@@ -202,16 +158,15 @@ export function MessagesPage() {
 export function NotificationsPage() {
   const { user } = useAuth()
   const userId = user?.id ?? 'seed-user-001'
-  const notifications = notificationsApi.list(userId)
-  const unreadCount = notifications.filter((n) => !n.read).length
-  const [readFilter, setReadFilter] = useState<ReadFilter>('all')
+  const listFilters = useNotificationsListFilters(userId)
+  const unreadCount = listFilters.notifications.filter((n) => !n.read).length
 
   const handleMarkAllRead = () => {
     notificationsApi.markAllRead(userId)
   }
 
   return (
-    <PmPage
+    <PmBrowsePage
       header={
         <PmPageHeader
           label="Communication"
@@ -220,7 +175,7 @@ export function NotificationsPage() {
           metric={<PmPageHeroMetric value={unreadCount} label="Unread" />}
           badges={
             <PmBadge tone={unreadCount > 0 ? 'warning' : 'success'}>
-              {notifications.length} total
+              {listFilters.notifications.length} total
             </PmBadge>
           }
           actions={
@@ -237,33 +192,34 @@ export function NotificationsPage() {
         />
       }
       toolbar={
-        notifications.length > 0 ? (
-          <PmToolbarSurface>
-            <PmTableToolbar
-              filters={
-                <PmTableFilter activeCount={readFilter !== 'all' ? 1 : 0} label="Filter">
-                  <div className="space-y-1.5">
-                    <label className={cn(pmTypography.bodySm, 'font-medium')}>Read state</label>
-                    <Select value={readFilter} onValueChange={(v) => setReadFilter(v as ReadFilter)}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All</SelectItem>
-                        <SelectItem value="unread">Unread only</SelectItem>
-                        <SelectItem value="read">Read only</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </PmTableFilter>
-              }
+        listFilters.notifications.length > 0 ? (
+          <PmBrowseToolbar>
+            <NotificationsBrowseToolbar
+              readFilter={listFilters.readFilter}
+              setReadFilter={listFilters.setReadFilter}
             />
-          </PmToolbarSurface>
+          </PmBrowseToolbar>
         ) : undefined
       }
+      pagination={
+        listFilters.totalItems > 0 ? (
+          <PmTablePagination
+            page={listFilters.safePage}
+            pageSize={listFilters.pageSize}
+            totalItems={listFilters.totalItems}
+            pageSizeOptions={[12, 24, 48]}
+            onPageChange={listFilters.setPage}
+            onPageSizeChange={listFilters.setPageSize}
+          />
+        ) : null
+      }
     >
-      <NotificationsListSection readFilter={readFilter} />
-    </PmPage>
+      <NotificationsListSection
+        filters={listFilters}
+        showToolbar={false}
+        showPagination={false}
+      />
+    </PmBrowsePage>
   )
 }
 

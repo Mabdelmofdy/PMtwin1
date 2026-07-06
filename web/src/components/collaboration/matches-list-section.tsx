@@ -37,24 +37,48 @@ import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import { cn } from '@/lib/utils'
 import type { PostMatch } from '@/types/domain.ts'
 
+export type MatchesListFilters = ReturnType<typeof useMatchesListFilters>
+
 export type MatchesListSectionProps = {
   matches: readonly PostMatch[]
   showToolbar?: boolean
+  showPagination?: boolean
   compact?: boolean
+  /** Browse page card grid; pipeline embed keeps table layout. */
+  layout?: 'table' | 'cards'
+  /** Truncate long titles in card layout (presentation only). */
+  shortenTitles?: boolean
+  /** When provided, filter/pagination state is controlled externally (browse page). */
+  filters?: MatchesListFilters
 }
 
-/** Shared matches list — PmDataTable desktop + MatchCard mobile. */
-export function MatchesListSection({
-  matches,
-  showToolbar = true,
-  compact = false,
-}: MatchesListSectionProps) {
-  const navigate = useNavigate()
-  const [search, setSearch] = useState('')
-  const [status, setStatus] = useState('all')
-  const [matchType, setMatchType] = useState('all')
+export function useMatchesListFilters(
+  matches: readonly PostMatch[],
+  options?: { compact?: boolean },
+) {
+  const compact = options?.compact ?? false
+  const [search, setSearchState] = useState('')
+  const [status, setStatusState] = useState('all')
+  const [matchType, setMatchTypeState] = useState('all')
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(compact ? 8 : 12)
+  const [pageSize, setPageSizeState] = useState(compact ? 8 : 12)
+
+  const setSearch = (value: string) => {
+    setSearchState(value)
+    setPage(1)
+  }
+  const setStatus = (value: string) => {
+    setStatusState(value)
+    setPage(1)
+  }
+  const setMatchType = (value: string) => {
+    setMatchTypeState(value)
+    setPage(1)
+  }
+  const setPageSize = (size: number) => {
+    setPageSizeState(size)
+    setPage(1)
+  }
 
   const filtered = useMemo(() => {
     return matches.filter((m) => {
@@ -95,10 +119,7 @@ export function MatchesListSection({
             id: 'status',
             label: 'Status',
             value: status.charAt(0).toUpperCase() + status.slice(1),
-            onRemove: () => {
-              setStatus('all')
-              setPage(1)
-            },
+            onRemove: () => setStatus('all'),
           },
         ]
       : []),
@@ -109,14 +130,358 @@ export function MatchesListSection({
             label: 'Match type',
             value:
               MATCHING_MODELS[matchType as keyof typeof MATCHING_MODELS]?.label ?? matchType,
-            onRemove: () => {
-              setMatchType('all')
-              setPage(1)
-            },
+            onRemove: () => setMatchType('all'),
           },
         ]
       : []),
   ]
+
+  const clearAllFilters = () => {
+    setSearchState('')
+    setStatusState('all')
+    setMatchTypeState('all')
+    setPage(1)
+  }
+
+  return {
+    search,
+    setSearch,
+    status,
+    setStatus,
+    matchType,
+    setMatchType,
+    page,
+    setPage,
+    pageSize,
+    setPageSize,
+    filtered,
+    paged,
+    totalItems,
+    safePage,
+    pageCount,
+    hasActiveFilters,
+    listEmpty,
+    activeFilterChips,
+    clearAllFilters,
+    compact,
+  }
+}
+
+export type MatchesBrowseToolbarProps = Pick<
+  MatchesListFilters,
+  | 'search'
+  | 'setSearch'
+  | 'status'
+  | 'setStatus'
+  | 'matchType'
+  | 'setMatchType'
+  | 'activeFilterChips'
+  | 'clearAllFilters'
+>
+
+/** Search, filter panel, and chips for matches browse — composed inside `PmBrowseToolbar`. */
+export function MatchesBrowseToolbar({
+  search,
+  setSearch,
+  status,
+  setStatus,
+  matchType,
+  setMatchType,
+  activeFilterChips,
+  clearAllFilters,
+}: MatchesBrowseToolbarProps) {
+  return (
+    <PmTableToolbar
+      search={
+        <PmTableSearch
+          placeholder="Search need, offer, or partner…"
+          value={search}
+          onValueChange={setSearch}
+        />
+      }
+      filters={
+        <PmTableFilter
+          activeCount={(status !== 'all' ? 1 : 0) + (matchType !== 'all' ? 1 : 0)}
+          label="Filters"
+        >
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className={pmTypography.label}>Status</label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="discovered">Discovered</SelectItem>
+                  <SelectItem value="accepted">Accepted</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="declined">Declined</SelectItem>
+                  <SelectItem value="expired">Expired</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className={pmTypography.label}>Match type</label>
+              <Select value={matchType} onValueChange={setMatchType}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All models</SelectItem>
+                  {MATCHING_MODEL_KEYS.map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {MATCHING_MODELS[key].label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </PmTableFilter>
+      }
+    >
+      <PmFilterChips
+        chips={activeFilterChips}
+        onClearAll={() => {
+          clearAllFilters()
+        }}
+      />
+    </PmTableToolbar>
+  )
+}
+
+/** Shared matches list — table (pipeline) or card grid (browse). */
+export function MatchesListSection({
+  matches,
+  showToolbar = true,
+  showPagination = true,
+  compact = false,
+  layout = 'table',
+  shortenTitles = false,
+  filters: externalFilters,
+}: MatchesListSectionProps) {
+  if (externalFilters) {
+    if (layout === 'cards') {
+      return (
+        <MatchesListCardGrid
+          showToolbar={showToolbar}
+          showPagination={showPagination}
+          filters={externalFilters}
+          shortenTitles={shortenTitles}
+        />
+      )
+    }
+
+    return (
+      <MatchesListTable
+        matches={matches}
+        showToolbar={showToolbar}
+        showPagination={showPagination}
+        filters={externalFilters}
+      />
+    )
+  }
+
+  return (
+    <MatchesListSectionWithFilters
+      matches={matches}
+      showToolbar={showToolbar}
+      showPagination={showPagination}
+      compact={compact}
+      layout={layout}
+      shortenTitles={shortenTitles}
+    />
+  )
+}
+
+function MatchesListSectionWithFilters({
+  matches,
+  showToolbar,
+  showPagination,
+  compact,
+  layout,
+  shortenTitles,
+}: Omit<MatchesListSectionProps, 'filters'>) {
+  const filters = useMatchesListFilters(matches, { compact })
+  if (layout === 'cards') {
+    return (
+      <MatchesListCardGrid
+        showToolbar={showToolbar}
+        showPagination={showPagination}
+        filters={filters}
+        shortenTitles={shortenTitles}
+      />
+    )
+  }
+
+  return (
+    <MatchesListTable
+      matches={matches}
+      showToolbar={showToolbar}
+      showPagination={showPagination}
+      filters={filters}
+    />
+  )
+}
+
+function MatchesListEmpty({
+  listEmpty,
+  clearAllFilters,
+}: {
+  listEmpty: MatchesListFilters['listEmpty']
+  clearAllFilters: () => void
+}) {
+  if (listEmpty.branch === 'first-run') {
+    return (
+      <PmEmptyState
+        title={listEmpty.config.title ?? 'No matches yet'}
+        description={listEmpty.config.description}
+        action={
+          <PmButton size="sm" asChild>
+            <Link to="/opportunities">{PRODUCT_LANGUAGE.OPEN_OPPORTUNITIES}</Link>
+          </PmButton>
+        }
+      />
+    )
+  }
+
+  if (listEmpty.branch === 'filtered') {
+    return (
+      <PmTableEmpty
+        variant="no-results"
+        title={listEmpty.config.title}
+        description={listEmpty.config.description}
+        primaryAction={
+          <PmButton size="sm" variant="outline" onClick={clearAllFilters}>
+            Clear filters
+          </PmButton>
+        }
+      />
+    )
+  }
+
+  return (
+    <PmTableEmpty
+      variant="no-results"
+      title="No matches found"
+      description="Matches appear when opportunities are published and the matching engine runs."
+    />
+  )
+}
+
+function MatchesListCardGrid({
+  showToolbar = true,
+  showPagination = true,
+  filters,
+  shortenTitles = false,
+}: {
+  showToolbar?: boolean
+  showPagination?: boolean
+  filters: MatchesListFilters
+  shortenTitles?: boolean
+}) {
+  const {
+    search,
+    setSearch,
+    status,
+    setStatus,
+    matchType,
+    setMatchType,
+    paged,
+    totalItems,
+    safePage,
+    pageSize,
+    setPage,
+    setPageSize,
+    listEmpty,
+    activeFilterChips,
+    clearAllFilters,
+    compact: isCompact,
+  } = filters
+
+  return (
+    <div data-slot="matches-list-cards" className="min-w-0 space-y-4">
+      {showToolbar ? (
+        <MatchesBrowseToolbar
+          search={search}
+          setSearch={setSearch}
+          status={status}
+          setStatus={setStatus}
+          matchType={matchType}
+          setMatchType={setMatchType}
+          activeFilterChips={activeFilterChips}
+          clearAllFilters={clearAllFilters}
+        />
+      ) : null}
+      {paged.length === 0 ? (
+        <MatchesListEmpty listEmpty={listEmpty} clearAllFilters={clearAllFilters} />
+      ) : (
+        <>
+          <div className="space-y-3 sm:hidden" role="list" aria-label="Matches">
+            {paged.map((match) => (
+              <div key={match.id} role="listitem">
+                <MatchCard match={match} shortenTitles={shortenTitles} />
+              </div>
+            ))}
+          </div>
+          <div
+            className="hidden gap-4 sm:grid md:grid-cols-2 xl:grid-cols-3"
+            role="list"
+            aria-label="Matches"
+          >
+            {paged.map((match) => (
+              <div key={match.id} role="listitem" className="min-w-0">
+                <MatchCard match={match} shortenTitles={shortenTitles} />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      {showPagination && totalItems > 0 ? (
+        <PmTablePagination
+          page={safePage}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          pageSizeOptions={isCompact ? [8, 16] : [12, 24, 48]}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
+      ) : null}
+    </div>
+  )
+}
+
+function MatchesListTable({
+  matches: _matches,
+  showToolbar = true,
+  showPagination = true,
+  filters,
+}: {
+  matches: readonly PostMatch[]
+  showToolbar?: boolean
+  showPagination?: boolean
+  filters: MatchesListFilters
+}) {
+  const navigate = useNavigate()
+  const {
+    search,
+    setSearch,
+    status,
+    setStatus,
+    matchType,
+    setMatchType,
+    paged,
+    totalItems,
+    safePage,
+    pageSize,
+    setPage,
+    setPageSize,
+    listEmpty,
+    activeFilterChips,
+    clearAllFilters,
+    compact: isCompact,
+  } = filters
 
   const columns: PmDataTableColumn<PostMatch>[] = [
     {
@@ -167,89 +532,23 @@ export function MatchesListSection({
 
   return (
     <PmDataTable
-      density={compact ? 'compact' : 'comfortable'}
+      density={isCompact ? 'compact' : 'comfortable'}
       columns={columns}
       data={paged}
       getRowId={(m) => m.id}
       caption="Matches"
       toolbar={
         showToolbar ? (
-          <PmTableToolbar
-            search={
-              <PmTableSearch
-                placeholder="Search need, offer, or partner…"
-                value={search}
-                onValueChange={(v) => {
-                  setSearch(v)
-                  setPage(1)
-                }}
-              />
-            }
-            filters={
-              <PmTableFilter
-                activeCount={
-                  (status !== 'all' ? 1 : 0) + (matchType !== 'all' ? 1 : 0)
-                }
-                label="Filters"
-              >
-                <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <label className={pmTypography.label}>Status</label>
-                    <Select
-                      value={status}
-                      onValueChange={(v) => {
-                        setStatus(v)
-                        setPage(1)
-                      }}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All statuses</SelectItem>
-                        <SelectItem value="discovered">Discovered</SelectItem>
-                        <SelectItem value="accepted">Accepted</SelectItem>
-                        <SelectItem value="confirmed">Confirmed</SelectItem>
-                        <SelectItem value="declined">Declined</SelectItem>
-                        <SelectItem value="expired">Expired</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className={pmTypography.label}>Match type</label>
-                    <Select
-                      value={matchType}
-                      onValueChange={(v) => {
-                        setMatchType(v)
-                        setPage(1)
-                      }}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All models</SelectItem>
-                        {MATCHING_MODEL_KEYS.map((key) => (
-                          <SelectItem key={key} value={key}>
-                            {MATCHING_MODELS[key].label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </PmTableFilter>
-            }
-          >
-            <PmFilterChips
-              chips={activeFilterChips}
-              onClearAll={() => {
-                setStatus('all')
-                setMatchType('all')
-                setPage(1)
-              }}
-            />
-          </PmTableToolbar>
+          <MatchesBrowseToolbar
+            search={search}
+            setSearch={setSearch}
+            status={status}
+            setStatus={setStatus}
+            matchType={matchType}
+            setMatchType={setMatchType}
+            activeFilterChips={activeFilterChips}
+            clearAllFilters={clearAllFilters}
+          />
         ) : undefined
       }
       rowActions={(m) => (
@@ -258,57 +557,16 @@ export function MatchesListSection({
           hiddenActions={['edit', 'delete', 'duplicate']}
         />
       )}
-      empty={
-        listEmpty.branch === 'first-run' ? (
-          <PmEmptyState
-            title={listEmpty.config.title ?? 'No matches yet'}
-            description={listEmpty.config.description}
-            action={
-              <PmButton size="sm" asChild>
-                <Link to="/opportunities">{PRODUCT_LANGUAGE.OPEN_OPPORTUNITIES}</Link>
-              </PmButton>
-            }
-          />
-        ) : listEmpty.branch === 'filtered' ? (
-          <PmTableEmpty
-            variant="no-results"
-            title={listEmpty.config.title}
-            description={listEmpty.config.description}
-            primaryAction={
-              <PmButton
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setSearch('')
-                  setStatus('all')
-                  setMatchType('all')
-                  setPage(1)
-                }}
-              >
-                Clear filters
-              </PmButton>
-            }
-          />
-        ) : (
-          <PmTableEmpty
-            variant="no-results"
-            title="No matches found"
-            description="Matches appear when opportunities are published and the matching engine runs."
-          />
-        )
-      }
+      empty={<MatchesListEmpty listEmpty={listEmpty} clearAllFilters={clearAllFilters} />}
       pagination={
-        totalItems > 0 ? (
+        showPagination && totalItems > 0 ? (
           <PmTablePagination
             page={safePage}
             pageSize={pageSize}
             totalItems={totalItems}
-            pageSizeOptions={compact ? [8, 16] : [12, 24, 48]}
+            pageSizeOptions={isCompact ? [8, 16] : [12, 24, 48]}
             onPageChange={setPage}
-            onPageSizeChange={(size) => {
-              setPageSize(size)
-              setPage(1)
-            }}
+            onPageSizeChange={setPageSize}
           />
         ) : undefined
       }

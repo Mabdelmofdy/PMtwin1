@@ -34,6 +34,7 @@ import {
 import {
   PmContentCard,
   PmDetailLayout,
+  PM_RECOMMENDED_NEXT_STEP,
   PmInspectorLayout,
   PmSectionHeader,
 } from '@/components/layout/pm-layout-index'
@@ -329,9 +330,8 @@ export function OpportunityDetailPage() {
         header={<PmPageHeader title="Access denied" description="This opportunity is not available." />}
       >
         <EntityAccessDenied
+          entity="opportunity"
           description="Draft opportunities are only visible to their owner or platform staff."
-          backHref="/opportunities"
-          backLabel="Back to opportunities"
         />
       </PmPage>
     )
@@ -514,8 +514,8 @@ export function OpportunityDetailPage() {
 
             {recommendedAction ? (
               <PmActionHub
-                title="Recommended next action"
-                description="The single most important step for this opportunity."
+                title={PM_RECOMMENDED_NEXT_STEP.title}
+                description={PM_RECOMMENDED_NEXT_STEP.description('opportunity')}
                 items={[recommendedAction]}
               />
             ) : null}
