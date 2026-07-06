@@ -40,6 +40,10 @@ export const COMMAND_REQUIRED_CAPABILITY: Readonly<
   SupersedePostMatch: 'admin.platform.execute',
   TransitionPostMatchStatus: 'admin.platform.execute',
   TransitionOpportunityStatus: 'opportunity.publish',
+  PublishOpportunity: 'opportunity.publish',
+  CreateOpportunity: 'opportunity.create',
+  UpdateOpportunity: 'opportunity.create',
+  ValidateOpportunityCollaborationModel: 'opportunity.view',
 }
 
 export type CommandRbacEvaluation = {

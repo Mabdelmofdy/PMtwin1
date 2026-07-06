@@ -20,7 +20,13 @@ import {
   buildIdempotencyKey,
 } from '@/commands/idempotency/InMemoryIdempotencyStore.ts'
 
-const OPPORTUNITY_COMMAND_TYPES = new Set(['TransitionOpportunityStatus'])
+const OPPORTUNITY_COMMAND_TYPES = new Set([
+  'TransitionOpportunityStatus',
+  'CreateOpportunity',
+  'UpdateOpportunity',
+  'ValidateOpportunityCollaborationModel',
+  'PublishOpportunity',
+])
 
 const APPLICATION_COMMAND_TYPES = new Set([
   'SubmitApplication',
@@ -41,6 +47,7 @@ const POST_MATCH_COMMAND_TYPES = new Set([
 
 const NEGOTIATION_COMMAND_TYPES = new Set([
   'StartNegotiationFromPostMatch',
+  'StartNegotiationFromApplication',
   'AgreeNegotiation',
   'CancelNegotiation',
   'TransitionNegotiationStatus',
@@ -48,6 +55,7 @@ const NEGOTIATION_COMMAND_TYPES = new Set([
 
 const DEAL_COMMAND_TYPES = new Set([
   'CreateDealFromPostMatch',
+  'CreateDealFromApplication',
   'CreateDealFromNegotiation',
   'TransitionDealStatus',
 ])
@@ -111,6 +119,7 @@ export class DefaultCommandGateway implements CommandGateway {
         command,
         this.resolveCommandPermissionActor(),
         command.commandType === 'TransitionOpportunityStatus'
+        || command.commandType === 'PublishOpportunity'
           ? {
               opportunity: this.resolveOpportunityForCommandRbac(
                 command.aggregateId,

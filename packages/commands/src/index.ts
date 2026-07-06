@@ -42,10 +42,12 @@ export type {
   SupersedePostMatchCommand,
   StartNegotiationCommand,
   StartNegotiationFromPostMatchCommand,
+  StartNegotiationFromApplicationCommand,
   AgreeNegotiationCommand,
   CancelNegotiationCommand,
   CreateDealFromNegotiationCommand,
   CreateDealFromPostMatchCommand,
+  CreateDealFromApplicationCommand,
   ContractMilestoneSnapshot,
   ContractParty,
   ActivateContractCommand,
@@ -53,6 +55,11 @@ export type {
   CreateContractFromDealCommand,
   SignContractCommand,
   TerminateContractCommand,
+  CreateOpportunityCommand,
+  UpdateOpportunityCommand,
+  ValidateOpportunityCollaborationModelCommand,
+  PublishOpportunityCommand,
+  OpportunityCollaborationPayload,
 } from './contracts/index.ts'
 
 export {

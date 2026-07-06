@@ -5,7 +5,6 @@ type OpportunityWithNormalized = Opportunity & {
   readonly normalized?: OpportunityPost['normalized']
   readonly exchangeData?: Readonly<Record<string, unknown>>
   readonly value_exchange?: OpportunityPost['value_exchange']
-  readonly subModelType?: string
   readonly attributes?: Readonly<Record<string, unknown>> & {
     readonly targetRole?: string
     readonly memberRoles?: unknown
@@ -33,14 +32,22 @@ export function opportunityToPost(opportunity: Opportunity): OpportunityPost {
     exchangeMode: record.exchangeMode,
     subModelType: record.subModelType,
     modelType: record.modelType,
+    mainCollaborationModel: record.mainCollaborationModel,
+    preferredMatchingTopology: record.preferredMatchingTopology,
     title: record.title,
     description: record.description,
     location: record.location,
-    attributes: record.attributes,
+    attributes: {
+      ...(record.collaborationAttributes ?? {}),
+      ...(record.attributes ?? {}),
+    },
     scope: record.scope,
     exchangeData: record.exchangeData,
     normalized: record.normalized,
-    value_exchange: record.value_exchange,
+    value_exchange: record.value_exchange ?? {
+      mode: record.exchangeMode,
+      accepted_modes: record.acceptedExchangeModes ?? record.paymentModes,
+    },
   }
 }
 

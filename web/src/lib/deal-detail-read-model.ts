@@ -12,10 +12,16 @@ import type {
 } from '@/types/domain.ts'
 import { normalizeParticipants } from '@/types/participant.ts'
 import { isTerminal, toCanonical } from '@pm-twin/lifecycle'
+import { formatCommercialTermsDisplayLines } from '@/domain/collaboration/value-exchange-lifecycle.ts'
+import { formatCollaborationExchangeMode } from '@/lib/collaboration-taxonomy-display.ts'
 import {
   formatCanonicalStatusLabel,
   resolveCanonicalStatus,
 } from '@/lib/status-display.ts'
+import {
+  buildWorkflowContext,
+  isWorkflowActionAvailable,
+} from '@/domain/workflows/workflow-bridge.ts'
 export type DealDetailLink = {
   readonly label: string
   readonly path: string
@@ -95,18 +101,28 @@ export function resolveExistingActiveContract(
 export function canCreateContractFromDeal(
   deal: Deal | null | undefined,
   contractsForDeal: readonly Contract[] = [],
+  options?: { readonly canMutate?: boolean; readonly userId?: string | null },
 ): boolean {
   if (!deal?.id) return false
 
-  const dealStatus = toCanonical(DEAL_ENTITY, deal.status ?? '')
-  if (!DEAL_STATUSES_ALLOWING_CONTRACT.has(dealStatus)) return false
+  const context = buildWorkflowContext({
+    primaryWorkflow: deal.applicationId ? 'hiring' : 'marketplace',
+    user: {
+      userId: options?.userId ?? null,
+      canMutate: options?.canMutate ?? true,
+      isParticipant: true,
+    },
+    deal,
+    linkage: {
+      contractsForDeal: contractsForDeal.map((contract) => ({
+        id: contract.id,
+        status: contract.status,
+        dealId: contract.dealId,
+      })),
+    },
+  })
 
-  if (resolveExistingActiveContract(contractsForDeal)) return false
-
-  const postMatchId = deal.postMatchId ?? deal.matchId
-  if (!postMatchId && !deal.negotiationId) return false
-
-  return true
+  return isWorkflowActionAvailable(context, 'create_contract_from_deal')
 }
 export function resolveDealPostMatchId(deal: Deal): string | null {
   return deal.postMatchId ?? deal.matchId ?? null
@@ -124,17 +140,13 @@ export function resolveDealCommercialTerms(deal: Deal): CommercialTerms | null {
 export function formatCommercialTermsLines(
   terms: CommercialTerms | null,
 ): readonly string[] {
+  const lines = formatCommercialTermsDisplayLines(terms)
+  if (lines.length > 0) return lines
   if (!terms) return []
-  const lines: string[] = []
-  if (terms.amount != null) {
-    const currency = terms.currency ?? 'SAR'
-    lines.push(`Amount: ${terms.amount.toLocaleString('en-GB')} ${currency}`)
+  if (terms.exchangeMode) {
+    return [`Exchange: ${formatCollaborationExchangeMode(terms.exchangeMode)}`]
   }
-  if (terms.duration) lines.push(`Duration: ${terms.duration}`)
-  if (terms.paymentSchedule) lines.push(`Payment schedule: ${terms.paymentSchedule}`)
-  if (terms.profitSplit != null) lines.push(`Profit split: ${terms.profitSplit}`)
-  if (terms.exchangeMode) lines.push(`Exchange mode: ${terms.exchangeMode}`)
-  return lines
+  return []
 }
 
 function resolveParticipantDisplayName(

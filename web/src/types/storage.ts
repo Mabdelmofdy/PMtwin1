@@ -20,6 +20,7 @@ export type Overrides = {
   users?: Record<string, Partial<PlatformUser>>
   companies?: Record<string, Partial<Company>>
   opportunities?: Record<string, Partial<Opportunity>>
+  newOpportunities?: Opportunity[]
   newApplications?: Application[]
   notifications?: Record<string, Partial<{ read: boolean }>>
   newNotifications?: Array<{ id: string } & Record<string, unknown>>

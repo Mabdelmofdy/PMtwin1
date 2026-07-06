@@ -1,0 +1,7 @@
+{
+  "negotiating": "draft",
+  "active": "executing",
+  "execution": "executing",
+  "delivery": "executing",
+  "closed": "completed"
+}

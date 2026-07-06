@@ -50,6 +50,11 @@ export type {
   CreateContractFromDealCommand,
   SignContractCommand,
   TerminateContractCommand,
+  CreateOpportunityCommand,
+  UpdateOpportunityCommand,
+  ValidateOpportunityCollaborationModelCommand,
+  PublishOpportunityCommand,
+  OpportunityCollaborationPayload,
 } from './src/index.ts'
 
 export {

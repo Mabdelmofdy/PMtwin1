@@ -48,6 +48,8 @@ export interface OpportunityPost {
     readonly exchangeMode?: string;
     readonly subModelType?: string;
     readonly modelType?: string;
+    readonly mainCollaborationModel?: string;
+    readonly preferredMatchingTopology?: string;
     readonly title?: string;
     readonly description?: string;
     readonly location?: string;

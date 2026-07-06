@@ -1,5 +1,6 @@
 import { PmBadge } from '@/components/ui/pm-index'
 import { OpportunityStatusBadge } from '@/components/opportunity/opportunity-status-badge'
+import { CollaborationTaxonomyBadges } from '@/components/opportunity/collaboration-taxonomy-badges.tsx'
 import {
   formatOpportunityIntent,
   formatOpportunityOwnershipLabel,
@@ -51,6 +52,7 @@ export function OpportunityIdentityBadges({
         </PmBadge>
       ) : null}
       {showStatus ? <OpportunityStatusBadge status={opportunity.status} /> : null}
+      <CollaborationTaxonomyBadges opportunity={opportunity} compact />
     </div>
   )
 }

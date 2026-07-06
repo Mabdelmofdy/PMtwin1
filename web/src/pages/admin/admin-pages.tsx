@@ -13,6 +13,7 @@ import {
 } from '@/domain/readiness-analytics/index.ts'
 import { buildMatchingQualityAnalytics } from '@/domain/matching-quality/index.ts'
 import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
+import { resolvePostMatchTopologyLabel } from '@/lib/collaboration-taxonomy-display.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { formatDate } from '@/lib/format'
 import {
@@ -543,7 +544,7 @@ export function AdminMatchingPage() {
 
   const matchColumns: PmDataTableColumn<(typeof matches)[number]>[] = [
     { id: 'id', label: 'ID', cell: (m) => m.id },
-    { id: 'type', label: 'Type', cell: (m) => m.matchType },
+    { id: 'type', label: 'Type', cell: (m) => resolvePostMatchTopologyLabel(m) },
     { id: 'score', label: 'Score', cell: (m) => (
       <PmMatchScoreBadge
         score={m.matchScore}
@@ -740,7 +741,7 @@ export function AdminConsortiumPage() {
       getSearchText={(m) => [m.id, m.matchType].join(' ')}
       columns={[
         { id: 'match', label: 'Match', cell: (m) => m.id },
-        { id: 'type', label: 'Type', cell: (m) => m.matchType },
+        { id: 'type', label: 'Type', cell: (m) => resolvePostMatchTopologyLabel(m) },
       ]}
     />
   )

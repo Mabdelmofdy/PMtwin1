@@ -48,7 +48,11 @@ const readyDraftOpportunity = {
   creatorId: 'user-1',
   intent: 'need',
   status: 'draft',
+  mainCollaborationModel: 'cash_subcontracting',
   modelType: 'project_based',
+  subModelType: 'task_based',
+  exchangeMode: 'cash',
+  acceptedExchangeModes: ['cash'],
   location: 'Riyadh, Saudi Arabia',
   scope: {
     sectors: ['Construction', 'Architecture'],
@@ -78,6 +82,10 @@ function opportunityFixture(id: string, status: string): Opportunity {
     status,
     creatorId: 'user-1',
     intent: 'need',
+    mainCollaborationModel: 'cash_subcontracting',
+    modelType: 'project_based',
+    subModelType: 'task_based',
+    exchangeMode: 'cash',
   }
 }
 

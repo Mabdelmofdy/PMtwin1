@@ -47,6 +47,14 @@ const readyProfile = {
   previousProjects: [{ title: 'NEOM Pavilion' }],
 }
 
+const canonicalCollaborationFields = {
+  mainCollaborationModel: 'cash_subcontracting',
+  modelType: 'project_based',
+  subModelType: 'task_based',
+  exchangeMode: 'cash',
+  acceptedExchangeModes: ['cash'],
+} as const
+
 function matchingNeed(
   id: string,
   creatorId: string,
@@ -59,7 +67,7 @@ function matchingNeed(
     description: 'Architectural delivery need with BIM scope.',
     intent: 'need',
     status,
-    modelType: 'project_based',
+    ...canonicalCollaborationFields,
     location: 'remote',
     scope: {
       sectors: ['Construction', 'Architecture'],
@@ -100,7 +108,7 @@ function matchingOffer(
     description: 'Architectural offer with BIM capability.',
     intent: 'offer',
     status,
-    modelType: 'project_based',
+    ...canonicalCollaborationFields,
     location: 'remote',
     scope: {
       sectors: ['Construction', 'Architecture'],
@@ -170,7 +178,7 @@ function circularPublishNeed(
     title: `Need ${id}`,
     intent: 'need',
     status,
-    modelType: 'project_based',
+    ...canonicalCollaborationFields,
     location: 'remote',
     scope: { sectors: ['Construction'], requiredSkills: skills },
     attributes: {
@@ -205,7 +213,7 @@ function circularPublishOffer(
     title: `Offer ${id}`,
     intent: 'offer',
     status,
-    modelType: 'project_based',
+    ...canonicalCollaborationFields,
     location: 'remote',
     scope: { sectors: ['Construction'], requiredSkills: skills },
     attributes: {

@@ -3,6 +3,10 @@ import { isTerminal, toCanonical } from '@pm-twin/lifecycle'
 import type { PostMatch } from '@/types/domain.ts'
 import { postMatchRepository } from '@/repositories/index.ts'
 import { postMatchCommandService } from '@/services/post-match-command-service.ts'
+import {
+  buildWorkflowContext,
+  isWorkflowActionAvailable,
+} from '@/domain/workflows/workflow-bridge.ts'
 
 const MATCH_ENTITY = 'match' as const
 const PARTICIPANT_RESPONDED_STATUSES = new Set(['accepted', 'declined'])
@@ -20,6 +24,23 @@ export type PostMatchUiActionsDeps = {
   readonly acceptPostMatch?: PostMatchCommandFn
   readonly declinePostMatch?: PostMatchCommandFn
   readonly readMatchStatus?: (postMatchId: string) => string | undefined
+  readonly canMutate?: boolean
+}
+
+function buildPostMatchParticipantContext(
+  match: PostMatch,
+  userId: string | null | undefined,
+  deps?: PostMatchUiActionsDeps,
+) {
+  return buildWorkflowContext({
+    primaryWorkflow: 'marketplace',
+    user: {
+      userId: userId ?? null,
+      canMutate: deps?.canMutate ?? Boolean(userId),
+      isParticipant: true,
+    },
+    postMatch: match,
+  })
 }
 
 function formatCommandErrors(result: CommandResult): string {
@@ -99,29 +120,19 @@ export function isPostMatchTerminalForParticipantActions(
 export function canShowAcceptPostMatch(
   match: PostMatch | null | undefined,
   userId: string | null | undefined,
+  deps?: PostMatchUiActionsDeps,
 ): boolean {
   if (!match?.id || !userId) return false
-  if (isPostMatchTerminalForParticipantActions(match)) return false
-
-  const canonical = toCanonical(MATCH_ENTITY, match.status ?? '') ?? ''
-  if (!['discovered', 'accepted'].includes(canonical)) return false
-  if (!isParticipantPendingResponse(match, userId)) return false
-
-  return Boolean(match.participants.some((participant) => participant.userId === userId))
+  const context = buildPostMatchParticipantContext(match, userId, deps)
+  return isWorkflowActionAvailable(context, 'accept_match')
 }
 
 export function canShowDeclinePostMatch(
   match: PostMatch | null | undefined,
   userId: string | null | undefined,
+  deps?: PostMatchUiActionsDeps,
 ): boolean {
   if (!match?.id || !userId) return false
-  if (isPostMatchTerminalForParticipantActions(match)) return false
-
-  const canonical = toCanonical(MATCH_ENTITY, match.status ?? '') ?? ''
-  if (!['discovered', 'accepted'].includes(canonical)) return false
-
-  const response = participantResponseStatus(match, userId)?.toLowerCase()
-  if (response === 'declined') return false
-
-  return Boolean(match.participants.some((participant) => participant.userId === userId))
+  const context = buildPostMatchParticipantContext(match, userId, deps)
+  return isWorkflowActionAvailable(context, 'decline_match')
 }

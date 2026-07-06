@@ -56,7 +56,11 @@ const readyDraftOpportunity = {
   creatorId: 'user-ready',
   intent: 'need',
   status: 'draft',
+  mainCollaborationModel: 'cash_subcontracting',
   modelType: 'project_based',
+  subModelType: 'task_based',
+  exchangeMode: 'cash',
+  acceptedExchangeModes: ['cash'],
   location: 'Riyadh, Saudi Arabia',
   scope: {
     sectors: ['Construction', 'Architecture'],
@@ -85,6 +89,10 @@ const weakDraftOpportunity = {
   creatorId: 'user-ready',
   intent: 'need',
   status: 'draft',
+  mainCollaborationModel: 'cash_subcontracting',
+  modelType: 'project_based',
+  subModelType: 'task_based',
+  exchangeMode: 'cash',
 } as Opportunity
 
 const matchParticipants = [

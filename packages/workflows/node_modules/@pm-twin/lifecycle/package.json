@@ -1,0 +1,28 @@
+{
+  "name": "@pm-twin/lifecycle",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ADR-001 canonical lifecycle registry — zero-dependency, pure functions only",
+  "main": "./dist/index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src/registry"
+  ],
+  "scripts": {
+    "build": "node esbuild.js",
+    "test": "node --test tests/**/*.test.js",
+    "validate": "node scripts/validate-manifest.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

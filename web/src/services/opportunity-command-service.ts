@@ -1,4 +1,12 @@
-import type { CommandResult, TransitionOpportunityStatusCommand } from '@pm-twin/commands'
+import type {
+  CommandResult,
+  CreateOpportunityCommand,
+  OpportunityCollaborationPayload,
+  PublishOpportunityCommand,
+  TransitionOpportunityStatusCommand,
+  UpdateOpportunityCommand,
+  ValidateOpportunityCollaborationModelCommand,
+} from '@pm-twin/commands'
 import type { DefaultCommandGateway } from '@/commands/default-command-gateway.ts'
 import { getApplicationCommandGateway } from '@/commands/application-command-gateway.ts'
 
@@ -11,6 +19,10 @@ function createClientRequestId(prefix: string): string {
     return `${prefix}-${crypto.randomUUID()}`
   }
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
+function createOpportunityId(): string {
+  return `opp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
 let gatewayOverride: DefaultCommandGateway | null = null
@@ -31,6 +43,56 @@ export function createOpportunityCommandService(
   deps?: OpportunityCommandServiceDeps,
 ) {
   return {
+    createOpportunity(
+      payload: OpportunityCollaborationPayload,
+      aggregateId?: string,
+    ): CommandResult {
+      const id = aggregateId ?? createOpportunityId()
+      const command = {
+        commandType: 'CreateOpportunity',
+        aggregateId: id,
+        clientRequestId: createClientRequestId('CreateOpportunity'),
+        payload,
+      } satisfies CreateOpportunityCommand
+      return resolveGateway(deps).execute(command)
+    },
+
+    updateOpportunity(
+      opportunityId: string,
+      payload: Partial<OpportunityCollaborationPayload>,
+    ): CommandResult {
+      const command = {
+        commandType: 'UpdateOpportunity',
+        aggregateId: opportunityId,
+        clientRequestId: createClientRequestId('UpdateOpportunity'),
+        payload,
+      } satisfies UpdateOpportunityCommand
+      return resolveGateway(deps).execute(command)
+    },
+
+    validateOpportunityCollaborationModel(
+      opportunityId: string,
+      payload: OpportunityCollaborationPayload,
+    ): CommandResult {
+      const command = {
+        commandType: 'ValidateOpportunityCollaborationModel',
+        aggregateId: opportunityId,
+        clientRequestId: createClientRequestId('ValidateOpportunityCollaborationModel'),
+        payload,
+      } satisfies ValidateOpportunityCollaborationModelCommand
+      return resolveGateway(deps).execute(command)
+    },
+
+    publishOpportunity(opportunityId: string, reason?: string): CommandResult {
+      const command = {
+        commandType: 'PublishOpportunity',
+        aggregateId: opportunityId,
+        clientRequestId: createClientRequestId('PublishOpportunity'),
+        reason,
+      } satisfies PublishOpportunityCommand
+      return resolveGateway(deps).execute(command)
+    },
+
     transitionOpportunityStatus(
       opportunityId: string,
       targetStatus: string,

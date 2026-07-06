@@ -31,6 +31,10 @@ export class DealRepository extends BaseRepository<Deal> {
     return this.getAll().find((deal) => deal.negotiationId === negotiationId)
   }
 
+  findByApplicationId(applicationId: string): Deal | undefined {
+    return this.getAll().find((deal) => deal.applicationId === applicationId)
+  }
+
   create(data: Omit<Deal, 'id' | 'createdAt' | 'updatedAt'>): Deal {
     const overrides = this.readOverrides()
     const deal: Deal = {

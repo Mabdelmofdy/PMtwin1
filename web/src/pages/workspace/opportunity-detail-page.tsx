@@ -25,12 +25,21 @@ import { formatDate } from '@/lib/format'
 import { resolveCanonicalStatus } from '@/lib/status-display.ts'
 import {
   publishOpportunityUiAction,
+  canShowPublishOpportunity,
   resolveProfileKindFromUser,
 } from '@/lib/publish-opportunity-ui-actions.ts'
 import {
   RELATED_MATCHES_SECTION_ID,
   showPublishSuccessFeedback,
 } from '@/lib/publish-opportunity-feedback.ts'
+import {
+  deriveMatchingTopology,
+  resolveMainCollaborationModelLabel,
+  resolveModelTypeLabel,
+  resolveSubModelLabel,
+} from '@/domain/collaboration/opportunity-collaboration.ts'
+import { formatFrameworkMatchTypeLabel } from '@/config/need-offer-framework.ts'
+import { formatCollaborationExchangeMode } from '@/lib/collaboration-taxonomy-display.ts'
 import {
   PmContentCard,
   PmDetailLayout,
@@ -371,10 +380,11 @@ export function OpportunityDetailPage() {
   const topMatchCard = relatedMatchesModel?.matches[0]
   const topMatchScore = topMatch?.matchScore
   const opportunityReadiness = resolveOpportunityReadiness(opp)
-  const canPublishDraft =
-    isOwner &&
-    !isPendingApproval &&
-    (opp.status === 'draft' || resolveCanonicalStatus('opportunity', opp.status) === 'draft')
+  const canPublishDraft = canShowPublishOpportunity(opp, {
+    userId: user?.id,
+    canMutate: !isPendingApproval,
+    isOpportunityOwner: isOwner,
+  })
   const topDeal = topMatchCard?.actions.dealId
     ? dealRepository.findByPostMatchId(topMatchCard.match.id)
     : undefined
@@ -596,8 +606,22 @@ export function OpportunityDetailPage() {
             {visibility.showBudgetAndTimeline ? (
               <PmFormReadonly>
                 <PmFormReadonlySection title="Budget & timeline" description="Commercial and schedule context.">
-                  <PmFormReadonlyField label="Exchange mode" value={opp.exchangeMode} />
-                  <PmFormReadonlyField label="Model type" value={opp.modelType} />
+                  <PmFormReadonlyField label="Main collaboration model" value={resolveMainCollaborationModelLabel(opp.mainCollaborationModel ?? '')} />
+                  <PmFormReadonlyField label="Sub-model" value={resolveSubModelLabel(opp.subModelType ?? '')} />
+                  <PmFormReadonlyField label="Model type" value={resolveModelTypeLabel(opp.modelType ?? '')} />
+                  <PmFormReadonlyField label="Exchange mode" value={formatCollaborationExchangeMode(opp.exchangeMode)} />
+                  <PmFormReadonlyField
+                    label="Matching topology"
+                    value={formatFrameworkMatchTypeLabel(
+                      opp.preferredMatchingTopology
+                      ?? deriveMatchingTopology({
+                        mainCollaborationModel: opp.mainCollaborationModel,
+                        modelType: opp.modelType,
+                        subModelType: opp.subModelType,
+                        exchangeMode: opp.exchangeMode,
+                      }).topology,
+                    )}
+                  />
                   <PmFormReadonlyField label="Start date" value={opp.attributes?.startDate} />
                   <PmFormReadonlyField label="Updated" value={formatDate(opp.updatedAt)} />
                 </PmFormReadonlySection>
@@ -614,7 +638,13 @@ export function OpportunityDetailPage() {
                 <ValueExchangeModesPanel selectedModes={opportunityPaymentModes} />
                 <MatchingModelsReferencePanel
                   selectedModel={
-                    (opp as { subModelType?: string }).subModelType ?? opp.modelType
+                    opp.preferredMatchingTopology
+                    ?? deriveMatchingTopology({
+                      mainCollaborationModel: opp.mainCollaborationModel,
+                      modelType: opp.modelType,
+                      subModelType: opp.subModelType,
+                      exchangeMode: opp.exchangeMode,
+                    }).topology
                   }
                   compact
                 />

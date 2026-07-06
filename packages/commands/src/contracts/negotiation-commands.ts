@@ -12,6 +12,11 @@ export interface StartNegotiationFromPostMatchCommand extends Command {
   readonly commandType: 'StartNegotiationFromPostMatch'
 }
 
+/** Start negotiation from an accepted hiring Application (aggregateId = applicationId). */
+export interface StartNegotiationFromApplicationCommand extends Command {
+  readonly commandType: 'StartNegotiationFromApplication'
+}
+
 export interface AgreeNegotiationCommand extends Command {
   readonly commandType: 'AgreeNegotiation'
 }

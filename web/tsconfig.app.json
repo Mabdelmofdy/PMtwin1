@@ -24,7 +24,8 @@
     "paths": {
       "*": ["./*"],
       "@/*": ["./src/*"],
-      "@seed-data/*": ["../POC/data/*"]
+      "@seed-data/*": ["../POC/data/*"],
+      "@pm-twin/workflows": ["../packages/workflows/src/index.ts"]
     }
   },
   "include": ["src"],

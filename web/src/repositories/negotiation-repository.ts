@@ -58,6 +58,16 @@ export class NegotiationRepository extends BaseRepository<Negotiation> {
     )
   }
 
+  getByApplicationId(applicationId: string): Negotiation[] {
+    return this.getAll().filter((n) => n.applicationId === applicationId)
+  }
+
+  findActiveByApplicationId(applicationId: string): Negotiation | undefined {
+    return this.getByApplicationId(applicationId).find((n) =>
+      isActiveStatus(n.status),
+    )
+  }
+
   create(
     data: Omit<Negotiation, 'id' | 'createdAt' | 'updatedAt'>,
   ): Negotiation {

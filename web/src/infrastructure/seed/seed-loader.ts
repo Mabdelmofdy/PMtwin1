@@ -12,6 +12,7 @@ import type {
   PostMatch,
   SiteContentPage,
 } from '@/types/domain.ts'
+import { normalizeOpportunities } from '@/domain/collaboration/opportunity-collaboration.ts'
 import {
   normalizeApplications,
   normalizeContracts,
@@ -50,9 +51,11 @@ export function mergeById<T extends { id: string }>(...sets: T[][]): T[] {
 }
 
 export function loadOpportunities(): Opportunity[] {
-  return mergeById(
-    rows(opportunitiesBase as DataEnvelope<Opportunity>),
-    rows(demoOpportunities as DataEnvelope<Opportunity>),
+  return normalizeOpportunities(
+    mergeById(
+      rows(opportunitiesBase as DataEnvelope<Opportunity>),
+      rows(demoOpportunities as DataEnvelope<Opportunity>),
+    ),
   )
 }
 

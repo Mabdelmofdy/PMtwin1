@@ -3,6 +3,10 @@ import type { Opportunity, PlatformUser } from '@/types/domain.ts'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import type { OpportunityReadinessResult } from '@/domain/opportunity-readiness/types.ts'
 import {
+  buildWorkflowContext,
+  findWorkflowAction,
+} from '@/domain/workflows/workflow-bridge.ts'
+import {
   evaluatePublishReadiness,
   formatPublishReadinessDetailLines,
   PUBLISH_READINESS_BLOCKED_CODE,
@@ -167,3 +171,23 @@ export function resolveProfileKindFromUser(user: PlatformUser): ProfileKind {
 }
 
 export { createOpportunityCommandService }
+
+export function canShowPublishOpportunity(
+  opportunity: Opportunity | null | undefined,
+  options?: {
+    readonly userId?: string | null
+    readonly canMutate?: boolean
+    readonly isOpportunityOwner?: boolean
+  },
+): boolean {
+  if (!opportunity?.id) return false
+  const context = buildWorkflowContext({
+    opportunity,
+    user: {
+      userId: options?.userId ?? null,
+      canMutate: options?.canMutate,
+      isOpportunityOwner: options?.isOpportunityOwner ?? false,
+    },
+  })
+  return Boolean(findWorkflowAction(context, 'publish_opportunity'))
+}

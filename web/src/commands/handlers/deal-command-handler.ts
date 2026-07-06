@@ -1,6 +1,7 @@
 import type {
   Command,
   CommandResult,
+  CreateDealFromApplicationCommand,
   CreateDealFromNegotiationCommand,
   CreateDealFromPostMatchCommand,
   TransitionDealStatusCommand,
@@ -20,6 +21,7 @@ import {
   type NotificationSink,
 } from '@/commands/handlers/lifecycle-notifications.ts'
 import type { AuditRepository } from '@/repositories/audit-repository.ts'
+import type { ApplicationRepository } from '@/repositories/application-repository.ts'
 import type { DealRepository } from '@/repositories/deal-repository.ts'
 import type { NegotiationRepository } from '@/repositories/negotiation-repository.ts'
 import type { PostMatchRepository } from '@/repositories/post-match-repository.ts'
@@ -32,6 +34,7 @@ export type DealCommandHandlerDeps = {
   readonly dealRepository: DealRepository
   readonly negotiationRepository: NegotiationRepository
   readonly postMatchRepository: PostMatchRepository
+  readonly applicationRepository?: ApplicationRepository | null
   readonly auditRepository?: AuditRepository | null
   readonly notificationRepository?: NotificationSink | null
 }
@@ -117,6 +120,7 @@ export class DealCommandHandler {
   private readonly dealRepository: DealRepository
   private readonly negotiationRepository: NegotiationRepository
   private readonly postMatchRepository: PostMatchRepository
+  private readonly applicationRepository: ApplicationRepository | null
   private readonly auditRepository: AuditRepository | null
   private readonly notificationRepository: NotificationSink | null
 
@@ -124,6 +128,7 @@ export class DealCommandHandler {
     this.dealRepository = deps.dealRepository
     this.negotiationRepository = deps.negotiationRepository
     this.postMatchRepository = deps.postMatchRepository
+    this.applicationRepository = deps.applicationRepository ?? null
     this.auditRepository = deps.auditRepository ?? null
     this.notificationRepository = deps.notificationRepository ?? null
   }
@@ -142,6 +147,10 @@ export class DealCommandHandler {
       case 'CreateDealFromPostMatch':
         return this.handleCreateFromPostMatch(
           command as CreateDealFromPostMatchCommand,
+        )
+      case 'CreateDealFromApplication':
+        return this.handleCreateFromApplication(
+          command as CreateDealFromApplicationCommand,
         )
       case 'CreateDealFromNegotiation':
         return this.handleCreateFromNegotiation(
@@ -235,6 +244,123 @@ export class DealCommandHandler {
       postMatchId,
       auditAction: 'deal.created_from_post_match',
     })
+  }
+
+  private handleCreateFromApplication(
+    command: CreateDealFromApplicationCommand,
+  ): CommandResult {
+    const applicationId = command.aggregateId
+
+    if (!command.negotiationId?.trim()) {
+      return failure(command.commandType, applicationId, [
+        'negotiationId is required',
+      ])
+    }
+
+    if (!this.applicationRepository) {
+      return failure(command.commandType, applicationId, [
+        'Application repository is not configured',
+      ])
+    }
+
+    const application = this.applicationRepository.getById(applicationId)
+    if (!application) {
+      return failure(command.commandType, applicationId, [
+        `Application "${applicationId}" not found`,
+      ])
+    }
+
+    const negotiation = this.negotiationRepository.getById(command.negotiationId)
+    if (!negotiation) {
+      return failure(command.commandType, applicationId, [
+        `Negotiation "${command.negotiationId}" not found`,
+      ])
+    }
+
+    const negotiationStatus =
+      toCanonical(NEGOTIATION_ENTITY, negotiation.status ?? '') ?? ''
+    if (negotiationStatus !== 'agreed') {
+      return failure(command.commandType, applicationId, [
+        `Deal can only be created from an agreed Negotiation (current status: "${negotiationStatus || negotiation.status}")`,
+      ])
+    }
+
+    if (negotiation.applicationId !== applicationId) {
+      return failure(command.commandType, applicationId, [
+        `Negotiation applicationId "${negotiation.applicationId}" does not match "${applicationId}"`,
+      ])
+    }
+
+    const existingByApplication = this.dealRepository.findByApplicationId(applicationId)
+    if (existingByApplication) {
+      return failure(command.commandType, applicationId, [
+        `Deal already exists for Application "${applicationId}" (${existingByApplication.id})`,
+      ])
+    }
+
+    const existingByNegotiation = this.dealRepository.findByNegotiationId(
+      command.negotiationId,
+    )
+    if (existingByNegotiation) {
+      return failure(command.commandType, applicationId, [
+        `Deal already exists for Negotiation "${command.negotiationId}" (${existingByNegotiation.id})`,
+      ])
+    }
+
+    const participants = mapParticipants(
+      negotiation.participants ?? negotiation.parties ?? [],
+    )
+    if (participants.length === 0) {
+      return failure(command.commandType, applicationId, [
+        'Deal requires at least one participant',
+      ])
+    }
+
+    const commercialTerms = commercialTermsFromLegacyTerms(
+      negotiation.commercialTerms ??
+        negotiation.agreedTerms ??
+        negotiation.initialTerms,
+    )
+
+    const deal = this.dealRepository.create({
+      negotiationId: command.negotiationId,
+      applicationId,
+      opportunityId: application.opportunityId,
+      opportunityIds: [application.opportunityId],
+      title: `Deal – Application ${applicationId}`,
+      status: 'draft',
+      participants,
+      parties: participants,
+      commercialTerms,
+      terms: commercialTerms,
+    })
+
+    this.applicationRepository.update(applicationId, { dealId: deal.id })
+
+    emitParticipantNotifications(this.notificationRepository, {
+      participants,
+      type: 'deal_created_from_application',
+      title: 'Deal created',
+      message: 'A deal was created from your accepted application.',
+      link: `/deals/${deal.id}`,
+      entityType: 'deal',
+      entityId: deal.id,
+    })
+
+    this.appendAudit({
+      action: 'deal.created_from_application',
+      entityType: 'deal',
+      entityId: deal.id,
+      requestId: command.clientRequestId,
+      details: {
+        applicationId,
+        negotiationId: command.negotiationId,
+        opportunityId: application.opportunityId,
+        status: 'draft',
+      },
+    })
+
+    return success(command.commandType, deal.id)
   }
 
   private handleCreateFromNegotiation(

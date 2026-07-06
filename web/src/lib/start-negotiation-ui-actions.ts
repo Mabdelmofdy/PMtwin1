@@ -3,11 +3,11 @@ import type { CommandResult } from '@pm-twin/commands'
 import type { Negotiation, PostMatch } from '@/types/domain.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
 import { negotiationCommandService } from '@/services/negotiation-command-service.ts'
-
-const MATCH_ENTITY = 'match' as const
-const NEGOTIATION_ENTITY = 'negotiation' as const
-
-const BLOCKING_NEGOTIATION_STATUSES = new Set(['active', 'countered', 'agreed'])
+import {
+  buildWorkflowContext,
+  findWorkflowAction,
+  isWorkflowActionAvailable,
+} from '@/domain/workflows/workflow-bridge.ts'
 
 export type StartNegotiationUiActionResult =
   | { readonly success: true; readonly negotiationId: string }
@@ -21,6 +21,8 @@ export type StartNegotiationUiActionsDeps = {
   readonly getNegotiationsForPostMatch?: (
     postMatchId: string,
   ) => readonly Negotiation[]
+  readonly userId?: string | null
+  readonly canMutate?: boolean
 }
 
 function formatCommandErrors(result: CommandResult): string {
@@ -35,9 +37,33 @@ function resolveNegotiationsForPostMatch(
   deps?: StartNegotiationUiActionsDeps,
 ): readonly Negotiation[] {
   const read =
-    deps?.getNegotiationsForPostMatch ??
-    ((id: string) => negotiationsApi.getByPostMatchId(id))
+    deps?.getNegotiationsForPostMatch
+    ?? ((id: string) => negotiationsApi.getByPostMatchId(id))
   return read(postMatchId)
+}
+
+function buildPostMatchWorkflowContext(
+  match: PostMatch,
+  deps?: StartNegotiationUiActionsDeps,
+) {
+  return buildWorkflowContext({
+    primaryWorkflow: 'marketplace',
+    user: {
+      userId: deps?.userId ?? null,
+      canMutate: deps?.canMutate ?? true,
+      isParticipant: true,
+    },
+    postMatch: match,
+    linkage: {
+      negotiationsForPostMatch: resolveNegotiationsForPostMatch(match.id, deps).map(
+        (negotiation) => ({
+          id: negotiation.id,
+          status: negotiation.status,
+          postMatchId: negotiation.postMatchId ?? negotiation.matchId,
+        }),
+      ),
+    },
+  })
 }
 
 export function canShowStartNegotiationFromPostMatch(
@@ -45,16 +71,8 @@ export function canShowStartNegotiationFromPostMatch(
   deps?: StartNegotiationUiActionsDeps,
 ): boolean {
   if (!match?.id) return false
-
-  const matchStatus = toCanonical(MATCH_ENTITY, match.status ?? '') ?? ''
-  if (matchStatus !== 'confirmed') return false
-
-  const linked = resolveNegotiationsForPostMatch(match.id, deps)
-  return !linked.some((negotiation) => {
-    const status =
-      toCanonical(NEGOTIATION_ENTITY, negotiation.status ?? '') ?? ''
-    return BLOCKING_NEGOTIATION_STATUSES.has(status)
-  })
+  const context = buildPostMatchWorkflowContext(match, deps)
+  return isWorkflowActionAvailable(context, 'start_negotiation_from_post_match')
 }
 
 export function startNegotiationFromPostMatchUiAction(
@@ -62,8 +80,8 @@ export function startNegotiationFromPostMatchUiAction(
   deps?: StartNegotiationUiActionsDeps,
 ): StartNegotiationUiActionResult {
   const start =
-    deps?.startNegotiationFromPostMatch ??
-    negotiationCommandService.startNegotiationFromPostMatch.bind(
+    deps?.startNegotiationFromPostMatch
+    ?? negotiationCommandService.startNegotiationFromPostMatch.bind(
       negotiationCommandService,
     )
 

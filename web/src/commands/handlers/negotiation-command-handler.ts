@@ -3,6 +3,7 @@ import type {
   CancelNegotiationCommand,
   Command,
   CommandResult,
+  StartNegotiationFromApplicationCommand,
   StartNegotiationFromPostMatchCommand,
   TransitionNegotiationStatusCommand,
 } from '@pm-twin/commands'
@@ -15,13 +16,17 @@ import {
 import type { AuditEntry, Negotiation } from '@/types/domain.ts'
 import type { NegotiationTerms } from '@/types/commercial-terms.ts'
 import type { Participant } from '@/types/participant.ts'
+import { buildCommercialTermsFromOpportunity } from '@/domain/collaboration/value-exchange-lifecycle.ts'
+import { resolvePostMatchTopologyLabel } from '@/lib/collaboration-taxonomy-display.ts'
 import { resolvePostMatchOpportunityIds } from '@/domain/normalized/post-match-opportunity-ids.ts'
 import {
   emitParticipantNotifications,
   type NotificationSink,
 } from '@/commands/handlers/lifecycle-notifications.ts'
 import type { AuditRepository } from '@/repositories/audit-repository.ts'
+import type { ApplicationRepository } from '@/repositories/application-repository.ts'
 import type { NegotiationRepository } from '@/repositories/negotiation-repository.ts'
+import type { OpportunityRepository } from '@/repositories/opportunity-repository.ts'
 import type { PostMatchRepository } from '@/repositories/post-match-repository.ts'
 
 const POST_MATCH_ENTITY = 'match' as const
@@ -29,10 +34,14 @@ const NEGOTIATION_ENTITY = 'negotiation' as const
 const AGREED_STATUS = 'agreed' as const
 const CANCELLED_STATUS = 'cancelled' as const
 const ACTIVE_NEGOTIATION_STATUSES = new Set(['active', 'countered'])
+const APPLICATION_ENTITY = 'application' as const
+const ACCEPTED_APPLICATION_STATUS = 'accepted' as const
 
 export type NegotiationCommandHandlerDeps = {
   readonly negotiationRepository: NegotiationRepository
   readonly postMatchRepository: PostMatchRepository
+  readonly opportunityRepository?: OpportunityRepository | null
+  readonly applicationRepository?: ApplicationRepository | null
   readonly auditRepository?: AuditRepository | null
   readonly notificationRepository?: NotificationSink | null
 }
@@ -63,15 +72,31 @@ function validateBaseCommand(command: Command): readonly string[] {
   return errors
 }
 
-const NEGOTIATION_OPEN_MESSAGES: Readonly<Record<string, string>> = {
-  one_way: 'Negotiation opened from confirmed Need/Offer match.',
-  two_way: 'Negotiation opened from confirmed barter match.',
-  consortium: 'Negotiation opened from confirmed consortium match.',
-  circular: 'Negotiation opened from confirmed circular exchange match.',
+function buildNegotiationOpenMessage(matchType: string): string {
+  const label = resolvePostMatchTopologyLabel({ matchType })
+  return `Negotiation opened from confirmed ${label} match.`
 }
 
-function buildNegotiationOpenMessage(matchType: string): string {
-  return NEGOTIATION_OPEN_MESSAGES[matchType] ?? NEGOTIATION_OPEN_MESSAGES.one_way
+function seedCommercialTermsFromOpportunity(
+  opportunityRepository: OpportunityRepository | null | undefined,
+  opportunityId: string | undefined,
+): CommercialTermsSeed | undefined {
+  if (!opportunityRepository || !opportunityId) return undefined
+  const opportunity = opportunityRepository.getById(opportunityId)
+  if (!opportunity) return undefined
+  const commercialTerms = buildCommercialTermsFromOpportunity(opportunity)
+  return {
+    commercialTerms,
+    initialTerms: {
+      message: `Commercial terms seeded from opportunity "${opportunity.title ?? opportunityId}".`,
+      ...commercialTerms,
+    } as NegotiationTerms,
+  }
+}
+
+type CommercialTermsSeed = {
+  readonly commercialTerms: ReturnType<typeof buildCommercialTermsFromOpportunity>
+  readonly initialTerms: NegotiationTerms
 }
 
 function isActiveNegotiationStatus(status: string | undefined): boolean {
@@ -135,12 +160,16 @@ function mapParticipants(participants: readonly Participant[]): Participant[] {
 export class NegotiationCommandHandler {
   private readonly negotiationRepository: NegotiationRepository
   private readonly postMatchRepository: PostMatchRepository
+  private readonly opportunityRepository: OpportunityRepository | null
+  private readonly applicationRepository: ApplicationRepository | null
   private readonly auditRepository: AuditRepository | null
   private readonly notificationRepository: NotificationSink | null
 
   constructor(deps: NegotiationCommandHandlerDeps) {
     this.negotiationRepository = deps.negotiationRepository
     this.postMatchRepository = deps.postMatchRepository
+    this.opportunityRepository = deps.opportunityRepository ?? null
+    this.applicationRepository = deps.applicationRepository ?? null
     this.auditRepository = deps.auditRepository ?? null
     this.notificationRepository = deps.notificationRepository ?? null
   }
@@ -159,6 +188,10 @@ export class NegotiationCommandHandler {
       case 'StartNegotiationFromPostMatch':
         return this.handleStartFromPostMatch(
           command as StartNegotiationFromPostMatchCommand,
+        )
+      case 'StartNegotiationFromApplication':
+        return this.handleStartFromApplication(
+          command as StartNegotiationFromApplicationCommand,
         )
       case 'AgreeNegotiation':
         return this.handleAgree(command as AgreeNegotiationCommand)
@@ -227,6 +260,10 @@ export class NegotiationCommandHandler {
     }
 
     const opportunityId = needOpportunityId ?? opportunityIds[0]
+    const termsSeed = seedCommercialTermsFromOpportunity(
+      this.opportunityRepository,
+      opportunityId,
+    )
     const negotiation = this.negotiationRepository.create({
       opportunityId,
       postMatchId,
@@ -237,7 +274,8 @@ export class NegotiationCommandHandler {
       participants,
       status: 'active',
       rounds: [],
-      initialTerms: {
+      commercialTerms: termsSeed?.commercialTerms,
+      initialTerms: termsSeed?.initialTerms ?? {
         message: buildNegotiationOpenMessage(matchType),
       } as NegotiationTerms,
     })
@@ -265,6 +303,132 @@ export class NegotiationCommandHandler {
         postMatchId,
         needOpportunityId,
         offerOpportunityId,
+        status: 'active',
+      },
+    })
+
+    return success(command.commandType, negotiation.id)
+  }
+
+  private handleStartFromApplication(
+    command: StartNegotiationFromApplicationCommand,
+  ): CommandResult {
+    const applicationId = command.aggregateId
+    if (!this.applicationRepository) {
+      return failure(command.commandType, applicationId, [
+        'Application repository is not configured',
+      ])
+    }
+
+    const application = this.applicationRepository.getById(applicationId)
+    if (!application) {
+      return failure(command.commandType, applicationId, [
+        `Application "${applicationId}" not found`,
+      ])
+    }
+
+    const currentStatus =
+      toCanonical(APPLICATION_ENTITY, application.status ?? '') ?? ''
+    if (currentStatus !== ACCEPTED_APPLICATION_STATUS) {
+      return failure(command.commandType, applicationId, [
+        `Negotiation can only start from an accepted Application (current status: "${currentStatus || application.status}")`,
+      ])
+    }
+
+    const existingActive =
+      this.negotiationRepository.findActiveByApplicationId(applicationId)
+    if (existingActive) {
+      return failure(command.commandType, applicationId, [
+        `Active negotiation already exists for Application "${applicationId}" (${existingActive.id})`,
+      ])
+    }
+
+    if (!this.opportunityRepository) {
+      return failure(command.commandType, applicationId, [
+        'Opportunity repository is not configured',
+      ])
+    }
+
+    const opportunity = this.opportunityRepository.getById(application.opportunityId)
+    if (!opportunity) {
+      return failure(command.commandType, applicationId, [
+        `Opportunity "${application.opportunityId}" not found`,
+      ])
+    }
+
+    const participants: Participant[] = [
+      {
+        userId: application.applicantId,
+        role: 'applicant',
+        opportunityId: application.opportunityId,
+      },
+      ...(opportunity.creatorId
+        ? [{
+            userId: opportunity.creatorId,
+            role: 'hiring_party',
+            opportunityId: application.opportunityId,
+          }]
+        : []),
+    ]
+
+    if (participants.length === 0) {
+      return failure(command.commandType, applicationId, [
+        'Application has no participants to negotiate with',
+      ])
+    }
+
+    const termsSeed = seedCommercialTermsFromOpportunity(
+      this.opportunityRepository,
+      application.opportunityId,
+    )
+    const mergedTerms = application.commercialTerms
+      ? {
+          commercialTerms: {
+            ...termsSeed?.commercialTerms,
+            ...application.commercialTerms,
+          },
+          initialTerms: {
+            message: 'Negotiation opened from accepted application.',
+            ...termsSeed?.commercialTerms,
+            ...application.commercialTerms,
+          } as NegotiationTerms,
+        }
+      : termsSeed
+
+    const negotiation = this.negotiationRepository.create({
+      opportunityId: application.opportunityId,
+      applicationId,
+      participants,
+      status: 'active',
+      rounds: [],
+      commercialTerms: mergedTerms?.commercialTerms,
+      initialTerms: mergedTerms?.initialTerms ?? {
+        message: 'Negotiation opened from accepted application.',
+      } as NegotiationTerms,
+    })
+
+    this.applicationRepository.update(applicationId, {
+      negotiationId: negotiation.id,
+    })
+
+    emitParticipantNotifications(this.notificationRepository, {
+      participants,
+      type: 'negotiation_started',
+      title: 'Negotiation started',
+      message: 'A negotiation has started from your accepted application.',
+      link: `/negotiations/${negotiation.id}`,
+      entityType: 'negotiation',
+      entityId: negotiation.id,
+    })
+
+    this.appendAudit({
+      action: 'negotiation.started_from_application',
+      entityType: 'negotiation',
+      entityId: negotiation.id,
+      requestId: command.clientRequestId,
+      details: {
+        applicationId,
+        opportunityId: application.opportunityId,
         status: 'active',
       },
     })

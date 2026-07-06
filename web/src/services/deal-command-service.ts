@@ -1,6 +1,7 @@
 import type {
   Command,
   CommandResult,
+  CreateDealFromApplicationCommand,
   CreateDealFromNegotiationCommand,
   CreateDealFromPostMatchCommand,
   TransitionDealStatusCommand,
@@ -61,6 +62,30 @@ export function createDealCommandService(deps?: DealCommandServiceDeps) {
         negotiationId,
         clientRequestId: createClientRequestId('CreateDealFromPostMatch'),
       } satisfies CreateDealFromPostMatchCommand
+
+      const result = executeCommand(command, effectiveDeps)
+
+      if (!result.success) {
+        return { result, deal: null }
+      }
+
+      const repository = resolveDealRepository(effectiveDeps)
+      const deal = repository.getById(result.aggregateId) ?? null
+      return { result, deal }
+    },
+
+    createDealFromApplication(
+      applicationId: string,
+      negotiationId: string,
+      serviceDeps?: DealCommandServiceDeps,
+    ): { result: CommandResult; deal: Deal | null } {
+      const effectiveDeps = serviceDeps ?? deps
+      const command = {
+        commandType: 'CreateDealFromApplication',
+        aggregateId: applicationId,
+        negotiationId,
+        clientRequestId: createClientRequestId('CreateDealFromApplication'),
+      } satisfies CreateDealFromApplicationCommand
 
       const result = executeCommand(command, effectiveDeps)
 

@@ -2,14 +2,12 @@ import { toCanonical } from '@pm-twin/lifecycle'
 import type { Deal, Negotiation, Opportunity, PostMatch } from '@/types/domain.ts'
 import { normalizeParticipants } from '@/types/participant.ts'
 import { formatPercent } from '@/lib/format'
-import { canShowCreateDealFromNegotiation } from '@/lib/create-deal-ui-actions.ts'
 import {
-  canShowStartNegotiationFromPostMatch,
-  type StartNegotiationUiActionsDeps,
-} from '@/lib/start-negotiation-ui-actions.ts'
+  buildWorkflowContext,
+  isWorkflowActionAvailable,
+  toWorkflowEntitySnapshot,
+} from '@/domain/workflows/workflow-bridge.ts'
 import {
-  canShowAcceptPostMatch,
-  canShowDeclinePostMatch,
   isPostMatchTerminalForParticipantActions,
 } from '@/lib/post-match-ui-actions.ts'
 import {
@@ -73,7 +71,7 @@ export type OpportunityMatchesReadModelDeps = {
   readonly getDealForPostMatch?: (postMatchId: string) => Deal | undefined
   readonly getPersonName?: (userId: string) => string | undefined
   readonly currentUserId?: string | null
-  readonly startNegotiationDeps?: StartNegotiationUiActionsDeps
+  readonly canMutate?: boolean
 }
 
 import { formatFrameworkMatchTypeLabel } from '@/config/need-offer-framework.ts'
@@ -98,10 +96,37 @@ type MatchLinkageDeps = Pick<
 >
 
 export type MatchCardActionsDeps = MatchLinkageDeps &
-  Pick<
-    OpportunityMatchesReadModelDeps,
-    'currentUserId' | 'startNegotiationDeps'
-  >
+  Pick<OpportunityMatchesReadModelDeps, 'currentUserId' | 'canMutate'>
+
+function buildMatchWorkflowContext(
+  match: PostMatch,
+  negotiation: Negotiation | undefined,
+  deal: Deal | undefined,
+  deps: MatchCardActionsDeps,
+) {
+  const negotiations = deps.getNegotiationsForPostMatch?.(match.id) ?? []
+  return buildWorkflowContext({
+    primaryWorkflow: 'marketplace',
+    user: {
+      userId: deps.currentUserId ?? null,
+      canMutate: deps.canMutate ?? Boolean(deps.currentUserId),
+      isParticipant: true,
+    },
+    postMatch: match,
+    negotiation,
+    deal,
+    linkage: {
+      negotiationsForPostMatch: negotiations.map((item) =>
+        toWorkflowEntitySnapshot(item) ?? {
+          id: item.id,
+          status: item.status,
+          postMatchId: item.postMatchId ?? item.matchId,
+        },
+      ),
+      dealForNegotiation: deal ? toWorkflowEntitySnapshot(deal as Parameters<typeof toWorkflowEntitySnapshot>[0]) ?? null : null,
+    },
+  })
+}
 
 function resolveActiveNegotiation(
   match: PostMatch,
@@ -136,25 +161,25 @@ export function buildMatchCardActions(
   match: PostMatch,
   deps: MatchCardActionsDeps,
 ): OpportunityMatchCardActions {
-  const userId = deps.currentUserId ?? null
   const negotiation = resolveActiveNegotiation(match, deps)
   const deal = resolveDealForMatch(match, deps)
   const terminalForParticipant = isPostMatchTerminalForParticipantActions(match)
+  const workflowContext = buildMatchWorkflowContext(match, negotiation, deal, deps)
 
-  const startNegotiationDeps: StartNegotiationUiActionsDeps | undefined =
-    deps.startNegotiationDeps ??
-    (deps.getNegotiationsForPostMatch
-      ? { getNegotiationsForPostMatch: deps.getNegotiationsForPostMatch }
-      : undefined)
-
-  const showAccept = !terminalForParticipant && canShowAcceptPostMatch(match, userId)
-  const showDecline = !terminalForParticipant && canShowDeclinePostMatch(match, userId)
-  const showStartNegotiation = canShowStartNegotiationFromPostMatch(
-    match,
-    startNegotiationDeps,
+  const showAccept =
+    !terminalForParticipant
+    && isWorkflowActionAvailable(workflowContext, 'accept_match')
+  const showDecline =
+    !terminalForParticipant
+    && isWorkflowActionAvailable(workflowContext, 'decline_match')
+  const showStartNegotiation = isWorkflowActionAvailable(
+    workflowContext,
+    'start_negotiation_from_post_match',
   )
   const showViewNegotiation = Boolean(negotiation?.id)
-  const showCreateDeal = canShowCreateDealFromNegotiation(negotiation)
+  const showCreateDeal = negotiation?.applicationId
+    ? isWorkflowActionAvailable(workflowContext, 'create_deal_from_application')
+    : isWorkflowActionAvailable(workflowContext, 'create_deal_from_negotiation')
   const showViewDeal = Boolean(deal?.id)
 
   return {

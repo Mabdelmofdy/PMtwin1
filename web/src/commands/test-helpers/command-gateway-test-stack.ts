@@ -134,12 +134,15 @@ export function createCommandGatewayTestStack(
     negotiationHandler: new NegotiationCommandHandler({
       negotiationRepository,
       postMatchRepository,
+      opportunityRepository,
+      applicationRepository,
       auditRepository,
     }),
     dealHandler: new DealCommandHandler({
       dealRepository,
       negotiationRepository,
       postMatchRepository,
+      applicationRepository,
       auditRepository,
     }),
     contractHandler: new ContractCommandHandler({

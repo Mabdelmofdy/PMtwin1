@@ -1,9 +1,10 @@
+import type { Opportunity } from '@/types/domain.ts'
 import { formatDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { PmContentCard } from '@/components/layout/pm-layout-panels'
 import { OpportunityStatusBadge } from '@/components/opportunity/opportunity-status-badge'
-import type { Opportunity } from '@/types/domain.ts'
+import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'
 
 type OpportunitySummaryCardProps = {
   readonly opportunity: Opportunity
@@ -16,6 +17,8 @@ export function OpportunitySummaryCard({
   creatorName,
   skillCount,
 }: OpportunitySummaryCardProps) {
+  const taxonomy = resolveOpportunityTaxonomyLabels(opportunity)
+
   return (
     <PmContentCard
       title="Overview"
@@ -42,18 +45,22 @@ export function OpportunitySummaryCard({
             <dd className="font-medium text-foreground">{creatorName}</dd>
           </div>
         ) : null}
-        {opportunity.exchangeMode ? (
-          <div>
-            <dt className="text-muted-foreground">Exchange</dt>
-            <dd className="font-medium text-foreground">{opportunity.exchangeMode}</dd>
-          </div>
-        ) : null}
-        {opportunity.modelType ? (
-          <div>
-            <dt className="text-muted-foreground">Model</dt>
-            <dd className="font-medium text-foreground">{opportunity.modelType}</dd>
-          </div>
-        ) : null}
+        <div>
+          <dt className="text-muted-foreground">Collaboration model</dt>
+          <dd className="font-medium text-foreground">{taxonomy.mainModel}</dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">Sub-model</dt>
+          <dd className="font-medium text-foreground">{taxonomy.subModel}</dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">Exchange</dt>
+          <dd className="font-medium text-foreground">{taxonomy.exchangeMode}</dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">Matching</dt>
+          <dd className="font-medium text-foreground">{taxonomy.matchingTopology}</dd>
+        </div>
         {skillCount > 0 ? (
           <div>
             <dt className="text-muted-foreground">Core skills</dt>

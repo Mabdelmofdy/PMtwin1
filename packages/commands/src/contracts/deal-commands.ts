@@ -10,3 +10,9 @@ export interface CreateDealFromPostMatchCommand extends Command {
   readonly commandType: 'CreateDealFromPostMatch'
   readonly negotiationId: string
 }
+
+/** Create Deal from agreed Application-linked Negotiation (aggregateId = applicationId). */
+export interface CreateDealFromApplicationCommand extends Command {
+  readonly commandType: 'CreateDealFromApplication'
+  readonly negotiationId: string
+}

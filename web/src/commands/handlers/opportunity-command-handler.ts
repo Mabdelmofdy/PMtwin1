@@ -1,7 +1,12 @@
 import type {
   Command,
   CommandResult,
+  CreateOpportunityCommand,
+  OpportunityCollaborationPayload,
+  PublishOpportunityCommand,
   TransitionOpportunityStatusCommand,
+  UpdateOpportunityCommand,
+  ValidateOpportunityCollaborationModelCommand,
 } from '@pm-twin/commands'
 import {
   allowedTransitions,
@@ -9,6 +14,11 @@ import {
   isTerminal,
   toCanonical,
 } from '@pm-twin/lifecycle'
+import {
+  normalizeSubModelType,
+  validateCollaborationTaxonomy,
+  validateOpportunityCollaborationModel,
+} from '@pm-twin/collaboration-models'
 import type { AuditEntry, Opportunity } from '@/types/domain.ts'
 import type { AuditRepository } from '@/repositories/audit-repository.ts'
 import type { OpportunityRepository } from '@/repositories/opportunity-repository.ts'
@@ -17,6 +27,10 @@ import {
   evaluatePublishReadiness,
   formatPublishReadinessCommandErrors,
 } from '@/domain/publish-readiness/publish-readiness-gate.ts'
+import {
+  buildOpportunityCollaborationPatch,
+  normalizeOpportunityCollaboration,
+} from '@/domain/collaboration/opportunity-collaboration.ts'
 import { toStoredStatus } from '@/domain/workflow/legacy-map.ts'
 
 const ENTITY_TYPE = 'opportunity' as const
@@ -97,6 +111,41 @@ function validateTransition(
   return []
 }
 
+function payloadToOpportunityFields(
+  payload: OpportunityCollaborationPayload,
+): Partial<Opportunity> {
+  const subModelType =
+    normalizeSubModelType(payload.subModelType, payload) ?? payload.subModelType
+  const collaborationPatch = buildOpportunityCollaborationPatch({
+    mainCollaborationModel: payload.mainCollaborationModel,
+    modelType: payload.modelType,
+    subModelType,
+    exchangeMode: payload.exchangeMode,
+    acceptedExchangeModes: payload.acceptedExchangeModes,
+    collaborationAttributes: payload.collaborationAttributes,
+    preferredMatchingTopology: payload.preferredMatchingTopology,
+  })
+
+  return {
+    title: payload.title,
+    description: payload.description,
+    intent: payload.intent === 'request' ? 'need' : payload.intent,
+    location: payload.location,
+    creatorId: payload.creatorId,
+    tenantId: payload.tenantId,
+    organizationId: payload.organizationId,
+    scope: payload.scope as Opportunity['scope'],
+    attributes: payload.attributes as Opportunity['attributes'],
+    exchangeData: payload.exchangeData,
+    normalized: payload.normalized,
+    value_exchange: {
+      mode: payload.exchangeMode,
+      accepted_modes: [...(payload.acceptedExchangeModes ?? [payload.exchangeMode])],
+    },
+    ...collaborationPatch,
+  }
+}
+
 export class OpportunityCommandHandler {
   private readonly opportunityRepository: OpportunityRepository
   private readonly auditRepository: AuditRepository | null
@@ -121,6 +170,14 @@ export class OpportunityCommandHandler {
     }
 
     switch (command.commandType) {
+      case 'CreateOpportunity':
+        return this.handleCreate(command as CreateOpportunityCommand)
+      case 'UpdateOpportunity':
+        return this.handleUpdate(command as UpdateOpportunityCommand)
+      case 'ValidateOpportunityCollaborationModel':
+        return this.handleValidate(command as ValidateOpportunityCollaborationModelCommand)
+      case 'PublishOpportunity':
+        return this.handlePublish(command as PublishOpportunityCommand)
       case 'TransitionOpportunityStatus':
         return this.handleTransition(
           command as TransitionOpportunityStatusCommand,
@@ -130,6 +187,130 @@ export class OpportunityCommandHandler {
           `Unsupported Opportunity command type "${command.commandType}"`,
         ])
     }
+  }
+
+  private handleCreate(command: CreateOpportunityCommand): CommandResult {
+    const payload = command.payload
+    if (!payload?.title?.trim()) {
+      return failure(command.commandType, command.aggregateId, ['title is required'])
+    }
+
+    const validation = validateOpportunityCollaborationModel({
+      mainCollaborationModel: payload.mainCollaborationModel,
+      modelType: payload.modelType,
+      subModelType: payload.subModelType,
+      exchangeMode: payload.exchangeMode,
+      acceptedExchangeModes: payload.acceptedExchangeModes,
+      collaborationAttributes: payload.collaborationAttributes,
+    })
+    if (!validation.valid) {
+      return failure(command.commandType, command.aggregateId, validation.errors)
+    }
+
+    const fields = payloadToOpportunityFields(payload)
+    const created = this.opportunityRepository.create({
+      ...fields,
+      id: command.aggregateId,
+      status: 'draft',
+    } as Omit<Opportunity, 'createdAt' | 'updatedAt'>)
+
+    this.appendAudit({
+      action: 'opportunity.created',
+      entityType: 'opportunity',
+      entityId: created.id,
+      requestId: command.clientRequestId,
+      details: {
+        mainCollaborationModel: created.mainCollaborationModel,
+        subModelType: created.subModelType,
+        preferredMatchingTopology: created.preferredMatchingTopology,
+      },
+    })
+
+    return success(command.commandType, created.id)
+  }
+
+  private handleUpdate(command: UpdateOpportunityCommand): CommandResult {
+    const existing = this.opportunityRepository.getById(command.aggregateId)
+    if (!existing) {
+      return failure(command.commandType, command.aggregateId, [
+        `Opportunity "${command.aggregateId}" not found`,
+      ])
+    }
+
+    const payload = command.payload ?? {}
+    const merged = {
+      ...existing,
+      ...payloadToOpportunityFields({
+        title: payload.title ?? existing.title,
+        description: payload.description ?? existing.description,
+        intent: (payload.intent ?? existing.intent) as OpportunityCollaborationPayload['intent'],
+        location: payload.location ?? existing.location,
+        mainCollaborationModel:
+          payload.mainCollaborationModel ?? existing.mainCollaborationModel ?? '',
+        modelType: payload.modelType ?? existing.modelType ?? '',
+        subModelType: payload.subModelType ?? existing.subModelType ?? '',
+        exchangeMode: payload.exchangeMode ?? existing.exchangeMode ?? 'cash',
+        acceptedExchangeModes:
+          payload.acceptedExchangeModes ?? existing.acceptedExchangeModes,
+        collaborationAttributes:
+          payload.collaborationAttributes ?? existing.collaborationAttributes,
+        preferredMatchingTopology:
+          payload.preferredMatchingTopology ?? existing.preferredMatchingTopology,
+        scope: payload.scope,
+        attributes: payload.attributes,
+        exchangeData: payload.exchangeData,
+        normalized: payload.normalized,
+      }),
+    }
+
+    if (payload.mainCollaborationModel || payload.subModelType || payload.modelType) {
+      const validation = validateOpportunityCollaborationModel({
+        mainCollaborationModel: merged.mainCollaborationModel,
+        modelType: merged.modelType,
+        subModelType: merged.subModelType,
+        exchangeMode: merged.exchangeMode,
+        acceptedExchangeModes: merged.acceptedExchangeModes,
+        collaborationAttributes: merged.collaborationAttributes,
+      })
+      if (!validation.valid) {
+        return failure(command.commandType, command.aggregateId, validation.errors)
+      }
+    }
+
+    const { status: _status, id: _id, createdAt: _createdAt, ...patch } = merged
+    this.opportunityRepository.update(command.aggregateId, patch)
+
+    this.appendAudit({
+      action: 'opportunity.updated',
+      entityType: 'opportunity',
+      entityId: command.aggregateId,
+      requestId: command.clientRequestId,
+      details: {
+        fields: Object.keys(payload),
+      },
+    })
+
+    return success(command.commandType, command.aggregateId)
+  }
+
+  private handleValidate(
+    command: ValidateOpportunityCollaborationModelCommand,
+  ): CommandResult {
+    const validation = validateOpportunityCollaborationModel(command.payload)
+    if (!validation.valid) {
+      return failure(command.commandType, command.aggregateId, validation.errors)
+    }
+    return success(command.commandType, command.aggregateId)
+  }
+
+  private handlePublish(command: PublishOpportunityCommand): CommandResult {
+    return this.handleTransition({
+      commandType: 'TransitionOpportunityStatus',
+      aggregateId: command.aggregateId,
+      clientRequestId: command.clientRequestId,
+      targetStatus: 'published',
+      reason: command.reason,
+    })
   }
 
   private handleTransition(
@@ -164,6 +345,25 @@ export class OpportunityCommandHandler {
     const storedStatus = toStoredStatus(ENTITY_TYPE, canonicalTarget)
 
     if (canonicalTarget === 'published') {
+      // Publish guard (future): enforce validateSubModelAttributes for opportunities
+      // created after collaboration-models rollout, while skipping full attribute
+      // validation for legacy seed rows loaded via normalizeOpportunityCollaboration.
+      const normalizedOpportunity = normalizeOpportunityCollaboration(opportunity)
+      const collaborationValidation = validateCollaborationTaxonomy({
+        mainCollaborationModel: normalizedOpportunity.mainCollaborationModel,
+        modelType: normalizedOpportunity.modelType,
+        subModelType: normalizedOpportunity.subModelType,
+        exchangeMode: normalizedOpportunity.exchangeMode,
+        acceptedExchangeModes: normalizedOpportunity.acceptedExchangeModes,
+      })
+      if (!collaborationValidation.valid) {
+        return failure(
+          command.commandType,
+          command.aggregateId,
+          collaborationValidation.errors,
+        )
+      }
+
       const publishContext = this.resolvePublishReadinessContext?.(opportunity) ?? {
         profile: null,
         profileKind: 'individual' as const,

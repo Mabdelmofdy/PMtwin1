@@ -83,12 +83,29 @@ export type Opportunity = TenantScoped & {
   status: OpportunityStatus | string
   creatorId?: string
   location?: string
+  /** UX-level main collaboration model (5 models). */
+  mainCollaborationModel?: string
   exchangeMode?: string
+  acceptedExchangeModes?: string[]
   modelType?: string
+  /** Canonical collaboration sub-model — never matching topology. */
+  subModelType?: string
+  /** Derived or recommended matching topology — not stored in subModelType. */
+  preferredMatchingTopology?: string
+  /** Sub-model specific business attributes from POC schema. */
+  collaborationAttributes?: Record<string, unknown>
+  exchangeData?: Record<string, unknown>
+  paymentModes?: string[]
   /** Canonical `need` | `offer` | `hybrid`, or legacy `request` (→ need on read). */
   intent?: OpportunityIntentStored
-  scope?: { coreSkills?: string[]; sectors?: string[] }
-  attributes?: { coreSkills?: string[]; startDate?: string; tenderDeadline?: string }
+  scope?: { coreSkills?: string[]; sectors?: string[]; requiredSkills?: string[]; offeredSkills?: string[] }
+  attributes?: { coreSkills?: string[]; startDate?: string; tenderDeadline?: string; targetRole?: string }
+  normalized?: Record<string, unknown>
+  value_exchange?: {
+    mode?: string
+    accepted_modes?: string[]
+    estimated_value?: number
+  }
   updatedAt?: string
   createdAt?: string
 }

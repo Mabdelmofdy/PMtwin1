@@ -39,6 +39,8 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
   const negotiationHandler = new NegotiationCommandHandler({
     negotiationRepository,
     postMatchRepository,
+    opportunityRepository,
+    applicationRepository,
     auditRepository,
     notificationRepository,
   })
@@ -46,6 +48,7 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
     dealRepository,
     negotiationRepository,
     postMatchRepository,
+    applicationRepository,
     auditRepository,
     notificationRepository,
   })

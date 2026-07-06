@@ -3,6 +3,7 @@ import type {
   CancelNegotiationCommand,
   Command,
   CommandResult,
+  StartNegotiationFromApplicationCommand,
   StartNegotiationFromPostMatchCommand,
   TransitionNegotiationStatusCommand,
 } from '@pm-twin/commands'
@@ -66,6 +67,28 @@ export function createNegotiationCommandService(
         aggregateId: postMatchId,
         clientRequestId: createClientRequestId('StartNegotiationFromPostMatch'),
       } satisfies StartNegotiationFromPostMatchCommand
+
+      const result = executeCommand(command, effectiveDeps)
+
+      if (!result.success) {
+        return { result, negotiation: null }
+      }
+
+      const repository = resolveNegotiationRepository(effectiveDeps)
+      const negotiation = repository.getById(result.aggregateId) ?? null
+      return { result, negotiation }
+    },
+
+    startNegotiationFromApplication(
+      applicationId: string,
+      serviceDeps?: NegotiationCommandServiceDeps,
+    ): { result: CommandResult; negotiation: Negotiation | null } {
+      const effectiveDeps = serviceDeps ?? deps
+      const command = {
+        commandType: 'StartNegotiationFromApplication',
+        aggregateId: applicationId,
+        clientRequestId: createClientRequestId('StartNegotiationFromApplication'),
+      } satisfies StartNegotiationFromApplicationCommand
 
       const result = executeCommand(command, effectiveDeps)
 

@@ -12,7 +12,6 @@ import { useAuth } from '@/providers/auth-provider'
 import {
   publishOpportunityUiAction,
   resolveProfileKindFromUser,
-  saveOpportunityDraftFields,
 } from '@/lib/publish-opportunity-ui-actions.ts'
 import { showPublishSuccessFeedback } from '@/lib/publish-opportunity-feedback.ts'
 import {
@@ -62,7 +61,7 @@ import {
   type OpportunityOwnershipFilter,
 } from '@/config/product-identity'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
+import { formatFrameworkMatchTypeLabel } from '@/config/need-offer-framework.ts'
 import {
   MatchingModelsReferencePanel,
   NeedOfferMirrorPanel,
@@ -70,11 +69,28 @@ import {
   ValueExchangeModesPanel,
 } from '@/components/need-offer/need-offer-framework-panels'
 import { buildOpportunitySemanticReadModel } from '@/lib/need-offer-semantic-read-model.ts'
+import {
+  buildOpportunityCollaborationPatch,
+  deriveMatchingTopology,
+  listMainCollaborationModels,
+  listSubModelsForMain,
+  resolveMainCollaborationModelLabel,
+  resolveSubModelLabel,
+} from '@/domain/collaboration/opportunity-collaboration.ts'
+import { CollaborationSubModelFields } from '@/components/opportunity/collaboration-sub-model-fields.tsx'
+import {
+  formatCollaborationExchangeMode,
+  resolveOpportunityTaxonomyLabels,
+} from '@/lib/collaboration-taxonomy-display.ts'
+import { opportunityCommandService } from '@/services/opportunity-command-service.ts'
+import { buildValueExchangeDraftPayload } from '@/domain/collaboration/value-exchange-lifecycle.ts'
+import type { OpportunityCollaborationPayload } from '@pm-twin/commands'
 
 const WIZARD_STEPS: readonly PmFormStepperStep[] = [
   { id: 'type', label: 'Type', description: 'Need or offer' },
   { id: 'scope', label: 'Scope', description: 'Title and category' },
   { id: 'exchange', label: 'Exchange', description: 'Collaboration model' },
+  { id: 'submodel', label: 'Sub-model', description: 'Business attributes' },
   { id: 'skills', label: 'Skills', description: 'Capabilities' },
   { id: 'timeline', label: 'Timeline', description: 'Location and dates' },
   { id: 'review', label: 'Review', description: 'Readiness check' },
@@ -86,8 +102,10 @@ type OpportunityDraft = {
   intent: 'need' | 'offer'
   description: string
   location: string
+  mainCollaborationModel: string
   modelType: string
-  collaborationModel: string
+  subModelType: string
+  exchangeMode: string
   paymentModes: string[]
   targetRole: string
   sector: string
@@ -95,6 +113,7 @@ type OpportunityDraft = {
   services: string
   startDate: string
   tenderDeadline: string
+  collaborationAttributes: Record<string, unknown>
 }
 
 const initialDraft: OpportunityDraft = {
@@ -102,8 +121,10 @@ const initialDraft: OpportunityDraft = {
   intent: 'need',
   description: '',
   location: '',
+  mainCollaborationModel: 'cash_subcontracting',
   modelType: 'project_based',
-  collaborationModel: 'one_way',
+  subModelType: 'task_based',
+  exchangeMode: 'cash',
   paymentModes: ['cash'],
   targetRole: '',
   sector: '',
@@ -111,6 +132,7 @@ const initialDraft: OpportunityDraft = {
   services: '',
   startDate: '',
   tenderDeadline: '',
+  collaborationAttributes: {},
 }
 
 function splitCsv(value: string): string[] {
@@ -124,30 +146,47 @@ function buildOpportunityDraftInput(draft: OpportunityDraft): Record<string, unk
   const skills = splitCsv(draft.skills)
   const services = splitCsv(draft.services)
   const sectors = draft.sector ? [draft.sector] : []
+  const collaborationPatch = buildOpportunityCollaborationPatch({
+    mainCollaborationModel: draft.mainCollaborationModel,
+    modelType: draft.modelType,
+    subModelType: draft.subModelType,
+    exchangeMode: draft.exchangeMode,
+    acceptedExchangeModes: draft.paymentModes,
+  })
 
   return {
     title: draft.title,
     intent: draft.intent,
     description: draft.description,
     location: draft.location,
-    modelType: draft.modelType,
+    ...collaborationPatch,
     scope: {
       sectors,
       ...(draft.intent === 'need'
-        ? { requiredSkills: skills }
-        : { offeredSkills: skills }),
+        ? { requiredSkills: skills, coreSkills: skills }
+        : { offeredSkills: skills, coreSkills: skills }),
     },
     attributes: {
       targetRole: draft.targetRole,
       startDate: draft.startDate || undefined,
       tenderDeadline: draft.tenderDeadline || undefined,
+      requiredSkills: skills,
       ...(draft.intent === 'offer'
         ? { availabilityDate: draft.startDate || undefined }
         : {}),
     },
-    exchangeMode: draft.paymentModes[0],
-    paymentModes: draft.paymentModes,
-    subModelType: draft.collaborationModel,
+    collaborationAttributes: {
+      ...draft.collaborationAttributes,
+      detailedScope: draft.collaborationAttributes.detailedScope ?? draft.description,
+      requiredSkills:
+        draft.collaborationAttributes.requiredSkills
+        ?? (skills.length > 0 ? skills : undefined),
+      startDate: (draft.collaborationAttributes.startDate ?? draft.startDate) || undefined,
+    },
+    exchangeData: {
+      exchangeMode: draft.exchangeMode,
+      ...buildValueExchangeDraftPayload(draft),
+    },
     normalized: {
       ...(draft.intent === 'need'
         ? { requiredServices: services }
@@ -156,12 +195,39 @@ function buildOpportunityDraftInput(draft: OpportunityDraft): Record<string, unk
   }
 }
 
+function buildCollaborationCommandPayload(
+  draft: OpportunityDraft,
+  creatorId?: string,
+): OpportunityCollaborationPayload {
+  const built = buildOpportunityDraftInput(draft)
+  return {
+    title: draft.title,
+    description: draft.description,
+    intent: draft.intent,
+    location: draft.location,
+    creatorId,
+    mainCollaborationModel: draft.mainCollaborationModel,
+    modelType: draft.modelType,
+    subModelType: draft.subModelType,
+    exchangeMode: draft.exchangeMode,
+    acceptedExchangeModes: draft.paymentModes,
+    preferredMatchingTopology: built.preferredMatchingTopology as string | undefined,
+    collaborationAttributes: built.collaborationAttributes as Record<string, unknown>,
+    scope: built.scope as Record<string, unknown>,
+    attributes: built.attributes as Record<string, unknown>,
+    normalized: built.normalized as Record<string, unknown>,
+    paymentModes: draft.paymentModes,
+  }
+}
+
 function resolveCompletedSteps(draft: OpportunityDraft): string[] {
   const completed: string[] = []
   if (draft.intent) completed.push('type')
   if (draft.title && draft.description) completed.push('scope')
-  if (draft.modelType) completed.push('exchange')
-  if (draft.collaborationModel) completed.push('exchange')
+  if (draft.mainCollaborationModel && draft.subModelType && draft.exchangeMode) {
+    completed.push('exchange')
+    completed.push('submodel')
+  }
   if (draft.skills || draft.services) completed.push('skills')
   if (draft.location) completed.push('timeline')
   if (draft.title) completed.push('review')
@@ -538,7 +604,26 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   const [draft, setDraft] = useState<OpportunityDraft>(initialDraft)
   const [activeStepId, setActiveStepId] = useState('type')
   const [publishDetails, setPublishDetails] = useState<readonly string[] | null>(null)
+  const [createdOpportunityId, setCreatedOpportunityId] = useState<string | undefined>()
   const existingOpportunity = opportunityId ? opportunitiesApi.get(opportunityId) : undefined
+  const resolvedOpportunityId = opportunityId ?? createdOpportunityId
+
+  const mainModels = useMemo(() => listMainCollaborationModels(), [])
+  const subModelOptions = useMemo(
+    () => listSubModelsForMain(draft.mainCollaborationModel),
+    [draft.mainCollaborationModel],
+  )
+  const derivedTopology = useMemo(
+    () =>
+      deriveMatchingTopology({
+        mainCollaborationModel: draft.mainCollaborationModel,
+        modelType: draft.modelType,
+        subModelType: draft.subModelType,
+        exchangeMode: draft.exchangeMode,
+        acceptedExchangeModes: draft.paymentModes,
+      }),
+    [draft],
+  )
 
   useEffect(() => {
     if (!existingOpportunity) return
@@ -547,7 +632,11 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       intent: existingOpportunity.intent === 'offer' ? 'offer' : 'need',
       description: existingOpportunity.description ?? '',
       location: existingOpportunity.location ?? '',
+      mainCollaborationModel:
+        existingOpportunity.mainCollaborationModel ?? 'cash_subcontracting',
       modelType: existingOpportunity.modelType ?? 'project_based',
+      subModelType: existingOpportunity.subModelType ?? 'task_based',
+      exchangeMode: existingOpportunity.exchangeMode ?? 'cash',
       targetRole:
         (existingOpportunity as { attributes?: { targetRole?: string } }).attributes?.targetRole ?? '',
       sector: existingOpportunity.scope?.sectors?.[0] ?? '',
@@ -559,18 +648,20 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       services: '',
       startDate: existingOpportunity.attributes?.startDate ?? '',
       tenderDeadline: existingOpportunity.attributes?.tenderDeadline ?? '',
-      collaborationModel:
-        (existingOpportunity as { subModelType?: string }).subModelType ?? 'one_way',
       paymentModes:
-        (existingOpportunity as { paymentModes?: string[] }).paymentModes
+        existingOpportunity.acceptedExchangeModes
+        ?? existingOpportunity.paymentModes
         ?? (existingOpportunity.exchangeMode ? [existingOpportunity.exchangeMode] : ['cash']),
+      collaborationAttributes: existingOpportunity.collaborationAttributes ?? {},
     })
   }, [existingOpportunity])
 
   const opportunityDraft = useMemo(() => {
     const built = buildOpportunityDraftInput(draft)
-    return opportunityId ? { ...existingOpportunity, ...built, id: opportunityId } : built
-  }, [draft, existingOpportunity, opportunityId])
+    return resolvedOpportunityId
+      ? { ...existingOpportunity, ...built, id: resolvedOpportunityId }
+      : built
+  }, [draft, existingOpportunity, resolvedOpportunityId])
 
   const semanticPreview = useMemo(
     () => buildOpportunitySemanticReadModel(opportunityDraft as import('@/types/domain.ts').Opportunity),
@@ -585,13 +676,31 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   }
 
   const handleSaveDraft = () => {
-    if (!opportunityId) {
-      sessionStorage.setItem('pmtwin.opportunity-draft', JSON.stringify(draft))
-      toast.success('Draft saved locally. Open an existing draft opportunity to persist changes.')
+    if (!user) {
+      toast.error('Sign in to save opportunities.')
       return
     }
 
-    saveOpportunityDraftFields(opportunityId, opportunityDraft as Partial<import('@/types/domain.ts').Opportunity>)
+    if (!resolvedOpportunityId) {
+      const payload = buildCollaborationCommandPayload(draft, user.id)
+      const result = opportunityCommandService.createOpportunity(payload)
+      if (!result.success) {
+        toast.error(result.errors?.join('\n') ?? 'Could not create opportunity')
+        return
+      }
+      setCreatedOpportunityId(result.aggregateId)
+      toast.success('Draft opportunity created')
+      return
+    }
+
+    const updateResult = opportunityCommandService.updateOpportunity(
+      resolvedOpportunityId,
+      buildCollaborationCommandPayload(draft, user.id),
+    )
+    if (!updateResult.success) {
+      toast.error(updateResult.errors?.join('\n') ?? 'Could not save draft')
+      return
+    }
     toast.success('Draft saved')
   }
 
@@ -600,12 +709,12 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       toast.error('Sign in to publish opportunities.')
       return
     }
-    if (!opportunityId) {
-      toast.error('Publishing requires an existing draft opportunity record.')
+    if (!resolvedOpportunityId) {
+      toast.error('Save the draft before publishing.')
       return
     }
 
-    const result = publishOpportunityUiAction(opportunityId, {
+    const result = publishOpportunityUiAction(resolvedOpportunityId, {
       profile: user.profile,
       profileKind: resolveProfileKindFromUser(user),
       opportunity: opportunityDraft,
@@ -811,45 +920,71 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
 
         <PmFormWizardStep stepId="exchange" activeStepId={activeStepId}>
           <PmFormSection
-            title="Matching model & exchange"
-            description="Select how this post participates in matching and value exchange."
+            title="Collaboration model & exchange"
+            description="Select main model, sub-model, and value exchange. Matching topology is derived automatically."
           >
-            <PmFormField id="opp-model" label="Sub-model (delivery type)" required>
-              <Select value={draft.modelType} onValueChange={(v) => updateDraft('modelType', v)}>
+            <PmFormField id="opp-main-model" label="Main collaboration model" required>
+              <Select
+                value={draft.mainCollaborationModel}
+                onValueChange={(value) => {
+                  const firstSub = listSubModelsForMain(value)[0]
+                  updateDraft('mainCollaborationModel', value)
+                  if (firstSub) {
+                    setDraft((current) => ({
+                      ...current,
+                      mainCollaborationModel: value,
+                      modelType: firstSub.modelType,
+                      subModelType: firstSub.key,
+                    }))
+                  }
+                  setPublishDetails(null)
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="project_based">Project based</SelectItem>
-                  <SelectItem value="retainer">Retainer</SelectItem>
-                  <SelectItem value="consortium">Consortium</SelectItem>
+                  {mainModels.map((model) => (
+                    <SelectItem key={model.key} value={model.key}>
+                      {model.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </PmFormField>
 
-            <div className="mt-4 space-y-2">
-              <p className={cn(pmTypography.label)}>Matching model</p>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {MATCHING_MODEL_KEYS.map((key) => {
-                  const model = MATCHING_MODELS[key]
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      className={cn(
-                        'rounded-lg border p-3 text-start',
-                        draft.collaborationModel === key
-                          ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/20'
-                          : 'border-border hover:border-primary/30',
-                      )}
-                      onClick={() => updateDraft('collaborationModel', key)}
-                    >
-                      <p className="font-medium">{model.label}</p>
-                      <p className={cn(pmTypography.caption, 'text-primary')}>{model.subtitle}</p>
-                    </button>
-                  )
-                })}
-              </div>
+            <PmFormField id="opp-sub-model" label="Sub-model" required className="mt-4">
+              <Select
+                value={draft.subModelType}
+                onValueChange={(value) => {
+                  const sub = subModelOptions.find((entry) => entry.key === value)
+                  setDraft((current) => ({
+                    ...current,
+                    subModelType: value,
+                    modelType: sub?.modelType ?? current.modelType,
+                  }))
+                  setPublishDetails(null)
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {subModelOptions.map((sub) => (
+                    <SelectItem key={sub.key} value={sub.key}>
+                      {sub.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </PmFormField>
+
+            <div className="mt-4 rounded-lg border border-border/70 bg-muted/20 p-3 text-sm">
+              <p className={cn(pmTypography.label)}>Recommended matching topology</p>
+              <p className="font-medium">{formatFrameworkMatchTypeLabel(derivedTopology.topology)}</p>
+              <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
+                {derivedTopology.reason}
+              </p>
             </div>
 
             <div className="mt-4">
@@ -858,15 +993,40 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                 selectable
                 onToggle={(modeKey) => {
                   const has = draft.paymentModes.includes(modeKey)
-                  updateDraft(
-                    'paymentModes',
-                    has
-                      ? draft.paymentModes.filter((mode) => mode !== modeKey)
-                      : [...draft.paymentModes, modeKey],
-                  )
+                  const nextModes = has
+                    ? draft.paymentModes.filter((mode) => mode !== modeKey)
+                    : [...draft.paymentModes, modeKey]
+                  setDraft((current) => ({
+                    ...current,
+                    paymentModes: nextModes.length > 0 ? nextModes : [modeKey],
+                    exchangeMode: (nextModes[0] ?? modeKey) as OpportunityDraft['exchangeMode'],
+                  }))
+                  setPublishDetails(null)
                 }}
               />
             </div>
+          </PmFormSection>
+        </PmFormWizardStep>
+
+        <PmFormWizardStep stepId="submodel" activeStepId={activeStepId}>
+          <PmFormSection
+            title="Sub-model attributes"
+            description="Registry-driven fields for the selected collaboration sub-model."
+          >
+            <CollaborationSubModelFields
+              subModelType={draft.subModelType}
+              values={draft.collaborationAttributes}
+              onChange={(key, value) => {
+                setDraft((current) => ({
+                  ...current,
+                  collaborationAttributes: {
+                    ...current.collaborationAttributes,
+                    [key]: value,
+                  },
+                }))
+                setPublishDetails(null)
+              }}
+            />
           </PmFormSection>
         </PmFormWizardStep>
 
@@ -940,23 +1100,23 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
             <dl className="grid gap-3 text-sm sm:grid-cols-2">
               <div><dt className="text-muted-foreground">Title</dt><dd className="font-medium">{draft.title || '—'}</dd></div>
               <div><dt className="text-muted-foreground">Post type</dt><dd className="font-medium">{formatOpportunityIntent(draft.intent)}</dd></div>
-              <div><dt className="text-muted-foreground">Matching model</dt><dd className="font-medium">{MATCHING_MODELS[draft.collaborationModel as keyof typeof MATCHING_MODELS]?.label ?? draft.collaborationModel}</dd></div>
-              <div><dt className="text-muted-foreground">Value exchange</dt><dd className="font-medium">{draft.paymentModes.join(', ') || '—'}</dd></div>
-              <div><dt className="text-muted-foreground">Location</dt><dd className="font-medium">{draft.location || '—'}</dd></div>
-              <div><dt className="text-muted-foreground">Sub-model</dt><dd className="font-medium">{draft.modelType}</dd></div>
+              <div><dt className="text-muted-foreground">Main model</dt><dd className="font-medium">{resolveMainCollaborationModelLabel(draft.mainCollaborationModel)}</dd></div>
+              <div><dt className="text-muted-foreground">Sub-model</dt><dd className="font-medium">{resolveSubModelLabel(draft.subModelType)}</dd></div>
+              <div><dt className="text-muted-foreground">Matching topology</dt><dd className="font-medium">{formatFrameworkMatchTypeLabel(derivedTopology.topology)}</dd></div>
+              <div><dt className="text-muted-foreground">Value exchange</dt><dd className="font-medium">{draft.paymentModes.map(formatCollaborationExchangeMode).join(', ') || '—'}</dd></div>
             </dl>
           </PmFormSection>
           <div className="mt-4 grid gap-4">
             <NeedOfferMirrorPanel semantic={semanticPreview} compact />
-            <MatchingModelsReferencePanel selectedModel={draft.collaborationModel} compact />
+            <MatchingModelsReferencePanel selectedModel={derivedTopology.topology} compact />
           </div>
         </PmFormWizardStep>
 
         <PmFormWizardStep stepId="publish" activeStepId={activeStepId}>
           <PmFormSection title="Publish" description="Save draft is always allowed. Publish requires readiness.">
             <p className="text-sm text-muted-foreground">
-              {!opportunityId
-                ? 'Create flow stores draft fields locally until you edit an existing draft opportunity.'
+              {!resolvedOpportunityId
+                ? 'Save draft to create a persisted opportunity record before publishing.'
                 : 'Publish when profile and opportunity readiness are complete.'}
             </p>
           </PmFormSection>

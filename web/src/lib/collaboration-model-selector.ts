@@ -1,9 +1,12 @@
-/** Public collaboration model identifiers — marketing wizard only. */
-export type CollaborationModelId =
-  | 'cash_subcontracting'
-  | 'service_exchange'
-  | 'joint_venture'
-  | 'resource_sharing'
+/**
+ * Collaboration model catalog — delegates to @pm-twin/collaboration-models registry.
+ */
+import {
+  listMainCollaborationModels,
+  type MainCollaborationModel,
+} from '@pm-twin/collaboration-models'
+
+export type CollaborationModelId = MainCollaborationModel
 
 export type CollaborationModelRecommendation = {
   id: CollaborationModelId
@@ -12,31 +15,16 @@ export type CollaborationModelRecommendation = {
   reason: string
 }
 
-export const COLLABORATION_MODEL_CATALOG: Record<
-  CollaborationModelId,
-  { title: string; summary: string }
-> = {
-  cash_subcontracting: {
-    title: 'Cash Subcontracting',
-    summary: 'Paid delivery for a defined scope with clear payment milestones.',
-  },
-  service_exchange: {
-    title: 'Service Exchange / Barter',
-    summary: 'Trade services or resources of comparable value instead of cash.',
-  },
-  joint_venture: {
-    title: 'Joint Venture',
-    summary: 'Shared delivery, governance, and outcomes across partners.',
-  },
-  resource_sharing: {
-    title: 'Resource Sharing',
-    summary: 'Pool equipment, teams, or procurement capacity across projects.',
-  },
-}
+export const COLLABORATION_MODEL_CATALOG = Object.fromEntries(
+  listMainCollaborationModels().map((model) => [
+    model.key,
+    { title: model.name, summary: model.description },
+  ]),
+) as Record<CollaborationModelId, { title: string; summary: string }>
 
-export type WizardExchangePreference = 'cash' | 'barter' | 'partnership' | 'pooling'
-export type WizardEngagementScope = 'defined_package' | 'swap' | 'multi_party' | 'capacity'
-export type WizardPriority = 'payment_clarity' | 'liquidity' | 'governance' | 'utilization'
+export type WizardExchangePreference = 'cash' | 'barter' | 'partnership' | 'pooling' | 'hiring'
+export type WizardEngagementScope = 'defined_package' | 'swap' | 'multi_party' | 'capacity' | 'role'
+export type WizardPriority = 'payment_clarity' | 'liquidity' | 'governance' | 'utilization' | 'talent'
 
 export type CollaborationWizardAnswers = {
   exchangePreference: WizardExchangePreference | ''
@@ -49,6 +37,7 @@ const EXCHANGE_SCORES: Record<WizardExchangePreference, Partial<Record<Collabora
   barter: { service_exchange: 3 },
   partnership: { joint_venture: 3 },
   pooling: { resource_sharing: 3 },
+  hiring: { hiring: 3 },
 }
 
 const SCOPE_SCORES: Record<WizardEngagementScope, Partial<Record<CollaborationModelId, number>>> = {
@@ -56,6 +45,7 @@ const SCOPE_SCORES: Record<WizardEngagementScope, Partial<Record<CollaborationMo
   swap: { service_exchange: 2 },
   multi_party: { joint_venture: 2 },
   capacity: { resource_sharing: 2 },
+  role: { hiring: 2 },
 }
 
 const PRIORITY_SCORES: Record<WizardPriority, Partial<Record<CollaborationModelId, number>>> = {
@@ -63,6 +53,7 @@ const PRIORITY_SCORES: Record<WizardPriority, Partial<Record<CollaborationModelI
   liquidity: { service_exchange: 2 },
   governance: { joint_venture: 2 },
   utilization: { resource_sharing: 2 },
+  talent: { hiring: 2 },
 }
 
 const REASONS: Record<CollaborationModelId, string> = {
@@ -74,6 +65,8 @@ const REASONS: Record<CollaborationModelId, string> = {
     'Fits when partners need shared governance and co-delivery on a joint objective.',
   resource_sharing:
     'Fits when the main gain is better utilization of equipment, teams, or pooled procurement.',
+  hiring:
+    'Fits when you need to engage a professional or consultant for a defined role or deliverable.',
 }
 
 function addScores(
@@ -94,6 +87,7 @@ export function recommendCollaborationModels(
     service_exchange: 0,
     joint_venture: 0,
     resource_sharing: 0,
+    hiring: 0,
   }
 
   if (answers.exchangePreference) {

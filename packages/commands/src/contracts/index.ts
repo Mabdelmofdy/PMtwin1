@@ -55,6 +55,7 @@ export {
 export type {
   StartNegotiationCommand,
   StartNegotiationFromPostMatchCommand,
+  StartNegotiationFromApplicationCommand,
   AgreeNegotiationCommand,
   CancelNegotiationCommand,
 } from './negotiation-commands.ts'
@@ -62,6 +63,7 @@ export type {
 export type {
   CreateDealFromNegotiationCommand,
   CreateDealFromPostMatchCommand,
+  CreateDealFromApplicationCommand,
 } from './deal-commands.ts'
 
 export type {
@@ -76,3 +78,11 @@ export type {
   SignContractCommand,
   TerminateContractCommand,
 } from './contract-commands.ts'
+
+export type {
+  CreateOpportunityCommand,
+  UpdateOpportunityCommand,
+  ValidateOpportunityCollaborationModelCommand,
+  PublishOpportunityCommand,
+  OpportunityCollaborationPayload,
+} from './opportunity-commands.ts'

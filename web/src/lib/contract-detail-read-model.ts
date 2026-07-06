@@ -10,6 +10,10 @@ import {
   formatCanonicalStatusLabel,
   resolveCanonicalStatus,
 } from '@/lib/status-display.ts'
+import {
+  buildWorkflowContext,
+  isWorkflowActionAvailable,
+} from '@/domain/workflows/workflow-bridge.ts'
 
 export type ContractDetailLink = {
   readonly label: string
@@ -81,7 +85,6 @@ const MISSING_LINK_LABEL = 'Unavailable'
 const MISSING_TITLE_FALLBACK = 'Linked record unavailable'
 const CONTRACT_ENTITY = 'contract' as const
 
-const SIGNABLE_CONTRACT_STATUSES = new Set(['draft', 'pending_signature'])
 const TERMINABLE_CONTRACT_STATUSES = new Set([
   'draft',
   'pending_signature',
@@ -112,10 +115,17 @@ export function contractDetailShowsMutationActions(
 
 export function canCompleteContract(
   contract: Contract | null | undefined,
+  options?: { readonly canMutate?: boolean; readonly userId?: string | null },
 ): boolean {
   if (!contract?.id) return false
-  if (isTerminal(CONTRACT_ENTITY, contract.status)) return false
-  return toCanonical(CONTRACT_ENTITY, contract.status ?? '') === 'active'
+  const context = buildWorkflowContext({
+    contract,
+    user: {
+      userId: options?.userId ?? null,
+      canMutate: options?.canMutate ?? true,
+    },
+  })
+  return isWorkflowActionAvailable(context, 'complete_contract')
 }
 
 export function canTerminateContract(
@@ -130,12 +140,19 @@ export function canTerminateContract(
 export function canSignContract(
   contract: Contract | null | undefined,
   currentUserId: string | null | undefined,
+  options?: { readonly canMutate?: boolean },
 ): boolean {
   if (!contract?.id || !currentUserId?.trim()) return false
-  if (isTerminal(CONTRACT_ENTITY, contract.status)) return false
 
-  const status = toCanonical(CONTRACT_ENTITY, contract.status ?? '')
-  if (!SIGNABLE_CONTRACT_STATUSES.has(status)) return false
+  const context = buildWorkflowContext({
+    contract,
+    user: {
+      userId: currentUserId,
+      canMutate: options?.canMutate ?? true,
+      isParticipant: true,
+    },
+  })
+  if (!isWorkflowActionAvailable(context, 'sign_contract')) return false
 
   const participants = normalizeParticipants(
     contract.participants,

@@ -504,22 +504,423 @@ function scorePair(needPost, offerPost, config, normalizedNeed, normalizedOffer)
   return { score: rounded, breakdown, labels };
 }
 
+// ../collaboration-models/dist/index.js
+function attrs(fields) {
+  return fields;
+}
+var TASK_BASED_ATTRIBUTES = attrs([
+  { key: "taskTitle", label: "Task Title", type: "text", required: true, maxLength: 100 },
+  { key: "taskType", label: "Task Type", type: "select", required: true, options: ["Design", "Engineering", "Consultation", "Review", "Analysis", "Other"] },
+  { key: "detailedScope", label: "Detailed Scope", type: "textarea", required: true, maxLength: 2e3 },
+  { key: "duration", label: "Duration (days)", type: "number", required: true, min: 1 },
+  { key: "requiredSkills", label: "Required Skills", type: "tags", required: true },
+  { key: "experienceLevel", label: "Experience Level", type: "select", required: true, options: ["Junior", "Mid-Level", "Senior", "Expert"] },
+  { key: "startDate", label: "Start Date", type: "date", required: true },
+  { key: "paymentTerms", label: "Payment Terms", type: "select", required: true, options: ["Upfront", "Milestone-Based", "Upon Completion", "Monthly"] }
+]);
+var CONSORTIUM_ATTRIBUTES = attrs([
+  { key: "projectTitle", label: "Project Title", type: "text", required: true, maxLength: 150 },
+  { key: "requiredMembers", label: "Required Members", type: "number", required: true, min: 2 },
+  { key: "memberRoles", label: "Member Roles", type: "array-objects", required: true },
+  { key: "scopeDivision", label: "Scope Division", type: "select", required: true, options: ["By Trade", "By Phase", "By Geography", "Mixed"] },
+  { key: "minimumRequirements", label: "Minimum Requirements", type: "array-objects", required: true },
+  { key: "tenderDeadline", label: "Tender Deadline", type: "date", required: false }
+]);
+var PROJECT_JV_ATTRIBUTES = attrs([
+  { key: "projectTitle", label: "Project Title", type: "text", required: true, maxLength: 150 },
+  { key: "partnerRoles", label: "Partner Roles", type: "array-objects", required: true },
+  { key: "equitySplit", label: "Equity Split", type: "array-percentages", required: true },
+  { key: "capitalContribution", label: "Capital Contribution", type: "currency", required: true },
+  { key: "profitDistribution", label: "Profit Distribution", type: "select", required: true, options: ["Proportional to Equity", "Fixed Percentage", "Performance-Based"] },
+  { key: "governance", label: "Governance Structure", type: "textarea", required: false, maxLength: 1e3 }
+]);
+var SPV_ATTRIBUTES = attrs([
+  { key: "projectTitle", label: "Project Title", type: "text", required: true, maxLength: 150 },
+  { key: "spvLegalForm", label: "SPV Legal Form", type: "select", required: true, options: ["LLC", "Limited Partnership", "Corporation", "Trust"] },
+  { key: "equityStructure", label: "Equity Structure", type: "array-objects", required: true },
+  { key: "projectValue", label: "Project Value", type: "currency", required: true, min: 5e7 },
+  { key: "governanceStructure", label: "Governance Structure", type: "textarea", required: true, maxLength: 1e3 }
+]);
+var STRATEGIC_JV_ATTRIBUTES = attrs([
+  { key: "jvName", label: "JV Name", type: "text", required: true, maxLength: 150 },
+  { key: "strategicObjective", label: "Strategic Objective", type: "textarea", required: true, maxLength: 1e3 },
+  { key: "equitySplit", label: "Equity Split", type: "array-percentages", required: true },
+  { key: "partnerContributions", label: "Partner Contributions", type: "array-objects", required: true },
+  { key: "governance", label: "Governance Structure", type: "textarea", required: true, maxLength: 1e3 }
+]);
+var STRATEGIC_ALLIANCE_ATTRIBUTES = attrs([
+  { key: "allianceTitle", label: "Alliance Title", type: "text", required: true, maxLength: 150 },
+  { key: "allianceType", label: "Alliance Type", type: "select", required: true, options: ["Preferred Supplier", "Technology Licensing", "Market Access", "Knowledge Sharing", "Joint Service Offering", "Other"] },
+  { key: "scopeOfCollaboration", label: "Scope of Collaboration", type: "textarea", required: true, maxLength: 1e3 },
+  { key: "financialTerms", label: "Financial Terms", type: "textarea", required: true, maxLength: 1e3 },
+  { key: "duration", label: "Duration (years)", type: "number", required: true, min: 3 }
+]);
+var MENTORSHIP_ATTRIBUTES = attrs([
+  { key: "mentorshipTitle", label: "Mentorship Title", type: "text", required: true, maxLength: 100 },
+  { key: "mentorshipType", label: "Mentorship Type", type: "select", required: true, options: ["Technical", "Career Development", "Business", "Leadership", "Project Management", "Design", "Other"] },
+  { key: "targetSkills", label: "Target Skills", type: "tags", required: true },
+  { key: "duration", label: "Duration (months)", type: "number", required: true }
+]);
+var BULK_PURCHASING_ATTRIBUTES = attrs([
+  { key: "productService", label: "Product/Service", type: "text", required: true, maxLength: 150 },
+  { key: "quantityNeeded", label: "Quantity Needed", type: "number", required: true },
+  { key: "participantsNeeded", label: "Participants Needed", type: "number", required: true },
+  { key: "deliveryTimeline", label: "Delivery Timeline", type: "date-range", required: true }
+]);
+var EQUIPMENT_SHARING_ATTRIBUTES = attrs([
+  { key: "assetDescription", label: "Asset Description", type: "text", required: true, maxLength: 150 },
+  { key: "assetType", label: "Equipment Type", type: "select", required: true, options: ["Heavy Equipment", "Vehicles", "Tools", "Technology", "Facility", "Other"] },
+  { key: "assetLocation", label: "Location", type: "text", required: true },
+  { key: "availability", label: "Availability", type: "date-range", required: true },
+  { key: "usageSchedule", label: "Usage Terms", type: "select", required: true, options: ["Rotation", "Booking System", "Priority by Ownership %"] }
+]);
+var RESOURCE_SHARING_ATTRIBUTES = attrs([
+  { key: "resourceTitle", label: "Resource Title", type: "text", required: true, maxLength: 150 },
+  { key: "resourceType", label: "Resource Type", type: "select", required: true, options: ["Materials", "Equipment", "Labor", "Services", "Knowledge", "Other"] },
+  { key: "location", label: "Location", type: "text", required: true },
+  { key: "availability", label: "Availability", type: "date-range", required: true },
+  { key: "transactionType", label: "Transaction Type", type: "select", required: true, options: ["Sell", "Buy", "Rent", "Barter", "Donate"] }
+]);
+var PROFESSIONAL_HIRING_ATTRIBUTES = attrs([
+  { key: "jobTitle", label: "Role", type: "text", required: true, maxLength: 100 },
+  { key: "requiredExperience", label: "Required Experience (years)", type: "number", required: true },
+  { key: "contractDuration", label: "Duration (months)", type: "number", required: false },
+  { key: "salaryRange", label: "Rate / Salary Range", type: "currency-range", required: true },
+  { key: "requiredSkills", label: "Required Skills", type: "tags", required: true },
+  { key: "startDate", label: "Start Date", type: "date", required: true }
+]);
+var CONSULTANT_HIRING_ATTRIBUTES = attrs([
+  { key: "consultationTitle", label: "Consultation Title", type: "text", required: true, maxLength: 100 },
+  { key: "consultationType", label: "Specialty", type: "select", required: true, options: ["Legal", "Financial", "Technical", "Sustainability", "Safety", "Design", "Project Management", "Other"] },
+  { key: "scopeOfWork", label: "Engagement Type / Scope", type: "textarea", required: true, maxLength: 2e3 },
+  { key: "deliverables", label: "Deliverables", type: "tags", required: true },
+  { key: "budget", label: "Budget", type: "currency-range", required: true },
+  { key: "duration", label: "Duration", type: "number", required: true }
+]);
+var COMPETITION_RFP_ATTRIBUTES = attrs([
+  { key: "competitionTitle", label: "Competition Title", type: "text", required: true, maxLength: 150 },
+  { key: "submissionDeadline", label: "Submission Deadline", type: "date", required: true },
+  { key: "evaluationCriteria", label: "Evaluation Criteria", type: "array-objects", required: true },
+  { key: "prizeContractValue", label: "Award Terms / Prize Value", type: "currency", required: true },
+  { key: "competitionRules", label: "Competition Rules", type: "textarea", required: true, maxLength: 2e3 }
+]);
+var SUB_MODEL_REGISTRY = {
+  task_based: {
+    key: "task_based",
+    name: "Task-Based Engagement",
+    description: "Short-term collaboration for specific tasks or deliverables.",
+    modelType: "project_based",
+    mainCollaborationModel: "cash_subcontracting",
+    allowedMatchTopologies: ["one_way"],
+    allowedExchangeModes: ["cash", "hybrid", "barter"],
+    requiredFields: ["detailedScope", "requiredSkills", "duration", "startDate"],
+    recommendedFields: ["taskTitle", "taskType", "paymentTerms", "experienceLevel"],
+    attributes: TASK_BASED_ATTRIBUTES
+  },
+  consortium: {
+    key: "consortium",
+    name: "Consortium",
+    description: "Multi-party project delivery with defined member roles.",
+    modelType: "project_based",
+    mainCollaborationModel: "joint_venture",
+    allowedMatchTopologies: ["consortium"],
+    allowedExchangeModes: ["cash", "profit_sharing", "hybrid"],
+    requiredFields: ["memberRoles", "requiredMembers", "minimumRequirements"],
+    recommendedFields: ["projectTitle", "scopeDivision", "tenderDeadline"],
+    attributes: CONSORTIUM_ATTRIBUTES
+  },
+  project_jv: {
+    key: "project_jv",
+    name: "Project-Specific Joint Venture",
+    description: "JV formed for a single project with equity and governance terms.",
+    modelType: "project_based",
+    mainCollaborationModel: "joint_venture",
+    allowedMatchTopologies: ["consortium"],
+    allowedExchangeModes: ["equity", "profit_sharing", "hybrid", "cash"],
+    requiredFields: ["partnerRoles", "equitySplit", "capitalContribution", "profitDistribution"],
+    recommendedFields: ["governance", "projectTitle", "riskAllocation"],
+    attributes: PROJECT_JV_ATTRIBUTES,
+    eligibility: {
+      allowedEntityTypes: ["company"],
+      reason: "Project-Specific Joint Venture requires a company entity"
+    }
+  },
+  spv: {
+    key: "spv",
+    name: "Special Purpose Vehicle (SPV)",
+    description: "Corporate vehicle for large structured projects.",
+    modelType: "project_based",
+    mainCollaborationModel: "joint_venture",
+    allowedMatchTopologies: ["consortium"],
+    allowedExchangeModes: ["equity", "profit_sharing", "hybrid"],
+    requiredFields: ["equityStructure", "spvLegalForm", "governanceStructure"],
+    recommendedFields: ["projectValue", "debtFinancing", "regulatoryApprovals"],
+    attributes: SPV_ATTRIBUTES,
+    eligibility: {
+      allowedEntityTypes: ["company"],
+      reason: "SPV is a corporate structure available to companies only"
+    }
+  },
+  strategic_jv: {
+    key: "strategic_jv",
+    name: "Strategic Joint Venture",
+    description: "Long-horizon JV with strategic objectives.",
+    modelType: "strategic_partnership",
+    mainCollaborationModel: "joint_venture",
+    allowedMatchTopologies: ["consortium"],
+    allowedExchangeModes: ["equity", "profit_sharing", "hybrid"],
+    requiredFields: ["partnerContributions", "equitySplit", "governance"],
+    recommendedFields: ["jvName", "strategicObjective", "businessScope"],
+    attributes: STRATEGIC_JV_ATTRIBUTES,
+    eligibility: {
+      allowedEntityTypes: ["company"],
+      reason: "Strategic Joint Venture requires a company entity"
+    }
+  },
+  strategic_alliance: {
+    key: "strategic_alliance",
+    name: "Long-Term Strategic Alliance",
+    description: "Non-equity strategic collaboration and service exchange.",
+    modelType: "strategic_partnership",
+    mainCollaborationModel: "service_exchange",
+    allowedMatchTopologies: ["two_way", "one_way"],
+    allowedExchangeModes: ["barter", "hybrid", "cash"],
+    requiredFields: ["scopeOfCollaboration", "duration", "financialTerms"],
+    recommendedFields: ["allianceTitle", "allianceType", "governance"],
+    attributes: STRATEGIC_ALLIANCE_ATTRIBUTES
+  },
+  mentorship: {
+    key: "mentorship",
+    name: "Mentorship Program",
+    description: "Knowledge and career development exchange.",
+    modelType: "strategic_partnership",
+    mainCollaborationModel: "service_exchange",
+    allowedMatchTopologies: ["two_way", "one_way"],
+    allowedExchangeModes: ["barter", "cash", "hybrid"],
+    requiredFields: ["targetSkills", "duration", "mentorshipType"],
+    recommendedFields: ["mentorshipTitle", "format", "compensation"],
+    attributes: MENTORSHIP_ATTRIBUTES
+  },
+  bulk_purchasing: {
+    key: "bulk_purchasing",
+    name: "Bulk Purchasing",
+    description: "Pooled procurement across participants.",
+    modelType: "resource_pooling",
+    mainCollaborationModel: "resource_sharing",
+    allowedMatchTopologies: ["one_way", "consortium"],
+    allowedExchangeModes: ["cash", "hybrid"],
+    requiredFields: ["productService", "quantityNeeded", "participantsNeeded"],
+    recommendedFields: ["deliveryTimeline", "targetPrice"],
+    attributes: BULK_PURCHASING_ATTRIBUTES
+  },
+  equipment_sharing: {
+    key: "equipment_sharing",
+    name: "Equipment Sharing",
+    description: "Shared ownership or usage of equipment assets.",
+    modelType: "resource_pooling",
+    mainCollaborationModel: "resource_sharing",
+    allowedMatchTopologies: ["one_way", "circular"],
+    allowedExchangeModes: ["cash", "barter", "hybrid"],
+    requiredFields: ["assetType", "assetLocation", "availability", "usageSchedule"],
+    recommendedFields: ["assetDescription", "ownershipStructure"],
+    attributes: EQUIPMENT_SHARING_ATTRIBUTES
+  },
+  resource_sharing: {
+    key: "resource_sharing",
+    name: "Resource Sharing & Exchange",
+    description: "Peer resource exchange across projects.",
+    modelType: "resource_pooling",
+    mainCollaborationModel: "resource_sharing",
+    allowedMatchTopologies: ["one_way", "circular", "two_way"],
+    allowedExchangeModes: ["cash", "barter", "hybrid"],
+    requiredFields: ["resourceType", "location", "availability"],
+    recommendedFields: ["resourceTitle", "transactionType"],
+    attributes: RESOURCE_SHARING_ATTRIBUTES
+  },
+  professional_hiring: {
+    key: "professional_hiring",
+    name: "Professional Hiring",
+    description: "Hire professionals for defined roles.",
+    modelType: "hiring",
+    mainCollaborationModel: "hiring",
+    allowedMatchTopologies: ["one_way"],
+    allowedExchangeModes: ["cash", "hybrid"],
+    requiredFields: ["jobTitle", "requiredExperience", "salaryRange", "startDate"],
+    recommendedFields: ["requiredSkills", "contractDuration", "employmentType"],
+    attributes: PROFESSIONAL_HIRING_ATTRIBUTES
+  },
+  consultant_hiring: {
+    key: "consultant_hiring",
+    name: "Consultant Hiring",
+    description: "Engage consultants for scoped advisory work.",
+    modelType: "hiring",
+    mainCollaborationModel: "hiring",
+    allowedMatchTopologies: ["one_way"],
+    allowedExchangeModes: ["cash", "barter", "hybrid"],
+    requiredFields: ["consultationType", "scopeOfWork", "deliverables", "budget"],
+    recommendedFields: ["consultationTitle", "duration", "paymentTerms"],
+    attributes: CONSULTANT_HIRING_ATTRIBUTES
+  },
+  competition_rfp: {
+    key: "competition_rfp",
+    name: "Competition / RFP",
+    description: "Structured competition or request-for-proposal.",
+    modelType: "competition",
+    mainCollaborationModel: "cash_subcontracting",
+    allowedMatchTopologies: ["one_way"],
+    allowedExchangeModes: ["cash", "hybrid"],
+    requiredFields: ["submissionDeadline", "evaluationCriteria", "prizeContractValue"],
+    recommendedFields: ["competitionTitle", "competitionRules", "eligibilityCriteria"],
+    attributes: COMPETITION_RFP_ATTRIBUTES
+  }
+};
+function getSubModel(key) {
+  return SUB_MODEL_REGISTRY[key];
+}
+var MATCH_TOPOLOGY_SUBMODEL_ALIASES = /* @__PURE__ */ new Set([
+  "one_way",
+  "two_way",
+  "circular",
+  "oneway",
+  "twoway",
+  "two-way",
+  "one-way"
+]);
+var LEGACY_SUB_MODEL_ALIASES = {
+  project: "task_based",
+  shared_resources: "resource_sharing",
+  resource_pooling: "resource_sharing",
+  hiring_resource: "professional_hiring",
+  retainer: "task_based"
+};
+function isMatchTopologyValue(value) {
+  if (!value) return false;
+  const normalized = value.toLowerCase().replace(/-/g, "_");
+  return MATCH_TOPOLOGY_SUBMODEL_ALIASES.has(normalized);
+}
+function normalizeSubModelType(raw, hints) {
+  if (!raw) return void 0;
+  const normalized = raw.toLowerCase().replace(/-/g, "_").trim();
+  if (isMatchTopologyValue(normalized)) {
+    return void 0;
+  }
+  if (LEGACY_SUB_MODEL_ALIASES[normalized]) {
+    return LEGACY_SUB_MODEL_ALIASES[normalized];
+  }
+  if (normalized === "joint_venture") {
+    if (hints?.modelType === "strategic_partnership") return "strategic_jv";
+    return "project_jv";
+  }
+  return normalized;
+}
+function inferMainCollaborationModel(input) {
+  if (input.mainCollaborationModel) {
+    return input.mainCollaborationModel;
+  }
+  const sub = input.subModelType ? normalizeSubModelType(input.subModelType, input) : void 0;
+  if (sub) {
+    return getSubModel(sub)?.mainCollaborationModel;
+  }
+  const modelType = input.modelType;
+  if (modelType === "hiring") return "hiring";
+  if (modelType === "resource_pooling") return "resource_sharing";
+  if (modelType === "competition") return "cash_subcontracting";
+  if (modelType === "strategic_partnership") return "service_exchange";
+  if (modelType === "project_based") return "cash_subcontracting";
+  return void 0;
+}
+function normalizeExchangeMode(mode) {
+  if (!mode) return void 0;
+  return mode.toLowerCase().replace(/-/g, "_").trim();
+}
+function deriveMatchingTopology(input) {
+  const main = inferMainCollaborationModel(input);
+  const subKey = normalizeSubModelType(input.subModelType, input);
+  const sub = subKey ? getSubModel(subKey) : void 0;
+  const exchange = normalizeExchangeMode(input.exchangeMode);
+  if (sub?.allowedMatchTopologies.length === 1) {
+    const topology = sub.allowedMatchTopologies[0];
+    return {
+      topology,
+      reason: `${sub.name} allows ${topology} matching only`
+    };
+  }
+  if (main === "cash_subcontracting" || subKey === "task_based" || subKey === "competition_rfp") {
+    return { topology: "one_way", reason: "Cash subcontracting uses one-way need/offer matching" };
+  }
+  if (main === "resource_sharing") {
+    const transactionType = String(
+      input.collaborationAttributes?.transactionType ?? ""
+    ).toLowerCase();
+    if (transactionType === "barter" || exchange === "barter") {
+      return {
+        topology: "circular",
+        reason: "Multi-party resource barter may form circular exchange rings",
+        alternatives: ["one_way"]
+      };
+    }
+    return {
+      topology: "one_way",
+      reason: "Resource sharing defaults to one-way matching",
+      alternatives: ["circular"]
+    };
+  }
+  if (main === "service_exchange" || exchange === "barter") {
+    return { topology: "two_way", reason: "Service exchange / barter uses reciprocal two-way matching" };
+  }
+  if (main === "joint_venture" || subKey === "consortium" || subKey === "project_jv" || subKey === "spv" || subKey === "strategic_jv") {
+    return { topology: "consortium", reason: "Joint venture sub-models use consortium group formation" };
+  }
+  if (main === "hiring" || subKey === "professional_hiring" || subKey === "consultant_hiring") {
+    return {
+      topology: "one_way",
+      reason: "Hiring uses one-way matching (Application path documented separately)"
+    };
+  }
+  if (exchange === "barter") {
+    return { topology: "two_way", reason: "Barter exchange mode implies two-way matching" };
+  }
+  return { topology: "one_way", reason: "Default matching topology" };
+}
+
 // src/routing/detect-model.ts
+function mapIntent(intent) {
+  if (intent === "request") return "need";
+  return intent ?? "need";
+}
 function detectMatchingModel(opportunity) {
-  const intent = opportunity.intent ?? "request";
-  const hasNeed = intent === "request" || intent === "hybrid";
+  const intent = mapIntent(opportunity.intent);
+  const hasNeed = intent === "need" || intent === "request" || intent === "hybrid";
   const hasOffer = intent === "offer" || intent === "hybrid";
   const acceptedModes = opportunity.value_exchange?.accepted_modes ?? [];
   const isBarter = (opportunity.exchangeMode ?? "").toLowerCase() === "barter" || acceptedModes.some((mode) => String(mode).toLowerCase() === "barter");
   const memberRoles = opportunity.attributes?.memberRoles;
   const partnerRoles = opportunity.attributes?.partnerRoles;
   const hasRoles = Array.isArray(memberRoles) && memberRoles.length > 0 || Array.isArray(partnerRoles) && partnerRoles.length > 0;
-  const subModelType = (opportunity.subModelType ?? "").toLowerCase();
+  const subModelType = normalizeSubModelType(opportunity.subModelType, {
+    modelType: opportunity.modelType
+  });
+  const derived = deriveMatchingTopology({
+    mainCollaborationModel: opportunity.mainCollaborationModel,
+    modelType: opportunity.modelType,
+    subModelType: subModelType ?? opportunity.subModelType,
+    exchangeMode: opportunity.exchangeMode,
+    acceptedExchangeModes: acceptedModes.map(String),
+    collaborationAttributes: opportunity.attributes,
+    intent
+  });
   const modelList = [];
-  if (hasNeed || hasOffer) modelList.push("one_way");
-  if (isBarter && (hasNeed || hasOffer)) modelList.push("two_way");
-  if (hasRoles || subModelType === "consortium") modelList.push("consortium");
-  return modelList;
+  const preferred = opportunity.preferredMatchingTopology ?? derived.topology;
+  if (preferred) modelList.push(preferred);
+  if ((hasNeed || hasOffer) && !modelList.includes("one_way")) modelList.push("one_way");
+  if (isBarter && (hasNeed || hasOffer) && !modelList.includes("two_way")) modelList.push("two_way");
+  if ((hasRoles || subModelType === "consortium") && !modelList.includes("consortium")) {
+    modelList.push("consortium");
+  }
+  if (subModelType === "resource_sharing" || subModelType === "equipment_sharing") {
+    if (!modelList.includes("circular")) modelList.push("circular");
+  }
+  return modelList.length > 0 ? modelList : ["one_way"];
 }
 
 // src/routing/rank-matches.ts

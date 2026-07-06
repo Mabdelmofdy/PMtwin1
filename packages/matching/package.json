@@ -24,6 +24,9 @@
     "type-check": "tsc --noEmit",
     "test": "npm run build && node --test tests/**/*.test.js"
   },
+  "dependencies": {
+    "@pm-twin/collaboration-models": "file:../collaboration-models"
+  },
   "devDependencies": {
     "esbuild": "^0.25.0",
     "typescript": "~6.0.2"
