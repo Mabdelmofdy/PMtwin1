@@ -14,6 +14,7 @@ export type EnvironmentContext = {
   namespace: string | null
   storageAdapter: IStorageAdapter
   canRestoreScenario: boolean
+  canExportEnvironment: boolean
 }
 
 function resolveEnvironmentContext(): EnvironmentContext {
@@ -29,6 +30,7 @@ function resolveEnvironmentContext(): EnvironmentContext {
     namespace,
     storageAdapter,
     canRestoreScenario: runtimeMode === 'demo' || runtimeMode === 'uat',
+    canExportEnvironment: runtimeMode === 'demo' || runtimeMode === 'uat',
   }
 }
 

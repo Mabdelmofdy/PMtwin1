@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import {
   buildEnvironmentMetadataSnapshot,
+  canRenderEnvironmentExportControls,
   canRenderScenarioRestoreControls,
 } from '@/components/admin/environment-management-panel.tsx'
 
@@ -20,6 +21,12 @@ describe('EnvironmentManagementPanel helpers', () => {
     assert.equal(canRenderScenarioRestoreControls('production'), false)
     assert.equal(canRenderScenarioRestoreControls('demo'), true)
     assert.equal(canRenderScenarioRestoreControls('uat'), true)
+  })
+
+  it('hides export controls in production mode', () => {
+    assert.equal(canRenderEnvironmentExportControls('production'), false)
+    assert.equal(canRenderEnvironmentExportControls('demo'), true)
+    assert.equal(canRenderEnvironmentExportControls('uat'), true)
   })
 })
 

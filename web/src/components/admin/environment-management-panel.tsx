@@ -16,6 +16,10 @@ import {
   restoreDemoScenario,
 } from '@/infrastructure/environment/environment-scenario-restore-service.ts'
 import {
+  exportEnvironmentData,
+  serializeEnvironmentExportPayload,
+} from '@/infrastructure/environment/environment-export-service.ts'
+import {
   loadApplications,
   loadContracts,
   loadNegotiations,
@@ -27,6 +31,7 @@ import { adminApi } from '@/api/admin.ts'
 import { dealsApi } from '@/api/deals.ts'
 import { peopleApi } from '@/api/people.ts'
 import { formatDate } from '@/lib/format'
+import { useAuth } from '@/providers/auth-provider.tsx'
 
 export type EnvironmentMetadataSnapshot = {
   runtimeMode: string
@@ -66,11 +71,29 @@ export function canRenderScenarioRestoreControls(
   return runtimeMode === 'demo' || runtimeMode === 'uat'
 }
 
+export function canRenderEnvironmentExportControls(
+  runtimeMode: string = environmentContext.runtimeMode,
+): boolean {
+  return runtimeMode === 'demo' || runtimeMode === 'uat'
+}
+
+function downloadEnvironmentExportFile(payload: ReturnType<typeof exportEnvironmentData>): void {
+  const serialized = serializeEnvironmentExportPayload(payload)
+  const blob = new Blob([serialized], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = `pmtwin-${payload.metadata.runtimeMode}-export-${payload.metadata.exportedAt.replace(/[:.]/g, '-')}.json`
+  anchor.click()
+  URL.revokeObjectURL(url)
+}
+
 function mapScenarioOption(scenario: DemoScenarioDefinition): { value: string; label: string } {
   return { value: scenario.id, label: scenario.title }
 }
 
 export function EnvironmentManagementPanel() {
+  const { user } = useAuth()
   const scenarioRegistry = useMemo(() => getDemoScenarioRegistry(), [])
   const scenarioOptions = useMemo(
     () => scenarioRegistry.map(mapScenarioOption),
@@ -81,6 +104,7 @@ export function EnvironmentManagementPanel() {
     activeScenario?.scenarioId ?? scenarioOptions[0]?.value ?? '',
   )
   const [isRestoring, setIsRestoring] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
 
   const metadata = buildEnvironmentMetadataSnapshot()
 
@@ -100,6 +124,26 @@ export function EnvironmentManagementPanel() {
       })
     } finally {
       setIsRestoring(false)
+    }
+  }
+
+  function handleExportEnvironment() {
+    if (isExporting) return
+    if (!canRenderEnvironmentExportControls()) return
+
+    setIsExporting(true)
+    try {
+      const payload = exportEnvironmentData(user?.email ?? user?.id ?? 'admin')
+      downloadEnvironmentExportFile(payload)
+      toast.success('Environment exported', {
+        description: `Exported ${environmentContext.runtimeMode.toUpperCase()} namespace data.`,
+      })
+    } catch (error) {
+      toast.error('Environment export failed', {
+        description: error instanceof Error ? error.message : 'Unexpected export error.',
+      })
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -158,13 +202,22 @@ export function EnvironmentManagementPanel() {
                 </option>
               ))}
             </select>
-            <PmButton onClick={handleRestoreScenario} disabled={isRestoring || !selectedScenarioId}>
-              {isRestoring ? 'Restoring scenario…' : 'Restore Selected Scenario'}
-            </PmButton>
+            <div className="flex flex-wrap gap-3">
+              <PmButton onClick={handleRestoreScenario} disabled={isRestoring || !selectedScenarioId}>
+                {isRestoring ? 'Restoring scenario…' : 'Restore Selected Scenario'}
+              </PmButton>
+              <PmButton
+                variant="outline"
+                onClick={handleExportEnvironment}
+                disabled={isExporting}
+              >
+                {isExporting ? 'Exporting…' : 'Export Environment Data'}
+              </PmButton>
+            </div>
           </div>
         ) : (
           <PmBadge tone="warning">
-            Scenario restore controls are hidden in production runtime.
+            Scenario restore and export controls are hidden in production runtime.
           </PmBadge>
         )}
       </div>

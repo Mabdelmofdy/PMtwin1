@@ -48,6 +48,7 @@ function createDemoContext(localStorage: MemoryLocalStorage): EnvironmentContext
     namespace: 'PMTWIN_DEMO_',
     storageAdapter: new NamespacedStorageAdapter(new LocalStorageAdapter(), 'PMTWIN_DEMO_'),
     canRestoreScenario: true,
+    canExportEnvironment: true,
   }
 }
 
