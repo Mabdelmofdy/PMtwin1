@@ -1,4 +1,6 @@
 import { localStorageAdapter } from '@/infrastructure/storage/local-storage-adapter.ts'
+import { environmentContext } from '@/infrastructure/environment/environment-context.ts'
+import { ensureEnvironmentBootstrap } from '@/infrastructure/environment/environment-bootstrap-service.ts'
 import {
   loadOpportunities,
   loadUsers,
@@ -32,75 +34,82 @@ import { NotificationRepository } from './notification-repository.ts'
 import { AuditRepository } from './audit-repository.ts'
 import { ProductLanguageSettingsRepository } from './product-language-settings-repository.ts'
 
+const runtimeMode = environmentContext.runtimeMode
+const storageAdapter = environmentContext.storageAdapter ?? localStorageAdapter
+
+if (runtimeMode === 'demo' || runtimeMode === 'uat') {
+  ensureEnvironmentBootstrap(storageAdapter, runtimeMode)
+}
+
 export const userRepository = new UserRepository(
-  localStorageAdapter,
+  storageAdapter,
   loadUsers,
 )
 
 export const companyRepository = new CompanyRepository(
-  localStorageAdapter,
+  storageAdapter,
   loadCompanies,
 )
 
 export const opportunityRepository = new OpportunityRepository(
-  localStorageAdapter,
+  storageAdapter,
   loadOpportunities,
 )
 
 export const applicationRepository = new ApplicationRepository(
-  localStorageAdapter,
+  storageAdapter,
   loadApplications,
 )
 
 export const commercialAgreementRepository = new CommercialAgreementRepository(
-  localStorageAdapter,
+  storageAdapter,
   loadCommercialAgreements,
 )
 /** @deprecated Use commercialAgreementRepository */
 export const dealRepository = commercialAgreementRepository
 
 export const postMatchRepository = new PostMatchRepository(
-  localStorageAdapter,
+  storageAdapter,
   loadPostMatches,
 )
 
 export const negotiationRepository = new NegotiationRepository(
-  localStorageAdapter,
+  storageAdapter,
   loadNegotiations,
 )
 
 export const negotiationMessageRepository = new NegotiationMessageRepository(
-  localStorageAdapter,
+  storageAdapter,
   loadNegotiationMessages,
 )
 
 export const negotiationOfferRepository = new NegotiationOfferRepository(
-  localStorageAdapter,
+  storageAdapter,
   loadNegotiationOffers,
 )
 
 export const negotiationTranscriptRepository = new NegotiationTranscriptRepository(
-  localStorageAdapter,
+  storageAdapter,
   loadNegotiationTranscriptEvents,
 )
 
 export const contractRepository = new ContractRepository(
-  localStorageAdapter,
+  storageAdapter,
   loadContracts,
 )
 
 export const notificationRepository = new NotificationRepository(
-  localStorageAdapter,
+  storageAdapter,
   loadNotifications,
 )
 
 export const auditRepository = new AuditRepository(
-  localStorageAdapter,
+  storageAdapter,
   loadAuditLog,
 )
 
 export const productLanguageSettingsRepository = new ProductLanguageSettingsRepository(
-  localStorageAdapter,
+  storageAdapter,
 )
 
 export {

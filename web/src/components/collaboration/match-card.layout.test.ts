@@ -21,8 +21,9 @@ describe('MatchCard layout contract', () => {
     assert.match(metadataBlock, /<PmWorkflowBadge status=\{match\.status\}/)
   })
 
-  it('exposes single primary Open match action', () => {
-    assert.match(source, /primary=\{\{ label: 'Open match', href \}\}/)
+  it('exposes single primary action from product language', () => {
+    assert.match(source, /import \{ PRODUCT_LANGUAGE \} from ['"]@\/lib\/product-language['"]/)
+    assert.match(source, /primary=\{\{ label: PRODUCT_LANGUAGE\.OPEN_MATCH, href \}\}/)
   })
 
   it('supports optional shortened browse titles', () => {

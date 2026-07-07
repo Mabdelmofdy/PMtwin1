@@ -55,6 +55,7 @@ import { AdminStatusBadge } from '@/pages/admin/admin-display'
 import { pmTypography, resolveMatchTypeStyle } from '@/tokens'
 import { cn } from '@/lib/utils'
 import { useProductLanguage } from '@/providers/product-language-provider.tsx'
+import { EnvironmentManagementPanel } from '@/components/admin/environment-management-panel.tsx'
 
 type AdminFunnelStage = {
   readonly id: string
@@ -797,19 +798,22 @@ export function AdminSettingsPage() {
         />
       }
     >
-      <PmForm onSubmit={(e) => e.preventDefault()} readOnly>
-        <PmFormSection
-          title="General"
-          description="Vertical settings tabs — wire to system_settings."
-        >
-          <p className="text-sm text-muted-foreground">
-            Settings form migration placeholder. Connect fields when backend wiring is ready.
-          </p>
-        </PmFormSection>
-        <PmFormSection title="Security" description="Authentication and access policies.">
-          <p className="text-sm text-muted-foreground">Read-only until settings API is connected.</p>
-        </PmFormSection>
-      </PmForm>
+      <div className="space-y-6">
+        <EnvironmentManagementPanel />
+        <PmForm onSubmit={(e) => e.preventDefault()} readOnly>
+          <PmFormSection
+            title="General"
+            description="Vertical settings tabs — wire to system_settings."
+          >
+            <p className="text-sm text-muted-foreground">
+              Settings form migration placeholder. Connect fields when backend wiring is ready.
+            </p>
+          </PmFormSection>
+          <PmFormSection title="Security" description="Authentication and access policies.">
+            <p className="text-sm text-muted-foreground">Read-only until settings API is connected.</p>
+          </PmFormSection>
+        </PmForm>
+      </div>
     </PmPage>
   )
 }

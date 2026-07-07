@@ -76,6 +76,17 @@ describe('evaluateAdminRouteAccess', () => {
     )
   })
 
+  it('direct /admin/settings URL blocked for non-admin', () => {
+    assert.equal(
+      evaluateAdminRouteAccess({
+        isLoading: false,
+        isAuthenticated: true,
+        userRole: 'professional',
+      }),
+      'access-denied',
+    )
+  })
+
   it('returns loading while auth restores', () => {
     assert.equal(
       evaluateAdminRouteAccess({
