@@ -58,6 +58,7 @@ import {
   PmMoreActions,
   PmWorkflowBadge,
   PmWorkflowLinksCard,
+  PmFilterChips,
   buildContractWorkflowSteps,
   type PmMoreActionItem,
 } from '@/components/ui/pm-index'
@@ -79,6 +80,10 @@ import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import { PmTechnicalDetails } from '@/components/ui/pm-technical-details.tsx'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { formatCollaborationExchangeMode } from '@/lib/collaboration-taxonomy-display.ts'
+import { useProductLanguage } from '@/providers/product-language-provider'
+import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'
+import { ExecutiveEntityMetadata } from '@/components/shared/executive-entity-metadata'
+import { useExecutiveListFilters } from '@/lib/executive-list-filters'
 
 function buildContractRecommendedAction(
   model: NonNullable<ReturnType<typeof buildContractDetailReadModel>>,
@@ -161,12 +166,20 @@ function buildContractNavMoreItems(model: NonNullable<ReturnType<typeof buildCon
 function ContractListCard({ contract }: { contract: Contract }) {
   const title = resolveContractListTitle(contract)
   const deal = contract.dealId ? dealsApi.get(contract.dealId) : undefined
+  const relatedOpportunity = deal?.needOpportunityId
+    ? opportunitiesApi.get(deal.needOpportunityId)
+    : deal?.offerOpportunityId
+      ? opportunitiesApi.get(deal.offerOpportunityId)
+      : undefined
+  const taxonomy = relatedOpportunity
+    ? resolveOpportunityTaxonomyLabels(relatedOpportunity)
+    : null
   return (
     <PmEntityListCard
       title={title}
       href={`/contracts/${contract.id}`}
       badge={<PmWorkflowBadge status={contract.status} entity="contract" size="sm" />}
-      meta={`${deal?.title ?? 'Collaboration deal'} · Updated ${formatDate(contract.updatedAt)}`}
+      meta={`${taxonomy?.mainModel ?? deal?.title ?? 'Collaboration deal'} · ${taxonomy?.exchangeMode ?? '—'} · Updated ${formatDate(contract.updatedAt)}`}
       primary={{ label: 'Open contract', href: `/contracts/${contract.id}` }}
     />
   )
@@ -175,11 +188,13 @@ function ContractListCard({ contract }: { contract: Contract }) {
 export function ContractsPage() {
   const navigate = useNavigate()
   const { user, canAccessAdmin } = useAuth()
-  const [search, setSearch] = useState('')
-  const [status, setStatus] = useState('all')
-  const [paymentMode, setPaymentMode] = useState('all')
+  const filters = useExecutiveListFilters('contracts', {
+    statusLabel: (value) => value.replace(/_/g, ' '),
+    modeLabel: (value) => formatCollaborationExchangeMode(value),
+  })
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
+  const { productLanguage } = useProductLanguage()
   const viewer = useMemo(
     () =>
       buildViewerContext({
@@ -199,15 +214,15 @@ export function ContractsPage() {
 
   const filtered = useMemo(() => {
     return contracts.filter((c) => {
-      const q = search.toLowerCase()
+      const q = filters.search.toLowerCase()
       const title = resolveContractListTitle(c).toLowerCase()
       const dealTitle = c.dealId ? dealsApi.get(c.dealId)?.title?.toLowerCase() ?? '' : ''
-      const matchesSearch = !search || title.includes(q) || dealTitle.includes(q)
-      const matchesStatus = status === 'all' || c.status === status
-      const matchesPaymentMode = paymentMode === 'all' || c.paymentMode === paymentMode
+      const matchesSearch = !filters.search || title.includes(q) || dealTitle.includes(q)
+      const matchesStatus = filters.status === 'all' || c.status === filters.status
+      const matchesPaymentMode = filters.mode === 'all' || c.paymentMode === filters.mode
       return matchesSearch && matchesStatus && matchesPaymentMode
     })
-  }, [contracts, search, status, paymentMode])
+  }, [contracts, filters.search, filters.status, filters.mode])
 
   const totalItems = filtered.length
   const pageCount = Math.max(1, Math.ceil(totalItems / pageSize))
@@ -216,10 +231,11 @@ export function ContractsPage() {
 
   const listEmpty = resolveListEmptyState({
     hasSourceData: contracts.length > 0,
-    hasActiveFilters: search.length > 0 || status !== 'all' || paymentMode !== 'all',
+    hasActiveFilters:
+      filters.search.length > 0 || filters.status !== 'all' || filters.mode !== 'all',
     firstRun: {
       title: 'No contracts yet',
-      description: 'Contracts are created from commercial agreements in draft, review, or signing.',
+      description: 'These records are created from commercial agreements in draft, review, or signing.',
     },
     filtered: {
       title: 'No contracts match your search',
@@ -230,7 +246,7 @@ export function ContractsPage() {
   const columns: PmDataTableColumn<Contract>[] = [
     {
       id: 'title',
-      label: 'Contract',
+      label: 'Record',
       cell: (c) => (
         <Link to={`/contracts/${c.id}`} className={cn(pmTypography.bodySm, 'font-medium hover:text-primary')}>
           {resolveContractListTitle(c)}
@@ -239,7 +255,7 @@ export function ContractsPage() {
     },
     {
       id: 'deal',
-      label: 'Deal',
+      label: 'Source record',
       cell: (c) => {
         const deal = c.dealId ? dealsApi.get(c.dealId) : undefined
         return deal?.title ?? '—'
@@ -249,6 +265,29 @@ export function ContractsPage() {
       id: 'status',
       label: 'Status',
       cell: (c) => <PmWorkflowBadge status={c.status} entity="contract" />,
+    },
+    {
+      id: 'business',
+      label: 'Business context',
+      cell: (c) => {
+        const deal = c.dealId ? dealsApi.get(c.dealId) : undefined
+        const opportunity = deal?.needOpportunityId
+          ? opportunitiesApi.get(deal.needOpportunityId)
+          : deal?.offerOpportunityId
+            ? opportunitiesApi.get(deal.offerOpportunityId)
+            : undefined
+        const taxonomy = opportunity ? resolveOpportunityTaxonomyLabels(opportunity) : null
+        return (
+          <ExecutiveEntityMetadata
+            mainModel={taxonomy?.mainModel}
+            subModel={taxonomy?.subModel}
+            exchangeMode={taxonomy?.exchangeMode}
+            topology={taxonomy?.matchingTopology}
+            status={c.status}
+            readiness={c.parties?.length ? `${c.parties.filter((party) => party.signedAt).length}/${c.parties.length} signed` : undefined}
+          />
+        )
+      },
     },
     {
       id: 'updated',
@@ -262,11 +301,11 @@ export function ContractsPage() {
       header={
         <PmPageHeader
           label="My Workspace"
-          title="My contracts"
+          title={`My ${productLanguage.plural('contract').toLowerCase()}`}
           description={
             contracts.length
               ? 'Agreements you own — pending signature, active, and completed.'
-              : 'Contracts assigned to you for signature and execution.'
+              : 'Records assigned to you for signature and execution.'
           }
           tone="contract"
           metric={<PmPageHeroMetric value={activeContracts} label="Active" />}
@@ -286,17 +325,23 @@ export function ContractsPage() {
             <PmTableToolbar
               search={
                 <PmTableSearch
-                  placeholder="Search contract or deal ID…"
-                  value={search}
+                  placeholder={`Search ${productLanguage.label('contract').toLowerCase()} or ${productLanguage.label('commercialAgreement').toLowerCase()} ID…`}
+                  value={filters.search}
                   onValueChange={(v) => {
-                    setSearch(v)
+                    filters.setSearch(v)
                     setPage(1)
                   }}
                 />
               }
               filters={
                 <div className="grid w-56 gap-2">
-                  <Select value={status} onValueChange={setStatus}>
+                  <Select
+                    value={filters.status}
+                    onValueChange={(value) => {
+                      filters.setStatus(value)
+                      setPage(1)
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -309,7 +354,13 @@ export function ContractsPage() {
                       <SelectItem value="terminated">Terminated</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select value={paymentMode} onValueChange={setPaymentMode}>
+                  <Select
+                    value={filters.mode}
+                    onValueChange={(value) => {
+                      filters.setMode(value)
+                      setPage(1)
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -324,7 +375,9 @@ export function ContractsPage() {
                   </Select>
                 </div>
               }
-            />
+            >
+              <PmFilterChips chips={filters.chips} onClearAll={() => filters.clearAll()} />
+            </PmTableToolbar>
           </PmBrowseToolbar>
         ) : undefined
       }
@@ -360,7 +413,7 @@ export function ContractsPage() {
           columns={columns}
           data={paged}
           getRowId={(c) => c.id}
-          caption="Contracts"
+          caption={productLanguage.plural('contract')}
           rowActions={(c) => (
             <PmTableRowActions
               onView={() => navigate(`/contracts/${c.id}`)}
@@ -378,9 +431,7 @@ export function ContractsPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => {
-                      setSearch('')
-                      setStatus('all')
-                      setPaymentMode('all')
+                      filters.clearAll()
                       setPage(1)
                     }}
                   >
@@ -400,6 +451,7 @@ export function ContractsPage() {
 export function ContractDetailPage() {
   const version = useDataStoreVersion()
   const { user, canAccessAdmin } = useAuth()
+  const { productLanguage } = useProductLanguage()
   const { id } = useParams()
 
   const viewer = useMemo(
@@ -434,11 +486,11 @@ export function ContractDetailPage() {
   if (!id || !model) {
     return (
       <PmPage
-        header={<PmPageHeader title="Contract" description="Contract summary." />}
+        header={<PmPageHeader title={productLanguage.label('contract')} description={`${productLanguage.label('contract')} summary.`} />}
       >
         <PmEmptyState
-          title="Contract not found"
-          description="This contract may have been removed or the link is invalid."
+          title={`${productLanguage.label('contract')} not found`}
+          description={`This ${productLanguage.label('contract').toLowerCase()} may have been removed or the link is invalid.`}
         />
       </PmPage>
     )
@@ -446,10 +498,10 @@ export function ContractDetailPage() {
 
   if (!canViewContractDetail(model.contract, viewer)) {
     return (
-      <PmPage header={<PmPageHeader title="Access denied" description="Contract summary." />}>
+      <PmPage header={<PmPageHeader title="Access denied" description={`${productLanguage.label('contract')} summary.`} />}>
         <EntityAccessDenied
           entity="contract"
-          description="Contract details are only visible to parties or authorized platform staff."
+          description={`${productLanguage.label('contract')} details are only visible to parties or authorized platform staff.`}
         />
       </PmPage>
     )
@@ -461,7 +513,7 @@ export function ContractDetailPage() {
   const timelineEvents: CollaborationTimelineEvent[] = [
     {
       id: 'created',
-      label: 'Contract created',
+      label: `${productLanguage.label('contract')} created`,
       timestamp: formatDate(model.contract.createdAt),
       status: 'done',
     },
@@ -511,7 +563,7 @@ export function ContractDetailPage() {
     <PmPage
       header={
         <PmPageHeader
-          label="Contract"
+          label={productLanguage.label('contract')}
           title={formatContractDisplayTitle({
             dealTitle: model.dealTitle,
             needTitle: model.needTitle,
@@ -573,7 +625,7 @@ export function ContractDetailPage() {
             <PmContentCard title="Summary">
               <PmFormReadonly>
                 <PmFormReadonlySection>
-                  <PmFormReadonlyField label="Deal" value={model.dealTitle} />
+                  <PmFormReadonlyField label="Source record" value={model.dealTitle} />
                   <PmFormReadonlyField label="Need" value={model.needTitle} />
                   <PmFormReadonlyField label="Offer" value={model.offerTitle} />
                 </PmFormReadonlySection>
@@ -581,10 +633,10 @@ export function ContractDetailPage() {
               <PmTechnicalDetails className="mt-4">
                 <PmFormReadonly>
                   <PmFormReadonlySection>
-                    <PmFormReadonlyField label="Contract reference" value={model.contractId} />
+                    <PmFormReadonlyField label="Primary reference" value={model.contractId} />
                     <PmFormReadonlyField label="Commercial agreement reference" value={model.dealId} />
                     <PmFormReadonlyField label="Match reference" value={model.postMatchId} />
-                    <PmFormReadonlyField label="Negotiation reference" value={model.negotiationId} />
+                    <PmFormReadonlyField label="Linked workflow reference" value={model.negotiationId} />
                   </PmFormReadonlySection>
                 </PmFormReadonly>
               </PmTechnicalDetails>
@@ -672,7 +724,7 @@ export function ContractDetailPage() {
           <CollaborationTimeline
             activeStep={collaborationStep}
             events={timelineEvents}
-            title="Contract timeline"
+            title={`${productLanguage.label('contract')} timeline`}
           />
         }
       />

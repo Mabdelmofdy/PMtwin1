@@ -146,6 +146,30 @@ export const mainNavigation: NavGroup[] = [
         preview: true,
         keywords: ['map', 'geo', 'location', 'discover'],
       },
+      {
+        title: 'Portfolio intelligence',
+        href: '/intelligence/portfolio',
+        icon: ChartBar,
+        keywords: ['intelligence', 'portfolio', 'kpi'],
+      },
+      {
+        title: 'Funnel intelligence',
+        href: '/intelligence/funnel',
+        icon: Sparkles,
+        keywords: ['conversion', 'funnel', 'quality'],
+      },
+      {
+        title: 'Risk intelligence',
+        href: '/intelligence/risk',
+        icon: ShieldAlert,
+        keywords: ['risk', 'blockers', 'escalation'],
+      },
+      {
+        title: 'Execution intelligence',
+        href: '/intelligence/execution',
+        icon: Activity,
+        keywords: ['execution', 'delivery', 'contracts'],
+      },
     ],
   },
   {
@@ -301,4 +325,9 @@ export const routeLabels: Record<string, string> = {
   register: 'Register',
   'forgot-password': 'Forgot password',
   'reset-password': 'Reset password',
+  intelligence: 'Intelligence',
+  portfolio: 'Portfolio',
+  funnel: 'Funnel',
+  risk: 'Risk',
+  execution: 'Execution',
 }

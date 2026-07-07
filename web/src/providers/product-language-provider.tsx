@@ -14,6 +14,7 @@ import {
   productLanguage,
 } from '@/lib/product-language.ts'
 import { canManageProductLanguageForRole } from '@/domain/rbac/admin-access.ts'
+import { updateProductLanguageSettings } from '@/services/product-language-settings-service.ts'
 import type { ProductLanguageSettings } from '@/types/domain.ts'
 import type {
   ProductLanguageLocale,
@@ -49,12 +50,14 @@ export function ProductLanguageProvider({ children }: { children: ReactNode }) {
   const updateSettings = useCallback(
     (overrides: ProductLanguageOverrides) => {
       if (!user?.id || !canEdit) return null
-      const updated = productLanguageSettingsRepository.upsert({
+      const updated = updateProductLanguageSettings({
         tenantId,
         locale,
         overrides,
         updatedBy: user.id,
+        role: user.role,
       })
+      if (!updated) return null
       configureProductLanguageRuntime({
         locale,
         tenantId,

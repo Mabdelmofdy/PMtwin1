@@ -18,6 +18,7 @@ import type { PostMatch } from '@/types/domain.ts'
 import { cn } from '@/lib/utils'
 import { collectPostMatchOpportunityIds } from '@/domain/normalized/post-match-strong-key.ts'
 import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'
+import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 
 const MATCH_TYPE_ICONS: Record<string, LucideIcon> = {
   one_way: ArrowRight,
@@ -160,7 +161,7 @@ export function MatchCard({
       </div>
 
       {showActions ? (
-        <PmCardActions className="mt-4" primary={{ label: 'Open match', href }} />
+        <PmCardActions className="mt-4" primary={{ label: PRODUCT_LANGUAGE.OPEN_MATCH, href }} />
       ) : null}
     </PmSurface>
   )

@@ -213,7 +213,7 @@ export function AdminDashboardPage() {
             <PmStatCard label="Incomplete" value={readinessAnalytics.profiles.incomplete} dense />
           </PmMetricGrid>
         </PmContentCard>
-        <PmContentCard title="Opportunities">
+        <PmContentCard title={productLanguage.plural('opportunity')}>
           <PmMetricGrid columns={3}>
             <PmStatCard label="Total opportunities" value={readinessAnalytics.opportunities.total} dense />
             <PmStatCard label="Average score" value={`${Math.round(readinessAnalytics.opportunities.averageScore)}%`} dense />
@@ -239,7 +239,7 @@ export function AdminDashboardPage() {
         />
         <PmStatCard
           label="Average opportunity readiness"
-          value={`${Math.round(matchingQuality.averageOpportunityReadiness)}%`}
+          value={Math.round(matchingQuality.averageOpportunityReadiness).toString() + '%'}
           dense
         />
         <PmStatCard
@@ -270,14 +270,14 @@ export function AdminDashboardPage() {
             },
             {
               id: 'negotiations',
-              label: 'Negotiations',
+              label: productLanguage.plural('negotiation'),
               count: matchingQuality.negotiationsStarted,
               rate: matchingQuality.negotiationRate,
               hint: `${Math.round(matchingQuality.negotiationRate)}% of accepted matches`,
             },
             {
               id: 'deals',
-              label: 'Deals',
+              label: productLanguage.plural('commercialAgreement'),
               count: matchingQuality.dealsCreated,
               rate: matchingQuality.dealConversionRate,
               hint: `${Math.round(matchingQuality.dealConversionRate)}% of negotiations`,
@@ -633,7 +633,7 @@ export function AdminNegotiationsPage() {
   return (
     <AdminListPage
       title={productLanguage.plural('negotiation')}
-      description="Negotiation command center."
+      description={`${productLanguage.label('negotiation')} command center.`}
       data={negs}
       getRowId={(n) => n.id}
       getRowHref={(n) => `/admin/negotiations/${n.id}`}
@@ -654,18 +654,19 @@ export function AdminNegotiationsPage() {
 }
 
 export function AdminNegotiationDetailPage() {
+  const { productLanguage } = useProductLanguage()
   return (
     <PmPage
       header={
         <PmPageHeader
-          title="Negotiation detail"
+          title={`${productLanguage.label('negotiation')} detail`}
           description="Admin inspector with transcript export."
         />
       }
     >
       <PmContentCard>
         <p className="text-sm text-muted-foreground">
-          Negotiation inspector — wire transcript export on migration.
+          {`${productLanguage.label('negotiation')} inspector — wire transcript export on migration.`}
         </p>
       </PmContentCard>
     </PmPage>

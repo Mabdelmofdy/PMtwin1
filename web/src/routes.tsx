@@ -32,6 +32,12 @@ import {
   OpportunitiesPage,
 } from '@/pages/workspace/opportunities-pages'
 import { MarketplaceHomePage } from '@/pages/workspace/marketplace-home-page'
+import {
+  IntelligenceExecutionPage,
+  IntelligenceFunnelPage,
+  IntelligencePortfolioPage,
+  IntelligenceRiskPage,
+} from '@/pages/workspace/intelligence-pages'
 import { OpportunityDetailPage } from '@/pages/workspace/opportunity-detail-page'
 import {
   MatchDetailPage,
@@ -128,6 +134,10 @@ export function AppRoutes() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/company-dashboard" element={<DashboardPage />} />
         <Route path="/marketplace" element={<MarketplaceHomePage />} />
+        <Route path="/intelligence/portfolio" element={<IntelligencePortfolioPage />} />
+        <Route path="/intelligence/funnel" element={<IntelligenceFunnelPage />} />
+        <Route path="/intelligence/risk" element={<IntelligenceRiskPage />} />
+        <Route path="/intelligence/execution" element={<IntelligenceExecutionPage />} />
 
         <Route path="/opportunities" element={<OpportunitiesPage />} />
         <Route path="/opportunities/map" element={<OpportunityMapPage />} />

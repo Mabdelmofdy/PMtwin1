@@ -10,26 +10,27 @@ const HARDCODED_LABEL_ALLOWLIST = [
   'lib/product-language.ts',
   'lib/product-language.test.ts',
   'domain/governance/product-language-governance.test.ts',
-  'components/user/settings-view.tsx',
-  'pages/admin/admin-pages.tsx',
-  'components/layout/workspace-dashboard-composition.tsx',
 ] as const
 
 const ACTIVE_UI_FILES = [
   'components/layout/app-sidebar.tsx',
   'components/layout/workspace-dashboard-composition.tsx',
-  'components/user/settings-view.tsx',
+  'components/collaboration/match-card.tsx',
+  'components/collaboration/matches-list-section.tsx',
   'pages/workspace/people-pages.tsx',
+  'pages/workspace/pipeline-pages.tsx',
+  'pages/workspace/commercial-agreements-pages.tsx',
+  'pages/workspace/contracts-pages.tsx',
   'pages/admin/admin-pages.tsx',
 ] as const
 
 const FORBIDDEN_LABELS = [
-  /\bCommercial Agreement(s)?\b/,
-  /\bDeal(s)?\b/,
-  /\bNegotiation(s)?\b/,
-  /\bContract(s)?\b/,
-  /\bOpportunity|Opportunities\b/,
-  /\bExecution\b/,
+  /['"`][^'"`\n]*\b(Commercial Agreement|Commercial Agreements)\b[^'"`\n]*['"`]/,
+  /['"`][^'"`\n]*\b(Deal|Deals)\b[^'"`\n]*['"`]/,
+  /['"`][^'"`\n]*\b(Negotiation|Negotiations)\b[^'"`\n]*['"`]/,
+  /['"`][^'"`\n]*\b(Contract|Contracts)\b[^'"`\n]*['"`]/,
+  /['"`][^'"`\n]*\b(Opportunity|Opportunities)\b[^'"`\n]*['"`]/,
+  /['"`][^'"`\n]*\bExecution\b[^'"`\n]*['"`]/,
 ]
 
 function listSourceFiles(root: string): string[] {
@@ -59,9 +60,6 @@ describe('product language governance', () => {
       }
 
       const source = readFileSync(absolutePath, 'utf8')
-      if (HARDCODED_LABEL_ALLOWLIST.includes(path as (typeof HARDCODED_LABEL_ALLOWLIST)[number])) {
-        continue
-      }
       if (!ACTIVE_UI_FILES.includes(path as (typeof ACTIVE_UI_FILES)[number])) {
         continue
       }

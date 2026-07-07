@@ -33,6 +33,8 @@ describe('CommercialAgreementsPage browse layout contract', () => {
     assert.match(pageSource, /<PmTableSearch/)
     assert.match(pageSource, /<PmDataTable/)
     assert.match(pageSource, /resolveListEmptyState/)
+    assert.match(pageSource, /useExecutiveListFilters/)
+    assert.match(pageSource, /PmFilterChips/)
   })
 
   it('keeps row actions and mobile list card navigation', () => {
@@ -48,5 +50,6 @@ describe('CommercialAgreementsPage browse layout contract', () => {
     )
     assert.match(source, /function CommercialAgreementListCard/)
     assert.match(source, /href=\{`\/commercial-agreements\/\$\{commercialAgreement\.id\}`\}/)
+    assert.match(source, /ExecutiveEntityMetadata/)
   })
 })

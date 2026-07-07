@@ -107,6 +107,11 @@ import {
 import { MatchTopologyDiagram } from '@/components/need-offer/need-offer-framework-panels'
 import { formatFrameworkMatchTypeSubtitle } from '@/config/need-offer-framework.ts'
 import { PRODUCT_LANGUAGE } from '@/lib/product-language'
+import { useProductLanguage } from '@/providers/product-language-provider'
+import { useExecutiveListFilters } from '@/lib/executive-list-filters'
+import { PmFilterChips } from '@/components/ui/pm-filter-chips'
+import { ExecutiveEntityMetadata } from '@/components/shared/executive-entity-metadata'
+import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'
 
 function resolveMatchNegotiation(match: PostMatch): Negotiation | undefined {
   if (match.negotiationId) {
@@ -339,7 +344,7 @@ function buildNegotiationRecommendedAction(input: {
 }
 
 const PIPELINE_TAB_DEFS = [
-  { value: 'opportunities', label: 'Opportunities' },
+  { value: 'opportunities', label: 'Workspace items' },
   { value: 'matches', label: 'Matches' },
   { value: 'applications', label: 'Applications (legacy)' },
 ] as const
@@ -356,6 +361,7 @@ export function PipelinePage() {
   const navigate = useNavigate()
   const { user, canAccessAdmin } = useAuth()
   const showLegacyApplications = productFlags.showLegacyApplications
+  const { productLanguage } = useProductLanguage()
   const pipelineTabs = getVisiblePipelineTabs(showLegacyApplications)
   const activeTab =
     !showLegacyApplications && tab === 'applications' ? 'opportunities' : (tab ?? 'opportunities')
@@ -407,16 +413,16 @@ export function PipelinePage() {
         <PmPageHeader
           label="Workflow"
           title="Pipeline"
-          description="Track opportunity and match stages here, then continue to negotiations, commercial agreements, and contracts in their workflow sections."
+          description={`Track ${productLanguage.label('opportunity').toLowerCase()} and match stages here, then continue to ${productLanguage.plural('negotiation').toLowerCase()}, ${productLanguage.plural('commercialAgreement').toLowerCase()}, and ${productLanguage.plural('contract').toLowerCase()} in their workflow sections.`}
           tone="mission"
           metric={
             <PmPageHeroMetric value={workflowCount} label="Active workflows" />
           }
           badges={
             <>
-              <PmBadge tone="primary">{opportunities.length} opportunities</PmBadge>
+              <PmBadge tone="primary">{opportunities.length} {productLanguage.plural('opportunity').toLowerCase()}</PmBadge>
               <PmBadge tone="info">{activeMatches} matches</PmBadge>
-              <PmBadge tone="muted">{'Next: Negotiations -> Commercial Agreements -> Contracts'}</PmBadge>
+              <PmBadge tone="muted">{`Next: ${productLanguage.plural('negotiation')} -> ${productLanguage.plural('commercialAgreement')} -> ${productLanguage.plural('contract')}`}</PmBadge>
               {showLegacyApplications ? (
                 <PmBadge tone="muted">{applications.length} applications</PmBadge>
               ) : null}
@@ -466,6 +472,7 @@ export function MatchesPage() {
   const [searchParams] = useSearchParams()
   const navState = readProductNavState(location.state)
   const { user, canAccessAdmin } = useAuth()
+  const { productLanguage } = useProductLanguage()
   const [matchView, setMatchView] = useState<MatchPresentationView>(() =>
     resolveDefaultMatchView(navState),
   )
@@ -563,7 +570,7 @@ export function MatchesPage() {
           description={
             isMarketplaceBrowse
               ? 'Discover ranked collaboration pairings across the marketplace.'
-              : 'Matches assigned to you — review, accept, and progress to negotiations.'
+              : `Matches assigned to you — review, accept, and progress to ${productLanguage.plural('negotiation').toLowerCase()}.`
           }
           tone="match"
           metric={
@@ -611,6 +618,10 @@ export function MatchesPage() {
               setStatus={listFilters.setStatus}
               matchType={listFilters.matchType}
               setMatchType={listFilters.setMatchType}
+              mainModel={listFilters.mainModel}
+              setMainModel={listFilters.setMainModel}
+              exchangeMode={listFilters.exchangeMode}
+              setExchangeMode={listFilters.setExchangeMode}
               activeFilterChips={listFilters.activeFilterChips}
               clearAllFilters={listFilters.clearAllFilters}
             />
@@ -765,7 +776,7 @@ export function MatchDetailPage() {
   if (negotiation) {
     timelineEvents.push({
       id: 'negotiation',
-      label: 'Negotiation started',
+      label: 'Discussion started',
       description: negotiation.status,
       status: actions.showViewDeal ? 'done' : 'upcoming',
     })
@@ -934,7 +945,7 @@ export function MatchDetailPage() {
           <PmInspectorLayout
             header={
               <PmSectionHeader
-                title="Negotiation"
+                title="Discussion"
                 description="Terms discussion for this match."
               />
             }
@@ -975,8 +986,10 @@ export function MatchDetailPage() {
 
 export function NegotiationsPage() {
   const { user, canAccessAdmin } = useAuth()
-  const [search, setSearch] = useState('')
-  const [status, setStatus] = useState('all')
+  const { productLanguage } = useProductLanguage()
+  const filters = useExecutiveListFilters('negotiations', {
+    statusLabel: (value) => value.charAt(0).toUpperCase() + value.slice(1),
+  })
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
   const allNegotiations = negotiationsApi.list()
@@ -996,13 +1009,13 @@ export function NegotiationsPage() {
     [allNegotiations, viewer],
   )
   const filteredNegotiations = useMemo(() => {
-    if (!search.trim()) return negotiations
-    const q = search.toLowerCase()
     return negotiations.filter((neg) =>
-      formatNegotiationDisplayTitle(neg, opportunitiesApi.get).toLowerCase().includes(q) &&
-      (status === 'all' || neg.status === status),
+      formatNegotiationDisplayTitle(neg, opportunitiesApi.get)
+        .toLowerCase()
+        .includes(filters.search.toLowerCase()) &&
+      (filters.status === 'all' || neg.status === filters.status),
     )
-  }, [negotiations, search, status])
+  }, [negotiations, filters.search, filters.status])
   const totalItems = filteredNegotiations.length
   const pageCount = Math.max(1, Math.ceil(totalItems / pageSize))
   const safePage = Math.min(page, pageCount)
@@ -1015,10 +1028,10 @@ export function NegotiationsPage() {
   ).length
   const listEmpty = resolveListEmptyState({
     hasSourceData: negotiations.length > 0,
-    hasActiveFilters: search.length > 0 || status !== 'all',
+    hasActiveFilters: filters.search.length > 0 || filters.status !== 'all',
     firstRun: {
       title: 'No negotiations yet',
-      description: 'Negotiations begin after you accept a match and start term discussions.',
+      description: 'Discussions begin after you accept a match and start term discussions.',
     },
     filtered: {
       title: 'No negotiations match your search',
@@ -1031,8 +1044,8 @@ export function NegotiationsPage() {
       header={
         <PmPageHeader
           label="My Workspace"
-          title="My active negotiations"
-          description="Respond to terms and counters on negotiations assigned to you."
+          title={`My active ${productLanguage.plural('negotiation').toLowerCase()}`}
+          description={`Respond to terms and counters on ${productLanguage.plural('negotiation').toLowerCase()} assigned to you.`}
           tone="negotiation"
           metric={<PmPageHeroMetric value={activeCount} label="Active" />}
           badges={
@@ -1049,17 +1062,23 @@ export function NegotiationsPage() {
             <PmTableToolbar
               search={
                 <PmTableSearch
-                  placeholder="Search negotiations…"
-                  value={search}
+                  placeholder={`Search ${productLanguage.plural('negotiation').toLowerCase()}…`}
+                  value={filters.search}
                   onValueChange={(value) => {
-                    setSearch(value)
+                    filters.setSearch(value)
                     setPage(1)
                   }}
                 />
               }
               filters={
                 <div className="w-44">
-                  <Select value={status} onValueChange={setStatus}>
+                  <Select
+                    value={filters.status}
+                    onValueChange={(value) => {
+                      filters.setStatus(value)
+                      setPage(1)
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1074,7 +1093,9 @@ export function NegotiationsPage() {
                   </Select>
                 </div>
               }
-            />
+            >
+              <PmFilterChips chips={filters.chips} onClearAll={() => filters.clearAll()} />
+            </PmTableToolbar>
           </PmBrowseToolbar>
         ) : undefined
       }
@@ -1111,7 +1132,14 @@ export function NegotiationsPage() {
             title={listEmpty.config.title}
             description={listEmpty.config.description}
             primaryAction={
-              <PmButton size="sm" variant="outline" onClick={() => setSearch('')}>
+              <PmButton
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  filters.clearAll()
+                  setPage(1)
+                }}
+              >
                 Clear search
               </PmButton>
             }
@@ -1127,6 +1155,25 @@ export function NegotiationsPage() {
               interactive
               className="flex h-full flex-col p-4 md:p-5"
             >
+              {(() => {
+                const linkedOpportunity = neg.opportunityId
+                  ? opportunitiesApi.get(neg.opportunityId)
+                  : undefined
+                const taxonomy = linkedOpportunity
+                  ? resolveOpportunityTaxonomyLabels(linkedOpportunity)
+                  : null
+                return (
+                  <ExecutiveEntityMetadata
+                    mainModel={taxonomy?.mainModel}
+                    subModel={taxonomy?.subModel}
+                    exchangeMode={taxonomy?.exchangeMode}
+                    topology={taxonomy?.matchingTopology}
+                    status={neg.status}
+                    confidence={neg.commercialTerms?.amount ? 'Terms proposed' : undefined}
+                    className="mb-2"
+                  />
+                )
+              })()}
               <div className="flex items-start justify-between gap-2">
                 <Link
                   to={`/negotiations/${neg.id}`}
@@ -1157,6 +1204,7 @@ export function NegotiationDetailPage() {
   const version = useDataStoreVersion()
   const neg = id ? negotiationsApi.get(id) : undefined
   const [proposalPending, setProposalPending] = useState(false)
+  const { productLanguage } = useProductLanguage()
 
   const viewer = useMemo(
     () =>
@@ -1199,11 +1247,11 @@ export function NegotiationDetailPage() {
   if (!neg) {
     return (
       <PmPage
-        header={<PmPageHeader title="Negotiation" description="Value negotiation workspace." />}
+        header={<PmPageHeader title={productLanguage.label('negotiation')} description={`Value ${productLanguage.label('negotiation').toLowerCase()} workspace.`} />}
       >
         <PmEmptyState
-          title="Negotiation not found"
-          description="This negotiation may have been removed or the link is invalid."
+          title={`${productLanguage.label('negotiation')} not found`}
+          description={`This ${productLanguage.label('negotiation').toLowerCase()} may have been removed or the link is invalid.`}
         />
       </PmPage>
     )
@@ -1212,11 +1260,11 @@ export function NegotiationDetailPage() {
   if (!canViewNegotiationDetail(neg, viewer)) {
     return (
       <PmPage
-        header={<PmPageHeader title="Access denied" description="Value negotiation workspace." />}
+        header={<PmPageHeader title="Access denied" description={`Value ${productLanguage.label('negotiation').toLowerCase()} workspace.`} />}
       >
         <EntityAccessDenied
           entity="negotiation"
-          description="Only negotiation participants and authorized auditors can access this workspace."
+          description={`Only ${productLanguage.label('negotiation').toLowerCase()} participants and authorized auditors can access this workspace.`}
         />
       </PmPage>
     )
@@ -1228,7 +1276,7 @@ export function NegotiationDetailPage() {
   const timelineEvents: CollaborationTimelineEvent[] = [
     {
       id: 'created',
-      label: 'Negotiation opened',
+      label: 'Discussion opened',
       timestamp: neg.createdAt ? formatDate(neg.createdAt) : undefined,
       status: 'done',
     },
@@ -1270,9 +1318,9 @@ export function NegotiationDetailPage() {
     <PmPage
       header={
         <PmPageHeader
-          label="Negotiation"
+          label={productLanguage.label('negotiation')}
           title={negotiationTitle}
-          description="Structured negotiation room with discussion, offers, and audit trail."
+          description={`Structured ${productLanguage.label('negotiation').toLowerCase()} room with discussion, offers, and audit trail.`}
           tone="negotiation"
           metric={
             <PmPageHeroMetric
@@ -1398,7 +1446,7 @@ export function NegotiationDetailPage() {
           <CollaborationTimeline
             activeStep={collaborationStep}
             events={timelineEvents}
-            title="Negotiation history"
+            title="Discussion history"
           />
         }
       />

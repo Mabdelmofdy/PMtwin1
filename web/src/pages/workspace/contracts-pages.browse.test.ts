@@ -33,6 +33,8 @@ describe('ContractsPage browse layout contract', () => {
     assert.match(contractsPageSource, /<PmTableSearch/)
     assert.match(contractsPageSource, /<PmDataTable/)
     assert.match(contractsPageSource, /resolveListEmptyState/)
+    assert.match(contractsPageSource, /useExecutiveListFilters/)
+    assert.match(contractsPageSource, /PmFilterChips/)
   })
 
   it('keeps row actions and mobile ContractListCard navigation', () => {
@@ -45,5 +47,6 @@ describe('ContractsPage browse layout contract', () => {
     assert.match(contractsPageSource, /renderMobileCard=\{\(c\) => <ContractListCard contract=\{c\} \/>/)
     assert.match(source, /function ContractListCard/)
     assert.match(source, /href=\{`\/contracts\/\$\{contract\.id\}`\}/)
+    assert.match(source, /ExecutiveEntityMetadata/)
   })
 })

@@ -50,4 +50,25 @@ describe('PRODUCT_LANGUAGE vocabulary', () => {
     })
     assert.equal(productLanguage.actionLabel('createOpportunity'), 'Publish Opportunity')
   })
+
+  it('applies tenant overrides to navigation labels', () => {
+    configureProductLanguageRuntime({
+      locale: 'en',
+      tenantId: 'tenant-nav',
+      overrides: {
+        navigation: {
+          opportunities: 'Projects',
+          commercialAgreements: 'Partnerships',
+        },
+      },
+    })
+    assert.equal(productLanguage.navigationLabel('opportunities'), 'Projects')
+    assert.equal(productLanguage.navigationLabel('commercialAgreements'), 'Partnerships')
+  })
+
+  it('keeps product labels presentation-only (domain command names unchanged)', () => {
+    const actionKeys = ['createOpportunity', 'startNegotiation', 'createCommercialAgreement', 'generateContract', 'startExecution']
+    assert.equal(actionKeys.includes('createDealFromNegotiation'), false)
+    assert.equal(actionKeys.includes('createContractFromDeal'), false)
+  })
 })

@@ -54,6 +54,7 @@ import {
   PmPageActions,
   PmWorkflowBadge,
   PmWorkflowLinksCard,
+  PmFilterChips,
   buildDealWorkflowSteps,
   type PmMoreActionItem,
 } from '@/components/ui/pm-index'
@@ -73,6 +74,10 @@ import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import { PmTechnicalDetails } from '@/components/ui/pm-technical-details.tsx'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { formatCollaborationExchangeMode } from '@/lib/collaboration-taxonomy-display.ts'
+import { useProductLanguage } from '@/providers/product-language-provider'
+import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'
+import { ExecutiveEntityMetadata } from '@/components/shared/executive-entity-metadata'
+import { useExecutiveListFilters } from '@/lib/executive-list-filters'
 
 function buildCommercialAgreementRecommendedAction(
   model: NonNullable<ReturnType<typeof buildCommercialAgreementDetailReadModel>>,
@@ -153,12 +158,24 @@ function buildCommercialAgreementNavMoreItems(
 }
 
 function CommercialAgreementListCard({ commercialAgreement }: { commercialAgreement: Deal }) {
+  const relatedOpportunity = commercialAgreement.needOpportunityId
+    ? opportunitiesApi.get(commercialAgreement.needOpportunityId)
+    : commercialAgreement.offerOpportunityId
+      ? opportunitiesApi.get(commercialAgreement.offerOpportunityId)
+      : undefined
+  const taxonomy = relatedOpportunity
+    ? resolveOpportunityTaxonomyLabels(relatedOpportunity)
+    : null
   return (
     <PmEntityListCard
       title={formatDealDisplayTitle(commercialAgreement)}
       href={`/commercial-agreements/${commercialAgreement.id}`}
       badge={<PmWorkflowBadge status={commercialAgreement.status} entity="deal" size="sm" />}
-      meta={`Updated ${formatDate(commercialAgreement.updatedAt)}`}
+      meta={
+        taxonomy
+          ? `${taxonomy.mainModel} · ${taxonomy.exchangeMode} · Updated ${formatDate(commercialAgreement.updatedAt)}`
+          : `Updated ${formatDate(commercialAgreement.updatedAt)}`
+      }
       primary={{ label: PRODUCT_LANGUAGE.OPEN_COMMERCIAL_AGREEMENT, href: `/commercial-agreements/${commercialAgreement.id}` }}
     />
   )
@@ -167,11 +184,13 @@ function CommercialAgreementListCard({ commercialAgreement }: { commercialAgreem
 export function CommercialAgreementsPage() {
   const navigate = useNavigate()
   const { user, canAccessAdmin } = useAuth()
-  const [search, setSearch] = useState('')
-  const [status, setStatus] = useState('all')
-  const [exchangeMode, setExchangeMode] = useState('all')
+  const filters = useExecutiveListFilters('agreements', {
+    statusLabel: (value) => value.charAt(0).toUpperCase() + value.slice(1),
+    modeLabel: (value) => formatCollaborationExchangeMode(value),
+  })
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
+  const { productLanguage } = useProductLanguage()
   const viewer = useMemo(
     () =>
       buildViewerContext({
@@ -191,13 +210,13 @@ export function CommercialAgreementsPage() {
 
   const filtered = useMemo(() => {
     return commercialAgreements.filter((d) => {
-      const q = search.toLowerCase()
-      const matchesSearch = !search || d.title.toLowerCase().includes(q)
-      const matchesStatus = status === 'all' || d.status === status
-      const matchesExchange = exchangeMode === 'all' || d.exchangeMode === exchangeMode
+      const q = filters.search.toLowerCase()
+      const matchesSearch = !filters.search || d.title.toLowerCase().includes(q)
+      const matchesStatus = filters.status === 'all' || d.status === filters.status
+      const matchesExchange = filters.mode === 'all' || d.exchangeMode === filters.mode
       return matchesSearch && matchesStatus && matchesExchange
     })
-  }, [commercialAgreements, search, status, exchangeMode])
+  }, [commercialAgreements, filters.search, filters.status, filters.mode])
 
   const totalItems = filtered.length
   const pageCount = Math.max(1, Math.ceil(totalItems / pageSize))
@@ -206,7 +225,8 @@ export function CommercialAgreementsPage() {
 
   const listEmpty = resolveListEmptyState({
     hasSourceData: commercialAgreements.length > 0,
-    hasActiveFilters: search.length > 0 || status !== 'all' || exchangeMode !== 'all',
+    hasActiveFilters:
+      filters.search.length > 0 || filters.status !== 'all' || filters.mode !== 'all',
     firstRun: {
       title: 'No commercial agreements yet',
       description: 'Commercial agreements appear when negotiations conclude successfully.',
@@ -233,6 +253,28 @@ export function CommercialAgreementsPage() {
       cell: (d) => <PmWorkflowBadge status={d.status} entity="deal" />,
     },
     {
+      id: 'business',
+      label: 'Business context',
+      cell: (d) => {
+        const opportunity = d.needOpportunityId
+          ? opportunitiesApi.get(d.needOpportunityId)
+          : d.offerOpportunityId
+            ? opportunitiesApi.get(d.offerOpportunityId)
+            : undefined
+        const taxonomy = opportunity ? resolveOpportunityTaxonomyLabels(opportunity) : null
+        return (
+          <ExecutiveEntityMetadata
+            mainModel={taxonomy?.mainModel}
+            subModel={taxonomy?.subModel}
+            exchangeMode={taxonomy?.exchangeMode}
+            topology={taxonomy?.matchingTopology}
+            status={d.status}
+            confidence={undefined}
+          />
+        )
+      },
+    },
+    {
       id: 'updated',
       label: 'Updated',
       cell: (d) => formatDate(d.updatedAt),
@@ -244,7 +286,7 @@ export function CommercialAgreementsPage() {
       header={
         <PmPageHeader
           label="My Workspace"
-          title="My commercial agreements"
+      title={`My ${productLanguage.plural('commercialAgreement').toLowerCase()}`}
           description={
             commercialAgreements.length
               ? 'Track your active commercial agreements through signing and execution stages.'
@@ -268,17 +310,23 @@ export function CommercialAgreementsPage() {
             <PmTableToolbar
               search={
                 <PmTableSearch
-                  placeholder="Search commercial agreements…"
-                  value={search}
+                  placeholder={`Search ${productLanguage.plural('commercialAgreement').toLowerCase()}…`}
+                  value={filters.search}
                   onValueChange={(v) => {
-                    setSearch(v)
+                    filters.setSearch(v)
                     setPage(1)
                   }}
                 />
               }
               filters={
                 <div className="grid w-56 gap-2">
-                  <Select value={status} onValueChange={setStatus}>
+                  <Select
+                    value={filters.status}
+                    onValueChange={(value) => {
+                      filters.setStatus(value)
+                      setPage(1)
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -291,7 +339,13 @@ export function CommercialAgreementsPage() {
                       <SelectItem value="cancelled">Cancelled</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select value={exchangeMode} onValueChange={setExchangeMode}>
+                  <Select
+                    value={filters.mode}
+                    onValueChange={(value) => {
+                      filters.setMode(value)
+                      setPage(1)
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -306,7 +360,9 @@ export function CommercialAgreementsPage() {
                   </Select>
                 </div>
               }
-            />
+            >
+              <PmFilterChips chips={filters.chips} onClearAll={() => filters.clearAll()} />
+            </PmTableToolbar>
           </PmBrowseToolbar>
         ) : undefined
       }
@@ -342,7 +398,7 @@ export function CommercialAgreementsPage() {
           columns={columns}
           data={paged}
           getRowId={(d) => d.id}
-          caption="Commercial agreements"
+          caption={productLanguage.plural('commercialAgreement')}
           rowActions={(d) => (
             <PmTableRowActions
               onView={() => navigate(`/commercial-agreements/${d.id}`)}
@@ -360,9 +416,7 @@ export function CommercialAgreementsPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => {
-                      setSearch('')
-                      setStatus('all')
-                      setExchangeMode('all')
+                      filters.clearAll()
                       setPage(1)
                     }}
                   >
@@ -383,6 +437,7 @@ export function CommercialAgreementDetailPage() {
   const version = useDataStoreVersion()
   const { id } = useParams()
   const { user, canAccessAdmin } = useAuth()
+  const { productLanguage } = useProductLanguage()
 
   const viewer = useMemo(
     () =>
@@ -417,14 +472,14 @@ export function CommercialAgreementDetailPage() {
       <PmPage
         header={
           <PmPageHeader
-            title="Commercial agreement"
-            description="Collaboration commercial agreement summary."
+            title={productLanguage.label('commercialAgreement')}
+            description={`Collaboration ${productLanguage.label('commercialAgreement').toLowerCase()} summary.`}
           />
         }
       >
         <PmEmptyState
-          title="Commercial agreement not found"
-          description="This commercial agreement may have been removed or the link is invalid."
+          title={`${productLanguage.label('commercialAgreement')} not found`}
+          description={`This ${productLanguage.label('commercialAgreement').toLowerCase()} may have been removed or the link is invalid.`}
         />
       </PmPage>
     )
@@ -436,13 +491,13 @@ export function CommercialAgreementDetailPage() {
         header={
           <PmPageHeader
             title="Access denied"
-            description="Collaboration commercial agreement summary."
+            description={`Collaboration ${productLanguage.label('commercialAgreement').toLowerCase()} summary.`}
           />
         }
       >
         <EntityAccessDenied
           entity="deal"
-          description="Commercial agreement details are only visible to participants or authorized platform staff."
+          description={`${productLanguage.label('commercialAgreement')} details are only visible to participants or authorized platform staff.`}
         />
       </PmPage>
     )
@@ -454,7 +509,7 @@ export function CommercialAgreementDetailPage() {
   const timelineEvents: CollaborationTimelineEvent[] = [
     {
       id: 'created',
-      label: 'Commercial agreement created',
+      label: `${productLanguage.label('commercialAgreement')} created`,
       timestamp: formatDate(model.commercialAgreement.createdAt),
       status: 'done',
     },
@@ -469,7 +524,7 @@ export function CommercialAgreementDetailPage() {
   if (model.existingContract) {
     timelineEvents.push({
       id: 'contract',
-      label: 'Contract linked',
+      label: 'Linked record created',
       description: model.existingContract.status,
       status: 'upcoming',
     })
@@ -509,7 +564,7 @@ export function CommercialAgreementDetailPage() {
     <PmPage
       header={
         <PmPageHeader
-          label="Commercial agreement"
+          label={productLanguage.label('commercialAgreement')}
           title={formatDealDisplayTitle(model.commercialAgreement)}
           description={`Created ${formatDate(model.commercialAgreement.createdAt)} · Updated ${formatDate(model.commercialAgreement.updatedAt)}`}
           tone="deal"
@@ -563,7 +618,7 @@ export function CommercialAgreementDetailPage() {
                 <PmFormReadonlySection>
                   <PmFormReadonlyField label="Need" value={model.needTitle} />
                   <PmFormReadonlyField label="Offer" value={model.offerTitle} />
-                  <PmFormReadonlyField label="Negotiation status">
+                  <PmFormReadonlyField label="Linked workflow status">
                     {model.negotiationStatus ? (
                       <PmWorkflowBadge status={model.negotiationStatus} entity="negotiation" />
                     ) : (
@@ -576,7 +631,7 @@ export function CommercialAgreementDetailPage() {
                 <PmFormReadonly>
                   <PmFormReadonlySection>
                     <PmFormReadonlyField label="Match reference" value={model.postMatchId} />
-                    <PmFormReadonlyField label="Negotiation reference" value={model.negotiationId} />
+                    <PmFormReadonlyField label="Linked workflow reference" value={model.negotiationId} />
                     <PmFormReadonlyField label="Need opportunity reference" value={model.needOpportunityId} />
                     <PmFormReadonlyField label="Offer opportunity reference" value={model.offerOpportunityId} />
                   </PmFormReadonlySection>
@@ -624,7 +679,7 @@ export function CommercialAgreementDetailPage() {
             ) : null}
             {model.existingContract ? (
               <PmFormReadonly>
-                <PmFormReadonlySection title="Contract">
+                <PmFormReadonlySection title="Linked record">
                   <PmFormReadonlyField label="Status">
                     <PmWorkflowBadge
                       status={model.existingContract.status}
@@ -640,7 +695,7 @@ export function CommercialAgreementDetailPage() {
           <CollaborationTimeline
             activeStep={collaborationStep}
             events={timelineEvents}
-            title="Commercial agreement history"
+            title={`${productLanguage.label('commercialAgreement')} history`}
           />
         }
       />
@@ -650,17 +705,18 @@ export function CommercialAgreementDetailPage() {
 
 export function CommercialAgreementRatePage() {
   const { id } = useParams()
+  const { productLanguage } = useProductLanguage()
   return (
     <PmPage
       header={
         <PmPageHeader
           label="Workflow"
           title="Rate participants"
-          description={`Post-agreement review for commercial agreement ${id}`}
+          description={`Post-agreement review for ${productLanguage.label('commercialAgreement').toLowerCase()} ${id}`}
           actions={
             <PmPageActions
               secondary={{
-                label: 'Back to commercial agreement',
+                label: `Back to ${productLanguage.label('commercialAgreement').toLowerCase()}`,
                 href: `/commercial-agreements/${id}`,
                 variant: 'outline',
               }}

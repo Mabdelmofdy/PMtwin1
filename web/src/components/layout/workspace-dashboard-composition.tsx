@@ -6,6 +6,7 @@ import { negotiationsApi } from '@/api/negotiations.ts'
 import { dealsApi } from '@/api/deals.ts'
 import { contractsApi } from '@/api/contracts.ts'
 import { notificationsApi } from '@/api/notifications.ts'
+import { peopleApi } from '@/api/people.ts'
 import { MatchCard } from '@/components/collaboration/match-card'
 import { formatNegotiationDisplayTitle } from '@/lib/entity-display-titles.ts'
 import {
@@ -36,6 +37,8 @@ import { resolveProfileReadiness } from '@/components/readiness/profile-readines
 import { cn } from '@/lib/utils'
 import { useProductLanguage } from '@/providers/product-language-provider'
 import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
+import { buildReadinessAnalytics, createCreatorProfileResolver } from '@/domain/readiness-analytics/readiness-analytics.ts'
+import { buildMatchingQualityAnalytics } from '@/domain/matching-quality/matching-quality-analytics.ts'
 function buildNeedsActionItems(input: {
   userId?: string
   matches: ReturnType<typeof matchesApi.list>
@@ -78,7 +81,7 @@ function buildNeedsActionItems(input: {
     items.push({
       id: `deal-${deal.id}`,
       title: deal.title,
-      context: 'Deal requires your signature or review.',
+      context: 'This record requires your signature or review.',
       status: deal.status,
       statusEntity: 'deal',
       primary: { label: PRODUCT_LANGUAGE.OPEN_COMMERCIAL_AGREEMENT, href: `/commercial-agreements/${deal.id}` },
@@ -121,6 +124,24 @@ export function WorkspaceDashboardComposition() {
   const deals = dealsApi.list()
   const contracts = contractsApi.list()
   const notifications = userId ? notificationsApi.list(userId).slice(0, 5) : []
+  const readinessAnalytics = buildReadinessAnalytics({
+    profiles: peopleApi.listUsers().map((entry) => ({
+      profile: entry.profile,
+      profileKind: entry.role === 'company' ? 'company' : 'individual',
+    })),
+    opportunities,
+    resolveProfileForOpportunity: createCreatorProfileResolver(peopleApi.get),
+  })
+  const qualityAnalytics = buildMatchingQualityAnalytics({
+    profiles: peopleApi.listUsers().map((entry) => ({
+      profile: entry.profile,
+      profileKind: entry.role === 'company' ? 'company' : 'individual',
+    })),
+    opportunities,
+    matches,
+    negotiations,
+    deals,
+  })
   const needsActionItems = buildNeedsActionItems({
     userId,
     matches,
@@ -423,6 +444,50 @@ export function WorkspaceDashboardComposition() {
           ))}
         </div>
       )}
+
+      <PmSectionHeader
+        title="Executive intelligence snapshot"
+        description="Portfolio, funnel, risk, and execution signals from current marketplace data."
+      />
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <PmSurface variant="muted" shadow="card" className="p-4 md:p-5">
+          <p className={cn(pmTypography.caption, 'text-muted-foreground')}>Portfolio readiness</p>
+          <p className={cn(pmTypography.stat, 'mt-1 tabular-nums')}>{Math.round(readinessAnalytics.opportunities.averageScore * 100)}%</p>
+          <p className={cn(pmTypography.caption, 'mt-1')}>{readinessAnalytics.opportunities.ready} ready opportunities</p>
+          <PmButton size="sm" variant="ghost" asChild className="mt-2 px-0">
+            <Link to="/intelligence/portfolio">Open portfolio</Link>
+          </PmButton>
+        </PmSurface>
+        <PmSurface variant="muted" shadow="card" className="p-4 md:p-5">
+          <p className={cn(pmTypography.caption, 'text-muted-foreground')}>Funnel conversion</p>
+          <p className={cn(pmTypography.stat, 'mt-1 tabular-nums')}>{Math.round(qualityAnalytics.dealConversionRate)}%</p>
+          <p className={cn(pmTypography.caption, 'mt-1')}>{qualityAnalytics.dealsCreated} deals from {qualityAnalytics.negotiationsStarted} negotiations</p>
+          <PmButton size="sm" variant="ghost" asChild className="mt-2 px-0">
+            <Link to="/intelligence/funnel">Open funnel</Link>
+          </PmButton>
+        </PmSurface>
+        <PmSurface variant="muted" shadow="card" className="p-4 md:p-5">
+          <p className={cn(pmTypography.caption, 'text-muted-foreground')}>Risk blockers</p>
+          <p className={cn(pmTypography.stat, 'mt-1 tabular-nums')}>
+            {matches.filter((m) => m.status === 'declined' || m.status === 'expired').length +
+              negotiations.filter((n) => n.status === 'countered' || n.status === 'cancelled').length}
+          </p>
+          <p className={cn(pmTypography.caption, 'mt-1')}>Matches and negotiations needing intervention</p>
+          <PmButton size="sm" variant="ghost" asChild className="mt-2 px-0">
+            <Link to="/intelligence/risk">Open risk</Link>
+          </PmButton>
+        </PmSurface>
+        <PmSurface variant="muted" shadow="card" className="p-4 md:p-5">
+          <p className={cn(pmTypography.caption, 'text-muted-foreground')}>Execution health</p>
+          <p className={cn(pmTypography.stat, 'mt-1 tabular-nums')}>
+            {contracts.filter((contract) => contract.status === 'active').length}
+          </p>
+          <p className={cn(pmTypography.caption, 'mt-1')}>Active contracts in execution</p>
+          <PmButton size="sm" variant="ghost" asChild className="mt-2 px-0">
+            <Link to="/intelligence/execution">Open execution</Link>
+          </PmButton>
+        </PmSurface>
+      </div>
     </PmDashboardLayout>
   )
 }

@@ -76,13 +76,13 @@ export function AppSidebar() {
                 title: isCompanyUser ? 'Company Dashboard' : 'My Workspace',
               }
             : item.href === '/opportunities'
-              ? { ...item, title: `My ${productLanguage.plural('opportunity')}` }
+              ? { ...item, title: `My ${productLanguage.navigationLabel('opportunities')}` }
               : item.href === '/negotiations'
-                ? { ...item, title: `My ${productLanguage.plural('negotiation')}` }
+                ? { ...item, title: `My ${productLanguage.navigationLabel('negotiations')}` }
                 : item.href === '/commercial-agreements'
-                  ? { ...item, title: `My ${productLanguage.plural('commercialAgreement')}` }
+                  ? { ...item, title: `My ${productLanguage.navigationLabel('commercialAgreements')}` }
                   : item.href === '/contracts'
-                    ? { ...item, title: `My ${productLanguage.plural('contract')}` }
+                    ? { ...item, title: `My ${productLanguage.navigationLabel('contracts')}` }
             : item,
         ),
       }))

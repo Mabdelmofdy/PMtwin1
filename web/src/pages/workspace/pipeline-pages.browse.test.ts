@@ -107,8 +107,18 @@ describe('NegotiationsPage browse layout contract', () => {
     const fnEnd = source.indexOf('export function NegotiationDetailPage')
     const negotiationsPageSource = source.slice(fnStart, fnEnd)
 
-    assert.match(negotiationsPageSource, /const \[status, setStatus\]/)
-    assert.match(negotiationsPageSource, /<Select value=\{status\}/)
+    assert.match(negotiationsPageSource, /useExecutiveListFilters/)
+    assert.match(negotiationsPageSource, /<Select[\s\S]*value=\{filters\.status\}/)
     assert.match(negotiationsPageSource, /All statuses/)
+  })
+
+  it('uses executive filter hook and metadata strip in negotiation cards', () => {
+    const fnStart = source.indexOf('export function NegotiationsPage')
+    const fnEnd = source.indexOf('export function NegotiationDetailPage')
+    const negotiationsPageSource = source.slice(fnStart, fnEnd)
+
+    assert.match(negotiationsPageSource, /useExecutiveListFilters/)
+    assert.match(negotiationsPageSource, /PmFilterChips/)
+    assert.match(negotiationsPageSource, /ExecutiveEntityMetadata/)
   })
 })
