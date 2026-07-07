@@ -13,21 +13,22 @@ import {
 } from '../lifecycle-helpers.ts'
 import {
   findAgreedApplicationNegotiation,
-  hasActiveContractForDeal,
+  hasActiveContractForCommercialAgreement,
   hasBlockingApplicationNegotiation,
   hasBlockingPostMatchNegotiation,
   resolveWorkflowKeys,
 } from './resolve-workflow.ts'
 import { validateCollaborationPublishRequirements } from './collaboration-guards.ts'
+import { isDecisionStatusApproved } from '@pm-twin/decision-engine'
 
 const MATCH_ENTITY = 'match'
 const APPLICATION_ENTITY = 'application'
 const NEGOTIATION_ENTITY = 'negotiation'
-const DEAL_ENTITY = 'deal'
+const COMMERCIAL_AGREEMENT_ENTITY = 'commercial_agreement'
 const CONTRACT_ENTITY = 'contract'
 const OPPORTUNITY_ENTITY = 'opportunity'
 
-const DEAL_STATUSES_ALLOWING_CONTRACT = new Set(['draft', 'review', 'signing'])
+const COMMERCIAL_AGREEMENT_STATUSES_ALLOWING_CONTRACT = new Set(['draft', 'review', 'signing'])
 
 type ActionEvaluator = (context: WorkflowContext) => WorkflowAction
 
@@ -187,12 +188,17 @@ function evaluateStartNegotiationFromApplication(context: WorkflowContext): Work
     legacyEnabled
     && Boolean(application?.id && status === 'accepted')
   const blocked = hasBlockingApplicationNegotiation(context)
-  const hasDeal = Boolean(context.linkage?.dealForApplication?.id || application?.dealId)
+  const hasCommercialAgreement = Boolean(
+    context.linkage?.commercialAgreementForApplication?.id
+    || context.linkage?.dealForApplication?.id
+    || application?.commercialAgreementId
+    || application?.dealId,
+  )
   const enabled =
     visible
     && userCanMutate(context)
     && !blocked
-    && !hasDeal
+    && !hasCommercialAgreement
 
   return buildAction(context, 'start_negotiation_from_application', {
     visible,
@@ -200,8 +206,8 @@ function evaluateStartNegotiationFromApplication(context: WorkflowContext): Work
     visibilityReason: visible
       ? 'Accepted application can start hiring negotiation'
       : 'Start hiring negotiation requires an accepted application',
-    disabledReason: hasDeal
-      ? 'A deal already exists for this application'
+    disabledReason: hasCommercialAgreement
+      ? 'A commercial agreement already exists for this application'
       : blocked
         ? 'A hiring negotiation already exists for this application'
         : !userCanMutate(context)
@@ -242,39 +248,199 @@ function evaluateCancelNegotiation(context: WorkflowContext): WorkflowAction {
   })
 }
 
-function evaluateCreateDealFromNegotiation(context: WorkflowContext): WorkflowAction {
+const AUDITOR_ROLES = new Set(['auditor', 'admin', 'moderator'])
+
+function isNegotiationRoomWritable(context: WorkflowContext): boolean {
   const negotiation = context.negotiation
   const status = canonicalEntityStatus(NEGOTIATION_ENTITY, negotiation?.status)
-  const existingDeal = context.linkage?.dealForNegotiation
-  const visible = Boolean(negotiation?.id && status === 'agreed')
-  const enabled = visible && userCanMutate(context) && !existingDeal?.id
+  return Boolean(
+    negotiation?.id
+    && (status === 'active' || status === 'countered'),
+  )
+}
 
-  return buildAction(context, 'create_deal_from_negotiation', {
+function isAuditorViewer(context: WorkflowContext): boolean {
+  const roles = context.user.roles ?? []
+  return roles.some((role) => AUDITOR_ROLES.has(role))
+}
+
+function canViewNegotiationTranscript(context: WorkflowContext): boolean {
+  const negotiation = context.negotiation
+  if (!negotiation?.id) return false
+  if (context.user.isParticipant) return true
+  if (isAuditorViewer(context)) return true
+  return Boolean(context.user.canMutate && context.user.userId)
+}
+
+function evaluateSendNegotiationMessage(context: WorkflowContext): WorkflowAction {
+  const negotiation = context.negotiation
+  const writable = isNegotiationRoomWritable(context)
+  const visible = Boolean(negotiation?.id && writable)
+  const enabled =
+    visible
+    && userCanMutate(context)
+    && Boolean(context.user.isParticipant)
+
+  return buildAction(context, 'send_negotiation_message', {
     visible,
     enabled: Boolean(enabled),
     visibilityReason: visible
-      ? 'Agreed negotiation can create a deal'
-      : 'Create deal requires an agreed negotiation',
-    disabledReason: existingDeal?.id
-      ? 'A deal already exists for this negotiation'
+      ? 'Negotiation room is open for discussion'
+      : 'Discussion is only available for active negotiations',
+    disabledReason: !context.user.isParticipant
+      ? 'Only negotiation participants can send messages'
       : !userCanMutate(context)
-        ? 'You do not have permission to create a deal'
+        ? 'You do not have permission to send messages'
         : undefined,
+    aggregateId: negotiation?.id,
+  })
+}
+
+function evaluateSubmitNegotiationOffer(context: WorkflowContext): WorkflowAction {
+  const negotiation = context.negotiation
+  const writable = isNegotiationRoomWritable(context)
+  const visible = Boolean(negotiation?.id && writable)
+  const enabled =
+    visible
+    && userCanMutate(context)
+    && Boolean(context.user.isParticipant)
+
+  return buildAction(context, 'submit_negotiation_offer', {
+    visible,
+    enabled: Boolean(enabled),
+    visibilityReason: visible
+      ? 'Negotiation room accepts initial offers'
+      : 'Offer submission requires an active negotiation',
+    disabledReason: !context.user.isParticipant
+      ? 'Only negotiation participants can submit offers'
+      : undefined,
+    aggregateId: negotiation?.id,
+  })
+}
+
+function evaluateSubmitNegotiationCounterOffer(
+  context: WorkflowContext,
+): WorkflowAction {
+  const negotiation = context.negotiation
+  const status = canonicalEntityStatus(NEGOTIATION_ENTITY, negotiation?.status)
+  const visible = Boolean(
+    negotiation?.id
+    && (status === 'active' || status === 'countered'),
+  )
+  const enabled =
+    visible
+    && userCanMutate(context)
+    && Boolean(context.user.isParticipant)
+
+  return buildAction(context, 'submit_negotiation_counter_offer', {
+    visible,
+    enabled: Boolean(enabled),
+    visibilityReason: visible
+      ? 'Counter offers can be submitted while negotiation is open'
+      : 'Counter offers require an active or countered negotiation',
+    disabledReason: !context.user.isParticipant
+      ? 'Only negotiation participants can submit counter offers'
+      : undefined,
+    aggregateId: negotiation?.id,
+  })
+}
+
+function evaluateAcceptNegotiationOffer(context: WorkflowContext): WorkflowAction {
+  const negotiation = context.negotiation
+  const writable = isNegotiationRoomWritable(context)
+  const visible = Boolean(negotiation?.id && writable)
+  const enabled =
+    visible
+    && userCanMutate(context)
+    && Boolean(context.user.isParticipant)
+
+  return buildAction(context, 'accept_negotiation_offer', {
+    visible,
+    enabled: Boolean(enabled),
+    visibilityReason: visible
+      ? 'Submitted offers can be accepted'
+      : 'Accept offer is only available for open negotiations',
+    disabledReason: !context.user.isParticipant
+      ? 'Only negotiation participants can accept offers'
+      : undefined,
+    aggregateId: negotiation?.id,
+  })
+}
+
+function evaluateRejectNegotiationOffer(context: WorkflowContext): WorkflowAction {
+  const accept = evaluateAcceptNegotiationOffer(context)
+  return buildAction(context, 'reject_negotiation_offer', {
+    visible: accept.visible,
+    enabled: accept.enabled,
+    visibilityReason: accept.visibilityReason,
+    disabledReason: accept.disabledReason,
+    aggregateId: accept.aggregateId,
+  })
+}
+
+function evaluateViewNegotiationTranscript(context: WorkflowContext): WorkflowAction {
+  const negotiation = context.negotiation
+  const visible = canViewNegotiationTranscript(context)
+  const enabled = visible
+
+  return buildAction(context, 'view_negotiation_transcript', {
+    visible: Boolean(negotiation?.id && visible),
+    enabled: Boolean(enabled),
+    visibilityReason: visible
+      ? 'Negotiation transcript is available for review'
+      : 'Transcript view requires participant or auditor access',
+    aggregateId: negotiation?.id,
+  })
+}
+
+function evaluateCreateCommercialAgreementFromNegotiation(context: WorkflowContext): WorkflowAction {
+  const negotiation = context.negotiation
+  const status = canonicalEntityStatus(NEGOTIATION_ENTITY, negotiation?.status)
+  const existingCommercialAgreement = context.linkage?.commercialAgreementForNegotiation
+    ?? context.linkage?.dealForNegotiation
+  const hasAcceptedOffer = Boolean(
+    context.linkage?.negotiationAcceptedOfferId
+    || (
+      status === 'agreed'
+      && context.negotiation?.commercialTerms
+      && Object.keys(context.negotiation.commercialTerms).length > 0
+    ),
+  )
+  const visible = Boolean(negotiation?.id && status === 'agreed')
+  const enabled =
+    visible
+    && userCanMutate(context)
+    && !existingCommercialAgreement?.id
+    && hasAcceptedOffer
+
+  return buildAction(context, 'create_commercial_agreement_from_negotiation', {
+    visible,
+    enabled: Boolean(enabled),
+    visibilityReason: visible
+      ? 'Agreed negotiation can create a commercial agreement'
+      : 'Create commercial agreement requires an agreed negotiation',
+    disabledReason: !hasAcceptedOffer
+      ? 'An accepted negotiation offer is required before creating a commercial agreement'
+      : existingCommercialAgreement?.id
+        ? 'A commercial agreement already exists for this negotiation'
+        : !userCanMutate(context)
+          ? 'You do not have permission to create a commercial agreement'
+          : undefined,
     aggregateId: negotiation?.id,
     metadata: negotiation?.id ? { negotiationId: negotiation.id } : undefined,
   })
 }
 
-function evaluateCreateDealFromPostMatch(context: WorkflowContext): WorkflowAction {
-  const base = evaluateCreateDealFromNegotiation(context)
+function evaluateCreateCommercialAgreementFromPostMatch(context: WorkflowContext): WorkflowAction {
+  const base = evaluateCreateCommercialAgreementFromNegotiation(context)
   const match = context.postMatch
   const visible = base.visible && Boolean(match?.id && negotiationLinkedToPostMatch(context))
-  return buildAction(context, 'create_deal_from_post_match', {
+  return buildAction(context, 'create_commercial_agreement_from_post_match', {
     visible,
     enabled: base.enabled && visible,
     visibilityReason: visible
-      ? 'Agreed PostMatch negotiation can create a deal'
-      : 'Create deal from PostMatch requires agreed negotiation linked to match',
+      ? 'Agreed PostMatch negotiation can create a commercial agreement'
+      : 'Create commercial agreement from PostMatch requires agreed negotiation linked to match',
     disabledReason: base.disabledReason,
     aggregateId: match?.id ?? base.aggregateId,
     metadata: {
@@ -284,10 +450,11 @@ function evaluateCreateDealFromPostMatch(context: WorkflowContext): WorkflowActi
   })
 }
 
-function evaluateCreateDealFromApplication(context: WorkflowContext): WorkflowAction {
+function evaluateCreateCommercialAgreementFromApplication(context: WorkflowContext): WorkflowAction {
   const application = context.application
   const agreed = findAgreedApplicationNegotiation(context)
-  const existingDeal = context.linkage?.dealForApplication
+  const existingCommercialAgreement = context.linkage?.commercialAgreementForApplication
+    ?? context.linkage?.dealForApplication
   const legacyEnabled = context.linkage?.legacyApplicationsEnabled !== false
   const visible =
     legacyEnabled
@@ -295,19 +462,20 @@ function evaluateCreateDealFromApplication(context: WorkflowContext): WorkflowAc
   const enabled =
     visible
     && userCanMutate(context)
-    && !existingDeal?.id
+    && !existingCommercialAgreement?.id
+    && !application?.commercialAgreementId
     && !application?.dealId
 
-  return buildAction(context, 'create_deal_from_application', {
+  return buildAction(context, 'create_commercial_agreement_from_application', {
     visible,
     enabled: Boolean(enabled),
     visibilityReason: visible
-      ? 'Agreed hiring negotiation can create a deal'
-      : 'Create hiring deal requires an agreed application-linked negotiation',
-    disabledReason: existingDeal?.id || application?.dealId
-      ? 'A deal already exists for this application'
+      ? 'Agreed hiring negotiation can create a commercial agreement'
+      : 'Create hiring commercial agreement requires an agreed application-linked negotiation',
+    disabledReason: existingCommercialAgreement?.id || application?.commercialAgreementId || application?.dealId
+      ? 'A commercial agreement already exists for this application'
       : !userCanMutate(context)
-        ? 'You do not have permission to create a hiring deal'
+        ? 'You do not have permission to create a hiring commercial agreement'
         : undefined,
     aggregateId: application?.id,
     workflowKey: 'hiring',
@@ -315,30 +483,65 @@ function evaluateCreateDealFromApplication(context: WorkflowContext): WorkflowAc
   })
 }
 
-function evaluateCreateContractFromDeal(context: WorkflowContext): WorkflowAction {
-  const deal = context.deal
-  const status = canonicalEntityStatus(DEAL_ENTITY, deal?.status)
+function evaluateCreateContractFromCommercialAgreement(context: WorkflowContext): WorkflowAction {
+  const commercialAgreement = context.commercialAgreement ?? context.deal
+  const status = canonicalEntityStatus(COMMERCIAL_AGREEMENT_ENTITY, commercialAgreement?.status)
   const visible = Boolean(
-    deal?.id
-    && DEAL_STATUSES_ALLOWING_CONTRACT.has(status)
-    && (deal.negotiationId || deal.postMatchId || deal.applicationId),
+    commercialAgreement?.id
+    && COMMERCIAL_AGREEMENT_STATUSES_ALLOWING_CONTRACT.has(status)
+    && (commercialAgreement.negotiationId || commercialAgreement.postMatchId || commercialAgreement.applicationId),
   )
-  const hasContract = hasActiveContractForDeal(context)
-  const enabled = visible && userCanMutate(context) && !hasContract
+  const hasContract = hasActiveContractForCommercialAgreement(context)
+  const decisionRequired = context.linkage?.contractDecisionRequired !== false
+  const decisionApproved = isDecisionStatusApproved(
+    context.linkage?.contractDecisionStatus,
+  )
+  const enabled = visible && userCanMutate(context) && !hasContract && (!decisionRequired || decisionApproved)
 
-  return buildAction(context, 'create_contract_from_deal', {
+  return buildAction(context, 'create_contract_from_commercial_agreement', {
     visible,
     enabled: Boolean(enabled),
     visibilityReason: visible
-      ? 'Deal is ready for contract creation'
-      : 'Create contract requires a draft, review, or signing deal',
+      ? 'Commercial agreement is ready for contract creation'
+      : 'Create contract requires a draft, review, or signing commercial agreement',
     disabledReason: hasContract
-      ? 'An active contract already exists for this deal'
+      ? 'An active contract already exists for this commercial agreement'
+      : decisionRequired && !decisionApproved
+        ? 'Decision review must be approved before creating a contract'
       : !userCanMutate(context)
         ? 'You do not have permission to create a contract'
         : undefined,
-    aggregateId: deal?.id,
-    metadata: deal?.id ? { dealId: deal.id } : undefined,
+    aggregateId: commercialAgreement?.id,
+    metadata: commercialAgreement?.id ? { commercialAgreementId: commercialAgreement.id } : undefined,
+  })
+}
+
+function evaluateRouteContractDecision(context: WorkflowContext): WorkflowAction {
+  const commercialAgreement = context.commercialAgreement ?? context.deal
+  const status = canonicalEntityStatus(COMMERCIAL_AGREEMENT_ENTITY, commercialAgreement?.status)
+  const visible = Boolean(
+    commercialAgreement?.id
+    && COMMERCIAL_AGREEMENT_STATUSES_ALLOWING_CONTRACT.has(status),
+  )
+  const hasContract = hasActiveContractForCommercialAgreement(context)
+  const decisionApproved = isDecisionStatusApproved(context.linkage?.contractDecisionStatus)
+  const enabled = visible && userCanMutate(context) && !hasContract && !decisionApproved
+
+  return buildAction(context, 'route_contract_decision', {
+    visible,
+    enabled,
+    visibilityReason: visible
+      ? 'Commercial agreement can be routed to decision engine review'
+      : 'Decision routing requires a draft, review, or signing commercial agreement',
+    disabledReason: hasContract
+      ? 'Contract already exists for this commercial agreement'
+      : decisionApproved
+        ? 'Decision review already approved'
+        : !userCanMutate(context)
+          ? 'You do not have permission to route contract decisions'
+          : undefined,
+    aggregateId: commercialAgreement?.id,
+    metadata: commercialAgreement?.id ? { commercialAgreementId: commercialAgreement.id } : undefined,
   })
 }
 
@@ -395,10 +598,17 @@ const ACTION_EVALUATORS: Record<WorkflowActionKey, ActionEvaluator> = {
   start_negotiation_from_application: evaluateStartNegotiationFromApplication,
   agree_negotiation: evaluateAgreeNegotiation,
   cancel_negotiation: evaluateCancelNegotiation,
-  create_deal_from_post_match: evaluateCreateDealFromPostMatch,
-  create_deal_from_application: evaluateCreateDealFromApplication,
-  create_deal_from_negotiation: evaluateCreateDealFromNegotiation,
-  create_contract_from_deal: evaluateCreateContractFromDeal,
+  send_negotiation_message: evaluateSendNegotiationMessage,
+  submit_negotiation_offer: evaluateSubmitNegotiationOffer,
+  submit_negotiation_counter_offer: evaluateSubmitNegotiationCounterOffer,
+  accept_negotiation_offer: evaluateAcceptNegotiationOffer,
+  reject_negotiation_offer: evaluateRejectNegotiationOffer,
+  view_negotiation_transcript: evaluateViewNegotiationTranscript,
+  create_commercial_agreement_from_post_match: evaluateCreateCommercialAgreementFromPostMatch,
+  create_commercial_agreement_from_application: evaluateCreateCommercialAgreementFromApplication,
+  create_commercial_agreement_from_negotiation: evaluateCreateCommercialAgreementFromNegotiation,
+  route_contract_decision: evaluateRouteContractDecision,
+  create_contract_from_commercial_agreement: evaluateCreateContractFromCommercialAgreement,
   sign_contract: evaluateSignContract,
   complete_contract: evaluateCompleteContract,
 }
@@ -425,7 +635,7 @@ function isActionAllowedForWorkflow(
     return true
   }
   if (
-    ['start_negotiation_from_application', 'create_deal_from_application'].includes(key)
+    ['start_negotiation_from_application', 'create_commercial_agreement_from_application'].includes(key)
     && context.application?.id
   ) {
     return true

@@ -84,11 +84,11 @@ export const mainNavigation: NavGroup[] = [
         keywords: ['my negotiations', 'terms', 'counter', 'pending'],
       },
       {
-        title: 'My Deals',
-        href: '/deals',
+        title: 'My Commercial Agreements',
+        href: '/commercial-agreements',
         icon: Handshake,
         state: { domain: 'workspace' },
-        keywords: ['my deals', 'executing', 'agreements'],
+        keywords: ['my commercial agreements', 'executing', 'agreements'],
       },
       {
         title: 'My Contracts',
@@ -104,10 +104,10 @@ export const mainNavigation: NavGroup[] = [
     items: [
       {
         title: 'Discover',
-        href: '/people',
+        href: '/marketplace',
         icon: Compass,
         state: { domain: 'marketplace' },
-        keywords: ['discover', 'explore', 'search', 'directory'],
+        keywords: ['discover', 'explore', 'marketplace', 'models', 'matching'],
       },
       {
         title: 'Browse Opportunities',
@@ -195,7 +195,7 @@ export const adminNavigationGroups: NavGroup[] = [
   {
     title: 'Deals & legal',
     items: [
-      { title: 'Deals', href: '/admin/deals', icon: Handshake },
+      { title: 'Commercial Agreements', href: '/admin/commercial-agreements', icon: Handshake },
       { title: 'Contracts', href: '/admin/contracts', icon: FileText },
       { title: 'Consortium', href: '/admin/consortium', icon: Building2 },
     ],
@@ -259,12 +259,14 @@ export const routeLabels: Record<string, string> = {
   'company-dashboard': 'Company Workspace',
   pipeline: 'Pipeline',
   people: 'Discover',
+  marketplace: 'Marketplace',
   opportunities: 'Opportunities',
   create: 'Create',
   edit: 'Edit',
   map: 'Map',
   matches: 'Matches',
   negotiations: 'Negotiations',
+  'commercial-agreements': 'Commercial Agreements',
   deals: 'Deals',
   rate: 'Rate',
   contracts: 'Contracts',

@@ -1,7 +1,7 @@
 import type {
   Application,
+  CommercialAgreement,
   Contract,
-  Deal,
   Negotiation,
 } from '@/types/domain.ts'
 import {
@@ -14,6 +14,7 @@ import { normalizeParticipants } from '@/types/participant.ts'
 export function normalizeApplication(raw: Application): Application {
   return {
     ...raw,
+    commercialAgreementId: raw.commercialAgreementId ?? raw.dealId,
     commercialTerms:
       raw.commercialTerms ??
       commercialTermsFromApplicationValue(raw.application_value),
@@ -33,7 +34,7 @@ export function normalizeNegotiation(raw: Negotiation): Negotiation {
   }
 }
 
-export function normalizeDeal(raw: Deal): Deal {
+export function normalizeCommercialAgreement(raw: CommercialAgreement): CommercialAgreement {
   const participants = normalizeParticipants(raw.participants, raw.parties)
   const commercialTerms =
     raw.commercialTerms ??
@@ -76,9 +77,16 @@ export function normalizeNegotiations(items: Negotiation[]): Negotiation[] {
   return items.map(normalizeNegotiation)
 }
 
-export function normalizeDeals(items: Deal[]): Deal[] {
-  return items.map(normalizeDeal)
+export function normalizeCommercialAgreements(
+  items: CommercialAgreement[],
+): CommercialAgreement[] {
+  return items.map(normalizeCommercialAgreement)
 }
+
+/** @deprecated Use normalizeCommercialAgreement */
+export const normalizeDeal = normalizeCommercialAgreement
+/** @deprecated Use normalizeCommercialAgreements */
+export const normalizeDeals = normalizeCommercialAgreements
 
 export function normalizeContracts(items: Contract[]): Contract[] {
   return items.map(normalizeContract)

@@ -1,148 +1,84 @@
-import type {
-  Command,
-  CommandResult,
-  CreateDealFromApplicationCommand,
-  CreateDealFromNegotiationCommand,
-  CreateDealFromPostMatchCommand,
-  TransitionDealStatusCommand,
-} from '@pm-twin/commands'
+export {
+  setCommercialAgreementCommandGatewayForTests as setDealCommandGatewayForTests,
+} from '@/services/commercial-agreement-command-service.ts'
+import type { CommandResult } from '@pm-twin/commands'
 import type { Deal } from '@/types/domain.ts'
-import type { DefaultCommandGateway } from '@/commands/default-command-gateway.ts'
-import type { DealRepository } from '@/repositories/deal-repository.ts'
-import { getApplicationCommandGateway } from '@/commands/application-command-gateway.ts'
-import { dealRepository } from '@/repositories/index.ts'
+import {
+  createCommercialAgreementCommandService,
+  type CommercialAgreementCommandServiceDeps,
+} from '@/services/commercial-agreement-command-service.ts'
+import type { CommercialAgreementRepository } from '@/repositories/commercial-agreement-repository.ts'
 
-export type DealCommandServiceDeps = {
-  readonly gateway?: DefaultCommandGateway
-  readonly dealRepository?: DealRepository
+export type DealCommandServiceDeps = CommercialAgreementCommandServiceDeps & {
+  /** @deprecated Use commercialAgreementRepository */
+  readonly dealRepository?: CommercialAgreementRepository
 }
 
-function createClientRequestId(prefix: string): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return `${prefix}-${crypto.randomUUID()}`
-  }
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`
-}
-
-let gatewayOverride: DefaultCommandGateway | null = null
-
-/** Test hook — inject an isolated gateway without touching UI wiring. */
-export function setDealCommandGatewayForTests(
-  gateway: DefaultCommandGateway | null,
-): void {
-  gatewayOverride = gateway
-}
-
-function resolveGateway(deps?: DealCommandServiceDeps): DefaultCommandGateway {
-  return deps?.gateway ?? gatewayOverride ?? getApplicationCommandGateway()
-}
-
-function resolveDealRepository(deps?: DealCommandServiceDeps): DealRepository {
-  return deps?.dealRepository ?? dealRepository
-}
-
-function executeCommand(
-  command: Command,
+function resolveCommercialAgreementDeps(
   deps?: DealCommandServiceDeps,
-): CommandResult {
-  return resolveGateway(deps).execute(command)
+): CommercialAgreementCommandServiceDeps | undefined {
+  if (!deps) return undefined
+  return {
+    gateway: deps.gateway,
+    commercialAgreementRepository:
+      deps.commercialAgreementRepository ?? deps.dealRepository,
+  }
 }
 
 export function createDealCommandService(deps?: DealCommandServiceDeps) {
+  const service = createCommercialAgreementCommandService(
+    resolveCommercialAgreementDeps(deps),
+  )
   return {
     createDealFromPostMatch(
       postMatchId: string,
       negotiationId: string,
       serviceDeps?: DealCommandServiceDeps,
     ): { result: CommandResult; deal: Deal | null } {
-      const effectiveDeps = serviceDeps ?? deps
-      const command = {
-        commandType: 'CreateDealFromPostMatch',
-        aggregateId: postMatchId,
-        negotiationId,
-        clientRequestId: createClientRequestId('CreateDealFromPostMatch'),
-      } satisfies CreateDealFromPostMatchCommand
-
-      const result = executeCommand(command, effectiveDeps)
-
-      if (!result.success) {
-        return { result, deal: null }
-      }
-
-      const repository = resolveDealRepository(effectiveDeps)
-      const deal = repository.getById(result.aggregateId) ?? null
-      return { result, deal }
+      const { result, commercialAgreement } =
+        service.createCommercialAgreementFromPostMatch(
+          postMatchId,
+          negotiationId,
+          resolveCommercialAgreementDeps(serviceDeps),
+        )
+      return { result, deal: commercialAgreement }
     },
-
     createDealFromApplication(
       applicationId: string,
       negotiationId: string,
       serviceDeps?: DealCommandServiceDeps,
     ): { result: CommandResult; deal: Deal | null } {
-      const effectiveDeps = serviceDeps ?? deps
-      const command = {
-        commandType: 'CreateDealFromApplication',
-        aggregateId: applicationId,
-        negotiationId,
-        clientRequestId: createClientRequestId('CreateDealFromApplication'),
-      } satisfies CreateDealFromApplicationCommand
-
-      const result = executeCommand(command, effectiveDeps)
-
-      if (!result.success) {
-        return { result, deal: null }
-      }
-
-      const repository = resolveDealRepository(effectiveDeps)
-      const deal = repository.getById(result.aggregateId) ?? null
-      return { result, deal }
+      const { result, commercialAgreement } =
+        service.createCommercialAgreementFromApplication(
+          applicationId,
+          negotiationId,
+          resolveCommercialAgreementDeps(serviceDeps),
+        )
+      return { result, deal: commercialAgreement }
     },
-
     createDealFromNegotiation(
       negotiationId: string,
       serviceDeps?: DealCommandServiceDeps,
     ): { result: CommandResult; deal: Deal | null } {
-      const effectiveDeps = serviceDeps ?? deps
-      const command = {
-        commandType: 'CreateDealFromNegotiation',
-        aggregateId: negotiationId,
-        negotiationId,
-        clientRequestId: createClientRequestId('CreateDealFromNegotiation'),
-      } satisfies CreateDealFromNegotiationCommand
-
-      const result = executeCommand(command, effectiveDeps)
-
-      if (!result.success) {
-        return { result, deal: null }
-      }
-
-      const repository = resolveDealRepository(effectiveDeps)
-      const deal = repository.getById(result.aggregateId) ?? null
-      return { result, deal }
+      const { result, commercialAgreement } =
+        service.createCommercialAgreementFromNegotiation(
+          negotiationId,
+          resolveCommercialAgreementDeps(serviceDeps),
+        )
+      return { result, deal: commercialAgreement }
     },
-
     transitionDealStatus(
       dealId: string,
       targetStatus: string,
       serviceDeps?: DealCommandServiceDeps,
     ): { result: CommandResult; deal: Deal | null } {
-      const effectiveDeps = serviceDeps ?? deps
-      const command = {
-        commandType: 'TransitionDealStatus',
-        aggregateId: dealId,
-        targetStatus,
-        clientRequestId: createClientRequestId('TransitionDealStatus'),
-      } satisfies TransitionDealStatusCommand
-
-      const result = executeCommand(command, effectiveDeps)
-
-      if (!result.success) {
-        return { result, deal: null }
-      }
-
-      const repository = resolveDealRepository(effectiveDeps)
-      const deal = repository.getById(dealId) ?? null
-      return { result, deal }
+      const { result, commercialAgreement } =
+        service.transitionCommercialAgreementStatus(
+          dealId,
+          targetStatus,
+          resolveCommercialAgreementDeps(serviceDeps),
+        )
+      return { result, deal: commercialAgreement }
     },
   }
 }

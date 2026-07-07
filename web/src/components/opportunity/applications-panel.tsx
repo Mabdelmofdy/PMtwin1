@@ -45,7 +45,7 @@ export const APPLICATIONS_LEGACY_SECTION_TITLE =
   'Direct applications (legacy / hiring)'
 
 export const APPLICATIONS_LEGACY_EMPTY_MESSAGE =
-  'No direct applications. Collaboration runs through matches — review matches above to accept, negotiate, and create deals.'
+  'No direct applications. Collaboration runs through matches - review matches above to accept, negotiate, and create commercial agreements.'
 
 function ApplicationHiringWorkflowActions({
   application,
@@ -69,7 +69,7 @@ function ApplicationHiringWorkflowActions({
   const createDealAction = showCreateDeal
     ? findWorkflowAction(
         buildWorkflowContext({ application, primaryWorkflow: 'hiring', user: { userId: null, canMutate: !disabled } }),
-        'create_deal_from_application',
+        'create_commercial_agreement_from_application',
       )
     : undefined
   const negotiationHref = resolveApplicationHiringNegotiationLink(application)
@@ -89,7 +89,7 @@ function ApplicationHiringWorkflowActions({
       return
     }
     toast.success('Hiring negotiation started', {
-      description: 'Agree terms, then create the hiring deal when ready.',
+      description: 'Agree terms, then create the hiring commercial agreement when ready.',
     })
     navigate(`/negotiations/${result.negotiationId}`)
   }
@@ -103,10 +103,10 @@ function ApplicationHiringWorkflowActions({
       toast.error(result.message)
       return
     }
-    toast.success('Hiring deal created', {
-      description: 'Draft deal workspace is ready.',
+    toast.success('Hiring commercial agreement created', {
+      description: 'Draft commercial agreement workspace is ready.',
     })
-    navigate(`/deals/${result.dealId}`)
+    navigate(`/commercial-agreements/${result.dealId}`)
   }
 
   return (
@@ -128,7 +128,7 @@ function ApplicationHiringWorkflowActions({
           disabled={disabled || pending !== null}
           onClick={handleCreateDeal}
         >
-          {pending === 'deal' ? 'Creating…' : (createDealAction?.label ?? 'Create hiring deal')}
+          {pending === 'deal' ? 'Creating…' : (createDealAction?.label ?? 'Create hiring commercial agreement')}
         </PmButton>
       ) : null}
       {negotiationHref && !showStartNegotiation ? (
@@ -138,7 +138,7 @@ function ApplicationHiringWorkflowActions({
       ) : null}
       {dealHref ? (
         <PmButton type="button" size="sm" variant="outline" asChild>
-          <Link to={dealHref}>View deal</Link>
+          <Link to={dealHref}>View commercial agreement</Link>
         </PmButton>
       ) : null}
     </div>
@@ -215,7 +215,7 @@ export function ApplicationsPanel({
       }
       description={
         variant === 'legacy'
-          ? 'Optional hiring path — does not replace Match → Negotiation → Deal.'
+          ? 'Optional hiring path - does not replace Match -> Negotiation -> Commercial Agreement.'
           : undefined
       }
       className={cn(

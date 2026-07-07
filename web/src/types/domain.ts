@@ -6,7 +6,7 @@ import type {
   ApplicationStatus,
   AuditActorType,
   ContractStatus,
-  DealStatus,
+  CommercialAgreementStatus,
   EntityType,
   MatchType,
   NegotiationStatus,
@@ -21,12 +21,17 @@ import type {
   NegotiationTerms,
 } from '@/types/commercial-terms.ts'
 import type { Participant } from '@/types/participant.ts'
+import type {
+  ProductLanguageLocale,
+  ProductLanguageOverrides,
+} from '../../../packages/product-language/src/index.ts'
 
 export type { Organization, OrganizationStatus } from '@/types/organization.ts'
 export type {
   ApplicationStatus,
   AuditActorType,
   ContractStatus,
+  CommercialAgreementStatus,
   DealStatus,
   EntityType,
   MatchType,
@@ -123,6 +128,8 @@ export type Application = TenantScoped & {
   matchId?: string
   matchType?: MatchType | string
   negotiationId?: string
+  commercialAgreementId?: string
+  /** @deprecated Prefer commercialAgreementId */
   dealId?: string
   createdAt?: string
   updatedAt?: string
@@ -214,6 +221,8 @@ export type PostMatch = TenantScoped & {
   updatedAt?: string
   expiresAt?: string
   isReplacement?: boolean
+  commercialAgreementId?: string
+  /** @deprecated Prefer commercialAgreementId */
   dealId?: string
   negotiationId?: string
   /** Set when superseded by a newer PostMatch (ADR-002). */
@@ -267,7 +276,7 @@ export type Negotiation = TenantScoped & {
   updatedAt?: string
 }
 
-export type DealMilestone = {
+export type CommercialAgreementMilestone = {
   id: string
   title: string
   description?: string
@@ -279,7 +288,7 @@ export type DealMilestone = {
   approvedBy?: string | null
 }
 
-export type Deal = TenantScoped & {
+export type CommercialAgreement = TenantScoped & {
   id: string
   negotiationId: string
   opportunityId: string
@@ -293,7 +302,7 @@ export type Deal = TenantScoped & {
   applicationId?: string | null
   matchType?: MatchType | string
   title: string
-  status: DealStatus | string
+  status: CommercialAgreementStatus | string
   participants: Participant[]
   /** @deprecated Use participants — legacy compat alias */
   parties?: Participant[]
@@ -304,7 +313,7 @@ export type Deal = TenantScoped & {
   valueTerms?: Record<string, unknown>
   scope?: string
   deliverables?: string | string[]
-  milestones?: DealMilestone[]
+  milestones?: CommercialAgreementMilestone[]
   timeline?: { start?: string; end?: string }
   exchangeMode?: string
   payload?: Record<string, unknown> | null
@@ -315,10 +324,16 @@ export type Deal = TenantScoped & {
   completedAt?: string | null
   closedAt?: string | null
 }
+/** @deprecated Use CommercialAgreementMilestone */
+export type DealMilestone = CommercialAgreementMilestone
+/** @deprecated Use CommercialAgreement */
+export type Deal = CommercialAgreement
 
 export type Contract = TenantScoped & {
   id: string
-  dealId: string
+  commercialAgreementId?: string
+  /** @deprecated Prefer commercialAgreementId */
+  dealId?: string
   opportunityId?: string
   opportunityIds?: string[]
   matchId?: string | null
@@ -376,4 +391,12 @@ export type SiteContentPage = {
   label: string
   route: string
   sections: Record<string, SiteContentSection>
+}
+
+export type ProductLanguageSettings = {
+  tenantId: string
+  locale: ProductLanguageLocale
+  overrides: ProductLanguageOverrides
+  updatedBy: string
+  updatedAt: string
 }

@@ -41,6 +41,8 @@ export {
   normalizeCompanies,
   normalizeContract,
   normalizeContracts,
+  normalizeCommercialAgreement,
+  normalizeCommercialAgreements,
   normalizeDeal,
   normalizeDeals,
   normalizeMatch,

@@ -1,5 +1,6 @@
 import transitions from '../registry/transitions.json' with { type: 'json' }
 import {
+  ENTITY_TYPE_LEGACY_ALIASES,
   getCanonicalStates,
   isEntityType,
   toCanonical,
@@ -20,11 +21,12 @@ import {
  * @returns {EntityFsm | null}
  */
 export function getFsm(entityType) {
-  if (!isEntityType(entityType)) {
+  const resolvedEntityType = ENTITY_TYPE_LEGACY_ALIASES[entityType] ?? entityType
+  if (!isEntityType(resolvedEntityType)) {
     return null
   }
 
-  const fsm = transitions[entityType]
+  const fsm = transitions[resolvedEntityType]
   if (!fsm) {
     return null
   }
@@ -36,8 +38,8 @@ export function getFsm(entityType) {
   }
 
   return Object.freeze({
-    entityType,
-    states: getCanonicalStates(entityType),
+    entityType: resolvedEntityType,
+    states: getCanonicalStates(resolvedEntityType),
     terminalStates: Object.freeze([...fsm.terminalStates]),
     transitions: Object.freeze(frozenTransitions),
   })
@@ -49,12 +51,13 @@ export function getFsm(entityType) {
  * @returns {boolean}
  */
 export function isTerminal(entityType, status) {
-  const canonical = toCanonical(entityType, status)
+  const resolvedEntityType = ENTITY_TYPE_LEGACY_ALIASES[entityType] ?? entityType
+  const canonical = toCanonical(resolvedEntityType, status)
   if (!canonical) {
     return false
   }
 
-  const fsm = transitions[entityType]
+  const fsm = transitions[resolvedEntityType]
   if (!fsm) {
     return false
   }
@@ -68,12 +71,13 @@ export function isTerminal(entityType, status) {
  * @returns {readonly string[]}
  */
 export function allowedTransitions(entityType, fromStatus) {
-  const from = toCanonical(entityType, fromStatus)
+  const resolvedEntityType = ENTITY_TYPE_LEGACY_ALIASES[entityType] ?? entityType
+  const from = toCanonical(resolvedEntityType, fromStatus)
   if (!from) {
     return Object.freeze([])
   }
 
-  const fsm = transitions[entityType]
+  const fsm = transitions[resolvedEntityType]
   if (!fsm) {
     return Object.freeze([])
   }
@@ -92,14 +96,15 @@ export function allowedTransitions(entityType, fromStatus) {
  * @returns {readonly string[]}
  */
 export function forbiddenTransitions(entityType, fromStatus) {
-  const from = toCanonical(entityType, fromStatus)
+  const resolvedEntityType = ENTITY_TYPE_LEGACY_ALIASES[entityType] ?? entityType
+  const from = toCanonical(resolvedEntityType, fromStatus)
   if (!from) {
     return Object.freeze([])
   }
 
   const allowed = new Set(allowedTransitions(entityType, from))
   return Object.freeze(
-    getCanonicalStates(entityType).filter(
+    getCanonicalStates(resolvedEntityType).filter(
       (state) => state !== from && !allowed.has(state),
     ),
   )

@@ -41,7 +41,7 @@ export type ContractDetailReadModel = {
   readonly status: string
   readonly canonicalStatus: string
   readonly statusLabel: string
-  readonly dealId: string
+  readonly dealId: string | null
   readonly postMatchId: string | null
   readonly negotiationId: string | null
   readonly needOpportunityId: string | null
@@ -301,7 +301,7 @@ export function buildContractDetailReadModel(
     status: contract.status,
     canonicalStatus: resolveCanonicalStatus(CONTRACT_ENTITY, contract.status),
     statusLabel: formatCanonicalStatusLabel(CONTRACT_ENTITY, contract.status),
-    dealId: contract.dealId,
+    dealId: contract.dealId ?? null,
     postMatchId,
     negotiationId,
     needOpportunityId,
@@ -327,7 +327,7 @@ export function buildContractDetailReadModel(
     offerOpportunityStatusLabel: offerOpportunity.statusLabel,
     links: {
       deal: contract.dealId
-        ? { label: 'Back to Deal', path: `/deals/${contract.dealId}` }
+        ? { label: 'Back to Commercial Agreement', path: `/commercial-agreements/${contract.dealId}` }
         : null,
       match: postMatchId
         ? { label: 'Back to Match', path: `/matches/${postMatchId}` }

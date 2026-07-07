@@ -9,6 +9,7 @@ export const REPOSITORY_ENTITY_KEYS = {
   audit: 'newAuditEntries',
   postMatch: 'postMatches',
   deal: 'deals',
+  commercialAgreement: 'commercialAgreements',
   negotiation: 'negotiations',
   contract: 'contracts',
   notification: 'notifications',

@@ -84,7 +84,7 @@ function buildApplicationWorkflowContext(
       negotiationsForApplication: getNegotiations(application.id).map((negotiation) =>
         toWorkflowEntitySnapshot(negotiation) ?? { id: negotiation.id, status: negotiation.status },
       ),
-      dealForApplication: (() => {
+      commercialAgreementForApplication: (() => {
         const deal = findDeal(application.id)
         return deal ? toWorkflowEntitySnapshot(deal) ?? null : null
       })(),
@@ -107,7 +107,7 @@ export function canShowCreateHiringDeal(
 ): boolean {
   if (!application?.id) return false
   const context = buildApplicationWorkflowContext(application, deps)
-  return isWorkflowActionAvailable(context, 'create_deal_from_application')
+  return isWorkflowActionAvailable(context, 'create_commercial_agreement_from_application')
 }
 
 export function startHiringNegotiationFromApplicationUiAction(
@@ -165,7 +165,7 @@ export function createHiringDealFromApplicationUiAction(
     getApplication(applicationId)
     ?? ({ id: applicationId } as Application)
   const context = buildApplicationWorkflowContext(application, deps)
-  const action = findWorkflowAction(context, 'create_deal_from_application')
+  const action = findWorkflowAction(context, 'create_commercial_agreement_from_application')
   if (!action?.enabled) {
     return {
       success: false,
@@ -227,5 +227,5 @@ export function resolveApplicationHiringDealLink(
   const deal =
     find(application.id)
     ?? (application.dealId ? dealRepository.getById(application.dealId) : undefined)
-  return deal?.id ? `/deals/${deal.id}` : null
+  return deal?.id ? `/commercial-agreements/${deal.id}` : null
 }

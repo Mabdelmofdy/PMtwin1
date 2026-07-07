@@ -6,44 +6,47 @@ import { describe, it } from 'node:test'
 
 const sourcePath = join(
   dirname(fileURLToPath(import.meta.url)),
-  'deals-pages.tsx',
+  'commercial-agreements-pages.tsx',
 )
 const source = readFileSync(sourcePath, 'utf8')
 
-describe('DealsPage browse layout contract', () => {
+describe('CommercialAgreementsPage browse layout contract', () => {
   it('uses PmBrowsePage with toolbar and pagination slots', () => {
-    const fnStart = source.indexOf('export function DealsPage')
-    const fnEnd = source.indexOf('export function DealDetailPage')
+    const fnStart = source.indexOf('export function CommercialAgreementsPage')
+    const fnEnd = source.indexOf('export function CommercialAgreementDetailPage')
     assert.ok(fnStart >= 0 && fnEnd > fnStart)
 
-    const dealsPageSource = source.slice(fnStart, fnEnd)
-    assert.match(dealsPageSource, /<PmBrowsePage/)
-    assert.match(dealsPageSource, /toolbar=\{[\s\S]*<PmBrowseToolbar/)
-    assert.match(dealsPageSource, /pagination=\{/)
-    assert.doesNotMatch(dealsPageSource, /<PmToolbarSurface/)
-    assert.doesNotMatch(dealsPageSource, /<PmPage[\s>]/)
+    const pageSource = source.slice(fnStart, fnEnd)
+    assert.match(pageSource, /<PmBrowsePage/)
+    assert.match(pageSource, /toolbar=\{[\s\S]*<PmBrowseToolbar/)
+    assert.match(pageSource, /pagination=\{/)
+    assert.doesNotMatch(pageSource, /<PmToolbarSurface/)
+    assert.doesNotMatch(pageSource, /<PmPage[\s>]/)
   })
 
   it('keeps PmDataTable with search in browse toolbar', () => {
-    const fnStart = source.indexOf('export function DealsPage')
-    const fnEnd = source.indexOf('export function DealDetailPage')
-    const dealsPageSource = source.slice(fnStart, fnEnd)
+    const fnStart = source.indexOf('export function CommercialAgreementsPage')
+    const fnEnd = source.indexOf('export function CommercialAgreementDetailPage')
+    const pageSource = source.slice(fnStart, fnEnd)
 
-    assert.match(dealsPageSource, /<PmTableToolbar/)
-    assert.match(dealsPageSource, /<PmTableSearch/)
-    assert.match(dealsPageSource, /<PmDataTable/)
-    assert.match(dealsPageSource, /resolveListEmptyState/)
+    assert.match(pageSource, /<PmTableToolbar/)
+    assert.match(pageSource, /<PmTableSearch/)
+    assert.match(pageSource, /<PmDataTable/)
+    assert.match(pageSource, /resolveListEmptyState/)
   })
 
-  it('keeps row actions and mobile DealListCard navigation', () => {
-    const fnStart = source.indexOf('export function DealsPage')
-    const fnEnd = source.indexOf('export function DealDetailPage')
-    const dealsPageSource = source.slice(fnStart, fnEnd)
+  it('keeps row actions and mobile list card navigation', () => {
+    const fnStart = source.indexOf('export function CommercialAgreementsPage')
+    const fnEnd = source.indexOf('export function CommercialAgreementDetailPage')
+    const pageSource = source.slice(fnStart, fnEnd)
 
-    assert.match(dealsPageSource, /<PmTableRowActions/)
-    assert.match(dealsPageSource, /navigate\(`\/deals\/\$\{d\.id\}`\)/)
-    assert.match(dealsPageSource, /renderMobileCard=\{\(d\) => <DealListCard deal=\{d\} \/>/)
-    assert.match(source, /function DealListCard/)
-    assert.match(source, /href=\{`\/deals\/\$\{deal\.id\}`\}/)
+    assert.match(pageSource, /<PmTableRowActions/)
+    assert.match(pageSource, /navigate\(`\/commercial-agreements\/\$\{d\.id\}`\)/)
+    assert.match(
+      pageSource,
+      /renderMobileCard=\{\(d\) => <CommercialAgreementListCard commercialAgreement=\{d\} \/>}/,
+    )
+    assert.match(source, /function CommercialAgreementListCard/)
+    assert.match(source, /href=\{`\/commercial-agreements\/\$\{commercialAgreement\.id\}`\}/)
   })
 })

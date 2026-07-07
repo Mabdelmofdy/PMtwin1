@@ -44,6 +44,17 @@ describe('MatchesPage browse layout contract', () => {
     assert.doesNotMatch(matchesPageSource, /<PmDataTable/)
   })
 
+  it('supports URL-driven enterprise match filters', () => {
+    const fnStart = source.indexOf('export function MatchesPage')
+    const fnEnd = source.indexOf('export function MatchDetailPage')
+    const matchesPageSource = source.slice(fnStart, fnEnd)
+
+    assert.match(matchesPageSource, /useSearchParams/)
+    assert.match(matchesPageSource, /matchTypes/)
+    assert.match(matchesPageSource, /mainModel/)
+    assert.match(matchesPageSource, /exchangeModes/)
+  })
+
   it('keeps MatchCard rendering in browse card grid', () => {
     const listSectionPath = join(
       dirname(fileURLToPath(import.meta.url)),
@@ -89,5 +100,15 @@ describe('NegotiationsPage browse layout contract', () => {
     assert.match(negotiationsPageSource, /grid gap-3 md:grid-cols-2/)
     assert.match(negotiationsPageSource, /Open negotiation/)
     assert.match(negotiationsPageSource, /<PmTablePagination/)
+  })
+
+  it('adds status filtering to negotiation browse toolbar', () => {
+    const fnStart = source.indexOf('export function NegotiationsPage')
+    const fnEnd = source.indexOf('export function NegotiationDetailPage')
+    const negotiationsPageSource = source.slice(fnStart, fnEnd)
+
+    assert.match(negotiationsPageSource, /const \[status, setStatus\]/)
+    assert.match(negotiationsPageSource, /<Select value=\{status\}/)
+    assert.match(negotiationsPageSource, /All statuses/)
   })
 })

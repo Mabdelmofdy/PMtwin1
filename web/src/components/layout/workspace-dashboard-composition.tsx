@@ -30,9 +30,11 @@ import { useAuth } from '@/providers/auth-provider'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { resolveMatchTypeStyle } from '@/tokens'
 import { formatDate, formatRelativeTime } from '@/lib/format'
+import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import { formatReadinessScorePercent } from '@/components/ui/pm-readiness-score-display'
 import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
 import { cn } from '@/lib/utils'
+import { useProductLanguage } from '@/providers/product-language-provider'
 import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
 function buildNeedsActionItems(input: {
   userId?: string
@@ -79,7 +81,7 @@ function buildNeedsActionItems(input: {
       context: 'Deal requires your signature or review.',
       status: deal.status,
       statusEntity: 'deal',
-      primary: { label: 'Open deal', href: `/deals/${deal.id}` },
+      primary: { label: PRODUCT_LANGUAGE.OPEN_COMMERCIAL_AGREEMENT, href: `/commercial-agreements/${deal.id}` },
     })
   }
 
@@ -105,6 +107,7 @@ function buildNeedsActionItems(input: {
 /** Action-first dashboard — attention, matches, active workflows, activity. */
 export function WorkspaceDashboardComposition() {
   const { user, isCompanyUser } = useAuth()
+  const { productLanguage } = useProductLanguage()
   const userId = user?.id
   const firstName = (user?.profile?.name ?? 'there').split(' ')[0]
   const profileKind = isCompanyUser ? 'company' : 'individual'
@@ -158,7 +161,7 @@ export function WorkspaceDashboardComposition() {
         title: d.title,
         status: d.status,
         entity: 'deal' as const,
-        href: `/deals/${d.id}`,
+        href: `/commercial-agreements/${d.id}`,
         updatedAt: d.updatedAt,
       })),
   ]
@@ -208,12 +211,12 @@ export function WorkspaceDashboardComposition() {
           actions={
             <PmPageActions
               primary={{
-                label: 'Post opportunity',
+                label: productLanguage.actionLabel('createOpportunity'),
                 href: '/opportunities/create',
                 render: () => (
                   <PmButton asChild>
                     <Link to="/opportunities/create">
-                      Post opportunity
+                      {productLanguage.actionLabel('createOpportunity')}
                       <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
                     </Link>
                   </PmButton>
@@ -228,14 +231,18 @@ export function WorkspaceDashboardComposition() {
           data-slot="pm-dashboard-metric-strip"
           items={[
             {
-              label: 'My opportunities',
+              label: `My ${productLanguage.plural('opportunity').toLowerCase()}`,
               value: opportunities.filter((o) => o.creatorId === userId).length,
               href: '/opportunities',
             },
             { label: 'My matches', value: matches.length, href: '/matches' },
-            { label: 'My negotiations', value: negotiations.length, href: '/negotiations' },
-            { label: 'My deals', value: deals.length, href: '/deals' },
-            { label: 'My contracts', value: contracts.length, href: '/contracts' },
+            { label: `My ${productLanguage.plural('negotiation').toLowerCase()}`, value: negotiations.length, href: '/negotiations' },
+            {
+              label: `My ${productLanguage.plural('commercialAgreement').toLowerCase()}`,
+              value: deals.length,
+              href: '/commercial-agreements',
+            },
+            { label: `My ${productLanguage.plural('contract').toLowerCase()}`, value: contracts.length, href: '/contracts' },
           ]}
         />
       }
@@ -251,7 +258,7 @@ export function WorkspaceDashboardComposition() {
           {notifications.length === 0 ? (
             <PmEmptyState
               title="No recent alerts"
-              description="Notifications about matches, negotiations, and deals will appear here."
+              description="Notifications about matches, negotiations, and commercial agreements will appear here."
               size="compact"
             />
           ) : (
@@ -332,7 +339,7 @@ export function WorkspaceDashboardComposition() {
       {blockedItems.length === 0 ? (
         <PmEmptyState
           title="No blockers right now"
-          description="Your workflow is moving. Keep monitoring negotiations and deals."
+          description="Your workflow is moving. Keep monitoring negotiations and commercial agreements."
           size="compact"
         />
       ) : (

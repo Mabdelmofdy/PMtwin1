@@ -51,10 +51,15 @@ export function findAgreedApplicationNegotiation(context: WorkflowContext) {
   return linked.find((negotiation) => (negotiation.status ?? '').toLowerCase() === 'agreed')
 }
 
-export function hasActiveContractForDeal(context: WorkflowContext): boolean {
-  const contracts = context.linkage?.contractsForDeal ?? []
+export function hasActiveContractForCommercialAgreement(context: WorkflowContext): boolean {
+  const contracts = context.linkage?.contractsForCommercialAgreement
+    ?? context.linkage?.contractsForDeal
+    ?? []
   return contracts.some((contract) => {
     const status = (contract.status ?? '').toLowerCase()
     return status !== 'completed' && status !== 'terminated' && status !== 'cancelled'
   })
 }
+
+/** @deprecated use `hasActiveContractForCommercialAgreement` */
+export const hasActiveContractForDeal = hasActiveContractForCommercialAgreement

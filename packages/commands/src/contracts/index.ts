@@ -1,8 +1,17 @@
 export type {
+  RouteDecisionCommand,
+  RouteContractDecisionCommand,
+  RecordDecisionApprovalCommand,
+  DelegateDecisionApprovalCommand,
+  EscalateDecisionCommand,
+} from './decision-commands.ts'
+
+export type {
   TransitionOpportunityStatusCommand,
   TransitionApplicationStatusCommand,
   TransitionPostMatchStatusCommand,
   TransitionNegotiationStatusCommand,
+  TransitionCommercialAgreementStatusCommand,
   TransitionDealStatusCommand,
   TransitionContractStatusCommand,
 } from './transition-commands.ts'
@@ -61,6 +70,24 @@ export type {
 } from './negotiation-commands.ts'
 
 export type {
+  NegotiationOfferTermsPayload,
+  SendNegotiationMessageCommand,
+  EditNegotiationMessageCommand,
+  AddNegotiationAttachmentCommand,
+  SubmitNegotiationOfferCommand,
+  SubmitNegotiationCounterOfferCommand,
+  AcceptNegotiationOfferCommand,
+  RejectNegotiationOfferCommand,
+  LockNegotiationTranscriptCommand,
+} from './negotiation-room-commands.ts'
+
+export type {
+  CreateCommercialAgreementFromNegotiationCommand,
+  CreateCommercialAgreementFromPostMatchCommand,
+  CreateCommercialAgreementFromApplicationCommand,
+} from './commercial-agreement-commands.ts'
+
+export type {
   CreateDealFromNegotiationCommand,
   CreateDealFromPostMatchCommand,
   CreateDealFromApplicationCommand,
@@ -74,6 +101,7 @@ export type {
 export type {
   ActivateContractCommand,
   CompleteContractCommand,
+  CreateContractFromCommercialAgreementCommand,
   CreateContractFromDealCommand,
   SignContractCommand,
   TerminateContractCommand,

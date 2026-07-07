@@ -4,6 +4,7 @@ import type {
   CommandResult,
   CompleteContractCommand,
   ContractParty,
+  CreateContractFromCommercialAgreementCommand,
   CreateContractFromDealCommand,
   SignContractCommand,
   TerminateContractCommand,
@@ -187,9 +188,10 @@ export class ContractCommandHandler {
     }
 
     switch (command.commandType) {
+      case 'CreateContractFromCommercialAgreement':
       case 'CreateContractFromDeal':
-        return this.handleCreateFromDeal(
-          command as CreateContractFromDealCommand,
+        return this.handleCreateFromCommercialAgreement(
+          command as CreateContractFromCommercialAgreementCommand,
         )
       case 'SignContract':
         return this.handleSign(command as SignContractCommand)
@@ -206,55 +208,57 @@ export class ContractCommandHandler {
     }
   }
 
-  private handleCreateFromDeal(
-    command: CreateContractFromDealCommand,
+  private handleCreateFromCommercialAgreement(
+    command: CreateContractFromCommercialAgreementCommand | CreateContractFromDealCommand,
   ): CommandResult {
-    const dealId = command.dealId?.trim()
-    if (!dealId) {
+    const commercialAgreementId =
+      command.commercialAgreementId?.trim()
+      ?? ('dealId' in command ? command.dealId?.trim() : undefined)
+    if (!commercialAgreementId) {
       return failure(command.commandType, command.aggregateId, [
-        'dealId is required',
+        'commercialAgreementId is required',
       ])
     }
-    if (dealId !== command.aggregateId) {
+    if (commercialAgreementId !== command.aggregateId) {
       return failure(command.commandType, command.aggregateId, [
-        `dealId "${dealId}" must match aggregateId "${command.aggregateId}"`,
+        `commercialAgreementId "${commercialAgreementId}" must match aggregateId "${command.aggregateId}"`,
       ])
     }
 
-    const deal = this.dealRepository.getById(dealId)
+    const deal = this.dealRepository.getById(commercialAgreementId)
     if (!deal) {
-      return failure(command.commandType, dealId, [
-        `Deal "${dealId}" not found`,
+      return failure(command.commandType, commercialAgreementId, [
+        `Commercial Agreement "${commercialAgreementId}" not found`,
       ])
     }
 
     const dealStatus = canonicalDealStatus(deal.status)
     if (!DEAL_STATUSES_ALLOWING_CONTRACT.has(dealStatus)) {
-      return failure(command.commandType, dealId, [
-        `Contract can only be created from a deal in draft, review, or signing (current status: "${dealStatus || deal.status}")`,
+      return failure(command.commandType, commercialAgreementId, [
+        `Contract can only be created from a commercial agreement in draft, review, or signing (current status: "${dealStatus || deal.status}")`,
       ])
     }
 
     const dealPostMatchId = resolveDealPostMatchId(deal)
     const dealNegotiationId = deal.negotiationId?.trim()
     if (!dealPostMatchId && !dealNegotiationId) {
-      return failure(command.commandType, dealId, [
-        'Deal must be linked to postMatchId or negotiationId',
+      return failure(command.commandType, commercialAgreementId, [
+        'Commercial agreement must be linked to postMatchId or negotiationId',
       ])
     }
 
     const existingActive = this.contractRepository
-      .findByDealId(dealId)
+      .findByDealId(commercialAgreementId)
       .find(isActiveContractForDeal)
     if (existingActive) {
-      return failure(command.commandType, dealId, [
-        `Active contract already exists for Deal "${dealId}" (${existingActive.id})`,
+      return failure(command.commandType, commercialAgreementId, [
+        `Active contract already exists for Commercial Agreement "${commercialAgreementId}" (${existingActive.id})`,
       ])
     }
 
     const participants = mapContractParties(command.parties, deal)
     if (participants.length === 0) {
-      return failure(command.commandType, dealId, [
+      return failure(command.commandType, commercialAgreementId, [
         'Contract requires at least one party',
       ])
     }
@@ -278,7 +282,8 @@ export class ContractCommandHandler {
         : primaryOpportunityIds
 
     const contract = this.contractRepository.create({
-      dealId,
+      commercialAgreementId,
+      dealId: commercialAgreementId,
       matchId: postMatchId ?? null,
       negotiationId: negotiationId ?? null,
       opportunityId: needOpportunityId ?? deal.opportunityId,
@@ -296,19 +301,20 @@ export class ContractCommandHandler {
       participants,
       type: 'contract_created',
       title: 'Contract created',
-      message: 'A contract was created from your deal.',
+      message: 'A contract was created from your commercial agreement.',
       link: `/contracts/${contract.id}`,
       entityType: 'contract',
       entityId: contract.id,
     })
 
     this.appendAudit({
-      action: 'contract.created_from_deal',
+      action: 'contract.created_from_commercial_agreement',
       entityType: 'contract',
       entityId: contract.id,
       requestId: command.clientRequestId,
       details: {
-        dealId,
+        commercialAgreementId,
+        dealId: commercialAgreementId,
         postMatchId,
         negotiationId,
         needOpportunityId,

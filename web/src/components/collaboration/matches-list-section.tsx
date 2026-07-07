@@ -36,6 +36,8 @@ import { formatFrameworkMatchTypeSubtitle } from '@/config/need-offer-framework.
 import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import { cn } from '@/lib/utils'
 import type { PostMatch } from '@/types/domain.ts'
+import { collectPostMatchOpportunityIds } from '@/domain/normalized/post-match-strong-key.ts'
+import { formatCollaborationExchangeMode } from '@/lib/collaboration-taxonomy-display.ts'
 
 export type MatchesListFilters = ReturnType<typeof useMatchesListFilters>
 
@@ -60,6 +62,8 @@ export function useMatchesListFilters(
   const [search, setSearchState] = useState('')
   const [status, setStatusState] = useState('all')
   const [matchType, setMatchTypeState] = useState('all')
+  const [mainModel, setMainModelState] = useState('all')
+  const [exchangeMode, setExchangeModeState] = useState('all')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSizeState] = useState(compact ? 8 : 12)
 
@@ -75,6 +79,14 @@ export function useMatchesListFilters(
     setMatchTypeState(value)
     setPage(1)
   }
+  const setMainModel = (value: string) => {
+    setMainModelState(value)
+    setPage(1)
+  }
+  const setExchangeMode = (value: string) => {
+    setExchangeModeState(value)
+    setPage(1)
+  }
   const setPageSize = (size: number) => {
     setPageSizeState(size)
     setPage(1)
@@ -87,9 +99,28 @@ export function useMatchesListFilters(
       const matchesStatus = status === 'all' || m.status === status
       const matchesType =
         matchType === 'all' || (m.matchType || 'one_way').toLowerCase() === matchType
-      return matchesSearch && matchesStatus && matchesType
+      const relatedOpportunities = collectPostMatchOpportunityIds(m)
+        .map((id) => opportunitiesApi.get(id))
+        .filter(Boolean)
+      const matchesMainModel =
+        mainModel === 'all' ||
+        relatedOpportunities.some((opp) => opp?.mainCollaborationModel === mainModel)
+      const matchesExchangeMode =
+        exchangeMode === 'all' ||
+        relatedOpportunities.some(
+          (opp) =>
+            opp?.exchangeMode === exchangeMode ||
+            opp?.acceptedExchangeModes?.includes(exchangeMode),
+        )
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesType &&
+        matchesMainModel &&
+        matchesExchangeMode
+      )
     })
-  }, [matches, search, status, matchType])
+  }, [matches, search, status, matchType, mainModel, exchangeMode])
 
   const totalItems = filtered.length
   const pageCount = Math.max(1, Math.ceil(totalItems / pageSize))
@@ -97,7 +128,11 @@ export function useMatchesListFilters(
   const paged = filtered.slice((safePage - 1) * pageSize, safePage * pageSize)
 
   const hasActiveFilters =
-    search.length > 0 || status !== 'all' || matchType !== 'all'
+    search.length > 0 ||
+    status !== 'all' ||
+    matchType !== 'all' ||
+    mainModel !== 'all' ||
+    exchangeMode !== 'all'
   const listEmpty = resolveListEmptyState({
     hasSourceData: matches.length > 0,
     hasActiveFilters,
@@ -134,12 +169,34 @@ export function useMatchesListFilters(
           },
         ]
       : []),
+    ...(mainModel !== 'all'
+      ? [
+          {
+            id: 'mainModel',
+            label: 'Main model',
+            value: mainModel.replace(/_/g, ' '),
+            onRemove: () => setMainModel('all'),
+          },
+        ]
+      : []),
+    ...(exchangeMode !== 'all'
+      ? [
+          {
+            id: 'exchangeMode',
+            label: 'Exchange',
+            value: formatCollaborationExchangeMode(exchangeMode),
+            onRemove: () => setExchangeMode('all'),
+          },
+        ]
+      : []),
   ]
 
   const clearAllFilters = () => {
     setSearchState('')
     setStatusState('all')
     setMatchTypeState('all')
+    setMainModelState('all')
+    setExchangeModeState('all')
     setPage(1)
   }
 
@@ -150,6 +207,10 @@ export function useMatchesListFilters(
     setStatus,
     matchType,
     setMatchType,
+    mainModel,
+    setMainModel,
+    exchangeMode,
+    setExchangeMode,
     page,
     setPage,
     pageSize,
@@ -175,6 +236,10 @@ export type MatchesBrowseToolbarProps = Pick<
   | 'setStatus'
   | 'matchType'
   | 'setMatchType'
+  | 'mainModel'
+  | 'setMainModel'
+  | 'exchangeMode'
+  | 'setExchangeMode'
   | 'activeFilterChips'
   | 'clearAllFilters'
 >
@@ -187,6 +252,10 @@ export function MatchesBrowseToolbar({
   setStatus,
   matchType,
   setMatchType,
+  mainModel,
+  setMainModel,
+  exchangeMode,
+  setExchangeMode,
   activeFilterChips,
   clearAllFilters,
 }: MatchesBrowseToolbarProps) {
@@ -232,6 +301,38 @@ export function MatchesBrowseToolbar({
                   {MATCHING_MODEL_KEYS.map((key) => (
                     <SelectItem key={key} value={key}>
                       {MATCHING_MODELS[key].label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className={pmTypography.label}>Main model</label>
+              <Select value={mainModel} onValueChange={setMainModel}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All main models</SelectItem>
+                  {['cash_subcontracting', 'service_exchange', 'joint_venture', 'resource_sharing', 'hiring'].map((model) => (
+                    <SelectItem key={model} value={model}>
+                      {model.replace(/_/g, ' ')}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className={pmTypography.label}>Exchange mode</label>
+              <Select value={exchangeMode} onValueChange={setExchangeMode}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All exchange modes</SelectItem>
+                  {['cash', 'barter', 'profit_sharing', 'equity', 'hybrid'].map((mode) => (
+                    <SelectItem key={mode} value={mode}>
+                      {formatCollaborationExchangeMode(mode)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -410,6 +511,10 @@ function MatchesListCardGrid({
           setStatus={setStatus}
           matchType={matchType}
           setMatchType={setMatchType}
+          mainModel={mainModel}
+          setMainModel={setMainModel}
+          exchangeMode={exchangeMode}
+          setExchangeMode={setExchangeMode}
           activeFilterChips={activeFilterChips}
           clearAllFilters={clearAllFilters}
         />
@@ -546,6 +651,10 @@ function MatchesListTable({
             setStatus={setStatus}
             matchType={matchType}
             setMatchType={setMatchType}
+            mainModel={mainModel}
+            setMainModel={setMainModel}
+            exchangeMode={exchangeMode}
+            setExchangeMode={setExchangeMode}
             activeFilterChips={activeFilterChips}
             clearAllFilters={clearAllFilters}
           />

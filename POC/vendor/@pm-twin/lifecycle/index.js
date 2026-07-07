@@ -49,7 +49,7 @@ var manifest_default = {
       ],
       aliasesFile: "aliases/negotiation.json"
     },
-    deal: {
+    commercial_agreement: {
       canonicalStates: [
         "draft",
         "review",
@@ -58,7 +58,7 @@ var manifest_default = {
         "completed",
         "cancelled"
       ],
-      aliasesFile: "aliases/deal.json"
+      aliasesFile: "aliases/commercial_agreement.json"
     },
     contract: {
       canonicalStates: [
@@ -98,8 +98,8 @@ var negotiation_default = {
   failed: "cancelled"
 };
 
-// src/registry/aliases/deal.json
-var deal_default = {
+// src/registry/aliases/commercial_agreement.json
+var commercial_agreement_default = {
   negotiating: "draft",
   active: "executing",
   execution: "executing",
@@ -118,9 +118,15 @@ var ALIAS_FILES = {
   application: application_default,
   match: match_default,
   negotiation: negotiation_default,
-  deal: deal_default,
+  commercial_agreement: commercial_agreement_default,
   contract: contract_default
 };
+var ENTITY_TYPE_LEGACY_ALIASES = Object.freeze({
+  deal: "commercial_agreement"
+});
+function resolveEntityType(entityType) {
+  return ENTITY_TYPE_LEGACY_ALIASES[entityType] ?? entityType;
+}
 function buildStatusMaps(entities, aliasFiles) {
   const canonicalStates = {};
   const legacyAliases = {};
@@ -154,10 +160,12 @@ var MANIFEST = Object.freeze(manifest_default);
 var CANONICAL_STATES = registry.canonicalStates;
 var LEGACY_ALIASES = registry.legacyAliases;
 function isEntityType(entityType) {
-  return Object.prototype.hasOwnProperty.call(manifest_default.entities, entityType);
+  const resolvedEntityType = resolveEntityType(entityType);
+  return Object.prototype.hasOwnProperty.call(manifest_default.entities, resolvedEntityType);
 }
 function getCanonicalStates(entityType) {
-  const states = registry.canonicalStates[entityType];
+  const resolvedEntityType = resolveEntityType(entityType);
+  const states = registry.canonicalStates[resolvedEntityType];
   if (!states) {
     return [];
   }
@@ -167,21 +175,24 @@ function isCanonicalState(entityType, status) {
   if (status == null || status === "") {
     return false;
   }
-  const states = registry.canonicalStates[entityType];
+  const resolvedEntityType = resolveEntityType(entityType);
+  const states = registry.canonicalStates[resolvedEntityType];
   if (!states) {
     return false;
   }
   return states.includes(String(status).toLowerCase());
 }
 function getLegacyAliases(entityType) {
-  return registry.legacyAliases[entityType] ?? Object.freeze({});
+  const resolvedEntityType = resolveEntityType(entityType);
+  return registry.legacyAliases[resolvedEntityType] ?? Object.freeze({});
 }
 function toCanonical(entityType, status) {
   if (status == null || status === "") {
     return "";
   }
+  const resolvedEntityType = resolveEntityType(entityType);
   const key = String(status).toLowerCase();
-  const map = registry.resolveMap[entityType];
+  const map = registry.resolveMap[resolvedEntityType];
   if (!map) {
     return key;
   }
@@ -236,7 +247,7 @@ var transitions_default = {
       cancelled: []
     }
   },
-  deal: {
+  commercial_agreement: {
     terminalStates: ["completed", "cancelled"],
     transitions: {
       draft: ["review", "cancelled"],
@@ -261,10 +272,11 @@ var transitions_default = {
 
 // src/api/get-fsm.js
 function getFsm(entityType) {
-  if (!isEntityType(entityType)) {
+  const resolvedEntityType = ENTITY_TYPE_LEGACY_ALIASES[entityType] ?? entityType;
+  if (!isEntityType(resolvedEntityType)) {
     return null;
   }
-  const fsm = transitions_default[entityType];
+  const fsm = transitions_default[resolvedEntityType];
   if (!fsm) {
     return null;
   }
@@ -273,29 +285,31 @@ function getFsm(entityType) {
     frozenTransitions[from] = Object.freeze([...targets]);
   }
   return Object.freeze({
-    entityType,
-    states: getCanonicalStates(entityType),
+    entityType: resolvedEntityType,
+    states: getCanonicalStates(resolvedEntityType),
     terminalStates: Object.freeze([...fsm.terminalStates]),
     transitions: Object.freeze(frozenTransitions)
   });
 }
 function isTerminal(entityType, status) {
-  const canonical = toCanonical(entityType, status);
+  const resolvedEntityType = ENTITY_TYPE_LEGACY_ALIASES[entityType] ?? entityType;
+  const canonical = toCanonical(resolvedEntityType, status);
   if (!canonical) {
     return false;
   }
-  const fsm = transitions_default[entityType];
+  const fsm = transitions_default[resolvedEntityType];
   if (!fsm) {
     return false;
   }
   return fsm.terminalStates.includes(canonical);
 }
 function allowedTransitions(entityType, fromStatus) {
-  const from = toCanonical(entityType, fromStatus);
+  const resolvedEntityType = ENTITY_TYPE_LEGACY_ALIASES[entityType] ?? entityType;
+  const from = toCanonical(resolvedEntityType, fromStatus);
   if (!from) {
     return Object.freeze([]);
   }
-  const fsm = transitions_default[entityType];
+  const fsm = transitions_default[resolvedEntityType];
   if (!fsm) {
     return Object.freeze([]);
   }
@@ -306,13 +320,14 @@ function allowedTransitions(entityType, fromStatus) {
   return Object.freeze([...allowed]);
 }
 function forbiddenTransitions(entityType, fromStatus) {
-  const from = toCanonical(entityType, fromStatus);
+  const resolvedEntityType = ENTITY_TYPE_LEGACY_ALIASES[entityType] ?? entityType;
+  const from = toCanonical(resolvedEntityType, fromStatus);
   if (!from) {
     return Object.freeze([]);
   }
   const allowed = new Set(allowedTransitions(entityType, from));
   return Object.freeze(
-    getCanonicalStates(entityType).filter(
+    getCanonicalStates(resolvedEntityType).filter(
       (state) => state !== from && !allowed.has(state)
     )
   );
@@ -320,6 +335,7 @@ function forbiddenTransitions(entityType, fromStatus) {
 export {
   CANONICAL_STATES,
   ENTITY_TYPES,
+  ENTITY_TYPE_LEGACY_ALIASES,
   LEGACY_ALIASES,
   MANIFEST,
   allowedTransitions,

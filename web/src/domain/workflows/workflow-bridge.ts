@@ -1,5 +1,6 @@
 import type {
   Application,
+  CommercialAgreement,
   Contract,
   Deal,
   Negotiation,
@@ -90,6 +91,7 @@ export type BuildWorkflowContextInput = {
   readonly application?: Application | null
   readonly postMatch?: PostMatch | Pick<PostMatch, 'id' | 'status' | 'matchType' | 'participants'> | null
   readonly negotiation?: Negotiation | null
+  readonly commercialAgreement?: CommercialAgreement | null
   readonly deal?: Deal | null
   readonly contract?: Contract | null
   readonly linkage?: WorkflowLinkageContext
@@ -100,6 +102,10 @@ export function buildWorkflowContext(
 ): WorkflowContext {
   const opportunity = input.opportunity ?? undefined
   const postMatch = input.postMatch ?? undefined
+  const commercialAgreement = input.commercialAgreement ?? input.deal ?? undefined
+  const decisionStatus =
+    (commercialAgreement?.payload as { decisionStatus?: string } | undefined)?.decisionStatus
+    ?? 'approved'
 
   return {
     primaryWorkflow:
@@ -111,7 +117,8 @@ export function buildWorkflowContext(
     application: toWorkflowEntitySnapshot(input.application ?? undefined),
     postMatch: toWorkflowEntitySnapshot(postMatch),
     negotiation: toWorkflowEntitySnapshot(input.negotiation ?? undefined),
-    deal: toWorkflowEntitySnapshot(input.deal ?? undefined),
+    commercialAgreement: toWorkflowEntitySnapshot(commercialAgreement),
+    deal: toWorkflowEntitySnapshot(commercialAgreement),
     contract: toWorkflowEntitySnapshot(input.contract ?? undefined),
     collaboration: {
       ...buildCollaborationWorkflowContext(opportunity),
@@ -119,6 +126,8 @@ export function buildWorkflowContext(
     },
     linkage: {
       legacyApplicationsEnabled: productFlags.showLegacyApplications,
+      contractDecisionRequired: true,
+      contractDecisionStatus: decisionStatus as WorkflowLinkageContext['contractDecisionStatus'],
       ...input.linkage,
     },
   }

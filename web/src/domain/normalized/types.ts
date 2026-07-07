@@ -132,6 +132,7 @@ export type NormalizedApplication = {
   matchId?: string
   matchType?: string
   negotiationId?: string
+  commercialAgreementId?: string
   dealId?: string
   createdAt: string
   updatedAt: string
@@ -307,6 +308,7 @@ export type NormalizedContractStatus =
 
 export type NormalizedContract = {
   id: string
+  commercialAgreementId?: string
   dealId: string
   opportunityId?: string
   opportunityIds?: string[]

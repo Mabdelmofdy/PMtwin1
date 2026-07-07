@@ -1,5 +1,6 @@
 export {
   CANONICAL_STATES,
+  ENTITY_TYPE_LEGACY_ALIASES,
   ENTITY_TYPES,
   getCanonicalStates,
   getLegacyAliases,

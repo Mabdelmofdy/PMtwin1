@@ -11,7 +11,7 @@ export const COLLABORATION_WORKFLOW_DEFINITIONS: Record<
     key: 'cash_subcontracting',
     label: 'Cash subcontracting',
     startEntity: 'opportunity',
-    steps: ['opportunity', 'publish', 'matching', 'post_match', 'negotiation', 'deal', 'contract', 'completion'],
+    steps: ['opportunity', 'publish', 'matching', 'post_match', 'negotiation', 'commercial_agreement', 'contract', 'completion'],
     allowedTransitions: [],
     allowedCommands: [],
     businessRules: [
@@ -25,7 +25,7 @@ export const COLLABORATION_WORKFLOW_DEFINITIONS: Record<
     key: 'service_exchange',
     label: 'Service exchange / barter',
     startEntity: 'opportunity',
-    steps: ['opportunity', 'publish', 'matching', 'post_match', 'negotiation', 'deal', 'contract', 'completion'],
+    steps: ['opportunity', 'publish', 'matching', 'post_match', 'negotiation', 'commercial_agreement', 'contract', 'completion'],
     allowedTransitions: [],
     allowedCommands: [],
     businessRules: [
@@ -39,7 +39,7 @@ export const COLLABORATION_WORKFLOW_DEFINITIONS: Record<
     key: 'joint_venture',
     label: 'Joint venture',
     startEntity: 'opportunity',
-    steps: ['opportunity', 'publish', 'matching', 'post_match', 'negotiation', 'deal', 'contract', 'completion'],
+    steps: ['opportunity', 'publish', 'matching', 'post_match', 'negotiation', 'commercial_agreement', 'contract', 'completion'],
     allowedTransitions: [],
     allowedCommands: [],
     businessRules: [
@@ -53,7 +53,7 @@ export const COLLABORATION_WORKFLOW_DEFINITIONS: Record<
     key: 'resource_sharing',
     label: 'Resource sharing',
     startEntity: 'opportunity',
-    steps: ['opportunity', 'publish', 'matching', 'post_match', 'negotiation', 'deal', 'contract', 'completion'],
+    steps: ['opportunity', 'publish', 'matching', 'post_match', 'negotiation', 'commercial_agreement', 'contract', 'completion'],
     allowedTransitions: [],
     allowedCommands: [],
     businessRules: [
@@ -66,7 +66,7 @@ export const COLLABORATION_WORKFLOW_DEFINITIONS: Record<
     key: 'hiring_engagement',
     label: 'Hiring / professional engagement',
     startEntity: 'application',
-    steps: ['application', 'accepted', 'negotiation', 'deal', 'contract', 'completion'],
+    steps: ['application', 'accepted', 'negotiation', 'commercial_agreement', 'contract', 'completion'],
     allowedTransitions: [],
     allowedCommands: [],
     businessRules: [

@@ -9,6 +9,7 @@ import type {
   RbacEntityType,
 } from '@/domain/rbac/types.ts'
 import { evaluateApplicationPolicy } from '@/domain/rbac/policies/application.policy.ts'
+import { evaluateCommercialAgreementPolicy } from '@/domain/rbac/policies/commercial-agreement.policy.ts'
 import { evaluateContractPolicy } from '@/domain/rbac/policies/contract.policy.ts'
 import { evaluateDealPolicy } from '@/domain/rbac/policies/deal.policy.ts'
 import { evaluateMatchPolicy } from '@/domain/rbac/policies/match.policy.ts'
@@ -25,7 +26,7 @@ const ENTITY_POLICIES: Record<RbacEntityType, EntityPolicyEvaluator> = {
   application: evaluateApplicationPolicy,
   match: evaluateMatchPolicy,
   negotiation: evaluateNegotiationPolicy,
-  deal: evaluateDealPolicy,
+  deal: evaluateCommercialAgreementPolicy,
   contract: evaluateContractPolicy,
 }
 
@@ -39,6 +40,7 @@ export function evaluateEntityPolicy(
 }
 
 export {
+  evaluateCommercialAgreementPolicy,
   evaluateApplicationPolicy,
   evaluateContractPolicy,
   evaluateDealPolicy,

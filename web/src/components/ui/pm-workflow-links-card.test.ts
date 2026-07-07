@@ -13,7 +13,7 @@ describe('PmWorkflowLinksCard contract', () => {
     const props: PmWorkflowLinksCardProps = {
       links: [
         { id: 'match', label: 'Open match', href: '/matches/m-1' },
-        { id: 'deal', label: 'Open deal', href: '/deals/d-1' },
+        { id: 'deal', label: 'Open commercial agreement', href: '/commercial-agreements/d-1' },
       ],
     }
 
@@ -30,7 +30,7 @@ describe('Entity access browse routes', () => {
   })
 
   it('provides human-readable back labels', () => {
-    assert.equal(resolveEntityBrowseBackLabel('deal'), 'Back to deals')
+    assert.equal(resolveEntityBrowseBackLabel('deal'), 'Back to commercial agreements')
     assert.equal(resolveEntityBrowseBackLabel('contract'), 'Back to contracts')
   })
 })

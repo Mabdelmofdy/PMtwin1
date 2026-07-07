@@ -1,8 +1,8 @@
 import {
   loadApplications,
   loadAuditLog,
+  loadCommercialAgreements,
   loadContracts,
-  loadDeals,
   loadNegotiations,
   loadNotifications,
 } from '@/infrastructure/seed/seed-loader.ts'
@@ -29,7 +29,7 @@ export type RelationshipReport = {
 }
 
 export function validateRelationshipIntegrity(): RelationshipReport {
-  const deals = loadDeals()
+  const deals = loadCommercialAgreements()
   const contracts = loadContracts()
   const applications = loadApplications()
   const notifications = loadNotifications()
@@ -45,16 +45,17 @@ export function validateRelationshipIntegrity(): RelationshipReport {
   let resolvedDealRefs = 0
 
   for (const app of applications) {
-    if (!app.dealId) continue
+    const commercialAgreementId = app.commercialAgreementId ?? app.dealId
+    if (!commercialAgreementId) continue
     applicationDealRefs += 1
-    if (dealIds.has(app.dealId)) {
+    if (dealIds.has(commercialAgreementId)) {
       resolvedDealRefs += 1
     } else {
       issues.push({
         entity: 'Application',
         field: 'dealId',
-        value: app.dealId,
-        expected: 'existing Deal.id',
+        value: commercialAgreementId,
+        expected: 'existing CommercialAgreement.id',
         severity: 'error',
       })
     }
@@ -113,12 +114,13 @@ export function validateRelationshipIntegrity(): RelationshipReport {
   let contractDealRefs = 0
   for (const c of contracts) {
     contractDealRefs += 1
-    if (!dealIds.has(c.dealId)) {
+    const commercialAgreementId = c.commercialAgreementId ?? c.dealId
+    if (!commercialAgreementId || !dealIds.has(commercialAgreementId)) {
       issues.push({
         entity: 'Contract',
-        field: 'dealId',
-        value: c.dealId,
-        expected: 'existing Deal.id',
+        field: 'commercialAgreementId',
+        value: commercialAgreementId ?? '',
+        expected: 'existing CommercialAgreement.id',
         severity: 'error',
       })
     }

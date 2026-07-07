@@ -6,6 +6,7 @@ import type { Command } from '../types.ts'
 import type {
   ActivateContractCommand,
   CompleteContractCommand,
+  CreateContractFromCommercialAgreementCommand,
   CreateContractFromDealCommand,
   SignContractCommand,
   TerminateContractCommand,
@@ -16,6 +17,7 @@ type AssertExtends<T extends Command> = T
 type AssertCommandType<T extends string> = T
 
 type _CreateExtendsCommand = AssertExtends<CreateContractFromDealCommand>
+type _CreateFromCommercialAgreementExtendsCommand = AssertExtends<CreateContractFromCommercialAgreementCommand>
 type _SignExtendsCommand = AssertExtends<SignContractCommand>
 type _ActivateExtendsCommand = AssertExtends<ActivateContractCommand>
 type _CompleteExtendsCommand = AssertExtends<CompleteContractCommand>
@@ -23,6 +25,9 @@ type _TerminateExtendsCommand = AssertExtends<TerminateContractCommand>
 
 type _CreateLiteral = AssertCommandType<
   CreateContractFromDealCommand['commandType']
+>
+type _CreateFromCommercialAgreementLiteral = AssertCommandType<
+  CreateContractFromCommercialAgreementCommand['commandType']
 >
 type _SignLiteral = AssertCommandType<SignContractCommand['commandType']>
 type _ActivateLiteral = AssertCommandType<
@@ -39,6 +44,7 @@ export const createContractFromDealFixture = {
   commandType: 'CreateContractFromDeal',
   aggregateId: 'deal-draft-1',
   clientRequestId: 'client-req-contract-1',
+  commercialAgreementId: 'ca-draft-1',
   dealId: 'deal-draft-1',
   postMatchId: 'pm-confirmed-1',
   negotiationId: 'neg-agreed-1',
@@ -68,6 +74,15 @@ export const createContractFromDealFixture = {
     },
   ],
 } satisfies CreateContractFromDealCommand
+
+export const createContractFromCommercialAgreementFixture = {
+  commandType: 'CreateContractFromCommercialAgreement',
+  aggregateId: 'ca-draft-1',
+  clientRequestId: 'client-req-contract-1b',
+  commercialAgreementId: 'ca-draft-1',
+  postMatchId: 'pm-confirmed-1',
+  negotiationId: 'neg-agreed-1',
+} satisfies CreateContractFromCommercialAgreementCommand
 
 export const signContractFixture = {
   commandType: 'SignContract',
@@ -99,6 +114,8 @@ export const terminateContractFixture = {
 
 const _createType: 'CreateContractFromDeal' =
   createContractFromDealFixture.commandType
+const _createFromCommercialAgreementType: 'CreateContractFromCommercialAgreement' =
+  createContractFromCommercialAgreementFixture.commandType
 const _signType: 'SignContract' = signContractFixture.commandType
 const _activateType: 'ActivateContract' = activateContractFixture.commandType
 const _completeType: 'CompleteContract' = completeContractFixture.commandType
@@ -106,6 +123,7 @@ const _terminateType: 'TerminateContract' =
   terminateContractFixture.commandType
 
 void _createType
+void _createFromCommercialAgreementType
 void _signType
 void _activateType
 void _completeType

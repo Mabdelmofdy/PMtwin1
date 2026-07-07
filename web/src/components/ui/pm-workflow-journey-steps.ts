@@ -114,7 +114,7 @@ export function buildOpportunityWorkflowSteps(
       label: 'Deal',
       status: dealStatus,
       statusEntity: 'deal' as const,
-      href: topCard?.actions.dealId ? `/deals/${topCard.actions.dealId}` : undefined,
+      href: topCard?.actions.dealId ? `/commercial-agreements/${topCard.actions.dealId}` : undefined,
     },
     {
       id: 'contract',
@@ -164,7 +164,7 @@ export function buildMatchWorkflowSteps(match: MatchWorkflowContext): readonly P
       label: 'Deal',
       status: deal?.status,
       statusEntity: 'deal',
-      href: deal ? `/deals/${deal.id}` : undefined,
+      href: deal ? `/commercial-agreements/${deal.id}` : undefined,
       state: deal ? 'current' : 'upcoming',
     },
     {
@@ -215,7 +215,7 @@ export function buildNegotiationWorkflowSteps(
       label: 'Deal',
       status: linkedDeal?.status,
       statusEntity: 'deal',
-      href: linkedDeal ? `/deals/${linkedDeal.id}` : undefined,
+      href: linkedDeal ? `/commercial-agreements/${linkedDeal.id}` : undefined,
       state: linkedDeal ? 'current' : 'upcoming',
     },
     {
@@ -263,7 +263,7 @@ export function buildDealWorkflowSteps(model: DealWorkflowContext): readonly PmW
       label: 'Deal',
       status: model.status,
       statusEntity: 'deal',
-      href: `/deals/${model.id}`,
+      href: `/commercial-agreements/${model.id}`,
       state: model.existingContract ? 'complete' : 'current',
     },
     {
@@ -310,7 +310,7 @@ export function buildContractWorkflowSteps(
     {
       id: 'deal',
       label: 'Deal',
-      href: model.dealId ? `/deals/${model.dealId}` : undefined,
+      href: model.dealId ? `/commercial-agreements/${model.dealId}` : undefined,
       state: 'complete',
     },
     {

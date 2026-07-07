@@ -235,6 +235,7 @@ export function normalizeApplication(
     matchId: pickMatchId(r),
     matchType: pickOptionalString(r, ['matchType']),
     negotiationId: pickOptionalString(r, ['negotiationId']),
+    commercialAgreementId: pickOptionalString(r, ['commercialAgreementId', 'dealId']),
     dealId: pickOptionalString(r, ['dealId']),
     createdAt,
     updatedAt,
@@ -419,6 +420,7 @@ export function normalizeDeal(
   }
   return wrapNormalizedWithValidation(data, validateDeal, options)
 }
+export const normalizeCommercialAgreement = normalizeDeal
 
 /** Normalize a legacy contract record. */
 export function normalizeContract(raw: unknown): NormalizedContract
@@ -438,7 +440,8 @@ export function normalizeContract(
     : undefined
   const data: NormalizedContract = {
     id: pickString(r, ['id']),
-    dealId: pickString(r, ['dealId']),
+    commercialAgreementId: pickOptionalString(r, ['commercialAgreementId', 'dealId']),
+    dealId: pickString(r, ['dealId', 'commercialAgreementId']),
     opportunityId: pickOptionalString(r, ['opportunityId']),
     opportunityIds,
     matchId: pickMatchId(r) ?? null,
@@ -546,6 +549,7 @@ export function normalizeNegotiations(items: unknown[]): NormalizedNegotiation[]
 export function normalizeDeals(items: unknown[]): NormalizedDeal[] {
   return items.map((item) => normalizeDeal(item) as NormalizedDeal)
 }
+export const normalizeCommercialAgreements = normalizeDeals
 
 export function normalizeContracts(items: unknown[]): NormalizedContract[] {
   return items.map((item) => normalizeContract(item) as NormalizedContract)

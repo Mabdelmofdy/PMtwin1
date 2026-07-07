@@ -5,7 +5,7 @@ import {
   createCommandGatewayTestStack,
   type CommandGatewayTestStack,
 } from '@/commands/test-helpers/command-gateway-test-stack.ts'
-import { createDealCommandService } from '@/services/deal-command-service.ts'
+import { createCommercialAgreementCommandService } from '@/services/commercial-agreement-command-service.ts'
 import { createDealService } from '@/services/deal-service.ts'
 
 const participants = [
@@ -67,19 +67,18 @@ function applicationNegotiation(): Negotiation {
   }
 }
 
+import { createCommercialAgreementCommandService } from '@/services/commercial-agreement-command-service.ts'
+
 function buildService(stack: CommandGatewayTestStack) {
-  const commandService = createDealCommandService({
+  const commandServiceDeps = {
     gateway: stack.gateway,
-    dealRepository: stack.dealRepository,
-  })
+    commercialAgreementRepository: stack.dealRepository,
+  }
   return createDealService({
     negotiationRepository: stack.negotiationRepository,
-    dealRepository: stack.dealRepository,
-    dealCommandService: commandService,
-    dealCommandServiceDeps: {
-      gateway: stack.gateway,
-      dealRepository: stack.dealRepository,
-    },
+    commercialAgreementRepository: stack.dealRepository,
+    commercialAgreementCommandService: createCommercialAgreementCommandService(commandServiceDeps),
+    commercialAgreementCommandServiceDeps: commandServiceDeps,
   })
 }
 

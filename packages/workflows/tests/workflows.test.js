@@ -50,7 +50,7 @@ function marketplaceContext(overrides = {}) {
     },
     linkage: {
       negotiationsForPostMatch: [],
-      dealForNegotiation: null,
+      commercialAgreementForNegotiation: null,
     },
     ...overrides,
   }
@@ -90,7 +90,7 @@ function hiringContext(overrides = {}) {
     linkage: {
       legacyApplicationsEnabled: true,
       negotiationsForApplication: [],
-      dealForApplication: null,
+      commercialAgreementForApplication: null,
     },
     ...overrides,
   }
@@ -128,35 +128,142 @@ describe('MarketplaceWorkflow', () => {
     ), false)
   })
 
-  it('blocks create deal before negotiation is agreed', () => {
+  it('blocks create commercial agreement before negotiation is agreed', () => {
     const validation = validateWorkflowTransition(
       marketplaceContext({
         negotiation: { id: 'neg-1', status: 'active', postMatchId: 'pm-1' },
       }),
-      'create_deal_from_negotiation',
+      'create_commercial_agreement_from_negotiation',
     )
     assert.equal(validation.valid, false)
     assert.ok(validation.errors.some((error) => error.includes('agreed')))
   })
 
-  it('allows create deal when negotiation is agreed', () => {
+  it('allows create commercial agreement when negotiation is agreed with accepted offer', () => {
     const validation = validateWorkflowTransition(
       marketplaceContext({
         negotiation: { id: 'neg-1', status: 'agreed', postMatchId: 'pm-1' },
-        linkage: { dealForNegotiation: null },
+        linkage: {
+          commercialAgreementForNegotiation: null,
+          negotiationAcceptedOfferId: 'offer-1',
+        },
       }),
-      'create_deal_from_negotiation',
+      'create_commercial_agreement_from_negotiation',
     )
     assert.equal(validation.valid, true)
   })
 
-  it('blocks create contract before deal exists', () => {
+  it('blocks create commercial agreement when agreed negotiation lacks accepted offer', () => {
     const validation = validateWorkflowTransition(
-      marketplaceContext(),
-      'create_contract_from_deal',
+      marketplaceContext({
+        negotiation: { id: 'neg-1', status: 'agreed', postMatchId: 'pm-1' },
+        linkage: { commercialAgreementForNegotiation: null },
+      }),
+      'create_commercial_agreement_from_negotiation',
     )
     assert.equal(validation.valid, false)
-    assert.ok(validation.errors.some((error) => error.includes('Deal')))
+    assert.ok(
+      validation.errors.some((error) => error.includes('accepted negotiation offer')),
+    )
+  })
+
+  it('exposes send message for active negotiation participants', () => {
+    const action = findWorkflowAction(
+      marketplaceContext({
+        negotiation: { id: 'neg-1', status: 'active', postMatchId: 'pm-1' },
+        user: {
+          userId: 'user-need',
+          isParticipant: true,
+          canMutate: true,
+        },
+      }),
+      'send_negotiation_message',
+    )
+    assert.ok(action)
+    assert.equal(action.enabled, true)
+  })
+
+  it('hides send message for auditors', () => {
+    const action = findWorkflowAction(
+      marketplaceContext({
+        negotiation: { id: 'neg-1', status: 'active', postMatchId: 'pm-1' },
+        user: {
+          userId: 'user-auditor',
+          roles: ['auditor'],
+          canMutate: true,
+          isParticipant: false,
+        },
+      }),
+      'send_negotiation_message',
+    )
+    assert.ok(action)
+    assert.equal(action.enabled, false)
+  })
+
+  it('exposes transcript view for auditors', () => {
+    const action = findWorkflowAction(
+      marketplaceContext({
+        negotiation: { id: 'neg-1', status: 'agreed', postMatchId: 'pm-1' },
+        user: {
+          userId: 'user-auditor',
+          roles: ['auditor'],
+          canMutate: true,
+          isParticipant: false,
+        },
+      }),
+      'view_negotiation_transcript',
+    )
+    assert.ok(action)
+    assert.equal(action.enabled, true)
+  })
+
+  it('blocks create contract before commercial agreement exists', () => {
+    const validation = validateWorkflowTransition(
+      marketplaceContext(),
+      'create_contract_from_commercial_agreement',
+    )
+    assert.equal(validation.valid, false)
+    assert.ok(validation.errors.some((error) => error.includes('Commercial agreement')))
+  })
+
+  it('requires approved decision before creating contract when gate is enabled', () => {
+    const validation = validateWorkflowTransition(
+      marketplaceContext({
+        commercialAgreement: {
+          id: 'ca-1',
+          status: 'draft',
+          negotiationId: 'neg-1',
+        },
+        linkage: {
+          commercialAgreementForNegotiation: { id: 'ca-1', status: 'draft' },
+          contractDecisionRequired: true,
+          contractDecisionStatus: 'in_review',
+        },
+      }),
+      'create_contract_from_commercial_agreement',
+    )
+    assert.equal(validation.valid, false)
+    assert.ok(validation.errors.some((error) => error.includes('Decision review')))
+  })
+
+  it('exposes decision routing action for commercial agreements', () => {
+    const action = findWorkflowAction(
+      marketplaceContext({
+        commercialAgreement: {
+          id: 'ca-1',
+          status: 'review',
+          negotiationId: 'neg-1',
+        },
+        linkage: {
+          commercialAgreementForNegotiation: { id: 'ca-1', status: 'review' },
+          contractDecisionRequired: true,
+          contractDecisionStatus: 'pending',
+        },
+      }),
+      'route_contract_decision',
+    )
+    assert.ok(action)
+    assert.equal(action.enabled, true)
   })
 })
 
@@ -181,7 +288,7 @@ describe('HiringWorkflow', () => {
     assert.equal(validation.valid, false)
   })
 
-  it('exposes create hiring deal when negotiation is agreed', () => {
+  it('exposes create hiring commercial agreement when negotiation is agreed', () => {
     const action = findWorkflowAction(
       hiringContext({
         linkage: {
@@ -189,10 +296,10 @@ describe('HiringWorkflow', () => {
           negotiationsForApplication: [{ id: 'neg-hire', status: 'agreed', applicationId: 'app-1' }],
         },
       }),
-      'create_deal_from_application',
+      'create_commercial_agreement_from_application',
     )
     assert.ok(action)
-    assert.equal(action.label, 'Create hiring deal')
+    assert.equal(action.label, 'Create hiring commercial agreement')
     assert.equal(action.enabled, true)
   })
 })

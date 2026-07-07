@@ -2,6 +2,7 @@
 const ANONYMOUS_BLOCKED_PREFIXES = [
   '/admin',
   '/contracts',
+  '/commercial-agreements',
   '/deals',
   '/negotiations',
   '/pipeline',

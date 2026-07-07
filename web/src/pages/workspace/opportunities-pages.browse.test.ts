@@ -27,4 +27,13 @@ describe('OpportunitiesPage browse layout contract', () => {
     assert.match(source, /<OpportunityCard/)
     assert.match(source, /md:grid-cols-2 xl:grid-cols-3/)
   })
+
+  it('supports enterprise taxonomy filter parameters and chips', () => {
+    assert.match(source, /useSearchParams/)
+    assert.match(source, /mainModel|mainModels/)
+    assert.match(source, /exchangeModes/)
+    assert.match(source, /setMainModels\(/)
+    assert.match(source, /setExchangeModes\(/)
+    assert.match(source, /PmFilterChips/)
+  })
 })

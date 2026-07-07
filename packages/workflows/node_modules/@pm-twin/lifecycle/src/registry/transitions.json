@@ -45,7 +45,7 @@
       "cancelled": []
     }
   },
-  "deal": {
+  "commercial_agreement": {
     "terminalStates": ["completed", "cancelled"],
     "transitions": {
       "draft": ["review", "cancelled"],

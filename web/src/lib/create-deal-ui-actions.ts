@@ -1,17 +1,20 @@
-import type { CommandResult } from '@pm-twin/commands'
-import type { Deal, Negotiation } from '@/types/domain.ts'
-import { dealRepository } from '@/repositories/index.ts'
-import { dealCommandService } from '@/services/deal-command-service.ts'
-import {
-  buildWorkflowContext,
-  isWorkflowActionAvailable,
-  toWorkflowEntitySnapshot,
-} from '@/domain/workflows/workflow-bridge.ts'
+/** @deprecated Import from `@/lib/create-commercial-agreement-ui-actions.ts` */
+export { isPostMatchNegotiation } from '@/lib/create-commercial-agreement-ui-actions.ts'
 
+import {
+  canShowCreateCommercialAgreementFromNegotiation,
+  createCommercialAgreementFromNegotiationUiAction,
+  type CreateCommercialAgreementUiActionsDeps,
+} from '@/lib/create-commercial-agreement-ui-actions.ts'
+import type { CommandResult } from '@pm-twin/commands'
+import type { Deal } from '@/types/domain.ts'
+
+/** @deprecated Use `CreateCommercialAgreementUiActionResult` */
 export type CreateDealUiActionResult =
   | { readonly success: true; readonly dealId: string; readonly deal: Deal }
   | { readonly success: false; readonly message: string }
 
+/** @deprecated Use `CreateCommercialAgreementUiActionsDeps` */
 export type CreateDealUiActionsDeps = {
   readonly createDealFromNegotiation?: (negotiationId: string) => {
     readonly result: CommandResult
@@ -23,113 +26,45 @@ export type CreateDealUiActionsDeps = {
   readonly canMutate?: boolean
 }
 
-function formatCommandErrors(result: CommandResult): string {
-  if (result.errors && result.errors.length > 0) {
-    return result.errors.join('. ')
-  }
-  return 'Deal could not be created.'
-}
-
-function buildNegotiationDealContext(
-  negotiation: Negotiation,
+function mapLegacyDeps(
   deps?: CreateDealUiActionsDeps,
-) {
-  const findDeal =
-    deps?.findDealByNegotiationId
-    ?? ((id: string) => dealRepository.findByNegotiationId(id))
-
-  return buildWorkflowContext({
-    primaryWorkflow: negotiation.applicationId ? 'hiring' : 'marketplace',
-    user: {
-      userId: deps?.userId ?? null,
-      canMutate: deps?.canMutate ?? true,
-      isParticipant: true,
-    },
-    postMatch: deps?.postMatch
-      ? {
-          id: deps.postMatch.id,
-          matchType: deps.postMatch.matchType ?? 'one_way',
-          status: 'confirmed',
-          matchScore: 0,
-          participants: [],
-        }
-      : negotiation.postMatchId
-        ? {
-            id: negotiation.postMatchId,
-            matchType: 'one_way',
-            status: 'confirmed',
-            matchScore: 0,
-            participants: [],
-          }
-        : undefined,
-    negotiation,
-    application: negotiation.applicationId
-      ? {
-          id: negotiation.applicationId,
-          status: 'accepted',
-          opportunityId: negotiation.opportunityId ?? '',
-          applicantId: '',
+): CreateCommercialAgreementUiActionsDeps | undefined {
+  if (!deps) return undefined
+  return {
+    createCommercialAgreementFromNegotiation: deps.createDealFromNegotiation
+      ? (negotiationId) => {
+          const { result, deal } = deps.createDealFromNegotiation!(negotiationId)
+          return { result, commercialAgreement: deal }
         }
       : undefined,
-    linkage: {
-      dealForNegotiation: (() => {
-        const deal = findDeal(negotiation.id)
-        return deal ? toWorkflowEntitySnapshot(deal) ?? null : null
-      })(),
-      legacyApplicationsEnabled: Boolean(negotiation.applicationId),
-      negotiationsForApplication: negotiation.applicationId
-        ? [
-            toWorkflowEntitySnapshot({
-              id: negotiation.id,
-              status: negotiation.status,
-              applicationId: negotiation.applicationId,
-            }) ?? {
-              id: negotiation.id,
-              status: negotiation.status,
-            },
-          ]
-        : undefined,
-    },
-  })
+    findCommercialAgreementByNegotiationId: deps.findDealByNegotiationId,
+    postMatch: deps.postMatch,
+    userId: deps.userId,
+    canMutate: deps.canMutate,
+  }
 }
 
+/** @deprecated Use `canShowCreateCommercialAgreementFromNegotiation` */
 export function canShowCreateDealFromNegotiation(
-  negotiation: Negotiation | null | undefined,
+  negotiation: Parameters<typeof canShowCreateCommercialAgreementFromNegotiation>[0],
   deps?: CreateDealUiActionsDeps,
 ): boolean {
-  if (!negotiation?.id) return false
-  const context = buildNegotiationDealContext(negotiation, deps)
-  if (negotiation.applicationId) {
-    return isWorkflowActionAvailable(context, 'create_deal_from_application')
-  }
-  return isWorkflowActionAvailable(context, 'create_deal_from_negotiation')
+  return canShowCreateCommercialAgreementFromNegotiation(negotiation, mapLegacyDeps(deps))
 }
 
-export function isPostMatchNegotiation(
-  negotiation: Negotiation | null | undefined,
-): boolean {
-  return Boolean(negotiation?.postMatchId)
-}
-
+/** @deprecated Use `createCommercialAgreementFromNegotiationUiAction` */
 export function createDealFromNegotiationUiAction(
   negotiationId: string,
   deps?: CreateDealUiActionsDeps,
 ): CreateDealUiActionResult {
-  const create =
-    deps?.createDealFromNegotiation
-    ?? dealCommandService.createDealFromNegotiation.bind(dealCommandService)
-
-  const { result, deal } = create(negotiationId)
-  if (!result.success) {
-    return { success: false, message: formatCommandErrors(result) }
+  const result = createCommercialAgreementFromNegotiationUiAction(
+    negotiationId,
+    mapLegacyDeps(deps),
+  )
+  if (!result.success) return result
+  return {
+    success: true,
+    dealId: result.commercialAgreementId,
+    deal: result.commercialAgreement,
   }
-
-  if (!deal?.id) {
-    return {
-      success: false,
-      message: 'Deal could not be created. Negotiation may not exist.',
-    }
-  }
-
-  return { success: true, dealId: deal.id, deal }
 }

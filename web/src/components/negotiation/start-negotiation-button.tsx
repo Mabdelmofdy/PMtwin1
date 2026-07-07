@@ -40,7 +40,7 @@ export function StartNegotiationButton({
     }
 
     toast.success('Negotiation started', {
-      description: 'You can agree terms or create a deal when ready.',
+      description: 'You can agree terms or create a commercial agreement when ready.',
     })
     navigate(`/negotiations/${result.negotiationId}`)
   }

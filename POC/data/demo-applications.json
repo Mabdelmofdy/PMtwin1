@@ -2,5 +2,25 @@
   "domain": "applications",
   "version": "3.0",
   "description": "PostMatch-first seed — application rows cleared (canonical flow: PostMatch → Negotiation → Deal → Contract).",
-  "data": []
+  "data": [
+    {
+      "id": "seed-app-demo-hiring-01",
+      "opportunityId": "seed-opp-demo-prof-hiring",
+      "applicantId": "seed-user-012",
+      "status": "accepted",
+      "proposal": "Applied for senior scheduler role with claims advisory support.",
+      "commercialTerms": {
+        "exchangeMode": "hybrid",
+        "currency": "SAR",
+        "amount": 145000,
+        "paymentSchedule": "Monthly retainer + success bonus"
+      },
+      "matchId": "seed-pm-demo-hiring",
+      "matchType": "one_way",
+      "negotiationId": "seed-neg-demo-hiring-path",
+      "commercialAgreementId": "seed-deal-demo-hiring",
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    }
+  ]
 }

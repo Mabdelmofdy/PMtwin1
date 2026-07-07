@@ -4,7 +4,7 @@ import { ApplicationRepository } from '@/repositories/application-repository.ts'
 import { AuditRepository } from '@/repositories/audit-repository.ts'
 import { CompanyRepository } from '@/repositories/company-repository.ts'
 import { ContractRepository } from '@/repositories/contract-repository.ts'
-import { DealRepository } from '@/repositories/deal-repository.ts'
+import { CommercialAgreementRepository } from '@/repositories/commercial-agreement-repository.ts'
 import { NegotiationRepository } from '@/repositories/negotiation-repository.ts'
 import { NotificationRepository } from '@/repositories/notification-repository.ts'
 import { OpportunityRepository } from '@/repositories/opportunity-repository.ts'
@@ -54,9 +54,9 @@ const REPOSITORY_SPECS: readonly RepositorySpec[] = [
     factory: (storage) => new PostMatchRepository(storage, () => []),
   },
   {
-    name: 'DealRepository',
-    entityKey: REPOSITORY_ENTITY_KEYS.deal,
-    factory: (storage) => new DealRepository(storage, () => []),
+    name: 'CommercialAgreementRepository',
+    entityKey: REPOSITORY_ENTITY_KEYS.commercialAgreement,
+    factory: (storage) => new CommercialAgreementRepository(storage, () => []),
   },
   {
     name: 'NegotiationRepository',

@@ -16,6 +16,8 @@ import { PmMatchScoreBadge } from '@/components/ui/pm-match-score-badge'
 import { PmWorkflowBadge } from '@/components/ui/pm-workflow-badge'
 import type { PostMatch } from '@/types/domain.ts'
 import { cn } from '@/lib/utils'
+import { collectPostMatchOpportunityIds } from '@/domain/normalized/post-match-strong-key.ts'
+import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'
 
 const MATCH_TYPE_ICONS: Record<string, LucideIcon> = {
   one_way: ArrowRight,
@@ -76,6 +78,20 @@ export function MatchCard({
     ? truncate(pairing.offerTitle, BROWSE_TITLE_MAX)
     : pairing.offerTitle
   const structureTitle = shortenTitles ? truncate(displayTitle, BROWSE_TITLE_MAX) : displayTitle
+  const relatedOpportunities = collectPostMatchOpportunityIds(match)
+    .map((id) => opportunitiesApi.get(id))
+    .filter(Boolean)
+  const primaryOpportunity = relatedOpportunities[0]
+  const taxonomy = primaryOpportunity
+    ? resolveOpportunityTaxonomyLabels(primaryOpportunity)
+    : null
+  const breakdown = match.payload?.breakdown ?? match.matchCriteria ?? {}
+  const confidence =
+    match.matchScore >= 0.9
+      ? 'High Confidence'
+      : match.matchScore >= 0.75
+        ? 'Medium Confidence'
+        : 'Low Confidence'
 
   return (
     <PmSurface
@@ -124,6 +140,23 @@ export function MatchCard({
         <MatchTypeChip matchType={match.matchType} />
         <span>{formatDate(match.createdAt)}</span>
         <PmWorkflowBadge status={match.status} entity="match" size="sm" />
+      </div>
+
+      {taxonomy ? (
+        <div className={cn(pmTypography.caption, 'mt-2 space-y-1 text-muted-foreground')}>
+          <p>{taxonomy.mainModel}</p>
+          <p>{taxonomy.subModel}</p>
+          <p>{taxonomy.exchangeMode}</p>
+          <p>{taxonomy.matchingTopology}</p>
+        </div>
+      ) : null}
+
+      <div className={cn(pmTypography.caption, 'mt-2 text-muted-foreground')}>
+        <p className="font-medium">{confidence}</p>
+        <p>
+          Skills {breakdown.skillMatch != null ? '✓' : '—'} · Timeline {breakdown.timelineFit != null ? '✓' : '—'} · Budget{' '}
+          {breakdown.budgetFit != null ? '✓' : '—'} · Location {breakdown.locationFit != null ? '✓' : '—'}
+        </p>
       </div>
 
       {showActions ? (

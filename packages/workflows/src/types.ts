@@ -18,6 +18,7 @@ export type WorkflowStepKey =
   | 'matching'
   | 'post_match'
   | 'negotiation'
+  | 'commercial_agreement'
   | 'deal'
   | 'contract'
   | 'completion'
@@ -32,10 +33,17 @@ export type WorkflowActionKey =
   | 'start_negotiation_from_application'
   | 'agree_negotiation'
   | 'cancel_negotiation'
-  | 'create_deal_from_post_match'
-  | 'create_deal_from_application'
-  | 'create_deal_from_negotiation'
-  | 'create_contract_from_deal'
+  | 'send_negotiation_message'
+  | 'submit_negotiation_offer'
+  | 'submit_negotiation_counter_offer'
+  | 'accept_negotiation_offer'
+  | 'reject_negotiation_offer'
+  | 'view_negotiation_transcript'
+  | 'create_commercial_agreement_from_post_match'
+  | 'create_commercial_agreement_from_application'
+  | 'create_commercial_agreement_from_negotiation'
+  | 'route_contract_decision'
+  | 'create_contract_from_commercial_agreement'
   | 'sign_contract'
   | 'complete_contract'
 
@@ -44,6 +52,7 @@ export type WorkflowEntityKind =
   | 'application'
   | 'post_match'
   | 'negotiation'
+  | 'commercial_agreement'
   | 'deal'
   | 'contract'
 
@@ -57,6 +66,7 @@ export type WorkflowEntitySnapshot = {
   readonly matchId?: string
   readonly applicationId?: string
   readonly negotiationId?: string
+  readonly commercialAgreementId?: string
   readonly dealId?: string
   readonly matchType?: string
   readonly participants?: readonly WorkflowParticipantSnapshot[]
@@ -95,10 +105,22 @@ export type WorkflowCollaborationContext = {
 export type WorkflowLinkageContext = {
   readonly negotiationsForPostMatch?: readonly WorkflowEntitySnapshot[]
   readonly negotiationsForApplication?: readonly WorkflowEntitySnapshot[]
+  readonly commercialAgreementForPostMatch?: WorkflowEntitySnapshot | null
+  readonly commercialAgreementForApplication?: WorkflowEntitySnapshot | null
+  readonly commercialAgreementForNegotiation?: WorkflowEntitySnapshot | null
+  readonly contractsForCommercialAgreement?: readonly WorkflowEntitySnapshot[]
+  /** @deprecated use `commercialAgreementForPostMatch` */
   readonly dealForPostMatch?: WorkflowEntitySnapshot | null
+  /** @deprecated use `commercialAgreementForApplication` */
   readonly dealForApplication?: WorkflowEntitySnapshot | null
+  /** @deprecated use `commercialAgreementForNegotiation` */
   readonly dealForNegotiation?: WorkflowEntitySnapshot | null
+  /** @deprecated use `contractsForCommercialAgreement` */
   readonly contractsForDeal?: readonly WorkflowEntitySnapshot[]
+  readonly negotiationAcceptedOfferId?: string | null
+  readonly contractDecisionRequired?: boolean
+  readonly contractDecisionId?: string | null
+  readonly contractDecisionStatus?: 'pending' | 'in_review' | 'escalated' | 'approved' | 'rejected' | 'cancelled' | 'expired' | null
   readonly opportunityClosed?: boolean
   readonly legacyApplicationsEnabled?: boolean
 }
@@ -111,6 +133,8 @@ export type WorkflowContext = {
   readonly application?: WorkflowEntitySnapshot
   readonly postMatch?: WorkflowEntitySnapshot
   readonly negotiation?: WorkflowEntitySnapshot
+  readonly commercialAgreement?: WorkflowEntitySnapshot
+  /** @deprecated use `commercialAgreement` */
   readonly deal?: WorkflowEntitySnapshot
   readonly contract?: WorkflowEntitySnapshot
   readonly collaboration?: WorkflowCollaborationContext

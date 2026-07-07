@@ -306,6 +306,7 @@ export function canViewNegotiationDetail(
   negotiation: Negotiation,
   viewer: ViewerContext,
 ): boolean {
+  if (viewer.canAccessAdmin) return true
   return isParticipantOnEntity(negotiation, viewer.userId)
 }
 

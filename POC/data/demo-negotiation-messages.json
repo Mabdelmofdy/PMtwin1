@@ -1,0 +1,33 @@
+{
+  "domain": "negotiation_messages",
+  "version": "1.0",
+  "data": [
+    {
+      "id": "seed-msg-demo-001",
+      "negotiationId": "seed-neg-demo-oneway-cash",
+      "senderId": "seed-user-004",
+      "senderRole": "offer_provider",
+      "body": "Offer submitted with milestone payment schedule.",
+      "visibility": "participants",
+      "createdAt": "2026-06-28T10:10:00.000Z"
+    },
+    {
+      "id": "seed-msg-demo-002",
+      "negotiationId": "seed-neg-demo-oneway-cash",
+      "senderId": "seed-co-corp-002",
+      "senderRole": "need_owner",
+      "body": "Counter offer submitted at 210K SAR with updated payment terms.",
+      "visibility": "participants",
+      "createdAt": "2026-06-29T08:00:00.000Z"
+    },
+    {
+      "id": "seed-msg-demo-003",
+      "negotiationId": "seed-neg-demo-circular-resource",
+      "senderId": "seed-user-010",
+      "senderRole": "cycle_member",
+      "body": "Shared equipment availability uploaded for Q3 planning.",
+      "visibility": "participants",
+      "createdAt": "2026-07-02T08:30:00.000Z"
+    }
+  ]
+}

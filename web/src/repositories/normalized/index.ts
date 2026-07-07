@@ -122,9 +122,12 @@ export const dealRepositoryNormalized = {
   },
 }
 
+export const commercialAgreementRepositoryNormalized = dealRepositoryNormalized
+
 export {
   userRepositoryNormalized as normalizedUserRepository,
   opportunityRepositoryNormalized as normalizedOpportunityRepository,
   applicationRepositoryNormalized as normalizedApplicationRepository,
+  commercialAgreementRepositoryNormalized as normalizedCommercialAgreementRepository,
   dealRepositoryNormalized as normalizedDealRepository,
 }

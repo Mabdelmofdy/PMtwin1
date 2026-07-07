@@ -49,31 +49,80 @@ var WORKFLOW_ACTION_REGISTRY = {
     requiredRole: "participant",
     requiredPermission: "negotiation:cancel"
   },
-  create_deal_from_post_match: {
-    key: "create_deal_from_post_match",
-    label: "Create deal",
-    commandType: "CreateDealFromPostMatch",
+  send_negotiation_message: {
+    key: "send_negotiation_message",
+    label: "Send message",
+    commandType: "SendNegotiationMessage",
     requiredRole: "participant",
-    requiredPermission: "deal:create"
+    requiredPermission: "negotiation:message"
   },
-  create_deal_from_application: {
-    key: "create_deal_from_application",
-    label: "Create hiring deal",
-    commandType: "CreateDealFromApplication",
+  submit_negotiation_offer: {
+    key: "submit_negotiation_offer",
+    label: "Submit offer",
+    commandType: "SubmitNegotiationOffer",
+    requiredRole: "participant",
+    requiredPermission: "negotiation:offer"
+  },
+  submit_negotiation_counter_offer: {
+    key: "submit_negotiation_counter_offer",
+    label: "Submit counter offer",
+    commandType: "SubmitNegotiationCounterOffer",
+    requiredRole: "participant",
+    requiredPermission: "negotiation:counter"
+  },
+  accept_negotiation_offer: {
+    key: "accept_negotiation_offer",
+    label: "Accept offer",
+    commandType: "AcceptNegotiationOffer",
+    requiredRole: "participant",
+    requiredPermission: "negotiation:offer:accept"
+  },
+  reject_negotiation_offer: {
+    key: "reject_negotiation_offer",
+    label: "Reject offer",
+    commandType: "RejectNegotiationOffer",
+    requiredRole: "participant",
+    requiredPermission: "negotiation:offer:reject"
+  },
+  view_negotiation_transcript: {
+    key: "view_negotiation_transcript",
+    label: "View transcript",
+    commandType: "LockNegotiationTranscript",
+    requiredRole: "auditor",
+    requiredPermission: "negotiation:transcript:view"
+  },
+  create_commercial_agreement_from_post_match: {
+    key: "create_commercial_agreement_from_post_match",
+    label: "Create commercial agreement",
+    commandType: "CreateCommercialAgreementFromPostMatch",
+    requiredRole: "participant",
+    requiredPermission: "commercial_agreement:create"
+  },
+  create_commercial_agreement_from_application: {
+    key: "create_commercial_agreement_from_application",
+    label: "Create hiring commercial agreement",
+    commandType: "CreateCommercialAgreementFromApplication",
     requiredRole: "hiring_party",
-    requiredPermission: "deal:create"
+    requiredPermission: "commercial_agreement:create"
   },
-  create_deal_from_negotiation: {
-    key: "create_deal_from_negotiation",
-    label: "Create deal",
-    commandType: "CreateDealFromNegotiation",
+  create_commercial_agreement_from_negotiation: {
+    key: "create_commercial_agreement_from_negotiation",
+    label: "Create commercial agreement",
+    commandType: "CreateCommercialAgreementFromNegotiation",
     requiredRole: "participant",
-    requiredPermission: "deal:create"
+    requiredPermission: "commercial_agreement:create"
   },
-  create_contract_from_deal: {
-    key: "create_contract_from_deal",
+  route_contract_decision: {
+    key: "route_contract_decision",
+    label: "Route contract decision",
+    commandType: "RouteContractDecision",
+    requiredRole: "participant",
+    requiredPermission: "contract:decision:route"
+  },
+  create_contract_from_commercial_agreement: {
+    key: "create_contract_from_commercial_agreement",
     label: "Create contract",
-    commandType: "CreateContractFromDeal",
+    commandType: "CreateContractFromCommercialAgreement",
     requiredRole: "participant",
     requiredPermission: "contract:create"
   },
@@ -102,7 +151,7 @@ var COLLABORATION_WORKFLOW_DEFINITIONS = {
     key: "cash_subcontracting",
     label: "Cash subcontracting",
     startEntity: "opportunity",
-    steps: ["opportunity", "publish", "matching", "post_match", "negotiation", "deal", "contract", "completion"],
+    steps: ["opportunity", "publish", "matching", "post_match", "negotiation", "commercial_agreement", "contract", "completion"],
     allowedTransitions: [],
     allowedCommands: [],
     businessRules: [
@@ -116,7 +165,7 @@ var COLLABORATION_WORKFLOW_DEFINITIONS = {
     key: "service_exchange",
     label: "Service exchange / barter",
     startEntity: "opportunity",
-    steps: ["opportunity", "publish", "matching", "post_match", "negotiation", "deal", "contract", "completion"],
+    steps: ["opportunity", "publish", "matching", "post_match", "negotiation", "commercial_agreement", "contract", "completion"],
     allowedTransitions: [],
     allowedCommands: [],
     businessRules: [
@@ -130,7 +179,7 @@ var COLLABORATION_WORKFLOW_DEFINITIONS = {
     key: "joint_venture",
     label: "Joint venture",
     startEntity: "opportunity",
-    steps: ["opportunity", "publish", "matching", "post_match", "negotiation", "deal", "contract", "completion"],
+    steps: ["opportunity", "publish", "matching", "post_match", "negotiation", "commercial_agreement", "contract", "completion"],
     allowedTransitions: [],
     allowedCommands: [],
     businessRules: [
@@ -144,7 +193,7 @@ var COLLABORATION_WORKFLOW_DEFINITIONS = {
     key: "resource_sharing",
     label: "Resource sharing",
     startEntity: "opportunity",
-    steps: ["opportunity", "publish", "matching", "post_match", "negotiation", "deal", "contract", "completion"],
+    steps: ["opportunity", "publish", "matching", "post_match", "negotiation", "commercial_agreement", "contract", "completion"],
     allowedTransitions: [],
     allowedCommands: [],
     businessRules: [
@@ -157,7 +206,7 @@ var COLLABORATION_WORKFLOW_DEFINITIONS = {
     key: "hiring_engagement",
     label: "Hiring / professional engagement",
     startEntity: "application",
-    steps: ["application", "accepted", "negotiation", "deal", "contract", "completion"],
+    steps: ["application", "accepted", "negotiation", "commercial_agreement", "contract", "completion"],
     allowedTransitions: [],
     allowedCommands: [],
     businessRules: [
@@ -188,8 +237,9 @@ function resolveCollaborationWorkflowKey(mainCollaborationModel) {
 var HIRING_COMMANDS = [
   "StartNegotiationFromApplication",
   "AgreeNegotiation",
-  "CreateDealFromApplication",
-  "CreateContractFromDeal",
+  "CreateCommercialAgreementFromApplication",
+  "RouteContractDecision",
+  "CreateContractFromCommercialAgreement",
   "SignContract",
   "CompleteContract"
 ];
@@ -201,23 +251,25 @@ var HIRING_WORKFLOW = {
     "application",
     "accepted",
     "negotiation",
-    "deal",
+    "commercial_agreement",
     "contract",
     "completion"
   ],
   allowedTransitions: [
     { from: "accepted", to: "negotiation", action: "start_negotiation_from_application", commandType: "StartNegotiationFromApplication" },
-    { from: "negotiation", to: "deal", action: "agree_negotiation", commandType: "AgreeNegotiation" },
-    { from: "negotiation", to: "deal", action: "create_deal_from_application", commandType: "CreateDealFromApplication" },
-    { from: "deal", to: "contract", action: "create_contract_from_deal", commandType: "CreateContractFromDeal" },
+    { from: "negotiation", to: "commercial_agreement", action: "agree_negotiation", commandType: "AgreeNegotiation" },
+    { from: "negotiation", to: "commercial_agreement", action: "create_commercial_agreement_from_application", commandType: "CreateCommercialAgreementFromApplication" },
+    { from: "commercial_agreement", to: "commercial_agreement", action: "route_contract_decision", commandType: "RouteContractDecision" },
+    { from: "commercial_agreement", to: "contract", action: "create_contract_from_commercial_agreement", commandType: "CreateContractFromCommercialAgreement" },
     { from: "contract", to: "completion", action: "sign_contract", commandType: "SignContract" },
     { from: "contract", to: "completion", action: "complete_contract", commandType: "CompleteContract" }
   ],
   allowedCommands: [...HIRING_COMMANDS],
   businessRules: [
     "Application must be accepted before starting hiring negotiation",
-    "Negotiation must be agreed before creating hiring deal",
-    "Deal must exist before creating contract",
+    "Negotiation must be agreed before creating hiring commercial agreement",
+    "Commercial agreement contract route must pass decision engine approval",
+    "Commercial agreement must exist before creating contract",
     "Hiring path does not require PostMatch"
   ],
   terminalStates: ["completed", "cancelled", "rejected", "withdrawn"]
@@ -231,9 +283,10 @@ var MARKETPLACE_COMMANDS = [
   "StartNegotiationFromPostMatch",
   "AgreeNegotiation",
   "CancelNegotiation",
-  "CreateDealFromPostMatch",
-  "CreateDealFromNegotiation",
-  "CreateContractFromDeal",
+  "CreateCommercialAgreementFromPostMatch",
+  "CreateCommercialAgreementFromNegotiation",
+  "RouteContractDecision",
+  "CreateContractFromCommercialAgreement",
   "SignContract",
   "CompleteContract"
 ];
@@ -247,7 +300,7 @@ var MARKETPLACE_WORKFLOW = {
     "matching",
     "post_match",
     "negotiation",
-    "deal",
+    "commercial_agreement",
     "contract",
     "completion"
   ],
@@ -256,18 +309,20 @@ var MARKETPLACE_WORKFLOW = {
     { from: "post_match", to: "negotiation", action: "start_negotiation_from_post_match", commandType: "StartNegotiationFromPostMatch" },
     { from: "post_match", to: "post_match", action: "accept_match", commandType: "AcceptPostMatch" },
     { from: "post_match", to: "post_match", action: "decline_match", commandType: "DeclinePostMatch" },
-    { from: "negotiation", to: "deal", action: "agree_negotiation", commandType: "AgreeNegotiation" },
-    { from: "negotiation", to: "deal", action: "create_deal_from_post_match", commandType: "CreateDealFromPostMatch" },
-    { from: "negotiation", to: "deal", action: "create_deal_from_negotiation", commandType: "CreateDealFromNegotiation" },
-    { from: "deal", to: "contract", action: "create_contract_from_deal", commandType: "CreateContractFromDeal" },
+    { from: "negotiation", to: "commercial_agreement", action: "agree_negotiation", commandType: "AgreeNegotiation" },
+    { from: "negotiation", to: "commercial_agreement", action: "create_commercial_agreement_from_post_match", commandType: "CreateCommercialAgreementFromPostMatch" },
+    { from: "negotiation", to: "commercial_agreement", action: "create_commercial_agreement_from_negotiation", commandType: "CreateCommercialAgreementFromNegotiation" },
+    { from: "commercial_agreement", to: "commercial_agreement", action: "route_contract_decision", commandType: "RouteContractDecision" },
+    { from: "commercial_agreement", to: "contract", action: "create_contract_from_commercial_agreement", commandType: "CreateContractFromCommercialAgreement" },
     { from: "contract", to: "completion", action: "sign_contract", commandType: "SignContract" },
     { from: "contract", to: "completion", action: "complete_contract", commandType: "CompleteContract" }
   ],
   allowedCommands: [...MARKETPLACE_COMMANDS],
   businessRules: [
     "PostMatch must be confirmed before starting negotiation",
-    "Negotiation must be agreed before creating a deal",
-    "Deal must exist before creating a contract",
+    "Negotiation must be agreed before creating a commercial agreement",
+    "Commercial agreement contract route must pass decision engine approval",
+    "Commercial agreement must exist before creating a contract",
     "Collaboration taxonomy must be valid before publish"
   ],
   terminalStates: ["completed", "cancelled", "closed", "terminated"]
@@ -337,7 +392,7 @@ var manifest_default = {
       ],
       aliasesFile: "aliases/negotiation.json"
     },
-    deal: {
+    commercial_agreement: {
       canonicalStates: [
         "draft",
         "review",
@@ -346,7 +401,7 @@ var manifest_default = {
         "completed",
         "cancelled"
       ],
-      aliasesFile: "aliases/deal.json"
+      aliasesFile: "aliases/commercial_agreement.json"
     },
     contract: {
       canonicalStates: [
@@ -377,7 +432,7 @@ var negotiation_default = {
   counter_offered: "countered",
   failed: "cancelled"
 };
-var deal_default = {
+var commercial_agreement_default = {
   negotiating: "draft",
   active: "executing",
   execution: "executing",
@@ -392,9 +447,15 @@ var ALIAS_FILES = {
   application: application_default,
   match: match_default,
   negotiation: negotiation_default,
-  deal: deal_default,
+  commercial_agreement: commercial_agreement_default,
   contract: contract_default
 };
+var ENTITY_TYPE_LEGACY_ALIASES = Object.freeze({
+  deal: "commercial_agreement"
+});
+function resolveEntityType(entityType) {
+  return ENTITY_TYPE_LEGACY_ALIASES[entityType] ?? entityType;
+}
 function buildStatusMaps(entities, aliasFiles) {
   const canonicalStates = {};
   const legacyAliases = {};
@@ -431,8 +492,9 @@ function toCanonical(entityType, status) {
   if (status == null || status === "") {
     return "";
   }
+  const resolvedEntityType = resolveEntityType(entityType);
   const key = String(status).toLowerCase();
-  const map = registry.resolveMap[entityType];
+  const map = registry.resolveMap[resolvedEntityType];
   if (!map) {
     return key;
   }
@@ -485,7 +547,7 @@ var transitions_default = {
       cancelled: []
     }
   },
-  deal: {
+  commercial_agreement: {
     terminalStates: ["completed", "cancelled"],
     transitions: {
       draft: ["review", "cancelled"],
@@ -508,22 +570,24 @@ var transitions_default = {
   }
 };
 function isTerminal(entityType, status) {
-  const canonical = toCanonical(entityType, status);
+  const resolvedEntityType = ENTITY_TYPE_LEGACY_ALIASES[entityType] ?? entityType;
+  const canonical = toCanonical(resolvedEntityType, status);
   if (!canonical) {
     return false;
   }
-  const fsm = transitions_default[entityType];
+  const fsm = transitions_default[resolvedEntityType];
   if (!fsm) {
     return false;
   }
   return fsm.terminalStates.includes(canonical);
 }
 function allowedTransitions(entityType, fromStatus) {
-  const from = toCanonical(entityType, fromStatus);
+  const resolvedEntityType = ENTITY_TYPE_LEGACY_ALIASES[entityType] ?? entityType;
+  const from = toCanonical(resolvedEntityType, fromStatus);
   if (!from) {
     return Object.freeze([]);
   }
-  const fsm = transitions_default[entityType];
+  const fsm = transitions_default[resolvedEntityType];
   if (!fsm) {
     return Object.freeze([]);
   }
@@ -591,8 +655,8 @@ function findAgreedApplicationNegotiation(context) {
   const linked = context.linkage?.negotiationsForApplication ?? [];
   return linked.find((negotiation) => (negotiation.status ?? "").toLowerCase() === "agreed");
 }
-function hasActiveContractForDeal(context) {
-  const contracts = context.linkage?.contractsForDeal ?? [];
+function hasActiveContractForCommercialAgreement(context) {
+  const contracts = context.linkage?.contractsForCommercialAgreement ?? context.linkage?.contractsForDeal ?? [];
   return contracts.some((contract) => {
     const status = (contract.status ?? "").toLowerCase();
     return status !== "completed" && status !== "terminated" && status !== "cancelled";
@@ -1197,14 +1261,19 @@ function validateJointVentureCommercialRequirements(collaboration) {
   return errors;
 }
 
+// ../decision-engine/dist/index.js
+function isDecisionStatusApproved(status) {
+  return status === "approved";
+}
+
 // src/engine/next-actions.ts
 var MATCH_ENTITY = "match";
 var APPLICATION_ENTITY = "application";
 var NEGOTIATION_ENTITY = "negotiation";
-var DEAL_ENTITY = "deal";
+var COMMERCIAL_AGREEMENT_ENTITY = "commercial_agreement";
 var CONTRACT_ENTITY = "contract";
 var OPPORTUNITY_ENTITY = "opportunity";
-var DEAL_STATUSES_ALLOWING_CONTRACT = /* @__PURE__ */ new Set(["draft", "review", "signing"]);
+var COMMERCIAL_AGREEMENT_STATUSES_ALLOWING_CONTRACT = /* @__PURE__ */ new Set(["draft", "review", "signing"]);
 function userCanMutate(context) {
   if (context.user.canMutate === false) return false;
   if (context.user.canMutate === true) return true;
@@ -1299,13 +1368,15 @@ function evaluateStartNegotiationFromApplication(context) {
   const legacyEnabled = context.linkage?.legacyApplicationsEnabled !== false;
   const visible = legacyEnabled && Boolean(application?.id && status === "accepted");
   const blocked = hasBlockingApplicationNegotiation(context);
-  const hasDeal = Boolean(context.linkage?.dealForApplication?.id || application?.dealId);
-  const enabled = visible && userCanMutate(context) && !blocked && !hasDeal;
+  const hasCommercialAgreement = Boolean(
+    context.linkage?.commercialAgreementForApplication?.id || context.linkage?.dealForApplication?.id || application?.commercialAgreementId || application?.dealId
+  );
+  const enabled = visible && userCanMutate(context) && !blocked && !hasCommercialAgreement;
   return buildAction(context, "start_negotiation_from_application", {
     visible,
     enabled: Boolean(enabled),
     visibilityReason: visible ? "Accepted application can start hiring negotiation" : "Start hiring negotiation requires an accepted application",
-    disabledReason: hasDeal ? "A deal already exists for this application" : blocked ? "A hiring negotiation already exists for this application" : !userCanMutate(context) ? "You do not have permission to start hiring negotiation" : void 0,
+    disabledReason: hasCommercialAgreement ? "A commercial agreement already exists for this application" : blocked ? "A hiring negotiation already exists for this application" : !userCanMutate(context) ? "You do not have permission to start hiring negotiation" : void 0,
     aggregateId: application?.id,
     workflowKey: "hiring"
   });
@@ -1334,29 +1405,126 @@ function evaluateCancelNegotiation(context) {
     aggregateId: agree.aggregateId
   });
 }
-function evaluateCreateDealFromNegotiation(context) {
+var AUDITOR_ROLES = /* @__PURE__ */ new Set(["auditor", "admin", "moderator"]);
+function isNegotiationRoomWritable(context) {
   const negotiation = context.negotiation;
   const status = canonicalEntityStatus(NEGOTIATION_ENTITY, negotiation?.status);
-  const existingDeal = context.linkage?.dealForNegotiation;
-  const visible = Boolean(negotiation?.id && status === "agreed");
-  const enabled = visible && userCanMutate(context) && !existingDeal?.id;
-  return buildAction(context, "create_deal_from_negotiation", {
+  return Boolean(
+    negotiation?.id && (status === "active" || status === "countered")
+  );
+}
+function isAuditorViewer(context) {
+  const roles = context.user.roles ?? [];
+  return roles.some((role) => AUDITOR_ROLES.has(role));
+}
+function canViewNegotiationTranscript(context) {
+  const negotiation = context.negotiation;
+  if (!negotiation?.id) return false;
+  if (context.user.isParticipant) return true;
+  if (isAuditorViewer(context)) return true;
+  return Boolean(context.user.canMutate && context.user.userId);
+}
+function evaluateSendNegotiationMessage(context) {
+  const negotiation = context.negotiation;
+  const writable = isNegotiationRoomWritable(context);
+  const visible = Boolean(negotiation?.id && writable);
+  const enabled = visible && userCanMutate(context) && Boolean(context.user.isParticipant);
+  return buildAction(context, "send_negotiation_message", {
     visible,
     enabled: Boolean(enabled),
-    visibilityReason: visible ? "Agreed negotiation can create a deal" : "Create deal requires an agreed negotiation",
-    disabledReason: existingDeal?.id ? "A deal already exists for this negotiation" : !userCanMutate(context) ? "You do not have permission to create a deal" : void 0,
+    visibilityReason: visible ? "Negotiation room is open for discussion" : "Discussion is only available for active negotiations",
+    disabledReason: !context.user.isParticipant ? "Only negotiation participants can send messages" : !userCanMutate(context) ? "You do not have permission to send messages" : void 0,
+    aggregateId: negotiation?.id
+  });
+}
+function evaluateSubmitNegotiationOffer(context) {
+  const negotiation = context.negotiation;
+  const writable = isNegotiationRoomWritable(context);
+  const visible = Boolean(negotiation?.id && writable);
+  const enabled = visible && userCanMutate(context) && Boolean(context.user.isParticipant);
+  return buildAction(context, "submit_negotiation_offer", {
+    visible,
+    enabled: Boolean(enabled),
+    visibilityReason: visible ? "Negotiation room accepts initial offers" : "Offer submission requires an active negotiation",
+    disabledReason: !context.user.isParticipant ? "Only negotiation participants can submit offers" : void 0,
+    aggregateId: negotiation?.id
+  });
+}
+function evaluateSubmitNegotiationCounterOffer(context) {
+  const negotiation = context.negotiation;
+  const status = canonicalEntityStatus(NEGOTIATION_ENTITY, negotiation?.status);
+  const visible = Boolean(
+    negotiation?.id && (status === "active" || status === "countered")
+  );
+  const enabled = visible && userCanMutate(context) && Boolean(context.user.isParticipant);
+  return buildAction(context, "submit_negotiation_counter_offer", {
+    visible,
+    enabled: Boolean(enabled),
+    visibilityReason: visible ? "Counter offers can be submitted while negotiation is open" : "Counter offers require an active or countered negotiation",
+    disabledReason: !context.user.isParticipant ? "Only negotiation participants can submit counter offers" : void 0,
+    aggregateId: negotiation?.id
+  });
+}
+function evaluateAcceptNegotiationOffer(context) {
+  const negotiation = context.negotiation;
+  const writable = isNegotiationRoomWritable(context);
+  const visible = Boolean(negotiation?.id && writable);
+  const enabled = visible && userCanMutate(context) && Boolean(context.user.isParticipant);
+  return buildAction(context, "accept_negotiation_offer", {
+    visible,
+    enabled: Boolean(enabled),
+    visibilityReason: visible ? "Submitted offers can be accepted" : "Accept offer is only available for open negotiations",
+    disabledReason: !context.user.isParticipant ? "Only negotiation participants can accept offers" : void 0,
+    aggregateId: negotiation?.id
+  });
+}
+function evaluateRejectNegotiationOffer(context) {
+  const accept = evaluateAcceptNegotiationOffer(context);
+  return buildAction(context, "reject_negotiation_offer", {
+    visible: accept.visible,
+    enabled: accept.enabled,
+    visibilityReason: accept.visibilityReason,
+    disabledReason: accept.disabledReason,
+    aggregateId: accept.aggregateId
+  });
+}
+function evaluateViewNegotiationTranscript(context) {
+  const negotiation = context.negotiation;
+  const visible = canViewNegotiationTranscript(context);
+  const enabled = visible;
+  return buildAction(context, "view_negotiation_transcript", {
+    visible: Boolean(negotiation?.id && visible),
+    enabled: Boolean(enabled),
+    visibilityReason: visible ? "Negotiation transcript is available for review" : "Transcript view requires participant or auditor access",
+    aggregateId: negotiation?.id
+  });
+}
+function evaluateCreateCommercialAgreementFromNegotiation(context) {
+  const negotiation = context.negotiation;
+  const status = canonicalEntityStatus(NEGOTIATION_ENTITY, negotiation?.status);
+  const existingCommercialAgreement = context.linkage?.commercialAgreementForNegotiation ?? context.linkage?.dealForNegotiation;
+  const hasAcceptedOffer = Boolean(
+    context.linkage?.negotiationAcceptedOfferId || status === "agreed" && context.negotiation?.commercialTerms && Object.keys(context.negotiation.commercialTerms).length > 0
+  );
+  const visible = Boolean(negotiation?.id && status === "agreed");
+  const enabled = visible && userCanMutate(context) && !existingCommercialAgreement?.id && hasAcceptedOffer;
+  return buildAction(context, "create_commercial_agreement_from_negotiation", {
+    visible,
+    enabled: Boolean(enabled),
+    visibilityReason: visible ? "Agreed negotiation can create a commercial agreement" : "Create commercial agreement requires an agreed negotiation",
+    disabledReason: !hasAcceptedOffer ? "An accepted negotiation offer is required before creating a commercial agreement" : existingCommercialAgreement?.id ? "A commercial agreement already exists for this negotiation" : !userCanMutate(context) ? "You do not have permission to create a commercial agreement" : void 0,
     aggregateId: negotiation?.id,
     metadata: negotiation?.id ? { negotiationId: negotiation.id } : void 0
   });
 }
-function evaluateCreateDealFromPostMatch(context) {
-  const base = evaluateCreateDealFromNegotiation(context);
+function evaluateCreateCommercialAgreementFromPostMatch(context) {
+  const base = evaluateCreateCommercialAgreementFromNegotiation(context);
   const match = context.postMatch;
   const visible = base.visible && Boolean(match?.id && negotiationLinkedToPostMatch(context));
-  return buildAction(context, "create_deal_from_post_match", {
+  return buildAction(context, "create_commercial_agreement_from_post_match", {
     visible,
     enabled: base.enabled && visible,
-    visibilityReason: visible ? "Agreed PostMatch negotiation can create a deal" : "Create deal from PostMatch requires agreed negotiation linked to match",
+    visibilityReason: visible ? "Agreed PostMatch negotiation can create a commercial agreement" : "Create commercial agreement from PostMatch requires agreed negotiation linked to match",
     disabledReason: base.disabledReason,
     aggregateId: match?.id ?? base.aggregateId,
     metadata: {
@@ -1365,38 +1533,60 @@ function evaluateCreateDealFromPostMatch(context) {
     }
   });
 }
-function evaluateCreateDealFromApplication(context) {
+function evaluateCreateCommercialAgreementFromApplication(context) {
   const application = context.application;
   const agreed = findAgreedApplicationNegotiation(context);
-  const existingDeal = context.linkage?.dealForApplication;
+  const existingCommercialAgreement = context.linkage?.commercialAgreementForApplication ?? context.linkage?.dealForApplication;
   const legacyEnabled = context.linkage?.legacyApplicationsEnabled !== false;
   const visible = legacyEnabled && Boolean(application?.id && agreed?.id);
-  const enabled = visible && userCanMutate(context) && !existingDeal?.id && !application?.dealId;
-  return buildAction(context, "create_deal_from_application", {
+  const enabled = visible && userCanMutate(context) && !existingCommercialAgreement?.id && !application?.commercialAgreementId && !application?.dealId;
+  return buildAction(context, "create_commercial_agreement_from_application", {
     visible,
     enabled: Boolean(enabled),
-    visibilityReason: visible ? "Agreed hiring negotiation can create a deal" : "Create hiring deal requires an agreed application-linked negotiation",
-    disabledReason: existingDeal?.id || application?.dealId ? "A deal already exists for this application" : !userCanMutate(context) ? "You do not have permission to create a hiring deal" : void 0,
+    visibilityReason: visible ? "Agreed hiring negotiation can create a commercial agreement" : "Create hiring commercial agreement requires an agreed application-linked negotiation",
+    disabledReason: existingCommercialAgreement?.id || application?.commercialAgreementId || application?.dealId ? "A commercial agreement already exists for this application" : !userCanMutate(context) ? "You do not have permission to create a hiring commercial agreement" : void 0,
     aggregateId: application?.id,
     workflowKey: "hiring",
     metadata: agreed?.id ? { negotiationId: agreed.id } : void 0
   });
 }
-function evaluateCreateContractFromDeal(context) {
-  const deal = context.deal;
-  const status = canonicalEntityStatus(DEAL_ENTITY, deal?.status);
+function evaluateCreateContractFromCommercialAgreement(context) {
+  const commercialAgreement = context.commercialAgreement ?? context.deal;
+  const status = canonicalEntityStatus(COMMERCIAL_AGREEMENT_ENTITY, commercialAgreement?.status);
   const visible = Boolean(
-    deal?.id && DEAL_STATUSES_ALLOWING_CONTRACT.has(status) && (deal.negotiationId || deal.postMatchId || deal.applicationId)
+    commercialAgreement?.id && COMMERCIAL_AGREEMENT_STATUSES_ALLOWING_CONTRACT.has(status) && (commercialAgreement.negotiationId || commercialAgreement.postMatchId || commercialAgreement.applicationId)
   );
-  const hasContract = hasActiveContractForDeal(context);
-  const enabled = visible && userCanMutate(context) && !hasContract;
-  return buildAction(context, "create_contract_from_deal", {
+  const hasContract = hasActiveContractForCommercialAgreement(context);
+  const decisionRequired = context.linkage?.contractDecisionRequired !== false;
+  const decisionApproved = isDecisionStatusApproved(
+    context.linkage?.contractDecisionStatus
+  );
+  const enabled = visible && userCanMutate(context) && !hasContract && (!decisionRequired || decisionApproved);
+  return buildAction(context, "create_contract_from_commercial_agreement", {
     visible,
     enabled: Boolean(enabled),
-    visibilityReason: visible ? "Deal is ready for contract creation" : "Create contract requires a draft, review, or signing deal",
-    disabledReason: hasContract ? "An active contract already exists for this deal" : !userCanMutate(context) ? "You do not have permission to create a contract" : void 0,
-    aggregateId: deal?.id,
-    metadata: deal?.id ? { dealId: deal.id } : void 0
+    visibilityReason: visible ? "Commercial agreement is ready for contract creation" : "Create contract requires a draft, review, or signing commercial agreement",
+    disabledReason: hasContract ? "An active contract already exists for this commercial agreement" : decisionRequired && !decisionApproved ? "Decision review must be approved before creating a contract" : !userCanMutate(context) ? "You do not have permission to create a contract" : void 0,
+    aggregateId: commercialAgreement?.id,
+    metadata: commercialAgreement?.id ? { commercialAgreementId: commercialAgreement.id } : void 0
+  });
+}
+function evaluateRouteContractDecision(context) {
+  const commercialAgreement = context.commercialAgreement ?? context.deal;
+  const status = canonicalEntityStatus(COMMERCIAL_AGREEMENT_ENTITY, commercialAgreement?.status);
+  const visible = Boolean(
+    commercialAgreement?.id && COMMERCIAL_AGREEMENT_STATUSES_ALLOWING_CONTRACT.has(status)
+  );
+  const hasContract = hasActiveContractForCommercialAgreement(context);
+  const decisionApproved = isDecisionStatusApproved(context.linkage?.contractDecisionStatus);
+  const enabled = visible && userCanMutate(context) && !hasContract && !decisionApproved;
+  return buildAction(context, "route_contract_decision", {
+    visible,
+    enabled,
+    visibilityReason: visible ? "Commercial agreement can be routed to decision engine review" : "Decision routing requires a draft, review, or signing commercial agreement",
+    disabledReason: hasContract ? "Contract already exists for this commercial agreement" : decisionApproved ? "Decision review already approved" : !userCanMutate(context) ? "You do not have permission to route contract decisions" : void 0,
+    aggregateId: commercialAgreement?.id,
+    metadata: commercialAgreement?.id ? { commercialAgreementId: commercialAgreement.id } : void 0
   });
 }
 function evaluateSignContract(context) {
@@ -1440,10 +1630,17 @@ var ACTION_EVALUATORS = {
   start_negotiation_from_application: evaluateStartNegotiationFromApplication,
   agree_negotiation: evaluateAgreeNegotiation,
   cancel_negotiation: evaluateCancelNegotiation,
-  create_deal_from_post_match: evaluateCreateDealFromPostMatch,
-  create_deal_from_application: evaluateCreateDealFromApplication,
-  create_deal_from_negotiation: evaluateCreateDealFromNegotiation,
-  create_contract_from_deal: evaluateCreateContractFromDeal,
+  send_negotiation_message: evaluateSendNegotiationMessage,
+  submit_negotiation_offer: evaluateSubmitNegotiationOffer,
+  submit_negotiation_counter_offer: evaluateSubmitNegotiationCounterOffer,
+  accept_negotiation_offer: evaluateAcceptNegotiationOffer,
+  reject_negotiation_offer: evaluateRejectNegotiationOffer,
+  view_negotiation_transcript: evaluateViewNegotiationTranscript,
+  create_commercial_agreement_from_post_match: evaluateCreateCommercialAgreementFromPostMatch,
+  create_commercial_agreement_from_application: evaluateCreateCommercialAgreementFromApplication,
+  create_commercial_agreement_from_negotiation: evaluateCreateCommercialAgreementFromNegotiation,
+  route_contract_decision: evaluateRouteContractDecision,
+  create_contract_from_commercial_agreement: evaluateCreateContractFromCommercialAgreement,
   sign_contract: evaluateSignContract,
   complete_contract: evaluateCompleteContract
 };
@@ -1458,7 +1655,7 @@ function isActionAllowedForWorkflow(context, key) {
   if (["accept_match", "decline_match", "start_negotiation_from_post_match"].includes(key) && context.postMatch?.id) {
     return true;
   }
-  if (["start_negotiation_from_application", "create_deal_from_application"].includes(key) && context.application?.id) {
+  if (["start_negotiation_from_application", "create_commercial_agreement_from_application"].includes(key) && context.application?.id) {
     return true;
   }
   return ACTION_EVALUATORS[key] !== void 0;
@@ -1480,7 +1677,7 @@ function isWorkflowActionAvailable(context, key) {
 var NEGOTIATION_ENTITY2 = "negotiation";
 var APPLICATION_ENTITY2 = "application";
 var MATCH_ENTITY2 = "match";
-var DEAL_ENTITY2 = "deal";
+var COMMERCIAL_AGREEMENT_ENTITY2 = "commercial_agreement";
 function validateActionBusinessRules(context, actionKey) {
   const errors = [];
   switch (actionKey) {
@@ -1516,37 +1713,59 @@ function validateActionBusinessRules(context, actionKey) {
       }
       break;
     }
-    case "create_deal_from_negotiation":
-    case "create_deal_from_post_match": {
+    case "create_commercial_agreement_from_negotiation":
+    case "create_commercial_agreement_from_post_match": {
       const status = canonicalEntityStatus(NEGOTIATION_ENTITY2, context.negotiation?.status);
       if (status !== "agreed") {
-        errors.push("Negotiation must be agreed before creating a deal");
+        errors.push("Negotiation must be agreed before creating a commercial agreement");
       }
-      if (context.linkage?.dealForNegotiation?.id) {
-        errors.push("A deal already exists for this negotiation");
+      if (!context.linkage?.negotiationAcceptedOfferId) {
+        const hasLegacyAgreedTerms = Boolean(
+          status === "agreed" && context.negotiation?.commercialTerms && Object.keys(context.negotiation.commercialTerms).length > 0
+        );
+        if (!hasLegacyAgreedTerms) {
+          errors.push("An accepted negotiation offer is required before creating a commercial agreement");
+        }
+      }
+      if (context.linkage?.commercialAgreementForNegotiation?.id || context.linkage?.dealForNegotiation?.id) {
+        errors.push("A commercial agreement already exists for this negotiation");
       }
       break;
     }
-    case "create_deal_from_application": {
+    case "create_commercial_agreement_from_application": {
       const agreed = findAgreedApplicationNegotiation(context);
       if (!agreed?.id) {
-        errors.push("An agreed application-linked negotiation is required before creating a deal");
+        errors.push("An agreed application-linked negotiation is required before creating a commercial agreement");
       }
-      if (context.linkage?.dealForApplication?.id || context.application?.dealId) {
-        errors.push("A deal already exists for this application");
+      if (context.linkage?.commercialAgreementForApplication?.id || context.linkage?.dealForApplication?.id || context.application?.commercialAgreementId || context.application?.dealId) {
+        errors.push("A commercial agreement already exists for this application");
       }
       break;
     }
-    case "create_contract_from_deal": {
-      if (!context.deal?.id) {
-        errors.push("Deal must exist before creating a contract");
+    case "create_contract_from_commercial_agreement": {
+      const commercialAgreement = context.commercialAgreement ?? context.deal;
+      if (!commercialAgreement?.id) {
+        errors.push("Commercial agreement must exist before creating a contract");
       }
-      const status = canonicalEntityStatus(DEAL_ENTITY2, context.deal?.status);
+      const status = canonicalEntityStatus(COMMERCIAL_AGREEMENT_ENTITY2, commercialAgreement?.status);
       if (!["draft", "review", "signing"].includes(status)) {
-        errors.push("Deal must be in draft, review, or signing to create a contract");
+        errors.push("Commercial agreement must be in draft, review, or signing to create a contract");
       }
-      if (hasActiveContractForDeal(context)) {
-        errors.push("An active contract already exists for this deal");
+      if (hasActiveContractForCommercialAgreement(context)) {
+        errors.push("An active contract already exists for this commercial agreement");
+      }
+      if (context.linkage?.contractDecisionRequired !== false && context.linkage?.contractDecisionStatus !== "approved") {
+        errors.push("Decision review must be approved before creating a contract");
+      }
+      break;
+    }
+    case "route_contract_decision": {
+      const commercialAgreement = context.commercialAgreement ?? context.deal;
+      if (!commercialAgreement?.id) {
+        errors.push("Commercial agreement must exist before routing decision review");
+      }
+      if (hasActiveContractForCommercialAgreement(context)) {
+        errors.push("Contract already exists for this commercial agreement");
       }
       break;
     }
@@ -1568,7 +1787,7 @@ function validateWorkflowTransition(context, actionKey) {
   const workflow = getWorkflowDefinition(primary);
   const definition = getActionDefinition(actionKey);
   if (!workflow.allowedCommands.includes(definition.commandType)) {
-    const hiringAllowed = primary === "hiring" && ["StartNegotiationFromApplication", "CreateDealFromApplication", "AgreeNegotiation", "CreateContractFromDeal", "SignContract", "CompleteContract"].includes(definition.commandType);
+    const hiringAllowed = primary === "hiring" && ["StartNegotiationFromApplication", "CreateCommercialAgreementFromApplication", "AgreeNegotiation", "RouteContractDecision", "CreateContractFromCommercialAgreement", "SignContract", "CompleteContract"].includes(definition.commandType);
     const marketplaceAllowed = primary === "marketplace" && workflow.allowedCommands.includes(definition.commandType);
     if (!hiringAllowed && !marketplaceAllowed) {
       errors.push(
@@ -1589,7 +1808,8 @@ var LIFECYCLE_ENTITY_BY_KIND = {
   application: "application",
   post_match: "match",
   negotiation: "negotiation",
-  deal: "deal",
+  commercial_agreement: "commercial_agreement",
+  deal: "commercial_agreement",
   contract: "contract"
 };
 var ENTITY_KIND_BY_ACTION = {
@@ -1600,10 +1820,17 @@ var ENTITY_KIND_BY_ACTION = {
   start_negotiation_from_application: "application",
   agree_negotiation: "negotiation",
   cancel_negotiation: "negotiation",
-  create_deal_from_post_match: "post_match",
-  create_deal_from_application: "application",
-  create_deal_from_negotiation: "negotiation",
-  create_contract_from_deal: "deal",
+  send_negotiation_message: "negotiation",
+  submit_negotiation_offer: "negotiation",
+  submit_negotiation_counter_offer: "negotiation",
+  accept_negotiation_offer: "negotiation",
+  reject_negotiation_offer: "negotiation",
+  view_negotiation_transcript: "negotiation",
+  create_commercial_agreement_from_post_match: "post_match",
+  create_commercial_agreement_from_application: "application",
+  create_commercial_agreement_from_negotiation: "negotiation",
+  route_contract_decision: "commercial_agreement",
+  create_contract_from_commercial_agreement: "commercial_agreement",
   sign_contract: "contract",
   complete_contract: "contract"
 };
@@ -1615,10 +1842,17 @@ var AUDIT_ACTION_BY_KEY = {
   start_negotiation_from_application: "negotiation.started_from_application",
   agree_negotiation: "negotiation.agreed",
   cancel_negotiation: "negotiation.cancelled",
-  create_deal_from_post_match: "deal.created_from_match",
-  create_deal_from_application: "deal.created_from_application",
-  create_deal_from_negotiation: "deal.created_from_negotiation",
-  create_contract_from_deal: "contract.created",
+  send_negotiation_message: "negotiation.message.sent",
+  submit_negotiation_offer: "negotiation.offer.submitted",
+  submit_negotiation_counter_offer: "negotiation.counter.submitted",
+  accept_negotiation_offer: "negotiation.offer.accepted",
+  reject_negotiation_offer: "negotiation.offer.rejected",
+  view_negotiation_transcript: "negotiation.transcript.viewed",
+  create_commercial_agreement_from_post_match: "commercial_agreement.created_from_match",
+  create_commercial_agreement_from_application: "commercial_agreement.created_from_application",
+  create_commercial_agreement_from_negotiation: "commercial_agreement.created_from_negotiation",
+  route_contract_decision: "decision.routed",
+  create_contract_from_commercial_agreement: "contract.created",
   sign_contract: "contract.signed",
   complete_contract: "contract.completed"
 };
@@ -1629,9 +1863,10 @@ var NOTIFICATION_TYPE_BY_KEY = {
   start_negotiation_from_post_match: "negotiation.started",
   start_negotiation_from_application: "hiring.negotiation.started",
   agree_negotiation: "negotiation.agreed",
-  create_deal_from_negotiation: "deal.created",
-  create_deal_from_application: "deal.created",
-  create_contract_from_deal: "contract.created",
+  create_commercial_agreement_from_negotiation: "commercial_agreement.created",
+  create_commercial_agreement_from_application: "commercial_agreement.created",
+  route_contract_decision: "decision.review.required",
+  create_contract_from_commercial_agreement: "contract.created",
   sign_contract: "contract.signature_required",
   complete_contract: "contract.completed"
 };
@@ -1645,8 +1880,10 @@ function resolveEntitySnapshot(context, actionKey) {
       return context.postMatch;
     case "negotiation":
       return context.negotiation;
+    case "commercial_agreement":
+      return context.commercialAgreement ?? context.deal;
     case "deal":
-      return context.deal;
+      return context.deal ?? context.commercialAgreement;
     case "contract":
       return context.contract;
     default:

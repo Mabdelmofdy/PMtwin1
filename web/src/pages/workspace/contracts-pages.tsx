@@ -77,6 +77,8 @@ import { EntityAccessDenied } from '@/components/auth/entity-access-state'
 import { formatContractDisplayTitle } from '@/lib/entity-display-titles.ts'
 import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import { PmTechnicalDetails } from '@/components/ui/pm-technical-details.tsx'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { formatCollaborationExchangeMode } from '@/lib/collaboration-taxonomy-display.ts'
 
 function buildContractRecommendedAction(
   model: NonNullable<ReturnType<typeof buildContractDetailReadModel>>,
@@ -106,7 +108,7 @@ function buildContractRecommendedAction(
     return {
       id: 'open-deal',
       title: 'Review source deal',
-      context: 'Commercial terms and participants live in the deal workspace.',
+      context: 'Commercial terms and participants live in the commercial agreement workspace.',
       status: model.status,
       statusEntity: 'contract',
       primary: { label: PRODUCT_LANGUAGE.OPEN_DEAL, href: model.links.deal.path },
@@ -174,6 +176,8 @@ export function ContractsPage() {
   const navigate = useNavigate()
   const { user, canAccessAdmin } = useAuth()
   const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('all')
+  const [paymentMode, setPaymentMode] = useState('all')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
   const viewer = useMemo(
@@ -195,13 +199,15 @@ export function ContractsPage() {
 
   const filtered = useMemo(() => {
     return contracts.filter((c) => {
-      if (!search) return true
       const q = search.toLowerCase()
       const title = resolveContractListTitle(c).toLowerCase()
       const dealTitle = c.dealId ? dealsApi.get(c.dealId)?.title?.toLowerCase() ?? '' : ''
-      return title.includes(q) || dealTitle.includes(q)
+      const matchesSearch = !search || title.includes(q) || dealTitle.includes(q)
+      const matchesStatus = status === 'all' || c.status === status
+      const matchesPaymentMode = paymentMode === 'all' || c.paymentMode === paymentMode
+      return matchesSearch && matchesStatus && matchesPaymentMode
     })
-  }, [contracts, search])
+  }, [contracts, search, status, paymentMode])
 
   const totalItems = filtered.length
   const pageCount = Math.max(1, Math.ceil(totalItems / pageSize))
@@ -210,10 +216,10 @@ export function ContractsPage() {
 
   const listEmpty = resolveListEmptyState({
     hasSourceData: contracts.length > 0,
-    hasActiveFilters: search.length > 0,
+    hasActiveFilters: search.length > 0 || status !== 'all' || paymentMode !== 'all',
     firstRun: {
       title: 'No contracts yet',
-      description: 'Contracts are created from deals in draft, review, or signing.',
+      description: 'Contracts are created from commercial agreements in draft, review, or signing.',
     },
     filtered: {
       title: 'No contracts match your search',
@@ -288,6 +294,36 @@ export function ContractsPage() {
                   }}
                 />
               }
+              filters={
+                <div className="grid w-56 gap-2">
+                  <Select value={status} onValueChange={setStatus}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All statuses</SelectItem>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="pending_signature">Pending signature</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="terminated">Terminated</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={paymentMode} onValueChange={setPaymentMode}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All payment modes</SelectItem>
+                      {['cash', 'barter', 'profit_sharing', 'equity', 'hybrid'].map((mode) => (
+                        <SelectItem key={mode} value={mode}>
+                          {formatCollaborationExchangeMode(mode)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              }
             />
           </PmBrowseToolbar>
         ) : undefined
@@ -314,7 +350,7 @@ export function ContractsPage() {
           description={listEmpty.config.description}
           action={
             <PmButton asChild>
-              <Link to="/deals">Open deals</Link>
+              <Link to="/commercial-agreements">Open commercial agreements</Link>
             </PmButton>
           }
         />
@@ -343,6 +379,8 @@ export function ContractsPage() {
                     variant="outline"
                     onClick={() => {
                       setSearch('')
+                      setStatus('all')
+                      setPaymentMode('all')
                       setPage(1)
                     }}
                   >
@@ -544,7 +582,7 @@ export function ContractDetailPage() {
                 <PmFormReadonly>
                   <PmFormReadonlySection>
                     <PmFormReadonlyField label="Contract reference" value={model.contractId} />
-                    <PmFormReadonlyField label="Deal reference" value={model.dealId} />
+                    <PmFormReadonlyField label="Commercial agreement reference" value={model.dealId} />
                     <PmFormReadonlyField label="Match reference" value={model.postMatchId} />
                     <PmFormReadonlyField label="Negotiation reference" value={model.negotiationId} />
                   </PmFormReadonlySection>

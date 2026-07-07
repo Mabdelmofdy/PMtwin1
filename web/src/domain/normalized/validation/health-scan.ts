@@ -8,7 +8,7 @@ import {
   normalizeAuditLogs,
   normalizeCompanies,
   normalizeContracts,
-  normalizeDeals,
+  normalizeCommercialAgreements,
   normalizeNegotiations,
   normalizeNotifications,
   normalizeOpportunities,
@@ -37,8 +37,8 @@ import {
   loadApplications,
   loadAuditLog,
   loadCompanies,
+  loadCommercialAgreements,
   loadContracts,
-  loadDeals,
   loadNegotiations,
   loadNotifications,
   loadOpportunities,
@@ -53,7 +53,7 @@ export function scanNormalizedDomainHealth(): DomainHealthReport {
   const applications = normalizeApplications(loadApplications())
   const matches = normalizePostMatches(loadPostMatches())
   const negotiations = normalizeNegotiations(loadNegotiations())
-  const deals = normalizeDeals(loadDeals())
+  const deals = normalizeCommercialAgreements(loadCommercialAgreements())
   const contracts = normalizeContracts(loadContracts())
   const notifications = normalizeNotifications(loadNotifications())
   const auditLogs = normalizeAuditLogs(loadAuditLog())

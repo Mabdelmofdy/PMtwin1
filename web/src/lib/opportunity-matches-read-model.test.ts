@@ -211,6 +211,12 @@ describe('buildOpportunityMatchesReadModel', () => {
             postMatchId: 'pm-confirmed',
             status: 'agreed',
             participants: [...participants],
+            commercialTerms: {
+              exchangeMode: 'cash',
+              budget: 10000,
+              paymentSchedule: 'Milestone',
+              amount: 10000,
+            },
           },
         ],
       }),

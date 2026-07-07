@@ -7,6 +7,7 @@ import {
   isWorkflowActionAvailable,
   toWorkflowEntitySnapshot,
 } from '@/domain/workflows/workflow-bridge.ts'
+import { findAcceptedNegotiationOfferId } from '@/lib/negotiation-room-ui-actions.ts'
 import {
   isPostMatchTerminalForParticipantActions,
 } from '@/lib/post-match-ui-actions.ts'
@@ -123,7 +124,10 @@ function buildMatchWorkflowContext(
           postMatchId: item.postMatchId ?? item.matchId,
         },
       ),
-      dealForNegotiation: deal ? toWorkflowEntitySnapshot(deal) ?? null : null,
+      commercialAgreementForNegotiation: deal ? toWorkflowEntitySnapshot(deal) ?? null : null,
+      negotiationAcceptedOfferId: negotiation
+        ? findAcceptedNegotiationOfferId(negotiation.id, negotiation)
+        : null,
     },
   })
 }
@@ -178,8 +182,8 @@ export function buildMatchCardActions(
   )
   const showViewNegotiation = Boolean(negotiation?.id)
   const showCreateDeal = negotiation?.applicationId
-    ? isWorkflowActionAvailable(workflowContext, 'create_deal_from_application')
-    : isWorkflowActionAvailable(workflowContext, 'create_deal_from_negotiation')
+    ? isWorkflowActionAvailable(workflowContext, 'create_commercial_agreement_from_application')
+    : isWorkflowActionAvailable(workflowContext, 'create_commercial_agreement_from_negotiation')
   const showViewDeal = Boolean(deal?.id)
 
   return {

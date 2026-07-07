@@ -230,6 +230,209 @@
       "updatedAt": "2026-03-18T12:00:00.000Z",
       "completedAt": null,
       "closedAt": null
+    },
+    {
+      "id": "seed-deal-demo-cash-subcontract",
+      "matchId": "seed-pm-demo-oneway-cash",
+      "postMatchId": "seed-pm-demo-oneway-cash",
+      "applicationId": null,
+      "negotiationId": "seed-neg-demo-oneway-cash",
+      "opportunityId": "seed-opp-demo-task-need",
+      "opportunityIds": [
+        "seed-opp-demo-task-need",
+        "seed-opp-demo-task-offer"
+      ],
+      "matchType": "one_way",
+      "status": "execution",
+      "title": "Cash subcontracting agreement - task package",
+      "participants": [
+        {
+          "userId": "seed-co-corp-002",
+          "role": "need_owner",
+          "approvalStatus": "approved",
+          "signedAt": "2026-07-01T10:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-004",
+          "role": "offer_provider",
+          "approvalStatus": "approved",
+          "signedAt": "2026-07-01T10:00:00.000Z"
+        }
+      ],
+      "scope": "Task-based subcontract delivery for planning package.",
+      "exchangeMode": "cash",
+      "valueTerms": {
+        "agreedValue": 210000,
+        "paymentSchedule": "40/30/30"
+      },
+      "contractId": "seed-contract-demo-cash",
+      "createdAt": "2026-07-01T10:00:00.000Z",
+      "updatedAt": "2026-07-01T10:00:00.000Z"
+    },
+    {
+      "id": "seed-deal-demo-barter-service",
+      "matchId": "seed-pm-demo-twoway-barter",
+      "postMatchId": "seed-pm-demo-twoway-barter",
+      "applicationId": null,
+      "negotiationId": "seed-neg-demo-barter-agreed",
+      "opportunityId": "seed-opp-demo-alliance-a",
+      "opportunityIds": [
+        "seed-opp-demo-alliance-a",
+        "seed-opp-demo-alliance-b"
+      ],
+      "matchType": "two_way",
+      "status": "active",
+      "title": "Barter service exchange agreement - strategic alliance",
+      "participants": [
+        {
+          "userId": "seed-user-005",
+          "role": "service_partner",
+          "approvalStatus": "approved",
+          "signedAt": "2026-07-01T16:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-006",
+          "role": "service_partner",
+          "approvalStatus": "approved",
+          "signedAt": "2026-07-01T16:00:00.000Z"
+        }
+      ],
+      "scope": "Two-way exchange of planning and engineering services.",
+      "exchangeMode": "barter",
+      "valueTerms": {
+        "agreedValue": 118000,
+        "paymentSchedule": "Service credit ledger"
+      },
+      "contractId": "seed-contract-demo-barter",
+      "createdAt": "2026-07-01T16:00:00.000Z",
+      "updatedAt": "2026-07-01T16:00:00.000Z"
+    },
+    {
+      "id": "seed-deal-demo-jv-profit",
+      "matchId": "seed-pm-demo-consortium-jv",
+      "postMatchId": "seed-pm-demo-consortium-jv",
+      "applicationId": null,
+      "negotiationId": "seed-neg-demo-consortium-jv",
+      "opportunityId": "seed-opp-demo-consortium-lead",
+      "opportunityIds": [
+        "seed-opp-demo-consortium-lead",
+        "seed-opp-demo-project-jv",
+        "seed-opp-demo-spv"
+      ],
+      "matchType": "consortium",
+      "status": "execution",
+      "title": "Joint venture profit-sharing agreement",
+      "participants": [
+        {
+          "userId": "seed-co-corp-005",
+          "role": "consortium_lead",
+          "approvalStatus": "approved",
+          "signedAt": "2026-06-30T09:30:00.000Z"
+        },
+        {
+          "userId": "seed-co-corp-006",
+          "role": "consortium_member",
+          "approvalStatus": "approved",
+          "signedAt": "2026-06-30T09:30:00.000Z"
+        },
+        {
+          "userId": "seed-co-corp-003",
+          "role": "consortium_member",
+          "approvalStatus": "approved",
+          "signedAt": "2026-06-30T09:30:00.000Z"
+        }
+      ],
+      "scope": "Project JV with SPV and profit-sharing governance.",
+      "exchangeMode": "profit_sharing",
+      "valueTerms": {
+        "profitSplit": "60-25-15"
+      },
+      "contractId": "seed-contract-demo-profit-sharing",
+      "createdAt": "2026-06-30T09:30:00.000Z",
+      "updatedAt": "2026-06-30T09:30:00.000Z"
+    },
+    {
+      "id": "seed-deal-demo-resource-circular",
+      "matchId": "seed-pm-demo-circular-resource",
+      "postMatchId": "seed-pm-demo-circular-resource",
+      "applicationId": null,
+      "negotiationId": "seed-neg-demo-circular-agreed",
+      "opportunityId": "seed-opp-demo-bulk",
+      "opportunityIds": [
+        "seed-opp-demo-bulk",
+        "seed-opp-demo-equip",
+        "seed-opp-demo-resource"
+      ],
+      "matchType": "circular",
+      "status": "active",
+      "title": "Resource sharing circular agreement",
+      "participants": [
+        {
+          "userId": "seed-co-corp-004",
+          "role": "cycle_member",
+          "approvalStatus": "approved",
+          "signedAt": "2026-07-02T11:30:00.000Z"
+        },
+        {
+          "userId": "seed-user-010",
+          "role": "cycle_member",
+          "approvalStatus": "approved",
+          "signedAt": "2026-07-02T11:30:00.000Z"
+        },
+        {
+          "userId": "seed-user-011",
+          "role": "cycle_member",
+          "approvalStatus": "approved",
+          "signedAt": "2026-07-02T11:30:00.000Z"
+        }
+      ],
+      "scope": "Circular resource and equipment sharing agreement.",
+      "exchangeMode": "hybrid",
+      "valueTerms": {
+        "agreedValue": 470000,
+        "paymentSchedule": "Monthly balancing"
+      },
+      "contractId": "seed-contract-demo-hybrid",
+      "createdAt": "2026-07-02T11:30:00.000Z",
+      "updatedAt": "2026-07-02T11:30:00.000Z"
+    },
+    {
+      "id": "seed-deal-demo-hiring",
+      "matchId": "seed-pm-demo-hiring",
+      "postMatchId": "seed-pm-demo-hiring",
+      "applicationId": "seed-app-demo-hiring-01",
+      "negotiationId": "seed-neg-demo-hiring-path",
+      "opportunityId": "seed-opp-demo-prof-hiring",
+      "opportunityIds": [
+        "seed-opp-demo-prof-hiring",
+        "seed-opp-demo-consultant"
+      ],
+      "matchType": "one_way",
+      "status": "active",
+      "title": "Hiring commercial agreement - scheduler consultant",
+      "participants": [
+        {
+          "userId": "seed-co-corp-002",
+          "role": "hiring_manager",
+          "approvalStatus": "approved",
+          "signedAt": "2026-07-01T12:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-012",
+          "role": "consultant_candidate",
+          "approvalStatus": "approved",
+          "signedAt": "2026-07-01T12:00:00.000Z"
+        }
+      ],
+      "scope": "Professional hiring agreement with advisory deliverables.",
+      "exchangeMode": "hybrid",
+      "valueTerms": {
+        "agreedValue": 145000,
+        "paymentSchedule": "Monthly retainer + milestone bonus"
+      },
+      "contractId": "seed-contract-demo-equity",
+      "createdAt": "2026-07-01T12:00:00.000Z",
+      "updatedAt": "2026-07-01T12:00:00.000Z"
     }
   ]
 }

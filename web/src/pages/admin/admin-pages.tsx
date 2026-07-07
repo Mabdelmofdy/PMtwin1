@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { adminApi } from '@/api/admin.ts'
+import { contractsApi } from '@/api/contracts.ts'
 import { dealsApi } from '@/api/deals.ts'
 import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
@@ -53,6 +54,7 @@ import { AdminListPage } from '@/pages/admin/admin-list-page'
 import { AdminStatusBadge } from '@/pages/admin/admin-display'
 import { pmTypography, resolveMatchTypeStyle } from '@/tokens'
 import { cn } from '@/lib/utils'
+import { useProductLanguage } from '@/providers/product-language-provider.tsx'
 
 type AdminFunnelStage = {
   readonly id: string
@@ -96,6 +98,7 @@ function AdminFunnelBars({ stages }: { readonly stages: readonly AdminFunnelStag
 }
 
 export function AdminDashboardPage() {
+  const { productLanguage } = useProductLanguage()
   const version = useDataStoreVersion()
   const opps = opportunitiesApi.list().length
   const users = peopleApi.listUsers().length
@@ -163,7 +166,7 @@ export function AdminDashboardPage() {
       }
       metrics={
         <PmMetricGrid columns={4}>
-          <PmStatCard label="Opportunities" value={opps} dense />
+          <PmStatCard label={productLanguage.plural('opportunity')} value={opps} dense />
           <PmStatCard label="Users" value={users} dense />
           <PmStatCard label="Matches" value={matches} dense />
           <PmStatCard label="Pending vetting" value={pendingVetting} dense />
@@ -319,6 +322,7 @@ export function AdminDashboardPage() {
 }
 
 export function AdminReportsPage() {
+  const { productLanguage } = useProductLanguage()
   const publishedCount = opportunitiesApi.list().filter((o) => o.status === 'published').length
 
   return (
@@ -328,13 +332,13 @@ export function AdminReportsPage() {
           label="Admin"
           title="Reports"
           description="Platform analytics and export tools."
-          metric={<PmPageHeroMetric value={publishedCount} label="Published opps" />}
+          metric={<PmPageHeroMetric value={publishedCount} label={`Published ${productLanguage.plural('opportunity').toLowerCase()}`} />}
         />
       }
     >
       <PmMetricGrid columns={3}>
         <PmStatCard label="New users (30d)" value="12" hint="Demo metric" dense />
-        <PmStatCard label="Published opps" value={publishedCount} dense />
+        <PmStatCard label={`Published ${productLanguage.plural('opportunity').toLowerCase()}`} value={publishedCount} dense />
         <PmStatCard label="Match rate" value="78%" hint="Demo metric" dense />
       </PmMetricGrid>
     </PmPage>
@@ -453,11 +457,12 @@ export function AdminVettingPage() {
 }
 
 export function AdminOpportunitiesPage() {
+  const { productLanguage } = useProductLanguage()
   const opps = opportunitiesApi.list()
 
   return (
     <AdminListPage
-      title="Opportunities"
+      title={productLanguage.plural('opportunity')}
       description="Platform opportunity oversight."
       data={opps}
       getRowId={(o) => o.id}
@@ -622,11 +627,12 @@ export function AdminMatchingPage() {
 }
 
 export function AdminNegotiationsPage() {
+  const { productLanguage } = useProductLanguage()
   const negs = negotiationsApi.list()
 
   return (
     <AdminListPage
-      title="Negotiations"
+      title={productLanguage.plural('negotiation')}
       description="Negotiation command center."
       data={negs}
       getRowId={(n) => n.id}
@@ -685,15 +691,16 @@ export function AdminDisputesPage() {
 }
 
 export function AdminDealsPage() {
+  const { productLanguage } = useProductLanguage()
   const deals = dealsApi.list()
 
   return (
     <AdminListPage
-      title="Deals"
+      title={productLanguage.plural('commercialAgreement')}
       description="All platform deals."
       data={deals}
       getRowId={(d) => d.id}
-      getRowHref={(d) => `/admin/deals/${d.id}`}
+      getRowHref={(d) => `/admin/commercial-agreements/${d.id}`}
       getSearchText={(d) => [d.id, d.status].filter(Boolean).join(' ')}
       columns={[
         { id: 'id', label: 'ID', cell: (d) => d.id },
@@ -710,18 +717,30 @@ export function AdminDealsPage() {
 }
 
 export function AdminContractsPage() {
+  const { productLanguage } = useProductLanguage()
+  const contracts = contractsApi.list()
+
   return (
     <AdminListPage
-      title="Contracts"
+      title={productLanguage.plural('contract')}
       description="All platform contracts."
-      data={[] as { id: string; status: string }[]}
+      data={contracts}
       getRowId={(c) => c.id}
-      emptyTitle="No contracts in seed"
-      emptyDescription="Contract records will appear here when available."
-      showPagination={false}
+      getRowHref={(c) => `/admin/contracts/${c.id}`}
+      getSearchText={(c) => [c.id, c.status, c.paymentMode].filter(Boolean).join(' ')}
+      searchPlaceholder="Search contracts…"
       columns={[
         { id: 'id', label: 'ID', cell: (c) => c.id },
-        { id: 'status', label: 'Status', cell: (c) => c.status },
+        {
+          id: 'paymentMode',
+          label: 'Payment mode',
+          cell: (c) => c.paymentMode ?? '—',
+        },
+        {
+          id: 'status',
+          label: 'Status',
+          cell: (c) => <AdminStatusBadge status={c.status} entity="contract" />,
+        },
       ]}
     />
   )

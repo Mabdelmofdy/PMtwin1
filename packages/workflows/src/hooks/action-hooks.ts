@@ -27,7 +27,8 @@ const LIFECYCLE_ENTITY_BY_KIND: Record<WorkflowEntityKind, string> = {
   application: 'application',
   post_match: 'match',
   negotiation: 'negotiation',
-  deal: 'deal',
+  commercial_agreement: 'commercial_agreement',
+  deal: 'commercial_agreement',
   contract: 'contract',
 }
 
@@ -39,10 +40,17 @@ const ENTITY_KIND_BY_ACTION: Record<WorkflowActionKey, WorkflowEntityKind> = {
   start_negotiation_from_application: 'application',
   agree_negotiation: 'negotiation',
   cancel_negotiation: 'negotiation',
-  create_deal_from_post_match: 'post_match',
-  create_deal_from_application: 'application',
-  create_deal_from_negotiation: 'negotiation',
-  create_contract_from_deal: 'deal',
+  send_negotiation_message: 'negotiation',
+  submit_negotiation_offer: 'negotiation',
+  submit_negotiation_counter_offer: 'negotiation',
+  accept_negotiation_offer: 'negotiation',
+  reject_negotiation_offer: 'negotiation',
+  view_negotiation_transcript: 'negotiation',
+  create_commercial_agreement_from_post_match: 'post_match',
+  create_commercial_agreement_from_application: 'application',
+  create_commercial_agreement_from_negotiation: 'negotiation',
+  route_contract_decision: 'commercial_agreement',
+  create_contract_from_commercial_agreement: 'commercial_agreement',
   sign_contract: 'contract',
   complete_contract: 'contract',
 }
@@ -55,10 +63,17 @@ const AUDIT_ACTION_BY_KEY: Record<WorkflowActionKey, string> = {
   start_negotiation_from_application: 'negotiation.started_from_application',
   agree_negotiation: 'negotiation.agreed',
   cancel_negotiation: 'negotiation.cancelled',
-  create_deal_from_post_match: 'deal.created_from_match',
-  create_deal_from_application: 'deal.created_from_application',
-  create_deal_from_negotiation: 'deal.created_from_negotiation',
-  create_contract_from_deal: 'contract.created',
+  send_negotiation_message: 'negotiation.message.sent',
+  submit_negotiation_offer: 'negotiation.offer.submitted',
+  submit_negotiation_counter_offer: 'negotiation.counter.submitted',
+  accept_negotiation_offer: 'negotiation.offer.accepted',
+  reject_negotiation_offer: 'negotiation.offer.rejected',
+  view_negotiation_transcript: 'negotiation.transcript.viewed',
+  create_commercial_agreement_from_post_match: 'commercial_agreement.created_from_match',
+  create_commercial_agreement_from_application: 'commercial_agreement.created_from_application',
+  create_commercial_agreement_from_negotiation: 'commercial_agreement.created_from_negotiation',
+  route_contract_decision: 'decision.routed',
+  create_contract_from_commercial_agreement: 'contract.created',
   sign_contract: 'contract.signed',
   complete_contract: 'contract.completed',
 }
@@ -70,9 +85,10 @@ const NOTIFICATION_TYPE_BY_KEY: Partial<Record<WorkflowActionKey, string>> = {
   start_negotiation_from_post_match: 'negotiation.started',
   start_negotiation_from_application: 'hiring.negotiation.started',
   agree_negotiation: 'negotiation.agreed',
-  create_deal_from_negotiation: 'deal.created',
-  create_deal_from_application: 'deal.created',
-  create_contract_from_deal: 'contract.created',
+  create_commercial_agreement_from_negotiation: 'commercial_agreement.created',
+  create_commercial_agreement_from_application: 'commercial_agreement.created',
+  route_contract_decision: 'decision.review.required',
+  create_contract_from_commercial_agreement: 'contract.created',
   sign_contract: 'contract.signature_required',
   complete_contract: 'contract.completed',
 }
@@ -90,8 +106,10 @@ function resolveEntitySnapshot(
       return context.postMatch
     case 'negotiation':
       return context.negotiation
+    case 'commercial_agreement':
+      return context.commercialAgreement ?? context.deal
     case 'deal':
-      return context.deal
+      return context.deal ?? context.commercialAgreement
     case 'contract':
       return context.contract
     default:

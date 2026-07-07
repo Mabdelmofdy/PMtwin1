@@ -4,10 +4,10 @@ import type {
   ContractParty,
 } from './contract-types.ts'
 
-/** Create Contract from a draft Deal (aggregateId = dealId until contract id is assigned). */
-export interface CreateContractFromDealCommand extends Command {
-  readonly commandType: 'CreateContractFromDeal'
-  readonly dealId: string
+/** Create Contract from a draft Commercial Agreement (aggregateId = commercialAgreementId until contract id is assigned). */
+export interface CreateContractFromCommercialAgreementCommand extends Command {
+  readonly commandType: 'CreateContractFromCommercialAgreement'
+  readonly commercialAgreementId: string
   readonly postMatchId?: string
   readonly negotiationId?: string
   readonly needOpportunityId?: string
@@ -15,6 +15,14 @@ export interface CreateContractFromDealCommand extends Command {
   readonly parties?: readonly ContractParty[]
   readonly scope?: string
   readonly milestonesSnapshot?: readonly ContractMilestoneSnapshot[]
+}
+
+/** @deprecated use `CreateContractFromCommercialAgreementCommand` */
+export type CreateContractFromDealCommand =
+  Omit<CreateContractFromCommercialAgreementCommand, 'commandType' | 'commercialAgreementId'> & {
+  readonly commandType: 'CreateContractFromDeal'
+  readonly commercialAgreementId: string
+  readonly dealId: string
 }
 
 export interface SignContractCommand extends Command {

@@ -1,18 +1,23 @@
-import type { Command } from '../types.ts'
+import type {
+  CreateCommercialAgreementFromApplicationCommand,
+  CreateCommercialAgreementFromNegotiationCommand,
+  CreateCommercialAgreementFromPostMatchCommand,
+} from './commercial-agreement-commands.ts'
 
-export interface CreateDealFromNegotiationCommand extends Command {
+/** @deprecated use `CreateCommercialAgreementFromNegotiationCommand` */
+export type CreateDealFromNegotiationCommand =
+  Omit<CreateCommercialAgreementFromNegotiationCommand, 'commandType'> & {
   readonly commandType: 'CreateDealFromNegotiation'
-  readonly negotiationId: string
 }
 
-/** Create Deal from agreed Negotiation linked to confirmed PostMatch (aggregateId = postMatchId). */
-export interface CreateDealFromPostMatchCommand extends Command {
+/** @deprecated use `CreateCommercialAgreementFromPostMatchCommand` */
+export type CreateDealFromPostMatchCommand =
+  Omit<CreateCommercialAgreementFromPostMatchCommand, 'commandType'> & {
   readonly commandType: 'CreateDealFromPostMatch'
-  readonly negotiationId: string
 }
 
-/** Create Deal from agreed Application-linked Negotiation (aggregateId = applicationId). */
-export interface CreateDealFromApplicationCommand extends Command {
+/** @deprecated use `CreateCommercialAgreementFromApplicationCommand` */
+export type CreateDealFromApplicationCommand =
+  Omit<CreateCommercialAgreementFromApplicationCommand, 'commandType'> & {
   readonly commandType: 'CreateDealFromApplication'
-  readonly negotiationId: string
 }

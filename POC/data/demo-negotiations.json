@@ -442,6 +442,238 @@
       "expiresAt": "2026-06-24T09:00:00.000Z",
       "createdAt": "2026-03-08T11:00:00.000Z",
       "updatedAt": "2026-03-12T15:00:00.000Z"
+    },
+    {
+      "id": "seed-neg-demo-oneway-cash",
+      "opportunityId": "seed-opp-demo-task-need",
+      "postMatchId": "seed-pm-demo-oneway-cash",
+      "matchId": "seed-pm-demo-oneway-cash",
+      "applicationId": null,
+      "status": "agreed",
+      "participants": [
+        {
+          "userId": "seed-co-corp-002",
+          "role": "need_owner"
+        },
+        {
+          "userId": "seed-user-004",
+          "role": "offer_provider"
+        }
+      ],
+      "commercialTerms": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "amount": 210000,
+        "paymentSchedule": "40/30/30"
+      },
+      "rounds": [
+        {
+          "by": "seed-user-004",
+          "at": "2026-06-28T10:00:00.000Z",
+          "proposal": {
+            "amount": 220000
+          },
+          "message": "Initial offer submitted."
+        },
+        {
+          "by": "seed-co-corp-002",
+          "at": "2026-06-29T08:00:00.000Z",
+          "proposal": {
+            "amount": 210000
+          },
+          "message": "Counter offer submitted."
+        }
+      ],
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-29T08:00:00.000Z"
+    },
+    {
+      "id": "seed-neg-demo-twoway-barter",
+      "opportunityId": "seed-opp-demo-alliance-a",
+      "postMatchId": "seed-pm-demo-twoway-barter",
+      "matchId": "seed-pm-demo-twoway-barter",
+      "applicationId": null,
+      "status": "counter_offered",
+      "participants": [
+        {
+          "userId": "seed-user-005",
+          "role": "need_owner"
+        },
+        {
+          "userId": "seed-user-006",
+          "role": "offer_provider"
+        }
+      ],
+      "commercialTerms": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "amount": 120000,
+        "paymentSchedule": "Service hours ledger"
+      },
+      "rounds": [
+        {
+          "by": "seed-user-005",
+          "at": "2026-06-28T10:00:00.000Z",
+          "proposal": {
+            "exchangeMode": "barter",
+            "amount": 115000
+          },
+          "message": "Offer submitted."
+        },
+        {
+          "by": "seed-user-006",
+          "at": "2026-06-29T09:00:00.000Z",
+          "proposal": {
+            "exchangeMode": "barter",
+            "amount": 120000
+          },
+          "message": "Counter offer submitted."
+        }
+      ],
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-29T09:00:00.000Z"
+    },
+    {
+      "id": "seed-neg-demo-consortium-jv",
+      "opportunityId": "seed-opp-demo-consortium-lead",
+      "postMatchId": "seed-pm-demo-consortium-jv",
+      "matchId": "seed-pm-demo-consortium-jv",
+      "applicationId": null,
+      "status": "agreed",
+      "participants": [
+        {
+          "userId": "seed-co-corp-005",
+          "role": "consortium_lead"
+        },
+        {
+          "userId": "seed-co-corp-006",
+          "role": "consortium_member"
+        },
+        {
+          "userId": "seed-co-corp-003",
+          "role": "consortium_member"
+        }
+      ],
+      "commercialTerms": {
+        "exchangeMode": "profit_sharing",
+        "currency": "SAR",
+        "amount": 3600000,
+        "profitShare": "60-25-15"
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-30T09:00:00.000Z"
+    },
+    {
+      "id": "seed-neg-demo-circular-resource",
+      "opportunityId": "seed-opp-demo-bulk",
+      "postMatchId": "seed-pm-demo-circular-resource",
+      "matchId": "seed-pm-demo-circular-resource",
+      "applicationId": null,
+      "status": "active",
+      "participants": [
+        {
+          "userId": "seed-co-corp-004",
+          "role": "cycle_member"
+        },
+        {
+          "userId": "seed-user-010",
+          "role": "cycle_member"
+        },
+        {
+          "userId": "seed-user-011",
+          "role": "cycle_member"
+        }
+      ],
+      "commercialTerms": {
+        "exchangeMode": "hybrid",
+        "currency": "SAR",
+        "amount": 480000,
+        "paymentSchedule": "Quarterly balancing"
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "seed-neg-demo-hiring-path",
+      "opportunityId": "seed-opp-demo-prof-hiring",
+      "postMatchId": "seed-pm-demo-hiring",
+      "matchId": "seed-pm-demo-hiring",
+      "applicationId": "seed-app-demo-hiring-01",
+      "status": "agreed",
+      "participants": [
+        {
+          "userId": "seed-co-corp-002",
+          "role": "hiring_manager"
+        },
+        {
+          "userId": "seed-user-012",
+          "role": "consultant_candidate"
+        }
+      ],
+      "commercialTerms": {
+        "exchangeMode": "hybrid",
+        "currency": "SAR",
+        "amount": 145000,
+        "paymentSchedule": "Monthly retainer + milestone bonus"
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-07-01T11:00:00.000Z"
+    },
+    {
+      "id": "seed-neg-demo-barter-agreed",
+      "opportunityId": "seed-opp-demo-alliance-b",
+      "postMatchId": "seed-pm-demo-twoway-barter",
+      "matchId": "seed-pm-demo-twoway-barter",
+      "applicationId": null,
+      "status": "agreed",
+      "participants": [
+        {
+          "userId": "seed-user-005",
+          "role": "service_partner"
+        },
+        {
+          "userId": "seed-user-006",
+          "role": "service_partner"
+        }
+      ],
+      "commercialTerms": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "amount": 118000,
+        "paymentSchedule": "Mutual service ledger"
+      },
+      "createdAt": "2026-07-01T12:00:00.000Z",
+      "updatedAt": "2026-07-01T16:00:00.000Z"
+    },
+    {
+      "id": "seed-neg-demo-circular-agreed",
+      "opportunityId": "seed-opp-demo-resource",
+      "postMatchId": "seed-pm-demo-circular-resource",
+      "matchId": "seed-pm-demo-circular-resource",
+      "applicationId": null,
+      "status": "agreed",
+      "participants": [
+        {
+          "userId": "seed-co-corp-004",
+          "role": "cycle_member"
+        },
+        {
+          "userId": "seed-user-010",
+          "role": "cycle_member"
+        },
+        {
+          "userId": "seed-user-011",
+          "role": "cycle_member"
+        }
+      ],
+      "commercialTerms": {
+        "exchangeMode": "hybrid",
+        "currency": "SAR",
+        "amount": 470000,
+        "paymentSchedule": "Monthly balancing"
+      },
+      "createdAt": "2026-07-02T08:00:00.000Z",
+      "updatedAt": "2026-07-02T11:00:00.000Z"
     }
   ]
 }

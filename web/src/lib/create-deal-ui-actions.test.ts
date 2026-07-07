@@ -53,6 +53,13 @@ function agreedNegotiation(postMatchId: string): Negotiation {
     opportunityId: 'need-1',
     participants: [...participants],
     status: 'agreed',
+    commercialTerms: {
+      exchangeMode: 'cash',
+      currency: 'SAR',
+      budget: 10000,
+      paymentSchedule: 'Milestone',
+      amount: 10000,
+    },
   }
 }
 
@@ -165,7 +172,7 @@ describe('createDealFromNegotiation UI actions', () => {
           success: false,
           aggregateId: 'neg-agreed',
           commandType: 'CreateDealFromNegotiation',
-          errors: ['Deal can only be created from a confirmed PostMatch'],
+          errors: ['Commercial Agreement can only be created from a confirmed PostMatch'],
         },
         deal: null,
       }),

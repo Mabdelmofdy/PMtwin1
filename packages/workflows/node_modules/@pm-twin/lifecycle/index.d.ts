@@ -3,8 +3,11 @@ export type LifecycleEntityType =
   | 'opportunity'
   | 'match'
   | 'negotiation'
-  | 'deal'
+  | 'commercial_agreement'
   | 'contract'
+
+/** @deprecated use `commercial_agreement` */
+export type LegacyDealEntityType = 'deal'
 
 export type EntityFsm = {
   entityType: LifecycleEntityType
@@ -14,6 +17,7 @@ export type EntityFsm = {
 }
 
 export const ENTITY_TYPES: readonly LifecycleEntityType[]
+export const ENTITY_TYPE_LEGACY_ALIASES: Readonly<Record<LegacyDealEntityType, LifecycleEntityType>>
 export const MANIFEST: Readonly<Record<string, unknown>>
 export const CANONICAL_STATES: Readonly<Record<string, readonly string[]>>
 export const LEGACY_ALIASES: Readonly<Record<string, Readonly<Record<string, string>>>>

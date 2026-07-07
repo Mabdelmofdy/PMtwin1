@@ -8,12 +8,12 @@ const webRoot = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
 const WORKFLOW_UI_SURFACES = [
   'components/opportunity/applications-panel.tsx',
-  'components/negotiation/create-deal-button.tsx',
+  'components/negotiation/create-commercial-agreement-button.tsx',
   'components/negotiation/start-negotiation-button.tsx',
-  'components/deal/create-contract-button.tsx',
+  'components/commercial-agreement/create-contract-button.tsx',
   'components/contract/sign-contract-button.tsx',
   'components/contract/complete-contract-button.tsx',
-  'pages/workspace/deals-pages.tsx',
+  'pages/workspace/commercial-agreements-pages.tsx',
   'pages/workspace/contracts-pages.tsx',
   'pages/workspace/pipeline-pages.tsx',
 ]
@@ -37,7 +37,7 @@ const WORKFLOW_GATE_PATTERNS: readonly {
 ]
 
 const ORCHESTRATOR_DELEGATION_PATTERN =
-  /workflow-bridge|[\w-]+-ui-actions|deal-detail-read-model|contract-detail-read-model|opportunity-matches-read-model|application-hiring-ui-actions/
+  /workflow-bridge|[\w-]+-ui-actions|commercial-agreement-detail-read-model|deal-detail-read-model|contract-detail-read-model|opportunity-matches-read-model|application-hiring-ui-actions/
 
 describe('workflow UI governance', () => {
   for (const relativePath of WORKFLOW_UI_SURFACES) {

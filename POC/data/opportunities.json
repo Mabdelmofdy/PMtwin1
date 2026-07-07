@@ -3732,6 +3732,915 @@
         "modelType": "project_based",
         "subModelType": "project_jv"
       }
+    },
+    {
+      "id": "seed-opp-demo-task-need",
+      "title": "Cash subcontracting task package (need)",
+      "description": "Demo scenario for task_based under cash_subcontracting.",
+      "creatorId": "seed-co-corp-002",
+      "intent": "need",
+      "status": "published",
+      "mainCollaborationModel": "cash_subcontracting",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "preferredMatchingTopology": "one_way",
+      "exchangeMode": "cash",
+      "acceptedExchangeModes": [
+        "cash",
+        "hybrid"
+      ],
+      "paymentModes": [
+        "cash",
+        "hybrid"
+      ],
+      "collaborationAttributes": {
+        "scenario": "web-demo-coverage",
+        "subModel": "task_based"
+      },
+      "location": "Riyadh, Saudi Arabia",
+      "skills": [
+        "Project Management",
+        "Coordination",
+        "task based"
+      ],
+      "scope": {
+        "coreSkills": [
+          "Project Management",
+          "Coordination"
+        ],
+        "sectors": [
+          "Construction"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        }
+      },
+      "value_exchange": {
+        "mode": "cash",
+        "accepted_modes": [
+          "cash",
+          "hybrid"
+        ],
+        "estimated_value": 220000
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "seed-opp-demo-task-offer",
+      "title": "Task package delivery specialist (offer)",
+      "description": "Demo scenario for task_based under cash_subcontracting.",
+      "creatorId": "seed-user-004",
+      "intent": "need",
+      "status": "published",
+      "mainCollaborationModel": "cash_subcontracting",
+      "modelType": "project_based",
+      "subModelType": "task_based",
+      "preferredMatchingTopology": "one_way",
+      "exchangeMode": "cash",
+      "acceptedExchangeModes": [
+        "cash",
+        "hybrid"
+      ],
+      "paymentModes": [
+        "cash",
+        "hybrid"
+      ],
+      "collaborationAttributes": {
+        "scenario": "web-demo-coverage",
+        "subModel": "task_based"
+      },
+      "location": "Riyadh, Saudi Arabia",
+      "skills": [
+        "Project Management",
+        "Coordination",
+        "task based"
+      ],
+      "scope": {
+        "coreSkills": [
+          "Project Management",
+          "Coordination"
+        ],
+        "sectors": [
+          "Construction"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        }
+      },
+      "value_exchange": {
+        "mode": "cash",
+        "accepted_modes": [
+          "cash",
+          "hybrid"
+        ],
+        "estimated_value": 220000
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "seed-opp-demo-alliance-a",
+      "title": "Strategic alliance partner A services",
+      "description": "Demo scenario for strategic_alliance under service_exchange.",
+      "creatorId": "seed-user-005",
+      "intent": "need",
+      "status": "published",
+      "mainCollaborationModel": "service_exchange",
+      "modelType": "strategic_partnership",
+      "subModelType": "strategic_alliance",
+      "preferredMatchingTopology": "two_way",
+      "exchangeMode": "barter",
+      "acceptedExchangeModes": [
+        "barter",
+        "hybrid"
+      ],
+      "paymentModes": [
+        "barter",
+        "hybrid"
+      ],
+      "collaborationAttributes": {
+        "scenario": "web-demo-coverage",
+        "subModel": "strategic_alliance"
+      },
+      "location": "Riyadh, Saudi Arabia",
+      "skills": [
+        "Project Management",
+        "Coordination",
+        "strategic alliance"
+      ],
+      "scope": {
+        "coreSkills": [
+          "Project Management",
+          "Coordination"
+        ],
+        "sectors": [
+          "Construction"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        }
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "accepted_modes": [
+          "barter",
+          "hybrid"
+        ],
+        "estimated_value": 220000
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "seed-opp-demo-alliance-b",
+      "title": "Strategic alliance partner B services",
+      "description": "Demo scenario for strategic_alliance under service_exchange.",
+      "creatorId": "seed-user-006",
+      "intent": "need",
+      "status": "published",
+      "mainCollaborationModel": "service_exchange",
+      "modelType": "strategic_partnership",
+      "subModelType": "strategic_alliance",
+      "preferredMatchingTopology": "two_way",
+      "exchangeMode": "barter",
+      "acceptedExchangeModes": [
+        "barter",
+        "hybrid"
+      ],
+      "paymentModes": [
+        "barter",
+        "hybrid"
+      ],
+      "collaborationAttributes": {
+        "scenario": "web-demo-coverage",
+        "subModel": "strategic_alliance"
+      },
+      "location": "Riyadh, Saudi Arabia",
+      "skills": [
+        "Project Management",
+        "Coordination",
+        "strategic alliance"
+      ],
+      "scope": {
+        "coreSkills": [
+          "Project Management",
+          "Coordination"
+        ],
+        "sectors": [
+          "Construction"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        }
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "accepted_modes": [
+          "barter",
+          "hybrid"
+        ],
+        "estimated_value": 220000
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "seed-opp-demo-mentor",
+      "title": "Mentorship in PMO governance",
+      "description": "Demo scenario for mentorship under service_exchange.",
+      "creatorId": "seed-user-007",
+      "intent": "need",
+      "status": "published",
+      "mainCollaborationModel": "service_exchange",
+      "modelType": "strategic_partnership",
+      "subModelType": "mentorship",
+      "preferredMatchingTopology": "one_way",
+      "exchangeMode": "hybrid",
+      "acceptedExchangeModes": [
+        "barter",
+        "cash",
+        "hybrid"
+      ],
+      "paymentModes": [
+        "barter",
+        "cash",
+        "hybrid"
+      ],
+      "collaborationAttributes": {
+        "scenario": "web-demo-coverage",
+        "subModel": "mentorship"
+      },
+      "location": "Riyadh, Saudi Arabia",
+      "skills": [
+        "Project Management",
+        "Coordination",
+        "mentorship"
+      ],
+      "scope": {
+        "coreSkills": [
+          "Project Management",
+          "Coordination"
+        ],
+        "sectors": [
+          "Construction"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "hybrid",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        }
+      },
+      "value_exchange": {
+        "mode": "hybrid",
+        "accepted_modes": [
+          "barter",
+          "cash",
+          "hybrid"
+        ],
+        "estimated_value": 220000
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "seed-opp-demo-consortium-lead",
+      "title": "Consortium lead for airport package",
+      "description": "Demo scenario for consortium under joint_venture.",
+      "creatorId": "seed-co-corp-005",
+      "intent": "need",
+      "status": "published",
+      "mainCollaborationModel": "joint_venture",
+      "modelType": "project_based",
+      "subModelType": "consortium",
+      "preferredMatchingTopology": "consortium",
+      "exchangeMode": "profit_sharing",
+      "acceptedExchangeModes": [
+        "cash",
+        "profit_sharing",
+        "hybrid"
+      ],
+      "paymentModes": [
+        "cash",
+        "profit_sharing",
+        "hybrid"
+      ],
+      "collaborationAttributes": {
+        "scenario": "web-demo-coverage",
+        "subModel": "consortium"
+      },
+      "location": "Riyadh, Saudi Arabia",
+      "skills": [
+        "Project Management",
+        "Coordination",
+        "consortium"
+      ],
+      "scope": {
+        "coreSkills": [
+          "Project Management",
+          "Coordination"
+        ],
+        "sectors": [
+          "Construction"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "profit_sharing",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        }
+      },
+      "value_exchange": {
+        "mode": "profit_sharing",
+        "accepted_modes": [
+          "cash",
+          "profit_sharing",
+          "hybrid"
+        ],
+        "estimated_value": 220000
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "seed-opp-demo-project-jv",
+      "title": "Project JV EPC partner",
+      "description": "Demo scenario for project_jv under joint_venture.",
+      "creatorId": "seed-co-corp-006",
+      "intent": "need",
+      "status": "published",
+      "mainCollaborationModel": "joint_venture",
+      "modelType": "project_based",
+      "subModelType": "project_jv",
+      "preferredMatchingTopology": "consortium",
+      "exchangeMode": "profit_sharing",
+      "acceptedExchangeModes": [
+        "equity",
+        "profit_sharing",
+        "hybrid"
+      ],
+      "paymentModes": [
+        "equity",
+        "profit_sharing",
+        "hybrid"
+      ],
+      "collaborationAttributes": {
+        "scenario": "web-demo-coverage",
+        "subModel": "project_jv"
+      },
+      "location": "Riyadh, Saudi Arabia",
+      "skills": [
+        "Project Management",
+        "Coordination",
+        "project jv"
+      ],
+      "scope": {
+        "coreSkills": [
+          "Project Management",
+          "Coordination"
+        ],
+        "sectors": [
+          "Construction"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "profit_sharing",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        }
+      },
+      "value_exchange": {
+        "mode": "profit_sharing",
+        "accepted_modes": [
+          "equity",
+          "profit_sharing",
+          "hybrid"
+        ],
+        "estimated_value": 220000
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "seed-opp-demo-spv",
+      "title": "SPV structuring partner for infrastructure",
+      "description": "Demo scenario for spv under joint_venture.",
+      "creatorId": "seed-co-corp-003",
+      "intent": "need",
+      "status": "published",
+      "mainCollaborationModel": "joint_venture",
+      "modelType": "project_based",
+      "subModelType": "spv",
+      "preferredMatchingTopology": "consortium",
+      "exchangeMode": "equity",
+      "acceptedExchangeModes": [
+        "equity",
+        "profit_sharing",
+        "hybrid"
+      ],
+      "paymentModes": [
+        "equity",
+        "profit_sharing",
+        "hybrid"
+      ],
+      "collaborationAttributes": {
+        "scenario": "web-demo-coverage",
+        "subModel": "spv"
+      },
+      "location": "Riyadh, Saudi Arabia",
+      "skills": [
+        "Project Management",
+        "Coordination",
+        "spv"
+      ],
+      "scope": {
+        "coreSkills": [
+          "Project Management",
+          "Coordination"
+        ],
+        "sectors": [
+          "Construction"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "equity",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        }
+      },
+      "value_exchange": {
+        "mode": "equity",
+        "accepted_modes": [
+          "equity",
+          "profit_sharing",
+          "hybrid"
+        ],
+        "estimated_value": 220000
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "seed-opp-demo-strategic-jv",
+      "title": "Strategic JV expansion partner",
+      "description": "Demo scenario for strategic_jv under joint_venture.",
+      "creatorId": "seed-co-corp-001",
+      "intent": "need",
+      "status": "published",
+      "mainCollaborationModel": "joint_venture",
+      "modelType": "strategic_partnership",
+      "subModelType": "strategic_jv",
+      "preferredMatchingTopology": "consortium",
+      "exchangeMode": "equity",
+      "acceptedExchangeModes": [
+        "equity",
+        "profit_sharing",
+        "hybrid"
+      ],
+      "paymentModes": [
+        "equity",
+        "profit_sharing",
+        "hybrid"
+      ],
+      "collaborationAttributes": {
+        "scenario": "web-demo-coverage",
+        "subModel": "strategic_jv"
+      },
+      "location": "Riyadh, Saudi Arabia",
+      "skills": [
+        "Project Management",
+        "Coordination",
+        "strategic jv"
+      ],
+      "scope": {
+        "coreSkills": [
+          "Project Management",
+          "Coordination"
+        ],
+        "sectors": [
+          "Construction"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "equity",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        }
+      },
+      "value_exchange": {
+        "mode": "equity",
+        "accepted_modes": [
+          "equity",
+          "profit_sharing",
+          "hybrid"
+        ],
+        "estimated_value": 220000
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "seed-opp-demo-bulk",
+      "title": "Bulk purchasing for steel and concrete",
+      "description": "Demo scenario for bulk_purchasing under resource_sharing.",
+      "creatorId": "seed-co-corp-004",
+      "intent": "need",
+      "status": "published",
+      "mainCollaborationModel": "resource_sharing",
+      "modelType": "resource_pooling",
+      "subModelType": "bulk_purchasing",
+      "preferredMatchingTopology": "one_way",
+      "exchangeMode": "cash",
+      "acceptedExchangeModes": [
+        "cash",
+        "hybrid"
+      ],
+      "paymentModes": [
+        "cash",
+        "hybrid"
+      ],
+      "collaborationAttributes": {
+        "scenario": "web-demo-coverage",
+        "subModel": "bulk_purchasing"
+      },
+      "location": "Riyadh, Saudi Arabia",
+      "skills": [
+        "Project Management",
+        "Coordination",
+        "bulk purchasing"
+      ],
+      "scope": {
+        "coreSkills": [
+          "Project Management",
+          "Coordination"
+        ],
+        "sectors": [
+          "Construction"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        }
+      },
+      "value_exchange": {
+        "mode": "cash",
+        "accepted_modes": [
+          "cash",
+          "hybrid"
+        ],
+        "estimated_value": 220000
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "seed-opp-demo-equip",
+      "title": "Equipment sharing cranes and loaders",
+      "description": "Demo scenario for equipment_sharing under resource_sharing.",
+      "creatorId": "seed-user-010",
+      "intent": "need",
+      "status": "published",
+      "mainCollaborationModel": "resource_sharing",
+      "modelType": "resource_pooling",
+      "subModelType": "equipment_sharing",
+      "preferredMatchingTopology": "circular",
+      "exchangeMode": "barter",
+      "acceptedExchangeModes": [
+        "cash",
+        "barter",
+        "hybrid"
+      ],
+      "paymentModes": [
+        "cash",
+        "barter",
+        "hybrid"
+      ],
+      "collaborationAttributes": {
+        "scenario": "web-demo-coverage",
+        "subModel": "equipment_sharing"
+      },
+      "location": "Riyadh, Saudi Arabia",
+      "skills": [
+        "Project Management",
+        "Coordination",
+        "equipment sharing"
+      ],
+      "scope": {
+        "coreSkills": [
+          "Project Management",
+          "Coordination"
+        ],
+        "sectors": [
+          "Construction"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        }
+      },
+      "value_exchange": {
+        "mode": "barter",
+        "accepted_modes": [
+          "cash",
+          "barter",
+          "hybrid"
+        ],
+        "estimated_value": 220000
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "seed-opp-demo-resource",
+      "title": "Resource sharing temporary crews",
+      "description": "Demo scenario for resource_sharing under resource_sharing.",
+      "creatorId": "seed-user-011",
+      "intent": "need",
+      "status": "published",
+      "mainCollaborationModel": "resource_sharing",
+      "modelType": "resource_pooling",
+      "subModelType": "resource_sharing",
+      "preferredMatchingTopology": "circular",
+      "exchangeMode": "hybrid",
+      "acceptedExchangeModes": [
+        "cash",
+        "barter",
+        "hybrid"
+      ],
+      "paymentModes": [
+        "cash",
+        "barter",
+        "hybrid"
+      ],
+      "collaborationAttributes": {
+        "scenario": "web-demo-coverage",
+        "subModel": "resource_sharing"
+      },
+      "location": "Riyadh, Saudi Arabia",
+      "skills": [
+        "Project Management",
+        "Coordination",
+        "resource sharing"
+      ],
+      "scope": {
+        "coreSkills": [
+          "Project Management",
+          "Coordination"
+        ],
+        "sectors": [
+          "Construction"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "hybrid",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        }
+      },
+      "value_exchange": {
+        "mode": "hybrid",
+        "accepted_modes": [
+          "cash",
+          "barter",
+          "hybrid"
+        ],
+        "estimated_value": 220000
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "seed-opp-demo-prof-hiring",
+      "title": "Professional hiring senior scheduler",
+      "description": "Demo scenario for professional_hiring under hiring.",
+      "creatorId": "seed-co-corp-002",
+      "intent": "need",
+      "status": "published",
+      "mainCollaborationModel": "hiring",
+      "modelType": "hiring",
+      "subModelType": "professional_hiring",
+      "preferredMatchingTopology": "one_way",
+      "exchangeMode": "cash",
+      "acceptedExchangeModes": [
+        "cash",
+        "hybrid"
+      ],
+      "paymentModes": [
+        "cash",
+        "hybrid"
+      ],
+      "collaborationAttributes": {
+        "scenario": "web-demo-coverage",
+        "subModel": "professional_hiring"
+      },
+      "location": "Riyadh, Saudi Arabia",
+      "skills": [
+        "Project Management",
+        "Coordination",
+        "professional hiring"
+      ],
+      "scope": {
+        "coreSkills": [
+          "Project Management",
+          "Coordination"
+        ],
+        "sectors": [
+          "Construction"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        }
+      },
+      "value_exchange": {
+        "mode": "cash",
+        "accepted_modes": [
+          "cash",
+          "hybrid"
+        ],
+        "estimated_value": 220000
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "seed-opp-demo-consultant",
+      "title": "Consultant hiring claims specialist",
+      "description": "Demo scenario for consultant_hiring under hiring.",
+      "creatorId": "seed-user-012",
+      "intent": "need",
+      "status": "published",
+      "mainCollaborationModel": "hiring",
+      "modelType": "hiring",
+      "subModelType": "consultant_hiring",
+      "preferredMatchingTopology": "one_way",
+      "exchangeMode": "hybrid",
+      "acceptedExchangeModes": [
+        "cash",
+        "barter",
+        "hybrid"
+      ],
+      "paymentModes": [
+        "cash",
+        "barter",
+        "hybrid"
+      ],
+      "collaborationAttributes": {
+        "scenario": "web-demo-coverage",
+        "subModel": "consultant_hiring"
+      },
+      "location": "Riyadh, Saudi Arabia",
+      "skills": [
+        "Project Management",
+        "Coordination",
+        "consultant hiring"
+      ],
+      "scope": {
+        "coreSkills": [
+          "Project Management",
+          "Coordination"
+        ],
+        "sectors": [
+          "Construction"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "hybrid",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        }
+      },
+      "value_exchange": {
+        "mode": "hybrid",
+        "accepted_modes": [
+          "cash",
+          "barter",
+          "hybrid"
+        ],
+        "estimated_value": 220000
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "seed-opp-demo-rfp",
+      "title": "Competition RFP for facade design",
+      "description": "Demo scenario for competition_rfp under cash_subcontracting.",
+      "creatorId": "seed-co-corp-003",
+      "intent": "need",
+      "status": "published",
+      "mainCollaborationModel": "cash_subcontracting",
+      "modelType": "competition",
+      "subModelType": "competition_rfp",
+      "preferredMatchingTopology": "one_way",
+      "exchangeMode": "hybrid",
+      "acceptedExchangeModes": [
+        "cash",
+        "hybrid"
+      ],
+      "paymentModes": [
+        "cash",
+        "hybrid"
+      ],
+      "collaborationAttributes": {
+        "scenario": "web-demo-coverage",
+        "subModel": "competition_rfp"
+      },
+      "location": "Riyadh, Saudi Arabia",
+      "skills": [
+        "Project Management",
+        "Coordination",
+        "competition rfp"
+      ],
+      "scope": {
+        "coreSkills": [
+          "Project Management",
+          "Coordination"
+        ],
+        "sectors": [
+          "Construction"
+        ]
+      },
+      "exchangeData": {
+        "exchangeMode": "hybrid",
+        "currency": "SAR",
+        "budgetRange": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        }
+      },
+      "value_exchange": {
+        "mode": "hybrid",
+        "accepted_modes": [
+          "cash",
+          "hybrid"
+        ],
+        "estimated_value": 220000
+      },
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:00:00.000Z"
     }
   ]
 }

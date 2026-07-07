@@ -1,4 +1,5 @@
 export { opportunitiesApi } from '@/api/opportunities.ts'
+export { commercialAgreementsApi } from '@/api/commercial-agreements.ts'
 export { dealsApi } from '@/api/deals.ts'
 export { negotiationsApi } from '@/api/negotiations.ts'
 export { matchesApi } from '@/api/matches.ts'

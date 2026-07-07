@@ -23,6 +23,7 @@ import { ApplyWizard } from '@/components/opportunity/apply-wizard'
 import { OpportunityReadinessCard, resolveOpportunityReadiness } from '@/components/readiness'
 import { formatDate } from '@/lib/format'
 import { resolveCanonicalStatus } from '@/lib/status-display.ts'
+import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import {
   publishOpportunityUiAction,
   canShowPublishOpportunity,
@@ -149,12 +150,12 @@ function buildRecommendedActionItem(input: {
   if (actions.showCreateDeal || actions.showViewDeal) {
     return {
       id: 'view-deal',
-      title: actions.showCreateDeal ? 'Create deal' : 'Review deal',
+      title: actions.showCreateDeal ? 'Create commercial agreement' : 'Review commercial agreement',
       context: 'Finalize commercial terms from the accepted negotiation.',
       status: actions.negotiation?.status,
       statusEntity: 'deal',
       primary: actions.dealId
-        ? { label: 'Open deal', href: `/deals/${actions.dealId}` }
+        ? { label: PRODUCT_LANGUAGE.OPEN_COMMERCIAL_AGREEMENT, href: `/commercial-agreements/${actions.dealId}` }
         : { label: 'Open match', href: topCard.detailPath },
     }
   }
@@ -715,7 +716,7 @@ export function OpportunityDetailPage() {
               ) : (
                 <PmContentCard title="Direct application (legacy / hiring)">
                   <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-                    Match is the primary path: Opportunity → Match → Negotiation → Deal → Contract.
+                    Match is the primary path: Opportunity to Match to Negotiation to Commercial Agreement to Contract.
                   </p>
                   <PmButton
                     className="mt-3 w-full"

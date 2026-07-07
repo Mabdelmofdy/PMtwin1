@@ -7,8 +7,8 @@ export type CreateContractUiActionResult =
   | { readonly success: false; readonly message: string }
 
 export type CreateContractUiActionsDeps = {
-  readonly createContractFromDeal?: (
-    dealId: string,
+  readonly createContractFromCommercialAgreement?: (
+    commercialAgreementId: string,
   ) => { result: CommandResult; contract: Contract | null }
 }
 
@@ -19,23 +19,39 @@ function formatCommandErrors(result: CommandResult): string {
   return 'Contract could not be created.'
 }
 
-export function createContractFromDealUiAction(
-  dealId: string,
+export function createContractFromCommercialAgreementUiAction(
+  commercialAgreementId: string,
   deps?: CreateContractUiActionsDeps,
 ): CreateContractUiActionResult {
   const create =
-    deps?.createContractFromDeal ??
-    contractCommandService.createContractFromDeal.bind(contractCommandService)
+    deps?.createContractFromCommercialAgreement
+    ?? contractCommandService.createContractFromCommercialAgreement.bind(
+      contractCommandService,
+    )
 
-  const { result, contract } = create(dealId)
+  const { result, contract } = create(commercialAgreementId)
   if (!result.success) {
     return { success: false, message: formatCommandErrors(result) }
   }
   if (!contract?.id) {
     return {
       success: false,
-      message: 'Contract could not be created. Deal may not exist.',
+      message: 'Contract could not be created. Commercial agreement may not exist.',
     }
   }
   return { success: true, contractId: contract.id, contract }
+}
+
+/** @deprecated Use `createContractFromCommercialAgreementUiAction` */
+export function createContractFromDealUiAction(
+  dealId: string,
+  deps?: {
+    readonly createContractFromDeal?: (
+      commercialAgreementId: string,
+    ) => { result: CommandResult; contract: Contract | null }
+  },
+): CreateContractUiActionResult {
+  return createContractFromCommercialAgreementUiAction(dealId, {
+    createContractFromCommercialAgreement: deps?.createContractFromDeal,
+  })
 }

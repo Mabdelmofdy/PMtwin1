@@ -3,7 +3,7 @@ import type {
   Command,
   CommandResult,
   CompleteContractCommand,
-  CreateContractFromDealCommand,
+  CreateContractFromCommercialAgreementCommand,
   SignContractCommand,
   TerminateContractCommand,
 } from '@pm-twin/commands'
@@ -55,22 +55,50 @@ function executeCommand(
 
 export function createContractCommandService(deps?: ContractCommandServiceDeps) {
   return {
-    createContractFromDeal(
-      dealId: string,
+    createContractFromCommercialAgreement(
+      commercialAgreementId: string,
       options: Omit<
-        CreateContractFromDealCommand,
-        'commandType' | 'aggregateId' | 'clientRequestId' | 'dealId'
+        CreateContractFromCommercialAgreementCommand,
+        'commandType' | 'aggregateId' | 'clientRequestId' | 'commercialAgreementId'
       > = {},
       serviceDeps?: ContractCommandServiceDeps,
     ): { result: CommandResult; contract: Contract | null } {
       const effectiveDeps = serviceDeps ?? deps
       const command = {
-        commandType: 'CreateContractFromDeal',
-        aggregateId: dealId,
-        dealId,
-        clientRequestId: createClientRequestId('CreateContractFromDeal'),
+        commandType: 'CreateContractFromCommercialAgreement',
+        aggregateId: commercialAgreementId,
+        commercialAgreementId,
+        clientRequestId: createClientRequestId('CreateContractFromCommercialAgreement'),
         ...options,
-      } satisfies CreateContractFromDealCommand
+      } satisfies CreateContractFromCommercialAgreementCommand
+
+      const result = executeCommand(command, effectiveDeps)
+      if (!result.success) {
+        return { result, contract: null }
+      }
+
+      const repository = resolveContractRepository(effectiveDeps)
+      const contract = repository.getById(result.aggregateId) ?? null
+      return { result, contract }
+    },
+
+    /** @deprecated Use `createContractFromCommercialAgreement` */
+    createContractFromDeal(
+      dealId: string,
+      options: Omit<
+        CreateContractFromCommercialAgreementCommand,
+        'commandType' | 'aggregateId' | 'clientRequestId' | 'dealId' | 'commercialAgreementId'
+      > = {},
+      serviceDeps?: ContractCommandServiceDeps,
+    ): { result: CommandResult; contract: Contract | null } {
+      const effectiveDeps = serviceDeps ?? deps
+      const command = {
+        commandType: 'CreateContractFromCommercialAgreement',
+        aggregateId: dealId,
+        commercialAgreementId: dealId,
+        clientRequestId: createClientRequestId('CreateContractFromCommercialAgreement'),
+        ...options,
+      } satisfies CreateContractFromCommercialAgreementCommand
 
       const result = executeCommand(command, effectiveDeps)
       if (!result.success) {

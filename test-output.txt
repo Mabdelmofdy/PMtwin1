@@ -1,0 +1,3032 @@
+﻿node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...version of npm.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+> web@0.0.0 test
+> node scripts/run-command-tests.mjs
+
+▶ DefaultCommandGateway RBAC
+  ✔ rejected admin command does not mutate repository (3.6333ms)
+  ✔ allowed admin command succeeds (6.2061ms)
+  ✔ participant accept command still succeeds for non-admin actor (1.6831ms)
+  ✔ denied publish command does not mutate opportunity repository (1.9168ms)
+✔ DefaultCommandGateway RBAC (15.6559ms)
+▶ ApplicationCommandHandler
+  ✔ allows a valid transition from reviewing to shortlisted (5.6507ms)
+  ✔ rejects an invalid transition from pending to accepted (1.2297ms)
+  ✔ deduplicates commands using the idempotency store (1.2696ms)
+  ✔ returns an error when the application is missing (0.9002ms)
+  ✔ rejects transitions from a terminal application state (0.851ms)
+✔ ApplicationCommandHandler (14.8292ms)
+▶ hiring application workflow
+  ✔ StartNegotiationFromApplication seeds commercial terms from opportunity (57.7946ms)
+  ✔ CreateDealFromApplication completes hiring path without PostMatch (3.6508ms)
+  ✔ rejects negotiation start for non-accepted applications (1.0188ms)
+  ✖ runs application hiring path through contract creation with audit trail (16.9447ms)
+✖ hiring application workflow (81.954ms)
+▶ ContractCommandHandler
+  ✔ create contract from deal creates draft (9.8243ms)
+  ✔ duplicate contract for same deal blocked (7.2624ms)
+  ✔ sign by party updates signature (4.2841ms)
+  ✔ non-party cannot sign (1.2892ms)
+  ✔ all parties signed activates contract and syncs deal to executing (33.3614ms)
+  ✔ complete active contract syncs deal to completed (2.225ms)
+  ✔ cannot complete draft contract (0.7895ms)
+  ✔ terminate active contract syncs deal to cancelled (4.2481ms)
+  ✔ terminal contract rejects further transitions (2.1731ms)
+  ✔ partial sign does not sync deal or opportunity status (1.2189ms)
+  ✔ logs opportunity sync failure when linked opportunity is missing (1.2204ms)
+  ✔ does not downgrade terminal opportunities during contract sync (0.8416ms)
+  ✔ does not change postMatch negotiation or application records (1.3005ms)
+✔ ContractCommandHandler (77.7023ms)
+▶ CreateDealFromPostMatch
+  ✖ agreed negotiation creates deal (33.9188ms)
+  ✔ active negotiation cannot create deal (1.2023ms)
+  ✔ confirmed PostMatch required (0.9008ms)
+  ✔ declined PostMatch cannot create deal (0.6874ms)
+  ✔ expired PostMatch cannot create deal (1.207ms)
+  ✔ superseded PostMatch cannot create deal (0.954ms)
+  ✔ duplicate deal blocked (1.073ms)
+  ✖ deal links postMatchId, negotiationId, needOpportunityId, offerOpportunityId (2.9051ms)
+  ✖ deal status is draft (1.2447ms)
+  ✔ no contract created (0.869ms)
+  ✔ negotiation without postMatchId cannot use CreateDealFromPostMatch (0.6173ms)
+✖ CreateDealFromPostMatch (48.7011ms)
+▶ CreateDealFromNegotiation
+  ✖ agreed negotiation creates draft deal (1.5119ms)
+  ✔ active negotiation rejected (0.5952ms)
+  ✔ countered negotiation rejected (0.4186ms)
+  ✔ cancelled negotiation rejected (0.3918ms)
+  ✔ expired negotiation rejected (0.4755ms)
+  ✔ duplicate negotiation deal rejected (0.4655ms)
+  ✔ missing negotiation rejected (0.3545ms)
+  ✖ persisted deal includes negotiationId postMatchId opportunityIds participants (0.9991ms)
+  ✔ negotiation without postMatchId is rejected (0.5428ms)
+✖ CreateDealFromNegotiation (6.4167ms)
+▶ TransitionDealStatus
+  ✖ draft to review is allowed (2.6778ms)
+  ✖ review to signing is allowed (1.283ms)
+  ✖ signing to executing is allowed (1.9557ms)
+  ✖ executing to completed is allowed (2.9788ms)
+  ✔ draft to executing is rejected (0.6526ms)
+  ✔ completed deal cannot transition (0.6505ms)
+  ✔ cancelled deal cannot transition (0.7559ms)
+  ✔ missing deal fails (0.5511ms)
+  ✖ same status is idempotent (0.8958ms)
+  ✖ persists canonical status only (0.9767ms)
+✖ TransitionDealStatus (14.1626ms)
+▶ four match types — multi-party confirm quorum
+  ✔ two_way confirms only after every participant accepts (6.7759ms)
+  ✔ circular confirms once all chain participants accept (0.8905ms)
+  ✔ preserves one_way quorum (both roles accept) (0.7847ms)
+✔ four match types — multi-party confirm quorum (12.8202ms)
+▶ four match types — full lifecycle (Accept → Confirm → Negotiation → Deal → Contract)
+  ✔ runs complete lifecycle for two_way match (7.3197ms)
+  ✔ runs complete lifecycle for circular match (1.5576ms)
+  ✔ runs PostMatch -> Negotiation -> Deal -> Contract for a consortium match (1.3288ms)
+✔ four match types — full lifecycle (Accept → Confirm → Negotiation → Deal → Contract) (11.0276ms)
+▶ four match types — best-effort notifications
+  ✔ emits participant notifications on confirm without a required sink (1.0077ms)
+  ✔ does not throw when no notification sink is provided (0.8322ms)
+✔ four match types — best-effort notifications (2.4636ms)
+▶ StartNegotiationFromPostMatch
+  ✔ confirmed PostMatch can start negotiation (7.9063ms)
+  ✔ discovered PostMatch cannot start negotiation (1.1138ms)
+  ✔ accepted PostMatch cannot start negotiation (0.8357ms)
+  ✔ declined PostMatch cannot start negotiation (0.8769ms)
+  ✔ expired PostMatch cannot start negotiation (0.9097ms)
+  ✔ superseded PostMatch cannot start negotiation (0.902ms)
+  ✔ duplicate active negotiation is blocked (1.7488ms)
+  ✔ created negotiation includes postMatchId, needOpportunityId, offerOpportunityId (0.692ms)
+  ✔ negotiation status is active (0.7554ms)
+  ✔ no deal is created (0.9247ms)
+  ✔ created negotiation includes participants from PostMatch (0.7183ms)
+✔ StartNegotiationFromPostMatch (20.5192ms)
+▶ AgreeNegotiation
+  ✔ active negotiation can agree (1.8344ms)
+  ✔ countered negotiation can agree (6.8926ms)
+  ✔ already agreed negotiation is idempotent (0.427ms)
+  ✔ cancelled negotiation cannot agree (0.6706ms)
+  ✔ missing negotiation fails (0.4723ms)
+  ✔ deduplicates AgreeNegotiation commands using the idempotency store (0.6002ms)
+✔ AgreeNegotiation (11.5614ms)
+▶ CancelNegotiation
+  ✔ active negotiation can cancel (0.8755ms)
+  ✔ countered negotiation can cancel (0.6592ms)
+  ✔ already cancelled negotiation is idempotent (0.4565ms)
+  ✔ agreed negotiation cannot cancel (0.4642ms)
+  ✔ missing negotiation fails (0.3507ms)
+✔ CancelNegotiation (3.1842ms)
+▶ TransitionNegotiationStatus
+  ✔ active to countered succeeds (0.842ms)
+  ✔ countered to active succeeds (0.5143ms)
+  ✔ active to agreed succeeds (0.4756ms)
+  ✔ countered to agreed succeeds (0.4564ms)
+  ✔ active to expired succeeds (0.4968ms)
+  ✔ rejects invalid transition (0.3821ms)
+  ✔ rejects transition from terminal state (0.4919ms)
+  ✔ missing negotiation fails (0.3424ms)
+  ✔ same status is idempotent (0.3196ms)
+✔ TransitionNegotiationStatus (4.9441ms)
+▶ Negotiation room commands
+  ✔ participant can send message (9.0783ms)
+  ✔ auditor cannot send message (0.9242ms)
+  ✔ message creates transcript event (0.8479ms)
+  ✔ messages blocked after agreed (0.9465ms)
+  ✔ submit initial offer (2.1911ms)
+  ✔ submit counter offer increments version and supersedes prior offer (30.3584ms)
+  ✔ accept offer sets negotiation agreed (4.383ms)
+  ✖ create deal only from accepted/agreed offer (32.7121ms)
+  ✔ transcript events are append-only (1.2387ms)
+✖ Negotiation room commands (85.6394ms)
+▶ CreateOpportunity command flow
+  ✔ create → save → publish → match (10.4878ms)
+✔ CreateOpportunity command flow (12.6463ms)
+▶ OpportunityCommandHandler
+  ✔ blocks publish when profile and opportunity readiness are incomplete (14.7845ms)
+  ✔ allows publish when profile and opportunity readiness are ready_for_matching (3.214ms)
+  ✔ owner can publish own opportunity (1.1458ms)
+  ✔ non-owner cannot publish (7.0454ms)
+  ✔ admin can publish (1.9089ms)
+  ✔ denied publish does not transition status (1.2337ms)
+  ✔ non-publish transitions follow existing rules without publish RBAC (1.1822ms)
+  ✔ invalid transition rejects (1.8204ms)
+  ✔ terminal opportunity transition rejects (7.9329ms)
+✔ OpportunityCommandHandler (43.9963ms)
+▶ pipelineOpportunityDrop command routing
+  ✔ pipeline drag uses opportunity command service and triggers matching when readiness passes (4.1651ms)
+  ✔ pipeline drag blocks publish when readiness fails (0.9361ms)
+  ✖ pipeline drag does not call dealService.updateOpportunityStatus (8.625ms)
+  ✔ executing/completed/cancelled guard still works (1.3605ms)
+✖ pipelineOpportunityDrop command routing (16.0948ms)
+▶ publish opportunity UI actions
+  ✔ blocks publish UI action when readiness fails (1.3148ms)
+  ✔ allows publish UI action when readiness passes (3.1234ms)
+  ✔ save draft remains allowed without changing status (0.8776ms)
+✔ publish opportunity UI actions (5.8439ms)
+▶ PostMatchCommandHandler
+  ✔ DiscoverPostMatch creates ADR-002 shaped PostMatch with payload fallback (9.1474ms)
+  ✔ DiscoverPostMatch rejects missing needOpportunityId (0.9011ms)
+  ✔ DiscoverPostMatch rejects missing offerOpportunityId (0.6035ms)
+  ✔ DiscoverPostMatch rejects missing matchScore (0.6678ms)
+  ✔ DiscoverPostMatch blocks duplicate when an active discovered match exists (1.1523ms)
+  ✔ DiscoverPostMatch blocks duplicate when an active accepted match exists (0.7589ms)
+  ✔ DiscoverPostMatch allows rediscovery after declined (0.7217ms)
+  ✔ DiscoverPostMatch allows rediscovery after expired (0.7946ms)
+  ✔ DiscoverPostMatch allows rediscovery after superseded (0.7815ms)
+  ✔ DiscoverPostMatch blocks duplicate using payload fallback FKs (0.638ms)
+  ✔ AcceptPostMatch from discovered moves aggregate to accepted on first acceptance (1.8145ms)
+  ✔ AcceptPostMatch quorum auto-confirms on second acceptance (0.7006ms)
+  ✔ AcceptPostMatch when already confirmed is rejected (0.377ms)
+  ✔ AcceptPostMatch by non-participant is rejected (0.3427ms)
+  ✔ AcceptPostMatch declines aggregate when a participant already declined (0.4653ms)
+  ✔ DeclinePostMatch from discovered moves aggregate to declined (4.5388ms)
+  ✔ ConfirmPostMatch from accepted moves aggregate to confirmed (0.7203ms)
+  ✔ ConfirmPostMatch from discovered fails (0.375ms)
+  ✔ ExpirePostMatch from accepted moves aggregate to expired (0.4664ms)
+  ✔ SupersedePostMatch from accepted moves aggregate to superseded (0.6343ms)
+  ✔ rejects terminal transition (0.5937ms)
+  ✔ deduplicates AcceptPostMatch commands using the idempotency store (0.5878ms)
+  ✔ deduplicates PostMatch commands using the idempotency store (0.4981ms)
+  ✔ uses canonical lifecycle entity key match, not post_match (1.6284ms)
+✔ PostMatchCommandHandler (33.5841ms)
+▶ collaboration-display
+  ✔ resolves collaboration step from match context (1.6225ms)
+  ✔ resolves collaboration step from deal context (0.3065ms)
+  ✔ maps match type tones and labels (0.4255ms)
+✔ collaboration-display (7.2673ms)
+▶ MatchCard layout contract
+  ✔ places match type in metadata row with date and status (1.7995ms)
+  ✔ exposes single primary Open match action (0.3345ms)
+  ✔ supports optional shortened browse titles (0.3746ms)
+✔ MatchCard layout contract (5.209ms)
+▶ MatchesListSection layout contract
+  ✔ supports card grid browse layout with responsive breakpoints (1.5817ms)
+  ✔ reuses MatchCard with Open match action in card grid (0.5567ms)
+  ✔ keeps table layout for pipeline embed path (0.3705ms)
+✔ MatchesListSection layout contract (4.6648ms)
+▶ pm-table-columns
+  ✔ builds default visibility from column meta (1.4977ms)
+  ✔ filters to visible columns only (2.23ms)
+  ✔ toggles hideable column visibility (1.1849ms)
+  ✔ reports whether data columns remain visible (0.6494ms)
+✔ pm-table-columns (8.108ms)
+▶ pm-table-density
+  ✔ resolves comfortable density classes (1.4236ms)
+  ✔ resolves compact density classes with pm-table-dense (0.4436ms)
+  ✔ returns tighter cell padding for compact mode (0.3905ms)
+  ✔ returns shorter skeleton rows for compact mode (0.2883ms)
+  ✔ normalizes unknown density to fallback (0.3249ms)
+✔ pm-table-density (5.2182ms)
+▶ pm-table-empty
+  ✔ applies no-data defaults (1.6248ms)
+  ✔ applies no-results defaults (0.3179ms)
+  ✔ allows title override (0.2739ms)
+  ✔ shouldShowTableEmpty respects loading and error (0.3299ms)
+✔ pm-table-empty (4.7486ms)
+▶ pm-table-selection
+  ✔ creates empty selection state (1.5893ms)
+  ✔ toggles row in multiple mode (0.4171ms)
+  ✔ replaces selection in single mode (0.2741ms)
+  ✔ resolves header checkbox indeterminate state (0.5146ms)
+  ✔ toggle select all selects and deselects visible rows (0.3283ms)
+  ✔ clearSelection removes all ids (0.3258ms)
+✔ pm-table-selection (5.7892ms)
+▶ pm-form-layout
+  ✔ resolves single-column grid (4.4296ms)
+  ✔ resolves two-column responsive grid (0.424ms)
+  ✔ resolves three-column responsive grid (0.2898ms)
+  ✔ resolves full span (0.3434ms)
+  ✔ resolves partial span in multi-column grid (0.2453ms)
+✔ pm-form-layout (8.1376ms)
+▶ pm-form-readonly-helpers
+  ✔ returns em dash for empty values (1.6471ms)
+  ✔ uses custom empty fallback (0.321ms)
+  ✔ formats booleans (0.3248ms)
+  ✔ joins arrays (0.4215ms)
+  ✔ uses custom formatter (0.3968ms)
+  ✔ isReadonlyValueEmpty detects empty values (0.3161ms)
+  ✔ groups fields by section (0.4467ms)
+✔ pm-form-readonly-helpers (6.6282ms)
+▶ pm-form-state
+  ✔ resolves form mode from flags (1.8976ms)
+  ✔ isFormInteractive respects loading and readonly (0.3721ms)
+  ✔ resolves active wizard step status (0.3575ms)
+  ✔ resolves completed step status (0.2818ms)
+  ✔ resolves error step status over active (0.3426ms)
+  ✔ calculates wizard progress from required steps (0.4116ms)
+  ✔ resolves active step index (0.3529ms)
+✔ pm-form-state (11.0475ms)
+▶ pm-form-validation
+  ✔ resolves error state when error present (1.8163ms)
+  ✔ resolves success state when no error (0.3208ms)
+  ✔ prefers error over success (0.276ms)
+  ✔ shouldShowFieldError respects touched flag (0.3187ms)
+  ✔ shouldShowFieldSuccess hides when error exists (0.3179ms)
+  ✔ builds aria-describedby ids (0.4827ms)
+  ✔ collects form errors from record (1.6206ms)
+✔ pm-form-validation (7.7179ms)
+▶ page-hero-display
+  ✔ summarizes opportunity list hero counts (1.9429ms)
+  ✔ counts active opportunities (0.425ms)
+  ✔ sums pipeline workflow items (0.4877ms)
+  ✔ formats platform health metric (0.3778ms)
+  ✔ counts active matches and deals (0.4896ms)
+✔ page-hero-display (6.993ms)
+▶ PmBrowsePage contract
+  ✔ requires header and content children (1.5207ms)
+  ✔ supports optional summary, toolbar, and pagination slots (0.5819ms)
+✔ PmBrowsePage contract (4.9061ms)
+▶ PmBrowseToolbar contract
+  ✔ uses the canonical browse toolbar data-slot name (1.5527ms)
+  ✔ accepts PmToolbarSurface-compatible props (0.3497ms)
+✔ PmBrowseToolbar contract (4.1422ms)
+▶ pm-direction-bridge
+  ✔ normalizes direction values (1.5472ms)
+  ✔ maps direction to document language (0.3334ms)
+  ✔ resolves document attributes (3.0067ms)
+  ✔ resolves toast position for RTL (0.3161ms)
+  ✔ flips hero reveal offset for RTL (0.3128ms)
+✔ pm-direction-bridge (7.9448ms)
+▶ PM_RECOMMENDED_NEXT_STEP
+  ✔ uses unified recommended next step title (1.4482ms)
+  ✔ builds entity-specific descriptions (0.5847ms)
+✔ PM_RECOMMENDED_NEXT_STEP (4.3546ms)
+▶ workspace-display
+  ✔ derives user initials (1.772ms)
+  ✔ resolves admin workspace context (0.698ms)
+  ✔ resolves company dashboard context (0.2816ms)
+  ✔ resolves breadcrumb home for admin routes (0.3166ms)
+✔ workspace-display (7.1695ms)
+▶ notification-display
+  ✔ groups notifications by day buckets (2.0183ms)
+  ✔ maps match notifications to heart icon (0.4188ms)
+✔ notification-display (2.8178ms)
+▶ recent-pages
+  ✔ records and reads recent pages in order (0.7185ms)
+✔ recent-pages (1.0624ms)
+▶ marketing motion presets
+  ✔ disables movement when reduced motion is on (3.5598ms)
+  ✔ enables fade-up when motion is allowed (0.4498ms)
+  ✔ stagger container has zero stagger when reduced (0.3804ms)
+  ✔ card hover omits transforms when reduced (0.3328ms)
+  ✔ hero float is static when reduced (0.3654ms)
+✔ marketing motion presets (9.6496ms)
+▶ CollaborationSubModelFields registry wiring
+  ✔ renders required fields for task_based (2.2722ms)
+  ✔ renders required fields for consortium (0.3282ms)
+  ✔ renders required fields for project_jv (0.3251ms)
+  ✔ renders required fields for spv (0.3606ms)
+  ✔ renders required fields for strategic_jv (0.2363ms)
+  ✔ renders required fields for strategic_alliance (0.4942ms)
+  ✔ renders required fields for mentorship (0.2039ms)
+  ✔ renders required fields for bulk_purchasing (0.2214ms)
+  ✔ renders required fields for equipment_sharing (0.3783ms)
+  ✔ renders required fields for resource_sharing (0.3582ms)
+  ✔ renders required fields for professional_hiring (0.2684ms)
+  ✔ renders required fields for consultant_hiring (0.3551ms)
+  ✔ renders required fields for competition_rfp (0.368ms)
+  ✔ includes recommended fields after required ones (0.4686ms)
+✔ CollaborationSubModelFields registry wiring (10.8324ms)
+▶ collaboration flow UX constants
+  ✔ defines canonical collaboration steps in order (2.5433ms)
+  ✔ labels applications as legacy and points to matches (0.5879ms)
+✔ collaboration flow UX constants (5.1571ms)
+▶ opportunity-display
+  ✔ counts opportunity buckets by canonical status (2.0314ms)
+  ✔ resolves publish visual states (0.4335ms)
+  ✔ formats intent labels (0.3739ms)
+  ✔ maps intent kinds to distinct badge tones (0.4632ms)
+  ✔ resolves ownership scope for viewer (0.4228ms)
+✔ opportunity-display (6.343ms)
+▶ readiness display helpers
+  ✔ formats readiness score as a percentage label (1.7519ms)
+  ✔ formats readiness status labels for UI copy (0.3391ms)
+  ✔ maps readiness status to semantic tone text classes (0.4096ms)
+  ✔ builds card view model with score and status (1.7523ms)
+  ✔ shows ready message when status is ready and no gaps remain (0.3705ms)
+  ✔ renders ready state with empty missing lists (0.3158ms)
+  ✔ renders missing required and recommended field lists (0.3355ms)
+✔ readiness display helpers (7.8179ms)
+▶ profile readiness card integration
+  ✔ uses evaluateProfileReadiness via resolveProfileReadiness (3.2274ms)
+  ✔ marks empty profile as incomplete (0.5009ms)
+  ✔ maps evaluator result to profile readiness CTA when incomplete (0.5118ms)
+  ✔ hides profile CTA when ready for matching (0.2898ms)
+✔ profile readiness card integration (5.1749ms)
+▶ opportunity readiness card integration
+  ✔ uses evaluateOpportunityReadiness via resolveOpportunityReadiness (1.938ms)
+  ✔ blocks ready status when role is missing (0.4879ms)
+  ✔ shows opportunity readiness CTA for owner with gaps (0.4961ms)
+  ✔ hides opportunity readiness CTA when fully ready (0.2603ms)
+  ✔ suppresses opportunity readiness CTA on create/edit form (0.2547ms)
+✔ opportunity readiness card integration (3.909ms)
+▶ opportunity readiness visibility
+  ✔ owner sees opportunity readiness section (0.2383ms)
+  ✔ non-owner does not see opportunity readiness section (0.151ms)
+✔ opportunity readiness visibility (0.5914ms)
+▶ pm-design-tokens
+  ✔ exposes stable typography class names (1.7535ms)
+  ✔ exposes motion utility class names (0.2804ms)
+  ✔ exposes layout rhythm class names (0.2373ms)
+  ✔ resolves known match type styles (0.4642ms)
+  ✔ falls back to neutral for unknown match types (0.2843ms)
+  ✔ formats match type labels for display (0.3849ms)
+✔ pm-design-tokens (5.822ms)
+▶ pm-layout-tokens
+  ✔ defines ascending breakpoint widths (1.5554ms)
+  ✔ exposes media query strings for each breakpoint (0.4954ms)
+  ✔ exposes detail grid class maps (0.2949ms)
+  ✔ exposes content width constraints (0.294ms)
+  ✔ resolves metric grid variant from column count (0.3794ms)
+  ✔ exposes split and wizard grid patterns (0.2517ms)
+✔ pm-layout-tokens (5.7129ms)
+▶ PmActionHubItem contract
+  ✔ requires title and primary action slot (1.4994ms)
+  ✔ allows optional secondary and more actions (0.2989ms)
+✔ PmActionHubItem contract (3.7423ms)
+▶ PmBoardColumn contract
+  ✔ requires title and children; count and description are optional (1.3758ms)
+  ✔ supports zero count display (distinct from undefined) (0.4668ms)
+✔ PmBoardColumn contract (4.0477ms)
+▶ PmEmptyState contract
+  ✔ requires title and supports optional description and action (1.7198ms)
+  ✔ supports default and compact size variants (1.51ms)
+  ✔ documents live-region semantics via role=status in implementation (0.2734ms)
+✔ PmEmptyState contract (5.9115ms)
+▶ PmEntityListCard contract
+  ✔ requires title, href, and primary action (1.4955ms)
+  ✔ supports optional badge, meta, and secondary action (0.5871ms)
+✔ PmEntityListCard contract (4.3866ms)
+▶ PmFilterChip contract
+  ✔ requires id, label (dimension), and value (1.7734ms)
+  ✔ supports role=group with aria-label for the chip bar (0.6251ms)
+✔ PmFilterChip contract (6.1338ms)
+▶ PmLifecycleMapStep contract
+  ✔ reuses workflow journey step shape (id, label, state) (1.4447ms)
+  ✔ covers the canonical lifecycle order (1.5522ms)
+✔ PmLifecycleMapStep contract (4.9491ms)
+▶ normalizeMatchScorePercent
+  ✔ converts fractional scores to percent (1.4901ms)
+  ✔ passes through whole-number percentages (0.3349ms)
+✔ normalizeMatchScorePercent (4.2968ms)
+▶ resolveMatchCompatibilityLevel
+  ✔ maps score tiers correctly (0.4216ms)
+✔ resolveMatchCompatibilityLevel (0.6976ms)
+▶ resolveMatchScoreDisplay
+  ✔ returns semantic tone and label for fractional input (0.4856ms)
+  ✔ maps weak and poor tiers to neutral and danger tones (0.3412ms)
+✔ resolveMatchScoreDisplay (1.1574ms)
+▶ PmMoreActionItem contract
+  ✔ requires href or onSelect for visible menu items (1.3495ms)
+✔ PmMoreActionItem contract (3.2622ms)
+▶ Card action rule priority
+  ✔ picks the next lifecycle action as primary (0.3381ms)
+✔ Card action rule priority (0.5531ms)
+▶ PmPage props contract
+  ✔ accepts the same slots as PmPageLayout (1.3487ms)
+✔ PmPage props contract (3.1954ms)
+▶ normalizeReadinessScorePercent
+  ✔ clamps and rounds scores (1.2901ms)
+✔ normalizeReadinessScorePercent (3.15ms)
+▶ resolveReadinessCompletionLevel
+  ✔ maps score tiers correctly (0.3481ms)
+✔ resolveReadinessCompletionLevel (0.5876ms)
+▶ resolveReadinessScoreDisplay
+  ✔ returns semantic tone and label (0.4775ms)
+  ✔ maps incomplete tier to danger tone (0.404ms)
+✔ resolveReadinessScoreDisplay (1.4995ms)
+▶ buildScoreAriaLabel
+  ✔ joins explanation lines for assistive tech (1.2904ms)
+✔ buildScoreAriaLabel (3.0873ms)
+▶ buildScoreRegionLabel
+  ✔ prefixes readiness hero regions (0.59ms)
+✔ buildScoreRegionLabel (0.8423ms)
+▶ formatMatchBreakdownLines
+  ✔ formats known breakdown keys as percents (7.4353ms)
+✔ formatMatchBreakdownLines (10.7273ms)
+▶ hasReadinessExplanation
+  ✔ returns true when gaps exist (0.4746ms)
+✔ hasReadinessExplanation (0.7399ms)
+▶ hasMatchExplanation
+  ✔ returns true when breakdown exists (0.4091ms)
+✔ hasMatchExplanation (0.6834ms)
+▶ buildReadinessExplanationLines
+  ✔ includes gap fields when provided (0.6504ms)
+✔ buildReadinessExplanationLines (0.9146ms)
+▶ buildMatchExplanationLines
+  ✔ includes breakdown lines when provided (0.9278ms)
+✔ buildMatchExplanationLines (1.8031ms)
+▶ PmStatsStripItem contract
+  ✔ requires label and value for each metric (1.889ms)
+  ✔ supports empty items array (component returns null) (0.2946ms)
+✔ PmStatsStripItem contract (4.5607ms)
+▶ PmTimelineEvent contract
+  ✔ requires id and label; status defaults to upcoming rendering (3.3408ms)
+  ✔ supports optional description and timestamp (0.4476ms)
+✔ PmTimelineEvent contract (7.5782ms)
+▶ PmToolbarSurface data-slot
+  ✔ uses the canonical toolbar surface slot name (1.4031ms)
+✔ PmToolbarSurface data-slot (3.3891ms)
+▶ PmTopologyGraph contract
+  ✔ supports the four canonical topologies (2.2916ms)
+  ✔ accepts read-model shaped nodes (structural compatibility) (0.3675ms)
+✔ PmTopologyGraph contract (5.3905ms)
+▶ resolveCollaborationActiveStepFromMatches
+  ✔ returns Deal when any match shows view deal (5.3389ms)
+  ✔ returns PostMatch when matches exist without negotiation/deal actions (0.6047ms)
+  ✔ returns Opportunity when no matches (0.2798ms)
+✔ resolveCollaborationActiveStepFromMatches (8.7992ms)
+▶ buildOpportunityWorkflowSteps
+  ✔ marks opportunity as current when at start of funnel (0.7131ms)
+✔ buildOpportunityWorkflowSteps (0.9895ms)
+▶ buildMatchWorkflowSteps
+  ✔ marks match current when no negotiation or deal (0.5253ms)
+  ✔ marks negotiation current when linked without deal (0.4631ms)
+✔ buildMatchWorkflowSteps (10.4873ms)
+▶ buildNegotiationWorkflowSteps
+  ✔ marks negotiation current without linked deal (0.428ms)
+✔ buildNegotiationWorkflowSteps (0.7597ms)
+▶ buildDealWorkflowSteps
+  ✔ marks deal current without contract (0.3747ms)
+✔ buildDealWorkflowSteps (0.5416ms)
+▶ buildContractWorkflowSteps
+  ✔ marks contract as current step (0.7023ms)
+✔ buildContractWorkflowSteps (1.3145ms)
+▶ PmWorkflowJourneyStep contract
+  ✔ requires id, label, and state for each step (1.4438ms)
+✔ PmWorkflowJourneyStep contract (3.6724ms)
+▶ PmWorkflowLinksCard contract
+  ✔ accepts workflow link items with id, label, and href (1.3952ms)
+✔ PmWorkflowLinksCard contract (3.3645ms)
+▶ Entity access browse routes
+  ✔ maps workflow entities to canonical browse routes (0.4111ms)
+  ✔ provides human-readable back labels (0.3077ms)
+✔ Entity access browse routes (1.0554ms)
+▶ NotificationsListSection layout contract
+  ✔ exports browse toolbar and filter hook for PmBrowsePage composition (1.6161ms)
+  ✔ keeps desktop table and grouped mobile notification list (0.475ms)
+  ✔ uses unified list empty state helpers (0.3372ms)
+✔ NotificationsListSection layout contract (4.6785ms)
+▶ PeopleListSection layout contract
+  ✔ exports browse toolbar and filter hook for PmBrowsePage composition (1.6445ms)
+  ✔ keeps profile navigation in table and row actions (0.4836ms)
+  ✔ uses unified list empty state helpers (0.3502ms)
+✔ PeopleListSection layout contract (5.1199ms)
+▶ user-display
+  ✔ resolves display name and filters public people (1.6273ms)
+  ✔ matches search query against profile fields (0.4298ms)
+  ✔ filters by people vs companies scope (0.3839ms)
+✔ user-display (4.797ms)
+▶ productFlags
+  ✔ hides legacy application UI by default before Visual Freeze (2.1185ms)
+✔ productFlags (7.7016ms)
+▶ getVisiblePipelineTabs
+  ✔ omits applications tab when legacy UI is suppressed (0.5059ms)
+  ✔ includes applications tab when legacy UI is enabled (1.4814ms)
+✔ getVisiblePipelineTabs (2.464ms)
+▶ opportunity collaboration wizard persistence
+  ✔ never stores matching topology in subModelType patch (2.3375ms)
+  ✔ builds canonical collaboration fields for task_based (0.6372ms)
+✔ opportunity collaboration wizard persistence (5.2414ms)
+▶ seed opportunity collaboration normalization
+  ✔ normalizes legacy subModelType values at load (7.9268ms)
+  ✔ resolves all opportunities against registry taxonomy (1.3947ms)
+  ✔ maps legacy project alias to task_based (0.3184ms)
+✔ seed opportunity collaboration normalization (10.2289ms)
+▶ value exchange lifecycle
+  ✔ extracts and displays commercial terms for cash (54.8462ms)
+  ✔ extracts and displays commercial terms for barter (0.406ms)
+  ✔ extracts and displays commercial terms for equity (0.2958ms)
+  ✔ extracts and displays commercial terms for profit_sharing (0.4643ms)
+  ✔ extracts and displays commercial terms for hybrid (0.4676ms)
+  ✔ builds wizard exchange payload for hybrid mode (0.3544ms)
+✔ value exchange lifecycle (59.3456ms)
+▶ toCanonicalIntent
+  ✔ normalizes request to need (2.8273ms)
+  ✔ keeps need as need (0.2851ms)
+  ✔ keeps offer as offer (0.2975ms)
+  ✔ keeps hybrid as hybrid (0.3021ms)
+  ✔ returns undefined for empty or unknown values (0.561ms)
+✔ toCanonicalIntent (7.078ms)
+▶ normalizeOpportunity intent
+  ✔ reads request as canonical need without mutating stored shape (1.6199ms)
+  ✔ keeps canonical need and offer (0.3773ms)
+✔ normalizeOpportunity intent (2.3972ms)
+▶ normalizePostMatch one_way fields
+  ✔ reads top-level needOpportunityId and offerOpportunityId (1.1093ms)
+  ✔ falls back to payload needOpportunityId and offerOpportunityId (0.6281ms)
+  ✔ prefers top-level FKs over payload (0.4653ms)
+  ✔ falls back matchCriteria from payload.breakdown (1.4495ms)
+  ✔ prefers top-level matchCriteria over payload.breakdown (0.3635ms)
+✔ normalizePostMatch one_way fields (5.044ms)
+▶ PostMatchRepository
+  ✔ reads from postMatches namespace only (not applications) (0.772ms)
+  ✔ getByOpportunity resolves payload and top-level FKs (0.6948ms)
+✔ PostMatchRepository (1.8111ms)
+▶ buildMatchingQualityAnalytics
+  ✔ handles empty dataset safely (3.532ms)
+  ✔ calculates average profile and opportunity readiness (6.9017ms)
+  ✔ calculates average match score from stored matchScore (0.7545ms)
+  ✔ calculates acceptance rate from accepted and confirmed matches (0.4593ms)
+  ✔ calculates negotiation rate from linked negotiations (0.5552ms)
+  ✔ calculates deal conversion rate from deals linked to negotiations (0.6023ms)
+  ✔ excludes negative terminal matches from total matches (0.4349ms)
+  ✔ handles lifecycle aliases for match status (0.3573ms)
+✔ buildMatchingQualityAnalytics (16.4637ms)
+▶ resolveStoredMatchScore
+  ✔ prefers matchScore and normalizes 0-1 values (0.4012ms)
+✔ resolveStoredMatchScore (0.7563ms)
+▶ applyReadinessAdjustmentIfEnabled
+  ✔ keeps score unchanged when feature flag is false (7.2066ms)
+  ✔ keeps ranking unchanged when feature flag is false (0.5184ms)
+  ✔ applies positive adjustment when feature flag is true (3.2136ms)
+  ✔ applies negative adjustment when feature flag is true (1.2227ms)
+  ✔ clamps adjusted score at 100 percent (stored as 1.0) (1.095ms)
+  ✔ clamps adjusted score at 0 percent (stored as 0) (0.6406ms)
+  ✔ keeps stored score scale consistent for fractional match scores (0.5856ms)
+  ✔ falls back to base score when profile or opportunity context is missing (0.311ms)
+  ✔ can change ranking when feature flag is true in tests (0.6504ms)
+✔ applyReadinessAdjustmentIfEnabled (18.1609ms)
+▶ matchingService.resolveDiscoverMatchScore
+  ✔ passes through base score when readiness integration is disabled (0.4837ms)
+✔ matchingService.resolveDiscoverMatchScore (0.7581ms)
+▶ calculateReadinessAdjustment
+  ✔ applies +5 bonus when average readiness is >= 90 (2.5528ms)
+  ✔ applies +3 bonus when average readiness is >= 80 (0.7757ms)
+  ✔ applies no change when average readiness is >= 70 (0.3591ms)
+  ✔ applies -5 penalty when average readiness is < 70 (0.3165ms)
+  ✔ applies -10 penalty when average readiness is < 60 (0.3194ms)
+  ✔ clamps adjusted score at 100 (0.3655ms)
+  ✔ clamps adjusted score at 0 (0.3491ms)
+  ✔ keeps feature flag disabled by default (0.4721ms)
+  ✔ returns transparent factors and reason (2.1154ms)
+✔ calculateReadinessAdjustment (10.673ms)
+▶ validateNegotiationOfferTerms
+  ✔ validates cash offer (3.017ms)
+  ✔ validates barter offer (0.4041ms)
+  ✔ validates equity offer (0.3746ms)
+  ✔ validates profit-sharing offer (0.362ms)
+  ✔ validates hybrid offer (0.3859ms)
+  ✔ rejects cash offer missing required fields (0.6132ms)
+✔ validateNegotiationOfferTerms (7.746ms)
+▶ validateDiscoverPostMatchCommand
+  ✔ accepts valid one_way command (3.0702ms)
+  ✔ rejects one_way without needOpportunityId (0.503ms)
+  ✔ rejects two_way without complete sides (0.5043ms)
+  ✔ rejects consortium without roles (0.4196ms)
+  ✔ rejects circular when links do not cover cycle (0.5468ms)
+✔ validateDiscoverPostMatchCommand (7.6155ms)
+▶ discoverPostMatchStrongKey
+  ✔ returns strong key for each topology (0.9981ms)
+✔ discoverPostMatchStrongKey (1.2586ms)
+▶ resolvePostMatchOpportunityIds
+  ✔ resolves one_way from promoted fields (3.112ms)
+  ✔ resolves two_way from both sides (0.647ms)
+  ✔ resolves consortium from lead + roles (0.5918ms)
+  ✔ resolves circular from links (de-duplicated) (0.5114ms)
+✔ resolvePostMatchOpportunityIds (7.2835ms)
+▶ computePostMatchStrongKey
+  ✔ generates one_way key from promoted fields (1.976ms)
+  ✔ generates one_way key from payload fallback (0.3531ms)
+  ✔ orders two_way sides deterministically (0.4479ms)
+  ✔ generates consortium key from lead need and sorted role assignments (0.4226ms)
+  ✔ generates circular key from sorted participants and link edges (0.7958ms)
+  ✔ returns null when topology payload is incomplete (0.3698ms)
+✔ computePostMatchStrongKey (7.1466ms)
+▶ collectPostMatchOpportunityIds
+  ✔ collects ids across consortium and circular payloads (2.2664ms)
+✔ collectPostMatchOpportunityIds (2.6384ms)
+▶ computePostMatchStrongKeyFromMatch
+  ✔ delegates to computePostMatchStrongKey (0.4665ms)
+✔ computePostMatchStrongKeyFromMatch (0.8456ms)
+▶ evaluateOpportunityReadiness — baseline states
+  ✔ returns incomplete for an empty opportunity object (5.2897ms)
+  ✔ marks a fully complete need opportunity as ready_for_matching (1.772ms)
+  ✔ marks a fully complete offer opportunity as ready_for_matching (0.5845ms)
+  ✔ marks required-only opportunity as needs_review at score 75 (0.5787ms)
+✔ evaluateOpportunityReadiness — baseline states (11.3526ms)
+▶ evaluateOpportunityReadiness — required field blockers
+  ✔ missing role blocks ready_for_matching (0.6244ms)
+  ✔ missing skills blocks ready_for_matching (0.3431ms)
+  ✔ missing services blocks ready_for_matching (0.3725ms)
+  ✔ missing location blocks ready_for_matching (0.3816ms)
+  ✔ missing timeline blocks ready_for_matching (1.8394ms)
+✔ evaluateOpportunityReadiness — required field blockers (4.4265ms)
+▶ evaluateOpportunityReadiness — hybrid intent
+  ✔ requires both sides for hybrid opportunities (0.6295ms)
+✔ evaluateOpportunityReadiness — hybrid intent (0.8553ms)
+▶ evaluateOpportunityReadiness — legacy aliases
+  ✔ supports legacy POC/web seed field names (0.76ms)
+✔ evaluateOpportunityReadiness — legacy aliases (0.9038ms)
+▶ evaluateOpportunityReadiness — incomplete opportunity
+  ✔ marks sparse drafts as incomplete when score is below 60 (0.4599ms)
+✔ evaluateOpportunityReadiness — incomplete opportunity (0.6132ms)
+▶ evaluateProfileReadiness — individual profiles
+  ✔ marks an empty individual profile as incomplete (2.4905ms)
+  ✔ marks a fully complete individual profile as ready_for_matching (1.5812ms)
+  ✔ marks an individual with only recommended gaps as needs_review (0.4393ms)
+✔ evaluateProfileReadiness — individual profiles (6.6138ms)
+▶ evaluateProfileReadiness — company profiles
+  ✔ marks an empty company profile as incomplete (0.8121ms)
+  ✔ marks a fully complete company profile as ready_for_matching (0.3474ms)
+  ✔ marks a company with only recommended gaps as needs_review (0.339ms)
+✔ evaluateProfileReadiness — company profiles (2.0103ms)
+▶ evaluateProfileReadiness — missing required fields
+  ✔ never returns ready_for_matching when any required field is missing (3.4079ms)
+  ✔ treats heavily missing required fields as incomplete even above the score floor (1.0053ms)
+✔ evaluateProfileReadiness — missing required fields (4.9015ms)
+▶ evaluateProfileReadiness — score boundaries
+  ✔ scores required-only completion at 70 (0.7827ms)
+  ✔ keeps profiles below 60 in incomplete status (0.5123ms)
+  ✔ requires all required fields and score >= 80 for ready_for_matching (1.3607ms)
+  ✔ returns ready_for_matching only when required, recommended, and score gates pass (0.2635ms)
+✔ evaluateProfileReadiness — score boundaries (3.2981ms)
+▶ evaluateProfileReadiness — legacy field aliases
+  ✔ accepts legacy POC field names for individual profiles (0.3326ms)
+  ✔ accepts legacy POC field names for company profiles (0.215ms)
+✔ evaluateProfileReadiness — legacy field aliases (0.7351ms)
+▶ evaluatePublishReadiness
+  ✔ blocks when profile is incomplete (6.5585ms)
+  ✔ blocks when opportunity is incomplete (0.6324ms)
+  ✔ blocks when profile needs_review (0.4235ms)
+  ✔ blocks when opportunity needs_review (0.5ms)
+  ✔ allows when both profile and opportunity are ready_for_matching (0.5973ms)
+  ✔ includes profile missing fields in error payload (0.6786ms)
+  ✔ includes opportunity missing fields in error payload (0.6592ms)
+✔ evaluatePublishReadiness (12.5955ms)
+▶ evaluatePublishReadiness — save draft unaffected
+  ✔ evaluates readiness without mutating draft opportunity data (0.5492ms)
+✔ evaluatePublishReadiness — save draft unaffected (0.8908ms)
+▶ canAccessAdminForRole
+  ✔ allows admin, moderator, and auditor (1.437ms)
+  ✔ denies company_owner, professional, and user roles (0.3453ms)
+✔ canAccessAdminForRole (4.0035ms)
+▶ evaluateAdminRouteAccess
+  ✔ unauthenticated user cannot access /admin (0.7224ms)
+  ✔ normal authenticated user cannot access /admin (0.4069ms)
+  ✔ company_owner cannot access /admin (0.3832ms)
+  ✔ admin can access /admin (0.7557ms)
+  ✔ direct /admin/vetting URL blocked for non-admin (0.5323ms)
+  ✔ returns loading while auth restores (0.3212ms)
+✔ evaluateAdminRouteAccess (4.2843ms)
+▶ evaluateCommandRbac
+  ✔ admin command rejected for non-admin (2.3485ms)
+  ✔ admin command rejected without actor (0.4004ms)
+  ✔ allowed admin command succeeds evaluation (0.4348ms)
+  ✔ participant command is not blocked at gateway (0.3017ms)
+  ✔ buildCommandRbacFailureResult returns structured failure (0.5053ms)
+  ✔ owner can publish own opportunity (0.9265ms)
+  ✔ non-owner cannot publish (0.7055ms)
+  ✔ admin can publish (0.642ms)
+  ✔ non-publish transitions follow existing rules (0.423ms)
+  ✔ publish requires authentication (0.5174ms)
+✔ evaluateCommandRbac (10.2203ms)
+▶ buildReadinessAnalytics
+  ✔ handles empty inputs safely (4.1718ms)
+  ✔ counts ready, needs_review, and incomplete profiles (2.6938ms)
+  ✔ calculates average profile score (0.4289ms)
+  ✔ counts ready, needs_review, and incomplete opportunities (2.8463ms)
+  ✔ calculates average opportunity score (0.5899ms)
+  ✔ counts draft opportunities (0.7511ms)
+  ✔ counts publish blocked draft opportunities when publish gate fails (0.8209ms)
+  ✔ treats missing creator profile as publish blocked for draft opportunities (0.4232ms)
+✔ buildReadinessAnalytics (16.7402ms)
+▶ Matching Readiness Foundation — regression
+  ✔ Scenario A — blocks weak publish, preserves draft, and does not create PostMatch (9.5222ms)
+  ✔ Scenario B — allows ready publish without readiness error (7.7021ms)
+  ✔ Scenario C — matching discover stores fractional score with adjustment disabled (3.3587ms)
+  ✖ Scenario D — post-publish lifecycle accept → confirm → negotiate → deal (22.2657ms)
+  ✔ Scenario E — admin readiness and quality analytics handle empty seed safely (2.3414ms)
+✖ Matching Readiness Foundation — regression (47.9503ms)
+▶ workflow UI bridge
+  ✔ delegates marketplace start negotiation visibility to orchestrator (9.7337ms)
+  ✔ delegates hiring start negotiation visibility to orchestrator (3.6989ms)
+  ✔ exposes orchestrator labels for hiring actions (0.4189ms)
+  ✖ uses orchestrator for create contract visibility on deals (0.7711ms)
+  ✖ blocks create contract when active contract exists (0.4891ms)
+  ✖ walks marketplace workflow actions from publish through deal creation (4.5786ms)
+  ✖ walks hiring workflow from accepted application to deal creation (0.5781ms)
+  ✖ blocks invalid transitions such as deal before agreed negotiation (0.8815ms)
+  ✔ delegates publish visibility to orchestrator for draft owner opportunities (1.1302ms)
+  ✖ builds match card actions from orchestrator without duplicate helpers (2.3292ms)
+✖ workflow UI bridge (28.9376ms)
+▶ workflow UI governance
+  ✔ components/opportunity/applications-panel.tsx avoids duplicated workflow transition gates (2.9999ms)
+  ✔ components/opportunity/applications-panel.tsx routes workflow visibility through orchestrator helpers (1.0105ms)
+  ✔ components/negotiation/create-deal-button.tsx avoids duplicated workflow transition gates (0.5599ms)
+  ✔ components/negotiation/create-deal-button.tsx routes workflow visibility through orchestrator helpers (0.4973ms)
+  ✔ components/negotiation/start-negotiation-button.tsx avoids duplicated workflow transition gates (0.5224ms)
+  ✔ components/negotiation/start-negotiation-button.tsx routes workflow visibility through orchestrator helpers (0.4758ms)
+  ✔ components/deal/create-contract-button.tsx avoids duplicated workflow transition gates (0.4344ms)
+  ✔ components/deal/create-contract-button.tsx routes workflow visibility through orchestrator helpers (0.4714ms)
+  ✔ components/contract/sign-contract-button.tsx avoids duplicated workflow transition gates (0.4724ms)
+  ✔ components/contract/sign-contract-button.tsx routes workflow visibility through orchestrator helpers (1.0755ms)
+  ✔ components/contract/complete-contract-button.tsx avoids duplicated workflow transition gates (0.4062ms)
+  ✔ components/contract/complete-contract-button.tsx routes workflow visibility through orchestrator helpers (0.4106ms)
+  ✔ pages/workspace/deals-pages.tsx avoids duplicated workflow transition gates (0.5229ms)
+  ✔ pages/workspace/deals-pages.tsx routes workflow visibility through orchestrator helpers (0.5348ms)
+  ✔ pages/workspace/contracts-pages.tsx avoids duplicated workflow transition gates (0.508ms)
+  ✔ pages/workspace/contracts-pages.tsx routes workflow visibility through orchestrator helpers (0.6624ms)
+  ✔ pages/workspace/pipeline-pages.tsx avoids duplicated workflow transition gates (0.9691ms)
+  ✔ pages/workspace/pipeline-pages.tsx routes workflow visibility through orchestrator helpers (0.6185ms)
+✔ workflow UI governance (16.9462ms)
+▶ @pm-twin/workflows package exports
+  ✔ resolves core orchestrator APIs from the built package entry (22.3926ms)
+  ✔ exposes hiring and marketplace workflow definitions (9.9002ms)
+✔ @pm-twin/workflows package exports (34.6277ms)
+▶ runtime ownership guard
+  ✔ web/src has no POC runtime coupling or legacy @poc-data imports (196.3612ms)
+✔ runtime ownership guard (198.3145ms)
+▶ seed loader — PostMatch-first POC sync
+  ✔ loads 40 opportunities from opportunities.json merge (1.8264ms)
+  ✔ loads 23 post-matches from demo-post-matches.json (0.2876ms)
+  ✔ loads 10 negotiations, 3 deals, and 3 contracts (0.2437ms)
+  ✔ loads zero applications from empty demo-applications.json (1.3073ms)
+  ✔ preserves mixed post-match match types from seed (0.3597ms)
+  ✔ does not require applicationId on negotiations, deals, or contracts (0.3412ms)
+  ✔ reflects lifecycle-aligned opportunity statuses (not all published) (0.3102ms)
+✔ seed loader — PostMatch-first POC sync (7.925ms)
+▶ status normalization — POC seed aliases
+  ✔ maps in_negotiation opportunity status to negotiating (0.614ms)
+  ✔ maps in_execution opportunity status to executing (0.5072ms)
+  ✔ maps pending post-match status to discovered (3.057ms)
+  ✔ maps counter_offered negotiation status to countered (0.3038ms)
+  ✔ maps execution deal status to executing (0.2134ms)
+✔ status normalization — POC seed aliases (5.4844ms)
+▶ RelatedMatchesPanel read model — POC seed scenarios
+  ✖ finds matches for completed opportunity with view deal action (4.5551ms)
+  ✖ finds matches for in_negotiation opportunity (0.622ms)
+  ✖ finds matches for matched opportunity with discovered post-match (0.8652ms)
+  ✔ returns empty state for published-only opportunity without post-matches (0.2632ms)
+✖ RelatedMatchesPanel read model — POC seed scenarios (6.6649ms)
+▶ match detail read model — POC seed match types
+  ✖ handles pending/discovered one_way match (4.0042ms)
+  ✖ handles accepted one_way match linked to active negotiation (0.5498ms)
+  ✖ handles confirmed one_way match with deal (0.4353ms)
+  ✖ handles two_way match topology (0.4662ms)
+  ✖ handles consortium match topology (0.4342ms)
+  ✖ handles circular match topology (1.6634ms)
+✖ match detail read model — POC seed match types (13.3285ms)
+▶ deal and contract read models — restored seed entities
+  ✖ resolves completed one-way deal with linked post-match and contract record (1.634ms)
+  ✖ resolves executing consortium deal with active contract (0.3888ms)
+  ✔ loads active consortium contract with linked deal and match (1.506ms)
+  ✔ loads completed one-way contract with completed deal (0.3093ms)
+✖ deal and contract read models — restored seed entities (4.1883ms)
+▶ post-match-first flow without applications
+  ✖ builds opportunity matches read model without application repository data (0.6812ms)
+  ✔ resolves all seed deals through post-match linkage only (0.2192ms)
+✖ post-match-first flow without applications (1.0953ms)
+▶ repositories — POC seed wiring
+  ✔ PostMatchRepository loads 23 post-matches from seed (0.6251ms)
+  ✔ OpportunityRepository loads 40 opportunities from seed merge (1.3798ms)
+  ✔ PostMatchRepository indexes lifecycle-aligned opportunity matches (0.7557ms)
+✔ repositories — POC seed wiring (3.1055ms)
+▶ application hiring UI actions
+  ✔ shows start hiring negotiation for accepted application without active negotiation (5.7171ms)
+  ✔ hides start hiring negotiation when active negotiation exists (3.1181ms)
+  ✔ hides start hiring negotiation when agreed negotiation exists (1.9642ms)
+  ✖ shows create hiring deal when negotiation is agreed and no deal exists (2.1989ms)
+  ✔ starts hiring negotiation through command service (6.1223ms)
+  ✖ creates hiring deal through command service (2.8477ms)
+✖ application hiring UI actions (24.7574ms)
+▶ collaboration model selector
+  ✔ returns empty when no answers provided (2.8783ms)
+  ✔ recommends cash subcontracting for cash + defined package (0.6112ms)
+  ✔ recommends service exchange for barter preferences (0.9378ms)
+  ✔ recommends joint venture for partnership scope (0.7654ms)
+  ✔ recommends resource sharing for pooling answers (0.4887ms)
+  ✔ can return multiple models when scores tie (0.5146ms)
+✔ collaboration model selector (9.8049ms)
+▶ collaboration taxonomy display
+  ✔ formats exchange modes without raw slugs (2.0878ms)
+  ✔ resolves opportunity labels from registry (1.0011ms)
+  ✔ resolves post-match topology labels (0.4188ms)
+  ✔ registry sub-models expose human labels distinct from keys (0.5018ms)
+✔ collaboration taxonomy display (6.428ms)
+▶ completeContract UI actions
+  ✔ complete button visible only for active contract (17.5309ms)
+  ✔ completes active contract (2.6275ms)
+  ✔ complete draft contract hidden and rejected (2.6222ms)
+  ✔ buttons hidden for completed contract (3.5105ms)
+  ✔ failure does not show success (1.0513ms)
+  ✔ completing active contract syncs deal to completed (1.6082ms)
+  ✔ complete syncs linked opportunities to completed (3.0682ms)
+✔ completeContract UI actions (34.8734ms)
+▶ contract detail read model
+  ✔ loads contract detail by id (11.4419ms)
+  ✔ shows draft status (1.2838ms)
+  ✔ shows dealId and linked deal status (1.7972ms)
+  ✔ shows PostMatch and Negotiation IDs (2.1503ms)
+  ✔ shows Need and Offer titles when available (2.5959ms)
+  ✔ shows parties and signature state (1.273ms)
+  ✔ shows scope and milestones snapshot (1.0581ms)
+  ✔ missing linked records show fallback (2.117ms)
+  ✔ does not expose mutation actions without eligible contract state (2.9114ms)
+  ✔ canSign is false without current user (1.3931ms)
+  ✔ canSign is true for unsigned party on draft contract (1.2694ms)
+  ✔ returns null when contract id is missing (0.5913ms)
+  ✔ resolveContractPostMatchId reads matchId (0.6239ms)
+  ✔ resolveContractNeedOpportunityId prefers deal need id (0.6749ms)
+  ✔ resolveContractMilestones parses snapshot array (0.7376ms)
+✔ contract detail read model (40.8561ms)
+▶ createContractFromDeal UI actions
+  ✖ create contract button visible for eligible deal (22.3966ms)
+  ✖ hidden when existing non-terminal contract exists (1.9454ms)
+  ✖ hidden for completed deal (1.8808ms)
+  ✖ click creates draft contract (6.1295ms)
+  ✖ command failure shows error (1.4088ms)
+  ✖ no deal status change (1.3154ms)
+  ✖ no opportunity status change (1.0928ms)
+  ✖ no signing or activation happens (0.9537ms)
+✖ createContractFromDeal UI actions (40.8624ms)
+▶ createDealFromNegotiation UI actions
+  ✖ shows Create Deal for agreed PostMatch negotiation (5.2002ms)
+  ✖ hides Create Deal for active negotiation (3.2992ms)
+  ✖ hides Create Deal for countered negotiation (0.9163ms)
+  ✖ click path calls command service (12.9193ms)
+  ✖ creates draft deal, not active (2.0612ms)
+  ✔ command failure shows error and does not report success (5.3848ms)
+  ✔ no contract created through UI action (1.0833ms)
+  ✖ application path without postMatchId is rejected (1.2947ms)
+✖ createDealFromNegotiation UI actions (38.148ms)
+▶ deal detail read model
+  ✖ loads deal detail by id (38.7408ms)
+  ✖ shows draft status after CreateDealFromPostMatch (2.0649ms)
+  ✖ shows PostMatch link fields (8.4945ms)
+  ✖ shows Need and Offer titles when available (1.4015ms)
+  ✖ shows negotiation status when available (1.4577ms)
+  ✖ shows commercial terms when available (1.3479ms)
+  ✖ missing linked records show safe fallback (1.1465ms)
+  ✖ can create contract for eligible draft deal (1.1663ms)
+  ✖ hides create contract when non-terminal contract exists (3.1642ms)
+  ✖ hides create contract for completed deal (1.753ms)
+  ✖ returns null when deal id is missing (0.9463ms)
+  ✖ resolveDealPostMatchId prefers postMatchId over legacy matchId (1.0124ms)
+  ✖ resolveDealCommercialTerms reads legacy terms fields (0.944ms)
+✖ deal detail read model (67.1969ms)
+▶ deal transition UI actions
+  ✔ lists FSM-allowed transitions for draft deal (6.35ms)
+  ✔ calls command service for valid transition (3.9816ms)
+  ✔ surfaces invalid transition failure (6.1499ms)
+  ✔ surfaces missing deal failure (1.2889ms)
+✔ deal transition UI actions (20.6926ms)
+▶ dormant bypass API guards
+  ✔ dealsApi.updateStatus rejects (2.5567ms)
+  ✔ dealsApi.update({ status }) rejects (0.4465ms)
+  ✔ dealService.updateDealStatus rejects (0.3999ms)
+  ✔ opportunitiesApi.update({ status }) rejects (0.4548ms)
+  ✔ dataStore.updateOpportunity({ status }) rejects (0.8864ms)
+  ✔ dataStore.updateApplication({ status }) rejects (0.7448ms)
+  ✔ negotiationsApi.update({ status }) rejects (1.1445ms)
+  ✔ normalizedOpportunityRepository.update({ status }) rejects (0.5723ms)
+  ✔ normalizedApplicationRepository.update({ status }) rejects (0.7773ms)
+  ✔ normalizedDealRepository.update({ status }) rejects (0.5512ms)
+  ✔ non-status opportunity update still works (3.0872ms)
+✔ dormant bypass API guards (15.1325ms)
+▶ dormant bypass guards preserve orchestrated writes
+  ✔ command handler status writes still work (3.7417ms)
+  ✔ orchestrator status writes still work (1.8821ms)
+✔ dormant bypass guards preserve orchestrated writes (6.0056ms)
+▶ entity-display-titles
+  ✔ formats opportunity title with fallback (2.0129ms)
+  ✔ formats deal title with fallback (0.3624ms)
+  ✔ formats negotiation title from linked opportunity (0.8926ms)
+  ✔ formats contract title from deal or opportunity subjects (0.8137ms)
+  ✔ formats match pairing label (0.5313ms)
+✔ entity-display-titles (7.3686ms)
+▶ resolveOpportunityDetailVisibility
+  ✔ grants owner full matching and readiness on published opportunity (2.8116ms)
+  ✔ denies unrelated users on draft opportunities (0.5754ms)
+  ✔ allows admin staff read without owner matching section (0.4698ms)
+  ✔ shows participant chip without matching section for matched non-owner (0.429ms)
+  ✔ limits unrelated users to public marketplace fields (0.3321ms)
+  ✔ uses teaser mode for suspended users (0.3229ms)
+✔ resolveOpportunityDetailVisibility (7.4099ms)
+▶ collaboration entity view gates
+  ✔ blocks match detail for outsiders (0.609ms)
+  ✔ blocks negotiation detail for outsiders (0.4544ms)
+  ✔ allows deal detail for participants and admin staff only (0.5114ms)
+  ✔ allows contract detail for parties and admin staff only (0.4644ms)
+✔ collaboration entity view gates (2.8069ms)
+▶ list filters
+  ✔ filters post-matches to participants (0.7139ms)
+  ✔ filters deals and contracts to participants (0.4219ms)
+  ✔ hides other users drafts from all scope (0.4638ms)
+✔ list filters (1.9528ms)
+▶ canEditOpportunity
+  ✔ allows owner and platform admin roles (0.3762ms)
+✔ canEditOpportunity (0.5243ms)
+▶ findParticipantOneWayMatchForOpportunity
+  ✔ finds one_way match linking viewer to opportunity (0.3865ms)
+✔ findParticipantOneWayMatchForOpportunity (0.5435ms)
+▶ productFlags
+  ✔ keeps legacy applications UI disabled by default (0.1706ms)
+✔ productFlags (0.2969ms)
+▶ buildMatchDetailReadModel
+  ✖ discovered participant sees accept and decline (5.2477ms)
+  ✖ non-participant sees read-only with no accept or decline (0.7052ms)
+  ✖ confirmed match hides accept and decline and shows start negotiation when allowed (0.6699ms)
+  ✖ terminal declined match hides participant actions (0.607ms)
+  ✖ terminal expired match hides participant actions (0.6481ms)
+  ✖ terminal superseded match hides participant actions (0.5749ms)
+  ✖ accepted participant does not see duplicate accept but may still decline (0.6741ms)
+  ✖ shows view negotiation and view deal when linked (1.3556ms)
+✖ buildMatchDetailReadModel (13.6821ms)
+▶ buildMatchDetailReadModel — topology per match type
+  ✖ exposes one_way Need → Offer topology (1.774ms)
+  ✖ exposes two_way Need A ↔ Need B topology (0.8733ms)
+  ✖ exposes consortium Lead + Roles topology (0.606ms)
+  ✖ exposes circular A → B → C → A topology (0.7835ms)
+✖ buildMatchDetailReadModel — topology per match type (4.7517ms)
+▶ match-display
+  ✔ resolves need and offer titles for pairing (2.4024ms)
+✔ match-display (4.4316ms)
+▶ need-offer framework config
+  ✔ defines four matching models with framework labels (1.5832ms)
+  ✔ defines five value exchange modes (1.624ms)
+  ✔ defines semantic mirror pairs (0.4321ms)
+✔ need-offer framework config (6.1317ms)
+▶ buildOpportunitySemanticReadModel
+  ✔ maps need intent to required-skills vocabulary (47.1671ms)
+  ✔ maps offer intent to available-skills vocabulary (0.7654ms)
+✔ buildOpportunitySemanticReadModel (48.3488ms)
+▶ buildMatchTopologyReadModel
+  ✔ builds one_way Need → Offer topology (0.9289ms)
+  ✔ builds two_way reciprocal edges (0.5906ms)
+  ✔ builds consortium lead + partner offers (0.6252ms)
+  ✔ builds circular exchange ring (0.7573ms)
+✔ buildMatchTopologyReadModel (3.5463ms)
+▶ negotiation-room-ui-actions
+  ✔ participant can send message while negotiation is active (4.5016ms)
+  ✔ auditor can view transcript but not send messages (1.4382ms)
+  ✔ blocks write actions when negotiation is agreed (0.992ms)
+✔ negotiation-room-ui-actions (9.455ms)
+▶ buildNegotiationTranscriptReadModel
+  ✔ participant can view and write (2.8859ms)
+  ✔ auditor can view transcript but cannot write (0.5119ms)
+  ✔ auditor sees linked entities (0.4649ms)
+  ✔ denies view for non-participant without admin access (0.3296ms)
+✔ buildNegotiationTranscriptReadModel (6.946ms)
+▶ negotiation UI actions
+  ✔ shows agree and cancel for active negotiation (4.1099ms)
+  ✔ hides agree and cancel for agreed negotiation (0.7632ms)
+  ✔ agree calls command service (5.3363ms)
+  ✔ cancel calls command service (1.2339ms)
+  ✔ surfaces agree command failure (1.0643ms)
+  ✔ surfaces cancel command failure for terminal negotiation (1.0403ms)
+  ✔ lists counter-proposal transitions for active negotiation (2.3006ms)
+  ✔ lists accept-updated transition for countered negotiation (1.3093ms)
+  ✔ transition calls command service (8.8476ms)
+  ✔ surfaces invalid transition failure (1.3488ms)
+  ✔ surfaces missing negotiation failure (1.0847ms)
+✔ negotiation UI actions (33.2603ms)
+▶ buildOpportunityMatchesReadModel
+  ✔ returns empty state when no matches exist (2.2557ms)
+  ✖ discovered match shows accept and decline for pending participant (5.4331ms)
+  ✖ confirmed match shows start negotiation when allowed (0.8341ms)
+  ✖ confirmed match shows view negotiation when negotiation exists (1.2007ms)
+  ✖ agreed negotiation shows create deal when no deal exists (0.7572ms)
+  ✖ terminal declined match hides accept and decline actions (0.7077ms)
+  ✖ shows view deal when deal exists for post match (0.7133ms)
+  ✔ marks post-match flow as primary over applications (0.3242ms)
+✖ buildOpportunityMatchesReadModel (15.1201ms)
+▶ pipelineApplicationDrop
+  ✔ still routes application drag through updateApplicationStatus (4.4407ms)
+✔ pipelineApplicationDrop (6.4655ms)
+▶ pipelineOpportunityDrop contract-lifecycle guard
+  ✔ blocks drag when opportunity is executing (2.0139ms)
+  ✔ blocks drag when opportunity is completed (0.4368ms)
+  ✔ blocks drag when opportunity is cancelled (0.3475ms)
+  ✔ cannot drag executing opportunity back to negotiating (0.3628ms)
+  ✔ allows drag to negotiating without publish orchestration (1.7284ms)
+  ✔ recognizes legacy aliases for orchestrated statuses (0.3655ms)
+✔ pipelineOpportunityDrop contract-lifecycle guard (7.743ms)
+▶ pipelineOpportunityDrop publish orchestration
+  ✔ pipeline publish triggers matching orchestration (9.2383ms)
+  ✔ blocked readiness prevents pipeline publish (1.2612ms)
+  ✔ pipeline publish returns matching result counts (1.165ms)
+✔ pipelineOpportunityDrop publish orchestration (13.5323ms)
+▶ resolvePostMatchRelatedOpportunities
+  ✔ one_way need opportunity shows counterpart offer (2.0273ms)
+  ✔ one_way offer opportunity shows counterpart need (0.4198ms)
+  ✔ two_way opportunity shows both barter sides (1.9865ms)
+  ✔ consortium opportunity shows lead need and role assignments (3.029ms)
+  ✔ circular opportunity shows cycle members and chain links (1.0977ms)
+✔ resolvePostMatchRelatedOpportunities (11.2191ms)
+▶ postMatchUiActions
+  ✔ accept action calls postMatchCommandService.acceptPostMatch (3.0035ms)
+  ✔ decline action calls postMatchCommandService.declinePostMatch (1.0237ms)
+  ✔ returns an error message when CommandResult.success is false (2.1113ms)
+  ✔ updates displayed status to accepted after a successful accept (5.5993ms)
+  ✔ shows confirmed after the second participant accepts when quorum is reached (1.3702ms)
+  ✔ does not create a negotiation when quorum confirms the match (1.2954ms)
+✔ postMatchUiActions (18.0293ms)
+▶ postMatch visibility helpers
+  ✔ canShowAcceptPostMatch is true for pending participant on discovered match (2.1808ms)
+  ✔ hides accept after participant has accepted (0.5302ms)
+  ✔ terminal match hides participant actions (0.6136ms)
+✔ postMatch visibility helpers (4.5704ms)
+▶ PRODUCT_LANGUAGE vocabulary
+  ✔ uses Open for entity navigation actions (1.4401ms)
+  ✔ keeps View all for collection affordances (0.4773ms)
+✔ PRODUCT_LANGUAGE vocabulary (4.329ms)
+▶ public brand copy
+  ✔ exposes PM-Twin as public brand name (1.375ms)
+  ✔ normalizes PMTwin to PM-Twin (0.5811ms)
+✔ public brand copy (4.1657ms)
+▶ kb faq content
+  ✔ parses FAQ items from seed HTML (2.9343ms)
+  ✔ filters FAQ items client-side (0.6209ms)
+✔ kb faq content (4.2184ms)
+▶ public contact channel resolution
+  ✔ normalizes configured email (1.5946ms)
+  ✔ falls back when contact email is not configured (0.3747ms)
+  ✔ rejects invalid configured email (0.2871ms)
+✔ public contact channel resolution (4.3767ms)
+▶ public contact mailto generation
+  ✔ creates sales inquiry mailto (0.6711ms)
+  ✔ creates demo request and pricing inquiry subjects (0.8022ms)
+  ✔ uses configured channel for pricing CTA path (0.4535ms)
+✔ public contact mailto generation (2.5202ms)
+▶ public link safety
+  ✔ blocks admin and workspace deep links for anonymous visitors (1.499ms)
+✔ public link safety (3.5027ms)
+▶ buildPublishSuccessFeedback
+  ✔ shows match count when matches were discovered (2.0296ms)
+  ✔ shows no-match message when none were discovered (0.3469ms)
+  ✔ includes duplicate skip message (0.361ms)
+  ✔ shows warning when partial matching errors exist but publish succeeded (0.3698ms)
+  ✔ uses singular match labels for count of one (0.3372ms)
+✔ buildPublishSuccessFeedback (5.9649ms)
+▶ publishOpportunityUiAction — blocked feedback unchanged
+  ✔ keeps readiness blocked message and details (3.5161ms)
+✔ publishOpportunityUiAction — blocked feedback unchanged (3.795ms)
+▶ publishOpportunityUiAction — readiness gate
+  ✔ blocks publish when profile is incomplete (5.2774ms)
+  ✔ blocks publish when opportunity is incomplete (0.8883ms)
+  ✔ blocks publish when profile needs_review (0.7115ms)
+  ✔ allows publish when profile and opportunity are ready_for_matching (9.9553ms)
+  ✔ returns missing required and recommended fields in details (0.7379ms)
+✔ publishOpportunityUiAction — readiness gate (20.3345ms)
+▶ saveOpportunityDraftFields — draft save unaffected
+  ✔ allows draft save when readiness is incomplete and strips status (0.5783ms)
+✔ saveOpportunityDraftFields — draft save unaffected (0.8427ms)
+▶ read model orchestration sync
+  ✖ reflects executing after contract activation (27.0483ms)
+  ✖ reflects completed after contract completion (7.3695ms)
+  ✖ reflects cancelled after contract termination (4.2387ms)
+  ✖ does not let stale seed override repository opportunity status (1.2904ms)
+  ✔ pipeline buckets use canonical orchestrated status (1.4249ms)
+  ✔ status badges display canonical labels (0.8534ms)
+✖ read model orchestration sync (44.988ms)
+▶ registration-service validation
+  ✔ requires key fields for individual registration (2.0277ms)
+  ✔ requires company-specific fields for company registration (0.533ms)
+  ✔ fails password confirmation mismatch (0.417ms)
+✔ registration-service validation (5.489ms)
+▶ registration-service request path
+  ✔ handles duplicate email before backend request (1.2885ms)
+  ✔ returns backend unavailable when API is not implemented (0.7118ms)
+  ✔ supports successful request path when API exists (0.5854ms)
+✔ registration-service request path (3.1052ms)
+▶ registration wizard validation
+  ✔ blocks progression when account type is missing (1.7651ms)
+  ✔ requires branch-specific role fields (0.5495ms)
+  ✔ validates individual profile requirements and password mismatch (0.4258ms)
+  ✔ validates company profile requirements (0.3337ms)
+  ✔ requires terms at documents step (0.2741ms)
+✔ registration wizard validation (5.5902ms)
+▶ registration wizard submit mapping
+  ✔ maps individual flow to registration service payload (0.4575ms)
+  ✔ uses registration submitter and returns backend unavailable honestly (0.5228ms)
+✔ registration wizard submit mapping (1.3972ms)
+▶ /register route implementation
+  ✔ does not render iframe-based PocRegisterPage (0.6021ms)
+✔ /register route implementation (0.9176ms)
+▶ signContract UI actions
+  ✔ sign button visible for eligible party (12.61ms)
+  ✔ hidden for non-party (1.7406ms)
+  ✔ hidden for already signed party (3.1773ms)
+  ✔ hidden for terminal contract (4.1403ms)
+  ✔ first sign moves draft to pending_signature (1.5812ms)
+  ✔ final sign moves pending_signature to active (1.6607ms)
+  ✔ failure does not show success (2.1361ms)
+  ✔ partial sign does not sync deal status (2.9118ms)
+  ✔ full sign syncs deal to executing (2.7076ms)
+  ✔ full sign syncs linked opportunities to executing (1.8896ms)
+✔ signContract UI actions (39.0759ms)
+▶ startNegotiation UI actions
+  ✔ shows start action for confirmed PostMatch without blocking negotiation (20.1822ms)
+  ✔ hides start action when active negotiation exists (2.1524ms)
+  ✔ calls command service and returns negotiation id (5.2814ms)
+  ✔ surfaces command failure (0.9697ms)
+✔ startNegotiation UI actions (31.3843ms)
+▶ terminateContract UI actions
+  ✔ terminate button visible for draft (10.9902ms)
+  ✔ terminate button visible for pending_signature (3.1374ms)
+  ✔ terminate button visible for active contract (3.6029ms)
+  ✔ terminates active contract (2.8914ms)
+  ✔ buttons hidden for completed contract (3.2529ms)
+  ✔ buttons hidden for terminated contract (3.1909ms)
+  ✔ failure does not show success (2.3374ms)
+  ✔ terminating contract syncs deal to cancelled (1.631ms)
+  ✔ terminate syncs linked opportunities to cancelled (2.3035ms)
+✔ terminateContract UI actions (36.8578ms)
+▶ admin-display
+  ✔ maps success statuses to success tone (1.8489ms)
+  ✔ maps danger statuses to danger tone (0.327ms)
+  ✔ maps draft to muted tone (0.2707ms)
+  ✔ falls back to neutral for unknown statuses (0.305ms)
+✔ admin-display (7.8807ms)
+▶ ContractsPage browse layout contract
+  ✔ uses PmBrowsePage with toolbar and pagination slots (2.1609ms)
+  ✔ keeps PmDataTable with search in browse toolbar (0.4262ms)
+  ✔ keeps row actions and mobile ContractListCard navigation (0.3829ms)
+✔ ContractsPage browse layout contract (6.2259ms)
+▶ DealsPage browse layout contract
+  ✔ uses PmBrowsePage with toolbar and pagination slots (2.1691ms)
+  ✔ keeps PmDataTable with search in browse toolbar (0.4514ms)
+  ✔ keeps row actions and mobile DealListCard navigation (0.4252ms)
+✔ DealsPage browse layout contract (5.5057ms)
+▶ OpportunitiesPage browse layout contract
+  ✔ uses PmBrowsePage with toolbar and pagination slots (2.1446ms)
+  ✔ keeps OpportunityCard grid content in browse children (0.3574ms)
+✔ OpportunitiesPage browse layout contract (4.8521ms)
+▶ PeoplePage browse layout contract
+  ✔ uses PmBrowsePage with toolbar and pagination slots (2.5769ms)
+  ✔ composes PeopleBrowseToolbar and external list filters in browse toolbar (0.4215ms)
+  ✔ keeps PersonCard mobile rendering via PeopleListSection (0.7464ms)
+✔ PeoplePage browse layout contract (6.027ms)
+▶ NotificationsPage browse layout contract
+  ✔ uses PmBrowsePage with toolbar and pagination slots (0.4803ms)
+  ✔ composes NotificationsBrowseToolbar and external list filters in browse toolbar (0.3908ms)
+  ✔ keeps grouped mobile list and desktop table in NotificationsListSection (0.7169ms)
+✔ NotificationsPage browse layout contract (2.148ms)
+▶ MatchesPage browse layout contract
+  ✔ uses PmBrowsePage with toolbar and pagination slots (2.3623ms)
+  ✔ composes MatchesBrowseToolbar and external list filters in browse toolbar (0.4669ms)
+  ✔ uses card grid layout for browse content instead of PmDataTable (0.4048ms)
+  ✔ keeps MatchCard rendering in browse card grid (0.9515ms)
+✔ MatchesPage browse layout contract (6.6795ms)
+▶ NegotiationsPage browse layout contract
+  ✔ uses PmBrowsePage with toolbar and pagination slots (0.9166ms)
+  ✔ uses unified list empty state helpers (0.5755ms)
+  ✔ keeps existing negotiation card grid in browse content (0.8694ms)
+✔ NegotiationsPage browse layout contract (3.1523ms)
+▶ PostMatchRepository duplicate detection
+  ✔ findActiveDuplicateByStrongKey blocks discovered and accepted matches (2.3849ms)
+  ✔ dedupes two_way by ordered side keys (0.5122ms)
+  ✔ getByOpportunity indexes consortium lead and member offers (1.2347ms)
+  ✔ isBlockingDiscoverDuplicateStatus follows lifecycle canonical names (0.4253ms)
+✔ PostMatchRepository duplicate detection (8.2936ms)
+▶ repository entityKey registry
+  ✔ assigns a unique entityKey to each repository (3.855ms)
+  ✔ ApplicationRepository uses entityKey "applications" (0.5144ms)
+  ✔ OpportunityRepository uses entityKey "opportunities" (0.4402ms)
+  ✔ UserRepository uses entityKey "users" (0.4009ms)
+  ✔ CompanyRepository uses entityKey "companies" (0.3891ms)
+  ✔ AuditRepository uses entityKey "newAuditEntries" (0.3954ms)
+  ✔ PostMatchRepository uses entityKey "postMatches" (0.3557ms)
+  ✖ DealRepository uses entityKey "deals" (6.3981ms)
+  ✔ NegotiationRepository uses entityKey "negotiations" (0.4261ms)
+  ✔ ContractRepository uses entityKey "contracts" (0.5144ms)
+  ✔ NotificationRepository uses entityKey "notifications" (0.3507ms)
+  ✔ user, company, and audit repositories do not use applications key (0.9182ms)
+  ✔ read-only seed repositories use dedicated keys (0.6096ms)
+✖ repository entityKey registry (19.6417ms)
+▶ dealService.createDealFromNegotiation legacy path guard
+  ✖ with postMatchId delegates to CreateDealFromNegotiation command path (10.7678ms)
+  ✖ PostMatch path creates draft deal, not active (0.8351ms)
+  ✖ without postMatchId rejects deal creation (6.5199ms)
+  ✖ command failure is not swallowed (2.8503ms)
+  ✖ application/manual path without postMatchId rejects (1.6558ms)
+  ✖ returns existing deal without re-running command (1.0822ms)
+✖ dealService.createDealFromNegotiation legacy path guard (26.9889ms)
+▶ deal-opportunity sync rules
+  ✔ maps deal executing to opportunity executing (1.6039ms)
+  ✔ maps deal completed to opportunity completed (0.3591ms)
+  ✔ maps deal cancelled to opportunity cancelled (0.3298ms)
+  ✔ does not map draft review or signing (0.2925ms)
+✔ deal-opportunity sync rules (4.9342ms)
+▶ contract-deal sync rules
+  ✔ maps contract active to deal executing (0.4423ms)
+  ✔ maps contract completed to deal completed (0.2418ms)
+  ✔ maps contract terminated to deal cancelled (0.2404ms)
+  ✔ does not map draft or pending_signature (0.376ms)
+✔ contract-deal sync rules (2.1657ms)
+▶ LifecycleOrchestrator contract → deal sync
+  ✔ syncs deal to executing when contract becomes active (7.2455ms)
+  ✔ syncs deal to completed when contract becomes completed (0.9401ms)
+  ✔ syncs deal to cancelled when contract becomes terminated (0.7282ms)
+  ✔ skips sync for draft contract (0.5857ms)
+  ✔ skips when deal already at target status (0.8212ms)
+  ✔ reports error when deal is missing (0.9283ms)
+✔ LifecycleOrchestrator contract → deal sync (11.9452ms)
+▶ LifecycleOrchestrator deal → opportunity sync
+  ✔ syncs need and offer to executing when deal is executing (3.3549ms)
+  ✔ syncs need and offer to completed when deal is completed (1.6301ms)
+  ✔ syncs need and offer to cancelled when deal is cancelled (3.6431ms)
+  ✔ logs sync failure when linked opportunity is missing (1.4391ms)
+  ✔ does not downgrade terminal opportunities (1.0374ms)
+  ✔ skips when opportunity already at target status (0.8684ms)
+  ✔ resolves opportunity ids from postMatch when deal omits them (0.842ms)
+✔ LifecycleOrchestrator deal → opportunity sync (13.4257ms)
+▶ LifecycleOrchestrator contract → deal → opportunity chain
+  ✔ contract active syncs deal executing then need and offer executing (0.9948ms)
+  ✔ contract completed syncs deal completed then need and offer completed (0.7383ms)
+  ✔ contract terminated syncs deal cancelled then need and offer cancelled (0.6033ms)
+✔ LifecycleOrchestrator contract → deal → opportunity chain (2.6427ms)
+▶ matchingService.discoverNeedOfferMatch
+  ✔ creates an ADR-002 shaped PostMatch through DiscoverPostMatch (6.8657ms)
+  ✔ blocks duplicate discovered matches for the same need/offer pair (1.2705ms)
+✔ matchingService.discoverNeedOfferMatch (11.1944ms)
+▶ runCircularMatchingForPublishedOpportunities
+  ✔ creates circular PostMatch from published pool (17.0717ms)
+  ✔ skips duplicate circular matches on second run (3.5087ms)
+  ✔ returns zero when no circular chain exists (0.9478ms)
+  ✔ continues run when a discover command fails (18.8461ms)
+  ✔ persists only via DiscoverCircularPostMatchCommand shape (3.8278ms)
+✔ runCircularMatchingForPublishedOpportunities (46.414ms)
+▶ circular matching run audit trail
+  ✔ writes completed audit record on successful run (1.7784ms)
+  ✔ writes completed_with_errors when discover commands fail (6.3727ms)
+  ✔ writes failed audit record when matching throws (1.4811ms)
+  ✔ returns matching result when audit write fails (1.4459ms)
+  ✔ returns runId on every run (1.7422ms)
+✔ circular matching run audit trail (13.7619ms)
+▶ runCircularMatchingUiAction RBAC
+  ✔ denies non-admin roles (0.7576ms)
+  ✔ allows admin roles to execute (1.4101ms)
+  ✔ allows moderator roles to execute (0.775ms)
+✔ runCircularMatchingUiAction RBAC (3.427ms)
+▶ matching run audit helpers
+  ✔ resolveMatchingRunStatus maps outcomes (2.0577ms)
+  ✔ buildMatchingRunAuditDetails includes error count (1.795ms)
+✔ matching run audit helpers (6.4651ms)
+▶ publish matching wiring
+  ✔ ready need publish creates one_way PostMatch (11.679ms)
+  ✔ ready offer publish creates one_way PostMatch (1.512ms)
+  ✔ duplicate match is skipped cleanly (1.0304ms)
+  ✔ blocked readiness does not run matching (0.4142ms)
+  ✔ partial command failure does not undo publish (2.4331ms)
+  ✖ Related Matches read model sees new PostMatch after publish (2.9355ms)
+  ✔ ready need publish also runs circular matching on publish orchestration (0.3918ms)
+  ✔ publish succeeds when circular matching throws (0.3975ms)
+  ✔ runCircularMatchingForOpportunity discovers circular matches on publish with cycle pool (2.3543ms)
+✖ publish matching wiring (25.0149ms)
+▶ modelRunResult → DiscoverPostMatch adapter
+  ✔ maps one_way result to DiscoverOneWayPostMatchCommand (0.7504ms)
+  ✔ maps two_way result to DiscoverTwoWayPostMatchCommand (1.0815ms)
+  ✔ maps consortium result to DiscoverConsortiumPostMatchCommand (1.0883ms)
+  ✔ maps circular result to DiscoverCircularPostMatchCommand (0.6003ms)
+✔ modelRunResult → DiscoverPostMatch adapter (3.7935ms)
+▶ postMatchCommandService
+  ✔ calls DiscoverPostMatch through the gateway (5.6426ms)
+  ✔ calls AcceptPostMatch through the gateway (1.5281ms)
+  ✔ returns failure for invalid command without swallowing errors (0.5342ms)
+  ✔ does not swallow CommandResult.success=false on discover validation failure (0.4499ms)
+  ✔ produces stable commandType literals (1.4837ms)
+  ✔ can confirm after quorum via accept calls (0.5402ms)
+✔ postMatchCommandService (11.9676ms)
+▶ pm-theme-provider-bridge
+  ✔ maps legacy light to enterprise-light (3.057ms)
+  ✔ maps legacy dark to enterprise-dark (1.0165ms)
+  ✔ resolves system preference to active PM theme from system mode (0.3041ms)
+  ✔ applies document classes compatible with legacy provider (2.5738ms)
+  ✔ maps theme mode to legacy preference (0.3441ms)
+  ✔ resolves system theme mode from prefers-color-scheme hint (0.4196ms)
+  ✔ does not treat planned themes as supported (0.4032ms)
+✔ pm-theme-provider-bridge (11.7556ms)
+▶ pm-theme-registry
+  ✔ registers all five theme slots (1.9535ms)
+  ✔ marks only enterprise themes as active (1.8927ms)
+  ✔ maps enterprise-light and enterprise-dark to current css root classes (0.3328ms)
+✔ pm-theme-registry (10.9292ms)
+▶ pm-theme-utils
+  ✔ normalizes legacy aliases to canonical theme ids (0.6542ms)
+  ✔ resolves theme definitions by id (0.3634ms)
+  ✔ supports only active enterprise themes (0.3859ms)
+  ✔ resolves class names only for active themes (0.3477ms)
+  ✔ exposes capabilities for planned themes without token implementation (0.4046ms)
+  ✔ maps legacy resolved mode to theme id (0.4165ms)
+  ✔ lists active themes matching registry (0.3855ms)
+  ✔ defaults to enterprise-light (0.3271ms)
+✔ pm-theme-utils (4.388ms)
+▶ design-governance-rules
+  ✔ detects hex colors outside allowlist (7.4433ms)
+  ✔ allows hex in token layer files (0.6817ms)
+  ✔ detects page shadcn button import (0.5554ms)
+  ✔ detects deprecated page-primitives import (1.7585ms)
+  ✔ detects tailwind palette colors (0.3622ms)
+  ✔ allows shadow arbitrary with CSS var reference (0.6409ms)
+  ✔ flags shadow arbitrary without var() (0.5112ms)
+  ✔ classifies page paths (0.2903ms)
+  ✔ allowlists shadcn ui wrappers (0.3085ms)
+  ✔ marks baseline exceptions (0.4281ms)
+  ✔ has baseline registry entries (0.2231ms)
+✔ design-governance-rules (16.7538ms)
+▶ motion tokens (DDS-005)
+  ✔ exposes base motion utility classes (1.8414ms)
+  ✔ documents duration and delay scales in ms (0.4953ms)
+  ✔ exposes interaction presets (0.6534ms)
+  ✔ exposes enter and loading presets (0.2945ms)
+  ✔ exposes pipeline and overlay presets (0.2856ms)
+  ✔ documents toast motion classes (0.5211ms)
+  ✔ uses global reduced-motion collapse policy (0.304ms)
+  ✔ provides framer-motion easing tuple (0.3064ms)
+✔ motion tokens (DDS-005) (7.7066ms)
+▶ responsive tokens
+  ✔ defines shell and page chrome containment classes (1.7346ms)
+  ✔ toolbar bleed uses page padding CSS variable (0.907ms)
+  ✔ documents QA viewport matrix (2.4134ms)
+✔ responsive tokens (7.6728ms)
+▶ pm-token-registry
+  ✔ defines ten official token layers (1.7269ms)
+  ✔ orders brand before semantic before component (0.2944ms)
+  ✔ assigns ownership for every layer (0.3112ms)
+  ✔ forbids brand as a component dependency (0.2439ms)
+  ✔ forbids pages from importing brand tokens (0.2422ms)
+  ✔ maps component tokens to motion and radius helpers (0.4374ms)
+  ✔ lists validation forbidden patterns (0.3282ms)
+  ✔ resolves match type styles via semantic mapping (0.1952ms)
+✔ pm-token-registry (6.2735ms)
+ℹ tests 947
+ℹ suites 220
+ℹ pass 855
+ℹ fail 92
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 19885.8031
+
+✖ failing tests:
+
+test at src\commands\handlers\application-hiring-flow.test.ts:1:3321
+✖ runs application hiring path through contract creation with audit trail (16.9447ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(auditActions.includes('deal.created_from_application'))
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\application-hiring-flow.test.ts:175:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\commands\handlers\deal-command-handler.test.ts:1:2141
+✖ agreed negotiation creates deal (33.9188ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\deal-command-handler.test.ts:113:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1518:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\commands\handlers\deal-command-handler.test.ts:1:5122
+✖ deal links postMatchId, negotiationId, needOpportunityId, offerOpportunityId (2.9051ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\deal-command-handler.test.ts:239:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\commands\handlers\deal-command-handler.test.ts:1:5528
+✖ deal status is draft (1.2447ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\deal-command-handler.test.ts:253:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\commands\handlers\deal-command-handler.test.ts:1:6941
+✖ agreed negotiation creates draft deal (1.5119ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\deal-command-handler.test.ts:314:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1518:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\commands\handlers\deal-command-handler.test.ts:1:9868
+✖ persisted deal includes negotiationId postMatchId opportunityIds participants (0.9991ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\deal-command-handler.test.ts:420:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\commands\handlers\deal-command-handler.test.ts:1:11507
+✖ draft to review is allowed (2.6778ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - 'review'
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\deal-command-handler.test.ts:490:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1518:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'review',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src\commands\handlers\deal-command-handler.test.ts:1:11687
+✖ review to signing is allowed (1.283ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - 'signing'
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\deal-command-handler.test.ts:509:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'signing',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src\commands\handlers\deal-command-handler.test.ts:1:12106
+✖ signing to executing is allowed (1.9557ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - 'executing'
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\deal-command-handler.test.ts:528:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'executing',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src\commands\handlers\deal-command-handler.test.ts:1:12536
+✖ executing to completed is allowed (2.9788ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - 'completed'
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\deal-command-handler.test.ts:547:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'completed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src\commands\handlers\deal-command-handler.test.ts:1:14281
+✖ same status is idempotent (0.8958ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - 'draft'
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\deal-command-handler.test.ts:603:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'draft',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src\commands\handlers\deal-command-handler.test.ts:1:14458
+✖ persists canonical status only (0.9767ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - 'review'
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\deal-command-handler.test.ts:609:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'review',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src\commands\handlers\negotiation-room-command-handler.test.ts:1:4946
+✖ create deal only from accepted/agreed offer (32.7121ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(created.deal?.id)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\negotiation-room-command-handler.test.ts:257:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\commands\handlers\opportunity-command-handler.test.ts:1:9282
+✖ pipeline drag does not call dealService.updateOpportunityStatus (8.625ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    Comparison {
+  +   message: 'dealService.updateOpportunityStatus is not a function'
+  -   message: 'Lifecycle status updates must use CommandGateway or LifecycleOrchestrator.'
+    }
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\opportunity-command-handler.test.ts:371:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: TypeError: dealService.updateOpportunityStatus is not a function
+        at assert.throws.message (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\opportunity-command-handler.test.ts:371:37)
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\commands\handlers\opportunity-command-handler.test.ts:371:12)
+        at Test.runInAsyncScope (node:async_hooks:214:14)
+        at Test.run (node:internal/test_runner/test:1106:25)
+        at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7),
+    expected: { message: 'Lifecycle status updates must use CommandGateway or LifecycleOrchestrator.' },
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at src\domain\readiness-foundation-regression.test.ts:1:7434
+✖ Scenario D — post-publish lifecycle accept → confirm → negotiate → deal (22.2657ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\domain\readiness-foundation-regression.test.ts:326:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\domain\workflows\workflow-bridge.test.ts:1:2536
+✖ uses orchestrator for create contract visibility on deals (0.7711ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at canCreateContractFromDeal (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.ts:123:10)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\domain\workflows\workflow-bridge.test.ts:92:7)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+
+test at src\domain\workflows\workflow-bridge.test.ts:1:2736
+✖ blocks create contract when active contract exists (0.4891ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at canCreateContractFromDeal (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.ts:123:10)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\domain\workflows\workflow-bridge.test.ts:108:7)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+
+test at src\domain\workflows\workflow-bridge.test.ts:1:2978
+✖ walks marketplace workflow actions from publish through deal creation (4.5786ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\domain\workflows\workflow-bridge.test.ts:165:7)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at src\domain\workflows\workflow-bridge.test.ts:1:4071
+✖ walks hiring workflow from accepted application to deal creation (0.5781ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\domain\workflows\workflow-bridge.test.ts:201:7)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at src\domain\workflows\workflow-bridge.test.ts:1:4953
+✖ blocks invalid transitions such as deal before agreed negotiation (0.8815ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at validateWorkflowTransition (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1726:18)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\domain\workflows\workflow-bridge.test.ts:207:20)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at src\domain\workflows\workflow-bridge.test.ts:1:5743
+✖ builds match card actions from orchestrator without duplicate helpers (2.3292ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\domain\workflows\workflow-bridge.test.ts:248:21)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+
+test at src\infrastructure\seed\seed-sync-validation.test.ts:1:6745
+✖ finds matches for completed opportunity with view deal action (4.5551ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchCard (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:230:14)
+      at <anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:21)
+      at Array.map (<anonymous>)
+      at buildOpportunityMatchesReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:6)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:216:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+
+test at src\infrastructure\seed\seed-sync-validation.test.ts:1:7107
+✖ finds matches for in_negotiation opportunity (0.622ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchCard (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:230:14)
+      at <anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:21)
+      at Array.map (<anonymous>)
+      at buildOpportunityMatchesReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:6)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:224:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+
+test at src\infrastructure\seed\seed-sync-validation.test.ts:1:7489
+✖ finds matches for matched opportunity with discovered post-match (0.8652ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchCard (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:230:14)
+      at <anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:21)
+      at Array.map (<anonymous>)
+      at buildOpportunityMatchesReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:6)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:237:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+
+test at src\infrastructure\seed\seed-sync-validation.test.ts:1:8882
+✖ handles pending/discovered one_way match (4.0042ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at modelFor (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:271:12)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:275:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.start (node:internal/test_runner/test:1003:17)
+
+test at src\infrastructure\seed\seed-sync-validation.test.ts:1:9123
+✖ handles accepted one_way match linked to active negotiation (0.5498ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at modelFor (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:271:12)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:282:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+
+test at src\infrastructure\seed\seed-sync-validation.test.ts:1:9333
+✖ handles confirmed one_way match with deal (0.4353ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at modelFor (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:271:12)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:288:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+
+test at src\infrastructure\seed\seed-sync-validation.test.ts:1:9571
+✖ handles two_way match topology (0.4662ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at modelFor (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:271:12)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:295:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+
+test at src\infrastructure\seed\seed-sync-validation.test.ts:1:9754
+✖ handles consortium match topology (0.4342ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at modelFor (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:271:12)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:301:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+
+test at src\infrastructure\seed\seed-sync-validation.test.ts:1:9941
+✖ handles circular match topology (1.6634ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at modelFor (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:271:12)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:307:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+
+test at src\infrastructure\seed\seed-sync-validation.test.ts:1:10322
+✖ resolves completed one-way deal with linked post-match and contract record (1.634ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at canCreateContractFromDeal (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.ts:123:10)
+      at buildDealDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.ts:228:29)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:319:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.start (node:internal/test_runner/test:1003:17)
+      at node:internal/test_runner/test:1516:71
+
+test at src\infrastructure\seed\seed-sync-validation.test.ts:1:10978
+✖ resolves executing consortium deal with active contract (0.3888ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at canCreateContractFromDeal (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.ts:123:10)
+      at buildDealDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.ts:228:29)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:334:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+
+test at src\infrastructure\seed\seed-sync-validation.test.ts:1:12149
+✖ builds opportunity matches read model without application repository data (0.6812ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchCard (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:230:14)
+      at <anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:21)
+      at Array.map (<anonymous>)
+      at buildOpportunityMatchesReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:6)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\infrastructure\seed\seed-sync-validation.test.ts:366:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+
+test at src\lib\application-hiring-ui-actions.test.ts:1:3771
+✖ shows create hiring deal when negotiation is agreed and no deal exists (2.1989ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at canShowCreateHiringDeal (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\application-hiring-ui-actions.ts:110:10)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\application-hiring-ui-actions.test.ts:146:7)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at src\lib\application-hiring-ui-actions.test.ts:1:4762
+✖ creates hiring deal through command service (2.8477ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at createHiringDealFromApplicationUiAction (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\application-hiring-ui-actions.ts:168:18)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\application-hiring-ui-actions.test.ts:184:20)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at src\lib\create-contract-ui-actions.test.ts:1:2368
+✖ create contract button visible for eligible deal (22.3966ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-contract-ui-actions.test.ts:85:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Test.start (node:internal/test_runner/test:1003:17)
+      at node:internal/test_runner/test:1516:71
+      at node:internal/per_context/primordials:464:82
+      at new Promise (<anonymous>) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\create-contract-ui-actions.test.ts:1:2574
+✖ hidden when existing non-terminal contract exists (1.9454ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-contract-ui-actions.test.ts:85:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Promise.all (index 0) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\create-contract-ui-actions.test.ts:1:2829
+✖ hidden for completed deal (1.8808ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-contract-ui-actions.test.ts:85:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\create-contract-ui-actions.test.ts:1:3027
+✖ click creates draft contract (6.1295ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-contract-ui-actions.test.ts:85:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\create-contract-ui-actions.test.ts:1:3272
+✖ command failure shows error (1.4088ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-contract-ui-actions.test.ts:85:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\create-contract-ui-actions.test.ts:1:3523
+✖ no deal status change (1.3154ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-contract-ui-actions.test.ts:85:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\create-contract-ui-actions.test.ts:1:3780
+✖ no opportunity status change (1.0928ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-contract-ui-actions.test.ts:85:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\create-contract-ui-actions.test.ts:1:4311
+✖ no signing or activation happens (0.9537ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-contract-ui-actions.test.ts:85:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\create-deal-ui-actions.test.ts:1:2403
+✖ shows Create Deal for agreed PostMatch negotiation (5.2002ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at canShowCreateDealFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-deal-ui-actions.ts:116:10)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-deal-ui-actions.test.ts:112:7)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1518:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3)
+
+test at src\lib\create-deal-ui-actions.test.ts:1:2624
+✖ hides Create Deal for active negotiation (3.2992ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at canShowCreateDealFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-deal-ui-actions.ts:116:10)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-deal-ui-actions.test.ts:121:7)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at src\lib\create-deal-ui-actions.test.ts:1:2765
+✖ hides Create Deal for countered negotiation (0.9163ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at canShowCreateDealFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-deal-ui-actions.ts:116:10)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-deal-ui-actions.test.ts:128:7)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at src\lib\create-deal-ui-actions.test.ts:1:2933
+✖ click path calls command service (12.9193ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  false !== true
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-deal-ui-actions.test.ts:150:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src\lib\create-deal-ui-actions.test.ts:1:3532
+✖ creates draft deal, not active (2.0612ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  false !== true
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-deal-ui-actions.test.ts:161:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src\lib\create-deal-ui-actions.test.ts:1:4446
+✖ application path without postMatchId is rejected (1.2947ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at canShowCreateDealFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-deal-ui-actions.ts:114:12)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\create-deal-ui-actions.test.ts:203:7)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at src\lib\deal-detail-read-model.test.ts:1:2347
+✖ loads deal detail by id (38.7408ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.test.ts:109:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Test.start (node:internal/test_runner/test:1003:17)
+      at node:internal/test_runner/test:1516:71
+      at node:internal/per_context/primordials:464:82
+      at new Promise (<anonymous>) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\deal-detail-read-model.test.ts:1:2526
+✖ shows draft status after CreateDealFromPostMatch (2.0649ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.test.ts:109:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Promise.all (index 0) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\deal-detail-read-model.test.ts:1:2730
+✖ shows PostMatch link fields (8.4945ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.test.ts:109:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\deal-detail-read-model.test.ts:1:3347
+✖ shows Need and Offer titles when available (1.4015ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.test.ts:109:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\deal-detail-read-model.test.ts:1:3610
+✖ shows negotiation status when available (1.4577ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.test.ts:109:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\deal-detail-read-model.test.ts:1:3817
+✖ shows commercial terms when available (1.3479ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.test.ts:109:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\deal-detail-read-model.test.ts:1:4212
+✖ missing linked records show safe fallback (1.1465ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.test.ts:109:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\deal-detail-read-model.test.ts:1:5010
+✖ can create contract for eligible draft deal (1.1663ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.test.ts:109:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\deal-detail-read-model.test.ts:1:5259
+✖ hides create contract when non-terminal contract exists (3.1642ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.test.ts:109:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\deal-detail-read-model.test.ts:1:5809
+✖ hides create contract for completed deal (1.753ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.test.ts:109:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\deal-detail-read-model.test.ts:1:6190
+✖ returns null when deal id is missing (0.9463ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.test.ts:109:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\deal-detail-read-model.test.ts:1:6363
+✖ resolveDealPostMatchId prefers postMatchId over legacy matchId (1.0124ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.test.ts:109:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\deal-detail-read-model.test.ts:1:6715
+✖ resolveDealCommercialTerms reads legacy terms fields (0.944ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(deal)
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.test.ts:109:12)
+      at TestHook.runInAsyncScope (node:async_hooks:214:14)
+      at TestHook.run (node:internal/test_runner/test:1106:25)
+      at TestHook.run (node:internal/test_runner/test:1427:18)
+      at Suite.runHook (node:internal/test_runner/test:1024:20)
+      at Test.run (node:internal/test_runner/test:1081:27)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at src\lib\match-detail-read-model.test.ts:1:1934
+✖ discovered participant sees accept and decline (5.2477ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.test.ts:87:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.start (node:internal/test_runner/test:1003:17)
+      at node:internal/test_runner/test:1516:71
+
+test at src\lib\match-detail-read-model.test.ts:1:2397
+✖ non-participant sees read-only with no accept or decline (0.7052ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.test.ts:101:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+
+test at src\lib\match-detail-read-model.test.ts:1:2907
+✖ confirmed match hides accept and decline and shows start negotiation when allowed (0.6699ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.test.ts:127:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+
+test at src\lib\match-detail-read-model.test.ts:1:3457
+✖ terminal declined match hides participant actions (0.607ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.test.ts:148:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+
+test at src\lib\match-detail-read-model.test.ts:1:3920
+✖ terminal expired match hides participant actions (0.6481ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.test.ts:164:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+
+test at src\lib\match-detail-read-model.test.ts:1:4233
+✖ terminal superseded match hides participant actions (0.5749ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.test.ts:179:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+
+test at src\lib\match-detail-read-model.test.ts:1:4555
+✖ accepted participant does not see duplicate accept but may still decline (0.6741ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.test.ts:197:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+
+test at src\lib\match-detail-read-model.test.ts:1:5049
+✖ shows view negotiation and view deal when linked (1.3556ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.test.ts:215:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+
+test at src\lib\match-detail-read-model.test.ts:1:6152
+✖ exposes one_way Need → Offer topology (1.774ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.test.ts:259:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.start (node:internal/test_runner/test:1003:17)
+      at node:internal/test_runner/test:1516:71
+
+test at src\lib\match-detail-read-model.test.ts:1:6592
+✖ exposes two_way Need A ↔ Need B topology (0.8733ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.test.ts:275:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+
+test at src\lib\match-detail-read-model.test.ts:1:7102
+✖ exposes consortium Lead + Roles topology (0.606ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.test.ts:292:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+
+test at src\lib\match-detail-read-model.test.ts:1:7581
+✖ exposes circular A → B → C → A topology (0.7835ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.ts:102:19)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\match-detail-read-model.test.ts:309:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+
+test at src\lib\opportunity-matches-read-model.test.ts:1:2062
+✖ discovered match shows accept and decline for pending participant (5.4331ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchCard (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:230:14)
+      at <anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:21)
+      at Array.map (<anonymous>)
+      at buildOpportunityMatchesReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:6)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.test.ts:95:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+
+test at src\lib\opportunity-matches-read-model.test.ts:1:2881
+✖ confirmed match shows start negotiation when allowed (0.8341ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchCard (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:230:14)
+      at <anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:21)
+      at Array.map (<anonymous>)
+      at buildOpportunityMatchesReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:6)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.test.ts:133:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+
+test at src\lib\opportunity-matches-read-model.test.ts:1:3628
+✖ confirmed match shows view negotiation when negotiation exists (1.2007ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchCard (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:230:14)
+      at <anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:21)
+      at Array.map (<anonymous>)
+      at buildOpportunityMatchesReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:6)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.test.ts:166:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+
+test at src\lib\opportunity-matches-read-model.test.ts:1:4456
+✖ agreed negotiation shows create deal when no deal exists (0.7572ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchCard (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:230:14)
+      at <anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:21)
+      at Array.map (<anonymous>)
+      at buildOpportunityMatchesReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:6)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.test.ts:204:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+
+test at src\lib\opportunity-matches-read-model.test.ts:1:5266
+✖ terminal declined match hides accept and decline actions (0.7077ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchCard (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:230:14)
+      at <anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:21)
+      at Array.map (<anonymous>)
+      at buildOpportunityMatchesReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:6)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.test.ts:248:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+
+test at src\lib\opportunity-matches-read-model.test.ts:1:6010
+✖ shows view deal when deal exists for post match (0.7133ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchCard (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:230:14)
+      at <anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:21)
+      at Array.map (<anonymous>)
+      at buildOpportunityMatchesReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:6)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.test.ts:278:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+
+test at src\lib\read-model-orchestration-sync.test.ts:1:2587
+✖ reflects executing after contract activation (27.0483ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at canCreateContractFromDeal (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.ts:123:10)
+      at buildDealDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.ts:228:29)
+      at dealModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\read-model-orchestration-sync.test.ts:104:12)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\read-model-orchestration-sync.test.ts:115:18)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Promise.all (index 0)
+
+test at src\lib\read-model-orchestration-sync.test.ts:1:3287
+✖ reflects completed after contract completion (7.3695ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at canCreateContractFromDeal (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.ts:123:10)
+      at buildDealDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.ts:228:29)
+      at dealModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\read-model-orchestration-sync.test.ts:104:12)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\read-model-orchestration-sync.test.ts:134:18)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at src\lib\read-model-orchestration-sync.test.ts:1:3866
+✖ reflects cancelled after contract termination (4.2387ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at canCreateContractFromDeal (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.ts:123:10)
+      at buildDealDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.ts:228:29)
+      at dealModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\read-model-orchestration-sync.test.ts:104:12)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\read-model-orchestration-sync.test.ts:150:18)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at src\lib\read-model-orchestration-sync.test.ts:1:4448
+✖ does not let stale seed override repository opportunity status (1.2904ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at canCreateContractFromDeal (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.ts:123:10)
+      at buildDealDetailReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\deal-detail-read-model.ts:228:29)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\read-model-orchestration-sync.test.ts:164:19)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at src\repositories\repository-entity-keys.test.ts:1:2800
+✖ DealRepository uses entityKey "deals" (6.3981ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'commercialAgreements'
+  - 'deals'
+  
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\repositories\repository-entity-keys.test.ts:88:14)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'commercialAgreements',
+    expected: 'deals',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src\services\deal-service.test.ts:1:2163
+✖ with postMatchId delegates to CreateDealFromNegotiation command path (10.7678ms)
+  Error: Negotiation "neg-agreed" not found
+      at Object.createCommercialAgreementFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\commercial-agreement-service.ts:59:15)
+      at Object.createDealFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.ts:25:22)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.test.ts:99:26)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1518:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3)
+
+test at src\services\deal-service.test.ts:1:2585
+✖ PostMatch path creates draft deal, not active (0.8351ms)
+  Error: Negotiation "neg-agreed" not found
+      at Object.createCommercialAgreementFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\commercial-agreement-service.ts:59:15)
+      at Object.createDealFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.ts:25:22)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.test.ts:113:26)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at src\services\deal-service.test.ts:1:2790
+✖ without postMatchId rejects deal creation (6.5199ms)
+  AssertionError [ERR_ASSERTION]: The validation function is expected to return "true". Received false
+  
+  Caught error:
+  
+  Error: Negotiation "neg-app" not found
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.test.ts:126:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: Negotiation "neg-app" not found
+        at Object.createCommercialAgreementFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\commercial-agreement-service.ts:59:15)
+        at Object.createDealFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.ts:25:22)
+        at <anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.test.ts:127:21)
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.test.ts:126:12)
+        at Test.runInAsyncScope (node:async_hooks:214:14)
+        at Test.run (node:internal/test_runner/test:1106:25)
+        at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7),
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at src\services\deal-service.test.ts:1:3113
+✖ command failure is not swallowed (2.8503ms)
+  AssertionError [ERR_ASSERTION]: The validation function is expected to return "true". Received false
+  
+  Caught error:
+  
+  Error: Negotiation "neg-agreed" not found
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.test.ts:140:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: Negotiation "neg-agreed" not found
+        at Object.createCommercialAgreementFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\commercial-agreement-service.ts:59:15)
+        at Object.createDealFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.ts:25:22)
+        at <anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.test.ts:141:21)
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.test.ts:140:12)
+        at Test.runInAsyncScope (node:async_hooks:214:14)
+        at Test.run (node:internal/test_runner/test:1106:25)
+        at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7),
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at src\services\deal-service.test.ts:1:3493
+✖ application/manual path without postMatchId rejects (1.6558ms)
+  AssertionError [ERR_ASSERTION]: The validation function is expected to return "true". Received false
+  
+  Caught error:
+  
+  Error: Negotiation "neg-match-only" not found
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.test.ts:160:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: Negotiation "neg-match-only" not found
+        at Object.createCommercialAgreementFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\commercial-agreement-service.ts:59:15)
+        at Object.createDealFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.ts:25:22)
+        at <anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.test.ts:161:21)
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.test.ts:160:12)
+        at Test.runInAsyncScope (node:async_hooks:214:14)
+        at Test.run (node:internal/test_runner/test:1106:25)
+        at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7),
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at src\services\deal-service.test.ts:1:3914
+✖ returns existing deal without re-running command (1.0822ms)
+  Error: Negotiation "neg-agreed" not found
+      at Object.createCommercialAgreementFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\commercial-agreement-service.ts:59:15)
+      at Object.createDealFromNegotiation (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.ts:25:22)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\deal-service.test.ts:168:27)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at src\services\matching\publish-matching.test.ts:1:13518
+✖ Related Matches read model sees new PostMatch after publish (2.9355ms)
+  TypeError: Cannot read properties of undefined (reading 'commandType')
+      at isActionAllowedForWorkflow (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1610:47)
+      at findWorkflowAction (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1626:8)
+      at isWorkflowActionAvailable (file:///D:/Cursor/PM-Twin%20MVP%20-%20saleh%20-live/packages/workflows/dist/index.js:1631:18)
+      at buildMatchCardActions (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:186:7)
+      at buildMatchCard (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:230:14)
+      at <anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:21)
+      at Array.map (<anonymous>)
+      at buildOpportunityMatchesReadModel (D:\Cursor\PM-Twin MVP - saleh -live\web\src\lib\opportunity-matches-read-model.ts:240:6)
+      at TestContext.<anonymous> (D:\Cursor\PM-Twin MVP - saleh -live\web\src\services\matching\publish-matching.test.ts:517:23)
+      at Test.runInAsyncScope (node:async_hooks:214:14)

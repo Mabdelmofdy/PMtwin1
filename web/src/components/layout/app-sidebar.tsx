@@ -31,6 +31,7 @@ import { PmButton } from '@/components/ui/pm-button'
 import { pmInteraction } from '@/tokens'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
+import { useProductLanguage } from '@/providers/product-language-provider'
 
 const navButtonClass =
   cn(
@@ -41,6 +42,7 @@ const navButtonClass =
 export function AppSidebar() {
   const { pathname } = useLocation()
   const { user, signOut, isCompanyUser, canAccessAdmin } = useAuth()
+  const { productLanguage } = useProductLanguage()
   if (!user) return null
   const displayName = user.profile?.name || user.email
   const isAdminArea = pathname.startsWith('/admin') && canAccessAdmin
@@ -73,6 +75,14 @@ export function AppSidebar() {
                 href: dashboardHref,
                 title: isCompanyUser ? 'Company Dashboard' : 'My Workspace',
               }
+            : item.href === '/opportunities'
+              ? { ...item, title: `My ${productLanguage.plural('opportunity')}` }
+              : item.href === '/negotiations'
+                ? { ...item, title: `My ${productLanguage.plural('negotiation')}` }
+                : item.href === '/commercial-agreements'
+                  ? { ...item, title: `My ${productLanguage.plural('commercialAgreement')}` }
+                  : item.href === '/contracts'
+                    ? { ...item, title: `My ${productLanguage.plural('contract')}` }
             : item,
         ),
       }))

@@ -39,7 +39,7 @@ export type NegotiationStatus =
   | 'expired'
   | 'cancelled'
 
-export type DealStatus =
+export type CommercialAgreementStatus =
   | 'draft'
   | 'active'
   | 'execution'
@@ -47,6 +47,8 @@ export type DealStatus =
   | 'cancelled'
   | 'negotiating'
   | 'signing'
+/** @deprecated Use CommercialAgreementStatus */
+export type DealStatus = CommercialAgreementStatus
 
 export type ContractStatus =
   | 'draft'

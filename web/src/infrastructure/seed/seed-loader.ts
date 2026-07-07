@@ -3,8 +3,8 @@ import type {
   AppNotification,
   AuditEntry,
   Company,
+  CommercialAgreement,
   Contract,
-  Deal,
   Negotiation,
   Opportunity,
   PendingUser,
@@ -12,11 +12,16 @@ import type {
   PostMatch,
   SiteContentPage,
 } from '@/types/domain.ts'
+import type {
+  NegotiationMessage,
+  NegotiationOffer,
+  NegotiationTranscriptEvent,
+} from '@/types/negotiation-discussion.ts'
 import { normalizeOpportunities } from '@/domain/collaboration/opportunity-collaboration.ts'
 import {
   normalizeApplications,
+  normalizeCommercialAgreements,
   normalizeContracts,
-  normalizeDeals,
   normalizeNegotiations,
 } from '@/domain/normalizers.ts'
 
@@ -35,6 +40,9 @@ import companiesBase from '@seed-data/companies.json'
 import siteContent from '@seed-data/site-content.json'
 import demoDeals from '@seed-data/demo-deals.json'
 import demoContracts from '@seed-data/demo-contracts.json'
+import demoNegotiationMessages from '@seed-data/demo-negotiation-messages.json'
+import demoNegotiationOffers from '@seed-data/demo-negotiation-offers.json'
+import demoNegotiationTranscriptEvents from '@seed-data/demo-negotiation-transcript-events.json'
 
 type DataEnvelope<T> = { data: T[] }
 
@@ -93,9 +101,13 @@ export function loadNotifications(): AppNotification[] {
   return rows(demoNotifications as DataEnvelope<AppNotification>)
 }
 
-export function loadDeals(): Deal[] {
-  return normalizeDeals(rows(demoDeals as DataEnvelope<Deal>))
+export function loadCommercialAgreements(): CommercialAgreement[] {
+  return normalizeCommercialAgreements(
+    rows(demoDeals as DataEnvelope<CommercialAgreement>),
+  )
 }
+/** @deprecated Use loadCommercialAgreements */
+export const loadDeals = loadCommercialAgreements
 
 export function loadContracts(): Contract[] {
   return normalizeContracts(rows(demoContracts as unknown as DataEnvelope<Contract>))
@@ -111,4 +123,18 @@ export function loadAuditLog(): AuditEntry[] {
 
 export function loadSiteContent(): Record<string, SiteContentPage> {
   return siteContent as Record<string, SiteContentPage>
+}
+
+export function loadNegotiationMessages(): NegotiationMessage[] {
+  return rows(demoNegotiationMessages as DataEnvelope<NegotiationMessage>)
+}
+
+export function loadNegotiationOffers(): NegotiationOffer[] {
+  return rows(demoNegotiationOffers as DataEnvelope<NegotiationOffer>)
+}
+
+export function loadNegotiationTranscriptEvents(): NegotiationTranscriptEvent[] {
+  return rows(
+    demoNegotiationTranscriptEvents as DataEnvelope<NegotiationTranscriptEvent>,
+  )
 }

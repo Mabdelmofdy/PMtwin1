@@ -22,16 +22,16 @@ import {
 } from '@/commands/handlers/lifecycle-notifications.ts'
 import type { AuditRepository } from '@/repositories/audit-repository.ts'
 import type { ApplicationRepository } from '@/repositories/application-repository.ts'
-import type { DealRepository } from '@/repositories/deal-repository.ts'
+import type { CommercialAgreementRepository } from '@/repositories/commercial-agreement-repository.ts'
 import type { NegotiationRepository } from '@/repositories/negotiation-repository.ts'
 import type { PostMatchRepository } from '@/repositories/post-match-repository.ts'
 
 const POST_MATCH_ENTITY = 'match' as const
 const NEGOTIATION_ENTITY = 'negotiation' as const
-const DEAL_ENTITY = 'deal' as const
+const COMMERCIAL_AGREEMENT_ENTITY = 'commercial_agreement' as const
 
 export type DealCommandHandlerDeps = {
-  readonly dealRepository: DealRepository
+  readonly dealRepository: CommercialAgreementRepository
   readonly negotiationRepository: NegotiationRepository
   readonly postMatchRepository: PostMatchRepository
   readonly applicationRepository?: ApplicationRepository | null
@@ -83,13 +83,13 @@ function validateDealTransition(
   currentStatus: string,
   targetStatus: string,
 ): readonly string[] {
-  const fsm = getFsm(DEAL_ENTITY)
+  const fsm = getFsm(COMMERCIAL_AGREEMENT_ENTITY)
   if (!fsm) {
-    return ['Deal lifecycle FSM is not available']
+    return ['Commercial Agreement lifecycle FSM is not available']
   }
 
-  const fromCanonical = toCanonical(DEAL_ENTITY, currentStatus)
-  const toCanonicalStatus = toCanonical(DEAL_ENTITY, targetStatus)
+  const fromCanonical = toCanonical(COMMERCIAL_AGREEMENT_ENTITY, currentStatus)
+  const toCanonicalStatus = toCanonical(COMMERCIAL_AGREEMENT_ENTITY, targetStatus)
 
   if (!fromCanonical) {
     return [`Unknown current status "${currentStatus}"`]
@@ -100,13 +100,13 @@ function validateDealTransition(
   if (fromCanonical === toCanonicalStatus) {
     return []
   }
-  if (isTerminal(DEAL_ENTITY, currentStatus)) {
+  if (isTerminal(COMMERCIAL_AGREEMENT_ENTITY, currentStatus)) {
     return [
-      `Deal is in terminal state "${fromCanonical}" and cannot transition`,
+      `Commercial Agreement is in terminal state "${fromCanonical}" and cannot transition`,
     ]
   }
 
-  const allowed = allowedTransitions(DEAL_ENTITY, currentStatus)
+  const allowed = allowedTransitions(COMMERCIAL_AGREEMENT_ENTITY, currentStatus)
   if (!allowed.includes(toCanonicalStatus)) {
     return [
       `Transition ${fromCanonical} → ${toCanonicalStatus} is not allowed`,
@@ -117,7 +117,7 @@ function validateDealTransition(
 }
 
 export class DealCommandHandler {
-  private readonly dealRepository: DealRepository
+  private readonly dealRepository: CommercialAgreementRepository
   private readonly negotiationRepository: NegotiationRepository
   private readonly postMatchRepository: PostMatchRepository
   private readonly applicationRepository: ApplicationRepository | null
@@ -144,23 +144,27 @@ export class DealCommandHandler {
     }
 
     switch (command.commandType) {
+      case 'CreateCommercialAgreementFromPostMatch':
       case 'CreateDealFromPostMatch':
         return this.handleCreateFromPostMatch(
           command as CreateDealFromPostMatchCommand,
         )
+      case 'CreateCommercialAgreementFromApplication':
       case 'CreateDealFromApplication':
         return this.handleCreateFromApplication(
           command as CreateDealFromApplicationCommand,
         )
+      case 'CreateCommercialAgreementFromNegotiation':
       case 'CreateDealFromNegotiation':
         return this.handleCreateFromNegotiation(
           command as CreateDealFromNegotiationCommand,
         )
+      case 'TransitionCommercialAgreementStatus':
       case 'TransitionDealStatus':
         return this.handleTransition(command as TransitionDealStatusCommand)
       default:
         return failure(command.commandType, command.aggregateId, [
-          `Unsupported Deal command type "${command.commandType}"`,
+          `Unsupported Commercial Agreement command type "${command.commandType}"`,
         ])
     }
   }
@@ -187,7 +191,7 @@ export class DealCommandHandler {
       toCanonical(POST_MATCH_ENTITY, postMatch.status ?? '') ?? ''
     if (postMatchStatus !== 'confirmed') {
       return failure(command.commandType, postMatchId, [
-        `Deal can only be created from a confirmed PostMatch (current status: "${postMatchStatus || postMatch.status}")`,
+        `Commercial Agreement can only be created from a confirmed PostMatch (current status: "${postMatchStatus || postMatch.status}")`,
       ])
     }
 
@@ -202,7 +206,7 @@ export class DealCommandHandler {
       toCanonical(NEGOTIATION_ENTITY, negotiation.status ?? '') ?? ''
     if (negotiationStatus !== 'agreed') {
       return failure(command.commandType, postMatchId, [
-        `Deal can only be created from an agreed Negotiation (current status: "${negotiationStatus || negotiation.status}")`,
+        `Commercial Agreement can only be created from an agreed Negotiation (current status: "${negotiationStatus || negotiation.status}")`,
       ])
     }
 
@@ -221,7 +225,7 @@ export class DealCommandHandler {
     const existingByPostMatch = this.dealRepository.findByPostMatchId(postMatchId)
     if (existingByPostMatch) {
       return failure(command.commandType, postMatchId, [
-        `Deal already exists for PostMatch "${postMatchId}" (${existingByPostMatch.id})`,
+        `Commercial Agreement already exists for PostMatch "${postMatchId}" (${existingByPostMatch.id})`,
       ])
     }
 
@@ -230,7 +234,7 @@ export class DealCommandHandler {
     )
     if (existingByNegotiation) {
       return failure(command.commandType, postMatchId, [
-        `Deal already exists for Negotiation "${command.negotiationId}" (${existingByNegotiation.id})`,
+        `Commercial Agreement already exists for Negotiation "${command.negotiationId}" (${existingByNegotiation.id})`,
       ])
     }
 
@@ -242,7 +246,7 @@ export class DealCommandHandler {
       postMatch,
       negotiationId: command.negotiationId,
       postMatchId,
-      auditAction: 'deal.created_from_post_match',
+      auditAction: 'commercial_agreement.created_from_post_match',
     })
   }
 
@@ -281,7 +285,7 @@ export class DealCommandHandler {
       toCanonical(NEGOTIATION_ENTITY, negotiation.status ?? '') ?? ''
     if (negotiationStatus !== 'agreed') {
       return failure(command.commandType, applicationId, [
-        `Deal can only be created from an agreed Negotiation (current status: "${negotiationStatus || negotiation.status}")`,
+        `Commercial Agreement can only be created from an agreed Negotiation (current status: "${negotiationStatus || negotiation.status}")`,
       ])
     }
 
@@ -294,7 +298,7 @@ export class DealCommandHandler {
     const existingByApplication = this.dealRepository.findByApplicationId(applicationId)
     if (existingByApplication) {
       return failure(command.commandType, applicationId, [
-        `Deal already exists for Application "${applicationId}" (${existingByApplication.id})`,
+        `Commercial Agreement already exists for Application "${applicationId}" (${existingByApplication.id})`,
       ])
     }
 
@@ -303,7 +307,7 @@ export class DealCommandHandler {
     )
     if (existingByNegotiation) {
       return failure(command.commandType, applicationId, [
-        `Deal already exists for Negotiation "${command.negotiationId}" (${existingByNegotiation.id})`,
+        `Commercial Agreement already exists for Negotiation "${command.negotiationId}" (${existingByNegotiation.id})`,
       ])
     }
 
@@ -312,7 +316,7 @@ export class DealCommandHandler {
     )
     if (participants.length === 0) {
       return failure(command.commandType, applicationId, [
-        'Deal requires at least one participant',
+        'Commercial Agreement requires at least one participant',
       ])
     }
 
@@ -327,7 +331,7 @@ export class DealCommandHandler {
       applicationId,
       opportunityId: application.opportunityId,
       opportunityIds: [application.opportunityId],
-      title: `Deal – Application ${applicationId}`,
+      title: `Commercial Agreement – Application ${applicationId}`,
       status: 'draft',
       participants,
       parties: participants,
@@ -335,21 +339,24 @@ export class DealCommandHandler {
       terms: commercialTerms,
     })
 
-    this.applicationRepository.update(applicationId, { dealId: deal.id })
+    this.applicationRepository.update(applicationId, {
+      commercialAgreementId: deal.id,
+      dealId: deal.id,
+    })
 
     emitParticipantNotifications(this.notificationRepository, {
       participants,
       type: 'deal_created_from_application',
-      title: 'Deal created',
-      message: 'A deal was created from your accepted application.',
-      link: `/deals/${deal.id}`,
-      entityType: 'deal',
+      title: 'Commercial Agreement created',
+      message: 'A commercial agreement was created from your accepted application.',
+      link: `/commercial-agreements/${deal.id}`,
+      entityType: 'commercial_agreement',
       entityId: deal.id,
     })
 
     this.appendAudit({
-      action: 'deal.created_from_application',
-      entityType: 'deal',
+      action: 'commercial_agreement.created_from_application',
+      entityType: 'commercial_agreement',
       entityId: deal.id,
       requestId: command.clientRequestId,
       details: {
@@ -388,7 +395,7 @@ export class DealCommandHandler {
       toCanonical(NEGOTIATION_ENTITY, negotiation.status ?? '') ?? ''
     if (negotiationStatus !== 'agreed') {
       return failure(command.commandType, negotiationId, [
-        `Deal can only be created from an agreed Negotiation (current status: "${negotiationStatus || negotiation.status}")`,
+        `Commercial Agreement can only be created from an agreed Negotiation (current status: "${negotiationStatus || negotiation.status}")`,
       ])
     }
 
@@ -397,7 +404,7 @@ export class DealCommandHandler {
     )
     if (existingByNegotiation) {
       return failure(command.commandType, negotiationId, [
-        `Deal already exists for Negotiation "${negotiationId}" (${existingByNegotiation.id})`,
+        `Commercial Agreement already exists for Negotiation "${negotiationId}" (${existingByNegotiation.id})`,
       ])
     }
 
@@ -411,7 +418,7 @@ export class DealCommandHandler {
     const existingByPostMatch = this.dealRepository.findByPostMatchId(postMatchId)
     if (existingByPostMatch) {
       return failure(command.commandType, negotiationId, [
-        `Deal already exists for PostMatch "${postMatchId}" (${existingByPostMatch.id})`,
+        `Commercial Agreement already exists for PostMatch "${postMatchId}" (${existingByPostMatch.id})`,
       ])
     }
 
@@ -426,7 +433,7 @@ export class DealCommandHandler {
       toCanonical(POST_MATCH_ENTITY, postMatch.status ?? '') ?? ''
     if (postMatchStatus !== 'confirmed') {
       return failure(command.commandType, negotiationId, [
-        `Deal can only be created from a confirmed PostMatch (current status: "${postMatchStatus || postMatch.status}")`,
+        `Commercial Agreement can only be created from a confirmed PostMatch (current status: "${postMatchStatus || postMatch.status}")`,
       ])
     }
 
@@ -438,7 +445,7 @@ export class DealCommandHandler {
       postMatch,
       negotiationId,
       postMatchId,
-      auditAction: 'deal.created_from_negotiation',
+      auditAction: 'commercial_agreement.created_from_negotiation',
     })
   }
 
@@ -483,7 +490,7 @@ export class DealCommandHandler {
       }
     } else if (opportunityIds.length < 2) {
       return failure(commandType, failureAggregateId, [
-        'PostMatch does not reference enough opportunities to create a deal',
+        'PostMatch does not reference enough opportunities to create a commercial agreement',
       ])
     }
 
@@ -495,7 +502,7 @@ export class DealCommandHandler {
     )
     if (participants.length === 0) {
       return failure(commandType, failureAggregateId, [
-        'Deal requires at least one participant',
+        'Commercial Agreement requires at least one participant',
       ])
     }
 
@@ -514,7 +521,7 @@ export class DealCommandHandler {
       opportunityId: needOpportunityId ?? opportunityIds[0],
       opportunityIds: [...opportunityIds],
       matchType: postMatch.matchType,
-      title: `Deal – ${postMatchId}`,
+      title: `Commercial Agreement – ${postMatchId}`,
       status: 'draft',
       participants,
       parties: participants,
@@ -523,21 +530,24 @@ export class DealCommandHandler {
       applicationId: negotiation.applicationId ?? null,
     })
 
-    this.postMatchRepository.update(postMatchId, { dealId: deal.id })
+    this.postMatchRepository.update(postMatchId, {
+      commercialAgreementId: deal.id,
+      dealId: deal.id,
+    })
 
     emitParticipantNotifications(this.notificationRepository, {
       participants,
       type: 'deal_created_from_match',
-      title: 'Deal created',
-      message: 'A deal was created from your match.',
-      link: `/deals/${deal.id}`,
-      entityType: 'deal',
+      title: 'Commercial Agreement created',
+      message: 'A commercial agreement was created from your match.',
+      link: `/commercial-agreements/${deal.id}`,
+      entityType: 'commercial_agreement',
       entityId: deal.id,
     })
 
     this.appendAudit({
       action: auditAction,
-      entityType: 'deal',
+      entityType: 'commercial_agreement',
       entityId: deal.id,
       requestId: clientRequestId,
       details: {
@@ -565,11 +575,11 @@ export class DealCommandHandler {
     const deal = this.dealRepository.getById(dealId)
     if (!deal) {
       return failure(command.commandType, dealId, [
-        `Deal "${dealId}" not found`,
+        `Commercial Agreement "${dealId}" not found`,
       ])
     }
 
-    const canonicalTarget = toCanonical(DEAL_ENTITY, command.targetStatus)
+    const canonicalTarget = toCanonical(COMMERCIAL_AGREEMENT_ENTITY, command.targetStatus)
     if (!canonicalTarget) {
       return failure(command.commandType, dealId, [
         `Unknown target status "${command.targetStatus}"`,
@@ -577,7 +587,7 @@ export class DealCommandHandler {
     }
 
     const currentCanonical =
-      toCanonical(DEAL_ENTITY, deal.status ?? '') ?? ''
+      toCanonical(COMMERCIAL_AGREEMENT_ENTITY, deal.status ?? '') ?? ''
     if (currentCanonical === canonicalTarget) {
       return success(command.commandType, dealId)
     }
@@ -593,8 +603,8 @@ export class DealCommandHandler {
     this.dealRepository.update(dealId, { status: canonicalTarget })
 
     this.appendAudit({
-      action: 'deal.status_changed',
-      entityType: 'deal',
+      action: 'commercial_agreement.status_changed',
+      entityType: 'commercial_agreement',
       entityId: dealId,
       requestId: command.clientRequestId,
       details: {

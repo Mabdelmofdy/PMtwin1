@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminRouteGuard, AccessDeniedPage } from '@/components/auth/admin-route-guard'
 import { AppShell } from '@/components/layout/app-shell'
@@ -31,6 +31,7 @@ import {
   OpportunityMapPage,
   OpportunitiesPage,
 } from '@/pages/workspace/opportunities-pages'
+import { MarketplaceHomePage } from '@/pages/workspace/marketplace-home-page'
 import { OpportunityDetailPage } from '@/pages/workspace/opportunity-detail-page'
 import {
   MatchDetailPage,
@@ -44,10 +45,10 @@ import {
   ContractsPage,
 } from '@/pages/workspace/contracts-pages'
 import {
-  DealDetailPage,
-  DealRatePage,
-  DealsPage,
-} from '@/pages/workspace/deals-pages'
+  CommercialAgreementDetailPage,
+  CommercialAgreementRatePage,
+  CommercialAgreementsPage,
+} from '@/pages/workspace/commercial-agreements-pages'
 import {
   MessagesPage,
   NotificationsPage,
@@ -78,6 +79,20 @@ import {
   AdminUsersPage,
   AdminVettingPage,
 } from '@/pages/admin/admin-pages'
+function CommercialAgreementLegacyRedirect() {
+  const { id } = useParams()
+  return <Navigate to={`/commercial-agreements/${id ?? ''}`} replace />
+}
+
+function CommercialAgreementRateLegacyRedirect() {
+  const { id } = useParams()
+  return <Navigate to={`/commercial-agreements/${id ?? ''}/rate`} replace />
+}
+
+function AdminCommercialAgreementLegacyRedirect() {
+  const { id } = useParams()
+  return <Navigate to={`/admin/commercial-agreements/${id ?? ''}`} replace />
+}
 
 export function AppRoutes() {
   return (
@@ -112,6 +127,7 @@ export function AppRoutes() {
       >
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/company-dashboard" element={<DashboardPage />} />
+        <Route path="/marketplace" element={<MarketplaceHomePage />} />
 
         <Route path="/opportunities" element={<OpportunitiesPage />} />
         <Route path="/opportunities/map" element={<OpportunityMapPage />} />
@@ -128,9 +144,12 @@ export function AppRoutes() {
         <Route path="/negotiations" element={<NegotiationsPage />} />
         <Route path="/negotiations/:id" element={<NegotiationDetailPage />} />
 
-        <Route path="/deals" element={<DealsPage />} />
-        <Route path="/deals/:id/rate" element={<DealRatePage />} />
-        <Route path="/deals/:id" element={<DealDetailPage />} />
+        <Route path="/commercial-agreements" element={<CommercialAgreementsPage />} />
+        <Route path="/commercial-agreements/:id/rate" element={<CommercialAgreementRatePage />} />
+        <Route path="/commercial-agreements/:id" element={<CommercialAgreementDetailPage />} />
+        <Route path="/deals" element={<Navigate to="/commercial-agreements" replace />} />
+        <Route path="/deals/:id/rate" element={<CommercialAgreementRateLegacyRedirect />} />
+        <Route path="/deals/:id" element={<CommercialAgreementLegacyRedirect />} />
 
         <Route path="/contracts" element={<ContractsPage />} />
         <Route path="/contracts/:id" element={<ContractDetailPage />} />
@@ -161,8 +180,10 @@ export function AppRoutes() {
           <Route path="/admin/negotiations" element={<AdminNegotiationsPage />} />
           <Route path="/admin/negotiations/:id" element={<AdminNegotiationDetailPage />} />
           <Route path="/admin/disputes" element={<AdminDisputesPage />} />
-          <Route path="/admin/deals" element={<AdminDealsPage />} />
-          <Route path="/admin/deals/:id" element={<DealDetailPage />} />
+          <Route path="/admin/commercial-agreements" element={<AdminDealsPage />} />
+          <Route path="/admin/commercial-agreements/:id" element={<CommercialAgreementDetailPage />} />
+          <Route path="/admin/deals" element={<Navigate to="/admin/commercial-agreements" replace />} />
+          <Route path="/admin/deals/:id" element={<AdminCommercialAgreementLegacyRedirect />} />
           <Route path="/admin/contracts" element={<AdminContractsPage />} />
           <Route path="/admin/contracts/:id" element={<ContractDetailPage />} />
           <Route path="/admin/consortium" element={<AdminConsortiumPage />} />

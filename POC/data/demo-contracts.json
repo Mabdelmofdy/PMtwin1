@@ -113,6 +113,189 @@
       "signedAt": "2026-03-18T12:00:00.000Z",
       "createdAt": "2026-03-18T12:00:00.000Z",
       "updatedAt": "2026-03-18T12:00:00.000Z"
+    },
+    {
+      "id": "seed-contract-demo-cash",
+      "dealId": "seed-deal-demo-cash-subcontract",
+      "commercialAgreementId": "seed-deal-demo-cash-subcontract",
+      "opportunityId": "seed-opp-demo-task-need",
+      "opportunityIds": [
+        "seed-opp-demo-task-need",
+        "seed-opp-demo-task-offer"
+      ],
+      "matchId": "seed-pm-demo-oneway-cash",
+      "applicationId": null,
+      "negotiationId": "seed-neg-demo-oneway-cash",
+      "participants": [
+        {
+          "userId": "seed-co-corp-002",
+          "role": "need_owner",
+          "signedAt": "2026-07-01T10:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-004",
+          "role": "offer_provider",
+          "signedAt": "2026-07-01T10:00:00.000Z"
+        }
+      ],
+      "scope": "Cash task subcontract contract",
+      "paymentMode": "cash",
+      "agreedValue": 210000,
+      "duration": "5 months",
+      "paymentSchedule": "40/30/30",
+      "status": "active",
+      "signedAt": "2026-07-01T10:00:00.000Z",
+      "createdAt": "2026-07-01T10:00:00.000Z",
+      "updatedAt": "2026-07-01T10:00:00.000Z"
+    },
+    {
+      "id": "seed-contract-demo-barter",
+      "dealId": "seed-deal-demo-barter-service",
+      "commercialAgreementId": "seed-deal-demo-barter-service",
+      "opportunityId": "seed-opp-demo-alliance-a",
+      "opportunityIds": [
+        "seed-opp-demo-alliance-a",
+        "seed-opp-demo-alliance-b"
+      ],
+      "matchId": "seed-pm-demo-twoway-barter",
+      "applicationId": null,
+      "negotiationId": "seed-neg-demo-barter-agreed",
+      "participants": [
+        {
+          "userId": "seed-user-005",
+          "role": "service_partner",
+          "signedAt": "2026-07-01T16:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-006",
+          "role": "service_partner",
+          "signedAt": "2026-07-01T16:00:00.000Z"
+        }
+      ],
+      "scope": "Barter exchange services contract",
+      "paymentMode": "barter",
+      "agreedValue": null,
+      "duration": "12 months",
+      "paymentSchedule": "Service ledger",
+      "status": "active",
+      "signedAt": "2026-07-01T16:00:00.000Z",
+      "createdAt": "2026-07-01T16:00:00.000Z",
+      "updatedAt": "2026-07-01T16:00:00.000Z"
+    },
+    {
+      "id": "seed-contract-demo-profit-sharing",
+      "dealId": "seed-deal-demo-jv-profit",
+      "commercialAgreementId": "seed-deal-demo-jv-profit",
+      "opportunityId": "seed-opp-demo-consortium-lead",
+      "opportunityIds": [
+        "seed-opp-demo-consortium-lead",
+        "seed-opp-demo-project-jv",
+        "seed-opp-demo-spv"
+      ],
+      "matchId": "seed-pm-demo-consortium-jv",
+      "applicationId": null,
+      "negotiationId": "seed-neg-demo-consortium-jv",
+      "participants": [
+        {
+          "userId": "seed-co-corp-005",
+          "role": "consortium_lead",
+          "signedAt": "2026-06-30T09:30:00.000Z"
+        },
+        {
+          "userId": "seed-co-corp-006",
+          "role": "consortium_member",
+          "signedAt": "2026-06-30T09:30:00.000Z"
+        },
+        {
+          "userId": "seed-co-corp-003",
+          "role": "consortium_member",
+          "signedAt": "2026-06-30T09:30:00.000Z"
+        }
+      ],
+      "scope": "JV profit-sharing contract",
+      "paymentMode": "profit_sharing",
+      "profitShare": "60-25-15",
+      "duration": "24 months",
+      "status": "active",
+      "signedAt": "2026-06-30T09:30:00.000Z",
+      "createdAt": "2026-06-30T09:30:00.000Z",
+      "updatedAt": "2026-06-30T09:30:00.000Z"
+    },
+    {
+      "id": "seed-contract-demo-equity",
+      "dealId": "seed-deal-demo-hiring",
+      "commercialAgreementId": "seed-deal-demo-hiring",
+      "opportunityId": "seed-opp-demo-prof-hiring",
+      "opportunityIds": [
+        "seed-opp-demo-prof-hiring",
+        "seed-opp-demo-consultant"
+      ],
+      "matchId": "seed-pm-demo-hiring",
+      "applicationId": "seed-app-demo-hiring-01",
+      "negotiationId": "seed-neg-demo-hiring-path",
+      "participants": [
+        {
+          "userId": "seed-co-corp-002",
+          "role": "hiring_manager",
+          "signedAt": "2026-07-01T12:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-012",
+          "role": "consultant_candidate",
+          "signedAt": "2026-07-01T12:00:00.000Z"
+        }
+      ],
+      "scope": "Hiring agreement with equity kicker",
+      "paymentMode": "equity",
+      "equityVesting": {
+        "percentage": 3,
+        "cliffMonths": 12
+      },
+      "duration": "18 months",
+      "status": "active",
+      "signedAt": "2026-07-01T12:00:00.000Z",
+      "createdAt": "2026-07-01T12:00:00.000Z",
+      "updatedAt": "2026-07-01T12:00:00.000Z"
+    },
+    {
+      "id": "seed-contract-demo-hybrid",
+      "dealId": "seed-deal-demo-resource-circular",
+      "commercialAgreementId": "seed-deal-demo-resource-circular",
+      "opportunityId": "seed-opp-demo-bulk",
+      "opportunityIds": [
+        "seed-opp-demo-bulk",
+        "seed-opp-demo-equip",
+        "seed-opp-demo-resource"
+      ],
+      "matchId": "seed-pm-demo-circular-resource",
+      "applicationId": null,
+      "negotiationId": "seed-neg-demo-circular-agreed",
+      "participants": [
+        {
+          "userId": "seed-co-corp-004",
+          "role": "cycle_member",
+          "signedAt": "2026-07-02T11:30:00.000Z"
+        },
+        {
+          "userId": "seed-user-010",
+          "role": "cycle_member",
+          "signedAt": "2026-07-02T11:30:00.000Z"
+        },
+        {
+          "userId": "seed-user-011",
+          "role": "cycle_member",
+          "signedAt": "2026-07-02T11:30:00.000Z"
+        }
+      ],
+      "scope": "Circular resource sharing hybrid contract",
+      "paymentMode": "hybrid",
+      "agreedValue": 470000,
+      "paymentSchedule": "Cash + reciprocal capacity credits",
+      "duration": "14 months",
+      "status": "active",
+      "signedAt": "2026-07-02T11:30:00.000Z",
+      "createdAt": "2026-07-02T11:30:00.000Z",
+      "updatedAt": "2026-07-02T11:30:00.000Z"
     }
   ]
 }

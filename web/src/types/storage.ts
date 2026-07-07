@@ -6,6 +6,7 @@ import type {
   PostMatch,
   Negotiation,
   PlatformUser,
+  ProductLanguageSettings,
 } from './domain.ts'
 
 export interface IStorageAdapter {
@@ -27,6 +28,8 @@ export type Overrides = {
   deletedNotifications?: string[]
   deals?: Record<string, Record<string, unknown>>
   newDeals?: Array<{ id: string } & Record<string, unknown>>
+  commercialAgreements?: Record<string, Record<string, unknown>>
+  newCommercialAgreements?: Array<{ id: string } & Record<string, unknown>>
   negotiations?: Record<string, Record<string, unknown>>
   newNegotiations?: Negotiation[]
   postMatches?: Record<string, Partial<PostMatch>>
@@ -34,6 +37,7 @@ export type Overrides = {
   contracts?: Record<string, Record<string, unknown>>
   newContracts?: Array<{ id: string } & Record<string, unknown>>
   newAuditEntries?: AuditEntry[]
+  productLanguageSettings?: Record<string, ProductLanguageSettings>
 }
 
 export const OVERRIDES_KEY = 'pmtwin_web_overrides'

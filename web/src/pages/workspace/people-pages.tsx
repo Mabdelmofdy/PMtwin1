@@ -32,6 +32,7 @@ import {
 import { PmBrowsePage, PmBrowseToolbar } from '@/components/layout/pm-layout-index'
 import { readProductNavState } from '@/config/product-identity'
 import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
+import { useProductLanguage } from '@/providers/product-language-provider'
 
 export function PeoplePage() {
   const location = useLocation()
@@ -159,6 +160,7 @@ export function NotificationsPage() {
   const { user } = useAuth()
   const userId = user?.id ?? 'seed-user-001'
   const listFilters = useNotificationsListFilters(userId)
+  const { productLanguage } = useProductLanguage()
   const unreadCount = listFilters.notifications.filter((n) => !n.read).length
 
   const handleMarkAllRead = () => {
@@ -171,7 +173,7 @@ export function NotificationsPage() {
         <PmPageHeader
           label="Communication"
           title="Notifications"
-          description="Alerts for matches, deals, negotiations, and messages."
+          description={`Alerts for matches, ${productLanguage.plural('commercialAgreement').toLowerCase()}, ${productLanguage.plural('negotiation').toLowerCase()}, and messages.`}
           metric={<PmPageHeroMetric value={unreadCount} label="Unread" />}
           badges={
             <PmBadge tone={unreadCount > 0 ? 'warning' : 'success'}>
@@ -263,13 +265,14 @@ export function ProfilePage() {
 }
 
 export function SettingsPage() {
+  const { productLanguage } = useProductLanguage()
   return (
     <PmPage
       header={
         <PmPageHeader
           label="Account"
           title="Settings"
-          description="Account security and notification preferences."
+          description={`Account security, notification preferences, and ${productLanguage.label('commercialAgreement').toLowerCase()} terminology settings.`}
         />
       }
     >

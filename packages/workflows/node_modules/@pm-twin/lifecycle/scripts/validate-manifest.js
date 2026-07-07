@@ -44,7 +44,7 @@ const ADR_001_CANONICAL = {
     'superseded',
   ],
   negotiation: ['active', 'countered', 'agreed', 'expired', 'cancelled'],
-  deal: ['draft', 'review', 'signing', 'executing', 'completed', 'cancelled'],
+  commercial_agreement: ['draft', 'review', 'signing', 'executing', 'completed', 'cancelled'],
   contract: [
     'draft',
     'pending_signature',
@@ -73,7 +73,7 @@ const ADR_001_ALIASES = {
     counter_offered: 'countered',
     failed: 'cancelled',
   },
-  deal: {
+  commercial_agreement: {
     negotiating: 'draft',
     active: 'executing',
     execution: 'executing',

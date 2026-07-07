@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@pm-twin/collaboration-models": "file:../collaboration-models",
+    "@pm-twin/decision-engine": "file:../decision-engine",
     "@pm-twin/lifecycle": "file:../lifecycle"
   },
   "devDependencies": {

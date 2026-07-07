@@ -208,12 +208,15 @@ export function buildEntityHealthStats(
 
 export function detectRelationshipAnomalies(
   deals: Array<{ id: string; negotiationId?: string; contractId?: string | null; applicationId?: string | null }>,
-  contracts: Array<{ id: string; dealId?: string }>,
-  applications: Array<{ id: string; dealId?: string; negotiationId?: string }>,
+  contracts: Array<{ id: string; dealId?: string; commercialAgreementId?: string }>,
+  applications: Array<{ id: string; dealId?: string; commercialAgreementId?: string; negotiationId?: string }>,
 ): RelationshipAnomaly[] {
   const anomalies: RelationshipAnomaly[] = []
   const contractByDeal = new Map(
-    contracts.filter((c) => c.dealId).map((c) => [c.dealId!, c.id]),
+    contracts
+      .map((c) => ({ id: c.id, commercialAgreementId: c.commercialAgreementId ?? c.dealId }))
+      .filter((c) => c.commercialAgreementId)
+      .map((c) => [c.commercialAgreementId!, c.id]),
   )
 
   for (const deal of deals) {
@@ -238,7 +241,8 @@ export function detectRelationshipAnomalies(
   }
 
   for (const app of applications) {
-    if (app.dealId && !deals.some((d) => d.id === app.dealId)) {
+    const commercialAgreementId = app.commercialAgreementId ?? app.dealId
+    if (commercialAgreementId && !deals.some((d) => d.id === commercialAgreementId)) {
       anomalies.push({
         entityKind: 'application',
         entityId: app.id,

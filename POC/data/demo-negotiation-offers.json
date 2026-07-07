@@ -1,0 +1,66 @@
+{
+  "domain": "negotiation_offers",
+  "version": "1.0",
+  "data": [
+    {
+      "id": "seed-offer-demo-001",
+      "negotiationId": "seed-neg-demo-oneway-cash",
+      "submittedBy": "seed-user-004",
+      "version": 1,
+      "terms": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "amount": 220000,
+        "paymentSchedule": "50/50"
+      },
+      "changeSummary": "Initial offer submitted",
+      "status": "superseded",
+      "createdAt": "2026-06-28T10:10:00.000Z"
+    },
+    {
+      "id": "seed-offer-demo-002",
+      "negotiationId": "seed-neg-demo-oneway-cash",
+      "submittedBy": "seed-co-corp-002",
+      "version": 2,
+      "terms": {
+        "exchangeMode": "cash",
+        "currency": "SAR",
+        "amount": 210000,
+        "paymentSchedule": "40/30/30"
+      },
+      "changeSummary": "Counter offer submitted",
+      "status": "accepted",
+      "createdAt": "2026-06-29T08:00:00.000Z"
+    },
+    {
+      "id": "seed-offer-demo-003",
+      "negotiationId": "seed-neg-demo-twoway-barter",
+      "submittedBy": "seed-user-005",
+      "version": 1,
+      "terms": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "amount": 115000,
+        "paymentSchedule": "Service ledger"
+      },
+      "changeSummary": "Offer submitted",
+      "status": "superseded",
+      "createdAt": "2026-06-28T11:10:00.000Z"
+    },
+    {
+      "id": "seed-offer-demo-004",
+      "negotiationId": "seed-neg-demo-twoway-barter",
+      "submittedBy": "seed-user-006",
+      "version": 2,
+      "terms": {
+        "exchangeMode": "barter",
+        "currency": "SAR",
+        "amount": 120000,
+        "paymentSchedule": "Balanced service credits"
+      },
+      "changeSummary": "Counter offer submitted",
+      "status": "submitted",
+      "createdAt": "2026-06-29T09:00:00.000Z"
+    }
+  ]
+}

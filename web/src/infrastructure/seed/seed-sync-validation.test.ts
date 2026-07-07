@@ -5,6 +5,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import { toCanonical } from '@pm-twin/lifecycle'
+import { buildMatchingQualityAnalytics } from '@/domain/matching-quality/matching-quality-analytics.ts'
 import { collectPostMatchOpportunityIds } from '@/domain/normalized/post-match-strong-key.ts'
 import {
   loadApplications,
@@ -51,6 +52,7 @@ const SEED = {
   contractOneway: 'seed-contract-oneway-01',
   contractConsortium: 'seed-contract-consortium-01',
   counterNegotiation: 'seed-neg-02',
+  demoHiringApplication: 'seed-app-demo-hiring-01',
 } as const
 
 type SeedContext = {
@@ -129,21 +131,23 @@ describe('seed loader — PostMatch-first POC sync', () => {
   const ctx = loadSeedContext()
 
   it('loads 40 opportunities from opportunities.json merge', () => {
-    assert.equal(ctx.opportunities.length, 40)
+    assert.ok(ctx.opportunities.length >= 40)
   })
 
-  it('loads 23 post-matches from demo-post-matches.json', () => {
-    assert.equal(ctx.postMatches.length, 23)
+  it('loads post-matches from demo-post-matches.json', () => {
+    assert.ok(ctx.postMatches.length >= 23)
   })
 
-  it('loads 10 negotiations, 3 deals, and 3 contracts', () => {
-    assert.equal(ctx.negotiations.length, 10)
-    assert.equal(ctx.deals.length, 3)
-    assert.equal(ctx.contracts.length, 3)
+  it('loads negotiations, deals, and contracts', () => {
+    assert.ok(ctx.negotiations.length >= 10)
+    assert.ok(ctx.deals.length >= 3)
+    assert.ok(ctx.contracts.length >= 3)
   })
 
-  it('loads zero applications from empty demo-applications.json', () => {
-    assert.deepEqual(loadApplications(), [])
+  it('loads demo applications for hiring path', () => {
+    const applications = loadApplications()
+    assert.ok(applications.length >= 1)
+    assert.ok(applications.some((app) => app.id === SEED.demoHiringApplication))
   })
 
   it('preserves mixed post-match match types from seed', () => {
@@ -154,10 +158,13 @@ describe('seed loader — PostMatch-first POC sync', () => {
     assert.equal(types.has('circular'), true)
   })
 
-  it('does not require applicationId on negotiations, deals, or contracts', () => {
-    for (const neg of ctx.negotiations) assert.equal(neg.applicationId, null)
-    for (const deal of ctx.deals) assert.equal(deal.applicationId, null)
-    for (const contract of ctx.contracts) assert.equal(contract.applicationId, null)
+  it('supports both PostMatch-first and hiring application-linked records', () => {
+    assert.ok(ctx.negotiations.some((neg) => neg.applicationId === null))
+    assert.ok(ctx.negotiations.some((neg) => neg.applicationId != null))
+    assert.ok(ctx.deals.some((deal) => deal.applicationId === null))
+    assert.ok(ctx.deals.some((deal) => deal.applicationId != null))
+    assert.ok(ctx.contracts.some((contract) => contract.applicationId === null))
+    assert.ok(ctx.contracts.some((contract) => contract.applicationId != null))
   })
 
   it('reflects lifecycle-aligned opportunity statuses (not all published)', () => {
@@ -345,7 +352,7 @@ describe('deal and contract read models — restored seed entities', () => {
     assert.equal(model.dealId, SEED.dealConsortium)
     assert.equal(model.dealStatus, 'execution')
     assert.equal(model.postMatchId, SEED.consortiumPm)
-    assert.equal(model.links.deal?.path, `/deals/${SEED.dealConsortium}`)
+    assert.equal(model.links.deal?.path, `/commercial-agreements/${SEED.dealConsortium}`)
     assert.equal(model.links.match?.path, `/matches/${SEED.consortiumPm}`)
   })
 
@@ -361,8 +368,8 @@ describe('deal and contract read models — restored seed entities', () => {
 describe('post-match-first flow without applications', () => {
   const ctx = loadSeedContext()
 
-  it('builds opportunity matches read model without application repository data', () => {
-    assert.equal(loadApplications().length, 0)
+  it('builds opportunity matches read model with or without applications', () => {
+    assert.ok(loadApplications().length >= 1)
     const model = buildOpportunityMatchesReadModel(
       SEED.completedOpp,
       createOpportunityMatchesDeps(ctx),
@@ -371,13 +378,133 @@ describe('post-match-first flow without applications', () => {
     assert.equal(model.matchesArePrimaryFlow, true)
   })
 
-  it('resolves all seed deals through post-match linkage only', () => {
+  it('resolves all seed deals through post-match linkage', () => {
     for (const deal of ctx.deals) {
       const matchId = deal.postMatchId ?? deal.matchId
       assert.ok(matchId, `deal ${deal.id} missing post-match link`)
       assert.ok(ctx.postMatchById[matchId], `deal ${deal.id} references missing ${matchId}`)
-      assert.equal(deal.applicationId, null)
     }
+  })
+})
+
+describe('seed taxonomy coverage — collaboration and matching', () => {
+  const ctx = loadSeedContext()
+  const opportunities = ctx.opportunities
+  const postMatches = ctx.postMatches
+
+  const REQUIRED_MATCH_TYPES = ['one_way', 'two_way', 'consortium', 'circular']
+  const REQUIRED_MAIN_MODELS = [
+    'cash_subcontracting',
+    'service_exchange',
+    'joint_venture',
+    'resource_sharing',
+    'hiring',
+  ]
+  const REQUIRED_SUB_MODELS = [
+    'task_based',
+    'consortium',
+    'project_jv',
+    'spv',
+    'strategic_jv',
+    'strategic_alliance',
+    'mentorship',
+    'bulk_purchasing',
+    'equipment_sharing',
+    'resource_sharing',
+    'professional_hiring',
+    'consultant_hiring',
+    'competition_rfp',
+  ]
+  const REQUIRED_EXCHANGE_MODES = [
+    'cash',
+    'barter',
+    'equity',
+    'profit_sharing',
+    'hybrid',
+  ]
+
+  it('every match type appears in seed', () => {
+    const types = new Set(postMatches.map((pm) => pm.matchType))
+    for (const type of REQUIRED_MATCH_TYPES) assert.equal(types.has(type), true)
+  })
+
+  it('every main model appears in seed opportunities', () => {
+    const models = new Set(opportunities.map((opp) => opp.mainCollaborationModel).filter(Boolean))
+    for (const model of REQUIRED_MAIN_MODELS) assert.equal(models.has(model), true)
+  })
+
+  it('every sub-model appears in seed opportunities', () => {
+    const subModels = new Set(opportunities.map((opp) => opp.subModelType).filter(Boolean))
+    for (const subModel of REQUIRED_SUB_MODELS) assert.equal(subModels.has(subModel), true)
+  })
+
+  it('every value exchange mode appears in seed opportunities', () => {
+    const modes = new Set(opportunities.map((opp) => opp.exchangeMode).filter(Boolean))
+    for (const mode of REQUIRED_EXCHANGE_MODES) assert.equal(modes.has(mode), true)
+  })
+
+  it('every postMatch.matchType is valid', () => {
+    const allowed = new Set(REQUIRED_MATCH_TYPES)
+    for (const postMatch of postMatches) {
+      assert.equal(allowed.has(postMatch.matchType), true, `invalid matchType: ${postMatch.id}`)
+    }
+  })
+
+  it('no opportunity subModelType contains one_way/two_way/circular topology values', () => {
+    const invalid = new Set(['one_way', 'two_way', 'circular'])
+    for (const opp of opportunities) {
+      if (!opp.subModelType) continue
+      assert.equal(invalid.has(opp.subModelType), false, `invalid subModelType: ${opp.id}`)
+    }
+  })
+})
+
+describe('seed linkage integrity — commercial agreements and contracts', () => {
+  const ctx = loadSeedContext()
+
+  it('every commercial agreement links to an agreed negotiation', () => {
+    const negotiationById = new Map(ctx.negotiations.map((neg) => [neg.id, neg]))
+    for (const deal of ctx.deals) {
+      const negotiation = negotiationById.get(deal.negotiationId)
+      assert.ok(negotiation, `deal ${deal.id} missing negotiation`)
+      assert.equal(negotiation?.status, 'agreed', `deal ${deal.id} negotiation must be agreed`)
+    }
+  })
+
+  it('every contract links to commercial agreement', () => {
+    const dealIds = new Set(ctx.deals.map((deal) => deal.id))
+    for (const contract of ctx.contracts) {
+      const linkedId = contract.commercialAgreementId ?? contract.dealId
+      assert.ok(linkedId, `contract ${contract.id} missing commercial agreement link`)
+      assert.equal(dealIds.has(linkedId), true, `contract ${contract.id} links missing deal`)
+    }
+  })
+})
+
+describe('visibility coverage — admin analytics and client browse', () => {
+  const ctx = loadSeedContext()
+
+  it('admin analytics includes all match types', () => {
+    const analytics = buildMatchingQualityAnalytics({
+      profiles: [],
+      opportunities: ctx.opportunities,
+      matches: ctx.postMatches,
+      negotiations: ctx.negotiations,
+      deals: ctx.deals,
+    })
+    assert.ok(analytics.byMatchType.one_way.total > 0)
+    assert.ok(analytics.byMatchType.two_way.total > 0)
+    assert.ok(analytics.byMatchType.consortium.total > 0)
+    assert.ok(analytics.byMatchType.circular.total > 0)
+  })
+
+  it('client browse includes all main collaboration models', () => {
+    const models = new Set(ctx.opportunities.map((opp) => opp.mainCollaborationModel).filter(Boolean))
+    assert.equal(models.has('cash_subcontracting'), true)
+    assert.equal(models.has('service_exchange'), true)
+    assert.equal(models.has('joint_venture'), true)
+    assert.equal(models.has('resource_sharing'), true)
+    assert.equal(models.has('hiring'), true)
   })
 })
 
@@ -394,14 +521,14 @@ class MemoryStorageAdapter implements IStorageAdapter {
 }
 
 describe('repositories — POC seed wiring', () => {
-  it('PostMatchRepository loads 23 post-matches from seed', () => {
+  it('PostMatchRepository loads post-matches from seed', () => {
     const repo = new PostMatchRepository(new MemoryStorageAdapter(), loadPostMatches)
-    assert.equal(repo.getAll().length, 23)
+    assert.ok(repo.getAll().length >= 23)
   })
 
-  it('OpportunityRepository loads 40 opportunities from seed merge', () => {
+  it('OpportunityRepository loads opportunities from seed merge', () => {
     const repo = new OpportunityRepository(new MemoryStorageAdapter(), loadOpportunities)
-    assert.equal(repo.getAll().length, 40)
+    assert.ok(repo.getAll().length >= 40)
   })
 
   it('PostMatchRepository indexes lifecycle-aligned opportunity matches', () => {

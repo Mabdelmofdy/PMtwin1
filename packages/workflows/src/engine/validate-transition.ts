@@ -8,7 +8,7 @@ import { getWorkflowDefinition } from '../registry/index.ts'
 import { canonicalEntityStatus } from '../lifecycle-helpers.ts'
 import {
   findAgreedApplicationNegotiation,
-  hasActiveContractForDeal,
+  hasActiveContractForCommercialAgreement,
   hasBlockingApplicationNegotiation,
   hasBlockingPostMatchNegotiation,
   resolveWorkflowKeys,
@@ -24,7 +24,7 @@ import type { ExchangeMode } from '@pm-twin/collaboration-models'
 const NEGOTIATION_ENTITY = 'negotiation'
 const APPLICATION_ENTITY = 'application'
 const MATCH_ENTITY = 'match'
-const DEAL_ENTITY = 'deal'
+const COMMERCIAL_AGREEMENT_ENTITY = 'commercial_agreement'
 
 function validateActionBusinessRules(
   context: WorkflowContext,
@@ -67,37 +67,66 @@ function validateActionBusinessRules(
       }
       break
     }
-    case 'create_deal_from_negotiation':
-    case 'create_deal_from_post_match': {
+    case 'create_commercial_agreement_from_negotiation':
+    case 'create_commercial_agreement_from_post_match': {
       const status = canonicalEntityStatus(NEGOTIATION_ENTITY, context.negotiation?.status)
       if (status !== 'agreed') {
-        errors.push('Negotiation must be agreed before creating a deal')
+        errors.push('Negotiation must be agreed before creating a commercial agreement')
       }
-      if (context.linkage?.dealForNegotiation?.id) {
-        errors.push('A deal already exists for this negotiation')
+      if (!context.linkage?.negotiationAcceptedOfferId) {
+        const hasLegacyAgreedTerms = Boolean(
+          status === 'agreed'
+          && context.negotiation?.commercialTerms
+          && Object.keys(context.negotiation.commercialTerms).length > 0,
+        )
+        if (!hasLegacyAgreedTerms) {
+          errors.push('An accepted negotiation offer is required before creating a commercial agreement')
+        }
+      }
+      if (context.linkage?.commercialAgreementForNegotiation?.id || context.linkage?.dealForNegotiation?.id) {
+        errors.push('A commercial agreement already exists for this negotiation')
       }
       break
     }
-    case 'create_deal_from_application': {
+    case 'create_commercial_agreement_from_application': {
       const agreed = findAgreedApplicationNegotiation(context)
       if (!agreed?.id) {
-        errors.push('An agreed application-linked negotiation is required before creating a deal')
+        errors.push('An agreed application-linked negotiation is required before creating a commercial agreement')
       }
-      if (context.linkage?.dealForApplication?.id || context.application?.dealId) {
-        errors.push('A deal already exists for this application')
+      if (
+        context.linkage?.commercialAgreementForApplication?.id
+        || context.linkage?.dealForApplication?.id
+        || context.application?.commercialAgreementId
+        || context.application?.dealId
+      ) {
+        errors.push('A commercial agreement already exists for this application')
       }
       break
     }
-    case 'create_contract_from_deal': {
-      if (!context.deal?.id) {
-        errors.push('Deal must exist before creating a contract')
+    case 'create_contract_from_commercial_agreement': {
+      const commercialAgreement = context.commercialAgreement ?? context.deal
+      if (!commercialAgreement?.id) {
+        errors.push('Commercial agreement must exist before creating a contract')
       }
-      const status = canonicalEntityStatus(DEAL_ENTITY, context.deal?.status)
+      const status = canonicalEntityStatus(COMMERCIAL_AGREEMENT_ENTITY, commercialAgreement?.status)
       if (!['draft', 'review', 'signing'].includes(status)) {
-        errors.push('Deal must be in draft, review, or signing to create a contract')
+        errors.push('Commercial agreement must be in draft, review, or signing to create a contract')
       }
-      if (hasActiveContractForDeal(context)) {
-        errors.push('An active contract already exists for this deal')
+      if (hasActiveContractForCommercialAgreement(context)) {
+        errors.push('An active contract already exists for this commercial agreement')
+      }
+      if (context.linkage?.contractDecisionRequired !== false && context.linkage?.contractDecisionStatus !== 'approved') {
+        errors.push('Decision review must be approved before creating a contract')
+      }
+      break
+    }
+    case 'route_contract_decision': {
+      const commercialAgreement = context.commercialAgreement ?? context.deal
+      if (!commercialAgreement?.id) {
+        errors.push('Commercial agreement must exist before routing decision review')
+      }
+      if (hasActiveContractForCommercialAgreement(context)) {
+        errors.push('Contract already exists for this commercial agreement')
       }
       break
     }
@@ -129,7 +158,7 @@ export function validateWorkflowTransition(
   if (!workflow.allowedCommands.includes(definition.commandType)) {
     const hiringAllowed =
       primary === 'hiring'
-      && ['StartNegotiationFromApplication', 'CreateDealFromApplication', 'AgreeNegotiation', 'CreateContractFromDeal', 'SignContract', 'CompleteContract'].includes(definition.commandType)
+      && ['StartNegotiationFromApplication', 'CreateCommercialAgreementFromApplication', 'AgreeNegotiation', 'RouteContractDecision', 'CreateContractFromCommercialAgreement', 'SignContract', 'CompleteContract'].includes(definition.commandType)
     const marketplaceAllowed =
       primary === 'marketplace'
       && workflow.allowedCommands.includes(definition.commandType)

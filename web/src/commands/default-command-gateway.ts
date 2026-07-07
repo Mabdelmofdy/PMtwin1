@@ -11,8 +11,9 @@ import {
 import type { CommandGateway } from '@/commands/CommandGateway.ts'
 import type { ApplicationCommandHandler } from '@/commands/handlers/application-command-handler.ts'
 import type { ContractCommandHandler } from '@/commands/handlers/contract-command-handler.ts'
-import type { DealCommandHandler } from '@/commands/handlers/deal-command-handler.ts'
+import type { CommercialAgreementCommandHandler } from '@/commands/handlers/commercial-agreement-command-handler.ts'
 import type { NegotiationCommandHandler } from '@/commands/handlers/negotiation-command-handler.ts'
+import type { NegotiationRoomCommandHandler } from '@/commands/handlers/negotiation-room-command-handler.ts'
 import type { OpportunityCommandHandler } from '@/commands/handlers/opportunity-command-handler.ts'
 import type { PostMatchCommandHandler } from '@/commands/handlers/post-match-command-handler.ts'
 import {
@@ -45,6 +46,17 @@ const POST_MATCH_COMMAND_TYPES = new Set([
   'TransitionPostMatchStatus',
 ])
 
+const NEGOTIATION_ROOM_COMMAND_TYPES = new Set([
+  'SendNegotiationMessage',
+  'EditNegotiationMessage',
+  'AddNegotiationAttachment',
+  'SubmitNegotiationOffer',
+  'SubmitNegotiationCounterOffer',
+  'AcceptNegotiationOffer',
+  'RejectNegotiationOffer',
+  'LockNegotiationTranscript',
+])
+
 const NEGOTIATION_COMMAND_TYPES = new Set([
   'StartNegotiationFromPostMatch',
   'StartNegotiationFromApplication',
@@ -54,6 +66,10 @@ const NEGOTIATION_COMMAND_TYPES = new Set([
 ])
 
 const DEAL_COMMAND_TYPES = new Set([
+  'CreateCommercialAgreementFromPostMatch',
+  'CreateCommercialAgreementFromApplication',
+  'CreateCommercialAgreementFromNegotiation',
+  'TransitionCommercialAgreementStatus',
   'CreateDealFromPostMatch',
   'CreateDealFromApplication',
   'CreateDealFromNegotiation',
@@ -61,6 +77,7 @@ const DEAL_COMMAND_TYPES = new Set([
 ])
 
 const CONTRACT_COMMAND_TYPES = new Set([
+  'CreateContractFromCommercialAgreement',
   'CreateContractFromDeal',
   'SignContract',
   'ActivateContract',
@@ -73,7 +90,8 @@ export type DefaultCommandGatewayDeps = {
   readonly opportunityHandler: OpportunityCommandHandler
   readonly postMatchHandler: PostMatchCommandHandler
   readonly negotiationHandler: NegotiationCommandHandler
-  readonly dealHandler: DealCommandHandler
+  readonly negotiationRoomHandler: NegotiationRoomCommandHandler
+  readonly dealHandler: CommercialAgreementCommandHandler
   readonly contractHandler: ContractCommandHandler
   readonly idempotencyStore?: InMemoryIdempotencyStore
   readonly resolveCommandPermissionActor?: () => CommandPermissionActor | null
@@ -88,7 +106,8 @@ export class DefaultCommandGateway implements CommandGateway {
   private readonly opportunityHandler: OpportunityCommandHandler
   private readonly postMatchHandler: PostMatchCommandHandler
   private readonly negotiationHandler: NegotiationCommandHandler
-  private readonly dealHandler: DealCommandHandler
+  private readonly negotiationRoomHandler: NegotiationRoomCommandHandler
+  private readonly dealHandler: CommercialAgreementCommandHandler
   private readonly contractHandler: ContractCommandHandler
   private readonly idempotencyStore: InMemoryIdempotencyStore
   private readonly resolveCommandPermissionActor: () => CommandPermissionActor | null
@@ -102,6 +121,7 @@ export class DefaultCommandGateway implements CommandGateway {
     this.opportunityHandler = deps.opportunityHandler
     this.postMatchHandler = deps.postMatchHandler
     this.negotiationHandler = deps.negotiationHandler
+    this.negotiationRoomHandler = deps.negotiationRoomHandler
     this.dealHandler = deps.dealHandler
     this.contractHandler = deps.contractHandler
     this.idempotencyStore =
@@ -171,7 +191,8 @@ export class DefaultCommandGateway implements CommandGateway {
     | OpportunityCommandHandler
     | PostMatchCommandHandler
     | NegotiationCommandHandler
-    | DealCommandHandler
+    | NegotiationRoomCommandHandler
+    | CommercialAgreementCommandHandler
     | ContractCommandHandler
     | null {
     if (APPLICATION_COMMAND_TYPES.has(commandType)) {
@@ -182,6 +203,9 @@ export class DefaultCommandGateway implements CommandGateway {
     }
     if (POST_MATCH_COMMAND_TYPES.has(commandType)) {
       return this.postMatchHandler
+    }
+    if (NEGOTIATION_ROOM_COMMAND_TYPES.has(commandType)) {
+      return this.negotiationRoomHandler
     }
     if (NEGOTIATION_COMMAND_TYPES.has(commandType)) {
       return this.negotiationHandler

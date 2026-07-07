@@ -1,0 +1,60 @@
+{
+  "domain": "negotiation_transcript_events",
+  "version": "1.0",
+  "data": [
+    {
+      "id": "seed-event-demo-001",
+      "negotiationId": "seed-neg-demo-oneway-cash",
+      "eventType": "offer.submitted",
+      "actorId": "seed-user-004",
+      "actorRole": "offer_provider",
+      "timestamp": "2026-06-28T10:10:00.000Z",
+      "summary": "Offer submitted"
+    },
+    {
+      "id": "seed-event-demo-002",
+      "negotiationId": "seed-neg-demo-oneway-cash",
+      "eventType": "offer.countered",
+      "actorId": "seed-co-corp-002",
+      "actorRole": "need_owner",
+      "timestamp": "2026-06-29T08:00:00.000Z",
+      "summary": "Counter offer submitted"
+    },
+    {
+      "id": "seed-event-demo-003",
+      "negotiationId": "seed-neg-demo-oneway-cash",
+      "eventType": "terms.changed",
+      "actorId": "seed-co-corp-002",
+      "actorRole": "need_owner",
+      "timestamp": "2026-06-29T08:01:00.000Z",
+      "summary": "Commercial terms changed"
+    },
+    {
+      "id": "seed-event-demo-004",
+      "negotiationId": "seed-neg-demo-oneway-cash",
+      "eventType": "negotiation.agreed",
+      "actorId": "seed-user-004",
+      "actorRole": "offer_provider",
+      "timestamp": "2026-07-01T10:05:00.000Z",
+      "summary": "Offer accepted"
+    },
+    {
+      "id": "seed-event-demo-005",
+      "negotiationId": "seed-neg-demo-oneway-cash",
+      "eventType": "transcript.locked",
+      "actorId": "seed-co-corp-002",
+      "actorRole": "need_owner",
+      "timestamp": "2026-07-01T10:30:00.000Z",
+      "summary": "Transcript locked after agreement"
+    },
+    {
+      "id": "seed-event-demo-006",
+      "negotiationId": "seed-neg-demo-circular-resource",
+      "eventType": "message.sent",
+      "actorId": "seed-user-010",
+      "actorRole": "cycle_member",
+      "timestamp": "2026-07-02T08:30:00.000Z",
+      "summary": "Resource availability shared"
+    }
+  ]
+}

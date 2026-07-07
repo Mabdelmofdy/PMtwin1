@@ -12,7 +12,7 @@ import { canShowStartHiringNegotiation } from '@/lib/application-hiring-ui-actio
 import { canShowPublishOpportunity } from '@/lib/publish-opportunity-ui-actions.ts'
 import { buildMatchCardActions } from '@/lib/opportunity-matches-read-model.ts'
 import { canShowStartNegotiationFromPostMatch } from '@/lib/start-negotiation-ui-actions.ts'
-import { canCreateContractFromDeal } from '@/lib/deal-detail-read-model.ts'
+import { canCreateContractFromCommercialAgreement } from '@/lib/commercial-agreement-detail-read-model.ts'
 
 const confirmedMatch: PostMatch = {
   id: 'pm-1',
@@ -89,7 +89,7 @@ describe('workflow UI bridge', () => {
 
   it('uses orchestrator for create contract visibility on deals', () => {
     assert.equal(
-      canCreateContractFromDeal(
+      canCreateContractFromCommercialAgreement(
         {
           id: 'deal-1',
           status: 'draft',
@@ -105,7 +105,7 @@ describe('workflow UI bridge', () => {
 
   it('blocks create contract when active contract exists', () => {
     assert.equal(
-      canCreateContractFromDeal(
+      canCreateContractFromCommercialAgreement(
         {
           id: 'deal-1',
           status: 'draft',
@@ -148,13 +148,21 @@ describe('workflow UI bridge', () => {
         postMatchId: 'pm-1',
         opportunityId: 'opp-1',
         participants: [],
+        commercialTerms: {
+          exchangeMode: 'cash',
+          budget: 10000,
+          paymentSchedule: 'Milestone',
+        },
       },
       postMatch: confirmedMatch,
       user: { userId: 'user-a', canMutate: true, isParticipant: true },
-      linkage: { dealForNegotiation: null },
+      linkage: {
+        commercialAgreementForNegotiation: null,
+        negotiationAcceptedOfferId: 'legacy-agreed-terms',
+      },
     })
     assert.equal(
-      isWorkflowActionAvailable(dealContext, 'create_deal_from_negotiation'),
+      isWorkflowActionAvailable(dealContext, 'create_commercial_agreement_from_negotiation'),
       true,
     )
   })
@@ -190,7 +198,7 @@ describe('workflow UI bridge', () => {
       },
     })
     assert.equal(
-      isWorkflowActionAvailable(dealContext, 'create_deal_from_application'),
+      isWorkflowActionAvailable(dealContext, 'create_commercial_agreement_from_application'),
       true,
     )
   })
@@ -206,9 +214,9 @@ describe('workflow UI bridge', () => {
           participants: [],
         },
         user: { userId: 'user-a', canMutate: true },
-        linkage: { dealForNegotiation: null },
+        linkage: { commercialAgreementForNegotiation: null },
       }),
-      'create_deal_from_negotiation',
+      'create_commercial_agreement_from_negotiation',
     )
     assert.equal(result.valid, false)
     assert.match(result.errors.join(' '), /agreed/i)

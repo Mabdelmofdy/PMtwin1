@@ -2,6 +2,7 @@ import {
   applicationRepository,
   auditRepository,
   contractRepository,
+  commercialAgreementRepository,
   dealRepository,
   negotiationRepository,
   notificationRepository,
@@ -10,13 +11,20 @@ import {
 } from '@/repositories/index.ts'
 import { ApplicationCommandHandler } from '@/commands/handlers/application-command-handler.ts'
 import { ContractCommandHandler } from '@/commands/handlers/contract-command-handler.ts'
-import { DealCommandHandler } from '@/commands/handlers/deal-command-handler.ts'
+import { CommercialAgreementCommandHandler } from '@/commands/handlers/commercial-agreement-command-handler.ts'
 import { NegotiationCommandHandler } from '@/commands/handlers/negotiation-command-handler.ts'
+import { NegotiationRoomCommandHandler } from '@/commands/handlers/negotiation-room-command-handler.ts'
 import { OpportunityCommandHandler } from '@/commands/handlers/opportunity-command-handler.ts'
 import { PostMatchCommandHandler } from '@/commands/handlers/post-match-command-handler.ts'
 import { DefaultCommandGateway } from '@/commands/default-command-gateway.ts'
 import { getCommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
 import { resolvePublishReadinessContextForOpportunity } from '@/lib/resolve-publish-readiness-context.ts'
+import {
+  negotiationMessageRepository,
+  negotiationOfferRepository,
+  negotiationTranscriptRepository,
+  userRepository,
+} from '@/repositories/index.ts'
 
 let gatewayInstance: DefaultCommandGateway | null = null
 
@@ -44,8 +52,16 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
     auditRepository,
     notificationRepository,
   })
-  const dealHandler = new DealCommandHandler({
-    dealRepository,
+  const negotiationRoomHandler = new NegotiationRoomCommandHandler({
+    negotiationRepository,
+    messageRepository: negotiationMessageRepository,
+    offerRepository: negotiationOfferRepository,
+    transcriptRepository: negotiationTranscriptRepository,
+    auditRepository,
+    userRepository,
+  })
+  const dealHandler = new CommercialAgreementCommandHandler({
+    dealRepository: commercialAgreementRepository,
     negotiationRepository,
     postMatchRepository,
     applicationRepository,
@@ -66,6 +82,7 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
     opportunityHandler,
     postMatchHandler,
     negotiationHandler,
+    negotiationRoomHandler,
     dealHandler,
     contractHandler,
     resolveCommandPermissionActor: getCommandPermissionActor,

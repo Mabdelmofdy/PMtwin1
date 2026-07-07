@@ -37,6 +37,10 @@ describe('isTerminal', () => {
 
 describe('allowedTransitions', () => {
   it('returns canonical next states', () => {
+    assert.deepEqual(allowedTransitions('commercial_agreement', 'draft'), ['review', 'cancelled'])
+  })
+
+  it('supports legacy entity alias', () => {
     assert.deepEqual(allowedTransitions('deal', 'draft'), ['review', 'cancelled'])
   })
 
@@ -51,7 +55,7 @@ describe('allowedTransitions', () => {
 
 describe('forbiddenTransitions', () => {
   it('excludes current and allowed states', () => {
-    const forbidden = forbiddenTransitions('deal', 'draft')
+    const forbidden = forbiddenTransitions('commercial_agreement', 'draft')
     assert.ok(!forbidden.includes('draft'))
     assert.ok(!forbidden.includes('review'))
     assert.ok(!forbidden.includes('cancelled'))

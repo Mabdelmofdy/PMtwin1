@@ -36,7 +36,7 @@ export function AgreeNegotiationButton({
     }
 
     toast.success('Terms agreed', {
-      description: 'You can create a deal workspace when ready.',
+      description: 'You can create a commercial agreement workspace when ready.',
     })
   }
 

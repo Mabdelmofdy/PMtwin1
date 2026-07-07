@@ -9,7 +9,10 @@
       "action": "opportunity_created",
       "entityType": "opportunity",
       "entityId": "seed-opp-001",
-      "details": { "title": "Sustainable tower design — architect need", "summary": "Opportunity published" },
+      "details": {
+        "title": "Sustainable tower design — architect need",
+        "summary": "Opportunity published"
+      },
       "ipAddress": "127.0.0.1",
       "timestamp": "2026-02-10T08:00:00.000Z"
     },
@@ -19,7 +22,10 @@
       "action": "match_discovered",
       "entityType": "post_match",
       "entityId": "demo-pm-oneway-01",
-      "details": { "opportunityId": "seed-opp-001", "summary": "Post-match discovered for architect need" },
+      "details": {
+        "opportunityId": "seed-opp-001",
+        "summary": "Post-match discovered for architect need"
+      },
       "ipAddress": "127.0.0.1",
       "timestamp": "2026-02-12T10:00:00.000Z"
     },
@@ -62,7 +68,10 @@
         "matchId": "demo-pm-oneway-01",
         "opportunityId": "seed-opp-001",
         "sourceOpportunityId": "seed-opp-001",
-        "opportunityIds": ["seed-opp-001", "seed-opp-002"],
+        "opportunityIds": [
+          "seed-opp-001",
+          "seed-opp-002"
+        ],
         "summary": "Deal created from confirmed match"
       },
       "ipAddress": "127.0.0.1",
@@ -74,7 +83,10 @@
       "action": "contract_signed",
       "entityType": "contract",
       "entityId": "seed-contract-oneway-01",
-      "details": { "dealId": "seed-deal-oneway-01", "summary": "Contract signed by need owner" },
+      "details": {
+        "dealId": "seed-deal-oneway-01",
+        "summary": "Contract signed by need owner"
+      },
       "ipAddress": "127.0.0.1",
       "timestamp": "2026-03-18T12:00:00.000Z"
     },
@@ -84,7 +96,10 @@
       "action": "deal_completed",
       "entityType": "deal",
       "entityId": "seed-deal-oneway-01",
-      "details": { "dealId": "seed-deal-oneway-01", "summary": "Deal completed" },
+      "details": {
+        "dealId": "seed-deal-oneway-01",
+        "summary": "Deal completed"
+      },
       "ipAddress": "127.0.0.1",
       "timestamp": "2026-05-20T16:00:00.000Z"
     },
@@ -94,7 +109,10 @@
       "action": "opportunity_created",
       "entityType": "opportunity",
       "entityId": "seed-opp-014",
-      "details": { "title": "Highway package consortium lead", "summary": "Opportunity published" },
+      "details": {
+        "title": "Highway package consortium lead",
+        "summary": "Opportunity published"
+      },
       "ipAddress": "127.0.0.1",
       "timestamp": "2026-02-14T08:00:00.000Z"
     },
@@ -123,7 +141,10 @@
         "matchId": "demo-pm-consortium-01",
         "opportunityId": "seed-opp-014",
         "sourceOpportunityId": "seed-opp-014",
-        "opportunityIds": ["seed-opp-014", "seed-opp-015"],
+        "opportunityIds": [
+          "seed-opp-014",
+          "seed-opp-015"
+        ],
         "summary": "Consortium deal created"
       },
       "ipAddress": "127.0.0.1",
@@ -135,7 +156,10 @@
       "action": "contract_signed",
       "entityType": "contract",
       "entityId": "seed-contract-consortium-01",
-      "details": { "dealId": "seed-deal-consortium-01", "summary": "Consortium contract signed" },
+      "details": {
+        "dealId": "seed-deal-consortium-01",
+        "summary": "Consortium contract signed"
+      },
       "ipAddress": "127.0.0.1",
       "timestamp": "2026-03-18T12:00:00.000Z"
     },
@@ -145,7 +169,10 @@
       "action": "deal_execution_started",
       "entityType": "deal",
       "entityId": "seed-deal-consortium-01",
-      "details": { "dealId": "seed-deal-consortium-01", "summary": "Deal entered execution" },
+      "details": {
+        "dealId": "seed-deal-consortium-01",
+        "summary": "Deal entered execution"
+      },
       "ipAddress": "127.0.0.1",
       "timestamp": "2026-03-19T09:00:00.000Z"
     },
@@ -155,7 +182,10 @@
       "action": "opportunity_created",
       "entityType": "opportunity",
       "entityId": "seed-opp-039",
-      "details": { "title": "Wind farm consortium lead", "summary": "Opportunity published" },
+      "details": {
+        "title": "Wind farm consortium lead",
+        "summary": "Opportunity published"
+      },
       "ipAddress": "127.0.0.1",
       "timestamp": "2026-02-18T08:00:00.000Z"
     },
@@ -170,7 +200,10 @@
         "matchId": "demo-pm-consortium-wind",
         "opportunityId": "seed-opp-039",
         "sourceOpportunityId": "seed-opp-039",
-        "opportunityIds": ["seed-opp-039", "seed-opp-035"],
+        "opportunityIds": [
+          "seed-opp-039",
+          "seed-opp-035"
+        ],
         "summary": "Wind consortium deal created"
       },
       "ipAddress": "127.0.0.1",
@@ -182,7 +215,10 @@
       "action": "contract_signed",
       "entityType": "contract",
       "entityId": "seed-contract-exchange-01",
-      "details": { "dealId": "seed-deal-exchange-01", "summary": "Wind consortium contract signed" },
+      "details": {
+        "dealId": "seed-deal-exchange-01",
+        "summary": "Wind consortium contract signed"
+      },
       "ipAddress": "127.0.0.1",
       "timestamp": "2026-03-18T12:00:00.000Z"
     },
@@ -192,9 +228,30 @@
       "action": "user_logged_in",
       "entityType": "user",
       "entityId": "seed-admin-001",
-      "details": { "summary": "Admin login" },
+      "details": {
+        "summary": "Admin login"
+      },
       "ipAddress": "127.0.0.1",
       "timestamp": "2026-06-13T08:00:00.000Z"
+    },
+    {
+      "id": "seed-audit-demo-neg-lock",
+      "action": "transcript_locked",
+      "entityType": "negotiation",
+      "entityId": "seed-neg-demo-oneway-cash",
+      "userId": "seed-co-corp-002",
+      "timestamp": "2026-07-01T10:30:00.000Z",
+      "details": {
+        "reason": "agreed_terms_finalized"
+      }
+    },
+    {
+      "id": "seed-audit-demo-offer-accepted",
+      "action": "offer_accepted",
+      "entityType": "negotiation",
+      "entityId": "seed-neg-demo-oneway-cash",
+      "userId": "seed-user-004",
+      "timestamp": "2026-07-01T10:05:00.000Z"
     }
   ]
 }

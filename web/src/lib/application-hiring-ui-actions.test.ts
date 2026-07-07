@@ -55,6 +55,8 @@ describe('application hiring UI actions', () => {
   function uiDeps() {
     return {
       legacyApplicationsEnabled: true,
+      userId: 'user-hiring',
+      canMutate: true,
       startNegotiationFromApplication: (applicationId: string) =>
         negotiationService.startNegotiationFromApplication(applicationId, {
           gateway: stack.gateway,

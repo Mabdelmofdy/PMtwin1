@@ -2,8 +2,9 @@ import type { AuditEntry, Contract, Deal, Negotiation, Opportunity, PlatformUser
 import type { IStorageAdapter } from '@/types/storage.ts'
 import { ApplicationCommandHandler } from '@/commands/handlers/application-command-handler.ts'
 import { ContractCommandHandler } from '@/commands/handlers/contract-command-handler.ts'
-import { DealCommandHandler } from '@/commands/handlers/deal-command-handler.ts'
+import { CommercialAgreementCommandHandler } from '@/commands/handlers/commercial-agreement-command-handler.ts'
 import { NegotiationCommandHandler } from '@/commands/handlers/negotiation-command-handler.ts'
+import { NegotiationRoomCommandHandler } from '@/commands/handlers/negotiation-room-command-handler.ts'
 import { OpportunityCommandHandler } from '@/commands/handlers/opportunity-command-handler.ts'
 import { PostMatchCommandHandler } from '@/commands/handlers/post-match-command-handler.ts'
 import { DefaultCommandGateway } from '@/commands/default-command-gateway.ts'
@@ -12,10 +13,14 @@ import type { CommandPermissionActor } from '@/domain/rbac/context/command-permi
 import { ApplicationRepository } from '@/repositories/application-repository.ts'
 import { AuditRepository } from '@/repositories/audit-repository.ts'
 import { ContractRepository } from '@/repositories/contract-repository.ts'
-import { DealRepository } from '@/repositories/deal-repository.ts'
+import { CommercialAgreementRepository } from '@/repositories/commercial-agreement-repository.ts'
 import { NegotiationRepository } from '@/repositories/negotiation-repository.ts'
+import { NegotiationMessageRepository } from '@/repositories/negotiation-message-repository.ts'
+import { NegotiationOfferRepository } from '@/repositories/negotiation-offer-repository.ts'
+import { NegotiationTranscriptRepository } from '@/repositories/negotiation-transcript-repository.ts'
 import { OpportunityRepository } from '@/repositories/opportunity-repository.ts'
 import { PostMatchRepository } from '@/repositories/post-match-repository.ts'
+import { UserRepository } from '@/repositories/user-repository.ts'
 
 export const TEST_ADMIN_ACTOR: CommandPermissionActor = {
   userId: 'test-admin',
@@ -51,7 +56,10 @@ export type CommandGatewayTestStack = {
   applicationRepository: ApplicationRepository
   postMatchRepository: PostMatchRepository
   negotiationRepository: NegotiationRepository
-  dealRepository: DealRepository
+  negotiationMessageRepository: NegotiationMessageRepository
+  negotiationOfferRepository: NegotiationOfferRepository
+  negotiationTranscriptRepository: NegotiationTranscriptRepository
+  dealRepository: CommercialAgreementRepository
   contractRepository: ContractRepository
   opportunityRepository: OpportunityRepository
   auditRepository: AuditRepository
@@ -100,7 +108,11 @@ export function createCommandGatewayTestStack(
     storage,
     () => options.negotiations ?? [],
   )
-  const dealRepository = new DealRepository(storage, () => options.deals ?? [])
+  const negotiationMessageRepository = new NegotiationMessageRepository(storage)
+  const negotiationOfferRepository = new NegotiationOfferRepository(storage)
+  const negotiationTranscriptRepository = new NegotiationTranscriptRepository(storage)
+  const userRepository = new UserRepository(storage, () => options.users ?? [])
+  const dealRepository = new CommercialAgreementRepository(storage, () => options.deals ?? [])
   const contractRepository = new ContractRepository(
     storage,
     () => options.contracts ?? [],
@@ -138,7 +150,15 @@ export function createCommandGatewayTestStack(
       applicationRepository,
       auditRepository,
     }),
-    dealHandler: new DealCommandHandler({
+    negotiationRoomHandler: new NegotiationRoomCommandHandler({
+      negotiationRepository,
+      messageRepository: negotiationMessageRepository,
+      offerRepository: negotiationOfferRepository,
+      transcriptRepository: negotiationTranscriptRepository,
+      auditRepository,
+      userRepository,
+    }),
+    dealHandler: new CommercialAgreementCommandHandler({
       dealRepository,
       negotiationRepository,
       postMatchRepository,
@@ -172,6 +192,9 @@ export function createCommandGatewayTestStack(
     applicationRepository,
     postMatchRepository,
     negotiationRepository,
+    negotiationMessageRepository,
+    negotiationOfferRepository,
+    negotiationTranscriptRepository,
     dealRepository,
     contractRepository,
     opportunityRepository,

@@ -1,27 +1,17 @@
+/** @deprecated Import from `@/lib/commercial-agreement-transition-ui-actions.ts` */
+import {
+  canShowCommercialAgreementTransition,
+  listCommercialAgreementTransitionOptions,
+  transitionCommercialAgreementStatusUiAction,
+  type CommercialAgreementTransitionOption,
+  type CommercialAgreementTransitionUiActionResult,
+  type CommercialAgreementTransitionUiActionsDeps,
+} from '@/lib/commercial-agreement-transition-ui-actions.ts'
 import type { CommandResult } from '@pm-twin/commands'
-import { allowedTransitions, isTerminal } from '@pm-twin/lifecycle'
 import type { Deal } from '@/types/domain.ts'
-import { dealCommandService } from '@/services/deal-command-service.ts'
-import { formatCanonicalStatusLabel } from '@/lib/status-display.ts'
 
-const DEAL_ENTITY = 'deal' as const
-
-const DEAL_TRANSITION_LABELS: Record<string, string> = {
-  review: 'Submit for review',
-  signing: 'Move to signing',
-  executing: 'Start execution',
-  completed: 'Mark completed',
-  cancelled: 'Cancel deal',
-}
-
-export type DealTransitionOption = {
-  readonly targetStatus: string
-  readonly label: string
-}
-
-export type DealTransitionUiActionResult =
-  | { readonly success: true; readonly status: string }
-  | { readonly success: false; readonly message: string }
+export type DealTransitionOption = CommercialAgreementTransitionOption
+export type DealTransitionUiActionResult = CommercialAgreementTransitionUiActionResult
 
 export type DealTransitionUiActionsDeps = {
   readonly transitionDealStatus?: (
@@ -34,39 +24,35 @@ export type DealTransitionUiActionsDeps = {
   readonly readDealStatus?: (dealId: string) => string | undefined
 }
 
-function formatCommandErrors(result: CommandResult): string {
-  if (result.errors && result.errors.length > 0) {
-    return result.errors.join('. ')
+function mapLegacyDeps(
+  deps?: DealTransitionUiActionsDeps,
+): CommercialAgreementTransitionUiActionsDeps | undefined {
+  if (!deps) return undefined
+  return {
+    transitionCommercialAgreementStatus: deps.transitionDealStatus
+      ? (commercialAgreementId, targetStatus) => {
+          const { result, deal } = deps.transitionDealStatus!(
+            commercialAgreementId,
+            targetStatus,
+          )
+          return { result, commercialAgreement: deal }
+        }
+      : undefined,
+    readCommercialAgreementStatus: deps.readDealStatus,
   }
-  return 'Deal status could not be updated.'
-}
-
-function transitionLabel(targetStatus: string): string {
-  return (
-    DEAL_TRANSITION_LABELS[targetStatus] ??
-    `Move to ${formatCanonicalStatusLabel(DEAL_ENTITY, targetStatus)}`
-  )
 }
 
 export function listDealTransitionOptions(
   deal: Deal | null | undefined,
 ): readonly DealTransitionOption[] {
-  if (!deal?.id) return []
-  if (isTerminal(DEAL_ENTITY, deal.status)) return []
-
-  return allowedTransitions(DEAL_ENTITY, deal.status).map((targetStatus) => ({
-    targetStatus,
-    label: transitionLabel(targetStatus),
-  }))
+  return listCommercialAgreementTransitionOptions(deal)
 }
 
 export function canShowDealTransition(
   deal: Deal | null | undefined,
   targetStatus: string,
 ): boolean {
-  return listDealTransitionOptions(deal).some(
-    (option) => option.targetStatus === targetStatus,
-  )
+  return canShowCommercialAgreementTransition(deal, targetStatus)
 }
 
 export function transitionDealStatusUiAction(
@@ -74,19 +60,9 @@ export function transitionDealStatusUiAction(
   targetStatus: string,
   deps?: DealTransitionUiActionsDeps,
 ): DealTransitionUiActionResult {
-  const transition =
-    deps?.transitionDealStatus ??
-    dealCommandService.transitionDealStatus.bind(dealCommandService)
-
-  const { result, deal } = transition(dealId, targetStatus)
-  if (!result.success) {
-    return { success: false, message: formatCommandErrors(result) }
-  }
-
-  const status =
-    deal?.status ??
-    deps?.readDealStatus?.(dealId) ??
-    targetStatus
-
-  return { success: true, status }
+  return transitionCommercialAgreementStatusUiAction(
+    dealId,
+    targetStatus,
+    mapLegacyDeps(deps),
+  )
 }

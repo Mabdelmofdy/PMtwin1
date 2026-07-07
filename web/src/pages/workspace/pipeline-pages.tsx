@@ -1,4 +1,4 @@
-import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useNavigate, useParams, useLocation, useSearchParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
@@ -16,10 +16,11 @@ import { buildMatchDetailReadModel } from '@/lib/match-detail-read-model.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
 import { EntityAccessDenied } from '@/components/auth/entity-access-state'
-import { CreateDealButton } from '@/components/negotiation/create-deal-button.tsx'
+import { CreateCommercialAgreementButton } from '@/components/negotiation/create-commercial-agreement-button.tsx'
 import { StartNegotiationButton } from '@/components/negotiation/start-negotiation-button.tsx'
 import { AgreeNegotiationButton } from '@/components/negotiation/agree-negotiation-button.tsx'
 import { CancelNegotiationButton } from '@/components/negotiation/cancel-negotiation-button.tsx'
+import { NegotiationRoomPanel } from '@/components/negotiation/negotiation-room-panel.tsx'
 import {
   canShowNegotiationTransition,
   transitionNegotiationStatusUiAction,
@@ -68,7 +69,6 @@ import {
   PmPageActions,
   PmStatCard,
   PmSurface,
-  PmTimeline,
   PmWorkflowBadge,
   PmWorkflowLinksCard,
   buildMatchWorkflowSteps,
@@ -78,6 +78,7 @@ import {
 } from '@/components/ui/pm-index'
 import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
@@ -151,8 +152,8 @@ function buildMatchDetailHeaderActions(input: {
   if (actions.showViewDeal && actions.dealId) {
     more.push({
       id: 'view-deal',
-      label: 'Open deal',
-      href: `/deals/${actions.dealId}`,
+      label: PRODUCT_LANGUAGE.OPEN_COMMERCIAL_AGREEMENT,
+      href: `/commercial-agreements/${actions.dealId}`,
     })
   }
 
@@ -174,7 +175,7 @@ function buildMatchDetailHeaderActions(input: {
             <CancelNegotiationButton negotiation={negotiation} variant="destructive" className="w-full justify-start" />
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <CreateDealButton negotiation={negotiation} variant="outline" className="w-full justify-start" />
+            <CreateCommercialAgreementButton negotiation={negotiation} variant="outline" className="w-full justify-start" />
           </DropdownMenuItem>
         </>
       ),
@@ -206,7 +207,7 @@ function buildMatchDetailHeaderActions(input: {
 
   if (actions.showViewDeal && actions.dealId) {
     return {
-      primary: { label: 'Open deal', href: `/deals/${actions.dealId}` },
+      primary: { label: PRODUCT_LANGUAGE.OPEN_COMMERCIAL_AGREEMENT, href: `/commercial-agreements/${actions.dealId}` },
       more,
     }
   }
@@ -267,12 +268,12 @@ function buildMatchRecommendedAction(input: {
     return {
       id: 'negotiation-active',
       title: 'Review negotiation',
-      context: 'Terms are in progress — agree, counter, or create a deal.',
+      context: 'Terms are in progress — agree, counter, or create a commercial agreement.',
       status: negotiation.status,
       statusEntity: 'negotiation',
       primary: { label: PRODUCT_LANGUAGE.OPEN_NEGOTIATION, href: `/negotiations/${negotiation.id}` },
       secondary: actions.showViewDeal && actions.dealId
-        ? { label: PRODUCT_LANGUAGE.OPEN_DEAL, href: `/deals/${actions.dealId}`, variant: 'outline' }
+        ? { label: PRODUCT_LANGUAGE.OPEN_COMMERCIAL_AGREEMENT, href: `/commercial-agreements/${actions.dealId}`, variant: 'outline' }
         : undefined,
     }
   }
@@ -280,11 +281,11 @@ function buildMatchRecommendedAction(input: {
   if (actions.showViewDeal && actions.dealId) {
     return {
       id: 'open-deal',
-      title: 'Review deal',
-      context: 'Commercial terms are ready for review.',
+      title: 'Review commercial agreement',
+      context: 'Commercial agreement terms are ready for review.',
       status: match.status,
       statusEntity: 'deal',
-      primary: { label: PRODUCT_LANGUAGE.OPEN_DEAL, href: `/deals/${actions.dealId}` },
+      primary: { label: PRODUCT_LANGUAGE.OPEN_COMMERCIAL_AGREEMENT, href: `/commercial-agreements/${actions.dealId}` },
       secondary: actions.showViewNegotiation && actions.negotiationId
         ? {
             label: PRODUCT_LANGUAGE.OPEN_NEGOTIATION,
@@ -308,11 +309,11 @@ function buildNegotiationRecommendedAction(input: {
   if (linkedDeal) {
     return {
       id: 'open-deal',
-      title: 'Review linked deal',
-      context: 'Terms are settled — continue in the deal workspace.',
+      title: 'Review linked commercial agreement',
+      context: 'Terms are settled — continue in the commercial agreement workspace.',
       status: linkedDeal.status,
       statusEntity: 'deal',
-      primary: { label: PRODUCT_LANGUAGE.OPEN_DEAL, href: `/deals/${linkedDeal.id}` },
+      primary: { label: PRODUCT_LANGUAGE.OPEN_COMMERCIAL_AGREEMENT, href: `/commercial-agreements/${linkedDeal.id}` },
       secondary: neg.postMatchId
         ? { label: PRODUCT_LANGUAGE.OPEN_MATCH, href: `/matches/${neg.postMatchId}`, variant: 'outline' }
         : undefined,
@@ -324,7 +325,7 @@ function buildNegotiationRecommendedAction(input: {
   return {
     id: 'agree-terms',
     title: 'Agree terms',
-    context: 'Confirm terms or create a deal when ready.',
+    context: 'Confirm terms or create a commercial agreement when ready.',
     status: neg.status,
     statusEntity: 'negotiation',
     primary: {
@@ -406,7 +407,7 @@ export function PipelinePage() {
         <PmPageHeader
           label="Workflow"
           title="Pipeline"
-          description="Track opportunity and match stages here, then continue to negotiations, deals, and contracts in their workflow sections."
+          description="Track opportunity and match stages here, then continue to negotiations, commercial agreements, and contracts in their workflow sections."
           tone="mission"
           metric={
             <PmPageHeroMetric value={workflowCount} label="Active workflows" />
@@ -415,7 +416,7 @@ export function PipelinePage() {
             <>
               <PmBadge tone="primary">{opportunities.length} opportunities</PmBadge>
               <PmBadge tone="info">{activeMatches} matches</PmBadge>
-              <PmBadge tone="muted">{'Next: Negotiations -> Deals -> Contracts'}</PmBadge>
+              <PmBadge tone="muted">{'Next: Negotiations -> Commercial Agreements -> Contracts'}</PmBadge>
               {showLegacyApplications ? (
                 <PmBadge tone="muted">{applications.length} applications</PmBadge>
               ) : null}
@@ -462,6 +463,7 @@ export function PipelinePage() {
 
 export function MatchesPage() {
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const navState = readProductNavState(location.state)
   const { user, canAccessAdmin } = useAuth()
   const [matchView, setMatchView] = useState<MatchPresentationView>(() =>
@@ -510,6 +512,33 @@ export function MatchesPage() {
   const marketplacePreview =
     matchView === 'marketplace' && !MATCH_MARKETPLACE_VIEW_AVAILABLE
   const listFilters = useMatchesListFilters(displayedMatches)
+
+  useEffect(() => {
+    const urlMatchTypes = searchParams.get('matchTypes')
+    const urlMainModel = searchParams.get('mainModel')
+    const urlExchangeMode = searchParams.get('exchangeModes')
+    if (urlMatchTypes) {
+      const first = urlMatchTypes.split(',').map((entry) => entry.trim()).find(Boolean)
+      if (first && first !== listFilters.matchType) listFilters.setMatchType(first)
+    }
+    if (urlMainModel && urlMainModel !== listFilters.mainModel) {
+      listFilters.setMainModel(urlMainModel)
+    }
+    if (urlExchangeMode) {
+      const first = urlExchangeMode.split(',').map((entry) => entry.trim()).find(Boolean)
+      if (first && first !== listFilters.exchangeMode) {
+        listFilters.setExchangeMode(first)
+      }
+    }
+  }, [
+    searchParams,
+    listFilters.matchType,
+    listFilters.mainModel,
+    listFilters.exchangeMode,
+    listFilters.setMatchType,
+    listFilters.setMainModel,
+    listFilters.setExchangeMode,
+  ])
 
   useEffect(() => {
     setMatchView(resolveDefaultMatchView(navState))
@@ -778,7 +807,7 @@ export function MatchDetailPage() {
         ]
       : []),
     ...(actions.showViewDeal && actions.dealId
-      ? [{ id: 'deal', label: PRODUCT_LANGUAGE.OPEN_DEAL, href: `/deals/${actions.dealId}` }]
+      ? [{ id: 'deal', label: PRODUCT_LANGUAGE.OPEN_COMMERCIAL_AGREEMENT, href: `/commercial-agreements/${actions.dealId}` }]
       : []),
   ]
 
@@ -927,7 +956,7 @@ export function MatchDetailPage() {
               </PmFormReadonly>
             ) : (
               <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-                No negotiation linked yet. Start negotiating terms before creating a deal.
+                No negotiation linked yet. Start negotiating terms before creating a commercial agreement.
               </p>
             )}
           </PmInspectorLayout>
@@ -947,6 +976,7 @@ export function MatchDetailPage() {
 export function NegotiationsPage() {
   const { user, canAccessAdmin } = useAuth()
   const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('all')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
   const allNegotiations = negotiationsApi.list()
@@ -969,9 +999,10 @@ export function NegotiationsPage() {
     if (!search.trim()) return negotiations
     const q = search.toLowerCase()
     return negotiations.filter((neg) =>
-      formatNegotiationDisplayTitle(neg, opportunitiesApi.get).toLowerCase().includes(q),
+      formatNegotiationDisplayTitle(neg, opportunitiesApi.get).toLowerCase().includes(q) &&
+      (status === 'all' || neg.status === status),
     )
-  }, [negotiations, search])
+  }, [negotiations, search, status])
   const totalItems = filteredNegotiations.length
   const pageCount = Math.max(1, Math.ceil(totalItems / pageSize))
   const safePage = Math.min(page, pageCount)
@@ -984,7 +1015,7 @@ export function NegotiationsPage() {
   ).length
   const listEmpty = resolveListEmptyState({
     hasSourceData: negotiations.length > 0,
-    hasActiveFilters: search.length > 0,
+    hasActiveFilters: search.length > 0 || status !== 'all',
     firstRun: {
       title: 'No negotiations yet',
       description: 'Negotiations begin after you accept a match and start term discussions.',
@@ -1025,6 +1056,23 @@ export function NegotiationsPage() {
                     setPage(1)
                   }}
                 />
+              }
+              filters={
+                <div className="w-44">
+                  <Select value={status} onValueChange={setStatus}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All statuses</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="countered">Countered</SelectItem>
+                      <SelectItem value="agreed">Agreed</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                      <SelectItem value="expired">Expired</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               }
             />
           </PmBrowseToolbar>
@@ -1168,7 +1216,7 @@ export function NegotiationDetailPage() {
       >
         <EntityAccessDenied
           entity="negotiation"
-          description="Only negotiation participants can access this workspace."
+          description="Only negotiation participants and authorized auditors can access this workspace."
         />
       </PmPage>
     )
@@ -1214,7 +1262,7 @@ export function NegotiationDetailPage() {
       ? [{ id: 'match', label: PRODUCT_LANGUAGE.OPEN_MATCH, href: `/matches/${neg.postMatchId}` }]
       : []),
     ...(linkedDeal
-      ? [{ id: 'deal', label: PRODUCT_LANGUAGE.OPEN_DEAL, href: `/deals/${linkedDeal.id}` }]
+      ? [{ id: 'deal', label: PRODUCT_LANGUAGE.OPEN_COMMERCIAL_AGREEMENT, href: `/commercial-agreements/${linkedDeal.id}` }]
       : []),
   ]
 
@@ -1224,7 +1272,7 @@ export function NegotiationDetailPage() {
         <PmPageHeader
           label="Negotiation"
           title={negotiationTitle}
-          description="Terms sheet, rounds timeline, and proposal form."
+          description="Structured negotiation room with discussion, offers, and audit trail."
           tone="negotiation"
           metric={
             <PmPageHeroMetric
@@ -1247,7 +1295,7 @@ export function NegotiationDetailPage() {
                 }
                 more={[
                   ...(linkedDeal
-                    ? [{ id: 'view-deal', label: 'Open deal', href: `/deals/${linkedDeal.id}` }]
+                    ? [{ id: 'view-deal', label: PRODUCT_LANGUAGE.OPEN_COMMERCIAL_AGREEMENT, href: `/commercial-agreements/${linkedDeal.id}` }]
                     : []),
                 ]}
                 moreChildren={
@@ -1260,7 +1308,7 @@ export function NegotiationDetailPage() {
                       />
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <CreateDealButton negotiation={neg} className="w-full justify-start" />
+                      <CreateCommercialAgreementButton negotiation={neg} className="w-full justify-start" />
                     </DropdownMenuItem>
                     {canSubmitProposal ? (
                       <DropdownMenuItem
@@ -1309,27 +1357,7 @@ export function NegotiationDetailPage() {
 
             <PmWorkflowLinksCard links={negotiationWorkflowLinks} />
 
-            <PmContentCard title="Discussion">
-            <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-              Negotiation workspace for match collaboration. Use the inspector to agree,
-              cancel, or create a deal when terms are settled.
-            </p>
-            {neg.rounds && neg.rounds.length > 0 ? (
-              <PmTimeline
-                bare
-                className="mt-4"
-                aria-label="Negotiation rounds"
-                events={neg.rounds.map((round, index) => ({
-                  id: `${round.at}-${index}`,
-                  label: `Round ${index + 1}`,
-                  description: round.by,
-                  timestamp: formatDate(round.at),
-                  status:
-                    index === (neg.rounds?.length ?? 0) - 1 ? ('active' as const) : ('done' as const),
-                }))}
-              />
-            ) : null}
-          </PmContentCard>
+            <NegotiationRoomPanel negotiation={neg} viewer={viewer} />
           </>
         }
         inspector={

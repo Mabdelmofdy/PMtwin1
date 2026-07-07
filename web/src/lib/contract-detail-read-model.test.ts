@@ -134,7 +134,7 @@ describe('contract detail read model', () => {
     assert.equal(model.dealId, 'deal-draft-1')
     assert.equal(model.dealTitle, 'Deal – pm-1')
     assert.equal(model.dealStatus, 'draft')
-    assert.equal(model.links.deal?.path, '/deals/deal-draft-1')
+    assert.equal(model.links.deal?.path, '/commercial-agreements/deal-draft-1')
   })
 
   it('shows PostMatch and Negotiation IDs', () => {

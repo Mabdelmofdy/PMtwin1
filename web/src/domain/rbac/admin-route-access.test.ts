@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { canAccessAdminForRole } from '@/domain/rbac/admin-access.ts'
+import {
+  canAccessAdminForRole,
+  canManageProductLanguageForRole,
+} from '@/domain/rbac/admin-access.ts'
 import { evaluateAdminRouteAccess } from '@/domain/rbac/admin-route-access.ts'
 
 describe('canAccessAdminForRole', () => {
@@ -82,5 +85,17 @@ describe('evaluateAdminRouteAccess', () => {
       }),
       'loading',
     )
+  })
+})
+
+describe('canManageProductLanguageForRole', () => {
+  it('allows admin and owner roles', () => {
+    assert.equal(canManageProductLanguageForRole('admin'), true)
+    assert.equal(canManageProductLanguageForRole('company_owner'), true)
+  })
+
+  it('denies non-admin roles', () => {
+    assert.equal(canManageProductLanguageForRole('moderator'), false)
+    assert.equal(canManageProductLanguageForRole('professional'), false)
   })
 })

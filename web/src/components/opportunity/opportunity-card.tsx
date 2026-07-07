@@ -11,6 +11,7 @@ import { OpportunityListLabels } from '@/components/opportunity/opportunity-list
 import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
 import type { Opportunity } from '@/types/domain.ts'
 import { cn } from '@/lib/utils'
+import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'
 
 export type OpportunityCardProps = {
   opportunity: Opportunity
@@ -39,6 +40,7 @@ export function OpportunityCard({
   const readiness = showOwnerInsights ? resolveOpportunityReadiness(opportunity) : null
   const category = opportunity.scope?.sectors?.[0]
   const href = `/opportunities/${opportunity.id}`
+  const taxonomy = resolveOpportunityTaxonomyLabels(opportunity)
 
   return (
     <PmSurface
@@ -79,6 +81,13 @@ export function OpportunityCard({
         </div>
       </div>
 
+      <div className={cn(pmTypography.caption, 'mt-3 space-y-1 text-muted-foreground')}>
+        <p>{taxonomy.mainModel}</p>
+        <p>{taxonomy.subModel}</p>
+        <p>{taxonomy.exchangeMode}</p>
+        <p>{taxonomy.matchingTopology}</p>
+      </div>
+
       <div
         className={cn(
           pmTypography.caption,
@@ -94,6 +103,9 @@ export function OpportunityCard({
           <span>
             {matchCount} match{matchCount === 1 ? '' : 'es'}
           </span>
+        ) : null}
+        {showOwnerInsights && readiness ? (
+          <span>{Math.round(readiness.score)}% matching ready</span>
         ) : null}
       </div>
 

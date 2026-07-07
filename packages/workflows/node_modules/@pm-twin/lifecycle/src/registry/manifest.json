@@ -48,7 +48,7 @@
       ],
       "aliasesFile": "aliases/negotiation.json"
     },
-    "deal": {
+    "commercial_agreement": {
       "canonicalStates": [
         "draft",
         "review",
@@ -57,7 +57,7 @@
         "completed",
         "cancelled"
       ],
-      "aliasesFile": "aliases/deal.json"
+      "aliasesFile": "aliases/commercial_agreement.json"
     },
     "contract": {
       "canonicalStates": [

@@ -7,7 +7,7 @@ import {
   declinePostMatchUiAction,
 } from '@/lib/post-match-ui-actions.ts'
 import { StartNegotiationButton } from '@/components/negotiation/start-negotiation-button.tsx'
-import { CreateDealButton } from '@/components/negotiation/create-deal-button.tsx'
+import { CreateCommercialAgreementButton } from '@/components/negotiation/create-commercial-agreement-button.tsx'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { formatMatchTypeLabel } from '@/lib/opportunity-matches-read-model.ts'
@@ -81,7 +81,7 @@ function buildMatchCardActions(
     more.push({
       id: 'view-deal',
       label: 'Open deal',
-      href: `/deals/${actions.dealId}`,
+      href: `/commercial-agreements/${actions.dealId}`,
     })
   }
 
@@ -115,7 +115,7 @@ function buildMatchCardActions(
       primary: {
         label: 'Create deal',
         render: () => (
-          <CreateDealButton
+          <CreateCommercialAgreementButton
             negotiation={card.actions.negotiation}
             variant="default"
             size="sm"
@@ -142,7 +142,7 @@ function buildMatchCardActions(
     return {
       primary: {
         label: 'Open deal',
-        href: `/deals/${actions.dealId}`,
+        href: `/commercial-agreements/${actions.dealId}`,
       },
       secondary: viewMatchSecondary,
       more: more.filter((item) => item.id !== 'view-deal'),

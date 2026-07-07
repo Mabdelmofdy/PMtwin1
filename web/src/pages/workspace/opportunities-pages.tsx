@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Map, Plus } from 'lucide-react'
 import { opportunitiesApi } from '@/api/opportunities.ts'
@@ -141,6 +141,14 @@ function splitCsv(value: string): string[] {
     .filter(Boolean)
 }
 
+function parseCsvParam(raw: string | null): string[] {
+  if (!raw) return []
+  return raw
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
 function buildOpportunityDraftInput(draft: OpportunityDraft): Record<string, unknown> {
   const skills = splitCsv(draft.skills)
   const services = splitCsv(draft.services)
@@ -236,9 +244,14 @@ function resolveCompletedSteps(draft: OpportunityDraft): string[] {
 export function OpportunitiesPage() {
   const { user } = useAuth()
   const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
   const navState = readProductNavState(location.state)
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('all')
+  const [mainModels, setMainModels] = useState<string[]>([])
+  const [subModels, setSubModels] = useState<string[]>([])
+  const [exchangeModes, setExchangeModes] = useState<string[]>([])
+  const [matchTypes, setMatchTypes] = useState<string[]>([])
   const [ownershipFilter, setOwnershipFilter] = useState<OpportunityOwnershipFilter>(() =>
     resolveDefaultOpportunityOwnershipFilter(navState),
   )
@@ -249,6 +262,13 @@ export function OpportunitiesPage() {
     setOwnershipFilter(resolveDefaultOpportunityOwnershipFilter(navState))
     setPage(1)
   }, [location.key, navState?.domain, navState?.ownershipScope])
+
+  useEffect(() => {
+    setMainModels(parseCsvParam(searchParams.get('mainModel') ?? searchParams.get('mainModels')))
+    setSubModels(parseCsvParam(searchParams.get('subModels')))
+    setExchangeModes(parseCsvParam(searchParams.get('exchangeModes')))
+    setMatchTypes(parseCsvParam(searchParams.get('matchTypes')))
+  }, [searchParams])
 
   const allOpportunities = opportunitiesApi.list()
   const heroSummary = summarizeOpportunityListHero(allOpportunities)
@@ -275,7 +295,26 @@ export function OpportunitiesPage() {
         o.title.toLowerCase().includes(search.toLowerCase()) ||
         o.location?.toLowerCase().includes(search.toLowerCase())
       const matchesStatus = status === 'all' || o.status === status
-      return matchesSearch && matchesStatus
+      const matchesMainModel =
+        mainModels.length === 0 || (o.mainCollaborationModel != null && mainModels.includes(o.mainCollaborationModel))
+      const matchesSubModel =
+        subModels.length === 0 || (o.subModelType != null && subModels.includes(o.subModelType))
+      const matchesExchangeMode =
+        exchangeModes.length === 0 ||
+        (o.exchangeMode != null && exchangeModes.includes(o.exchangeMode)) ||
+        o.acceptedExchangeModes?.some((mode) => exchangeModes.includes(mode))
+      const matchesTopology =
+        matchTypes.length === 0 ||
+        (o.preferredMatchingTopology != null &&
+          matchTypes.includes(o.preferredMatchingTopology))
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesMainModel &&
+        matchesSubModel &&
+        matchesExchangeMode &&
+        matchesTopology
+      )
     })
   }, [
     allOpportunities,
@@ -286,6 +325,10 @@ export function OpportunitiesPage() {
     user?.role,
     user?.status,
     user?.organizationId,
+    mainModels,
+    subModels,
+    exchangeModes,
+    matchTypes,
   ])
 
   const totalItems = opportunities.length
@@ -310,7 +353,13 @@ export function OpportunitiesPage() {
 
   const listEmpty = resolveListEmptyState({
     hasSourceData: scopedSourceCount > 0,
-    hasActiveFilters: search.length > 0 || status !== 'all',
+    hasActiveFilters:
+      search.length > 0 ||
+      status !== 'all' ||
+      mainModels.length > 0 ||
+      subModels.length > 0 ||
+      exchangeModes.length > 0 ||
+      matchTypes.length > 0,
     firstRun: {
       title: isMarketplaceBrowse
         ? 'No opportunities available yet'
@@ -437,25 +486,106 @@ export function OpportunitiesPage() {
                       </SelectContent>
                     </Select>
                   </PmFormField>
+                  <PmFormField id="opp-filter-main-models" label="Main collaboration model">
+                    <Select
+                      value="__placeholder__"
+                      onValueChange={(value) => {
+                        if (value === '__placeholder__') return
+                        setMainModels((current) =>
+                          current.includes(value)
+                            ? current.filter((item) => item !== value)
+                            : [...current, value],
+                        )
+                        setPage(1)
+                      }}
+                    >
+                      <SelectTrigger id="opp-filter-main-models" className="w-full">
+                        <SelectValue placeholder="Toggle model…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__placeholder__">Toggle model…</SelectItem>
+                        {listMainCollaborationModels().map((model) => (
+                          <SelectItem key={model.key} value={model.key}>
+                            {model.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </PmFormField>
+                  <PmFormField id="opp-filter-exchange-modes" label="Exchange mode">
+                    <Select
+                      value="__placeholder_exchange__"
+                      onValueChange={(value) => {
+                        if (value === '__placeholder_exchange__') return
+                        setExchangeModes((current) =>
+                          current.includes(value)
+                            ? current.filter((item) => item !== value)
+                            : [...current, value],
+                        )
+                        setPage(1)
+                      }}
+                    >
+                      <SelectTrigger id="opp-filter-exchange-modes" className="w-full">
+                        <SelectValue placeholder="Toggle exchange mode…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__placeholder_exchange__">Toggle exchange mode…</SelectItem>
+                        {['cash', 'barter', 'profit_sharing', 'equity', 'hybrid'].map((mode) => (
+                          <SelectItem key={mode} value={mode}>
+                            {formatCollaborationExchangeMode(mode)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </PmFormField>
                 </div>
               </PmTableFilter>
             }
           >
             <PmFilterChips
               chips={
-                status !== 'all'
-                  ? [
-                      {
-                        id: 'status',
-                        label: 'Status',
-                        value: status.charAt(0).toUpperCase() + status.slice(1),
-                        onRemove: () => {
-                          setStatus('all')
-                          setPage(1)
+                [
+                  ...(status !== 'all'
+                    ? [
+                        {
+                          id: 'status',
+                          label: 'Status',
+                          value: status.charAt(0).toUpperCase() + status.slice(1),
+                          onRemove: () => {
+                            setStatus('all')
+                            setPage(1)
+                          },
                         },
-                      },
-                    ]
-                  : []
+                      ]
+                    : []),
+                  ...mainModels.map((model) => ({
+                    id: `main-${model}`,
+                    label: 'Main model',
+                    value: resolveMainCollaborationModelLabel(model),
+                    onRemove: () => {
+                      setMainModels((current) => current.filter((item) => item !== model))
+                      setPage(1)
+                    },
+                  })),
+                  ...exchangeModes.map((mode) => ({
+                    id: `exchange-${mode}`,
+                    label: 'Exchange',
+                    value: formatCollaborationExchangeMode(mode),
+                    onRemove: () => {
+                      setExchangeModes((current) => current.filter((item) => item !== mode))
+                      setPage(1)
+                    },
+                  })),
+                  ...matchTypes.map((type) => ({
+                    id: `matchType-${type}`,
+                    label: 'Match type',
+                    value: formatFrameworkMatchTypeLabel(type),
+                    onRemove: () => {
+                      setMatchTypes((current) => current.filter((item) => item !== type))
+                      setPage(1)
+                    },
+                  })),
+                ]
               }
             />
           </PmTableToolbar>
@@ -507,6 +637,11 @@ export function OpportunitiesPage() {
                 onClick={() => {
                   setSearch('')
                   setStatus('all')
+                    setMainModels([])
+                    setSubModels([])
+                    setExchangeModes([])
+                    setMatchTypes([])
+                    setSearchParams({})
                   setPage(1)
                 }}
               >

@@ -10,7 +10,7 @@ export const ENTITY_BROWSE_ROUTES: Record<WorkflowEntityBrowseKey, string> = {
   opportunity: '/opportunities',
   match: '/matches',
   negotiation: '/negotiations',
-  deal: '/deals',
+  deal: '/commercial-agreements',
   contract: '/contracts',
 }
 
@@ -18,7 +18,7 @@ export const ENTITY_BROWSE_BACK_LABELS: Record<WorkflowEntityBrowseKey, string> 
   opportunity: 'Back to opportunities',
   match: 'Back to matches',
   negotiation: 'Back to negotiations',
-  deal: 'Back to deals',
+  deal: 'Back to commercial agreements',
   contract: 'Back to contracts',
 }
 

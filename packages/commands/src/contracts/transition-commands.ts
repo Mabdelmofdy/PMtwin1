@@ -21,9 +21,15 @@ export interface TransitionNegotiationStatusCommand extends Command {
   readonly targetStatus: string
 }
 
-export interface TransitionDealStatusCommand extends Command {
-  readonly commandType: 'TransitionDealStatus'
+export interface TransitionCommercialAgreementStatusCommand extends Command {
+  readonly commandType: 'TransitionCommercialAgreementStatus'
   readonly targetStatus: string
+}
+
+/** @deprecated use `TransitionCommercialAgreementStatusCommand` */
+export type TransitionDealStatusCommand =
+  Omit<TransitionCommercialAgreementStatusCommand, 'commandType'> & {
+  readonly commandType: 'TransitionDealStatus'
 }
 
 export interface TransitionContractStatusCommand extends Command {
