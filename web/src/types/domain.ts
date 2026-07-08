@@ -90,6 +90,8 @@ export type Opportunity = TenantScoped & {
   status: OpportunityStatus | string
   visibilityStatus?: OpportunityVisibilityStatus | string
   creatorId?: string
+  /** Canonical party owner — optional in seed; resolved via adapter from creatorId. */
+  ownerPartyId?: string
   location?: string
   /** UX-level main collaboration model (5 models). */
   mainCollaborationModel?: string

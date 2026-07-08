@@ -33,6 +33,8 @@ import { ContractRepository } from './contract-repository.ts'
 import { NotificationRepository } from './notification-repository.ts'
 import { AuditRepository } from './audit-repository.ts'
 import { ProductLanguageSettingsRepository } from './product-language-settings-repository.ts'
+import { PartyRepository } from './party-repository.ts'
+import { PartyMembershipRepository } from './party-membership-repository.ts'
 
 const runtimeMode = environmentContext.runtimeMode
 const storageAdapter = environmentContext.storageAdapter ?? localStorageAdapter
@@ -112,6 +114,18 @@ export const productLanguageSettingsRepository = new ProductLanguageSettingsRepo
   storageAdapter,
 )
 
+export const partyRepository = new PartyRepository(
+  storageAdapter,
+  loadUsers,
+  loadCompanies,
+)
+
+export const partyMembershipRepository = new PartyMembershipRepository(
+  storageAdapter,
+  loadUsers,
+  loadCompanies,
+)
+
 export {
   UserRepository,
   CompanyRepository,
@@ -128,6 +142,8 @@ export {
   NotificationRepository,
   AuditRepository,
   ProductLanguageSettingsRepository,
+  PartyRepository,
+  PartyMembershipRepository,
 }
 
 export { loadPendingUsers, loadAuditLog, loadContracts }

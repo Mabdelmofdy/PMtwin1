@@ -136,6 +136,35 @@ export type SubModelEligibility = {
   readonly reason?: string
 }
 
+export type RelationshipType = 'B2B' | 'B2P' | 'P2B' | 'P2P'
+
+export type OwnershipPolicyMode = 'single' | 'shared' | 'multi'
+
+export type OwnershipPolicy = {
+  readonly mode: OwnershipPolicyMode
+  readonly transferable: boolean
+  readonly requiresPrimaryOwner: boolean
+}
+
+export type ParticipantConstraints = {
+  readonly minimumParticipants: number
+  readonly maximumParticipants: number | 'unlimited'
+  readonly recommendedParticipants: number
+}
+
+export type CollaborationApplicability = {
+  readonly allowedPartyTypes?: readonly ('company' | 'individual')[]
+  readonly primaryRelationship?: RelationshipType
+  readonly supportedRelationships: readonly RelationshipType[]
+  readonly supportsB2B?: boolean
+  readonly supportsB2P?: boolean
+  readonly supportsP2B?: boolean
+  readonly supportsP2P?: boolean
+  readonly ownershipPolicy: OwnershipPolicy
+  readonly participantConstraints: ParticipantConstraints
+  readonly reason?: string
+}
+
 export type SubModelDefinition = {
   readonly key: SubModelType
   readonly name: string
@@ -149,8 +178,15 @@ export type SubModelDefinition = {
   /** Temporary compatibility layer — future: generate from knowledge.dynamicForm. */
   readonly attributes: readonly SubModelFieldDefinition[]
   readonly eligibility?: SubModelEligibility
+  /** Party-driven applicability — canonical Sprint 2.5 metadata. */
+  readonly applicability?: CollaborationApplicability
   /** Canonical Collaboration Knowledge Engine payload. */
   readonly knowledge: SubModelKnowledge
+}
+
+export type PartyEligibilityValidationContext = {
+  readonly ownerPartyType: 'company' | 'individual'
+  readonly participantPartyType?: 'company' | 'individual'
 }
 
 export type MainCollaborationModelDefinition = {

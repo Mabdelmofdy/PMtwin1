@@ -8,6 +8,7 @@ import type {
   PlatformUser,
   ProductLanguageSettings,
 } from './domain.ts'
+import type { Party, PartyMembership } from '@pm-twin/party'
 
 export interface IStorageAdapter {
   get<T>(key: string): T | null
@@ -49,6 +50,12 @@ export type Overrides = {
   auditSnapshot?: AuditEntry[]
   newAuditEntries?: AuditEntry[]
   productLanguageSettings?: Record<string, ProductLanguageSettings>
+  parties?: Record<string, Partial<Party>>
+  newParties?: Party[]
+  deletedParties?: string[]
+  partyMemberships?: Record<string, Partial<PartyMembership>>
+  newPartyMemberships?: PartyMembership[]
+  deletedPartyMemberships?: string[]
 }
 
 export const OVERRIDES_KEY = 'pmtwin_web_overrides'

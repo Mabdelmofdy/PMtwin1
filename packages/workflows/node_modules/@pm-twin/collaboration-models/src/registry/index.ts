@@ -32,6 +32,10 @@ export function getSubModel(key: string): SubModelDefinition | undefined {
   return SUB_MODEL_REGISTRY[key]
 }
 
+export function getSubModelApplicability(key: string) {
+  return SUB_MODEL_REGISTRY[key]?.applicability
+}
+
 export function listMainCollaborationModels(): readonly MainCollaborationModelDefinition[] {
   return Object.values(MAIN_MODEL_REGISTRY)
 }

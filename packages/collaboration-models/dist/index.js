@@ -1735,6 +1735,201 @@ var SUB_MODEL_KNOWLEDGE = {
   }
 };
 
+// ../party/dist/index.js
+function canPartyOwnSubModel(partyType, applicability) {
+  if (!applicability) return true;
+  if (!applicability.allowedPartyTypes?.length) return true;
+  return applicability.allowedPartyTypes.includes(partyType);
+}
+function getRelationshipType(ownerType, participantType) {
+  if (ownerType === "company" && participantType === "company") return "B2B";
+  if (ownerType === "company" && participantType === "individual") return "B2P";
+  if (ownerType === "individual" && participantType === "company") return "P2B";
+  return "P2P";
+}
+function resolvePrimaryRelationship(applicability) {
+  if (applicability.primaryRelationship) return applicability.primaryRelationship;
+  return applicability.supportedRelationships[0];
+}
+function relationshipFlagsFromSupported(supported) {
+  return {
+    supportsB2B: supported.includes("B2B"),
+    supportsB2P: supported.includes("B2P"),
+    supportsP2B: supported.includes("P2B"),
+    supportsP2P: supported.includes("P2P")
+  };
+}
+function isRelationshipSupported(applicability, relationship) {
+  if (applicability.supportedRelationships.includes(relationship)) return true;
+  switch (relationship) {
+    case "B2B":
+      return applicability.supportsB2B === true;
+    case "B2P":
+      return applicability.supportsB2P === true;
+    case "P2B":
+      return applicability.supportsP2B === true;
+    case "P2P":
+      return applicability.supportsP2P === true;
+    default:
+      return false;
+  }
+}
+function canPartyParticipate(ownerType, participantType, applicability) {
+  if (!applicability) return true;
+  const relationship = getRelationshipType(ownerType, participantType);
+  return isRelationshipSupported(applicability, relationship);
+}
+function validatePartyEligibility(context, applicability) {
+  const errors = [];
+  const warnings = [];
+  if (!applicability) {
+    return { valid: true, errors, warnings };
+  }
+  if (!canPartyOwnSubModel(context.ownerPartyType, applicability)) {
+    errors.push(
+      applicability.reason ?? `Party type "${context.ownerPartyType}" cannot own this collaboration sub-model`
+    );
+  }
+  if (context.participantPartyType) {
+    if (!canPartyParticipate(
+      context.ownerPartyType,
+      context.participantPartyType,
+      applicability
+    )) {
+      const relationship = getRelationshipType(
+        context.ownerPartyType,
+        context.participantPartyType
+      );
+      errors.push(
+        `Relationship ${relationship} is not supported for this collaboration sub-model`
+      );
+    }
+  }
+  const primary = resolvePrimaryRelationship(applicability);
+  if (primary && context.participantPartyType) {
+    const actual = getRelationshipType(context.ownerPartyType, context.participantPartyType);
+    if (actual !== primary) {
+      warnings.push(
+        `Primary relationship for this sub-model is ${primary}; current pairing is ${actual}`
+      );
+    }
+  }
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings
+  };
+}
+
+// src/registry/applicability-data.ts
+function buildApplicability(supportedRelationships, ownershipPolicy, participantConstraints, options = {}) {
+  return {
+    allowedPartyTypes: options.allowedPartyTypes,
+    primaryRelationship: options.primaryRelationship ?? supportedRelationships[0],
+    supportedRelationships,
+    ...relationshipFlagsFromSupported(supportedRelationships),
+    ownershipPolicy,
+    participantConstraints,
+    reason: options.reason
+  };
+}
+var ALL = ["B2B", "B2P", "P2B", "P2P"];
+var B2B_ONLY = ["B2B"];
+var HIRING = ["B2P", "P2B"];
+var B2B_B2P_P2B = ["B2B", "B2P", "P2B"];
+var SUB_MODEL_APPLICABILITY = {
+  task_based: buildApplicability(
+    ALL,
+    { mode: "single", transferable: true, requiresPrimaryOwner: true },
+    { minimumParticipants: 1, maximumParticipants: 1, recommendedParticipants: 1 },
+    { primaryRelationship: "B2B" }
+  ),
+  consortium: buildApplicability(
+    B2B_ONLY,
+    { mode: "multi", transferable: false, requiresPrimaryOwner: true },
+    { minimumParticipants: 2, maximumParticipants: "unlimited", recommendedParticipants: 4 },
+    { allowedPartyTypes: ["company"], primaryRelationship: "B2B" }
+  ),
+  project_jv: buildApplicability(
+    B2B_ONLY,
+    { mode: "shared", transferable: false, requiresPrimaryOwner: true },
+    { minimumParticipants: 2, maximumParticipants: "unlimited", recommendedParticipants: 2 },
+    {
+      allowedPartyTypes: ["company"],
+      primaryRelationship: "B2B",
+      reason: "Project-Specific Joint Venture requires a company entity"
+    }
+  ),
+  spv: buildApplicability(
+    B2B_ONLY,
+    { mode: "shared", transferable: false, requiresPrimaryOwner: true },
+    { minimumParticipants: 2, maximumParticipants: "unlimited", recommendedParticipants: 3 },
+    {
+      allowedPartyTypes: ["company"],
+      primaryRelationship: "B2B",
+      reason: "SPV is a corporate structure available to companies only"
+    }
+  ),
+  strategic_jv: buildApplicability(
+    B2B_ONLY,
+    { mode: "shared", transferable: false, requiresPrimaryOwner: true },
+    { minimumParticipants: 2, maximumParticipants: "unlimited", recommendedParticipants: 2 },
+    {
+      allowedPartyTypes: ["company"],
+      primaryRelationship: "B2B",
+      reason: "Strategic Joint Venture requires a company entity"
+    }
+  ),
+  strategic_alliance: buildApplicability(
+    ALL,
+    { mode: "shared", transferable: true, requiresPrimaryOwner: true },
+    { minimumParticipants: 2, maximumParticipants: "unlimited", recommendedParticipants: 2 },
+    { primaryRelationship: "B2B" }
+  ),
+  mentorship: buildApplicability(
+    ["P2P", "B2P", "P2B"],
+    { mode: "single", transferable: false, requiresPrimaryOwner: true },
+    { minimumParticipants: 1, maximumParticipants: 2, recommendedParticipants: 1 },
+    { primaryRelationship: "P2P" }
+  ),
+  bulk_purchasing: buildApplicability(
+    ["B2B", "B2P"],
+    { mode: "multi", transferable: false, requiresPrimaryOwner: true },
+    { minimumParticipants: 2, maximumParticipants: "unlimited", recommendedParticipants: 3 },
+    { primaryRelationship: "B2B" }
+  ),
+  equipment_sharing: buildApplicability(
+    ALL,
+    { mode: "shared", transferable: true, requiresPrimaryOwner: true },
+    { minimumParticipants: 2, maximumParticipants: "unlimited", recommendedParticipants: 2 },
+    { primaryRelationship: "B2B" }
+  ),
+  resource_sharing: buildApplicability(
+    ALL,
+    { mode: "shared", transferable: true, requiresPrimaryOwner: false },
+    { minimumParticipants: 2, maximumParticipants: "unlimited", recommendedParticipants: 2 },
+    { primaryRelationship: "B2P" }
+  ),
+  professional_hiring: buildApplicability(
+    HIRING,
+    { mode: "single", transferable: false, requiresPrimaryOwner: true },
+    { minimumParticipants: 1, maximumParticipants: 1, recommendedParticipants: 1 },
+    { allowedPartyTypes: ["company"], primaryRelationship: "B2P" }
+  ),
+  consultant_hiring: buildApplicability(
+    B2B_B2P_P2B,
+    { mode: "single", transferable: true, requiresPrimaryOwner: true },
+    { minimumParticipants: 1, maximumParticipants: "unlimited", recommendedParticipants: 1 },
+    { primaryRelationship: "B2P" }
+  ),
+  competition_rfp: buildApplicability(
+    ALL,
+    { mode: "single", transferable: false, requiresPrimaryOwner: true },
+    { minimumParticipants: 1, maximumParticipants: "unlimited", recommendedParticipants: 3 },
+    { primaryRelationship: "B2B" }
+  )
+};
+
 // src/registry/registry-data.ts
 var SUB_MODEL_REGISTRY = {
   task_based: {
@@ -1748,6 +1943,7 @@ var SUB_MODEL_REGISTRY = {
     requiredFields: ["detailedScope", "requiredSkills", "duration", "startDate"],
     recommendedFields: ["taskTitle", "taskType", "paymentTerms", "experienceLevel"],
     attributes: TASK_BASED_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.task_based,
     knowledge: SUB_MODEL_KNOWLEDGE.task_based
   },
   consortium: {
@@ -1761,6 +1957,7 @@ var SUB_MODEL_REGISTRY = {
     requiredFields: ["memberRoles", "requiredMembers", "minimumRequirements"],
     recommendedFields: ["projectTitle", "scopeDivision", "tenderDeadline"],
     attributes: CONSORTIUM_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.consortium,
     knowledge: SUB_MODEL_KNOWLEDGE.consortium
   },
   project_jv: {
@@ -1778,6 +1975,7 @@ var SUB_MODEL_REGISTRY = {
       allowedEntityTypes: ["company"],
       reason: "Project-Specific Joint Venture requires a company entity"
     },
+    applicability: SUB_MODEL_APPLICABILITY.project_jv,
     knowledge: SUB_MODEL_KNOWLEDGE.project_jv
   },
   spv: {
@@ -1795,6 +1993,7 @@ var SUB_MODEL_REGISTRY = {
       allowedEntityTypes: ["company"],
       reason: "SPV is a corporate structure available to companies only"
     },
+    applicability: SUB_MODEL_APPLICABILITY.spv,
     knowledge: SUB_MODEL_KNOWLEDGE.spv
   },
   strategic_jv: {
@@ -1812,6 +2011,7 @@ var SUB_MODEL_REGISTRY = {
       allowedEntityTypes: ["company"],
       reason: "Strategic Joint Venture requires a company entity"
     },
+    applicability: SUB_MODEL_APPLICABILITY.strategic_jv,
     knowledge: SUB_MODEL_KNOWLEDGE.strategic_jv
   },
   strategic_alliance: {
@@ -1825,6 +2025,7 @@ var SUB_MODEL_REGISTRY = {
     requiredFields: ["scopeOfCollaboration", "duration", "financialTerms"],
     recommendedFields: ["allianceTitle", "allianceType", "governance"],
     attributes: STRATEGIC_ALLIANCE_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.strategic_alliance,
     knowledge: SUB_MODEL_KNOWLEDGE.strategic_alliance
   },
   mentorship: {
@@ -1838,6 +2039,7 @@ var SUB_MODEL_REGISTRY = {
     requiredFields: ["targetSkills", "duration", "mentorshipType"],
     recommendedFields: ["mentorshipTitle", "format", "compensation"],
     attributes: MENTORSHIP_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.mentorship,
     knowledge: SUB_MODEL_KNOWLEDGE.mentorship
   },
   bulk_purchasing: {
@@ -1851,6 +2053,7 @@ var SUB_MODEL_REGISTRY = {
     requiredFields: ["productService", "quantityNeeded", "participantsNeeded"],
     recommendedFields: ["deliveryTimeline", "targetPrice"],
     attributes: BULK_PURCHASING_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.bulk_purchasing,
     knowledge: SUB_MODEL_KNOWLEDGE.bulk_purchasing
   },
   equipment_sharing: {
@@ -1864,6 +2067,7 @@ var SUB_MODEL_REGISTRY = {
     requiredFields: ["assetType", "assetLocation", "availability", "usageSchedule"],
     recommendedFields: ["assetDescription", "ownershipStructure"],
     attributes: EQUIPMENT_SHARING_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.equipment_sharing,
     knowledge: SUB_MODEL_KNOWLEDGE.equipment_sharing
   },
   resource_sharing: {
@@ -1877,6 +2081,7 @@ var SUB_MODEL_REGISTRY = {
     requiredFields: ["resourceType", "location", "availability"],
     recommendedFields: ["resourceTitle", "transactionType"],
     attributes: RESOURCE_SHARING_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.resource_sharing,
     knowledge: SUB_MODEL_KNOWLEDGE.resource_sharing
   },
   professional_hiring: {
@@ -1890,6 +2095,7 @@ var SUB_MODEL_REGISTRY = {
     requiredFields: ["jobTitle", "requiredExperience", "salaryRange", "startDate"],
     recommendedFields: ["requiredSkills", "contractDuration", "employmentType"],
     attributes: PROFESSIONAL_HIRING_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.professional_hiring,
     knowledge: SUB_MODEL_KNOWLEDGE.professional_hiring
   },
   consultant_hiring: {
@@ -1903,6 +2109,7 @@ var SUB_MODEL_REGISTRY = {
     requiredFields: ["consultationType", "scopeOfWork", "deliverables", "budget"],
     recommendedFields: ["consultationTitle", "duration", "paymentTerms"],
     attributes: CONSULTANT_HIRING_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.consultant_hiring,
     knowledge: SUB_MODEL_KNOWLEDGE.consultant_hiring
   },
   competition_rfp: {
@@ -1916,6 +2123,7 @@ var SUB_MODEL_REGISTRY = {
     requiredFields: ["submissionDeadline", "evaluationCriteria", "prizeContractValue"],
     recommendedFields: ["competitionTitle", "competitionRules", "eligibilityCriteria"],
     attributes: COMPETITION_RFP_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.competition_rfp,
     knowledge: SUB_MODEL_KNOWLEDGE.competition_rfp
   }
 };
@@ -2006,6 +2214,9 @@ function getModelType(key) {
 }
 function getSubModel(key) {
   return SUB_MODEL_REGISTRY[key];
+}
+function getSubModelApplicability(key) {
+  return SUB_MODEL_REGISTRY[key]?.applicability;
 }
 function listMainCollaborationModels() {
   return Object.values(MAIN_MODEL_REGISTRY);
@@ -2220,7 +2431,7 @@ function validateSubModelAttributes(subModelType, attributes) {
   }
   return { valid: errors.length === 0, errors, warnings: [] };
 }
-function validateOpportunityCollaborationModel(input) {
+function validateOpportunityCollaborationModel(input, partyContext) {
   const taxonomy = validateCollaborationTaxonomy(input);
   if (!taxonomy.valid) return taxonomy;
   const subKey = normalizeSubModelType(input.subModelType, input);
@@ -2229,10 +2440,20 @@ function validateOpportunityCollaborationModel(input) {
     subKey,
     input.collaborationAttributes
   );
+  const errors = [...taxonomy.errors, ...attributes.errors];
+  const warnings = [...taxonomy.warnings, ...attributes.warnings];
+  if (partyContext) {
+    const sub = getSubModel(subKey);
+    const eligibility = validatePartyEligibility(partyContext, sub?.applicability);
+    if (!eligibility.valid) {
+      errors.push(...eligibility.errors);
+    }
+    warnings.push(...eligibility.warnings);
+  }
   return {
-    valid: taxonomy.valid && attributes.valid,
-    errors: [...taxonomy.errors, ...attributes.errors],
-    warnings: [...taxonomy.warnings, ...attributes.warnings]
+    valid: errors.length === 0,
+    errors,
+    warnings
   };
 }
 function recommendMatchingTopology(input) {
@@ -3447,6 +3668,7 @@ export {
   getReadinessDefinition,
   getRiskProfile,
   getSubModel,
+  getSubModelApplicability,
   getValueExchangeReadinessFields,
   getWorkflowMetadata,
   groupFields,

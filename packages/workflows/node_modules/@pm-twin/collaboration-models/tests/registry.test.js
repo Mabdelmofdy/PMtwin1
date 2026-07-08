@@ -31,6 +31,10 @@ describe('collaboration-models registry completeness', () => {
       assert.ok(sub.allowedMatchTopologies.length > 0, `${sub.key} missing match topologies`)
       assert.ok(sub.modelType, `${sub.key} missing modelType`)
       assert.ok(SUB_MODEL_REGISTRY[sub.key], `${sub.key} not in registry`)
+      assert.ok(sub.applicability, `${sub.key} missing applicability`)
+      assert.ok(sub.applicability.supportedRelationships.length > 0, `${sub.key} missing supportedRelationships`)
+      assert.ok(sub.applicability.ownershipPolicy, `${sub.key} missing ownershipPolicy`)
+      assert.ok(sub.applicability.participantConstraints, `${sub.key} missing participantConstraints`)
     }
   })
 
@@ -183,6 +187,42 @@ describe('sub-model business validation', () => {
         requiredSkills: ['Structural'],
         duration: 30,
         startDate: '2026-08-01',
+      },
+    })
+    assert.equal(valid.valid, true)
+  })
+
+  it('rejects ineligible owner party type when context provided', () => {
+    const invalid = validateOpportunityCollaborationModel(
+      {
+        mainCollaborationModel: 'joint_venture',
+        modelType: 'project_based',
+        subModelType: 'project_jv',
+        exchangeMode: 'equity',
+        collaborationAttributes: {
+          partnerRoles: ['Lead'],
+          equitySplit: [{ partner: 'A', percentage: 50 }, { partner: 'B', percentage: 50 }],
+          capitalContribution: 1000000,
+          profitDistribution: [{ partner: 'A', percentage: 50 }, { partner: 'B', percentage: 50 }],
+        },
+      },
+      { ownerPartyType: 'individual' },
+    )
+    assert.equal(invalid.valid, false)
+    assert.ok(invalid.errors.some((e) => e.includes('company')))
+  })
+
+  it('keeps validation unchanged when party context omitted', () => {
+    const valid = validateOpportunityCollaborationModel({
+      mainCollaborationModel: 'joint_venture',
+      modelType: 'project_based',
+      subModelType: 'project_jv',
+      exchangeMode: 'equity',
+      collaborationAttributes: {
+        partnerRoles: ['Lead'],
+        equitySplit: [{ partner: 'A', percentage: 50 }, { partner: 'B', percentage: 50 }],
+        capitalContribution: 1000000,
+        profitDistribution: [{ partner: 'A', percentage: 50 }, { partner: 'B', percentage: 50 }],
       },
     })
     assert.equal(valid.valid, true)

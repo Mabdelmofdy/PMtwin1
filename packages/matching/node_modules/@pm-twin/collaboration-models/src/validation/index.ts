@@ -1,3 +1,4 @@
+import { validatePartyEligibility } from '@pm-twin/party'
 import { getSubModel, listSubModelsForMain } from '../registry/index.ts'
 import type {
   CollaborationTaxonomyInput,
@@ -5,6 +6,7 @@ import type {
   DerivedMatchingTopology,
   ExchangeMode,
   MatchTopology,
+  PartyEligibilityValidationContext,
 } from '../types.ts'
 import {
   inferMainCollaborationModel,
@@ -178,6 +180,7 @@ export function validateSubModelAttributes(
 
 export function validateOpportunityCollaborationModel(
   input: CollaborationTaxonomyInput,
+  partyContext?: PartyEligibilityValidationContext,
 ): CollaborationValidationResult {
   const taxonomy = validateCollaborationTaxonomy(input)
   if (!taxonomy.valid) return taxonomy
@@ -190,10 +193,22 @@ export function validateOpportunityCollaborationModel(
     input.collaborationAttributes,
   )
 
+  const errors = [...taxonomy.errors, ...attributes.errors]
+  const warnings = [...taxonomy.warnings, ...attributes.warnings]
+
+  if (partyContext) {
+    const sub = getSubModel(subKey)
+    const eligibility = validatePartyEligibility(partyContext, sub?.applicability)
+    if (!eligibility.valid) {
+      errors.push(...eligibility.errors)
+    }
+    warnings.push(...eligibility.warnings)
+  }
+
   return {
-    valid: taxonomy.valid && attributes.valid,
-    errors: [...taxonomy.errors, ...attributes.errors],
-    warnings: [...taxonomy.warnings, ...attributes.warnings],
+    valid: errors.length === 0,
+    errors,
+    warnings,
   }
 }
 

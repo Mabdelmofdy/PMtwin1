@@ -13,6 +13,8 @@ export const REPOSITORY_ENTITY_KEYS = {
   negotiation: 'negotiations',
   contract: 'contracts',
   notification: 'notifications',
+  party: 'parties',
+  partyMembership: 'partyMemberships',
 } as const satisfies Record<string, keyof Overrides>
 
 /** Keys that must never be shared across repositories (excluding append-only audit). */

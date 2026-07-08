@@ -1,5 +1,6 @@
 import type { MainCollaborationModelDefinition, ModelTypeDefinition, SubModelDefinition } from '../types.ts'
 import { SUB_MODEL_KNOWLEDGE } from '../knowledge/catalog.ts'
+import { SUB_MODEL_APPLICABILITY } from './applicability-data.ts'
 import {
   BULK_PURCHASING_ATTRIBUTES,
   COMPETITION_RFP_ATTRIBUTES,
@@ -28,6 +29,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['detailedScope', 'requiredSkills', 'duration', 'startDate'],
     recommendedFields: ['taskTitle', 'taskType', 'paymentTerms', 'experienceLevel'],
     attributes: TASK_BASED_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.task_based,
     knowledge: SUB_MODEL_KNOWLEDGE.task_based,
   },
   consortium: {
@@ -41,6 +43,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['memberRoles', 'requiredMembers', 'minimumRequirements'],
     recommendedFields: ['projectTitle', 'scopeDivision', 'tenderDeadline'],
     attributes: CONSORTIUM_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.consortium,
     knowledge: SUB_MODEL_KNOWLEDGE.consortium,
   },
   project_jv: {
@@ -58,6 +61,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
       allowedEntityTypes: ['company'],
       reason: 'Project-Specific Joint Venture requires a company entity',
     },
+    applicability: SUB_MODEL_APPLICABILITY.project_jv,
     knowledge: SUB_MODEL_KNOWLEDGE.project_jv,
   },
   spv: {
@@ -75,6 +79,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
       allowedEntityTypes: ['company'],
       reason: 'SPV is a corporate structure available to companies only',
     },
+    applicability: SUB_MODEL_APPLICABILITY.spv,
     knowledge: SUB_MODEL_KNOWLEDGE.spv,
   },
   strategic_jv: {
@@ -92,6 +97,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
       allowedEntityTypes: ['company'],
       reason: 'Strategic Joint Venture requires a company entity',
     },
+    applicability: SUB_MODEL_APPLICABILITY.strategic_jv,
     knowledge: SUB_MODEL_KNOWLEDGE.strategic_jv,
   },
   strategic_alliance: {
@@ -105,6 +111,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['scopeOfCollaboration', 'duration', 'financialTerms'],
     recommendedFields: ['allianceTitle', 'allianceType', 'governance'],
     attributes: STRATEGIC_ALLIANCE_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.strategic_alliance,
     knowledge: SUB_MODEL_KNOWLEDGE.strategic_alliance,
   },
   mentorship: {
@@ -118,6 +125,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['targetSkills', 'duration', 'mentorshipType'],
     recommendedFields: ['mentorshipTitle', 'format', 'compensation'],
     attributes: MENTORSHIP_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.mentorship,
     knowledge: SUB_MODEL_KNOWLEDGE.mentorship,
   },
   bulk_purchasing: {
@@ -131,6 +139,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['productService', 'quantityNeeded', 'participantsNeeded'],
     recommendedFields: ['deliveryTimeline', 'targetPrice'],
     attributes: BULK_PURCHASING_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.bulk_purchasing,
     knowledge: SUB_MODEL_KNOWLEDGE.bulk_purchasing,
   },
   equipment_sharing: {
@@ -144,6 +153,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['assetType', 'assetLocation', 'availability', 'usageSchedule'],
     recommendedFields: ['assetDescription', 'ownershipStructure'],
     attributes: EQUIPMENT_SHARING_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.equipment_sharing,
     knowledge: SUB_MODEL_KNOWLEDGE.equipment_sharing,
   },
   resource_sharing: {
@@ -157,6 +167,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['resourceType', 'location', 'availability'],
     recommendedFields: ['resourceTitle', 'transactionType'],
     attributes: RESOURCE_SHARING_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.resource_sharing,
     knowledge: SUB_MODEL_KNOWLEDGE.resource_sharing,
   },
   professional_hiring: {
@@ -170,6 +181,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['jobTitle', 'requiredExperience', 'salaryRange', 'startDate'],
     recommendedFields: ['requiredSkills', 'contractDuration', 'employmentType'],
     attributes: PROFESSIONAL_HIRING_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.professional_hiring,
     knowledge: SUB_MODEL_KNOWLEDGE.professional_hiring,
   },
   consultant_hiring: {
@@ -183,6 +195,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['consultationType', 'scopeOfWork', 'deliverables', 'budget'],
     recommendedFields: ['consultationTitle', 'duration', 'paymentTerms'],
     attributes: CONSULTANT_HIRING_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.consultant_hiring,
     knowledge: SUB_MODEL_KNOWLEDGE.consultant_hiring,
   },
   competition_rfp: {
@@ -196,6 +209,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['submissionDeadline', 'evaluationCriteria', 'prizeContractValue'],
     recommendedFields: ['competitionTitle', 'competitionRules', 'eligibilityCriteria'],
     attributes: COMPETITION_RFP_ATTRIBUTES,
+    applicability: SUB_MODEL_APPLICABILITY.competition_rfp,
     knowledge: SUB_MODEL_KNOWLEDGE.competition_rfp,
   },
 }
