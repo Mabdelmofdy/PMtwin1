@@ -104,7 +104,7 @@ const WIZARD_STEPS: readonly PmFormStepperStep[] = [
 
 type OpportunityDraft = {
   title: string
-  intent: 'need' | 'offer'
+  intent: 'need' | 'offer' | ''
   description: string
   location: string
   mainCollaborationModel: string
@@ -119,12 +119,16 @@ type OpportunityDraft = {
   startDate: string
   tenderDeadline: string
   collaborationAttributes: Record<string, unknown>
+  preferredPartnerType: string
+  attachmentsText: string
+  complianceRequirementsText: string
+  deliveryMilestonesText: string
 }
 
-/** New drafts start empty — readinessScore must be 0 (no pre-filled demo models). */
+/** New drafts start empty — readinessScore must be 0 (no pre-filled demo models/intent). */
 const initialDraft: OpportunityDraft = {
   title: EMPTY_OPPORTUNITY_WIZARD_DRAFT.title ?? '',
-  intent: 'need',
+  intent: '',
   description: EMPTY_OPPORTUNITY_WIZARD_DRAFT.description ?? '',
   location: EMPTY_OPPORTUNITY_WIZARD_DRAFT.location ?? '',
   mainCollaborationModel: EMPTY_OPPORTUNITY_WIZARD_DRAFT.mainCollaborationModel ?? '',
@@ -139,10 +143,36 @@ const initialDraft: OpportunityDraft = {
   startDate: EMPTY_OPPORTUNITY_WIZARD_DRAFT.startDate ?? '',
   tenderDeadline: EMPTY_OPPORTUNITY_WIZARD_DRAFT.tenderDeadline ?? '',
   collaborationAttributes: {},
+  preferredPartnerType: '',
+  attachmentsText: '',
+  complianceRequirementsText: '',
+  deliveryMilestonesText: '',
 }
 
 function toWizardDraft(draft: OpportunityDraft): OpportunityWizardDraft {
   return draft
+}
+
+function formatNameList(
+  values: ReadonlyArray<{ name?: string } | string> | undefined,
+): string {
+  if (!values?.length) return ''
+  return values
+    .map((item) => (typeof item === 'string' ? item : item.name ?? ''))
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .join(', ')
+}
+
+function formatMilestoneList(
+  values: ReadonlyArray<{ title?: string } | string> | undefined,
+): string {
+  if (!values?.length) return ''
+  return values
+    .map((item) => (typeof item === 'string' ? item : item.title ?? ''))
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .join(', ')
 }
 
 function splitCsv(value: string): string[] {
@@ -182,17 +212,22 @@ function buildOpportunityDraftInput(draft: OpportunityDraft): Record<string, unk
     : {}
 
   const base = buildOpportunityWizardReadinessInput(toWizardDraft(draft))
+  const exchangePayload = hasCollaborationSelection
+    ? buildValueExchangeDraftPayload(draft)
+    : {}
 
   return {
     ...base,
     ...collaborationPatch,
     scope: {
+      ...(base.scope as Record<string, unknown>),
       sectors,
-      ...(draft.intent === 'need'
-        ? { requiredSkills: skills, coreSkills: skills }
-        : { offeredSkills: skills, coreSkills: skills }),
+      ...(draft.intent === 'offer'
+        ? { offeredSkills: skills, coreSkills: skills }
+        : { requiredSkills: skills, coreSkills: skills }),
     },
     attributes: {
+      ...(base.attributes as Record<string, unknown>),
       targetRole: draft.targetRole,
       startDate: draft.startDate || undefined,
       tenderDeadline: draft.tenderDeadline || undefined,
@@ -210,15 +245,14 @@ function buildOpportunityDraftInput(draft: OpportunityDraft): Record<string, unk
       startDate: (draft.collaborationAttributes.startDate ?? draft.startDate) || undefined,
     },
     exchangeData: {
-      ...(hasCollaborationSelection
-        ? buildValueExchangeDraftPayload(draft)
-        : {}),
+      ...(base.exchangeData as Record<string, unknown>),
+      ...exchangePayload,
       ...(draft.exchangeMode ? { exchangeMode: draft.exchangeMode } : {}),
     },
     normalized: {
-      ...(draft.intent === 'need'
-        ? { requiredServices: services }
-        : { offeredServices: services }),
+      ...(draft.intent === 'offer'
+        ? { offeredServices: services }
+        : { requiredServices: services }),
     },
   }
 }
@@ -233,7 +267,7 @@ function buildCollaborationCommandPayload(
   return {
     title: draft.title,
     description: draft.description,
-    intent: draft.intent,
+    intent: draft.intent === 'offer' || draft.intent === 'need' ? draft.intent : undefined,
     location: draft.location,
     creatorId,
     mainCollaborationModel: draft.mainCollaborationModel,
@@ -245,7 +279,13 @@ function buildCollaborationCommandPayload(
     scope: built.scope as Record<string, unknown>,
     attributes: built.attributes as Record<string, unknown>,
     normalized: built.normalized as Record<string, unknown>,
+    exchangeData: built.exchangeData as Record<string, unknown>,
     paymentModes: draft.paymentModes,
+    preferredPartnerType: draft.preferredPartnerType || undefined,
+    attachments: built.attachments as OpportunityCollaborationPayload['attachments'],
+    complianceRequirements: built.complianceRequirements as string[] | undefined,
+    deliveryMilestones:
+      built.deliveryMilestones as OpportunityCollaborationPayload['deliveryMilestones'],
   }
 }
 
@@ -824,6 +864,13 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         ?? existingOpportunity.paymentModes
         ?? (existingOpportunity.exchangeMode ? [existingOpportunity.exchangeMode] : []),
       collaborationAttributes: existingOpportunity.collaborationAttributes ?? {},
+      preferredPartnerType:
+        existingOpportunity.preferredPartnerType
+        ?? existingOpportunity.attributes?.preferredPartnerType
+        ?? '',
+      attachmentsText: formatNameList(existingOpportunity.attachments),
+      complianceRequirementsText: (existingOpportunity.complianceRequirements ?? []).join(', '),
+      deliveryMilestonesText: formatMilestoneList(existingOpportunity.deliveryMilestones),
     })
   }, [existingOpportunity])
 
@@ -834,24 +881,14 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       : built
   }, [draft, existingOpportunity, resolvedOpportunityId])
 
+  // Single source of truth: field-level readiness (same as publish gate).
   const wizardReadiness = useMemo(
     () => evaluateOpportunityWizardReadiness(toWizardDraft(draft)),
     [draft],
   )
 
   const wizardReadinessResult = useMemo(
-    () => ({
-      score: wizardReadiness.readinessScore,
-      status: wizardReadiness.status,
-      missingRequired: wizardReadiness.stages
-        .filter((stage) => !stage.complete)
-        .map((stage) => stage.label),
-      missingRecommended: [] as readonly string[],
-      presentRequired: wizardReadiness.stages
-        .filter((stage) => stage.complete)
-        .map((stage) => stage.label),
-      presentRecommended: [] as readonly string[],
-    }),
+    () => wizardReadiness.fieldReadiness,
     [wizardReadiness],
   )
 
@@ -1294,6 +1331,64 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                   />
                 </PmFormField>
               ) : null}
+            </PmFormGrid>
+          </PmFormSection>
+
+          <PmFormSection
+            title="Recommended details"
+            description="Optional fields that raise Completion Score to 100%. Required fields alone unlock publish at 80%+."
+            className="mt-4"
+          >
+            <PmFormGrid columns={2}>
+              <PmFormField id="opp-partner-type" label="Preferred partner type">
+                <Select
+                  value={draft.preferredPartnerType || undefined}
+                  onValueChange={(value) => updateDraft('preferredPartnerType', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select partner type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="company">Company</SelectItem>
+                    <SelectItem value="individual">Individual</SelectItem>
+                    <SelectItem value="consultant">Consultant</SelectItem>
+                    <SelectItem value="general_contractor">General contractor</SelectItem>
+                  </SelectContent>
+                </Select>
+              </PmFormField>
+              <PmFormField
+                id="opp-attachments"
+                label="Attachments / portfolio"
+                help="Comma-separated reference names"
+              >
+                <Input
+                  value={draft.attachmentsText}
+                  onChange={(e) => updateDraft('attachmentsText', e.target.value)}
+                  placeholder="design-brief.pdf, portfolio.pdf"
+                />
+              </PmFormField>
+              <PmFormField
+                id="opp-compliance"
+                label="Compliance requirements"
+                help="Comma-separated"
+              >
+                <Input
+                  value={draft.complianceRequirementsText}
+                  onChange={(e) => updateDraft('complianceRequirementsText', e.target.value)}
+                  placeholder="Saudi Building Code, PDPL"
+                />
+              </PmFormField>
+              <PmFormField
+                id="opp-milestones"
+                label="Delivery milestones"
+                help="Comma-separated milestone titles"
+              >
+                <Input
+                  value={draft.deliveryMilestonesText}
+                  onChange={(e) => updateDraft('deliveryMilestonesText', e.target.value)}
+                  placeholder="Concept design, Delivery kickoff"
+                />
+              </PmFormField>
             </PmFormGrid>
           </PmFormSection>
         </PmFormWizardStep>

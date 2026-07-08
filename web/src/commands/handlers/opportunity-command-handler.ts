@@ -149,6 +149,12 @@ function payloadToOpportunityFields(
     attributes: payload.attributes as Opportunity['attributes'],
     exchangeData: payload.exchangeData,
     normalized: payload.normalized,
+    preferredPartnerType: payload.preferredPartnerType,
+    attachments: payload.attachments as Opportunity['attachments'],
+    complianceRequirements: payload.complianceRequirements
+      ? [...payload.complianceRequirements]
+      : undefined,
+    deliveryMilestones: payload.deliveryMilestones as Opportunity['deliveryMilestones'],
     ...(hasCollaborationSelection
       ? {
           value_exchange: {
@@ -284,6 +290,13 @@ export class OpportunityCommandHandler {
         attributes: payload.attributes,
         exchangeData: payload.exchangeData,
         normalized: payload.normalized,
+        preferredPartnerType:
+          payload.preferredPartnerType ?? existing.preferredPartnerType,
+        attachments: payload.attachments ?? existing.attachments,
+        complianceRequirements:
+          payload.complianceRequirements ?? existing.complianceRequirements,
+        deliveryMilestones:
+          payload.deliveryMilestones ?? existing.deliveryMilestones,
       }),
     }
 

@@ -12,8 +12,20 @@ export function PublishReadinessAlert({
   details?: readonly string[]
   className?: string
 }) {
-  const profileLines = extractSection(details, 'Profile missing:')
-  const opportunityLines = extractSection(details, 'Opportunity missing:')
+  const profileRequired = extractSection(details, 'Profile required:')
+  const profileRecommended = extractSection(details, 'Profile recommended:')
+  const opportunityRequired = extractSection(details, 'Opportunity required:')
+  const opportunityRecommended = extractSection(details, 'Opportunity recommended:')
+
+  // Legacy combined headings when finer sections are absent.
+  const profileMissing =
+    profileRequired.length === 0 && profileRecommended.length === 0
+      ? extractSection(details, 'Profile missing:')
+      : []
+  const opportunityMissing =
+    opportunityRequired.length === 0 && opportunityRecommended.length === 0
+      ? extractSection(details, 'Opportunity missing:')
+      : []
 
   return (
     <PmSurface
@@ -25,27 +37,33 @@ export function PublishReadinessAlert({
       )}
     >
       <p className={cn(pmTypography.label, 'text-warning')}>{message}</p>
-      {profileLines.length > 0 ? (
-        <div className="mt-3">
-          <p className={cn(pmTypography.caption, 'font-medium')}>Profile missing:</p>
-          <ul className={cn('mt-1 list-disc space-y-1 ps-5', pmTypography.bodySm)}>
-            {profileLines.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-      {opportunityLines.length > 0 ? (
-        <div className="mt-3">
-          <p className={cn(pmTypography.caption, 'font-medium')}>Opportunity missing:</p>
-          <ul className={cn('mt-1 list-disc space-y-1 ps-5', pmTypography.bodySm)}>
-            {opportunityLines.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
+      <MissingList heading="Profile required:" items={profileRequired} />
+      <MissingList heading="Profile recommended:" items={profileRecommended} />
+      <MissingList heading="Opportunity required:" items={opportunityRequired} />
+      <MissingList heading="Opportunity recommended:" items={opportunityRecommended} />
+      <MissingList heading="Profile missing:" items={profileMissing} />
+      <MissingList heading="Opportunity missing:" items={opportunityMissing} />
     </PmSurface>
+  )
+}
+
+function MissingList({
+  heading,
+  items,
+}: {
+  heading: string
+  items: readonly string[]
+}) {
+  if (items.length === 0) return null
+  return (
+    <div className="mt-3">
+      <p className={cn(pmTypography.caption, 'font-medium')}>{heading}</p>
+      <ul className={cn('mt-1 list-disc space-y-1 ps-5', pmTypography.bodySm)}>
+        {items.map((item) => (
+          <li key={`${heading}-${item}`}>{item}</li>
+        ))}
+      </ul>
+    </div>
   )
 }
 

@@ -1,3 +1,5 @@
+import type { SubModelKnowledge } from './knowledge/types.ts'
+
 /** Matching topology — never store in subModelType. */
 export type MatchTopology = 'one_way' | 'two_way' | 'consortium' | 'circular'
 
@@ -102,6 +104,15 @@ export type FieldType =
   | 'boolean'
   | 'array-objects'
   | 'array-percentages'
+  | 'datetime'
+  | 'multiselect'
+  | 'location'
+  | 'company'
+  | 'person'
+  | 'skills'
+  | 'equipment'
+  | 'resource'
+  | 'attachment'
 
 export type FieldConditional = {
   readonly field: string
@@ -135,8 +146,11 @@ export type SubModelDefinition = {
   readonly allowedExchangeModes: readonly ExchangeMode[]
   readonly requiredFields: readonly string[]
   readonly recommendedFields: readonly string[]
+  /** Temporary compatibility layer — future: generate from knowledge.dynamicForm. */
   readonly attributes: readonly SubModelFieldDefinition[]
   readonly eligibility?: SubModelEligibility
+  /** Canonical Collaboration Knowledge Engine payload. */
+  readonly knowledge: SubModelKnowledge
 }
 
 export type MainCollaborationModelDefinition = {
@@ -182,3 +196,6 @@ export type ValueExchangeFieldGroup = {
   readonly requiredFields: readonly string[]
   readonly optionalFields: readonly string[]
 }
+
+/** Re-export canonical knowledge type for taxonomy consumers. */
+export type { SubModelKnowledge }

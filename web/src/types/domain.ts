@@ -104,10 +104,26 @@ export type Opportunity = TenantScoped & {
   collaborationAttributes?: Record<string, unknown>
   exchangeData?: Record<string, unknown>
   paymentModes?: string[]
+  /** Recommended readiness — preferred partner segment. */
+  preferredPartnerType?: string
+  /** Recommended readiness — attachment/portfolio references. */
+  attachments?: ReadonlyArray<{ name?: string } | string>
+  /** Recommended readiness — compliance / certification requirements. */
+  complianceRequirements?: readonly string[]
+  /** Recommended readiness — delivery milestones. */
+  deliveryMilestones?: ReadonlyArray<{ title?: string } | string>
   /** Canonical `need` | `offer` | `hybrid`, or legacy `request` (→ need on read). */
   intent?: OpportunityIntentStored
   scope?: { coreSkills?: string[]; sectors?: string[]; requiredSkills?: string[]; offeredSkills?: string[] }
-  attributes?: { coreSkills?: string[]; startDate?: string; tenderDeadline?: string; targetRole?: string }
+  attributes?: {
+    coreSkills?: string[]
+    startDate?: string
+    tenderDeadline?: string
+    targetRole?: string
+    preferredPartnerType?: string
+    deliveryMilestones?: ReadonlyArray<{ title?: string } | string>
+    attachments?: ReadonlyArray<{ name?: string } | string>
+  }
   normalized?: Record<string, unknown>
   value_exchange?: {
     mode?: string

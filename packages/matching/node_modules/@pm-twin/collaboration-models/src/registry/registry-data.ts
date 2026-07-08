@@ -1,124 +1,20 @@
-import type {
-  MainCollaborationModelDefinition,
-  ModelTypeDefinition,
-  SubModelDefinition,
-  SubModelFieldDefinition,
-} from '../types.ts'
-
-function attrs(
-  fields: SubModelFieldDefinition[],
-): readonly SubModelFieldDefinition[] {
-  return fields
-}
-
-const TASK_BASED_ATTRIBUTES = attrs([
-  { key: 'taskTitle', label: 'Task Title', type: 'text', required: true, maxLength: 100 },
-  { key: 'taskType', label: 'Task Type', type: 'select', required: true, options: ['Design', 'Engineering', 'Consultation', 'Review', 'Analysis', 'Other'] },
-  { key: 'detailedScope', label: 'Detailed Scope', type: 'textarea', required: true, maxLength: 2000 },
-  { key: 'duration', label: 'Duration (days)', type: 'number', required: true, min: 1 },
-  { key: 'requiredSkills', label: 'Required Skills', type: 'tags', required: true },
-  { key: 'experienceLevel', label: 'Experience Level', type: 'select', required: true, options: ['Junior', 'Mid-Level', 'Senior', 'Expert'] },
-  { key: 'startDate', label: 'Start Date', type: 'date', required: true },
-  { key: 'paymentTerms', label: 'Payment Terms', type: 'select', required: true, options: ['Upfront', 'Milestone-Based', 'Upon Completion', 'Monthly'] },
-])
-
-const CONSORTIUM_ATTRIBUTES = attrs([
-  { key: 'projectTitle', label: 'Project Title', type: 'text', required: true, maxLength: 150 },
-  { key: 'requiredMembers', label: 'Required Members', type: 'number', required: true, min: 2 },
-  { key: 'memberRoles', label: 'Member Roles', type: 'array-objects', required: true },
-  { key: 'scopeDivision', label: 'Scope Division', type: 'select', required: true, options: ['By Trade', 'By Phase', 'By Geography', 'Mixed'] },
-  { key: 'minimumRequirements', label: 'Minimum Requirements', type: 'array-objects', required: true },
-  { key: 'tenderDeadline', label: 'Tender Deadline', type: 'date', required: false },
-])
-
-const PROJECT_JV_ATTRIBUTES = attrs([
-  { key: 'projectTitle', label: 'Project Title', type: 'text', required: true, maxLength: 150 },
-  { key: 'partnerRoles', label: 'Partner Roles', type: 'array-objects', required: true },
-  { key: 'equitySplit', label: 'Equity Split', type: 'array-percentages', required: true },
-  { key: 'capitalContribution', label: 'Capital Contribution', type: 'currency', required: true },
-  { key: 'profitDistribution', label: 'Profit Distribution', type: 'select', required: true, options: ['Proportional to Equity', 'Fixed Percentage', 'Performance-Based'] },
-  { key: 'governance', label: 'Governance Structure', type: 'textarea', required: false, maxLength: 1000 },
-])
-
-const SPV_ATTRIBUTES = attrs([
-  { key: 'projectTitle', label: 'Project Title', type: 'text', required: true, maxLength: 150 },
-  { key: 'spvLegalForm', label: 'SPV Legal Form', type: 'select', required: true, options: ['LLC', 'Limited Partnership', 'Corporation', 'Trust'] },
-  { key: 'equityStructure', label: 'Equity Structure', type: 'array-objects', required: true },
-  { key: 'projectValue', label: 'Project Value', type: 'currency', required: true, min: 50000000 },
-  { key: 'governanceStructure', label: 'Governance Structure', type: 'textarea', required: true, maxLength: 1000 },
-])
-
-const STRATEGIC_JV_ATTRIBUTES = attrs([
-  { key: 'jvName', label: 'JV Name', type: 'text', required: true, maxLength: 150 },
-  { key: 'strategicObjective', label: 'Strategic Objective', type: 'textarea', required: true, maxLength: 1000 },
-  { key: 'equitySplit', label: 'Equity Split', type: 'array-percentages', required: true },
-  { key: 'partnerContributions', label: 'Partner Contributions', type: 'array-objects', required: true },
-  { key: 'governance', label: 'Governance Structure', type: 'textarea', required: true, maxLength: 1000 },
-])
-
-const STRATEGIC_ALLIANCE_ATTRIBUTES = attrs([
-  { key: 'allianceTitle', label: 'Alliance Title', type: 'text', required: true, maxLength: 150 },
-  { key: 'allianceType', label: 'Alliance Type', type: 'select', required: true, options: ['Preferred Supplier', 'Technology Licensing', 'Market Access', 'Knowledge Sharing', 'Joint Service Offering', 'Other'] },
-  { key: 'scopeOfCollaboration', label: 'Scope of Collaboration', type: 'textarea', required: true, maxLength: 1000 },
-  { key: 'financialTerms', label: 'Financial Terms', type: 'textarea', required: true, maxLength: 1000 },
-  { key: 'duration', label: 'Duration (years)', type: 'number', required: true, min: 3 },
-])
-
-const MENTORSHIP_ATTRIBUTES = attrs([
-  { key: 'mentorshipTitle', label: 'Mentorship Title', type: 'text', required: true, maxLength: 100 },
-  { key: 'mentorshipType', label: 'Mentorship Type', type: 'select', required: true, options: ['Technical', 'Career Development', 'Business', 'Leadership', 'Project Management', 'Design', 'Other'] },
-  { key: 'targetSkills', label: 'Target Skills', type: 'tags', required: true },
-  { key: 'duration', label: 'Duration (months)', type: 'number', required: true },
-])
-
-const BULK_PURCHASING_ATTRIBUTES = attrs([
-  { key: 'productService', label: 'Product/Service', type: 'text', required: true, maxLength: 150 },
-  { key: 'quantityNeeded', label: 'Quantity Needed', type: 'number', required: true },
-  { key: 'participantsNeeded', label: 'Participants Needed', type: 'number', required: true },
-  { key: 'deliveryTimeline', label: 'Delivery Timeline', type: 'date-range', required: true },
-])
-
-const EQUIPMENT_SHARING_ATTRIBUTES = attrs([
-  { key: 'assetDescription', label: 'Asset Description', type: 'text', required: true, maxLength: 150 },
-  { key: 'assetType', label: 'Equipment Type', type: 'select', required: true, options: ['Heavy Equipment', 'Vehicles', 'Tools', 'Technology', 'Facility', 'Other'] },
-  { key: 'assetLocation', label: 'Location', type: 'text', required: true },
-  { key: 'availability', label: 'Availability', type: 'date-range', required: true },
-  { key: 'usageSchedule', label: 'Usage Terms', type: 'select', required: true, options: ['Rotation', 'Booking System', 'Priority by Ownership %'] },
-])
-
-const RESOURCE_SHARING_ATTRIBUTES = attrs([
-  { key: 'resourceTitle', label: 'Resource Title', type: 'text', required: true, maxLength: 150 },
-  { key: 'resourceType', label: 'Resource Type', type: 'select', required: true, options: ['Materials', 'Equipment', 'Labor', 'Services', 'Knowledge', 'Other'] },
-  { key: 'location', label: 'Location', type: 'text', required: true },
-  { key: 'availability', label: 'Availability', type: 'date-range', required: true },
-  { key: 'transactionType', label: 'Transaction Type', type: 'select', required: true, options: ['Sell', 'Buy', 'Rent', 'Barter', 'Donate'] },
-])
-
-const PROFESSIONAL_HIRING_ATTRIBUTES = attrs([
-  { key: 'jobTitle', label: 'Role', type: 'text', required: true, maxLength: 100 },
-  { key: 'requiredExperience', label: 'Required Experience (years)', type: 'number', required: true },
-  { key: 'contractDuration', label: 'Duration (months)', type: 'number', required: false },
-  { key: 'salaryRange', label: 'Rate / Salary Range', type: 'currency-range', required: true },
-  { key: 'requiredSkills', label: 'Required Skills', type: 'tags', required: true },
-  { key: 'startDate', label: 'Start Date', type: 'date', required: true },
-])
-
-const CONSULTANT_HIRING_ATTRIBUTES = attrs([
-  { key: 'consultationTitle', label: 'Consultation Title', type: 'text', required: true, maxLength: 100 },
-  { key: 'consultationType', label: 'Specialty', type: 'select', required: true, options: ['Legal', 'Financial', 'Technical', 'Sustainability', 'Safety', 'Design', 'Project Management', 'Other'] },
-  { key: 'scopeOfWork', label: 'Engagement Type / Scope', type: 'textarea', required: true, maxLength: 2000 },
-  { key: 'deliverables', label: 'Deliverables', type: 'tags', required: true },
-  { key: 'budget', label: 'Budget', type: 'currency-range', required: true },
-  { key: 'duration', label: 'Duration', type: 'number', required: true },
-])
-
-const COMPETITION_RFP_ATTRIBUTES = attrs([
-  { key: 'competitionTitle', label: 'Competition Title', type: 'text', required: true, maxLength: 150 },
-  { key: 'submissionDeadline', label: 'Submission Deadline', type: 'date', required: true },
-  { key: 'evaluationCriteria', label: 'Evaluation Criteria', type: 'array-objects', required: true },
-  { key: 'prizeContractValue', label: 'Award Terms / Prize Value', type: 'currency', required: true },
-  { key: 'competitionRules', label: 'Competition Rules', type: 'textarea', required: true, maxLength: 2000 },
-])
+import type { MainCollaborationModelDefinition, ModelTypeDefinition, SubModelDefinition } from '../types.ts'
+import { SUB_MODEL_KNOWLEDGE } from '../knowledge/catalog.ts'
+import {
+  BULK_PURCHASING_ATTRIBUTES,
+  COMPETITION_RFP_ATTRIBUTES,
+  CONSORTIUM_ATTRIBUTES,
+  CONSULTANT_HIRING_ATTRIBUTES,
+  EQUIPMENT_SHARING_ATTRIBUTES,
+  MENTORSHIP_ATTRIBUTES,
+  PROFESSIONAL_HIRING_ATTRIBUTES,
+  PROJECT_JV_ATTRIBUTES,
+  RESOURCE_SHARING_ATTRIBUTES,
+  SPV_ATTRIBUTES,
+  STRATEGIC_ALLIANCE_ATTRIBUTES,
+  STRATEGIC_JV_ATTRIBUTES,
+  TASK_BASED_ATTRIBUTES,
+} from './legacy-attributes.ts'
 
 export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
   task_based: {
@@ -132,6 +28,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['detailedScope', 'requiredSkills', 'duration', 'startDate'],
     recommendedFields: ['taskTitle', 'taskType', 'paymentTerms', 'experienceLevel'],
     attributes: TASK_BASED_ATTRIBUTES,
+    knowledge: SUB_MODEL_KNOWLEDGE.task_based,
   },
   consortium: {
     key: 'consortium',
@@ -144,6 +41,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['memberRoles', 'requiredMembers', 'minimumRequirements'],
     recommendedFields: ['projectTitle', 'scopeDivision', 'tenderDeadline'],
     attributes: CONSORTIUM_ATTRIBUTES,
+    knowledge: SUB_MODEL_KNOWLEDGE.consortium,
   },
   project_jv: {
     key: 'project_jv',
@@ -160,6 +58,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
       allowedEntityTypes: ['company'],
       reason: 'Project-Specific Joint Venture requires a company entity',
     },
+    knowledge: SUB_MODEL_KNOWLEDGE.project_jv,
   },
   spv: {
     key: 'spv',
@@ -176,6 +75,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
       allowedEntityTypes: ['company'],
       reason: 'SPV is a corporate structure available to companies only',
     },
+    knowledge: SUB_MODEL_KNOWLEDGE.spv,
   },
   strategic_jv: {
     key: 'strategic_jv',
@@ -192,6 +92,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
       allowedEntityTypes: ['company'],
       reason: 'Strategic Joint Venture requires a company entity',
     },
+    knowledge: SUB_MODEL_KNOWLEDGE.strategic_jv,
   },
   strategic_alliance: {
     key: 'strategic_alliance',
@@ -204,6 +105,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['scopeOfCollaboration', 'duration', 'financialTerms'],
     recommendedFields: ['allianceTitle', 'allianceType', 'governance'],
     attributes: STRATEGIC_ALLIANCE_ATTRIBUTES,
+    knowledge: SUB_MODEL_KNOWLEDGE.strategic_alliance,
   },
   mentorship: {
     key: 'mentorship',
@@ -216,6 +118,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['targetSkills', 'duration', 'mentorshipType'],
     recommendedFields: ['mentorshipTitle', 'format', 'compensation'],
     attributes: MENTORSHIP_ATTRIBUTES,
+    knowledge: SUB_MODEL_KNOWLEDGE.mentorship,
   },
   bulk_purchasing: {
     key: 'bulk_purchasing',
@@ -228,6 +131,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['productService', 'quantityNeeded', 'participantsNeeded'],
     recommendedFields: ['deliveryTimeline', 'targetPrice'],
     attributes: BULK_PURCHASING_ATTRIBUTES,
+    knowledge: SUB_MODEL_KNOWLEDGE.bulk_purchasing,
   },
   equipment_sharing: {
     key: 'equipment_sharing',
@@ -240,6 +144,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['assetType', 'assetLocation', 'availability', 'usageSchedule'],
     recommendedFields: ['assetDescription', 'ownershipStructure'],
     attributes: EQUIPMENT_SHARING_ATTRIBUTES,
+    knowledge: SUB_MODEL_KNOWLEDGE.equipment_sharing,
   },
   resource_sharing: {
     key: 'resource_sharing',
@@ -252,6 +157,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['resourceType', 'location', 'availability'],
     recommendedFields: ['resourceTitle', 'transactionType'],
     attributes: RESOURCE_SHARING_ATTRIBUTES,
+    knowledge: SUB_MODEL_KNOWLEDGE.resource_sharing,
   },
   professional_hiring: {
     key: 'professional_hiring',
@@ -264,6 +170,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['jobTitle', 'requiredExperience', 'salaryRange', 'startDate'],
     recommendedFields: ['requiredSkills', 'contractDuration', 'employmentType'],
     attributes: PROFESSIONAL_HIRING_ATTRIBUTES,
+    knowledge: SUB_MODEL_KNOWLEDGE.professional_hiring,
   },
   consultant_hiring: {
     key: 'consultant_hiring',
@@ -276,6 +183,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['consultationType', 'scopeOfWork', 'deliverables', 'budget'],
     recommendedFields: ['consultationTitle', 'duration', 'paymentTerms'],
     attributes: CONSULTANT_HIRING_ATTRIBUTES,
+    knowledge: SUB_MODEL_KNOWLEDGE.consultant_hiring,
   },
   competition_rfp: {
     key: 'competition_rfp',
@@ -288,6 +196,7 @@ export const SUB_MODEL_REGISTRY: Record<string, SubModelDefinition> = {
     requiredFields: ['submissionDeadline', 'evaluationCriteria', 'prizeContractValue'],
     recommendedFields: ['competitionTitle', 'competitionRules', 'eligibilityCriteria'],
     attributes: COMPETITION_RFP_ATTRIBUTES,
+    knowledge: SUB_MODEL_KNOWLEDGE.competition_rfp,
   },
 }
 

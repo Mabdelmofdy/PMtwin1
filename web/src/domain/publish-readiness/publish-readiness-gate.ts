@@ -57,6 +57,33 @@ export function formatPublishReadinessDetailLines(
 ): readonly string[] {
   const lines: string[] = [PUBLISH_READINESS_BLOCKED_MESSAGE]
 
+  if (gate.missingProfileRequired.length > 0) {
+    lines.push('Profile required:')
+    for (const item of gate.missingProfileRequired) {
+      lines.push(`- ${item}`)
+    }
+  }
+  if (gate.missingProfileRecommended.length > 0) {
+    lines.push('Profile recommended:')
+    for (const item of gate.missingProfileRecommended) {
+      lines.push(`- ${item}`)
+    }
+  }
+
+  if (gate.missingOpportunityRequired.length > 0) {
+    lines.push('Opportunity required:')
+    for (const item of gate.missingOpportunityRequired) {
+      lines.push(`- ${item}`)
+    }
+  }
+  if (gate.missingOpportunityRecommended.length > 0) {
+    lines.push('Opportunity recommended:')
+    for (const item of gate.missingOpportunityRecommended) {
+      lines.push(`- ${item}`)
+    }
+  }
+
+  // Backward-compatible combined headings for older alert parsers / copy.
   const profileMissing = [
     ...gate.missingProfileRequired,
     ...gate.missingProfileRecommended,

@@ -17,6 +17,13 @@ export function getMainCollaborationModel(
   return MAIN_MODEL_REGISTRY[key]
 }
 
+/** Sprint alias — same as getMainCollaborationModel. */
+export function getCollaborationModel(
+  key: string,
+): MainCollaborationModelDefinition | undefined {
+  return getMainCollaborationModel(key)
+}
+
 export function getModelType(key: string): ModelTypeDefinition | undefined {
   return MODEL_TYPE_REGISTRY[key]
 }

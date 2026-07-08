@@ -162,6 +162,7 @@ describe('evaluatePublishReadiness', () => {
 
     const lines = formatPublishReadinessDetailLines(gate)
     assert.ok(lines[0]?.includes('Complete your profile'))
+    assert.ok(lines.some((line) => line === 'Profile required:'))
     assert.ok(lines.some((line) => line === 'Profile missing:'))
     assert.ok(lines.some((line) => line.startsWith('- ')))
     assert.ok(gate.missingProfileRequired.length > 0)
@@ -175,8 +176,11 @@ describe('evaluatePublishReadiness', () => {
     })
 
     const lines = formatPublishReadinessDetailLines(gate)
+    assert.ok(lines.some((line) => line === 'Opportunity required:'))
+    assert.ok(lines.some((line) => line === 'Opportunity recommended:'))
     assert.ok(lines.some((line) => line === 'Opportunity missing:'))
     assert.ok(gate.missingOpportunityRequired.length > 0)
+    assert.ok(gate.missingOpportunityRecommended.length > 0)
   })
 })
 

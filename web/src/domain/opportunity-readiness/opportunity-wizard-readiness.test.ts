@@ -4,13 +4,18 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, it } from 'node:test'
 import {
+  buildOpportunityWizardReadinessInput,
   EMPTY_OPPORTUNITY_WIZARD_DRAFT,
   evaluateOpportunityWizardReadiness,
   isOpportunityWizardPublishReady,
-  OPPORTUNITY_WIZARD_READINESS_STAGE_WEIGHTS,
   type OpportunityWizardDraft,
 } from '@/domain/opportunity-readiness/opportunity-wizard-readiness.ts'
-import { OPPORTUNITY_READINESS_STATUS_THRESHOLDS } from '@/domain/opportunity-readiness/opportunity-readiness-rules.ts'
+import { evaluateOpportunityReadiness } from '@/domain/opportunity-readiness/opportunity-readiness-evaluator.ts'
+import {
+  OPPORTUNITY_READINESS_SCORE_WEIGHTS,
+  OPPORTUNITY_READINESS_STATUS_THRESHOLDS,
+} from '@/domain/opportunity-readiness/opportunity-readiness-rules.ts'
+import { evaluatePublishReadiness } from '@/domain/publish-readiness/publish-readiness-gate.ts'
 import type { Opportunity } from '@/types/domain.ts'
 
 const sourcePath = join(
@@ -41,7 +46,8 @@ function withStages(
   }
 }
 
-const publishReadyDraft: OpportunityWizardDraft = withStages({
+/** Required fields complete (publish-eligible at 80) — recommended still missing. */
+const requiredCompleteDraft: OpportunityWizardDraft = withStages({
   title: 'Tower coordination need',
   description: 'Need BIM coordination lead for mixed-use tower.',
   sector: 'Construction',
@@ -61,6 +67,28 @@ const publishReadyDraft: OpportunityWizardDraft = withStages({
   },
 })
 
+/** Full 100% — all required + recommended wizard inputs. */
+const fullReadinessDraft: OpportunityWizardDraft = withStages({
+  ...requiredCompleteDraft,
+  preferredPartnerType: 'company',
+  attachmentsText: 'design-brief.pdf',
+  complianceRequirementsText: 'Saudi Building Code',
+  deliveryMilestonesText: 'Concept design',
+})
+
+const readyProfile = {
+  name: 'Khalid Al-Harbi',
+  title: 'Senior Architect',
+  skills: ['BIM', 'Sustainable Design'],
+  services: ['Architectural Design'],
+  location: 'Riyadh, Saudi Arabia',
+  preferredWorkMode: 'On-Site',
+  caseStudies: [{ title: 'Riyadh Mixed-Use Tower' }],
+  yearsExperience: 9,
+  certifications: ['LEED AP BD+C'],
+  previousProjects: [{ title: 'NEOM Pavilion' }],
+}
+
 describe('opportunity wizard readiness — initial draft', () => {
   it('new opportunity draft starts with readinessScore 0', () => {
     const result = evaluateOpportunityWizardReadiness(EMPTY_OPPORTUNITY_WIZARD_DRAFT)
@@ -70,20 +98,111 @@ describe('opportunity wizard readiness — initial draft', () => {
     assert.equal(result.score, 0)
     assert.equal(result.status, 'incomplete')
     assert.equal(result.publishReady, false)
-    assert.equal(result.completedStageIds.length, 0)
+    assert.equal(result.missingRequired.length, 10)
   })
 
   it('does not initialize readiness to a high demo value from intent alone', () => {
     const result = evaluateOpportunityWizardReadiness(
       withStages({ intent: 'need' }),
     )
-    assert.equal(result.readinessScore, 0)
+    assert.ok(result.readinessScore < 20)
+    assert.equal(result.publishReady, false)
   })
 })
 
-describe('opportunity wizard readiness — progressive stages', () => {
+describe('opportunity readiness stabilization — single score source', () => {
+  it('displayed readiness equals publish gate readiness', () => {
+    const wizard = evaluateOpportunityWizardReadiness(requiredCompleteDraft)
+    const field = evaluateOpportunityReadiness(
+      buildOpportunityWizardReadinessInput(requiredCompleteDraft),
+    )
+    const gate = evaluatePublishReadiness({
+      profile: readyProfile,
+      profileKind: 'individual',
+      opportunity: buildOpportunityWizardReadinessInput(requiredCompleteDraft),
+    })
+
+    assert.equal(wizard.readinessScore, field.score)
+    assert.equal(wizard.score, field.score)
+    assert.equal(wizard.status, field.status)
+    assert.equal(wizard.fieldReadiness.score, field.score)
+    assert.equal(gate.opportunityReadiness.score, wizard.readinessScore)
+    assert.equal(gate.opportunityReadiness.status, wizard.status)
+    assert.equal(gate.allowed, wizard.publishReady)
+  })
+
+  it('blocked publish shows missing required and recommended items', () => {
+    const sparse = withStages({
+      title: 'Partial',
+      description: 'Partial draft',
+      sector: 'Construction',
+    })
+    const gate = evaluatePublishReadiness({
+      profile: readyProfile,
+      profileKind: 'individual',
+      opportunity: buildOpportunityWizardReadinessInput(sparse),
+    })
+
+    assert.equal(gate.allowed, false)
+    assert.ok(gate.missingOpportunityRequired.length > 0)
+    assert.ok(gate.missingOpportunityRecommended.length > 0)
+
+    const details = gate.reason
+      ? [
+          gate.reason,
+          'Opportunity required:',
+          ...gate.missingOpportunityRequired.map((item) => `- ${item}`),
+          'Opportunity recommended:',
+          ...gate.missingOpportunityRecommended.map((item) => `- ${item}`),
+        ]
+      : []
+
+    assert.ok(details.some((line) => line === 'Opportunity required:'))
+    assert.ok(details.some((line) => line.startsWith('- ')))
+  })
+
+  it('user can reach 100% readiness from wizard inputs', () => {
+    const result = evaluateOpportunityWizardReadiness(fullReadinessDraft)
+
+    assert.equal(result.readinessScore, 100)
+    assert.equal(result.status, 'ready_for_matching')
+    assert.equal(result.publishReady, true)
+    assert.deepEqual(result.missingRequired, [])
+    assert.deepEqual(result.missingRecommended, [])
+  })
+
+  it('recommended fields improve score but required fields control publish eligibility', () => {
+    const requiredOnly = evaluateOpportunityWizardReadiness(requiredCompleteDraft)
+    assert.equal(requiredOnly.missingRequired.length, 0)
+    assert.ok(requiredOnly.missingRecommended.length > 0)
+    assert.ok(requiredOnly.readinessScore >= OPPORTUNITY_READINESS_SCORE_WEIGHTS.required)
+    assert.ok(requiredOnly.readinessScore < 100)
+    assert.ok(requiredOnly.readinessScore >= OPPORTUNITY_READINESS_STATUS_THRESHOLDS.readyMin)
+    assert.equal(requiredOnly.publishReady, true)
+    assert.equal(isOpportunityWizardPublishReady(requiredCompleteDraft), true)
+
+    const withRecommended = evaluateOpportunityWizardReadiness(fullReadinessDraft)
+    assert.ok(withRecommended.readinessScore > requiredOnly.readinessScore)
+    assert.equal(withRecommended.readinessScore, 100)
+
+    const missingRequired = evaluateOpportunityWizardReadiness(
+      withStages({
+        title: 'Need title',
+        description: 'Need description',
+        sector: 'Construction',
+        targetRole: 'Architect',
+        // missing skills/services/location/timeline/collaboration
+      }),
+    )
+    assert.ok(missingRequired.missingRequired.length > 0)
+    assert.equal(missingRequired.publishReady, false)
+  })
+})
+
+describe('opportunity wizard readiness — progressive field completion', () => {
   it('increases score after basic info', () => {
-    const result = evaluateOpportunityWizardReadiness(
+    const before = evaluateOpportunityWizardReadiness(EMPTY_OPPORTUNITY_WIZARD_DRAFT)
+    const after = evaluateOpportunityWizardReadiness(
       withStages({
         title: 'Need title',
         description: 'Need description with enough detail.',
@@ -92,8 +211,8 @@ describe('opportunity wizard readiness — progressive stages', () => {
       }),
     )
 
-    assert.equal(result.readinessScore, OPPORTUNITY_WIZARD_READINESS_STAGE_WEIGHTS.basicInfo)
-    assert.ok(result.completedStageIds.includes('basicInfo'))
+    assert.ok(after.readinessScore > before.readinessScore)
+    assert.ok(after.completedStageIds.includes('basicInfo'))
   })
 
   it('increases score after main collaboration model selection', () => {
@@ -116,7 +235,7 @@ describe('opportunity wizard readiness — progressive stages', () => {
       }),
     )
 
-    assert.ok(after.readinessScore > before.readinessScore)
+    assert.ok(after.readinessScore >= before.readinessScore)
     assert.ok(after.completedStageIds.includes('mainCollaborationModel'))
   })
 
@@ -143,7 +262,7 @@ describe('opportunity wizard readiness — progressive stages', () => {
       }),
     )
 
-    assert.ok(after.readinessScore > before.readinessScore)
+    assert.ok(after.readinessScore >= before.readinessScore)
     assert.ok(after.completedStageIds.includes('subModel'))
   })
 
@@ -172,7 +291,7 @@ describe('opportunity wizard readiness — progressive stages', () => {
       }),
     )
 
-    assert.ok(after.readinessScore > before.readinessScore)
+    assert.ok(after.readinessScore >= before.readinessScore)
     assert.ok(after.completedStageIds.includes('subModelFields'))
   })
 
@@ -209,6 +328,7 @@ describe('opportunity wizard readiness — progressive stages', () => {
 
     assert.ok(after.readinessScore > before.readinessScore)
     assert.ok(after.completedStageIds.includes('valueExchange'))
+    assert.ok(after.presentRecommended.includes('Budget / Value Terms'))
   })
 
   it('increases score after timeline / location / skills', () => {
@@ -243,6 +363,7 @@ describe('opportunity wizard readiness — progressive stages', () => {
         location: 'Riyadh',
         startDate: '2026-04-01',
         skills: 'BIM',
+        services: 'Coordination',
         collaborationAttributes: {
           ...taskBasedRequiredAttrs,
           ...cashExchangeAttrs,
@@ -252,16 +373,7 @@ describe('opportunity wizard readiness — progressive stages', () => {
 
     assert.ok(after.readinessScore > before.readinessScore)
     assert.ok(after.completedStageIds.includes('timelineLocationSkills'))
-  })
-
-  it('review completion reaches publish-ready threshold', () => {
-    const result = evaluateOpportunityWizardReadiness(publishReadyDraft)
-
-    assert.ok(result.completedStageIds.includes('review'))
-    assert.equal(result.readinessScore, 100)
-    assert.equal(result.publishReady, true)
-    assert.ok(result.readinessScore >= result.publishThreshold)
-    assert.equal(result.status, 'ready_for_matching')
+    assert.equal(after.publishReady, true)
   })
 })
 
@@ -275,14 +387,13 @@ describe('opportunity wizard readiness — publish gate', () => {
     })
     const result = evaluateOpportunityWizardReadiness(partial)
 
-    assert.ok(result.readinessScore < OPPORTUNITY_READINESS_STATUS_THRESHOLDS.readyMin)
     assert.equal(result.publishReady, false)
     assert.equal(isOpportunityWizardPublishReady(partial), false)
   })
 
-  it('allows publish above threshold', () => {
-    assert.equal(isOpportunityWizardPublishReady(publishReadyDraft), true)
-    const result = evaluateOpportunityWizardReadiness(publishReadyDraft)
+  it('allows publish when required fields are complete', () => {
+    assert.equal(isOpportunityWizardPublishReady(requiredCompleteDraft), true)
+    const result = evaluateOpportunityWizardReadiness(requiredCompleteDraft)
     assert.ok(result.readinessScore >= OPPORTUNITY_READINESS_STATUS_THRESHOLDS.readyMin)
   })
 })
@@ -295,6 +406,7 @@ describe('opportunity wizard — Match Score must not appear', () => {
     assert.doesNotMatch(wizardSource, /\d+%\s*Match/)
     assert.match(wizardSource, /Opportunity Readiness/)
     assert.match(wizardSource, /evaluateOpportunityWizardReadiness/)
+    assert.match(wizardSource, /Recommended details/)
   })
 
   it('opportunity entity type does not declare matchScore', () => {

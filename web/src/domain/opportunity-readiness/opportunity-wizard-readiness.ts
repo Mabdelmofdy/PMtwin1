@@ -1,8 +1,10 @@
 /**
- * Opportunity creation readiness — progressive stage scoring for the create/edit wizard.
+ * Opportunity creation readiness — wizard draft → field-level Opportunity Readiness.
  *
- * This is NOT matchScore. Match scores belong only on PostMatch / Match records
- * after matching runs. Wizard UI must show Opportunity Readiness / Completion Score only.
+ * Single source of truth: `evaluateOpportunityReadiness` (same as publish gate).
+ * Wizard stages are a completion checklist only — they do NOT invent a separate score.
+ *
+ * This is NOT matchScore. Match scores belong only on PostMatch / Match records.
  */
 
 import {
@@ -11,10 +13,14 @@ import {
   VALUE_EXCHANGE_FIELD_GROUPS,
   type ExchangeMode,
 } from '@pm-twin/collaboration-models'
+import { evaluateOpportunityReadiness } from '@/domain/opportunity-readiness/opportunity-readiness-evaluator.ts'
 import {
   OPPORTUNITY_READINESS_STATUS_THRESHOLDS,
 } from '@/domain/opportunity-readiness/opportunity-readiness-rules.ts'
-import type { OpportunityReadinessStatus } from '@/domain/opportunity-readiness/types.ts'
+import type {
+  OpportunityReadinessResult,
+  OpportunityReadinessStatus,
+} from '@/domain/opportunity-readiness/types.ts'
 
 export const OPPORTUNITY_WIZARD_READINESS_STAGE_WEIGHTS = {
   basicInfo: 15,
@@ -46,6 +52,11 @@ export type OpportunityWizardDraft = {
   readonly startDate?: string
   readonly tenderDeadline?: string
   readonly collaborationAttributes?: Readonly<Record<string, unknown>>
+  /** Recommended readiness fields (raise Completion Score to 100%). */
+  readonly preferredPartnerType?: string
+  readonly attachmentsText?: string
+  readonly complianceRequirementsText?: string
+  readonly deliveryMilestonesText?: string
 }
 
 export type OpportunityWizardReadinessStage = {
@@ -53,24 +64,31 @@ export type OpportunityWizardReadinessStage = {
   readonly label: string
   readonly weight: number
   readonly complete: boolean
+  /** Informational progress only — score comes from field-level readiness. */
   readonly earned: number
 }
 
 export type OpportunityWizardReadinessResult = {
-  /** Alias for UI / API consumers — never a match score. */
+  /** Same value as publish-gate opportunity readiness score. */
   readonly readinessScore: number
   readonly completionScore: number
   readonly score: number
   readonly status: OpportunityReadinessStatus
   readonly publishReady: boolean
   readonly publishThreshold: number
+  readonly missingRequired: readonly string[]
+  readonly missingRecommended: readonly string[]
+  readonly presentRequired: readonly string[]
+  readonly presentRecommended: readonly string[]
+  readonly fieldReadiness: OpportunityReadinessResult
   readonly stages: readonly OpportunityWizardReadinessStage[]
   readonly completedStageIds: readonly OpportunityWizardReadinessStageId[]
 }
 
 export const EMPTY_OPPORTUNITY_WIZARD_DRAFT: OpportunityWizardDraft = {
   title: '',
-  intent: 'need',
+  /** Empty until Type step — keeps new-draft readinessScore at 0. */
+  intent: '',
   description: '',
   location: '',
   mainCollaborationModel: '',
@@ -85,6 +103,10 @@ export const EMPTY_OPPORTUNITY_WIZARD_DRAFT: OpportunityWizardDraft = {
   startDate: '',
   tenderDeadline: '',
   collaborationAttributes: {},
+  preferredPartnerType: '',
+  attachmentsText: '',
+  complianceRequirementsText: '',
+  deliveryMilestonesText: '',
 }
 
 function hasText(value: unknown): boolean {
@@ -110,6 +132,14 @@ function hasPresentValue(value: unknown): boolean {
 
 function normalizeMode(value: string | undefined): string {
   return (value ?? '').trim().toLowerCase().replace(/-/g, '_')
+}
+
+function toAttachmentRecords(text: string | undefined): { name: string }[] {
+  return splitCsv(text).map((name) => ({ name }))
+}
+
+function toMilestoneRecords(text: string | undefined): { title: string }[] {
+  return splitCsv(text).map((title) => ({ title }))
 }
 
 function isBasicInfoComplete(draft: OpportunityWizardDraft): boolean {
@@ -161,7 +191,6 @@ function isValueExchangeComplete(draft: OpportunityWizardDraft): boolean {
 
   return group.requiredFields.every((key) => {
     if (hasPresentValue(attrs[key])) return true
-    // Common aliases used by sub-model / exchange draft builders
     if (key === 'budget') {
       return (
         hasPresentValue(attrs.budget) ||
@@ -242,70 +271,10 @@ const STAGE_DEFINITIONS: readonly {
   { id: 'review', label: 'Review', isComplete: isReviewComplete },
 ]
 
-function roundScore(value: number): number {
-  return Math.round(value * 100) / 100
-}
-
-function resolveStatus(
-  score: number,
-  publishReady: boolean,
-): OpportunityReadinessStatus {
-  if (publishReady) return 'ready_for_matching'
-  if (score < OPPORTUNITY_READINESS_STATUS_THRESHOLDS.incompleteMax) return 'incomplete'
-  return 'needs_review'
-}
-
-/**
- * Evaluate creation/edit Opportunity Readiness (Completion Score).
- * Empty / unsaved drafts start at readinessScore = 0.
- */
-export function evaluateOpportunityWizardReadiness(
-  draft?: OpportunityWizardDraft | null,
-): OpportunityWizardReadinessResult {
-  const record: OpportunityWizardDraft = draft ?? EMPTY_OPPORTUNITY_WIZARD_DRAFT
-  const publishThreshold = OPPORTUNITY_READINESS_STATUS_THRESHOLDS.readyMin
-
-  const stages: OpportunityWizardReadinessStage[] = STAGE_DEFINITIONS.map((def) => {
-    const weight = OPPORTUNITY_WIZARD_READINESS_STAGE_WEIGHTS[def.id]
-    const complete = def.isComplete(record)
-    return {
-      id: def.id,
-      label: def.label,
-      weight,
-      complete,
-      earned: complete ? weight : 0,
-    }
-  })
-
-  const score = roundScore(stages.reduce((sum, stage) => sum + stage.earned, 0))
-  const publishReady = score >= publishThreshold
-  const completedStageIds = stages
-    .filter((stage) => stage.complete)
-    .map((stage) => stage.id)
-
-  return {
-    readinessScore: score,
-    completionScore: score,
-    score,
-    status: resolveStatus(score, publishReady),
-    publishReady,
-    publishThreshold,
-    stages,
-    completedStageIds,
-  }
-}
-
-/** True when wizard readiness meets the publish gate threshold (default ≥ 80). */
-export function isOpportunityWizardPublishReady(
-  draft?: OpportunityWizardDraft | null,
-): boolean {
-  return evaluateOpportunityWizardReadiness(draft).publishReady
-}
-
 /**
  * Build a readiness evaluator bag from a wizard draft without inventing
  * collaboration taxonomy defaults. Unselected model fields stay empty so
- * new drafts score 0.
+ * new drafts score 0. Includes recommended fields so 100% is reachable.
  */
 export function buildOpportunityWizardReadinessInput(
   draft: OpportunityWizardDraft,
@@ -313,35 +282,84 @@ export function buildOpportunityWizardReadinessInput(
   const skills = splitCsv(draft.skills)
   const services = splitCsv(draft.services)
   const sectors = hasText(draft.sector) ? [draft.sector!.trim()] : []
-  const intent = draft.intent === 'offer' ? 'offer' : draft.intent === 'hybrid' ? 'hybrid' : 'need'
+  const rawIntent = (draft.intent ?? '').trim().toLowerCase()
+  const intent =
+    rawIntent === 'offer' || rawIntent === 'hybrid' || rawIntent === 'need'
+      ? rawIntent
+      : undefined
+  const attrs = draft.collaborationAttributes ?? {}
+  const attachments = toAttachmentRecords(draft.attachmentsText)
+  const compliance = splitCsv(draft.complianceRequirementsText)
+  const milestones = toMilestoneRecords(draft.deliveryMilestonesText)
+
+  const exchangeData: Record<string, unknown> = {
+    ...(hasText(draft.exchangeMode) ? { exchangeMode: draft.exchangeMode } : {}),
+    ...(draft.paymentModes && draft.paymentModes.length > 0
+      ? { accepted_modes: [...draft.paymentModes] }
+      : {}),
+  }
+
+  // Mirror value-exchange attrs into exchangeData so Budget / Value Terms scores.
+  if (attrs.budgetRange) exchangeData.budgetRange = attrs.budgetRange
+  if (attrs.budget) exchangeData.budgetRange = attrs.budget
+  if (attrs.cashAmount != null) exchangeData.cashAmount = attrs.cashAmount
+  if (attrs.paymentSchedule) exchangeData.paymentSchedule = attrs.paymentSchedule
+  if (attrs.cashPaymentTerms) exchangeData.cashPaymentTerms = attrs.cashPaymentTerms
+  if (attrs.value != null) exchangeData.value = attrs.value
+  if (attrs.barterOffer) exchangeData.barterOffer = attrs.barterOffer
+  if (attrs.offeredService) exchangeData.barterOffer = attrs.offeredService
+  if (attrs.equivalenceEstimate) exchangeData.equivalenceEstimate = attrs.equivalenceEstimate
+  if (attrs.profitSplit) exchangeData.profitSplit = attrs.profitSplit
+  if (attrs.equityPercentage) exchangeData.equityPercentage = attrs.equityPercentage
 
   const input: Record<string, unknown> = {
     title: draft.title ?? '',
-    intent,
     description: draft.description ?? '',
     location: draft.location ?? '',
     scope: {
       sectors,
       ...(intent === 'offer'
         ? { offeredSkills: skills, coreSkills: skills }
-        : { requiredSkills: skills, coreSkills: skills }),
+        : intent === 'hybrid'
+          ? { requiredSkills: skills, offeredSkills: skills, coreSkills: skills }
+          : { requiredSkills: skills, coreSkills: skills }),
+      ...(compliance.length > 0 ? { complianceRequirements: compliance } : {}),
     },
     attributes: {
       targetRole: draft.targetRole ?? '',
       startDate: hasText(draft.startDate) ? draft.startDate : undefined,
       tenderDeadline: hasText(draft.tenderDeadline) ? draft.tenderDeadline : undefined,
-    },
-    collaborationAttributes: { ...(draft.collaborationAttributes ?? {}) },
-    exchangeData: {
-      ...(hasText(draft.exchangeMode) ? { exchangeMode: draft.exchangeMode } : {}),
-      ...(draft.paymentModes && draft.paymentModes.length > 0
-        ? { accepted_modes: [...draft.paymentModes] }
+      ...(hasText(draft.preferredPartnerType)
+        ? { preferredPartnerType: draft.preferredPartnerType!.trim() }
         : {}),
+      ...(milestones.length > 0 ? { deliveryMilestones: milestones } : {}),
+      ...(attachments.length > 0 ? { attachments } : {}),
     },
+    collaborationAttributes: { ...attrs },
+    exchangeData,
     normalized:
       intent === 'offer'
         ? { offeredServices: services }
-        : { requiredServices: services },
+        : intent === 'hybrid'
+          ? { requiredServices: services, offeredServices: services }
+          : { requiredServices: services },
+  }
+
+  if (intent) {
+    input.intent = intent
+  }
+
+  if (hasText(draft.preferredPartnerType)) {
+    input.preferredPartnerType = draft.preferredPartnerType!.trim()
+  }
+  if (attachments.length > 0) {
+    input.attachments = attachments
+  }
+  if (compliance.length > 0) {
+    input.complianceRequirements = compliance
+  }
+  if (milestones.length > 0) {
+    input.deliveryMilestones = milestones
   }
 
   if (hasText(draft.mainCollaborationModel)) {
@@ -362,4 +380,60 @@ export function buildOpportunityWizardReadinessInput(
   }
 
   return input
+}
+
+/**
+ * Evaluate wizard Opportunity Readiness using the same field-level rules as
+ * the publish gate. Stages remain a checklist for stepper UX only.
+ */
+export function evaluateOpportunityWizardReadiness(
+  draft?: OpportunityWizardDraft | null,
+): OpportunityWizardReadinessResult {
+  const record: OpportunityWizardDraft = draft ?? EMPTY_OPPORTUNITY_WIZARD_DRAFT
+  const publishThreshold = OPPORTUNITY_READINESS_STATUS_THRESHOLDS.readyMin
+  const fieldReadiness = evaluateOpportunityReadiness(
+    buildOpportunityWizardReadinessInput(record),
+  )
+
+  const stages: OpportunityWizardReadinessStage[] = STAGE_DEFINITIONS.map((def) => {
+    const weight = OPPORTUNITY_WIZARD_READINESS_STAGE_WEIGHTS[def.id]
+    const complete = def.isComplete(record)
+    return {
+      id: def.id,
+      label: def.label,
+      weight,
+      complete,
+      earned: complete ? weight : 0,
+    }
+  })
+
+  const completedStageIds = stages
+    .filter((stage) => stage.complete)
+    .map((stage) => stage.id)
+
+  const score = fieldReadiness.score
+  const publishReady = fieldReadiness.status === 'ready_for_matching'
+
+  return {
+    readinessScore: score,
+    completionScore: score,
+    score,
+    status: fieldReadiness.status,
+    publishReady,
+    publishThreshold,
+    missingRequired: fieldReadiness.missingRequired,
+    missingRecommended: fieldReadiness.missingRecommended,
+    presentRequired: fieldReadiness.presentRequired,
+    presentRecommended: fieldReadiness.presentRecommended,
+    fieldReadiness,
+    stages,
+    completedStageIds,
+  }
+}
+
+/** True when field-level readiness meets the publish gate (required complete + score ≥ 80). */
+export function isOpportunityWizardPublishReady(
+  draft?: OpportunityWizardDraft | null,
+): boolean {
+  return evaluateOpportunityWizardReadiness(draft).publishReady
 }

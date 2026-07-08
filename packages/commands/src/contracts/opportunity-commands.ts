@@ -20,6 +20,11 @@ export type OpportunityCollaborationPayload = {
   readonly attributes?: Readonly<Record<string, unknown>>
   readonly normalized?: Readonly<Record<string, unknown>>
   readonly paymentModes?: readonly string[]
+  /** Recommended readiness fields (do not affect matching algorithm). */
+  readonly preferredPartnerType?: string
+  readonly attachments?: ReadonlyArray<{ readonly name?: string } | string>
+  readonly complianceRequirements?: readonly string[]
+  readonly deliveryMilestones?: ReadonlyArray<{ readonly title?: string } | string>
 }
 
 export type CreateOpportunityCommand = Command & {
