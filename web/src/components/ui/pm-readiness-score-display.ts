@@ -19,9 +19,9 @@ export type ReadinessScoreDisplay = {
 }
 
 const COMPLETION_LABELS: Record<ReadinessCompletionLevel, string> = {
-  ready: 'Ready',
-  good: 'Good',
-  needs_improvement: 'Needs Improvement',
+  ready: 'Ready to publish',
+  good: '75%+',
+  needs_improvement: '50%+',
   incomplete: 'Incomplete',
 }
 

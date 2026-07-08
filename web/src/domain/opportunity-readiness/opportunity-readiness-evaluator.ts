@@ -57,15 +57,15 @@ function computeWeightedScore(
 function resolveStatus(
   score: number,
   missingRequired: readonly string[],
-  missingRecommended: readonly string[],
 ): OpportunityReadinessStatus {
   if (score < OPPORTUNITY_READINESS_STATUS_THRESHOLDS.incompleteMax) {
     return 'incomplete'
   }
 
+  // Publish gate: readinessScore >= readyMin with all required fields present.
+  // Recommended fields raise Completion Score but do not block publishing.
   if (
     missingRequired.length > 0 ||
-    missingRecommended.length > 0 ||
     score < OPPORTUNITY_READINESS_STATUS_THRESHOLDS.readyMin
   ) {
     return 'needs_review'
@@ -90,11 +90,7 @@ export function evaluateOpportunityReadiness(
     recommended.length,
   )
 
-  const status = resolveStatus(
-    score,
-    requiredEvaluation.missing,
-    recommendedEvaluation.missing,
-  )
+  const status = resolveStatus(score, requiredEvaluation.missing)
 
   return {
     score,

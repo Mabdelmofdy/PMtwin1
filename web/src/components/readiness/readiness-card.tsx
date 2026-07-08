@@ -24,13 +24,16 @@ export function ReadinessCard({
   result,
   className,
   cta,
+  opportunityCopy = false,
 }: {
   title: string
   result: ReadinessResult
   className?: string
   cta?: ReadinessCta | null
+  /** Use Opportunity Readiness / Ready to publish wording (not Match Score). */
+  opportunityCopy?: boolean
 }) {
-  const viewModel = buildReadinessCardViewModel(title, result)
+  const viewModel = buildReadinessCardViewModel(title, result, { opportunityCopy })
   const tone = getReadinessStatusTone(result.status)
 
   return (
@@ -42,8 +45,11 @@ export function ReadinessCard({
       <div className="flex items-center gap-4">
         <ReadinessScoreRing score={result.score} status={result.status} />
         <div className={cn('space-y-1', pmTypography.bodySm)}>
-          <p className="text-muted-foreground">Score</p>
+          <p className="text-muted-foreground">Opportunity Readiness</p>
           <p className={pmTypography.stat}>{viewModel.scoreLabel}</p>
+          <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
+            Completion Score
+          </p>
           <p>
             <span className="text-muted-foreground">Status:</span>{' '}
             <span className="font-medium">{viewModel.statusLabel}</span>

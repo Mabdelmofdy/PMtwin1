@@ -54,18 +54,19 @@ const needsReviewProfile = {
   preferredWorkMode: 'Hybrid',
 }
 
+/** Missing services → score in the needs_review band (not incomplete, not ready). */
 const needsReviewOpportunity = {
   id: 'opp-review',
   creatorId: 'user-ready',
   status: 'published',
-  title: 'Required-only need',
+  title: 'Almost-ready need',
   intent: 'need',
   scope: { sectors: ['Infrastructure'], requiredSkills: ['Planning'] },
   attributes: { targetRole: 'PM', startDate: '2026-04-01' },
-  normalized: { requiredServices: ['Program Management'] },
+  normalized: {},
   location: 'Dammam',
   modelType: 'project_based',
-  description: 'Need PM.',
+  description: 'Need PM — services still missing.',
 }
 
 describe('buildReadinessAnalytics', () => {
@@ -155,7 +156,8 @@ describe('buildReadinessAnalytics', () => {
       resolveProfileForOpportunity,
     })
 
-    assert.equal(analytics.opportunities.averageScore, 87.5)
+    // ready=100, needs_review (9/10 required)=72 → average 86
+    assert.equal(analytics.opportunities.averageScore, 86)
   })
 
   it('counts draft opportunities', () => {

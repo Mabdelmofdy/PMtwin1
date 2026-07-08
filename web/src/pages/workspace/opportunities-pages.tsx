@@ -83,6 +83,12 @@ import {
 } from '@/lib/collaboration-taxonomy-display.ts'
 import { opportunityCommandService } from '@/services/opportunity-command-service.ts'
 import { buildValueExchangeDraftPayload } from '@/domain/collaboration/value-exchange-lifecycle.ts'
+import {
+  buildOpportunityWizardReadinessInput,
+  EMPTY_OPPORTUNITY_WIZARD_DRAFT,
+  evaluateOpportunityWizardReadiness,
+  type OpportunityWizardDraft,
+} from '@/domain/opportunity-readiness/opportunity-wizard-readiness.ts'
 import type { OpportunityCollaborationPayload } from '@pm-twin/commands'
 
 const WIZARD_STEPS: readonly PmFormStepperStep[] = [
@@ -115,23 +121,28 @@ type OpportunityDraft = {
   collaborationAttributes: Record<string, unknown>
 }
 
+/** New drafts start empty — readinessScore must be 0 (no pre-filled demo models). */
 const initialDraft: OpportunityDraft = {
-  title: '',
+  title: EMPTY_OPPORTUNITY_WIZARD_DRAFT.title ?? '',
   intent: 'need',
-  description: '',
-  location: '',
-  mainCollaborationModel: 'cash_subcontracting',
-  modelType: 'project_based',
-  subModelType: 'task_based',
-  exchangeMode: 'cash',
-  paymentModes: ['cash'],
-  targetRole: '',
-  sector: '',
-  skills: '',
-  services: '',
-  startDate: '',
-  tenderDeadline: '',
+  description: EMPTY_OPPORTUNITY_WIZARD_DRAFT.description ?? '',
+  location: EMPTY_OPPORTUNITY_WIZARD_DRAFT.location ?? '',
+  mainCollaborationModel: EMPTY_OPPORTUNITY_WIZARD_DRAFT.mainCollaborationModel ?? '',
+  modelType: EMPTY_OPPORTUNITY_WIZARD_DRAFT.modelType ?? '',
+  subModelType: EMPTY_OPPORTUNITY_WIZARD_DRAFT.subModelType ?? '',
+  exchangeMode: EMPTY_OPPORTUNITY_WIZARD_DRAFT.exchangeMode ?? '',
+  paymentModes: [...(EMPTY_OPPORTUNITY_WIZARD_DRAFT.paymentModes ?? [])],
+  targetRole: EMPTY_OPPORTUNITY_WIZARD_DRAFT.targetRole ?? '',
+  sector: EMPTY_OPPORTUNITY_WIZARD_DRAFT.sector ?? '',
+  skills: EMPTY_OPPORTUNITY_WIZARD_DRAFT.skills ?? '',
+  services: EMPTY_OPPORTUNITY_WIZARD_DRAFT.services ?? '',
+  startDate: EMPTY_OPPORTUNITY_WIZARD_DRAFT.startDate ?? '',
+  tenderDeadline: EMPTY_OPPORTUNITY_WIZARD_DRAFT.tenderDeadline ?? '',
   collaborationAttributes: {},
+}
+
+function toWizardDraft(draft: OpportunityDraft): OpportunityWizardDraft {
+  return draft
 }
 
 function splitCsv(value: string): string[] {
@@ -153,19 +164,27 @@ function buildOpportunityDraftInput(draft: OpportunityDraft): Record<string, unk
   const skills = splitCsv(draft.skills)
   const services = splitCsv(draft.services)
   const sectors = draft.sector ? [draft.sector] : []
-  const collaborationPatch = buildOpportunityCollaborationPatch({
-    mainCollaborationModel: draft.mainCollaborationModel,
-    modelType: draft.modelType,
-    subModelType: draft.subModelType,
-    exchangeMode: draft.exchangeMode,
-    acceptedExchangeModes: draft.paymentModes,
-  })
+  const hasCollaborationSelection =
+    Boolean(draft.mainCollaborationModel?.trim()) &&
+    Boolean(draft.subModelType?.trim()) &&
+    Boolean(draft.exchangeMode?.trim())
+
+  // Never invent taxonomy defaults for an empty create draft — that inflated
+  // readiness/collaboration completion before the user made choices.
+  const collaborationPatch = hasCollaborationSelection
+    ? buildOpportunityCollaborationPatch({
+        mainCollaborationModel: draft.mainCollaborationModel,
+        modelType: draft.modelType,
+        subModelType: draft.subModelType,
+        exchangeMode: draft.exchangeMode,
+        acceptedExchangeModes: draft.paymentModes,
+      })
+    : {}
+
+  const base = buildOpportunityWizardReadinessInput(toWizardDraft(draft))
 
   return {
-    title: draft.title,
-    intent: draft.intent,
-    description: draft.description,
-    location: draft.location,
+    ...base,
     ...collaborationPatch,
     scope: {
       sectors,
@@ -191,8 +210,10 @@ function buildOpportunityDraftInput(draft: OpportunityDraft): Record<string, unk
       startDate: (draft.collaborationAttributes.startDate ?? draft.startDate) || undefined,
     },
     exchangeData: {
-      exchangeMode: draft.exchangeMode,
-      ...buildValueExchangeDraftPayload(draft),
+      ...(hasCollaborationSelection
+        ? buildValueExchangeDraftPayload(draft)
+        : {}),
+      ...(draft.exchangeMode ? { exchangeMode: draft.exchangeMode } : {}),
     },
     normalized: {
       ...(draft.intent === 'need'
@@ -229,16 +250,25 @@ function buildCollaborationCommandPayload(
 }
 
 function resolveCompletedSteps(draft: OpportunityDraft): string[] {
+  const readiness = evaluateOpportunityWizardReadiness(toWizardDraft(draft))
   const completed: string[] = []
   if (draft.intent) completed.push('type')
-  if (draft.title && draft.description) completed.push('scope')
-  if (draft.mainCollaborationModel && draft.subModelType && draft.exchangeMode) {
+  if (readiness.stages.find((s) => s.id === 'basicInfo')?.complete) completed.push('scope')
+  if (readiness.stages.find((s) => s.id === 'mainCollaborationModel')?.complete) {
     completed.push('exchange')
+  }
+  if (
+    readiness.stages.find((s) => s.id === 'subModel')?.complete &&
+    readiness.stages.find((s) => s.id === 'subModelFields')?.complete
+  ) {
     completed.push('submodel')
   }
   if (draft.skills || draft.services) completed.push('skills')
-  if (draft.location) completed.push('timeline')
-  if (draft.title) completed.push('review')
+  if (readiness.stages.find((s) => s.id === 'timelineLocationSkills')?.complete) {
+    completed.push('timeline')
+  }
+  if (readiness.stages.find((s) => s.id === 'review')?.complete) completed.push('review')
+  if (readiness.publishReady) completed.push('publish')
   return completed
 }
 
@@ -774,10 +804,10 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       description: existingOpportunity.description ?? '',
       location: existingOpportunity.location ?? '',
       mainCollaborationModel:
-        existingOpportunity.mainCollaborationModel ?? 'cash_subcontracting',
-      modelType: existingOpportunity.modelType ?? 'project_based',
-      subModelType: existingOpportunity.subModelType ?? 'task_based',
-      exchangeMode: existingOpportunity.exchangeMode ?? 'cash',
+        existingOpportunity.mainCollaborationModel ?? '',
+      modelType: existingOpportunity.modelType ?? '',
+      subModelType: existingOpportunity.subModelType ?? '',
+      exchangeMode: existingOpportunity.exchangeMode ?? '',
       targetRole:
         (existingOpportunity as { attributes?: { targetRole?: string } }).attributes?.targetRole ?? '',
       sector: existingOpportunity.scope?.sectors?.[0] ?? '',
@@ -792,7 +822,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       paymentModes:
         existingOpportunity.acceptedExchangeModes
         ?? existingOpportunity.paymentModes
-        ?? (existingOpportunity.exchangeMode ? [existingOpportunity.exchangeMode] : ['cash']),
+        ?? (existingOpportunity.exchangeMode ? [existingOpportunity.exchangeMode] : []),
       collaborationAttributes: existingOpportunity.collaborationAttributes ?? {},
     })
   }, [existingOpportunity])
@@ -803,6 +833,27 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       ? { ...existingOpportunity, ...built, id: resolvedOpportunityId }
       : built
   }, [draft, existingOpportunity, resolvedOpportunityId])
+
+  const wizardReadiness = useMemo(
+    () => evaluateOpportunityWizardReadiness(toWizardDraft(draft)),
+    [draft],
+  )
+
+  const wizardReadinessResult = useMemo(
+    () => ({
+      score: wizardReadiness.readinessScore,
+      status: wizardReadiness.status,
+      missingRequired: wizardReadiness.stages
+        .filter((stage) => !stage.complete)
+        .map((stage) => stage.label),
+      missingRecommended: [] as readonly string[],
+      presentRequired: wizardReadiness.stages
+        .filter((stage) => stage.complete)
+        .map((stage) => stage.label),
+      presentRecommended: [] as readonly string[],
+    }),
+    [wizardReadiness],
+  )
 
   const semanticPreview = useMemo(
     () => buildOpportunitySemanticReadModel(opportunityDraft as import('@/types/domain.ts').Opportunity),
@@ -934,6 +985,8 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
           opportunity={opportunityDraft}
           opportunityId={opportunityId}
           suppressCta
+          title="Opportunity Readiness"
+          result={wizardReadinessResult}
         />
       }
       footer={
@@ -958,8 +1011,8 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         tone="opportunity"
         metric={
           <PmPageHeroMetric
-            value={`${completedStepIds.length}/${WIZARD_STEPS.length}`}
-            label="Steps complete"
+            value={`${Math.round(wizardReadiness.readinessScore)}%`}
+            label="Opportunity Readiness"
           />
         }
         bordered={false}
@@ -1066,7 +1119,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
           >
             <PmFormField id="opp-main-model" label="Main collaboration model" required>
               <Select
-                value={draft.mainCollaborationModel}
+                value={draft.mainCollaborationModel || undefined}
                 onValueChange={(value) => {
                   const firstSub = listSubModelsForMain(value)[0]
                   updateDraft('mainCollaborationModel', value)
@@ -1082,7 +1135,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select collaboration model" />
                 </SelectTrigger>
                 <SelectContent>
                   {mainModels.map((model) => (
@@ -1096,7 +1149,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
 
             <PmFormField id="opp-sub-model" label="Sub-model" required className="mt-4">
               <Select
-                value={draft.subModelType}
+                value={draft.subModelType || undefined}
                 onValueChange={(value) => {
                   const sub = subModelOptions.find((entry) => entry.key === value)
                   setDraft((current) => ({
@@ -1108,7 +1161,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select sub-model" />
                 </SelectTrigger>
                 <SelectContent>
                   {subModelOptions.map((sub) => (

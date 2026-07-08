@@ -60,14 +60,14 @@ const needsReviewOpportunity = {
   id: 'opp-review',
   creatorId: 'user-ready',
   status: 'published',
-  title: 'Required-only need',
+  title: 'Almost-ready need',
   intent: 'need',
   scope: { sectors: ['Infrastructure'], requiredSkills: ['Planning'] },
   attributes: { targetRole: 'PM', startDate: '2026-04-01' },
-  normalized: { requiredServices: ['Program Management'] },
+  normalized: {},
   location: 'Dammam',
   modelType: 'project_based',
-  description: 'Need PM.',
+  description: 'Need PM — services still missing.',
 }
 
 describe('buildMatchingQualityAnalytics', () => {
@@ -113,7 +113,8 @@ describe('buildMatchingQualityAnalytics', () => {
     })
 
     assert.equal(analytics.averageProfileReadiness, 85)
-    assert.equal(analytics.averageOpportunityReadiness, 87.5)
+    // ready=100, needs_review (9/10 required * 80)=72 → average 86
+    assert.equal(analytics.averageOpportunityReadiness, 86)
   })
 
   it('calculates average match score from stored matchScore', () => {

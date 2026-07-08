@@ -28,7 +28,7 @@ describe('resolveReadinessScoreDisplay', () => {
     const display = resolveReadinessScoreDisplay(91)
     assert.equal(display.percent, 91)
     assert.equal(display.level, 'ready')
-    assert.equal(display.label, 'Ready')
+    assert.equal(display.label, 'Ready to publish')
     assert.equal(display.tone, 'success')
   })
 

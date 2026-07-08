@@ -25,6 +25,14 @@ export function formatReadinessStatusLabel(status: ReadinessStatus): string {
   return STATUS_LABELS[status]
 }
 
+/** Opportunity create/edit wording — avoids "Matching" so it is not confused with Match Score. */
+export function formatOpportunityReadinessStatusLabel(
+  status: OpportunityReadinessStatus,
+): string {
+  if (status === 'ready_for_matching') return 'Ready to publish'
+  return formatReadinessStatusLabel(status)
+}
+
 export function formatReadinessScore(score: number): string {
   return `${Math.round(score)}%`
 }
@@ -73,15 +81,25 @@ export type ReadinessCardViewModel = {
 export function buildReadinessCardViewModel(
   title: string,
   result: ReadinessResult,
+  options?: { readonly opportunityCopy?: boolean },
 ): ReadinessCardViewModel {
   const showReadyMessage =
-    result.status === 'ready_for_matching' && !hasReadinessGaps(result)
+    result.status === 'ready_for_matching' &&
+    (options?.opportunityCopy
+      ? result.missingRequired.length === 0
+      : !hasReadinessGaps(result))
+
+  const statusLabel = options?.opportunityCopy
+    ? formatOpportunityReadinessStatusLabel(result.status as OpportunityReadinessStatus)
+    : formatReadinessStatusLabel(result.status)
 
   return {
     title,
     scoreLabel: formatReadinessScore(result.score),
-    statusLabel: formatReadinessStatusLabel(result.status),
-    summaryMessage: getReadinessSummaryMessage(result),
+    statusLabel,
+    summaryMessage: options?.opportunityCopy
+      ? statusLabel
+      : getReadinessSummaryMessage(result),
     missingRequired: result.missingRequired,
     missingRecommended: result.missingRecommended,
     showReadyMessage,

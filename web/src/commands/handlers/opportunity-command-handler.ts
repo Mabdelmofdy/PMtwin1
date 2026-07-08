@@ -116,18 +116,26 @@ function validateTransition(
 function payloadToOpportunityFields(
   payload: OpportunityCollaborationPayload,
 ): Partial<Opportunity> {
+  const hasCollaborationSelection = Boolean(
+    payload.mainCollaborationModel?.trim() || payload.subModelType?.trim(),
+  )
   const subModelType =
     normalizeSubModelType(payload.subModelType, payload) ?? payload.subModelType
   // preferredMatchingTopology is system-derived inside the patch builder —
   // never accept a manual matchType / topology override from form input.
-  const collaborationPatch = buildOpportunityCollaborationPatch({
-    mainCollaborationModel: payload.mainCollaborationModel,
-    modelType: payload.modelType,
-    subModelType,
-    exchangeMode: payload.exchangeMode,
-    acceptedExchangeModes: payload.acceptedExchangeModes,
-    collaborationAttributes: payload.collaborationAttributes,
-  })
+  // Skip inventing taxonomy defaults for empty create drafts (readiness starts at 0).
+  const collaborationPatch = hasCollaborationSelection
+    ? buildOpportunityCollaborationPatch({
+        mainCollaborationModel: payload.mainCollaborationModel,
+        modelType: payload.modelType,
+        subModelType,
+        exchangeMode: payload.exchangeMode,
+        acceptedExchangeModes: payload.acceptedExchangeModes,
+        collaborationAttributes: payload.collaborationAttributes,
+      })
+    : (payload.collaborationAttributes
+        ? { collaborationAttributes: { ...payload.collaborationAttributes } }
+        : {})
 
   return {
     title: payload.title,
@@ -141,10 +149,14 @@ function payloadToOpportunityFields(
     attributes: payload.attributes as Opportunity['attributes'],
     exchangeData: payload.exchangeData,
     normalized: payload.normalized,
-    value_exchange: {
-      mode: payload.exchangeMode,
-      accepted_modes: [...(payload.acceptedExchangeModes ?? [payload.exchangeMode])],
-    },
+    ...(hasCollaborationSelection
+      ? {
+          value_exchange: {
+            mode: payload.exchangeMode,
+            accepted_modes: [...(payload.acceptedExchangeModes ?? [payload.exchangeMode])],
+          },
+        }
+      : {}),
     ...collaborationPatch,
   }
 }
@@ -202,16 +214,23 @@ export class OpportunityCommandHandler {
       return failure(command.commandType, command.aggregateId, ['title is required'])
     }
 
-    const validation = validateOpportunityCollaborationModel({
-      mainCollaborationModel: payload.mainCollaborationModel,
-      modelType: payload.modelType,
-      subModelType: payload.subModelType,
-      exchangeMode: payload.exchangeMode,
-      acceptedExchangeModes: payload.acceptedExchangeModes,
-      collaborationAttributes: payload.collaborationAttributes,
-    })
-    if (!validation.valid) {
-      return failure(command.commandType, command.aggregateId, validation.errors)
+    // Drafts may be saved before collaboration taxonomy is chosen (readiness starts at 0).
+    // Validate taxonomy only once the user has selected a main model / sub-model.
+    const hasCollaborationSelection = Boolean(
+      payload.mainCollaborationModel?.trim() || payload.subModelType?.trim(),
+    )
+    if (hasCollaborationSelection) {
+      const validation = validateOpportunityCollaborationModel({
+        mainCollaborationModel: payload.mainCollaborationModel,
+        modelType: payload.modelType,
+        subModelType: payload.subModelType,
+        exchangeMode: payload.exchangeMode,
+        acceptedExchangeModes: payload.acceptedExchangeModes,
+        collaborationAttributes: payload.collaborationAttributes,
+      })
+      if (!validation.valid) {
+        return failure(command.commandType, command.aggregateId, validation.errors)
+      }
     }
 
     const fields = payloadToOpportunityFields(payload)

@@ -92,7 +92,26 @@ describe('evaluatePublishReadiness', () => {
     assert.equal(gate.profileReadiness.status, 'needs_review')
   })
 
-  it('blocks when opportunity needs_review', () => {
+  it('blocks when opportunity is incomplete (below publish threshold)', () => {
+    const gate = evaluatePublishReadiness({
+      profile: readyProfile,
+      profileKind: 'individual',
+      opportunity: {
+        title: 'Sparse need',
+        intent: 'need',
+        description: 'Only a few fields filled',
+      },
+    })
+
+    assert.equal(gate.allowed, false)
+    assert.ok(
+      gate.opportunityReadiness.status === 'incomplete' ||
+        gate.opportunityReadiness.status === 'needs_review',
+    )
+    assert.ok(gate.opportunityReadiness.score < 80)
+  })
+
+  it('allows when opportunity has all required fields even if recommended are missing', () => {
     const gate = evaluatePublishReadiness({
       profile: readyProfile,
       profileKind: 'individual',
@@ -116,8 +135,9 @@ describe('evaluatePublishReadiness', () => {
       },
     })
 
-    assert.equal(gate.allowed, false)
-    assert.equal(gate.opportunityReadiness.status, 'needs_review')
+    assert.equal(gate.allowed, true)
+    assert.equal(gate.opportunityReadiness.status, 'ready_for_matching')
+    assert.ok(gate.opportunityReadiness.score >= 80)
   })
 
   it('allows when both profile and opportunity are ready_for_matching', () => {

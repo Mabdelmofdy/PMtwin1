@@ -188,9 +188,9 @@ function hasCollaborationModel(opportunity: Record<string, unknown>): boolean {
   const normalized = nested(opportunity, 'normalized')
 
   return (
-    hasAnyString(opportunity, ['modelType', 'collaborationType', 'collaborationModel', 'exchangeMode', 'subModelType']) ||
+    hasAnyString(opportunity, ['modelType', 'collaborationType', 'collaborationModel', 'mainCollaborationModel', 'exchangeMode', 'subModelType']) ||
     hasAnyArray(opportunity, ['paymentModes']) ||
-    hasAnyString(normalized, ['modelType', 'collaborationType', 'collaborationModel', 'exchangeMode', 'subModelType'])
+    hasAnyString(normalized, ['modelType', 'collaborationType', 'collaborationModel', 'mainCollaborationModel', 'exchangeMode', 'subModelType'])
   )
 }
 
@@ -340,12 +340,13 @@ const RECOMMENDED_RULES: readonly OpportunityFieldRule[] = [
 ]
 
 export const OPPORTUNITY_READINESS_SCORE_WEIGHTS = {
-  required: 75,
-  recommended: 25,
+  required: 80,
+  recommended: 20,
 } as const
 
 export const OPPORTUNITY_READINESS_STATUS_THRESHOLDS = {
   incompleteMax: 60,
+  /** Publish gate: opportunity readinessScore must be >= readyMin. */
   readyMin: 80,
 } as const
 

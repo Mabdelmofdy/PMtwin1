@@ -69,10 +69,12 @@ describe('readiness display helpers', () => {
   })
 
   it('shows ready message when status is ready and no gaps remain', () => {
-    const viewModel = buildReadinessCardViewModel('Opportunity Readiness', readyResult)
+    const viewModel = buildReadinessCardViewModel('Opportunity Readiness', readyResult, {
+      opportunityCopy: true,
+    })
 
     assert.equal(viewModel.showReadyMessage, true)
-    assert.equal(getReadinessSummaryMessage(readyResult), READINESS_READY_MESSAGE)
+    assert.equal(viewModel.statusLabel, 'Ready to publish')
     assert.equal(isReadinessFullyReady(readyResult), true)
   })
 
@@ -158,8 +160,8 @@ describe('opportunity readiness card integration', () => {
     })
 
     assert.equal(result.missingRequired.length, 0)
-    assert.equal(result.status, 'needs_review')
-    assert.equal(result.score, 75)
+    assert.equal(result.status, 'ready_for_matching')
+    assert.equal(result.score, 80)
   })
 
   it('blocks ready status when role is missing', () => {

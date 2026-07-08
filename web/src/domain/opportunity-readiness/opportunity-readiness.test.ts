@@ -108,15 +108,14 @@ describe('evaluateOpportunityReadiness — baseline states', () => {
     assert.deepEqual(result.missingRecommended, [])
   })
 
-  it('marks required-only opportunity as needs_review at score 75', () => {
+  it('marks required-only opportunity as ready_for_matching at required weight (>= publish threshold)', () => {
     const result = evaluateOpportunityReadiness(requiredOnlyNeedOpportunity)
 
     assert.equal(result.score, OPPORTUNITY_READINESS_SCORE_WEIGHTS.required)
-    assert.equal(result.status, 'needs_review')
+    assert.equal(result.status, 'ready_for_matching')
     assert.equal(result.missingRequired.length, 0)
     assert.equal(result.missingRecommended.length, 5)
-    assert.ok(result.score >= OPPORTUNITY_READINESS_STATUS_THRESHOLDS.incompleteMax)
-    assert.ok(result.score < OPPORTUNITY_READINESS_STATUS_THRESHOLDS.readyMin)
+    assert.ok(result.score >= OPPORTUNITY_READINESS_STATUS_THRESHOLDS.readyMin)
   })
 })
 
@@ -258,7 +257,7 @@ describe('evaluateOpportunityReadiness — legacy aliases', () => {
     assert.equal(result.missingRequired.length, 0)
     assert.equal(result.presentRequired.length, 10)
     assert.ok(result.score >= OPPORTUNITY_READINESS_SCORE_WEIGHTS.required)
-    assert.equal(result.status, 'needs_review')
+    assert.equal(result.status, 'ready_for_matching')
   })
 })
 
