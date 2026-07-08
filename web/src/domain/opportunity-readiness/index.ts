@@ -1,4 +1,8 @@
-export { evaluateOpportunityReadiness } from '@/domain/opportunity-readiness/opportunity-readiness-evaluator.ts'
+export {
+  evaluateOpportunityReadiness,
+  evaluateOpportunityReadinessCanonical,
+  toOpportunityReadinessResult,
+} from '@/domain/opportunity-readiness/opportunity-readiness-evaluator.ts'
 export {
   getOpportunityReadinessRules,
   OPPORTUNITY_READINESS_SCORE_WEIGHTS,

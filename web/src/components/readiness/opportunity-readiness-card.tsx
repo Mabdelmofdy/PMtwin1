@@ -1,9 +1,13 @@
 import { useMemo } from 'react'
+import {
+  evaluateOpportunityReadinessCanonical,
+} from '@/domain/opportunity-readiness/opportunity-readiness-evaluator.ts'
 import { evaluateOpportunityReadiness } from '@/domain/opportunity-readiness/opportunity-readiness-evaluator.ts'
 import type {
   OpportunityReadinessOpportunity,
   OpportunityReadinessResult,
 } from '@/domain/opportunity-readiness/types.ts'
+import type { ReadinessResult } from '@pm-twin/collaboration-models'
 import { ReadinessCard } from '@/components/readiness/readiness-card.tsx'
 import { resolveOpportunityReadinessCta } from '@/components/readiness/readiness-ui-rules.ts'
 
@@ -18,6 +22,12 @@ export function resolveOpportunityReadiness(
   opportunity?: object | null,
 ) {
   return evaluateOpportunityReadiness(toOpportunityReadinessInput(opportunity))
+}
+
+export function resolveOpportunityReadinessCanonical(
+  opportunity?: object | null,
+): ReadinessResult {
+  return evaluateOpportunityReadinessCanonical(toOpportunityReadinessInput(opportunity))
 }
 
 export function OpportunityReadinessCard({

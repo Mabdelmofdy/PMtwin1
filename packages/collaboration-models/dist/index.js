@@ -2676,6 +2676,721 @@ function getCommercialMetadata(subModelKey) {
 function getKnowledgeMetadata(subModelKey) {
   return getSubModel(subModelKey)?.knowledge.metadata;
 }
+
+// src/readiness/types.ts
+var READINESS_ENGINE_VERSION = "1.0.0";
+
+// src/knowledge/opportunity-core-readiness.ts
+var REQUIRED_WEIGHT_EACH = 8;
+var RECOMMENDED_WEIGHT_EACH = 4;
+var CORE_FIELDS = [
+  { id: "title", label: "Title", category: "general", priority: "required" },
+  { id: "intent", label: "Intent", category: "general", priority: "required" },
+  { id: "categoryProfession", label: "Category / Profession", category: "general", priority: "required" },
+  { id: "roleIntent", label: "Role Needed or Role Offered", category: "requirements", priority: "required" },
+  { id: "skillsIntent", label: "Skills Required or Offered", category: "requirements", priority: "required" },
+  { id: "servicesIntent", label: "Services Required or Offered", category: "requirements", priority: "required" },
+  { id: "location", label: "Location or Service Area", category: "location", priority: "required" },
+  { id: "timeline", label: "Timeline / Availability", category: "timeline", priority: "required" },
+  { id: "collaborationModel", label: "Collaboration Model", category: "commercial", priority: "required" },
+  { id: "descriptionScope", label: "Description / Scope", category: "technical", priority: "required" },
+  { id: "budgetValueTerms", label: "Budget / Value Terms", category: "financial", priority: "recommended" },
+  { id: "preferredPartnerType", label: "Preferred Partner Type", category: "requirements", priority: "recommended" },
+  { id: "attachments", label: "Attachments / Portfolio References", category: "requirements", priority: "recommended" },
+  { id: "compliance", label: "Compliance Requirements", category: "legal", priority: "recommended" },
+  { id: "deliveryMilestones", label: "Delivery Milestones", category: "timeline", priority: "recommended" }
+];
+var OPPORTUNITY_CORE_READINESS = {
+  requiredFields: CORE_FIELDS.filter((f) => f.priority === "required").map((f) => f.id),
+  optionalFields: CORE_FIELDS.filter((f) => f.priority === "recommended").map((f) => f.id),
+  minimumPublishFields: CORE_FIELDS.filter((f) => f.priority === "required").map((f) => f.id),
+  fields: CORE_FIELDS.map((field) => ({
+    id: field.id,
+    label: field.label,
+    category: field.category,
+    priority: field.priority,
+    weight: field.priority === "required" ? REQUIRED_WEIGHT_EACH : RECOMMENDED_WEIGHT_EACH,
+    requiredWeight: field.priority === "required" ? REQUIRED_WEIGHT_EACH : 0,
+    recommendedWeight: field.priority === "recommended" ? RECOMMENDED_WEIGHT_EACH : 0
+  }))
+};
+var OPPORTUNITY_READINESS_STATUS_THRESHOLDS = {
+  incompleteMax: 60,
+  readyMin: 80
+};
+var OPPORTUNITY_READINESS_SCORE_WEIGHTS = {
+  required: 80,
+  recommended: 20
+};
+
+// src/readiness/field-presence.ts
+function asRecord(value) {
+  if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+    return value;
+  }
+  return {};
+}
+function hasNonEmptyString(value) {
+  return typeof value === "string" && value.trim().length > 0;
+}
+function hasNonEmptyArray(value) {
+  return Array.isArray(value) && value.length > 0;
+}
+function hasPresentNumber(value) {
+  if (value == null || value === "") return false;
+  return Number.isFinite(Number(value));
+}
+function hasAnyString(opportunity, keys) {
+  return keys.some((key) => hasNonEmptyString(opportunity[key]));
+}
+function hasAnyArray(opportunity, keys) {
+  return keys.some((key) => hasNonEmptyArray(opportunity[key]));
+}
+function nested(opportunity, key) {
+  return asRecord(opportunity[key]);
+}
+function resolveIntent(opportunity) {
+  const raw = opportunity.intent ?? opportunity.type ?? nested(opportunity, "normalized").intent ?? nested(opportunity, "normalized").type;
+  const value = typeof raw === "string" ? raw.trim().toLowerCase() : "";
+  if (value === "need" || value === "offer" || value === "hybrid") return value;
+  if (value === "request") return "need";
+  if (value === "provide" || value === "supply") return "offer";
+  return void 0;
+}
+function hasRoleNeeded(opportunity) {
+  const attributes = nested(opportunity, "attributes");
+  const scope = nested(opportunity, "scope");
+  const normalized = nested(opportunity, "normalized");
+  return hasAnyString(opportunity, ["roleNeeded", "requiredRole"]) || hasAnyString(attributes, ["roleNeeded", "requiredRole", "targetRole"]) || hasAnyString(scope, ["roleNeeded", "requiredRole", "targetRole"]) || hasAnyString(normalized, ["roleNeeded", "requiredRole", "role"]);
+}
+function hasRoleOffered(opportunity) {
+  const attributes = nested(opportunity, "attributes");
+  const scope = nested(opportunity, "scope");
+  const normalized = nested(opportunity, "normalized");
+  return hasAnyString(opportunity, ["roleOffered", "offeredRole"]) || hasAnyString(attributes, ["roleOffered", "offeredRole", "targetRole"]) || hasAnyString(scope, ["roleOffered", "offeredRole", "targetRole"]) || hasAnyString(normalized, ["roleOffered", "offeredRole", "role"]);
+}
+function hasRoleForIntent(opportunity) {
+  const intent = resolveIntent(opportunity);
+  if (intent === "need") return hasRoleNeeded(opportunity);
+  if (intent === "offer") return hasRoleOffered(opportunity);
+  if (intent === "hybrid") return hasRoleNeeded(opportunity) && hasRoleOffered(opportunity);
+  return hasRoleNeeded(opportunity) || hasRoleOffered(opportunity);
+}
+function hasRequiredSkills(opportunity) {
+  const scope = nested(opportunity, "scope");
+  const attributes = nested(opportunity, "attributes");
+  const normalized = nested(opportunity, "normalized");
+  return hasAnyArray(opportunity, ["requiredSkills", "coreSkills", "skills", "specializations"]) || hasAnyArray(scope, ["requiredSkills", "coreSkills", "skills", "specializations"]) || hasAnyArray(attributes, ["requiredSkills", "coreSkills", "skills", "specializations"]) || hasAnyArray(normalized, ["requiredSkills", "coreSkills", "skills", "specializations"]);
+}
+function hasOfferedSkills(opportunity) {
+  const scope = nested(opportunity, "scope");
+  const attributes = nested(opportunity, "attributes");
+  const normalized = nested(opportunity, "normalized");
+  return hasAnyArray(opportunity, ["offeredSkills", "coreSkills", "skills", "specializations"]) || hasAnyArray(scope, ["offeredSkills", "coreSkills", "skills", "specializations"]) || hasAnyArray(attributes, ["offeredSkills", "coreSkills", "skills", "specializations"]) || hasAnyArray(normalized, ["offeredSkills", "coreSkills", "skills", "specializations"]);
+}
+function hasSkillsForIntent(opportunity) {
+  const intent = resolveIntent(opportunity);
+  if (intent === "need") return hasRequiredSkills(opportunity);
+  if (intent === "offer") return hasOfferedSkills(opportunity);
+  if (intent === "hybrid") return hasRequiredSkills(opportunity) && hasOfferedSkills(opportunity);
+  return hasRequiredSkills(opportunity) || hasOfferedSkills(opportunity);
+}
+function hasRequiredServices(opportunity) {
+  const scope = nested(opportunity, "scope");
+  const normalized = nested(opportunity, "normalized");
+  return hasAnyArray(opportunity, ["requiredServices", "services"]) || hasAnyArray(scope, ["requiredServices", "services"]) || hasAnyArray(normalized, ["requiredServices", "services"]);
+}
+function hasOfferedServices(opportunity) {
+  const scope = nested(opportunity, "scope");
+  const normalized = nested(opportunity, "normalized");
+  return hasAnyArray(opportunity, ["offeredServices", "services"]) || hasAnyArray(scope, ["offeredServices", "services"]) || hasAnyArray(normalized, ["offeredServices", "services"]);
+}
+function hasServicesForIntent(opportunity) {
+  const intent = resolveIntent(opportunity);
+  if (intent === "need") return hasRequiredServices(opportunity);
+  if (intent === "offer") return hasOfferedServices(opportunity);
+  if (intent === "hybrid") return hasRequiredServices(opportunity) && hasOfferedServices(opportunity);
+  return hasRequiredServices(opportunity) || hasOfferedServices(opportunity);
+}
+function hasCategoryOrProfession(opportunity) {
+  const scope = nested(opportunity, "scope");
+  const attributes = nested(opportunity, "attributes");
+  const normalized = nested(opportunity, "normalized");
+  return hasAnyString(opportunity, ["category", "profession", "sector"]) || hasAnyArray(opportunity, ["categories", "sectors"]) || hasAnyArray(scope, ["sectors", "categories", "profession"]) || hasAnyString(attributes, ["profession", "category", "sector"]) || hasAnyArray(normalized, ["categories", "sectors"]);
+}
+function hasLocationOrServiceArea(opportunity) {
+  const attributes = nested(opportunity, "attributes");
+  const normalized = nested(opportunity, "normalized");
+  return hasAnyString(opportunity, ["location", "serviceArea"]) || hasAnyArray(opportunity, ["serviceArea", "serviceAreas", "coverageAreas"]) || hasAnyString(attributes, ["locationRequirement", "location", "serviceArea"]) || hasAnyString(normalized, ["location", "serviceArea"]) || hasAnyArray(normalized, ["serviceArea", "serviceAreas"]);
+}
+function hasTimelineOrAvailability(opportunity) {
+  const attributes = nested(opportunity, "attributes");
+  const normalized = nested(opportunity, "normalized");
+  const timeline = nested(opportunity, "timeline");
+  const normalizedTimeline = nested(normalized, "timeline");
+  const availability = attributes.availability ?? opportunity.availability ?? normalized.availability;
+  if (hasNonEmptyString(opportunity.duration)) return true;
+  if (hasAnyString(attributes, ["startDate", "endDate", "tenderDeadline", "applicationDeadline", "duration"])) {
+    return true;
+  }
+  if (hasNonEmptyString(timeline.start) || hasNonEmptyString(timeline.end)) return true;
+  if (hasNonEmptyString(normalizedTimeline.start) || hasNonEmptyString(normalizedTimeline.end)) return true;
+  if (hasNonEmptyString(normalized.deadline)) return true;
+  if (hasNonEmptyString(availability)) return true;
+  if (availability !== null && typeof availability === "object" && !Array.isArray(availability)) {
+    const record = availability;
+    return hasNonEmptyString(record.start) || hasNonEmptyString(record.end);
+  }
+  return false;
+}
+function hasCollaborationModel(opportunity) {
+  const normalized = nested(opportunity, "normalized");
+  return hasAnyString(opportunity, ["modelType", "collaborationType", "collaborationModel", "mainCollaborationModel", "exchangeMode", "subModelType"]) || hasAnyArray(opportunity, ["paymentModes"]) || hasAnyString(normalized, ["modelType", "collaborationType", "collaborationModel", "mainCollaborationModel", "exchangeMode", "subModelType"]);
+}
+function hasDescriptionOrScope(opportunity) {
+  const scope = nested(opportunity, "scope");
+  if (hasAnyString(opportunity, ["description", "details"])) return true;
+  if (hasNonEmptyString(scope.description) || hasNonEmptyString(scope.details)) return true;
+  if (hasAnyArray(scope, [
+    "sectors",
+    "coreSkills",
+    "requiredSkills",
+    "offeredSkills",
+    "categories",
+    "profession"
+  ])) {
+    return true;
+  }
+  return hasAnyString(scope, ["summary", "profession", "category", "sector"]);
+}
+function hasBudgetOrValueTerms(opportunity) {
+  const exchangeData = nested(opportunity, "exchangeData");
+  const commercialTerms = nested(opportunity, "commercialTerms");
+  const normalized = nested(opportunity, "normalized");
+  const attrs2 = nested(opportunity, "collaborationAttributes");
+  if (hasPresentNumber(opportunity.budget) || hasPresentNumber(opportunity.agreedValue)) return true;
+  if (hasNonEmptyArray(exchangeData.budgetRange) || asRecord(exchangeData.budgetRange).min != null) return true;
+  if (hasPresentNumber(exchangeData.cashAmount) || hasPresentNumber(exchangeData.value)) return true;
+  if (Object.keys(commercialTerms).length > 0) return true;
+  if (asRecord(normalized.budget).min != null || hasPresentNumber(normalized.budget)) return true;
+  if (asRecord(attrs2.budget).min != null || hasPresentNumber(attrs2.budget)) return true;
+  if (asRecord(attrs2.budgetRange).min != null) return true;
+  if (hasPresentNumber(attrs2.cashAmount)) return true;
+  return hasAnyString(opportunity, ["valueTerms", "paymentSchedule"]);
+}
+function hasPreferredPartnerType(opportunity) {
+  const attributes = nested(opportunity, "attributes");
+  return hasAnyString(opportunity, ["preferredPartnerType", "partnerType", "targetPartnerType"]) || hasAnyString(attributes, ["preferredPartnerType", "partnerType", "targetPartnerType"]);
+}
+function hasAttachments(opportunity) {
+  return hasAnyArray(opportunity, ["attachments", "portfolioReferences", "documents", "files", "references"]) || hasAnyArray(nested(opportunity, "attributes"), ["attachments", "documents"]);
+}
+function hasComplianceRequirements(opportunity) {
+  const scope = nested(opportunity, "scope");
+  const attributes = nested(opportunity, "attributes");
+  return hasAnyArray(opportunity, ["complianceRequirements", "certifications", "regulatoryRequirements"]) || hasAnyArray(scope, ["certifications", "complianceRequirements", "regulatoryRequirements"]) || hasAnyArray(attributes, ["complianceRequirements", "certifications", "regulatoryRequirements"]);
+}
+function hasDeliveryMilestones(opportunity) {
+  const attributes = nested(opportunity, "attributes");
+  return hasAnyArray(opportunity, ["deliveryMilestones", "milestones"]) || hasAnyArray(attributes, ["deliveryMilestones", "milestones"]);
+}
+var CORE_PRESENCE = {
+  title: (o) => hasAnyString(o, ["title", "name"]),
+  intent: (o) => resolveIntent(o) != null,
+  categoryProfession: hasCategoryOrProfession,
+  roleIntent: hasRoleForIntent,
+  skillsIntent: hasSkillsForIntent,
+  servicesIntent: hasServicesForIntent,
+  location: hasLocationOrServiceArea,
+  timeline: hasTimelineOrAvailability,
+  collaborationModel: hasCollaborationModel,
+  descriptionScope: hasDescriptionOrScope,
+  budgetValueTerms: hasBudgetOrValueTerms,
+  preferredPartnerType: hasPreferredPartnerType,
+  attachments: hasAttachments,
+  compliance: hasComplianceRequirements,
+  deliveryMilestones: hasDeliveryMilestones
+};
+function isCoreFieldPresent(fieldId, formState) {
+  const checker = CORE_PRESENCE[fieldId];
+  return checker ? checker(formState) : false;
+}
+function isEmptyReadinessValue(value) {
+  if (value == null) return true;
+  if (typeof value === "string") return value.trim() === "";
+  if (Array.isArray(value)) return value.length === 0;
+  if (typeof value === "object") return Object.keys(value).length === 0;
+  return false;
+}
+function fieldIdToReasonCode(fieldId) {
+  const snake = fieldId.replace(/([A-Z])/g, "_$1").replace(/[^a-zA-Z0-9]+/g, "_").toUpperCase().replace(/^_/, "");
+  return `READINESS_MISSING_${snake}`;
+}
+
+// src/readiness/explainability/explanation-builder.ts
+function buildExplanations(contributions, score) {
+  const explanations = [
+    {
+      code: "READINESS_SCORE_SUMMARY",
+      message: `Readiness ${Math.round(score)}%`,
+      severity: "info"
+    }
+  ];
+  const missingRequired = contributions.filter(
+    (c) => c.requiredWeight > 0 && !c.present
+  );
+  const missingRecommended = contributions.filter(
+    (c) => c.recommendedWeight > 0 && !c.present
+  );
+  for (const field of missingRequired) {
+    explanations.push({
+      code: fieldIdToReasonCode(field.fieldId),
+      message: `Missing required: ${field.label}`,
+      severity: "critical",
+      category: field.category,
+      fieldId: field.fieldId
+    });
+  }
+  if (missingRecommended.length > 0) {
+    explanations.push({
+      code: "READINESS_RECOMMENDED_GAPS",
+      message: `${missingRecommended.length} recommended field(s) remaining`,
+      severity: "warning"
+    });
+    for (const field of missingRecommended) {
+      explanations.push({
+        code: fieldIdToReasonCode(field.fieldId),
+        message: `Recommended: ${field.label}`,
+        severity: "warning",
+        category: field.category,
+        fieldId: field.fieldId
+      });
+    }
+  }
+  return explanations;
+}
+function explanationsToMessages(explanations) {
+  return explanations.map((item) => item.message);
+}
+function buildBlockingReasons(contributions) {
+  return contributions.filter((c) => c.requiredWeight > 0 && !c.present).map((field) => ({
+    code: fieldIdToReasonCode(field.fieldId),
+    message: `Complete ${field.label}`,
+    severity: "critical",
+    fieldId: field.fieldId,
+    category: field.category
+  }));
+}
+
+// src/readiness/readiness-levels.ts
+function roundReadinessScore(value) {
+  return Math.round(value * 100) / 100;
+}
+function resolveReadinessLevel(score, publishReady, missingRecommendedCount) {
+  if (score === 0) return "draft";
+  if (score > 0 && score < 40) return "basic";
+  if (!publishReady) return "partial";
+  if (publishReady && missingRecommendedCount > 0) return "ready";
+  return "excellent";
+}
+function resolveReadinessHealth(score, publishReady, missingRequiredCount, missingRecommendedCount) {
+  if (missingRequiredCount > 0 || !publishReady && score < 40) return "critical";
+  if (!publishReady && score >= 40) return "warning";
+  if (publishReady && missingRecommendedCount > 3) return "warning";
+  if (publishReady && missingRecommendedCount > 0) return "good";
+  return "excellent";
+}
+function resolveLegacyOpportunityStatus(score, missingRequiredCount) {
+  if (score < OPPORTUNITY_READINESS_STATUS_THRESHOLDS.incompleteMax) {
+    return "incomplete";
+  }
+  if (missingRequiredCount > 0 || score < OPPORTUNITY_READINESS_STATUS_THRESHOLDS.readyMin) {
+    return "needs_review";
+  }
+  return "ready_for_matching";
+}
+
+// src/readiness/explainability/recommendation-builder.ts
+function roundScore(value) {
+  return Math.round(value * 100) / 100;
+}
+function simulateScoreAfterField(contributions, targetFieldId) {
+  let earnedRequired = 0;
+  let earnedRecommended = 0;
+  let totalRequired = 0;
+  let totalRecommended = 0;
+  for (const field of contributions) {
+    totalRequired += field.requiredWeight;
+    totalRecommended += field.recommendedWeight;
+    const present = field.fieldId === targetFieldId ? true : field.present;
+    if (present) {
+      earnedRequired += field.requiredWeight;
+      earnedRecommended += field.recommendedWeight;
+    }
+  }
+  const requiredRatio = totalRequired === 0 ? 1 : earnedRequired / totalRequired;
+  const recommendedRatio = totalRecommended === 0 ? 1 : earnedRecommended / totalRecommended;
+  return roundScore(requiredRatio * 80 + recommendedRatio * 20);
+}
+function buildNextBestActions(contributions, publishReady) {
+  const missing = contributions.filter((c) => !c.present);
+  const requiredMissing = missing.filter((c) => c.requiredWeight > 0);
+  const recommendedMissing = missing.filter((c) => c.recommendedWeight > 0);
+  const pool = requiredMissing.length > 0 ? requiredMissing : recommendedMissing;
+  const actions = pool.map((field) => {
+    const impact = field.requiredWeight > 0 ? field.requiredWeight : field.recommendedWeight;
+    const estimatedScore = simulateScoreAfterField(contributions, field.fieldId);
+    const estimatedLevel = resolveReadinessLevel(
+      estimatedScore,
+      publishReady || field.requiredWeight > 0,
+      requiredMissing.length > 1 ? requiredMissing.length - 1 : recommendedMissing.length
+    );
+    const priority = field.requiredWeight > 0 ? "required" : "recommended";
+    return {
+      fieldId: field.fieldId,
+      label: field.label,
+      category: field.category,
+      reasonCode: fieldIdToReasonCode(field.fieldId),
+      impactPercent: impact,
+      estimatedGain: impact,
+      estimatedScore,
+      estimatedReadinessLevel: estimatedLevel,
+      priority
+    };
+  });
+  return actions.sort((a, b) => b.impactPercent - a.impactPercent);
+}
+function getMissingRequiredFields(result) {
+  return result.missingRequiredFields;
+}
+function getMissingRecommendedFields(result) {
+  return result.missingRecommendedFields;
+}
+function getNextBestActions(result) {
+  return result.nextBestActions;
+}
+function getBlockingReasons(result) {
+  return result.blockingReasons;
+}
+
+// src/readiness/explainability/summary-builder.ts
+function emptyCategoryMap() {
+  const map = {};
+  for (const id of FIELD_GROUP_IDS) {
+    map[id] = { present: 0, total: 0 };
+  }
+  return map;
+}
+function buildReadinessSummary(result) {
+  const byCategory = emptyCategoryMap();
+  for (const field of result.fieldContributions) {
+    const bucket = byCategory[field.category];
+    bucket.total += 1;
+    if (field.present) bucket.present += 1;
+  }
+  return {
+    score: result.score,
+    requiredScore: result.requiredScore,
+    recommendedScore: result.recommendedScore,
+    readinessLevel: result.readinessLevel,
+    health: result.health,
+    publishReady: result.publishReady,
+    missingRequiredCount: result.missingRequiredFields.length,
+    missingRecommendedCount: result.missingRecommendedFields.length,
+    remainingRequired: result.missingRequiredFields,
+    remainingRecommended: result.missingRecommendedFields,
+    byCategory
+  };
+}
+function buildReadinessBreakdown(result) {
+  const byCategory = {};
+  for (const id of FIELD_GROUP_IDS) {
+    byCategory[id] = { earned: 0, max: 0 };
+  }
+  const entries = result.fieldContributions.map((field) => {
+    const maxRequired = field.requiredWeight;
+    const maxRecommended = field.recommendedWeight;
+    byCategory[field.category].earned += field.earnedRequired + field.earnedRecommended;
+    byCategory[field.category].max += maxRequired + maxRecommended;
+    return {
+      fieldId: field.fieldId,
+      label: field.label,
+      category: field.category,
+      present: field.present,
+      earnedRequired: field.earnedRequired,
+      earnedRecommended: field.earnedRecommended,
+      maxRequired,
+      maxRecommended
+    };
+  });
+  return { entries, byCategory };
+}
+
+// src/readiness/explainability/timeline-builder.ts
+function roundScore2(value) {
+  return Math.round(value * 100) / 100;
+}
+function buildReadinessTimeline(contributions) {
+  const points = [
+    {
+      score: 0,
+      fieldId: "__start__",
+      label: "Start",
+      reasonCode: "READINESS_SCORE_SUMMARY"
+    }
+  ];
+  let earnedRequired = 0;
+  let earnedRecommended = 0;
+  let totalRequired = 0;
+  let totalRecommended = 0;
+  for (const field of contributions) {
+    totalRequired += field.requiredWeight;
+    totalRecommended += field.recommendedWeight;
+  }
+  const ordered = [...contributions].sort((a, b) => {
+    const weightA = a.requiredWeight + a.recommendedWeight;
+    const weightB = b.requiredWeight + b.recommendedWeight;
+    return weightB - weightA;
+  });
+  for (const field of ordered) {
+    if (!field.present) continue;
+    earnedRequired += field.requiredWeight;
+    earnedRecommended += field.recommendedWeight;
+    const requiredRatio = totalRequired === 0 ? 1 : earnedRequired / totalRequired;
+    const recommendedRatio = totalRecommended === 0 ? 1 : earnedRecommended / totalRecommended;
+    const score = roundScore2(requiredRatio * 80 + recommendedRatio * 20);
+    points.push({
+      score,
+      fieldId: field.fieldId,
+      label: field.label,
+      reasonCode: fieldIdToReasonCode(field.fieldId)
+    });
+  }
+  if (points.length === 1 && contributions.some((c) => c.present)) {
+    const requiredRatio = totalRequired === 0 ? 1 : earnedRequired / totalRequired;
+    const recommendedRatio = totalRecommended === 0 ? 1 : earnedRecommended / totalRecommended;
+    points.push({
+      score: roundScore2(requiredRatio * 80 + recommendedRatio * 20),
+      fieldId: "__current__",
+      label: "Current",
+      reasonCode: "READINESS_SCORE_SUMMARY"
+    });
+  }
+  return points;
+}
+
+// src/readiness/readiness-engine.ts
+var resultCache = /* @__PURE__ */ new Map();
+function stableCacheKey(input) {
+  const sub = input.subModelKey ?? "";
+  const ctx = JSON.stringify(input.contextValues ?? {});
+  const state = JSON.stringify(input.formState);
+  return `${sub}::${ctx}::${state}`;
+}
+function clearReadinessCaches() {
+  resultCache.clear();
+}
+function mergedValues(formState, contextValues) {
+  return { ...formState, ...contextValues };
+}
+function buildSnapshot(subModelKey) {
+  const meta = subModelKey ? getKnowledgeMetadata(subModelKey) : void 0;
+  return {
+    generatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    knowledgeVersion: meta?.knowledgeVersion ?? 1,
+    formVersion: meta?.schemaVersion ?? "1.0",
+    engineVersion: READINESS_ENGINE_VERSION
+  };
+}
+function evaluateCoreContributions(formState) {
+  return OPPORTUNITY_CORE_READINESS.fields.map((field) => {
+    const present = isCoreFieldPresent(field.id, formState);
+    return {
+      fieldId: field.id,
+      label: field.label,
+      category: field.category,
+      present,
+      requiredWeight: field.requiredWeight,
+      recommendedWeight: field.recommendedWeight,
+      earnedRequired: present ? field.requiredWeight : 0,
+      earnedRecommended: present ? field.recommendedWeight : 0,
+      scope: "core"
+    };
+  });
+}
+function evaluateSubModelContributions(subModelKey, values) {
+  const readiness = getReadinessDefinition(subModelKey);
+  const form = buildDynamicForm(subModelKey);
+  if (!readiness || !form) return [];
+  const attrs2 = values.collaborationAttributes ?? values;
+  const merged = mergedValues(attrs2, values);
+  const visible = resolveConditionalFields(form.fields, merged).filter((f) => f.visible);
+  return visible.map((field) => {
+    const weight = readiness.fieldWeights.find((w) => w.fieldId === field.id);
+    const isRequired = readiness.requiredFields.includes(field.id);
+    const isOptional = readiness.optionalFields.includes(field.id);
+    const raw = merged[field.id] ?? attrs2[field.id];
+    const present = !isEmptyReadinessValue(raw);
+    const requiredWeight = isRequired ? weight?.requiredWeight ?? 0 : 0;
+    const recommendedWeight = isOptional ? weight?.recommendedWeight ?? 0 : 0;
+    return {
+      fieldId: field.id,
+      label: field.label,
+      category: field.group,
+      present,
+      requiredWeight,
+      recommendedWeight,
+      earnedRequired: present ? requiredWeight : 0,
+      earnedRecommended: present ? recommendedWeight : 0,
+      scope: "subModel"
+    };
+  });
+}
+function computeScores(contributions) {
+  const coreOnly = contributions.filter((c) => c.scope === "core");
+  let earnedRequired = 0;
+  let earnedRecommended = 0;
+  let totalRequired = 0;
+  let totalRecommended = 0;
+  for (const field of coreOnly) {
+    totalRequired += field.requiredWeight;
+    totalRecommended += field.recommendedWeight;
+    earnedRequired += field.earnedRequired;
+    earnedRecommended += field.earnedRecommended;
+  }
+  const requiredRatio = totalRequired === 0 ? 1 : earnedRequired / totalRequired;
+  const recommendedRatio = totalRecommended === 0 ? 1 : earnedRecommended / totalRecommended;
+  const score = roundReadinessScore(requiredRatio * 80 + recommendedRatio * 20);
+  return {
+    score,
+    requiredScore: roundReadinessScore(requiredRatio * 100),
+    recommendedScore: roundReadinessScore(recommendedRatio * 100),
+    completedRequiredWeight: earnedRequired,
+    completedRecommendedWeight: earnedRecommended
+  };
+}
+function partitionLists(contributions) {
+  const missingRequiredFields = [];
+  const missingRecommendedFields = [];
+  const completedRequiredFields = [];
+  const completedRecommendedFields = [];
+  const completedFields = [];
+  for (const field of contributions) {
+    if (field.present) {
+      completedFields.push(field.label);
+      if (field.requiredWeight > 0) completedRequiredFields.push(field.label);
+      if (field.recommendedWeight > 0) completedRecommendedFields.push(field.label);
+    } else {
+      if (field.requiredWeight > 0) missingRequiredFields.push(field.label);
+      if (field.recommendedWeight > 0) missingRecommendedFields.push(field.label);
+    }
+  }
+  return {
+    missingRequiredFields,
+    missingRecommendedFields,
+    completedRequiredFields,
+    completedRecommendedFields,
+    completedFields
+  };
+}
+function isPublishReady(contributions, score) {
+  const coreRequired = contributions.filter(
+    (c) => c.scope === "core" && c.requiredWeight > 0
+  );
+  const allCoreRequired = coreRequired.every((c) => c.present);
+  return allCoreRequired && score >= 80;
+}
+function evaluateReadiness(input) {
+  const cacheKey = stableCacheKey(input);
+  const cached = resultCache.get(cacheKey);
+  if (cached) return cached;
+  const subModelKey = input.subModelKey ?? (typeof input.formState.subModelType === "string" ? input.formState.subModelType : void 0);
+  const coreContributions = evaluateCoreContributions(input.formState);
+  const subModelContributions = subModelKey ? evaluateSubModelContributions(subModelKey, input.formState) : [];
+  const contributions = [...coreContributions, ...subModelContributions];
+  const scores = computeScores(contributions);
+  const lists = partitionLists(coreContributions);
+  const publishReady = isPublishReady(contributions, scores.score);
+  const readinessLevel = resolveReadinessLevel(
+    scores.score,
+    publishReady,
+    lists.missingRecommendedFields.length
+  );
+  const health = resolveReadinessHealth(
+    scores.score,
+    publishReady,
+    lists.missingRequiredFields.length,
+    lists.missingRecommendedFields.length
+  );
+  const blockingReasons = buildBlockingReasons(coreContributions);
+  const explanations = buildExplanations(coreContributions, scores.score);
+  const nextBestActions = buildNextBestActions(
+    coreContributions,
+    publishReady
+  );
+  const result = {
+    ...scores,
+    ...lists,
+    fieldContributions: contributions,
+    explanations,
+    nextBestActions,
+    blockingReasons,
+    publishReady,
+    readinessLevel,
+    health,
+    snapshot: buildSnapshot(subModelKey),
+    explanation: explanationsToMessages(explanations)
+  };
+  resultCache.set(cacheKey, result);
+  return result;
+}
+
+// src/knowledge/value-exchange-readiness.ts
+var EXCHANGE_FIELD_META = {
+  budget: { label: "Budget", category: "financial" },
+  paymentSchedule: { label: "Payment Schedule", category: "financial" },
+  currency: { label: "Currency", category: "financial" },
+  cashAmount: { label: "Cash Amount", category: "financial" },
+  cashPaymentTerms: { label: "Cash Payment Terms", category: "financial" },
+  budgetRange: { label: "Budget Range", category: "financial" },
+  offeredService: { label: "Offered Service", category: "commercial" },
+  requestedService: { label: "Requested Service", category: "commercial" },
+  equivalenceEstimate: { label: "Equivalence Estimate", category: "commercial" },
+  barterOffer: { label: "Barter Offer", category: "commercial" },
+  barterPreferences: { label: "Barter Preferences", category: "commercial" },
+  profitSplit: { label: "Profit Split", category: "financial" },
+  calculationBasis: { label: "Calculation Basis", category: "financial" },
+  profitDistribution: { label: "Profit Distribution", category: "financial" },
+  revenueModel: { label: "Revenue Model", category: "financial" },
+  equityPercentage: { label: "Equity Percentage", category: "financial" },
+  ownershipTerms: { label: "Ownership Terms", category: "legal" },
+  equitySplit: { label: "Equity Split", category: "financial" },
+  equityStructure: { label: "Equity Structure", category: "financial" },
+  vestingTerms: { label: "Vesting Terms", category: "legal" },
+  cashComponent: { label: "Cash Component", category: "financial" },
+  nonCashComponent: { label: "Non-Cash Component", category: "commercial" },
+  barterComponent: { label: "Barter Component", category: "commercial" },
+  equityComponent: { label: "Equity Component", category: "financial" },
+  profitComponent: { label: "Profit Component", category: "financial" }
+};
+function fieldMeta(id) {
+  const meta = EXCHANGE_FIELD_META[id];
+  return {
+    id,
+    label: meta?.label ?? id,
+    category: meta?.category ?? "commercial",
+    priority: "required"
+  };
+}
+function getValueExchangeReadinessFields(mode) {
+  const group = VALUE_EXCHANGE_FIELD_GROUPS[mode];
+  const required = group.requiredFields.map((id) => ({ ...fieldMeta(id), priority: "required" }));
+  const optional = group.optionalFields.map((id) => ({
+    ...fieldMeta(id),
+    priority: "recommended"
+  }));
+  return [...required, ...optional];
+}
 export {
   EXCHANGE_MODE_KEYS,
   FIELD_GROUP_IDS,
@@ -2688,6 +3403,10 @@ export {
   MATCH_TOPOLOGY_SUBMODEL_ALIASES,
   MODEL_TYPE_KEYS,
   MODEL_TYPE_REGISTRY,
+  OPPORTUNITY_CORE_READINESS,
+  OPPORTUNITY_READINESS_SCORE_WEIGHTS,
+  OPPORTUNITY_READINESS_STATUS_THRESHOLDS,
+  READINESS_ENGINE_VERSION,
   RISK_LEVEL_VALUES,
   SUB_MODEL_KNOWLEDGE,
   SUB_MODEL_REGISTRY,
@@ -2695,14 +3414,20 @@ export {
   VALUE_EXCHANGE_FIELD_GROUPS,
   buildDynamicForm,
   buildFieldReadiness,
+  buildReadinessBreakdown,
+  buildReadinessSummary,
+  buildReadinessTimeline,
   buildValidationRules,
   buildValueExchangePayload,
   clearDynamicFormCaches,
+  clearReadinessCaches,
   deriveMatchingTopology,
+  evaluateReadiness,
   evaluateValidation,
   extractCommercialTermsFromExchange,
   getAiMetadata,
   getAnalyticsMetadata,
+  getBlockingReasons,
   getCapabilityDependencies,
   getCollaborationModel,
   getCommercialMetadata,
@@ -2715,10 +3440,14 @@ export {
   getLifecycleMetadata,
   getMainCollaborationModel,
   getMatchingMetrics,
+  getMissingRecommendedFields,
+  getMissingRequiredFields,
   getModelType,
+  getNextBestActions,
   getReadinessDefinition,
   getRiskProfile,
   getSubModel,
+  getValueExchangeReadinessFields,
   getWorkflowMetadata,
   groupFields,
   inferMainCollaborationModel,
@@ -2733,8 +3462,11 @@ export {
   recommendMatchingTopology,
   resolveConditionalFields,
   resolveLegacyFallback,
+  resolveLegacyOpportunityStatus,
   resolveMainCollaborationModelLabel,
   resolveModelTypeLabel,
+  resolveReadinessHealth,
+  resolveReadinessLevel,
   resolveSubModelFormFields,
   resolveSubModelLabel,
   validateCollaborationTaxonomy,

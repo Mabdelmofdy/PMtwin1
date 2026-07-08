@@ -149,3 +149,41 @@ export {
   getRiskProfile,
   getWorkflowMetadata,
 } from './knowledge/index.ts'
+
+export type {
+  ReadinessAction,
+  ReadinessBlockingReason,
+  ReadinessBreakdown,
+  ReadinessBreakdownEntry,
+  ReadinessCategory,
+  ReadinessEvaluateInput,
+  ReadinessExplanation,
+  ReadinessFieldContribution,
+  ReadinessHealth,
+  ReadinessLevel,
+  ReadinessReasonCode,
+  ReadinessResult,
+  ReadinessSnapshot,
+  ReadinessSummary,
+  ReadinessTimelinePoint,
+} from './readiness/index.ts'
+
+export {
+  READINESS_ENGINE_VERSION,
+  evaluateReadiness,
+  clearReadinessCaches,
+  resolveReadinessLevel,
+  resolveReadinessHealth,
+  resolveLegacyOpportunityStatus,
+  buildReadinessSummary,
+  buildReadinessBreakdown,
+  buildReadinessTimeline,
+  getMissingRequiredFields,
+  getMissingRecommendedFields,
+  getNextBestActions,
+  getBlockingReasons,
+  OPPORTUNITY_CORE_READINESS,
+  OPPORTUNITY_READINESS_SCORE_WEIGHTS,
+  OPPORTUNITY_READINESS_STATUS_THRESHOLDS,
+  getValueExchangeReadinessFields,
+} from './readiness/index.ts'

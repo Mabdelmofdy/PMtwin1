@@ -9,7 +9,10 @@ import { PmReadinessScoreBadge } from '@/components/ui/pm-readiness-score-badge'
 import { PmSurface } from '@/components/ui/pm-surface'
 import { PmBadge } from '@/components/ui/pm-badge'
 import { OpportunityListLabels } from '@/components/opportunity/opportunity-list-labels'
-import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
+import {
+  resolveOpportunityReadiness,
+  resolveOpportunityReadinessCanonical,
+} from '@/components/readiness/opportunity-readiness-card'
 import type { Opportunity } from '@/types/domain.ts'
 import { cn } from '@/lib/utils'
 import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'
@@ -39,6 +42,9 @@ export function OpportunityCard({
 }: OpportunityCardProps) {
   const matchCount = showOwnerInsights ? matchesApi.getByOpportunity(opportunity.id).length : 0
   const readiness = showOwnerInsights ? resolveOpportunityReadiness(opportunity) : null
+  const canonicalReadiness = showOwnerInsights
+    ? resolveOpportunityReadinessCanonical(opportunity)
+    : null
   const category = opportunity.scope?.sectors?.[0]
   const href = `/opportunities/${opportunity.id}`
   const taxonomy = resolveOpportunityTaxonomyLabels(opportunity)
@@ -111,8 +117,10 @@ export function OpportunityCard({
             {matchCount} match{matchCount === 1 ? '' : 'es'}
           </span>
         ) : null}
-        {showOwnerInsights && readiness ? (
-          <span>{Math.round(readiness.score)}% matching ready</span>
+        {showOwnerInsights && readiness && canonicalReadiness ? (
+          <span>
+            {Math.round(readiness.score)}% · {canonicalReadiness.readinessLevel}
+          </span>
         ) : null}
       </div>
 

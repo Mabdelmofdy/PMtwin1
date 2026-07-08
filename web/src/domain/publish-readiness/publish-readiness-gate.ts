@@ -1,4 +1,7 @@
-import { evaluateOpportunityReadiness } from '@/domain/opportunity-readiness/opportunity-readiness-evaluator.ts'
+import {
+  evaluateOpportunityReadiness,
+  evaluateOpportunityReadinessCanonical,
+} from '@/domain/opportunity-readiness/opportunity-readiness-evaluator.ts'
 import { evaluateProfileReadiness } from '@/domain/profile-readiness/profile-readiness-evaluator.ts'
 import type { ProfileReadinessProfile } from '@/domain/profile-readiness/types.ts'
 import type { OpportunityReadinessOpportunity } from '@/domain/opportunity-readiness/types.ts'
@@ -34,10 +37,13 @@ export function evaluatePublishReadiness(
   const opportunityReadiness = evaluateOpportunityReadiness(
     toOpportunityInput(input.opportunity),
   )
+  const canonicalOpportunity = evaluateOpportunityReadinessCanonical(
+    toOpportunityInput(input.opportunity),
+  )
 
   const allowed =
     profileReadiness.status === 'ready_for_matching' &&
-    opportunityReadiness.status === 'ready_for_matching'
+    canonicalOpportunity.publishReady
 
   return {
     allowed,
@@ -45,6 +51,8 @@ export function evaluatePublishReadiness(
     reason: allowed ? undefined : PUBLISH_READINESS_BLOCKED_MESSAGE,
     profileReadiness,
     opportunityReadiness,
+    canonicalOpportunityReadiness: canonicalOpportunity,
+    opportunityBlockingReasons: canonicalOpportunity.blockingReasons,
     missingProfileRequired: profileReadiness.missingRequired,
     missingProfileRecommended: profileReadiness.missingRecommended,
     missingOpportunityRequired: opportunityReadiness.missingRequired,
@@ -74,6 +82,11 @@ export function formatPublishReadinessDetailLines(
     lines.push('Opportunity required:')
     for (const item of gate.missingOpportunityRequired) {
       lines.push(`- ${item}`)
+    }
+  } else if (gate.opportunityBlockingReasons.length > 0) {
+    lines.push('Opportunity required:')
+    for (const item of gate.opportunityBlockingReasons) {
+      lines.push(`- ${item.message}`)
     }
   }
   if (gate.missingOpportunityRecommended.length > 0) {

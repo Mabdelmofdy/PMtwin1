@@ -3,6 +3,7 @@ import type {
   ProfileKind,
   ProfileReadinessResult,
 } from '@/domain/profile-readiness/types.ts'
+import type { ReadinessBlockingReason, ReadinessResult } from '@pm-twin/collaboration-models'
 
 export type PublishReadinessInput = {
   readonly profile?: object | null
@@ -16,6 +17,8 @@ export type PublishReadinessResult = {
   readonly reason?: string
   readonly profileReadiness: ProfileReadinessResult
   readonly opportunityReadiness: OpportunityReadinessResult
+  readonly canonicalOpportunityReadiness: ReadinessResult
+  readonly opportunityBlockingReasons: readonly ReadinessBlockingReason[]
   readonly missingProfileRequired: readonly string[]
   readonly missingProfileRecommended: readonly string[]
   readonly missingOpportunityRequired: readonly string[]

@@ -13,13 +13,17 @@ import {
   VALUE_EXCHANGE_FIELD_GROUPS,
   type ExchangeMode,
 } from '@pm-twin/collaboration-models'
-import { evaluateOpportunityReadiness } from '@/domain/opportunity-readiness/opportunity-readiness-evaluator.ts'
 import {
   OPPORTUNITY_READINESS_STATUS_THRESHOLDS,
-} from '@/domain/opportunity-readiness/opportunity-readiness-rules.ts'
+} from '@pm-twin/collaboration-models'
+import {
+  evaluateOpportunityReadiness,
+  evaluateOpportunityReadinessCanonical,
+} from '@/domain/opportunity-readiness/opportunity-readiness-evaluator.ts'
 import type {
   OpportunityReadinessResult,
   OpportunityReadinessStatus,
+  ReadinessResult,
 } from '@/domain/opportunity-readiness/types.ts'
 
 export const OPPORTUNITY_WIZARD_READINESS_STAGE_WEIGHTS = {
@@ -81,6 +85,7 @@ export type OpportunityWizardReadinessResult = {
   readonly presentRequired: readonly string[]
   readonly presentRecommended: readonly string[]
   readonly fieldReadiness: OpportunityReadinessResult
+  readonly canonicalReadiness: ReadinessResult
   readonly stages: readonly OpportunityWizardReadinessStage[]
   readonly completedStageIds: readonly OpportunityWizardReadinessStageId[]
 }
@@ -391,9 +396,9 @@ export function evaluateOpportunityWizardReadiness(
 ): OpportunityWizardReadinessResult {
   const record: OpportunityWizardDraft = draft ?? EMPTY_OPPORTUNITY_WIZARD_DRAFT
   const publishThreshold = OPPORTUNITY_READINESS_STATUS_THRESHOLDS.readyMin
-  const fieldReadiness = evaluateOpportunityReadiness(
-    buildOpportunityWizardReadinessInput(record),
-  )
+  const readinessInput = buildOpportunityWizardReadinessInput(record)
+  const canonicalReadiness = evaluateOpportunityReadinessCanonical(readinessInput)
+  const fieldReadiness = evaluateOpportunityReadiness(readinessInput)
 
   const stages: OpportunityWizardReadinessStage[] = STAGE_DEFINITIONS.map((def) => {
     const weight = OPPORTUNITY_WIZARD_READINESS_STAGE_WEIGHTS[def.id]
@@ -412,7 +417,7 @@ export function evaluateOpportunityWizardReadiness(
     .map((stage) => stage.id)
 
   const score = fieldReadiness.score
-  const publishReady = fieldReadiness.status === 'ready_for_matching'
+  const publishReady = canonicalReadiness.publishReady
 
   return {
     readinessScore: score,
@@ -426,6 +431,7 @@ export function evaluateOpportunityWizardReadiness(
     presentRequired: fieldReadiness.presentRequired,
     presentRecommended: fieldReadiness.presentRecommended,
     fieldReadiness,
+    canonicalReadiness,
     stages,
     completedStageIds,
   }
