@@ -706,7 +706,6 @@ function resolveSubModelFormFields(subModelType) {
   const sub = getSubModel(subModelType);
   if (!sub) return [];
   const required = new Set(sub.requiredFields);
-  const recommended = new Set(sub.recommendedFields);
   const keys = /* @__PURE__ */ new Set([...sub.requiredFields, ...sub.recommendedFields]);
   return sub.attributes.filter((field) => keys.has(field.key)).map((field) => ({
     ...field,
