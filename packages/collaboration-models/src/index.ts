@@ -71,6 +71,24 @@ export {
   type SubModelFormField,
 } from './forms/sub-model-form.ts'
 
+export {
+  buildDynamicForm,
+  groupFields,
+  resolveConditionalFields,
+  buildValidationRules,
+  evaluateValidation,
+  buildFieldReadiness,
+  resolveLegacyFallback,
+  clearDynamicFormCaches,
+  type FieldReadinessWeights,
+  type ResolvedDynamicForm,
+  type FieldGroupSection,
+  type ResolvedConditionalField,
+  type DynamicFieldValidationRule,
+  type ValidationError,
+  type ValidationResult,
+} from './forms/dynamic-form-engine.ts'
+
 export type {
   AiMetadata,
   AnalyticsMetadata,
@@ -85,9 +103,14 @@ export type {
   DocumentsMetadata,
   DynamicFieldDefinition,
   DynamicFieldType,
+  DynamicFieldUiMetadata,
   DynamicFormDefinition,
+  DynamicFormExtensionStubs,
   EducationalContent,
   EducationFaqItem,
+  FieldCondition,
+  FieldConditionOperator,
+  FieldConditionSet,
   FieldGroupId,
   FieldValidation,
   KnowledgeStability,

@@ -144,6 +144,36 @@ var COMPETITION_RFP_ATTRIBUTES = attrs([
 ]);
 
 // src/knowledge/builders.ts
+var EQUITY_VISIBLE_FIELD_IDS = /* @__PURE__ */ new Set([
+  "equitySplit",
+  "equityStructure",
+  "equityPercentage",
+  "ownershipTerms",
+  "vestingTerms",
+  "equityComponent"
+]);
+function inferFieldWidth(type) {
+  if (type === "textarea" || type === "array-objects" || type === "array-percentages" || type === "currency-range" || type === "date-range" || type === "attachment") {
+    return "full";
+  }
+  return "half";
+}
+function mapLegacyConditional(attr) {
+  if (!attr.conditional) return void 0;
+  const value = attr.conditional.value;
+  if (Array.isArray(value)) {
+    return { field: attr.conditional.field, op: "in", value };
+  }
+  return { field: attr.conditional.field, op: "eq", value };
+}
+function equityVisibleWhen(fieldId) {
+  if (!EQUITY_VISIBLE_FIELD_IDS.has(fieldId)) return void 0;
+  return {
+    field: "exchangeMode",
+    op: "notIn",
+    value: ["cash", "barter", "profit_sharing", "hybrid"]
+  };
+}
 var DEFAULT_KNOWLEDGE_METADATA = {
   schemaVersion: "1.0",
   knowledgeVersion: 1,
@@ -213,22 +243,39 @@ function mapLegacyFieldType(type) {
 }
 function attributesToDynamicFields(attributes, requiredKeys) {
   const required = new Set(requiredKeys);
-  return attributes.map((attr, index) => ({
-    id: attr.key,
-    label: attr.label,
-    description: attr.description ?? `${attr.label} for this collaboration model.`,
-    type: mapLegacyFieldType(attr.type),
-    required: required.has(attr.key) || attr.required,
-    placeholder: `Enter ${attr.label.toLowerCase()}`,
-    helpText: attr.description,
-    validation: {
-      ...attr.min != null ? { min: attr.min } : {},
-      ...attr.maxLength != null ? { maxLength: attr.maxLength } : {}
-    },
-    displayOrder: (index + 1) * 10,
-    group: inferFieldGroup(attr),
-    ...attr.options ? { options: attr.options } : {}
-  }));
+  return attributes.map((attr, index) => {
+    const type = mapLegacyFieldType(attr.type);
+    const displayOrder = (index + 1) * 10;
+    const placeholder = `Enter ${attr.label.toLowerCase()}`;
+    const description = attr.description ?? `${attr.label} for this collaboration model.`;
+    const legacyConditional = mapLegacyConditional(attr);
+    const equityConditional = equityVisibleWhen(attr.key);
+    const visibleWhen = legacyConditional ?? equityConditional;
+    return {
+      id: attr.key,
+      label: attr.label,
+      description,
+      type,
+      required: required.has(attr.key) || attr.required,
+      placeholder,
+      helpText: attr.description,
+      validation: {
+        ...required.has(attr.key) || attr.required ? { required: true } : {},
+        ...attr.min != null ? { min: attr.min } : {},
+        ...attr.maxLength != null ? { maxLength: attr.maxLength } : {}
+      },
+      displayOrder,
+      group: inferFieldGroup(attr),
+      ...attr.options ? { options: attr.options } : {},
+      ui: {
+        width: inferFieldWidth(type),
+        order: displayOrder,
+        hint: attr.description,
+        placeholder
+      },
+      ...visibleWhen ? { visibleWhen } : {}
+    };
+  });
 }
 function uniqueGroups(fields) {
   const seen = /* @__PURE__ */ new Set();
@@ -2279,6 +2326,282 @@ function listSubModelFormFieldKeys(subModelType) {
   return resolveSubModelFormFields(subModelType).map((field) => field.key);
 }
 
+// src/knowledge/field-groups.ts
+var FIELD_GROUP_LABELS = {
+  general: "General",
+  commercial: "Commercial",
+  timeline: "Timeline",
+  resources: "Resources",
+  technical: "Technical",
+  legal: "Legal",
+  risk: "Risk",
+  financial: "Financial",
+  location: "Location",
+  requirements: "Requirements"
+};
+
+// src/forms/dynamic-form-engine.ts
+var formCache = /* @__PURE__ */ new Map();
+var readinessCache = /* @__PURE__ */ new Map();
+function asConditionList(set) {
+  if (!set) return [];
+  if (Array.isArray(set)) return set;
+  return [set];
+}
+function normalizeComparable(value) {
+  if (value == null) return "";
+  if (typeof value === "boolean" || typeof value === "number") return String(value);
+  return String(value).toLowerCase().replace(/-/g, "_").trim();
+}
+function evaluateCondition(condition, values) {
+  const raw = values[condition.field];
+  const op = condition.op;
+  if (op === "truthy") return Boolean(raw);
+  if (op === "falsy") return !raw;
+  const left = normalizeComparable(raw);
+  if (op === "eq") {
+    return left === normalizeComparable(condition.value);
+  }
+  if (op === "neq") {
+    return left !== normalizeComparable(condition.value);
+  }
+  const list = Array.isArray(condition.value) ? condition.value.map((item) => normalizeComparable(item)) : [normalizeComparable(condition.value)];
+  if (op === "in") return list.includes(left);
+  if (op === "notIn") return !list.includes(left);
+  return true;
+}
+function evaluateConditionSet(set, values) {
+  const conditions = asConditionList(set);
+  if (conditions.length === 0) return true;
+  return conditions.every((condition) => evaluateCondition(condition, values));
+}
+function sortFields(fields) {
+  return [...fields].sort((a, b) => {
+    const orderA = a.ui?.order ?? a.displayOrder;
+    const orderB = b.ui?.order ?? b.displayOrder;
+    return orderA - orderB;
+  });
+}
+function isDynamicFormIncomplete(subModelKey, fields) {
+  if (fields.length === 0) return true;
+  const sub = getSubModel(subModelKey);
+  if (!sub) return true;
+  const ids = new Set(fields.map((field) => field.id));
+  return sub.requiredFields.some((key) => !ids.has(key));
+}
+function resolveLegacyFallback(subModelKey) {
+  const sub = getSubModel(subModelKey);
+  if (!sub) return void 0;
+  const fields = sortFields(
+    attributesToDynamicFields(sub.attributes, sub.requiredFields)
+  );
+  return {
+    subModelKey,
+    groups: uniqueGroups(fields),
+    fields,
+    source: "legacy-fallback"
+  };
+}
+function buildDynamicForm(subModelKey) {
+  const cached = formCache.get(subModelKey);
+  if (cached) return cached;
+  const sub = getSubModel(subModelKey);
+  if (!sub) return void 0;
+  const knowledgeFields = sortFields(sub.knowledge.dynamicForm.fields);
+  let resolved;
+  if (isDynamicFormIncomplete(subModelKey, knowledgeFields)) {
+    const fallback = resolveLegacyFallback(subModelKey);
+    if (!fallback) return void 0;
+    resolved = fallback;
+  } else {
+    const groupOrder = sub.knowledge.dynamicForm.groups;
+    resolved = {
+      subModelKey,
+      groups: groupOrder.length > 0 ? groupOrder : uniqueGroups(knowledgeFields),
+      fields: knowledgeFields,
+      source: "knowledge"
+    };
+  }
+  formCache.set(subModelKey, resolved);
+  return resolved;
+}
+function clearDynamicFormCaches() {
+  formCache.clear();
+  readinessCache.clear();
+}
+function groupFields(fields, groupOrder) {
+  const order = groupOrder && groupOrder.length > 0 ? groupOrder : uniqueGroups(fields);
+  const byGroup = /* @__PURE__ */ new Map();
+  for (const field of fields) {
+    const bucket = byGroup.get(field.group) ?? [];
+    bucket.push(field);
+    byGroup.set(field.group, bucket);
+  }
+  const sections = [];
+  const seen = /* @__PURE__ */ new Set();
+  for (const groupId of order) {
+    const groupFieldsList = byGroup.get(groupId);
+    if (!groupFieldsList || groupFieldsList.length === 0) continue;
+    seen.add(groupId);
+    const sectionDescription = groupFieldsList.find(
+      (field) => field.ui?.sectionDescription
+    )?.ui?.sectionDescription;
+    sections.push({
+      id: groupId,
+      label: FIELD_GROUP_LABELS[groupId],
+      ...sectionDescription ? { description: sectionDescription } : {},
+      fields: sortFields(groupFieldsList)
+    });
+  }
+  for (const [groupId, groupFieldsList] of byGroup) {
+    if (seen.has(groupId) || groupFieldsList.length === 0) continue;
+    sections.push({
+      id: groupId,
+      label: FIELD_GROUP_LABELS[groupId],
+      fields: sortFields(groupFieldsList)
+    });
+  }
+  return sections;
+}
+function resolveConditionalFields(fields, values) {
+  return fields.map((field) => {
+    const visible = evaluateConditionSet(field.visibleWhen, values);
+    const enabled = evaluateConditionSet(field.enabledWhen, values);
+    const conditionallyRequired = evaluateConditionSet(field.requiredWhen, values);
+    const effectivelyRequired = visible && (field.required || field.validation?.required === true || field.requiredWhen != null && conditionallyRequired);
+    return {
+      ...field,
+      visible,
+      enabled,
+      effectivelyRequired
+    };
+  });
+}
+function buildValidationRules(fields) {
+  return fields.map((field) => ({
+    fieldId: field.id,
+    label: field.label,
+    validation: {
+      required: field.required || field.validation?.required === true,
+      min: field.validation?.min,
+      max: field.validation?.max,
+      minLength: field.validation?.minLength,
+      maxLength: field.validation?.maxLength,
+      regex: field.validation?.regex ?? field.validation?.pattern,
+      pattern: field.validation?.pattern,
+      customValidatorKey: field.validation?.customValidatorKey,
+      message: field.validation?.message
+    },
+    async: false
+  }));
+}
+function isEmptyValue(value) {
+  if (value == null) return true;
+  if (typeof value === "string") return value.trim() === "";
+  if (Array.isArray(value)) return value.length === 0;
+  return false;
+}
+function valueAsNumber(value) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim() !== "") {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : void 0;
+  }
+  return void 0;
+}
+function valueAsString(value) {
+  if (value == null) return "";
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.join(", ");
+  return String(value);
+}
+function evaluateValidation(rules, values, options) {
+  const allow = options?.onlyFieldIds ? new Set(options.onlyFieldIds) : null;
+  const errors = [];
+  for (const rule of rules) {
+    if (allow && !allow.has(rule.fieldId)) continue;
+    const value = values[rule.fieldId];
+    const { validation, label } = rule;
+    const fallbackMessage = validation.message;
+    if (validation.required && isEmptyValue(value)) {
+      errors.push({
+        fieldId: rule.fieldId,
+        message: fallbackMessage ?? `${label} is required`,
+        code: "required"
+      });
+      continue;
+    }
+    if (isEmptyValue(value)) continue;
+    const num = valueAsNumber(value);
+    if (validation.min != null && num != null && num < validation.min) {
+      errors.push({
+        fieldId: rule.fieldId,
+        message: fallbackMessage ?? `${label} must be at least ${validation.min}`,
+        code: "min"
+      });
+    }
+    if (validation.max != null && num != null && num > validation.max) {
+      errors.push({
+        fieldId: rule.fieldId,
+        message: fallbackMessage ?? `${label} must be at most ${validation.max}`,
+        code: "max"
+      });
+    }
+    const str = valueAsString(value);
+    if (validation.minLength != null && str.length < validation.minLength) {
+      errors.push({
+        fieldId: rule.fieldId,
+        message: fallbackMessage ?? `${label} must be at least ${validation.minLength} characters`,
+        code: "minLength"
+      });
+    }
+    if (validation.maxLength != null && str.length > validation.maxLength) {
+      errors.push({
+        fieldId: rule.fieldId,
+        message: fallbackMessage ?? `${label} must be at most ${validation.maxLength} characters`,
+        code: "maxLength"
+      });
+    }
+    const patternSource = validation.regex ?? validation.pattern;
+    if (patternSource) {
+      try {
+        const re = new RegExp(patternSource);
+        if (!re.test(str)) {
+          errors.push({
+            fieldId: rule.fieldId,
+            message: fallbackMessage ?? `${label} format is invalid`,
+            code: "regex"
+          });
+        }
+      } catch {
+      }
+    }
+    if (validation.customValidatorKey) {
+      errors.push({
+        fieldId: rule.fieldId,
+        message: fallbackMessage ?? `${label} awaits validator "${validation.customValidatorKey}"`,
+        code: "customValidatorPending"
+      });
+    }
+  }
+  return { valid: errors.length === 0, errors };
+}
+function buildFieldReadiness(subModelKey) {
+  const cached = readinessCache.get(subModelKey);
+  if (cached) return cached;
+  const sub = getSubModel(subModelKey);
+  if (!sub) return void 0;
+  const map = {};
+  for (const entry of sub.knowledge.readiness.fieldWeights) {
+    map[entry.fieldId] = {
+      requiredWeight: entry.requiredWeight,
+      recommendedWeight: entry.recommendedWeight
+    };
+  }
+  readinessCache.set(subModelKey, map);
+  return map;
+}
+
 // src/knowledge/types.ts
 var FIELD_GROUP_IDS = [
   "general",
@@ -2304,20 +2627,6 @@ var RISK_LEVEL_VALUES = [
   "high",
   "critical"
 ];
-
-// src/knowledge/field-groups.ts
-var FIELD_GROUP_LABELS = {
-  general: "General",
-  commercial: "Commercial",
-  timeline: "Timeline",
-  resources: "Resources",
-  technical: "Technical",
-  legal: "Legal",
-  risk: "Risk",
-  financial: "Financial",
-  location: "Location",
-  requirements: "Requirements"
-};
 
 // src/knowledge/api.ts
 function getDynamicFields(subModelKey) {
@@ -2384,8 +2693,13 @@ export {
   SUB_MODEL_REGISTRY,
   SUB_MODEL_TYPE_KEYS,
   VALUE_EXCHANGE_FIELD_GROUPS,
+  buildDynamicForm,
+  buildFieldReadiness,
+  buildValidationRules,
   buildValueExchangePayload,
+  clearDynamicFormCaches,
   deriveMatchingTopology,
+  evaluateValidation,
   extractCommercialTermsFromExchange,
   getAiMetadata,
   getAnalyticsMetadata,
@@ -2406,6 +2720,7 @@ export {
   getRiskProfile,
   getSubModel,
   getWorkflowMetadata,
+  groupFields,
   inferMainCollaborationModel,
   isMatchTopologyValue,
   listMainCollaborationModels,
@@ -2416,6 +2731,8 @@ export {
   listSubModelsForModelType,
   normalizeSubModelType,
   recommendMatchingTopology,
+  resolveConditionalFields,
+  resolveLegacyFallback,
   resolveMainCollaborationModelLabel,
   resolveModelTypeLabel,
   resolveSubModelFormFields,

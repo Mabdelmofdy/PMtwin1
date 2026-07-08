@@ -2,9 +2,58 @@ import type { SubModelFieldDefinition } from '../types.ts'
 import type {
   DashboardWidgetRecommendation,
   DynamicFieldDefinition,
+  FieldConditionSet,
   FieldGroupId,
   SubModelKnowledgeMetadata,
 } from './types.ts'
+
+/** Equity-related fields shown only when exchange mode is equity. */
+const EQUITY_VISIBLE_FIELD_IDS = new Set([
+  'equitySplit',
+  'equityStructure',
+  'equityPercentage',
+  'ownershipTerms',
+  'vestingTerms',
+  'equityComponent',
+])
+
+function inferFieldWidth(
+  type: DynamicFieldDefinition['type'],
+): NonNullable<DynamicFieldDefinition['ui']>['width'] {
+  if (
+    type === 'textarea'
+    || type === 'array-objects'
+    || type === 'array-percentages'
+    || type === 'currency-range'
+    || type === 'date-range'
+    || type === 'attachment'
+  ) {
+    return 'full'
+  }
+  return 'half'
+}
+
+function mapLegacyConditional(
+  attr: SubModelFieldDefinition,
+): FieldConditionSet | undefined {
+  if (!attr.conditional) return undefined
+  const value = attr.conditional.value
+  if (Array.isArray(value)) {
+    return { field: attr.conditional.field, op: 'in', value }
+  }
+  return { field: attr.conditional.field, op: 'eq', value }
+}
+
+function equityVisibleWhen(fieldId: string): FieldConditionSet | undefined {
+  if (!EQUITY_VISIBLE_FIELD_IDS.has(fieldId)) return undefined
+  // Hide only when a non-equity exchange mode is explicitly selected.
+  // Empty / unset exchangeMode keeps fields visible (wizard default UX).
+  return {
+    field: 'exchangeMode',
+    op: 'notIn',
+    value: ['cash', 'barter', 'profit_sharing', 'hybrid'],
+  }
+}
 
 export const DEFAULT_KNOWLEDGE_METADATA: SubModelKnowledgeMetadata = {
   schemaVersion: '1.0',
@@ -89,22 +138,40 @@ export function attributesToDynamicFields(
   requiredKeys: readonly string[],
 ): readonly DynamicFieldDefinition[] {
   const required = new Set(requiredKeys)
-  return attributes.map((attr, index) => ({
-    id: attr.key,
-    label: attr.label,
-    description: attr.description ?? `${attr.label} for this collaboration model.`,
-    type: mapLegacyFieldType(attr.type),
-    required: required.has(attr.key) || attr.required,
-    placeholder: `Enter ${attr.label.toLowerCase()}`,
-    helpText: attr.description,
-    validation: {
-      ...(attr.min != null ? { min: attr.min } : {}),
-      ...(attr.maxLength != null ? { maxLength: attr.maxLength } : {}),
-    },
-    displayOrder: (index + 1) * 10,
-    group: inferFieldGroup(attr),
-    ...(attr.options ? { options: attr.options } : {}),
-  }))
+  return attributes.map((attr, index) => {
+    const type = mapLegacyFieldType(attr.type)
+    const displayOrder = (index + 1) * 10
+    const placeholder = `Enter ${attr.label.toLowerCase()}`
+    const description = attr.description ?? `${attr.label} for this collaboration model.`
+    const legacyConditional = mapLegacyConditional(attr)
+    const equityConditional = equityVisibleWhen(attr.key)
+    const visibleWhen = legacyConditional ?? equityConditional
+
+    return {
+      id: attr.key,
+      label: attr.label,
+      description,
+      type,
+      required: required.has(attr.key) || attr.required,
+      placeholder,
+      helpText: attr.description,
+      validation: {
+        ...(required.has(attr.key) || attr.required ? { required: true } : {}),
+        ...(attr.min != null ? { min: attr.min } : {}),
+        ...(attr.maxLength != null ? { maxLength: attr.maxLength } : {}),
+      },
+      displayOrder,
+      group: inferFieldGroup(attr),
+      ...(attr.options ? { options: attr.options } : {}),
+      ui: {
+        width: inferFieldWidth(type),
+        order: displayOrder,
+        hint: attr.description,
+        placeholder,
+      },
+      ...(visibleWhen ? { visibleWhen } : {}),
+    }
+  })
 }
 
 export function uniqueGroups(

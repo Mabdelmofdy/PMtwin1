@@ -55,11 +55,47 @@ export type DynamicFieldType =
   | 'attachment'
 
 export type FieldValidation = {
+  readonly required?: boolean
   readonly min?: number
   readonly max?: number
+  readonly minLength?: number
   readonly maxLength?: number
+  /** Preferred regex source string. */
+  readonly regex?: string
+  /** Legacy alias of `regex` for Sprint 1 seeded fields. */
   readonly pattern?: string
+  readonly customValidatorKey?: string
   readonly message?: string
+}
+
+export type FieldConditionOperator = 'eq' | 'neq' | 'in' | 'notIn' | 'truthy' | 'falsy'
+
+export type FieldCondition = {
+  readonly field: string
+  readonly op: FieldConditionOperator
+  readonly value?: string | number | boolean | readonly string[]
+}
+
+export type FieldConditionSet = FieldCondition | readonly FieldCondition[]
+
+export type DynamicFieldUiMetadata = {
+  readonly icon?: string
+  readonly width?: 'full' | 'half' | 'third'
+  readonly step?: string
+  readonly order?: number
+  readonly hint?: string
+  readonly placeholder?: string
+  readonly sectionDescription?: string
+}
+
+/** Reserved for future engines — metadata only this sprint. */
+export type DynamicFormExtensionStubs = {
+  readonly visibilityRules?: Readonly<Record<string, unknown>>
+  readonly permissions?: Readonly<Record<string, unknown>>
+  readonly displayModes?: Readonly<Record<string, unknown>>
+  readonly mobileLayout?: Readonly<Record<string, unknown>>
+  readonly printLayout?: Readonly<Record<string, unknown>>
+  readonly apiMapping?: Readonly<Record<string, unknown>>
 }
 
 export type DynamicFieldDefinition = {
@@ -74,12 +110,16 @@ export type DynamicFieldDefinition = {
   readonly displayOrder: number
   readonly group: FieldGroupId
   readonly options?: readonly string[]
-}
+  readonly ui?: DynamicFieldUiMetadata
+  readonly visibleWhen?: FieldConditionSet
+  readonly enabledWhen?: FieldConditionSet
+  readonly requiredWhen?: FieldConditionSet
+} & DynamicFormExtensionStubs
 
 export type DynamicFormDefinition = {
   readonly groups: readonly FieldGroupId[]
   readonly fields: readonly DynamicFieldDefinition[]
-}
+} & DynamicFormExtensionStubs
 
 export type KnowledgeStability = 'experimental' | 'beta' | 'stable' | 'deprecated'
 

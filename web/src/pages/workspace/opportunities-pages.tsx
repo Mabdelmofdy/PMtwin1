@@ -1256,6 +1256,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
             <CollaborationSubModelFields
               subModelType={draft.subModelType}
               values={draft.collaborationAttributes}
+              exchangeMode={draft.exchangeMode}
               onChange={(key, value) => {
                 setDraft((current) => ({
                   ...current,

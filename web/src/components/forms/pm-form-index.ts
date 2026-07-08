@@ -3,6 +3,13 @@
  * Phase 5B: infrastructure only; no page migrations.
  */
 
+// Dynamic forms (Knowledge Registry)
+export {
+  DynamicFormRenderer,
+  listVisibleDynamicFieldIds,
+  type DynamicFormRendererProps,
+} from '@/components/forms/dynamic-form-renderer'
+
 // Core form
 export {
   PmForm,
