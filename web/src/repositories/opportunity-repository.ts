@@ -2,6 +2,7 @@ import type { Opportunity } from '@/types/domain.ts'
 import type { IStorageAdapter } from '@/types/storage.ts'
 import { normalizeOpportunityCollaboration } from '@/domain/collaboration/opportunity-collaboration.ts'
 import { BaseRepository } from './base-repository.ts'
+import { mergeSeedWithOverrides } from './seed-override-merge.ts'
 
 function createOpportunityId(): string {
   return `opp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -13,18 +14,14 @@ export class OpportunityRepository extends BaseRepository<Opportunity> {
   }
 
   override getAll(): Opportunity[] {
-    const base = this.loadSeed()
     const overrides = this.readOverrides()
-    const patched = base.map((o) =>
-      normalizeOpportunityCollaboration({
-        ...o,
-        ...overrides.opportunities?.[o.id],
-      }),
-    )
-    return [
-      ...patched,
-      ...(overrides.newOpportunities ?? []).map(normalizeOpportunityCollaboration),
-    ]
+    return mergeSeedWithOverrides({
+      seed: this.loadSeed(),
+      patches: overrides.opportunities,
+      newItems: overrides.newOpportunities ?? [],
+      deletedIds: overrides.deletedOpportunities ?? [],
+      normalize: normalizeOpportunityCollaboration,
+    })
   }
 
   override getById(id: string): Opportunity | undefined {

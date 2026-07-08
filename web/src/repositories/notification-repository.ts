@@ -1,6 +1,7 @@
 import type { AppNotification } from '@/types/domain.ts'
 import type { IStorageAdapter } from '@/types/storage.ts'
 import { BaseRepository } from './base-repository.ts'
+import { mergeSeedWithOverrides } from './seed-override-merge.ts'
 
 export class NotificationRepository extends BaseRepository<AppNotification> {
   constructor(
@@ -11,19 +12,13 @@ export class NotificationRepository extends BaseRepository<AppNotification> {
   }
 
   override getAll(): AppNotification[] {
-    const base = this.loadSeed()
     const overrides = this.readOverrides()
-    const patchMap = overrides.notifications ?? {}
-    const deletedSet = new Set(overrides.deletedNotifications ?? [])
-
-    const patched = base
-      .filter((n) => !deletedSet.has(n.id))
-      .map((n) => ({ ...n, ...patchMap[n.id] }))
-
-    const newNotifs = ((overrides.newNotifications ?? []) as AppNotification[])
-      .filter((n) => !deletedSet.has(n.id))
-
-    return [...patched, ...newNotifs]
+    return mergeSeedWithOverrides({
+      seed: this.loadSeed(),
+      patches: overrides.notifications as Record<string, Partial<AppNotification>> | undefined,
+      newItems: (overrides.newNotifications ?? []) as AppNotification[],
+      deletedIds: overrides.deletedNotifications ?? [],
+    })
   }
 
   getByUserId(userId: string): AppNotification[] {

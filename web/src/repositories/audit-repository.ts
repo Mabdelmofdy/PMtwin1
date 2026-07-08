@@ -2,6 +2,7 @@ import type { AuditEntry } from '@/types/domain.ts'
 import type { IStorageAdapter } from '@/types/storage.ts'
 import { REPOSITORY_ENTITY_KEYS } from './repository-entity-keys.ts'
 import { BaseRepository } from './base-repository.ts'
+import { mergeAuditEntries } from './seed-override-merge.ts'
 
 export class AuditRepository extends BaseRepository<AuditEntry> {
   constructor(storage: IStorageAdapter, loadSeed: () => AuditEntry[]) {
@@ -9,9 +10,8 @@ export class AuditRepository extends BaseRepository<AuditEntry> {
   }
 
   override getAll(): AuditEntry[] {
-    const base = this.loadSeed()
     const overrides = this.readOverrides()
-    return [...base, ...(overrides.newAuditEntries ?? [])]
+    return mergeAuditEntries(this.loadSeed(), overrides)
   }
 
   append(entry: Omit<AuditEntry, 'id' | 'timestamp'>): AuditEntry {

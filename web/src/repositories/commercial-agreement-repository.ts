@@ -1,6 +1,7 @@
 import type { CommercialAgreement } from '@/types/domain.ts'
 import type { IStorageAdapter } from '@/types/storage.ts'
 import { BaseRepository } from './base-repository.ts'
+import { mergeSeedWithOverrides } from './seed-override-merge.ts'
 
 function resolvePostMatchId(commercialAgreement: CommercialAgreement): string | undefined {
   return commercialAgreement.postMatchId ?? commercialAgreement.matchId ?? undefined
@@ -12,15 +13,18 @@ export class CommercialAgreementRepository extends BaseRepository<CommercialAgre
   }
 
   override getAll(): CommercialAgreement[] {
-    const base = this.loadSeed()
     const overrides = this.readOverrides()
     const patchMap = ((overrides.commercialAgreements ?? overrides.deals ?? {}) as Record<
       string,
       Partial<CommercialAgreement>
     >)
-    const patched = base.map((item) => ({ ...item, ...patchMap[item.id] }))
     const newItems = ((overrides.newCommercialAgreements ?? overrides.newDeals ?? []) as CommercialAgreement[])
-    return [...patched, ...newItems]
+    return mergeSeedWithOverrides({
+      seed: this.loadSeed(),
+      patches: patchMap,
+      newItems,
+      deletedIds: overrides.deletedCommercialAgreements ?? [],
+    })
   }
 
   findByPostMatchId(postMatchId: string): CommercialAgreement | undefined {

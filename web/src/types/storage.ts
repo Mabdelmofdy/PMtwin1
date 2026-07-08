@@ -19,10 +19,16 @@ export interface IStorageAdapter {
 export type Overrides = {
   applications?: Record<string, Partial<Application>>
   users?: Record<string, Partial<PlatformUser>>
+  newUsers?: PlatformUser[]
+  deletedUsers?: string[]
   companies?: Record<string, Partial<Company>>
+  newCompanies?: Company[]
+  deletedCompanies?: string[]
   opportunities?: Record<string, Partial<Opportunity>>
   newOpportunities?: Opportunity[]
+  deletedOpportunities?: string[]
   newApplications?: Application[]
+  deletedApplications?: string[]
   notifications?: Record<string, Partial<{ read: boolean }>>
   newNotifications?: Array<{ id: string } & Record<string, unknown>>
   deletedNotifications?: string[]
@@ -30,12 +36,17 @@ export type Overrides = {
   newDeals?: Array<{ id: string } & Record<string, unknown>>
   commercialAgreements?: Record<string, Record<string, unknown>>
   newCommercialAgreements?: Array<{ id: string } & Record<string, unknown>>
+  deletedCommercialAgreements?: string[]
   negotiations?: Record<string, Record<string, unknown>>
   newNegotiations?: Negotiation[]
+  deletedNegotiations?: string[]
   postMatches?: Record<string, Partial<PostMatch>>
   newPostMatches?: PostMatch[]
+  deletedPostMatches?: string[]
   contracts?: Record<string, Record<string, unknown>>
   newContracts?: Array<{ id: string } & Record<string, unknown>>
+  deletedContracts?: string[]
+  auditSnapshot?: AuditEntry[]
   newAuditEntries?: AuditEntry[]
   productLanguageSettings?: Record<string, ProductLanguageSettings>
 }

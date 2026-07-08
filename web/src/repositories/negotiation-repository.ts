@@ -2,6 +2,7 @@ import type { Negotiation } from '@/types/domain.ts'
 import type { IStorageAdapter } from '@/types/storage.ts'
 import { toCanonical } from '@pm-twin/lifecycle'
 import { BaseRepository } from './base-repository.ts'
+import { mergeSeedWithOverrides } from './seed-override-merge.ts'
 
 const NEGOTIATION_ENTITY = 'negotiation' as const
 const ACTIVE_NEGOTIATION_STATUSES = new Set(['active', 'countered'])
@@ -21,14 +22,13 @@ export class NegotiationRepository extends BaseRepository<Negotiation> {
   }
 
   override getAll(): Negotiation[] {
-    const base = this.loadSeed()
     const overrides = this.readOverrides()
-    const patchMap = (overrides.negotiations ?? {}) as Record<
-      string,
-      Partial<Negotiation>
-    >
-    const patched = base.map((n) => ({ ...n, ...patchMap[n.id] }))
-    return [...patched, ...(overrides.newNegotiations ?? [])]
+    return mergeSeedWithOverrides({
+      seed: this.loadSeed(),
+      patches: (overrides.negotiations ?? {}) as Record<string, Partial<Negotiation>>,
+      newItems: overrides.newNegotiations ?? [],
+      deletedIds: overrides.deletedNegotiations ?? [],
+    })
   }
 
   getByOpportunity(opportunityId: string): Negotiation[] {

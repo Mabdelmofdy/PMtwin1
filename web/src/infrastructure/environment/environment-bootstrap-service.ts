@@ -2,7 +2,7 @@ import type { RuntimeMode } from '@/config/runtime-environment.ts'
 import type { IStorageAdapter } from '@/types/storage.ts'
 
 export const SEED_VERSION = '1.0.0'
-const BOOTSTRAP_METADATA_KEY = 'pmtwin_environment_bootstrap'
+export const BOOTSTRAP_METADATA_KEY = 'pmtwin_environment_bootstrap'
 
 export type EnvironmentBootstrapMetadata = {
   bootstrappedAt: string

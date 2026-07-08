@@ -62,6 +62,8 @@ function createDemoContext(localStorage: MemoryLocalStorage): EnvironmentContext
     storageAdapter,
     canRestoreScenario: true,
     canExportEnvironment: true,
+    canImportEnvironment: true,
+    canResetEnvironment: true,
   }
 }
 
@@ -73,6 +75,8 @@ function createProductionContext(): EnvironmentContext {
     storageAdapter: new LocalStorageAdapter(),
     canRestoreScenario: false,
     canExportEnvironment: false,
+    canImportEnvironment: false,
+    canResetEnvironment: false,
   }
 }
 

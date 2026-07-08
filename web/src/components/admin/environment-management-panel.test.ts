@@ -3,6 +3,8 @@ import { describe, it } from 'node:test'
 import {
   buildEnvironmentMetadataSnapshot,
   canRenderEnvironmentExportControls,
+  canRenderEnvironmentImportControls,
+  canRenderEnvironmentResetControls,
   canRenderScenarioRestoreControls,
 } from '@/components/admin/environment-management-panel.tsx'
 
@@ -27,6 +29,18 @@ describe('EnvironmentManagementPanel helpers', () => {
     assert.equal(canRenderEnvironmentExportControls('production'), false)
     assert.equal(canRenderEnvironmentExportControls('demo'), true)
     assert.equal(canRenderEnvironmentExportControls('uat'), true)
+  })
+
+  it('hides import controls in production mode', () => {
+    assert.equal(canRenderEnvironmentImportControls('production'), false)
+    assert.equal(canRenderEnvironmentImportControls('demo'), true)
+    assert.equal(canRenderEnvironmentImportControls('uat'), true)
+  })
+
+  it('hides reset controls in production mode', () => {
+    assert.equal(canRenderEnvironmentResetControls('production'), false)
+    assert.equal(canRenderEnvironmentResetControls('demo'), true)
+    assert.equal(canRenderEnvironmentResetControls('uat'), true)
   })
 })
 

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { PmContentCard, PmMetricGrid } from '@/components/layout/pm-layout-index'
 import { PmBadge, PmButton, PmStatCard } from '@/components/ui/pm-index'
@@ -16,9 +16,19 @@ import {
   restoreDemoScenario,
 } from '@/infrastructure/environment/environment-scenario-restore-service.ts'
 import {
+  EnvironmentResetError,
+  resetEnvironment,
+} from '@/infrastructure/environment/environment-reset-service.ts'
+import {
   exportEnvironmentData,
   serializeEnvironmentExportPayload,
 } from '@/infrastructure/environment/environment-export-service.ts'
+import {
+  EnvironmentImportError,
+  importEnvironmentData,
+  parseEnvironmentImportJson,
+  validateEnvironmentImportPayload,
+} from '@/infrastructure/environment/environment-import-service.ts'
 import {
   loadApplications,
   loadContracts,
@@ -77,6 +87,28 @@ export function canRenderEnvironmentExportControls(
   return runtimeMode === 'demo' || runtimeMode === 'uat'
 }
 
+export function canRenderEnvironmentImportControls(
+  runtimeMode: string = environmentContext.runtimeMode,
+): boolean {
+  return runtimeMode === 'demo' || runtimeMode === 'uat'
+}
+
+export function canRenderEnvironmentResetControls(
+  runtimeMode: string = environmentContext.runtimeMode,
+): boolean {
+  return runtimeMode === 'demo' || runtimeMode === 'uat'
+}
+
+export const ENVIRONMENT_IMPORT_OVERWRITE_MESSAGE =
+  'Importing will overwrite all data in the current environment namespace. Continue?'
+
+export const ENVIRONMENT_RESET_CONFIRM_MESSAGE =
+  'Reset will clear the current environment namespace and restore canonical seed data. Continue?'
+
+export async function readEnvironmentImportFile(file: File): Promise<string> {
+  return file.text()
+}
+
 function downloadEnvironmentExportFile(payload: ReturnType<typeof exportEnvironmentData>): void {
   const serialized = serializeEnvironmentExportPayload(payload)
   const blob = new Blob([serialized], { type: 'application/json' })
@@ -105,6 +137,9 @@ export function EnvironmentManagementPanel() {
   )
   const [isRestoring, setIsRestoring] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+  const [isImporting, setIsImporting] = useState(false)
+  const [isResetting, setIsResetting] = useState(false)
+  const importInputRef = useRef<HTMLInputElement>(null)
 
   const metadata = buildEnvironmentMetadataSnapshot()
 
@@ -144,6 +179,73 @@ export function EnvironmentManagementPanel() {
       })
     } finally {
       setIsExporting(false)
+    }
+  }
+
+  async function handleImportFileSelected(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file || isImporting) return
+    if (!canRenderEnvironmentImportControls()) return
+
+    setIsImporting(true)
+    try {
+      const json = await readEnvironmentImportFile(file)
+      validateEnvironmentImportPayload(parseEnvironmentImportJson(json))
+
+      const confirmed = window.confirm(ENVIRONMENT_IMPORT_OVERWRITE_MESSAGE)
+      if (!confirmed) return
+
+      importEnvironmentData(json, {
+        confirmed: true,
+        importedBy: user?.email ?? user?.id ?? 'admin',
+      })
+
+      toast.success('Environment imported', {
+        description: `Restored ${environmentContext.runtimeMode.toUpperCase()} namespace from ${file.name}.`,
+      })
+    } catch (error) {
+      const description =
+        error instanceof EnvironmentImportError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : 'Unexpected import error.'
+      toast.error('Environment import failed', { description })
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
+  function handleImportEnvironmentClick() {
+    if (isImporting) return
+    if (!canRenderEnvironmentImportControls()) return
+    importInputRef.current?.click()
+  }
+
+  function handleResetEnvironment() {
+    if (isResetting) return
+    if (!canRenderEnvironmentResetControls()) return
+
+    const confirmed = window.confirm(ENVIRONMENT_RESET_CONFIRM_MESSAGE)
+    if (!confirmed) return
+
+    setIsResetting(true)
+    try {
+      resetEnvironment()
+      toast.success('Environment reset', {
+        description: `Restored canonical seed for ${environmentContext.runtimeMode.toUpperCase()}.`,
+      })
+    } catch (error) {
+      const description =
+        error instanceof EnvironmentResetError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : 'Unexpected reset error.'
+      toast.error('Environment reset failed', { description })
+    } finally {
+      setIsResetting(false)
     }
   }
 
@@ -213,11 +315,34 @@ export function EnvironmentManagementPanel() {
               >
                 {isExporting ? 'Exporting…' : 'Export Environment Data'}
               </PmButton>
+              <PmButton
+                variant="outline"
+                onClick={handleImportEnvironmentClick}
+                disabled={isImporting}
+              >
+                {isImporting ? 'Importing…' : 'Import Environment Data'}
+              </PmButton>
+              <input
+                ref={importInputRef}
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={(event) => {
+                  void handleImportFileSelected(event)
+                }}
+              />
+              <PmButton
+                variant="destructive"
+                onClick={handleResetEnvironment}
+                disabled={isResetting}
+              >
+                {isResetting ? 'Resetting…' : 'Reset Entire Environment'}
+              </PmButton>
             </div>
           </div>
         ) : (
           <PmBadge tone="warning">
-            Scenario restore and export controls are hidden in production runtime.
+            Scenario restore, export, import, and reset controls are hidden in production runtime.
           </PmBadge>
         )}
       </div>

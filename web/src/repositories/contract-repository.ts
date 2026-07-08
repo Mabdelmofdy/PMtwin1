@@ -1,6 +1,7 @@
 import type { Contract } from '@/types/domain.ts'
 import type { IStorageAdapter } from '@/types/storage.ts'
 import { BaseRepository } from './base-repository.ts'
+import { mergeSeedWithOverrides } from './seed-override-merge.ts'
 
 export class ContractRepository extends BaseRepository<Contract> {
   constructor(storage: IStorageAdapter, loadSeed: () => Contract[]) {
@@ -8,18 +9,13 @@ export class ContractRepository extends BaseRepository<Contract> {
   }
 
   override getAll(): Contract[] {
-    const base = this.loadSeed()
     const overrides = this.readOverrides()
-    const patchMap = (overrides.contracts ?? {}) as Record<
-      string,
-      Partial<Contract>
-    >
-    const patched = base.map((contract) => ({
-      ...contract,
-      ...patchMap[contract.id],
-    }))
-    const newContracts = (overrides.newContracts ?? []) as Contract[]
-    return [...patched, ...newContracts]
+    return mergeSeedWithOverrides({
+      seed: this.loadSeed(),
+      patches: (overrides.contracts ?? {}) as Record<string, Partial<Contract>>,
+      newItems: (overrides.newContracts ?? []) as Contract[],
+      deletedIds: overrides.deletedContracts ?? [],
+    })
   }
 
   findByDealId(dealId: string): Contract[] {

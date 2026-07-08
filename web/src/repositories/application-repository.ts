@@ -1,6 +1,7 @@
 import type { Application } from '@/types/domain.ts'
 import type { IStorageAdapter } from '@/types/storage.ts'
 import { BaseRepository } from './base-repository.ts'
+import { mergeSeedWithOverrides } from './seed-override-merge.ts'
 
 export class ApplicationRepository extends BaseRepository<Application> {
   constructor(storage: IStorageAdapter, loadSeed: () => Application[]) {
@@ -8,13 +9,13 @@ export class ApplicationRepository extends BaseRepository<Application> {
   }
 
   override getAll(): Application[] {
-    const base = this.loadSeed()
     const overrides = this.readOverrides()
-    const patched = base.map((a) => ({
-      ...a,
-      ...overrides.applications?.[a.id],
-    }))
-    return [...patched, ...(overrides.newApplications ?? [])]
+    return mergeSeedWithOverrides({
+      seed: this.loadSeed(),
+      patches: overrides.applications,
+      newItems: overrides.newApplications ?? [],
+      deletedIds: overrides.deletedApplications ?? [],
+    })
   }
 
   getByOpportunity(opportunityId: string): Application[] {

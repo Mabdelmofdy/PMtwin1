@@ -13,6 +13,7 @@ import {
 } from '@/domain/normalized/post-match-strong-key.ts'
 
 import { BaseRepository } from './base-repository.ts'
+import { mergeSeedWithOverrides } from './seed-override-merge.ts'
 
 
 
@@ -46,21 +47,19 @@ export class PostMatchRepository extends BaseRepository<PostMatch> {
 
   override getAll(): PostMatch[] {
 
-    const base = this.loadSeed()
-
     const overrides = this.readOverrides()
 
-    const patchMap = (overrides.postMatches ?? {}) as Record<
+    return mergeSeedWithOverrides({
 
-      string,
+      seed: this.loadSeed(),
 
-      Partial<PostMatch>
+      patches: (overrides.postMatches ?? {}) as Record<string, Partial<PostMatch>>,
 
-    >
+      newItems: overrides.newPostMatches ?? [],
 
-    const patched = base.map((m) => ({ ...m, ...patchMap[m.id] }))
+      deletedIds: overrides.deletedPostMatches ?? [],
 
-    return [...patched, ...(overrides.newPostMatches ?? [])]
+    })
 
   }
 

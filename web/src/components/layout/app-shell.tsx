@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { AppHeader } from '@/components/layout/app-header'
+import { EnvironmentBanner } from '@/components/layout/environment-banner'
 import { CommandMenu } from '@/components/layout/command-menu'
 import { AppPageChrome } from '@/components/layout/page-chrome'
 import { PageBreadcrumbs } from '@/components/layout/page-breadcrumbs'
@@ -44,6 +45,7 @@ export function AppShell() {
           Skip to content
         </a>
         <AppHeader />
+        <EnvironmentBanner />
         <RecentPageTracker />
         <main id="main-content" className="flex flex-1 flex-col">
           <div className="border-b border-border/40 px-3 py-2 md:hidden">
