@@ -77,7 +77,7 @@ export function IntelligenceFunnelPage() {
         <PmStatCard label="Total matches" value={data.quality.totalMatches} dense />
         <PmStatCard label="Accepted" value={data.quality.acceptedMatches} dense />
         <PmStatCard label="Negotiations started" value={data.quality.negotiationsStarted} dense />
-        <PmStatCard label="Deals created" value={data.quality.dealsCreated} dense />
+        <PmStatCard label="Commercial Agreements created" value={data.quality.dealsCreated} dense />
       </PmMetricGrid>
     </PmPage>
   )

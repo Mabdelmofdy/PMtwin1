@@ -217,7 +217,7 @@ export const adminNavigationGroups: NavGroup[] = [
     ],
   },
   {
-    title: 'Deals & legal',
+    title: 'Commercial agreements & legal',
     items: [
       { title: 'Commercial Agreements', href: '/admin/commercial-agreements', icon: Handshake },
       { title: 'Contracts', href: '/admin/contracts', icon: FileText },
@@ -291,7 +291,7 @@ export const routeLabels: Record<string, string> = {
   matches: 'Matches',
   negotiations: 'Negotiations',
   'commercial-agreements': 'Commercial Agreements',
-  deals: 'Deals',
+  deals: 'Commercial Agreements',
   rate: 'Rate',
   contracts: 'Contracts',
   messages: 'Messages',

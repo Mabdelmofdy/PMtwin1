@@ -85,7 +85,7 @@ export function useNotificationsListFilters(userId: string) {
     hasActiveFilters: readFilter !== 'all',
     firstRun: {
       title: 'No notifications',
-      description: 'Alerts for matches, deals, negotiations, and messages will appear here.',
+      description: 'Alerts for matches, commercial agreements, negotiations, and messages will appear here.',
     },
     filtered: {
       title: 'No notifications match this filter',

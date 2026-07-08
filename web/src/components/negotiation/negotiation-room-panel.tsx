@@ -54,6 +54,8 @@ export type NegotiationRoomPanelProps = {
   readonly viewer: ViewerContext
 }
 
+export const NEGOTIATION_LINKED_COMMERCIAL_AGREEMENT_LABEL = 'Commercial Agreement'
+
 function resolveSenderLabel(userId: string): string {
   const person = peopleApi.get(userId)
   return person?.profile?.name ? `${person.profile.name} (${userId})` : userId
@@ -232,7 +234,7 @@ export function NegotiationRoomPanel({
               ) : null}
               {readModel.linkedEntities.deal ? (
                 <PmFormReadonlyField
-                  label="Deal"
+                  label={NEGOTIATION_LINKED_COMMERCIAL_AGREEMENT_LABEL}
                   value={readModel.linkedEntities.deal.id}
                 />
               ) : null}

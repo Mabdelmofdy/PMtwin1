@@ -2,7 +2,7 @@ export const COLLABORATION_FLOW_STEPS = [
   'Opportunity',
   'PostMatch',
   'Negotiation',
-  'Deal',
+  'Commercial Agreement',
   'Contract',
 ] as const
 

@@ -101,7 +101,7 @@ function buildCommercialAgreementRecommendedAction(
     return {
       id: 'create-contract',
       title: 'Create contract',
-      context: 'Turn agreed deal terms into a signable contract.',
+      context: 'Turn agreed commercial agreement terms into a signable contract.',
       status: model.status,
       statusEntity: 'deal',
       primary: {

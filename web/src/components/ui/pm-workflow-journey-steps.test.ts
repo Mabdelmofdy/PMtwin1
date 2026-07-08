@@ -11,11 +11,11 @@ import {
 } from '@/components/ui/pm-workflow-journey-steps'
 
 describe('resolveCollaborationActiveStepFromMatches', () => {
-  it('returns Deal when any match shows view deal', () => {
+  it('returns Commercial Agreement when any match shows view deal', () => {
     const step = resolveCollaborationActiveStepFromMatches([
       { actions: { showViewDeal: true } },
     ])
-    assert.equal(step, 'Deal')
+    assert.equal(step, 'Commercial Agreement')
   })
 
   it('returns PostMatch when matches exist without negotiation/deal actions', () => {

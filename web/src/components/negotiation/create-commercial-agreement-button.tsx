@@ -15,6 +15,9 @@ type CreateCommercialAgreementButtonProps = {
   readonly size?: 'default' | 'sm' | 'lg' | 'icon'
 }
 
+export const CREATE_COMMERCIAL_AGREEMENT_LABEL = 'Create Commercial Agreement'
+export const CREATING_COMMERCIAL_AGREEMENT_LABEL = 'Creating Commercial Agreement...'
+
 export function CreateCommercialAgreementButton({
   negotiation,
   className,
@@ -54,7 +57,7 @@ export function CreateCommercialAgreementButton({
       disabled={pending}
       onClick={handleCreate}
     >
-      {pending ? 'Creating commercial agreement…' : 'Create commercial agreement'}
+      {pending ? CREATING_COMMERCIAL_AGREEMENT_LABEL : CREATE_COMMERCIAL_AGREEMENT_LABEL}
     </PmButton>
   )
 }

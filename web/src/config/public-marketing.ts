@@ -29,7 +29,7 @@ export const PUBLIC_TRUST_ITEMS = [
   {
     icon: 'ph-duotone ph-shield-check',
     title: 'Security-minded design',
-    body: 'Role-based access and workflow-aware permissions for multi-party deals.',
+    body: 'Role-based access and workflow-aware permissions for multi-party commercial agreements.',
   },
   {
     icon: 'ph-duotone ph-globe-hemisphere-east',

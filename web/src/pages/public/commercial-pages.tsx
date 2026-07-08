@@ -50,8 +50,8 @@ const FEATURES = [
   {
     id: '06',
     icon: 'ph-duotone ph-file-text',
-    title: 'Deal & contract lifecycle',
-    body: 'Move from agreed terms into deal records and contract status — aligned to a clear operational sequence.',
+    title: 'Commercial agreement & contract lifecycle',
+    body: 'Move from agreed terms into commercial agreement records and contract status — aligned to a clear operational sequence.',
   },
   {
     id: '07',
@@ -285,7 +285,7 @@ export function AboutPage() {
       <MarketingSection
         eyebrow="Our focus"
         title="Marketplace, collaboration, and lifecycle — together"
-        subtitle="PM-Twin is designed for companies and professionals who design, build, and deliver projects — not as a generic directory, but as a deal-ready collaboration surface."
+        subtitle="PM-Twin is designed for companies and professionals who design, build, and deliver projects — not as a generic directory, but as a commercial-agreement-ready collaboration surface."
       >
         <div className="mkt-about-grid">
           <article className="mkt-about-block">
@@ -305,7 +305,7 @@ export function AboutPage() {
           <article className="mkt-about-block">
             <h3>Lifecycle management</h3>
             <p>
-              Carry relationships from match through negotiation, deal, and contract stages with a
+              Carry relationships from match through negotiation, commercial agreement, and contract stages with a
               clear operational sequence.
             </p>
           </article>

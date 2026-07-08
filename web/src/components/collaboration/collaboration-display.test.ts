@@ -16,12 +16,12 @@ describe('collaboration-display', () => {
     )
     assert.equal(
       resolveCollaborationStepFromMatch({ hasDeal: true, hasNegotiation: true }),
-      'Deal',
+      'Commercial Agreement',
     )
   })
 
   it('resolves collaboration step from deal context', () => {
-    assert.equal(resolveCollaborationStepFromDeal(false), 'Deal')
+    assert.equal(resolveCollaborationStepFromDeal(false), 'Commercial Agreement')
     assert.equal(resolveCollaborationStepFromDeal(true), 'Contract')
   })
 

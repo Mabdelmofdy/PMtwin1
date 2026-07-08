@@ -112,7 +112,7 @@ function buildContractRecommendedAction(
   if (model.links.deal) {
     return {
       id: 'open-deal',
-      title: 'Review source deal',
+      title: 'Review source commercial agreement',
       context: 'Commercial terms and participants live in the commercial agreement workspace.',
       status: model.status,
       statusEntity: 'contract',
@@ -179,7 +179,7 @@ function ContractListCard({ contract }: { contract: Contract }) {
       title={title}
       href={`/contracts/${contract.id}`}
       badge={<PmWorkflowBadge status={contract.status} entity="contract" size="sm" />}
-      meta={`${taxonomy?.mainModel ?? deal?.title ?? 'Collaboration deal'} · ${taxonomy?.exchangeMode ?? '—'} · Updated ${formatDate(contract.updatedAt)}`}
+      meta={`${taxonomy?.mainModel ?? deal?.title ?? 'Commercial agreement'} · ${taxonomy?.exchangeMode ?? '—'} · Updated ${formatDate(contract.updatedAt)}`}
       primary={{ label: 'Open contract', href: `/contracts/${contract.id}` }}
     />
   )

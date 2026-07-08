@@ -5,7 +5,7 @@ export type CollaborationActiveStep =
   | 'Opportunity'
   | 'PostMatch'
   | 'Negotiation'
-  | 'Deal'
+  | 'Commercial Agreement'
   | 'Contract'
 
 export type OpportunityWorkflowContext = {
@@ -26,7 +26,7 @@ export type OpportunityMatchWorkflowContext = {
 export function resolveCollaborationActiveStepFromMatches(
   matches: ReadonlyArray<{ actions: { showViewDeal?: boolean; showViewNegotiation?: boolean; showCreateDeal?: boolean } }>,
 ): CollaborationActiveStep {
-  if (matches.some((card) => card.actions.showViewDeal)) return 'Deal'
+  if (matches.some((card) => card.actions.showViewDeal)) return 'Commercial Agreement'
   if (matches.some((card) => card.actions.showViewNegotiation || card.actions.showCreateDeal)) {
     return 'Negotiation'
   }
@@ -45,7 +45,7 @@ function resolveJourneyActiveIndex(
     Opportunity: 0,
     PostMatch: 1,
     Negotiation: 2,
-    Deal: 3,
+    'Commercial Agreement': 3,
     Contract: 4,
   }
   return stepIndex[collaborationStep] ?? 0
@@ -111,7 +111,7 @@ export function buildOpportunityWorkflowSteps(
     },
     {
       id: 'deal',
-      label: 'Deal',
+      label: 'Commercial Agreement',
       status: dealStatus,
       statusEntity: 'deal' as const,
       href: topCard?.actions.dealId ? `/commercial-agreements/${topCard.actions.dealId}` : undefined,
@@ -161,7 +161,7 @@ export function buildMatchWorkflowSteps(match: MatchWorkflowContext): readonly P
     },
     {
       id: 'deal',
-      label: 'Deal',
+      label: 'Commercial Agreement',
       status: deal?.status,
       statusEntity: 'deal',
       href: deal ? `/commercial-agreements/${deal.id}` : undefined,
@@ -212,7 +212,7 @@ export function buildNegotiationWorkflowSteps(
     },
     {
       id: 'deal',
-      label: 'Deal',
+      label: 'Commercial Agreement',
       status: linkedDeal?.status,
       statusEntity: 'deal',
       href: linkedDeal ? `/commercial-agreements/${linkedDeal.id}` : undefined,
@@ -260,7 +260,7 @@ export function buildDealWorkflowSteps(model: DealWorkflowContext): readonly PmW
     },
     {
       id: 'deal',
-      label: 'Deal',
+      label: 'Commercial Agreement',
       status: model.status,
       statusEntity: 'deal',
       href: `/commercial-agreements/${model.id}`,
@@ -309,7 +309,7 @@ export function buildContractWorkflowSteps(
     },
     {
       id: 'deal',
-      label: 'Deal',
+      label: 'Commercial Agreement',
       href: model.dealId ? `/commercial-agreements/${model.dealId}` : undefined,
       state: 'complete',
     },

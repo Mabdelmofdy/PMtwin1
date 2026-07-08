@@ -251,7 +251,7 @@ export function AdminDashboardPage() {
       </PmMetricGrid>
       <PmContentCard
         title="Collaboration funnel"
-        description="Conversion from discovered matches through negotiations to deals."
+        description="Conversion from discovered matches through negotiations to commercial agreements."
       >
         <AdminFunnelBars
           stages={[
@@ -699,7 +699,7 @@ export function AdminDealsPage() {
   return (
     <AdminListPage
       title={productLanguage.plural('commercialAgreement')}
-      description="All platform deals."
+      description="All platform commercial agreements."
       data={deals}
       getRowId={(d) => d.id}
       getRowHref={(d) => `/admin/commercial-agreements/${d.id}`}
@@ -756,7 +756,7 @@ export function AdminConsortiumPage() {
   return (
     <AdminListPage
       title="Consortium"
-      description="Consortium deals subset."
+      description="Consortium commercial agreements subset."
       data={consortiumMatches}
       getRowId={(m) => m.id}
       getSearchText={(m) => [m.id, m.matchType].join(' ')}

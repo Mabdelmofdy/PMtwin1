@@ -14,7 +14,7 @@ describe('collaboration flow UX constants', () => {
       'Opportunity',
       'PostMatch',
       'Negotiation',
-      'Deal',
+      'Commercial Agreement',
       'Contract',
     ])
   })

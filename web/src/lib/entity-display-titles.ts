@@ -7,7 +7,7 @@ import type { Deal, Negotiation, Opportunity } from '@/types/domain.ts'
 
 export const UNTITLED_OPPORTUNITY = 'Untitled Opportunity'
 export const UNTITLED_NEGOTIATION = 'Untitled Negotiation'
-export const UNTITLED_DEAL = 'Untitled Deal'
+export const UNTITLED_DEAL = 'Untitled Commercial Agreement'
 export const UNTITLED_CONTRACT = 'Untitled Contract'
 
 export type OpportunityLookup = (id: string) => Opportunity | undefined

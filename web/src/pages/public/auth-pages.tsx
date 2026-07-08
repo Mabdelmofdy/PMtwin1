@@ -35,7 +35,7 @@ export function ForgotPasswordPage() {
           kicker="Account recovery"
           kickerIcon="ph-envelope-simple"
           title="We'll help you get back into your workspace."
-          description="Password reset keeps your deal flow, matches, and contract records secure. This preview shows the recovery experience — email delivery is not yet connected."
+          description="Password reset keeps your commercial agreement flow, matches, and contract records secure. This preview shows the recovery experience — email delivery is not yet connected."
         />
       }
     >

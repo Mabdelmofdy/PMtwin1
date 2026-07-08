@@ -27,7 +27,7 @@ export function resolveCollaborationStepFromMatch(options: {
   hasDeal?: boolean
   hasNegotiation?: boolean
 }): CollaborationFlowStep {
-  if (options.hasDeal) return 'Deal'
+  if (options.hasDeal) return 'Commercial Agreement'
   if (options.hasNegotiation) return 'Negotiation'
   return 'PostMatch'
 }
@@ -35,13 +35,13 @@ export function resolveCollaborationStepFromMatch(options: {
 export function resolveCollaborationStepFromNegotiation(
   hasDeal: boolean,
 ): CollaborationFlowStep {
-  return hasDeal ? 'Deal' : 'Negotiation'
+  return hasDeal ? 'Commercial Agreement' : 'Negotiation'
 }
 
 export function resolveCollaborationStepFromDeal(
   hasContract: boolean,
 ): CollaborationFlowStep {
-  return hasContract ? 'Contract' : 'Deal'
+  return hasContract ? 'Contract' : 'Commercial Agreement'
 }
 
 export function resolveCollaborationStepFromContract(): CollaborationFlowStep {

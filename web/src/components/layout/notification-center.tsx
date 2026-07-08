@@ -176,7 +176,7 @@ export function NotificationCenter() {
             <PmEmptyState
               size="compact"
               title="You're all caught up"
-              description="New matches, deals, and messages will appear here."
+              description="New matches, commercial agreements, and messages will appear here."
               icon={<Bell className="size-5" aria-hidden />}
               className="m-2 border-0 bg-transparent shadow-none"
             />

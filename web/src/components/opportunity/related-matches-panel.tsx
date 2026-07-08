@@ -80,7 +80,7 @@ function buildMatchCardActions(
   if (actions.showViewDeal && actions.dealId) {
     more.push({
       id: 'view-deal',
-      label: 'Open deal',
+      label: 'Open commercial agreement',
       href: `/commercial-agreements/${actions.dealId}`,
     })
   }
@@ -113,7 +113,7 @@ function buildMatchCardActions(
   if (canAct && actions.showCreateDeal) {
     return {
       primary: {
-        label: 'Create deal',
+        label: 'Create Commercial Agreement',
         render: () => (
           <CreateCommercialAgreementButton
             negotiation={card.actions.negotiation}
@@ -141,7 +141,7 @@ function buildMatchCardActions(
   if (actions.showViewDeal && actions.dealId) {
     return {
       primary: {
-        label: 'Open deal',
+        label: 'Open commercial agreement',
         href: `/commercial-agreements/${actions.dealId}`,
       },
       secondary: viewMatchSecondary,

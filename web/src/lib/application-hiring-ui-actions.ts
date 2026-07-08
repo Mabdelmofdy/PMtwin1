@@ -169,7 +169,7 @@ export function createHiringDealFromApplicationUiAction(
   if (!action?.enabled) {
     return {
       success: false,
-      message: action?.disabledReason ?? 'Create hiring deal is not available',
+      message: action?.disabledReason ?? 'Create hiring commercial agreement is not available',
     }
   }
 
@@ -184,7 +184,7 @@ export function createHiringDealFromApplicationUiAction(
   if (!resolvedNegotiationId) {
     return {
       success: false,
-      message: 'An agreed hiring negotiation is required before creating a deal.',
+      message: 'An agreed hiring negotiation is required before creating a commercial agreement.',
     }
   }
 
@@ -200,7 +200,7 @@ export function createHiringDealFromApplicationUiAction(
   if (!deal?.id) {
     return {
       success: false,
-      message: 'Hiring deal could not be created. No deal record returned.',
+      message: 'Hiring commercial agreement could not be created. No record returned.',
     }
   }
 
