@@ -612,8 +612,8 @@ export function OpportunityDetailPage() {
                   <PmFormReadonlyField label="Model type" value={resolveModelTypeLabel(opp.modelType ?? '')} />
                   <PmFormReadonlyField label="Exchange mode" value={formatCollaborationExchangeMode(opp.exchangeMode)} />
                   <PmFormReadonlyField
-                    label="Matching topology"
-                    value={formatFrameworkMatchTypeLabel(
+                    label="Recommended Matching Topology"
+                    value={`System will match this as ${formatFrameworkMatchTypeLabel(
                       opp.preferredMatchingTopology
                       ?? deriveMatchingTopology({
                         mainCollaborationModel: opp.mainCollaborationModel,
@@ -621,7 +621,11 @@ export function OpportunityDetailPage() {
                         subModelType: opp.subModelType,
                         exchangeMode: opp.exchangeMode,
                       }).topology,
-                    )}
+                    )}`}
+                  />
+                  <PmFormReadonlyField
+                    label="Topology source"
+                    value="System-derived — based on your collaboration model and exchange mode"
                   />
                   <PmFormReadonlyField label="Start date" value={opp.attributes?.startDate} />
                   <PmFormReadonlyField label="Updated" value={formatDate(opp.updatedAt)} />
@@ -648,6 +652,7 @@ export function OpportunityDetailPage() {
                     }).topology
                   }
                   compact
+                  systemDerived
                 />
               </PmDisclosureSection>
             ) : null}

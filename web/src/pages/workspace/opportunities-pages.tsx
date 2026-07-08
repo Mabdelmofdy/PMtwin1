@@ -207,6 +207,8 @@ function buildCollaborationCommandPayload(
   creatorId?: string,
 ): OpportunityCollaborationPayload {
   const built = buildOpportunityDraftInput(draft)
+  // Prefer taxonomy fields only — preferredMatchingTopology is derived by the
+  // command handler / patch builder and must never come from user matchType input.
   return {
     title: draft.title,
     description: draft.description,
@@ -218,7 +220,6 @@ function buildCollaborationCommandPayload(
     subModelType: draft.subModelType,
     exchangeMode: draft.exchangeMode,
     acceptedExchangeModes: draft.paymentModes,
-    preferredMatchingTopology: built.preferredMatchingTopology as string | undefined,
     collaborationAttributes: built.collaborationAttributes as Record<string, unknown>,
     scope: built.scope as Record<string, unknown>,
     attributes: built.attributes as Record<string, unknown>,
@@ -1061,7 +1062,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         <PmFormWizardStep stepId="exchange" activeStepId={activeStepId}>
           <PmFormSection
             title="Collaboration model & exchange"
-            description="Select main model, sub-model, and value exchange. Matching topology is derived automatically."
+            description="Choose main collaboration model, sub-model, and value exchange mode. Matching topology is system-derived — not a user choice."
           >
             <PmFormField id="opp-main-model" label="Main collaboration model" required>
               <Select
@@ -1119,10 +1120,19 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
               </Select>
             </PmFormField>
 
-            <div className="mt-4 rounded-lg border border-border/70 bg-muted/20 p-3 text-sm">
-              <p className={cn(pmTypography.label)}>Recommended matching topology</p>
-              <p className="font-medium">{formatFrameworkMatchTypeLabel(derivedTopology.topology)}</p>
+            <div
+              className="mt-4 rounded-lg border border-border/70 bg-muted/20 p-3 text-sm"
+              data-testid="recommended-matching-topology"
+              aria-live="polite"
+            >
+              <p className={cn(pmTypography.label)}>Recommended Matching Topology</p>
+              <p className="font-medium">
+                System will match this as {formatFrameworkMatchTypeLabel(derivedTopology.topology)}
+              </p>
               <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
+                System-derived — based on your collaboration model and exchange mode.
+              </p>
+              <p className={cn(pmTypography.caption, 'mt-1 text-muted-foreground')}>
                 {derivedTopology.reason}
               </p>
             </div>
@@ -1242,13 +1252,25 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
               <div><dt className="text-muted-foreground">Post type</dt><dd className="font-medium">{formatOpportunityIntent(draft.intent)}</dd></div>
               <div><dt className="text-muted-foreground">Main model</dt><dd className="font-medium">{resolveMainCollaborationModelLabel(draft.mainCollaborationModel)}</dd></div>
               <div><dt className="text-muted-foreground">Sub-model</dt><dd className="font-medium">{resolveSubModelLabel(draft.subModelType)}</dd></div>
-              <div><dt className="text-muted-foreground">Matching topology</dt><dd className="font-medium">{formatFrameworkMatchTypeLabel(derivedTopology.topology)}</dd></div>
+              <div>
+                <dt className="text-muted-foreground">Recommended Matching Topology</dt>
+                <dd className="font-medium">
+                  System will match this as {formatFrameworkMatchTypeLabel(derivedTopology.topology)}
+                </dd>
+                <dd className={cn(pmTypography.caption, 'text-muted-foreground')}>
+                  System-derived — based on your collaboration model and exchange mode
+                </dd>
+              </div>
               <div><dt className="text-muted-foreground">Value exchange</dt><dd className="font-medium">{draft.paymentModes.map(formatCollaborationExchangeMode).join(', ') || '—'}</dd></div>
             </dl>
           </PmFormSection>
           <div className="mt-4 grid gap-4">
             <NeedOfferMirrorPanel semantic={semanticPreview} compact />
-            <MatchingModelsReferencePanel selectedModel={derivedTopology.topology} compact />
+            <MatchingModelsReferencePanel
+              selectedModel={derivedTopology.topology}
+              compact
+              systemDerived
+            />
           </div>
         </PmFormWizardStep>
 

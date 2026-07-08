@@ -141,34 +141,56 @@ export function ValueExchangeModesPanel({
 }
 
 type MatchingModelsReferencePanelProps = {
+  /** System-derived topology to highlight — never a user-selected control. */
   readonly selectedModel?: string
   readonly compact?: boolean
+  readonly systemDerived?: boolean
 }
 
 export function MatchingModelsReferencePanel({
   selectedModel,
   compact = false,
+  systemDerived = false,
 }: MatchingModelsReferencePanelProps) {
   return (
     <PmContentCard
-      title="Matching models"
-      description="Four topology models from the Need/Offer framework."
+      title={systemDerived ? 'Recommended Matching Topology' : 'Matching models'}
+      description={
+        systemDerived
+          ? 'System-derived — based on your collaboration model and exchange mode.'
+          : 'Four topology models from the Need/Offer framework (reference only).'
+      }
     >
-      <div className={cn('grid gap-2', compact ? 'sm:grid-cols-2' : 'sm:grid-cols-2')}>
+      <div
+        className={cn('grid gap-2', compact ? 'sm:grid-cols-2' : 'sm:grid-cols-2')}
+        role="list"
+        aria-label={
+          systemDerived
+            ? 'System-derived matching topology reference'
+            : 'Matching models reference'
+        }
+      >
         {MATCHING_MODEL_KEYS.map((key) => {
           const model = MATCHING_MODELS[key]
-          const isSelected = selectedModel?.toLowerCase() === key
+          const isHighlighted = selectedModel?.toLowerCase() === key
           return (
             <div
               key={key}
+              role="listitem"
+              aria-current={isHighlighted ? 'true' : undefined}
               className={cn(
                 'rounded-lg border p-3',
-                isSelected ? 'border-primary/40 bg-primary/5' : 'border-border/60',
+                isHighlighted ? 'border-primary/40 bg-primary/5' : 'border-border/60',
               )}
             >
               <p className={cn(pmTypography.bodySm, 'font-medium')}>{model.label}</p>
               <p className={cn(pmTypography.caption, 'text-primary')}>{model.subtitle}</p>
-              {!compact ? (
+              {isHighlighted && systemDerived ? (
+                <p className={cn(pmTypography.caption, 'mt-1 text-muted-foreground')}>
+                  System will match this as {model.label}
+                </p>
+              ) : null}
+              {!compact && !systemDerived ? (
                 <p className={cn(pmTypography.caption, 'mt-1 text-muted-foreground')}>
                   {model.description}
                 </p>

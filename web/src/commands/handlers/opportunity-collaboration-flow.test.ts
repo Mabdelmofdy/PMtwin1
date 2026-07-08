@@ -54,4 +54,91 @@ describe('CreateOpportunity command flow', () => {
     })
     assert.equal(updateResult.success, true, updateResult.errors?.join('; '))
   })
+
+  it('rejects create when subModelType is a matching topology (one_way / two_way / circular)', () => {
+    const stack = createCommandGatewayTestStack({
+      users: [
+        {
+          id: 'seed-user-001',
+          email: 'creator@test.com',
+          role: 'pm',
+          status: 'active',
+          profile: {
+            type: 'individual',
+            skills: ['Structural'],
+            headline: 'Structural engineer',
+          },
+        },
+      ],
+    })
+    const commandService = createOpportunityCommandService({ gateway: stack.gateway })
+
+    for (const topology of ['one_way', 'two_way', 'circular'] as const) {
+      const result = commandService.createOpportunity({
+        title: `Illegal topology sub-model ${topology}`,
+        intent: 'need',
+        creatorId: 'seed-user-001',
+        mainCollaborationModel: 'cash_subcontracting',
+        modelType: 'project_based',
+        subModelType: topology,
+        exchangeMode: 'cash',
+        acceptedExchangeModes: ['cash'],
+        collaborationAttributes: {
+          detailedScope: 'Scope',
+          requiredSkills: ['Structural'],
+          duration: 30,
+          startDate: '2026-08-01',
+        },
+      })
+      assert.equal(result.success, false, topology)
+      assert.ok(
+        result.errors?.some((e) => e.includes('subModelType')),
+        `${topology}: ${result.errors?.join('; ')}`,
+      )
+    }
+  })
+
+  it('does not persist a manual preferredMatchingTopology from the payload', () => {
+    const stack = createCommandGatewayTestStack({
+      users: [
+        {
+          id: 'seed-user-001',
+          email: 'creator@test.com',
+          role: 'pm',
+          status: 'active',
+          profile: {
+            type: 'individual',
+            skills: ['Structural'],
+            headline: 'Structural engineer',
+          },
+        },
+      ],
+    })
+    const commandService = createOpportunityCommandService({ gateway: stack.gateway })
+
+    const createResult = commandService.createOpportunity({
+      title: 'Override topology ignored',
+      description: 'Service barter should derive two_way',
+      intent: 'need',
+      location: 'Riyadh',
+      creatorId: 'seed-user-001',
+      mainCollaborationModel: 'service_exchange',
+      modelType: 'strategic_partnership',
+      subModelType: 'strategic_alliance',
+      exchangeMode: 'barter',
+      acceptedExchangeModes: ['barter'],
+      preferredMatchingTopology: 'circular',
+      collaborationAttributes: {
+        scopeOfCollaboration: 'Skill swap package',
+        duration: 90,
+        financialTerms: 'In-kind skill exchange',
+      },
+    })
+
+    assert.equal(createResult.success, true, createResult.errors?.join('; '))
+    const stored = stack.opportunityRepository.getById(createResult.aggregateId)
+    assert.equal(stored?.preferredMatchingTopology, 'two_way')
+    assert.notEqual(stored?.preferredMatchingTopology, 'circular')
+    assert.notEqual(stored?.subModelType, 'two_way')
+  })
 })

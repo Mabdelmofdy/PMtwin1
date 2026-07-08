@@ -46,7 +46,7 @@ describe('collaboration-models registry completeness', () => {
 })
 
 describe('wizard persistence guardrails', () => {
-  it('rejects matching topology stored in subModelType', () => {
+  it('rejects matching topology stored in subModelType (one_way / two_way / circular)', () => {
     for (const topology of ['one_way', 'two_way', 'circular']) {
       assert.ok(isMatchTopologyValue(topology))
       const result = validateCollaborationTaxonomy({
@@ -57,7 +57,28 @@ describe('wizard persistence guardrails', () => {
       })
       assert.equal(result.valid, false)
       assert.ok(result.errors.some((e) => e.includes('subModelType')))
+      assert.ok(
+        result.errors.some((e) => e.includes('preferredMatchingTopology')),
+        topology,
+      )
     }
+  })
+
+  it('allows consortium as a JV sub-model key (not a free-standing topology pick)', () => {
+    const result = validateCollaborationTaxonomy({
+      mainCollaborationModel: 'joint_venture',
+      modelType: 'project_based',
+      subModelType: 'consortium',
+      exchangeMode: 'cash',
+    })
+    assert.equal(result.valid, true, result.errors.join('; '))
+    assert.equal(
+      deriveMatchingTopology({
+        mainCollaborationModel: 'joint_venture',
+        subModelType: 'consortium',
+      }).topology,
+      'consortium',
+    )
   })
 
   it('normalizes legacy seed aliases', () => {

@@ -108,6 +108,10 @@ export function buildOpportunityCollaborationPatch(input: {
   readonly exchangeMode: string
   readonly acceptedExchangeModes?: readonly string[]
   readonly collaborationAttributes?: Readonly<Record<string, unknown>>
+  /**
+   * Ignored — matching topology is always system-derived from the collaboration
+   * taxonomy. Kept optional only for call-site backward compatibility.
+   */
   readonly preferredMatchingTopology?: string
 }): Partial<Opportunity> {
   const normalizedSub = normalizeSubModelType(input.subModelType, input)
@@ -118,10 +122,12 @@ export function buildOpportunityCollaborationPatch(input: {
     ?? 'task_based'
   const subDef = getSubModel(subModelType)
   const derived = deriveMatchingTopology({
-    ...input,
-    modelType: subDef?.modelType ?? input.modelType,
     mainCollaborationModel: subDef?.mainCollaborationModel ?? input.mainCollaborationModel,
+    modelType: subDef?.modelType ?? input.modelType,
     subModelType,
+    exchangeMode: input.exchangeMode,
+    acceptedExchangeModes: input.acceptedExchangeModes,
+    collaborationAttributes: input.collaborationAttributes,
   })
 
   return {
@@ -134,8 +140,8 @@ export function buildOpportunityCollaborationPatch(input: {
     collaborationAttributes: input.collaborationAttributes
       ? { ...input.collaborationAttributes }
       : undefined,
-    preferredMatchingTopology:
-      input.preferredMatchingTopology ?? derived.topology,
+    // Always system-derived; never persist a manual matchType / topology override.
+    preferredMatchingTopology: derived.topology,
   }
 }
 

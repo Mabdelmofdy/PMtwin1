@@ -35,6 +35,36 @@ describe('opportunity collaboration wizard persistence', () => {
     assert.equal(patch.mainCollaborationModel, 'cash_subcontracting')
     assert.equal(patch.preferredMatchingTopology, 'one_way')
   })
+
+  it('ignores manual preferredMatchingTopology override — always system-derived', () => {
+    const serviceBarter = buildOpportunityCollaborationPatch({
+      mainCollaborationModel: 'service_exchange',
+      modelType: 'strategic_partnership',
+      subModelType: 'strategic_alliance',
+      exchangeMode: 'barter',
+      preferredMatchingTopology: 'one_way',
+    })
+    assert.equal(serviceBarter.preferredMatchingTopology, 'two_way')
+
+    const jv = buildOpportunityCollaborationPatch({
+      mainCollaborationModel: 'joint_venture',
+      modelType: 'project_based',
+      subModelType: 'project_jv',
+      exchangeMode: 'equity',
+      preferredMatchingTopology: 'one_way',
+    })
+    assert.equal(jv.preferredMatchingTopology, 'consortium')
+
+    const resourceBarter = buildOpportunityCollaborationPatch({
+      mainCollaborationModel: 'resource_sharing',
+      modelType: 'resource_pooling',
+      subModelType: 'resource_sharing',
+      exchangeMode: 'barter',
+      collaborationAttributes: { transactionType: 'barter' },
+      preferredMatchingTopology: 'two_way',
+    })
+    assert.equal(resourceBarter.preferredMatchingTopology, 'circular')
+  })
 })
 
 describe('seed opportunity collaboration normalization', () => {

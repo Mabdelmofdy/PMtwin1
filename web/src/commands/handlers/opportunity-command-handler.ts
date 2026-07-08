@@ -118,6 +118,8 @@ function payloadToOpportunityFields(
 ): Partial<Opportunity> {
   const subModelType =
     normalizeSubModelType(payload.subModelType, payload) ?? payload.subModelType
+  // preferredMatchingTopology is system-derived inside the patch builder —
+  // never accept a manual matchType / topology override from form input.
   const collaborationPatch = buildOpportunityCollaborationPatch({
     mainCollaborationModel: payload.mainCollaborationModel,
     modelType: payload.modelType,
@@ -125,7 +127,6 @@ function payloadToOpportunityFields(
     exchangeMode: payload.exchangeMode,
     acceptedExchangeModes: payload.acceptedExchangeModes,
     collaborationAttributes: payload.collaborationAttributes,
-    preferredMatchingTopology: payload.preferredMatchingTopology,
   })
 
   return {
@@ -260,8 +261,6 @@ export class OpportunityCommandHandler {
           payload.acceptedExchangeModes ?? existing.acceptedExchangeModes,
         collaborationAttributes:
           payload.collaborationAttributes ?? existing.collaborationAttributes,
-        preferredMatchingTopology:
-          payload.preferredMatchingTopology ?? existing.preferredMatchingTopology,
         scope: payload.scope,
         attributes: payload.attributes,
         exchangeData: payload.exchangeData,
