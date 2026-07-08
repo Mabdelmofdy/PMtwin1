@@ -395,6 +395,13 @@ export function filterOpportunitiesForListScope(
     if (isDraftOpportunity(opportunity) && opportunity.creatorId !== viewer.userId) {
       return false
     }
+    if (
+      opportunity.creatorId !== viewer.userId
+      && (opportunity.visibilityStatus ?? '').toLowerCase() !== 'published'
+      && opportunityCanonicalStatus(opportunity) !== 'published'
+    ) {
+      return false
+    }
     return true
   })
 }

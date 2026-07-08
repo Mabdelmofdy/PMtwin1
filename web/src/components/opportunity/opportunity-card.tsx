@@ -7,6 +7,7 @@ import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { PmCardActions } from '@/components/ui/pm-more-actions'
 import { PmReadinessScoreBadge } from '@/components/ui/pm-readiness-score-badge'
 import { PmSurface } from '@/components/ui/pm-surface'
+import { PmBadge } from '@/components/ui/pm-badge'
 import { OpportunityListLabels } from '@/components/opportunity/opportunity-list-labels'
 import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
 import type { Opportunity } from '@/types/domain.ts'
@@ -57,6 +58,12 @@ export function OpportunityCard({
         showStatus
         className="mb-2"
       />
+      {!showOwnerInsights && (opportunity.visibilityStatus ?? '').toLowerCase() === 'published' ? (
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          <PmBadge tone="success" size="sm">Open</PmBadge>
+          <PmBadge tone="info" size="sm">Accepting Collaboration</PmBadge>
+        </div>
+      ) : null}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <Link to={href} className={cn(pmTypography.h3, 'line-clamp-2 hover:text-primary')}>

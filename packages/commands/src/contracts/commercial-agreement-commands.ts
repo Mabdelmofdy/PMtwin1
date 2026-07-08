@@ -21,3 +21,10 @@ export interface TransitionCommercialAgreementStatusCommand extends Command {
   readonly commandType: 'TransitionCommercialAgreementStatus'
   readonly targetStatus: string
 }
+
+export interface AwardCommercialAgreementCommand extends Command {
+  readonly commandType: 'AwardCommercialAgreement'
+  readonly commercialAgreementId: string
+  readonly actorUserId?: string
+  readonly createContract?: boolean
+}

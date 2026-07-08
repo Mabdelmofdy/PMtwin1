@@ -42,6 +42,7 @@ export type WorkflowActionKey =
   | 'create_commercial_agreement_from_post_match'
   | 'create_commercial_agreement_from_application'
   | 'create_commercial_agreement_from_negotiation'
+  | 'award_commercial_agreement'
   | 'route_contract_decision'
   | 'create_contract_from_commercial_agreement'
   | 'sign_contract'
@@ -59,6 +60,8 @@ export type WorkflowEntityKind =
 export type WorkflowEntitySnapshot = {
   readonly id: string
   readonly status?: string
+  readonly visibilityStatus?: string
+  readonly awardStatus?: string
   readonly creatorId?: string
   readonly applicantId?: string
   readonly opportunityId?: string

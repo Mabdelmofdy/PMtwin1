@@ -12,6 +12,7 @@ import type {
   NegotiationStatus,
   NotificationType,
   OpportunityIntentStored,
+  OpportunityVisibilityStatus,
   OpportunityStatus,
   UserRole,
 } from '@/types/enums.ts'
@@ -38,6 +39,7 @@ export type {
   NegotiationStatus,
   NotificationType,
   OpportunityIntent,
+  OpportunityVisibilityStatus,
   OpportunityIntentStored,
   OpportunityStatus,
   UserRole,
@@ -86,6 +88,7 @@ export type Opportunity = TenantScoped & {
   title: string
   description?: string
   status: OpportunityStatus | string
+  visibilityStatus?: OpportunityVisibilityStatus | string
   creatorId?: string
   location?: string
   /** UX-level main collaboration model (5 models). */
@@ -303,6 +306,7 @@ export type CommercialAgreement = TenantScoped & {
   matchType?: MatchType | string
   title: string
   status: CommercialAgreementStatus | string
+  awardStatus?: 'none' | 'awarded' | 'rejected' | 'withdrawn'
   participants: Participant[]
   /** @deprecated Use participants — legacy compat alias */
   parties?: Participant[]

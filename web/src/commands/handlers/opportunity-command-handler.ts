@@ -1,4 +1,6 @@
 import type {
+  ArchiveOpportunityCommand,
+  CloseOpportunityCommand,
   Command,
   CommandResult,
   CreateOpportunityCommand,
@@ -178,6 +180,10 @@ export class OpportunityCommandHandler {
         return this.handleValidate(command as ValidateOpportunityCollaborationModelCommand)
       case 'PublishOpportunity':
         return this.handlePublish(command as PublishOpportunityCommand)
+      case 'CloseOpportunity':
+        return this.handleClose(command as CloseOpportunityCommand)
+      case 'ArchiveOpportunity':
+        return this.handleArchive(command as ArchiveOpportunityCommand)
       case 'TransitionOpportunityStatus':
         return this.handleTransition(
           command as TransitionOpportunityStatusCommand,
@@ -313,6 +319,32 @@ export class OpportunityCommandHandler {
     })
   }
 
+  private handleClose(command: CloseOpportunityCommand): CommandResult {
+    const opportunity = this.opportunityRepository.getById(command.aggregateId)
+    if (!opportunity) {
+      return failure(command.commandType, command.aggregateId, [
+        `Opportunity "${command.aggregateId}" not found`,
+      ])
+    }
+    this.opportunityRepository.update(command.aggregateId, {
+      visibilityStatus: 'closed',
+    })
+    return success(command.commandType, command.aggregateId)
+  }
+
+  private handleArchive(command: ArchiveOpportunityCommand): CommandResult {
+    const opportunity = this.opportunityRepository.getById(command.aggregateId)
+    if (!opportunity) {
+      return failure(command.commandType, command.aggregateId, [
+        `Opportunity "${command.aggregateId}" not found`,
+      ])
+    }
+    this.opportunityRepository.update(command.aggregateId, {
+      visibilityStatus: 'archived',
+    })
+    return success(command.commandType, command.aggregateId)
+  }
+
   private handleTransition(
     command: TransitionOpportunityStatusCommand,
   ): CommandResult {
@@ -390,6 +422,9 @@ export class OpportunityCommandHandler {
 
     this.opportunityRepository.update(command.aggregateId, {
       status: storedStatus,
+      ...(canonicalTarget === 'published'
+        ? { visibilityStatus: 'published' }
+        : {}),
     })
 
     this.appendAudit({

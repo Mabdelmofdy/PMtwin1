@@ -27,6 +27,8 @@ const OPPORTUNITY_COMMAND_TYPES = new Set([
   'UpdateOpportunity',
   'ValidateOpportunityCollaborationModel',
   'PublishOpportunity',
+  'CloseOpportunity',
+  'ArchiveOpportunity',
 ])
 
 const APPLICATION_COMMAND_TYPES = new Set([
@@ -70,6 +72,7 @@ const DEAL_COMMAND_TYPES = new Set([
   'CreateCommercialAgreementFromApplication',
   'CreateCommercialAgreementFromNegotiation',
   'TransitionCommercialAgreementStatus',
+  'AwardCommercialAgreement',
   'CreateDealFromPostMatch',
   'CreateDealFromApplication',
   'CreateDealFromNegotiation',

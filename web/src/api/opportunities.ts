@@ -6,6 +6,7 @@ import { opportunityCommandService } from '@/services/opportunity-command-servic
 
 export const opportunitiesApi = {
   list: () => opportunityRepository.getAll(),
+  listMarketplace: () => opportunityRepository.listPublishedForMarketplace(),
   get: (id: string) => opportunityRepository.getById(id),
   create: (payload: OpportunityCollaborationPayload) => {
     const result = opportunityCommandService.createOpportunity(payload)

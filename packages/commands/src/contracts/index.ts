@@ -85,6 +85,7 @@ export type {
   CreateCommercialAgreementFromNegotiationCommand,
   CreateCommercialAgreementFromPostMatchCommand,
   CreateCommercialAgreementFromApplicationCommand,
+  AwardCommercialAgreementCommand,
 } from './commercial-agreement-commands.ts'
 
 export type {
@@ -112,5 +113,7 @@ export type {
   UpdateOpportunityCommand,
   ValidateOpportunityCollaborationModelCommand,
   PublishOpportunityCommand,
+  CloseOpportunityCommand,
+  ArchiveOpportunityCommand,
   OpportunityCollaborationPayload,
 } from './opportunity-commands.ts'

@@ -324,7 +324,9 @@ export function AdminDashboardPage() {
 
 export function AdminReportsPage() {
   const { productLanguage } = useProductLanguage()
-  const publishedCount = opportunitiesApi.list().filter((o) => o.status === 'published').length
+  const publishedCount = opportunitiesApi
+    .list()
+    .filter((o) => (o.visibilityStatus ?? '').toLowerCase() === 'published').length
 
   return (
     <PmPage

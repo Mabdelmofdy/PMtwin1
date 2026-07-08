@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import type { Deal } from '@/types/domain.ts'
+import { commercialAgreementCommandService } from '@/services/commercial-agreement-command-service.ts'
 import {
   listCommercialAgreementTransitionOptions,
   transitionCommercialAgreementStatusUiAction,
@@ -18,6 +19,7 @@ export function CommercialAgreementStageActions({
   className,
 }: CommercialAgreementStageActionsProps) {
   const [pendingTarget, setPendingTarget] = useState<string | null>(null)
+  const [isAwarding, setIsAwarding] = useState(false)
   const options = listCommercialAgreementTransitionOptions(commercialAgreement)
 
   if (!commercialAgreement?.id || options.length === 0) {
@@ -73,9 +75,40 @@ export function CommercialAgreementStageActions({
   }
 
   const isPrimaryCancel = primaryOption.targetStatus === 'cancelled'
+  const canAward =
+    commercialAgreement.awardStatus !== 'awarded'
+    && commercialAgreement.awardStatus !== 'rejected'
+    && commercialAgreement.awardStatus !== 'withdrawn'
+    && ['draft', 'active', 'signing'].includes((commercialAgreement.status ?? '').toLowerCase())
+
+  const handleAward = () => {
+    if (!commercialAgreement.id || isAwarding) return
+    setIsAwarding(true)
+    const { result } = commercialAgreementCommandService.awardCommercialAgreement(
+      commercialAgreement.id,
+      undefined,
+      true,
+    )
+    setIsAwarding(false)
+    if (!result.success) {
+      toast.error(result.errors?.join('\n') ?? 'Failed to award commercial agreement')
+      return
+    }
+    toast.success('Commercial agreement awarded')
+  }
 
   return (
     <div className={className ?? 'flex flex-col gap-2'}>
+      {canAward ? (
+        <PmButton
+          type="button"
+          className="w-full cursor-pointer"
+          disabled={pendingTarget !== null || isAwarding}
+          onClick={handleAward}
+        >
+          {isAwarding ? 'Awarding…' : 'Award commercial agreement'}
+        </PmButton>
+      ) : null}
       <PmButton
         type="button"
         variant={isPrimaryCancel ? 'outline' : 'default'}

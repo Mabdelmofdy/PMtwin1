@@ -41,6 +41,14 @@ export function opportunityToCollaborationInput(
 export function normalizeOpportunityCollaboration(
   raw: Opportunity,
 ): Opportunity {
+  const lifecycleStatus = (raw.status ?? '').toLowerCase()
+  const visibilityStatus =
+    raw.visibilityStatus
+    ?? (lifecycleStatus === 'published'
+      ? 'published'
+      : ['closed', 'cancelled', 'completed'].includes(lifecycleStatus)
+        ? 'closed'
+        : undefined)
   const subModelType = normalizeSubModelType(raw.subModelType, {
     modelType: raw.modelType,
     mainCollaborationModel: raw.mainCollaborationModel,
@@ -76,6 +84,7 @@ export function normalizeOpportunityCollaboration(
 
   return {
     ...raw,
+    visibilityStatus,
     mainCollaborationModel,
     modelType,
     subModelType,

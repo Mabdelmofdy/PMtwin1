@@ -28,6 +28,12 @@ export class OpportunityRepository extends BaseRepository<Opportunity> {
     return this.getAll().find((item) => item.id === id)
   }
 
+  listPublishedForMarketplace(): Opportunity[] {
+    return this.getAll().filter(
+      (item) => (item.visibilityStatus ?? '').toLowerCase() === 'published',
+    )
+  }
+
   update(id: string, patch: Partial<Opportunity>): void {
     const overrides = this.readOverrides()
     const isNew = overrides.newOpportunities?.some((o) => o.id === id)
@@ -59,6 +65,7 @@ export class OpportunityRepository extends BaseRepository<Opportunity> {
       ...data,
       id: data.id ?? createOpportunityId(),
       status: data.status || 'draft',
+      visibilityStatus: data.visibilityStatus,
       createdAt: now,
       updatedAt: now,
     }

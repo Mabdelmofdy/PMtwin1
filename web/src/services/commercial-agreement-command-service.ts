@@ -120,6 +120,26 @@ export function createCommercialAgreementCommandService(deps?: CommercialAgreeme
       const commercialAgreement = resolveRepository(effectiveDeps).getById(commercialAgreementId) ?? null
       return { result, commercialAgreement }
     },
+    awardCommercialAgreement(
+      commercialAgreementId: string,
+      actorUserId?: string,
+      createContract = true,
+      serviceDeps?: CommercialAgreementCommandServiceDeps,
+    ): { result: CommandResult; commercialAgreement: CommercialAgreement | null } {
+      const effectiveDeps = serviceDeps ?? deps
+      const command = {
+        commandType: 'AwardCommercialAgreement',
+        aggregateId: commercialAgreementId,
+        commercialAgreementId,
+        actorUserId,
+        createContract,
+        clientRequestId: createClientRequestId('AwardCommercialAgreement'),
+      } as const
+      const result = executeCommand(command, effectiveDeps)
+      if (!result.success) return { result, commercialAgreement: null }
+      const commercialAgreement = resolveRepository(effectiveDeps).getById(commercialAgreementId) ?? null
+      return { result, commercialAgreement }
+    },
   }
 }
 

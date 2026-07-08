@@ -290,6 +290,12 @@ export function OpportunitiesPage() {
       user?.organizationId,
     )
     return scoped.filter((o) => {
+      if (
+        ownershipFilter === 'marketplace'
+        && (o.visibilityStatus ?? '').toLowerCase() !== 'published'
+      ) {
+        return false
+      }
       const matchesSearch =
         !search ||
         o.title.toLowerCase().includes(search.toLowerCase()) ||

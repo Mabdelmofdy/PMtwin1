@@ -64,7 +64,10 @@ export function LegacyFindPage() {
   )
 
   const opportunities = useMemo(
-    () => opportunitiesApi.list().filter((opp) => opp.status === 'published'),
+    () =>
+      opportunitiesApi
+        .list()
+        .filter((opp) => (opp.visibilityStatus ?? '').toLowerCase() === 'published'),
     [],
   )
 

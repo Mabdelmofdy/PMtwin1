@@ -1,4 +1,6 @@
 import type {
+  ArchiveOpportunityCommand,
+  CloseOpportunityCommand,
   CommandResult,
   CreateOpportunityCommand,
   OpportunityCollaborationPayload,
@@ -90,6 +92,26 @@ export function createOpportunityCommandService(
         clientRequestId: createClientRequestId('PublishOpportunity'),
         reason,
       } satisfies PublishOpportunityCommand
+      return resolveGateway(deps).execute(command)
+    },
+
+    closeOpportunity(opportunityId: string, reason?: string): CommandResult {
+      const command = {
+        commandType: 'CloseOpportunity',
+        aggregateId: opportunityId,
+        clientRequestId: createClientRequestId('CloseOpportunity'),
+        reason,
+      } satisfies CloseOpportunityCommand
+      return resolveGateway(deps).execute(command)
+    },
+
+    archiveOpportunity(opportunityId: string, reason?: string): CommandResult {
+      const command = {
+        commandType: 'ArchiveOpportunity',
+        aggregateId: opportunityId,
+        clientRequestId: createClientRequestId('ArchiveOpportunity'),
+        reason,
+      } satisfies ArchiveOpportunityCommand
       return resolveGateway(deps).execute(command)
     },
 

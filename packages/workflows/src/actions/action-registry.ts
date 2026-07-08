@@ -124,6 +124,13 @@ export const WORKFLOW_ACTION_REGISTRY: Record<
     requiredRole: 'participant',
     requiredPermission: 'commercial_agreement:create',
   },
+  award_commercial_agreement: {
+    key: 'award_commercial_agreement',
+    label: 'Award commercial agreement',
+    commandType: 'AwardCommercialAgreement',
+    requiredRole: 'opportunity_owner',
+    requiredPermission: 'commercial_agreement:award',
+  },
   route_contract_decision: {
     key: 'route_contract_decision',
     label: 'Route contract decision',

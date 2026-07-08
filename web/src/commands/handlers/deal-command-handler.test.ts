@@ -610,3 +610,109 @@ describe('TransitionDealStatus', () => {
     assert.notEqual(deal?.status, 'in_review')
   })
 })
+
+describe('AwardCommercialAgreement ordering', () => {
+  function dealFixture(
+    id: string,
+    opportunityId: string,
+    negotiationId: string,
+  ): Deal {
+    return {
+      id,
+      opportunityId,
+      opportunityIds: [opportunityId],
+      negotiationId,
+      title: `Deal ${id}`,
+      status: 'draft',
+      participants: [...participants],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      awardStatus: 'none',
+    }
+  }
+
+  function negotiationFixture(id: string): Negotiation {
+    return {
+      id,
+      opportunityId: 'opp-award',
+      status: 'active',
+      participants: [...participants],
+    }
+  }
+
+  it('contract creation failure keeps opportunity visible', () => {
+    const stack = createCommandGatewayTestStack({
+      opportunities: [{
+        id: 'opp-award',
+        title: 'Award opportunity',
+        status: 'published',
+        visibilityStatus: 'published',
+        creatorId: 'user-need',
+      }],
+      deals: [
+        dealFixture('ca-winner', 'opp-award', 'neg-winner'),
+        dealFixture('ca-loser', 'opp-award', 'neg-loser'),
+      ],
+      negotiations: [
+        negotiationFixture('neg-winner'),
+        negotiationFixture('neg-loser'),
+      ],
+    })
+
+    const originalCreate = stack.contractRepository.create.bind(stack.contractRepository)
+    stack.contractRepository.create = (() => {
+      throw new Error('simulated contract failure')
+    }) as typeof stack.contractRepository.create
+
+    const result = stack.gateway.execute({
+      commandType: 'AwardCommercialAgreement',
+      aggregateId: 'ca-winner',
+      commercialAgreementId: 'ca-winner',
+      createContract: true,
+      clientRequestId: 'test-award-fail',
+    })
+
+    stack.contractRepository.create = originalCreate
+
+    assert.equal(result.success, false)
+    assert.ok(result.errors?.some((error) => error.includes('Contract creation failed')))
+    assert.equal(
+      stack.opportunityRepository.getById('opp-award')?.visibilityStatus,
+      'published',
+    )
+  })
+
+  it('successful contract creation closes opportunity', () => {
+    const stack = createCommandGatewayTestStack({
+      opportunities: [{
+        id: 'opp-award',
+        title: 'Award opportunity',
+        status: 'published',
+        visibilityStatus: 'published',
+        creatorId: 'user-need',
+      }],
+      deals: [
+        dealFixture('ca-winner', 'opp-award', 'neg-winner'),
+        dealFixture('ca-loser', 'opp-award', 'neg-loser'),
+      ],
+      negotiations: [
+        negotiationFixture('neg-winner'),
+        negotiationFixture('neg-loser'),
+      ],
+    })
+
+    const result = stack.gateway.execute({
+      commandType: 'AwardCommercialAgreement',
+      aggregateId: 'ca-winner',
+      commercialAgreementId: 'ca-winner',
+      createContract: true,
+      clientRequestId: 'test-award-success',
+    })
+
+    assert.equal(result.success, true)
+    assert.equal(
+      stack.opportunityRepository.getById('opp-award')?.visibilityStatus,
+      'closed',
+    )
+  })
+})

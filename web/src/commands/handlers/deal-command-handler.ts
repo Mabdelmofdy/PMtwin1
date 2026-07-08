@@ -1,4 +1,5 @@
 import type {
+  AwardCommercialAgreementCommand,
   Command,
   CommandResult,
   CreateDealFromApplicationCommand,
@@ -23,7 +24,9 @@ import {
 import type { AuditRepository } from '@/repositories/audit-repository.ts'
 import type { ApplicationRepository } from '@/repositories/application-repository.ts'
 import type { CommercialAgreementRepository } from '@/repositories/commercial-agreement-repository.ts'
+import type { ContractRepository } from '@/repositories/contract-repository.ts'
 import type { NegotiationRepository } from '@/repositories/negotiation-repository.ts'
+import type { OpportunityRepository } from '@/repositories/opportunity-repository.ts'
 import type { PostMatchRepository } from '@/repositories/post-match-repository.ts'
 
 const POST_MATCH_ENTITY = 'match' as const
@@ -34,6 +37,8 @@ export type DealCommandHandlerDeps = {
   readonly dealRepository: CommercialAgreementRepository
   readonly negotiationRepository: NegotiationRepository
   readonly postMatchRepository: PostMatchRepository
+  readonly contractRepository?: ContractRepository | null
+  readonly opportunityRepository?: OpportunityRepository | null
   readonly applicationRepository?: ApplicationRepository | null
   readonly auditRepository?: AuditRepository | null
   readonly notificationRepository?: NotificationSink | null
@@ -120,6 +125,8 @@ export class DealCommandHandler {
   private readonly dealRepository: CommercialAgreementRepository
   private readonly negotiationRepository: NegotiationRepository
   private readonly postMatchRepository: PostMatchRepository
+  private readonly contractRepository: ContractRepository | null
+  private readonly opportunityRepository: OpportunityRepository | null
   private readonly applicationRepository: ApplicationRepository | null
   private readonly auditRepository: AuditRepository | null
   private readonly notificationRepository: NotificationSink | null
@@ -128,6 +135,8 @@ export class DealCommandHandler {
     this.dealRepository = deps.dealRepository
     this.negotiationRepository = deps.negotiationRepository
     this.postMatchRepository = deps.postMatchRepository
+    this.contractRepository = deps.contractRepository ?? null
+    this.opportunityRepository = deps.opportunityRepository ?? null
     this.applicationRepository = deps.applicationRepository ?? null
     this.auditRepository = deps.auditRepository ?? null
     this.notificationRepository = deps.notificationRepository ?? null
@@ -162,6 +171,8 @@ export class DealCommandHandler {
       case 'TransitionCommercialAgreementStatus':
       case 'TransitionDealStatus':
         return this.handleTransition(command as TransitionDealStatusCommand)
+      case 'AwardCommercialAgreement':
+        return this.handleAwardCommercialAgreement(command as AwardCommercialAgreementCommand)
       default:
         return failure(command.commandType, command.aggregateId, [
           `Unsupported Commercial Agreement command type "${command.commandType}"`,
@@ -614,6 +625,183 @@ export class DealCommandHandler {
     })
 
     return success(command.commandType, dealId)
+  }
+
+  private handleAwardCommercialAgreement(
+    command: AwardCommercialAgreementCommand,
+  ): CommandResult {
+    const commercialAgreementId =
+      command.commercialAgreementId?.trim() || command.aggregateId
+    const winner = this.dealRepository.getById(commercialAgreementId)
+    if (!winner) {
+      return failure(command.commandType, command.aggregateId, [
+        `Commercial Agreement "${commercialAgreementId}" not found`,
+      ])
+    }
+
+    const opportunityId = winner.opportunityId
+    const siblings = this.dealRepository
+      .getAll()
+      .filter((item) => item.opportunityId === opportunityId && item.id !== winner.id)
+    const existingAward = this.dealRepository
+      .getAll()
+      .find((item) => item.opportunityId === opportunityId && item.awardStatus === 'awarded' && item.id !== winner.id)
+    if (existingAward) {
+      return failure(command.commandType, command.aggregateId, [
+        `Opportunity already has awarded commercial agreement "${existingAward.id}"`,
+      ])
+    }
+
+    const shouldCreateContract = command.createContract !== false
+    const hasExistingContract = this.contractRepository
+      ? this.contractRepository
+        .findByDealId(winner.id)
+        .some((contract) => ['draft', 'pending_signature', 'active'].includes((contract.status ?? '').toLowerCase()))
+      : false
+    if (shouldCreateContract && !hasExistingContract && !this.contractRepository) {
+      return failure(command.commandType, command.aggregateId, [
+        'Contract repository is required to create contract during award',
+      ])
+    }
+
+    const winnerBefore = this.dealRepository.getById(winner.id)
+    const siblingBefore = siblings.map((item) => ({
+      id: item.id,
+      status: item.status,
+      awardStatus: item.awardStatus,
+    }))
+    const winnerNegotiationBefore = winner.negotiationId
+      ? this.negotiationRepository.getById(winner.negotiationId)
+      : null
+    const siblingNegotiationsBefore = siblings
+      .map((item) => item.negotiationId)
+      .filter((id): id is string => Boolean(id))
+      .map((id) => this.negotiationRepository.getById(id))
+      .filter((item): item is NonNullable<typeof item> => Boolean(item))
+      .map((item) => ({ id: item.id, status: item.status }))
+    const opportunityBefore = this.opportunityRepository?.getById(opportunityId)
+
+    this.dealRepository.update(winner.id, {
+      awardStatus: 'awarded',
+      status: 'signing',
+    })
+
+    const winnerNegotiation = winner.negotiationId
+      ? this.negotiationRepository.getById(winner.negotiationId)
+      : null
+    if (winnerNegotiation) {
+      this.negotiationRepository.update(winnerNegotiation.id, { status: 'agreed' })
+    }
+
+    const siblingNegotiationIds = new Set<string>()
+    for (const sibling of siblings) {
+      this.dealRepository.update(sibling.id, {
+        awardStatus: 'rejected',
+        status: 'cancelled',
+      })
+      if (sibling.negotiationId) siblingNegotiationIds.add(sibling.negotiationId)
+    }
+    for (const negotiationId of siblingNegotiationIds) {
+      const negotiation = this.negotiationRepository.getById(negotiationId)
+      if (!negotiation) continue
+      this.negotiationRepository.update(negotiationId, { status: 'cancelled' })
+    }
+
+    try {
+      if (shouldCreateContract && this.contractRepository && !hasExistingContract) {
+        this.contractRepository.create({
+          commercialAgreementId: winner.id,
+          dealId: winner.id,
+          opportunityId: winner.opportunityId,
+          opportunityIds: winner.opportunityIds,
+          matchId: winner.postMatchId ?? winner.matchId ?? null,
+          negotiationId: winner.negotiationId ?? null,
+          participants: winner.participants,
+          parties: winner.participants,
+          commercialTerms: winner.commercialTerms,
+          terms: winner.terms as Record<string, unknown> | undefined,
+          scope: winner.scope,
+          status: 'draft',
+        })
+      }
+    } catch (error) {
+      if (winnerBefore) {
+        this.dealRepository.update(winner.id, {
+          status: winnerBefore.status,
+          awardStatus: winnerBefore.awardStatus,
+        })
+      }
+      for (const sibling of siblingBefore) {
+        this.dealRepository.update(sibling.id, {
+          status: sibling.status,
+          awardStatus: sibling.awardStatus,
+        })
+      }
+      if (winnerNegotiationBefore) {
+        this.negotiationRepository.update(winnerNegotiationBefore.id, {
+          status: winnerNegotiationBefore.status,
+        })
+      }
+      for (const negotiation of siblingNegotiationsBefore) {
+        this.negotiationRepository.update(negotiation.id, {
+          status: negotiation.status,
+        })
+      }
+      if (opportunityBefore && this.opportunityRepository) {
+        this.opportunityRepository.update(opportunityBefore.id, {
+          visibilityStatus: opportunityBefore.visibilityStatus,
+        })
+      }
+      return failure(command.commandType, command.aggregateId, [
+        error instanceof Error
+          ? `Contract creation failed: ${error.message}`
+          : 'Contract creation failed during award',
+      ])
+    }
+
+    if (this.opportunityRepository?.getById(opportunityId)) {
+      this.opportunityRepository.update(opportunityId, {
+        visibilityStatus: 'closed',
+      })
+    }
+
+    this.appendAudit({
+      action: 'commercial_agreement.awarded',
+      entityType: 'commercial_agreement',
+      entityId: winner.id,
+      requestId: command.clientRequestId,
+      details: { opportunityId },
+    })
+    this.appendAudit({
+      action: 'opportunity.closed',
+      entityType: 'opportunity',
+      entityId: opportunityId,
+      requestId: command.clientRequestId,
+      details: { visibilityStatus: 'closed' },
+    })
+    this.appendAudit({
+      action: 'winner_negotiation.completed',
+      entityType: 'negotiation',
+      entityId: winner.negotiationId,
+      requestId: command.clientRequestId,
+      details: { status: 'agreed' },
+    })
+    this.appendAudit({
+      action: 'remaining_negotiations.cancelled',
+      entityType: 'negotiation',
+      entityId: winner.negotiationId,
+      requestId: command.clientRequestId,
+      details: { count: siblingNegotiationIds.size },
+    })
+    this.appendAudit({
+      action: 'remaining_commercial_agreements.rejected',
+      entityType: 'commercial_agreement',
+      entityId: winner.id,
+      requestId: command.clientRequestId,
+      details: { count: siblings.length },
+    })
+
+    return success(command.commandType, winner.id)
   }
 
   private appendAudit(entry: Omit<AuditEntry, 'id' | 'timestamp'>): void {

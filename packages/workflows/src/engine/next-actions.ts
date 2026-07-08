@@ -516,6 +516,35 @@ function evaluateCreateContractFromCommercialAgreement(context: WorkflowContext)
   })
 }
 
+function evaluateAwardCommercialAgreement(context: WorkflowContext): WorkflowAction {
+  const commercialAgreement = context.commercialAgreement ?? context.deal
+  const opportunity = context.opportunity
+  const status = canonicalEntityStatus(COMMERCIAL_AGREEMENT_ENTITY, commercialAgreement?.status)
+  const visible = Boolean(
+    commercialAgreement?.id
+    && (status === 'draft' || status === 'active' || status === 'signing'),
+  )
+  const enabled = Boolean(
+    visible
+    && userCanMutate(context)
+    && context.user.isOpportunityOwner
+    && (opportunity?.visibilityStatus ?? '').toLowerCase() === 'published'
+    && (commercialAgreement?.awardStatus ?? 'none') === 'none',
+  )
+
+  return buildAction(context, 'award_commercial_agreement', {
+    visible,
+    enabled,
+    visibilityReason: visible
+      ? 'Commercial agreement can be awarded by opportunity owner'
+      : 'Award is only available for awardable commercial agreements',
+    disabledReason: !context.user.isOpportunityOwner
+      ? 'Only opportunity owner can award'
+      : undefined,
+    aggregateId: commercialAgreement?.id,
+  })
+}
+
 function evaluateRouteContractDecision(context: WorkflowContext): WorkflowAction {
   const commercialAgreement = context.commercialAgreement ?? context.deal
   const status = canonicalEntityStatus(COMMERCIAL_AGREEMENT_ENTITY, commercialAgreement?.status)
@@ -607,6 +636,7 @@ const ACTION_EVALUATORS: Record<WorkflowActionKey, ActionEvaluator> = {
   create_commercial_agreement_from_post_match: evaluateCreateCommercialAgreementFromPostMatch,
   create_commercial_agreement_from_application: evaluateCreateCommercialAgreementFromApplication,
   create_commercial_agreement_from_negotiation: evaluateCreateCommercialAgreementFromNegotiation,
+  award_commercial_agreement: evaluateAwardCommercialAgreement,
   route_contract_decision: evaluateRouteContractDecision,
   create_contract_from_commercial_agreement: evaluateCreateContractFromCommercialAgreement,
   sign_contract: evaluateSignContract,

@@ -19,6 +19,11 @@ export type OpportunityStatus =
   | 'cancelled'
   | 'closed'
 
+export type OpportunityVisibilityStatus =
+  | 'published'
+  | 'closed'
+  | 'archived'
+
 export type ApplicationStatus =
   | 'submitted'
   | 'pending'
@@ -83,6 +88,10 @@ export type NotificationType =
   | 'negotiation_started'
   | 'match_confirmed'
   | 'review_received'
+  | 'commercial_agreement_awarded'
+  | 'commercial_agreement_accepted'
+  | 'commercial_agreement_rejected'
+  | 'contract_ready'
 
 export type AuditActorType = 'user' | 'system' | 'admin' | 'service'
 

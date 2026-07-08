@@ -28,3 +28,9 @@ export function resolveOpportunitySyncTarget(
 export function canonicalOpportunityStatus(status: string | undefined | null): string {
   return toCanonical(OPPORTUNITY_ENTITY, status ?? '') ?? ''
 }
+
+export function shouldSyncOpportunityFromCommercialAgreement(input: {
+  readonly visibilityStatus?: string | null
+}): boolean {
+  return (input.visibilityStatus ?? '').toLowerCase() !== 'published'
+}

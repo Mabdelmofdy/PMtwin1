@@ -64,6 +64,8 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
     dealRepository: commercialAgreementRepository,
     negotiationRepository,
     postMatchRepository,
+    contractRepository,
+    opportunityRepository,
     applicationRepository,
     auditRepository,
     notificationRepository,

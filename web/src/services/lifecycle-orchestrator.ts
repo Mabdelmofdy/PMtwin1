@@ -10,6 +10,7 @@ import {
 import {
   canonicalOpportunityStatus,
   resolveOpportunitySyncTarget,
+  shouldSyncOpportunityFromCommercialAgreement,
 } from '@/services/deal-opportunity-sync-rules.ts'
 import { findLifecycleTransitionPath } from '@/services/lifecycle-transition-path.ts'
 
@@ -119,6 +120,22 @@ function syncSingleOpportunity(
   }
 
   const previousCanonical = canonicalOpportunityStatus(opportunity.status)
+  if (
+    !shouldSyncOpportunityFromCommercialAgreement({
+      visibilityStatus: opportunity.visibilityStatus,
+    })
+  ) {
+    return {
+      role,
+      opportunityId,
+      synced: false,
+      skipped: true,
+      previousStatus: opportunity.status ?? null,
+      targetStatus,
+      appliedStatuses: [],
+      errors: [],
+    }
+  }
   if (previousCanonical === targetStatus) {
     return {
       role,

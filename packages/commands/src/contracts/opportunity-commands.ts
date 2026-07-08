@@ -41,3 +41,13 @@ export type PublishOpportunityCommand = Command & {
   readonly commandType: 'PublishOpportunity'
   readonly reason?: string
 }
+
+export type CloseOpportunityCommand = Command & {
+  readonly commandType: 'CloseOpportunity'
+  readonly reason?: string
+}
+
+export type ArchiveOpportunityCommand = Command & {
+  readonly commandType: 'ArchiveOpportunity'
+  readonly reason?: string
+}

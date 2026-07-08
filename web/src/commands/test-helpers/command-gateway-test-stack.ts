@@ -162,6 +162,8 @@ export function createCommandGatewayTestStack(
       dealRepository,
       negotiationRepository,
       postMatchRepository,
+      contractRepository,
+      opportunityRepository,
       applicationRepository,
       auditRepository,
     }),

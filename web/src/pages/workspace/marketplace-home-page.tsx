@@ -60,7 +60,11 @@ export function MarketplaceHomePage() {
       }
     >
       <PmMetricGrid columns={4}>
-        <PmStatCard label="Published opportunities" value={opportunities.filter((o) => o.status === 'published').length} dense />
+        <PmStatCard
+          label="Published opportunities"
+          value={opportunities.filter((o) => (o.visibilityStatus ?? '').toLowerCase() === 'published').length}
+          dense
+        />
         <PmStatCard label="Active negotiations" value={negotiations.filter((n) => n.status === 'active' || n.status === 'countered').length} dense />
         <PmStatCard label="Commercial agreements" value={deals.length} dense />
         <PmStatCard label="Active contracts" value={contracts.filter((c) => c.status === 'active').length} dense />
