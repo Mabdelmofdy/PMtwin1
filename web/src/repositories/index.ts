@@ -35,6 +35,7 @@ import { AuditRepository } from './audit-repository.ts'
 import { ProductLanguageSettingsRepository } from './product-language-settings-repository.ts'
 import { PartyRepository } from './party-repository.ts'
 import { PartyMembershipRepository } from './party-membership-repository.ts'
+import { formatMembershipId } from './party-membership-repository.ts'
 
 const runtimeMode = environmentContext.runtimeMode
 const storageAdapter = environmentContext.storageAdapter ?? localStorageAdapter
@@ -144,6 +145,7 @@ export {
   ProductLanguageSettingsRepository,
   PartyRepository,
   PartyMembershipRepository,
+  formatMembershipId,
 }
 
 export { loadPendingUsers, loadAuditLog, loadContracts }

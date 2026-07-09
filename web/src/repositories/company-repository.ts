@@ -22,4 +22,20 @@ export class CompanyRepository extends BaseRepository<Company> {
   override getById(id: string): Company | undefined {
     return this.getAll().find((item) => item.id === id)
   }
+
+  create(
+    data: Omit<Company, 'createdAt' | 'updatedAt'> & { createdAt?: string; updatedAt?: string },
+  ): Company {
+    const overrides = this.readOverrides()
+    const now = new Date().toISOString()
+    const company: Company = {
+      ...data,
+      status: data.status || 'active',
+      createdAt: data.createdAt ?? now,
+      updatedAt: data.updatedAt ?? now,
+    }
+    overrides.newCompanies = [...(overrides.newCompanies ?? []), company]
+    this.writeOverrides(overrides)
+    return company
+  }
 }

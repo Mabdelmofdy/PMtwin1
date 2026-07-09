@@ -1,13 +1,22 @@
 import { canAccessAdminForRole } from '@/domain/rbac/admin-access.ts'
 import type { PlatformUser } from '@/types/domain.ts'
 import type { AuthSession, AccountType } from '@/types/domain.ts'
+import type { ImplementedPartyType } from '@pm-twin/party'
 import { peopleApi } from '@/api/people.ts'
+import { partiesApi } from '@/api/parties.ts'
+import { formatMembershipId } from '@/repositories/party-membership-repository.ts'
 import { localStorageAdapter } from '@/infrastructure/storage/local-storage-adapter.ts'
 import { sessionStorageAdapter } from '@/infrastructure/storage/session-storage-adapter.ts'
 
 const SESSION_KEY = 'pmtwin_web_session'
 
 export type { AccountType, AuthSession }
+
+export type SessionPartyContext = {
+  activePartyId: string
+  activeMembershipId: string
+  partyType: ImplementedPartyType | string
+}
 
 function encodePassword(password: string) {
   return btoa(password)
@@ -32,8 +41,61 @@ function writeSession(session: AuthSession | null) {
   target.set(SESSION_KEY, session)
 }
 
+function resolveSessionPartyContext(userId: string): SessionPartyContext {
+  const activePartyId = partiesApi.resolveActivePartyId(userId)
+  const membership = partiesApi.getPrimaryMembership(userId)
+  const party = partiesApi.resolveActiveParty(userId)
+
+  return {
+    activePartyId,
+    activeMembershipId: membership
+      ? formatMembershipId(membership)
+      : formatMembershipId({ userId, partyId: activePartyId }),
+    partyType: party?.partyType ?? 'individual',
+  }
+}
+
+function buildSession(
+  user: PlatformUser,
+  options: { rememberMe?: boolean } & Partial<SessionPartyContext> = {},
+): AuthSession {
+  const resolved = resolveSessionPartyContext(user.id)
+
+  return {
+    token: generateToken(),
+    userId: user.id,
+    rememberMe: !!options.rememberMe,
+    activePartyId: options.activePartyId ?? resolved.activePartyId,
+    activeMembershipId: options.activeMembershipId ?? resolved.activeMembershipId,
+    partyType: options.partyType ?? resolved.partyType,
+  }
+}
+
+function migrateLegacySession(session: AuthSession, user: PlatformUser): AuthSession {
+  if (session.activePartyId && session.activeMembershipId && session.partyType) {
+    return session
+  }
+
+  const resolved = resolveSessionPartyContext(user.id)
+  return {
+    ...session,
+    activePartyId: session.activePartyId ?? resolved.activePartyId,
+    activeMembershipId: session.activeMembershipId ?? resolved.activeMembershipId,
+    partyType: session.partyType ?? resolved.partyType,
+  }
+}
+
 export const authService = {
   encodePassword,
+
+  createSessionForUser(
+    user: PlatformUser,
+    options: { rememberMe?: boolean } & Partial<SessionPartyContext> = {},
+  ): AuthSession {
+    const session = buildSession(user, options)
+    writeSession(session)
+    return session
+  },
 
   async login(
     email: string,
@@ -69,12 +131,7 @@ export const authService = {
       throw new Error('Account suspended. Please contact support.')
     }
 
-    const session: AuthSession = {
-      token: generateToken(),
-      userId: user.id,
-      rememberMe: !!options.rememberMe,
-    }
-    writeSession(session)
+    this.createSessionForUser(user, { rememberMe: options.rememberMe })
     return user
   },
 
@@ -94,10 +151,18 @@ export const authService = {
       writeSession(null)
       return null
     }
+
+    const migrated = migrateLegacySession(session, user)
+    if (migrated !== session) {
+      writeSession(migrated)
+    }
+
     return user
   },
 
   isCompanyUser(user: PlatformUser) {
+    const activeParty = partiesApi.resolveActiveParty(user.id)
+    if (activeParty?.partyType === 'company') return true
     return user.profile?.type === 'company'
   },
 

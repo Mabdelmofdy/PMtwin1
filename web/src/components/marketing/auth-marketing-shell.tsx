@@ -6,14 +6,27 @@ type AuthMarketingShellProps = {
   marketing: ReactNode
   children: ReactNode
   formLabel: string
+  pageClassName?: string
 }
 
 /** Split auth layout matching Login — marketing column + animated form zone. */
-export function AuthMarketingShell({ marketing, children, formLabel }: AuthMarketingShellProps) {
+export function AuthMarketingShell({
+  marketing,
+  children,
+  formLabel,
+  pageClassName,
+}: AuthMarketingShellProps) {
   const { reducedMotion } = useMarketingMotion()
 
   return (
-    <div className="legacy-poc-page page-container pm-auth-page pm-auth-page--marketing">
+    <div
+      className={[
+        'legacy-poc-page page-container pm-auth-page pm-auth-page--marketing',
+        pageClassName,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <section className="pm-auth-visual" aria-label="PM-Twin product reassurance">
         {marketing}
       </section>

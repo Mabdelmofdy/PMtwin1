@@ -22,4 +22,20 @@ export class UserRepository extends BaseRepository<PlatformUser> {
   override getById(id: string): PlatformUser | undefined {
     return this.getAll().find((item) => item.id === id)
   }
+
+  create(
+    data: Omit<PlatformUser, 'createdAt' | 'updatedAt'> & { createdAt?: string; updatedAt?: string },
+  ): PlatformUser {
+    const overrides = this.readOverrides()
+    const now = new Date().toISOString()
+    const user: PlatformUser = {
+      ...data,
+      status: data.status || 'active',
+      createdAt: data.createdAt ?? now,
+      updatedAt: data.updatedAt ?? now,
+    }
+    overrides.newUsers = [...(overrides.newUsers ?? []), user]
+    this.writeOverrides(overrides)
+    return user
+  }
 }

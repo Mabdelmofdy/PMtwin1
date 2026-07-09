@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   AuthMarketingColumn,
   AuthMarketingShell,
@@ -8,6 +8,9 @@ import {
 } from '@/components/marketing/marketing-index'
 import { PUBLIC_CTA } from '@/config/public-marketing'
 import { PUBLIC_BRAND_NAME } from '@/lib/public-brand'
+import { environmentContext } from '@/infrastructure/environment/environment-context.ts'
+import { useAuth } from '@/providers/auth-provider'
+import { resolveBreadcrumbHomeHref } from '@/components/layout/workspace-display'
 import {
   submitWizardRegistration,
   validateWizardStep,
@@ -21,19 +24,40 @@ import {
   type IndividualType,
   type AccountType,
 } from '@/lib/registration-wizard'
-import { registrationContracts, type RegistrationValidationErrors } from '@/lib/registration-service.ts'
+import {
+  registrationContracts,
+  type RegistrationResult,
+  type RegistrationValidationErrors,
+} from '@/lib/registration-service.ts'
 
 const STEPS = ['Account Type', 'Role', 'Profile Info', 'Documents', 'Review', 'Verification'] as const
 const NEXT_STEP: Record<WizardStep, WizardStep> = { 0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 5 }
 const PREV_STEP: Record<WizardStep, WizardStep> = { 0: 0, 1: 0, 2: 1, 3: 2, 4: 3, 5: 4 }
 
+type CompletionState = {
+  partyType: 'individual' | 'company'
+  runtimeLabel: string
+}
+
+function runtimeLabel(mode: string): string {
+  if (mode === 'demo') return 'Demo'
+  if (mode === 'uat') return 'UAT'
+  return 'Production'
+}
+
 export function LegacyRegisterPage() {
+  const { isAuthenticated, isCompanyUser, registerAndSignIn } = useAuth()
+  const navigate = useNavigate()
+  const runtimeMode = environmentContext.runtimeMode
+  const isLocalSignupRuntime = runtimeMode === 'demo' || runtimeMode === 'uat'
+
   const [step, setStep] = useState<WizardStep>(0)
   const [form, setForm] = useState<RegistrationWizardData>(createInitialWizardData)
   const [fieldErrors, setFieldErrors] = useState<WizardErrors>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [completion, setCompletion] = useState<CompletionState | null>(null)
 
   const accountTypeLabel = useMemo(() => (form.accountType === 'company' ? 'Company' : 'Individual'), [form.accountType])
   const branchTitle = useMemo(() => {
@@ -41,6 +65,18 @@ export function LegacyRegisterPage() {
     if (form.individualType === 'consultant') return 'Consultant verification path'
     return 'Professional verification path'
   }, [form.accountType, form.individualType])
+
+  const headerSubtitle = useMemo(() => {
+    if (isLocalSignupRuntime) {
+      return 'Accounts are saved in this browser using namespaced local storage for Demo/UAT.'
+    }
+    return 'Production registration requires a backend API. This wizard validates your details safely.'
+  }, [isLocalSignupRuntime])
+
+  if (isAuthenticated && !completion) {
+    navigate(resolveBreadcrumbHomeHref('/', isCompanyUser), { replace: true })
+    return null
+  }
 
   const update = <K extends keyof RegistrationWizardData>(key: K, value: RegistrationWizardData[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -74,7 +110,10 @@ export function LegacyRegisterPage() {
     setNotice(null)
     setIsSubmitting(true)
 
-    const result = await submitWizardRegistration(form)
+    const input = toRegistrationInput(form)
+    const result: RegistrationResult = isLocalSignupRuntime
+      ? await registerAndSignIn(input)
+      : await submitWizardRegistration(form)
     setIsSubmitting(false)
 
     if (!result.ok) {
@@ -90,15 +129,23 @@ export function LegacyRegisterPage() {
       return
     }
 
-    setNotice(
-      'Registration details are ready, but the production registration API is not active yet. No account has been created.',
-    )
+    setCompletion({
+      partyType: result.partyType,
+      runtimeLabel: runtimeLabel(runtimeMode),
+    })
+  }
+
+  const continueToDashboard = () => {
+    navigate(resolveBreadcrumbHomeHref('/', resultPartyIsCompany(completion)), {
+      replace: true,
+    })
   }
 
   const mappedRequest = useMemo(() => toRegistrationInput(form), [form])
 
   return (
     <AuthMarketingShell
+      pageClassName="pm-register-page"
       formLabel="Registration wizard"
       marketing={
         <AuthMarketingColumn
@@ -110,12 +157,46 @@ export function LegacyRegisterPage() {
       }
     >
       <div className="reg-main-card rounded-xl border border-gray-100 bg-white p-6 shadow-lg sm:p-8">
+        {completion ? (
+          <section className="reg-completion-screen" aria-label="Registration complete">
+            <header className="reg-header mb-6">
+              <h1 className="reg-header-title text-2xl font-bold text-gray-900">
+                {completion.partyType === 'company' ? 'Company Created' : 'Account Created'}
+              </h1>
+              <p className="reg-header-subtitle mt-1 text-gray-600">
+                Your account is ready. Continue to your workspace dashboard.
+              </p>
+            </header>
+            <dl className="mb-6 space-y-3 text-sm">
+              {completion.partyType === 'company' ? (
+                <>
+                  <ReviewRow label="Party" value="Company Party" />
+                  <ReviewRow label="Primary Membership" value="Owner" />
+                </>
+              ) : (
+                <>
+                  <ReviewRow label="Party" value="Individual" />
+                  <ReviewRow label="Primary Role" value="Owner" />
+                </>
+              )}
+              <ReviewRow label="Runtime" value={completion.runtimeLabel} />
+            </dl>
+            <MarketingButton type="button" variant="primary" onClick={continueToDashboard}>
+              Continue to Dashboard
+            </MarketingButton>
+          </section>
+        ) : (
+          <>
         <header className="reg-header mb-6">
           <h1 className="reg-header-title text-2xl font-bold text-gray-900">{PUBLIC_BRAND_NAME} registration</h1>
-          <p className="reg-header-subtitle mt-1 text-gray-600">
-            Production API is still pending. This wizard validates your details safely without creating accounts.
-          </p>
+          <p className="reg-header-subtitle mt-1 text-gray-600">{headerSubtitle}</p>
         </header>
+
+        {isLocalSignupRuntime ? (
+          <div className="reg-preview-notice mb-4" role="status">
+            Demo/UAT mode: registrations persist locally in this browser only.
+          </div>
+        ) : null}
 
         <ol className="mb-6 grid grid-cols-3 gap-2 text-xs text-slate-600 sm:grid-cols-6" aria-label="Registration steps">
           {STEPS.map((label, index) => (
@@ -391,9 +472,15 @@ export function LegacyRegisterPage() {
             {PUBLIC_CTA.contactSales}
           </Link>
         </div>
+          </>
+        )}
       </div>
     </AuthMarketingShell>
   )
+}
+
+function resultPartyIsCompany(completion: CompletionState | null): boolean {
+  return completion?.partyType === 'company'
 }
 
 function AccountTypeGrid({

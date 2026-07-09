@@ -400,6 +400,9 @@ export type AuthSession = {
   token: string
   userId: string
   rememberMe: boolean
+  activePartyId: string
+  activeMembershipId: string
+  partyType: string
 }
 
 export type AccountType = 'auto' | 'individual' | 'company'

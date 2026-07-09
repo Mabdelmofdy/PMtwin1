@@ -10,5 +10,11 @@ export const partiesApi = {
     partyMembershipRepository.listForUser(userId),
   getPrimaryMembership: (userId: string) =>
     partyMembershipRepository.getPrimaryForUser(userId),
-  resolveActivePartyId: (sessionUserId: string) => sessionUserId,
+  resolveActivePartyId(userId: string) {
+    return partyMembershipRepository.getPrimaryForUser(userId)?.partyId ?? userId
+  },
+  resolveActiveParty(userId: string) {
+    const partyId = partiesApi.resolveActivePartyId(userId)
+    return partyRepository.getById(partyId)
+  },
 }

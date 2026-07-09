@@ -182,6 +182,11 @@ export function toRegistrationInput(data: RegistrationWizardData): RegistrationI
       confirmPassword: data.confirmPassword,
       intent: data.intent,
       termsAccepted: data.termsAccepted,
+      mobile: data.mobile,
+      country: data.country,
+      region: data.region,
+      city: data.city,
+      companyDescription: data.companyDescription,
     }
   }
 
@@ -193,6 +198,13 @@ export function toRegistrationInput(data: RegistrationWizardData): RegistrationI
     confirmPassword: data.confirmPassword,
     intent: data.intent,
     termsAccepted: data.termsAccepted,
+    mobile: data.mobile,
+    country: data.country,
+    region: data.region,
+    city: data.city,
+    specialty: data.specialty,
+    expertise: data.expertise,
+    skills: data.skills,
   }
 }
 

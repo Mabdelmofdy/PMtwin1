@@ -1,4 +1,7 @@
 import { peopleApi } from '@/api/people.ts'
+import { resolveRuntimeMode } from '@/config/runtime-environment.ts'
+import { registerLocalAccount } from '@/lib/local-registration-service.ts'
+import type { ImplementedPartyType } from '@pm-twin/party'
 
 export type RegistrationAccountType = 'individual' | 'company'
 
@@ -10,6 +13,13 @@ export type IndividualRegistrationInput = {
   confirmPassword: string
   intent?: string
   termsAccepted: boolean
+  mobile?: string
+  country?: string
+  region?: string
+  city?: string
+  specialty?: string
+  expertise?: string
+  skills?: string
 }
 
 export type CompanyRegistrationInput = {
@@ -21,6 +31,11 @@ export type CompanyRegistrationInput = {
   confirmPassword: string
   intent?: string
   termsAccepted: boolean
+  mobile?: string
+  country?: string
+  region?: string
+  city?: string
+  companyDescription?: string
 }
 
 export type RegistrationInput = IndividualRegistrationInput | CompanyRegistrationInput
@@ -49,8 +64,25 @@ export type RegistrationRequest = {
   password: string
   profile: {
     displayName: string
+    contactPerson?: string
     intent?: string
+    mobile?: string
+    country?: string
+    region?: string
+    city?: string
+    specialty?: string
+    expertise?: string
+    skills?: string[]
+    companyDescription?: string
   }
+}
+
+export type RegistrationSuccess = {
+  ok: true
+  userId: string
+  partyId: string
+  membershipId: string
+  partyType: ImplementedPartyType
 }
 
 export type RegistrationFailureCode =
@@ -60,7 +92,7 @@ export type RegistrationFailureCode =
   | 'REQUEST_FAILED'
 
 export type RegistrationResult =
-  | { ok: true }
+  | RegistrationSuccess
   | {
       ok: false
       code: RegistrationFailureCode
@@ -69,7 +101,12 @@ export type RegistrationResult =
     }
 
 export interface RegistrationApiClient {
-  register(request: RegistrationRequest): Promise<{ userId: string }>
+  register(request: RegistrationRequest): Promise<{
+    userId: string
+    partyId: string
+    membershipId: string
+    partyType: ImplementedPartyType
+  }>
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -120,6 +157,11 @@ export function validateRegistrationInput(input: RegistrationInput): Registratio
 
 function toRegistrationRequest(input: RegistrationInput): RegistrationRequest {
   if (input.accountType === 'individual') {
+    const skills = input.skills
+      ?.split(',')
+      .map((skill) => skill.trim())
+      .filter(Boolean)
+
     return {
       accountType: 'individual',
       email: input.email.trim().toLowerCase(),
@@ -127,6 +169,13 @@ function toRegistrationRequest(input: RegistrationInput): RegistrationRequest {
       profile: {
         displayName: input.name.trim(),
         intent: input.intent?.trim() || undefined,
+        mobile: input.mobile?.trim() || undefined,
+        country: input.country?.trim() || undefined,
+        region: input.region?.trim() || undefined,
+        city: input.city?.trim() || undefined,
+        specialty: input.specialty?.trim() || undefined,
+        expertise: input.expertise?.trim() || undefined,
+        skills,
       },
     }
   }
@@ -137,7 +186,13 @@ function toRegistrationRequest(input: RegistrationInput): RegistrationRequest {
     password: input.password,
     profile: {
       displayName: input.companyName.trim(),
+      contactPerson: input.contactPerson.trim(),
       intent: input.intent?.trim() || undefined,
+      mobile: input.mobile?.trim() || undefined,
+      country: input.country?.trim() || undefined,
+      region: input.region?.trim() || undefined,
+      city: input.city?.trim() || undefined,
+      companyDescription: input.companyDescription?.trim() || undefined,
     },
   }
 }
@@ -152,13 +207,35 @@ const backendUnavailableClient: RegistrationApiClient = {
   },
 }
 
+function readViteEnv(name: string): string | undefined {
+  const env = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env
+  return env?.[name]
+}
+
+function resolveRegistrationClient(): RegistrationApiClient {
+  const runtimeMode = resolveRuntimeMode()
+  const allowProductionLocalRegistration = readViteEnv('VITE_ENABLE_LOCAL_REGISTRATION') === 'true'
+
+  if (runtimeMode === 'demo' || runtimeMode === 'uat' || allowProductionLocalRegistration) {
+    return {
+      async register(request) {
+        return registerLocalAccount(request)
+      },
+    }
+  }
+
+  return backendUnavailableClient
+}
+
 type RegistrationDependencies = {
   apiClient: RegistrationApiClient
   emailExists: (email: string) => boolean
 }
 
 const defaultDependencies: RegistrationDependencies = {
-  apiClient: backendUnavailableClient,
+  get apiClient() {
+    return resolveRegistrationClient()
+  },
   emailExists(email) {
     const normalized = email.trim().toLowerCase()
     return peopleApi
@@ -169,8 +246,13 @@ const defaultDependencies: RegistrationDependencies = {
 
 export async function registerAccount(
   input: RegistrationInput,
-  dependencies: RegistrationDependencies = defaultDependencies,
+  dependencies: Partial<RegistrationDependencies> = {},
 ): Promise<RegistrationResult> {
+  const resolvedDependencies: RegistrationDependencies = {
+    ...defaultDependencies,
+    ...dependencies,
+    apiClient: dependencies.apiClient ?? resolveRegistrationClient(),
+  }
   const validation = validateRegistrationInput(input)
   if (!validation.valid) {
     return {
@@ -182,7 +264,7 @@ export async function registerAccount(
   }
 
   const request = toRegistrationRequest(input)
-  if (dependencies.emailExists(request.email)) {
+  if (resolvedDependencies.emailExists(request.email)) {
     return {
       ok: false,
       code: 'DUPLICATE_EMAIL',
@@ -195,8 +277,14 @@ export async function registerAccount(
   }
 
   try {
-    await dependencies.apiClient.register(request)
-    return { ok: true }
+    const created = await resolvedDependencies.apiClient.register(request)
+    return {
+      ok: true,
+      userId: created.userId,
+      partyId: created.partyId,
+      membershipId: created.membershipId,
+      partyType: created.partyType,
+    }
   } catch (error) {
     if (error instanceof Error && error.message === 'Registration API is not available yet.') {
       return {

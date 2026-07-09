@@ -2,6 +2,7 @@ import type { Party } from '@pm-twin/party'
 import type { IStorageAdapter, Overrides } from '@/types/storage.ts'
 import type { PlatformUser } from '@/types/domain.ts'
 import { OVERRIDES_KEY } from '@/types/storage.ts'
+import { notifyDataStore } from '@/hooks/use-data-store.ts'
 import { REPOSITORY_ENTITY_KEYS } from './repository-entity-keys.ts'
 import { mergeSeedWithOverrides } from './seed-override-merge.ts'
 import {
@@ -28,6 +29,11 @@ export class PartyRepository {
     return this.storage.get<Overrides>(OVERRIDES_KEY) ?? {}
   }
 
+  private writeOverrides(overrides: Overrides): void {
+    this.storage.set(OVERRIDES_KEY, overrides)
+    notifyDataStore()
+  }
+
   private synthesizedParties(): Party[] {
     const companies = this.loadCompanies()
     const users = this.loadUsers()
@@ -47,5 +53,12 @@ export class PartyRepository {
 
   getById(id: string): Party | undefined {
     return this.getAll().find((party) => party.id === id)
+  }
+
+  create(party: Party): Party {
+    const overrides = this.readOverrides()
+    overrides.newParties = [...(overrides.newParties ?? []), party]
+    this.writeOverrides(overrides)
+    return party
   }
 }

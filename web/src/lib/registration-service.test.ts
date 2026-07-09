@@ -100,7 +100,12 @@ describe('registration-service request path', () => {
     const apiClient: RegistrationApiClient = {
       async register() {
         called = true
-        return { userId: 'user-1' }
+        return {
+          userId: 'user-1',
+          partyId: 'party-1',
+          membershipId: 'user-1::party-1',
+          partyType: 'individual',
+        }
       },
     }
     const result = await registerAccount(validIndividualInput(), {
@@ -110,5 +115,11 @@ describe('registration-service request path', () => {
 
     assert.equal(called, true)
     assert.equal(result.ok, true)
+    if (result.ok) {
+      assert.equal(result.userId, 'user-1')
+      assert.equal(result.partyId, 'party-1')
+      assert.equal(result.membershipId, 'user-1::party-1')
+      assert.equal(result.partyType, 'individual')
+    }
   })
 })

@@ -90,6 +90,34 @@ describe('registration wizard submit mapping', () => {
     assert.equal(payload.name, 'Aisha Saleh')
   })
 
+  it('maps extended individual profile fields to registration service payload', () => {
+    const payload = toRegistrationInput(
+      makeIndividual({
+        country: 'Saudi Arabia',
+        region: 'Riyadh',
+        city: 'Riyadh',
+        specialty: 'Structural Engineering',
+        skills: 'PM, Risk',
+      }),
+    )
+    assert.equal(payload.accountType, 'individual')
+    assert.equal(payload.country, 'Saudi Arabia')
+    assert.equal(payload.specialty, 'Structural Engineering')
+    assert.equal(payload.skills, 'PM, Risk')
+  })
+
+  it('maps extended company profile fields to registration service payload', () => {
+    const payload = toRegistrationInput(
+      makeCompany({
+        country: 'Saudi Arabia',
+        companyDescription: 'Regional contractor',
+      }),
+    )
+    assert.equal(payload.accountType, 'company')
+    assert.equal(payload.country, 'Saudi Arabia')
+    assert.equal(payload.companyDescription, 'Regional contractor')
+  })
+
   it('uses registration submitter and returns backend unavailable honestly', async () => {
     let called = false
     const result = await submitWizardRegistration(makeCompany(), async (input) => {
@@ -115,5 +143,12 @@ describe('/register route implementation', () => {
     const source = readFileSync(filePath, 'utf8')
     assert.equal(source.includes('PocRegisterPage'), false)
     assert.equal(source.includes('return <LegacyRegisterPage />'), true)
+  })
+
+  it('applies pm-register-page class on legacy register page', () => {
+    const filePath = path.join(process.cwd(), 'src/pages/public/legacy-register-page.tsx')
+    const source = readFileSync(filePath, 'utf8')
+    assert.equal(source.includes('pageClassName="pm-register-page"'), true)
+    assert.equal(source.includes('Continue to Dashboard'), true)
   })
 })
