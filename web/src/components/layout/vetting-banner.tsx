@@ -1,11 +1,15 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@/providers/auth-provider.tsx'
 import { PmButton } from '@/components/ui/pm-index'
 
+const DASHBOARD_PATHS = new Set(['/dashboard', '/company-dashboard'])
+
 export function VettingBanner() {
-  const { user, isVettingRestricted } = useAuth()
+  const { user, isVettingRestricted, isPendingApproval } = useAuth()
+  const location = useLocation()
 
   if (!user || !isVettingRestricted) return null
+  if (isPendingApproval && DASHBOARD_PATHS.has(location.pathname)) return null
 
   const isClarificationRequested = user.status === 'clarification_requested'
   const requestedItems = user.profile?.vetting?.requestedItems ?? []

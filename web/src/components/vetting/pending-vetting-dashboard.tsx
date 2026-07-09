@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 import type { PlatformUser } from '@/types/domain.ts'
 import { evaluateVettingReadiness } from '@/domain/vetting-readiness/vetting-readiness-evaluator.ts'
 import { resolvePendingVettingJourney } from '@/domain/pending-vetting-journey/pending-vetting-journey.ts'
-import { PmActionHub, PmBadge, PmButton, PmPageHeader, PmStatsStrip } from '@/components/ui/pm-index'
+import { PmBadge, PmButton, PmPageHeader, PmPageHeroMetric, PmStatsStrip } from '@/components/ui/pm-index'
 import { PmContentCard, PmDashboardLayout } from '@/components/layout/pm-layout-index'
 import { formatReadinessScorePercent } from '@/components/ui/pm-readiness-score-display'
 import {
@@ -15,6 +15,10 @@ import { partyDocumentRepository } from '@/repositories/index.ts'
 import { vettingService } from '@/lib/vetting-service.ts'
 import { PendingVettingJourneyPanel } from '@/components/vetting/pending-vetting-journey-panel.tsx'
 import { OverallOnboardingProgressCard } from '@/components/vetting/overall-onboarding-progress-card.tsx'
+import { VettingDocumentsProgressCard } from '@/components/vetting/vetting-documents-progress-card.tsx'
+import { PendingVettingSecondaryActions } from '@/components/vetting/pending-vetting-secondary-actions.tsx'
+import { PendingVettingWhatHappensNext } from '@/components/vetting/pending-vetting-what-happens-next.tsx'
+import { resolveVettingActionQueue } from '@/components/vetting/resolve-vetting-action-queue.ts'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { cn } from '@/lib/utils'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
@@ -23,24 +27,14 @@ function toTitleCase(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
-function resolveActionLink(action: string): { readonly label: string; readonly href: string } {
-  const normalized = action.toLowerCase()
-  if (normalized.includes('resubmit')) {
-    return { label: 'Resubmit for review', href: '/party-documents' }
-  }
-  if (
-    normalized.includes('upload')
-    || normalized.includes('replace expired')
-    || normalized.includes('document')
-    || normalized.includes('vat')
-    || normalized.includes('cr')
-  ) {
-    return { label: 'Upload documents', href: '/party-documents' }
-  }
-  if (normalized.includes('waiting for admin review')) {
-    return { label: 'View status', href: '/dashboard' }
-  }
-  return { label: 'Open profile', href: '/profile' }
+function resolveCurrentStageIndex(
+  steps: ReturnType<typeof resolvePendingVettingJourney>['steps'],
+): number {
+  const activeIndex = steps.findIndex(
+    (step) => step.state === 'current' || step.state === 'blocked',
+  )
+  if (activeIndex >= 0) return activeIndex + 1
+  return steps.filter((step) => step.state === 'completed').length
 }
 
 export function PendingVettingDashboard({ user }: { user: PlatformUser }) {
@@ -68,13 +62,23 @@ export function PendingVettingDashboard({ user }: { user: PlatformUser }) {
     documents: vettingDocuments,
   })
 
-  const changesRequested = user.profile?.vetting?.reviewProgress === 'changes_requested'
+  const actionQueue = resolveVettingActionQueue({
+    user,
+    journey,
+    profile: profileCompletion,
+    vetting,
+  })
+
+  const changesRequested =
+    user.profile?.vetting?.reviewProgress === 'changes_requested'
+    || user.status === 'clarification_requested'
   const requestedItems =
     user.profile?.vetting?.requestedChanges ??
     user.profile?.vetting?.requestedItems ??
     []
 
-  const pendingActions = [journey.nextBestAction]
+  const totalStages = journey.steps.length
+  const currentStageIndex = resolveCurrentStageIndex(journey.steps)
 
   return (
     <PmDashboardLayout
@@ -84,6 +88,13 @@ export function PendingVettingDashboard({ user }: { user: PlatformUser }) {
           title="Pending Vetting"
           description="Complete profile and verification actions to unlock full workspace actions."
           tone="mission"
+          metric={
+            <PmPageHeroMetric
+              value={formatReadinessScorePercent(journey.overallOnboarding.percent)}
+              label="Overall onboarding"
+              animate={false}
+            />
+          }
           badges={<PmBadge tone="warning">Pending Vetting</PmBadge>}
           actions={
             <div className="flex flex-wrap gap-2">
@@ -114,53 +125,49 @@ export function PendingVettingDashboard({ user }: { user: PlatformUser }) {
             { label: 'Profile completion', value: formatReadinessScorePercent(profileCompletion.score) },
             { label: 'Vetting progress', value: formatReadinessScorePercent(vetting.score) },
             {
-              label: 'Documents progress',
-              value: `${vetting.documentsProgress.approvedRequired} / ${vetting.documentsProgress.totalRequired}`,
+              label: 'Stage',
+              value: `${currentStageIndex} / ${totalStages}`,
             },
           ]}
         />
       }
     >
-      <div className="grid gap-4 lg:grid-cols-2">
-        <OverallOnboardingProgressCard
-          overall={journey.overallOnboarding}
-          stepsRemaining={journey.stepsRemaining}
-          nextBestAction={journey.nextBestAction}
-        />
-        <PendingVettingJourneyPanel steps={journey.steps} />
-      </div>
+      <div className="space-y-6">
+        <div className="grid gap-4 lg:grid-cols-2">
+          <OverallOnboardingProgressCard
+            overall={journey.overallOnboarding}
+            stepsRemaining={journey.stepsRemaining}
+            currentStageIndex={currentStageIndex}
+            totalStages={totalStages}
+          />
+          <VettingDocumentsProgressCard documents={vettingDocuments} />
+        </div>
 
-      {changesRequested ? (
-        <PmContentCard title="Changes requested" className="mt-4">
-          <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-            {user.profile?.vetting?.reviewNotes ?? user.profile?.vetting?.reason}
-          </p>
-          {requestedItems.length > 0 ? (
-            <ul className={cn('mt-2 list-disc pl-5', pmTypography.bodySm)}>
-              {requestedItems.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          ) : null}
-          {user.profile?.vetting?.dueDate ? (
-            <p className={cn('mt-2', pmTypography.caption, 'text-muted-foreground')}>
-              Due by {user.profile.vetting.dueDate}
+        <PendingVettingJourneyPanel steps={journey.steps} actionQueue={actionQueue} />
+
+        {changesRequested ? (
+          <PmContentCard title="Changes requested" id="vetting-review" role="status">
+            <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
+              {user.profile?.vetting?.reviewNotes ?? user.profile?.vetting?.reason}
             </p>
-          ) : null}
-        </PmContentCard>
-      ) : null}
+            {requestedItems.length > 0 ? (
+              <ul className={cn('mt-2 list-disc ps-5', pmTypography.bodySm)}>
+                {requestedItems.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            ) : null}
+            {user.profile?.vetting?.dueDate ? (
+              <p className={cn('mt-2', pmTypography.caption, 'text-muted-foreground')}>
+                Due by {user.profile.vetting.dueDate}
+              </p>
+            ) : null}
+          </PmContentCard>
+        ) : null}
 
-      <PmActionHub
-        className="mt-4"
-        title="Next actions"
-        description="Explainable recommendations derived from readiness evaluators."
-        items={pendingActions.map((action, index) => ({
-          id: `pending-action-${index}`,
-          title: action,
-          context: 'Complete and resubmit to move vetting forward.',
-          primary: resolveActionLink(action),
-        }))}
-      />
+        <PendingVettingSecondaryActions actionQueue={actionQueue} />
+        <PendingVettingWhatHappensNext />
+      </div>
     </PmDashboardLayout>
   )
 }

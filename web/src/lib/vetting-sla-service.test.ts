@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import type { PlatformUser } from '@/types/domain.ts'
 import {
+  formatVettingSlaDisplay,
   resolveVettingReviewAnchor,
   resolveVettingSlaStatus,
   shouldEmitOverdueNotification,
@@ -64,5 +65,17 @@ describe('vetting sla service', () => {
     const user = pendingUser(daysAgo(VETTING_SLA_CONFIG.atRiskDays - 1))
     assert.equal(resolveVettingSlaStatus(user), 'on_track')
     assert.equal(shouldEmitOverdueNotification(user), false)
+  })
+
+  it('formats relative and target SLA labels for display', () => {
+    const overdueUser = pendingUser(daysAgo(VETTING_SLA_CONFIG.overdueDays + 5))
+    const overdueDisplay = formatVettingSlaDisplay(overdueUser, 'overdue')
+    assert.match(overdueDisplay.relativeLabel, /overdue/)
+    assert.equal(overdueDisplay.targetLabel, `Target SLA: ${VETTING_SLA_CONFIG.overdueDays} days`)
+
+    const onTrackUser = pendingUser(daysAgo(1))
+    const onTrackDisplay = formatVettingSlaDisplay(onTrackUser, 'on_track')
+    assert.match(onTrackDisplay.relativeLabel, /Due in/)
+    assert.equal(onTrackDisplay.targetLabel, `SLA: ${VETTING_SLA_CONFIG.overdueDays} days`)
   })
 })

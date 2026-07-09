@@ -29,6 +29,10 @@ import { runCircularMatchingUiAction } from '@/lib/run-circular-matching-ui-acti
 import { useAuth } from '@/providers/auth-provider.tsx'
 import { VettingReviewDialog } from '@/components/admin/vetting-review-dialog.tsx'
 import { VettingSlaBadge } from '@/components/admin/vetting-sla-badge.tsx'
+import {
+  AdminVettingKpiStrip,
+  computeAdminVettingKpiMetrics,
+} from '@/components/admin/admin-vetting-kpi-strip.tsx'
 import type { VettingWorkflowEntry } from '@/lib/vetting-admin-workflow.ts'
 import {
   PmDataTable,
@@ -443,6 +447,7 @@ export function AdminVettingPage() {
   const { user } = useAuth()
   const version = useDataStoreVersion()
   const workflow = useMemo(() => adminApi.getVettingWorkflow(), [version])
+  const kpiMetrics = useMemo(() => computeAdminVettingKpiMetrics(workflow), [workflow])
   const [reviewing, setReviewing] = useState<VettingWorkflowEntry | null>(null)
 
   const reviewerId = user?.id ?? 'admin'
@@ -452,9 +457,14 @@ export function AdminVettingPage() {
     description: string,
     entries: readonly VettingWorkflowEntry[],
     emptyTitle: string,
+    history = false,
   ) {
     return (
-      <PmContentCard title={title} description={description} className="mb-4">
+      <PmContentCard
+        title={title}
+        description={description}
+        className={history ? 'mb-4 opacity-90' : 'mb-4'}
+      >
         {entries.length === 0 ? (
           <PmTableEmpty title={emptyTitle} />
         ) : (
@@ -476,7 +486,9 @@ export function AdminVettingPage() {
               {
                 id: 'sla',
                 label: 'SLA',
-                cell: (entry) => <VettingSlaBadge status={entry.slaStatus} />,
+                cell: (entry) => (
+                  <VettingSlaBadge status={entry.slaStatus} user={entry.user} />
+                ),
               },
               {
                 id: 'review',
@@ -490,13 +502,21 @@ export function AdminVettingPage() {
                     return '—'
                   }
                   return (
-                    <span className="text-sm text-muted-foreground">
-                      {reviewNotes}
-                      {requestedItems.length
-                        ? ` · ${requestedItems.join(', ')}`
-                        : ''}
-                      {reviewedBy ? ` · Reviewed by ${reviewedBy}` : ''}
-                    </span>
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      {reviewNotes ? <p>{reviewNotes}</p> : null}
+                      {requestedItems.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {requestedItems.map((item) => (
+                            <PmBadge key={item} tone="warning" size="sm">
+                              {item}
+                            </PmBadge>
+                          ))}
+                        </div>
+                      ) : null}
+                      {reviewedBy ? (
+                        <p className={cn(pmTypography.caption)}>Reviewed by {reviewedBy}</p>
+                      ) : null}
+                    </div>
                   )
                 },
               },
@@ -530,6 +550,7 @@ export function AdminVettingPage() {
         />
       }
     >
+      <AdminVettingKpiStrip metrics={kpiMetrics} />
       {renderQueueTable(
         'Pending review',
         'New submissions awaiting first admin review.',
@@ -553,6 +574,7 @@ export function AdminVettingPage() {
         'Completed vetting decisions.',
         workflow.history,
         'No vetting history yet',
+        true,
       )}
 
       <VettingReviewDialog

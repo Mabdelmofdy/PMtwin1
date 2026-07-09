@@ -1,4 +1,5 @@
 import type { PmWorkflowJourneyStep } from '@/components/ui/pm-workflow-journey'
+import type { PendingJourneyStep } from '@/domain/pending-vetting-journey/types.ts'
 import type { StatusEntity } from '@/lib/status-display'
 
 export type CollaborationActiveStep =
@@ -327,4 +328,47 @@ export function buildContractWorkflowSteps(
       state: 'upcoming',
     },
   ]
+}
+
+function mapPendingStepState(
+  state: PendingJourneyStep['state'],
+): PmWorkflowJourneyStep['state'] {
+  if (state === 'completed') return 'complete'
+  if (state === 'current') return 'current'
+  return 'upcoming'
+}
+
+function resolveVettingStepHref(stepId: PendingJourneyStep['id']): string {
+  switch (stepId) {
+    case 'account_created':
+    case 'approved':
+      return '/dashboard'
+    case 'email_verified':
+    case 'profile_completion':
+      return '/profile'
+    case 'upload_documents':
+      return '/party-documents'
+    case 'admin_review':
+      return '/dashboard#vetting-review'
+    default:
+      return '/dashboard'
+  }
+}
+
+/** Six-step vetting onboarding journey — same builder family as collaboration workflows. */
+export function buildVettingWorkflowSteps(
+  steps: readonly PendingJourneyStep[],
+): readonly PmWorkflowJourneyStep[] {
+  return steps.map((step) => ({
+    id: step.id,
+    label: step.label,
+    href: step.href ?? resolveVettingStepHref(step.id),
+    state: mapPendingStepState(step.state),
+    status:
+      step.state === 'blocked'
+        ? 'blocked'
+        : step.state === 'completed'
+          ? 'complete'
+          : step.state,
+  }))
 }

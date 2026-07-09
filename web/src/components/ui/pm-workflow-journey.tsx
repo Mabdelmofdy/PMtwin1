@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { Check } from 'lucide-react'
+import { Ban, Check, Circle, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/components/shared/pm-design-tokens'
 import { PmSurface } from '@/components/ui/pm-surface'
@@ -38,6 +38,20 @@ export function PmWorkflowJourney({
 }: PmWorkflowJourneyProps) {
   if (steps.length === 0) return null
 
+  function resolveStateIcon(step: PmWorkflowJourneyStep): ReactNode {
+    if (step.icon) return step.icon
+    if (step.state === 'complete') {
+      return <Check className="size-3.5 shrink-0 text-success" aria-hidden />
+    }
+    if (step.status === 'blocked') {
+      return <Ban className="size-3.5 shrink-0 text-danger" aria-hidden />
+    }
+    if (step.state === 'current') {
+      return <Clock className="size-3.5 shrink-0 text-primary" aria-hidden />
+    }
+    return <Circle className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+  }
+
   return (
     <PmSurface
       data-slot="pm-workflow-journey"
@@ -68,9 +82,7 @@ export function PmWorkflowJourney({
                 step.state === 'upcoming' && 'text-muted-foreground',
               )}
             >
-              {step.state === 'complete' ? (
-                <Check className="size-3.5 shrink-0 text-success" aria-hidden />
-              ) : null}
+              {resolveStateIcon(step)}
               <span className="truncate">{step.label}</span>
               {step.status ? (
                 <PmWorkflowBadge
@@ -97,7 +109,7 @@ export function PmWorkflowJourney({
               )}
               {!isLast ? (
                 <span
-                  className="hidden px-0.5 text-muted-foreground sm:inline"
+                  className="hidden px-0.5 text-muted-foreground sm:inline rtl:rotate-180"
                   aria-hidden
                 >
                   →

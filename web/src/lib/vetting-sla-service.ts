@@ -37,3 +37,44 @@ export function resolveVettingSlaStatus(user: PlatformUser): VettingSlaStatus {
 export function shouldEmitOverdueNotification(user: PlatformUser): boolean {
   return resolveVettingSlaStatus(user) === 'overdue'
 }
+
+export type VettingSlaDisplay = {
+  readonly relativeLabel: string
+  readonly targetLabel: string
+}
+
+function formatDayCount(days: number): string {
+  const rounded = Math.max(1, Math.round(days))
+  return `${rounded} ${rounded === 1 ? 'day' : 'days'}`
+}
+
+/** Display-only SLA labels — does not change resolveVettingSlaStatus. */
+export function formatVettingSlaDisplay(
+  user: PlatformUser,
+  status: VettingSlaStatus,
+): VettingSlaDisplay {
+  const targetDays = VETTING_SLA_CONFIG.overdueDays
+  const anchor = resolveVettingReviewAnchor(user)
+  const elapsed = daysSince(anchor) ?? 0
+
+  if (status === 'overdue') {
+    const overdueDays = Math.max(1, Math.floor(elapsed - targetDays))
+    return {
+      relativeLabel: `${formatDayCount(overdueDays)} overdue`,
+      targetLabel: `Target SLA: ${targetDays} days`,
+    }
+  }
+
+  const remaining = Math.ceil(targetDays - elapsed)
+  if (remaining <= 0) {
+    return {
+      relativeLabel: `${formatDayCount(Math.floor(elapsed - targetDays))} overdue`,
+      targetLabel: `Target SLA: ${targetDays} days`,
+    }
+  }
+
+  return {
+    relativeLabel: `Due in ${formatDayCount(remaining)}`,
+    targetLabel: `SLA: ${targetDays} days`,
+  }
+}

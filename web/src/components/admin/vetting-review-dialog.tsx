@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { PmButton } from '@/components/ui/pm-index'
+import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { cn } from '@/lib/utils'
 
 type VettingReviewAction = 'approve' | 'reject' | 'request_changes'
 
@@ -45,6 +48,8 @@ export function VettingReviewDialog({
   const [reviewNotes, setReviewNotes] = useState('')
   const [dueDate, setDueDate] = useState('')
   const [requestedItems, setRequestedItems] = useState<string[]>([])
+  const reviewNotesId = useId()
+  const dueDateId = useId()
 
   const isRequestChanges = action === 'request_changes'
   const isReject = action === 'reject'
@@ -74,10 +79,15 @@ export function VettingReviewDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="flex flex-wrap gap-2">
+          <div
+            className="flex flex-wrap gap-2"
+            role="radiogroup"
+            aria-label="Review decision"
+          >
             <PmButton
               variant={action === 'approve' ? 'default' : 'outline'}
               size="sm"
+              aria-pressed={action === 'approve'}
               onClick={() => setAction('approve')}
             >
               Approve
@@ -85,6 +95,7 @@ export function VettingReviewDialog({
             <PmButton
               variant={action === 'reject' ? 'default' : 'outline'}
               size="sm"
+              aria-pressed={action === 'reject'}
               onClick={() => setAction('reject')}
             >
               Reject
@@ -92,6 +103,7 @@ export function VettingReviewDialog({
             <PmButton
               variant={action === 'request_changes' ? 'default' : 'outline'}
               size="sm"
+              aria-pressed={action === 'request_changes'}
               onClick={() => setAction('request_changes')}
             >
               Request Changes
@@ -99,8 +111,11 @@ export function VettingReviewDialog({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Review Notes</label>
-            <Input
+            <label htmlFor={reviewNotesId} className={cn(pmTypography.bodySm, 'mb-1 block font-medium')}>
+              Review Notes
+            </label>
+            <Textarea
+              id={reviewNotesId}
               value={reviewNotes}
               onChange={(event) => setReviewNotes(event.target.value)}
               placeholder="Review notes"
@@ -109,8 +124,10 @@ export function VettingReviewDialog({
 
           {isRequestChanges ? (
             <>
-              <div>
-                <label className="mb-1 block text-sm font-medium">Requested Items</label>
+              <fieldset>
+                <legend className={cn(pmTypography.bodySm, 'mb-2 font-medium')}>
+                  Requested Items
+                </legend>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {REQUESTED_ITEM_OPTIONS.map((option) => (
                     <label
@@ -126,10 +143,13 @@ export function VettingReviewDialog({
                     </label>
                   ))}
                 </div>
-              </div>
+              </fieldset>
               <div>
-                <label className="mb-1 block text-sm font-medium">Due Date</label>
+                <label htmlFor={dueDateId} className={cn(pmTypography.bodySm, 'mb-1 block font-medium')}>
+                  Due Date
+                </label>
                 <Input
+                  id={dueDateId}
                   type="date"
                   value={dueDate}
                   onChange={(event) => setDueDate(event.target.value)}

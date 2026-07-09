@@ -18,7 +18,7 @@ describe('admin vetting workflow page source', () => {
     assert.equal(source.includes('rejectVetting'), true)
   })
 
-  it('shows governance metadata fields in review column', () => {
+  it('shows governance metadata fields in review column and KPI strip', () => {
     const source = readFileSync(
       path.join(process.cwd(), 'src/pages/admin/admin-pages.tsx'),
       'utf8',
@@ -27,5 +27,8 @@ describe('admin vetting workflow page source', () => {
     assert.equal(source.includes('reviewNotes ?? vetting?.reason'), true)
     assert.equal(source.includes('Reviewed by'), true)
     assert.equal(source.includes('VettingSlaBadge'), true)
+    assert.equal(source.includes('AdminVettingKpiStrip'), true)
+    assert.equal(source.includes('computeAdminVettingKpiMetrics'), true)
+    assert.equal(source.includes('opacity-90'), true)
   })
 })
