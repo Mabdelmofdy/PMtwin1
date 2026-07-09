@@ -174,7 +174,7 @@ E5 does **not** wire the adapter into `negotiation-transcript-read-model` or UI.
 ### Deferred
 
 - Web wiring in negotiation transcript / room UI (E7)
-- Agreement + contract adapters + `RecommendationService` (E6)
+- Agreement + contract adapters + `RecommendationService` (E6) — see [ADR-201-E6](./ADR-201-E6-agreement-contract-recommendation-service.md)
 - KnowledgeBridge enrichment for `NEGOTIATION_*` codes (E8)
 
 ---

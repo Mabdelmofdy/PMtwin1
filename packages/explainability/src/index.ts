@@ -196,6 +196,63 @@ export {
 } from './adapters/negotiation-adapter.ts'
 
 export type {
+  AgreementDecisionStatus,
+  AgreementAwardStatus,
+  AgreementExplainabilitySnapshot,
+  AgreementStageBlocker,
+  AgreementStageTransition,
+  AgreementStatus,
+  AgreementTimelineEventSnapshot,
+} from './adapters/agreement-types.ts'
+
+export {
+  AGREEMENT_ADAPTER_SCORE_WEIGHTS,
+  AGREEMENT_BREAKDOWN_LABELS,
+  AGREEMENT_STATUS_TO_REASON_CODE,
+  agreementStatusToHref,
+  agreementStatusToReasonCode,
+  commercialAwardToReasonCode,
+  commercialDecisionToReasonCode,
+  hasPendingSignatures,
+  isAwardPending,
+  isDecisionPending,
+} from './adapters/agreement-field-map.ts'
+
+export {
+  AGREEMENT_ADAPTER_VERSION,
+  buildAgreementExplanation,
+  computeAgreementProgressScore,
+  agreementExplainabilityAdapter,
+} from './adapters/agreement-adapter.ts'
+
+export type {
+  ContractExplainabilitySnapshot,
+  ContractMilestoneSnapshot,
+  ContractPartySignatureSnapshot,
+  ContractStatus,
+  ContractTimelineEventSnapshot,
+} from './adapters/contract-types.ts'
+
+export {
+  CONTRACT_ADAPTER_SCORE_WEIGHTS,
+  CONTRACT_BREAKDOWN_LABELS,
+  CONTRACT_STATUS_TO_REASON_CODE,
+  contractStatusToHref,
+  contractStatusToReasonCode,
+  hasBlockedMilestones,
+  hasUnsignedParties,
+  resolvePartiesSigned,
+  resolveTotalParties,
+} from './adapters/contract-field-map.ts'
+
+export {
+  CONTRACT_ADAPTER_VERSION,
+  buildContractExplanation,
+  computeContractProgressScore,
+  contractExplainabilityAdapter,
+} from './adapters/contract-adapter.ts'
+
+export type {
   KnowledgeAnswer,
   KnowledgeBridge,
   KnowledgeBridgeRequest,
@@ -205,6 +262,14 @@ export type {
   RecommendationService,
   RecommendationServiceInput,
 } from './services/recommendation-service.ts'
+
+export type { AggregateRecommendationsOptions } from './services/recommendation-service-impl.ts'
+
+export {
+  DEFAULT_AGGREGATE_RECOMMENDATION_LIMIT,
+  aggregateRecommendations,
+  createRecommendationService,
+} from './services/recommendation-service-impl.ts'
 
 export type { AIExplanationPayload } from './ai/serialization.ts'
 

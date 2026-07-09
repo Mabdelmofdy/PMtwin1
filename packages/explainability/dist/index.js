@@ -43,7 +43,18 @@ var TIMELINE_EVENT_STATUS = {
 
 // src/reason-codes/agreement.ts
 var AGREEMENT_REASON_CODES = {
+  SCORE_SUMMARY: "AGREEMENT_SCORE_SUMMARY",
+  STATUS_DRAFT: "AGREEMENT_STATUS_DRAFT",
+  STATUS_REVIEW: "AGREEMENT_STATUS_REVIEW",
+  STATUS_SIGNING: "AGREEMENT_STATUS_SIGNING",
+  STATUS_EXECUTING: "AGREEMENT_STATUS_EXECUTING",
+  STATUS_COMPLETED: "AGREEMENT_STATUS_COMPLETED",
+  STATUS_CANCELLED: "AGREEMENT_STATUS_CANCELLED",
   TERMS_PENDING: "AGREEMENT_TERMS_PENDING",
+  REVIEW_INCOMPLETE: "AGREEMENT_REVIEW_INCOMPLETE",
+  SIGNATURES_PENDING: "AGREEMENT_SIGNATURES_PENDING",
+  STAGE_GATE_BLOCKED: "AGREEMENT_STAGE_GATE_BLOCKED",
+  CONTRACT_MISSING: "AGREEMENT_CONTRACT_MISSING",
   COUNTERPARTY_UNRESPONSIVE: "AGREEMENT_COUNTERPARTY_UNRESPONSIVE",
   AWARD_PENDING: "AGREEMENT_AWARD_PENDING"
 };
@@ -58,13 +69,26 @@ var ANALYTICS_REASON_CODES = {
 // src/reason-codes/commercial.ts
 var COMMERCIAL_REASON_CODES = {
   APPROVAL_PENDING: "COMMERCIAL_APPROVAL_PENDING",
+  DECISION_PENDING: "COMMERCIAL_DECISION_PENDING",
   PAYMENT_PENDING: "COMMERCIAL_PAYMENT_PENDING",
-  VAT_VALIDATION_REQUIRED: "COMMERCIAL_VAT_VALIDATION_REQUIRED"
+  VAT_VALIDATION_REQUIRED: "COMMERCIAL_VAT_VALIDATION_REQUIRED",
+  AWARD_PENDING: "COMMERCIAL_AWARD_PENDING",
+  STAGE_GATE_BLOCKED: "COMMERCIAL_STAGE_GATE_BLOCKED"
 };
 
 // src/reason-codes/contract.ts
 var CONTRACT_REASON_CODES = {
+  SCORE_SUMMARY: "CONTRACT_SCORE_SUMMARY",
+  STATUS_DRAFT: "CONTRACT_STATUS_DRAFT",
+  STATUS_PENDING_SIGNATURE: "CONTRACT_STATUS_PENDING_SIGNATURE",
+  STATUS_ACTIVE: "CONTRACT_STATUS_ACTIVE",
+  STATUS_COMPLETED: "CONTRACT_STATUS_COMPLETED",
+  STATUS_TERMINATED: "CONTRACT_STATUS_TERMINATED",
   SIGNATURE_PENDING: "CONTRACT_SIGNATURE_PENDING",
+  SIGNATURES_INCOMPLETE: "CONTRACT_SIGNATURES_INCOMPLETE",
+  ACTIVATION_PENDING: "CONTRACT_ACTIVATION_PENDING",
+  COMPLETION_READY: "CONTRACT_COMPLETION_READY",
+  TERMINATION_AVAILABLE: "CONTRACT_TERMINATION_AVAILABLE",
   TERMS_UNRESOLVED: "CONTRACT_TERMS_UNRESOLVED",
   MILESTONE_BLOCKED: "CONTRACT_MILESTONE_BLOCKED"
 };
@@ -2562,6 +2586,1236 @@ var negotiationExplainabilityAdapter = {
   buildTimeline: buildTimelineFromSnapshot5
 };
 
+// src/adapters/agreement-field-map.ts
+var AGREEMENT_ADAPTER_SCORE_WEIGHTS = {
+  stageProgression: 35,
+  commercialApproval: 25,
+  signatures: 25,
+  contractLinkage: 15
+};
+var AGREEMENT_BREAKDOWN_LABELS = {
+  stageProgression: "Stage progression",
+  commercialApproval: "Commercial approval",
+  signatures: "Signatures",
+  contractLinkage: "Contract linkage"
+};
+var AGREEMENT_STATUS_TO_REASON_CODE = {
+  draft: AGREEMENT_REASON_CODES.STATUS_DRAFT,
+  review: AGREEMENT_REASON_CODES.STATUS_REVIEW,
+  signing: AGREEMENT_REASON_CODES.STATUS_SIGNING,
+  executing: AGREEMENT_REASON_CODES.STATUS_EXECUTING,
+  completed: AGREEMENT_REASON_CODES.STATUS_COMPLETED,
+  cancelled: AGREEMENT_REASON_CODES.STATUS_CANCELLED
+};
+function agreementStatusToReasonCode(status) {
+  return AGREEMENT_STATUS_TO_REASON_CODE[status];
+}
+function agreementStatusToHref(entityId, section) {
+  const base = `/commercial-agreements/${entityId}`;
+  if (section) return `${base}/${section}`;
+  return base;
+}
+function commercialDecisionToReasonCode() {
+  return COMMERCIAL_REASON_CODES.APPROVAL_PENDING;
+}
+function commercialAwardToReasonCode() {
+  return COMMERCIAL_REASON_CODES.AWARD_PENDING;
+}
+function isDecisionPending(decisionStatus) {
+  return decisionStatus === "pending";
+}
+function isAwardPending(awardStatus) {
+  return awardStatus === "pending";
+}
+function hasPendingSignatures(pendingSignatures, totalSignatures) {
+  if (pendingSignatures != null && pendingSignatures > 0) return true;
+  if (totalSignatures != null && pendingSignatures != null && pendingSignatures < totalSignatures) {
+    return pendingSignatures > 0;
+  }
+  return false;
+}
+
+// src/adapters/agreement-adapter.ts
+var AGREEMENT_ADAPTER_VERSION = "1.0.0";
+function roundScore6(value) {
+  return Math.round(value * 100) / 100;
+}
+function clamp2(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+function resolveGeneratedAt6(input) {
+  return input.evaluatedAt ?? (/* @__PURE__ */ new Date()).toISOString();
+}
+var STAGE_SCORE = {
+  draft: 25,
+  review: 45,
+  signing: 65,
+  executing: 85,
+  completed: 100,
+  cancelled: 10
+};
+function computeAgreementProgressScore(input) {
+  let score = STAGE_SCORE[input.status];
+  if (isDecisionPending(input.decisionStatus)) {
+    score -= 15;
+  }
+  if (isAwardPending(input.awardStatus)) {
+    score -= 10;
+  }
+  if (hasPendingSignatures(input.pendingSignatures, input.totalSignatures) && input.status === "signing") {
+    score -= 10;
+  }
+  if (!input.linkedContractId && input.canCreateContract && (input.status === "signing" || input.status === "executing")) {
+    score -= 5;
+  }
+  if ((input.stageBlockers?.length ?? 0) > 0) {
+    score -= Math.min(20, (input.stageBlockers?.length ?? 0) * 5);
+  }
+  return roundScore6(clamp2(score, 0, 100));
+}
+function resolveHealth6(input, scorePercent) {
+  if (input.status === "completed") return HEALTH.EXCELLENT;
+  if (input.status === "cancelled") return HEALTH.CRITICAL;
+  if (input.status === "executing" && scorePercent >= 80) return HEALTH.GOOD;
+  if (input.status === "signing" && scorePercent >= 60) return HEALTH.GOOD;
+  if (input.status === "review" || input.status === "signing") {
+    return HEALTH.WARNING;
+  }
+  if (input.status === "executing") return HEALTH.WARNING;
+  return HEALTH.CRITICAL;
+}
+function statusMessage2(status) {
+  switch (status) {
+    case "draft":
+      return "Commercial agreement is in draft \u2014 terms are being prepared.";
+    case "review":
+      return "Commercial agreement is under review \u2014 approval may be required.";
+    case "signing":
+      return "Commercial agreement is in signing \u2014 parties must sign to proceed.";
+    case "executing":
+      return "Commercial agreement is executing \u2014 deliverables are in progress.";
+    case "completed":
+      return "Commercial agreement completed \u2014 all obligations fulfilled.";
+    case "cancelled":
+      return "Commercial agreement cancelled \u2014 no further actions apply.";
+    default:
+      return `Commercial agreement status: ${status}`;
+  }
+}
+function buildSummary6(input, scorePercent) {
+  if (input.status === "completed") {
+    return "Commercial agreement completed \u2014 all stages fulfilled.";
+  }
+  if (input.status === "cancelled") {
+    return "Commercial agreement cancelled \u2014 review history for context.";
+  }
+  if (isDecisionPending(input.decisionStatus)) {
+    return "Commercial approval pending \u2014 resolve decision gates to advance.";
+  }
+  if (hasPendingSignatures(input.pendingSignatures, input.totalSignatures) && input.status === "signing") {
+    return "Signatures pending \u2014 all parties must sign before execution.";
+  }
+  if (input.status === "review") {
+    return "Review in progress \u2014 complete review to move to signing.";
+  }
+  if (!input.linkedContractId && input.canCreateContract) {
+    return "Agreement ready \u2014 create a contract to formalize terms.";
+  }
+  return `Agreement progress ${Math.round(scorePercent)}% \u2014 ${statusMessage2(input.status).toLowerCase()}`;
+}
+function buildReasons6(input, scorePercent) {
+  const reasons = [
+    {
+      code: AGREEMENT_REASON_CODES.SCORE_SUMMARY,
+      message: `Agreement progress ${Math.round(scorePercent)}%`,
+      severity: EXPLANATION_SEVERITY.INFO,
+      category: "summary",
+      relatedEntityId: input.entityId
+    },
+    {
+      code: agreementStatusToReasonCode(input.status),
+      message: statusMessage2(input.status),
+      severity: input.status === "cancelled" ? EXPLANATION_SEVERITY.CRITICAL : input.status === "completed" ? EXPLANATION_SEVERITY.INFO : EXPLANATION_SEVERITY.WARNING,
+      category: "status",
+      relatedEntityId: input.entityId
+    }
+  ];
+  if (isDecisionPending(input.decisionStatus)) {
+    reasons.push({
+      code: COMMERCIAL_REASON_CODES.APPROVAL_PENDING,
+      message: "Commercial approval decision is pending.",
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      category: "commercial",
+      relatedEntityId: input.entityId
+    });
+  }
+  if (isAwardPending(input.awardStatus)) {
+    reasons.push({
+      code: AGREEMENT_REASON_CODES.AWARD_PENDING,
+      message: "Award decision is pending.",
+      severity: EXPLANATION_SEVERITY.WARNING,
+      category: "award",
+      relatedEntityId: input.entityId
+    });
+  }
+  if (hasPendingSignatures(input.pendingSignatures, input.totalSignatures)) {
+    reasons.push({
+      code: AGREEMENT_REASON_CODES.SIGNATURES_PENDING,
+      message: `${input.pendingSignatures ?? "Some"} signature(s) still pending.`,
+      severity: EXPLANATION_SEVERITY.WARNING,
+      category: "signing",
+      relatedEntityId: input.entityId
+    });
+  }
+  if (!input.linkedContractId && input.canCreateContract && input.status !== "draft" && input.status !== "cancelled") {
+    reasons.push({
+      code: AGREEMENT_REASON_CODES.CONTRACT_MISSING,
+      message: "No contract linked \u2014 create one to formalize the agreement.",
+      severity: EXPLANATION_SEVERITY.WARNING,
+      category: "contract",
+      relatedEntityId: input.entityId
+    });
+  }
+  for (const blocker of input.stageBlockers ?? []) {
+    reasons.push({
+      code: AGREEMENT_REASON_CODES.STAGE_GATE_BLOCKED,
+      message: blocker.label,
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      category: blocker.code,
+      relatedEntityId: input.entityId
+    });
+  }
+  if (input.status === "review") {
+    reasons.push({
+      code: AGREEMENT_REASON_CODES.REVIEW_INCOMPLETE,
+      message: "Review stage incomplete \u2014 complete review to advance.",
+      severity: EXPLANATION_SEVERITY.WARNING,
+      category: "review",
+      relatedEntityId: input.entityId
+    });
+  }
+  return reasons;
+}
+function buildBlockers6(input) {
+  const blockers = [];
+  if (isDecisionPending(input.decisionStatus)) {
+    blockers.push({
+      reasonCode: COMMERCIAL_REASON_CODES.APPROVAL_PENDING,
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      blockingEntity: input.entityId,
+      resolutionHint: "Obtain commercial approval before advancing the agreement."
+    });
+  }
+  if (input.status === "cancelled") {
+    blockers.push({
+      reasonCode: AGREEMENT_REASON_CODES.STATUS_CANCELLED,
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      blockingEntity: input.entityId,
+      resolutionHint: "Agreement was cancelled \u2014 initiate a new agreement to proceed."
+    });
+  }
+  for (const gate of input.stageBlockers ?? []) {
+    blockers.push({
+      reasonCode: AGREEMENT_REASON_CODES.STAGE_GATE_BLOCKED,
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      blockingEntity: input.entityId,
+      resolutionHint: gate.resolutionHint ?? `Resolve: ${gate.label}`
+    });
+  }
+  if (hasPendingSignatures(input.pendingSignatures, input.totalSignatures) && input.status === "signing") {
+    blockers.push({
+      reasonCode: AGREEMENT_REASON_CODES.SIGNATURES_PENDING,
+      severity: EXPLANATION_SEVERITY.WARNING,
+      blockingEntity: input.entityId,
+      resolutionHint: "Collect all required signatures before moving to execution."
+    });
+  }
+  return blockers;
+}
+function buildStrengths6(input) {
+  const strengths = [];
+  if (input.status === "completed") {
+    strengths.push({
+      code: AGREEMENT_REASON_CODES.STATUS_COMPLETED,
+      label: "Agreement completed",
+      impactPercent: 40
+    });
+  }
+  if (input.decisionStatus === "approved") {
+    strengths.push({
+      code: COMMERCIAL_REASON_CODES.APPROVAL_PENDING,
+      label: "Commercial approval granted",
+      impactPercent: 25
+    });
+  }
+  if (input.linkedContractId) {
+    strengths.push({
+      code: AGREEMENT_REASON_CODES.STATUS_EXECUTING,
+      label: "Contract linked",
+      impactPercent: 20
+    });
+  }
+  if (input.status === "signing" && !hasPendingSignatures(input.pendingSignatures, input.totalSignatures) && (input.totalSignatures ?? 0) > 0) {
+    strengths.push({
+      code: AGREEMENT_REASON_CODES.STATUS_SIGNING,
+      label: "All signatures collected",
+      impactPercent: 25
+    });
+  }
+  return strengths;
+}
+function buildWeaknesses6(input) {
+  const weaknesses = [];
+  if (isDecisionPending(input.decisionStatus)) {
+    weaknesses.push({
+      code: COMMERCIAL_REASON_CODES.APPROVAL_PENDING,
+      label: "Commercial approval pending",
+      impactPercent: AGREEMENT_ADAPTER_SCORE_WEIGHTS.commercialApproval
+    });
+  }
+  if (isAwardPending(input.awardStatus)) {
+    weaknesses.push({
+      code: AGREEMENT_REASON_CODES.AWARD_PENDING,
+      label: "Award decision pending",
+      impactPercent: 15
+    });
+  }
+  if (hasPendingSignatures(input.pendingSignatures, input.totalSignatures)) {
+    weaknesses.push({
+      code: AGREEMENT_REASON_CODES.SIGNATURES_PENDING,
+      label: "Signatures incomplete",
+      impactPercent: AGREEMENT_ADAPTER_SCORE_WEIGHTS.signatures
+    });
+  }
+  if (!input.linkedContractId && input.canCreateContract) {
+    weaknesses.push({
+      code: AGREEMENT_REASON_CODES.CONTRACT_MISSING,
+      label: "Contract not yet created",
+      impactPercent: AGREEMENT_ADAPTER_SCORE_WEIGHTS.contractLinkage
+    });
+  }
+  for (const blocker of input.stageBlockers ?? []) {
+    weaknesses.push({
+      code: AGREEMENT_REASON_CODES.STAGE_GATE_BLOCKED,
+      label: blocker.label,
+      impactPercent: roundScore6(
+        AGREEMENT_ADAPTER_SCORE_WEIGHTS.stageProgression / Math.max(1, input.stageBlockers?.length ?? 1)
+      )
+    });
+  }
+  return weaknesses;
+}
+function dimensionScore3(input, dimension) {
+  const weight = AGREEMENT_ADAPTER_SCORE_WEIGHTS[dimension];
+  switch (dimension) {
+    case "stageProgression": {
+      const base = STAGE_SCORE[input.status] / 100;
+      return roundScore6(base * weight);
+    }
+    case "commercialApproval": {
+      if (input.decisionStatus === "approved" || input.decisionStatus === "not_required") {
+        return weight;
+      }
+      if (isDecisionPending(input.decisionStatus)) return 0;
+      return roundScore6(weight * 0.5);
+    }
+    case "signatures": {
+      if (input.status === "completed" || input.status === "executing") {
+        return weight;
+      }
+      if (hasPendingSignatures(input.pendingSignatures, input.totalSignatures)) {
+        const total = input.totalSignatures ?? 1;
+        const pending = input.pendingSignatures ?? total;
+        const signed = Math.max(0, total - pending);
+        return roundScore6(signed / total * weight);
+      }
+      if (input.status === "signing") return roundScore6(weight * 0.3);
+      return weight;
+    }
+    case "contractLinkage": {
+      if (input.linkedContractId) return weight;
+      if (input.canCreateContract) return roundScore6(weight * 0.4);
+      return 0;
+    }
+    default:
+      return 0;
+  }
+}
+function buildRecommendationsFromSnapshot6(input) {
+  const recommendations = [];
+  const currentScore = computeAgreementProgressScore(input);
+  let index = 0;
+  if (isDecisionPending(input.decisionStatus)) {
+    recommendations.push({
+      id: `agreement-rec-approval-${index}`,
+      label: "Obtain commercial approval to advance",
+      reasonCode: commercialDecisionToReasonCode(),
+      priority: RECOMMENDATION_PRIORITY.CRITICAL,
+      impactPercent: AGREEMENT_ADAPTER_SCORE_WEIGHTS.commercialApproval,
+      estimatedScore: roundScore6(Math.min(100, currentScore + 20)),
+      href: agreementStatusToHref(input.entityId, "review"),
+      category: "commercial",
+      severity: EXPLANATION_SEVERITY.CRITICAL
+    });
+    index += 1;
+  }
+  if (input.status === "review") {
+    recommendations.push({
+      id: `agreement-rec-review-${index}`,
+      label: "Complete review and advance to signing",
+      reasonCode: AGREEMENT_REASON_CODES.REVIEW_INCOMPLETE,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent: AGREEMENT_ADAPTER_SCORE_WEIGHTS.stageProgression,
+      estimatedScore: roundScore6(Math.min(100, currentScore + 15)),
+      href: agreementStatusToHref(input.entityId, "review"),
+      category: "review",
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+    index += 1;
+  }
+  if (hasPendingSignatures(input.pendingSignatures, input.totalSignatures) && input.status === "signing") {
+    recommendations.push({
+      id: `agreement-rec-sign-${index}`,
+      label: "Collect pending signatures from all parties",
+      reasonCode: AGREEMENT_REASON_CODES.SIGNATURES_PENDING,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent: AGREEMENT_ADAPTER_SCORE_WEIGHTS.signatures,
+      estimatedScore: roundScore6(Math.min(100, currentScore + 15)),
+      href: agreementStatusToHref(input.entityId, "signing"),
+      category: "signing",
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+    index += 1;
+  }
+  if (!input.linkedContractId && input.canCreateContract && input.status !== "draft" && input.status !== "cancelled" && input.status !== "completed") {
+    recommendations.push({
+      id: `agreement-rec-contract-${index}`,
+      label: "Create contract from commercial agreement",
+      reasonCode: AGREEMENT_REASON_CODES.CONTRACT_MISSING,
+      priority: RECOMMENDATION_PRIORITY.MEDIUM,
+      impactPercent: AGREEMENT_ADAPTER_SCORE_WEIGHTS.contractLinkage,
+      estimatedScore: roundScore6(Math.min(100, currentScore + 10)),
+      href: agreementStatusToHref(input.entityId, "contract"),
+      category: "contract",
+      severity: EXPLANATION_SEVERITY.INFO
+    });
+    index += 1;
+  }
+  if (input.status === "signing" && !hasPendingSignatures(input.pendingSignatures, input.totalSignatures)) {
+    recommendations.push({
+      id: `agreement-rec-advance-${index}`,
+      label: "Advance agreement to execution stage",
+      reasonCode: AGREEMENT_REASON_CODES.STATUS_EXECUTING,
+      priority: RECOMMENDATION_PRIORITY.MEDIUM,
+      impactPercent: 20,
+      estimatedScore: roundScore6(Math.min(100, currentScore + 20)),
+      href: agreementStatusToHref(input.entityId),
+      category: "stage",
+      severity: EXPLANATION_SEVERITY.INFO
+    });
+    index += 1;
+  }
+  if (isAwardPending(input.awardStatus)) {
+    recommendations.push({
+      id: `agreement-rec-award-${index}`,
+      label: "Complete award decision",
+      reasonCode: commercialAwardToReasonCode(),
+      priority: RECOMMENDATION_PRIORITY.MEDIUM,
+      impactPercent: 15,
+      estimatedScore: roundScore6(Math.min(100, currentScore + 10)),
+      href: agreementStatusToHref(input.entityId, "review"),
+      category: "award",
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+  }
+  for (const blocker of input.stageBlockers ?? []) {
+    recommendations.push({
+      id: `agreement-rec-gate-${blocker.code}-${index}`,
+      label: `Resolve stage gate: ${blocker.label}`,
+      reasonCode: AGREEMENT_REASON_CODES.STAGE_GATE_BLOCKED,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent: roundScore6(
+        AGREEMENT_ADAPTER_SCORE_WEIGHTS.stageProgression / Math.max(1, input.stageBlockers?.length ?? 1)
+      ),
+      estimatedScore: roundScore6(Math.min(100, currentScore + 10)),
+      href: agreementStatusToHref(input.entityId),
+      category: blocker.code,
+      severity: EXPLANATION_SEVERITY.CRITICAL
+    });
+    index += 1;
+  }
+  return recommendations;
+}
+function buildBreakdownFromSnapshot6(input) {
+  return Object.keys(AGREEMENT_ADAPTER_SCORE_WEIGHTS).map((dimension) => {
+    const weight = AGREEMENT_ADAPTER_SCORE_WEIGHTS[dimension];
+    const score = dimensionScore3(input, dimension);
+    const reasonCodes = [];
+    if (dimension === "stageProgression") {
+      reasonCodes.push(agreementStatusToReasonCode(input.status));
+    }
+    if (dimension === "commercialApproval" && isDecisionPending(input.decisionStatus)) {
+      reasonCodes.push(COMMERCIAL_REASON_CODES.APPROVAL_PENDING);
+    }
+    if (dimension === "signatures" && hasPendingSignatures(input.pendingSignatures, input.totalSignatures)) {
+      reasonCodes.push(AGREEMENT_REASON_CODES.SIGNATURES_PENDING);
+    }
+    if (dimension === "contractLinkage" && !input.linkedContractId) {
+      reasonCodes.push(AGREEMENT_REASON_CODES.CONTRACT_MISSING);
+    }
+    return {
+      label: AGREEMENT_BREAKDOWN_LABELS[dimension],
+      weight,
+      score,
+      maxScore: weight,
+      reasonCodes
+    };
+  });
+}
+function mapTimelineStatus2(status) {
+  if (status === "blocked" || status === "failed" || status === "cancelled") {
+    return TIMELINE_EVENT_STATUS.BLOCKED;
+  }
+  if (status === "pending") {
+    return TIMELINE_EVENT_STATUS.PENDING;
+  }
+  if (status === "in_progress" || status === "active") {
+    return TIMELINE_EVENT_STATUS.ACTIVE;
+  }
+  return TIMELINE_EVENT_STATUS.COMPLETED;
+}
+function buildTimelineFromSnapshot6(input) {
+  if (input.timelineEvents && input.timelineEvents.length > 0) {
+    return input.timelineEvents.map((event) => ({
+      type: event.type,
+      title: event.title,
+      description: event.description ?? event.title,
+      timestamp: event.timestamp,
+      status: mapTimelineStatus2(event.status),
+      relatedEntity: input.entityId
+    }));
+  }
+  const events = [];
+  const evaluatedAt = resolveGeneratedAt6(input);
+  if (input.createdAt) {
+    events.push({
+      type: "agreement-created",
+      title: "Agreement created",
+      description: "Commercial agreement draft opened.",
+      timestamp: input.createdAt,
+      status: TIMELINE_EVENT_STATUS.COMPLETED,
+      relatedEntity: input.entityId
+    });
+  }
+  for (const transition of input.stageTransitions ?? []) {
+    events.push({
+      type: `agreement-${transition.stage}`,
+      title: `Stage: ${transition.stage}`,
+      description: statusMessage2(transition.stage),
+      timestamp: transition.timestamp,
+      status: transition.stage === input.status ? TIMELINE_EVENT_STATUS.ACTIVE : TIMELINE_EVENT_STATUS.COMPLETED,
+      relatedEntity: input.entityId
+    });
+  }
+  if (input.status === "cancelled") {
+    events.push({
+      type: "agreement-cancelled",
+      title: "Agreement cancelled",
+      description: "Commercial agreement was cancelled.",
+      timestamp: evaluatedAt,
+      status: TIMELINE_EVENT_STATUS.BLOCKED,
+      relatedEntity: input.entityId
+    });
+  }
+  if (input.status === "completed") {
+    events.push({
+      type: "agreement-completed",
+      title: "Agreement completed",
+      description: "All agreement obligations fulfilled.",
+      timestamp: evaluatedAt,
+      status: TIMELINE_EVENT_STATUS.COMPLETED,
+      relatedEntity: input.entityId
+    });
+  }
+  if (events.length === 0) {
+    events.push({
+      type: "agreement-active",
+      title: "Agreement in progress",
+      description: statusMessage2(input.status),
+      timestamp: evaluatedAt,
+      status: TIMELINE_EVENT_STATUS.ACTIVE,
+      relatedEntity: input.entityId
+    });
+  }
+  return events;
+}
+function buildAgreementExplanation(input) {
+  const scorePercent = computeAgreementProgressScore(input);
+  const generatedAt = resolveGeneratedAt6(input);
+  return {
+    engine: ENGINE_ID.AGREEMENT,
+    entityId: input.entityId,
+    score: scorePercent,
+    health: resolveHealth6(input, scorePercent),
+    summary: buildSummary6(input, scorePercent),
+    scoreBreakdown: buildBreakdownFromSnapshot6(input),
+    reasons: buildReasons6(input, scorePercent),
+    blockers: buildBlockers6(input),
+    strengths: buildStrengths6(input),
+    weaknesses: buildWeaknesses6(input),
+    recommendations: buildRecommendationsFromSnapshot6(input),
+    timeline: buildTimelineFromSnapshot6(input),
+    metadata: {
+      generatedAt,
+      engineVersion: AGREEMENT_ADAPTER_VERSION,
+      locale: input.locale ?? "en-SA",
+      source: "agreement-adapter",
+      tags: [input.status],
+      extensions: {
+        status: input.status,
+        decisionStatus: input.decisionStatus ?? null,
+        awardStatus: input.awardStatus ?? null,
+        linkedContractId: input.linkedContractId ?? null,
+        linkedNegotiationId: input.linkedNegotiationId ?? null,
+        pendingSignatures: input.pendingSignatures ?? null,
+        canCreateContract: input.canCreateContract ?? false
+      }
+    }
+  };
+}
+var agreementExplainabilityAdapter = {
+  buildExplanation: buildAgreementExplanation,
+  buildRecommendations: buildRecommendationsFromSnapshot6,
+  buildBreakdown: buildBreakdownFromSnapshot6,
+  buildTimeline: buildTimelineFromSnapshot6
+};
+
+// src/adapters/contract-field-map.ts
+var CONTRACT_ADAPTER_SCORE_WEIGHTS = {
+  signatures: 35,
+  activation: 25,
+  execution: 25,
+  milestones: 15
+};
+var CONTRACT_BREAKDOWN_LABELS = {
+  signatures: "Party signatures",
+  activation: "Activation readiness",
+  execution: "Execution progress",
+  milestones: "Milestone delivery"
+};
+var CONTRACT_STATUS_TO_REASON_CODE = {
+  draft: CONTRACT_REASON_CODES.STATUS_DRAFT,
+  pending_signature: CONTRACT_REASON_CODES.STATUS_PENDING_SIGNATURE,
+  active: CONTRACT_REASON_CODES.STATUS_ACTIVE,
+  completed: CONTRACT_REASON_CODES.STATUS_COMPLETED,
+  terminated: CONTRACT_REASON_CODES.STATUS_TERMINATED
+};
+function contractStatusToReasonCode(status) {
+  return CONTRACT_STATUS_TO_REASON_CODE[status];
+}
+function contractStatusToHref(entityId, section) {
+  const base = `/contracts/${entityId}`;
+  if (section) return `${base}/${section}`;
+  return base;
+}
+function resolvePartiesSigned(partiesSigned, parties) {
+  if (partiesSigned != null) return partiesSigned;
+  if (!parties) return 0;
+  return parties.filter((party) => Boolean(party.signedAt)).length;
+}
+function resolveTotalParties(totalParties, parties) {
+  if (totalParties != null) return totalParties;
+  return parties?.length ?? 0;
+}
+function hasUnsignedParties(partiesSigned, totalParties) {
+  return totalParties > 0 && partiesSigned < totalParties;
+}
+function hasBlockedMilestones(milestones) {
+  if (!milestones?.length) return false;
+  return milestones.some(
+    (milestone) => milestone.status === "blocked" || milestone.status === "overdue" || milestone.status === "failed"
+  );
+}
+
+// src/adapters/contract-adapter.ts
+var CONTRACT_ADAPTER_VERSION = "1.0.0";
+function roundScore7(value) {
+  return Math.round(value * 100) / 100;
+}
+function clamp3(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+function resolveGeneratedAt7(input) {
+  return input.evaluatedAt ?? (/* @__PURE__ */ new Date()).toISOString();
+}
+var STAGE_SCORE2 = {
+  draft: 25,
+  pending_signature: 55,
+  active: 85,
+  completed: 100,
+  terminated: 10
+};
+function computeContractProgressScore(input) {
+  let score = STAGE_SCORE2[input.status];
+  const partiesSigned = resolvePartiesSigned(input.partiesSigned, input.parties);
+  const totalParties = resolveTotalParties(input.totalParties, input.parties);
+  if (input.status === "pending_signature" && hasUnsignedParties(partiesSigned, totalParties)) {
+    const signedRatio = totalParties > 0 ? partiesSigned / totalParties : 0;
+    score = roundScore7(40 + signedRatio * 25);
+  }
+  if (hasBlockedMilestones(input.milestones) && input.status === "active") {
+    score -= 15;
+  }
+  if (input.status === "active" && input.canComplete) {
+    score = Math.max(score, 90);
+  }
+  return roundScore7(clamp3(score, 0, 100));
+}
+function resolveHealth7(input, scorePercent) {
+  if (input.status === "completed") return HEALTH.EXCELLENT;
+  if (input.status === "terminated") return HEALTH.CRITICAL;
+  if (input.status === "active" && scorePercent >= 80) return HEALTH.GOOD;
+  if (input.status === "pending_signature") return HEALTH.WARNING;
+  if (input.status === "active") return HEALTH.WARNING;
+  if (input.status === "draft") return HEALTH.CRITICAL;
+  return HEALTH.CRITICAL;
+}
+function statusMessage3(status) {
+  switch (status) {
+    case "draft":
+      return "Contract is in draft \u2014 terms are being finalized.";
+    case "pending_signature":
+      return "Contract pending signature \u2014 parties must sign to activate.";
+    case "active":
+      return "Contract is active \u2014 deliverables are in progress.";
+    case "completed":
+      return "Contract completed \u2014 all obligations fulfilled.";
+    case "terminated":
+      return "Contract terminated \u2014 no further obligations apply.";
+    default:
+      return `Contract status: ${status}`;
+  }
+}
+function buildSummary7(input, scorePercent) {
+  const partiesSigned = resolvePartiesSigned(input.partiesSigned, input.parties);
+  const totalParties = resolveTotalParties(input.totalParties, input.parties);
+  if (input.status === "completed") {
+    return "Contract completed \u2014 all milestones and obligations fulfilled.";
+  }
+  if (input.status === "terminated") {
+    return input.terminationReason ? `Contract terminated \u2014 ${input.terminationReason}` : "Contract terminated \u2014 review termination details.";
+  }
+  if (input.status === "pending_signature" && hasUnsignedParties(partiesSigned, totalParties)) {
+    return `${totalParties - partiesSigned} of ${totalParties} signature(s) pending \u2014 sign to activate.`;
+  }
+  if (input.status === "active" && input.canComplete) {
+    return "Contract active \u2014 ready to mark as completed.";
+  }
+  if (hasBlockedMilestones(input.milestones)) {
+    return "Contract active \u2014 blocked milestone(s) require attention.";
+  }
+  return `Contract progress ${Math.round(scorePercent)}% \u2014 ${statusMessage3(input.status).toLowerCase()}`;
+}
+function buildReasons7(input, scorePercent) {
+  const partiesSigned = resolvePartiesSigned(input.partiesSigned, input.parties);
+  const totalParties = resolveTotalParties(input.totalParties, input.parties);
+  const reasons = [
+    {
+      code: CONTRACT_REASON_CODES.SCORE_SUMMARY,
+      message: `Contract progress ${Math.round(scorePercent)}%`,
+      severity: EXPLANATION_SEVERITY.INFO,
+      category: "summary",
+      relatedEntityId: input.entityId
+    },
+    {
+      code: contractStatusToReasonCode(input.status),
+      message: statusMessage3(input.status),
+      severity: input.status === "terminated" ? EXPLANATION_SEVERITY.CRITICAL : input.status === "completed" ? EXPLANATION_SEVERITY.INFO : EXPLANATION_SEVERITY.WARNING,
+      category: "status",
+      relatedEntityId: input.entityId
+    }
+  ];
+  if (hasUnsignedParties(partiesSigned, totalParties) && (input.status === "pending_signature" || input.status === "draft")) {
+    reasons.push({
+      code: CONTRACT_REASON_CODES.SIGNATURE_PENDING,
+      message: `${totalParties - partiesSigned} of ${totalParties} party signature(s) pending.`,
+      severity: EXPLANATION_SEVERITY.WARNING,
+      category: "signatures",
+      relatedEntityId: input.entityId
+    });
+  }
+  if (input.status === "pending_signature" && !hasUnsignedParties(partiesSigned, totalParties) && totalParties > 0) {
+    reasons.push({
+      code: CONTRACT_REASON_CODES.ACTIVATION_PENDING,
+      message: "All signatures collected \u2014 contract activation pending.",
+      severity: EXPLANATION_SEVERITY.INFO,
+      category: "activation",
+      relatedEntityId: input.entityId
+    });
+  }
+  if (input.status === "active" && input.canComplete) {
+    reasons.push({
+      code: CONTRACT_REASON_CODES.COMPLETION_READY,
+      message: "Contract eligible for completion.",
+      severity: EXPLANATION_SEVERITY.INFO,
+      category: "completion",
+      relatedEntityId: input.entityId
+    });
+  }
+  if (input.status === "terminated" && input.terminationReason) {
+    reasons.push({
+      code: CONTRACT_REASON_CODES.STATUS_TERMINATED,
+      message: input.terminationReason,
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      category: "termination",
+      relatedEntityId: input.entityId
+    });
+  }
+  if (hasBlockedMilestones(input.milestones)) {
+    reasons.push({
+      code: CONTRACT_REASON_CODES.MILESTONE_BLOCKED,
+      message: "One or more milestones are blocked or overdue.",
+      severity: EXPLANATION_SEVERITY.WARNING,
+      category: "milestones",
+      relatedEntityId: input.entityId
+    });
+  }
+  return reasons;
+}
+function buildBlockers7(input) {
+  const blockers = [];
+  const partiesSigned = resolvePartiesSigned(input.partiesSigned, input.parties);
+  const totalParties = resolveTotalParties(input.totalParties, input.parties);
+  if (hasUnsignedParties(partiesSigned, totalParties) && input.status === "pending_signature") {
+    blockers.push({
+      reasonCode: CONTRACT_REASON_CODES.SIGNATURE_PENDING,
+      severity: EXPLANATION_SEVERITY.WARNING,
+      blockingEntity: input.entityId,
+      resolutionHint: "All parties must sign before the contract can activate."
+    });
+  }
+  if (input.status === "terminated") {
+    blockers.push({
+      reasonCode: CONTRACT_REASON_CODES.STATUS_TERMINATED,
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      blockingEntity: input.entityId,
+      resolutionHint: input.terminationReason ?? "Contract was terminated \u2014 no further actions apply."
+    });
+  }
+  if (hasBlockedMilestones(input.milestones) && input.status === "active") {
+    blockers.push({
+      reasonCode: CONTRACT_REASON_CODES.MILESTONE_BLOCKED,
+      severity: EXPLANATION_SEVERITY.WARNING,
+      blockingEntity: input.entityId,
+      resolutionHint: "Resolve blocked or overdue milestones to continue execution."
+    });
+  }
+  return blockers;
+}
+function buildStrengths7(input) {
+  const strengths = [];
+  const partiesSigned = resolvePartiesSigned(input.partiesSigned, input.parties);
+  const totalParties = resolveTotalParties(input.totalParties, input.parties);
+  if (input.status === "completed") {
+    strengths.push({
+      code: CONTRACT_REASON_CODES.STATUS_COMPLETED,
+      label: "Contract completed",
+      impactPercent: 40
+    });
+  }
+  if (totalParties > 0 && partiesSigned === totalParties && input.status !== "draft") {
+    strengths.push({
+      code: CONTRACT_REASON_CODES.SIGNATURE_PENDING,
+      label: "All parties signed",
+      impactPercent: 30
+    });
+  }
+  if (input.status === "active" && !hasBlockedMilestones(input.milestones)) {
+    strengths.push({
+      code: CONTRACT_REASON_CODES.STATUS_ACTIVE,
+      label: "Execution on track",
+      impactPercent: 25
+    });
+  }
+  return strengths;
+}
+function buildWeaknesses7(input) {
+  const weaknesses = [];
+  const partiesSigned = resolvePartiesSigned(input.partiesSigned, input.parties);
+  const totalParties = resolveTotalParties(input.totalParties, input.parties);
+  if (hasUnsignedParties(partiesSigned, totalParties)) {
+    weaknesses.push({
+      code: CONTRACT_REASON_CODES.SIGNATURES_INCOMPLETE,
+      label: `${totalParties - partiesSigned} unsigned party(ies)`,
+      impactPercent: CONTRACT_ADAPTER_SCORE_WEIGHTS.signatures
+    });
+  }
+  if (input.status === "pending_signature" && !hasUnsignedParties(partiesSigned, totalParties) && totalParties > 0) {
+    weaknesses.push({
+      code: CONTRACT_REASON_CODES.ACTIVATION_PENDING,
+      label: "Activation pending after signatures",
+      impactPercent: CONTRACT_ADAPTER_SCORE_WEIGHTS.activation
+    });
+  }
+  if (hasBlockedMilestones(input.milestones)) {
+    weaknesses.push({
+      code: CONTRACT_REASON_CODES.MILESTONE_BLOCKED,
+      label: "Blocked milestones",
+      impactPercent: CONTRACT_ADAPTER_SCORE_WEIGHTS.milestones
+    });
+  }
+  return weaknesses;
+}
+function dimensionScore4(input, dimension) {
+  const weight = CONTRACT_ADAPTER_SCORE_WEIGHTS[dimension];
+  const partiesSigned = resolvePartiesSigned(input.partiesSigned, input.parties);
+  const totalParties = resolveTotalParties(input.totalParties, input.parties);
+  switch (dimension) {
+    case "signatures": {
+      if (input.status === "completed" || input.status === "active") {
+        return weight;
+      }
+      if (totalParties === 0) return roundScore7(weight * 0.5);
+      return roundScore7(partiesSigned / totalParties * weight);
+    }
+    case "activation": {
+      if (input.status === "active" || input.status === "completed") {
+        return weight;
+      }
+      if (input.status === "pending_signature" && !hasUnsignedParties(partiesSigned, totalParties) && totalParties > 0) {
+        return roundScore7(weight * 0.8);
+      }
+      return 0;
+    }
+    case "execution": {
+      const base = STAGE_SCORE2[input.status] / 100;
+      return roundScore7(base * weight);
+    }
+    case "milestones": {
+      if (!input.milestones?.length) return weight;
+      if (hasBlockedMilestones(input.milestones)) {
+        return roundScore7(weight * 0.4);
+      }
+      const completed = input.milestones.filter(
+        (m) => m.status === "completed" || m.status === "done"
+      ).length;
+      return roundScore7(completed / input.milestones.length * weight);
+    }
+    default:
+      return 0;
+  }
+}
+function buildRecommendationsFromSnapshot7(input) {
+  const recommendations = [];
+  const currentScore = computeContractProgressScore(input);
+  const partiesSigned = resolvePartiesSigned(input.partiesSigned, input.parties);
+  const totalParties = resolveTotalParties(input.totalParties, input.parties);
+  let index = 0;
+  if (input.canSign && hasUnsignedParties(partiesSigned, totalParties)) {
+    recommendations.push({
+      id: `contract-rec-sign-${index}`,
+      label: "Sign the contract to proceed",
+      reasonCode: CONTRACT_REASON_CODES.SIGNATURE_PENDING,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent: CONTRACT_ADAPTER_SCORE_WEIGHTS.signatures,
+      estimatedScore: roundScore7(Math.min(100, currentScore + 20)),
+      href: contractStatusToHref(input.entityId, "sign"),
+      category: "signatures",
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+    index += 1;
+  }
+  if (input.status === "pending_signature" && !hasUnsignedParties(partiesSigned, totalParties) && totalParties > 0) {
+    recommendations.push({
+      id: `contract-rec-activate-${index}`,
+      label: "Activate contract \u2014 all signatures collected",
+      reasonCode: CONTRACT_REASON_CODES.ACTIVATION_PENDING,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent: CONTRACT_ADAPTER_SCORE_WEIGHTS.activation,
+      estimatedScore: roundScore7(Math.min(100, currentScore + 25)),
+      href: contractStatusToHref(input.entityId),
+      category: "activation",
+      severity: EXPLANATION_SEVERITY.INFO
+    });
+    index += 1;
+  }
+  if (input.canComplete && input.status === "active") {
+    recommendations.push({
+      id: `contract-rec-complete-${index}`,
+      label: "Mark contract as completed",
+      reasonCode: CONTRACT_REASON_CODES.COMPLETION_READY,
+      priority: RECOMMENDATION_PRIORITY.MEDIUM,
+      impactPercent: 30,
+      estimatedScore: 100,
+      href: contractStatusToHref(input.entityId, "complete"),
+      category: "completion",
+      severity: EXPLANATION_SEVERITY.INFO
+    });
+    index += 1;
+  }
+  if (input.canTerminate && input.status !== "completed" && input.status !== "terminated") {
+    recommendations.push({
+      id: `contract-rec-terminate-${index}`,
+      label: "Terminate contract (provide reason)",
+      reasonCode: CONTRACT_REASON_CODES.TERMINATION_AVAILABLE,
+      priority: RECOMMENDATION_PRIORITY.LOW,
+      impactPercent: 5,
+      estimatedScore: 10,
+      href: contractStatusToHref(input.entityId, "terminate"),
+      category: "termination",
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+    index += 1;
+  }
+  if (hasBlockedMilestones(input.milestones)) {
+    recommendations.push({
+      id: `contract-rec-milestone-${index}`,
+      label: "Resolve blocked or overdue milestones",
+      reasonCode: CONTRACT_REASON_CODES.MILESTONE_BLOCKED,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent: CONTRACT_ADAPTER_SCORE_WEIGHTS.milestones,
+      estimatedScore: roundScore7(Math.min(100, currentScore + 15)),
+      href: contractStatusToHref(input.entityId, "milestones"),
+      category: "milestones",
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+  }
+  return recommendations;
+}
+function buildBreakdownFromSnapshot7(input) {
+  return Object.keys(CONTRACT_ADAPTER_SCORE_WEIGHTS).map((dimension) => {
+    const weight = CONTRACT_ADAPTER_SCORE_WEIGHTS[dimension];
+    const score = dimensionScore4(input, dimension);
+    const reasonCodes = [];
+    const partiesSigned = resolvePartiesSigned(input.partiesSigned, input.parties);
+    const totalParties = resolveTotalParties(input.totalParties, input.parties);
+    if (dimension === "signatures" && hasUnsignedParties(partiesSigned, totalParties)) {
+      reasonCodes.push(CONTRACT_REASON_CODES.SIGNATURE_PENDING);
+    }
+    if (dimension === "activation" && input.status === "pending_signature") {
+      reasonCodes.push(CONTRACT_REASON_CODES.ACTIVATION_PENDING);
+    }
+    if (dimension === "execution") {
+      reasonCodes.push(contractStatusToReasonCode(input.status));
+    }
+    if (dimension === "milestones" && hasBlockedMilestones(input.milestones)) {
+      reasonCodes.push(CONTRACT_REASON_CODES.MILESTONE_BLOCKED);
+    }
+    return {
+      label: CONTRACT_BREAKDOWN_LABELS[dimension],
+      weight,
+      score,
+      maxScore: weight,
+      reasonCodes
+    };
+  });
+}
+function mapTimelineStatus3(status) {
+  if (status === "blocked" || status === "failed" || status === "terminated") {
+    return TIMELINE_EVENT_STATUS.BLOCKED;
+  }
+  if (status === "pending") {
+    return TIMELINE_EVENT_STATUS.PENDING;
+  }
+  if (status === "in_progress" || status === "active") {
+    return TIMELINE_EVENT_STATUS.ACTIVE;
+  }
+  return TIMELINE_EVENT_STATUS.COMPLETED;
+}
+function buildTimelineFromSnapshot7(input) {
+  if (input.timelineEvents && input.timelineEvents.length > 0) {
+    return input.timelineEvents.map((event) => ({
+      type: event.type,
+      title: event.title,
+      description: event.description ?? event.title,
+      timestamp: event.timestamp,
+      status: mapTimelineStatus3(event.status),
+      relatedEntity: input.entityId
+    }));
+  }
+  const events = [];
+  const evaluatedAt = resolveGeneratedAt7(input);
+  if (input.createdAt) {
+    events.push({
+      type: "contract-created",
+      title: "Contract created",
+      description: "Contract draft opened.",
+      timestamp: input.createdAt,
+      status: TIMELINE_EVENT_STATUS.COMPLETED,
+      relatedEntity: input.entityId
+    });
+  }
+  for (const party of input.parties ?? []) {
+    if (party.signedAt) {
+      events.push({
+        type: "contract-signed",
+        title: "Party signed",
+        description: party.role ? `${party.role} signed the contract` : `Party ${party.userId} signed the contract`,
+        timestamp: party.signedAt,
+        status: TIMELINE_EVENT_STATUS.COMPLETED,
+        relatedEntity: input.entityId
+      });
+    }
+  }
+  if (input.activatedAt) {
+    events.push({
+      type: "contract-activated",
+      title: "Contract activated",
+      description: "Contract entered active execution.",
+      timestamp: input.activatedAt,
+      status: TIMELINE_EVENT_STATUS.COMPLETED,
+      relatedEntity: input.entityId
+    });
+  }
+  if (input.completedAt) {
+    events.push({
+      type: "contract-completed",
+      title: "Contract completed",
+      description: input.completionReason ?? "All contract obligations fulfilled.",
+      timestamp: input.completedAt,
+      status: TIMELINE_EVENT_STATUS.COMPLETED,
+      relatedEntity: input.entityId
+    });
+  }
+  if (input.terminatedAt || input.status === "terminated") {
+    events.push({
+      type: "contract-terminated",
+      title: "Contract terminated",
+      description: input.terminationReason ?? "Contract was terminated.",
+      timestamp: input.terminatedAt ?? evaluatedAt,
+      status: TIMELINE_EVENT_STATUS.BLOCKED,
+      relatedEntity: input.entityId
+    });
+  }
+  if (events.length === 0) {
+    events.push({
+      type: "contract-active",
+      title: "Contract in progress",
+      description: statusMessage3(input.status),
+      timestamp: evaluatedAt,
+      status: input.status === "terminated" ? TIMELINE_EVENT_STATUS.BLOCKED : TIMELINE_EVENT_STATUS.ACTIVE,
+      relatedEntity: input.entityId
+    });
+  }
+  return events;
+}
+function buildContractExplanation(input) {
+  const scorePercent = computeContractProgressScore(input);
+  const generatedAt = resolveGeneratedAt7(input);
+  const partiesSigned = resolvePartiesSigned(input.partiesSigned, input.parties);
+  const totalParties = resolveTotalParties(input.totalParties, input.parties);
+  return {
+    engine: ENGINE_ID.CONTRACT,
+    entityId: input.entityId,
+    score: scorePercent,
+    health: resolveHealth7(input, scorePercent),
+    summary: buildSummary7(input, scorePercent),
+    scoreBreakdown: buildBreakdownFromSnapshot7(input),
+    reasons: buildReasons7(input, scorePercent),
+    blockers: buildBlockers7(input),
+    strengths: buildStrengths7(input),
+    weaknesses: buildWeaknesses7(input),
+    recommendations: buildRecommendationsFromSnapshot7(input),
+    timeline: buildTimelineFromSnapshot7(input),
+    metadata: {
+      generatedAt,
+      engineVersion: CONTRACT_ADAPTER_VERSION,
+      locale: input.locale ?? "en-SA",
+      source: "contract-adapter",
+      tags: [input.status],
+      extensions: {
+        status: input.status,
+        partiesSigned,
+        totalParties,
+        canSign: input.canSign ?? false,
+        canComplete: input.canComplete ?? false,
+        canTerminate: input.canTerminate ?? false
+      }
+    }
+  };
+}
+var contractExplainabilityAdapter = {
+  buildExplanation: buildContractExplanation,
+  buildRecommendations: buildRecommendationsFromSnapshot7,
+  buildBreakdown: buildBreakdownFromSnapshot7,
+  buildTimeline: buildTimelineFromSnapshot7
+};
+
+// src/services/recommendation-service-impl.ts
+var DEFAULT_AGGREGATE_RECOMMENDATION_LIMIT = 10;
+var PRIORITY_ORDER = {
+  [RECOMMENDATION_PRIORITY.CRITICAL]: 0,
+  [RECOMMENDATION_PRIORITY.HIGH]: 1,
+  [RECOMMENDATION_PRIORITY.MEDIUM]: 2,
+  [RECOMMENDATION_PRIORITY.LOW]: 3
+};
+function mergeSnapshot(entityId, input) {
+  return { ...input, entityId };
+}
+function aggregateRecommendations(bundles, options) {
+  const limit = options?.limit ?? DEFAULT_AGGREGATE_RECOMMENDATION_LIMIT;
+  const deduped = /* @__PURE__ */ new Map();
+  for (const bundle of bundles) {
+    for (const recommendation of bundle.recommendations) {
+      const key = `${recommendation.reasonCode}::${recommendation.label}`;
+      const existing = deduped.get(key);
+      if (!existing || recommendation.impactPercent > existing.impactPercent || PRIORITY_ORDER[recommendation.priority] < PRIORITY_ORDER[existing.priority]) {
+        deduped.set(key, recommendation);
+      }
+    }
+  }
+  return [...deduped.values()].sort((left, right) => {
+    const priorityDiff = PRIORITY_ORDER[left.priority] - PRIORITY_ORDER[right.priority];
+    if (priorityDiff !== 0) return priorityDiff;
+    return right.impactPercent - left.impactPercent;
+  }).slice(0, limit);
+}
+function createRecommendationService() {
+  return {
+    forProfile(entityId, input) {
+      const snapshot = mergeSnapshot(entityId, input);
+      return profileExplainabilityAdapter.buildRecommendations(snapshot);
+    },
+    forVetting(entityId, input) {
+      const snapshot = mergeSnapshot(entityId, input);
+      return vettingExplainabilityAdapter.buildRecommendations(snapshot);
+    },
+    forOpportunity(entityId, input) {
+      const snapshot = mergeSnapshot(entityId, input);
+      const engine = typeof input.engine === "string" ? input.engine : void 0;
+      if (engine === "readiness") {
+        return readinessExplainabilityAdapter.buildRecommendations(snapshot);
+      }
+      return opportunityExplainabilityAdapter.buildRecommendations(snapshot);
+    },
+    forMatching(entityId, input) {
+      const snapshot = mergeSnapshot(entityId, input);
+      return matchingExplainabilityAdapter.buildRecommendations(snapshot);
+    },
+    forNegotiation(entityId, input) {
+      const snapshot = mergeSnapshot(
+        entityId,
+        input
+      );
+      return negotiationExplainabilityAdapter.buildRecommendations(snapshot);
+    },
+    forAgreement(entityId, input) {
+      const snapshot = mergeSnapshot(
+        entityId,
+        input
+      );
+      return agreementExplainabilityAdapter.buildRecommendations(snapshot);
+    },
+    forContract(entityId, input) {
+      const snapshot = mergeSnapshot(
+        entityId,
+        input
+      );
+      return contractExplainabilityAdapter.buildRecommendations(snapshot);
+    }
+  };
+}
+
 // src/validation/bundle-shape.ts
 var HEALTH_VALUES = new Set(Object.values(HEALTH));
 var ENGINE_VALUES = new Set(Object.values(ENGINE_ID));
@@ -2688,13 +3942,22 @@ function deserializeAIExplanationPayload(json) {
   return candidate;
 }
 export {
+  AGREEMENT_ADAPTER_SCORE_WEIGHTS,
+  AGREEMENT_ADAPTER_VERSION,
+  AGREEMENT_BREAKDOWN_LABELS,
   AGREEMENT_REASON_CODES,
+  AGREEMENT_STATUS_TO_REASON_CODE,
   AI_EXPLANATION_PAYLOAD_VERSION,
   ALL_REASON_CODES,
   ANALYTICS_REASON_CODES,
   COMMERCIAL_REASON_CODES,
+  CONTRACT_ADAPTER_SCORE_WEIGHTS,
+  CONTRACT_ADAPTER_VERSION,
+  CONTRACT_BREAKDOWN_LABELS,
   CONTRACT_REASON_CODES,
+  CONTRACT_STATUS_TO_REASON_CODE,
   DASHBOARD_REASON_CODES,
+  DEFAULT_AGGREGATE_RECOMMENDATION_LIMIT,
   DOCUMENT_REASON_CODES,
   ENGINE_ID,
   EXPLANATION_BUNDLE_KEYS,
@@ -2730,18 +3993,37 @@ export {
   VETTING_REASON_CODES,
   VETTING_REVIEW_GAP_LABEL_TO_REASON_CODE,
   VETTING_REVIEW_PROGRESS_TO_REASON_CODE,
+  aggregateRecommendations,
+  agreementExplainabilityAdapter,
+  agreementStatusToHref,
+  agreementStatusToReasonCode,
   assertReasonCode,
+  buildAgreementExplanation,
+  buildContractExplanation,
   buildMatchingExplanation,
   buildNegotiationExplanation,
   buildOpportunityExplanation,
   buildProfileExplanation,
   buildReadinessExplanation,
   buildVettingExplanation,
+  commercialAwardToReasonCode,
+  commercialDecisionToReasonCode,
+  computeAgreementProgressScore,
+  computeContractProgressScore,
   computeNegotiationProgressScore,
+  contractExplainabilityAdapter,
+  contractStatusToHref,
+  contractStatusToReasonCode,
+  createRecommendationService,
   deserializeAIExplanationPayload,
   deserializeExplanationBundle,
   dimensionImprovementHint,
   fromAIExplanationPayload,
+  hasBlockedMilestones,
+  hasPendingSignatures,
+  hasUnsignedParties,
+  isAwardPending,
+  isDecisionPending,
   isExplanationBundle,
   isLargePriceGap,
   isLowDimensionScore,
@@ -2766,6 +4048,8 @@ export {
   profileFieldLabelToHref,
   profileFieldLabelToReasonCode,
   readinessExplainabilityAdapter,
+  resolvePartiesSigned,
+  resolveTotalParties,
   serializeAIExplanationPayload,
   serializeExplanationBundle,
   toAIExplanationPayload,
