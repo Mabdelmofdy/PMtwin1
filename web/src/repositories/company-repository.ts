@@ -38,4 +38,37 @@ export class CompanyRepository extends BaseRepository<Company> {
     this.writeOverrides(overrides)
     return company
   }
+
+  update(id: string, patch: Partial<Company>): Company | undefined {
+    const overrides = this.readOverrides()
+    const existing = this.getById(id)
+    if (!existing) return undefined
+
+    const updated: Company = {
+      ...existing,
+      ...patch,
+      profile: patch.profile ? { ...existing.profile, ...patch.profile } : existing.profile,
+      updatedAt: new Date().toISOString(),
+    }
+
+    const isNew = overrides.newCompanies?.some((company) => company.id === id)
+    if (isNew) {
+      overrides.newCompanies = overrides.newCompanies!.map((company) =>
+        company.id === id ? updated : company,
+      )
+    } else {
+      overrides.companies = {
+        ...overrides.companies,
+        [id]: {
+          ...overrides.companies?.[id],
+          ...patch,
+          profile: updated.profile,
+          updatedAt: updated.updatedAt,
+        },
+      }
+    }
+
+    this.writeOverrides(overrides)
+    return updated
+  }
 }

@@ -17,6 +17,11 @@ import type { NegotiationRoomCommandHandler } from '@/commands/handlers/negotiat
 import type { OpportunityCommandHandler } from '@/commands/handlers/opportunity-command-handler.ts'
 import type { PostMatchCommandHandler } from '@/commands/handlers/post-match-command-handler.ts'
 import {
+  buildVettingMutationFailureResult,
+  evaluateVettingMutationGuard,
+  type VettingActorContext,
+} from '@/domain/rbac/vetting-mutation-guard.ts'
+import {
   InMemoryIdempotencyStore,
   buildIdempotencyKey,
 } from '@/commands/idempotency/InMemoryIdempotencyStore.ts'
@@ -101,7 +106,9 @@ export type DefaultCommandGatewayDeps = {
   readonly resolveOpportunityForCommandRbac?: (
     aggregateId: string,
   ) => CommandRbacEntitySnapshot | null | undefined
+  readonly resolveVettingActorContext?: () => VettingActorContext | null
   readonly enforceCommandRbac?: boolean
+  readonly enforceVettingGuard?: boolean
 }
 
 export class DefaultCommandGateway implements CommandGateway {
@@ -117,7 +124,9 @@ export class DefaultCommandGateway implements CommandGateway {
   private readonly resolveOpportunityForCommandRbac: (
     aggregateId: string,
   ) => CommandRbacEntitySnapshot | null | undefined
+  private readonly resolveVettingActorContext: () => VettingActorContext | null
   private readonly enforceCommandRbac: boolean
+  private readonly enforceVettingGuard: boolean
 
   constructor(deps: DefaultCommandGatewayDeps) {
     this.applicationHandler = deps.applicationHandler
@@ -133,7 +142,9 @@ export class DefaultCommandGateway implements CommandGateway {
       deps.resolveCommandPermissionActor ?? getCommandPermissionActor
     this.resolveOpportunityForCommandRbac =
       deps.resolveOpportunityForCommandRbac ?? (() => undefined)
+    this.resolveVettingActorContext = deps.resolveVettingActorContext ?? (() => null)
     this.enforceCommandRbac = deps.enforceCommandRbac !== false
+    this.enforceVettingGuard = deps.enforceVettingGuard !== false
   }
 
   execute(command: Command): CommandResult {
@@ -152,6 +163,17 @@ export class DefaultCommandGateway implements CommandGateway {
       )
       if (!rbac.allowed) {
         return buildCommandRbacFailureResult(command, rbac)
+      }
+    }
+
+    if (this.enforceVettingGuard) {
+      const vetting = evaluateVettingMutationGuard(
+        command,
+        this.resolveCommandPermissionActor(),
+        this.resolveVettingActorContext,
+      )
+      if (!vetting.allowed) {
+        return buildVettingMutationFailureResult(command, vetting)
       }
     }
 

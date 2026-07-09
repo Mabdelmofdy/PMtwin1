@@ -10,6 +10,7 @@ import { PostMatchCommandHandler } from '@/commands/handlers/post-match-command-
 import { DefaultCommandGateway } from '@/commands/default-command-gateway.ts'
 import { InMemoryIdempotencyStore } from '@/commands/idempotency/InMemoryIdempotencyStore.ts'
 import type { CommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
+import type { VettingActorContext } from '@/domain/rbac/vetting-mutation-guard.ts'
 import { ApplicationRepository } from '@/repositories/application-repository.ts'
 import { AuditRepository } from '@/repositories/audit-repository.ts'
 import { ContractRepository } from '@/repositories/contract-repository.ts'
@@ -21,6 +22,7 @@ import { NegotiationTranscriptRepository } from '@/repositories/negotiation-tran
 import { OpportunityRepository } from '@/repositories/opportunity-repository.ts'
 import { PostMatchRepository } from '@/repositories/post-match-repository.ts'
 import { UserRepository } from '@/repositories/user-repository.ts'
+import { PartyRepository } from '@/repositories/party-repository.ts'
 
 export const TEST_ADMIN_ACTOR: CommandPermissionActor = {
   userId: 'test-admin',
@@ -112,6 +114,11 @@ export function createCommandGatewayTestStack(
   const negotiationOfferRepository = new NegotiationOfferRepository(storage)
   const negotiationTranscriptRepository = new NegotiationTranscriptRepository(storage)
   const userRepository = new UserRepository(storage, () => options.users ?? [])
+  const partyRepository = new PartyRepository(
+    storage,
+    () => options.users ?? [],
+    () => [],
+  )
   const dealRepository = new CommercialAgreementRepository(storage, () => options.deals ?? [])
   const contractRepository = new ContractRepository(
     storage,
@@ -179,6 +186,17 @@ export function createCommandGatewayTestStack(
       options.commandPermissionActor === null
         ? null
         : (options.commandPermissionActor ?? TEST_ADMIN_ACTOR),
+    resolveVettingActorContext: (): VettingActorContext | null => {
+      const actor =
+        options.commandPermissionActor === null
+          ? null
+          : (options.commandPermissionActor ?? TEST_ADMIN_ACTOR)
+      if (!actor) return null
+      const user = userRepository.getById(actor.userId)
+      if (!user) return null
+      const party = partyRepository.getById(actor.activePartyId ?? actor.userId) ?? null
+      return { user, activeParty: party }
+    },
     resolveOpportunityForCommandRbac: (aggregateId) => {
       const opportunity = opportunityRepository.getById(aggregateId)
       if (!opportunity) return undefined

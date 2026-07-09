@@ -6,6 +6,7 @@
 export type CommandPermissionActor = {
   readonly userId: string
   readonly userRole: string
+  readonly activePartyId?: string
 }
 
 let actorOverride: CommandPermissionActor | null | undefined

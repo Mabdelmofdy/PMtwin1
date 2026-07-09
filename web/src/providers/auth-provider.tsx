@@ -17,6 +17,8 @@ import {
   type RegistrationSuccess,
 } from '@/lib/registration-service.ts'
 import { setCommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
+import { canMutateAsVettedUser } from '@/domain/rbac/vetting-mutation-guard.ts'
+import { partiesApi } from '@/api/parties.ts'
 
 export type RegistrationCompletion = {
   partyType: RegistrationSuccess['partyType']
@@ -30,6 +32,8 @@ type AuthContextValue = {
   isCompanyUser: boolean
   canAccessAdmin: boolean
   isPendingApproval: boolean
+  isVettingRestricted: boolean
+  canMutate: boolean
   login: (
     email: string,
     password: string,
@@ -53,7 +57,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (user) {
-      setCommandPermissionActor({ userId: user.id, userRole: user.role })
+      const session = authService.getSession()
+      setCommandPermissionActor({
+        userId: user.id,
+        userRole: user.role,
+        activePartyId: session?.activePartyId ?? partiesApi.resolveActivePartyId(user.id),
+      })
     } else {
       setCommandPermissionActor(null)
     }
@@ -100,20 +109,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }, [])
 
-  const value = useMemo<AuthContextValue>(
-    () => ({
+  const value = useMemo<AuthContextValue>(() => {
+    const activeParty = user ? partiesApi.resolveActiveParty(user.id) : null
+    return {
       user,
       isAuthenticated: !!user,
       isLoading,
       isCompanyUser: user ? authService.isCompanyUser(user) : false,
       canAccessAdmin: user ? authService.canAccessAdmin(user) : false,
       isPendingApproval: user ? authService.isPendingApproval(user) : false,
+      isVettingRestricted: user ? authService.isVettingRestricted(user) : false,
+      canMutate: user ? canMutateAsVettedUser(user, activeParty) : false,
       login,
       registerAndSignIn,
       signOut,
-    }),
-    [user, isLoading, login, registerAndSignIn, signOut],
-  )
+    }
+  }, [user, isLoading, login, registerAndSignIn, signOut])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

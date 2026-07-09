@@ -61,4 +61,30 @@ export class PartyRepository {
     this.writeOverrides(overrides)
     return party
   }
+
+  updateStatus(id: string, status: string): Party | undefined {
+    const overrides = this.readOverrides()
+    const existing = this.getById(id)
+    if (!existing) return undefined
+
+    const updated: Party = { ...existing, status }
+
+    const isNew = overrides.newParties?.some((party) => party.id === id)
+    if (isNew) {
+      overrides.newParties = overrides.newParties!.map((party) =>
+        party.id === id ? updated : party,
+      )
+    } else {
+      overrides.parties = {
+        ...overrides.parties,
+        [id]: {
+          ...overrides.parties?.[id],
+          status,
+        },
+      }
+    }
+
+    this.writeOverrides(overrides)
+    return updated
+  }
 }

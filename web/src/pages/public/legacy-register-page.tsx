@@ -164,7 +164,8 @@ export function LegacyRegisterPage() {
                 {completion.partyType === 'company' ? 'Company Created' : 'Account Created'}
               </h1>
               <p className="reg-header-subtitle mt-1 text-gray-600">
-                Your account is ready. Continue to your workspace dashboard.
+                Account created and pending review. You can browse now, and full actions unlock
+                after approval.
               </p>
             </header>
             <dl className="mb-6 space-y-3 text-sm">

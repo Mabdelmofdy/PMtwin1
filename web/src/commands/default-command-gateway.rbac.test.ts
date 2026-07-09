@@ -33,6 +33,82 @@ const acceptedMatch = {
 } as const
 
 describe('DefaultCommandGateway RBAC', () => {
+  it('blocks guarded mutation command for pending user', () => {
+    const stack = createCommandGatewayTestStack({
+      users: [
+        {
+          id: 'user-pending',
+          email: 'pending@test',
+          role: 'company_owner',
+          status: 'pending',
+        },
+      ],
+      commandPermissionActor: {
+        userId: 'user-pending',
+        userRole: 'company_owner',
+      },
+    })
+
+    const result = stack.gateway.execute({
+      commandType: 'CreateOpportunity',
+      aggregateId: 'opp-pending',
+      clientRequestId: 'req-pending-create-opp',
+      payload: {
+        title: 'Pending should fail',
+        mainCollaborationModel: 'project',
+        modelType: 'project_based',
+        subModelType: 'design',
+        exchangeMode: 'cash',
+      },
+    })
+
+    assert.equal(result.success, false)
+    assert.ok(
+      result.errors?.some((error) =>
+        /Account pending review\. You can browse but cannot perform this action until approved\./i.test(
+          error,
+        ),
+      ),
+    )
+  })
+
+  it('allows guarded mutation command for active vetted user', () => {
+    const discovered = {
+      ...acceptedMatch,
+      id: 'pm-active-accept',
+      status: 'discovered',
+      participants: acceptedMatch.participants.map((participant) => ({
+        ...participant,
+        participantStatus: 'pending',
+      })),
+    }
+
+    const stack = createCommandGatewayTestStack({
+      users: [
+        {
+          id: 'user-need',
+          email: 'need@test',
+          role: 'professional',
+          status: 'active',
+        },
+      ],
+      postMatches: [discovered],
+      commandPermissionActor: {
+        userId: 'user-need',
+        userRole: 'professional',
+      },
+    })
+
+    const result = stack.gateway.execute({
+      commandType: 'AcceptPostMatch',
+      aggregateId: 'pm-active-accept',
+      clientRequestId: 'req-active-accept',
+      userId: 'user-need',
+    })
+
+    assert.equal(result.success, true)
+  })
+
   it('rejected admin command does not mutate repository', () => {
     const stack = createCommandGatewayTestStack({
       postMatches: [acceptedMatch],
@@ -86,6 +162,14 @@ describe('DefaultCommandGateway RBAC', () => {
     }
 
     const stack = createCommandGatewayTestStack({
+      users: [
+        {
+          id: 'user-need',
+          email: 'need@test',
+          role: 'professional',
+          status: 'active',
+        },
+      ],
       postMatches: [discovered],
       commandPermissionActor: {
         userId: 'user-need',

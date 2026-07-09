@@ -56,6 +56,8 @@ export type TenantScoped = {
   organizationId?: string
 }
 
+import type { VettingMetadata } from '@/types/vetting.ts'
+
 export type PersonProfile = {
   name?: string
   headline?: string
@@ -64,6 +66,7 @@ export type PersonProfile = {
   bio?: string
   description?: string
   skills?: string[]
+  vetting?: VettingMetadata
 }
 
 export type PlatformUser = TenantScoped & {

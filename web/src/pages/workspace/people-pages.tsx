@@ -1,6 +1,8 @@
-import { useParams, useLocation } from 'react-router-dom'
+import { useParams, useLocation, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { peopleApi } from '@/api/people.ts'
 import { notificationsApi } from '@/api/notifications.ts'
+import { partiesApi } from '@/api/parties.ts'
 import { useAuth } from '@/providers/auth-provider'
 import {
   PeopleBrowseToolbar,
@@ -24,15 +26,19 @@ import { MOCK_MESSAGE_THREADS } from '@/components/user/user-display'
 import { PmTablePagination } from '@/components/data/pm-data-index'
 import {
   PmBadge,
+  PmButton,
   PmPage,
   PmPageHeader,
   PmPageHeroMetric,
   PmPageActions,
 } from '@/components/ui/pm-index'
-import { PmBrowsePage, PmBrowseToolbar } from '@/components/layout/pm-layout-index'
+import { Input } from '@/components/ui/input'
+import { toast } from 'sonner'
+import { PmBrowsePage, PmBrowseToolbar, PmContentCard } from '@/components/layout/pm-layout-index'
 import { readProductNavState } from '@/config/product-identity'
 import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
 import { useProductLanguage } from '@/providers/product-language-provider'
+import { vettingService } from '@/lib/vetting-service.ts'
 
 export function PeoplePage() {
   const location = useLocation()
@@ -226,8 +232,12 @@ export function NotificationsPage() {
 }
 
 export function ProfilePage() {
-  const { user, isCompanyUser } = useAuth()
+  const navigate = useNavigate()
+  const { user, isCompanyUser, isVettingRestricted } = useAuth()
   const profileKind = isCompanyUser ? 'company' : 'individual'
+  const [skillsDraft, setSkillsDraft] = useState(user?.profile?.skills?.join(', ') ?? '')
+  const [documentType, setDocumentType] = useState('Commercial Registration')
+  const [documentFileName, setDocumentFileName] = useState('')
   const readiness = user?.profile
     ? resolveProfileReadiness(user.profile, profileKind)
     : null
@@ -260,6 +270,87 @@ export function ProfilePage() {
         profileKind={profileKind}
         email={user?.email}
       />
+      {user && isVettingRestricted ? (
+        <PmContentCard
+          title="Vetting updates"
+          description="Your account is under review. You can update profile skills, upload replacement PartyDocument metadata, and resubmit."
+        >
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Skills (comma-separated)</label>
+              <Input
+                value={skillsDraft}
+                onChange={(event) => setSkillsDraft(event.target.value)}
+                placeholder="Project Management, Risk, Procurement"
+              />
+              <PmButton
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  const skills = skillsDraft
+                    .split(',')
+                    .map((skill) => skill.trim())
+                    .filter(Boolean)
+                  vettingService.updateProfile(user.id, { skills })
+                  toast.success('Profile updated for vetting review')
+                  navigate(0)
+                }}
+              >
+                Save profile update
+              </PmButton>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">PartyDocument type</label>
+              <Input
+                value={documentType}
+                onChange={(event) => setDocumentType(event.target.value)}
+                placeholder="Commercial Registration"
+              />
+              <label className="text-sm font-medium">File name (metadata only)</label>
+              <Input
+                value={documentFileName}
+                onChange={(event) => setDocumentFileName(event.target.value)}
+                placeholder="cr-valid-2026.pdf"
+              />
+              <PmButton
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  const partyId = partiesApi.resolveActivePartyId(user.id)
+                  if (!documentType.trim() || !documentFileName.trim()) {
+                    toast.error('Document type and file name are required.')
+                    return
+                  }
+                  vettingService.replacePartyDocument({
+                    ownerPartyId: partyId,
+                    uploadedByUserId: user.id,
+                    documentCategory: 'vetting',
+                    documentType: documentType.trim(),
+                    fileName: documentFileName.trim(),
+                  })
+                  toast.success('PartyDocument metadata added for review')
+                  setDocumentFileName('')
+                }}
+              >
+                Upload replacement metadata
+              </PmButton>
+            </div>
+
+            <PmButton
+              size="sm"
+              onClick={() => {
+                const partyId = partiesApi.resolveActivePartyId(user.id)
+                vettingService.resubmitForReview(user.id, partyId)
+                toast.success('Resubmitted for vetting review')
+                navigate(0)
+              }}
+            >
+              Resubmit for review
+            </PmButton>
+          </div>
+        </PmContentCard>
+      ) : null}
     </PmPage>
   )
 }

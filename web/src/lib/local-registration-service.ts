@@ -65,7 +65,7 @@ export function registerLocalAccount(
       email: request.email,
       passwordHash,
       role: 'user',
-      status: 'active',
+      status: 'pending',
       profile: {
         name: request.profile.displayName,
         location,
@@ -95,7 +95,7 @@ export function registerLocalAccount(
     email: request.email,
     passwordHash,
     role: 'company_owner',
-    status: 'active',
+    status: 'pending',
     profile: {
       name: contactName,
       location,
@@ -106,7 +106,7 @@ export function registerLocalAccount(
     id: companyId,
     email: `${companyId}@internal.pmtwin`,
     role: 'company_owner',
-    status: 'active',
+    status: 'pending',
     profile: {
       name: request.profile.displayName,
       type: 'company',

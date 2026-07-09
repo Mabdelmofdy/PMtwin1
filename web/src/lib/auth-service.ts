@@ -4,6 +4,7 @@ import type { AuthSession, AccountType } from '@/types/domain.ts'
 import type { ImplementedPartyType } from '@pm-twin/party'
 import { peopleApi } from '@/api/people.ts'
 import { partiesApi } from '@/api/parties.ts'
+import { isVettingRestrictedUser } from '@/domain/rbac/vetting-mutation-guard.ts'
 import { formatMembershipId } from '@/repositories/party-membership-repository.ts'
 import { localStorageAdapter } from '@/infrastructure/storage/local-storage-adapter.ts'
 import { sessionStorageAdapter } from '@/infrastructure/storage/session-storage-adapter.ts'
@@ -171,7 +172,15 @@ export const authService = {
   },
 
   isPendingApproval(user: PlatformUser) {
-    return user.status === 'pending'
+    return user.status === 'pending' || user.status === 'clarification_requested'
+  },
+
+  isVettingRestricted(user: PlatformUser) {
+    return isVettingRestrictedUser(user)
+  },
+
+  getSession(): AuthSession | null {
+    return readSession()
   },
 }
 

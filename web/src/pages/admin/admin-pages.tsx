@@ -437,7 +437,11 @@ export function AdminUserDetailPage() {
 }
 
 export function AdminVettingPage() {
-  const pending = adminApi.getPendingUsers()
+  const { user } = useAuth()
+  const version = useDataStoreVersion()
+  const pending = useMemo(() => adminApi.getPendingUsers(), [version])
+
+  const reviewerId = user?.id ?? 'admin'
 
   return (
     <AdminListPage
@@ -445,15 +449,99 @@ export function AdminVettingPage() {
       title="Vetting"
       description="Pre-approval user queue."
       data={pending}
-      getRowId={(u) => u.id}
-      getSearchText={(u) => [u.profile?.name, u.email].filter(Boolean).join(' ')}
+      getRowId={(entry) => entry.user.id}
+      getSearchText={(entry) =>
+        [
+          entry.user.profile?.name,
+          entry.user.email,
+          entry.user.status,
+          entry.activeParty?.id,
+        ]
+          .filter(Boolean)
+          .join(' ')
+      }
       searchPlaceholder="Search queue…"
       emptyTitle="No pending users"
       emptyDescription="The vetting queue is empty."
       columns={[
-        { id: 'name', label: 'Name', cell: (u) => u.profile?.name ?? u.id },
-        { id: 'email', label: 'Email', cell: (u) => u.email },
-        { id: 'submitted', label: 'Submitted', cell: (u) => formatDate(u.createdAt) },
+        { id: 'name', label: 'Name', cell: (entry) => entry.user.profile?.name ?? entry.user.id },
+        { id: 'email', label: 'Email', cell: (entry) => entry.user.email },
+        {
+          id: 'status',
+          label: 'Status',
+          cell: (entry) => <AdminStatusBadge status={entry.user.status} />,
+        },
+        {
+          id: 'party',
+          label: 'Party',
+          cell: (entry) => entry.partyLabel,
+        },
+        {
+          id: 'submitted',
+          label: 'Submitted',
+          cell: (entry) => formatDate(entry.user.createdAt),
+        },
+        {
+          id: 'actions',
+          label: 'Actions',
+          cell: (entry) => {
+            const partyId = entry.activeParty?.id ?? entry.user.id
+            return (
+              <div className="flex flex-wrap gap-2">
+                <PmButton
+                  size="sm"
+                  onClick={() => {
+                    adminApi.approveVetting(entry.user.id, partyId, reviewerId)
+                    toast.success('Vetting approved')
+                  }}
+                >
+                  Approve
+                </PmButton>
+                <PmButton
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    const reason = window.prompt('Reason for rejection') ?? ''
+                    adminApi.rejectVetting(entry.user.id, partyId, reviewerId, reason)
+                    toast.success('Vetting rejected')
+                  }}
+                >
+                  Reject
+                </PmButton>
+                <PmButton
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    const reason = window.prompt('Request changes reason') ?? ''
+                    const requestedItemsRaw = window.prompt(
+                      'Requested items (comma-separated)',
+                    ) ?? ''
+                    const dueDate = window.prompt('Optional due date (YYYY-MM-DD)') ?? undefined
+                    const requestedItems = requestedItemsRaw
+                      .split(',')
+                      .map((item) => item.trim())
+                      .filter(Boolean)
+                    if (!reason || requestedItems.length === 0) {
+                      toast.error('Reason and requested items are required.')
+                      return
+                    }
+                    adminApi.requestVettingChanges({
+                      userId: entry.user.id,
+                      partyId,
+                      reviewerId,
+                      reason,
+                      requestedItems,
+                      dueDate,
+                    })
+                    toast.success('Changes requested')
+                  }}
+                >
+                  Request changes
+                </PmButton>
+              </div>
+            )
+          },
+        },
       ]}
     />
   )

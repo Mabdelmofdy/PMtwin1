@@ -38,4 +38,35 @@ export class UserRepository extends BaseRepository<PlatformUser> {
     this.writeOverrides(overrides)
     return user
   }
+
+  update(id: string, patch: Partial<PlatformUser>): PlatformUser | undefined {
+    const overrides = this.readOverrides()
+    const existing = this.getById(id)
+    if (!existing) return undefined
+
+    const updated: PlatformUser = {
+      ...existing,
+      ...patch,
+      profile: patch.profile ? { ...existing.profile, ...patch.profile } : existing.profile,
+      updatedAt: new Date().toISOString(),
+    }
+
+    const isNew = overrides.newUsers?.some((user) => user.id === id)
+    if (isNew) {
+      overrides.newUsers = overrides.newUsers!.map((user) => (user.id === id ? updated : user))
+    } else {
+      overrides.users = {
+        ...overrides.users,
+        [id]: {
+          ...overrides.users?.[id],
+          ...patch,
+          profile: updated.profile,
+          updatedAt: updated.updatedAt,
+        },
+      }
+    }
+
+    this.writeOverrides(overrides)
+    return updated
+  }
 }

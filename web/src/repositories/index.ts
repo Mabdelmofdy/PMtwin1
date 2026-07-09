@@ -37,6 +37,8 @@ import { PartyRepository } from './party-repository.ts'
 import { PartyMembershipRepository } from './party-membership-repository.ts'
 import { formatMembershipId } from './party-membership-repository.ts'
 
+import { PartyDocumentRepository } from './party-document-repository.ts'
+
 const runtimeMode = environmentContext.runtimeMode
 const storageAdapter = environmentContext.storageAdapter ?? localStorageAdapter
 
@@ -127,6 +129,8 @@ export const partyMembershipRepository = new PartyMembershipRepository(
   loadCompanies,
 )
 
+export const partyDocumentRepository = new PartyDocumentRepository(storageAdapter)
+
 export {
   UserRepository,
   CompanyRepository,
@@ -145,6 +149,7 @@ export {
   ProductLanguageSettingsRepository,
   PartyRepository,
   PartyMembershipRepository,
+  PartyDocumentRepository,
   formatMembershipId,
 }
 

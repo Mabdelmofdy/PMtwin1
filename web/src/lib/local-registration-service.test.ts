@@ -80,6 +80,8 @@ describe('local registration service', () => {
 
     assert.equal(result.partyType, 'individual')
     assert.equal(result.partyId, result.userId)
+    assert.equal(stack.userRepository.getById(result.userId)?.status, 'pending')
+    assert.equal(stack.partyRepository.getById(result.partyId)?.status, 'pending')
     assert.equal(
       stack.partyMembershipRepository.getPrimaryForUser(result.userId)?.partyId,
       result.userId,
@@ -109,6 +111,9 @@ describe('local registration service', () => {
 
     assert.equal(result.partyType, 'company')
     assert.notEqual(result.userId, result.partyId)
+    assert.equal(authUser?.status, 'pending')
+    assert.equal(company?.status, 'pending')
+    assert.equal(stack.partyRepository.getById(result.partyId)?.status, 'pending')
     assert.equal(authUser?.email, 'owner@acme.test')
     assert.equal(authUser?.profile?.type, undefined)
     assert.equal(company?.profile?.type, 'company')

@@ -19,6 +19,7 @@ import { PostMatchCommandHandler } from '@/commands/handlers/post-match-command-
 import { DefaultCommandGateway } from '@/commands/default-command-gateway.ts'
 import { getCommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
 import { resolvePublishReadinessContextForOpportunity } from '@/lib/resolve-publish-readiness-context.ts'
+import { resolveVettingActorContextForGateway } from '@/domain/rbac/resolve-vetting-actor-context.ts'
 import {
   negotiationMessageRepository,
   negotiationOfferRepository,
@@ -88,6 +89,7 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
     dealHandler,
     contractHandler,
     resolveCommandPermissionActor: getCommandPermissionActor,
+    resolveVettingActorContext: resolveVettingActorContextForGateway,
     resolveOpportunityForCommandRbac: (aggregateId) => {
       const opportunity = opportunityRepository.getById(aggregateId)
       if (!opportunity) return undefined

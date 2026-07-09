@@ -313,7 +313,7 @@ function resolveCompletedSteps(draft: OpportunityDraft): string[] {
 }
 
 export function OpportunitiesPage() {
-  const { user } = useAuth()
+  const { user, canMutate } = useAuth()
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const navState = readProductNavState(location.state)
@@ -501,7 +501,7 @@ export function OpportunitiesPage() {
                 label: 'Create opportunity',
                 href: '/opportunities/create',
                 render: () => (
-                  <PmButton asChild>
+                  <PmButton asChild disabled={!canMutate}>
                     <Link to="/opportunities/create">
                       <Plus className="size-4" aria-hidden />
                       Create opportunity
