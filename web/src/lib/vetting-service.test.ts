@@ -127,6 +127,7 @@ describe('vetting service', () => {
       reviewerId: 'admin-1',
       reason: 'CR expired',
       requestedItems: ['Upload valid CR'],
+      dueDate: '2026-08-01',
     })
     assert.equal(stack.users.get('u-1')?.status, 'pending_vetting')
 
@@ -144,6 +145,121 @@ describe('vetting service', () => {
           entry.action === 'notification.created'
           && entry.title === 'Changes requested',
       ),
+    )
+    assert.ok(
+      stack.audits.some(
+        (entry) =>
+          entry.action === 'vetting.changes_requested'
+          && typeof entry.details === 'object'
+          && (entry.details as { dueDate?: string }).dueDate === '2026-08-01',
+      ),
+    )
+    assert.equal(stack.users.get('u-1')?.profile?.vetting?.requestedChanges?.length, 1)
+    assert.equal(stack.users.get('u-1')?.profile?.vetting?.reviewedBy, 'admin-1')
+    assert.equal(stack.users.get('u-1')?.profile?.vetting?.reviewProgress, 'in_review')
+    assert.equal(stack.users.get('u-1')?.profile?.vetting?.changesResolved, true)
+    assert.equal(Boolean(stack.users.get('u-1')?.profile?.vetting?.lastResubmittedAt), true)
+    assert.ok(
+      stack.audits.some(
+        (entry) =>
+          entry.action === 'notification.created'
+          && entry.title === 'Resubmission received',
+      ),
+    )
+  })
+
+  it('approves and rejects with governance metadata, notifications, and audit', () => {
+    const stack = createInMemoryDeps()
+    stack.users.set('u-2', {
+      id: 'u-2',
+      email: 'approve@test',
+      role: 'user',
+      status: 'pending_vetting',
+      profile: { name: 'Approve Me' },
+    })
+    stack.parties.set('u-2', {
+      id: 'u-2',
+      partyType: 'individual',
+      displayName: 'Approve Me',
+      status: 'pending_vetting',
+      sourceEntityId: 'u-2',
+      sourceEntityType: 'individual',
+    })
+
+    const service = createVettingService(stack.deps as never)
+    service.approve('u-2', 'u-2', 'admin-1')
+    assert.equal(stack.users.get('u-2')?.status, 'active')
+    assert.equal(stack.users.get('u-2')?.profile?.vetting?.reviewedBy, 'admin-1')
+    assert.ok(stack.audits.some((entry) => entry.action === 'vetting.approved'))
+    assert.ok(stack.audits.some((entry) => entry.action === 'user.vetting_approved'))
+    assert.ok(stack.audits.some((entry) => entry.action === 'party.vetting_approved'))
+    assert.ok(
+      stack.audits.some(
+        (entry) =>
+          entry.action === 'notification.created'
+          && entry.title === 'Account approved',
+      ),
+    )
+
+    stack.users.set('u-3', {
+      id: 'u-3',
+      email: 'reject@test',
+      role: 'user',
+      status: 'pending_vetting',
+      profile: { name: 'Reject Me' },
+    })
+    stack.parties.set('u-3', {
+      id: 'u-3',
+      partyType: 'individual',
+      displayName: 'Reject Me',
+      status: 'pending_vetting',
+      sourceEntityId: 'u-3',
+      sourceEntityType: 'individual',
+    })
+    service.reject('u-3', 'u-3', 'admin-1', 'Incomplete documents')
+    assert.equal(stack.users.get('u-3')?.status, 'rejected')
+    assert.ok(stack.audits.some((entry) => entry.action === 'vetting.rejected'))
+    assert.ok(stack.audits.some((entry) => entry.action === 'user.vetting_rejected'))
+    assert.ok(stack.audits.some((entry) => entry.action === 'party.vetting_rejected'))
+    assert.ok(
+      stack.audits.some(
+        (entry) =>
+          entry.action === 'notification.created'
+          && entry.title === 'Account rejected',
+      ),
+    )
+  })
+
+  it('syncs SLA escalation and emits overdue notification and audit once', () => {
+    const stack = createInMemoryDeps()
+    const oldDate = new Date()
+    oldDate.setDate(oldDate.getDate() - 10)
+    stack.users.set('u-4', {
+      id: 'u-4',
+      email: 'overdue@test',
+      role: 'user',
+      status: 'pending_vetting',
+      createdAt: oldDate.toISOString(),
+      profile: { name: 'Overdue User' },
+    })
+
+    const service = createVettingService(stack.deps as never)
+    service.syncSlaEscalations()
+    assert.equal(stack.users.get('u-4')?.profile?.vetting?.slaStatus, 'overdue')
+    assert.ok(stack.audits.some((entry) => entry.action === 'vetting.escalated'))
+    assert.ok(
+      stack.audits.some(
+        (entry) =>
+          entry.action === 'notification.created'
+          && entry.title === 'Review overdue',
+      ),
+    )
+
+    const auditCount = stack.audits.filter((entry) => entry.action === 'vetting.escalated').length
+    service.syncSlaEscalations()
+    assert.equal(
+      stack.audits.filter((entry) => entry.action === 'vetting.escalated').length,
+      auditCount,
     )
   })
 
@@ -181,6 +297,21 @@ describe('vetting service', () => {
         (entry) =>
           entry.action === 'notification.created'
           && entry.title === 'Document approved',
+      ),
+    )
+
+    const rejected = service.reviewPartyDocument(String(document.id), {
+      status: 'rejected',
+      reviewedBy: 'admin-2',
+      reviewNotes: 'Document expired',
+    })
+    assert.equal(rejected?.status, 'rejected')
+    assert.ok(stack.audits.some((entry) => entry.action === 'vetting.document_rejected'))
+    assert.ok(
+      stack.audits.some(
+        (entry) =>
+          entry.action === 'notification.created'
+          && entry.title === 'Document rejected',
       ),
     )
   })

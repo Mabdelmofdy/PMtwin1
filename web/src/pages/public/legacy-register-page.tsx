@@ -7,7 +7,6 @@ import {
   MarketingCard,
 } from '@/components/marketing/marketing-index'
 import { PUBLIC_CTA } from '@/config/public-marketing'
-import { PUBLIC_BRAND_NAME } from '@/lib/public-brand'
 import { environmentContext } from '@/infrastructure/environment/environment-context.ts'
 import { useAuth } from '@/providers/auth-provider'
 import { resolveBreadcrumbHomeHref } from '@/components/layout/workspace-display'
@@ -65,13 +64,6 @@ export function LegacyRegisterPage() {
     if (form.individualType === 'consultant') return 'Consultant verification path'
     return 'Professional verification path'
   }, [form.accountType, form.individualType])
-
-  const headerSubtitle = useMemo(() => {
-    if (isLocalSignupRuntime) {
-      return 'Accounts are saved in this browser using namespaced local storage for Demo/UAT.'
-    }
-    return 'Production registration requires a backend API. This wizard validates your details safely.'
-  }, [isLocalSignupRuntime])
 
   if (isAuthenticated && !completion) {
     navigate(resolveBreadcrumbHomeHref('/', isCompanyUser), { replace: true })
@@ -156,7 +148,7 @@ export function LegacyRegisterPage() {
         />
       }
     >
-      <div className="reg-main-card rounded-xl border border-gray-100 bg-white p-6 shadow-lg sm:p-8">
+      <div className="reg-main-card">
         {completion ? (
           <section className="reg-completion-screen" aria-label="Registration complete">
             <header className="reg-header mb-6">
@@ -188,28 +180,35 @@ export function LegacyRegisterPage() {
           </section>
         ) : (
           <>
-        <header className="reg-header mb-6">
-          <h1 className="reg-header-title text-2xl font-bold text-gray-900">{PUBLIC_BRAND_NAME} registration</h1>
-          <p className="reg-header-subtitle mt-1 text-gray-600">{headerSubtitle}</p>
+        <header className="reg-header mb-5">
+          <h1 className="reg-header-title text-2xl font-bold text-gray-900">Create your account</h1>
+          <p className="reg-header-subtitle mt-1 text-gray-600">
+            {isLocalSignupRuntime
+              ? 'Quick setup — saved locally in this browser for Demo/UAT.'
+              : 'Complete a few steps to join PM-Twin.'}
+          </p>
         </header>
 
         {isLocalSignupRuntime ? (
-          <div className="reg-preview-notice mb-4" role="status">
-            Demo/UAT mode: registrations persist locally in this browser only.
+          <div className="reg-preview-notice mb-4 text-sm" role="status">
+            Demo/UAT: data stays in this browser only.
           </div>
         ) : null}
 
-        <ol className="mb-6 grid grid-cols-3 gap-2 text-xs text-slate-600 sm:grid-cols-6" aria-label="Registration steps">
-          {STEPS.map((label, index) => (
-            <li
-              key={label}
-              className={`rounded-lg border px-2 py-2 text-center ${step === index ? 'border-primary bg-cyan-50 font-semibold text-slate-900' : index < step ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200'}`}
-              aria-current={step === index ? 'step' : undefined}
-            >
-              {label}
-            </li>
-          ))}
-        </ol>
+        <div className="reg-wizard-progress" aria-label="Registration progress">
+          <div className="reg-wizard-progress-track">
+            <div
+              className="reg-wizard-progress-fill"
+              style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
+            />
+          </div>
+          <div className="reg-wizard-progress-meta">
+            <span>
+              Step <strong>{step + 1}</strong> of {STEPS.length}
+            </span>
+            <strong>{STEPS[step]}</strong>
+          </div>
+        </div>
 
         <form onSubmit={onSubmit} noValidate>
           {step === 0 ? (
@@ -437,42 +436,42 @@ export function LegacyRegisterPage() {
           {submitError ? <div className="alert alert-error mb-4" role="alert">{submitError}</div> : null}
           {notice ? <div className="reg-preview-notice mb-4" role="status">{notice}</div> : null}
 
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <MarketingButton type="button" variant="ghost" onClick={onBack} disabled={step === 0 || isSubmitting}>
+          <div className="reg-wizard-footer">
+            <button
+              id="reg-btn-back"
+              type="button"
+              className="reg-wizard-btn reg-wizard-btn--secondary"
+              onClick={onBack}
+              disabled={step === 0 || isSubmitting}
+            >
               Back
-            </MarketingButton>
+            </button>
             {step < 5 ? (
-              <MarketingButton type="button" variant="primary" onClick={onNext} disabled={isSubmitting}>
+              <button
+                id="reg-btn-next"
+                type="button"
+                className="reg-wizard-btn reg-wizard-btn--primary"
+                onClick={onNext}
+                disabled={isSubmitting}
+              >
                 Next
-              </MarketingButton>
+              </button>
             ) : (
-              <MarketingButton type="submit" variant="primary" disabled={isSubmitting}>
-                {isSubmitting ? 'Validating registration...' : 'Submit registration'}
-              </MarketingButton>
+              <button
+                id="reg-btn-submit"
+                type="submit"
+                className="reg-wizard-btn reg-wizard-btn--primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creating account…' : 'Create account'}
+              </button>
             )}
           </div>
         </form>
 
-        <div className="reg-preview-actions mt-6">
-          <Link
-            to="/login"
-            className="reg-btn-primary inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 font-medium text-white no-underline"
-          >
-            {PUBLIC_CTA.signInDemo}
-          </Link>
-          <Link
-            to="/find"
-            className="inline-flex items-center justify-center rounded-lg border border-[#0369a1] bg-white px-6 py-3 text-sm font-semibold text-[#0369a1] no-underline transition-colors hover:bg-[#0369a1]/5"
-          >
-            {PUBLIC_CTA.exploreMarketplace}
-          </Link>
-          <Link
-            to="/contact"
-            className="inline-flex items-center justify-center rounded-lg px-6 py-3 text-sm font-semibold text-[#0369a1] no-underline hover:underline"
-          >
-            {PUBLIC_CTA.contactSales}
-          </Link>
-        </div>
+        <p className="reg-wizard-signin-hint">
+          Already have an account? <Link to="/login">{PUBLIC_CTA.signInDemo}</Link>
+        </p>
           </>
         )}
       </div>

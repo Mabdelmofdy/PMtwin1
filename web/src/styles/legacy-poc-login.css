@@ -8,6 +8,11 @@
     --auth-teal-dark: var(--primary-dark);
     --auth-primary-tint: var(--portal-sidebar-active-bg, #ecfeff);
     --auth-coral: #e85d4f;
+    /* Marketing buttons on auth pages (outside .mkt-page scope) */
+    --mkt-cta: var(--primary-color);
+    --mkt-cta-hover: var(--primary-dark);
+    --mkt-line: var(--border-color);
+    --mkt-muted: var(--text-muted);
     width: 100%;
     max-width: none;
     min-height: calc(100vh - 64px);

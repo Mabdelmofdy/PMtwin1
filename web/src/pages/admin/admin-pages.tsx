@@ -28,6 +28,8 @@ import {
 import { runCircularMatchingUiAction } from '@/lib/run-circular-matching-ui-action.ts'
 import { useAuth } from '@/providers/auth-provider.tsx'
 import { VettingReviewDialog } from '@/components/admin/vetting-review-dialog.tsx'
+import { VettingSlaBadge } from '@/components/admin/vetting-sla-badge.tsx'
+import type { VettingWorkflowEntry } from '@/lib/vetting-admin-workflow.ts'
 import {
   PmDataTable,
   PmTableEmpty,
@@ -440,109 +442,158 @@ export function AdminUserDetailPage() {
 export function AdminVettingPage() {
   const { user } = useAuth()
   const version = useDataStoreVersion()
-  const pending = useMemo(() => adminApi.getPendingUsers(), [version])
-  const [reviewing, setReviewing] = useState<(typeof pending)[number] | null>(null)
+  const workflow = useMemo(() => adminApi.getVettingWorkflow(), [version])
+  const [reviewing, setReviewing] = useState<VettingWorkflowEntry | null>(null)
 
   const reviewerId = user?.id ?? 'admin'
 
+  function renderQueueTable(
+    title: string,
+    description: string,
+    entries: readonly VettingWorkflowEntry[],
+    emptyTitle: string,
+  ) {
+    return (
+      <PmContentCard title={title} description={description} className="mb-4">
+        {entries.length === 0 ? (
+          <PmTableEmpty title={emptyTitle} />
+        ) : (
+          <PmDataTable
+            data={entries}
+            getRowId={(entry) => entry.user.id}
+            columns={[
+              {
+                id: 'name',
+                label: 'Name',
+                cell: (entry) => entry.user.profile?.name ?? entry.user.id,
+              },
+              { id: 'email', label: 'Email', cell: (entry) => entry.user.email },
+              {
+                id: 'status',
+                label: 'Status',
+                cell: (entry) => <AdminStatusBadge status={entry.user.status} />,
+              },
+              {
+                id: 'sla',
+                label: 'SLA',
+                cell: (entry) => <VettingSlaBadge status={entry.slaStatus} />,
+              },
+              {
+                id: 'review',
+                label: 'Review',
+                cell: (entry) => {
+                  const vetting = entry.user.profile?.vetting
+                  const reviewNotes = vetting?.reviewNotes ?? vetting?.reason
+                  const requestedItems = vetting?.requestedChanges ?? vetting?.requestedItems ?? []
+                  const reviewedBy = vetting?.reviewedBy ?? vetting?.reviewerId
+                  if (!reviewNotes && requestedItems.length === 0 && !reviewedBy) {
+                    return '—'
+                  }
+                  return (
+                    <span className="text-sm text-muted-foreground">
+                      {reviewNotes}
+                      {requestedItems.length
+                        ? ` · ${requestedItems.join(', ')}`
+                        : ''}
+                      {reviewedBy ? ` · Reviewed by ${reviewedBy}` : ''}
+                    </span>
+                  )
+                },
+              },
+              {
+                id: 'actions',
+                label: 'Actions',
+                cell: (entry) => (
+                  <PmButton
+                    size="sm"
+                    onClick={() => setReviewing(entry)}
+                    disabled={entry.user.status === 'active' || entry.user.status === 'rejected'}
+                  >
+                    Review
+                  </PmButton>
+                ),
+              },
+            ]}
+          />
+        )}
+      </PmContentCard>
+    )
+  }
+
   return (
-    <AdminListPage
-      label="Queue"
-      title="Vetting"
-      description="Pre-approval user queue."
-      data={pending}
-      getRowId={(entry) => entry.user.id}
-      getSearchText={(entry) =>
-        [
-          entry.user.profile?.name,
-          entry.user.email,
-          entry.user.status,
-          entry.activeParty?.id,
-        ]
-          .filter(Boolean)
-          .join(' ')
-      }
-      searchPlaceholder="Search queue…"
-      emptyTitle="No pending users"
-      emptyDescription="The vetting queue is empty."
-      columns={[
-        { id: 'name', label: 'Name', cell: (entry) => entry.user.profile?.name ?? entry.user.id },
-        { id: 'email', label: 'Email', cell: (entry) => entry.user.email },
-        {
-          id: 'status',
-          label: 'Status',
-          cell: (entry) => <AdminStatusBadge status={entry.user.status} />,
-        },
-        {
-          id: 'party',
-          label: 'Party',
-          cell: (entry) => entry.partyLabel,
-        },
-        {
-          id: 'submitted',
-          label: 'Submitted',
-          cell: (entry) => formatDate(entry.user.createdAt),
-        },
-        {
-          id: 'actions',
-          label: 'Actions',
-          cell: (entry) => {
-            return (
-              <div className="flex flex-wrap gap-2">
-                <PmButton
-                  size="sm"
-                  onClick={() => {
-                    setReviewing(entry)
-                  }}
-                >
-                  Review
-                </PmButton>
-              </div>
-            )
-          },
-        },
-      ]}
-      headerActions={
-        <VettingReviewDialog
-          open={Boolean(reviewing)}
-          onOpenChange={(open) => {
-            if (!open) setReviewing(null)
-          }}
-          userLabel={reviewing?.user.profile?.name ?? reviewing?.user.email ?? 'User'}
-          onSubmit={(payload) => {
-            if (!reviewing) return
-            const partyId = reviewing.activeParty?.id ?? reviewing.user.id
-            if (payload.action === 'approve') {
-              adminApi.approveVetting(reviewing.user.id, partyId, reviewerId)
-              toast.success('Vetting approved')
-            } else if (payload.action === 'reject') {
-              adminApi.rejectVetting(
-                reviewing.user.id,
-                partyId,
-                reviewerId,
-                payload.reviewNotes,
-              )
-              toast.success('Vetting rejected')
-            } else {
-              if (!payload.reviewNotes || payload.requestedItems.length === 0) {
-                toast.error('Review notes and requested items are required.')
-                return
-              }
-              adminApi.requestVettingChanges({
-                userId: reviewing.user.id,
-                partyId,
-                reviewerId,
-                reason: payload.reviewNotes,
-                requestedItems: payload.requestedItems,
-                dueDate: payload.dueDate,
-              })
-              toast.success('Changes requested')
-            }
-            setReviewing(null)
-          }}
+    <PmPage
+      header={
+        <PmPageHeader
+          label="Queue"
+          title="Vetting"
+          description="Pre-approval user workflow — pending, changes requested, resubmitted, and history."
         />
       }
-    />
+    >
+      {renderQueueTable(
+        'Pending review',
+        'New submissions awaiting first admin review.',
+        workflow.pending,
+        'No pending users',
+      )}
+      {renderQueueTable(
+        'Changes requested',
+        'Users asked to update profile or documents.',
+        workflow.changes_requested,
+        'No change requests',
+      )}
+      {renderQueueTable(
+        'Resubmitted',
+        'Users who resubmitted after requested changes.',
+        workflow.resubmitted,
+        'No resubmissions',
+      )}
+      {renderQueueTable(
+        'Approved / rejected history',
+        'Completed vetting decisions.',
+        workflow.history,
+        'No vetting history yet',
+      )}
+
+      <VettingReviewDialog
+        open={Boolean(reviewing)}
+        onOpenChange={(open) => {
+          if (!open) setReviewing(null)
+        }}
+        userLabel={reviewing?.user.profile?.name ?? reviewing?.user.email ?? 'User'}
+        onSubmit={(payload) => {
+          if (!reviewing) return
+          const partyId = reviewing.activeParty?.id ?? reviewing.user.id
+          if (payload.action === 'approve') {
+            adminApi.approveVetting(reviewing.user.id, partyId, reviewerId)
+            toast.success('Vetting approved')
+          } else if (payload.action === 'reject') {
+            adminApi.rejectVetting(
+              reviewing.user.id,
+              partyId,
+              reviewerId,
+              payload.reviewNotes,
+            )
+            toast.success('Vetting rejected')
+          } else {
+            if (!payload.reviewNotes || payload.requestedItems.length === 0) {
+              toast.error('Review notes and requested items are required.')
+              return
+            }
+            adminApi.requestVettingChanges({
+              userId: reviewing.user.id,
+              partyId,
+              reviewerId,
+              reason: payload.reviewNotes,
+              requestedItems: payload.requestedItems,
+              dueDate: payload.dueDate,
+            })
+            toast.success('Changes requested')
+          }
+          setReviewing(null)
+        }}
+      />
+    </PmPage>
   )
 }
 

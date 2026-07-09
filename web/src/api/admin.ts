@@ -11,12 +11,16 @@ import { negotiationsApi } from '@/api/negotiations.ts'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { peopleApi } from '@/api/people.ts'
 import { vettingService, type RequestVettingChangesInput } from '@/lib/vetting-service.ts'
+import {
+  bucketVettingWorkflow,
+} from '@/lib/vetting-admin-workflow.ts'
 import type { PlatformUser } from '@/types/domain.ts'
 import type { PartyDocument } from '@/types/party-document.ts'
 
 export const adminApi = {
   getAuditLog: () => auditRepository.getAll(),
   getPendingUsers: () => {
+    vettingService.syncSlaEscalations()
     const seeded = loadPendingUsers().map((user) => ({
       user,
       activeParty: null,
@@ -42,6 +46,12 @@ export const adminApi = {
       seen.add(entry.user.id)
       return true
     })
+  },
+  getVettingWorkflow: () => {
+    vettingService.syncSlaEscalations()
+    const queue = vettingService.listQueue()
+    const history = vettingService.listHistory()
+    return bucketVettingWorkflow([...queue, ...history])
   },
   getSiteContent: () => loadSiteContent(),
   listOpportunities: () => opportunitiesApi.list(),

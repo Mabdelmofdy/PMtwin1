@@ -150,6 +150,124 @@
     padding: clamp(1.25rem, 3vw, 2.5rem);
 }
 
+.pm-register-page .pm-login-card {
+    width: min(720px, 100%);
+    max-width: 100%;
+}
+
+.pm-register-page .reg-main-card {
+    padding: 0;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent;
+}
+
+.pm-register-page .reg-wizard-progress {
+    margin-bottom: 1.5rem;
+}
+
+.pm-register-page .reg-wizard-progress-track {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--bg-tertiary);
+    overflow: hidden;
+}
+
+.pm-register-page .reg-wizard-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--primary-color);
+    transition: width 0.25s ease;
+}
+
+.pm-register-page .reg-wizard-progress-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.65rem;
+    font-size: 0.82rem;
+    color: var(--auth-muted);
+}
+
+.pm-register-page .reg-wizard-progress-meta strong {
+    color: var(--auth-ink);
+    font-weight: 700;
+}
+
+.pm-register-page .reg-wizard-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--auth-line);
+}
+
+.pm-register-page .reg-wizard-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    min-width: 7.5rem;
+    padding: 0 1.25rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.pm-register-page .reg-wizard-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.pm-register-page .reg-wizard-btn--primary,
+.pm-register-page .mkt-btn-primary {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+
+.pm-register-page .reg-wizard-btn--primary:hover:not(:disabled),
+.pm-register-page .mkt-btn-primary:hover:not(:disabled) {
+    background: var(--primary-dark) !important;
+    border-color: var(--primary-dark) !important;
+}
+
+.pm-register-page .reg-wizard-btn--secondary,
+.pm-register-page .mkt-btn-ghost {
+    background: #ffffff !important;
+    border-color: var(--auth-line) !important;
+    color: var(--auth-ink) !important;
+}
+
+.pm-register-page .reg-wizard-btn--secondary:hover:not(:disabled),
+.pm-register-page .mkt-btn-ghost:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--primary-color) 40%, var(--auth-line)) !important;
+    background: var(--bg-secondary) !important;
+}
+
+.pm-register-page .reg-wizard-signin-hint {
+    margin: 1.25rem 0 0;
+    text-align: center;
+    font-size: 0.88rem;
+    color: var(--auth-muted);
+}
+
+.pm-register-page .reg-wizard-signin-hint a {
+    color: var(--primary-color);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.pm-register-page .reg-wizard-signin-hint a:hover {
+    text-decoration: underline;
+}
+
 .pm-register-card-wrap {
     width: min(1080px, 100%);
     max-width: 100%;

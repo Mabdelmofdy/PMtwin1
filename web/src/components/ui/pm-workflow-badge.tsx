@@ -15,6 +15,7 @@ const STATUS_TONE: Record<string, PmBadgeTone> = {
   agreed: 'success',
   confirmed: 'success',
   pending: 'warning',
+  blocked: 'danger',
   pending_signature: 'warning',
   draft: 'muted',
   review: 'muted',

@@ -1,8 +1,17 @@
+export type VettingSlaStatus = 'on_track' | 'at_risk' | 'overdue'
+
 export type VettingMetadata = {
   reason?: string
   requestedItems?: string[]
+  /** Alias for review notes in admin governance UI. */
+  reviewNotes?: string
+  /** Alias for requestedItems in admin governance UI. */
+  requestedChanges?: string[]
   dueDate?: string
+  escalationAt?: string
+  slaStatus?: VettingSlaStatus
   reviewerId?: string
+  reviewedBy?: string
   reviewedAt?: string
   lastResubmittedAt?: string
   reviewProgress?: 'not_started' | 'in_review' | 'changes_requested' | 'approved'

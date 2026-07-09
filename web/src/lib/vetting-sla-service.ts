@@ -1,0 +1,39 @@
+import type { PlatformUser } from '@/types/domain.ts'
+import type { VettingSlaStatus } from '@/types/vetting.ts'
+
+export const VETTING_SLA_CONFIG = {
+  atRiskDays: 3,
+  overdueDays: 7,
+} as const
+
+function daysSince(isoDate: string | undefined): number | null {
+  if (!isoDate) return null
+  const ms = Date.now() - new Date(isoDate).getTime()
+  if (!Number.isFinite(ms) || ms < 0) return 0
+  return ms / (1000 * 60 * 60 * 24)
+}
+
+export function resolveVettingReviewAnchor(user: PlatformUser): string | undefined {
+  return (
+    user.profile?.vetting?.lastResubmittedAt ??
+    user.profile?.vetting?.reviewedAt ??
+    user.createdAt
+  )
+}
+
+export function resolveVettingSlaStatus(user: PlatformUser): VettingSlaStatus {
+  if (user.status === 'active' || user.status === 'rejected') {
+    return 'on_track'
+  }
+
+  const anchor = resolveVettingReviewAnchor(user)
+  const elapsed = daysSince(anchor)
+  if (elapsed === null) return 'on_track'
+  if (elapsed >= VETTING_SLA_CONFIG.overdueDays) return 'overdue'
+  if (elapsed >= VETTING_SLA_CONFIG.atRiskDays) return 'at_risk'
+  return 'on_track'
+}
+
+export function shouldEmitOverdueNotification(user: PlatformUser): boolean {
+  return resolveVettingSlaStatus(user) === 'overdue'
+}
