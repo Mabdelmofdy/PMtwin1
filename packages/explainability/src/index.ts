@@ -29,6 +29,7 @@ export type {
   ContractReasonCode,
   DashboardReasonCode,
   DocumentReasonCode,
+  KnowledgeReasonCode,
   MatchReasonCode,
   NegotiationReasonCode,
   ProfileReasonCode,
@@ -46,6 +47,7 @@ export {
   CONTRACT_REASON_CODES,
   DASHBOARD_REASON_CODES,
   DOCUMENT_REASON_CODES,
+  KNOWLEDGE_REASON_CODES,
   MATCH_REASON_CODES,
   NEGOTIATION_REASON_CODES,
   PROFILE_REASON_CODES,
@@ -257,6 +259,15 @@ export type {
   KnowledgeBridge,
   KnowledgeBridgeRequest,
 } from './services/knowledge-bridge.ts'
+
+export { createKnowledgeBridge } from './services/knowledge-bridge-impl.ts'
+
+export type {
+  EnrichmentOptions,
+  KnowledgeExtension,
+} from './services/enrichment.ts'
+
+export { enrichExplanationBundle } from './services/enrichment.ts'
 
 export type {
   RecommendationService,

@@ -39,6 +39,10 @@ import {
   type ReadinessReasonCode,
 } from './readiness.ts'
 import {
+  KNOWLEDGE_REASON_CODES,
+  type KnowledgeReasonCode,
+} from './knowledge.ts'
+import {
   VETTING_REASON_CODES,
   type VettingReasonCode,
 } from './vetting.ts'
@@ -50,6 +54,7 @@ export {
   CONTRACT_REASON_CODES,
   DASHBOARD_REASON_CODES,
   DOCUMENT_REASON_CODES,
+  KNOWLEDGE_REASON_CODES,
   MATCH_REASON_CODES,
   NEGOTIATION_REASON_CODES,
   PROFILE_REASON_CODES,
@@ -64,6 +69,7 @@ export type {
   ContractReasonCode,
   DashboardReasonCode,
   DocumentReasonCode,
+  KnowledgeReasonCode,
   MatchReasonCode,
   NegotiationReasonCode,
   ProfileReasonCode,
@@ -83,6 +89,7 @@ export const REASON_CODE_PREFIX = {
   DASHBOARD: 'DASHBOARD_',
   ANALYTICS: 'ANALYTICS_',
   AGREEMENT: 'AGREEMENT_',
+  KNOWLEDGE: 'KNOWLEDGE_',
 } as const
 
 export type ReasonCodePrefix =
@@ -100,6 +107,7 @@ export type ReasonCode =
   | DashboardReasonCode
   | AnalyticsReasonCode
   | AgreementReasonCode
+  | KnowledgeReasonCode
 
 const STATIC_REASON_CODES: readonly ReasonCode[] = [
   ...Object.values(PROFILE_REASON_CODES),
@@ -113,6 +121,7 @@ const STATIC_REASON_CODES: readonly ReasonCode[] = [
   ...Object.values(DASHBOARD_REASON_CODES),
   ...Object.values(ANALYTICS_REASON_CODES),
   ...Object.values(AGREEMENT_REASON_CODES),
+  ...Object.values(KNOWLEDGE_REASON_CODES),
 ] as const
 
 export const ALL_REASON_CODES: readonly ReasonCode[] = STATIC_REASON_CODES

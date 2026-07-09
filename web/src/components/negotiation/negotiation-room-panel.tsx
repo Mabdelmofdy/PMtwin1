@@ -48,6 +48,9 @@ import {
 } from '@/repositories/index.ts'
 import type { ViewerContext } from '@/lib/entity-view-visibility.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
+import { opportunitiesApi } from '@/api/opportunities.ts'
+import { ExplanationPanel } from '@/components/explainability/explanation-panel.tsx'
+import { buildNegotiationExplanation } from '@/services/explainability/index.ts'
 
 export type NegotiationRoomPanelProps = {
   readonly negotiation: Negotiation
@@ -124,6 +127,19 @@ export function NegotiationRoomPanel({
   const canCounter = canSubmitNegotiationCounterOffer(negotiation, roomContext)
   const canAccept = canAcceptNegotiationOffer(negotiation, roomContext)
   const canReject = canRejectNegotiationOffer(negotiation, roomContext)
+
+  const negotiationExplanationBundle = useMemo(() => {
+    const postMatch = readModel.linkedEntities.postMatch
+    const opportunityId = postMatch?.needOpportunityId ?? postMatch?.offerOpportunityId
+    const opportunity = opportunityId ? opportunitiesApi.get(opportunityId) : undefined
+    const subModelKey =
+      typeof opportunity?.subModelType === 'string' ? opportunity.subModelType : undefined
+
+    return buildNegotiationExplanation(negotiation, readModel, {
+      subModelKey,
+      locale: 'en-SA',
+    })
+  }, [negotiation, readModel])
 
   const handleSendMessage = () => {
     if (!viewer.userId || !messageBody.trim() || pending) return
@@ -246,6 +262,18 @@ export function NegotiationRoomPanel({
               ) : null}
             </PmFormReadonlySection>
           </PmFormReadonly>
+          <div className="mt-4 border-t border-border pt-4">
+            <p className={cn(pmTypography.label, 'mb-3 text-muted-foreground')}>
+              Negotiation insights
+            </p>
+            <ExplanationPanel
+              bundle={negotiationExplanationBundle}
+              compact
+              showBreakdown={false}
+              showTimeline={false}
+              showAiPayload
+            />
+          </div>
         </PmContentCard>
       </TabsContent>
 

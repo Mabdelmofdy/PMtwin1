@@ -23,7 +23,9 @@ import { ExplanationPanel } from '@/components/explainability/explanation-panel.
 import {
   buildProfileExplanation,
   buildVettingExplanation,
+  getAggregatedRecommendations,
 } from '@/services/explainability/index.ts'
+import { ExplanationRecommendations } from '@/components/explainability/explanation-recommendations.tsx'
 import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
@@ -71,6 +73,10 @@ export function PendingVettingDashboard({ user }: { user: PlatformUser }) {
     changesResolved: user.profile?.vetting?.changesResolved,
     documents: vettingDocuments,
   })
+  const onboardingRecommendations = getAggregatedRecommendations(
+    [profileBundle, vettingBundle],
+    5,
+  )
 
   const journey = resolvePendingVettingJourney({
     user,
@@ -162,6 +168,18 @@ export function PendingVettingDashboard({ user }: { user: PlatformUser }) {
         </div>
 
         <PendingVettingJourneyPanel steps={journey.steps} actionQueue={actionQueue} />
+
+        {onboardingRecommendations.length > 0 ? (
+          <PmContentCard title="Next best actions">
+            <ExplanationRecommendations
+              bundle={{
+                ...profileBundle,
+                recommendations: onboardingRecommendations,
+              }}
+              heading="Prioritized onboarding actions"
+            />
+          </PmContentCard>
+        ) : null}
 
         <div className="grid gap-4 lg:grid-cols-2">
           <PmContentCard title="Profile gaps">

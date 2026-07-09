@@ -8,7 +8,9 @@ import {
   buildOpportunityExplanation as buildOpportunityExplanationBundle,
   buildProfileExplanation as buildProfileExplanationBundle,
   buildVettingExplanation as buildVettingExplanationBundle,
+  createKnowledgeBridge,
   createRecommendationService,
+  enrichExplanationBundle,
 } from '@pm-twin/explainability'
 import type { ReadinessResult } from '@pm-twin/collaboration-models'
 import { evaluateOpportunityReadinessCanonical } from '@/domain/opportunity-readiness/opportunity-readiness-evaluator.ts'
@@ -41,9 +43,30 @@ import {
 export type ExplainabilityLocaleOptions = {
   readonly locale?: string
   readonly evaluatedAt?: string
+  readonly subModelKey?: string
 }
 
 const recommendationService = createRecommendationService()
+const knowledgeBridge = createKnowledgeBridge()
+
+export function enrichBundle(
+  bundle: ExplanationBundle,
+  options?: Pick<ExplainabilityLocaleOptions, 'subModelKey' | 'locale'>,
+): ExplanationBundle {
+  return enrichExplanationBundle(bundle, {
+    subModelKey: options?.subModelKey,
+    locale: options?.locale,
+    knowledgeBridge,
+  })
+}
+
+function maybeEnrich(
+  bundle: ExplanationBundle,
+  options?: ExplainabilityLocaleOptions,
+): ExplanationBundle {
+  if (!options?.subModelKey) return bundle
+  return enrichBundle(bundle, options)
+}
 
 export function buildProfileExplanation(
   userId: string,
@@ -85,10 +108,10 @@ export function buildVettingExplanation(
 export function buildOpportunityExplanation(
   opportunityId: string,
   canonical: ReadinessResult,
-  options?: ExplainabilityLocaleOptions & { readonly subModelKey?: string },
+  options?: ExplainabilityLocaleOptions,
 ): ExplanationBundle {
   const snapshot = buildOpportunityReadinessSnapshot(opportunityId, canonical, options)
-  return buildOpportunityExplanationBundle(snapshot)
+  return maybeEnrich(buildOpportunityExplanationBundle(snapshot), options)
 }
 
 export function buildOpportunityExplanationFromForm(
@@ -115,7 +138,7 @@ export function buildAgreementExplanation(
   options?: ExplainabilityLocaleOptions,
 ): ExplanationBundle {
   const snapshot = buildAgreementExplainabilitySnapshot(model, options)
-  return buildAgreementExplanationBundle(snapshot)
+  return maybeEnrich(buildAgreementExplanationBundle(snapshot), options)
 }
 
 export function buildContractExplanation(
@@ -132,7 +155,7 @@ export function buildNegotiationExplanation(
   options?: ExplainabilityLocaleOptions,
 ): ExplanationBundle {
   const snapshot = buildNegotiationExplainabilitySnapshot(negotiation, transcript, options)
-  return buildNegotiationExplanationBundle(snapshot)
+  return maybeEnrich(buildNegotiationExplanationBundle(snapshot), options)
 }
 
 export function buildPublishReadinessBundles(

@@ -9,6 +9,7 @@ export {
   buildContractExplanation,
   buildNegotiationExplanation,
   buildPublishReadinessBundles,
+  enrichBundle,
   getAggregatedRecommendations,
   bundleToReadinessTooltipLines,
   bundleToMatchTooltipLines,

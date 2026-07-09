@@ -35,6 +35,7 @@ import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import { formatReadinessScorePercent } from '@/components/ui/pm-readiness-score-display'
 import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
 import {
+  buildOpportunityExplanationFromForm,
   buildProfileExplanationFromEvaluation,
   getAggregatedRecommendations,
 } from '@/services/explainability/index.ts'
@@ -123,13 +124,23 @@ export function WorkspaceDashboardComposition() {
   const readiness = user?.profile
     ? resolveProfileReadiness(user.profile, profileKind)
     : null
+  const opportunities = opportunitiesApi.list()
   const profileExplanationBundle = user?.id
     ? buildProfileExplanationFromEvaluation(user.id, profileKind, user.profile)
     : null
-  const dashboardRecommendations = profileExplanationBundle
-    ? getAggregatedRecommendations([profileExplanationBundle], 5)
+  const draftOpportunity = userId
+    ? opportunities.find((opportunity) => opportunity.creatorId === userId && opportunity.status === 'draft')
+    : undefined
+  const draftOpportunityBundle = draftOpportunity
+    ? buildOpportunityExplanationFromForm(draftOpportunity.id, draftOpportunity)
+    : null
+  const dashboardBundles = [
+    profileExplanationBundle,
+    draftOpportunityBundle,
+  ].filter((bundle): bundle is NonNullable<typeof bundle> => bundle != null)
+  const dashboardRecommendations = dashboardBundles.length > 0
+    ? getAggregatedRecommendations(dashboardBundles, 5)
     : []
-  const opportunities = opportunitiesApi.list()
   const matches = matchesApi.list()
   const activeMatches = countActiveMatches(matches)
   const negotiations = negotiationsApi.list()
