@@ -1,10 +1,6 @@
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import type { ExplanationBundle, KnowledgeExtension } from '@pm-twin/explainability'
-import {
-  serializeAIExplanationPayload,
-  toAIExplanationPayload,
-} from '@pm-twin/explainability'
 import { ExplanationBlockers } from '@/components/explainability/explanation-blockers.tsx'
 import { ExplanationBreakdown } from '@/components/explainability/explanation-breakdown.tsx'
 import { ExplanationRecommendations } from '@/components/explainability/explanation-recommendations.tsx'
@@ -13,6 +9,8 @@ import { ExplanationTimeline } from '@/components/explainability/explanation-tim
 import { PmButton } from '@/components/ui/pm-index'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/tokens'
+import { serializeBundleForAi } from '@/services/explainability/ai-gateway-service.ts'
+import { useProductLanguage } from '@/providers/product-language-provider.tsx'
 
 function resolveKnowledgeExtension(bundle: ExplanationBundle): KnowledgeExtension | undefined {
   const knowledge = bundle.metadata.extensions?.knowledge
@@ -73,10 +71,7 @@ function ExplanationKnowledgeHints({ knowledge }: { knowledge: KnowledgeExtensio
 
 function ExplanationAiPayloadFooter({ bundle }: { bundle: ExplanationBundle }) {
   const [expanded, setExpanded] = useState(false)
-  const payload = useMemo(
-    () => serializeAIExplanationPayload(toAIExplanationPayload(bundle)),
-    [bundle],
-  )
+  const payload = useMemo(() => serializeBundleForAi(bundle), [bundle])
 
   const handleCopy = async () => {
     try {
@@ -137,6 +132,7 @@ export function ExplanationPanel({
   showKnowledgeHints = true,
   showAiPayload = false,
 }: ExplanationPanelProps) {
+  const { locale } = useProductLanguage()
   const knowledge = resolveKnowledgeExtension(bundle)
 
   return (
@@ -144,6 +140,7 @@ export function ExplanationPanel({
       className={cn('space-y-4', className)}
       data-slot="explanation-panel"
       data-engine={bundle.engine}
+      data-locale={locale}
     >
       <ExplanationSummary bundle={bundle} scoreLabel={scoreLabel} />
       {showKnowledgeHints && knowledge ? <ExplanationKnowledgeHints knowledge={knowledge} /> : null}

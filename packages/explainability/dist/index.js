@@ -3752,6 +3752,626 @@ var contractExplainabilityAdapter = {
   buildTimeline: buildTimelineFromSnapshot7
 };
 
+// src/adapters/dashboard-adapter.ts
+var DASHBOARD_ADAPTER_VERSION = "1.0.0";
+var DASHBOARD_ADAPTER_SCORE_WEIGHTS = {
+  profileReadiness: 25,
+  vettingReadiness: 20,
+  pipelineActivity: 25,
+  workflowMomentum: 20,
+  contractExecution: 10
+};
+function roundScore8(value) {
+  return Math.round(value * 100) / 100;
+}
+function resolveGeneratedAt8(input) {
+  return input.evaluatedAt ?? (/* @__PURE__ */ new Date()).toISOString();
+}
+function resolveActivityScore(input) {
+  const counts = [
+    input.opportunityCount ?? 0,
+    input.matchCount ?? 0,
+    input.negotiationCount ?? 0,
+    input.dealCount ?? 0,
+    input.contractCount ?? 0
+  ];
+  const total = counts.reduce((sum, value) => sum + value, 0);
+  if (total === 0) return 0;
+  return roundScore8(Math.min(100, 20 + total * 8));
+}
+function resolveWorkflowMomentum(input) {
+  const negotiations = input.negotiationCount ?? 0;
+  const deals = input.dealCount ?? 0;
+  const contracts = input.contractCount ?? 0;
+  if (negotiations + deals + contracts === 0) return 30;
+  return roundScore8(Math.min(100, 40 + deals * 15 + contracts * 10));
+}
+function computeDashboardScore(input) {
+  const profile = input.profileScore ?? 0;
+  const vetting = input.vettingScore ?? 100;
+  const activity = resolveActivityScore(input);
+  const momentum = resolveWorkflowMomentum(input);
+  const contracts = input.contractCount ?? 0;
+  const contractScore = contracts > 0 ? 100 : 50;
+  const weighted = (profile * DASHBOARD_ADAPTER_SCORE_WEIGHTS.profileReadiness + vetting * DASHBOARD_ADAPTER_SCORE_WEIGHTS.vettingReadiness + activity * DASHBOARD_ADAPTER_SCORE_WEIGHTS.pipelineActivity + momentum * DASHBOARD_ADAPTER_SCORE_WEIGHTS.workflowMomentum + contractScore * DASHBOARD_ADAPTER_SCORE_WEIGHTS.contractExecution) / 100;
+  return roundScore8(weighted);
+}
+function resolveHealth8(score) {
+  if (score >= 85) return HEALTH.EXCELLENT;
+  if (score >= 70) return HEALTH.GOOD;
+  if (score >= 50) return HEALTH.WARNING;
+  return HEALTH.CRITICAL;
+}
+function hasStalledPipeline(input) {
+  const matches = input.matchCount ?? 0;
+  const negotiations = input.negotiationCount ?? 0;
+  const deals = input.dealCount ?? 0;
+  return matches > 0 && negotiations === 0 && deals === 0;
+}
+function hasActionRequired(input) {
+  const profileLow = (input.profileScore ?? 100) < 70;
+  const vettingLow = input.vettingScore != null && input.vettingScore < 70;
+  const pendingRecs = (input.aggregatedRecommendations?.length ?? 0) > 0;
+  return profileLow || vettingLow || pendingRecs;
+}
+function buildReasons8(input) {
+  const reasons = [];
+  if (hasActionRequired(input)) {
+    reasons.push({
+      code: DASHBOARD_REASON_CODES.ACTION_REQUIRED,
+      message: "Workspace items need attention to keep the pipeline moving.",
+      severity: EXPLANATION_SEVERITY.WARNING,
+      category: "attention"
+    });
+  }
+  if (hasStalledPipeline(input)) {
+    reasons.push({
+      code: DASHBOARD_REASON_CODES.PIPELINE_STALLED,
+      message: "Matches exist but no negotiations or agreements have started.",
+      severity: EXPLANATION_SEVERITY.WARNING,
+      category: "pipeline"
+    });
+  }
+  if ((input.profileScore ?? 100) < 60 || (input.vettingScore ?? 100) < 60) {
+    reasons.push({
+      code: DASHBOARD_REASON_CODES.DEADLINE_APPROACHING,
+      message: "Readiness gaps may block upcoming publish or matching deadlines.",
+      severity: EXPLANATION_SEVERITY.INFO,
+      category: "readiness"
+    });
+  }
+  if (input.heroMetric) {
+    reasons.push({
+      code: DASHBOARD_REASON_CODES.ACTION_REQUIRED,
+      message: `${input.heroMetric.label}: ${input.heroMetric.value}`,
+      severity: EXPLANATION_SEVERITY.INFO,
+      category: "hero"
+    });
+  }
+  return reasons;
+}
+function buildBlockers8(input) {
+  const blockers = [];
+  if ((input.profileScore ?? 100) < 50) {
+    blockers.push({
+      reasonCode: DASHBOARD_REASON_CODES.ACTION_REQUIRED,
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      blockingEntity: input.entityId,
+      resolutionHint: "Complete required profile fields from the dashboard recommendations."
+    });
+  }
+  if (input.vettingScore != null && input.vettingScore < 50) {
+    blockers.push({
+      reasonCode: DASHBOARD_REASON_CODES.ACTION_REQUIRED,
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      blockingEntity: input.entityId,
+      resolutionHint: "Upload pending compliance documents to unblock matching."
+    });
+  }
+  return blockers;
+}
+function buildStrengths8(input) {
+  const strengths = [];
+  if ((input.profileScore ?? 0) >= 80) {
+    strengths.push({
+      code: DASHBOARD_REASON_CODES.ACTION_REQUIRED,
+      label: "Strong profile readiness",
+      impactPercent: DASHBOARD_ADAPTER_SCORE_WEIGHTS.profileReadiness
+    });
+  }
+  if ((input.contractCount ?? 0) > 0) {
+    strengths.push({
+      code: DASHBOARD_REASON_CODES.PIPELINE_STALLED,
+      label: "Active contract execution",
+      impactPercent: DASHBOARD_ADAPTER_SCORE_WEIGHTS.contractExecution
+    });
+  }
+  return strengths;
+}
+function buildWeaknesses8(input) {
+  const weaknesses = [];
+  if (hasStalledPipeline(input)) {
+    weaknesses.push({
+      code: DASHBOARD_REASON_CODES.PIPELINE_STALLED,
+      label: "Pipeline stalled after matching",
+      impactPercent: DASHBOARD_ADAPTER_SCORE_WEIGHTS.workflowMomentum
+    });
+  }
+  if ((input.opportunityCount ?? 0) === 0) {
+    weaknesses.push({
+      code: DASHBOARD_REASON_CODES.DEADLINE_APPROACHING,
+      label: "No active opportunities",
+      impactPercent: DASHBOARD_ADAPTER_SCORE_WEIGHTS.pipelineActivity
+    });
+  }
+  return weaknesses;
+}
+function buildRecommendationsFromSnapshot8(input) {
+  const recommendations = [];
+  let index = 0;
+  const score = computeDashboardScore(input);
+  for (const rec of input.aggregatedRecommendations ?? []) {
+    recommendations.push({
+      ...rec,
+      id: rec.id || `dashboard-agg-${index}`
+    });
+    index += 1;
+  }
+  if ((input.profileScore ?? 100) < 80) {
+    recommendations.push({
+      id: `dashboard-rec-profile-${index}`,
+      label: "Improve profile readiness",
+      reasonCode: DASHBOARD_REASON_CODES.ACTION_REQUIRED,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent: 15,
+      estimatedScore: roundScore8(Math.min(100, score + 12)),
+      href: "/settings/profile",
+      category: "profile",
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+    index += 1;
+  }
+  if (hasStalledPipeline(input)) {
+    recommendations.push({
+      id: `dashboard-rec-pipeline-${index}`,
+      label: "Review matches and start negotiations",
+      reasonCode: DASHBOARD_REASON_CODES.PIPELINE_STALLED,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent: 20,
+      estimatedScore: roundScore8(Math.min(100, score + 15)),
+      href: "/matches",
+      category: "pipeline",
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+    index += 1;
+  }
+  if ((input.opportunityCount ?? 0) > 0 && (input.matchCount ?? 0) === 0) {
+    recommendations.push({
+      id: `dashboard-rec-matching-${index}`,
+      label: "Run matching on published opportunities",
+      reasonCode: DASHBOARD_REASON_CODES.ACTION_REQUIRED,
+      priority: RECOMMENDATION_PRIORITY.MEDIUM,
+      impactPercent: 12,
+      estimatedScore: roundScore8(Math.min(100, score + 10)),
+      href: "/opportunities",
+      category: "matching",
+      severity: EXPLANATION_SEVERITY.INFO
+    });
+  }
+  return recommendations;
+}
+function buildBreakdownFromSnapshot8(input) {
+  const entries = [
+    {
+      label: "Profile readiness",
+      score: input.profileScore ?? 0,
+      weight: DASHBOARD_ADAPTER_SCORE_WEIGHTS.profileReadiness,
+      maxScore: 100,
+      reasonCodes: (input.profileScore ?? 100) < 70 ? [DASHBOARD_REASON_CODES.ACTION_REQUIRED] : []
+    },
+    {
+      label: "Vetting readiness",
+      score: input.vettingScore ?? 100,
+      weight: DASHBOARD_ADAPTER_SCORE_WEIGHTS.vettingReadiness,
+      maxScore: 100,
+      reasonCodes: []
+    },
+    {
+      label: "Pipeline activity",
+      score: resolveActivityScore(input),
+      weight: DASHBOARD_ADAPTER_SCORE_WEIGHTS.pipelineActivity,
+      maxScore: 100,
+      reasonCodes: hasStalledPipeline(input) ? [DASHBOARD_REASON_CODES.PIPELINE_STALLED] : []
+    },
+    {
+      label: "Workflow momentum",
+      score: resolveWorkflowMomentum(input),
+      weight: DASHBOARD_ADAPTER_SCORE_WEIGHTS.workflowMomentum,
+      maxScore: 100,
+      reasonCodes: []
+    },
+    {
+      label: "Contract execution",
+      score: (input.contractCount ?? 0) > 0 ? 100 : 50,
+      weight: DASHBOARD_ADAPTER_SCORE_WEIGHTS.contractExecution,
+      maxScore: 100,
+      reasonCodes: []
+    }
+  ];
+  return entries;
+}
+function buildTimelineFromSnapshot8(_input) {
+  return [];
+}
+function buildSummary8(input, score) {
+  if (input.heroMetric) {
+    return `Dashboard health ${Math.round(score)}% \u2014 focus on ${input.heroMetric.label.toLowerCase()}.`;
+  }
+  if (hasStalledPipeline(input)) {
+    return `Dashboard health ${Math.round(score)}% \u2014 pipeline activity has stalled after matching.`;
+  }
+  return `Dashboard health ${Math.round(score)}% across profile, pipeline, and execution signals.`;
+}
+function buildDashboardExplanation(input) {
+  const score = computeDashboardScore(input);
+  const generatedAt = resolveGeneratedAt8(input);
+  return {
+    engine: ENGINE_ID.DASHBOARD,
+    entityId: input.entityId,
+    score,
+    health: resolveHealth8(score),
+    summary: buildSummary8(input, score),
+    scoreBreakdown: buildBreakdownFromSnapshot8(input),
+    reasons: buildReasons8(input),
+    blockers: buildBlockers8(input),
+    strengths: buildStrengths8(input),
+    weaknesses: buildWeaknesses8(input),
+    recommendations: buildRecommendationsFromSnapshot8(input),
+    timeline: buildTimelineFromSnapshot8(input),
+    metadata: {
+      generatedAt,
+      engineVersion: DASHBOARD_ADAPTER_VERSION,
+      locale: input.locale ?? "en",
+      source: "dashboard-adapter",
+      tags: ["workspace"],
+      extensions: {
+        opportunityCount: input.opportunityCount,
+        matchCount: input.matchCount,
+        negotiationCount: input.negotiationCount,
+        dealCount: input.dealCount,
+        contractCount: input.contractCount,
+        heroMetric: input.heroMetric
+      }
+    }
+  };
+}
+var dashboardExplainabilityAdapter = {
+  buildExplanation: buildDashboardExplanation,
+  buildRecommendations: buildRecommendationsFromSnapshot8,
+  buildBreakdown: buildBreakdownFromSnapshot8,
+  buildTimeline: buildTimelineFromSnapshot8
+};
+
+// src/adapters/analytics-adapter.ts
+var ANALYTICS_ADAPTER_VERSION = "1.0.0";
+var ANALYTICS_ADAPTER_SCORE_WEIGHTS = {
+  readinessCoverage: 30,
+  matchingQuality: 30,
+  funnelConversion: 25,
+  dataConfidence: 15
+};
+var INTELLIGENCE_ROUTES = {
+  portfolio: "/intelligence/portfolio",
+  funnel: "/intelligence/funnel",
+  risk: "/intelligence/risk",
+  execution: "/intelligence/execution"
+};
+function roundScore9(value) {
+  return Math.round(value * 100) / 100;
+}
+function resolveGeneratedAt9(input) {
+  return input.evaluatedAt ?? (/* @__PURE__ */ new Date()).toISOString();
+}
+function hasInsufficientData(input) {
+  const readiness = input.readinessAnalytics;
+  const matching = input.matchingQualityAnalytics;
+  const profileTotal = readiness?.profileTotal ?? 0;
+  const opportunityTotal = readiness?.opportunityTotal ?? 0;
+  const matchTotal = matching?.totalMatches ?? 0;
+  return profileTotal + opportunityTotal + matchTotal < 3;
+}
+function readinessCoverageScore(input) {
+  const readiness = input.readinessAnalytics;
+  if (!readiness) return 0;
+  const profileDenom = Math.max(1, readiness.profileTotal);
+  const oppDenom = Math.max(1, readiness.opportunityTotal);
+  const profileReadyRate = readiness.profileReady / profileDenom * 100;
+  const oppReadyRate = readiness.opportunityReady / oppDenom * 100;
+  return roundScore9((profileReadyRate + oppReadyRate) / 2);
+}
+function matchingQualityScore(input) {
+  const matching = input.matchingQualityAnalytics;
+  if (!matching) return 0;
+  return roundScore9(
+    (matching.averageMatchScore + matching.acceptanceRate + matching.negotiationRate + matching.dealConversionRate) / 4
+  );
+}
+function funnelConversionScore(input) {
+  const matching = input.matchingQualityAnalytics;
+  if (!matching || matching.totalMatches === 0) return 0;
+  return roundScore9(
+    matching.acceptanceRate * 0.4 + matching.negotiationRate * 0.35 + matching.dealConversionRate * 0.25
+  );
+}
+function dataConfidenceScore(input) {
+  return hasInsufficientData(input) ? 25 : 90;
+}
+function computeAnalyticsScore(input) {
+  const readiness = readinessCoverageScore(input);
+  const matching = matchingQualityScore(input);
+  const funnel = funnelConversionScore(input);
+  const confidence = dataConfidenceScore(input);
+  const weighted = (readiness * ANALYTICS_ADAPTER_SCORE_WEIGHTS.readinessCoverage + matching * ANALYTICS_ADAPTER_SCORE_WEIGHTS.matchingQuality + funnel * ANALYTICS_ADAPTER_SCORE_WEIGHTS.funnelConversion + confidence * ANALYTICS_ADAPTER_SCORE_WEIGHTS.dataConfidence) / 100;
+  return roundScore9(weighted);
+}
+function resolveHealth9(score) {
+  if (score >= 85) return HEALTH.EXCELLENT;
+  if (score >= 70) return HEALTH.GOOD;
+  if (score >= 50) return HEALTH.WARNING;
+  return HEALTH.CRITICAL;
+}
+function hasNegativeTrend(input) {
+  const matching = input.matchingQualityAnalytics;
+  if (!matching) return false;
+  return matching.acceptanceRate < 35 || matching.negotiationRate < 25 || matching.dealConversionRate < 15;
+}
+function buildReasons9(input) {
+  const reasons = [];
+  if (hasInsufficientData(input)) {
+    reasons.push({
+      code: ANALYTICS_REASON_CODES.DATA_INSUFFICIENT,
+      message: "Insufficient portfolio data to produce high-confidence analytics.",
+      severity: EXPLANATION_SEVERITY.WARNING,
+      category: "data"
+    });
+  }
+  if (hasNegativeTrend(input)) {
+    reasons.push({
+      code: ANALYTICS_REASON_CODES.TREND_NEGATIVE,
+      message: "Funnel conversion rates are below healthy marketplace benchmarks.",
+      severity: EXPLANATION_SEVERITY.WARNING,
+      category: "funnel"
+    });
+  }
+  const readiness = input.readinessAnalytics;
+  if (readiness && readiness.opportunityPublishBlocked > 0) {
+    reasons.push({
+      code: ANALYTICS_REASON_CODES.FORECAST_LOW_CONFIDENCE,
+      message: `${readiness.opportunityPublishBlocked} opportunities are publish-blocked.`,
+      severity: EXPLANATION_SEVERITY.INFO,
+      category: "readiness"
+    });
+  }
+  if (input.periodLabel) {
+    reasons.push({
+      code: ANALYTICS_REASON_CODES.DATA_INSUFFICIENT,
+      message: `Analytics period: ${input.periodLabel}`,
+      severity: EXPLANATION_SEVERITY.INFO,
+      category: "period"
+    });
+  }
+  return reasons;
+}
+function buildBlockers9(input) {
+  const blockers = [];
+  for (const risk of input.riskBlockers ?? []) {
+    if (risk.count <= 0) continue;
+    blockers.push({
+      reasonCode: ANALYTICS_REASON_CODES.TREND_NEGATIVE,
+      severity: EXPLANATION_SEVERITY.WARNING,
+      blockingEntity: input.entityId,
+      resolutionHint: risk.href ? `Review details at ${risk.href}` : "Investigate blocked workload in intelligence views."
+    });
+  }
+  return blockers;
+}
+function buildStrengths9(input) {
+  const strengths = [];
+  const matching = input.matchingQualityAnalytics;
+  if (matching && matching.acceptanceRate >= 60) {
+    strengths.push({
+      code: ANALYTICS_REASON_CODES.TREND_NEGATIVE,
+      label: "Healthy match acceptance rate",
+      impactPercent: ANALYTICS_ADAPTER_SCORE_WEIGHTS.funnelConversion
+    });
+  }
+  const readiness = input.readinessAnalytics;
+  if (readiness && readiness.profileReady >= readiness.profileTotal * 0.7) {
+    strengths.push({
+      code: ANALYTICS_REASON_CODES.DATA_INSUFFICIENT,
+      label: "Strong profile readiness coverage",
+      impactPercent: ANALYTICS_ADAPTER_SCORE_WEIGHTS.readinessCoverage
+    });
+  }
+  return strengths;
+}
+function buildWeaknesses9(input) {
+  const weaknesses = [];
+  const matching = input.matchingQualityAnalytics;
+  if (hasNegativeTrend(input)) {
+    weaknesses.push({
+      code: ANALYTICS_REASON_CODES.TREND_NEGATIVE,
+      label: "Funnel conversion below target",
+      impactPercent: ANALYTICS_ADAPTER_SCORE_WEIGHTS.funnelConversion
+    });
+  }
+  if (matching) {
+    for (const [matchType, entry] of Object.entries(matching.byMatchType)) {
+      if (entry.total >= 3 && entry.accepted === 0) {
+        weaknesses.push({
+          code: ANALYTICS_REASON_CODES.FORECAST_LOW_CONFIDENCE,
+          label: `No accepted matches for ${matchType.replace("_", " ")} topology`,
+          impactPercent: 8
+        });
+      }
+    }
+  }
+  for (const risk of input.riskBlockers ?? []) {
+    if (risk.count > 0) {
+      weaknesses.push({
+        code: ANALYTICS_REASON_CODES.TREND_NEGATIVE,
+        label: risk.label,
+        impactPercent: 10
+      });
+    }
+  }
+  return weaknesses;
+}
+function buildRecommendationsFromSnapshot9(input) {
+  const recommendations = [];
+  let index = 0;
+  const score = computeAnalyticsScore(input);
+  if (hasInsufficientData(input)) {
+    recommendations.push({
+      id: `analytics-rec-data-${index}`,
+      label: "Add more profiles and opportunities to improve analytics confidence",
+      reasonCode: ANALYTICS_REASON_CODES.DATA_INSUFFICIENT,
+      priority: RECOMMENDATION_PRIORITY.MEDIUM,
+      impactPercent: 15,
+      estimatedScore: roundScore9(Math.min(100, score + 10)),
+      href: INTELLIGENCE_ROUTES.portfolio,
+      category: "data",
+      severity: EXPLANATION_SEVERITY.INFO
+    });
+    index += 1;
+  }
+  const readiness = input.readinessAnalytics;
+  if (readiness && readiness.opportunityPublishBlocked > 0) {
+    recommendations.push({
+      id: `analytics-rec-readiness-${index}`,
+      label: "Resolve publish-blocked opportunities",
+      reasonCode: ANALYTICS_REASON_CODES.FORECAST_LOW_CONFIDENCE,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent: 18,
+      estimatedScore: roundScore9(Math.min(100, score + 12)),
+      href: INTELLIGENCE_ROUTES.portfolio,
+      category: "readiness",
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+    index += 1;
+  }
+  if (hasNegativeTrend(input)) {
+    recommendations.push({
+      id: `analytics-rec-funnel-${index}`,
+      label: "Drill into funnel conversion blockers",
+      reasonCode: ANALYTICS_REASON_CODES.TREND_NEGATIVE,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent: 20,
+      estimatedScore: roundScore9(Math.min(100, score + 15)),
+      href: INTELLIGENCE_ROUTES.funnel,
+      category: "funnel",
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+    index += 1;
+  }
+  if ((input.riskBlockers?.length ?? 0) > 0) {
+    recommendations.push({
+      id: `analytics-rec-risk-${index}`,
+      label: "Review risk and blocker workload",
+      reasonCode: ANALYTICS_REASON_CODES.TREND_NEGATIVE,
+      priority: RECOMMENDATION_PRIORITY.MEDIUM,
+      impactPercent: 12,
+      estimatedScore: roundScore9(Math.min(100, score + 8)),
+      href: INTELLIGENCE_ROUTES.risk,
+      category: "risk",
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+  }
+  return recommendations;
+}
+function buildBreakdownFromSnapshot9(input) {
+  return [
+    {
+      label: "Readiness coverage",
+      score: readinessCoverageScore(input),
+      weight: ANALYTICS_ADAPTER_SCORE_WEIGHTS.readinessCoverage,
+      maxScore: 100,
+      reasonCodes: hasInsufficientData(input) ? [ANALYTICS_REASON_CODES.DATA_INSUFFICIENT] : []
+    },
+    {
+      label: "Matching quality",
+      score: matchingQualityScore(input),
+      weight: ANALYTICS_ADAPTER_SCORE_WEIGHTS.matchingQuality,
+      maxScore: 100,
+      reasonCodes: []
+    },
+    {
+      label: "Funnel conversion",
+      score: funnelConversionScore(input),
+      weight: ANALYTICS_ADAPTER_SCORE_WEIGHTS.funnelConversion,
+      maxScore: 100,
+      reasonCodes: hasNegativeTrend(input) ? [ANALYTICS_REASON_CODES.TREND_NEGATIVE] : []
+    },
+    {
+      label: "Data confidence",
+      score: dataConfidenceScore(input),
+      weight: ANALYTICS_ADAPTER_SCORE_WEIGHTS.dataConfidence,
+      maxScore: 100,
+      reasonCodes: hasInsufficientData(input) ? [ANALYTICS_REASON_CODES.FORECAST_LOW_CONFIDENCE] : []
+    }
+  ];
+}
+function buildTimelineFromSnapshot9(_input) {
+  return [];
+}
+function buildSummary9(input, score) {
+  const period = input.periodLabel ? ` for ${input.periodLabel}` : "";
+  if (hasInsufficientData(input)) {
+    return `Analytics confidence ${Math.round(score)}%${period} \u2014 more portfolio data is needed.`;
+  }
+  if (hasNegativeTrend(input)) {
+    return `Analytics health ${Math.round(score)}%${period} \u2014 funnel conversion needs attention.`;
+  }
+  return `Analytics health ${Math.round(score)}%${period} across readiness and matching quality.`;
+}
+function buildAnalyticsExplanation(input) {
+  const score = computeAnalyticsScore(input);
+  const generatedAt = resolveGeneratedAt9(input);
+  return {
+    engine: ENGINE_ID.ANALYTICS,
+    entityId: input.entityId,
+    score,
+    health: resolveHealth9(score),
+    summary: buildSummary9(input, score),
+    scoreBreakdown: buildBreakdownFromSnapshot9(input),
+    reasons: buildReasons9(input),
+    blockers: buildBlockers9(input),
+    strengths: buildStrengths9(input),
+    weaknesses: buildWeaknesses9(input),
+    recommendations: buildRecommendationsFromSnapshot9(input),
+    timeline: buildTimelineFromSnapshot9(input),
+    metadata: {
+      generatedAt,
+      engineVersion: ANALYTICS_ADAPTER_VERSION,
+      locale: input.locale ?? "en",
+      source: "analytics-adapter",
+      tags: ["intelligence"],
+      extensions: {
+        readinessAnalytics: input.readinessAnalytics,
+        matchingQualityAnalytics: input.matchingQualityAnalytics,
+        riskBlockers: input.riskBlockers,
+        periodLabel: input.periodLabel
+      }
+    }
+  };
+}
+var analyticsExplainabilityAdapter = {
+  buildExplanation: buildAnalyticsExplanation,
+  buildRecommendations: buildRecommendationsFromSnapshot9,
+  buildBreakdown: buildBreakdownFromSnapshot9,
+  buildTimeline: buildTimelineFromSnapshot9
+};
+
 // ../collaboration-models/dist/index.js
 function attrs(fields) {
   return fields;
@@ -6012,6 +6632,41 @@ function createKnowledgeBridge() {
   return createKnowledgeBridgeImpl();
 }
 
+// src/services/locale.ts
+function pickArabicField(english, arabic) {
+  return arabic ?? english;
+}
+function resolveLocalizedKnowledge(content, locale) {
+  if (!content) return void 0;
+  if (locale === "en") {
+    return content;
+  }
+  const withArabic = content;
+  const ar = withArabic.ar;
+  if (!ar) {
+    return {
+      ...content,
+      whatIsIt: content.whatIsIt,
+      whyUseIt: content.whyUseIt,
+      advantages: content.advantages,
+      risks: content.risks
+    };
+  }
+  return {
+    ...content,
+    whatIsIt: pickArabicField(content.whatIsIt, ar.whatIsIt),
+    whyUseIt: pickArabicField(content.whyUseIt, ar.whyUseIt),
+    advantages: pickArabicField(content.advantages, ar.advantages),
+    risks: pickArabicField(content.risks, ar.risks)
+  };
+}
+function normalizeExplainabilityLocale(locale) {
+  if (!locale) return "en";
+  const normalized = locale.trim().toLowerCase();
+  if (normalized.startsWith("ar")) return "ar";
+  return "en";
+}
+
 // src/services/enrichment.ts
 function uniqueReasonCodes(bundle) {
   const codes = /* @__PURE__ */ new Set();
@@ -6096,22 +6751,32 @@ function supplementaryReasons(bundle, knowledge) {
 function enrichExplanationBundle(bundle, options) {
   const bridge = options?.knowledgeBridge ?? createKnowledgeBridge();
   const subModelKey = options?.subModelKey;
-  const locale = options?.locale ?? bundle.metadata.locale;
+  const locale = normalizeExplainabilityLocale(
+    options?.locale ?? bundle.metadata.locale
+  );
   const knowledge = buildKnowledgeExtension(bundle, bridge, subModelKey, locale);
   const knowledgeMetadata = subModelKey ? getKnowledgeMetadata(subModelKey) : void 0;
   if (!knowledge) {
-    return bundle;
+    return {
+      ...bundle,
+      metadata: {
+        ...bundle.metadata,
+        locale
+      }
+    };
   }
+  const localizedKnowledge = resolveLocalizedKnowledge(knowledge, locale);
   return {
     ...bundle,
-    reasons: supplementaryReasons(bundle, knowledge),
+    reasons: supplementaryReasons(bundle, localizedKnowledge),
     metadata: {
       ...bundle.metadata,
       locale,
       knowledgeVersion: knowledgeMetadata?.knowledgeVersion ?? bundle.metadata.knowledgeVersion,
       extensions: {
         ...bundle.metadata.extensions,
-        knowledge
+        knowledge: localizedKnowledge,
+        localeResolved: locale
       }
     }
   };
@@ -6317,6 +6982,98 @@ function deserializeAIExplanationPayload(json) {
   }
   return candidate;
 }
+
+// src/ai/gateway.ts
+function resolveKnowledgeFromBundles(bundles, includeKnowledge) {
+  if (!includeKnowledge) return void 0;
+  for (const bundle of bundles) {
+    const knowledge = bundle.metadata.extensions?.knowledge;
+    if (knowledge && typeof knowledge === "object") {
+      return knowledge;
+    }
+  }
+  return void 0;
+}
+function createAIExplanationGateway() {
+  return {
+    exportPayload(bundle) {
+      return toAIExplanationPayload(bundle);
+    },
+    importPayload(payload) {
+      return fromAIExplanationPayload(payload);
+    },
+    exportBatch(bundles) {
+      const payloads = bundles.map((bundle) => toAIExplanationPayload(bundle));
+      return JSON.stringify(payloads);
+    },
+    buildAgentContext(options) {
+      const locale = normalizeExplainabilityLocale(options.locale);
+      const includeKnowledge = options.includeKnowledge ?? true;
+      return {
+        generatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+        locale,
+        subModelKey: options.subModelKey,
+        includeKnowledge,
+        bundles: options.bundles,
+        summaries: options.bundles.map((bundle) => ({
+          engine: bundle.engine,
+          entityId: bundle.entityId,
+          score: bundle.score,
+          health: bundle.health,
+          summary: bundle.summary
+        })),
+        knowledge: resolveKnowledgeFromBundles(options.bundles, includeKnowledge)
+      };
+    }
+  };
+}
+function importPayloadFromJson(json) {
+  const parsed = JSON.parse(json);
+  if (typeof parsed === "object" && parsed !== null && "version" in parsed && "bundle" in parsed) {
+    return fromAIExplanationPayload(parsed);
+  }
+  return deserializeExplanationBundle(json);
+}
+function serializeAgentContext(context) {
+  return JSON.stringify(context);
+}
+
+// src/observability/trace.ts
+function resolveTraceMetadata(result) {
+  if (typeof result !== "object" || result === null || !("metadata" in result)) {
+    return { enriched: false, knowledgeHit: false };
+  }
+  const candidate = result;
+  const knowledge = candidate.metadata?.extensions?.knowledge;
+  return {
+    engine: candidate.engine,
+    entityId: candidate.entityId,
+    enriched: knowledge != null,
+    knowledgeHit: knowledge != null
+  };
+}
+function traceExplainabilityBuild(label, fn) {
+  const startedAt = performance.now();
+  const finalize = (result) => {
+    const meta = resolveTraceMetadata(result);
+    return {
+      result,
+      trace: {
+        label,
+        engine: meta.engine,
+        entityId: meta.entityId,
+        durationMs: Math.round((performance.now() - startedAt) * 100) / 100,
+        enriched: meta.enriched,
+        knowledgeHit: meta.knowledgeHit
+      }
+    };
+  };
+  const output = fn();
+  if (output instanceof Promise) {
+    return output.then(finalize);
+  }
+  return finalize(output);
+}
 export {
   AGREEMENT_ADAPTER_SCORE_WEIGHTS,
   AGREEMENT_ADAPTER_VERSION,
@@ -6325,6 +7082,8 @@ export {
   AGREEMENT_STATUS_TO_REASON_CODE,
   AI_EXPLANATION_PAYLOAD_VERSION,
   ALL_REASON_CODES,
+  ANALYTICS_ADAPTER_SCORE_WEIGHTS,
+  ANALYTICS_ADAPTER_VERSION,
   ANALYTICS_REASON_CODES,
   COMMERCIAL_REASON_CODES,
   CONTRACT_ADAPTER_SCORE_WEIGHTS,
@@ -6332,6 +7091,8 @@ export {
   CONTRACT_BREAKDOWN_LABELS,
   CONTRACT_REASON_CODES,
   CONTRACT_STATUS_TO_REASON_CODE,
+  DASHBOARD_ADAPTER_SCORE_WEIGHTS,
+  DASHBOARD_ADAPTER_VERSION,
   DASHBOARD_REASON_CODES,
   DEFAULT_AGGREGATE_RECOMMENDATION_LIMIT,
   DOCUMENT_REASON_CODES,
@@ -6374,9 +7135,12 @@ export {
   agreementExplainabilityAdapter,
   agreementStatusToHref,
   agreementStatusToReasonCode,
+  analyticsExplainabilityAdapter,
   assertReasonCode,
   buildAgreementExplanation,
+  buildAnalyticsExplanation,
   buildContractExplanation,
+  buildDashboardExplanation,
   buildMatchingExplanation,
   buildNegotiationExplanation,
   buildOpportunityExplanation,
@@ -6391,8 +7155,10 @@ export {
   contractExplainabilityAdapter,
   contractStatusToHref,
   contractStatusToReasonCode,
+  createAIExplanationGateway,
   createKnowledgeBridge,
   createRecommendationService,
+  dashboardExplainabilityAdapter,
   deserializeAIExplanationPayload,
   deserializeExplanationBundle,
   dimensionImprovementHint,
@@ -6401,6 +7167,7 @@ export {
   hasBlockedMilestones,
   hasPendingSignatures,
   hasUnsignedParties,
+  importPayloadFromJson,
   isAwardPending,
   isDecisionPending,
   isExplanationBundle,
@@ -6419,6 +7186,7 @@ export {
   negotiationStatusToHref,
   negotiationStatusToReasonCode,
   negotiationTermsFieldToHref,
+  normalizeExplainabilityLocale,
   opportunityExplainabilityAdapter,
   opportunityFieldIdToHref,
   opportunityFieldIdToReasonCode,
@@ -6427,11 +7195,14 @@ export {
   profileFieldLabelToHref,
   profileFieldLabelToReasonCode,
   readinessExplainabilityAdapter,
+  resolveLocalizedKnowledge,
   resolvePartiesSigned,
   resolveTotalParties,
   serializeAIExplanationPayload,
+  serializeAgentContext,
   serializeExplanationBundle,
   toAIExplanationPayload,
+  traceExplainabilityBuild,
   vettingDocumentLabelToHref,
   vettingDocumentLabelToReasonCode,
   vettingDocumentTypeToHref,

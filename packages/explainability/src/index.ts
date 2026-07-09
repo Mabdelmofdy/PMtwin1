@@ -255,6 +255,32 @@ export {
 } from './adapters/contract-adapter.ts'
 
 export type {
+  DashboardExplainabilitySnapshot,
+  DashboardHeroMetric,
+} from './adapters/dashboard-types.ts'
+
+export {
+  DASHBOARD_ADAPTER_SCORE_WEIGHTS,
+  DASHBOARD_ADAPTER_VERSION,
+  buildDashboardExplanation,
+  dashboardExplainabilityAdapter,
+} from './adapters/dashboard-adapter.ts'
+
+export type {
+  AnalyticsExplainabilitySnapshot,
+  AnalyticsMatchingQualitySummary,
+  AnalyticsReadinessSummary,
+  AnalyticsRiskBlocker,
+} from './adapters/analytics-types.ts'
+
+export {
+  ANALYTICS_ADAPTER_SCORE_WEIGHTS,
+  ANALYTICS_ADAPTER_VERSION,
+  buildAnalyticsExplanation,
+  analyticsExplainabilityAdapter,
+} from './adapters/analytics-adapter.ts'
+
+export type {
   KnowledgeAnswer,
   KnowledgeBridge,
   KnowledgeBridgeRequest,
@@ -270,6 +296,16 @@ export type {
 export { enrichExplanationBundle } from './services/enrichment.ts'
 
 export type {
+  ExplainabilityLocale,
+  LocalizedKnowledgeContent,
+} from './services/locale.ts'
+
+export {
+  normalizeExplainabilityLocale,
+  resolveLocalizedKnowledge,
+} from './services/locale.ts'
+
+export type {
   RecommendationService,
   RecommendationServiceInput,
 } from './services/recommendation-service.ts'
@@ -283,6 +319,23 @@ export {
 } from './services/recommendation-service-impl.ts'
 
 export type { AIExplanationPayload } from './ai/serialization.ts'
+
+export type { AgentExplainabilityContext } from './ai/agent-context.ts'
+
+export type { AIExplanationGateway } from './ai/gateway.ts'
+
+export {
+  createAIExplanationGateway,
+  importPayloadFromJson,
+  serializeAgentContext,
+} from './ai/gateway.ts'
+
+export type {
+  ExplainabilityTrace,
+  ExplainabilityTraceResult,
+} from './observability/trace.ts'
+
+export { traceExplainabilityBuild } from './observability/trace.ts'
 
 export {
   AI_EXPLANATION_PAYLOAD_VERSION,

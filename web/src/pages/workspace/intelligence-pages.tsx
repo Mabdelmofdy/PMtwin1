@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { matchesApi } from '@/api/matches.ts'
@@ -7,8 +8,11 @@ import { contractsApi } from '@/api/contracts.ts'
 import { peopleApi } from '@/api/people.ts'
 import { PmContentCard, PmMetricGrid } from '@/components/layout/pm-layout-index'
 import { PmBadge, PmButton, PmPage, PmPageHeader, PmPageHeroMetric, PmStatCard } from '@/components/ui/pm-index'
+import { ExplanationPanel } from '@/components/explainability/explanation-panel.tsx'
 import { buildReadinessAnalytics, createCreatorProfileResolver } from '@/domain/readiness-analytics/readiness-analytics.ts'
 import { buildMatchingQualityAnalytics } from '@/domain/matching-quality/matching-quality-analytics.ts'
+import { buildAnalyticsExplanation } from '@/services/explainability/index.ts'
+import { useProductLanguage } from '@/providers/product-language-provider.tsx'
 
 function useIntelligenceData() {
   const opportunities = opportunitiesApi.list()
@@ -36,8 +40,38 @@ function useIntelligenceData() {
   return { opportunities, matches, negotiations, deals, contracts, readiness, quality }
 }
 
+function useIntelligenceAnalyticsBundle(
+  data: ReturnType<typeof useIntelligenceData>,
+  entityId: string,
+  periodLabel: string,
+  riskBlockers?: readonly { label: string; count: number; href?: string }[],
+) {
+  const { locale } = useProductLanguage()
+
+  return useMemo(
+    () =>
+      buildAnalyticsExplanation(
+        {
+          entityId,
+          readinessAnalytics: data.readiness,
+          matchingQualityAnalytics: data.quality,
+          riskBlockers,
+          periodLabel,
+        },
+        { locale },
+      ),
+    [data.readiness, data.quality, entityId, locale, periodLabel, riskBlockers],
+  )
+}
+
 export function IntelligencePortfolioPage() {
   const data = useIntelligenceData()
+  const analyticsBundle = useIntelligenceAnalyticsBundle(
+    data,
+    'intelligence-portfolio',
+    'portfolio overview',
+  )
+
   return (
     <PmPage
       header={
@@ -56,12 +90,27 @@ export function IntelligencePortfolioPage() {
         <PmStatCard label="Active negotiations" value={data.negotiations.filter((item) => item.status === 'active' || item.status === 'countered').length} dense />
         <PmStatCard label="Active contracts" value={data.contracts.filter((item) => item.status === 'active').length} dense />
       </PmMetricGrid>
+      <PmContentCard title="Readiness explainability" className="mt-6">
+        <ExplanationPanel
+          bundle={analyticsBundle}
+          compact
+          showTimeline={false}
+          showBreakdown={false}
+          scoreLabel="Analytics health"
+        />
+      </PmContentCard>
     </PmPage>
   )
 }
 
 export function IntelligenceFunnelPage() {
   const data = useIntelligenceData()
+  const analyticsBundle = useIntelligenceAnalyticsBundle(
+    data,
+    'intelligence-funnel',
+    'funnel conversion',
+  )
+
   return (
     <PmPage
       header={
@@ -79,6 +128,15 @@ export function IntelligenceFunnelPage() {
         <PmStatCard label="Negotiations started" value={data.quality.negotiationsStarted} dense />
         <PmStatCard label="Commercial Agreements created" value={data.quality.dealsCreated} dense />
       </PmMetricGrid>
+      <PmContentCard title="Matching quality explainability" className="mt-6">
+        <ExplanationPanel
+          bundle={analyticsBundle}
+          compact
+          showTimeline={false}
+          showBlockers={false}
+          scoreLabel="Funnel health"
+        />
+      </PmContentCard>
     </PmPage>
   )
 }
@@ -88,6 +146,18 @@ export function IntelligenceRiskPage() {
   const blockedMatches = data.matches.filter((item) => item.status === 'declined' || item.status === 'expired')
   const blockedNegotiations = data.negotiations.filter((item) => item.status === 'countered' || item.status === 'cancelled')
   const blockedContracts = data.contracts.filter((item) => item.status === 'terminated')
+  const riskBlockers = [
+    { label: 'Blocked matches', count: blockedMatches.length, href: '/intelligence/risk' },
+    { label: 'Blocked negotiations', count: blockedNegotiations.length, href: '/intelligence/risk' },
+    { label: 'Terminated contracts', count: blockedContracts.length, href: '/intelligence/risk' },
+  ]
+  const analyticsBundle = useIntelligenceAnalyticsBundle(
+    data,
+    'intelligence-risk',
+    'risk and blockers',
+    riskBlockers,
+  )
+
   return (
     <PmPage
       header={
@@ -104,12 +174,27 @@ export function IntelligenceRiskPage() {
         <p>{blockedNegotiations.length} blocked negotiations</p>
         <p>{blockedContracts.length} terminated contracts</p>
       </PmContentCard>
+      <PmContentCard title="Risk explainability" className="mt-6">
+        <ExplanationPanel
+          bundle={analyticsBundle}
+          compact
+          showTimeline={false}
+          showBreakdown={false}
+          scoreLabel="Risk posture"
+        />
+      </PmContentCard>
     </PmPage>
   )
 }
 
 export function IntelligenceExecutionPage() {
   const data = useIntelligenceData()
+  const analyticsBundle = useIntelligenceAnalyticsBundle(
+    data,
+    'intelligence-execution',
+    'execution health',
+  )
+
   return (
     <PmPage
       header={
@@ -132,6 +217,14 @@ export function IntelligenceExecutionPage() {
         <PmStatCard label="Active contracts" value={data.contracts.filter((item) => item.status === 'active').length} dense />
         <PmStatCard label="Completed contracts" value={data.contracts.filter((item) => item.status === 'completed').length} dense />
       </PmMetricGrid>
+      <PmContentCard title="Execution explainability" className="mt-6">
+        <ExplanationPanel
+          bundle={analyticsBundle}
+          compact
+          showTimeline={false}
+          scoreLabel="Execution health"
+        />
+      </PmContentCard>
     </PmPage>
   )
 }

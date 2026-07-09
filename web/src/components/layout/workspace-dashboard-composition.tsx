@@ -35,10 +35,12 @@ import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import { formatReadinessScorePercent } from '@/components/ui/pm-readiness-score-display'
 import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
 import {
+  buildDashboardExplanation,
   buildOpportunityExplanationFromForm,
   buildProfileExplanationFromEvaluation,
   getAggregatedRecommendations,
 } from '@/services/explainability/index.ts'
+import { ExplanationPanel } from '@/components/explainability/explanation-panel.tsx'
 import { ExplanationRecommendations } from '@/components/explainability/explanation-recommendations.tsx'
 import { cn } from '@/lib/utils'
 import { useProductLanguage } from '@/providers/product-language-provider'
@@ -117,7 +119,7 @@ function buildNeedsActionItems(input: {
 /** Action-first dashboard — attention, matches, active workflows, activity. */
 export function WorkspaceDashboardComposition() {
   const { user, isCompanyUser, isPendingApproval, canMutate } = useAuth()
-  const { productLanguage } = useProductLanguage()
+  const { productLanguage, locale } = useProductLanguage()
   const userId = user?.id
   const firstName = (user?.profile?.name ?? 'there').split(' ')[0]
   const profileKind = isCompanyUser ? 'company' : 'individual'
@@ -165,6 +167,25 @@ export function WorkspaceDashboardComposition() {
     negotiations,
     deals,
   })
+  const dashboardExplanationBundle = userId
+    ? buildDashboardExplanation(
+        {
+          entityId: userId,
+          profileScore: readiness?.score,
+          opportunityCount: opportunities.length,
+          matchCount: matches.length,
+          negotiationCount: negotiations.length,
+          dealCount: deals.length,
+          contractCount: contracts.length,
+          aggregatedRecommendations: dashboardRecommendations,
+          heroMetric: {
+            label: 'Active matches',
+            value: activeMatches,
+          },
+        },
+        { locale },
+      )
+    : null
   const needsActionItems = buildNeedsActionItems({
     userId,
     matches,
@@ -342,6 +363,17 @@ export function WorkspaceDashboardComposition() {
               recommendations: dashboardRecommendations,
             }}
             heading="Prioritized recommendations"
+          />
+        </PmContentCard>
+      ) : null}
+      {dashboardExplanationBundle ? (
+        <PmContentCard title="Dashboard explainability">
+          <ExplanationPanel
+            bundle={dashboardExplanationBundle}
+            compact
+            showTimeline={false}
+            showAiPayload
+            scoreLabel="Workspace health"
           />
         </PmContentCard>
       ) : null}

@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | Accepted |
+| **Status** | Accepted — **program complete (E0–E9)** |
 | **Version** | 1.0 |
 | **Date** | 9 July 2026 |
 | **Depends on** | ADR-100 (Architecture Freeze v1.0), ADR-101 (Backend Domain Ownership) |
@@ -181,7 +181,9 @@ Resolves Knowledge Registry content by `ReasonCode`:
 | **E6** | Agreement + contract + `RecommendationService` | `ENGINE_ID.AGREEMENT`, `ENGINE_ID.CONTRACT`, `ENGINE_ID.COMMERCIAL` — see [ADR-201-E6](./ADR-201-E6-agreement-contract-recommendation-service.md) |
 | **E7** | UI components | Renders `ExplanationBundle` |
 | **E8** | `KnowledgeBridge` implementation | Knowledge Registry integration |
-| **E9** | AI gateway + observability | `AIExplanationPayload` ingestion, Dashboard + Analytics adapters |
+| **E9** | AI gateway + observability | `AIExplanationPayload` ingestion, Dashboard + Analytics adapters — see [ADR-201-E9](./ADR-201-E9-ai-analytics-program-completion.md) |
+
+**Program status:** E0–E9 **complete** as of 9 July 2026. See [ADR-201-E9](./ADR-201-E9-ai-analytics-program-completion.md) for completion summary and post-E9 backlog.
 
 **Mandatory:** E1–E9 MUST import from `@pm-twin/explainability` and MUST NOT redefine overlapping types locally.
 
@@ -221,5 +223,6 @@ E3 will provide an adapter that maps `ReadinessResult` → `ExplanationBundle`, 
 ## References
 
 - `packages/explainability/` — canonical implementation
+- [ADR-201-E9: AI Gateway & Program Completion](./ADR-201-E9-ai-analytics-program-completion.md)
 - `docs/runtime-ownership.md` — active runtime authority
 - `packages/collaboration-models/src/readiness/` — existing readiness explainability (frozen for E0)

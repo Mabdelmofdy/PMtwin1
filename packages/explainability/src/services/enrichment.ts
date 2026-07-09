@@ -5,6 +5,10 @@ import { EXPLANATION_SEVERITY } from '../types/severity.ts'
 import type { ReasonCode } from '../reason-codes/index.ts'
 import { createKnowledgeBridge } from './knowledge-bridge-impl.ts'
 import type { KnowledgeAnswer, KnowledgeBridge } from './knowledge-bridge.ts'
+import {
+  normalizeExplainabilityLocale,
+  resolveLocalizedKnowledge,
+} from './locale.ts'
 
 export type KnowledgeExtension = {
   readonly subModelKey?: string
@@ -149,25 +153,36 @@ export function enrichExplanationBundle(
 ): ExplanationBundle {
   const bridge = options?.knowledgeBridge ?? createKnowledgeBridge()
   const subModelKey = options?.subModelKey
-  const locale = options?.locale ?? bundle.metadata.locale
+  const locale = normalizeExplainabilityLocale(
+    options?.locale ?? bundle.metadata.locale,
+  )
 
   const knowledge = buildKnowledgeExtension(bundle, bridge, subModelKey, locale)
   const knowledgeMetadata = subModelKey ? getKnowledgeMetadata(subModelKey) : undefined
 
   if (!knowledge) {
-    return bundle
+    return {
+      ...bundle,
+      metadata: {
+        ...bundle.metadata,
+        locale,
+      },
+    }
   }
+
+  const localizedKnowledge = resolveLocalizedKnowledge(knowledge, locale)
 
   return {
     ...bundle,
-    reasons: supplementaryReasons(bundle, knowledge),
+    reasons: supplementaryReasons(bundle, localizedKnowledge),
     metadata: {
       ...bundle.metadata,
       locale,
       knowledgeVersion: knowledgeMetadata?.knowledgeVersion ?? bundle.metadata.knowledgeVersion,
       extensions: {
         ...bundle.metadata.extensions,
-        knowledge,
+        knowledge: localizedKnowledge,
+        localeResolved: locale,
       },
     },
   }

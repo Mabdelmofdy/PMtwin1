@@ -2,7 +2,9 @@ import type { ExplanationBundle, Recommendation } from '@pm-twin/explainability'
 import {
   aggregateRecommendations,
   buildAgreementExplanation as buildAgreementExplanationBundle,
+  buildAnalyticsExplanation as buildAnalyticsExplanationBundle,
   buildContractExplanation as buildContractExplanationBundle,
+  buildDashboardExplanation as buildDashboardExplanationBundle,
   buildMatchingExplanation as buildMatchingExplanationBundle,
   buildNegotiationExplanation as buildNegotiationExplanationBundle,
   buildOpportunityExplanation as buildOpportunityExplanationBundle,
@@ -11,6 +13,9 @@ import {
   createKnowledgeBridge,
   createRecommendationService,
   enrichExplanationBundle,
+  normalizeExplainabilityLocale,
+  traceExplainabilityBuild,
+  type ExplainabilityTrace,
 } from '@pm-twin/explainability'
 import type { ReadinessResult } from '@pm-twin/collaboration-models'
 import { evaluateOpportunityReadinessCanonical } from '@/domain/opportunity-readiness/opportunity-readiness-evaluator.ts'
@@ -32,12 +37,19 @@ import type { NegotiationTranscriptReadModel } from '@/lib/negotiation-transcrip
 import type { Negotiation, PostMatch } from '@/types/domain.ts'
 import {
   buildAgreementExplainabilitySnapshot,
+  buildAnalyticsExplainabilitySnapshot,
   buildContractExplainabilitySnapshot,
+  buildDashboardExplainabilitySnapshot,
   buildMatchExplainabilitySnapshot,
   buildNegotiationExplainabilitySnapshot,
   buildOpportunityReadinessSnapshot,
   buildProfileReadinessSnapshot,
   buildVettingReadinessSnapshot,
+  resolveAgreementSubModelKey,
+} from '@/services/explainability/snapshot-builders/index.ts'
+import type {
+  AnalyticsSnapshotInput,
+  DashboardSnapshotInput,
 } from '@/services/explainability/snapshot-builders/index.ts'
 
 export type ExplainabilityLocaleOptions = {
@@ -46,8 +58,54 @@ export type ExplainabilityLocaleOptions = {
   readonly subModelKey?: string
 }
 
+export type ExplainabilityBuildResult = {
+  readonly bundle: ExplanationBundle
+  readonly trace: ExplainabilityTrace
+}
+
 const recommendationService = createRecommendationService()
 const knowledgeBridge = createKnowledgeBridge()
+
+const isDevEnvironment =
+  typeof import.meta !== 'undefined' &&
+  Boolean((import.meta as { env?: { DEV?: boolean } }).env?.DEV)
+
+function resolveLocale(options?: ExplainabilityLocaleOptions): string {
+  return normalizeExplainabilityLocale(options?.locale)
+}
+
+function logExplainabilityTrace(trace: ExplainabilityTrace): void {
+  if (!isDevEnvironment) return
+  console.debug('[explainability]', trace)
+}
+
+function attachTraceToBundle(
+  bundle: ExplanationBundle,
+  trace: ExplainabilityTrace,
+): ExplanationBundle {
+  return {
+    ...bundle,
+    metadata: {
+      ...bundle.metadata,
+      extensions: {
+        ...bundle.metadata.extensions,
+        trace,
+      },
+    },
+  }
+}
+
+function traceBuild(
+  label: string,
+  build: () => ExplanationBundle,
+): ExplainabilityBuildResult {
+  const { result, trace } = traceExplainabilityBuild(label, build)
+  logExplainabilityTrace(trace)
+  return {
+    bundle: attachTraceToBundle(result, trace),
+    trace,
+  }
+}
 
 export function enrichBundle(
   bundle: ExplanationBundle,
@@ -55,7 +113,7 @@ export function enrichBundle(
 ): ExplanationBundle {
   return enrichExplanationBundle(bundle, {
     subModelKey: options?.subModelKey,
-    locale: options?.locale,
+    locale: resolveLocale(options),
     knowledgeBridge,
   })
 }
@@ -137,8 +195,38 @@ export function buildAgreementExplanation(
   model: CommercialAgreementDetailReadModel,
   options?: ExplainabilityLocaleOptions,
 ): ExplanationBundle {
-  const snapshot = buildAgreementExplainabilitySnapshot(model, options)
-  return maybeEnrich(buildAgreementExplanationBundle(snapshot), options)
+  const subModelKey =
+    options?.subModelKey ?? resolveAgreementSubModelKey(model, options)
+  const snapshot = buildAgreementExplainabilitySnapshot(model, {
+    ...options,
+    subModelKey,
+  })
+  const enrichedOptions = { ...options, locale: resolveLocale(options), subModelKey }
+  return traceBuild('agreement', () =>
+    maybeEnrich(buildAgreementExplanationBundle(snapshot), enrichedOptions),
+  ).bundle
+}
+
+export function buildDashboardExplanation(
+  input: DashboardSnapshotInput,
+  options?: ExplainabilityLocaleOptions,
+): ExplanationBundle {
+  const snapshot = buildDashboardExplainabilitySnapshot(input, {
+    locale: resolveLocale(options),
+    evaluatedAt: options?.evaluatedAt,
+  })
+  return traceBuild('dashboard', () => buildDashboardExplanationBundle(snapshot)).bundle
+}
+
+export function buildAnalyticsExplanation(
+  input: AnalyticsSnapshotInput,
+  options?: ExplainabilityLocaleOptions,
+): ExplanationBundle {
+  const snapshot = buildAnalyticsExplainabilitySnapshot(input, {
+    locale: resolveLocale(options),
+    evaluatedAt: options?.evaluatedAt,
+  })
+  return traceBuild('analytics', () => buildAnalyticsExplanationBundle(snapshot)).bundle
 }
 
 export function buildContractExplanation(

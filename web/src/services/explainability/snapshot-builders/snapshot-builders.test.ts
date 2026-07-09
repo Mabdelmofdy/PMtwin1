@@ -7,6 +7,7 @@ import {
   buildOpportunityReadinessSnapshot,
   buildProfileReadinessSnapshot,
   buildVettingReadinessSnapshot,
+  resolveAgreementSubModelKey,
 } from '@/services/explainability/snapshot-builders/index.ts'
 import {
   buildOpportunityExplanation,
@@ -107,5 +108,40 @@ describe('vetting snapshot builder', () => {
     assert.equal(isExplanationBundle(bundle), true)
     assert.equal(bundle.engine, 'vetting')
     assert.ok(bundle.recommendations.length > 0)
+  })
+})
+
+describe('agreement subModelKey resolution', () => {
+  it('derives subModelKey from linked need opportunity', () => {
+    const subModelKey = resolveAgreementSubModelKey(
+      {
+        needOpportunityId: 'opp-need',
+        offerOpportunityId: null,
+        postMatchId: null,
+      } as Parameters<typeof resolveAgreementSubModelKey>[0],
+      {
+        getOpportunity: (id) =>
+          id === 'opp-need' ? { subModelType: 'project_based' } : undefined,
+      },
+    )
+
+    assert.equal(subModelKey, 'project_based')
+  })
+
+  it('falls back to post-match linked opportunity', () => {
+    const subModelKey = resolveAgreementSubModelKey(
+      {
+        needOpportunityId: null,
+        offerOpportunityId: null,
+        postMatchId: 'match-001',
+      } as Parameters<typeof resolveAgreementSubModelKey>[0],
+      {
+        getPostMatch: () => ({ offerOpportunityId: 'opp-offer' }),
+        getOpportunity: (id) =>
+          id === 'opp-offer' ? { subModelType: 'service_exchange' } : undefined,
+      },
+    )
+
+    assert.equal(subModelKey, 'service_exchange')
   })
 })
