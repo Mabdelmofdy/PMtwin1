@@ -173,8 +173,8 @@ Resolves Knowledge Registry content by `ReasonCode`:
 
 | Sprint | Scope | Engine / surface |
 |--------|-------|------------------|
-| **E1** | Profile adapter | `ENGINE_ID.PROFILE` |
-| **E2** | Vetting adapter | `ENGINE_ID.VETTING` |
+| **E1** | Profile adapter | `ENGINE_ID.PROFILE` — see [ADR-201-E1](./ADR-201-E1-profile-adapter.md) |
+| **E2** | Vetting adapter | `ENGINE_ID.VETTING` — see [ADR-201-E2](./ADR-201-E2-vetting-adapter.md) |
 | **E3** | Opportunity + readiness adapter | `ENGINE_ID.OPPORTUNITY`, `ENGINE_ID.READINESS` |
 | **E4** | Matching adapter | `ENGINE_ID.MATCHING` |
 | **E5** | Negotiation adapter | `ENGINE_ID.NEGOTIATION` |

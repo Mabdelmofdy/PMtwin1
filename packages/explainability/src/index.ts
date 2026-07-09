@@ -59,6 +59,53 @@ export {
 export type { ExplainabilityAdapter } from './adapters/explainability-adapter.ts'
 
 export type {
+  ProfileKind,
+  ProfileReadinessSnapshot,
+  ProfileReadinessStatus,
+} from './adapters/profile-types.ts'
+
+export {
+  PROFILE_FIELD_LABEL_TO_REASON_CODE,
+  profileFieldLabelToHref,
+  profileFieldLabelToReasonCode,
+} from './adapters/profile-field-map.ts'
+
+export {
+  PROFILE_ADAPTER_SCORE_WEIGHTS,
+  PROFILE_ADAPTER_VERSION,
+  buildProfileExplanation,
+  profileExplainabilityAdapter,
+} from './adapters/profile-adapter.ts'
+
+export type {
+  VettingDocumentEntry,
+  VettingDocumentStatus,
+  VettingReadinessSnapshot,
+  VettingReadinessStatus,
+  VettingReviewProgress,
+} from './adapters/vetting-types.ts'
+
+export {
+  VETTING_DOCUMENT_LABEL_TO_REASON_CODE,
+  VETTING_REVIEW_GAP_LABEL_TO_REASON_CODE,
+  VETTING_REVIEW_PROGRESS_TO_REASON_CODE,
+  vettingDocumentLabelToHref,
+  vettingDocumentLabelToReasonCode,
+  vettingDocumentTypeToHref,
+  vettingDocumentTypeToReasonCode,
+  vettingReviewGapLabelToHref,
+  vettingReviewGapLabelToReasonCode,
+  vettingReviewProgressToReasonCode,
+} from './adapters/vetting-field-map.ts'
+
+export {
+  VETTING_ADAPTER_SCORE_WEIGHTS,
+  VETTING_ADAPTER_VERSION,
+  buildVettingExplanation,
+  vettingExplainabilityAdapter,
+} from './adapters/vetting-adapter.ts'
+
+export type {
   KnowledgeAnswer,
   KnowledgeBridge,
   KnowledgeBridgeRequest,
