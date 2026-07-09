@@ -106,6 +106,36 @@ export {
 } from './adapters/vetting-adapter.ts'
 
 export type {
+  OpportunityAction,
+  OpportunityBlockingReason,
+  OpportunityExplainabilitySeverity,
+  OpportunityExplanation,
+  OpportunityFieldContribution,
+  OpportunityReadinessCategory,
+  OpportunityReadinessHealth,
+  OpportunityReadinessLevel,
+  OpportunityReadinessReasonCode,
+  OpportunityReadinessSnapshot,
+  OpportunityReadinessSnapshotMeta,
+} from './adapters/opportunity-types.ts'
+
+export {
+  OPPORTUNITY_FIELD_ID_TO_REASON_CODE,
+  opportunityFieldIdToHref,
+  opportunityFieldIdToReasonCode,
+  opportunityReasonCodeToCanonical,
+} from './adapters/opportunity-field-map.ts'
+
+export {
+  OPPORTUNITY_ADAPTER_SCORE_WEIGHTS,
+  OPPORTUNITY_ADAPTER_VERSION,
+  buildOpportunityExplanation,
+  buildReadinessExplanation,
+  opportunityExplainabilityAdapter,
+  readinessExplainabilityAdapter,
+} from './adapters/opportunity-adapter.ts'
+
+export type {
   KnowledgeAnswer,
   KnowledgeBridge,
   KnowledgeBridgeRequest,

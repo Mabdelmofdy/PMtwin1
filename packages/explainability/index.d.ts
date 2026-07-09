@@ -106,6 +106,36 @@ export {
 } from './src/index.ts'
 
 export type {
+  OpportunityAction,
+  OpportunityBlockingReason,
+  OpportunityExplainabilitySeverity,
+  OpportunityExplanation,
+  OpportunityFieldContribution,
+  OpportunityReadinessCategory,
+  OpportunityReadinessHealth,
+  OpportunityReadinessLevel,
+  OpportunityReadinessReasonCode,
+  OpportunityReadinessSnapshot,
+  OpportunityReadinessSnapshotMeta,
+} from './src/adapters/opportunity-types.ts'
+
+export {
+  OPPORTUNITY_FIELD_ID_TO_REASON_CODE,
+  opportunityFieldIdToHref,
+  opportunityFieldIdToReasonCode,
+  opportunityReasonCodeToCanonical,
+} from './src/index.ts'
+
+export {
+  OPPORTUNITY_ADAPTER_SCORE_WEIGHTS,
+  OPPORTUNITY_ADAPTER_VERSION,
+  buildOpportunityExplanation,
+  buildReadinessExplanation,
+  opportunityExplainabilityAdapter,
+  readinessExplainabilityAdapter,
+} from './src/index.ts'
+
+export type {
   KnowledgeAnswer,
   KnowledgeBridge,
   KnowledgeBridgeRequest,

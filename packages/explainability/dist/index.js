@@ -137,12 +137,30 @@ var PROFILE_REASON_CODES = {
 
 // src/reason-codes/readiness.ts
 var READINESS_REASON_CODES = {
-  MISSING_BUDGET: "READINESS_MISSING_BUDGET",
+  MISSING_TITLE: "READINESS_MISSING_TITLE",
+  MISSING_INTENT: "READINESS_MISSING_INTENT",
+  MISSING_CATEGORY_PROFESSION: "READINESS_MISSING_CATEGORY_PROFESSION",
+  MISSING_ROLE_INTENT: "READINESS_MISSING_ROLE_INTENT",
+  MISSING_SKILLS_INTENT: "READINESS_MISSING_SKILLS_INTENT",
+  MISSING_SERVICES_INTENT: "READINESS_MISSING_SERVICES_INTENT",
+  MISSING_LOCATION: "READINESS_MISSING_LOCATION",
   MISSING_TIMELINE: "READINESS_MISSING_TIMELINE",
+  MISSING_COLLABORATION_MODEL: "READINESS_MISSING_COLLABORATION_MODEL",
+  MISSING_DESCRIPTION_SCOPE: "READINESS_MISSING_DESCRIPTION_SCOPE",
+  MISSING_BUDGET: "READINESS_MISSING_BUDGET",
+  MISSING_BUDGET_VALUE_TERMS: "READINESS_MISSING_BUDGET_VALUE_TERMS",
+  MISSING_PREFERRED_PARTNER_TYPE: "READINESS_MISSING_PREFERRED_PARTNER_TYPE",
+  MISSING_ATTACHMENTS: "READINESS_MISSING_ATTACHMENTS",
+  MISSING_COMPLIANCE: "READINESS_MISSING_COMPLIANCE",
+  MISSING_DELIVERY_MILESTONES: "READINESS_MISSING_DELIVERY_MILESTONES",
   MISSING_SCOPE: "READINESS_MISSING_SCOPE",
   PUBLISH_BLOCKED: "READINESS_PUBLISH_BLOCKED",
+  PUBLISH_READY: "READINESS_PUBLISH_READY",
+  REQUIRED_COMPLETE: "READINESS_REQUIRED_COMPLETE",
+  RECOMMENDED_COMPLETE: "READINESS_RECOMMENDED_COMPLETE",
   SCORE_SUMMARY: "READINESS_SCORE_SUMMARY",
-  RECOMMENDED_GAPS: "READINESS_RECOMMENDED_GAPS"
+  RECOMMENDED_GAPS: "READINESS_RECOMMENDED_GAPS",
+  COMPLETE: "READINESS_COMPLETE"
 };
 
 // src/reason-codes/vetting.ts
@@ -1038,6 +1056,424 @@ var vettingExplainabilityAdapter = {
   buildTimeline: buildTimelineFromSnapshot2
 };
 
+// src/adapters/opportunity-field-map.ts
+var OPPORTUNITY_FIELD_ID_TO_REASON_CODE = {
+  title: READINESS_REASON_CODES.MISSING_TITLE,
+  intent: READINESS_REASON_CODES.MISSING_INTENT,
+  categoryProfession: READINESS_REASON_CODES.MISSING_CATEGORY_PROFESSION,
+  roleIntent: READINESS_REASON_CODES.MISSING_ROLE_INTENT,
+  skillsIntent: READINESS_REASON_CODES.MISSING_SKILLS_INTENT,
+  servicesIntent: READINESS_REASON_CODES.MISSING_SERVICES_INTENT,
+  location: READINESS_REASON_CODES.MISSING_LOCATION,
+  timeline: READINESS_REASON_CODES.MISSING_TIMELINE,
+  collaborationModel: READINESS_REASON_CODES.MISSING_COLLABORATION_MODEL,
+  descriptionScope: READINESS_REASON_CODES.MISSING_DESCRIPTION_SCOPE,
+  budgetValueTerms: READINESS_REASON_CODES.MISSING_BUDGET_VALUE_TERMS,
+  preferredPartnerType: READINESS_REASON_CODES.MISSING_PREFERRED_PARTNER_TYPE,
+  attachments: READINESS_REASON_CODES.MISSING_ATTACHMENTS,
+  compliance: READINESS_REASON_CODES.MISSING_COMPLIANCE,
+  deliveryMilestones: READINESS_REASON_CODES.MISSING_DELIVERY_MILESTONES
+};
+var OPPORTUNITY_FIELD_HREF_SLUG = {
+  title: "title",
+  intent: "intent",
+  categoryProfession: "category-profession",
+  roleIntent: "role-intent",
+  skillsIntent: "skills-intent",
+  servicesIntent: "services-intent",
+  location: "location",
+  timeline: "timeline",
+  collaborationModel: "collaboration-model",
+  descriptionScope: "description-scope",
+  budgetValueTerms: "budget-value-terms",
+  preferredPartnerType: "preferred-partner-type",
+  attachments: "attachments",
+  compliance: "compliance",
+  deliveryMilestones: "delivery-milestones"
+};
+var READINESS_CODE_ALIASES = {
+  READINESS_MISSING_BUDGET_VALUE_TERMS: READINESS_REASON_CODES.MISSING_BUDGET_VALUE_TERMS,
+  READINESS_MISSING_DESCRIPTION_SCOPE: READINESS_REASON_CODES.MISSING_DESCRIPTION_SCOPE,
+  READINESS_MISSING_SCOPE: READINESS_REASON_CODES.MISSING_DESCRIPTION_SCOPE
+};
+function fieldIdToParameterizedCode(fieldId) {
+  const snake = fieldId.replace(/([A-Z])/g, "_$1").replace(/[^a-zA-Z0-9]+/g, "_").toUpperCase().replace(/^_/, "");
+  return `READINESS_MISSING_${snake}`;
+}
+function opportunityFieldIdToReasonCode(fieldId) {
+  return OPPORTUNITY_FIELD_ID_TO_REASON_CODE[fieldId] ?? fieldIdToParameterizedCode(fieldId);
+}
+var STATIC_READINESS_CODES = Object.values(
+  READINESS_REASON_CODES
+);
+function opportunityReasonCodeToCanonical(code, fieldId) {
+  if (code in READINESS_CODE_ALIASES) {
+    return READINESS_CODE_ALIASES[code];
+  }
+  if (STATIC_READINESS_CODES.includes(code)) {
+    return code;
+  }
+  if (code.startsWith("READINESS_MISSING_") && fieldId) {
+    return opportunityFieldIdToReasonCode(fieldId);
+  }
+  if (code.startsWith("READINESS_")) {
+    return code;
+  }
+  if (fieldId) {
+    return opportunityFieldIdToReasonCode(fieldId);
+  }
+  return code;
+}
+function opportunityFieldIdToHref(fieldId, subModelKey) {
+  const slug = OPPORTUNITY_FIELD_HREF_SLUG[fieldId] ?? fieldId.replace(/([A-Z])/g, "-$1").toLowerCase();
+  const base = subModelKey ? `/opportunity/edit/${subModelKey}` : "/opportunity/edit";
+  return `${base}#${slug}`;
+}
+
+// src/adapters/opportunity-adapter.ts
+var OPPORTUNITY_ADAPTER_VERSION = "1.0.0";
+var OPPORTUNITY_ADAPTER_SCORE_WEIGHTS = {
+  required: 80,
+  recommended: 20
+};
+function roundScore3(value) {
+  return Math.round(value * 100) / 100;
+}
+function resolveGeneratedAt3(input) {
+  return input.evaluatedAt ?? input.snapshot.generatedAt ?? (/* @__PURE__ */ new Date()).toISOString();
+}
+function resolveHealth3(health) {
+  switch (health) {
+    case "excellent":
+      return HEALTH.EXCELLENT;
+    case "good":
+      return HEALTH.GOOD;
+    case "warning":
+      return HEALTH.WARNING;
+    case "critical":
+    default:
+      return HEALTH.CRITICAL;
+  }
+}
+function toCanonicalCode(code, fieldId) {
+  return opportunityReasonCodeToCanonical(code, fieldId);
+}
+function mapExplanationSeverity(severity) {
+  if (severity === "critical") return EXPLANATION_SEVERITY.CRITICAL;
+  if (severity === "warning") return EXPLANATION_SEVERITY.WARNING;
+  return EXPLANATION_SEVERITY.INFO;
+}
+function buildSummary3(input) {
+  if (input.publishReady) {
+    return "Opportunity is publish-ready \u2014 all required fields are complete.";
+  }
+  const missingRequired = input.missingRequiredFields.length;
+  if (missingRequired > 0) {
+    return `Opportunity is incomplete \u2014 ${missingRequired} required field${missingRequired === 1 ? "" : "s"} still missing.`;
+  }
+  const missingRecommended = input.missingRecommendedFields.length;
+  if (missingRecommended > 0) {
+    return `Opportunity meets publish requirements \u2014 ${missingRecommended} recommended field${missingRecommended === 1 ? "" : "s"} can improve visibility.`;
+  }
+  return `Opportunity readiness is ${input.readinessLevel} at ${Math.round(input.score)}%.`;
+}
+function buildReasons3(input) {
+  if (input.explanations.length > 0) {
+    return input.explanations.map((explanation) => ({
+      code: toCanonicalCode(explanation.code, explanation.fieldId),
+      message: explanation.message,
+      severity: mapExplanationSeverity(explanation.severity),
+      category: explanation.category ?? (explanation.fieldId ? "field" : "summary"),
+      relatedEntityId: input.entityId
+    }));
+  }
+  const reasons = [
+    {
+      code: READINESS_REASON_CODES.SCORE_SUMMARY,
+      message: `Readiness ${Math.round(input.score)}%`,
+      severity: EXPLANATION_SEVERITY.INFO,
+      category: "summary"
+    }
+  ];
+  for (const fieldId of input.missingRequiredFields) {
+    const contribution = input.fieldContributions.find((entry) => entry.fieldId === fieldId);
+    reasons.push({
+      code: opportunityFieldIdToReasonCode(fieldId),
+      message: `Missing required: ${contribution?.label ?? fieldId}`,
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      category: contribution?.category ?? "required",
+      relatedEntityId: input.entityId
+    });
+  }
+  if (input.missingRecommendedFields.length > 0) {
+    reasons.push({
+      code: READINESS_REASON_CODES.RECOMMENDED_GAPS,
+      message: `${input.missingRecommendedFields.length} recommended field(s) remaining`,
+      severity: EXPLANATION_SEVERITY.WARNING,
+      category: "recommended"
+    });
+  }
+  return reasons;
+}
+function buildBlockers3(input) {
+  if (input.blockingReasons.length > 0) {
+    return input.blockingReasons.map((blocker) => ({
+      reasonCode: toCanonicalCode(blocker.code, blocker.fieldId),
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      blockingEntity: input.entityId,
+      resolutionHint: blocker.message
+    }));
+  }
+  if (!input.publishReady) {
+    return input.missingRequiredFields.map((fieldId) => {
+      const contribution = input.fieldContributions.find((entry) => entry.fieldId === fieldId);
+      return {
+        reasonCode: opportunityFieldIdToReasonCode(fieldId),
+        severity: EXPLANATION_SEVERITY.CRITICAL,
+        blockingEntity: input.entityId,
+        resolutionHint: `Complete ${contribution?.label ?? fieldId} to publish.`
+      };
+    });
+  }
+  return [];
+}
+function fieldImpactPercent(contribution, input) {
+  if (contribution.requiredWeight > 0) {
+    const totalRequired = input.fieldContributions.reduce(
+      (sum, entry) => sum + entry.requiredWeight,
+      0
+    );
+    if (totalRequired === 0) return 0;
+    return roundScore3(
+      contribution.requiredWeight / totalRequired * OPPORTUNITY_ADAPTER_SCORE_WEIGHTS.required
+    );
+  }
+  const totalRecommended = input.fieldContributions.reduce(
+    (sum, entry) => sum + entry.recommendedWeight,
+    0
+  );
+  if (totalRecommended === 0) return 0;
+  return roundScore3(
+    contribution.recommendedWeight / totalRecommended * OPPORTUNITY_ADAPTER_SCORE_WEIGHTS.recommended
+  );
+}
+function buildStrengths3(input) {
+  const strengths = [];
+  const completedRequired = input.completedRequiredFields ?? input.fieldContributions.filter((entry) => entry.requiredWeight > 0 && entry.present).map((entry) => entry.fieldId);
+  const completedRecommended = input.completedRecommendedFields ?? input.fieldContributions.filter((entry) => entry.recommendedWeight > 0 && entry.present).map((entry) => entry.fieldId);
+  const totalRequired = input.fieldContributions.filter(
+    (entry) => entry.requiredWeight > 0
+  ).length;
+  const totalRecommended = input.fieldContributions.filter(
+    (entry) => entry.recommendedWeight > 0
+  ).length;
+  if (completedRequired.length === totalRequired && totalRequired > 0) {
+    strengths.push({
+      code: READINESS_REASON_CODES.REQUIRED_COMPLETE,
+      label: "All required fields complete",
+      impactPercent: OPPORTUNITY_ADAPTER_SCORE_WEIGHTS.required
+    });
+  }
+  if (completedRecommended.length === totalRecommended && totalRecommended > 0) {
+    strengths.push({
+      code: READINESS_REASON_CODES.RECOMMENDED_COMPLETE,
+      label: "All recommended fields complete",
+      impactPercent: OPPORTUNITY_ADAPTER_SCORE_WEIGHTS.recommended
+    });
+  }
+  for (const fieldId of completedRequired) {
+    const contribution = input.fieldContributions.find((entry) => entry.fieldId === fieldId);
+    if (!contribution) continue;
+    strengths.push({
+      code: `READINESS_COMPLETE_${fieldId.replace(/([A-Z])/g, "_$1").toUpperCase()}`,
+      label: contribution.label,
+      impactPercent: fieldImpactPercent(contribution, input)
+    });
+  }
+  for (const fieldId of completedRecommended) {
+    const contribution = input.fieldContributions.find((entry) => entry.fieldId === fieldId);
+    if (!contribution) continue;
+    strengths.push({
+      code: `READINESS_COMPLETE_${fieldId.replace(/([A-Z])/g, "_$1").toUpperCase()}`,
+      label: contribution.label,
+      impactPercent: fieldImpactPercent(contribution, input)
+    });
+  }
+  if (input.publishReady) {
+    strengths.push({
+      code: READINESS_REASON_CODES.PUBLISH_READY,
+      label: "Publish-ready opportunity",
+      impactPercent: 100
+    });
+  }
+  return strengths;
+}
+function buildWeaknesses3(input) {
+  const weaknesses = [];
+  for (const fieldId of input.missingRequiredFields) {
+    const contribution = input.fieldContributions.find((entry) => entry.fieldId === fieldId);
+    if (!contribution) {
+      weaknesses.push({
+        code: opportunityFieldIdToReasonCode(fieldId),
+        label: fieldId,
+        impactPercent: 0
+      });
+      continue;
+    }
+    weaknesses.push({
+      code: opportunityFieldIdToReasonCode(fieldId),
+      label: contribution.label,
+      impactPercent: fieldImpactPercent(contribution, input)
+    });
+  }
+  for (const fieldId of input.missingRecommendedFields) {
+    const contribution = input.fieldContributions.find((entry) => entry.fieldId === fieldId);
+    if (!contribution) {
+      weaknesses.push({
+        code: opportunityFieldIdToReasonCode(fieldId),
+        label: fieldId,
+        impactPercent: 0
+      });
+      continue;
+    }
+    weaknesses.push({
+      code: opportunityFieldIdToReasonCode(fieldId),
+      label: contribution.label,
+      impactPercent: fieldImpactPercent(contribution, input)
+    });
+  }
+  return weaknesses;
+}
+function recommendationPriority3(priority) {
+  return priority === "required" ? RECOMMENDATION_PRIORITY.CRITICAL : RECOMMENDATION_PRIORITY.MEDIUM;
+}
+function buildRecommendationsFromSnapshot3(input) {
+  return input.nextBestActions.map((action, index) => {
+    const reasonCode = toCanonicalCode(action.reasonCode, action.fieldId);
+    const slug = action.fieldId.replace(/([A-Z])/g, "-$1").toLowerCase();
+    return {
+      id: `opportunity-rec-${slug}-${index}`,
+      label: `Complete ${action.label}`,
+      reasonCode,
+      priority: recommendationPriority3(action.priority),
+      impactPercent: action.impactPercent,
+      estimatedScore: action.estimatedScore,
+      href: opportunityFieldIdToHref(action.fieldId, input.subModelKey),
+      category: action.priority,
+      severity: action.priority === "required" ? EXPLANATION_SEVERITY.CRITICAL : EXPLANATION_SEVERITY.WARNING
+    };
+  });
+}
+function buildBreakdownFromSnapshot3(input) {
+  const requiredReasonCodes = input.missingRequiredFields.map(opportunityFieldIdToReasonCode);
+  const recommendedReasonCodes = input.missingRecommendedFields.map(
+    opportunityFieldIdToReasonCode
+  );
+  return [
+    {
+      label: "Required fields",
+      weight: OPPORTUNITY_ADAPTER_SCORE_WEIGHTS.required,
+      score: roundScore3(
+        input.requiredScore / 100 * OPPORTUNITY_ADAPTER_SCORE_WEIGHTS.required
+      ),
+      maxScore: OPPORTUNITY_ADAPTER_SCORE_WEIGHTS.required,
+      reasonCodes: requiredReasonCodes
+    },
+    {
+      label: "Recommended fields",
+      weight: OPPORTUNITY_ADAPTER_SCORE_WEIGHTS.recommended,
+      score: roundScore3(
+        input.recommendedScore / 100 * OPPORTUNITY_ADAPTER_SCORE_WEIGHTS.recommended
+      ),
+      maxScore: OPPORTUNITY_ADAPTER_SCORE_WEIGHTS.recommended,
+      reasonCodes: recommendedReasonCodes
+    }
+  ];
+}
+function buildTimelineFromSnapshot3(input) {
+  const events = [];
+  if (input.createdAt) {
+    events.push({
+      type: "opportunity-created",
+      title: "Opportunity created",
+      description: "Opportunity draft record created.",
+      timestamp: input.createdAt,
+      status: TIMELINE_EVENT_STATUS.COMPLETED,
+      relatedEntity: input.entityId
+    });
+  }
+  events.push({
+    type: "opportunity-evaluated",
+    title: "Opportunity readiness evaluated",
+    description: buildSummary3(input),
+    timestamp: resolveGeneratedAt3(input),
+    status: input.publishReady ? TIMELINE_EVENT_STATUS.COMPLETED : input.missingRequiredFields.length > 0 ? TIMELINE_EVENT_STATUS.BLOCKED : TIMELINE_EVENT_STATUS.ACTIVE,
+    relatedEntity: input.entityId
+  });
+  if (input.publishReady) {
+    events.push({
+      type: "opportunity-publish-ready",
+      title: "Publish-ready milestone reached",
+      description: "All required opportunity fields are complete.",
+      timestamp: resolveGeneratedAt3(input),
+      status: TIMELINE_EVENT_STATUS.COMPLETED,
+      relatedEntity: input.entityId
+    });
+  }
+  return events;
+}
+function buildOpportunityBundle(input, engine) {
+  const generatedAt = resolveGeneratedAt3(input);
+  return {
+    engine,
+    entityId: input.entityId,
+    score: input.score,
+    health: resolveHealth3(input.health),
+    summary: buildSummary3(input),
+    scoreBreakdown: buildBreakdownFromSnapshot3(input),
+    reasons: buildReasons3(input),
+    blockers: buildBlockers3(input),
+    strengths: buildStrengths3(input),
+    weaknesses: buildWeaknesses3(input),
+    recommendations: buildRecommendationsFromSnapshot3(input),
+    timeline: buildTimelineFromSnapshot3(input),
+    metadata: {
+      generatedAt,
+      engineVersion: input.snapshot.engineVersion ?? OPPORTUNITY_ADAPTER_VERSION,
+      locale: input.locale ?? "en-SA",
+      source: engine === ENGINE_ID.READINESS ? "readiness-adapter" : "opportunity-readiness-adapter",
+      tags: [input.readinessLevel, input.health, input.publishReady ? "publish-ready" : "draft"],
+      extensions: {
+        subModelKey: input.subModelKey ?? null,
+        readinessLevel: input.readinessLevel,
+        publishReady: input.publishReady,
+        requiredScore: input.requiredScore,
+        recommendedScore: input.recommendedScore,
+        knowledgeVersion: input.snapshot.knowledgeVersion,
+        formVersion: input.snapshot.formVersion
+      }
+    }
+  };
+}
+function buildOpportunityExplanation(input) {
+  return buildOpportunityBundle(input, ENGINE_ID.OPPORTUNITY);
+}
+function buildReadinessExplanation(input) {
+  return buildOpportunityBundle(input, ENGINE_ID.READINESS);
+}
+var opportunityExplainabilityAdapter = {
+  buildExplanation: buildOpportunityExplanation,
+  buildRecommendations: buildRecommendationsFromSnapshot3,
+  buildBreakdown: buildBreakdownFromSnapshot3,
+  buildTimeline: buildTimelineFromSnapshot3
+};
+var readinessExplainabilityAdapter = {
+  buildExplanation: buildReadinessExplanation,
+  buildRecommendations: buildRecommendationsFromSnapshot3,
+  buildBreakdown: buildBreakdownFromSnapshot3,
+  buildTimeline: buildTimelineFromSnapshot3
+};
+
 // src/validation/bundle-shape.ts
 var HEALTH_VALUES = new Set(Object.values(HEALTH));
 var ENGINE_VALUES = new Set(Object.values(ENGINE_ID));
@@ -1178,6 +1614,9 @@ export {
   HEALTH,
   MATCH_REASON_CODES,
   NEGOTIATION_REASON_CODES,
+  OPPORTUNITY_ADAPTER_SCORE_WEIGHTS,
+  OPPORTUNITY_ADAPTER_VERSION,
+  OPPORTUNITY_FIELD_ID_TO_REASON_CODE,
   PROFILE_ADAPTER_SCORE_WEIGHTS,
   PROFILE_ADAPTER_VERSION,
   PROFILE_FIELD_LABEL_TO_REASON_CODE,
@@ -1193,16 +1632,23 @@ export {
   VETTING_REVIEW_GAP_LABEL_TO_REASON_CODE,
   VETTING_REVIEW_PROGRESS_TO_REASON_CODE,
   assertReasonCode,
+  buildOpportunityExplanation,
   buildProfileExplanation,
+  buildReadinessExplanation,
   buildVettingExplanation,
   deserializeAIExplanationPayload,
   deserializeExplanationBundle,
   fromAIExplanationPayload,
   isExplanationBundle,
   isReasonCode,
+  opportunityExplainabilityAdapter,
+  opportunityFieldIdToHref,
+  opportunityFieldIdToReasonCode,
+  opportunityReasonCodeToCanonical,
   profileExplainabilityAdapter,
   profileFieldLabelToHref,
   profileFieldLabelToReasonCode,
+  readinessExplainabilityAdapter,
   serializeAIExplanationPayload,
   serializeExplanationBundle,
   toAIExplanationPayload,
