@@ -27,6 +27,7 @@ import {
 } from '@/lib/run-circular-matching-feedback.ts'
 import { runCircularMatchingUiAction } from '@/lib/run-circular-matching-ui-action.ts'
 import { useAuth } from '@/providers/auth-provider.tsx'
+import { VettingReviewDialog } from '@/components/admin/vetting-review-dialog.tsx'
 import {
   PmDataTable,
   PmTableEmpty,
@@ -440,6 +441,7 @@ export function AdminVettingPage() {
   const { user } = useAuth()
   const version = useDataStoreVersion()
   const pending = useMemo(() => adminApi.getPendingUsers(), [version])
+  const [reviewing, setReviewing] = useState<(typeof pending)[number] | null>(null)
 
   const reviewerId = user?.id ?? 'admin'
 
@@ -485,64 +487,61 @@ export function AdminVettingPage() {
           id: 'actions',
           label: 'Actions',
           cell: (entry) => {
-            const partyId = entry.activeParty?.id ?? entry.user.id
             return (
               <div className="flex flex-wrap gap-2">
                 <PmButton
                   size="sm"
                   onClick={() => {
-                    adminApi.approveVetting(entry.user.id, partyId, reviewerId)
-                    toast.success('Vetting approved')
+                    setReviewing(entry)
                   }}
                 >
-                  Approve
-                </PmButton>
-                <PmButton
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    const reason = window.prompt('Reason for rejection') ?? ''
-                    adminApi.rejectVetting(entry.user.id, partyId, reviewerId, reason)
-                    toast.success('Vetting rejected')
-                  }}
-                >
-                  Reject
-                </PmButton>
-                <PmButton
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => {
-                    const reason = window.prompt('Request changes reason') ?? ''
-                    const requestedItemsRaw = window.prompt(
-                      'Requested items (comma-separated)',
-                    ) ?? ''
-                    const dueDate = window.prompt('Optional due date (YYYY-MM-DD)') ?? undefined
-                    const requestedItems = requestedItemsRaw
-                      .split(',')
-                      .map((item) => item.trim())
-                      .filter(Boolean)
-                    if (!reason || requestedItems.length === 0) {
-                      toast.error('Reason and requested items are required.')
-                      return
-                    }
-                    adminApi.requestVettingChanges({
-                      userId: entry.user.id,
-                      partyId,
-                      reviewerId,
-                      reason,
-                      requestedItems,
-                      dueDate,
-                    })
-                    toast.success('Changes requested')
-                  }}
-                >
-                  Request changes
+                  Review
                 </PmButton>
               </div>
             )
           },
         },
       ]}
+      headerActions={
+        <VettingReviewDialog
+          open={Boolean(reviewing)}
+          onOpenChange={(open) => {
+            if (!open) setReviewing(null)
+          }}
+          userLabel={reviewing?.user.profile?.name ?? reviewing?.user.email ?? 'User'}
+          onSubmit={(payload) => {
+            if (!reviewing) return
+            const partyId = reviewing.activeParty?.id ?? reviewing.user.id
+            if (payload.action === 'approve') {
+              adminApi.approveVetting(reviewing.user.id, partyId, reviewerId)
+              toast.success('Vetting approved')
+            } else if (payload.action === 'reject') {
+              adminApi.rejectVetting(
+                reviewing.user.id,
+                partyId,
+                reviewerId,
+                payload.reviewNotes,
+              )
+              toast.success('Vetting rejected')
+            } else {
+              if (!payload.reviewNotes || payload.requestedItems.length === 0) {
+                toast.error('Review notes and requested items are required.')
+                return
+              }
+              adminApi.requestVettingChanges({
+                userId: reviewing.user.id,
+                partyId,
+                reviewerId,
+                reason: payload.reviewNotes,
+                requestedItems: payload.requestedItems,
+                dueDate: payload.dueDate,
+              })
+              toast.success('Changes requested')
+            }
+            setReviewing(null)
+          }}
+        />
+      }
     />
   )
 }

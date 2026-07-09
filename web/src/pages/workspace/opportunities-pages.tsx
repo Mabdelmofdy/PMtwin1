@@ -313,7 +313,7 @@ function resolveCompletedSteps(draft: OpportunityDraft): string[] {
 }
 
 export function OpportunitiesPage() {
-  const { user, canMutate } = useAuth()
+  const { user, canMutate, isPendingApproval } = useAuth()
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const navState = readProductNavState(location.state)
@@ -502,7 +502,7 @@ export function OpportunitiesPage() {
                 href: '/opportunities/create',
                 render: () => (
                   <PmButton asChild disabled={!canMutate}>
-                    <Link to="/opportunities/create">
+                    <Link to={isPendingApproval ? '/dashboard' : '/opportunities/create'}>
                       <Plus className="size-4" aria-hidden />
                       Create opportunity
                     </Link>
@@ -811,7 +811,7 @@ export function OpportunityCreatePage() {
 function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   const { id } = useParams()
   const opportunityId = mode === 'edit' ? id : undefined
-  const { user } = useAuth()
+  const { user, isPendingApproval } = useAuth()
   const [draft, setDraft] = useState<OpportunityDraft>(initialDraft)
   const [activeStepId, setActiveStepId] = useState('type')
   const [publishDetails, setPublishDetails] = useState<readonly string[] | null>(null)
@@ -905,6 +905,10 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   }
 
   const handleSaveDraft = () => {
+    if (isPendingApproval) {
+      toast.error('Account pending vetting. Opportunity creation is blocked until approval.')
+      return
+    }
     if (!user) {
       toast.error('Sign in to save opportunities.')
       return
@@ -934,6 +938,10 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   }
 
   const handlePublish = () => {
+    if (isPendingApproval) {
+      toast.error('Account pending vetting. Publishing is blocked until approval.')
+      return
+    }
     if (!user) {
       toast.error('Sign in to publish opportunities.')
       return

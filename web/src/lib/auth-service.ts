@@ -172,7 +172,11 @@ export const authService = {
   },
 
   isPendingApproval(user: PlatformUser) {
-    return user.status === 'pending' || user.status === 'clarification_requested'
+    return (
+      user.status === 'pending_vetting' ||
+      user.status === 'pending' ||
+      user.status === 'clarification_requested'
+    )
   },
 
   isVettingRestricted(user: PlatformUser) {

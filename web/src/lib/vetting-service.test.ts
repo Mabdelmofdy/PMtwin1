@@ -72,7 +72,14 @@ function createInMemoryDeps() {
         documents.push(document)
         return document
       },
-      update: (_id: string, _patch: Record<string, unknown>) => undefined,
+      getById: (id: string) =>
+        documents.find((document) => String(document.id) === id),
+      update: (id: string, patch: Record<string, unknown>) => {
+        const index = documents.findIndex((document) => String(document.id) === id)
+        if (index < 0) return undefined
+        documents[index] = { ...documents[index], ...patch }
+        return documents[index]
+      },
       listForParty: (ownerPartyId: string) =>
         documents.filter((doc) => doc.ownerPartyId === ownerPartyId),
     },
@@ -80,6 +87,12 @@ function createInMemoryDeps() {
       append: (entry: Record<string, unknown>) => {
         audits.push(entry)
         return { id: `audit-${audits.length}`, ...entry }
+      },
+    },
+    notificationRepository: {
+      create: (entry: Record<string, unknown>) => {
+        audits.push({ action: 'notification.created', ...entry })
+        return { id: `notif-${audits.length}`, ...entry }
       },
     },
   }
@@ -94,14 +107,14 @@ describe('vetting service', () => {
       id: 'u-1',
       email: 'user@test',
       role: 'user',
-      status: 'pending',
+      status: 'pending_vetting',
       profile: { name: 'User One' },
     })
     stack.parties.set('u-1', {
       id: 'u-1',
       partyType: 'individual',
       displayName: 'User One',
-      status: 'pending',
+      status: 'pending_vetting',
       sourceEntityId: 'u-1',
       sourceEntityType: 'individual',
     })
@@ -115,15 +128,22 @@ describe('vetting service', () => {
       reason: 'CR expired',
       requestedItems: ['Upload valid CR'],
     })
-    assert.equal(stack.users.get('u-1')?.status, 'clarification_requested')
+    assert.equal(stack.users.get('u-1')?.status, 'pending_vetting')
 
     service.resubmitForReview('u-1', 'u-1')
-    assert.equal(stack.users.get('u-1')?.status, 'pending')
+    assert.equal(stack.users.get('u-1')?.status, 'pending_vetting')
     assert.ok(
       stack.audits.some((entry) => entry.action === 'vetting.changes_requested'),
     )
     assert.ok(
       stack.audits.some((entry) => entry.action === 'vetting.resubmitted'),
+    )
+    assert.ok(
+      stack.audits.some(
+        (entry) =>
+          entry.action === 'notification.created'
+          && entry.title === 'Changes requested',
+      ),
     )
   })
 
@@ -145,6 +165,23 @@ describe('vetting service', () => {
     assert.equal(stack.documents.length, 1)
     assert.ok(
       stack.audits.some((entry) => entry.action === 'vetting.document_replaced'),
+    )
+    const listed = service.listPartyDocuments('party-1')
+    assert.equal(listed.length, 1)
+    assert.equal(listed[0]?.ownerPartyId, 'party-1')
+
+    const reviewed = service.reviewPartyDocument(String(document.id), {
+      status: 'approved',
+      reviewedBy: 'admin-1',
+      reviewNotes: 'Looks valid',
+    })
+    assert.equal(reviewed?.status, 'approved')
+    assert.ok(
+      stack.audits.some(
+        (entry) =>
+          entry.action === 'notification.created'
+          && entry.title === 'Document approved',
+      ),
     )
   })
 })

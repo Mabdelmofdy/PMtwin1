@@ -58,6 +58,7 @@ import {
 import {
   MessagesPage,
   NotificationsPage,
+  PartyDocumentsPage,
   PeoplePage,
   PersonProfilePage,
   ProfilePage,
@@ -172,6 +173,7 @@ export function AppRoutes() {
 
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/party-documents" element={<PartyDocumentsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
 
         <Route path="/access-denied" element={<AccessDeniedPage />} />

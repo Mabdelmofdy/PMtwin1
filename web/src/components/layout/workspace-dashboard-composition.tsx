@@ -39,6 +39,7 @@ import { useProductLanguage } from '@/providers/product-language-provider'
 import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
 import { buildReadinessAnalytics, createCreatorProfileResolver } from '@/domain/readiness-analytics/readiness-analytics.ts'
 import { buildMatchingQualityAnalytics } from '@/domain/matching-quality/matching-quality-analytics.ts'
+import { PendingVettingDashboard } from '@/components/vetting/pending-vetting-dashboard.tsx'
 function buildNeedsActionItems(input: {
   userId?: string
   matches: ReturnType<typeof matchesApi.list>
@@ -109,7 +110,7 @@ function buildNeedsActionItems(input: {
 
 /** Action-first dashboard — attention, matches, active workflows, activity. */
 export function WorkspaceDashboardComposition() {
-  const { user, isCompanyUser } = useAuth()
+  const { user, isCompanyUser, isPendingApproval, canMutate } = useAuth()
   const { productLanguage } = useProductLanguage()
   const userId = user?.id
   const firstName = (user?.profile?.name ?? 'there').split(' ')[0]
@@ -210,6 +211,10 @@ export function WorkspaceDashboardComposition() {
       })),
   ].slice(0, 4)
 
+  if (user && isPendingApproval) {
+    return <PendingVettingDashboard user={user} />
+  }
+
   return (
     <PmDashboardLayout
       header={
@@ -235,7 +240,7 @@ export function WorkspaceDashboardComposition() {
                 label: productLanguage.actionLabel('createOpportunity'),
                 href: '/opportunities/create',
                 render: () => (
-                  <PmButton asChild>
+                  <PmButton asChild disabled={!canMutate}>
                     <Link to="/opportunities/create">
                       {productLanguage.actionLabel('createOpportunity')}
                       <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />

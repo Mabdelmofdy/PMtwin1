@@ -371,3 +371,118 @@ export function SettingsPage() {
     </PmPage>
   )
 }
+
+const PARTY_DOCUMENT_CATEGORIES = [
+  'profile',
+  'vetting',
+  'legal',
+  'technical',
+  'commercial',
+  'financial',
+  'insurance',
+  'certification',
+  'attachment',
+] as const
+
+export function PartyDocumentsPage() {
+  const { user } = useAuth()
+  const [documentType, setDocumentType] = useState('General')
+  const [fileName, setFileName] = useState('')
+  const [category, setCategory] = useState<(typeof PARTY_DOCUMENT_CATEGORIES)[number]>('profile')
+  const ownerPartyId = user ? partiesApi.resolveActivePartyId(user.id) : ''
+  const documents = ownerPartyId ? vettingService.listPartyDocuments(ownerPartyId) : []
+
+  const grouped = PARTY_DOCUMENT_CATEGORIES.map((group) => ({
+    group,
+    items: documents.filter((document) => document.documentCategory === group),
+  }))
+
+  return (
+    <PmPage
+      header={
+        <PmPageHeader
+          label="Account"
+          title="Party Documents"
+          description="Unified metadata-only document center grouped by category."
+        />
+      }
+    >
+      <PmContentCard title="Upload metadata">
+        <div className="grid gap-3 md:grid-cols-3">
+          <Input
+            value={documentType}
+            onChange={(event) => setDocumentType(event.target.value)}
+            placeholder="Document type"
+          />
+          <Input
+            value={fileName}
+            onChange={(event) => setFileName(event.target.value)}
+            placeholder="File name"
+          />
+          <select
+            className="rounded border border-input bg-background px-3 py-2 text-sm"
+            value={category}
+            onChange={(event) => setCategory(event.target.value as (typeof PARTY_DOCUMENT_CATEGORIES)[number])}
+          >
+            {PARTY_DOCUMENT_CATEGORIES.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="mt-3">
+          <PmButton
+            size="sm"
+            onClick={() => {
+              if (!user || !ownerPartyId) {
+                toast.error('Sign in first.')
+                return
+              }
+              if (!documentType.trim() || !fileName.trim()) {
+                toast.error('Document type and file name are required.')
+                return
+              }
+              vettingService.replacePartyDocument({
+                ownerPartyId,
+                uploadedByUserId: user.id,
+                documentCategory: category,
+                documentType: documentType.trim(),
+                fileName: fileName.trim(),
+              })
+              toast.success('PartyDocument metadata uploaded')
+              setFileName('')
+            }}
+          >
+            Upload
+          </PmButton>
+        </div>
+      </PmContentCard>
+
+      <div className="mt-4 grid gap-4">
+        {grouped.map(({ group, items }) => (
+          <PmContentCard key={group} title={group[0].toUpperCase() + group.slice(1)}>
+            {items.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No documents in this category.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {items.map((document) => (
+                  <div key={document.id} className="rounded border p-3 text-sm">
+                    <p><strong>Type:</strong> {document.documentType}</p>
+                    <p><strong>File:</strong> {document.fileName}</p>
+                    <p><strong>Status:</strong> {document.status}</p>
+                    <p><strong>Expiry:</strong> {document.expiryDate ?? '—'}</p>
+                    <p><strong>Review notes:</strong> {document.reviewNotes ?? '—'}</p>
+                    <p><strong>History:</strong> Placeholder</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </PmContentCard>
+        ))}
+      </div>
+    </PmPage>
+  )
+}

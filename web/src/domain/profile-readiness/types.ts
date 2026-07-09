@@ -8,6 +8,7 @@ export type ProfileReadinessResult = {
   readonly status: ProfileReadinessStatus
   readonly missingRequired: readonly string[]
   readonly missingRecommended: readonly string[]
+  readonly recommendations: readonly string[]
 }
 
 export type ProfileKind = 'individual' | 'company'
@@ -18,6 +19,7 @@ export type ProfileReadinessProfile = Readonly<Record<string, unknown>>
 export type ProfileReadinessInput = {
   readonly profileKind: ProfileKind
   readonly profile?: ProfileReadinessProfile | null
+  readonly respectCompletionLock?: boolean
 }
 
 export type ProfileFieldRule = {

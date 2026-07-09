@@ -8,6 +8,7 @@ import { peopleApi } from '@/api/people.ts'
 import {
   auditRepository,
   companyRepository,
+  notificationRepository,
   partyDocumentRepository,
   partyRepository,
   userRepository,
@@ -46,6 +47,7 @@ export type VettingServiceDeps = {
   readonly partyRepository: typeof partyRepository
   readonly partyDocumentRepository: typeof partyDocumentRepository
   readonly auditRepository: typeof auditRepository
+  readonly notificationRepository: typeof notificationRepository
 }
 
 const defaultDeps: VettingServiceDeps = {
@@ -56,6 +58,7 @@ const defaultDeps: VettingServiceDeps = {
   partyRepository,
   partyDocumentRepository,
   auditRepository,
+  notificationRepository,
 }
 
 function isVettingQueueStatus(status: string): boolean {
@@ -95,7 +98,7 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
   return {
     listQueue(): VettingQueueEntry[] {
       return deps.peopleApi
-        .listUsers()
+        .listAll()
         .filter((user) => isVettingQueueStatus(user.status))
         .map((user) => {
           const activeParty = deps.partiesApi.resolveActiveParty(user.id)
@@ -130,8 +133,21 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
         entityId: partyId,
         details: { userId },
       })
+      deps.notificationRepository.create({
+        userId,
+        title: 'Account approved',
+        message: 'Your onboarding review is complete. You can now perform full platform actions.',
+        read: false,
+        type: 'review_received',
+        entityType: 'user',
+        entityId: userId,
+      })
 
       return user
+    },
+
+    approveAccount(userId: string, partyId: string, reviewerId: string): PlatformUser | undefined {
+      return this.approve(userId, partyId, reviewerId)
     },
 
     reject(
@@ -159,6 +175,15 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
         entityId: partyId,
         details: { userId, reason },
       })
+      deps.notificationRepository.create({
+        userId,
+        title: 'Account rejected',
+        message: reason || 'Your onboarding submission was rejected. Please contact support.',
+        read: false,
+        type: 'review_received',
+        entityType: 'user',
+        entityId: userId,
+      })
 
       return user
     },
@@ -174,12 +199,14 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
           dueDate: input.dueDate,
           reviewerId: input.reviewerId,
           reviewedAt,
+          reviewProgress: 'changes_requested',
+          changesResolved: false,
         },
-        'clarification_requested',
+        'pending_vetting',
       )
       if (!user) return undefined
 
-      syncPartyStatus(deps, input.partyId, 'clarification_requested')
+      syncPartyStatus(deps, input.partyId, 'pending_vetting')
 
       deps.auditRepository.append({
         action: 'vetting.changes_requested',
@@ -193,6 +220,15 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
           dueDate: input.dueDate,
         },
       })
+      deps.notificationRepository.create({
+        userId: input.userId,
+        title: 'Changes requested',
+        message: input.reason,
+        read: false,
+        type: 'review_received',
+        entityType: 'user',
+        entityId: input.userId,
+      })
 
       return user
     },
@@ -203,7 +239,11 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
     ): PlatformUser | undefined {
       const existing = deps.userRepository.getById(userId)
       if (!existing) return undefined
-      if (existing.status !== 'pending' && existing.status !== 'clarification_requested') {
+      if (
+        existing.status !== 'pending' &&
+        existing.status !== 'pending_vetting' &&
+        existing.status !== 'clarification_requested'
+      ) {
         return undefined
       }
 
@@ -255,6 +295,14 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
           replacedDocumentId: input.replaceDocumentId,
         },
       })
+      deps.notificationRepository.create({
+        userId: input.uploadedByUserId,
+        title: 'Document replaced',
+        message: `${input.documentType} was uploaded for review.`,
+        read: false,
+        type: 'review_received',
+        entityType: 'notification',
+      })
 
       return document
     },
@@ -262,7 +310,11 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
     resubmitForReview(userId: string, partyId: string): PlatformUser | undefined {
       const existing = deps.userRepository.getById(userId)
       if (!existing) return undefined
-      if (existing.status !== 'clarification_requested' && existing.status !== 'pending') {
+      if (
+        existing.status !== 'clarification_requested' &&
+        existing.status !== 'pending' &&
+        existing.status !== 'pending_vetting'
+      ) {
         return undefined
       }
 
@@ -272,12 +324,14 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
         {
           ...existing.profile?.vetting,
           lastResubmittedAt: new Date().toISOString(),
+          reviewProgress: 'in_review',
+          changesResolved: true,
         },
-        'pending',
+        'pending_vetting',
       )
       if (!user) return undefined
 
-      syncPartyStatus(deps, partyId, 'pending')
+      syncPartyStatus(deps, partyId, 'pending_vetting')
 
       deps.auditRepository.append({
         action: 'vetting.resubmitted',
@@ -286,12 +340,72 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
         entityId: userId,
         details: { partyId },
       })
+      deps.notificationRepository.create({
+        userId,
+        title: 'Resubmission received',
+        message: 'Your onboarding updates were resubmitted and queued for review.',
+        read: false,
+        type: 'review_received',
+        entityType: 'user',
+        entityId: userId,
+      })
 
       return user
     },
 
     listPartyDocuments(ownerPartyId: string): PartyDocument[] {
       return deps.partyDocumentRepository.listForParty(ownerPartyId)
+    },
+
+    reviewPartyDocument(
+      documentId: string,
+      input: {
+        status: 'approved' | 'rejected'
+        reviewedBy: string
+        reviewNotes?: string
+      },
+    ): PartyDocument | undefined {
+      const existing = deps.partyDocumentRepository.getById(documentId)
+      if (!existing) return undefined
+
+      const updated = deps.partyDocumentRepository.update(documentId, {
+        status: input.status,
+        reviewedBy: input.reviewedBy,
+        reviewedAt: new Date().toISOString(),
+        reviewNotes: input.reviewNotes,
+      })
+      if (!updated) return undefined
+
+      deps.notificationRepository.create({
+        userId: existing.uploadedByUserId,
+        title:
+          input.status === 'approved'
+            ? 'Document approved'
+            : 'Document rejected',
+        message:
+          input.status === 'approved'
+            ? `${existing.documentType} has been approved.`
+            : `${existing.documentType} was rejected. ${input.reviewNotes ?? ''}`.trim(),
+        read: false,
+        type: 'review_received',
+        entityType: 'notification',
+      })
+
+      deps.auditRepository.append({
+        action:
+          input.status === 'approved'
+            ? 'vetting.document_approved'
+            : 'vetting.document_rejected',
+        userId: input.reviewedBy,
+        entityType: 'party_document',
+        entityId: documentId,
+        details: {
+          ownerPartyId: existing.ownerPartyId,
+          reviewNotes: input.reviewNotes,
+        },
+      })
+
+      return updated
     },
   }
 }

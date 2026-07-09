@@ -78,9 +78,31 @@ function resolveStatus(
   return 'ready_for_matching'
 }
 
+function toRecommendations(
+  missingRequired: readonly string[],
+  missingRecommended: readonly string[],
+): readonly string[] {
+  return [...missingRequired, ...missingRecommended].map((label) => `Complete ${label}`)
+}
+
 export function evaluateProfileReadiness(input: ProfileReadinessInput): ProfileReadinessResult {
   const profile: ProfileReadinessProfile = input.profile ?? {}
   const { required, recommended } = getProfileReadinessRules(input.profileKind)
+  const respectCompletionLock = input.respectCompletionLock ?? true
+  const hasLock = Object.prototype.hasOwnProperty.call(profile, 'profileCompletionUnlocked')
+  const isUnlocked = profile.profileCompletionUnlocked === true
+
+  if (respectCompletionLock && hasLock && !isUnlocked) {
+    const missingRequired = required.map((rule) => rule.label)
+    const missingRecommended = recommended.map((rule) => rule.label)
+    return {
+      score: 0,
+      status: 'incomplete',
+      missingRequired,
+      missingRecommended,
+      recommendations: toRecommendations(missingRequired, missingRecommended),
+    }
+  }
 
   const requiredEvaluation = evaluateRules(profile, required)
   const recommendedEvaluation = evaluateRules(profile, recommended)
@@ -104,5 +126,9 @@ export function evaluateProfileReadiness(input: ProfileReadinessInput): ProfileR
     status,
     missingRequired: requiredEvaluation.missing,
     missingRecommended: recommendedEvaluation.missing,
+    recommendations: toRecommendations(
+      requiredEvaluation.missing,
+      recommendedEvaluation.missing,
+    ),
   }
 }

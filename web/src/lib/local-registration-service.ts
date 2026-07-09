@@ -46,18 +46,11 @@ function createLocalCompanyId(): string {
   return `local-co-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
-function buildProfileLocation(profile: RegistrationRequest['profile']): string | undefined {
-  const parts = [profile.city, profile.region, profile.country].filter((part) => part?.trim())
-  return parts.length > 0 ? parts.join(', ') : undefined
-}
-
 export function registerLocalAccount(
   request: RegistrationRequest,
   deps: LocalRegistrationDeps = defaultDeps,
 ): LocalRegistrationResult {
   const passwordHash = authService.encodePassword(request.password)
-  const location = buildProfileLocation(request.profile)
-
   if (request.accountType === 'individual') {
     const userId = createLocalUserId()
     const user = deps.userRepository.create({
@@ -65,12 +58,10 @@ export function registerLocalAccount(
       email: request.email,
       passwordHash,
       role: 'user',
-      status: 'pending',
+      status: 'pending_vetting',
       profile: {
-        name: request.profile.displayName,
-        location,
-        headline: request.profile.specialty ?? request.profile.expertise,
-        skills: request.profile.skills,
+        accountLabel: request.profile.displayName,
+        profileCompletionUnlocked: false,
       },
     })
 
@@ -95,10 +86,10 @@ export function registerLocalAccount(
     email: request.email,
     passwordHash,
     role: 'company_owner',
-    status: 'pending',
+    status: 'pending_vetting',
     profile: {
-      name: contactName,
-      location,
+      accountLabel: contactName,
+      profileCompletionUnlocked: false,
     },
   })
 
@@ -106,12 +97,11 @@ export function registerLocalAccount(
     id: companyId,
     email: `${companyId}@internal.pmtwin`,
     role: 'company_owner',
-    status: 'pending',
+    status: 'pending_vetting',
     profile: {
-      name: request.profile.displayName,
+      accountLabel: request.profile.displayName,
+      profileCompletionUnlocked: false,
       type: 'company',
-      location,
-      description: request.profile.companyDescription,
     },
   })
 

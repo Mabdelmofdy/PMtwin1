@@ -48,7 +48,11 @@ export function canMutateAsVettedUser(
 }
 
 export function isVettingRestrictedUser(user: PlatformUser): boolean {
-  return user.status === 'pending' || user.status === 'clarification_requested'
+  return (
+    user.status === 'pending_vetting' ||
+    user.status === 'pending' ||
+    user.status === 'clarification_requested'
+  )
 }
 
 export function requiresVettingMutationGuard(commandType: string): boolean {

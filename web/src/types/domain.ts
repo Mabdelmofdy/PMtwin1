@@ -59,6 +59,8 @@ export type TenantScoped = {
 import type { VettingMetadata } from '@/types/vetting.ts'
 
 export type PersonProfile = {
+  accountLabel?: string
+  profileCompletionUnlocked?: boolean
   name?: string
   headline?: string
   type?: string
