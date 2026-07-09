@@ -136,6 +136,37 @@ export {
 } from './adapters/opportunity-adapter.ts'
 
 export type {
+  MatchBreakdownSnapshot,
+  MatchExplainabilitySnapshot,
+  MatchHardGateFailure,
+  MatchLabelsSnapshot,
+  MatchRecommendationSnapshot,
+  MatchRecommendationTier,
+  MatchScoreLabel,
+  MatchTopology,
+} from './adapters/matching-types.ts'
+
+export {
+  MATCH_ADAPTER_SCORE_WEIGHTS,
+  MATCH_DIMENSION_LABELS,
+  MATCH_DIMENSION_THRESHOLDS,
+  MATCH_DIMENSION_TO_REASON_CODE,
+  dimensionImprovementHint,
+  isLowDimensionScore,
+  labelFromDimensionScore,
+  matchDimensionToReasonCode,
+  matchHardGateCodeToReasonCode,
+  matchTierToReasonCode,
+  matchTopologyToReasonCode,
+} from './adapters/matching-field-map.ts'
+
+export {
+  MATCHING_ADAPTER_VERSION,
+  buildMatchingExplanation,
+  matchingExplainabilityAdapter,
+} from './adapters/matching-adapter.ts'
+
+export type {
   KnowledgeAnswer,
   KnowledgeBridge,
   KnowledgeBridgeRequest,

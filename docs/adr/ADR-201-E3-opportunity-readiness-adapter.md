@@ -183,8 +183,10 @@ const bundle = opportunityExplainabilityAdapter.buildExplanation({
 ### Deferred
 
 - UI rendering (E7)
-- Matching adapter (E4)
+- Negotiation adapter (E5)
 - KnowledgeBridge enrichment for readiness codes (E8)
+
+See also: [ADR-201-E4: Matching Adapter](./ADR-201-E4-matching-adapter.md)
 
 ---
 

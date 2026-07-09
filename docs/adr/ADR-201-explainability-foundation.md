@@ -176,7 +176,7 @@ Resolves Knowledge Registry content by `ReasonCode`:
 | **E1** | Profile adapter | `ENGINE_ID.PROFILE` — see [ADR-201-E1](./ADR-201-E1-profile-adapter.md) |
 | **E2** | Vetting adapter | `ENGINE_ID.VETTING` — see [ADR-201-E2](./ADR-201-E2-vetting-adapter.md) |
 | **E3** | Opportunity + readiness adapter | `ENGINE_ID.OPPORTUNITY`, `ENGINE_ID.READINESS` — see [ADR-201-E3](./ADR-201-E3-opportunity-readiness-adapter.md) |
-| **E4** | Matching adapter | `ENGINE_ID.MATCHING` |
+| **E4** | Matching adapter | `ENGINE_ID.MATCHING` — see [ADR-201-E4](./ADR-201-E4-matching-adapter.md) |
 | **E5** | Negotiation adapter | `ENGINE_ID.NEGOTIATION` |
 | **E6** | Agreement + contract + `RecommendationService` | `ENGINE_ID.AGREEMENT`, `ENGINE_ID.CONTRACT`, `ENGINE_ID.COMMERCIAL` |
 | **E7** | UI components | Renders `ExplanationBundle` |

@@ -62,9 +62,13 @@ export function opportunityFieldIdToReasonCode(fieldId: string): ReadinessReason
   return OPPORTUNITY_FIELD_ID_TO_REASON_CODE[fieldId] ?? fieldIdToParameterizedCode(fieldId)
 }
 
-const STATIC_READINESS_CODES = Object.values(
-  READINESS_REASON_CODES,
-) as readonly string[]
+const READINESS_REASON_CODE_VALUES = new Set<string>(
+  Object.values(READINESS_REASON_CODES),
+)
+
+export function isReadinessReasonCode(code: string): code is ReadinessReasonCode {
+  return READINESS_REASON_CODE_VALUES.has(code)
+}
 
 export function opportunityReasonCodeToCanonical(
   code: string,
@@ -74,8 +78,8 @@ export function opportunityReasonCodeToCanonical(
     return READINESS_CODE_ALIASES[code]
   }
 
-  if (STATIC_READINESS_CODES.includes(code)) {
-    return code as ReadinessReasonCode
+  if (isReadinessReasonCode(code)) {
+    return code
   }
 
   if (code.startsWith('READINESS_MISSING_') && fieldId) {

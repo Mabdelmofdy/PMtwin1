@@ -93,8 +93,24 @@ var MATCH_REASON_CODES = {
   SKILL_LOW: "MATCH_SKILL_LOW",
   LOCATION_LOW: "MATCH_LOCATION_LOW",
   VALUE_LOW: "MATCH_VALUE_LOW",
+  BUDGET_LOW: "MATCH_BUDGET_LOW",
+  TIMELINE_LOW: "MATCH_TIMELINE_LOW",
+  EXCHANGE_LOW: "MATCH_EXCHANGE_LOW",
+  REPUTATION_LOW: "MATCH_REPUTATION_LOW",
+  SERVICE_OVERLAP_LOW: "MATCH_SERVICE_OVERLAP_LOW",
   AVAILABILITY_LOW: "MATCH_AVAILABILITY_LOW",
-  CONSTRAINT_BLOCKED: "MATCH_CONSTRAINT_BLOCKED"
+  CONSTRAINT_BLOCKED: "MATCH_CONSTRAINT_BLOCKED",
+  HARD_GATE_ROLE_INCOMPATIBLE: "MATCH_HARD_GATE_ROLE_INCOMPATIBLE",
+  HARD_GATE_SKILL_MISSING: "MATCH_HARD_GATE_SKILL_MISSING",
+  HARD_GATE_SERVICE_OVERLAP_LOW: "MATCH_HARD_GATE_SERVICE_OVERLAP_LOW",
+  TIER_TOP: "MATCH_TIER_TOP",
+  TIER_GOOD: "MATCH_TIER_GOOD",
+  TIER_POSSIBLE: "MATCH_TIER_POSSIBLE",
+  SCORE_SUMMARY: "MATCH_SCORE_SUMMARY",
+  TOPOLOGY_ONE_WAY: "MATCH_TOPOLOGY_ONE_WAY",
+  TOPOLOGY_TWO_WAY: "MATCH_TOPOLOGY_TWO_WAY",
+  TOPOLOGY_CONSORTIUM: "MATCH_TOPOLOGY_CONSORTIUM",
+  TOPOLOGY_CIRCULAR: "MATCH_TOPOLOGY_CIRCULAR"
 };
 
 // src/reason-codes/negotiation.ts
@@ -1103,14 +1119,17 @@ function fieldIdToParameterizedCode(fieldId) {
 function opportunityFieldIdToReasonCode(fieldId) {
   return OPPORTUNITY_FIELD_ID_TO_REASON_CODE[fieldId] ?? fieldIdToParameterizedCode(fieldId);
 }
-var STATIC_READINESS_CODES = Object.values(
-  READINESS_REASON_CODES
+var READINESS_REASON_CODE_VALUES = new Set(
+  Object.values(READINESS_REASON_CODES)
 );
+function isReadinessReasonCode(code) {
+  return READINESS_REASON_CODE_VALUES.has(code);
+}
 function opportunityReasonCodeToCanonical(code, fieldId) {
   if (code in READINESS_CODE_ALIASES) {
     return READINESS_CODE_ALIASES[code];
   }
-  if (STATIC_READINESS_CODES.includes(code)) {
+  if (isReadinessReasonCode(code)) {
     return code;
   }
   if (code.startsWith("READINESS_MISSING_") && fieldId) {
@@ -1474,6 +1493,415 @@ var readinessExplainabilityAdapter = {
   buildTimeline: buildTimelineFromSnapshot3
 };
 
+// src/adapters/matching-field-map.ts
+var MATCH_ADAPTER_SCORE_WEIGHTS = {
+  skillMatch: 25,
+  exchangeCompatibility: 20,
+  valueCompatibility: 20,
+  budgetFit: 10,
+  timelineFit: 10,
+  locationFit: 10,
+  reputation: 5,
+  attributeOverlap: 0,
+  serviceOverlapPct: 0
+};
+var MATCH_DIMENSION_THRESHOLDS = {
+  low: 0.25,
+  partial: 0.25,
+  good: 0.7
+};
+var MATCH_DIMENSION_LABELS = {
+  skillMatch: "Skill match",
+  attributeOverlap: "Attribute overlap",
+  serviceOverlapPct: "Service overlap",
+  exchangeCompatibility: "Exchange compatibility",
+  valueCompatibility: "Value compatibility",
+  budgetFit: "Budget fit",
+  timelineFit: "Timeline fit",
+  locationFit: "Location fit",
+  reputation: "Reputation"
+};
+var MATCH_DIMENSION_TO_REASON_CODE = {
+  skillMatch: MATCH_REASON_CODES.SKILL_LOW,
+  attributeOverlap: MATCH_REASON_CODES.SKILL_LOW,
+  serviceOverlapPct: MATCH_REASON_CODES.SERVICE_OVERLAP_LOW,
+  exchangeCompatibility: MATCH_REASON_CODES.EXCHANGE_LOW,
+  valueCompatibility: MATCH_REASON_CODES.VALUE_LOW,
+  budgetFit: MATCH_REASON_CODES.BUDGET_LOW,
+  timelineFit: MATCH_REASON_CODES.TIMELINE_LOW,
+  locationFit: MATCH_REASON_CODES.LOCATION_LOW,
+  reputation: MATCH_REASON_CODES.REPUTATION_LOW
+};
+var HARD_GATE_CODE_MAP = {
+  role_incompatible: MATCH_REASON_CODES.HARD_GATE_ROLE_INCOMPATIBLE,
+  core_skill_missing: MATCH_REASON_CODES.HARD_GATE_SKILL_MISSING,
+  service_overlap_low: MATCH_REASON_CODES.HARD_GATE_SERVICE_OVERLAP_LOW,
+  role_missing: MATCH_REASON_CODES.CONSTRAINT_BLOCKED
+};
+var TOPOLOGY_REASON_CODES = {
+  one_way: MATCH_REASON_CODES.TOPOLOGY_ONE_WAY,
+  two_way: MATCH_REASON_CODES.TOPOLOGY_TWO_WAY,
+  consortium: MATCH_REASON_CODES.TOPOLOGY_CONSORTIUM,
+  circular: MATCH_REASON_CODES.TOPOLOGY_CIRCULAR
+};
+function matchDimensionToReasonCode(dimension) {
+  return MATCH_DIMENSION_TO_REASON_CODE[dimension];
+}
+function matchHardGateCodeToReasonCode(code) {
+  const normalized = code.trim().toLowerCase();
+  return HARD_GATE_CODE_MAP[normalized] ?? MATCH_REASON_CODES.CONSTRAINT_BLOCKED;
+}
+function matchTopologyToReasonCode(topology) {
+  return TOPOLOGY_REASON_CODES[topology];
+}
+function matchTierToReasonCode(tier) {
+  switch (tier) {
+    case "top":
+      return MATCH_REASON_CODES.TIER_TOP;
+    case "good":
+      return MATCH_REASON_CODES.TIER_GOOD;
+    default:
+      return MATCH_REASON_CODES.TIER_POSSIBLE;
+  }
+}
+function labelFromDimensionScore(score) {
+  if (score >= 1) return "Match";
+  if (score >= MATCH_DIMENSION_THRESHOLDS.partial) return "Partial";
+  return "No Match";
+}
+function isLowDimensionScore(score) {
+  return score < MATCH_DIMENSION_THRESHOLDS.low;
+}
+function dimensionImprovementHint(dimension) {
+  switch (dimension) {
+    case "skillMatch":
+    case "attributeOverlap":
+      return "Align required skills and services with the counterpart post.";
+    case "serviceOverlapPct":
+      return "Increase overlap between required and offered services.";
+    case "exchangeCompatibility":
+      return "Review exchange model compatibility between posts.";
+    case "valueCompatibility":
+      return "Negotiate value terms to improve equivalence.";
+    case "budgetFit":
+      return "Adjust budget ranges to improve overlap.";
+    case "timelineFit":
+      return "Align availability and deadline windows.";
+    case "locationFit":
+      return "Clarify location or remote-work preferences.";
+    case "reputation":
+      return "Improve counterpart reputation signals or choose a higher-rated partner.";
+    default:
+      return "Review this match dimension with the counterpart.";
+  }
+}
+
+// src/adapters/matching-adapter.ts
+var MATCHING_ADAPTER_VERSION = "1.0.0";
+var SCORED_DIMENSIONS = [
+  "skillMatch",
+  "exchangeCompatibility",
+  "valueCompatibility",
+  "budgetFit",
+  "timelineFit",
+  "locationFit",
+  "reputation"
+];
+var SUPPLEMENTARY_DIMENSIONS = [
+  "attributeOverlap",
+  "serviceOverlapPct"
+];
+function roundScore4(value) {
+  return Math.round(value * 100) / 100;
+}
+function normalizeMatchScore(score) {
+  if (score <= 1) {
+    return roundScore4(score * 100);
+  }
+  return roundScore4(score);
+}
+function resolveGeneratedAt4(input) {
+  return input.evaluatedAt ?? (/* @__PURE__ */ new Date()).toISOString();
+}
+function resolveHealth4(scorePercent, recommendation) {
+  if (recommendation?.tier === "top") return HEALTH.EXCELLENT;
+  if (recommendation?.tier === "good") return HEALTH.GOOD;
+  if (recommendation?.tier === "possible") return HEALTH.WARNING;
+  if (scorePercent >= 85) return HEALTH.EXCELLENT;
+  if (scorePercent >= 70) return HEALTH.GOOD;
+  if (scorePercent >= 50) return HEALTH.WARNING;
+  return HEALTH.CRITICAL;
+}
+function resolveLabel(dimension, score, breakdown, labels) {
+  const explicit = labels?.[dimension];
+  if (explicit) return explicit;
+  if ((dimension === "attributeOverlap" || dimension === "serviceOverlapPct") && breakdown.skillMatch != null) {
+    const skillScore = breakdown.skillMatch;
+    if (Math.abs(score - skillScore) < 1e-3) {
+      return resolveLabel("skillMatch", skillScore, breakdown, labels);
+    }
+  }
+  return labelFromDimensionScore(score);
+}
+function dimensionScore(breakdown, dimension) {
+  const value = breakdown[dimension];
+  if (typeof value !== "number") return void 0;
+  return value;
+}
+function activeDimensions(breakdown) {
+  const dimensions = [...SCORED_DIMENSIONS];
+  for (const dimension of SUPPLEMENTARY_DIMENSIONS) {
+    if (dimensionScore(breakdown, dimension) != null) {
+      dimensions.push(dimension);
+    }
+  }
+  return dimensions;
+}
+function buildSummary4(input, scorePercent) {
+  if (input.hardGateFailure) {
+    return `Match blocked \u2014 ${input.hardGateFailure.message}`;
+  }
+  if (input.breakdown.rejected === "skill_floor") {
+    return "Match rejected \u2014 skill overlap below minimum threshold.";
+  }
+  if (input.recommendation?.reason) {
+    return input.recommendation.reason;
+  }
+  const tier = input.recommendation?.tier;
+  if (tier === "top") {
+    return `Strong match at ${Math.round(scorePercent)}% \u2014 ready for contracting.`;
+  }
+  if (tier === "good") {
+    return `Good match at ${Math.round(scorePercent)}% \u2014 review value terms.`;
+  }
+  if (tier === "possible") {
+    return `Possible match at ${Math.round(scorePercent)}% \u2014 negotiation may be needed.`;
+  }
+  return `Match score ${Math.round(scorePercent)}%.`;
+}
+function buildReasons4(input, scorePercent) {
+  const reasons = [
+    {
+      code: MATCH_REASON_CODES.SCORE_SUMMARY,
+      message: `Match score ${Math.round(scorePercent)}%`,
+      severity: EXPLANATION_SEVERITY.INFO,
+      category: "summary",
+      relatedEntityId: input.entityId
+    }
+  ];
+  if (input.topology) {
+    reasons.push({
+      code: matchTopologyToReasonCode(input.topology),
+      message: input.topologyReason ?? `Matching topology: ${input.topology.replace("_", " ")}`,
+      severity: EXPLANATION_SEVERITY.INFO,
+      category: "topology",
+      relatedEntityId: input.entityId
+    });
+  }
+  if (input.recommendation) {
+    reasons.push({
+      code: matchTierToReasonCode(input.recommendation.tier),
+      message: input.recommendation.reason,
+      severity: input.recommendation.tier === "top" ? EXPLANATION_SEVERITY.INFO : input.recommendation.tier === "good" ? EXPLANATION_SEVERITY.WARNING : EXPLANATION_SEVERITY.WARNING,
+      category: "recommendation",
+      relatedEntityId: input.entityId
+    });
+  }
+  for (const dimension of activeDimensions(input.breakdown)) {
+    const score = dimensionScore(input.breakdown, dimension);
+    if (score == null) continue;
+    const label = resolveLabel(dimension, score, input.breakdown, input.labels);
+    if (label === "Match") continue;
+    reasons.push({
+      code: matchDimensionToReasonCode(dimension),
+      message: `${MATCH_DIMENSION_LABELS[dimension]} is ${label.toLowerCase()} (${Math.round(score * 100)}%).`,
+      severity: label === "No Match" ? EXPLANATION_SEVERITY.CRITICAL : EXPLANATION_SEVERITY.WARNING,
+      category: dimension,
+      relatedEntityId: input.entityId
+    });
+  }
+  return reasons;
+}
+function buildBlockers4(input) {
+  const blockers = [];
+  if (input.hardGateFailure) {
+    blockers.push({
+      reasonCode: matchHardGateCodeToReasonCode(input.hardGateFailure.code),
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      blockingEntity: input.counterpartEntityId ?? input.entityId,
+      resolutionHint: input.hardGateFailure.message
+    });
+  }
+  if (input.breakdown.rejected === "skill_floor") {
+    blockers.push({
+      reasonCode: MATCH_REASON_CODES.SKILL_LOW,
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      blockingEntity: input.counterpartEntityId ?? input.entityId,
+      resolutionHint: "Increase skill and service overlap above the minimum match threshold."
+    });
+  }
+  return blockers;
+}
+function dimensionImpactPercent(dimension) {
+  return MATCH_ADAPTER_SCORE_WEIGHTS[dimension];
+}
+function buildStrengths4(input) {
+  const strengths = [];
+  if (input.recommendation?.tier === "top") {
+    strengths.push({
+      code: MATCH_REASON_CODES.TIER_TOP,
+      label: "Top-tier match recommendation",
+      impactPercent: 100
+    });
+  }
+  for (const dimension of activeDimensions(input.breakdown)) {
+    const score = dimensionScore(input.breakdown, dimension);
+    if (score == null) continue;
+    const label = resolveLabel(dimension, score, input.breakdown, input.labels);
+    if (label !== "Match") continue;
+    strengths.push({
+      code: `MATCH_STRONG_${dimension.replace(/([A-Z])/g, "_$1").toUpperCase()}`,
+      label: MATCH_DIMENSION_LABELS[dimension],
+      impactPercent: dimensionImpactPercent(dimension)
+    });
+  }
+  return strengths;
+}
+function buildWeaknesses4(input) {
+  const weaknesses = [];
+  for (const dimension of activeDimensions(input.breakdown)) {
+    const score = dimensionScore(input.breakdown, dimension);
+    if (score == null) continue;
+    const label = resolveLabel(dimension, score, input.breakdown, input.labels);
+    if (label === "Match") continue;
+    weaknesses.push({
+      code: matchDimensionToReasonCode(dimension),
+      label: MATCH_DIMENSION_LABELS[dimension],
+      impactPercent: dimensionImpactPercent(dimension)
+    });
+  }
+  return weaknesses;
+}
+function recommendationPriority4(tier) {
+  if (tier === "top") return RECOMMENDATION_PRIORITY.LOW;
+  if (tier === "good") return RECOMMENDATION_PRIORITY.MEDIUM;
+  return RECOMMENDATION_PRIORITY.HIGH;
+}
+function buildRecommendationsFromSnapshot4(input) {
+  const recommendations = [];
+  const currentScore = normalizeMatchScore(input.matchScore);
+  let index = 0;
+  if (input.recommendation?.actionRequired) {
+    recommendations.push({
+      id: `matching-rec-action-${index}`,
+      label: input.recommendation.reason,
+      reasonCode: matchTierToReasonCode(input.recommendation.tier),
+      priority: recommendationPriority4(input.recommendation.tier),
+      impactPercent: 100,
+      estimatedScore: currentScore,
+      category: "action",
+      severity: input.recommendation.tier === "possible" ? EXPLANATION_SEVERITY.CRITICAL : EXPLANATION_SEVERITY.WARNING
+    });
+    index += 1;
+  }
+  for (const dimension of activeDimensions(input.breakdown)) {
+    const score = dimensionScore(input.breakdown, dimension);
+    if (score == null || !isLowDimensionScore(score)) continue;
+    const impactPercent = dimensionImpactPercent(dimension);
+    const reasonCode = matchDimensionToReasonCode(dimension);
+    recommendations.push({
+      id: `matching-rec-${dimension}-${index}`,
+      label: dimensionImprovementHint(dimension),
+      reasonCode,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent,
+      estimatedScore: roundScore4(Math.min(100, currentScore + impactPercent)),
+      category: dimension,
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+    index += 1;
+  }
+  return recommendations;
+}
+function buildBreakdownFromSnapshot4(input) {
+  return activeDimensions(input.breakdown).map((dimension) => {
+    const rawScore = dimensionScore(input.breakdown, dimension) ?? 0;
+    const weight = MATCH_ADAPTER_SCORE_WEIGHTS[dimension];
+    const label = resolveLabel(dimension, rawScore, input.breakdown, input.labels);
+    const reasonCodes = label === "Match" ? [] : [matchDimensionToReasonCode(dimension)];
+    return {
+      label: MATCH_DIMENSION_LABELS[dimension],
+      weight,
+      score: weight > 0 ? roundScore4(rawScore * weight) : roundScore4(rawScore * 100),
+      maxScore: weight > 0 ? weight : 100,
+      reasonCodes
+    };
+  });
+}
+function buildTimelineFromSnapshot4(input) {
+  const evaluatedAt = resolveGeneratedAt4(input);
+  const events = [
+    {
+      type: "match-discovered",
+      title: "Match candidate discovered",
+      description: input.counterpartEntityId ? `Counterpart ${input.counterpartEntityId} identified as a candidate.` : "Match candidate identified during discovery.",
+      timestamp: evaluatedAt,
+      status: TIMELINE_EVENT_STATUS.COMPLETED,
+      relatedEntity: input.entityId
+    },
+    {
+      type: "match-evaluated",
+      title: "Match evaluated",
+      description: buildSummary4(input, normalizeMatchScore(input.matchScore)),
+      timestamp: evaluatedAt,
+      status: input.hardGateFailure || input.breakdown.rejected ? TIMELINE_EVENT_STATUS.BLOCKED : TIMELINE_EVENT_STATUS.COMPLETED,
+      relatedEntity: input.entityId
+    }
+  ];
+  return events;
+}
+function buildMatchingExplanation(input) {
+  const scorePercent = normalizeMatchScore(input.matchScore);
+  const generatedAt = resolveGeneratedAt4(input);
+  return {
+    engine: ENGINE_ID.MATCHING,
+    entityId: input.entityId,
+    score: scorePercent,
+    health: resolveHealth4(scorePercent, input.recommendation),
+    summary: buildSummary4(input, scorePercent),
+    scoreBreakdown: buildBreakdownFromSnapshot4(input),
+    reasons: buildReasons4(input, scorePercent),
+    blockers: buildBlockers4(input),
+    strengths: buildStrengths4(input),
+    weaknesses: buildWeaknesses4(input),
+    recommendations: buildRecommendationsFromSnapshot4(input),
+    timeline: buildTimelineFromSnapshot4(input),
+    metadata: {
+      generatedAt,
+      engineVersion: MATCHING_ADAPTER_VERSION,
+      locale: input.locale ?? "en-SA",
+      source: "matching-adapter",
+      tags: [
+        input.recommendation?.tier ?? "unranked",
+        input.topology ?? "unknown-topology"
+      ],
+      extensions: {
+        topology: input.topology ?? null,
+        topologyReason: input.topologyReason ?? null,
+        counterpartEntityId: input.counterpartEntityId ?? null,
+        rejected: input.breakdown.rejected ?? null,
+        hardGateFailure: input.hardGateFailure ?? null
+      }
+    }
+  };
+}
+var matchingExplainabilityAdapter = {
+  buildExplanation: buildMatchingExplanation,
+  buildRecommendations: buildRecommendationsFromSnapshot4,
+  buildBreakdown: buildBreakdownFromSnapshot4,
+  buildTimeline: buildTimelineFromSnapshot4
+};
+
 // src/validation/bundle-shape.ts
 var HEALTH_VALUES = new Set(Object.values(HEALTH));
 var ENGINE_VALUES = new Set(Object.values(ENGINE_ID));
@@ -1612,6 +2040,11 @@ export {
   EXPLANATION_BUNDLE_KEYS,
   EXPLANATION_SEVERITY,
   HEALTH,
+  MATCHING_ADAPTER_VERSION,
+  MATCH_ADAPTER_SCORE_WEIGHTS,
+  MATCH_DIMENSION_LABELS,
+  MATCH_DIMENSION_THRESHOLDS,
+  MATCH_DIMENSION_TO_REASON_CODE,
   MATCH_REASON_CODES,
   NEGOTIATION_REASON_CODES,
   OPPORTUNITY_ADAPTER_SCORE_WEIGHTS,
@@ -1632,15 +2065,24 @@ export {
   VETTING_REVIEW_GAP_LABEL_TO_REASON_CODE,
   VETTING_REVIEW_PROGRESS_TO_REASON_CODE,
   assertReasonCode,
+  buildMatchingExplanation,
   buildOpportunityExplanation,
   buildProfileExplanation,
   buildReadinessExplanation,
   buildVettingExplanation,
   deserializeAIExplanationPayload,
   deserializeExplanationBundle,
+  dimensionImprovementHint,
   fromAIExplanationPayload,
   isExplanationBundle,
+  isLowDimensionScore,
   isReasonCode,
+  labelFromDimensionScore,
+  matchDimensionToReasonCode,
+  matchHardGateCodeToReasonCode,
+  matchTierToReasonCode,
+  matchTopologyToReasonCode,
+  matchingExplainabilityAdapter,
   opportunityExplainabilityAdapter,
   opportunityFieldIdToHref,
   opportunityFieldIdToReasonCode,

@@ -136,6 +136,37 @@ export {
 } from './src/index.ts'
 
 export type {
+  MatchBreakdownSnapshot,
+  MatchExplainabilitySnapshot,
+  MatchHardGateFailure,
+  MatchLabelsSnapshot,
+  MatchRecommendationSnapshot,
+  MatchRecommendationTier,
+  MatchScoreLabel,
+  MatchTopology,
+} from './src/adapters/matching-types.ts'
+
+export {
+  MATCH_ADAPTER_SCORE_WEIGHTS,
+  MATCH_DIMENSION_LABELS,
+  MATCH_DIMENSION_THRESHOLDS,
+  MATCH_DIMENSION_TO_REASON_CODE,
+  dimensionImprovementHint,
+  isLowDimensionScore,
+  labelFromDimensionScore,
+  matchDimensionToReasonCode,
+  matchHardGateCodeToReasonCode,
+  matchTierToReasonCode,
+  matchTopologyToReasonCode,
+} from './src/index.ts'
+
+export {
+  MATCHING_ADAPTER_VERSION,
+  buildMatchingExplanation,
+  matchingExplainabilityAdapter,
+} from './src/index.ts'
+
+export type {
   KnowledgeAnswer,
   KnowledgeBridge,
   KnowledgeBridgeRequest,
