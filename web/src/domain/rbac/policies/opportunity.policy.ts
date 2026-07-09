@@ -12,6 +12,7 @@ import {
   deny,
   isAdmin,
   isCompanyOwner,
+  isUser,
   isReadOnlyState,
 } from '@/domain/rbac/policies/policy-utils.ts'
 
@@ -30,19 +31,21 @@ export function evaluateOpportunityPolicy(
 
   switch (action) {
     case 'opportunity.create':
-      if (isCompanyOwner(context)) {
-        return allow(`${POLICY_ID}:owner-create`)
+      // Companies and individual professionals both post Need/Offer opportunities.
+      if (isCompanyOwner(context) || isUser(context)) {
+        return allow(`${POLICY_ID}:authenticated-create`)
       }
       return deny(
         `${POLICY_ID}:create-denied`,
-        'Only company owners can create opportunities',
+        'Sign in as a company or professional to create opportunities',
       )
 
     case 'opportunity.publish': {
-      if (!isCompanyOwner(context)) {
+      // Coarse role gate only — command RBAC enforces opportunity ownership.
+      if (!isCompanyOwner(context) && !isUser(context)) {
         return deny(
           `${POLICY_ID}:publish-denied`,
-          'Only company owners can publish opportunities',
+          'Sign in as a company or professional to publish opportunities',
         )
       }
       const state = context.workflowState
@@ -53,14 +56,14 @@ export function evaluateOpportunityPolicy(
           true,
         )
       }
-      return allow(`${POLICY_ID}:owner-publish`, true)
+      return allow(`${POLICY_ID}:authenticated-publish`, true)
     }
 
     case 'opportunity.cancel': {
-      if (!isCompanyOwner(context)) {
+      if (!isCompanyOwner(context) && !isUser(context)) {
         return deny(
           `${POLICY_ID}:cancel-denied`,
-          'Only company owners can cancel opportunities',
+          'Sign in as a company or professional to cancel opportunities',
         )
       }
       if (isReadOnlyState(context, READ_ONLY_STATES)) {

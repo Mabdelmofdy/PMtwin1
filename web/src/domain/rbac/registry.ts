@@ -52,6 +52,8 @@ export const ROLE_MATRIX: Readonly<Record<Role, readonly string[]>> = {
     'contract.terminate',
   ],
   user: [
+    // Individuals (professionals) post Need/Offer drafts — same marketplace actors as companies.
+    'opportunity.create',
     'application.apply',
     'application.view',
     'opportunity.view',

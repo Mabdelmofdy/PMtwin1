@@ -313,6 +313,35 @@ function resolveCompletedSteps(draft: OpportunityDraft): string[] {
   return completed
 }
 
+/** Soft gate before advancing — blocks only when the current step has a hard prerequisite. */
+function validateWizardStepAdvance(
+  stepId: string,
+  draft: OpportunityDraft,
+): string | null {
+  switch (stepId) {
+    case 'type':
+      return draft.intent === 'need' || draft.intent === 'offer'
+        ? null
+        : 'Choose Need or Offer before continuing.'
+    case 'scope':
+      return draft.title.trim() && draft.description.trim()
+        ? null
+        : 'Add a title and description before continuing.'
+    case 'exchange':
+      return draft.mainCollaborationModel.trim() &&
+        draft.subModelType.trim() &&
+        draft.paymentModes.length > 0
+        ? null
+        : 'Select a collaboration model, sub-model, and at least one value exchange mode.'
+    default:
+      return null
+  }
+}
+
+function resolveWizardStepIndex(stepId: string): number {
+  return WIZARD_STEPS.findIndex((step) => step.id === stepId)
+}
+
 export function OpportunitiesPage() {
   const { user, canMutate, isPendingApproval } = useAuth()
   const location = useLocation()
@@ -926,11 +955,36 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   )
 
   const completedStepIds = useMemo(() => resolveCompletedSteps(draft), [draft])
+  const activeStepIndex = resolveWizardStepIndex(activeStepId)
 
   const updateDraft = <K extends keyof OpportunityDraft>(key: K, value: OpportunityDraft[K]) => {
     setDraft((current) => ({ ...current, [key]: value }))
     setPublishDetails(null)
     setPublishBundles(null)
+  }
+
+  const goToStep = (stepId: string) => {
+    setActiveStepId(stepId)
+    setPublishDetails(null)
+    setPublishBundles(null)
+  }
+
+  const handleContinue = () => {
+    const gateMessage = validateWizardStepAdvance(activeStepId, draft)
+    if (gateMessage) {
+      toast.error(gateMessage)
+      return
+    }
+    if (activeStepIndex < 0 || activeStepIndex >= WIZARD_STEPS.length - 1) return
+    goToStep(WIZARD_STEPS[activeStepIndex + 1]!.id)
+  }
+
+  const handleBack = () => {
+    if (activeStepIndex <= 0) {
+      window.history.back()
+      return
+    }
+    goToStep(WIZARD_STEPS[activeStepIndex - 1]!.id)
   }
 
   const handleSaveDraft = () => {
@@ -1068,14 +1122,10 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       }
       footer={
         <PmFormActions
-          onCancel={() => window.history.back()}
+          onCancel={handleBack}
+          cancelLabel={activeStepIndex <= 0 ? 'Cancel' : 'Back'}
           onSaveDraft={handleSaveDraft}
-          onSubmit={activeStepId === 'publish' ? handlePublish : () => {
-            const idx = WIZARD_STEPS.findIndex((s) => s.id === activeStepId)
-            if (idx < WIZARD_STEPS.length - 1) {
-              setActiveStepId(WIZARD_STEPS[idx + 1]!.id)
-            }
-          }}
+          onSubmit={activeStepId === 'publish' ? handlePublish : handleContinue}
           submitLabel={activeStepId === 'publish' ? 'Publish for matching' : 'Continue'}
           saveDraftLabel="Save draft"
         />
@@ -1107,8 +1157,8 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
             ? 'post'
             : activeStepId === 'exchange'
               ? 'model'
-              : activeStepId === 'review'
-                ? 'attributes'
+              : activeStepId === 'submodel'
+                ? 'submodel'
                 : activeStepId === 'publish'
                   ? 'matching'
                   : 'attributes'
@@ -1202,7 +1252,6 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                 value={draft.mainCollaborationModel || undefined}
                 onValueChange={(value) => {
                   const firstSub = listSubModelsForMain(value)[0]
-                  updateDraft('mainCollaborationModel', value)
                   if (firstSub) {
                     setDraft((current) => ({
                       ...current,
@@ -1210,9 +1259,11 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                       modelType: firstSub.modelType,
                       subModelType: firstSub.key,
                     }))
+                  } else {
+                    updateDraft('mainCollaborationModel', value)
                   }
                   setPublishDetails(null)
-    setPublishBundles(null)
+                  setPublishBundles(null)
                 }}
               >
                 <SelectTrigger>
@@ -1239,7 +1290,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                     modelType: sub?.modelType ?? current.modelType,
                   }))
                   setPublishDetails(null)
-    setPublishBundles(null)
+                  setPublishBundles(null)
                 }}
               >
                 <SelectTrigger>
@@ -1287,7 +1338,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                     exchangeMode: (nextModes[0] ?? modeKey) as OpportunityDraft['exchangeMode'],
                   }))
                   setPublishDetails(null)
-    setPublishBundles(null)
+                  setPublishBundles(null)
                 }}
               />
             </div>
@@ -1312,7 +1363,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                   },
                 }))
                 setPublishDetails(null)
-    setPublishBundles(null)
+                setPublishBundles(null)
               }}
             />
           </PmFormSection>

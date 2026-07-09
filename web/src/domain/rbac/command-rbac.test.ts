@@ -144,4 +144,50 @@ describe('evaluateCommandRbac', () => {
     assert.equal(result.allowed, false)
     assert.match(result.reason ?? '', /Authentication required/i)
   })
+
+  it('individual professional can create opportunity drafts', () => {
+    const result = evaluateCommandRbac(
+      {
+        commandType: 'CreateOpportunity',
+        aggregateId: 'opp-new',
+        clientRequestId: 'req-create-individual',
+        title: 'Need BIM review',
+        intent: 'need',
+      } as never,
+      { userId: 'seed-user-001', userRole: 'user' },
+    )
+
+    assert.equal(result.allowed, true)
+    assert.ok(result.matchedPolicies.includes('command-rbac:role-matrix'))
+  })
+
+  it('legacy professional role alias can create opportunity drafts', () => {
+    const result = evaluateCommandRbac(
+      {
+        commandType: 'CreateOpportunity',
+        aggregateId: 'opp-new',
+        clientRequestId: 'req-create-professional',
+        title: 'Offer capacity',
+        intent: 'offer',
+      } as never,
+      { userId: 'seed-user-001', userRole: 'professional' },
+    )
+
+    assert.equal(result.allowed, true)
+  })
+
+  it('individual owner can publish own opportunity via PublishOpportunity', () => {
+    const result = evaluateCommandRbac(
+      {
+        commandType: 'PublishOpportunity',
+        aggregateId: 'opp-1',
+        clientRequestId: 'req-publish-individual',
+      } as never,
+      { userId: 'seed-user-001', userRole: 'user' },
+      { opportunity: { creatorId: 'seed-user-001', status: 'draft' } },
+    )
+
+    assert.equal(result.allowed, true)
+    assert.ok(result.matchedPolicies.includes('command-rbac:owner-publish'))
+  })
 })

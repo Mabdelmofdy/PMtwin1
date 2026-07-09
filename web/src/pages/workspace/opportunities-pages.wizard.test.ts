@@ -150,3 +150,41 @@ describe('Opportunity wizard topology derivation cases', () => {
     }
   })
 })
+
+describe('Opportunity wizard — step navigation', () => {
+  it('Continue must not use native form submit (avoids reload to ?)', () => {
+    const actionsSource = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), '../../components/forms/pm-form-actions.tsx'),
+      'utf8',
+    )
+    const wizardShell = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), '../../components/forms/pm-form-wizard.tsx'),
+      'utf8',
+    )
+    // Primary action is a button, not type=submit — native GET would reset draft.
+    assert.match(actionsSource, /type=["']button["']/)
+    assert.doesNotMatch(actionsSource, /type=["']submit["']/)
+    assert.match(wizardShell, /event\.preventDefault\(\)/)
+  })
+
+  it('gates Continue on post type and wires Back / Continue handlers', () => {
+    const wizard = wizardSource()
+    assert.match(source, /validateWizardStepAdvance/)
+    assert.match(source, /Choose Need or Offer before continuing/)
+    assert.match(wizard, /handleContinue/)
+    assert.match(wizard, /handleBack/)
+    assert.match(wizard, /cancelLabel=\{activeStepIndex <= 0 \? 'Cancel' : 'Back'\}/)
+    for (const stepId of [
+      'type',
+      'scope',
+      'exchange',
+      'submodel',
+      'skills',
+      'timeline',
+      'review',
+      'publish',
+    ]) {
+      assert.match(wizard, new RegExp(`stepId=["']${stepId}["']`))
+    }
+  })
+})

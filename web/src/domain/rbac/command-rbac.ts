@@ -214,6 +214,22 @@ export function evaluateCommandRbac(
     )
   }
 
+  // PublishOpportunity is ownership-gated (same as Transition → published),
+  // not company_owner-only — individuals publish their own Need/Offer drafts.
+  if (command.commandType === 'PublishOpportunity') {
+    return evaluateTransitionOpportunityStatusRbac(
+      {
+        commandType: 'TransitionOpportunityStatus',
+        aggregateId: command.aggregateId,
+        clientRequestId: command.clientRequestId,
+        targetStatus: 'published',
+      } as TransitionOpportunityStatusCommand,
+      actor,
+      context?.opportunity,
+      'opportunity.publish',
+    )
+  }
+
   const capability = COMMAND_REQUIRED_CAPABILITY[command.commandType]
 
   if (!capability) {

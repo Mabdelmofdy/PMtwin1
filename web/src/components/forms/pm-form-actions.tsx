@@ -100,9 +100,12 @@ export function PmFormActions({
         ) : null}
         {onSubmit ? (
           <PmButton
-            type="submit"
+            type="button"
             size="sm"
-            onClick={onSubmit}
+            onClick={(event) => {
+              event.preventDefault()
+              onSubmit()
+            }}
             disabled={isDisabled}
           >
             {loading ? (

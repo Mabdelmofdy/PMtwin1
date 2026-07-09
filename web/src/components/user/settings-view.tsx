@@ -126,11 +126,12 @@ export function SettingsView() {
       footer={
 
         <PmFormActions
-
           submitLabel="Save changes"
-
-          onSubmit={() => {}}
-
+          onSubmit={() => {
+            if (canEdit) {
+              updateSettings(languageDraft)
+            }
+          }}
         />
 
       }

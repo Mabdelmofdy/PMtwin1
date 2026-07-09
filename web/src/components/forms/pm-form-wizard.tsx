@@ -35,7 +35,16 @@ export function PmFormWizard({
     >
       <PmFormStepper {...stepper} />
 
-      <PmForm loading={loading} disabled={disabled} className="gap-6">
+      <PmForm
+        loading={loading}
+        disabled={disabled}
+        className="gap-6"
+        onSubmit={(event) => {
+          // Wizard navigation must never trigger a native GET submit
+          // (that reloads to `?` and resets draft state).
+          event.preventDefault()
+        }}
+      >
         {rail ? (
           <div className={pmLayoutGrid.wizard}>
             <div className={pmLayoutGrid.wizardMain}>{children}</div>
