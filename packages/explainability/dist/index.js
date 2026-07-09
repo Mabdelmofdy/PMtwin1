@@ -118,7 +118,18 @@ var NEGOTIATION_REASON_CODES = {
   PRICE_GAP: "NEGOTIATION_PRICE_GAP",
   RESPONSE_DELAY: "NEGOTIATION_RESPONSE_DELAY",
   TERMS_MISMATCH: "NEGOTIATION_TERMS_MISMATCH",
-  COUNTER_OFFER_PENDING: "NEGOTIATION_COUNTER_OFFER_PENDING"
+  COUNTER_PENDING: "NEGOTIATION_COUNTER_PENDING",
+  /** @deprecated Use COUNTER_PENDING — retained for backward compatibility */
+  COUNTER_OFFER_PENDING: "NEGOTIATION_COUNTER_PENDING",
+  STATUS_ACTIVE: "NEGOTIATION_STATUS_ACTIVE",
+  STATUS_COUNTERED: "NEGOTIATION_STATUS_COUNTERED",
+  STATUS_AGREED: "NEGOTIATION_STATUS_AGREED",
+  STATUS_EXPIRED: "NEGOTIATION_STATUS_EXPIRED",
+  STATUS_CANCELLED: "NEGOTIATION_STATUS_CANCELLED",
+  CHANGES_REQUESTED: "NEGOTIATION_CHANGES_REQUESTED",
+  OFFER_ACCEPTED: "NEGOTIATION_OFFER_ACCEPTED",
+  NO_OFFERS: "NEGOTIATION_NO_OFFERS",
+  SCORE_SUMMARY: "NEGOTIATION_SCORE_SUMMARY"
 };
 
 // src/reason-codes/profile.ts
@@ -1902,6 +1913,655 @@ var matchingExplainabilityAdapter = {
   buildTimeline: buildTimelineFromSnapshot4
 };
 
+// src/adapters/negotiation-field-map.ts
+var NEGOTIATION_ADAPTER_SCORE_WEIGHTS = {
+  priceAlignment: 30,
+  termsAlignment: 30,
+  responseTimeliness: 20,
+  offerProgression: 20
+};
+var NEGOTIATION_BREAKDOWN_LABELS = {
+  priceAlignment: "Price alignment",
+  termsAlignment: "Terms alignment",
+  responseTimeliness: "Response timeliness",
+  offerProgression: "Offer progression"
+};
+var NEGOTIATION_STATUS_TO_REASON_CODE = {
+  active: NEGOTIATION_REASON_CODES.STATUS_ACTIVE,
+  countered: NEGOTIATION_REASON_CODES.STATUS_COUNTERED,
+  agreed: NEGOTIATION_REASON_CODES.STATUS_AGREED,
+  expired: NEGOTIATION_REASON_CODES.STATUS_EXPIRED,
+  cancelled: NEGOTIATION_REASON_CODES.STATUS_CANCELLED
+};
+var NEGOTIATION_LARGE_PRICE_GAP_PERCENT = 20;
+var NEGOTIATION_RESPONSE_DELAY_DAYS_THRESHOLD = 3;
+function negotiationStatusToReasonCode(status) {
+  return NEGOTIATION_STATUS_TO_REASON_CODE[status];
+}
+function negotiationStatusToHref(entityId, section) {
+  const base = `/negotiation/${entityId}`;
+  if (section) return `${base}/${section}`;
+  return base;
+}
+function negotiationTermsFieldToHref(entityId, field) {
+  const slug = field.replace(/([A-Z])/g, "-$1").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return `${negotiationStatusToHref(entityId, "terms")}#${slug}`;
+}
+function negotiationGapToReasonCode() {
+  return NEGOTIATION_REASON_CODES.TERMS_MISMATCH;
+}
+function isLargePriceGap(percent) {
+  return percent != null && percent >= NEGOTIATION_LARGE_PRICE_GAP_PERCENT;
+}
+function isResponseDelayed(days) {
+  return days != null && days >= NEGOTIATION_RESPONSE_DELAY_DAYS_THRESHOLD;
+}
+
+// src/adapters/negotiation-adapter.ts
+var NEGOTIATION_ADAPTER_VERSION = "1.0.0";
+function roundScore5(value) {
+  return Math.round(value * 100) / 100;
+}
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+function resolveGeneratedAt5(input) {
+  return input.evaluatedAt ?? (/* @__PURE__ */ new Date()).toISOString();
+}
+function resolveOfferCount(input) {
+  if (input.offerCount != null) return input.offerCount;
+  return input.currentOffer ? 1 : 0;
+}
+function resolveCounterOfferCount(input) {
+  if (input.counterOfferCount != null) return input.counterOfferCount;
+  if (input.status === "countered") return 1;
+  return 0;
+}
+function gapPenalty(input) {
+  const gapCount = input.commercialTermsGaps?.length ?? 0;
+  return Math.min(20, gapCount * 4);
+}
+function priceGapPenalty(input) {
+  const percent = input.priceGap?.percent;
+  if (percent == null) return 0;
+  return Math.min(25, percent / 2);
+}
+function delayPenalty(input) {
+  const days = input.responseDelayDays;
+  if (days == null || days < NEGOTIATION_RESPONSE_DELAY_DAYS_THRESHOLD) return 0;
+  return Math.min(15, (days - 2) * 3);
+}
+function computeNegotiationProgressScore(input) {
+  const offerCount = resolveOfferCount(input);
+  const counterCount = resolveCounterOfferCount(input);
+  switch (input.status) {
+    case "agreed":
+      return 100;
+    case "cancelled":
+      return 10;
+    case "expired":
+      return 5;
+    case "countered": {
+      let score = 50 + Math.min(10, counterCount * 3);
+      if (input.currentOffer) score += 5;
+      score -= gapPenalty(input);
+      score -= priceGapPenalty(input);
+      score -= delayPenalty(input);
+      if (input.pendingCounterOffer) score -= 5;
+      return roundScore5(clamp(score, 40, 60));
+    }
+    case "active": {
+      if (offerCount === 0) return 30;
+      let score = 55 + Math.min(15, offerCount * 5);
+      if (input.pendingCounterOffer) score -= 5;
+      score -= gapPenalty(input);
+      score -= priceGapPenalty(input);
+      score -= delayPenalty(input);
+      return roundScore5(clamp(score, 50, 70));
+    }
+    default:
+      return 0;
+  }
+}
+function resolveHealth5(input, scorePercent) {
+  if (input.status === "agreed") return HEALTH.EXCELLENT;
+  if (input.status === "expired" || input.status === "cancelled") {
+    return HEALTH.CRITICAL;
+  }
+  if (input.status === "active" && scorePercent >= 65) return HEALTH.GOOD;
+  if (input.status === "countered" && scorePercent >= 55) return HEALTH.GOOD;
+  if (input.status === "active" || input.status === "countered") {
+    return HEALTH.WARNING;
+  }
+  return HEALTH.CRITICAL;
+}
+function statusMessage(status) {
+  switch (status) {
+    case "active":
+      return "Negotiation is active \u2014 offers may be submitted or reviewed.";
+    case "countered":
+      return "Negotiation has been countered \u2014 terms are under revision.";
+    case "agreed":
+      return "Negotiation agreed \u2014 commercial terms are accepted.";
+    case "expired":
+      return "Negotiation expired \u2014 no agreement was reached in time.";
+    case "cancelled":
+      return "Negotiation cancelled \u2014 parties did not proceed.";
+    default:
+      return `Negotiation status: ${status}`;
+  }
+}
+function buildSummary5(input, scorePercent) {
+  if (input.status === "agreed") {
+    return "Negotiation agreed \u2014 terms accepted and ready for contracting.";
+  }
+  if (input.status === "expired") {
+    return "Negotiation expired \u2014 respond or restart to continue.";
+  }
+  if (input.status === "cancelled") {
+    return "Negotiation cancelled \u2014 no further offers can be accepted.";
+  }
+  if (input.changesRequested) {
+    return "Changes requested \u2014 resolve review feedback before proceeding.";
+  }
+  if (input.pendingCounterOffer) {
+    return "Counter-offer pending \u2014 review and respond to continue negotiation.";
+  }
+  if (resolveOfferCount(input) === 0) {
+    return "Negotiation active \u2014 submit an initial offer to begin.";
+  }
+  return `Negotiation progress ${Math.round(scorePercent)}% \u2014 ${statusMessage(input.status).toLowerCase()}`;
+}
+function buildReasons5(input, scorePercent) {
+  const reasons = [
+    {
+      code: NEGOTIATION_REASON_CODES.SCORE_SUMMARY,
+      message: `Negotiation progress ${Math.round(scorePercent)}%`,
+      severity: EXPLANATION_SEVERITY.INFO,
+      category: "summary",
+      relatedEntityId: input.entityId
+    },
+    {
+      code: negotiationStatusToReasonCode(input.status),
+      message: statusMessage(input.status),
+      severity: input.status === "expired" || input.status === "cancelled" ? EXPLANATION_SEVERITY.CRITICAL : input.status === "agreed" ? EXPLANATION_SEVERITY.INFO : EXPLANATION_SEVERITY.WARNING,
+      category: "status",
+      relatedEntityId: input.entityId
+    }
+  ];
+  if (resolveOfferCount(input) === 0 && input.status !== "agreed") {
+    reasons.push({
+      code: NEGOTIATION_REASON_CODES.NO_OFFERS,
+      message: "No offers submitted yet.",
+      severity: EXPLANATION_SEVERITY.WARNING,
+      category: "offers",
+      relatedEntityId: input.entityId
+    });
+  }
+  if (input.currentOffer?.termsSummary) {
+    reasons.push({
+      code: NEGOTIATION_REASON_CODES.STATUS_ACTIVE,
+      message: `Current offer: ${input.currentOffer.termsSummary}`,
+      severity: EXPLANATION_SEVERITY.INFO,
+      category: "offers",
+      relatedEntityId: input.entityId
+    });
+  }
+  for (const gap of input.commercialTermsGaps ?? []) {
+    reasons.push({
+      code: negotiationGapToReasonCode(),
+      message: gap.changeSummary ?? `${gap.label}: ${gap.priorValue ?? "\u2014"} \u2192 ${gap.proposedValue ?? "\u2014"}`,
+      severity: EXPLANATION_SEVERITY.WARNING,
+      category: gap.field,
+      relatedEntityId: input.entityId
+    });
+  }
+  if (input.priceGap?.percent != null || input.priceGap?.absolute != null) {
+    const parts = [];
+    if (input.priceGap.percent != null) {
+      parts.push(`${Math.round(input.priceGap.percent)}%`);
+    }
+    if (input.priceGap.absolute != null) {
+      const currency = input.priceGap.currency ?? "SAR";
+      parts.push(`${input.priceGap.absolute} ${currency}`);
+    }
+    reasons.push({
+      code: NEGOTIATION_REASON_CODES.PRICE_GAP,
+      message: `Price gap: ${parts.join(" / ")}`,
+      severity: isLargePriceGap(input.priceGap.percent) ? EXPLANATION_SEVERITY.CRITICAL : EXPLANATION_SEVERITY.WARNING,
+      category: "commercial",
+      relatedEntityId: input.entityId
+    });
+  }
+  if (isResponseDelayed(input.responseDelayDays)) {
+    reasons.push({
+      code: NEGOTIATION_REASON_CODES.RESPONSE_DELAY,
+      message: `Response delayed by ${input.responseDelayDays} day(s).`,
+      severity: EXPLANATION_SEVERITY.WARNING,
+      category: "timeliness",
+      relatedEntityId: input.entityId
+    });
+  }
+  if (input.pendingCounterOffer) {
+    reasons.push({
+      code: NEGOTIATION_REASON_CODES.COUNTER_PENDING,
+      message: "A counter-offer is awaiting response.",
+      severity: EXPLANATION_SEVERITY.WARNING,
+      category: "offers",
+      relatedEntityId: input.entityId
+    });
+  }
+  if (input.changesRequested) {
+    reasons.push({
+      code: NEGOTIATION_REASON_CODES.CHANGES_REQUESTED,
+      message: input.reviewNotes ?? `Changes requested${input.requestedItems?.length ? `: ${input.requestedItems.join(", ")}` : ""}.`,
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      category: "review",
+      relatedEntityId: input.entityId
+    });
+  }
+  return reasons;
+}
+function buildBlockers5(input) {
+  const blockers = [];
+  if (input.changesRequested) {
+    blockers.push({
+      reasonCode: NEGOTIATION_REASON_CODES.CHANGES_REQUESTED,
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      blockingEntity: input.entityId,
+      resolutionHint: input.reviewNotes ?? "Resolve requested changes and resubmit terms."
+    });
+  }
+  if (input.status === "expired") {
+    blockers.push({
+      reasonCode: NEGOTIATION_REASON_CODES.STATUS_EXPIRED,
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      blockingEntity: input.entityId,
+      resolutionHint: "Restart negotiation or submit a new offer before the deadline."
+    });
+  }
+  if (input.status === "cancelled") {
+    blockers.push({
+      reasonCode: NEGOTIATION_REASON_CODES.STATUS_CANCELLED,
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      blockingEntity: input.entityId,
+      resolutionHint: "Negotiation was cancelled \u2014 initiate a new negotiation to proceed."
+    });
+  }
+  if (isLargePriceGap(input.priceGap?.percent)) {
+    blockers.push({
+      reasonCode: NEGOTIATION_REASON_CODES.PRICE_GAP,
+      severity: EXPLANATION_SEVERITY.CRITICAL,
+      blockingEntity: input.entityId,
+      resolutionHint: "Close the price gap with a revised offer or accept adjusted terms."
+    });
+  }
+  return blockers;
+}
+function buildStrengths5(input) {
+  const strengths = [];
+  if (input.status === "agreed") {
+    strengths.push({
+      code: NEGOTIATION_REASON_CODES.STATUS_AGREED,
+      label: "Negotiation agreed",
+      impactPercent: 40
+    });
+  }
+  if (input.acceptedOffer) {
+    strengths.push({
+      code: NEGOTIATION_REASON_CODES.OFFER_ACCEPTED,
+      label: input.acceptedOffer.termsSummary ?? "Accepted offer on record",
+      impactPercent: 35
+    });
+  }
+  const gapCount = input.commercialTermsGaps?.length ?? 0;
+  if (resolveOfferCount(input) > 0 && gapCount === 0 && input.status !== "expired") {
+    strengths.push({
+      code: NEGOTIATION_REASON_CODES.STATUS_ACTIVE,
+      label: "Commercial terms aligned",
+      impactPercent: 25
+    });
+  }
+  if (input.responseDelayDays != null && input.responseDelayDays < NEGOTIATION_RESPONSE_DELAY_DAYS_THRESHOLD && (input.status === "active" || input.status === "countered")) {
+    strengths.push({
+      code: NEGOTIATION_REASON_CODES.STATUS_ACTIVE,
+      label: "Timely responses",
+      impactPercent: 10
+    });
+  }
+  return strengths;
+}
+function buildWeaknesses5(input) {
+  const weaknesses = [];
+  for (const gap of input.commercialTermsGaps ?? []) {
+    weaknesses.push({
+      code: negotiationGapToReasonCode(),
+      label: gap.label,
+      impactPercent: roundScore5(
+        NEGOTIATION_ADAPTER_SCORE_WEIGHTS.termsAlignment / Math.max(1, input.commercialTermsGaps?.length ?? 1)
+      )
+    });
+  }
+  if (input.priceGap?.percent != null || input.priceGap?.absolute != null) {
+    weaknesses.push({
+      code: NEGOTIATION_REASON_CODES.PRICE_GAP,
+      label: "Price gap between parties",
+      impactPercent: NEGOTIATION_ADAPTER_SCORE_WEIGHTS.priceAlignment
+    });
+  }
+  if (isResponseDelayed(input.responseDelayDays)) {
+    weaknesses.push({
+      code: NEGOTIATION_REASON_CODES.RESPONSE_DELAY,
+      label: `Response delayed (${input.responseDelayDays} days)`,
+      impactPercent: NEGOTIATION_ADAPTER_SCORE_WEIGHTS.responseTimeliness
+    });
+  }
+  if (input.pendingCounterOffer) {
+    weaknesses.push({
+      code: NEGOTIATION_REASON_CODES.COUNTER_PENDING,
+      label: "Counter-offer awaiting response",
+      impactPercent: 15
+    });
+  }
+  if (resolveOfferCount(input) === 0 && input.status === "active") {
+    weaknesses.push({
+      code: NEGOTIATION_REASON_CODES.NO_OFFERS,
+      label: "No offers submitted",
+      impactPercent: NEGOTIATION_ADAPTER_SCORE_WEIGHTS.offerProgression
+    });
+  }
+  return weaknesses;
+}
+function dimensionScore2(input, dimension) {
+  const weight = NEGOTIATION_ADAPTER_SCORE_WEIGHTS[dimension];
+  switch (dimension) {
+    case "priceAlignment": {
+      const percent = input.priceGap?.percent;
+      if (percent == null) return weight;
+      const alignment = clamp(1 - percent / 100, 0, 1);
+      return roundScore5(alignment * weight);
+    }
+    case "termsAlignment": {
+      const gapCount = input.commercialTermsGaps?.length ?? 0;
+      if (gapCount === 0) return weight;
+      const alignment = clamp(1 - gapCount * 0.2, 0, 1);
+      return roundScore5(alignment * weight);
+    }
+    case "responseTimeliness": {
+      const days = input.responseDelayDays ?? 0;
+      if (days < NEGOTIATION_RESPONSE_DELAY_DAYS_THRESHOLD) return weight;
+      const alignment = clamp(1 - (days - 2) * 0.1, 0, 1);
+      return roundScore5(alignment * weight);
+    }
+    case "offerProgression": {
+      if (input.status === "agreed") return weight;
+      const offers = resolveOfferCount(input);
+      const counters = resolveCounterOfferCount(input);
+      if (offers === 0) return 0;
+      const progression = clamp((offers + counters * 0.5) / 4, 0, 1);
+      return roundScore5(progression * weight);
+    }
+    default:
+      return 0;
+  }
+}
+function buildRecommendationsFromSnapshot5(input) {
+  const recommendations = [];
+  const currentScore = computeNegotiationProgressScore(input);
+  let index = 0;
+  if (input.pendingCounterOffer || input.status === "countered") {
+    recommendations.push({
+      id: `negotiation-rec-counter-${index}`,
+      label: "Review and respond to the counter-offer",
+      reasonCode: NEGOTIATION_REASON_CODES.COUNTER_PENDING,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent: 25,
+      estimatedScore: roundScore5(Math.min(100, currentScore + 15)),
+      href: negotiationStatusToHref(input.entityId, "offers"),
+      category: "offers",
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+    index += 1;
+  }
+  if (input.currentOffer && input.status !== "agreed" && input.status !== "expired" && input.status !== "cancelled" && !input.pendingCounterOffer) {
+    recommendations.push({
+      id: `negotiation-rec-accept-${index}`,
+      label: "Accept the current offer to proceed",
+      reasonCode: NEGOTIATION_REASON_CODES.OFFER_ACCEPTED,
+      priority: RECOMMENDATION_PRIORITY.MEDIUM,
+      impactPercent: 40,
+      estimatedScore: 100,
+      href: negotiationStatusToHref(input.entityId, "offers"),
+      category: "offers",
+      severity: EXPLANATION_SEVERITY.INFO
+    });
+    index += 1;
+  }
+  if (input.changesRequested) {
+    recommendations.push({
+      id: `negotiation-rec-changes-${index}`,
+      label: "Resolve requested changes and resubmit",
+      reasonCode: NEGOTIATION_REASON_CODES.CHANGES_REQUESTED,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent: 30,
+      estimatedScore: roundScore5(Math.min(100, currentScore + 20)),
+      href: negotiationStatusToHref(input.entityId, "terms"),
+      category: "review",
+      severity: EXPLANATION_SEVERITY.CRITICAL
+    });
+    index += 1;
+  }
+  if (isResponseDelayed(input.responseDelayDays)) {
+    recommendations.push({
+      id: `negotiation-rec-delay-${index}`,
+      label: "Respond to pending negotiation items",
+      reasonCode: NEGOTIATION_REASON_CODES.RESPONSE_DELAY,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent: 20,
+      estimatedScore: roundScore5(Math.min(100, currentScore + 10)),
+      href: negotiationStatusToHref(input.entityId, "messages"),
+      category: "timeliness",
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+    index += 1;
+  }
+  if (isLargePriceGap(input.priceGap?.percent)) {
+    recommendations.push({
+      id: `negotiation-rec-price-${index}`,
+      label: "Submit a revised offer to close the price gap",
+      reasonCode: NEGOTIATION_REASON_CODES.PRICE_GAP,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent: NEGOTIATION_ADAPTER_SCORE_WEIGHTS.priceAlignment,
+      estimatedScore: roundScore5(Math.min(100, currentScore + 20)),
+      href: negotiationStatusToHref(input.entityId, "offers"),
+      category: "commercial",
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+    index += 1;
+  }
+  for (const gap of input.commercialTermsGaps ?? []) {
+    recommendations.push({
+      id: `negotiation-rec-term-${gap.field}-${index}`,
+      label: `Align ${gap.label.toLowerCase()} terms`,
+      reasonCode: negotiationGapToReasonCode(),
+      priority: RECOMMENDATION_PRIORITY.MEDIUM,
+      impactPercent: roundScore5(
+        NEGOTIATION_ADAPTER_SCORE_WEIGHTS.termsAlignment / Math.max(1, input.commercialTermsGaps?.length ?? 1)
+      ),
+      estimatedScore: roundScore5(Math.min(100, currentScore + 8)),
+      href: negotiationTermsFieldToHref(input.entityId, gap.field),
+      category: gap.field,
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+    index += 1;
+  }
+  if (resolveOfferCount(input) === 0 && input.status === "active" && !input.changesRequested) {
+    recommendations.push({
+      id: `negotiation-rec-submit-${index}`,
+      label: "Submit an initial offer",
+      reasonCode: NEGOTIATION_REASON_CODES.NO_OFFERS,
+      priority: RECOMMENDATION_PRIORITY.HIGH,
+      impactPercent: NEGOTIATION_ADAPTER_SCORE_WEIGHTS.offerProgression,
+      estimatedScore: 55,
+      href: negotiationStatusToHref(input.entityId, "offers"),
+      category: "offers",
+      severity: EXPLANATION_SEVERITY.WARNING
+    });
+  }
+  return recommendations;
+}
+function buildBreakdownFromSnapshot5(input) {
+  return Object.keys(NEGOTIATION_ADAPTER_SCORE_WEIGHTS).map((dimension) => {
+    const weight = NEGOTIATION_ADAPTER_SCORE_WEIGHTS[dimension];
+    const score = dimensionScore2(input, dimension);
+    const reasonCodes = [];
+    if (dimension === "priceAlignment" && input.priceGap) {
+      reasonCodes.push(NEGOTIATION_REASON_CODES.PRICE_GAP);
+    }
+    if (dimension === "termsAlignment" && (input.commercialTermsGaps?.length ?? 0) > 0) {
+      reasonCodes.push(NEGOTIATION_REASON_CODES.TERMS_MISMATCH);
+    }
+    if (dimension === "responseTimeliness" && isResponseDelayed(input.responseDelayDays)) {
+      reasonCodes.push(NEGOTIATION_REASON_CODES.RESPONSE_DELAY);
+    }
+    if (dimension === "offerProgression" && resolveOfferCount(input) === 0) {
+      reasonCodes.push(NEGOTIATION_REASON_CODES.NO_OFFERS);
+    }
+    return {
+      label: NEGOTIATION_BREAKDOWN_LABELS[dimension],
+      weight,
+      score,
+      maxScore: weight,
+      reasonCodes
+    };
+  });
+}
+function mapTimelineStatus(status) {
+  if (status === "blocked" || status === "failed") {
+    return TIMELINE_EVENT_STATUS.BLOCKED;
+  }
+  if (status === "pending") {
+    return TIMELINE_EVENT_STATUS.PENDING;
+  }
+  if (status === "in_progress" || status === "active") {
+    return TIMELINE_EVENT_STATUS.ACTIVE;
+  }
+  return TIMELINE_EVENT_STATUS.COMPLETED;
+}
+function buildTimelineFromSnapshot5(input) {
+  if (input.timelineEvents && input.timelineEvents.length > 0) {
+    return input.timelineEvents.map((event) => ({
+      type: event.type,
+      title: event.title,
+      description: event.description,
+      timestamp: event.timestamp,
+      status: mapTimelineStatus(event.status),
+      relatedEntity: input.entityId
+    }));
+  }
+  const events = [];
+  const evaluatedAt = resolveGeneratedAt5(input);
+  if (input.currentOffer?.submittedAt) {
+    events.push({
+      type: "offer-submitted",
+      title: "Offer submitted",
+      description: input.currentOffer.termsSummary ?? `Offer submitted${input.currentOffer.submittedBy ? ` by ${input.currentOffer.submittedBy}` : ""}.`,
+      timestamp: input.currentOffer.submittedAt,
+      status: TIMELINE_EVENT_STATUS.COMPLETED,
+      relatedEntity: input.entityId
+    });
+  }
+  if (resolveCounterOfferCount(input) > 0 || input.status === "countered") {
+    events.push({
+      type: "counter-offered",
+      title: "Counter-offer submitted",
+      description: input.pendingCounterOffer ? "Counter-offer awaiting response." : "Parties exchanged counter-offers.",
+      timestamp: input.currentOffer?.submittedAt ?? evaluatedAt,
+      status: input.pendingCounterOffer ? TIMELINE_EVENT_STATUS.PENDING : TIMELINE_EVENT_STATUS.COMPLETED,
+      relatedEntity: input.entityId
+    });
+  }
+  if (input.status === "agreed" || input.acceptedOffer) {
+    events.push({
+      type: "negotiation-agreed",
+      title: "Negotiation agreed",
+      description: input.acceptedOffer?.termsSummary ?? "Commercial terms accepted by both parties.",
+      timestamp: input.acceptedOffer?.submittedAt ?? evaluatedAt,
+      status: TIMELINE_EVENT_STATUS.COMPLETED,
+      relatedEntity: input.entityId
+    });
+  }
+  if (input.status === "expired") {
+    events.push({
+      type: "negotiation-expired",
+      title: "Negotiation expired",
+      description: "Negotiation window closed without agreement.",
+      timestamp: evaluatedAt,
+      status: TIMELINE_EVENT_STATUS.BLOCKED,
+      relatedEntity: input.entityId
+    });
+  }
+  if (input.status === "cancelled") {
+    events.push({
+      type: "negotiation-cancelled",
+      title: "Negotiation cancelled",
+      description: "Negotiation was cancelled by a participant.",
+      timestamp: evaluatedAt,
+      status: TIMELINE_EVENT_STATUS.BLOCKED,
+      relatedEntity: input.entityId
+    });
+  }
+  if (events.length === 0) {
+    events.push({
+      type: "negotiation-active",
+      title: "Negotiation opened",
+      description: statusMessage(input.status),
+      timestamp: evaluatedAt,
+      status: TIMELINE_EVENT_STATUS.ACTIVE,
+      relatedEntity: input.entityId
+    });
+  }
+  return events;
+}
+function buildNegotiationExplanation(input) {
+  const scorePercent = computeNegotiationProgressScore(input);
+  const generatedAt = resolveGeneratedAt5(input);
+  return {
+    engine: ENGINE_ID.NEGOTIATION,
+    entityId: input.entityId,
+    score: scorePercent,
+    health: resolveHealth5(input, scorePercent),
+    summary: buildSummary5(input, scorePercent),
+    scoreBreakdown: buildBreakdownFromSnapshot5(input),
+    reasons: buildReasons5(input, scorePercent),
+    blockers: buildBlockers5(input),
+    strengths: buildStrengths5(input),
+    weaknesses: buildWeaknesses5(input),
+    recommendations: buildRecommendationsFromSnapshot5(input),
+    timeline: buildTimelineFromSnapshot5(input),
+    metadata: {
+      generatedAt,
+      engineVersion: NEGOTIATION_ADAPTER_VERSION,
+      locale: input.locale ?? "en-SA",
+      source: "negotiation-adapter",
+      tags: [input.status],
+      extensions: {
+        offerCount: resolveOfferCount(input),
+        counterOfferCount: resolveCounterOfferCount(input),
+        status: input.status,
+        pendingCounterOffer: input.pendingCounterOffer ?? false,
+        changesRequested: input.changesRequested ?? false
+      }
+    }
+  };
+}
+var negotiationExplainabilityAdapter = {
+  buildExplanation: buildNegotiationExplanation,
+  buildRecommendations: buildRecommendationsFromSnapshot5,
+  buildBreakdown: buildBreakdownFromSnapshot5,
+  buildTimeline: buildTimelineFromSnapshot5
+};
+
 // src/validation/bundle-shape.ts
 var HEALTH_VALUES = new Set(Object.values(HEALTH));
 var ENGINE_VALUES = new Set(Object.values(ENGINE_ID));
@@ -2046,7 +2706,13 @@ export {
   MATCH_DIMENSION_THRESHOLDS,
   MATCH_DIMENSION_TO_REASON_CODE,
   MATCH_REASON_CODES,
+  NEGOTIATION_ADAPTER_SCORE_WEIGHTS,
+  NEGOTIATION_ADAPTER_VERSION,
+  NEGOTIATION_BREAKDOWN_LABELS,
+  NEGOTIATION_LARGE_PRICE_GAP_PERCENT,
   NEGOTIATION_REASON_CODES,
+  NEGOTIATION_RESPONSE_DELAY_DAYS_THRESHOLD,
+  NEGOTIATION_STATUS_TO_REASON_CODE,
   OPPORTUNITY_ADAPTER_SCORE_WEIGHTS,
   OPPORTUNITY_ADAPTER_VERSION,
   OPPORTUNITY_FIELD_ID_TO_REASON_CODE,
@@ -2066,23 +2732,32 @@ export {
   VETTING_REVIEW_PROGRESS_TO_REASON_CODE,
   assertReasonCode,
   buildMatchingExplanation,
+  buildNegotiationExplanation,
   buildOpportunityExplanation,
   buildProfileExplanation,
   buildReadinessExplanation,
   buildVettingExplanation,
+  computeNegotiationProgressScore,
   deserializeAIExplanationPayload,
   deserializeExplanationBundle,
   dimensionImprovementHint,
   fromAIExplanationPayload,
   isExplanationBundle,
+  isLargePriceGap,
   isLowDimensionScore,
   isReasonCode,
+  isResponseDelayed,
   labelFromDimensionScore,
   matchDimensionToReasonCode,
   matchHardGateCodeToReasonCode,
   matchTierToReasonCode,
   matchTopologyToReasonCode,
   matchingExplainabilityAdapter,
+  negotiationExplainabilityAdapter,
+  negotiationGapToReasonCode,
+  negotiationStatusToHref,
+  negotiationStatusToReasonCode,
+  negotiationTermsFieldToHref,
   opportunityExplainabilityAdapter,
   opportunityFieldIdToHref,
   opportunityFieldIdToReasonCode,

@@ -167,6 +167,35 @@ export {
 } from './src/index.ts'
 
 export type {
+  CommercialTermsGap,
+  NegotiationExplainabilitySnapshot,
+  NegotiationOfferSnapshot,
+  NegotiationStatus,
+  NegotiationTimelineEventSnapshot,
+} from './src/adapters/negotiation-types.ts'
+
+export {
+  NEGOTIATION_ADAPTER_SCORE_WEIGHTS,
+  NEGOTIATION_BREAKDOWN_LABELS,
+  NEGOTIATION_LARGE_PRICE_GAP_PERCENT,
+  NEGOTIATION_RESPONSE_DELAY_DAYS_THRESHOLD,
+  NEGOTIATION_STATUS_TO_REASON_CODE,
+  isLargePriceGap,
+  isResponseDelayed,
+  negotiationGapToReasonCode,
+  negotiationStatusToHref,
+  negotiationStatusToReasonCode,
+  negotiationTermsFieldToHref,
+} from './src/index.ts'
+
+export {
+  NEGOTIATION_ADAPTER_VERSION,
+  buildNegotiationExplanation,
+  computeNegotiationProgressScore,
+  negotiationExplainabilityAdapter,
+} from './src/index.ts'
+
+export type {
   KnowledgeAnswer,
   KnowledgeBridge,
   KnowledgeBridgeRequest,

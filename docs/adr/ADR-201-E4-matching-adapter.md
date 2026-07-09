@@ -160,8 +160,8 @@ E4 does **not** wire the adapter into `matching-service` or UI. Future web servi
 ### Deferred
 
 - Web wiring in `matching-service` (E7)
-- Negotiation adapter (E5)
-- KnowledgeBridge enrichment for `MATCH_*` codes (E8)
+- Negotiation adapter (E5) — see [ADR-201-E5](./ADR-201-E5-negotiation-adapter.md)
+- Agreement + contract adapters + `RecommendationService` (E6)
 
 ---
 
