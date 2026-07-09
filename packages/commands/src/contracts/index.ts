@@ -115,5 +115,9 @@ export type {
   PublishOpportunityCommand,
   CloseOpportunityCommand,
   ArchiveOpportunityCommand,
+  DeleteOpportunityCommand,
   OpportunityCollaborationPayload,
+  OpportunityStructuredSkill,
+  OpportunityWorkPackage,
+  OpportunityCapacity,
 } from './opportunity-commands.ts'

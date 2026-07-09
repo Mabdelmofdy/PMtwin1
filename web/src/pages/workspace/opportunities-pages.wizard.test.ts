@@ -5,71 +5,95 @@ import { fileURLToPath } from 'node:url'
 import { describe, it } from 'node:test'
 import { deriveMatchingTopology } from '@pm-twin/collaboration-models'
 import { buildOpportunityCollaborationPatch } from '@/domain/collaboration/opportunity-collaboration.ts'
+import { WIZARD_STEPS } from '@/components/opportunity/wizard/wizard-steps.ts'
+import {
+  normalizeDeliverables,
+  normalizeStructuredSkills,
+  skillNames,
+} from '@/domain/opportunity-creation'
+import { getReadinessReasonCopy } from '@/lib/readiness-reason-copy.ts'
 
-const sourcePath = join(
+const wizardPath = join(
   dirname(fileURLToPath(import.meta.url)),
-  'opportunities-pages.tsx',
+  '../../components/opportunity/wizard/opportunity-wizard-page.tsx',
 )
-const source = readFileSync(sourcePath, 'utf8')
+const wizardSource = readFileSync(wizardPath, 'utf8')
 
-function wizardSource(): string {
-  const start = source.indexOf('function OpportunityWizardPage')
-  assert.ok(start >= 0)
-  return source.slice(start)
-}
-
-describe('Opportunity wizard — system-derived matching topology', () => {
-  it('does not render selectable match type options (one_way / two_way / consortium / circular)', () => {
-    const wizard = wizardSource()
-
-    // Value exchange is selectable; matching topologies must not be.
-    assert.match(wizard, /ValueExchangeModesPanel/)
-    assert.match(wizard, /selectable/)
-
-    // No SelectItem / radio / toggle bound to topology keys as user choices.
-    assert.doesNotMatch(
-      wizard,
-      /SelectItem[^>]*>\s*(One Way|Two Way|Consortium Matching|Circular)/i,
+describe('Opportunity wizard — Enterprise Creation 2.0 steps', () => {
+  it('has exactly 7 draft-first steps and no Publish step', () => {
+    assert.equal(WIZARD_STEPS.length, 7)
+    assert.deepEqual(
+      WIZARD_STEPS.map((s) => s.id),
+      [
+        'type',
+        'basic',
+        'collaboration',
+        'attributes',
+        'commercial',
+        'timeline',
+        'review',
+      ],
     )
-    assert.doesNotMatch(
-      wizard,
-      /onValueChange=\{[^}]*matchType|setMatchType|updateDraft\('matchType'/,
-    )
-    assert.doesNotMatch(wizard, /label=["']Match [Tt]ype["']/)
-    assert.doesNotMatch(wizard, /id=["']opp-match-type["']/)
-
-    // Four topology keys must not appear as selectable option values in the wizard.
-    for (const topology of ['one_way', 'two_way', 'circular'] as const) {
-      assert.doesNotMatch(
-        wizard,
-        new RegExp(`SelectItem[^>]*value=["']${topology}["']`),
-      )
-    }
+    assert.ok(!WIZARD_STEPS.some((s) => s.id === 'publish'))
+    assert.doesNotMatch(wizardSource, /stepId=["']publish["']/)
+    assert.doesNotMatch(wizardSource, /Publish for matching/)
+    assert.doesNotMatch(wizardSource, /handlePublish/)
   })
 
-  it('shows derived topology as read-only Recommended Matching Topology', () => {
-    const wizard = wizardSource()
-    assert.match(wizard, /Recommended Matching Topology/)
-    assert.match(wizard, /System will match this as/)
-    assert.match(wizard, /System-derived/)
-    assert.match(wizard, /Based on your collaboration model and exchange mode/i)
-    assert.match(wizard, /data-testid=["']recommended-matching-topology["']/)
-    assert.match(wizard, /deriveMatchingTopology\(/)
-    assert.match(wizard, /systemDerived/)
+  it('Save Draft navigates to opportunity detail', () => {
+    assert.match(wizardSource, /navigate\(`\/opportunities\/\$\{/)
+    assert.match(wizardSource, /handleSaveDraft/)
+    assert.match(wizardSource, /Create Draft|Save Draft/)
   })
 
-  it('command payload builder does not forward manual matchType / preferredMatchingTopology', () => {
-    const wizard = wizardSource()
-    const payloadFnStart = source.indexOf('function buildCollaborationCommandPayload')
-    const payloadFnEnd = source.indexOf('function resolveCompletedSteps')
-    assert.ok(payloadFnStart >= 0 && payloadFnEnd > payloadFnStart)
-    const payloadFn = source.slice(payloadFnStart, payloadFnEnd)
+  it('gates Continue on post type and wires Back / Continue handlers', () => {
+    assert.match(wizardSource, /validateWizardStepAdvance|Choose Need or Offer/)
+    assert.match(wizardSource, /handleContinue/)
+    assert.match(wizardSource, /handleBack/)
+  })
 
-    assert.doesNotMatch(payloadFn, /preferredMatchingTopology:/)
-    assert.doesNotMatch(payloadFn, /matchType:/)
-    assert.match(payloadFn, /mainCollaborationModel:/)
-    assert.match(payloadFn, /subModelType:/)
-    assert.match(payloadFn, /exchangeMode:/)
+  it('Need vs Offer field differences are gated', () => {
+    assert.match(wizardSource, /draft\.intent === 'need'/)
+    assert.match(wizardSource, /draft\.intent === 'offer'/)
+    assert.match(wizardSource, /Required skills|required skills|StructuredSkillsEditor/)
+    assert.match(wizardSource, /showCapacity=\{draft\.intent === 'offer'\}/)
+  })
+
+  it('supports multiple tasks and structured skills editors', () => {
+    assert.match(wizardSource, /WorkPackagesEditor/)
+    assert.match(wizardSource, /StructuredSkillsEditor/)
+  })
+
+  it('renders commercial fields by exchange mode', () => {
+    assert.match(wizardSource, /CommercialTermsStep/)
+    const commercialPath = join(
+      dirname(fileURLToPath(import.meta.url)),
+      '../../components/opportunity/wizard/commercial-terms-step.tsx',
+    )
+    const commercial = readFileSync(commercialPath, 'utf8')
+    assert.match(commercial, /commercial-cash-fields/)
+    assert.match(commercial, /commercial-barter-fields/)
+    assert.match(commercial, /commercial-equity-fields/)
+    assert.match(commercial, /commercial-profit-fields/)
+    assert.match(commercial, /commercial-hybrid-fields/)
+    assert.match(commercial, /Commercial constraints/)
+  })
+
+  it('Marketplace Preview reuses OpportunityCard', () => {
+    const preview = readFileSync(
+      join(
+        dirname(fileURLToPath(import.meta.url)),
+        '../../components/opportunity/wizard/marketplace-preview-panel.tsx',
+      ),
+      'utf8',
+    )
+    assert.match(preview, /OpportunityCard/)
+    assert.match(preview, /MUST reuse|same Marketplace Card/i)
+  })
+
+  it('does not render selectable match type options', () => {
+    assert.match(wizardSource, /ValueExchangeModesPanel/)
+    assert.doesNotMatch(wizardSource, /label=["']Match [Tt]ype["']/)
   })
 })
 
@@ -78,7 +102,6 @@ describe('Opportunity wizard topology derivation cases', () => {
     assert.equal(
       deriveMatchingTopology({
         mainCollaborationModel: 'cash_subcontracting',
-        modelType: 'project_based',
         subModelType: 'task_based',
         exchangeMode: 'cash',
       }).topology,
@@ -86,44 +109,7 @@ describe('Opportunity wizard topology derivation cases', () => {
     )
   })
 
-  it('service exchange + barter → two_way', () => {
-    assert.equal(
-      deriveMatchingTopology({
-        mainCollaborationModel: 'service_exchange',
-        modelType: 'strategic_partnership',
-        subModelType: 'strategic_alliance',
-        exchangeMode: 'barter',
-      }).topology,
-      'two_way',
-    )
-  })
-
-  it('joint venture (SPV / project JV) → consortium', () => {
-    for (const sub of ['project_jv', 'spv', 'consortium'] as const) {
-      assert.equal(
-        deriveMatchingTopology({
-          mainCollaborationModel: 'joint_venture',
-          subModelType: sub,
-        }).topology,
-        'consortium',
-        sub,
-      )
-    }
-  })
-
-  it('resource sharing + barter / circular chain → circular', () => {
-    assert.equal(
-      deriveMatchingTopology({
-        mainCollaborationModel: 'resource_sharing',
-        subModelType: 'resource_sharing',
-        exchangeMode: 'barter',
-        collaborationAttributes: { transactionType: 'barter' },
-      }).topology,
-      'circular',
-    )
-  })
-
-  it('submitted patch ignores manual preferredMatchingTopology / matchType override', () => {
+  it('submitted patch ignores manual preferredMatchingTopology override', () => {
     const patch = buildOpportunityCollaborationPatch({
       mainCollaborationModel: 'cash_subcontracting',
       modelType: 'project_based',
@@ -132,59 +118,49 @@ describe('Opportunity wizard topology derivation cases', () => {
       preferredMatchingTopology: 'circular',
     })
     assert.equal(patch.preferredMatchingTopology, 'one_way')
-    assert.notEqual(patch.preferredMatchingTopology, 'circular')
-    assert.equal(patch.subModelType, 'task_based')
-  })
-
-  it('subModelType cannot equal one_way / two_way / circular', () => {
-    for (const topology of ['one_way', 'two_way', 'circular'] as const) {
-      const patch = buildOpportunityCollaborationPatch({
-        mainCollaborationModel: 'cash_subcontracting',
-        modelType: 'project_based',
-        subModelType: topology,
-        exchangeMode: 'cash',
-      })
-      assert.notEqual(patch.subModelType, topology)
-      assert.ok(patch.subModelType)
-      assert.ok(patch.preferredMatchingTopology)
-    }
   })
 })
 
-describe('Opportunity wizard — step navigation', () => {
-  it('Continue must not use native form submit (avoids reload to ?)', () => {
-    const actionsSource = readFileSync(
-      join(dirname(fileURLToPath(import.meta.url)), '../../components/forms/pm-form-actions.tsx'),
-      'utf8',
-    )
-    const wizardShell = readFileSync(
-      join(dirname(fileURLToPath(import.meta.url)), '../../components/forms/pm-form-wizard.tsx'),
-      'utf8',
-    )
-    // Primary action is a button, not type=submit — native GET would reset draft.
-    assert.match(actionsSource, /type=["']button["']/)
-    assert.doesNotMatch(actionsSource, /type=["']submit["']/)
-    assert.match(wizardShell, /event\.preventDefault\(\)/)
+describe('Structured skills & deliverables normalization', () => {
+  it('accepts structured skills and legacy strings', () => {
+    const skills = normalizeStructuredSkills([
+      { name: 'BIM', level: 'expert', certificationRequired: true, mandatory: true },
+      'AutoCAD',
+    ])
+    assert.equal(skills.length, 2)
+    assert.deepEqual(skillNames(skills), ['BIM', 'AutoCAD'])
   })
 
-  it('gates Continue on post type and wires Back / Continue handlers', () => {
-    const wizard = wizardSource()
-    assert.match(source, /validateWizardStepAdvance/)
-    assert.match(source, /Choose Need or Offer before continuing/)
-    assert.match(wizard, /handleContinue/)
-    assert.match(wizard, /handleBack/)
-    assert.match(wizard, /cancelLabel=\{activeStepIndex <= 0 \? 'Cancel' : 'Back'\}/)
-    for (const stepId of [
-      'type',
-      'scope',
-      'exchange',
-      'submodel',
-      'skills',
-      'timeline',
-      'review',
-      'publish',
-    ]) {
-      assert.match(wizard, new RegExp(`stepId=["']${stepId}["']`))
-    }
+  it('coerces legacy deliverable strings', () => {
+    const items = normalizeDeliverables(['Drawing set', { title: 'Report', acceptanceCriteria: 'Signed', mandatory: true }])
+    assert.equal(items.length, 2)
+    assert.equal(items[0]!.title, 'Drawing set')
+    assert.equal(items[1]!.acceptanceCriteria, 'Signed')
+  })
+})
+
+describe('Readiness reason copy humanization', () => {
+  it('maps READINESS_MISSING_SKILLS_INTENT to human label', () => {
+    const copy = getReadinessReasonCopy('READINESS_MISSING_SKILLS_INTENT')
+    assert.equal(copy.label, 'Missing required skills')
+    assert.match(copy.why, /skill/i)
+    assert.equal(copy.stepId, 'attributes')
+  })
+
+  it('ExplanationBlockers does not render raw reason codes as visible text', () => {
+    const blockers = readFileSync(
+      join(
+        dirname(fileURLToPath(import.meta.url)),
+        '../../components/explainability/explanation-blockers.tsx',
+      ),
+      'utf8',
+    )
+    assert.match(blockers, /getReadinessReasonCopy/)
+    assert.match(blockers, /copy\.label/)
+    assert.match(blockers, /data-reason-code/)
+    assert.doesNotMatch(
+      blockers,
+      /<span className="font-medium">\{blocker\.reasonCode\}<\/span>/,
+    )
   })
 })

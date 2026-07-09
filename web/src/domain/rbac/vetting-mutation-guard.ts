@@ -10,6 +10,8 @@ export const VETTING_GUARDED_COMMAND_TYPES = new Set([
   'CreateOpportunity',
   'UpdateOpportunity',
   'PublishOpportunity',
+  'DeleteOpportunity',
+  'ArchiveOpportunity',
   'AcceptPostMatch',
   'DeclinePostMatch',
   'StartNegotiationFromPostMatch',

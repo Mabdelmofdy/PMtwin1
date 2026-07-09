@@ -4,6 +4,7 @@ import type {
   Command,
   CommandResult,
   CreateOpportunityCommand,
+  DeleteOpportunityCommand,
   OpportunityCollaborationPayload,
   PublishOpportunityCommand,
   TransitionOpportunityStatusCommand,
@@ -34,12 +35,20 @@ import {
   normalizeOpportunityCollaboration,
 } from '@/domain/collaboration/opportunity-collaboration.ts'
 import { toStoredStatus } from '@/domain/workflow/legacy-map.ts'
+import {
+  composePublishValidation,
+  formatPublishValidationMessages,
+  runDraftValidation,
+  runUpdateValidation,
+} from '@/domain/opportunity-validation/index.ts'
 
 const ENTITY_TYPE = 'opportunity' as const
 
 export type PublishReadinessContext = {
   readonly profile?: object | null
   readonly profileKind: ProfileKind
+  /** When omitted, publish validation treats vetting as approved (legacy test stacks). */
+  readonly vettingApproved?: boolean
 }
 
 export type OpportunityCommandHandlerDeps = {
@@ -155,6 +164,17 @@ function payloadToOpportunityFields(
       ? [...payload.complianceRequirements]
       : undefined,
     deliveryMilestones: payload.deliveryMilestones as Opportunity['deliveryMilestones'],
+    structuredSkills: payload.structuredSkills as Opportunity['structuredSkills'],
+    workPackages: payload.workPackages as Opportunity['workPackages'],
+    capacity: payload.capacity as Opportunity['capacity'],
+    startDate: payload.startDate,
+    endDate: payload.endDate,
+    duration: payload.duration,
+    deliveryDeadline: payload.deliveryDeadline,
+    country: payload.country,
+    city: payload.city,
+    workMode: payload.workMode,
+    budget: payload.budget,
     ...(hasCollaborationSelection
       ? {
           value_exchange: {
@@ -203,6 +223,8 @@ export class OpportunityCommandHandler {
         return this.handleClose(command as CloseOpportunityCommand)
       case 'ArchiveOpportunity':
         return this.handleArchive(command as ArchiveOpportunityCommand)
+      case 'DeleteOpportunity':
+        return this.handleDelete(command as DeleteOpportunityCommand)
       case 'TransitionOpportunityStatus':
         return this.handleTransition(
           command as TransitionOpportunityStatusCommand,
@@ -240,6 +262,13 @@ export class OpportunityCommandHandler {
     }
 
     const fields = payloadToOpportunityFields(payload)
+    const draftCheck = runDraftValidation(fields, {
+      taxonomyValid: hasCollaborationSelection ? true : undefined,
+    })
+    if (draftCheck.blocked) {
+      return failure(command.commandType, command.aggregateId, draftCheck.messages)
+    }
+
     const created = this.opportunityRepository.create({
       ...fields,
       id: command.aggregateId,
@@ -297,6 +326,17 @@ export class OpportunityCommandHandler {
           payload.complianceRequirements ?? existing.complianceRequirements,
         deliveryMilestones:
           payload.deliveryMilestones ?? existing.deliveryMilestones,
+        structuredSkills: payload.structuredSkills ?? existing.structuredSkills,
+        workPackages: payload.workPackages ?? existing.workPackages,
+        capacity: payload.capacity ?? existing.capacity,
+        startDate: payload.startDate ?? existing.startDate,
+        endDate: payload.endDate ?? existing.endDate,
+        duration: payload.duration ?? existing.duration,
+        deliveryDeadline: payload.deliveryDeadline ?? existing.deliveryDeadline,
+        country: payload.country ?? existing.country,
+        city: payload.city ?? existing.city,
+        workMode: payload.workMode ?? existing.workMode,
+        budget: payload.budget ?? existing.budget,
       }),
     }
 
@@ -312,6 +352,11 @@ export class OpportunityCommandHandler {
       if (!validation.valid) {
         return failure(command.commandType, command.aggregateId, validation.errors)
       }
+    }
+
+    const updateCheck = runUpdateValidation(merged, { isExistingDraft: true })
+    if (updateCheck.blocked) {
+      return failure(command.commandType, command.aggregateId, updateCheck.messages)
     }
 
     const { status: _status, id: _id, createdAt: _createdAt, ...patch } = merged
@@ -373,6 +418,39 @@ export class OpportunityCommandHandler {
     this.opportunityRepository.update(command.aggregateId, {
       visibilityStatus: 'archived',
     })
+    this.appendAudit({
+      action: 'opportunity.archived',
+      entityType: 'opportunity',
+      entityId: command.aggregateId,
+      requestId: command.clientRequestId,
+      details: { reason: command.reason },
+    })
+    return success(command.commandType, command.aggregateId)
+  }
+
+  private handleDelete(command: DeleteOpportunityCommand): CommandResult {
+    const opportunity = this.opportunityRepository.getById(command.aggregateId)
+    if (!opportunity) {
+      return failure(command.commandType, command.aggregateId, [
+        `Opportunity "${command.aggregateId}" not found`,
+      ])
+    }
+
+    const status = (opportunity.status ?? '').toLowerCase()
+    if (status !== 'draft') {
+      return failure(command.commandType, command.aggregateId, [
+        'Published opportunities cannot be hard-deleted. Archive instead.',
+      ])
+    }
+
+    this.opportunityRepository.softDelete(command.aggregateId)
+    this.appendAudit({
+      action: 'opportunity.deleted',
+      entityType: 'opportunity',
+      entityId: command.aggregateId,
+      requestId: command.clientRequestId,
+      details: { reason: command.reason, status: 'draft' },
+    })
     return success(command.commandType, command.aggregateId)
   }
 
@@ -431,17 +509,24 @@ export class OpportunityCommandHandler {
         profile: null,
         profileKind: 'individual' as const,
       }
+      // Consume existing readiness gate — do not recalculate scores inside validation.
       const publishGate = evaluatePublishReadiness({
         profile: publishContext.profile,
         profileKind: publishContext.profileKind,
         opportunity,
       })
-      if (!publishGate.allowed) {
-        return failure(
-          command.commandType,
-          command.aggregateId,
-          formatPublishReadinessCommandErrors(publishGate),
-        )
+      const publishValidation = composePublishValidation({
+        opportunity,
+        publishReadiness: publishGate,
+        vettingApproved: publishContext.vettingApproved ?? true,
+        taxonomyValid: collaborationValidation.valid,
+        taxonomyErrors: collaborationValidation.errors,
+      })
+      if (publishValidation.status === 'blocked') {
+        const messages = !publishGate.allowed
+          ? formatPublishReadinessCommandErrors(publishGate)
+          : formatPublishValidationMessages(publishValidation)
+        return failure(command.commandType, command.aggregateId, messages)
       }
     }
 

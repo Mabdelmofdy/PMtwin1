@@ -22,6 +22,7 @@
     "@pm-twin/lifecycle": "file:../packages/lifecycle",
     "@pm-twin/matching": "file:../packages/matching",
     "@pm-twin/party": "file:../packages/party",
+    "@pm-twin/validation": "file:../packages/validation",
     "@pm-twin/workflows": "file:../packages/workflows",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",

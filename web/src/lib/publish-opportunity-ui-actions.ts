@@ -14,6 +14,11 @@ import {
   PUBLISH_READINESS_BLOCKED_MESSAGE,
 } from '@/domain/publish-readiness/index.ts'
 import { buildPublishReadinessBundles } from '@/services/explainability/index.ts'
+import {
+  composePublishValidation,
+  formatPublishValidationMessages,
+} from '@/domain/opportunity-validation/index.ts'
+import { buildPublishValidationExplanationLines } from '@/services/explainability/publish-validation-explain.ts'
 import type { ProfileKind, ProfileReadinessResult } from '@/domain/profile-readiness/types.ts'
 import {
   matchingService,
@@ -23,6 +28,8 @@ import {
   createOpportunityCommandService,
   opportunityCommandService,
 } from '@/services/opportunity-command-service.ts'
+
+export const PUBLISH_VALIDATION_BLOCKED_CODE = 'PUBLISH_VALIDATION_BLOCKED' as const
 
 export type PublishOpportunityUiActionResult =
   | {
@@ -34,7 +41,10 @@ export type PublishOpportunityUiActionResult =
     }
   | {
       readonly success: false
-      readonly code: typeof PUBLISH_READINESS_BLOCKED_CODE | 'COMMAND_FAILED'
+      readonly code:
+        | typeof PUBLISH_READINESS_BLOCKED_CODE
+        | typeof PUBLISH_VALIDATION_BLOCKED_CODE
+        | 'COMMAND_FAILED'
       readonly message: string
       readonly details?: readonly string[]
       readonly publishBundles?: readonly ExplanationBundle[]
@@ -131,21 +141,47 @@ export function publishOpportunityUiAction(
     readonly profileKind: ProfileKind
     readonly opportunity?: object | null
     readonly profileId?: string
+    readonly vettingApproved?: boolean
   },
   deps?: PublishOrchestrationDeps,
 ): PublishOpportunityUiActionResult {
+  // Produce readiness snapshot once; publish validation consumes it (no recalculation).
   const gate = evaluatePublishReadiness({
     profile: context.profile,
     profileKind: context.profileKind,
     opportunity: context.opportunity,
   })
 
-  if (!gate.allowed) {
+  const opportunity = (context.opportunity ?? {}) as Partial<Opportunity>
+  const publishValidation = composePublishValidation({
+    opportunity,
+    publishReadiness: gate,
+    vettingApproved: context.vettingApproved ?? true,
+  })
+
+  if (publishValidation.status === 'blocked') {
+    // Preserve readiness detail format when readiness itself failed (regression UX).
+    // Append validation-only human messages when readiness passed but other gates failed.
+    const details = gate.allowed
+      ? [
+          ...formatPublishValidationMessages(publishValidation),
+          ...buildPublishValidationExplanationLines(publishValidation),
+        ]
+      : [
+          ...formatPublishReadinessDetailLines(gate),
+          ...formatPublishValidationMessages(publishValidation).filter(
+            (line) => line !== PUBLISH_READINESS_BLOCKED_MESSAGE,
+          ),
+        ]
     return {
       success: false,
-      code: PUBLISH_READINESS_BLOCKED_CODE,
-      message: PUBLISH_READINESS_BLOCKED_MESSAGE,
-      details: formatPublishReadinessDetailLines(gate),
+      code: gate.allowed
+        ? PUBLISH_VALIDATION_BLOCKED_CODE
+        : PUBLISH_READINESS_BLOCKED_CODE,
+      message: gate.allowed
+        ? (details[0] ?? PUBLISH_READINESS_BLOCKED_MESSAGE)
+        : PUBLISH_READINESS_BLOCKED_MESSAGE,
+      details,
       publishBundles: buildPublishReadinessBundles(gate, {
         profileId: context.profileId ?? 'current-user',
         opportunityId,

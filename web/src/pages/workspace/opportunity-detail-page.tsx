@@ -1,8 +1,11 @@
 import type { ExplanationBundle } from '@pm-twin/explainability'
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { Pencil } from 'lucide-react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Archive, Copy, FileJson, Pencil, Printer, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { opportunityCommandService } from '@/services/opportunity-command-service.ts'
+import { OpportunityVersionTimeline } from '@/components/opportunity/opportunity-version-timeline.tsx'
+import { buildCollaborationCommandPayload, opportunityToDraft } from '@/components/opportunity/wizard/draft-model.ts'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
@@ -175,6 +178,7 @@ function buildRecommendedActionItem(input: {
 export function OpportunityDetailPage() {
   const version = useDataStoreVersion()
   const { id } = useParams()
+  const navigate = useNavigate()
   const { user, isPendingApproval, canAccessAdmin } = useAuth()
   const [showWizard, setShowWizard] = useState(false)
   const [publishDetails, setPublishDetails] = useState<readonly string[] | null>(null)
@@ -431,11 +435,137 @@ export function OpportunityDetailPage() {
 
     setPublishDetails(null)
     setPublishBundles(null)
-    const feedback = showPublishSuccessFeedback(result)
-    if (feedback.shouldHighlightRelatedMatches) {
-      setHighlightRelatedMatches(true)
-    }
+    setHighlightRelatedMatches(true)
+    showPublishSuccessFeedback(result)
   }
+
+  const isDraft = (opp.status ?? '').toLowerCase() === 'draft'
+  const isArchived = (opp.visibilityStatus ?? '').toLowerCase() === 'archived'
+
+  const handleDeleteDraft = () => {
+    if (!window.confirm('Delete this draft opportunity? This cannot be undone.')) return
+    const result = opportunityCommandService.deleteOpportunity(opp.id)
+    if (!result.success) {
+      toast.error(result.errors?.join('\n') ?? 'Could not delete draft')
+      return
+    }
+    toast.success('Draft deleted')
+    navigate('/opportunities')
+  }
+
+  const handleArchive = () => {
+    const result = opportunityCommandService.archiveOpportunity(opp.id, 'Owner archived')
+    if (!result.success) {
+      toast.error(result.errors?.join('\n') ?? 'Could not archive')
+      return
+    }
+    toast.success('Opportunity archived')
+  }
+
+  const handleDuplicate = (asTemplate: boolean) => {
+    if (!user) {
+      toast.error('Sign in to duplicate opportunities.')
+      return
+    }
+    const draft = opportunityToDraft(opp)
+    const payload = buildCollaborationCommandPayload(draft, user.id)
+    const result = opportunityCommandService.duplicateOpportunity({
+      ...payload,
+      asTemplate,
+      sourceOpportunityId: opp.id,
+    })
+    if (!result.success) {
+      toast.error(result.errors?.join('\n') ?? 'Could not duplicate')
+      return
+    }
+    toast.success(asTemplate ? 'Template draft created' : 'Draft copy created')
+    navigate(`/opportunities/${result.aggregateId}`)
+  }
+
+  const handleExportJson = () => {
+    const blob = new Blob([JSON.stringify(opp, null, 2)], {
+      type: 'application/json',
+    })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `${opp.id}.json`
+    anchor.click()
+    URL.revokeObjectURL(url)
+    toast.success('JSON exported')
+  }
+
+  const handlePrintSummary = () => {
+    window.print()
+  }
+
+  const handleExportPdf = () => {
+    toast.message('Export PDF', {
+      description: 'Use Print Summary and choose Save as PDF in the print dialog.',
+    })
+    window.print()
+  }
+
+  const ownerMoreActions = isOwner
+    ? [
+        {
+          id: 'edit',
+          label: isDraft ? 'Edit draft' : 'Edit opportunity',
+          href: `/opportunities/${opp.id}/edit`,
+          icon: Pencil,
+        },
+        {
+          id: 'duplicate-draft',
+          label: 'Duplicate as Draft',
+          onSelect: () => handleDuplicate(false),
+          icon: Copy,
+        },
+        {
+          id: 'duplicate-template',
+          label: 'Duplicate as Template',
+          onSelect: () => handleDuplicate(true),
+          icon: Copy,
+        },
+        {
+          id: 'export-json',
+          label: 'Export JSON',
+          onSelect: handleExportJson,
+          icon: FileJson,
+        },
+        {
+          id: 'export-pdf',
+          label: 'Export PDF',
+          onSelect: handleExportPdf,
+          icon: Printer,
+        },
+        {
+          id: 'print',
+          label: 'Print Summary',
+          onSelect: handlePrintSummary,
+          icon: Printer,
+        },
+        ...(isDraft
+          ? [
+              {
+                id: 'delete-draft',
+                label: 'Delete draft',
+                onSelect: handleDeleteDraft,
+                icon: Trash2,
+              },
+            ]
+          : []),
+        ...(!isDraft && !isArchived
+          ? [
+              {
+                id: 'archive',
+                label: 'Archive / Withdraw',
+                onSelect: handleArchive,
+                icon: Archive,
+              },
+            ]
+          : []),
+      ]
+    : undefined
 
   const headerDescription = [
     opp.location,
@@ -499,18 +629,7 @@ export function OpportunityDetailPage() {
                         ? undefined
                         : { label: 'Open matches', href: '/matches', variant: 'outline' }
                 }
-                more={
-                  isOwner
-                    ? [
-                        {
-                          id: 'edit',
-                          label: 'Edit opportunity',
-                          href: `/opportunities/${opp.id}/edit`,
-                          icon: Pencil,
-                        },
-                      ]
-                    : undefined
-                }
+                more={ownerMoreActions}
               />
             ) : undefined
           }
@@ -682,6 +801,8 @@ export function OpportunityDetailPage() {
             {visibility.showReadiness ? (
               <OpportunityReadinessCard opportunity={opp} opportunityId={opp.id} />
             ) : null}
+
+            {isOwner ? <OpportunityVersionTimeline opportunity={opp} /> : null}
 
             {visibility.showOwnerActions && canPublishDraft ? (
               <OpportunityPublishPanel

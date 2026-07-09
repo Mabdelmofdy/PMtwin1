@@ -78,7 +78,11 @@ export type {
   PublishOpportunityCommand,
   CloseOpportunityCommand,
   ArchiveOpportunityCommand,
+  DeleteOpportunityCommand,
   OpportunityCollaborationPayload,
+  OpportunityStructuredSkill,
+  OpportunityWorkPackage,
+  OpportunityCapacity,
 } from './src/index.ts'
 
 export {

@@ -20,7 +20,7 @@ import type { Opportunity } from '@/types/domain.ts'
 
 const sourcePath = join(
   dirname(fileURLToPath(import.meta.url)),
-  '../../pages/workspace/opportunities-pages.tsx',
+  '../../components/opportunity/wizard/opportunity-wizard-page.tsx',
 )
 const wizardSource = readFileSync(sourcePath, 'utf8')
 

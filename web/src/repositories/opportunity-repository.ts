@@ -76,4 +76,20 @@ export class OpportunityRepository extends BaseRepository<Opportunity> {
     this.writeOverrides(overrides)
     return opportunity
   }
+
+  /** Soft-delete via deletedOpportunities override list (draft lifecycle only). */
+  softDelete(id: string): void {
+    const overrides = this.readOverrides()
+    const deleted = new Set(overrides.deletedOpportunities ?? [])
+    deleted.add(id)
+    overrides.deletedOpportunities = [...deleted]
+    overrides.newOpportunities = (overrides.newOpportunities ?? []).filter(
+      (item) => item.id !== id,
+    )
+    if (overrides.opportunities?.[id]) {
+      const { [id]: _removed, ...rest } = overrides.opportunities
+      overrides.opportunities = rest
+    }
+    this.writeOverrides(overrides)
+  }
 }

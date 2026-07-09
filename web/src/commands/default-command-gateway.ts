@@ -34,6 +34,7 @@ const OPPORTUNITY_COMMAND_TYPES = new Set([
   'PublishOpportunity',
   'CloseOpportunity',
   'ArchiveOpportunity',
+  'DeleteOpportunity',
 ])
 
 const APPLICATION_COMMAND_TYPES = new Set([

@@ -131,6 +131,34 @@ export type Opportunity = TenantScoped & {
     deliveryMilestones?: ReadonlyArray<{ title?: string } | string>
     attachments?: ReadonlyArray<{ name?: string } | string>
   }
+  /** Structured skills for validation (complements scope string arrays). */
+  structuredSkills?: ReadonlyArray<{
+    skillId?: string
+    name?: string
+    role: 'required' | 'provided'
+    level?: string
+    years?: number
+    intent?: 'need' | 'offer' | 'hybrid'
+  }>
+  workPackages?: ReadonlyArray<{
+    id?: string
+    title?: string
+    description?: string
+    skills?: readonly string[]
+    deadline?: string
+  }>
+  capacity?: {
+    required?: number
+    available?: number
+  }
+  startDate?: string
+  endDate?: string
+  duration?: number | string
+  deliveryDeadline?: string
+  country?: string
+  city?: string
+  workMode?: string
+  budget?: number
   normalized?: Record<string, unknown>
   value_exchange?: {
     mode?: string

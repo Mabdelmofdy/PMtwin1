@@ -3,6 +3,7 @@ import type {
   CloseOpportunityCommand,
   CommandResult,
   CreateOpportunityCommand,
+  DeleteOpportunityCommand,
   OpportunityCollaborationPayload,
   PublishOpportunityCommand,
   TransitionOpportunityStatusCommand,
@@ -113,6 +114,42 @@ export function createOpportunityCommandService(
         reason,
       } satisfies ArchiveOpportunityCommand
       return resolveGateway(deps).execute(command)
+    },
+
+    deleteOpportunity(opportunityId: string, reason?: string): CommandResult {
+      const command = {
+        commandType: 'DeleteOpportunity',
+        aggregateId: opportunityId,
+        clientRequestId: createClientRequestId('DeleteOpportunity'),
+        reason,
+      } satisfies DeleteOpportunityCommand
+      return resolveGateway(deps).execute(command)
+    },
+
+    duplicateOpportunity(
+      source: OpportunityCollaborationPayload & {
+        readonly title: string
+        readonly asTemplate?: boolean
+        readonly sourceOpportunityId?: string
+      },
+    ): CommandResult {
+      const suffix = source.asTemplate ? ' (Template)' : ' (Copy)'
+      const title = source.title.endsWith(suffix)
+        ? source.title
+        : `${source.title}${suffix}`
+      const attrs = {
+        ...(source.collaborationAttributes ?? {}),
+        templateMetadata: {
+          isTemplate: Boolean(source.asTemplate),
+          templateScope: source.asTemplate ? 'personal' : undefined,
+          sourceOpportunityId: source.sourceOpportunityId,
+        },
+      }
+      return this.createOpportunity({
+        ...source,
+        title,
+        collaborationAttributes: attrs,
+      })
     },
 
     transitionOpportunityStatus(
