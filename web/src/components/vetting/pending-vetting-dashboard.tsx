@@ -19,6 +19,11 @@ import { VettingDocumentsProgressCard } from '@/components/vetting/vetting-docum
 import { PendingVettingSecondaryActions } from '@/components/vetting/pending-vetting-secondary-actions.tsx'
 import { PendingVettingWhatHappensNext } from '@/components/vetting/pending-vetting-what-happens-next.tsx'
 import { resolveVettingActionQueue } from '@/components/vetting/resolve-vetting-action-queue.ts'
+import { ExplanationPanel } from '@/components/explainability/explanation-panel.tsx'
+import {
+  buildProfileExplanation,
+  buildVettingExplanation,
+} from '@/services/explainability/index.ts'
 import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
@@ -48,6 +53,19 @@ export function PendingVettingDashboard({ user }: { user: PlatformUser }) {
     .filter((document) => document.documentCategory === 'vetting')
 
   const vetting = evaluateVettingReadiness({
+    accountStatus: user.status,
+    reviewProgress: user.profile?.vetting?.reviewProgress,
+    changesResolved: user.profile?.vetting?.changesResolved,
+    documents: vettingDocuments,
+  })
+
+  const profileBundle = buildProfileExplanation(
+    user.id,
+    user.role === 'company' ? 'company' : 'individual',
+    profileCompletion,
+    scorableProfile,
+  )
+  const vettingBundle = buildVettingExplanation(user.id, vetting, {
     accountStatus: user.status,
     reviewProgress: user.profile?.vetting?.reviewProgress,
     changesResolved: user.profile?.vetting?.changesResolved,
@@ -144,6 +162,25 @@ export function PendingVettingDashboard({ user }: { user: PlatformUser }) {
         </div>
 
         <PendingVettingJourneyPanel steps={journey.steps} actionQueue={actionQueue} />
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <PmContentCard title="Profile gaps">
+            <ExplanationPanel
+              bundle={profileBundle}
+              compact
+              showBreakdown={false}
+              showTimeline={false}
+            />
+          </PmContentCard>
+          <PmContentCard title="Vetting gaps">
+            <ExplanationPanel
+              bundle={vettingBundle}
+              compact
+              showBreakdown={false}
+              showTimeline={false}
+            />
+          </PmContentCard>
+        </div>
 
         {changesRequested ? (
           <PmContentCard title="Changes requested" id="vetting-review" role="status">

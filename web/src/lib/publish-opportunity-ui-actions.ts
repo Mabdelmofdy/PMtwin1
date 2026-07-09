@@ -1,4 +1,5 @@
 import type { CommandResult } from '@pm-twin/commands'
+import type { ExplanationBundle } from '@pm-twin/explainability'
 import type { Opportunity, PlatformUser } from '@/types/domain.ts'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import type { OpportunityReadinessResult } from '@/domain/opportunity-readiness/types.ts'
@@ -12,6 +13,7 @@ import {
   PUBLISH_READINESS_BLOCKED_CODE,
   PUBLISH_READINESS_BLOCKED_MESSAGE,
 } from '@/domain/publish-readiness/index.ts'
+import { buildPublishReadinessBundles } from '@/services/explainability/index.ts'
 import type { ProfileKind, ProfileReadinessResult } from '@/domain/profile-readiness/types.ts'
 import {
   matchingService,
@@ -35,6 +37,7 @@ export type PublishOpportunityUiActionResult =
       readonly code: typeof PUBLISH_READINESS_BLOCKED_CODE | 'COMMAND_FAILED'
       readonly message: string
       readonly details?: readonly string[]
+      readonly publishBundles?: readonly ExplanationBundle[]
       readonly profileReadiness?: ProfileReadinessResult
       readonly opportunityReadiness?: OpportunityReadinessResult
     }
@@ -127,6 +130,7 @@ export function publishOpportunityUiAction(
     readonly profile?: object | null
     readonly profileKind: ProfileKind
     readonly opportunity?: object | null
+    readonly profileId?: string
   },
   deps?: PublishOrchestrationDeps,
 ): PublishOpportunityUiActionResult {
@@ -142,6 +146,11 @@ export function publishOpportunityUiAction(
       code: PUBLISH_READINESS_BLOCKED_CODE,
       message: PUBLISH_READINESS_BLOCKED_MESSAGE,
       details: formatPublishReadinessDetailLines(gate),
+      publishBundles: buildPublishReadinessBundles(gate, {
+        profileId: context.profileId ?? 'current-user',
+        opportunityId,
+        profileKind: context.profileKind,
+      }),
       profileReadiness: gate.profileReadiness,
       opportunityReadiness: gate.opportunityReadiness,
     }

@@ -10,6 +10,8 @@ import { CreateContractButton } from '@/components/commercial-agreement/create-c
 import { CommercialAgreementStageActions } from '@/components/commercial-agreement/commercial-agreement-stage-actions.tsx'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { buildCommercialAgreementDetailReadModel } from '@/lib/commercial-agreement-detail-read-model.ts'
+import { ExplanationPanel } from '@/components/explainability/explanation-panel.tsx'
+import { buildAgreementExplanation } from '@/services/explainability/index.ts'
 import { formatDate } from '@/lib/format'
 import { CollaborationTimeline } from '@/components/collaboration/collaboration-timeline'
 import { resolveCollaborationStepFromDeal } from '@/components/collaboration/collaboration-display'
@@ -465,6 +467,11 @@ export function CommercialAgreementDetailPage() {
         })
       : null
 
+  const agreementBundle = useMemo(
+    () => (model ? buildAgreementExplanation(model) : null),
+    [model],
+  )
+
   void version
 
   if (!id || !model) {
@@ -689,6 +696,12 @@ export function CommercialAgreementDetailPage() {
                 </PmFormReadonlySection>
               </PmFormReadonly>
             ) : null}
+            <ExplanationPanel
+              bundle={agreementBundle!}
+              scoreLabel="Agreement progress"
+              compact
+              showTimeline={false}
+            />
           </PmInspectorLayout>
         }
         timeline={

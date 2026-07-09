@@ -9,6 +9,8 @@ import { SignContractButton } from '@/components/contract/sign-contract-button.t
 import { CompleteContractButton } from '@/components/contract/complete-contract-button.tsx'
 import { TerminateContractButton } from '@/components/contract/terminate-contract-button.tsx'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
+import { ExplanationPanel } from '@/components/explainability/explanation-panel.tsx'
+import { buildContractExplanation } from '@/services/explainability/index.ts'
 import {
   buildContractDetailReadModel,
   contractDetailShowsMutationActions,
@@ -481,6 +483,11 @@ export function ContractDetailPage() {
         )
       : null
 
+  const contractBundle = useMemo(
+    () => (model ? buildContractExplanation(model) : null),
+    [model],
+  )
+
   void version
 
   if (!id || !model) {
@@ -718,6 +725,13 @@ export function ContractDetailPage() {
             <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
               {model.scope ?? 'No scope recorded.'}
             </p>
+            <ExplanationPanel
+              bundle={contractBundle!}
+              scoreLabel={`${productLanguage.label('contract')} progress`}
+              compact
+              showTimeline={false}
+              className="mt-4 border-t border-border/50 pt-4"
+            />
           </PmInspectorLayout>
         }
         timeline={

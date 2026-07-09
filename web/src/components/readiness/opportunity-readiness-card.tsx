@@ -10,6 +10,7 @@ import type {
 import type { ReadinessResult } from '@pm-twin/collaboration-models'
 import { ReadinessCard } from '@/components/readiness/readiness-card.tsx'
 import { resolveOpportunityReadinessCta } from '@/components/readiness/readiness-ui-rules.ts'
+import { buildOpportunityExplanation } from '@/services/explainability/index.ts'
 
 export function toOpportunityReadinessInput(
   opportunity?: object | null,
@@ -51,6 +52,11 @@ export function OpportunityReadinessCard({
     [opportunity],
   )
 
+  const canonical = useMemo(
+    () => resolveOpportunityReadinessCanonical(readinessInput),
+    [readinessInput],
+  )
+
   const evaluated = useMemo(
     () => resolveOpportunityReadiness(readinessInput),
     [readinessInput],
@@ -61,7 +67,18 @@ export function OpportunityReadinessCard({
     opportunityId ??
     (readinessInput && 'id' in readinessInput
       ? (readinessInput.id as string | undefined)
-      : undefined)
+      : undefined) ??
+    'draft-opportunity'
+
+  const bundle = useMemo(
+    () => buildOpportunityExplanation(resolvedOpportunityId, canonical, {
+      subModelKey:
+        typeof readinessInput?.subModelType === 'string'
+          ? readinessInput.subModelType
+          : undefined,
+    }),
+    [resolvedOpportunityId, canonical, readinessInput],
+  )
 
   const cta = useMemo(
     () =>
@@ -78,6 +95,8 @@ export function OpportunityReadinessCard({
       className={className}
       cta={cta}
       opportunityCopy
+      bundle={bundle}
+      scoreKindLabel="Opportunity Readiness"
     />
   )
 }

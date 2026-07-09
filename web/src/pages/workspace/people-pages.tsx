@@ -288,6 +288,7 @@ export function ProfilePage() {
         profile={user?.profile}
         profileKind={profileKind}
         email={user?.email}
+        userId={user?.id}
       />
       {user && isVettingRestricted ? (
         <PmContentCard

@@ -17,10 +17,11 @@ export type ProfileViewProps = {
   profile?: object | null
   profileKind: ProfileKind
   email?: string
+  userId?: string
 }
 
 /** Authenticated profile page — summary, skills, readiness panel. */
-export function ProfileView({ profile, profileKind, email }: ProfileViewProps) {
+export function ProfileView({ profile, profileKind, email, userId }: ProfileViewProps) {
   const personProfile = profile as {
     name?: string
     bio?: string
@@ -145,7 +146,11 @@ export function ProfileView({ profile, profileKind, email }: ProfileViewProps) {
         </PmForm>
       }
       inspector={
-        <ProfileReadinessCard profile={profile} profileKind={profileKind} />
+        <ProfileReadinessCard
+          profile={profile}
+          profileKind={profileKind}
+          userId={userId}
+        />
       }
     />
   )

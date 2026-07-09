@@ -1,15 +1,19 @@
+import type { ExplanationBundle } from '@pm-twin/explainability'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/tokens'
 import { PmSurface } from '@/components/ui/pm-surface'
+import { ExplanationBlockers } from '@/components/explainability/explanation-blockers.tsx'
 import { PUBLISH_READINESS_BLOCKED_MESSAGE } from '@/domain/publish-readiness/index.ts'
 
 export function PublishReadinessAlert({
   message = PUBLISH_READINESS_BLOCKED_MESSAGE,
   details,
+  bundles,
   className,
 }: {
   message?: string
   details?: readonly string[]
+  bundles?: readonly ExplanationBundle[]
   className?: string
 }) {
   const profileRequired = extractSection(details, 'Profile required:')
@@ -17,7 +21,6 @@ export function PublishReadinessAlert({
   const opportunityRequired = extractSection(details, 'Opportunity required:')
   const opportunityRecommended = extractSection(details, 'Opportunity recommended:')
 
-  // Legacy combined headings when finer sections are absent.
   const profileMissing =
     profileRequired.length === 0 && profileRecommended.length === 0
       ? extractSection(details, 'Profile missing:')
@@ -26,6 +29,8 @@ export function PublishReadinessAlert({
     opportunityRequired.length === 0 && opportunityRecommended.length === 0
       ? extractSection(details, 'Opportunity missing:')
       : []
+
+  const hasBundleBlockers = (bundles?.length ?? 0) > 0
 
   return (
     <PmSurface
@@ -37,6 +42,18 @@ export function PublishReadinessAlert({
       )}
     >
       <p className={cn(pmTypography.label, 'text-warning')}>{message}</p>
+
+      {hasBundleBlockers
+        ? bundles?.map((bundle) => (
+            <ExplanationBlockers
+              key={`${bundle.engine}-${bundle.entityId}`}
+              bundle={bundle}
+              className="mt-3 text-foreground"
+              heading={`${bundle.engine} blockers`}
+            />
+          ))
+        : null}
+
       <MissingList heading="Profile required:" items={profileRequired} />
       <MissingList heading="Profile recommended:" items={profileRecommended} />
       <MissingList heading="Opportunity required:" items={opportunityRequired} />

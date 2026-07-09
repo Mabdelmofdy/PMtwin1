@@ -1,3 +1,4 @@
+import type { ExplanationBundle } from '@pm-twin/explainability'
 import type { ComponentProps, ReactElement } from 'react'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/tokens'
@@ -12,6 +13,7 @@ import {
   buildReadinessExplanationLines,
   type ReadinessScoreExplanation,
 } from '@/components/ui/pm-score-explanation'
+import { bundleToReadinessTooltipLines } from '@/services/explainability/explainability-service.ts'
 import { PmScoreTooltip } from '@/components/ui/pm-score-tooltip'
 
 export type PmReadinessScoreBadgeVariant =
@@ -32,6 +34,7 @@ export type PmReadinessScoreBadgeProps = {
   className?: string
   display?: ReadinessScoreDisplay
   explanation?: ReadinessScoreExplanation
+  bundle?: ExplanationBundle
   explainable?: boolean
 } & Omit<ComponentProps<'div'>, 'children'>
 
@@ -56,12 +59,15 @@ export function PmReadinessScoreBadge({
   className,
   display: displayProp,
   explanation,
+  bundle,
   explainable,
   ...props
 }: PmReadinessScoreBadgeProps) {
   const display = displayProp ?? resolveReadinessScoreDisplay(score)
   const percentLabel = `${display.percent}%`
-  const explanationLines = buildReadinessExplanationLines(display, explanation)
+  const explanationLines = bundle
+    ? bundleToReadinessTooltipLines(bundle)
+    : buildReadinessExplanationLines(display, explanation)
   const resolvedVariant = variant === 'card' ? 'default' : variant
   const shouldExplain =
     explainable ??

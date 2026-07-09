@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils'
 import { collectPostMatchOpportunityIds } from '@/domain/normalized/post-match-strong-key.ts'
 import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'
 import { PRODUCT_LANGUAGE } from '@/lib/product-language'
+import { buildMatchExplanation } from '@/services/explainability/index.ts'
 
 const MATCH_TYPE_ICONS: Record<string, LucideIcon> = {
   one_way: ArrowRight,
@@ -88,6 +89,7 @@ export function MatchCard({
     ? resolveOpportunityTaxonomyLabels(primaryOpportunity)
     : null
   const breakdown = match.payload?.breakdown ?? match.matchCriteria ?? {}
+  const matchBundle = buildMatchExplanation(match)
   const confidence =
     match.matchScore >= 0.9
       ? 'High Confidence'
@@ -130,6 +132,7 @@ export function MatchCard({
           variant="compact"
           showLabel={false}
           breakdown={match.payload?.breakdown ?? match.matchCriteria}
+          bundle={matchBundle}
         />
       </div>
 

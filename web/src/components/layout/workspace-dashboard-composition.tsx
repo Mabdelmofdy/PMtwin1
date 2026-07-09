@@ -34,6 +34,11 @@ import { formatDate, formatRelativeTime } from '@/lib/format'
 import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import { formatReadinessScorePercent } from '@/components/ui/pm-readiness-score-display'
 import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
+import {
+  buildProfileExplanationFromEvaluation,
+  getAggregatedRecommendations,
+} from '@/services/explainability/index.ts'
+import { ExplanationRecommendations } from '@/components/explainability/explanation-recommendations.tsx'
 import { cn } from '@/lib/utils'
 import { useProductLanguage } from '@/providers/product-language-provider'
 import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
@@ -118,6 +123,12 @@ export function WorkspaceDashboardComposition() {
   const readiness = user?.profile
     ? resolveProfileReadiness(user.profile, profileKind)
     : null
+  const profileExplanationBundle = user?.id
+    ? buildProfileExplanationFromEvaluation(user.id, profileKind, user.profile)
+    : null
+  const dashboardRecommendations = profileExplanationBundle
+    ? getAggregatedRecommendations([profileExplanationBundle], 5)
+    : []
   const opportunities = opportunitiesApi.list()
   const matches = matchesApi.list()
   const activeMatches = countActiveMatches(matches)
@@ -312,6 +323,17 @@ export function WorkspaceDashboardComposition() {
         description="Items that need your action to keep execution moving."
         items={needsActionItems}
       />
+      {dashboardRecommendations.length > 0 && profileExplanationBundle ? (
+        <PmContentCard title="Next best actions">
+          <ExplanationRecommendations
+            bundle={{
+              ...profileExplanationBundle,
+              recommendations: dashboardRecommendations,
+            }}
+            heading="Prioritized recommendations"
+          />
+        </PmContentCard>
+      ) : null}
       <PmSectionHeader
         title="My workflow"
         description="Progress, current stage, and next step across active entities."

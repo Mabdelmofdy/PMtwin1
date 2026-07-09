@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import type { ExplanationBundle } from '@pm-twin/explainability'
 import { PmBadge } from '@/components/ui/pm-badge'
 import { PmReadinessScoreBadge } from '@/components/ui/pm-readiness-score-badge'
 import { PmButton } from '@/components/ui/pm-button'
@@ -21,6 +22,7 @@ const STATE_COPY: Record<
 export type OpportunityPublishPanelProps = {
   opportunity: Opportunity
   publishDetails?: readonly string[] | null
+  publishBundles?: readonly ExplanationBundle[] | null
   onPublish?: () => void
   showPublishButton?: boolean
   className?: string
@@ -30,6 +32,7 @@ export type OpportunityPublishPanelProps = {
 export function OpportunityPublishPanel({
   opportunity,
   publishDetails,
+  publishBundles,
   onPublish,
   showPublishButton = false,
   className,
@@ -51,7 +54,10 @@ export function OpportunityPublishPanel({
 
         {publishDetails ? (
           <div className="mt-3">
-            <PublishReadinessAlert details={publishDetails} />
+            <PublishReadinessAlert
+              details={publishDetails}
+              bundles={publishBundles ?? undefined}
+            />
           </div>
         ) : null}
 
@@ -67,19 +73,24 @@ export function OpportunityPublishPanel({
 
 export type OpportunityPublishExperienceProps = {
   publishDetails?: readonly string[] | null
+  publishBundles?: readonly ExplanationBundle[] | null
   className?: string
 }
 
 /** Inline publish blocked alert for wizard — visual wrapper only. */
 export function OpportunityPublishExperience({
   publishDetails,
+  publishBundles,
   className,
 }: OpportunityPublishExperienceProps) {
   if (!publishDetails?.length) return null
 
   return (
-    <div className={className} data-slot="opportunity-publish-experience">
-      <PublishReadinessAlert details={publishDetails} />
+    <div className={cn(className)} data-slot="opportunity-publish-experience">
+      <PublishReadinessAlert
+        details={publishDetails}
+        bundles={publishBundles ?? undefined}
+      />
     </div>
   )
 }

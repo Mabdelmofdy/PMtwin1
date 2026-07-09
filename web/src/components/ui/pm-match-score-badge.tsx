@@ -1,3 +1,4 @@
+import type { ExplanationBundle } from '@pm-twin/explainability'
 import type { ComponentProps, ReactElement } from 'react'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/tokens'
@@ -9,6 +10,7 @@ import {
 } from '@/components/ui/pm-match-score-display'
 import { buildScoreRegionLabel } from '@/components/ui/pm-score-a11y'
 import { buildMatchExplanationLines } from '@/components/ui/pm-score-explanation'
+import { bundleToMatchTooltipLines } from '@/services/explainability/explainability-service.ts'
 import { PmScoreTooltip } from '@/components/ui/pm-score-tooltip'
 
 export type PmMatchScoreBadgeVariant =
@@ -28,6 +30,7 @@ export type PmMatchScoreBadgeProps = {
   className?: string
   display?: MatchScoreDisplay
   breakdown?: Record<string, number>
+  bundle?: ExplanationBundle
   explainable?: boolean
 } & Omit<ComponentProps<'div'>, 'children'>
 
@@ -52,12 +55,15 @@ export function PmMatchScoreBadge({
   className,
   display: displayProp,
   breakdown,
+  bundle,
   explainable,
   ...props
 }: PmMatchScoreBadgeProps) {
   const display = displayProp ?? resolveMatchScoreDisplay(score)
   const percentLabel = `${display.percent}%`
-  const explanationLines = buildMatchExplanationLines(display, breakdown)
+  const explanationLines = bundle
+    ? bundleToMatchTooltipLines(bundle)
+    : buildMatchExplanationLines(display, breakdown)
   const resolvedVariant = variant === 'card' ? 'default' : variant
   const shouldExplain =
     explainable ??

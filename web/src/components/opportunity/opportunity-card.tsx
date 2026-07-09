@@ -16,6 +16,7 @@ import {
 import type { Opportunity } from '@/types/domain.ts'
 import { cn } from '@/lib/utils'
 import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'
+import { buildOpportunityExplanationFromForm } from '@/services/explainability/index.ts'
 
 export type OpportunityCardProps = {
   opportunity: Opportunity
@@ -44,6 +45,9 @@ export function OpportunityCard({
   const readiness = showOwnerInsights ? resolveOpportunityReadiness(opportunity) : null
   const canonicalReadiness = showOwnerInsights
     ? resolveOpportunityReadinessCanonical(opportunity)
+    : null
+  const explanationBundle = showOwnerInsights
+    ? buildOpportunityExplanationFromForm(opportunity.id, opportunity)
     : null
   const category = opportunity.scope?.sectors?.[0]
   const href = `/opportunities/${opportunity.id}`
@@ -89,6 +93,7 @@ export function OpportunityCard({
                 missingRequired: readiness.missingRequired,
                 missingRecommended: readiness.missingRecommended,
               }}
+              bundle={explanationBundle ?? undefined}
             />
           ) : null}
         </div>

@@ -1,3 +1,4 @@
+import type { ExplanationBundle } from '@pm-twin/explainability'
 import { useMemo, useState, useEffect } from 'react'
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -841,6 +842,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   const [draft, setDraft] = useState<OpportunityDraft>(initialDraft)
   const [activeStepId, setActiveStepId] = useState('type')
   const [publishDetails, setPublishDetails] = useState<readonly string[] | null>(null)
+  const [publishBundles, setPublishBundles] = useState<readonly ExplanationBundle[] | null>(null)
   const [createdOpportunityId, setCreatedOpportunityId] = useState<string | undefined>()
   const existingOpportunity = opportunityId ? opportunitiesApi.get(opportunityId) : undefined
   const resolvedOpportunityId = opportunityId ?? createdOpportunityId
@@ -928,6 +930,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   const updateDraft = <K extends keyof OpportunityDraft>(key: K, value: OpportunityDraft[K]) => {
     setDraft((current) => ({ ...current, [key]: value }))
     setPublishDetails(null)
+    setPublishBundles(null)
   }
 
   const handleSaveDraft = () => {
@@ -981,15 +984,18 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       profile: user.profile,
       profileKind: resolveProfileKindFromUser(user),
       opportunity: opportunityDraft,
+      profileId: user.id,
     })
 
     if (!result.success) {
       setPublishDetails(result.details ?? [result.message])
+      setPublishBundles(result.publishBundles ?? null)
       toast.error(result.message)
       return
     }
 
     setPublishDetails(null)
+    setPublishBundles(null)
     showPublishSuccessFeedback(result)
   }
 
@@ -1090,7 +1096,10 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         className="mb-2"
       />
 
-      <OpportunityPublishExperience publishDetails={publishDetails} />
+      <OpportunityPublishExperience
+        publishDetails={publishDetails}
+        publishBundles={publishBundles}
+      />
 
       <UserJourneyStrip
         activeStepId={
@@ -1203,6 +1212,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                     }))
                   }
                   setPublishDetails(null)
+    setPublishBundles(null)
                 }}
               >
                 <SelectTrigger>
@@ -1229,6 +1239,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                     modelType: sub?.modelType ?? current.modelType,
                   }))
                   setPublishDetails(null)
+    setPublishBundles(null)
                 }}
               >
                 <SelectTrigger>
@@ -1276,6 +1287,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                     exchangeMode: (nextModes[0] ?? modeKey) as OpportunityDraft['exchangeMode'],
                   }))
                   setPublishDetails(null)
+    setPublishBundles(null)
                 }}
               />
             </div>
@@ -1300,6 +1312,7 @@ function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
                   },
                 }))
                 setPublishDetails(null)
+    setPublishBundles(null)
               }}
             />
           </PmFormSection>

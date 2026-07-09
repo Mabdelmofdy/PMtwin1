@@ -1,3 +1,4 @@
+import type { ExplanationBundle } from '@pm-twin/explainability'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Pencil } from 'lucide-react'
@@ -177,6 +178,7 @@ export function OpportunityDetailPage() {
   const { user, isPendingApproval, canAccessAdmin } = useAuth()
   const [showWizard, setShowWizard] = useState(false)
   const [publishDetails, setPublishDetails] = useState<readonly string[] | null>(null)
+  const [publishBundles, setPublishBundles] = useState<readonly ExplanationBundle[] | null>(null)
   const [highlightRelatedMatches, setHighlightRelatedMatches] = useState(false)
 
   const opp = useMemo(
@@ -417,15 +419,18 @@ export function OpportunityDetailPage() {
       profile: user.profile,
       profileKind: resolveProfileKindFromUser(user),
       opportunity: opp,
+      profileId: user.id,
     })
 
     if (!result.success) {
       setPublishDetails(result.details ?? [result.message])
+      setPublishBundles(result.publishBundles ?? null)
       toast.error(result.message)
       return
     }
 
     setPublishDetails(null)
+    setPublishBundles(null)
     const feedback = showPublishSuccessFeedback(result)
     if (feedback.shouldHighlightRelatedMatches) {
       setHighlightRelatedMatches(true)
@@ -540,7 +545,10 @@ export function OpportunityDetailPage() {
             ) : null}
 
             {visibility.showOwnerActions ? (
-              <OpportunityPublishExperience publishDetails={publishDetails} />
+              <OpportunityPublishExperience
+                publishDetails={publishDetails}
+                publishBundles={publishBundles}
+              />
             ) : null}
 
             {visibility.showFullDescription ? (
@@ -679,6 +687,7 @@ export function OpportunityDetailPage() {
               <OpportunityPublishPanel
                 opportunity={opp}
                 publishDetails={publishDetails}
+                publishBundles={publishBundles}
                 onPublish={handlePublish}
                 showPublishButton={!recommendedAction || recommendedAction.id !== 'publish'}
               />
