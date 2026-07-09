@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { cn } from '@/lib/utils'
-import { pmMotion } from '@/components/shared/pm-design-tokens'
+import { pmMotion } from '@/tokens'
 import { PmCard, type PmCardProps } from '@/components/ui/pm-card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 

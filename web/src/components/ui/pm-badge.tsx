@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { Badge } from '@/components/ui/badge'
 
 const pmBadgeVariants = cva(

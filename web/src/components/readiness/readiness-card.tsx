@@ -11,7 +11,7 @@ import { ReadinessScoreRing } from '@/components/readiness/readiness-score-ring.
 import { ReadinessStatusBadge } from '@/components/readiness/readiness-status-badge.tsx'
 import { PmContentCard } from '@/components/layout/pm-layout-index'
 import { PmButton } from '@/components/ui/pm-button'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 
 const toneBorderStyles: Record<ReturnType<typeof getReadinessStatusTone>, string> = {
   incomplete: 'border-warning/30',

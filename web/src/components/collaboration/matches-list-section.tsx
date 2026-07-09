@@ -30,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
 import { formatFrameworkMatchTypeSubtitle } from '@/config/need-offer-framework.ts'
 import { PRODUCT_LANGUAGE } from '@/lib/product-language'

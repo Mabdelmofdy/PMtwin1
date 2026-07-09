@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 
 export type DynamicFormRendererProps = {
   readonly form: ResolvedDynamicForm

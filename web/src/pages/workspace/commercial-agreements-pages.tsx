@@ -58,7 +58,7 @@ import {
   buildDealWorkflowSteps,
   type PmMoreActionItem,
 } from '@/components/ui/pm-index'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 import type { Deal } from '@/types/domain.ts'
 import { useAuth } from '@/providers/auth-provider'

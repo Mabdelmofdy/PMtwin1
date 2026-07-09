@@ -20,7 +20,7 @@ import {
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
 import { PmBadge, PmButton, PmEmptyState } from '@/components/ui/pm-index'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import {
   Select,
   SelectContent,

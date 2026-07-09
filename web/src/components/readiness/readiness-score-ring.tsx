@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { resolveReadinessScoreDisplay } from '@/components/ui/pm-readiness-score-display'
 import type { ReadinessStatus } from '@/components/readiness/readiness-display.ts'
 

@@ -9,7 +9,7 @@ import {
   type NavItem,
 } from '@/config/navigation'
 import { useCommandMenu } from '@/providers/command-menu-provider'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { useAuth } from '@/providers/auth-provider'
 import { readRecentPages } from '@/components/layout/recent-pages'
 import { cn } from '@/lib/utils'

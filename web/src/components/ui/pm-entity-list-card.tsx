@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { PmCardActions, type PmCardActionSlot } from '@/components/ui/pm-more-actions'
 import { PmSurface } from '@/components/ui/pm-surface'
 

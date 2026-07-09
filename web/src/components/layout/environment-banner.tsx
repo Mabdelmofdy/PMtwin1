@@ -1,6 +1,6 @@
 import { environmentContext } from '@/infrastructure/environment/environment-context.ts'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 
 export const DEMO_ENVIRONMENT_BANNER_MESSAGE =
   'Demo Mode — sample data. You can reset or restore scenarios anytime.'

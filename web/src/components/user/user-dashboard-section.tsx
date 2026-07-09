@@ -16,7 +16,7 @@ import {
 } from '@/components/layout/pm-layout-index'
 import { PmBadge, PmButton, PmReadinessScoreBadge, PmSurface, PmWorkflowBadge } from '@/components/ui/pm-index'
 import { useAuth } from '@/providers/auth-provider'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 
 /** User-focused dashboard widgets — recent activity across workspace. */

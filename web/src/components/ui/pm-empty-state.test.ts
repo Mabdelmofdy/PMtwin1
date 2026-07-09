@@ -19,8 +19,14 @@ describe('PmEmptyState contract', () => {
     assert.deepEqual(sizes, ['default', 'compact'])
   })
 
-  it('documents live-region semantics via role=status in implementation', () => {
-    const expectedRole = 'status'
-    assert.equal(expectedRole, 'status')
+  it('supports optional primary and secondary actions', () => {
+    const props: PmEmptyStateProps = {
+      title: 'No matches yet',
+      description: 'Publish an opportunity to start matching.',
+      action: 'primary',
+      secondaryAction: 'secondary',
+    }
+    assert.ok(props.action)
+    assert.ok(props.secondaryAction)
   })
 })

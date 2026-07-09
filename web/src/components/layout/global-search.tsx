@@ -2,7 +2,7 @@ import { Search } from 'lucide-react'
 import { useCommandMenu } from '@/providers/command-menu-provider'
 import { PmButton } from '@/components/ui/pm-button'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 
 type GlobalSearchProps = {
   className?: string

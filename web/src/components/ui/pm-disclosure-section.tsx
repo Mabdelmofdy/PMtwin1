@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 
 export type PmDisclosureSectionProps = {
   readonly title: string

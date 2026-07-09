@@ -28,7 +28,7 @@ import {
   PmWorkflowBadge,
 } from '@/components/ui/pm-index'
 import { useAuth } from '@/providers/auth-provider'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { resolveMatchTypeStyle } from '@/tokens'
 import { formatDate, formatRelativeTime } from '@/lib/format'
 import { PRODUCT_LANGUAGE } from '@/lib/product-language'

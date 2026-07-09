@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { PmBadge } from '@/components/ui/pm-badge'
 import { PmCardActions } from '@/components/ui/pm-more-actions'
 import { PmSurface } from '@/components/ui/pm-surface'

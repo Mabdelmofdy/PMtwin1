@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { cn } from '@/lib/utils'
-import { pmLayout, pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmLayout, pmTypography } from '@/tokens'
 import { PmSurface } from '@/components/ui/pm-surface'
 
 export type PmFormSectionProps = ComponentProps<'section'> & {

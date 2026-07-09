@@ -6,7 +6,7 @@ import { PmSplitLayout } from '@/components/layout/pm-split-layout'
 import { PmFormField } from '@/components/forms/pm-form-index'
 import { PmBadge, PmButton, PmEmptyState } from '@/components/ui/pm-index'
 import { Input } from '@/components/ui/input'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 
 export type MessagesViewProps = {

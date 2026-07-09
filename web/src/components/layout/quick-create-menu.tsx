@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { commandActions } from '@/config/navigation'
 import { PmButton } from '@/components/ui/pm-button'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 import {
   DropdownMenu,

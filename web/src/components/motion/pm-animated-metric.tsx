@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { pmMetricCountDuration } from '@/components/motion/pm-motion-presets'
 import { usePmReducedMotion } from '@/components/motion/use-pm-reduced-motion'
 

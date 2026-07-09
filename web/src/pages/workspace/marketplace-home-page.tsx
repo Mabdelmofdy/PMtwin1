@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Handshake, Layers, RefreshCcw, Repeat, ArrowRightLeft, CircleDollarSign } from 'lucide-react'
+import { Handshake, Layers, RefreshCcw, Repeat, ArrowRightLeft, CircleDollarSign, Compass } from 'lucide-react'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
 import { contractsApi } from '@/api/contracts.ts'
@@ -8,9 +8,9 @@ import { matchesApi } from '@/api/matches.ts'
 import { resolveMainCollaborationModelLabel } from '@/domain/collaboration/opportunity-collaboration.ts'
 import { formatCollaborationExchangeMode } from '@/lib/collaboration-taxonomy-display.ts'
 import { PmContentCard, PmMetricGrid } from '@/components/layout/pm-layout-index'
-import { PmBadge, PmPage, PmPageHeader, PmPageHeroMetric, PmStatCard } from '@/components/ui/pm-index'
+import { PmBadge, PmButton, PmEmptyState, PmPage, PmPageHeader, PmPageHeroMetric, PmStatCard } from '@/components/ui/pm-index'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 
 const MAIN_MODELS = [
   'cash_subcontracting',
@@ -69,6 +69,26 @@ export function MarketplaceHomePage() {
         <PmStatCard label="Commercial agreements" value={deals.length} dense />
         <PmStatCard label="Active contracts" value={contracts.filter((c) => c.status === 'active').length} dense />
       </PmMetricGrid>
+
+      {opportunities.length === 0 && matches.length === 0 ? (
+        <div className="mt-6">
+          <PmEmptyState
+            title="Marketplace is warming up"
+            description="Published opportunities and matches will appear here as the network grows."
+            icon={<Compass className="size-10" />}
+            action={
+              <PmButton size="sm" asChild>
+                <Link to="/opportunities">Browse opportunities</Link>
+              </PmButton>
+            }
+            secondaryAction={
+              <PmButton size="sm" variant="outline" asChild>
+                <Link to="/dashboard">Go to dashboard</Link>
+              </PmButton>
+            }
+          />
+        </div>
+      ) : null}
 
       <section className="mt-6 space-y-3">
         <h2 className={pmTypography.h3}>Explore by collaboration</h2>

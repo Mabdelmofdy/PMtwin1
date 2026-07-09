@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { opportunitiesApi } from '@/api/opportunities.ts'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { formatDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { OpportunityCard } from '@/components/opportunity/opportunity-card'

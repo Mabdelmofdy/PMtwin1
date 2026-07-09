@@ -34,7 +34,7 @@ import {
 } from '@/components/forms/pm-form-index'
 import { PmContentCard, PmBrowsePage, PmBrowseToolbar, summarizeOpportunityListHero } from '@/components/layout/pm-layout-index'
 import { PmBadge, PmButton, PmEmptyState, PmFilterChips, PmPage, PmPageHeader, PmPageHeroMetric, PmPageActions, PmSurface } from '@/components/ui/pm-index'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { pmResponsive } from '@/tokens'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
@@ -699,7 +699,22 @@ export function OpportunitiesPage() {
                 <PmButton size="sm" asChild>
                   <Link to="/opportunities/create">Post opportunity</Link>
                 </PmButton>
-              ) : undefined
+              ) : (
+                <PmButton size="sm" asChild>
+                  <Link to="/marketplace">Explore marketplace</Link>
+                </PmButton>
+              )
+            }
+            secondaryAction={
+              isMarketplaceBrowse ? (
+                <PmButton size="sm" variant="outline" asChild>
+                  <Link to="/dashboard">Go to dashboard</Link>
+                </PmButton>
+              ) : (
+                <PmButton size="sm" variant="outline" asChild>
+                  <Link to="/marketplace">Browse marketplace</Link>
+                </PmButton>
+              )
             }
           />
         ) : listEmpty.branch === 'filtered' ? (
@@ -724,6 +739,17 @@ export function OpportunitiesPage() {
               >
                 Clear filters
               </PmButton>
+            }
+            secondaryAction={
+              !isMarketplaceBrowse ? (
+                <PmButton size="sm" asChild>
+                  <Link to="/opportunities/create">Post opportunity</Link>
+                </PmButton>
+              ) : (
+                <PmButton size="sm" variant="outline" asChild>
+                  <Link to="/marketplace">Marketplace home</Link>
+                </PmButton>
+              )
             }
           />
         ) : null

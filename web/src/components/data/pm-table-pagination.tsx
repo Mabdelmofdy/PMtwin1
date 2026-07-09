@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { PmButton } from '@/components/ui/pm-button'
 import {
   Select,
@@ -77,7 +77,7 @@ export function PmTablePagination({
             value={String(pageSize)}
             onValueChange={(v) => onPageSizeChange?.(Number(v))}
           >
-            <SelectTrigger className="h-8 w-16" aria-label="Rows per page">
+            <SelectTrigger className="h-9 w-16" aria-label="Rows per page">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -94,7 +94,8 @@ export function PmTablePagination({
           <PmButton
             type="button"
             variant="outline"
-            size="icon-sm"
+            size="icon"
+            className="min-h-9 min-w-9"
             disabled={!canPrev}
             onClick={() => onPageChange?.(page - 1)}
             aria-label="Previous page"
@@ -109,7 +110,8 @@ export function PmTablePagination({
           <PmButton
             type="button"
             variant="outline"
-            size="icon-sm"
+            size="icon"
+            className="min-h-9 min-w-9"
             disabled={!canNext}
             onClick={() => onPageChange?.(page + 1)}
             aria-label="Next page"

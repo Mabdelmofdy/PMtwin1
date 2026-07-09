@@ -5,7 +5,7 @@ import {
   formatVettingSlaDisplay,
   type VettingSlaDisplay,
 } from '@/lib/vetting-sla-service.ts'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 
 const SLA_TONE: Record<VettingSlaStatus, 'success' | 'warning' | 'danger'> = {

@@ -6,7 +6,7 @@ import {
   pmMotion,
   pmTypography,
   resolveMatchTypeStyle,
-} from '@/components/shared/pm-design-tokens.ts'
+} from '@/tokens'
 
 describe('pm-design-tokens', () => {
   it('exposes stable typography class names', () => {

@@ -1,5 +1,6 @@
+import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { useEffect } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 import {
   SidebarInset,
   SidebarProvider,
@@ -15,7 +16,54 @@ import { recordRecentPage } from '@/components/layout/recent-pages'
 import { resolveWorkspaceContext } from '@/components/layout/workspace-display'
 import { pmResponsive } from '@/tokens'
 import { useAuth } from '@/providers/auth-provider'
+import { PmButton, PmEmptyState } from '@/components/ui/pm-index'
 import { cn } from '@/lib/utils'
+
+type AppShellErrorBoundaryProps = {
+  children: ReactNode
+}
+
+type AppShellErrorBoundaryState = {
+  hasError: boolean
+}
+
+class AppShellErrorBoundary extends Component<
+  AppShellErrorBoundaryProps,
+  AppShellErrorBoundaryState
+> {
+  state: AppShellErrorBoundaryState = { hasError: false }
+
+  static getDerivedStateFromError(): AppShellErrorBoundaryState {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('App shell render error', error, info)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <PmEmptyState
+          title="Something went wrong"
+          description="This page could not be displayed. Reload the page or return to your dashboard."
+          action={
+            <PmButton type="button" onClick={() => window.location.reload()}>
+              Reload page
+            </PmButton>
+          }
+          secondaryAction={
+            <PmButton variant="outline" asChild>
+              <Link to="/dashboard">Go to dashboard</Link>
+            </PmButton>
+          }
+        />
+      )
+    }
+
+    return this.props.children
+  }
+}
 
 function RecentPageTracker() {
   const { pathname } = useLocation()
@@ -54,7 +102,9 @@ export function AppShell() {
             <PageBreadcrumbs />
           </div>
           <AppPageChrome>
-            <Outlet />
+            <AppShellErrorBoundary>
+              <Outlet />
+            </AppShellErrorBoundary>
           </AppPageChrome>
         </main>
       </SidebarInset>

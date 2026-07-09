@@ -5,7 +5,7 @@ import {
   resolveEntityBrowseBackLabel,
   type WorkflowEntityBrowseKey,
 } from '@/components/auth/entity-browse-routes'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 
 type EntityAccessDeniedProps = {

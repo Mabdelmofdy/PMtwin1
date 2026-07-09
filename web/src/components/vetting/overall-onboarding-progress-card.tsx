@@ -1,7 +1,7 @@
 import type { OverallOnboardingProgress } from '@/domain/pending-vetting-journey/types.ts'
 import { PmContentCard } from '@/components/layout/pm-layout-index'
 import { ReadinessScoreRing } from '@/components/readiness/readiness-score-ring.tsx'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 
 export function OverallOnboardingProgressCard({

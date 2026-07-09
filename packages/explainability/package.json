@@ -1,0 +1,30 @@
+{
+  "name": "@pm-twin/explainability",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ADR-201 explainability foundation — canonical types, reason codes, adapter contracts, AI serialization",
+  "main": "./dist/index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "index.d.ts",
+    "src"
+  ],
+  "scripts": {
+    "build": "node esbuild.js && npm run type-check",
+    "type-check": "tsc --noEmit",
+    "test": "npm run build && node --test tests/**/*.test.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "~6.0.2"
+  }
+}

@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { Copy } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { PmButton } from '@/components/ui/pm-button'
 import { PmSurface } from '@/components/ui/pm-surface'
 import {

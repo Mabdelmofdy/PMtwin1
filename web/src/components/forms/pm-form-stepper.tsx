@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { pmResponsive } from '@/tokens'
 import {
   resolveWizardProgress,

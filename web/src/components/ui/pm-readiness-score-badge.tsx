@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactElement } from 'react'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { PmBadge } from '@/components/ui/pm-badge'
 import {
   formatReadinessScorePercent,

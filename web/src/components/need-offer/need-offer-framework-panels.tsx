@@ -12,7 +12,7 @@ import type { MatchTopologyReadModel } from '@/lib/match-topology-read-model.ts'
 import { PmBadge } from '@/components/ui/pm-badge'
 import { PmTopologyGraph } from '@/components/ui/pm-topology-graph'
 import { PmContentCard } from '@/components/layout/pm-layout-panels'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 
 type NeedOfferMirrorPanelProps = {

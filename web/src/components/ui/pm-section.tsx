@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { cn } from '@/lib/utils'
-import { pmLayout, pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmLayout, pmTypography } from '@/tokens'
 
 export type PmSectionProps = ComponentProps<'section'> & {
   title?: string

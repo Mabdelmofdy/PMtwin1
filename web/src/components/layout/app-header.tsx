@@ -10,7 +10,7 @@ import { QuickCreateMenu } from '@/components/layout/quick-create-menu'
 import { ThemeToggle } from '@/components/layout/theme-toggle'
 import { resolveWorkspaceContext } from '@/components/layout/workspace-display'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 
 export function AppHeader() {
   const { pathname } = useLocation()

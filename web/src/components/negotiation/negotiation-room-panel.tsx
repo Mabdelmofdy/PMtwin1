@@ -16,7 +16,7 @@ import { PmEmptyState, PmBadge } from '@/components/ui/pm-index'
 import { PmTimeline } from '@/components/ui/pm-timeline'
 import { formatDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { pmResponsive } from '@/tokens'
 import { buildNegotiationTranscriptReadModel } from '@/lib/negotiation-transcript-read-model.ts'
 import {
@@ -305,7 +305,7 @@ export function NegotiationRoomPanel({
                     <span className={pmTypography.label}>v{offer.version}</span>
                     <PmBadge tone="neutral">{offer.status}</PmBadge>
                     {offer.status === 'accepted' ? (
-                      <span className={cn(pmTypography.bodySm, 'text-emerald-600')}>
+                      <span className={cn(pmTypography.bodySm, 'text-success')}>
                         Accepted offer
                       </span>
                     ) : null}
@@ -404,7 +404,7 @@ export function NegotiationRoomPanel({
                     ) : null}
                   </div>
                   {entry.diffFromPrevious.length > 0 ? (
-                    <ul className={cn(pmTypography.bodySm, 'list-disc pl-5 space-y-1')}>
+                    <ul className={cn(pmTypography.bodySm, 'list-disc ps-5 space-y-1')}>
                       {entry.diffFromPrevious.map((line) => (
                         <li key={line}>{line}</li>
                       ))}

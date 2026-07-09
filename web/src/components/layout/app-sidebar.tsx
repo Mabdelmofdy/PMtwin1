@@ -29,7 +29,7 @@ import {
 import { PmNavBadge } from '@/components/ui/pm-badge'
 import { PmButton } from '@/components/ui/pm-button'
 import { pmInteraction } from '@/tokens'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 import { useProductLanguage } from '@/providers/product-language-provider'
 

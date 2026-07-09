@@ -35,7 +35,7 @@ import {
 
 } from '@/components/ui/select'
 
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 
 import { useAuth } from '@/providers/auth-provider'
 import { formatUserRoleLabel } from '@/components/user/user-display'

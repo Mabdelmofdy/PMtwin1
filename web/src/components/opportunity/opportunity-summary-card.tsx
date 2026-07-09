@@ -1,7 +1,7 @@
 import type { Opportunity } from '@/types/domain.ts'
 import { formatDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { PmContentCard } from '@/components/layout/pm-layout-panels'
 import { OpportunityStatusBadge } from '@/components/opportunity/opportunity-status-badge'
 import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'

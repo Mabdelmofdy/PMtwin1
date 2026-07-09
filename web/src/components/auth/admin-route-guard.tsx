@@ -3,7 +3,7 @@ import { useAuth } from '@/providers/auth-provider'
 import { evaluateAdminRouteAccess } from '@/domain/rbac/admin-route-access.ts'
 import { PmButton, PmPage, PmPageHeader } from '@/components/ui/pm-index'
 import { Skeleton } from '@/components/ui/skeleton'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 
 export function AdminRouteGuard() {
@@ -18,7 +18,12 @@ export function AdminRouteGuard() {
 
   if (decision === 'loading') {
     return (
-      <div className="space-y-4 p-8">
+      <div
+        className="space-y-4 p-8"
+        role="status"
+        aria-busy="true"
+        aria-label="Loading admin workspace"
+      >
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-32 w-full" />
       </div>

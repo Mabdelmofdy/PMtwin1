@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { pmRtlTypography } from '@/tokens'
 import { PmSurface } from '@/components/ui/pm-surface'
 import {

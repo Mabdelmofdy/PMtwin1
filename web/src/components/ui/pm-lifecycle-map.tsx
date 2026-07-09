@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { PmSurface } from '@/components/ui/pm-surface'
 import { PmWorkflowBadge } from '@/components/ui/pm-workflow-badge'
 import type {

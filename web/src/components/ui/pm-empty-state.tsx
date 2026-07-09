@@ -12,8 +12,11 @@ export type PmEmptyStateProps = {
   description?: string
   icon?: ReactNode
   action?: ReactNode
+  secondaryAction?: ReactNode
   className?: string
   size?: 'default' | 'compact'
+  /** DOM data-slot — defaults to pm-empty-state. */
+  dataSlot?: string
 }
 
 export function PmEmptyState({
@@ -21,8 +24,10 @@ export function PmEmptyState({
   description,
   icon,
   action,
+  secondaryAction,
   className,
   size = 'default',
+  dataSlot = 'pm-empty-state',
 }: PmEmptyStateProps) {
   const reducedMotion = usePmReducedMotion()
   const variants = pmEmptyStateVariants(reducedMotion)
@@ -30,7 +35,7 @@ export function PmEmptyState({
 
   return (
     <PmSurface
-      data-slot="pm-empty-state"
+      data-slot={dataSlot}
       role="status"
       aria-labelledby={titleId}
       variant="muted"
@@ -60,9 +65,13 @@ export function PmEmptyState({
           {description}
         </motion.p>
       ) : null}
-      {action ? (
-        <motion.div className="mt-4" {...variants.cta}>
+      {action || secondaryAction ? (
+        <motion.div
+          className="mt-4 flex flex-wrap items-center justify-center gap-2"
+          {...variants.cta}
+        >
           {action}
+          {secondaryAction}
         </motion.div>
       ) : null}
     </PmSurface>

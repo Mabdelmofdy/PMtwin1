@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { READINESS_READY_MESSAGE } from '@/components/readiness/readiness-display.ts'
 
 export function ReadinessList({

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { PmContentCard } from '@/components/layout/pm-layout-index'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 
 export type PmRelationshipChainItem = {

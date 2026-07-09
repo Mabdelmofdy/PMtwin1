@@ -3,7 +3,7 @@ import type { PartyDocument } from '@/types/party-document.ts'
 import { resolveDocumentsProgress } from '@/components/vetting/vetting-documents-provider.ts'
 import { PmButton } from '@/components/ui/pm-index'
 import { PmContentCard } from '@/components/layout/pm-layout-index'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 
 export function VettingDocumentsProgressCard({

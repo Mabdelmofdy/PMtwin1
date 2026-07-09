@@ -73,7 +73,7 @@ import { formatReadinessScorePercent } from '@/components/ui/pm-readiness-score-
 import { OpportunityStatusBadge } from '@/components/opportunity/opportunity-status-badge'
 import { OpportunityIdentityBadges } from '@/components/opportunity/opportunity-identity'
 import { formatOpportunityIntent } from '@/components/opportunity/opportunity-display'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 import { productFlags } from '@/config/product-flags.ts'
 import {

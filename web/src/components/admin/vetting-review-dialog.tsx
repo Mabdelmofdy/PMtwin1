@@ -10,10 +10,16 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { PmButton } from '@/components/ui/pm-index'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 
 type VettingReviewAction = 'approve' | 'reject' | 'request_changes'
+
+const REVIEW_DECISIONS: readonly { id: VettingReviewAction; label: string }[] = [
+  { id: 'approve', label: 'Approve' },
+  { id: 'reject', label: 'Reject' },
+  { id: 'request_changes', label: 'Request Changes' },
+]
 
 export type VettingReviewDialogSubmit = {
   action: VettingReviewAction
@@ -84,30 +90,20 @@ export function VettingReviewDialog({
             role="radiogroup"
             aria-label="Review decision"
           >
-            <PmButton
-              variant={action === 'approve' ? 'default' : 'outline'}
-              size="sm"
-              aria-pressed={action === 'approve'}
-              onClick={() => setAction('approve')}
-            >
-              Approve
-            </PmButton>
-            <PmButton
-              variant={action === 'reject' ? 'default' : 'outline'}
-              size="sm"
-              aria-pressed={action === 'reject'}
-              onClick={() => setAction('reject')}
-            >
-              Reject
-            </PmButton>
-            <PmButton
-              variant={action === 'request_changes' ? 'default' : 'outline'}
-              size="sm"
-              aria-pressed={action === 'request_changes'}
-              onClick={() => setAction('request_changes')}
-            >
-              Request Changes
-            </PmButton>
+            {REVIEW_DECISIONS.map((option) => (
+              <PmButton
+                key={option.id}
+                type="button"
+                variant={action === option.id ? 'default' : 'outline'}
+                size="sm"
+                role="radio"
+                aria-checked={action === option.id}
+                tabIndex={action === option.id ? 0 : -1}
+                onClick={() => setAction(option.id)}
+              >
+                {option.label}
+              </PmButton>
+            ))}
           </div>
 
           <div>

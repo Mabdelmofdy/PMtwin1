@@ -3,7 +3,7 @@ import type { VettingActionQueue } from '@/components/vetting/resolve-vetting-ac
 import { PmButton, PmWorkflowBadge } from '@/components/ui/pm-index'
 import { PmContentCard } from '@/components/layout/pm-layout-index'
 import { PmSurface } from '@/components/ui/pm-surface'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 
 export function PendingVettingSecondaryActions({

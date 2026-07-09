@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ArrowLeftRight, ArrowRight, RefreshCw, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { PmBadge, type PmBadgeTone } from '@/components/ui/pm-badge'
 
 export type PmTopologyKind = 'one_way' | 'two_way' | 'consortium' | 'circular'

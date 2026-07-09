@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { PmSurface } from '@/components/ui/pm-surface'
 
 export type PmTimelineEventStatus = 'done' | 'active' | 'upcoming'

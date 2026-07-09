@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 import { userMenuLinks } from '@/config/navigation'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { useAuth } from '@/providers/auth-provider'
 import { getUserInitials } from '@/components/layout/workspace-display'
 import { cn } from '@/lib/utils'

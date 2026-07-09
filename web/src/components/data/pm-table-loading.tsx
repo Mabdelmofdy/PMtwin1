@@ -43,13 +43,18 @@ export function PmTableLoading({
     columnCount + (showSelectionColumn ? 1 : 0) + (showActionsColumn ? 1 : 0)
 
   return (
-    <div
-      data-slot="pm-table-loading"
-      className={cn('overflow-hidden rounded-xl border border-border/60', pmLoading.section, className)}
-      aria-busy="true"
-      aria-label="Loading table data"
-    >
-      <Table className={resolveTableDensityClasses(density)}>
+    <>
+      <div
+        data-slot="pm-table-loading"
+        className={cn(
+          'hidden overflow-hidden rounded-xl border border-border/60 sm:block',
+          pmLoading.section,
+          className,
+        )}
+        aria-busy="true"
+        aria-label="Loading table data"
+      >
+        <Table className={resolveTableDensityClasses(density)}>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             {showSelectionColumn ? (
@@ -90,7 +95,25 @@ export function PmTableLoading({
           ))}
         </TableBody>
       </Table>
-    </div>
+      </div>
+      <div
+        className={cn('space-y-3 sm:hidden', className)}
+        role="status"
+        aria-busy="true"
+        aria-label="Loading list data"
+      >
+        {Array.from({ length: Math.min(rowCount, 5) }, (_, index) => (
+          <div
+            key={index}
+            className="rounded-2xl border border-border/60 p-4"
+          >
+            <Skeleton className="mb-3 h-4 w-2/5 rounded" />
+            <Skeleton className="mb-2 h-3 w-full rounded" />
+            <Skeleton className="h-3 w-4/5 rounded" />
+          </div>
+        ))}
+      </div>
+    </>
   )
 }
 

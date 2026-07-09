@@ -8,10 +8,11 @@ import {
   formatMatchDisplayTitle,
   resolveMatchNeedOfferTitles,
 } from '@/lib/match-display.ts'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { resolveMatchTypeStyle } from '@/tokens'
 import { PmCardActions } from '@/components/ui/pm-more-actions'
 import { PmSurface } from '@/components/ui/pm-surface'
+import { PmBadge } from '@/components/ui/pm-badge'
 import { PmMatchScoreBadge } from '@/components/ui/pm-match-score-badge'
 import { PmWorkflowBadge } from '@/components/ui/pm-workflow-badge'
 import type { PostMatch } from '@/types/domain.ts'
@@ -38,18 +39,18 @@ export function MatchTypeChip({
   const key = (matchType || 'one_way').toLowerCase()
   const Icon = MATCH_TYPE_ICONS[key] ?? ArrowRight
   return (
-    <span
+    <PmBadge
       data-slot="match-type-chip"
+      size="sm"
       className={cn(
-        pmTypography.badge,
-        'inline-flex items-center gap-1 rounded-md px-2 py-0.5 uppercase tracking-wide',
+        'gap-1 uppercase tracking-wide',
         resolveMatchTypeStyle(key),
         className,
       )}
     >
       <Icon className="size-3 rtl:rotate-180" aria-hidden />
       {formatMatchTypeBadgeLabel(key)}
-    </span>
+    </PmBadge>
   )
 }
 

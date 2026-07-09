@@ -19,7 +19,7 @@ import { VettingDocumentsProgressCard } from '@/components/vetting/vetting-docum
 import { PendingVettingSecondaryActions } from '@/components/vetting/pending-vetting-secondary-actions.tsx'
 import { PendingVettingWhatHappensNext } from '@/components/vetting/pending-vetting-what-happens-next.tsx'
 import { resolveVettingActionQueue } from '@/components/vetting/resolve-vetting-action-queue.ts'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 

@@ -94,7 +94,7 @@ import {
   canViewNegotiationDetail,
   filterPostMatchesForViewer,
 } from '@/lib/entity-view-visibility.ts'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { pmResponsive } from '@/tokens'
 import { cn } from '@/lib/utils'
 import {

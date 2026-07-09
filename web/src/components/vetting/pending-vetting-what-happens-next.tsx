@@ -1,6 +1,6 @@
 import { PmContentCard } from '@/components/layout/pm-layout-index'
 import { PmSurface } from '@/components/ui/pm-surface'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 
 const STEPS = [

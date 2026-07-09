@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { peopleApi } from '@/api/people.ts'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { PmContentCard, PmDetailLayout } from '@/components/layout/pm-layout-index'
 import {
   PmFormReadonly,

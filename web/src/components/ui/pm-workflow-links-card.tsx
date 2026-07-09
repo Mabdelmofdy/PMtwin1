@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { PmContentCard } from '@/components/layout/pm-layout-panels'
 import { PmButton } from '@/components/ui/pm-button'
-import { pmTypography } from '@/components/shared/pm-design-tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 
 export type PmWorkflowLink = {
