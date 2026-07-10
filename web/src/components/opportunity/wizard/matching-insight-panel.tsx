@@ -1,9 +1,13 @@
 import { PmFormSection } from '@/components/forms/pm-form-index'
 import { PmBadge } from '@/components/ui/pm-badge'
+import { PmButton } from '@/components/ui/pm-button'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/tokens'
 import type { StructuredSkill } from '@/domain/opportunity-creation'
 import { skillNames } from '@/domain/opportunity-creation'
+import type { WizardStepId } from '@/components/opportunity/wizard/wizard-steps.ts'
+import { formatCollaborationExchangeMode } from '@/lib/collaboration-taxonomy-display.ts'
+import { formatFrameworkMatchTypeLabel } from '@/config/need-offer-framework.ts'
 
 /**
  * Advisory Matching Insight — presentation only.
@@ -14,32 +18,41 @@ export function MatchingInsightPanel({
   skills,
   location,
   exchangeMode,
+  topology,
+  relationshipLabel = 'Company → Company',
+  collaborationLabel,
   readinessScore,
   missingRequired,
+  onFixFactor,
 }: {
   intent: 'need' | 'offer' | ''
   skills: StructuredSkill[]
   location: string
   exchangeMode: string
+  topology?: string
+  relationshipLabel?: string
+  collaborationLabel?: string
   readinessScore: number
   missingRequired: readonly string[]
+  onFixFactor?: (stepId: WizardStepId) => void
 }) {
   const names = skillNames(skills)
   const quality =
     readinessScore >= 80 ? 'High' : readinessScore >= 50 ? 'Medium' : 'Developing'
+  const confidence =
+    readinessScore >= 80 ? 'High' : readinessScore >= 50 ? 'Medium' : 'Low'
 
-  const companyHint =
-    intent === 'need'
-      ? 'Companies offering matching capacity and delivery models'
-      : 'Companies seeking the services you provide'
-  const professionalHint =
-    intent === 'offer'
-      ? 'Professionals and consultants who may engage your offer'
-      : 'Professionals with the required skills'
-  const consortiumHint =
-    exchangeMode === 'equity' || exchangeMode === 'profit_sharing'
-      ? 'Consortium / JV partners for shared-value models'
-      : 'Optional consortium partners for multi-party delivery'
+  const estimatedPartners = Math.max(
+    5,
+    Math.round(readinessScore * 1.1) + names.length * 3 + (location ? 8 : 0),
+  )
+
+  const topFactors: string[] = []
+  if (location) topFactors.push('Location')
+  if (names.length > 0) topFactors.push('Skills')
+  if (exchangeMode) topFactors.push('Exchange')
+  if (topology) topFactors.push('Match type')
+  if (topFactors.length === 0) topFactors.push('Complete more fields for stronger factors')
 
   const missingFactors =
     missingRequired.length > 0
@@ -50,66 +63,91 @@ export function MatchingInsightPanel({
           ? ['Location not yet specified']
           : []
 
-  const recommendations: string[] = []
-  if (names.length === 0) {
-    recommendations.push('Add structured skills to improve discoverability.')
-  }
-  if (!location) {
-    recommendations.push('Add a location or service area.')
-  }
-  if (readinessScore < 80) {
-    recommendations.push('Raise readiness to 80%+ before publishing.')
-  }
-  if (recommendations.length === 0) {
-    recommendations.push('Draft looks discoverable — review commercial terms and publish when ready.')
-  }
-
   return (
     <PmFormSection
-      title="Matching insight"
-      description="Advisory estimates only — does not run or change the matching engine."
+      title="Matching preview"
+      description="Advisory estimates only — does not run or change the matching engine. Shows who you are likely to attract after publish."
     >
       <div className="space-y-3 text-sm" data-testid="matching-insight-panel">
         <div className="flex flex-wrap gap-2">
           <PmBadge tone="info" size="sm">
-            Expected quality: {quality}
+            Estimated quality: {quality}
           </PmBadge>
           <PmBadge tone="muted" size="sm">
-            Skills: {names.length || 'none'}
+            Confidence: {confidence}
+          </PmBadge>
+          <PmBadge tone="muted" size="sm">
+            Compatible partners ≈ {estimatedPartners}
           </PmBadge>
         </div>
-        <dl className="grid gap-2 sm:grid-cols-3">
+
+        <dl className="grid gap-2 sm:grid-cols-2">
           <div>
-            <dt className="text-muted-foreground">Potential companies</dt>
-            <dd className="font-medium">{companyHint}</dd>
+            <dt className="text-muted-foreground">Expected match type</dt>
+            <dd className="font-medium">
+              {topology
+                ? formatFrameworkMatchTypeLabel(topology)
+                : 'Derived after model selection'}
+            </dd>
           </div>
           <div>
-            <dt className="text-muted-foreground">Potential professionals</dt>
-            <dd className="font-medium">{professionalHint}</dd>
+            <dt className="text-muted-foreground">Expected relationship</dt>
+            <dd className="font-medium">{relationshipLabel}</dd>
           </div>
           <div>
-            <dt className="text-muted-foreground">Potential consortiums</dt>
-            <dd className="font-medium">{consortiumHint}</dd>
+            <dt className="text-muted-foreground">Expected collaboration</dt>
+            <dd className="font-medium">
+              {collaborationLabel || (intent === 'need' ? 'Need seeking Offer' : intent === 'offer' ? 'Offer seeking Need' : '—')}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Exchange mode</dt>
+            <dd className="font-medium">
+              {exchangeMode
+                ? formatCollaborationExchangeMode(exchangeMode)
+                : '—'}
+            </dd>
           </div>
         </dl>
+
+        <div>
+          <p className={cn(pmTypography.label)}>Top matching factors</p>
+          <ul className="mt-1 flex flex-wrap gap-1.5">
+            {topFactors.map((factor) => (
+              <PmBadge key={factor} tone="muted" size="sm">
+                {factor}
+              </PmBadge>
+            ))}
+          </ul>
+        </div>
+
         {missingFactors.length > 0 ? (
           <div>
-            <p className={cn(pmTypography.label)}>Top missing match factors</p>
+            <p className={cn(pmTypography.label)}>Why match quality may be limited</p>
             <ul className="mt-1 list-disc ps-5 text-muted-foreground">
               {missingFactors.map((factor) => (
                 <li key={factor}>{factor}</li>
               ))}
             </ul>
+            {onFixFactor ? (
+              <PmButton
+                type="button"
+                size="sm"
+                variant="outline"
+                className="mt-2"
+                onClick={() =>
+                  onFixFactor(names.length === 0 ? 'attributes' : 'timeline')
+                }
+              >
+                Fix matching inputs →
+              </PmButton>
+            ) : null}
           </div>
-        ) : null}
-        <div>
-          <p className={cn(pmTypography.label)}>Recommendations to improve discoverability</p>
-          <ul className="mt-1 list-disc ps-5 text-muted-foreground">
-            {recommendations.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
+        ) : (
+          <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
+            Draft looks discoverable — save, then publish from the detail page when ready.
+          </p>
+        )}
       </div>
     </PmFormSection>
   )

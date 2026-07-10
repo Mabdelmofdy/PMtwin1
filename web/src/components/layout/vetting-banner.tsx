@@ -17,7 +17,7 @@ export function VettingBanner() {
 
   return (
     <div
-      className="border-b border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+      className="border-b border-warning/30 bg-warning/10 px-4 py-3 text-sm text-foreground"
       role="status"
     >
       {isClarificationRequested ? (

@@ -25,6 +25,15 @@ import { RelatedMatchesPanel } from '@/components/opportunity/related-matches-pa
 import { OpportunityPublishExperience, OpportunityPublishPanel } from '@/components/opportunity/opportunity-publish-experience'
 import { ApplyWizard } from '@/components/opportunity/apply-wizard'
 import { OpportunityReadinessCard, resolveOpportunityReadiness } from '@/components/readiness'
+import {
+  OpportunityHealthIndicator,
+  resolveOpportunityHealthState,
+} from '@/components/opportunity/opportunity-health-indicator.tsx'
+import { CollaborationSummaryCard } from '@/components/opportunity/collaboration-summary-card.tsx'
+import { DraftMetadataCard } from '@/components/opportunity/ocx/draft-metadata-card.tsx'
+import { MarketplacePreviewPanel } from '@/components/opportunity/wizard/marketplace-preview-panel.tsx'
+import { evaluateLiveOpportunityValidation } from '@/domain/opportunity-validation/index.ts'
+import { trackOcxEvent } from '@/lib/ocx-analytics.ts'
 import { formatDate } from '@/lib/format'
 import { resolveCanonicalStatus } from '@/lib/status-display.ts'
 import { PRODUCT_LANGUAGE } from '@/lib/product-language'
@@ -244,6 +253,20 @@ export function OpportunityDetailPage() {
     [opp],
   )
 
+  const opportunityReadinessResult = useMemo(
+    () => (opp ? resolveOpportunityReadiness(opp) : null),
+    [opp],
+  )
+  const opportunityLiveValidation = useMemo(
+    () => (opp ? evaluateLiveOpportunityValidation(opp) : null),
+    [opp],
+  )
+  const validationErrorCount = opportunityLiveValidation
+    ? opportunityLiveValidation.issues.filter(
+        (i) => i.severity === 'error' || i.severity === 'blocker',
+      ).length
+    : 0
+
   const opportunityPaymentModes = useMemo(
     () => (opp ? resolveOpportunityPaymentModes(opp) : []),
     [opp],
@@ -433,6 +456,7 @@ export function OpportunityDetailPage() {
       return
     }
 
+    trackOcxEvent('published_from_detail', { opportunityId: opp.id })
     setPublishDetails(null)
     setPublishBundles(null)
     setHighlightRelatedMatches(true)
@@ -513,6 +537,16 @@ export function OpportunityDetailPage() {
           label: isDraft ? 'Edit draft' : 'Edit opportunity',
           href: `/opportunities/${opp.id}/edit`,
           icon: Pencil,
+        },
+        {
+          id: 'preview-marketplace',
+          label: 'Marketplace preview',
+          onSelect: () => {
+            document
+              .getElementById('marketplace-preview')
+              ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          },
+          icon: Printer,
         },
         {
           id: 'duplicate-draft',
@@ -668,6 +702,72 @@ export function OpportunityDetailPage() {
                 publishDetails={publishDetails}
                 publishBundles={publishBundles}
               />
+            ) : null}
+
+            {visibility.showOwnerActions || visibility.showFullDescription ? (
+              <>
+                <OpportunityHealthIndicator
+                  healthState={resolveOpportunityHealthState({
+                    status: opp.status,
+                    visibilityStatus: opp.visibilityStatus,
+                    errorCount: validationErrorCount,
+                    publishReady:
+                      opportunityReadinessResult?.status === 'ready_for_matching',
+                  })}
+                  validationPercent={Math.max(0, 100 - validationErrorCount * 12)}
+                  readinessPercent={opportunityReadinessResult?.score ?? 0}
+                  publishReady={
+                    opportunityReadinessResult?.status === 'ready_for_matching'
+                  }
+                  estimatedMatch={
+                    (opportunityReadinessResult?.score ?? 0) >= 80
+                      ? 'High'
+                      : (opportunityReadinessResult?.score ?? 0) >= 50
+                        ? 'Medium'
+                        : 'Developing'
+                  }
+                />
+                <CollaborationSummaryCard
+                  intent={formatOpportunityIntent(opp.intent)}
+                  mainModelLabel={resolveMainCollaborationModelLabel(
+                    opp.mainCollaborationModel ?? '',
+                  )}
+                  subModelLabel={resolveSubModelLabel(opp.subModelType ?? '')}
+                  exchangeModeLabel={formatCollaborationExchangeMode(opp.exchangeMode)}
+                  topologyLabel={formatFrameworkMatchTypeLabel(
+                    opp.preferredMatchingTopology ??
+                      deriveMatchingTopology({
+                        mainCollaborationModel: opp.mainCollaborationModel,
+                        modelType: opp.modelType,
+                        subModelType: opp.subModelType,
+                        exchangeMode: opp.exchangeMode,
+                        acceptedExchangeModes: opp.acceptedExchangeModes,
+                      }).topology,
+                  )}
+                  relationshipLabel="Company → Company"
+                  readyToPublish={
+                    opportunityReadinessResult?.status === 'ready_for_matching'
+                  }
+                />
+                <DraftMetadataCard
+                  status={opp.status}
+                  createdAt={opp.createdAt}
+                  updatedAt={opp.updatedAt}
+                  ownerLabel={
+                    visibility.showCreatorName ? creator?.profile?.name : opp.ownerPartyId
+                  }
+                  lastValidationLabel={
+                    !opportunityLiveValidation ||
+                    opportunityLiveValidation.issues.length === 0
+                      ? 'No open issues'
+                      : `${opportunityLiveValidation.issues.length} issue(s)`
+                  }
+                  lastReadinessLabel={`${Math.round(opportunityReadinessResult?.score ?? 0)}% · ${opportunityReadinessResult?.status ?? '—'}`}
+                />
+                <div id="marketplace-preview">
+                  <MarketplacePreviewPanel opportunity={opp} />
+                </div>
+              </>
             ) : null}
 
             {visibility.showFullDescription ? (

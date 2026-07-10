@@ -35,20 +35,36 @@ function resolveSkills(input: OpportunityValidationInput) {
   if (input.structuredSkills && input.structuredSkills.length > 0) {
     return input.structuredSkills
   }
+  const intent = normalizeIntent(input.intent)
   const scope = input.scope ?? {}
-  const required = Array.isArray(scope.requiredSkills)
-    ? (scope.requiredSkills as string[]).map((name) => ({
-        name,
-        role: 'required' as const,
-      }))
-    : []
-  const provided = Array.isArray(scope.offeredSkills)
+  const offered = Array.isArray(scope.offeredSkills)
     ? (scope.offeredSkills as string[]).map((name) => ({
         name,
         role: 'provided' as const,
       }))
     : []
-  return [...required, ...provided]
+  const requiredListed = Array.isArray(scope.requiredSkills)
+    ? (scope.requiredSkills as string[])
+    : []
+
+  // Legacy readiness/matching fixtures often store offer skills in requiredSkills.
+  // Treat those as provided when intent is offer/hybrid and offeredSkills is empty.
+  if (
+    (intent === 'offer' || intent === 'hybrid') &&
+    offered.length === 0 &&
+    requiredListed.length > 0
+  ) {
+    return requiredListed.map((name) => ({
+      name,
+      role: 'provided' as const,
+    }))
+  }
+
+  const required = requiredListed.map((name) => ({
+    name,
+    role: 'required' as const,
+  }))
+  return [...required, ...offered]
 }
 
 export const skillRequiredMissing: ValidationRule = {

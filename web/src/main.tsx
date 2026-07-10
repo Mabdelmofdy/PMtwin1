@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { AppProviders } from '@/providers/app-providers'
 import App from '@/App'
 import './index.css'
@@ -30,12 +30,20 @@ function normalizeLegacyHashRoute() {
 
 normalizeLegacyHashRoute()
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <BrowserRouter>
+// Data router required for useBlocker (unsaved-changes guard on opportunity wizard).
+const router = createBrowserRouter([
+  {
+    path: '*',
+    element: (
       <AppProviders>
         <App />
       </AppProviders>
-    </BrowserRouter>
+    ),
+  },
+])
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <RouterProvider router={router} />
   </StrictMode>,
 )

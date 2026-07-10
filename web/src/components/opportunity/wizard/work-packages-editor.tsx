@@ -152,9 +152,11 @@ function DeliverablesEditor({
 export function WorkPackagesEditor({
   packages,
   onChange,
+  fieldStatus,
 }: {
   packages: WorkPackage[]
   onChange: (packages: WorkPackage[]) => void
+  fieldStatus?: ReactNode
 }) {
   const updateAt = (index: number, patch: Partial<WorkPackage>) => {
     onChange(packages.map((pkg, i) => (i === index ? { ...pkg, ...patch } : pkg)))
@@ -174,6 +176,7 @@ export function WorkPackagesEditor({
       title="Work packages / tasks"
       description="Add multiple task packages with deliverables and document requirements."
     >
+      {fieldStatus}
       <div className="space-y-4" data-testid="work-packages-editor">
         {packages.map((pkg, index) => (
           <div

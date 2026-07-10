@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { PmFormField, PmFormGrid, PmFormSection } from '@/components/forms/pm-form-index'
 import { Input } from '@/components/ui/input'
 import {
@@ -19,6 +20,8 @@ export function RichTimelineFields({
   onStartDateChange,
   onDeadlineChange,
   onTimelineChange,
+  locationStatus,
+  startDateStatus,
 }: {
   intent: 'need' | 'offer' | ''
   location: string
@@ -29,6 +32,8 @@ export function RichTimelineFields({
   onStartDateChange: (value: string) => void
   onDeadlineChange: (value: string) => void
   onTimelineChange: (timeline: RichTimeline) => void
+  locationStatus?: ReactNode
+  startDateStatus?: ReactNode
 }) {
   return (
     <div className="space-y-4" data-testid="rich-timeline-fields">
@@ -41,26 +46,32 @@ export function RichTimelineFields({
         }
       >
         <PmFormGrid columns={2}>
-          <PmFormField
-            id="opp-location"
-            label={intent === 'need' ? 'Location' : 'Preferred location / service area'}
-          >
-            <Input
-              value={location}
-              onChange={(e) => onLocationChange(e.target.value)}
-              placeholder="Riyadh, Saudi Arabia"
-            />
-          </PmFormField>
-          <PmFormField
-            id="opp-start"
-            label={intent === 'need' ? 'Start date' : 'Availability from'}
-          >
-            <Input
-              type="date"
-              value={startDate}
-              onChange={(e) => onStartDateChange(e.target.value)}
-            />
-          </PmFormField>
+          <div>
+            <PmFormField
+              id="opp-location"
+              label={intent === 'need' ? 'Location' : 'Preferred location / service area'}
+            >
+              <Input
+                value={location}
+                onChange={(e) => onLocationChange(e.target.value)}
+                placeholder="Riyadh, Saudi Arabia"
+              />
+            </PmFormField>
+            {locationStatus}
+          </div>
+          <div>
+            <PmFormField
+              id="opp-start"
+              label={intent === 'need' ? 'Start date' : 'Availability from'}
+            >
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => onStartDateChange(e.target.value)}
+              />
+            </PmFormField>
+            {startDateStatus}
+          </div>
           {intent === 'need' ? (
             <PmFormField id="opp-deadline" label="Deadline">
               <Input

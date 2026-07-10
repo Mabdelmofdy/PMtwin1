@@ -636,16 +636,24 @@ function resolveSkills(input) {
   if (input.structuredSkills && input.structuredSkills.length > 0) {
     return input.structuredSkills;
   }
+  const intent = normalizeIntent(input.intent);
   const scope = input.scope ?? {};
-  const required = Array.isArray(scope.requiredSkills) ? scope.requiredSkills.map((name) => ({
-    name,
-    role: "required"
-  })) : [];
-  const provided = Array.isArray(scope.offeredSkills) ? scope.offeredSkills.map((name) => ({
+  const offered = Array.isArray(scope.offeredSkills) ? scope.offeredSkills.map((name) => ({
     name,
     role: "provided"
   })) : [];
-  return [...required, ...provided];
+  const requiredListed = Array.isArray(scope.requiredSkills) ? scope.requiredSkills : [];
+  if ((intent === "offer" || intent === "hybrid") && offered.length === 0 && requiredListed.length > 0) {
+    return requiredListed.map((name) => ({
+      name,
+      role: "provided"
+    }));
+  }
+  const required = requiredListed.map((name) => ({
+    name,
+    role: "required"
+  }));
+  return [...required, ...offered];
 }
 var skillRequiredMissing = {
   id: "skill-required-missing",

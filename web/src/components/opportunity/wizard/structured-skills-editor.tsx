@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { PmFormField, PmFormGrid, PmFormSection } from '@/components/forms/pm-form-index'
 import { PmButton } from '@/components/ui/pm-button'
@@ -19,10 +20,12 @@ export function StructuredSkillsEditor({
   label,
   skills,
   onChange,
+  fieldStatus,
 }: {
   label: string
   skills: StructuredSkill[]
   onChange: (skills: StructuredSkill[]) => void
+  fieldStatus?: ReactNode
 }) {
   const updateAt = (index: number, patch: Partial<StructuredSkill>) => {
     onChange(skills.map((skill, i) => (i === index ? { ...skill, ...patch } : skill)))
@@ -30,6 +33,7 @@ export function StructuredSkillsEditor({
 
   return (
     <PmFormSection title={label} description="Structured skills with level and requirements.">
+      {fieldStatus}
       <div className="space-y-3" data-testid="structured-skills-editor">
         {skills.map((skill, index) => (
           <div

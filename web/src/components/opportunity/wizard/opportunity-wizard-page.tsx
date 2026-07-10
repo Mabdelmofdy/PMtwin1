@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import {
+  Link,
+  useBlocker,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
 import { toast } from 'sonner'
+import type { DuplicateDraftCandidate } from '@pm-twin/validation'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { formatOpportunityIntent } from '@/components/opportunity/opportunity-display'
 import { CollaborationSubModelFields } from '@/components/opportunity/collaboration-sub-model-fields.tsx'
@@ -14,7 +21,6 @@ import {
   PmFormWizard,
   PmFormWizardStep,
 } from '@/components/forms/pm-form-index'
-import { OpportunityReadinessCard } from '@/components/readiness'
 import {
   ValueExchangeModesPanel,
   UserJourneyStrip,
@@ -27,6 +33,27 @@ import {
   PmPageHeroMetric,
   PmSurface,
 } from '@/components/ui/pm-index'
+import { trackOcxEvent } from '@/lib/ocx-analytics.ts'
+import {
+  clearLocalDraftSnapshot,
+  formatLastSavedAt,
+  readLocalDraftSnapshot,
+  saveLocalDraftSnapshot,
+  type AutosaveStatus,
+} from '@/lib/wizard-local-draft.ts'
+import { evaluateLiveOpportunityValidation } from '@/domain/opportunity-validation/index.ts'
+import { resolveStepForValidationIssue } from '@/domain/opportunity-validation/validation-step-map.ts'
+import { LiveFieldStatus } from '@/components/opportunity/validation/field-validation-status.tsx'
+import { SmartRightPanel } from '@/components/opportunity/wizard/smart-right-panel.tsx'
+import { ContextualHelp } from '@/components/opportunity/wizard/contextual-help.tsx'
+import { DuplicateDraftDialog } from '@/components/opportunity/wizard/duplicate-draft-dialog.tsx'
+import {
+  DraftRecoveryBanner,
+  UnsavedChangesDialog,
+} from '@/components/opportunity/wizard/wizard-guards.tsx'
+import { CollaborationSummaryCard } from '@/components/opportunity/collaboration-summary-card.tsx'
+import { FinancialSummaryCard } from '@/components/opportunity/ocx/financial-summary-card.tsx'
+import { WorkPackageSummaryCard } from '@/components/opportunity/ocx/work-package-summary-card.tsx'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -158,6 +185,17 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   const [activeStepId, setActiveStepId] = useState<string>('type')
   const [createdOpportunityId, setCreatedOpportunityId] = useState<string | undefined>()
   const [saving, setSaving] = useState(false)
+  const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle')
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
+  const [dirty, setDirty] = useState(false)
+  const [allowNavigation, setAllowNavigation] = useState(false)
+  const [showRecovery, setShowRecovery] = useState(false)
+  const [recoverySnapshot, setRecoverySnapshot] = useState<
+    ReturnType<typeof readLocalDraftSnapshot>
+  >(null)
+  const [duplicateOpen, setDuplicateOpen] = useState(false)
+  const [suppressDuplicate, setSuppressDuplicate] = useState(false)
+  const [readinessTimeline, setReadinessTimeline] = useState<number[]>([])
   const existingOpportunity = opportunityId
     ? opportunitiesApi.get(opportunityId)
     : undefined
@@ -165,6 +203,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   const autosaveReadyRef = useRef(false)
   const draftRef = useRef(draft)
   draftRef.current = draft
+  const trackedStartRef = useRef(false)
 
   const mainModels = useMemo(() => listMainCollaborationModels(), [])
   const subModelOptions = useMemo(
@@ -189,6 +228,28 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
     ],
   )
 
+  const existingDrafts = useMemo((): readonly DuplicateDraftCandidate[] => {
+    if (!user?.id) return []
+    return opportunitiesApi
+      .list()
+      .filter(
+        (o) =>
+          (o.status ?? '').toLowerCase() === 'draft' &&
+          o.creatorId === user.id &&
+          o.id !== resolvedOpportunityId,
+      )
+      .map((o) => ({
+        id: o.id,
+        title: o.title,
+        ownerId: o.ownerPartyId,
+        creatorId: o.creatorId,
+        mainCollaborationModel: o.mainCollaborationModel,
+        subModelType: o.subModelType,
+        location: o.location,
+        status: o.status,
+      }))
+  }, [user?.id, resolvedOpportunityId])
+
   useEffect(() => {
     const stepParam = searchParams.get('step')
     if (!stepParam) return
@@ -198,10 +259,30 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   }, [searchParams])
 
   useEffect(() => {
+    if (!trackedStartRef.current) {
+      trackedStartRef.current = true
+      trackOcxEvent('wizard_started', { mode })
+    }
+  }, [mode])
+
+  useEffect(() => {
+    trackOcxEvent('step_viewed', { stepId: activeStepId })
+  }, [activeStepId])
+
+  useEffect(() => {
     if (!existingOpportunity) return
     setDraft(opportunityToDraft(existingOpportunity))
     autosaveReadyRef.current = true
+    setDirty(false)
   }, [existingOpportunity])
+
+  useEffect(() => {
+    const snapshot = readLocalDraftSnapshot(mode, opportunityId)
+    if (!snapshot) return
+    // Only offer recovery when local snapshot is newer than empty initial / stale page
+    setRecoverySnapshot(snapshot)
+    setShowRecovery(true)
+  }, [mode, opportunityId])
 
   const opportunityDraft = useMemo(() => {
     const built = buildOpportunityDraftInput(draft)
@@ -215,6 +296,47 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
     [draft],
   )
 
+  useEffect(() => {
+    const score = Math.round(wizardReadiness.readinessScore)
+    setReadinessTimeline((prev) => {
+      if (prev.length > 0 && prev[prev.length - 1] === score) return prev
+      return [...prev, score].slice(-8)
+    })
+  }, [wizardReadiness.readinessScore])
+
+  const liveValidation = useMemo(
+    () =>
+      evaluateLiveOpportunityValidation(opportunityDraft as object, {
+        existingDrafts,
+      }),
+    [opportunityDraft, existingDrafts],
+  )
+
+  useEffect(() => {
+    if (liveValidation.issues.some((i) => i.severity === 'error' || i.severity === 'blocker')) {
+      trackOcxEvent('validation_error_seen', {
+        count: liveValidation.issues.filter(
+          (i) => i.severity === 'error' || i.severity === 'blocker',
+        ).length,
+      })
+    }
+  }, [liveValidation.issues])
+
+  useEffect(() => {
+    if (
+      liveValidation.duplicateDraftWarning &&
+      !suppressDuplicate &&
+      !duplicateOpen
+    ) {
+      setDuplicateOpen(true)
+      trackOcxEvent('duplicate_warning_seen')
+    }
+  }, [
+    liveValidation.duplicateDraftWarning,
+    suppressDuplicate,
+    duplicateOpen,
+  ])
+
   const explanationBundle = useMemo(() => {
     if (!resolvedOpportunityId) return null
     return buildOpportunityExplanationFromForm(
@@ -224,15 +346,44 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   }, [resolvedOpportunityId, opportunityDraft])
 
   const completedStepIds = useMemo(() => resolveCompletedSteps(draft), [draft])
+  const errorStepIds = useMemo(() => {
+    const steps = new Set<string>()
+    for (const issue of liveValidation.issues) {
+      if (issue.severity !== 'error' && issue.severity !== 'blocker') continue
+      steps.add(resolveStepForValidationIssue(issue))
+    }
+    return [...steps]
+  }, [liveValidation.issues])
+
   const activeStepIndex = resolveWizardStepIndex(activeStepId)
   const isReviewStep = activeStepId === 'review'
   const draftSubmitLabel = resolvedOpportunityId ? 'Save Draft' : 'Create Draft'
+
+  const nextAction = useMemo(() => {
+    const firstError = liveValidation.issues.find(
+      (i) => i.severity === 'error' || i.severity === 'blocker',
+    )
+    if (firstError) {
+      return {
+        label: firstError.message.replace(/\.$/, '') + ' →',
+        stepId: resolveStepForValidationIssue(firstError),
+      }
+    }
+    if (!wizardReadiness.publishReady && wizardReadiness.missingRequired[0]) {
+      return {
+        label: `Add ${wizardReadiness.missingRequired[0]}`,
+        stepId: 'review' as WizardStepId,
+      }
+    }
+    return { label: 'Save draft, then publish from detail', stepId: 'review' as WizardStepId }
+  }, [liveValidation.issues, wizardReadiness])
 
   const updateDraft = <K extends keyof OpportunityDraft>(
     key: K,
     value: OpportunityDraft[K],
   ) => {
     setDraft((current) => ({ ...current, [key]: value }))
+    setDirty(true)
   }
 
   const syncStructuredSkills = (skills: OpportunityDraft['structuredSkills']) => {
@@ -242,6 +393,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       structuredSkills: skills,
       skills: names.length > 0 ? names.join(', ') : current.skills,
     }))
+    setDirty(true)
   }
 
   const goToStep = (stepId: string) => {
@@ -255,6 +407,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       return
     }
     if (activeStepIndex < 0 || activeStepIndex >= WIZARD_STEPS.length - 1) return
+    trackOcxEvent('step_completed', { stepId: activeStepId })
     goToStep(WIZARD_STEPS[activeStepIndex + 1]!.id)
   }
 
@@ -289,6 +442,10 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         }
         const newId = result.aggregateId
         setCreatedOpportunityId(newId)
+        clearLocalDraftSnapshot(mode, opportunityId)
+        trackOcxEvent('draft_saved', { opportunityId: newId })
+        setDirty(false)
+        setAllowNavigation(true)
         toast.success('Draft opportunity created')
         navigate(`/opportunities/${newId}`)
         return
@@ -302,6 +459,10 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         toast.error(updateResult.errors?.join('\n') ?? 'Could not save draft')
         return
       }
+      clearLocalDraftSnapshot(mode, resolvedOpportunityId)
+      trackOcxEvent('draft_saved', { opportunityId: resolvedOpportunityId })
+      setDirty(false)
+      setAllowNavigation(true)
       toast.success('Draft saved')
       navigate(`/opportunities/${resolvedOpportunityId}`)
     } finally {
@@ -309,25 +470,61 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
     }
   }
 
-  // Autosave: debounce update when a persisted opportunity id exists.
+  // Server autosave (authoritative draft update) + local recovery snapshot
   useEffect(() => {
-    if (!resolvedOpportunityId || !user) return
+    if (!user) return
+
+    saveLocalDraftSnapshot({
+      savedAt: new Date().toISOString(),
+      mode,
+      opportunityId: resolvedOpportunityId,
+      draft,
+      activeStepId,
+    })
+
+    if (!resolvedOpportunityId) return
     if (mode === 'edit' && !autosaveReadyRef.current) return
     if (mode === 'create' && !createdOpportunityId) return
 
+    setAutosaveStatus('saving')
     const timer = window.setTimeout(() => {
       const result = opportunityCommandService.updateOpportunity(
         resolvedOpportunityId,
         buildCollaborationCommandPayload(draftRef.current, user.id),
       )
       if (!result.success) {
-        // Silent failure — user can still Save Draft explicitly.
+        setAutosaveStatus('error')
         return
       }
+      const now = new Date().toISOString()
+      setLastSavedAt(now)
+      setAutosaveStatus('saved')
+      setDirty(false)
     }, 2000)
 
     return () => window.clearTimeout(timer)
-  }, [draft, resolvedOpportunityId, user, mode, createdOpportunityId])
+  }, [draft, resolvedOpportunityId, user, mode, createdOpportunityId, activeStepId])
+
+  const blocker = useBlocker(dirty && !allowNavigation && !saving)
+
+  useEffect(() => {
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!dirty || allowNavigation) return
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [dirty, allowNavigation])
+
+  const autosaveLabel =
+    autosaveStatus === 'saving'
+      ? 'Saving…'
+      : autosaveStatus === 'saved'
+        ? `Saved · Last saved at ${formatLastSavedAt(lastSavedAt)}`
+        : autosaveStatus === 'error'
+          ? 'Autosave failed — use Save Draft'
+          : null
 
   if (mode === 'edit' && opportunityId) {
     if (!existingOpportunity) {
@@ -380,32 +577,123 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
 
   return (
     <PmPage>
+      {showRecovery && recoverySnapshot ? (
+        <DraftRecoveryBanner
+          savedAtLabel={formatLastSavedAt(recoverySnapshot.savedAt)}
+          onContinue={() => {
+            setDraft(recoverySnapshot.draft)
+            setActiveStepId(recoverySnapshot.activeStepId)
+            setShowRecovery(false)
+            setDirty(true)
+          }}
+          onDiscard={() => {
+            clearLocalDraftSnapshot(mode, opportunityId)
+            setShowRecovery(false)
+            setRecoverySnapshot(null)
+          }}
+        />
+      ) : null}
+
+      <UnsavedChangesDialog
+        open={blocker.state === 'blocked'}
+        onStay={() => blocker.reset?.()}
+        onLeave={() => {
+          trackOcxEvent('wizard_abandoned', { stepId: activeStepId })
+          setAllowNavigation(true)
+          blocker.proceed?.()
+        }}
+      />
+
+      <DuplicateDraftDialog
+        open={duplicateOpen}
+        onOpenChange={setDuplicateOpen}
+        onOpenExisting={() => {
+          const idToOpen = liveValidation.duplicateDraftWarning
+            ? existingDrafts[0]?.id
+            : undefined
+          setDuplicateOpen(false)
+          if (idToOpen) navigate(`/opportunities/${idToOpen}`)
+        }}
+        onCreateNew={() => {
+          setSuppressDuplicate(true)
+          setDuplicateOpen(false)
+        }}
+        onDuplicateAnyway={() => {
+          setSuppressDuplicate(true)
+          setDuplicateOpen(false)
+        }}
+      />
+
       <PmFormWizard
         stepper={{
           steps: [...WIZARD_STEPS],
           activeStepId,
           completedStepIds,
+          errorStepIds,
           onStepClick: (stepId) => goToStep(stepId),
         }}
         rail={
-          <OpportunityReadinessCard
-            opportunity={opportunityDraft}
-            opportunityId={opportunityId}
-            suppressCta
-            title="Opportunity Readiness"
-            result={wizardReadiness.fieldReadiness}
+          <SmartRightPanel
+            statusLabel={resolvedOpportunityId ? 'Draft' : 'New draft'}
+            issues={liveValidation.issues}
+            readinessScore={wizardReadiness.readinessScore}
+            readinessTimeline={readinessTimeline}
+            nextActionLabel={nextAction.label}
+            nextActionStepId={nextAction.stepId}
+            publishReady={wizardReadiness.publishReady}
+            publishBlockedWhy={
+              wizardReadiness.missingRequired[0]
+                ? `Missing: ${wizardReadiness.missingRequired[0]}`
+                : undefined
+            }
+            summary={{
+              skills: draft.structuredSkills.length,
+              packages: draft.workPackages.length,
+              budgetLabel: String(
+                (draft.commercialTerms as Record<string, unknown>).budget ??
+                  (draft.commercialTerms as Record<string, unknown>).cashAmount ??
+                  '—',
+              ),
+              timelineLabel: draft.startDate || draft.tenderDeadline
+                ? `${draft.startDate || '…'} → ${draft.tenderDeadline || '…'}`
+                : '—',
+            }}
+            collaboration={{
+              intent: formatOpportunityIntent(draft.intent),
+              mainModel: resolveMainCollaborationModelLabel(draft.mainCollaborationModel),
+              subModel: resolveSubModelLabel(draft.subModelType),
+              exchangeMode: draft.exchangeMode
+                ? formatCollaborationExchangeMode(draft.exchangeMode)
+                : undefined,
+              topology: formatFrameworkMatchTypeLabel(derivedTopology.topology),
+              relationshipLabel: 'Company → Company',
+              readyToPublish: wizardReadiness.publishReady,
+            }}
+            onNavigateIssue={(stepId) => goToStep(stepId)}
+            onNextAction={(stepId) => goToStep(stepId)}
           />
         }
         footer={
-          <PmFormActions
-            onCancel={handleBack}
-            cancelLabel={activeStepIndex <= 0 ? 'Cancel' : 'Back'}
-            onSaveDraft={handleSaveDraft}
-            saveDraftLabel="Save draft"
-            onSubmit={isReviewStep ? handleSaveDraft : handleContinue}
-            submitLabel={isReviewStep ? draftSubmitLabel : 'Continue'}
-            loading={saving}
-          />
+          <div className="space-y-2">
+            {autosaveLabel ? (
+              <p
+                className={cn(pmTypography.caption, 'text-muted-foreground')}
+                aria-live="polite"
+                data-testid="autosave-status"
+              >
+                {autosaveLabel}
+              </p>
+            ) : null}
+            <PmFormActions
+              onCancel={handleBack}
+              cancelLabel={activeStepIndex <= 0 ? 'Cancel' : 'Back'}
+              onSaveDraft={handleSaveDraft}
+              saveDraftLabel="Save draft"
+              onSubmit={isReviewStep ? handleSaveDraft : handleContinue}
+              submitLabel={isReviewStep ? draftSubmitLabel : 'Continue'}
+              loading={saving}
+            />
+          </div>
         }
       >
         <PmPageHeader
@@ -479,22 +767,34 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
           >
             <PmFormGrid columns={2}>
               <PmFormGridItem span="full" gridColumns={2}>
-                <PmFormField id="opp-title" label="Title" required>
-                  <Input
-                    value={draft.title}
-                    onChange={(e) => updateDraft('title', e.target.value)}
-                    placeholder="Opportunity title"
+                <div>
+                  <PmFormField id="opp-title" label="Title" required>
+                    <Input
+                      value={draft.title}
+                      onChange={(e) => updateDraft('title', e.target.value)}
+                      placeholder="Opportunity title"
+                    />
+                  </PmFormField>
+                  <LiveFieldStatus
+                    view={liveValidation.field('title')}
+                    hasValue={Boolean(draft.title.trim())}
                   />
-                </PmFormField>
+                </div>
               </PmFormGridItem>
               <PmFormGridItem span="full" gridColumns={2}>
-                <PmFormField id="opp-description" label="Description" required>
-                  <Textarea
-                    value={draft.description}
-                    onChange={(e) => updateDraft('description', e.target.value)}
-                    placeholder="Describe scope and expectations"
+                <div>
+                  <PmFormField id="opp-description" label="Description" required>
+                    <Textarea
+                      value={draft.description}
+                      onChange={(e) => updateDraft('description', e.target.value)}
+                      placeholder="Describe scope and expectations"
+                    />
+                  </PmFormField>
+                  <LiveFieldStatus
+                    view={liveValidation.field('description')}
+                    hasValue={Boolean(draft.description.trim())}
                   />
-                </PmFormField>
+                </div>
               </PmFormGridItem>
               <PmFormField id="opp-sector" label="Category / sector">
                 <Input
@@ -609,61 +909,79 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
           <PmFormSection
             title="Collaboration model & exchange"
             description="Choose main collaboration model, sub-model, and value exchange mode. Matching topology is system-derived — not a user choice."
+            actions={
+              <div className="flex gap-1">
+                <ContextualHelp topic="collaboration" subModelType={draft.subModelType} />
+                <ContextualHelp topic="exchange" label="Exchange help" />
+              </div>
+            }
           >
-            <PmFormField id="opp-main-model" label="Main collaboration model" required>
-              <Select
-                value={draft.mainCollaborationModel || undefined}
-                onValueChange={(value) => {
-                  const firstSub = listSubModelsForMain(value)[0]
-                  if (firstSub) {
+            <div>
+              <PmFormField id="opp-main-model" label="Main collaboration model" required>
+                <Select
+                  value={draft.mainCollaborationModel || undefined}
+                  onValueChange={(value) => {
+                    const firstSub = listSubModelsForMain(value)[0]
+                    if (firstSub) {
+                      setDraft((current) => ({
+                        ...current,
+                        mainCollaborationModel: value,
+                        modelType: firstSub.modelType,
+                        subModelType: firstSub.key,
+                      }))
+                    } else {
+                      updateDraft('mainCollaborationModel', value)
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select collaboration model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mainModels.map((model) => (
+                      <SelectItem key={model.key} value={model.key}>
+                        {model.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </PmFormField>
+              <LiveFieldStatus
+                view={liveValidation.field('mainCollaborationModel')}
+                hasValue={Boolean(draft.mainCollaborationModel)}
+              />
+            </div>
+
+            <div className="mt-4">
+              <PmFormField id="opp-sub-model" label="Sub-model" required>
+                <Select
+                  value={draft.subModelType || undefined}
+                  onValueChange={(value) => {
+                    const sub = subModelOptions.find((entry) => entry.key === value)
                     setDraft((current) => ({
                       ...current,
-                      mainCollaborationModel: value,
-                      modelType: firstSub.modelType,
-                      subModelType: firstSub.key,
+                      subModelType: value,
+                      modelType: sub?.modelType ?? current.modelType,
                     }))
-                  } else {
-                    updateDraft('mainCollaborationModel', value)
-                  }
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select collaboration model" />
-                </SelectTrigger>
-                <SelectContent>
-                  {mainModels.map((model) => (
-                    <SelectItem key={model.key} value={model.key}>
-                      {model.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </PmFormField>
-
-            <PmFormField id="opp-sub-model" label="Sub-model" required className="mt-4">
-              <Select
-                value={draft.subModelType || undefined}
-                onValueChange={(value) => {
-                  const sub = subModelOptions.find((entry) => entry.key === value)
-                  setDraft((current) => ({
-                    ...current,
-                    subModelType: value,
-                    modelType: sub?.modelType ?? current.modelType,
-                  }))
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select sub-model" />
-                </SelectTrigger>
-                <SelectContent>
-                  {subModelOptions.map((sub) => (
-                    <SelectItem key={sub.key} value={sub.key}>
-                      {sub.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </PmFormField>
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select sub-model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subModelOptions.map((sub) => (
+                      <SelectItem key={sub.key} value={sub.key}>
+                        {sub.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </PmFormField>
+              <LiveFieldStatus
+                view={liveValidation.field('subModelType')}
+                hasValue={Boolean(draft.subModelType)}
+              />
+            </div>
 
             <div
               className="mt-4 rounded-lg border border-border/70 bg-muted/20 p-3 text-sm"
@@ -735,6 +1053,12 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
               }
               skills={draft.structuredSkills}
               onChange={syncStructuredSkills}
+              fieldStatus={
+                <LiveFieldStatus
+                  view={liveValidation.field('structuredSkills')}
+                  hasValue={draft.structuredSkills.length > 0}
+                />
+              }
             />
 
             <ServicesField
@@ -753,6 +1077,12 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
               <WorkPackagesEditor
                 packages={draft.workPackages}
                 onChange={(packages) => updateDraft('workPackages', packages)}
+                fieldStatus={
+                  <LiveFieldStatus
+                    view={liveValidation.field('workPackages')}
+                    hasValue={draft.workPackages.length > 0}
+                  />
+                }
               />
             ) : null}
 
@@ -763,6 +1093,17 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
               showCapacity={draft.intent === 'offer'}
               onResourcesChange={(resources) => updateDraft('resources', resources)}
               onCapacityChange={(capacity) => updateDraft('capacity', capacity)}
+              fieldStatus={
+                <LiveFieldStatus
+                  view={liveValidation.field('capacity')}
+                  hasValue={Boolean(
+                    draft.capacity.availableCapacity != null ||
+                      draft.capacity.maximumCapacity != null ||
+                      draft.capacity.reservedCapacity != null ||
+                      draft.capacity.availableFrom,
+                  )}
+                />
+              }
             />
 
             {draft.intent === 'need' ? (
@@ -793,6 +1134,16 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
             onConstraintsChange={(constraints) =>
               updateDraft('commercialConstraints', constraints)
             }
+            budgetStatus={
+              <LiveFieldStatus
+                view={liveValidation.field('budget')}
+                hasValue={Boolean(
+                  String(
+                    (draft.commercialTerms as Record<string, unknown>).budget ?? '',
+                  ).trim(),
+                )}
+              />
+            }
           />
         </PmFormWizardStep>
 
@@ -807,6 +1158,18 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
             onStartDateChange={(value) => updateDraft('startDate', value)}
             onDeadlineChange={(value) => updateDraft('tenderDeadline', value)}
             onTimelineChange={(timeline) => updateDraft('richTimeline', timeline)}
+            locationStatus={
+              <LiveFieldStatus
+                view={liveValidation.field('location')}
+                hasValue={Boolean(draft.location.trim())}
+              />
+            }
+            startDateStatus={
+              <LiveFieldStatus
+                view={liveValidation.field('startDate')}
+                hasValue={Boolean(draft.startDate)}
+              />
+            }
           />
 
           <PmFormSection
@@ -897,114 +1260,121 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         </PmFormWizardStep>
 
         <PmFormWizardStep stepId="review" activeStepId={activeStepId}>
-          <PmFormSection
-            title="Review draft"
-            description="Confirm details, then save as draft. Publish from the opportunity detail page when ready."
-            bordered
-          >
-            <dl className="grid gap-3 text-sm sm:grid-cols-2">
-              <div>
-                <dt className="text-muted-foreground">Title</dt>
-                <dd className="font-medium">{draft.title || '—'}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Post type</dt>
-                <dd className="font-medium">
-                  {formatOpportunityIntent(draft.intent)}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Main model</dt>
-                <dd className="font-medium">
-                  {resolveMainCollaborationModelLabel(draft.mainCollaborationModel)}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Sub-model</dt>
-                <dd className="font-medium">
-                  {resolveSubModelLabel(draft.subModelType)}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Recommended Matching Topology</dt>
-                <dd className="font-medium">
-                  System will match this as{' '}
-                  {formatFrameworkMatchTypeLabel(derivedTopology.topology)}
-                </dd>
-                <dd className={cn(pmTypography.caption, 'text-muted-foreground')}>
-                  System-derived — based on your collaboration model and exchange mode
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Value exchange</dt>
-                <dd className="font-medium">
-                  {draft.paymentModes.map(formatCollaborationExchangeMode).join(', ') ||
-                    '—'}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Skills</dt>
-                <dd className="font-medium">
-                  {skillNames(draft.structuredSkills).join(', ') ||
-                    draft.skills ||
-                    '—'}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Work packages</dt>
-                <dd className="font-medium">
-                  {draft.workPackages.length > 0
-                    ? `${draft.workPackages.length} package(s)`
-                    : '—'}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Location</dt>
-                <dd className="font-medium">{draft.location || '—'}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Readiness</dt>
-                <dd className="font-medium">
-                  {Math.round(wizardReadiness.readinessScore)}%
-                  {wizardReadiness.publishReady
-                    ? ' — publish-ready after save'
-                    : ' — complete required fields before publish'}
-                </dd>
-              </div>
-            </dl>
-          </PmFormSection>
-
-          <div className="mt-4 space-y-4">
+          <div className="space-y-4" data-testid="review-draft-step">
+            <CollaborationSummaryCard
+              intent={formatOpportunityIntent(draft.intent)}
+              mainModelLabel={resolveMainCollaborationModelLabel(
+                draft.mainCollaborationModel,
+              )}
+              subModelLabel={resolveSubModelLabel(draft.subModelType)}
+              exchangeModeLabel={
+                draft.exchangeMode
+                  ? formatCollaborationExchangeMode(draft.exchangeMode)
+                  : undefined
+              }
+              topologyLabel={formatFrameworkMatchTypeLabel(derivedTopology.topology)}
+              relationshipLabel="Company → Company"
+              readyToPublish={wizardReadiness.publishReady}
+            />
+            <PmFormSection
+              title="General"
+              description="Confirm the fundamentals before saving this draft."
+              bordered
+            >
+              <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="text-muted-foreground">Title</dt>
+                  <dd className="font-medium">{draft.title || '—'}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Post type</dt>
+                  <dd className="font-medium">
+                    {formatOpportunityIntent(draft.intent)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Location</dt>
+                  <dd className="font-medium">{draft.location || '—'}</dd>
+                </div>
+              </dl>
+              <PmButton
+                type="button"
+                size="sm"
+                variant="outline"
+                className="mt-3"
+                onClick={() => goToStep('basic')}
+              >
+                Edit basic details →
+              </PmButton>
+            </PmFormSection>
+            <FinancialSummaryCard
+              exchangeMode={draft.exchangeMode}
+              commercialTerms={draft.commercialTerms as Record<string, unknown>}
+            />
+            <WorkPackageSummaryCard
+              workPackages={draft.workPackages}
+              skills={draft.structuredSkills}
+              resourcesCount={draft.resources.length}
+              deliverablesCount={
+                draft.deliveryMilestonesText
+                  ? draft.deliveryMilestonesText.split(',').filter(Boolean).length
+                  : 0
+              }
+            />
             <MarketplacePreviewPanel opportunity={opportunityDraft} />
             <MatchingInsightPanel
               intent={draft.intent}
               skills={draft.structuredSkills}
               location={draft.location}
               exchangeMode={draft.exchangeMode}
+              topology={derivedTopology.topology}
+              collaborationLabel={resolveMainCollaborationModelLabel(
+                draft.mainCollaborationModel,
+              )}
               readinessScore={wizardReadiness.readinessScore}
               missingRequired={wizardReadiness.missingRequired}
+              onFixFactor={(stepId) => goToStep(stepId)}
             />
             <AiSuggestionsPanel
               bundle={explanationBundle}
               subModelType={draft.subModelType || undefined}
             />
             <PmFormSection
-              title="Draft readiness"
-              description="Saving creates or updates a draft. Publish remains on the opportunity detail page when readiness ≥ 80% and your account is approved."
+              title="Publish checklist"
+              description="Save this draft first. Publish remains on the opportunity detail page when readiness ≥ 80% and your account is approved."
             >
               <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
                 {wizardReadiness.missingRequired.length > 0
                   ? `Still missing for publish: ${wizardReadiness.missingRequired
                       .slice(0, 5)
-                      .join(', ')}${
-                      wizardReadiness.missingRequired.length > 5 ? '…' : ''
-                    }`
-                  : 'Required fields look complete. You can save this draft and publish from detail when ready.'}
+                      .join(', ')}`
+                  : 'Core readiness looks complete — save draft, then open detail to publish.'}
               </p>
               <p className={cn(pmTypography.caption, 'mt-2 text-muted-foreground')}>
-                Primary action: {draftSubmitLabel} — you will be taken to the opportunity
-                detail page.
+                Validation and readiness are separate: validation checks correctness;
+                readiness measures completeness for matching.
               </p>
+            </PmFormSection>
+            <PmFormSection
+              title="Review actions"
+              description="Export options — Print works now; PDF and Share are coming soon."
+            >
+              <div className="flex flex-wrap gap-2" data-testid="review-footer-actions">
+                <PmButton
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => window.print()}
+                >
+                  Print summary
+                </PmButton>
+                <PmButton type="button" size="sm" variant="outline" disabled title="Coming soon">
+                  Export PDF (coming soon)
+                </PmButton>
+                <PmButton type="button" size="sm" variant="outline" disabled title="Coming soon">
+                  Share draft (coming soon)
+                </PmButton>
+              </div>
             </PmFormSection>
           </div>
         </PmFormWizardStep>

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { PmFormField, PmFormGrid, PmFormSection } from '@/components/forms/pm-form-index'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -16,19 +17,24 @@ const HYBRID_OPTIONS = [
 function CashFields({
   terms,
   onChange,
+  budgetStatus,
 }: {
   terms: CommercialTermsByMode
   onChange: (terms: CommercialTermsByMode) => void
+  budgetStatus?: ReactNode
 }) {
   return (
     <div data-testid="commercial-cash-fields">
       <PmFormGrid columns={2}>
-        <PmFormField id="cash-budget" label="Budget">
-          <Input
-            value={terms.budget ?? ''}
-            onChange={(e) => onChange({ ...terms, budget: e.target.value })}
-          />
-        </PmFormField>
+        <div>
+          <PmFormField id="cash-budget" label="Budget">
+            <Input
+              value={terms.budget ?? ''}
+              onChange={(e) => onChange({ ...terms, budget: e.target.value })}
+            />
+          </PmFormField>
+          {budgetStatus}
+        </div>
         <PmFormField id="cash-currency" label="Currency">
           <Input
             value={terms.currency ?? 'SAR'}
@@ -207,6 +213,7 @@ export function CommercialTermsStep({
   constraints,
   onTermsChange,
   onConstraintsChange,
+  budgetStatus,
 }: {
   exchangeMode: string
   paymentModes: string[]
@@ -214,6 +221,7 @@ export function CommercialTermsStep({
   constraints: CommercialConstraints
   onTermsChange: (terms: CommercialTermsByMode) => void
   onConstraintsChange: (constraints: CommercialConstraints) => void
+  budgetStatus?: ReactNode
 }) {
   const mode = (exchangeMode || paymentModes[0] || '').toLowerCase()
   const hybridComponents = terms.hybridComponents ?? []
@@ -267,7 +275,7 @@ export function CommercialTermsStep({
         {showCash ? (
           <div className="mb-4">
             <p className="mb-2 text-sm font-medium">Cash</p>
-            <CashFields terms={terms} onChange={onTermsChange} />
+            <CashFields terms={terms} onChange={onTermsChange} budgetStatus={budgetStatus} />
           </div>
         ) : null}
         {showBarter ? (

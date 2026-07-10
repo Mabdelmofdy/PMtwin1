@@ -50,7 +50,10 @@ export function PmFormWizard({
             <div className={pmLayoutGrid.wizardMain}>{children}</div>
             <aside
               data-slot="pm-form-wizard-rail"
-              className={cn(pmLayoutGrid.wizardAside, 'lg:sticky lg:top-20 lg:self-start')}
+              className={cn(
+                pmLayoutGrid.wizardAside,
+                'md:sticky md:top-20 md:self-start md:max-h-[calc(100vh-6rem)] md:overflow-y-auto',
+              )}
             >
               {rail}
             </aside>

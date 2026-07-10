@@ -29,6 +29,33 @@ export function toOpportunityValidationInput(
   if (!opportunity) return {}
   const attrs = opportunity.attributes ?? {}
   const exchangeData = opportunity.exchangeData ?? {}
+  const normalized = opportunity.normalized as
+    | { skills?: unknown; offeredServices?: unknown; requiredServices?: unknown }
+    | undefined
+  const baseScope = (opportunity.scope ?? {}) as Record<string, unknown>
+  const scopeSkills = Array.isArray(baseScope.requiredSkills)
+    ? (baseScope.requiredSkills as string[])
+    : Array.isArray(baseScope.offeredSkills)
+      ? (baseScope.offeredSkills as string[])
+      : []
+  const normalizedSkills = Array.isArray(normalized?.skills)
+    ? (normalized.skills as string[])
+    : []
+  // Prefer first-class structuredSkills; otherwise keep scope, seeding from
+  // normalized.skills when seed/fixture opportunities only have normalized.
+  const scope: Record<string, unknown> = { ...baseScope }
+  if (
+    !opportunity.structuredSkills?.length &&
+    scopeSkills.length === 0 &&
+    normalizedSkills.length > 0
+  ) {
+    if (opportunity.intent === 'offer') {
+      scope.offeredSkills = normalizedSkills
+    } else {
+      scope.requiredSkills = normalizedSkills
+    }
+  }
+
   return {
     id: opportunity.id,
     title: opportunity.title,
@@ -55,7 +82,7 @@ export function toOpportunityValidationInput(
     structuredSkills: opportunity.structuredSkills,
     workPackages: opportunity.workPackages,
     capacity: opportunity.capacity,
-    scope: opportunity.scope as Record<string, unknown> | undefined,
+    scope,
     exchangeData: exchangeData as Record<string, unknown>,
     collaborationAttributes: opportunity.collaborationAttributes,
     complianceRequirements: opportunity.complianceRequirements,

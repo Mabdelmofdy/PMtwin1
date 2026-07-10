@@ -185,6 +185,22 @@ describe('skills', () => {
     )
     assert.ok(result.issues.some((i) => i.code === VAL_CODES.SKILL_PROVIDED_MISSING))
   })
+
+  it('accepts legacy offer skills stored in scope.requiredSkills on publish', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        intent: 'offer',
+        scope: { requiredSkills: ['BIM', 'Revit'] },
+      },
+      { operationScope: 'publish' },
+      { scopes: ['publish'], groups: ['skills'] },
+    )
+    assert.equal(
+      result.issues.some((i) => i.code === VAL_CODES.SKILL_PROVIDED_MISSING),
+      false,
+    )
+  })
 })
 
 describe('work packages', () => {

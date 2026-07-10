@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { PmFormField, PmFormGrid, PmFormSection } from '@/components/forms/pm-form-index'
 import { PmButton } from '@/components/ui/pm-button'
@@ -32,6 +33,7 @@ export function ResourcesCapacityEditor({
   showCapacity,
   onResourcesChange,
   onCapacityChange,
+  fieldStatus,
 }: {
   resources: OpportunityResource[]
   capacity: OfferCapacity
@@ -39,6 +41,7 @@ export function ResourcesCapacityEditor({
   showCapacity: boolean
   onResourcesChange: (resources: OpportunityResource[]) => void
   onCapacityChange: (capacity: OfferCapacity) => void
+  fieldStatus?: ReactNode
 }) {
   const updateAt = (index: number, patch: Partial<OpportunityResource>) => {
     onResourcesChange(
@@ -48,6 +51,7 @@ export function ResourcesCapacityEditor({
 
   return (
     <div className="space-y-4" data-testid="resources-capacity-editor">
+      {fieldStatus}
       <PmFormSection
         title="Resources"
         description="People, equipment, vehicles, materials, software, and licenses. Optionally associate with a work package."
