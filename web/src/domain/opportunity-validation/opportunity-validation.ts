@@ -4,6 +4,7 @@ import type {
   PublishReadinessSnapshot,
   PublishValidationResult,
   RunRulesOptions,
+  StructuredSkillInput,
   ValidationContext,
   ValidationIssue,
   ValidationResult,
@@ -23,6 +24,49 @@ import type { PublishReadinessResult } from '@/domain/publish-readiness/types.ts
 
 export type OpportunityValidationLiveState = 'valid' | 'warning' | 'error'
 
+function mapStructuredSkills(
+  source: unknown,
+  intentRole: 'required' | 'provided',
+): StructuredSkillInput[] | undefined {
+  if (!Array.isArray(source)) return undefined
+  const mapped = source
+    .map((skill): StructuredSkillInput | null => {
+      if (typeof skill === 'string') {
+        const name = skill.trim()
+        return name ? { name, role: intentRole } : null
+      }
+      if (!skill || typeof skill !== 'object') return null
+      const record = skill as Record<string, unknown>
+      const name =
+        typeof record.name === 'string'
+          ? record.name.trim()
+          : typeof record.skillId === 'string'
+            ? record.skillId.trim()
+            : ''
+      if (!name) return null
+      const role =
+        record.role === 'provided' || record.role === 'required'
+          ? record.role
+          : intentRole
+      const years =
+        typeof record.years === 'number'
+          ? record.years
+          : typeof record.yearsRequired === 'number'
+            ? record.yearsRequired
+            : undefined
+      return {
+        name,
+        role,
+        skillId:
+          typeof record.skillId === 'string' ? record.skillId : undefined,
+        level: typeof record.level === 'string' ? record.level : undefined,
+        years,
+      }
+    })
+    .filter((skill): skill is StructuredSkillInput => skill != null)
+  return mapped.length > 0 ? mapped : undefined
+}
+
 export function toOpportunityValidationInput(
   opportunity: Partial<Opportunity> | null | undefined,
 ): OpportunityValidationInput {
@@ -34,9 +78,9 @@ export function toOpportunityValidationInput(
     | undefined
   const baseScope = (opportunity.scope ?? {}) as Record<string, unknown>
   const scopeSkills = Array.isArray(baseScope.requiredSkills)
-    ? (baseScope.requiredSkills as string[])
+    ? (baseScope.requiredSkills as unknown[])
     : Array.isArray(baseScope.offeredSkills)
-      ? (baseScope.offeredSkills as string[])
+      ? (baseScope.offeredSkills as unknown[])
       : []
   const normalizedSkills = Array.isArray(normalized?.skills)
     ? (normalized.skills as string[])
@@ -55,6 +99,17 @@ export function toOpportunityValidationInput(
       scope.requiredSkills = normalizedSkills
     }
   }
+
+  const collaboration = opportunity.collaborationAttributes as
+    | { structuredSkills?: unknown }
+    | undefined
+  const intentRole =
+    opportunity.intent === 'offer'
+      ? ('provided' as const)
+      : ('required' as const)
+  const structuredSkills =
+    mapStructuredSkills(opportunity.structuredSkills, intentRole) ??
+    mapStructuredSkills(collaboration?.structuredSkills, intentRole)
 
   return {
     id: opportunity.id,
@@ -79,7 +134,7 @@ export function toOpportunityValidationInput(
     budget: opportunity.budget,
     ownerId: opportunity.ownerPartyId,
     creatorId: opportunity.creatorId,
-    structuredSkills: opportunity.structuredSkills,
+    structuredSkills,
     workPackages: opportunity.workPackages,
     capacity: opportunity.capacity,
     scope,

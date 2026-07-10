@@ -44,13 +44,21 @@ export function normalizeExchangeMode(mode?: string): string | undefined {
   return mode.toLowerCase().replace(/-/g, '_').trim()
 }
 
+function skillIdentityPart(value: unknown): string {
+  if (typeof value === 'string') return value.toLowerCase().trim()
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  return ''
+}
+
 export function skillKey(skill: {
   skillId?: string
   name?: string
   role?: string
 }): string {
-  const id = (skill.skillId ?? skill.name ?? '').toLowerCase().trim()
-  return `${id}::${skill.role ?? ''}`
+  const id = skillIdentityPart(skill.skillId) || skillIdentityPart(skill.name)
+  const role =
+    typeof skill.role === 'string' ? skill.role.toLowerCase().trim() : ''
+  return `${id}::${role}`
 }
 
 export function titleSimilarity(a?: string, b?: string): number {

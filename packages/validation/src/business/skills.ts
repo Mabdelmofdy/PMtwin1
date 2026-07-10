@@ -1,11 +1,13 @@
 import type {
   OpportunityValidationInput,
+  StructuredSkillInput,
   ValidationIssue,
   ValidationRule,
 } from '../types.ts'
 import { VAL_CODES } from '../rules/codes.ts'
 import { messageForCode } from '../messages/catalog.ts'
 import {
+  hasText,
   normalizeIntent,
   skillKey,
   toNumber,
@@ -31,21 +33,57 @@ function skillIssue(
   }
 }
 
+function coerceScopeSkill(
+  entry: unknown,
+  role: 'required' | 'provided',
+): StructuredSkillInput | null {
+  if (typeof entry === 'string') {
+    const name = entry.trim()
+    if (!name) return null
+    return { name, role }
+  }
+  if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return null
+  const record = entry as Record<string, unknown>
+  const name = hasText(record.name)
+    ? String(record.name).trim()
+    : hasText(record.skillId)
+      ? String(record.skillId).trim()
+      : ''
+  if (!name) return null
+  const entryRole =
+    record.role === 'provided' || record.role === 'required'
+      ? record.role
+      : role
+  return {
+    name,
+    role: entryRole,
+    skillId: hasText(record.skillId) ? String(record.skillId) : undefined,
+    level: hasText(record.level) ? String(record.level) : undefined,
+    years:
+      toNumber(record.years) ??
+      toNumber(record.yearsRequired) ??
+      undefined,
+  }
+}
+
+function coerceScopeSkillList(
+  value: unknown,
+  role: 'required' | 'provided',
+): StructuredSkillInput[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .map((entry) => coerceScopeSkill(entry, role))
+    .filter((skill): skill is StructuredSkillInput => skill != null)
+}
+
 function resolveSkills(input: OpportunityValidationInput) {
   if (input.structuredSkills && input.structuredSkills.length > 0) {
     return input.structuredSkills
   }
   const intent = normalizeIntent(input.intent)
   const scope = input.scope ?? {}
-  const offered = Array.isArray(scope.offeredSkills)
-    ? (scope.offeredSkills as string[]).map((name) => ({
-        name,
-        role: 'provided' as const,
-      }))
-    : []
-  const requiredListed = Array.isArray(scope.requiredSkills)
-    ? (scope.requiredSkills as string[])
-    : []
+  const offered = coerceScopeSkillList(scope.offeredSkills, 'provided')
+  const requiredListed = coerceScopeSkillList(scope.requiredSkills, 'required')
 
   // Legacy readiness/matching fixtures often store offer skills in requiredSkills.
   // Treat those as provided when intent is offer/hybrid and offeredSkills is empty.
@@ -54,17 +92,13 @@ function resolveSkills(input: OpportunityValidationInput) {
     offered.length === 0 &&
     requiredListed.length > 0
   ) {
-    return requiredListed.map((name) => ({
-      name,
+    return requiredListed.map((skill) => ({
+      ...skill,
       role: 'provided' as const,
     }))
   }
 
-  const required = requiredListed.map((name) => ({
-    name,
-    role: 'required' as const,
-  }))
-  return [...required, ...offered]
+  return [...requiredListed, ...offered]
 }
 
 export const skillRequiredMissing: ValidationRule = {
@@ -186,7 +220,7 @@ export const skillLevelYearsImpossible: ValidationRule = {
       if (!s.level) continue
       const years = toNumber(s.years)
       if (years === null) continue
-      const levelKey = s.level.toLowerCase().trim()
+      const levelKey = String(s.level).toLowerCase().trim()
       const minYears = config.skillLevelMinYears[levelKey]
       if (minYears === undefined) continue
       if (years < minYears) {

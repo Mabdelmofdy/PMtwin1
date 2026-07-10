@@ -186,6 +186,29 @@ describe('skills', () => {
     assert.ok(result.issues.some((i) => i.code === VAL_CODES.SKILL_PROVIDED_MISSING))
   })
 
+  it('accepts scope.requiredSkills as StructuredSkill objects without crashing', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        intent: 'need',
+        scope: {
+          requiredSkills: [
+            {
+              name: 'BIM',
+              level: 'intermediate',
+              certificationRequired: false,
+              mandatory: true,
+            },
+          ],
+        },
+      },
+      { operationScope: 'draft' },
+      { groups: ['skills'] },
+    )
+    assert.equal(result.valid, true)
+    assert.ok(!result.issues.some((i) => i.code === VAL_CODES.SKILL_DUPLICATE))
+  })
+
   it('accepts legacy offer skills stored in scope.requiredSkills on publish', () => {
     const result = validateOpportunityBusiness(
       {

@@ -221,20 +221,19 @@ export function buildOpportunityDraftInput(
   return {
     ...base,
     ...collaborationPatch,
+    structuredSkills: draft.structuredSkills,
+    workPackages: draft.workPackages,
+    capacity: draft.intent === 'offer' ? draft.capacity : undefined,
     scope: {
       ...(base.scope as Record<string, unknown>),
       sectors,
       ...(draft.intent === 'offer'
         ? {
-            offeredSkills: draft.structuredSkills.length
-              ? draft.structuredSkills
-              : legacySkills,
+            offeredSkills: legacySkills,
             coreSkills: legacySkills,
           }
         : {
-            requiredSkills: draft.structuredSkills.length
-              ? draft.structuredSkills
-              : legacySkills,
+            requiredSkills: legacySkills,
             coreSkills: legacySkills,
           }),
     },

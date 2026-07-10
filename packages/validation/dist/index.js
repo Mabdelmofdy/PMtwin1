@@ -242,9 +242,15 @@ function normalizeExchangeMode(mode) {
   if (!mode) return void 0;
   return mode.toLowerCase().replace(/-/g, "_").trim();
 }
+function skillIdentityPart(value) {
+  if (typeof value === "string") return value.toLowerCase().trim();
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  return "";
+}
 function skillKey(skill) {
-  const id = (skill.skillId ?? skill.name ?? "").toLowerCase().trim();
-  return `${id}::${skill.role ?? ""}`;
+  const id = skillIdentityPart(skill.skillId) || skillIdentityPart(skill.name);
+  const role = typeof skill.role === "string" ? skill.role.toLowerCase().trim() : "";
+  return `${id}::${role}`;
 }
 function titleSimilarity(a, b) {
   const left = (a ?? "").toLowerCase().trim();
@@ -632,28 +638,44 @@ function skillIssue(code, fieldPaths, scope = DRAFT_UPDATE_PUBLISH4) {
     group: "skills"
   };
 }
+function coerceScopeSkill(entry, role) {
+  if (typeof entry === "string") {
+    const name2 = entry.trim();
+    if (!name2) return null;
+    return { name: name2, role };
+  }
+  if (!entry || typeof entry !== "object" || Array.isArray(entry)) return null;
+  const record = entry;
+  const name = hasText(record.name) ? String(record.name).trim() : hasText(record.skillId) ? String(record.skillId).trim() : "";
+  if (!name) return null;
+  const entryRole = record.role === "provided" || record.role === "required" ? record.role : role;
+  return {
+    name,
+    role: entryRole,
+    skillId: hasText(record.skillId) ? String(record.skillId) : void 0,
+    level: hasText(record.level) ? String(record.level) : void 0,
+    years: toNumber(record.years) ?? toNumber(record.yearsRequired) ?? void 0
+  };
+}
+function coerceScopeSkillList(value, role) {
+  if (!Array.isArray(value)) return [];
+  return value.map((entry) => coerceScopeSkill(entry, role)).filter((skill) => skill != null);
+}
 function resolveSkills(input) {
   if (input.structuredSkills && input.structuredSkills.length > 0) {
     return input.structuredSkills;
   }
   const intent = normalizeIntent(input.intent);
   const scope = input.scope ?? {};
-  const offered = Array.isArray(scope.offeredSkills) ? scope.offeredSkills.map((name) => ({
-    name,
-    role: "provided"
-  })) : [];
-  const requiredListed = Array.isArray(scope.requiredSkills) ? scope.requiredSkills : [];
+  const offered = coerceScopeSkillList(scope.offeredSkills, "provided");
+  const requiredListed = coerceScopeSkillList(scope.requiredSkills, "required");
   if ((intent === "offer" || intent === "hybrid") && offered.length === 0 && requiredListed.length > 0) {
-    return requiredListed.map((name) => ({
-      name,
+    return requiredListed.map((skill) => ({
+      ...skill,
       role: "provided"
     }));
   }
-  const required = requiredListed.map((name) => ({
-    name,
-    role: "required"
-  }));
-  return [...required, ...offered];
+  return [...requiredListed, ...offered];
 }
 var skillRequiredMissing = {
   id: "skill-required-missing",
@@ -769,7 +791,7 @@ var skillLevelYearsImpossible = {
       if (!s.level) continue;
       const years = toNumber(s.years);
       if (years === null) continue;
-      const levelKey = s.level.toLowerCase().trim();
+      const levelKey = String(s.level).toLowerCase().trim();
       const minYears = config.skillLevelMinYears[levelKey];
       if (minYears === void 0) continue;
       if (years < minYears) {
