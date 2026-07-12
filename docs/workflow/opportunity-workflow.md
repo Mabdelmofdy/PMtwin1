@@ -1,5 +1,7 @@
 # Opportunity Workflow
 
+> **Runtime authority (Phase 10.3+):** Product behavior lives in `web/` (command gateway + handlers) and shared packages. Opportunity Details Experience 4.0 is the canonical read surface. Matching after publish is PostMatch-first — see [matching-workflow.md](matching-workflow.md) and [opportunity-details-experience-4.md](../ui/opportunity-details-experience-4.md). Sections below retain lifecycle reference; prefer web command paths over legacy POC `data-service` notes when implementing.
+
 ### What this page is
 
 Step-by-step reference for **creating**, **editing**, **publishing**, and **closing** opportunities—whether you are an individual or a company.

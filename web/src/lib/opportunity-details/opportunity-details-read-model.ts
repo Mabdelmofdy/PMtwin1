@@ -22,12 +22,17 @@ import {
   type PublicCommercialPresentation,
 } from '@/domain/opportunity-commercial-structure'
 import {
+  normalizeDeliverables,
   normalizeMilestones,
+  normalizeResources,
   normalizeStructuredSkills,
   normalizeWorkPackages,
+  type OfferCapacity,
   type OpportunityDeliverable,
   type OpportunityMilestone,
+  type OpportunityResource,
   type OpportunityTask,
+  type RichTimeline,
   type StructuredSkill,
   type WorkPackage,
 } from '@/domain/opportunity-creation'
@@ -102,17 +107,37 @@ export type OpportunityDetailsCollaboration = {
   readonly visibilityStatus?: string
 }
 
+export type OpportunityDetailsQualifications = {
+  readonly experienceLevel?: string
+  readonly certifications: readonly string[]
+  readonly teamSize?: string
+  readonly minimumQualifications?: string
+}
+
 export type OpportunityDetailsScope = {
   readonly workPackages: readonly WorkPackage[]
   readonly tasks: readonly OpportunityTask[]
   readonly deliverables: readonly OpportunityDeliverable[]
   readonly milestones: readonly OpportunityMilestone[]
   readonly skills: readonly StructuredSkill[]
+  readonly requiredSkills: readonly StructuredSkill[]
+  readonly preferredSkills: readonly StructuredSkill[]
+  readonly requiredServices: readonly string[]
+  readonly offeredServices: readonly string[]
+  /** @deprecated Prefer requiredServices / offeredServices */
   readonly services: readonly string[]
+  readonly structuredResources: readonly OpportunityResource[]
   readonly resources: readonly string[]
   readonly compliance: readonly string[]
   readonly preferredPartnerType?: string
   readonly capacity?: Opportunity['capacity']
+  readonly offerCapacity?: OfferCapacity
+  readonly richTimeline?: RichTimeline
+  readonly serviceArea?: string
+  readonly deliveryMethod?: string
+  readonly languages: readonly string[]
+  readonly priority?: string
+  readonly qualifications: OpportunityDetailsQualifications
 }
 
 export type OpportunityDetailsViewer = {
@@ -184,8 +209,31 @@ function attrsOf(opportunity: Opportunity): Record<string, unknown> {
   return (opportunity.collaborationAttributes ?? {}) as Record<string, unknown>
 }
 
+function stringList(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map(String).map((s) => s.trim()).filter(Boolean)
+  if (typeof value === 'string' && value.trim()) {
+    return value.split(/[,;]/).map((s) => s.trim()).filter(Boolean)
+  }
+  return []
+}
+
+function asOfferCapacity(value: unknown): OfferCapacity | undefined {
+  if (!value || typeof value !== 'object') return undefined
+  const record = value as Record<string, unknown>
+  if (
+    'availableCapacity' in record
+    || 'maximumCapacity' in record
+    || 'reservedCapacity' in record
+    || 'availableFrom' in record
+  ) {
+    return value as OfferCapacity
+  }
+  return undefined
+}
+
 function extractScope(opportunity: Opportunity): OpportunityDetailsScope {
   const attrs = attrsOf(opportunity)
+  const normalized = (opportunity.normalized ?? {}) as Record<string, unknown>
   const packages = normalizeWorkPackages(
     attrs.workPackages ?? opportunity.workPackages ?? [],
   )
@@ -193,6 +241,7 @@ function extractScope(opportunity: Opportunity): OpportunityDetailsScope {
     attrs.milestones ?? opportunity.deliveryMilestones ?? opportunity.attributes?.deliveryMilestones ?? [],
   )
   const tasks = packages.flatMap((pkg) => pkg.tasks ?? [])
+  const topLevelDeliverables = normalizeDeliverables(attrs.deliverables)
 
   const skills = normalizeStructuredSkills(
     attrs.structuredSkills
@@ -201,17 +250,64 @@ function extractScope(opportunity: Opportunity): OpportunityDetailsScope {
       ?? opportunity.attributes?.coreSkills
       ?? [],
   )
+  const requiredSkills = skills.filter((s) => s.mandatory)
+  const preferredSkills = skills.filter((s) => !s.mandatory)
 
-  const services = Array.isArray(attrs.requiredServices)
-    ? (attrs.requiredServices as unknown[]).map(String).filter(Boolean)
-    : Array.isArray(attrs.services)
-      ? (attrs.services as unknown[]).map(String).filter(Boolean)
-      : []
+  const requiredServices = stringList(
+    normalized.requiredServices ?? attrs.requiredServices ?? attrs.services,
+  )
+  const offeredServices = stringList(
+    normalized.offeredServices ?? attrs.offeredServices,
+  )
 
-  const resources: string[] = []
+  const structuredResources = normalizeResources(attrs.resources)
+  const resourceStrings: string[] = structuredResources.map(
+    (r) => `${r.name} (${r.type}${r.quantity ? ` · ${r.quantity} ${r.unit}` : ''})`,
+  )
   for (const pkg of packages) {
-    if (pkg.requiredResources?.trim()) resources.push(pkg.requiredResources.trim())
-    if (pkg.offeredResources?.trim()) resources.push(pkg.offeredResources.trim())
+    if (pkg.requiredResources?.trim()) resourceStrings.push(pkg.requiredResources.trim())
+    if (pkg.offeredResources?.trim()) resourceStrings.push(pkg.offeredResources.trim())
+  }
+
+  const offerCapacity =
+    asOfferCapacity(attrs.offerCapacity) ?? asOfferCapacity(attrs.capacity)
+
+  const richTimelineRaw = attrs.richTimeline
+  const richTimeline =
+    richTimelineRaw && typeof richTimelineRaw === 'object'
+      ? (richTimelineRaw as RichTimeline)
+      : undefined
+
+  const serviceArea =
+    (typeof attrs.serviceArea === 'string' && attrs.serviceArea.trim())
+    || (typeof attrs.serviceAreas === 'string' && attrs.serviceAreas.trim())
+    || (Array.isArray(attrs.serviceAreas) ? stringList(attrs.serviceAreas).join(', ') : undefined)
+    || richTimeline?.serviceAreas?.join(', ')
+    || undefined
+
+  const deliveryMethod =
+    richTimeline?.deliveryMethod
+    || opportunity.workMode
+    || undefined
+
+  const languages = stringList(attrs.languages)
+  const priority =
+    typeof attrs.priority === 'string' && attrs.priority.trim()
+      ? attrs.priority.trim()
+      : undefined
+
+  const certifications = stringList(
+    attrs.certifications ?? attrs.requiredCertifications,
+  )
+  const qualifications: OpportunityDetailsQualifications = {
+    experienceLevel:
+      typeof attrs.experienceLevel === 'string' ? attrs.experienceLevel : undefined,
+    certifications,
+    teamSize: attrs.teamSize != null ? String(attrs.teamSize) : undefined,
+    minimumQualifications:
+      typeof attrs.minimumQualifications === 'string'
+        ? attrs.minimumQualifications
+        : undefined,
   }
 
   const compliance = [
@@ -224,16 +320,28 @@ function extractScope(opportunity: Opportunity): OpportunityDetailsScope {
   return {
     workPackages: packages,
     tasks,
-    deliverables: [],
+    deliverables: topLevelDeliverables,
     milestones,
     skills,
-    services,
-    resources: [...new Set(resources)],
+    requiredSkills,
+    preferredSkills,
+    requiredServices,
+    offeredServices,
+    services: [...requiredServices, ...offeredServices],
+    structuredResources,
+    resources: [...new Set(resourceStrings)],
     compliance: [...new Set(compliance)],
     preferredPartnerType:
       opportunity.preferredPartnerType
       ?? opportunity.attributes?.preferredPartnerType,
     capacity: opportunity.capacity,
+    offerCapacity,
+    richTimeline,
+    serviceArea,
+    deliveryMethod,
+    languages,
+    priority,
+    qualifications,
   }
 }
 
@@ -242,6 +350,7 @@ function extractDocuments(
   scope: OpportunityDetailsScope,
 ): OpportunityDetailsDocumentItem[] {
   const items: OpportunityDetailsDocumentItem[] = []
+  const attrs = attrsOf(opportunity)
   const attachments = [
     ...(opportunity.attachments ?? []),
     ...(opportunity.attributes?.attachments ?? []),
@@ -255,6 +364,16 @@ function extractDocuments(
       id: `att-${index}-${name}`,
       name: name.trim(),
       category: 'Attachments',
+      visibility: 'owner',
+    })
+  })
+
+  const portfolio = stringList(attrs.portfolio ?? attrs.portfolioReferences)
+  portfolio.forEach((name, index) => {
+    items.push({
+      id: `portfolio-${index}-${name}`,
+      name,
+      category: 'Portfolio',
       visibility: 'owner',
     })
   })
@@ -302,7 +421,9 @@ function flattenDeliverables(scope: OpportunityDetailsScope): OpportunityDeliver
       workPackageId: d.workPackageId ?? pkg.id,
     })),
   )
-  return fromPackages
+  const seen = new Set(fromPackages.map((d) => d.id))
+  const topLevel = scope.deliverables.filter((d) => !seen.has(d.id))
+  return [...fromPackages, ...topLevel]
 }
 
 export function buildOpportunityDetailsReadModel(
@@ -467,6 +588,12 @@ export function buildOpportunityDetailsReadModel(
   })
 
   const status = resolveCanonicalStatus('opportunity', opportunity.status)
+  const relatedContracts = workspaceVisibility.canViewRelatedObjectExistence
+    ? contracts
+    : []
+
+  const primaryContractId = relatedContracts[0]?.id ?? null
+
   const nextAction = resolveOpportunityDetailsNextAction({
     capabilities,
     opportunityId,
@@ -475,6 +602,8 @@ export function buildOpportunityDetailsReadModel(
     matchCount: cards.length,
     topCard: cards[0],
     showRecommendedActions: visibility.showRecommendedActions,
+    contractId: primaryContractId,
+    opportunityStatus: opportunity.status,
   })
 
   const auditEntries = (deps.getAuditEntries?.() ?? []).filter(

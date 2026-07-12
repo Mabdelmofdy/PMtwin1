@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 import { pmTypography } from '@/tokens'
 import { trackOcxEvent } from '@/lib/ocx-analytics.ts'
 import type { OpportunityDetailsActionHandlers } from '../header/opportunity-executive-header.tsx'
+import { OpportunityHealthCard } from './opportunity-health-card.tsx'
 
 function CommandCenterBody({
   handlers,
@@ -56,6 +57,11 @@ function CommandCenterBody({
               Duplicate
             </PmButton>
           ) : null}
+          {capabilities.canClose ? (
+            <PmButton size="sm" variant="outline" onClick={() => handlers.onClose?.()}>
+              Close Opportunity
+            </PmButton>
+          ) : null}
           {capabilities.canArchive ? (
             <PmButton size="sm" variant="outline" onClick={() => handlers.onArchive?.()}>
               Archive
@@ -68,6 +74,8 @@ function CommandCenterBody({
           ) : null}
         </div>
       </section>
+
+      <OpportunityHealthCard />
 
       {capabilities.canViewReadinessDetails ? (
         <section className="space-y-2">

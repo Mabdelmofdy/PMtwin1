@@ -13,6 +13,9 @@ export type VersionTimelineEvent = {
 /**
  * Lifecycle Version Timeline — separate from Activity Timeline.
  * Draft Created → Updated → Published → Archived → Republished
+ *
+ * @deprecated Not mounted on Opportunity Details 4.0 — interactive journey uses
+ * `PmWorkflowJourney` + `buildOpportunityWorkflowSteps`. Kept for reference/tests only.
  */
 export function buildVersionTimelineEvents(
   opportunity: Opportunity | null | undefined,

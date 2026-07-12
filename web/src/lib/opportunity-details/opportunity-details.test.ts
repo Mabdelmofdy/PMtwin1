@@ -112,6 +112,23 @@ describe('opportunity-details-kpis', () => {
     assert.equal(kpis.commercial.allocationMethod, 'mixed')
   })
 
+  it('shows negotiating stage instead of Published', () => {
+    const kpis = buildOpportunityDetailsKpis({
+      opportunity: { ...draftOpp, status: 'negotiating' },
+      readiness,
+      healthState: 'Needs Attention',
+      workPackageCount: 0,
+      taskCount: 0,
+      deliverableCount: 0,
+      milestoneCount: 0,
+      matchingAvailable: true,
+      matchCount: 2,
+      validationErrorCount: 0,
+      publishReady: true,
+    })
+    assert.equal(kpis.lifecycle.primaryLabel, 'Negotiating')
+  })
+
   it('omits matching counts when unavailable', () => {
     const kpis = buildOpportunityDetailsKpis({
       opportunity: draftOpp,

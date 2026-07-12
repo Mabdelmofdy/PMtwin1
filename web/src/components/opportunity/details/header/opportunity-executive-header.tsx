@@ -29,6 +29,7 @@ export type OpportunityDetailsActionHandlers = {
   readonly onPublish?: () => void
   readonly onDeleteDraft?: () => void
   readonly onArchive?: () => void
+  readonly onClose?: () => void
   readonly onDuplicate?: (asTemplate: boolean) => void
   readonly onExportJson?: () => void
   readonly onExportPdf?: () => void
@@ -207,7 +208,7 @@ export function OpportunityExecutiveHeader({
                   Export JSON
                 </DropdownMenuItem>
               ) : null}
-              {(capabilities.canArchive || capabilities.canDeleteDraft) && (
+              {(capabilities.canArchive || capabilities.canDeleteDraft || capabilities.canClose) && (
                 <DropdownMenuSeparator />
               )}
               {capabilities.canDeleteDraft ? (
@@ -220,6 +221,17 @@ export function OpportunityExecutiveHeader({
                 >
                   <Trash2 className="size-3.5" />
                   Delete Draft
+                </DropdownMenuItem>
+              ) : null}
+              {capabilities.canClose ? (
+                <DropdownMenuItem
+                  onSelect={() => {
+                    trackAction('close', opportunity.id)
+                    handlers.onClose?.()
+                  }}
+                >
+                  <Archive className="size-3.5" />
+                  Close Opportunity
                 </DropdownMenuItem>
               ) : null}
               {capabilities.canArchive ? (

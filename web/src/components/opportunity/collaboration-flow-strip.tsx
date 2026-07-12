@@ -10,7 +10,10 @@ type CollaborationFlowStripProps = {
   readonly className?: string
 }
 
-/** Collaboration path indicator — delegates to OpportunityTimeline. */
+/** Collaboration path indicator — delegates to OpportunityTimeline.
+ * @deprecated Not mounted on Opportunity Details 4.0 — use `PmWorkflowJourney`.
+ * Retained for collaboration UX unit tests only.
+ */
 export function CollaborationFlowStrip({
   activeStep = 'Opportunity',
   className,

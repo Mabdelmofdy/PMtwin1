@@ -19,7 +19,8 @@ export function OverviewWorkspace() {
   const { model } = useOpportunityDetailsContext()
   const opp = model.opportunity
   const layers = buildCollaborationLayerRows(model)
-  const attrs = (opp.collaborationAttributes ?? {}) as Record<string, unknown>
+  const { scope } = model
+  const q = scope.qualifications
 
   return (
     <div className="space-y-6" role="tabpanel" aria-label="Overview">
@@ -44,32 +45,27 @@ export function OverviewWorkspace() {
 
       <OpportunitySection title="Opportunity facts">
         <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <Field label="Category / sector" value={opp.scope?.sectors?.[0]} />
-          <Field label="Profession / role" value={opp.attributes?.targetRole} />
+          <Field label="Post Type" value={model.collaboration.postIntent} />
+          <Field label="Category or profession" value={opp.scope?.sectors?.[0]} />
+          <Field label="Target role" value={opp.attributes?.targetRole} />
           <Field label="Owner" value={model.creatorName} />
-          <Field label="Location" value={opp.location ?? opp.city} />
+          <Field label="Primary location" value={opp.location ?? opp.city} />
           <Field label="Country" value={opp.country} />
-          <Field label="Delivery mode" value={opp.workMode} />
-          <Field
-            label="Service areas"
-            value={
-              typeof attrs.serviceAreas === 'string'
-                ? attrs.serviceAreas
-                : Array.isArray(attrs.serviceAreas)
-                  ? (attrs.serviceAreas as string[]).join(', ')
-                  : undefined
-            }
-          />
+          <Field label="Service area" value={scope.serviceArea} />
+          <Field label="Delivery method" value={scope.deliveryMethod} />
           <Field
             label="Languages"
-            value={
-              Array.isArray(attrs.languages)
-                ? (attrs.languages as string[]).join(', ')
-                : typeof attrs.languages === 'string'
-                  ? attrs.languages
-                  : undefined
-            }
+            value={scope.languages.length > 0 ? scope.languages.join(', ') : undefined}
           />
+          <Field label="Priority" value={scope.priority} />
+          <Field label="Preferred partner type" value={scope.preferredPartnerType} />
+          <Field label="Experience level" value={q.experienceLevel} />
+          <Field
+            label="Certifications"
+            value={q.certifications.length > 0 ? q.certifications.join(', ') : undefined}
+          />
+          <Field label="Team size" value={q.teamSize} />
+          <Field label="Minimum qualifications" value={q.minimumQualifications} />
           <Field label="Created" value={formatOptionalDate(opp.createdAt)} />
           <Field label="Updated" value={formatOptionalDate(opp.updatedAt)} />
           <Field

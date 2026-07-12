@@ -17,7 +17,11 @@ import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useAuth } from '@/providers/auth-provider'
 import { getEffectiveProductFlags } from '@/domain/admin/settings/effective-settings.ts'
 import { EntityAccessDenied, EntityLimitedViewBanner } from '@/components/auth/entity-access-state'
-import { PmEmptyState, PmButton, PmPage, PmPageHeader } from '@/components/ui/pm-index'
+import { PmEmptyState, PmButton, PmPage, PmPageHeader, PmWorkflowJourney } from '@/components/ui/pm-index'
+import {
+  buildOpportunityWorkflowSteps,
+  resolveCollaborationActiveStepFromMatches,
+} from '@/components/ui/pm-workflow-journey-steps'
 import { OpportunityExecutiveHeader, type OpportunityDetailsActionHandlers } from './header/opportunity-executive-header.tsx'
 import { OpportunityKpiStrip } from './header/opportunity-kpi-strip.tsx'
 import {
@@ -231,13 +235,23 @@ export function OpportunityDetailsShell({
   }
 
   const handleArchive = () => {
-    if (!window.confirm('Archive this opportunity?')) return
+    if (!window.confirm('Archive this opportunity? It will be withdrawn from active marketplace visibility.')) return
     const result = opportunityCommandService.archiveOpportunity(opp.id, 'Owner archived')
     if (!result.success) {
       toast.error(result.errors?.join('\n') ?? 'Could not archive')
       return
     }
     toast.success('Opportunity archived')
+  }
+
+  const handleClose = () => {
+    if (!window.confirm('Close this opportunity? This ends the opportunity lifecycle for new matching.')) return
+    const result = opportunityCommandService.closeOpportunity(opp.id, 'Owner closed')
+    if (!result.success) {
+      toast.error(result.errors?.join('\n') ?? 'Could not close')
+      return
+    }
+    toast.success('Opportunity closed')
   }
 
   const handleDuplicate = (asTemplate: boolean) => {
@@ -305,6 +319,7 @@ export function OpportunityDetailsShell({
     onPublish: handlePublish,
     onDeleteDraft: handleDeleteDraft,
     onArchive: handleArchive,
+    onClose: handleClose,
     onDuplicate: handleDuplicate,
     onExportJson: handleExportJson,
     onExportPdf: handleExportPdf,
@@ -312,6 +327,18 @@ export function OpportunityDetailsShell({
     onShare: handleShare,
     onCopyLink: handleCopyLink,
   }
+
+  const collaborationStep = resolveCollaborationActiveStepFromMatches(model.matching.cards)
+  const topCard = model.matching.cards[0]
+  const topContract = model.related.contracts[0]
+  const journeySteps = buildOpportunityWorkflowSteps(
+    opp,
+    collaborationStep,
+    topCard,
+    model.related.agreements[0]?.status,
+    topContract?.status,
+    topContract?.id,
+  )
 
   return (
     <OpportunityDetailsProvider
@@ -328,6 +355,12 @@ export function OpportunityDetailsShell({
           <div className="space-y-4">
             <OpportunityExecutiveHeader model={model} handlers={handlers} />
             <OpportunityKpiStrip model={model} />
+            <PmWorkflowJourney
+              steps={journeySteps}
+              label="Opportunity journey"
+              aria-label="Opportunity lifecycle journey"
+              compact
+            />
           </div>
         }
       >

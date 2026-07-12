@@ -51,8 +51,11 @@ export function deriveTimelineState(input: {
   readonly opportunityStatus?: string | null
 }): TimelineState {
   const status = (input.opportunityStatus ?? '').toLowerCase()
-  if (['completed', 'closed', 'cancelled', 'contracted'].includes(status)) {
+  if (['completed', 'closed', 'cancelled'].includes(status)) {
     return 'completed'
+  }
+  if (['contracted', 'executing', 'in_execution'].includes(status)) {
+    return 'active'
   }
   const start = input.startDate ? Date.parse(input.startDate) : NaN
   const deadline = input.deadline ? Date.parse(input.deadline) : NaN

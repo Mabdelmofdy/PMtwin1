@@ -520,14 +520,14 @@ export function OpportunityMapPage() {
         <PmPageHeader
           label="Marketplace"
           title="Opportunity map"
-          description="Explore opportunities by location across the GCC. Map integration is in preview."
+          description="Explore opportunities by location. Geospatial services are not configured in this environment."
           tone="opportunity"
           metric={
             <PmPageHeroMetric value={allOpportunities.length} label="Listings" />
           }
           actions={
             <PmButton variant="outline" asChild>
-              <Link to="/opportunities">List view</Link>
+              <Link to="/opportunities">Return to Marketplace</Link>
             </PmButton>
           }
         />
@@ -540,10 +540,15 @@ export function OpportunityMapPage() {
           noPadding
         >
           <PmEmptyState
-            title="Map coming soon"
-            description="Map integration placeholder — wire to map service when ready."
+            title="Feature unavailable in the current environment"
+            description="Geospatial services are not configured. Return to Marketplace to browse opportunities."
             size="compact"
             className="min-h-[22rem]"
+            action={
+              <PmButton size="sm" variant="outline" asChild>
+                <Link to="/opportunities">Return to Marketplace</Link>
+              </PmButton>
+            }
           />
         </PmContentCard>
         <PmContentCard title="Nearby listings">

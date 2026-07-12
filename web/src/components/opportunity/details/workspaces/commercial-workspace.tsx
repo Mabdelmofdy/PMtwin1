@@ -259,6 +259,59 @@ export function CommercialWorkspace() {
         ) : null}
       </OpportunitySection>
 
+      {(() => {
+        const cash = enabled.find((c) => c.type === 'cash')
+        if (!cash || cash.type !== 'cash') return null
+        const schedule = cash.paymentSchedule ?? []
+        return (
+          <OpportunitySection title="Payment">
+            <dl className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <Field label="Currency" value={cash.currency} />
+              <Field label="Budget type" value={cash.budgetType} />
+              {showAmounts ? <Field label="Budget / fixed amount" value={cash.fixedAmount} /> : null}
+              {showAmounts && cash.minimumAmount != null ? (
+                <Field label="Budget range" value={`${cash.minimumAmount} – ${cash.maximumAmount ?? '—'}`} />
+              ) : null}
+              {showAmounts ? <Field label="Advance %" value={cash.advancePercentage} /> : null}
+              {showAmounts ? <Field label="Retention %" value={cash.retentionPercentage} /> : null}
+              <Field label="VAT" value={cash.vatHandling} />
+              <Field label="Tax handling" value={cash.taxHandling} />
+              <Field label="Payment frequency" value={cash.paymentFrequency} />
+              <Field label="Payment terms" value={cash.paymentTerms} />
+              <Field label="Invoice requirements" value={cash.invoiceRequirements} />
+              <Field label="Payment method" value={cash.paymentMethod} />
+              {showAmounts ? <Field label="Bank guarantee" value={cash.bankGuarantee} /> : null}
+              {showAmounts ? <Field label="Performance bond" value={cash.performanceBond} /> : null}
+              <Field label="Penalties" value={cash.penalties} />
+              <Field label="Late payment terms" value={cash.latePaymentTerms} />
+              <Field label="Performance bonus" value={cash.performanceBonus} />
+            </dl>
+            {showAmounts && schedule.length > 0 ? (
+              <div className="mt-4">
+                <p className={cn(pmTypography.label, 'mb-2')}>Payment schedule</p>
+                <ul className="space-y-2">
+                  {schedule.map((item) => (
+                    <li key={item.id} className="rounded-md border border-border/50 px-3 py-2 text-sm">
+                      <span className="font-medium">{item.title}</span>
+                      <span className="text-muted-foreground">
+                        {[
+                          item.percentage != null ? `${item.percentage}%` : null,
+                          item.amount != null ? String(item.amount) : null,
+                          item.triggerType,
+                          item.dueCondition,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </OpportunitySection>
+        )
+      })()}
+
       <OpportunitySection title="Components">
         <div className="space-y-3">
           {enabled.map((component) => (

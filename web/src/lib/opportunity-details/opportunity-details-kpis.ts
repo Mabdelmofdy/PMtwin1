@@ -10,12 +10,16 @@ import {
   type TimelineState,
 } from './opportunity-details-formatters.ts'
 
-/** Mirrors OpportunityHealthState — kept local to avoid lib→component imports in tests. */
 export type LifecycleKpiLabel =
   | 'Draft'
   | 'Needs Attention'
   | 'Ready to Publish'
   | 'Published'
+  | 'Matching'
+  | 'Negotiating'
+  | 'Contracted'
+  | 'Executing'
+  | 'Completed'
   | 'Archived'
   | 'Withdrawn'
   | 'Closed'
@@ -64,16 +68,30 @@ export function countStrongMatches(
   return scores.filter((score) => typeof score === 'number' && score >= STRONG_MATCH_THRESHOLD).length
 }
 
-function resolvePublishedLifecycleLabel(input: {
+/** Stage-accurate lifecycle label — never collapses negotiating/contracted to “Published”. */
+export function resolveLifecycleKpiLabel(input: {
   readonly status?: string
   readonly visibilityStatus?: string
-}): LifecycleKpiLabel {
+  readonly healthState?: LifecycleKpiLabel | string
+  readonly isDraftHealthFallback?: boolean
+}): LifecycleKpiLabel | string {
   const visibility = (input.visibilityStatus ?? '').toLowerCase()
   const status = (input.status ?? 'draft').toLowerCase()
-  if (visibility === 'archived' || status === 'cancelled') return 'Archived'
+  if (visibility === 'archived') return 'Archived'
   if (visibility === 'withdrawn') return 'Withdrawn'
-  if (['closed', 'completed'].includes(status)) return 'Closed'
-  return 'Published'
+  if (status === 'cancelled') return 'Closed'
+  if (status === 'completed' || status === 'closed') return status === 'completed' ? 'Completed' : 'Closed'
+  if (status === 'executing' || status === 'in_execution') return 'Executing'
+  if (status === 'contracted') return 'Contracted'
+  if (status === 'negotiating' || status === 'in_negotiation') return 'Negotiating'
+  if (status === 'matched') return 'Matching'
+  if (status === 'published') return 'Published'
+  if (status === 'draft') {
+    return input.isDraftHealthFallback && input.healthState
+      ? input.healthState
+      : (input.healthState ?? 'Draft')
+  }
+  return input.healthState ?? status
 }
 
 export function buildOpportunityDetailsKpis(input: {
@@ -104,29 +122,25 @@ export function buildOpportunityDetailsKpis(input: {
     ?? undefined
 
   const status = (opportunity.status ?? '').toLowerCase()
-  const isPublishedLike = [
-    'published',
-    'matched',
-    'negotiating',
-    'contracted',
-    'executing',
-    'in_execution',
-    'completed',
-  ].includes(status)
 
-  // Never contradict a published opportunity with "Publish Blocked" as primary.
-  const primaryLabel = isPublishedLike
-    ? resolvePublishedLifecycleLabel({
-        status: opportunity.status,
-        visibilityStatus: opportunity.visibilityStatus,
-      })
-    : input.healthState
+  const primaryLabel = resolveLifecycleKpiLabel({
+    status: opportunity.status,
+    visibilityStatus: opportunity.visibilityStatus,
+    healthState: input.healthState,
+    isDraftHealthFallback: status === 'draft',
+  })
 
   let nextMeaningfulState: string | undefined
   if (status === 'draft') {
     nextMeaningfulState = input.publishReady ? 'Ready to Publish' : 'Needs Attention'
   } else if (status === 'published' && (input.matchCount ?? 0) === 0) {
     nextMeaningfulState = 'Awaiting matches'
+  } else if (status === 'matched') {
+    nextMeaningfulState = 'Review matches'
+  } else if (status === 'negotiating' || status === 'in_negotiation') {
+    nextMeaningfulState = 'Continue negotiation'
+  } else if (status === 'contracted') {
+    nextMeaningfulState = 'Open contract'
   }
 
   return {

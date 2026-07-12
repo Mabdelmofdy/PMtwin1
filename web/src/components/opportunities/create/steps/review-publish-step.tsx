@@ -53,7 +53,30 @@ export function ReviewPublishStep({ draft, onEdit }: ReviewPublishStepProps) {
       <div>
         <h2 className={cn(pmTypography.h2)}>Review & Publish</h2>
         <p className={cn(pmTypography.body, 'mt-1 text-muted-foreground')}>
-          Confirm the opportunity, then save as draft or publish when ready.
+          Confirm the opportunity executive summary before publish. This review mirrors what appears on Opportunity Details after save.
+        </p>
+      </div>
+
+      <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+        <p className={cn(pmTypography.label, 'text-foreground')}>Executive summary</p>
+        <p className={cn(pmTypography.h3, 'mt-1')}>{draft.title || 'Untitled opportunity'}</p>
+        <p className={cn(pmTypography.bodySm, 'mt-1 text-muted-foreground')}>
+          {[
+            draft.intent,
+            draft.mainCollaborationModel
+              ? resolveMainCollaborationModelLabel(draft.mainCollaborationModel)
+              : null,
+            draft.subModelType ? resolveSubModelLabel(draft.subModelType) : null,
+            commercial.isHybrid ? 'Hybrid' : commercial.derivedExchangeMode,
+            draft.location,
+          ]
+            .filter(Boolean)
+            .join(' · ') || 'Complete the steps above to build this summary.'}
+        </p>
+        <p className={cn(pmTypography.caption, 'mt-2 text-muted-foreground')}>
+          {draft.workPackages.length} Work Packages · {taskCount} Tasks ·{' '}
+          {draft.deliverables.length + packageDeliverables} Deliverables ·{' '}
+          {draft.milestones.length} Milestones
         </p>
       </div>
 
@@ -90,7 +113,28 @@ export function ReviewPublishStep({ draft, onEdit }: ReviewPublishStepProps) {
         <p>Skills: {draft.structuredSkills.map((s) => s.name).filter(Boolean).join(', ') || '—'}</p>
         <p>Services: {draft.services || '—'}</p>
         <p>Experience: {draft.experienceLevel || '—'}</p>
+        <p>Certifications: {draft.certificationsText || '—'}</p>
+        <p>Team size: {draft.teamSize || '—'}</p>
         <p>Preferred partner: {draft.preferredPartnerType || '—'}</p>
+        <p>
+          Resources:{' '}
+          {draft.resources?.length
+            ? draft.resources.map((r) => r.name).filter(Boolean).join(', ')
+            : '—'}
+        </p>
+        <p>
+          Capacity:{' '}
+          {[
+            draft.capacity?.availableCapacity != null
+              ? `Available ${draft.capacity.availableCapacity}`
+              : null,
+            draft.capacity?.maximumCapacity != null
+              ? `Max ${draft.capacity.maximumCapacity}`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(' · ') || '—'}
+        </p>
       </ReviewSection>
 
       <ReviewSection
@@ -123,15 +167,45 @@ export function ReviewPublishStep({ draft, onEdit }: ReviewPublishStepProps) {
         {commercial.allocationLines.map((line) => (
           <p key={line}>{line}</p>
         ))}
+        {(() => {
+          const cash = draft.commercialStructure.components.find((c) => c.type === 'cash' && c.enabled)
+          if (!cash || cash.type !== 'cash') return null
+          return (
+            <>
+              <p className="mt-2 font-medium text-foreground">Payment</p>
+              <p>Currency: {cash.currency || '—'}</p>
+              <p>Budget type: {cash.budgetType || '—'}</p>
+              <p>Advance: {cash.advancePercentage != null ? `${cash.advancePercentage}%` : '—'}</p>
+              <p>Retention: {cash.retentionPercentage != null ? `${cash.retentionPercentage}%` : '—'}</p>
+              <p>
+                Schedule:{' '}
+                {cash.paymentSchedule?.length
+                  ? `${cash.paymentSchedule.length} milestone(s)`
+                  : '—'}
+              </p>
+            </>
+          )
+        })()}
       </ReviewSection>
 
       <ReviewSection
         title="Timeline and Location"
         onEdit={() => onEdit('scope_work', 'timeline')}
       >
-        <p>Location: {draft.location || '—'}</p>
+        <p>Primary location: {draft.location || '—'}</p>
         <p>Service area: {draft.serviceArea || '—'}</p>
+        <p>Delivery method: {draft.richTimeline.deliveryMethod || '—'}</p>
         <p>Duration: {draft.richTimeline.estimatedDuration || '—'}</p>
+        <p>Working days: {draft.richTimeline.workingDays || '—'}</p>
+        <p>Shift: {draft.richTimeline.shiftType || '—'}</p>
+        <p>
+          Flexible start:{' '}
+          {draft.richTimeline.flexibleStart == null
+            ? '—'
+            : draft.richTimeline.flexibleStart
+              ? 'Yes'
+              : 'No'}
+        </p>
       </ReviewSection>
 
       <ReviewSection
@@ -139,6 +213,7 @@ export function ReviewPublishStep({ draft, onEdit }: ReviewPublishStepProps) {
         onEdit={() => onEdit('scope_work', 'documents-compliance')}
       >
         <p>Attachments: {draft.attachmentsText || '—'}</p>
+        <p>Portfolio: {draft.portfolioText || '—'}</p>
         <p>Compliance: {draft.complianceRequirementsText || '—'}</p>
       </ReviewSection>
     </div>

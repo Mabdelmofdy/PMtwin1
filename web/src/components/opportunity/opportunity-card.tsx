@@ -93,10 +93,45 @@ export function OpportunityCard({
         showStatus
         className="mb-2"
       />
-      {!showOwnerInsights && (opportunity.visibilityStatus ?? '').toLowerCase() === 'published' ? (
+      {!showOwnerInsights ? (
         <div className="mb-2 flex flex-wrap gap-1.5">
-          <PmBadge tone="success" size="sm">Open</PmBadge>
-          <PmBadge tone="info" size="sm">Accepting Collaboration</PmBadge>
+          {(() => {
+            const status = (opportunity.status ?? '').toLowerCase()
+            const visibility = (opportunity.visibilityStatus ?? '').toLowerCase()
+            if (visibility === 'archived') {
+              return <PmBadge tone="muted" size="sm">Archived</PmBadge>
+            }
+            if (visibility === 'withdrawn') {
+              return <PmBadge tone="muted" size="sm">Withdrawn</PmBadge>
+            }
+            if (status === 'closed' || status === 'cancelled') {
+              return <PmBadge tone="muted" size="sm">Closed</PmBadge>
+            }
+            if (status === 'completed') {
+              return <PmBadge tone="success" size="sm">Completed</PmBadge>
+            }
+            if (status === 'contracted' || status === 'executing' || status === 'in_execution') {
+              return <PmBadge tone="info" size="sm">Contracted</PmBadge>
+            }
+            if (status === 'negotiating' || status === 'in_negotiation') {
+              return <PmBadge tone="warning" size="sm">Negotiating</PmBadge>
+            }
+            if (status === 'matched') {
+              return <PmBadge tone="info" size="sm">Matching</PmBadge>
+            }
+            if (visibility === 'published' || status === 'published') {
+              return (
+                <>
+                  <PmBadge tone="success" size="sm">Published</PmBadge>
+                  <PmBadge tone="info" size="sm">Open for collaboration</PmBadge>
+                </>
+              )
+            }
+            if (status === 'draft') {
+              return <PmBadge tone="muted" size="sm">Draft</PmBadge>
+            }
+            return null
+          })()}
         </div>
       ) : null}
       <div className="flex items-start justify-between gap-3">
@@ -125,18 +160,21 @@ export function OpportunityCard({
       </div>
 
       <div className={cn(pmTypography.caption, 'mt-3 space-y-1 text-muted-foreground')}>
-        <p>{taxonomy.mainModel}</p>
-        <p>{taxonomy.subModel}</p>
+        {taxonomy.mainModel ? <p>Main model · {taxonomy.mainModel}</p> : null}
+        {taxonomy.subModel ? <p>Sub-model · {taxonomy.subModel}</p> : null}
         {commercial ? (
           <p>
-            {commercial.isHybrid ? 'Hybrid' : commercial.derivedMode}
+            Exchange · {commercial.isHybrid ? 'Hybrid' : commercial.derivedMode}
             {commercial.componentTypes.length > 0
               ? ` · ${commercial.componentTypes.join(' + ')}`
               : ''}
           </p>
-        ) : (
-          <p>{taxonomy.exchangeMode}</p>
-        )}
+        ) : taxonomy.exchangeMode ? (
+          <p>Exchange · {taxonomy.exchangeMode}</p>
+        ) : null}
+        {taxonomy.matchingTopology ? (
+          <p>Matching · {taxonomy.matchingTopology}</p>
+        ) : null}
         {(workPackages.length > 0 || taskCount > 0 || deliverableCount > 0) && (
           <p>
             {workPackages.length} Work Packages

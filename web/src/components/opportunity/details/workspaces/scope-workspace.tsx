@@ -115,7 +115,7 @@ function WorkPackageCard({
           ) : null}
           {canEdit ? (
             <PmButton size="sm" variant="outline" asChild>
-              <Link to={`/opportunities/${opportunityId}/edit?step=scope`}>Edit scope</Link>
+              <Link to={`/opportunities/${opportunityId}/edit?step=scope_work`}>Edit scope</Link>
             </PmButton>
           ) : null}
         </div>
@@ -141,9 +141,13 @@ export function ScopeWorkspace() {
   const hasAny =
     scope.workPackages.length > 0
     || scope.skills.length > 0
-    || scope.services.length > 0
+    || scope.requiredServices.length > 0
+    || scope.offeredServices.length > 0
+    || scope.structuredResources.length > 0
     || scope.milestones.length > 0
     || scope.compliance.length > 0
+    || Boolean(scope.offerCapacity)
+    || Boolean(scope.richTimeline)
 
   if (!hasAny) {
     return (
@@ -153,7 +157,7 @@ export function ScopeWorkspace() {
         action={
           capabilities.canEdit ? (
             <PmButton size="sm" asChild>
-              <Link to={`/opportunities/${opportunity.id}/edit?step=scope`}>Edit opportunity</Link>
+              <Link to={`/opportunities/${opportunity.id}/edit?step=scope_work`}>Edit opportunity</Link>
             </PmButton>
           ) : undefined
         }
@@ -163,32 +167,98 @@ export function ScopeWorkspace() {
 
   return (
     <div className="space-y-6" role="tabpanel" aria-label="Scope and Work">
-      {(scope.skills.length > 0 || scope.services.length > 0) && (
+      {(scope.skills.length > 0
+        || scope.requiredServices.length > 0
+        || scope.offeredServices.length > 0) && (
         <OpportunitySection title="Skills and Services">
-          <div className="flex flex-wrap gap-1.5">
-            {scope.skills.map((skill) => (
-              <PmBadge key={skill.name} tone={skill.mandatory ? 'info' : 'muted'}>
-                {skill.name}
-                {skill.level ? ` · ${skill.level}` : ''}
-                {skill.mandatory ? ' · Required' : ' · Preferred'}
-              </PmBadge>
-            ))}
-            {scope.services.map((service) => (
-              <PmBadge key={service} tone="muted">
-                {service}
-              </PmBadge>
-            ))}
-          </div>
+          {scope.requiredSkills.length > 0 ? (
+            <div className="mb-3">
+              <p className={cn(pmTypography.caption, 'mb-1.5 text-muted-foreground')}>Required skills</p>
+              <div className="flex flex-wrap gap-1.5">
+                {scope.requiredSkills.map((skill) => (
+                  <PmBadge key={`req-${skill.name}`} tone="info">
+                    {skill.name}
+                    {skill.level ? ` · ${skill.level}` : ''}
+                    {skill.yearsRequired != null ? ` · ${skill.yearsRequired}y` : ''}
+                    {skill.certificationRequired ? ' · Cert' : ''}
+                  </PmBadge>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {scope.preferredSkills.length > 0 ? (
+            <div className="mb-3">
+              <p className={cn(pmTypography.caption, 'mb-1.5 text-muted-foreground')}>Preferred skills</p>
+              <div className="flex flex-wrap gap-1.5">
+                {scope.preferredSkills.map((skill) => (
+                  <PmBadge key={`pref-${skill.name}`} tone="muted">
+                    {skill.name}
+                    {skill.level ? ` · ${skill.level}` : ''}
+                  </PmBadge>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {scope.requiredServices.length > 0 ? (
+            <div className="mb-3">
+              <p className={cn(pmTypography.caption, 'mb-1.5 text-muted-foreground')}>Required services</p>
+              <div className="flex flex-wrap gap-1.5">
+                {scope.requiredServices.map((service) => (
+                  <PmBadge key={`rs-${service}`} tone="info">{service}</PmBadge>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {scope.offeredServices.length > 0 ? (
+            <div>
+              <p className={cn(pmTypography.caption, 'mb-1.5 text-muted-foreground')}>Offered / preferred services</p>
+              <div className="flex flex-wrap gap-1.5">
+                {scope.offeredServices.map((service) => (
+                  <PmBadge key={`os-${service}`} tone="muted">{service}</PmBadge>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </OpportunitySection>
       )}
 
-      {(scope.resources.length > 0 || scope.capacity || scope.preferredPartnerType) && (
+      {(scope.structuredResources.length > 0
+        || scope.resources.length > 0
+        || scope.capacity
+        || scope.offerCapacity
+        || scope.preferredPartnerType) && (
         <OpportunitySection title="Resources and Capacity">
           <dl className="grid gap-2 sm:grid-cols-2">
             {scope.preferredPartnerType ? (
               <div>
-                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Preferred partner</dt>
+                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Preferred partner type</dt>
                 <dd className={cn(pmTypography.bodySm)}>{scope.preferredPartnerType}</dd>
+              </div>
+            ) : null}
+            {scope.offerCapacity?.availableCapacity != null ? (
+              <div>
+                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Available capacity</dt>
+                <dd className={cn(pmTypography.bodySm)}>{scope.offerCapacity.availableCapacity}</dd>
+              </div>
+            ) : null}
+            {scope.offerCapacity?.reservedCapacity != null ? (
+              <div>
+                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Reserved capacity</dt>
+                <dd className={cn(pmTypography.bodySm)}>{scope.offerCapacity.reservedCapacity}</dd>
+              </div>
+            ) : null}
+            {scope.offerCapacity?.maximumCapacity != null ? (
+              <div>
+                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Maximum capacity</dt>
+                <dd className={cn(pmTypography.bodySm)}>{scope.offerCapacity.maximumCapacity}</dd>
+              </div>
+            ) : null}
+            {scope.offerCapacity?.availableFrom ? (
+              <div>
+                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Capacity available from</dt>
+                <dd className={cn(pmTypography.bodySm)}>
+                  {formatOptionalDate(scope.offerCapacity.availableFrom) ?? scope.offerCapacity.availableFrom}
+                </dd>
               </div>
             ) : null}
             {scope.capacity?.required != null ? (
@@ -199,12 +269,25 @@ export function ScopeWorkspace() {
             ) : null}
             {scope.capacity?.available != null ? (
               <div>
-                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Available capacity</dt>
+                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Available capacity (legacy)</dt>
                 <dd className={cn(pmTypography.bodySm)}>{scope.capacity.available}</dd>
               </div>
             ) : null}
           </dl>
-          {scope.resources.length > 0 ? (
+          {scope.structuredResources.length > 0 ? (
+            <ul className="mt-3 space-y-2">
+              {scope.structuredResources.map((r, index) => (
+                <li key={`${r.name}-${index}`} className="rounded-md bg-muted/30 px-3 py-2 text-sm">
+                  <span className="font-medium">{r.name}</span>
+                  <span className="text-muted-foreground">
+                    {' '}· {r.type} · {r.quantity} {r.unit}
+                    {r.mandatory ? ' · Required' : ''}
+                    {r.availability ? ` · ${r.availability}` : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : scope.resources.length > 0 ? (
             <ul className="mt-2 list-inside list-disc text-sm text-muted-foreground">
               {scope.resources.map((r) => (
                 <li key={r}>{r}</li>
@@ -264,17 +347,23 @@ export function ScopeWorkspace() {
         </OpportunitySection>
       ) : null}
 
-      {(opportunity.location || model.kpis.timeline.startDate) && (
+      {(opportunity.location || model.kpis.timeline.startDate || scope.richTimeline) && (
         <OpportunitySection title="Timeline and Locations">
           <dl className="grid gap-2 sm:grid-cols-2">
             <div>
-              <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Location</dt>
+              <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Primary location</dt>
               <dd className={cn(pmTypography.bodySm)}>{opportunity.location ?? opportunity.city ?? '—'}</dd>
             </div>
             <div>
-              <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Delivery mode</dt>
-              <dd className={cn(pmTypography.bodySm)}>{opportunity.workMode ?? '—'}</dd>
+              <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Delivery method</dt>
+              <dd className={cn(pmTypography.bodySm)}>{scope.deliveryMethod ?? opportunity.workMode ?? '—'}</dd>
             </div>
+            {scope.serviceArea ? (
+              <div>
+                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Service area</dt>
+                <dd className={cn(pmTypography.bodySm)}>{scope.serviceArea}</dd>
+              </div>
+            ) : null}
             <div>
               <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Start</dt>
               <dd className={cn(pmTypography.bodySm)}>{model.kpis.timeline.startDate ?? '—'}</dd>
@@ -283,6 +372,55 @@ export function ScopeWorkspace() {
               <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Deadline</dt>
               <dd className={cn(pmTypography.bodySm)}>{model.kpis.timeline.deadline ?? '—'}</dd>
             </div>
+            {scope.richTimeline?.estimatedDuration ? (
+              <div>
+                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Estimated duration</dt>
+                <dd className={cn(pmTypography.bodySm)}>{scope.richTimeline.estimatedDuration}</dd>
+              </div>
+            ) : null}
+            {scope.richTimeline?.workingDays ? (
+              <div>
+                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Working days</dt>
+                <dd className={cn(pmTypography.bodySm)}>{scope.richTimeline.workingDays}</dd>
+              </div>
+            ) : null}
+            {scope.richTimeline?.shiftType ? (
+              <div>
+                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Shift</dt>
+                <dd className={cn(pmTypography.bodySm)}>{scope.richTimeline.shiftType}</dd>
+              </div>
+            ) : null}
+            {scope.richTimeline?.mustFinishBefore ? (
+              <div>
+                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Must finish before</dt>
+                <dd className={cn(pmTypography.bodySm)}>
+                  {formatOptionalDate(scope.richTimeline.mustFinishBefore)
+                    ?? scope.richTimeline.mustFinishBefore}
+                </dd>
+              </div>
+            ) : null}
+            {scope.richTimeline?.availabilityWindows ? (
+              <div className="sm:col-span-2">
+                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Availability windows</dt>
+                <dd className={cn(pmTypography.bodySm)}>{scope.richTimeline.availabilityWindows}</dd>
+              </div>
+            ) : null}
+            {scope.richTimeline?.flexibleStart != null ? (
+              <div>
+                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Flexible start</dt>
+                <dd className={cn(pmTypography.bodySm)}>
+                  {scope.richTimeline.flexibleStart ? 'Yes' : 'No'}
+                </dd>
+              </div>
+            ) : null}
+            {scope.richTimeline?.weekendAllowed != null ? (
+              <div>
+                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Weekend allowed</dt>
+                <dd className={cn(pmTypography.bodySm)}>
+                  {scope.richTimeline.weekendAllowed ? 'Yes' : 'No'}
+                </dd>
+              </div>
+            ) : null}
           </dl>
         </OpportunitySection>
       )}

@@ -20,6 +20,7 @@ export type NextActionDescriptor = {
     | 'open_agreement'
     | 'open_contract'
     | 'open_marketplace'
+    | 'close'
 }
 
 export function resolveOpportunityDetailsNextAction(input: {
@@ -30,10 +31,13 @@ export function resolveOpportunityDetailsNextAction(input: {
   readonly matchCount: number
   readonly topCard?: OpportunityMatchCard
   readonly showRecommendedActions: boolean
+  readonly contractId?: string | null
+  readonly opportunityStatus?: string
 }): NextActionDescriptor | null {
   if (!input.showRecommendedActions) return null
 
   const { capabilities, topCard } = input
+  const status = (input.opportunityStatus ?? '').toLowerCase()
 
   if (capabilities.canPublish) {
     return {
@@ -53,6 +57,17 @@ export function resolveOpportunityDetailsNextAction(input: {
       primaryLabel: 'Edit opportunity',
       href: `/opportunities/${input.opportunityId}/edit`,
       actionId: 'edit',
+    }
+  }
+
+  if (input.contractId) {
+    return {
+      id: 'open-contract',
+      title: 'Open awarded contract',
+      context: 'A contract is linked to this opportunity.',
+      primaryLabel: 'Open contract',
+      href: `/contracts/${input.contractId}`,
+      actionId: 'open_contract',
     }
   }
 
@@ -102,6 +117,23 @@ export function resolveOpportunityDetailsNextAction(input: {
       primaryLabel: 'Open matching',
       href: `/opportunities/${input.opportunityId}?workspace=matching`,
       actionId: 'open_matching',
+    }
+  }
+
+  if (
+    ['completed', 'closed'].includes(status) === false
+    && capabilities.canClose
+  ) {
+    // Prefer edit over close when still actively collaborating
+    if (['published', 'matched'].includes(status) && capabilities.canEdit) {
+      return {
+        id: 'edit',
+        title: 'Review opportunity details',
+        context: 'Update scope, commercial structure, or marketplace presentation.',
+        primaryLabel: 'Edit',
+        href: `/opportunities/${input.opportunityId}/edit`,
+        actionId: 'edit',
+      }
     }
   }
 

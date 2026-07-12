@@ -62,19 +62,24 @@ function mapStepDefsToJourney(
   }>,
   activeIndex: number,
 ): readonly PmWorkflowJourneyStep[] {
-  return stepDefs.map((step, index) => ({
-    id: step.id,
-    label: step.label,
-    status: step.status,
-    statusEntity: step.statusEntity,
-    href: step.href,
-    state:
+  return stepDefs.map((step, index) => {
+    const state =
       index < activeIndex
         ? ('complete' as const)
         : index === activeIndex
           ? ('current' as const)
-          : ('upcoming' as const),
-  }))
+          : ('upcoming' as const)
+    // Interactive journey: completed + current stages clickable when href exists; future disabled.
+    const href = state === 'upcoming' ? undefined : step.href
+    return {
+      id: step.id,
+      label: step.label,
+      status: step.status,
+      statusEntity: step.statusEntity,
+      href,
+      state,
+    }
+  })
 }
 
 /** Six-step journey for opportunity detail (Opportunity → Complete). */
@@ -84,6 +89,7 @@ export function buildOpportunityWorkflowSteps(
   topCard?: OpportunityMatchWorkflowContext,
   dealStatus?: string,
   contractStatus?: string,
+  contractId?: string,
 ): readonly PmWorkflowJourneyStep[] {
   const activeIndex = resolveJourneyActiveIndex(collaborationStep, opp.status)
   const stepDefs = [
@@ -122,6 +128,7 @@ export function buildOpportunityWorkflowSteps(
       label: 'Contract',
       status: contractStatus,
       statusEntity: 'contract' as const,
+      href: contractId ? `/contracts/${contractId}` : undefined,
     },
     {
       id: 'execution',

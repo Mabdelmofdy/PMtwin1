@@ -36,6 +36,7 @@ export const LEGACY_STEP_ID_MAP: Readonly<Record<string, WizardStepId>> = {
   basic: 'opportunity',
   collaboration: 'collaboration',
   attributes: 'scope_work',
+  scope: 'scope_work',
   commercial: 'commercial',
   timeline: 'scope_work',
   review: 'review',
