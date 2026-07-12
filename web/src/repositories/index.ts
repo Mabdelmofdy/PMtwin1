@@ -38,6 +38,9 @@ import { adminSettingsRepository } from './admin-settings-repository.ts'
 import { PartyRepository } from './party-repository.ts'
 import { PartyMembershipRepository } from './party-membership-repository.ts'
 import { formatMembershipId } from './party-membership-repository.ts'
+import { WorkspaceRepository } from './workspace-repository.ts'
+import { WorkspaceMembershipRepository } from './workspace-membership-repository.ts'
+import { IdentityProjectionService } from '@/domain/identity/identity-projection-service.ts'
 
 import { PartyDocumentRepository } from './party-document-repository.ts'
 
@@ -61,6 +64,10 @@ export const companyRepository = new CompanyRepository(
 export const opportunityRepository = new OpportunityRepository(
   storageAdapter,
   loadOpportunities,
+  () => ({
+    companyIds: new Set(companyRepository.getAll().map((company) => company.id)),
+    userIds: new Set(userRepository.getAll().map((user) => user.id)),
+  }),
 )
 
 export const applicationRepository = new ApplicationRepository(
@@ -133,6 +140,32 @@ export const partyMembershipRepository = new PartyMembershipRepository(
   loadCompanies,
 )
 
+export const identityProjectionService = new IdentityProjectionService(
+  userRepository,
+  companyRepository,
+  {
+    parties: partyRepository.getAll(),
+    memberships: partyMembershipRepository.getAll(),
+  },
+)
+
+export const workspaceRepository = new WorkspaceRepository(
+  storageAdapter,
+  loadUsers,
+  loadCompanies,
+  undefined,
+  () => identityProjectionService.build().parties,
+)
+
+export const workspaceMembershipRepository =
+  new WorkspaceMembershipRepository(
+    storageAdapter,
+    loadUsers,
+    loadCompanies,
+    undefined,
+    () => identityProjectionService.build().memberships,
+  )
+
 export const partyDocumentRepository = new PartyDocumentRepository(storageAdapter)
 
 export {
@@ -154,6 +187,8 @@ export {
   AdminSettingsRepository,
   PartyRepository,
   PartyMembershipRepository,
+  WorkspaceRepository,
+  WorkspaceMembershipRepository,
   PartyDocumentRepository,
   formatMembershipId,
 }

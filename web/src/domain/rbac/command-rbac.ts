@@ -1,4 +1,8 @@
 import type { Command, TransitionOpportunityStatusCommand } from '@pm-twin/commands'
+import {
+  hasWorkspaceCapability,
+  type WorkspaceCapability,
+} from '@pm-twin/identity'
 import { toCanonical } from '@pm-twin/lifecycle'
 import { buildPermissionContext } from '@/domain/rbac/context/build-context.ts'
 import { isAdmin } from '@/domain/rbac/policies/policy-utils.ts'
@@ -21,6 +25,8 @@ export const ADMIN_ONLY_COMMAND_TYPES = new Set([
 
 export type CommandRbacEntitySnapshot = {
   readonly creatorId?: string
+  readonly workspaceId?: string
+  readonly ownerPartyId?: string
   readonly status?: string
 }
 
@@ -30,6 +36,7 @@ export type CommandRbacEvaluationContext = {
 
 export type CommandCapability =
   | 'admin.platform.execute'
+  | WorkspaceCapability
   | PermissionAction
 
 export const COMMAND_REQUIRED_CAPABILITY: Readonly<
@@ -42,7 +49,7 @@ export const COMMAND_REQUIRED_CAPABILITY: Readonly<
   TransitionOpportunityStatus: 'opportunity.publish',
   PublishOpportunity: 'opportunity.publish',
   CreateOpportunity: 'opportunity.create',
-  UpdateOpportunity: 'opportunity.create',
+  UpdateOpportunity: 'opportunity.edit',
   ValidateOpportunityCollaborationModel: 'opportunity.view',
 }
 
@@ -133,8 +140,42 @@ function isOpportunityOwner(
   actor: CommandPermissionActor,
   opportunity?: CommandRbacEntitySnapshot | null,
 ): boolean {
-  if (!opportunity?.creatorId) return false
-  return opportunity.creatorId === actor.userId
+  if (!opportunity) return false
+  if (
+    opportunity.workspaceId &&
+    opportunity.workspaceId === actor.activeWorkspaceId
+  ) {
+    return true
+  }
+  if (
+    opportunity.ownerPartyId &&
+    opportunity.ownerPartyId === actor.activePartyId
+  ) {
+    return true
+  }
+  // Dual-read legacy ownership only when canonical fields are absent.
+  if (
+    !opportunity.workspaceId &&
+    !opportunity.ownerPartyId &&
+    opportunity.creatorId &&
+    opportunity.creatorId === actor.userId
+  ) {
+    return true
+  }
+  return false
+}
+
+function hasActorWorkspaceCapability(
+  actor: CommandPermissionActor,
+  capability: WorkspaceCapability,
+): boolean {
+  return hasWorkspaceCapability(
+    {
+      capabilities: actor.capabilities,
+      workspaceRole: actor.workspaceRole,
+    },
+    capability,
+  )
 }
 
 function evaluateTransitionOpportunityStatusRbac(
@@ -169,7 +210,17 @@ function evaluateTransitionOpportunityStatusRbac(
   }
 
   if (isOpportunityOwner(actor, opportunity)) {
-    return allow(['command-rbac:owner-publish'])
+    if (
+      hasActorWorkspaceCapability(actor, 'opportunity.publish') ||
+      (!actor.workspaceRole && !actor.capabilities)
+    ) {
+      return allow(['command-rbac:owner-publish'])
+    }
+    return deny(
+      'The active workspace role cannot publish opportunities.',
+      capability,
+      ['command-rbac:workspace-capability-denied'],
+    )
   }
 
   return deny(
@@ -226,7 +277,42 @@ export function evaluateCommandRbac(
     return evaluateAdminPlatformCommand(actor, capability)
   }
 
-  return evaluatePermissionActionCommand(capability, actor)
+  if (
+    actor?.userId &&
+    (capability === 'opportunity.create' || capability === 'opportunity.edit')
+  ) {
+    const capabilityOk =
+      hasActorWorkspaceCapability(actor, capability) ||
+      (!actor.workspaceRole && !actor.capabilities)
+    if (capabilityOk) {
+      if (
+        capability === 'opportunity.create' ||
+        isOpportunityOwner(actor, context?.opportunity)
+      ) {
+        return allow(['command-rbac:workspace-capability'])
+      }
+    }
+  }
+
+  if (capability === 'opportunity.edit') {
+    const adminContext: PermissionContext = buildPermissionContext({
+      userId: actor?.userId ?? '',
+      userRole: actor?.userRole ?? '',
+      entityType: 'opportunity',
+      entity: context?.opportunity ?? undefined,
+      workflowState: context?.opportunity?.status,
+    })
+    if (actor?.userId && isAdmin(adminContext)) {
+      return allow(['command-rbac:admin-edit'])
+    }
+    return deny(
+      'Only an opportunity owner with edit capability can update it.',
+      capability,
+      ['command-rbac:edit-not-owner'],
+    )
+  }
+
+  return evaluatePermissionActionCommand(capability as PermissionAction, actor)
 }
 
 export function buildCommandRbacFailureResult(

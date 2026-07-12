@@ -6,6 +6,7 @@
 import { resolveCanonicalStatus } from '@/lib/status-display'
 import type { Opportunity } from '@/types/domain.ts'
 import type { PmBadgeTone } from '@/components/ui/pm-badge'
+import { isOpportunityOwnedByContext } from '@/domain/identity/ownership-adapters.ts'
 import {
   getReadinessStatusTone,
   type ReadinessStatus,
@@ -25,11 +26,23 @@ export type PublishVisualState = 'draft' | 'ready' | 'blocked' | 'published'
 
 /** Counts opportunities by canonical pipeline stage for dashboard widgets. */
 export function countOpportunityBuckets(
-  opportunities: readonly { status?: string; creatorId?: string }[],
+  opportunities: readonly Pick<
+    Opportunity,
+    'status' | 'creatorId' | 'workspaceId' | 'ownerPartyId'
+  >[],
   userId?: string,
+  activeContext?: {
+    readonly activeWorkspaceId?: string
+    readonly activePartyId?: string
+  },
 ): OpportunityDashboardBuckets {
   const scoped = userId
-    ? opportunities.filter((o) => o.creatorId === userId)
+    ? opportunities.filter((opportunity) =>
+        isOpportunityOwnedByContext(opportunity, {
+          ...activeContext,
+          userId,
+        }),
+      )
     : opportunities
 
   let drafts = 0
@@ -119,14 +132,25 @@ export function resolveOpportunityOwnerBadgeTone(): PmBadgeTone {
 export type OpportunityOwnershipScope = 'mine' | 'company' | 'marketplace'
 
 export function resolveOpportunityOwnershipScope(input: {
-  readonly opportunity: Pick<Opportunity, 'creatorId' | 'organizationId'>
+  readonly opportunity: Pick<
+    Opportunity,
+    'creatorId' | 'organizationId' | 'workspaceId' | 'ownerPartyId'
+  >
   readonly viewerUserId?: string | null
+  readonly viewerWorkspaceId?: string | null
+  readonly viewerPartyId?: string | null
   readonly viewerOrganizationId?: string | null
   readonly creatorOrganizationId?: string | null
 }): OpportunityOwnershipScope {
   const { opportunity, viewerUserId, viewerOrganizationId, creatorOrganizationId } = input
 
-  if (viewerUserId && opportunity.creatorId === viewerUserId) {
+  if (
+    isOpportunityOwnedByContext(opportunity, {
+      userId: viewerUserId,
+      activeWorkspaceId: input.viewerWorkspaceId,
+      activePartyId: input.viewerPartyId,
+    })
+  ) {
     return 'mine'
   }
 

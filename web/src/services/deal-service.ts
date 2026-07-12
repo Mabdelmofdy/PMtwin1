@@ -7,6 +7,8 @@ import {
   type CommercialAgreementServiceDeps,
 } from '@/services/commercial-agreement-service.ts'
 import { rejectLifecycleStatusBypass } from '@/lib/lifecycle-status-guard.ts'
+import type { Opportunity } from '@/types/domain.ts'
+import { isOpportunityOwnedByContext } from '@/domain/identity/ownership-adapters.ts'
 
 export const DEAL_COMMAND_PATH_REQUIRED_ERROR =
   COMMERCIAL_AGREEMENT_COMMAND_PATH_REQUIRED_ERROR
@@ -33,11 +35,30 @@ export function createDealService(deps?: DealServiceDeps) {
       rejectLifecycleStatusBypass()
     },
     bucketOpportunitiesForPipeline(
-      opportunities: Array<{ status?: string; creatorId?: string; intent?: string }>,
+      opportunities: Array<
+        Pick<
+          Opportunity,
+          'status' | 'creatorId' | 'workspaceId' | 'ownerPartyId' | 'intent'
+        >
+      >,
       userId: string,
       intentFilter: '' | 'request' | 'offer' = '',
+      activeContext?: {
+        readonly activeWorkspaceId?: string
+        readonly activePartyId?: string
+      },
     ) {
-      let items = opportunities.filter((o) => o.creatorId === userId)
+      let items = opportunities.filter((opportunity) =>
+        isOpportunityOwnedByContext(opportunity, {
+          ...activeContext,
+          userId,
+        }) ||
+          // Pipeline boards historically scoped by creatorId; keep dual-read when
+          // the caller has not supplied an active Workspace/Party context.
+          (!activeContext?.activeWorkspaceId &&
+            !activeContext?.activePartyId &&
+            opportunity.creatorId === userId),
+      )
       if (intentFilter) {
         items = items.filter((o) => (o.intent || 'request') === intentFilter)
       }

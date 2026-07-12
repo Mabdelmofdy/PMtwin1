@@ -1,6 +1,11 @@
 import type { Opportunity } from '@/types/domain.ts'
 import type { IStorageAdapter } from '@/types/storage.ts'
 import { normalizeOpportunityCollaboration } from '@/domain/collaboration/opportunity-collaboration.ts'
+import {
+  resolveOpportunityOwnership,
+  withCanonicalOpportunityOwnership,
+  type OpportunityOwnershipContext,
+} from '@/domain/identity/ownership-adapters.ts'
 import { BaseRepository } from './base-repository.ts'
 import { mergeSeedWithOverrides } from './seed-override-merge.ts'
 
@@ -9,8 +14,18 @@ function createOpportunityId(): string {
 }
 
 export class OpportunityRepository extends BaseRepository<Opportunity> {
-  constructor(storage: IStorageAdapter, loadSeed: () => Opportunity[]) {
+  private readonly loadOwnershipContext: () => OpportunityOwnershipContext
+
+  constructor(
+    storage: IStorageAdapter,
+    loadSeed: () => Opportunity[],
+    loadOwnershipContext: () => OpportunityOwnershipContext = () => ({
+      companyIds: new Set<string>(),
+      userIds: new Set<string>(),
+    }),
+  ) {
     super(storage, 'opportunities', loadSeed)
+    this.loadOwnershipContext = loadOwnershipContext
   }
 
   override getAll(): Opportunity[] {
@@ -34,13 +49,42 @@ export class OpportunityRepository extends BaseRepository<Opportunity> {
     )
   }
 
+  listByWorkspaceId(workspaceId: string): Opportunity[] {
+    const context = this.loadOwnershipContext()
+    return this.getAll().filter(
+      (item) =>
+        resolveOpportunityOwnership(item, context).workspaceId === workspaceId,
+    )
+  }
+
+  listByOwnerPartyId(ownerPartyId: string): Opportunity[] {
+    const context = this.loadOwnershipContext()
+    return this.getAll().filter(
+      (item) =>
+        resolveOpportunityOwnership(item, context).ownerPartyId === ownerPartyId,
+    )
+  }
+
   update(id: string, patch: Partial<Opportunity>): void {
     const overrides = this.readOverrides()
+    const existing = this.getById(id)
+    if (!existing) return
+    const canonical = withCanonicalOpportunityOwnership(
+      { ...existing, ...patch },
+      this.loadOwnershipContext(),
+    )
+    const canonicalPatch: Partial<Opportunity> = {
+      ...patch,
+      workspaceId: canonical.workspaceId,
+      ownerPartyId: canonical.ownerPartyId,
+      createdByUserId: canonical.createdByUserId,
+      createdByActorType: canonical.createdByActor.actorType,
+    }
     const isNew = overrides.newOpportunities?.some((o) => o.id === id)
     if (isNew) {
       overrides.newOpportunities = overrides.newOpportunities!.map((o) =>
         o.id === id
-          ? { ...o, ...patch, updatedAt: new Date().toISOString() }
+          ? { ...o, ...canonicalPatch, updatedAt: new Date().toISOString() }
           : o,
       )
     } else {
@@ -48,7 +92,7 @@ export class OpportunityRepository extends BaseRepository<Opportunity> {
         ...overrides.opportunities,
         [id]: {
           ...overrides.opportunities?.[id],
-          ...patch,
+          ...canonicalPatch,
           updatedAt: new Date().toISOString(),
         },
       }
@@ -61,8 +105,16 @@ export class OpportunityRepository extends BaseRepository<Opportunity> {
   ): Opportunity {
     const overrides = this.readOverrides()
     const now = new Date().toISOString()
+    const canonical = withCanonicalOpportunityOwnership(
+      data,
+      this.loadOwnershipContext(),
+    )
     const opportunity: Opportunity = {
       ...data,
+      workspaceId: canonical.workspaceId,
+      ownerPartyId: canonical.ownerPartyId,
+      createdByUserId: canonical.createdByUserId,
+      createdByActorType: canonical.createdByActor.actorType,
       id: data.id ?? createOpportunityId(),
       status: data.status || 'draft',
       visibilityStatus: data.visibilityStatus,
@@ -87,8 +139,9 @@ export class OpportunityRepository extends BaseRepository<Opportunity> {
       (item) => item.id !== id,
     )
     if (overrides.opportunities?.[id]) {
-      const { [id]: _removed, ...rest } = overrides.opportunities
-      overrides.opportunities = rest
+      const nextPatches = { ...overrides.opportunities }
+      delete nextPatches[id]
+      overrides.opportunities = nextPatches
     }
     this.writeOverrides(overrides)
   }

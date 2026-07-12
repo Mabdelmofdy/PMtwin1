@@ -1,4 +1,5 @@
 import type { Party } from '@pm-twin/party'
+import { workspaceIdForSource } from '@pm-twin/identity'
 import type { IStorageAdapter, Overrides } from '@/types/storage.ts'
 import type { PlatformUser } from '@/types/domain.ts'
 import { OVERRIDES_KEY } from '@/types/storage.ts'
@@ -38,7 +39,15 @@ export class PartyRepository {
     const companies = this.loadCompanies()
     const users = this.loadUsers()
     const companyIds = buildCompanyIdSet(companies.map((company) => company.id))
-    return projectAccountsToParties([...companies, ...users], companyIds)
+    return projectAccountsToParties([...companies, ...users], companyIds).map(
+      (party) => ({
+        ...party,
+        workspaceId: workspaceIdForSource(
+          party.sourceEntityId,
+          party.sourceEntityType === 'company' ? 'company' : 'personal',
+        ),
+      }),
+    )
   }
 
   getAll(): Party[] {

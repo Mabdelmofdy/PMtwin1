@@ -6,6 +6,7 @@
 import { resolveCanonicalStatus } from '@/lib/status-display.ts'
 import { normalizeParticipants } from '@/types/participant.ts'
 import { resolvePostMatchOpportunityIds } from '@/domain/normalized/post-match-opportunity-ids.ts'
+import { isOpportunityOwnedByContext } from '@/domain/identity/ownership-adapters.ts'
 import type {
   Contract,
   Deal,
@@ -19,6 +20,8 @@ export type ViewerContext = {
   readonly role?: string | null
   readonly status?: string | null
   readonly canAccessAdmin?: boolean
+  readonly activeWorkspaceId?: string | null
+  readonly activePartyId?: string | null
   readonly profile?: {
     readonly type?: string
     readonly individualType?: string
@@ -63,7 +66,7 @@ const CONTRACT_SECTION_STATUSES = new Set([
 const PLATFORM_ADMIN_ROLES = new Set(['admin', 'moderator'])
 
 function isOpportunityOwner(opportunity: Opportunity, viewer: ViewerContext): boolean {
-  return Boolean(viewer.userId && opportunity.creatorId === viewer.userId)
+  return isOpportunityOwnedByContext(opportunity, viewer)
 }
 
 function isPlatformAdminRole(role: string | null | undefined): boolean {
@@ -390,13 +393,14 @@ export function filterOpportunitiesForListScope(
 ): Opportunity[] {
   return opportunities.filter((opportunity) => {
     if (scope === 'mine') {
-      return Boolean(viewer.userId && opportunity.creatorId === viewer.userId)
+      return isOpportunityOwner(opportunity, viewer)
     }
-    if (isDraftOpportunity(opportunity) && opportunity.creatorId !== viewer.userId) {
+    const owner = isOpportunityOwner(opportunity, viewer)
+    if (isDraftOpportunity(opportunity) && !owner) {
       return false
     }
     if (
-      opportunity.creatorId !== viewer.userId
+      !owner
       && (opportunity.visibilityStatus ?? '').toLowerCase() !== 'published'
       && opportunityCanonicalStatus(opportunity) !== 'published'
     ) {
@@ -421,6 +425,8 @@ export function buildViewerContext(input: {
   readonly role?: string | null
   readonly status?: string | null
   readonly canAccessAdmin?: boolean
+  readonly activeWorkspaceId?: string | null
+  readonly activePartyId?: string | null
   readonly profile?: ViewerContext['profile']
 }): ViewerContext {
   return {
@@ -428,6 +434,8 @@ export function buildViewerContext(input: {
     role: input.role ?? undefined,
     status: input.status ?? undefined,
     canAccessAdmin: input.canAccessAdmin ?? false,
+    activeWorkspaceId: input.activeWorkspaceId ?? undefined,
+    activePartyId: input.activePartyId ?? undefined,
     profile: input.profile ?? undefined,
   }
 }

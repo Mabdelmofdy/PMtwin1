@@ -6,6 +6,8 @@ import { PartyRepository } from '@/repositories/party-repository.ts'
 import { PartyMembershipRepository } from '@/repositories/party-membership-repository.ts'
 import { UserRepository } from '@/repositories/user-repository.ts'
 import { CompanyRepository } from '@/repositories/company-repository.ts'
+import { WorkspaceRepository } from '@/repositories/workspace-repository.ts'
+import { WorkspaceMembershipRepository } from '@/repositories/workspace-membership-repository.ts'
 import { registerLocalAccount } from '@/lib/local-registration-service.ts'
 
 class MemoryStorageAdapter implements IStorageAdapter {
@@ -58,6 +60,16 @@ describe('parties api resolution', () => {
       () => userRepository.getAll(),
       () => companyRepository.getAll(),
     )
+    const workspaceRepository = new WorkspaceRepository(
+      storage,
+      () => userRepository.getAll(),
+      () => companyRepository.getAll(),
+    )
+    const workspaceMembershipRepository = new WorkspaceMembershipRepository(
+      storage,
+      () => userRepository.getAll(),
+      () => companyRepository.getAll(),
+    )
 
     const signup = registerLocalAccount(
       {
@@ -74,6 +86,9 @@ describe('parties api resolution', () => {
         companyRepository,
         partyRepository,
         partyMembershipRepository,
+        workspaceRepository,
+        workspaceMembershipRepository,
+        storageAdapter: storage,
       },
     )
 

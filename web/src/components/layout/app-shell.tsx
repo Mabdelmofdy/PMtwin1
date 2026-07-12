@@ -67,17 +67,18 @@ class AppShellErrorBoundary extends Component<
 
 function RecentPageTracker() {
   const { pathname } = useLocation()
-  const { isCompanyUser, canAccessAdmin } = useAuth()
+  const { isCompanyUser, activeWorkspace, platformContextActive } = useAuth()
 
   useEffect(() => {
     if (pathname === '/login' || pathname === '/register') return
-    const isAdminArea = pathname.startsWith('/admin') && canAccessAdmin
+    const isAdminArea = pathname.startsWith('/admin') && platformContextActive
     const { title } = resolveWorkspaceContext(pathname, {
       isCompanyUser,
       isAdminArea,
+      activeWorkspaceName: activeWorkspace?.name,
     })
     recordRecentPage(pathname, title)
-  }, [pathname, isCompanyUser, canAccessAdmin])
+  }, [pathname, isCompanyUser, activeWorkspace, platformContextActive])
 
   return null
 }

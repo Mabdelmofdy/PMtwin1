@@ -2,10 +2,19 @@ import { canAccessAdminForRole } from '@/domain/rbac/admin-access.ts'
 import type { PlatformUser } from '@/types/domain.ts'
 import type { AuthSession, AccountType } from '@/types/domain.ts'
 import type { ImplementedPartyType } from '@pm-twin/party'
+import {
+  recoverActiveBusinessContext,
+  resolveLegacyRoleToPlatformRoles,
+} from '@pm-twin/identity'
 import { peopleApi } from '@/api/people.ts'
 import { partiesApi } from '@/api/parties.ts'
 import { isVettingRestrictedUser } from '@/domain/rbac/vetting-mutation-guard.ts'
 import { formatMembershipId } from '@/repositories/party-membership-repository.ts'
+import {
+  identityProjectionService,
+  workspaceMembershipRepository,
+  workspaceRepository,
+} from '@/repositories/index.ts'
 import { localStorageAdapter } from '@/infrastructure/storage/local-storage-adapter.ts'
 import { sessionStorageAdapter } from '@/infrastructure/storage/session-storage-adapter.ts'
 
@@ -14,9 +23,11 @@ const SESSION_KEY = 'pmtwin_web_session'
 export type { AccountType, AuthSession }
 
 export type SessionPartyContext = {
+  activeWorkspaceId?: string
   activePartyId: string
   activeMembershipId: string
   partyType: ImplementedPartyType | string
+  platformContextActive?: boolean
 }
 
 function encodePassword(password: string) {
@@ -42,17 +53,55 @@ function writeSession(session: AuthSession | null) {
   target.set(SESSION_KEY, session)
 }
 
-function resolveSessionPartyContext(userId: string): SessionPartyContext {
-  const activePartyId = partiesApi.resolveActivePartyId(userId)
-  const membership = partiesApi.getPrimaryMembership(userId)
-  const party = partiesApi.resolveActiveParty(userId)
+function resolveSessionPartyContext(
+  userId: string,
+  preferred: Partial<SessionPartyContext> = {},
+): SessionPartyContext {
+  const projection = identityProjectionService.build()
+  const memberships = workspaceMembershipRepository.listMembershipsByUserId(userId)
+  const workspaces = workspaceRepository.getAll()
+  const recovered = recoverActiveBusinessContext({
+    userId,
+    memberships,
+    workspaces,
+    parties: projection.parties,
+    preferredWorkspaceId: preferred.activeWorkspaceId,
+    preferredPartyId: preferred.activePartyId || undefined,
+  })
+  const workspace = recovered.activeWorkspaceId
+    ? workspaceRepository.getById(recovered.activeWorkspaceId)
+    : undefined
+  const membership = recovered.activeWorkspaceId
+    ? workspaceMembershipRepository.getActiveMembership(
+        userId,
+        recovered.activeWorkspaceId,
+      )
+    : undefined
+
+  if (workspace && membership) {
+    return {
+      activeWorkspaceId: workspace.id,
+      activePartyId: recovered.activePartyId ?? workspace.ownerPartyId,
+      activeMembershipId: membership.id,
+      partyType: workspace.type === 'company' ? 'company' : 'individual',
+      platformContextActive: preferred.platformContextActive,
+    }
+  }
+
+  const legacyParty = partiesApi.resolveActiveParty(userId)
+  const legacyMembership = partiesApi.getPrimaryMembership(userId)
 
   return {
-    activePartyId,
-    activeMembershipId: membership
-      ? formatMembershipId(membership)
-      : formatMembershipId({ userId, partyId: activePartyId }),
-    partyType: party?.partyType ?? 'individual',
+    activePartyId: legacyParty?.id ?? '',
+    activeMembershipId: legacyMembership
+      ? formatMembershipId(legacyMembership)
+      : '',
+    partyType: legacyParty?.partyType ?? (
+      resolveLegacyRoleToPlatformRoles(peopleApi.get(userId)?.role).length > 0
+        ? 'platform'
+        : 'individual'
+    ),
+    platformContextActive: preferred.platformContextActive,
   }
 }
 
@@ -66,23 +115,23 @@ function buildSession(
     token: generateToken(),
     userId: user.id,
     rememberMe: !!options.rememberMe,
+    activeWorkspaceId: options.activeWorkspaceId ?? resolved.activeWorkspaceId,
     activePartyId: options.activePartyId ?? resolved.activePartyId,
     activeMembershipId: options.activeMembershipId ?? resolved.activeMembershipId,
     partyType: options.partyType ?? resolved.partyType,
+    platformContextActive: options.platformContextActive ?? false,
   }
 }
 
 function migrateLegacySession(session: AuthSession, user: PlatformUser): AuthSession {
-  if (session.activePartyId && session.activeMembershipId && session.partyType) {
-    return session
-  }
-
-  const resolved = resolveSessionPartyContext(user.id)
+  const resolved = resolveSessionPartyContext(user.id, session)
   return {
     ...session,
+    activeWorkspaceId: resolved.activeWorkspaceId,
     activePartyId: session.activePartyId ?? resolved.activePartyId,
     activeMembershipId: session.activeMembershipId ?? resolved.activeMembershipId,
     partyType: session.partyType ?? resolved.partyType,
+    platformContextActive: session.platformContextActive ?? false,
   }
 }
 
@@ -140,6 +189,53 @@ export const authService = {
     writeSession(null)
   },
 
+  switchWorkspace(userId: string, workspaceId: string): SessionPartyContext {
+    const session = readSession()
+    if (!session || session.userId !== userId) {
+      throw new Error('Authenticated session required')
+    }
+    const membership = workspaceMembershipRepository.getActiveMembership(
+      userId,
+      workspaceId,
+    )
+    const workspace = workspaceRepository.getById(workspaceId)
+    if (!membership || !workspace || workspace.status !== 'active') {
+      throw new Error('Workspace access denied')
+    }
+    const context: SessionPartyContext = {
+      activeWorkspaceId: workspace.id,
+      activePartyId: workspace.ownerPartyId,
+      activeMembershipId: membership.id,
+      partyType: workspace.type === 'company' ? 'company' : 'individual',
+      platformContextActive: false,
+    }
+    writeSession({ ...session, ...context })
+    return context
+  },
+
+  enterPlatformContext(user: PlatformUser): AuthSession {
+    const session = readSession()
+    if (!session || session.userId !== user.id) {
+      throw new Error('Authenticated session required')
+    }
+    if (resolveLegacyRoleToPlatformRoles(user.role).length === 0) {
+      throw new Error('Platform access denied')
+    }
+    const updated = { ...session, platformContextActive: true }
+    writeSession(updated)
+    return updated
+  },
+
+  exitPlatformContext(user: PlatformUser): AuthSession {
+    const session = readSession()
+    if (!session || session.userId !== user.id) {
+      throw new Error('Authenticated session required')
+    }
+    const updated = { ...session, platformContextActive: false }
+    writeSession(updated)
+    return updated
+  },
+
   restoreSession(): PlatformUser | null {
     const session = readSession()
     if (!session) return null
@@ -162,6 +258,11 @@ export const authService = {
   },
 
   isCompanyUser(user: PlatformUser) {
+    const session = readSession()
+    const activeWorkspace = session?.activeWorkspaceId
+      ? workspaceRepository.getById(session.activeWorkspaceId)
+      : undefined
+    if (activeWorkspace) return activeWorkspace.type === 'company'
     const activeParty = partiesApi.resolveActiveParty(user.id)
     if (activeParty?.partyType === 'company') return true
     return user.profile?.type === 'company'

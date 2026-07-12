@@ -143,8 +143,8 @@ export function LegacyRegisterPage() {
         <AuthMarketingColumn
           kicker="Registration"
           kickerIcon="ph-user-plus"
-          title="Create your PM-Twin profile in guided steps."
-          description="Choose company or individual onboarding and complete the same step structure used in the POC flow, now natively in web."
+          title="Create your workspace in guided steps."
+          description="Choose a Personal Workspace or Company Workspace, then complete your profile."
         />
       }
     >
@@ -153,7 +153,9 @@ export function LegacyRegisterPage() {
           <section className="reg-completion-screen" aria-label="Registration complete">
             <header className="reg-header mb-6">
               <h1 className="reg-header-title text-2xl font-bold text-gray-900">
-                {completion.partyType === 'company' ? 'Company Created' : 'Account Created'}
+                {completion.partyType === 'company'
+                  ? 'Company Workspace Created'
+                  : 'Personal Workspace Created'}
               </h1>
               <p className="reg-header-subtitle mt-1 text-gray-600">
                 Account created and pending review. You can browse now, and full actions unlock
@@ -181,7 +183,7 @@ export function LegacyRegisterPage() {
         ) : (
           <>
         <header className="reg-header mb-5">
-          <h1 className="reg-header-title text-2xl font-bold text-gray-900">Create your account</h1>
+          <h1 className="reg-header-title text-2xl font-bold text-gray-900">Create your workspace</h1>
           <p className="reg-header-subtitle mt-1 text-gray-600">
             {isLocalSignupRuntime
               ? 'Quick setup — saved locally in this browser for Demo/UAT.'
@@ -213,8 +215,8 @@ export function LegacyRegisterPage() {
         <form onSubmit={onSubmit} noValidate>
           {step === 0 ? (
             <section className="reg-step-content reg-step-card mb-6" aria-label="Account type">
-              <h2 className="reg-step-title mb-2 text-lg font-semibold text-gray-900">Select account type</h2>
-              <p className="mb-6 text-gray-600">Choose whether you register as a company or an individual.</p>
+              <h2 className="reg-step-title mb-2 text-lg font-semibold text-gray-900">Select workspace type</h2>
+              <p className="mb-6 text-gray-600">Choose a Personal Workspace or Company Workspace.</p>
               <AccountTypeGrid accountType={form.accountType} onChange={(type) => update('accountType', type)} />
               {fieldErrors.accountType ? <ErrorText text={fieldErrors.accountType} /> : null}
             </section>
@@ -494,8 +496,8 @@ function AccountTypeGrid({
     <div className="reg-account-type-grid grid grid-cols-1 gap-5 sm:grid-cols-2">
       {(
         [
-          ['company', 'Company', 'For businesses looking for collaborations and partnerships.', 'ph-buildings'],
-          ['individual', 'Individual', 'For professionals and consultants joining on their own.', 'ph-user'],
+          ['company', 'Company Workspace', 'For teams looking for collaborations and partnerships.', 'ph-buildings'],
+          ['individual', 'Personal Workspace', 'For professionals and consultants working independently.', 'ph-user'],
         ] as const
       ).map(([value, title, body, icon]) => (
         <label

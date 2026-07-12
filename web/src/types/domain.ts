@@ -94,6 +94,14 @@ export type Opportunity = TenantScoped & {
   description?: string
   status: OpportunityStatus | string
   visibilityStatus?: OpportunityVisibilityStatus | string
+  /** Canonical business-workspace owner. */
+  workspaceId?: string
+  /** Canonical user who originally created the record. */
+  createdByUserId?: string
+  /** Canonical user who most recently changed the record. */
+  lastModifiedByUserId?: string
+  createdByActorType?: 'marketplace_user' | 'platform_operator' | 'system'
+  /** Legacy creator alias retained for dual-read compatibility. */
   creatorId?: string
   /** Canonical party owner — optional in seed; resolved via adapter from creatorId. */
   ownerPartyId?: string
@@ -270,6 +278,11 @@ export type PostMatch = TenantScoped & {
   matchCriteria?: Record<string, number>
   runId?: string
   participants: Participant[]
+  /** Originating opportunity owner party when known. */
+  originatingOwnerPartyId?: string
+  initiatingPartyId?: string
+  createdByUserId?: string
+  createdByActorType?: 'marketplace_user' | 'platform_operator' | 'system'
   payload?: PostMatchPayload
   createdAt?: string
   updatedAt?: string
@@ -286,6 +299,10 @@ export type PostMatch = TenantScoped & {
 export type AppNotification = TenantScoped & {
   id: string
   userId: string
+  recipientUserId?: string
+  recipientWorkspaceId?: string
+  recipientPartyId?: string
+  recipientPlatformRole?: string
   type?: NotificationType | string
   title: string
   message: string
@@ -318,6 +335,11 @@ export type Negotiation = TenantScoped & {
   participants?: Participant[]
   /** @deprecated Use participants — legacy seed field */
   parties?: Participant[]
+  initiatingPartyId?: string
+  originatingOwnerPartyId?: string
+  createdByUserId?: string
+  lastModifiedByUserId?: string
+  createdByActorType?: 'marketplace_user' | 'platform_operator' | 'system'
   status: NegotiationStatus | string
   /** @deprecated Prefer commercialTerms */
   initialTerms?: NegotiationTerms
@@ -361,6 +383,16 @@ export type CommercialAgreement = TenantScoped & {
   participants: Participant[]
   /** @deprecated Use participants — legacy compat alias */
   parties?: Participant[]
+  initiatingPartyId?: string
+  originatingOwnerPartyId?: string
+  originatingOpportunityOwnerPartyId?: string
+  awardedPartyId?: string
+  awardedWorkspaceId?: string
+  awardedByUserId?: string
+  awardDecisionByPartyId?: string
+  createdByUserId?: string
+  lastModifiedByUserId?: string
+  createdByActorType?: 'marketplace_user' | 'platform_operator' | 'system'
   commercialTerms?: CommercialTerms
   /** @deprecated Prefer commercialTerms */
   terms?: NegotiationTerms
@@ -398,6 +430,10 @@ export type Contract = TenantScoped & {
   participants: Participant[]
   /** @deprecated Use participants — legacy compat alias */
   parties?: Participant[]
+  originatingAgreementId?: string
+  createdByUserId?: string
+  lastModifiedByUserId?: string
+  createdByActorType?: 'marketplace_user' | 'platform_operator' | 'system'
   commercialTerms?: CommercialTerms
   /** @deprecated Prefer commercialTerms */
   terms?: Record<string, unknown>
@@ -421,6 +457,11 @@ export type AuditEntry = TenantScoped & {
   action: string
   userId?: string
   actorType?: AuditActorType | string
+  actorUserId?: string
+  workspaceId?: string
+  partyId?: string
+  workspaceRole?: string
+  platformRole?: string
   entityType?: EntityType | string
   entityId?: string
   details?: Record<string, unknown>
@@ -433,9 +474,11 @@ export type AuthSession = {
   token: string
   userId: string
   rememberMe: boolean
+  activeWorkspaceId?: string
   activePartyId: string
   activeMembershipId: string
   partyType: string
+  platformContextActive?: boolean
 }
 
 export type AccountType = 'auto' | 'individual' | 'company'

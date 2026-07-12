@@ -85,7 +85,7 @@ export function parseEnvironmentImportJson(json: string): unknown {
 }
 
 export function isCompatibleImportSchemaVersion(schemaVersion: string): boolean {
-  return schemaVersion === EXPORT_SCHEMA_VERSION
+  return schemaVersion === EXPORT_SCHEMA_VERSION || schemaVersion === '1.0'
 }
 
 function assertMetadataString(
@@ -281,8 +281,40 @@ export function validateEnvironmentImportPayload(raw: unknown): EnvironmentExpor
   assertMetadataString(raw.metadata, 'exportedBy')
   assertMetadataString(raw.metadata, 'exportedAt')
 
+  const identityCollections = new Set([
+    'workspaces',
+    'workspaceMemberships',
+    'parties',
+  ])
+
   for (const collectionKey of ENVIRONMENT_EXPORT_COLLECTION_KEYS) {
+    // Identity collections are optional for legacy 1.0 payloads and for fixtures
+    // that have not yet been upgraded; default to empty arrays.
+    if (
+      identityCollections.has(collectionKey) &&
+      raw[collectionKey] === undefined
+    ) {
+      raw[collectionKey] = []
+      continue
+    }
     validateEntityCollection(collectionKey, raw[collectionKey])
+  }
+
+  if (schemaVersion !== '1.0') {
+    const identityVersion = raw.metadata.identitySchemaVersion
+    const ownershipVersion = raw.metadata.ownershipSchemaVersion
+    if (typeof identityVersion === 'number' && identityVersion > 1) {
+      throw new EnvironmentImportError(
+        'INCOMPATIBLE_SCHEMA',
+        `Unsupported identitySchemaVersion ${identityVersion}.`,
+      )
+    }
+    if (typeof ownershipVersion === 'number' && ownershipVersion > 1) {
+      throw new EnvironmentImportError(
+        'INCOMPATIBLE_SCHEMA',
+        `Unsupported ownershipSchemaVersion ${ownershipVersion}.`,
+      )
+    }
   }
 
   const payload = raw as EnvironmentExportPayload

@@ -11,6 +11,14 @@ import type {
   PostMatch,
 } from '@/types/domain.ts'
 import type {
+  BusinessWorkspace,
+  WorkspaceMembership,
+} from '@pm-twin/identity'
+import {
+  createCurrentSchemaMeta,
+} from '@pm-twin/identity'
+import type { Party } from '@pm-twin/party'
+import type {
   NegotiationMessage,
   NegotiationOffer,
   NegotiationTranscriptEvent,
@@ -39,13 +47,16 @@ import {
   negotiationRepository,
   notificationRepository,
   opportunityRepository,
+  partyRepository,
   postMatchRepository,
   userRepository,
+  workspaceMembershipRepository,
+  workspaceRepository,
   adminSettingsRepository,
   productLanguageSettingsRepository,
 } from '@/repositories/index.ts'
 
-export const EXPORT_SCHEMA_VERSION = '1.0'
+export const EXPORT_SCHEMA_VERSION = '1.1'
 export const EXPORT_TYPE = 'pmtwin-environment-export'
 
 export type EnvironmentExportMetadata = {
@@ -56,12 +67,17 @@ export type EnvironmentExportMetadata = {
   runtimeMode: string
   exportedBy: string
   exportedAt: string
+  identitySchemaVersion: number
+  ownershipSchemaVersion: number
 }
 
 export type EnvironmentExportPayload = {
   metadata: EnvironmentExportMetadata
   users: PlatformUser[]
   companies: Company[]
+  workspaces: BusinessWorkspace[]
+  workspaceMemberships: WorkspaceMembership[]
+  parties: Party[]
   opportunities: Opportunity[]
   postMatches: PostMatch[]
   negotiations: Negotiation[]
@@ -85,6 +101,9 @@ export type EnvironmentExportPayload = {
 export const ENVIRONMENT_EXPORT_COLLECTION_KEYS = [
   'users',
   'companies',
+  'workspaces',
+  'workspaceMemberships',
+  'parties',
   'opportunities',
   'postMatches',
   'negotiations',
@@ -104,6 +123,9 @@ type EnvironmentExportDeps = {
   readonly exportedAt: string
   readonly readUsers: () => PlatformUser[]
   readonly readCompanies: () => Company[]
+  readonly readWorkspaces: () => BusinessWorkspace[]
+  readonly readWorkspaceMemberships: () => WorkspaceMembership[]
+  readonly readParties: () => Party[]
   readonly readOpportunities: () => Opportunity[]
   readonly readPostMatches: () => PostMatch[]
   readonly readNegotiations: () => Negotiation[]
@@ -144,6 +166,9 @@ function createDefaultDeps(exportedBy: string): EnvironmentExportDeps {
     exportedAt: new Date().toISOString(),
     readUsers: () => userRepository.getAll(),
     readCompanies: () => companyRepository.getAll(),
+    readWorkspaces: () => workspaceRepository.getAll(),
+    readWorkspaceMemberships: () => workspaceMembershipRepository.getAll(),
+    readParties: () => partyRepository.getAll(),
     readOpportunities: () => opportunityRepository.getAll(),
     readPostMatches: () => postMatchRepository.getAll(),
     readNegotiations: () => negotiationRepository.getAll(),
@@ -196,6 +221,7 @@ export function buildEnvironmentExportPayload(
   }
 
   const bootstrap = readEnvironmentBootstrapMetadata(context.storageAdapter)
+  const schemaMeta = createCurrentSchemaMeta()
 
   return {
     metadata: {
@@ -206,9 +232,16 @@ export function buildEnvironmentExportPayload(
       runtimeMode: context.runtimeMode,
       exportedBy: resolvedDeps.exportedBy,
       exportedAt: resolvedDeps.exportedAt,
+      identitySchemaVersion:
+        bootstrap?.identitySchemaVersion ?? schemaMeta.identitySchemaVersion,
+      ownershipSchemaVersion:
+        bootstrap?.ownershipSchemaVersion ?? schemaMeta.ownershipSchemaVersion,
     },
     users: resolvedDeps.readUsers(),
     companies: resolvedDeps.readCompanies(),
+    workspaces: resolvedDeps.readWorkspaces(),
+    workspaceMemberships: resolvedDeps.readWorkspaceMemberships(),
+    parties: resolvedDeps.readParties(),
     opportunities: resolvedDeps.readOpportunities(),
     postMatches: resolvedDeps.readPostMatches(),
     negotiations: resolvedDeps.readNegotiations(),

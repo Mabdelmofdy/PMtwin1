@@ -48,7 +48,8 @@ export function OverviewWorkspace() {
           <Field label="Post Type" value={model.collaboration.postIntent} />
           <Field label="Category or profession" value={opp.scope?.sectors?.[0]} />
           <Field label="Target role" value={opp.attributes?.targetRole} />
-          <Field label="Owner" value={model.creatorName} />
+          <Field label="Owned by" value={model.ownerPartyName ?? model.creatorName} />
+          <Field label="Created by" value={model.creatorName} />
           <Field label="Primary location" value={opp.location ?? opp.city} />
           <Field label="Country" value={opp.country} />
           <Field label="Service area" value={scope.serviceArea} />

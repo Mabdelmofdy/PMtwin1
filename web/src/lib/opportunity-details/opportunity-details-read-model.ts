@@ -186,6 +186,7 @@ export type OpportunityDetailsReadModel = {
   readonly kpis: OpportunityDetailsKpis
   readonly nextAction: NextActionDescriptor | null
   readonly creatorName?: string
+  readonly ownerPartyName?: string
   readonly updatedLabel?: string
   readonly analyticsAvailable: false
 }
@@ -704,8 +705,12 @@ export function buildOpportunityDetailsReadModel(
     capabilities,
     kpis,
     nextAction,
-    creatorName: opportunity.creatorId
-      ? deps.getPersonName?.(opportunity.creatorId)
+    creatorName: (() => {
+      const actorId = opportunity.createdByUserId ?? opportunity.creatorId
+      return actorId ? deps.getPersonName?.(actorId) : undefined
+    })(),
+    ownerPartyName: opportunity.ownerPartyId
+      ? deps.getPersonName?.(opportunity.ownerPartyId)
       : undefined,
     updatedLabel: formatRelativeUpdatedAt(opportunity.updatedAt),
     analyticsAvailable: false,

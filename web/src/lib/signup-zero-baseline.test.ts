@@ -6,6 +6,8 @@ import { UserRepository } from '@/repositories/user-repository.ts'
 import { CompanyRepository } from '@/repositories/company-repository.ts'
 import { PartyRepository } from '@/repositories/party-repository.ts'
 import { PartyMembershipRepository } from '@/repositories/party-membership-repository.ts'
+import { WorkspaceRepository } from '@/repositories/workspace-repository.ts'
+import { WorkspaceMembershipRepository } from '@/repositories/workspace-membership-repository.ts'
 import { registerLocalAccount } from '@/lib/local-registration-service.ts'
 import { evaluateVettingReadiness } from '@/domain/vetting-readiness/vetting-readiness-evaluator.ts'
 import { evaluateProfileReadiness } from '@/domain/profile-readiness/profile-readiness-evaluator.ts'
@@ -32,10 +34,25 @@ function createStack() {
   const companyRepository = new CompanyRepository(storage, loadCompanies)
   const partyRepository = new PartyRepository(storage, loadUsers, loadCompanies)
   const partyMembershipRepository = new PartyMembershipRepository(storage, loadUsers, loadCompanies)
+  const workspaceRepository = new WorkspaceRepository(storage, loadUsers, loadCompanies)
+  const workspaceMembershipRepository = new WorkspaceMembershipRepository(
+    storage,
+    loadUsers,
+    loadCompanies,
+  )
   return {
     userRepository,
     companyRepository,
-    deps: { userRepository, companyRepository, partyRepository, partyMembershipRepository },
+    partyRepository,
+    deps: {
+      userRepository,
+      companyRepository,
+      partyRepository,
+      partyMembershipRepository,
+      workspaceRepository,
+      workspaceMembershipRepository,
+      storageAdapter: storage,
+    },
   }
 }
 
@@ -80,7 +97,10 @@ describe('signup zero baseline', () => {
       stack.deps,
     )
 
-    const company = stack.companyRepository.getById(result.partyId)
+    const companyId = stack.partyRepository.getById(result.partyId)?.sourceEntityId
+    const company = companyId
+      ? stack.companyRepository.getById(companyId)
+      : undefined
     assert.ok(company)
     assert.equal(company?.status, 'pending_vetting')
     assert.equal(company?.profile?.profileCompletionUnlocked, false)

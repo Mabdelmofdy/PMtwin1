@@ -9,6 +9,7 @@ import type {
   ProductLanguageSettings,
 } from './domain.ts'
 import type { Party, PartyMembership } from '@pm-twin/party'
+import type { BusinessWorkspace, WorkspaceMembership } from '@pm-twin/identity'
 import type { PartyDocument } from './party-document.ts'
 import type { AdminSettingsDocument } from '@/domain/admin/settings/types.ts'
 
@@ -20,6 +21,8 @@ export interface IStorageAdapter {
 }
 
 export type Overrides = {
+  identitySchemaVersion?: number
+  ownershipSchemaVersion?: number
   applications?: Record<string, Partial<Application>>
   users?: Record<string, Partial<PlatformUser>>
   newUsers?: PlatformUser[]
@@ -60,6 +63,12 @@ export type Overrides = {
   partyMemberships?: Record<string, Partial<PartyMembership>>
   newPartyMemberships?: PartyMembership[]
   deletedPartyMemberships?: string[]
+  workspaces?: Record<string, Partial<BusinessWorkspace>>
+  newWorkspaces?: BusinessWorkspace[]
+  deletedWorkspaces?: string[]
+  workspaceMemberships?: Record<string, Partial<WorkspaceMembership>>
+  newWorkspaceMemberships?: WorkspaceMembership[]
+  deletedWorkspaceMemberships?: string[]
   partyDocuments?: Record<string, Partial<PartyDocument>>
   newPartyDocuments?: PartyDocument[]
   deletedPartyDocuments?: string[]

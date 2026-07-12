@@ -1,0 +1,27 @@
+{
+  "name": "@pm-twin/identity",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Canonical User, Business Workspace, Membership, Platform access, capabilities, and ownership integrity",
+  "main": "./dist/index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "node esbuild.js",
+    "test": "npm run build && node --test tests/**/*.test.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

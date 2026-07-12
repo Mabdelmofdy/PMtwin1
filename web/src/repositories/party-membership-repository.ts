@@ -71,7 +71,15 @@ export class PartyMembershipRepository {
   }
 
   getPrimaryForUser(userId: string): PartyMembership | undefined {
-    return this.listForUser(userId).find((membership) => membership.isPrimary)
+    const memberships = this.listForUser(userId)
+    const explicitPrimary = memberships.find(
+      (membership) =>
+        membership.isPrimary &&
+        !membership.partyId.startsWith('ws-') &&
+        membership.partyId !== userId,
+    )
+    if (explicitPrimary) return explicitPrimary
+    return memberships.find((membership) => membership.isPrimary)
   }
 
   setPrimaryMembership(

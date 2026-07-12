@@ -37,6 +37,7 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
   const opportunityHandler = new OpportunityCommandHandler({
     opportunityRepository,
     auditRepository,
+    resolveCommandActor: getCommandPermissionActor,
     resolvePublishReadinessContext: (opportunity) =>
       resolvePublishReadinessContextForOpportunity(opportunity),
   })
@@ -95,6 +96,8 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
       if (!opportunity) return undefined
       return {
         creatorId: opportunity.creatorId,
+        workspaceId: opportunity.workspaceId,
+        ownerPartyId: opportunity.ownerPartyId,
         status: opportunity.status,
       }
     },

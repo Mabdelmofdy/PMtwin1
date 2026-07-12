@@ -86,7 +86,14 @@ export function OpportunityExecutiveHeader({
           </h1>
           {header.ownerLabel ? (
             <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-              Owner · {header.ownerLabel}
+              Owned by · {header.ownerLabel}
+              {header.createdByLabel && header.createdByLabel !== header.ownerLabel
+                ? ` · Created by · ${header.createdByLabel}`
+                : null}
+            </p>
+          ) : header.createdByLabel ? (
+            <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
+              Created by · {header.createdByLabel}
             </p>
           ) : null}
           {chips.length > 0 ? (

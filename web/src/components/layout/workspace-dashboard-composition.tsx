@@ -48,14 +48,25 @@ import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framew
 import { buildReadinessAnalytics, createCreatorProfileResolver } from '@/domain/readiness-analytics/readiness-analytics.ts'
 import { buildMatchingQualityAnalytics } from '@/domain/matching-quality/matching-quality-analytics.ts'
 import { PendingVettingDashboard } from '@/components/vetting/pending-vetting-dashboard.tsx'
+import { isOpportunityOwnedByContext } from '@/domain/identity/ownership-adapters.ts'
 function buildNeedsActionItems(input: {
   userId?: string
+  activeWorkspaceId?: string
+  activePartyId?: string
   matches: ReturnType<typeof matchesApi.list>
   negotiations: ReturnType<typeof negotiationsApi.list>
   deals: ReturnType<typeof dealsApi.list>
   opportunities: ReturnType<typeof opportunitiesApi.list>
 }): PmActionHubItem[] {
-  const { userId, matches, negotiations, deals, opportunities } = input
+  const {
+    userId,
+    activeWorkspaceId,
+    activePartyId,
+    matches,
+    negotiations,
+    deals,
+    opportunities,
+  } = input
   const items: PmActionHubItem[] = []
 
   for (const match of matches.filter((m) => m.status === 'discovered').slice(0, 2)) {
@@ -99,7 +110,15 @@ function buildNeedsActionItems(input: {
 
   if (userId) {
     for (const opp of opportunities
-      .filter((o) => o.creatorId === userId && o.status === 'draft')
+      .filter(
+        (opportunity) =>
+          opportunity.status === 'draft' &&
+          isOpportunityOwnedByContext(opportunity, {
+            userId,
+            activeWorkspaceId,
+            activePartyId,
+          }),
+      )
       .slice(0, 1)) {
       items.push({
         id: `opp-${opp.id}`,
@@ -118,7 +137,14 @@ function buildNeedsActionItems(input: {
 
 /** Action-first dashboard — attention, matches, active workflows, activity. */
 export function WorkspaceDashboardComposition() {
-  const { user, isCompanyUser, isPendingApproval, canMutate } = useAuth()
+  const {
+    user,
+    activeWorkspace,
+    activeParty,
+    isCompanyUser,
+    isPendingApproval,
+    canMutate,
+  } = useAuth()
   const { productLanguage, locale } = useProductLanguage()
   const userId = user?.id
   const firstName = (user?.profile?.name ?? 'there').split(' ')[0]
@@ -127,11 +153,19 @@ export function WorkspaceDashboardComposition() {
     ? resolveProfileReadiness(user.profile, profileKind)
     : null
   const opportunities = opportunitiesApi.list()
+  const ownsOpportunity = (opportunity: (typeof opportunities)[number]) =>
+    isOpportunityOwnedByContext(opportunity, {
+      userId,
+      activeWorkspaceId: activeWorkspace?.id,
+      activePartyId: activeParty?.id,
+    })
   const profileExplanationBundle = user?.id
     ? buildProfileExplanationFromEvaluation(user.id, profileKind, user.profile)
     : null
   const draftOpportunity = userId
-    ? opportunities.find((opportunity) => opportunity.creatorId === userId && opportunity.status === 'draft')
+    ? opportunities.find(
+        (opportunity) => ownsOpportunity(opportunity) && opportunity.status === 'draft',
+      )
     : undefined
   const draftOpportunityBundle = draftOpportunity
     ? buildOpportunityExplanationFromForm(draftOpportunity.id, draftOpportunity)
@@ -188,6 +222,8 @@ export function WorkspaceDashboardComposition() {
     : null
   const needsActionItems = buildNeedsActionItems({
     userId,
+    activeWorkspaceId: activeWorkspace?.id,
+    activePartyId: activeParty?.id,
     matches,
     negotiations,
     deals,
@@ -301,7 +337,7 @@ export function WorkspaceDashboardComposition() {
           items={[
             {
               label: `My ${productLanguage.plural('opportunity').toLowerCase()}`,
-              value: opportunities.filter((o) => o.creatorId === userId).length,
+              value: opportunities.filter(ownsOpportunity).length,
               href: '/opportunities',
             },
             { label: 'My matches', value: matches.length, href: '/matches' },

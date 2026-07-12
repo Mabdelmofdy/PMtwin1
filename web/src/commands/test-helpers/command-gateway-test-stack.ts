@@ -202,6 +202,8 @@ export function createCommandGatewayTestStack(
       if (!opportunity) return undefined
       return {
         creatorId: opportunity.creatorId,
+        workspaceId: opportunity.workspaceId,
+        ownerPartyId: opportunity.ownerPartyId,
         status: opportunity.status,
       }
     },

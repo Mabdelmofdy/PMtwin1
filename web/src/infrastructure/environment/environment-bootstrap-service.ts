@@ -1,5 +1,9 @@
 import type { RuntimeMode } from '@/config/runtime-environment.ts'
 import type { IStorageAdapter } from '@/types/storage.ts'
+import {
+  IDENTITY_SCHEMA_VERSION,
+  OWNERSHIP_SCHEMA_VERSION,
+} from '@pm-twin/identity'
 
 export const SEED_VERSION = '1.0.0'
 export const BOOTSTRAP_METADATA_KEY = 'pmtwin_environment_bootstrap'
@@ -9,6 +13,8 @@ export type EnvironmentBootstrapMetadata = {
   seedVersion: string
   mode: RuntimeMode
   appVersion: string
+  identitySchemaVersion?: number
+  ownershipSchemaVersion?: number
 }
 
 export type EnvironmentBootstrapResult = {
@@ -38,6 +44,8 @@ export function ensureEnvironmentBootstrap(
     seedVersion: SEED_VERSION,
     mode,
     appVersion: resolveAppVersion(),
+    identitySchemaVersion: IDENTITY_SCHEMA_VERSION,
+    ownershipSchemaVersion: OWNERSHIP_SCHEMA_VERSION,
   }
   storage.set(BOOTSTRAP_METADATA_KEY, metadata)
   return {

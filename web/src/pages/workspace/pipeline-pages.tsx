@@ -112,6 +112,7 @@ import { useExecutiveListFilters } from '@/lib/executive-list-filters'
 import { PmFilterChips } from '@/components/ui/pm-filter-chips'
 import { ExecutiveEntityMetadata } from '@/components/shared/executive-entity-metadata'
 import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'
+import { isOpportunityOwnedByContext } from '@/domain/identity/ownership-adapters.ts'
 
 function resolveMatchNegotiation(match: PostMatch): Negotiation | undefined {
   if (match.negotiationId) {
@@ -359,7 +360,7 @@ export function getVisiblePipelineTabs(showLegacyApplications: boolean) {
 export function PipelinePage() {
   const { tab } = useParams()
   const navigate = useNavigate()
-  const { user, canAccessAdmin } = useAuth()
+  const { user, activeWorkspace, activeParty, canAccessAdmin } = useAuth()
   const showLegacyApplications = getEffectiveProductFlags().showLegacyApplications
   const { productLanguage } = useProductLanguage()
   const pipelineTabs = getVisiblePipelineTabs(showLegacyApplications)
@@ -376,19 +377,27 @@ export function PipelinePage() {
         role: user?.role,
         status: user?.status,
         canAccessAdmin,
+        activeWorkspaceId: activeWorkspace?.id,
+        activePartyId: activeParty?.id,
         profile: user?.profile,
       }),
-    [user, canAccessAdmin],
+    [user, activeWorkspace?.id, activeParty?.id, canAccessAdmin],
   )
   const ownedOpportunityIds = useMemo(() => {
     const ids = new Set<string>()
     for (const opp of opportunities) {
-      if (opp.creatorId && opp.creatorId === user?.id) {
+      if (
+        isOpportunityOwnedByContext(opp, {
+          userId: user?.id,
+          activeWorkspaceId: activeWorkspace?.id,
+          activePartyId: activeParty?.id,
+        })
+      ) {
         ids.add(opp.id)
       }
     }
     return ids
-  }, [opportunities, user?.id])
+  }, [opportunities, user?.id, activeWorkspace?.id, activeParty?.id])
   const matches = useMemo(
     () => filterPostMatchesForViewer(allMatches, viewer, { ownedOpportunityIds }),
     [allMatches, viewer, ownedOpportunityIds],
@@ -471,7 +480,7 @@ export function MatchesPage() {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const navState = readProductNavState(location.state)
-  const { user, canAccessAdmin } = useAuth()
+  const { user, activeWorkspace, activeParty, canAccessAdmin } = useAuth()
   const { productLanguage } = useProductLanguage()
   const [matchView, setMatchView] = useState<MatchPresentationView>(() =>
     resolveDefaultMatchView(navState),
@@ -484,19 +493,27 @@ export function MatchesPage() {
         role: user?.role,
         status: user?.status,
         canAccessAdmin,
+        activeWorkspaceId: activeWorkspace?.id,
+        activePartyId: activeParty?.id,
         profile: user?.profile,
       }),
-    [user, canAccessAdmin],
+    [user, activeWorkspace?.id, activeParty?.id, canAccessAdmin],
   )
   const ownedOpportunityIds = useMemo(() => {
     const ids = new Set<string>()
     for (const opp of opportunitiesApi.list()) {
-      if (opp.creatorId && opp.creatorId === user?.id) {
+      if (
+        isOpportunityOwnedByContext(opp, {
+          userId: user?.id,
+          activeWorkspaceId: activeWorkspace?.id,
+          activePartyId: activeParty?.id,
+        })
+      ) {
         ids.add(opp.id)
       }
     }
     return ids
-  }, [user?.id])
+  }, [user?.id, activeWorkspace?.id, activeParty?.id])
   const myMatches = useMemo(
     () => filterPostMatchesForViewer(allMatches, viewer, { ownedOpportunityIds }),
     [allMatches, viewer, ownedOpportunityIds],

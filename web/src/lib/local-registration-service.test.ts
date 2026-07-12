@@ -11,6 +11,8 @@ import { UserRepository } from '@/repositories/user-repository.ts'
 import { CompanyRepository } from '@/repositories/company-repository.ts'
 import { PartyRepository } from '@/repositories/party-repository.ts'
 import { PartyMembershipRepository } from '@/repositories/party-membership-repository.ts'
+import { WorkspaceRepository } from '@/repositories/workspace-repository.ts'
+import { WorkspaceMembershipRepository } from '@/repositories/workspace-membership-repository.ts'
 import { OpportunityRepository } from '@/repositories/opportunity-repository.ts'
 import { registerLocalAccount } from '@/lib/local-registration-service.ts'
 import { resolveOpportunityOwnerPartyId } from '@/domain/party/ownership-adapters.ts'
@@ -47,6 +49,16 @@ function createIsolatedRegistrationStack(namespace: string) {
     () => companyRepository.getAll(),
   )
   const opportunityRepository = new OpportunityRepository(storage, () => [])
+  const workspaceRepository = new WorkspaceRepository(
+    storage,
+    () => userRepository.getAll(),
+    () => companyRepository.getAll(),
+  )
+  const workspaceMembershipRepository = new WorkspaceMembershipRepository(
+    storage,
+    () => userRepository.getAll(),
+    () => companyRepository.getAll(),
+  )
 
   return {
     storage,
@@ -56,11 +68,16 @@ function createIsolatedRegistrationStack(namespace: string) {
     partyRepository,
     partyMembershipRepository,
     opportunityRepository,
+    workspaceRepository,
+    workspaceMembershipRepository,
     deps: {
       userRepository,
       companyRepository,
       partyRepository,
       partyMembershipRepository,
+      workspaceRepository,
+      workspaceMembershipRepository,
+      storageAdapter: storage,
     },
   }
 }
@@ -79,12 +96,18 @@ describe('local registration service', () => {
     )
 
     assert.equal(result.partyType, 'individual')
-    assert.equal(result.partyId, result.userId)
+    assert.notEqual(result.partyId, result.userId)
     assert.equal(stack.userRepository.getById(result.userId)?.status, 'pending_vetting')
     assert.equal(stack.partyRepository.getById(result.partyId)?.status, 'pending_vetting')
     assert.equal(
       stack.partyMembershipRepository.getPrimaryForUser(result.userId)?.partyId,
-      result.userId,
+      result.partyId,
+    )
+    assert.equal(
+      stack.workspaceMembershipRepository
+        .getActiveMembership(result.userId, result.workspaceId)
+        ?.role,
+      'workspace_owner',
     )
     assert.equal(stack.rootStorage.get(`${DEMO_NAMESPACE_PREFIX}${OVERRIDES_KEY}`) != null, true)
     assert.equal(loadUsers().some((user) => user.email === 'individual.demo@test'), false)
@@ -107,7 +130,10 @@ describe('local registration service', () => {
     )
 
     const authUser = stack.userRepository.getById(result.userId)
-    const company = stack.companyRepository.getById(result.partyId)
+    const companyProfileId = stack.partyRepository.getById(result.partyId)?.sourceEntityId
+    const company = companyProfileId
+      ? stack.companyRepository.getById(companyProfileId)
+      : undefined
 
     assert.equal(result.partyType, 'company')
     assert.notEqual(result.userId, result.partyId)
@@ -122,6 +148,7 @@ describe('local registration service', () => {
       stack.partyMembershipRepository.getPrimaryForUser(result.userId)?.membershipRole,
       'owner',
     )
+    assert.equal(authUser?.role, 'user')
   })
 })
 

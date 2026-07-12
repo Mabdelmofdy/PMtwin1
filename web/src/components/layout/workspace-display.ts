@@ -21,13 +21,14 @@ export function resolveWorkspaceContext(
   options: {
     isCompanyUser: boolean
     isAdminArea: boolean
+    activeWorkspaceName?: string
   },
 ): WorkspaceContext {
   const dashboardHref = options.isCompanyUser
     ? '/company-dashboard'
     : '/dashboard'
 
-  if (options.isAdminArea || pathname.startsWith('/admin')) {
+  if (options.isAdminArea) {
     return {
       title: `${APP_NAME} Admin`,
       subtitle: 'Platform operations',
@@ -38,7 +39,9 @@ export function resolveWorkspaceContext(
 
   if (pathname === '/dashboard' || pathname === '/company-dashboard') {
     return {
-      title: options.isCompanyUser ? 'Company workspace' : 'My Workspace',
+      title:
+        options.activeWorkspaceName ??
+        (options.isCompanyUser ? 'Company workspace' : 'My Workspace'),
       subtitle: APP_NAME,
       homeHref: dashboardHref,
       isAdmin: false,

@@ -80,6 +80,7 @@ export type RegistrationRequest = {
 export type RegistrationSuccess = {
   ok: true
   userId: string
+  workspaceId: string
   partyId: string
   membershipId: string
   partyType: ImplementedPartyType
@@ -103,6 +104,7 @@ export type RegistrationResult =
 export interface RegistrationApiClient {
   register(request: RegistrationRequest): Promise<{
     userId: string
+    workspaceId: string
     partyId: string
     membershipId: string
     partyType: ImplementedPartyType
@@ -281,6 +283,7 @@ export async function registerAccount(
     return {
       ok: true,
       userId: created.userId,
+      workspaceId: created.workspaceId,
       partyId: created.partyId,
       membershipId: created.membershipId,
       partyType: created.partyType,

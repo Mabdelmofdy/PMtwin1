@@ -33,6 +33,7 @@ import {
   emitParticipantNotifications,
   type NotificationSink,
 } from '@/commands/handlers/lifecycle-notifications.ts'
+import { getCommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
 
 /** Canonical lifecycle entity key — never use `post_match`. */
 export const POST_MATCH_ENTITY_TYPE = 'match' as const
@@ -114,17 +115,32 @@ function mapParticipants(
   participants: readonly Participant[],
   userId: string,
   participantStatus: string,
+  actor?: {
+    readonly actorUserId?: string
+    readonly partyId?: string
+    readonly workspaceId?: string
+  },
 ): Participant[] {
   let found = false
+  const actedAt = new Date().toISOString()
   const updated = participants.map((participant) => {
-    if (participant.userId !== userId) {
+    const matchesUser = participant.userId === userId
+    const matchesParty =
+      Boolean(actor?.partyId) &&
+      (participant.partyId === actor?.partyId ||
+        participant.representativeUserIds?.includes(userId))
+    if (!matchesUser && !matchesParty) {
       return { ...participant }
     }
     found = true
     return {
       ...participant,
       participantStatus,
-      respondedAt: new Date().toISOString(),
+      respondedAt: actedAt,
+      actorUserId: actor?.actorUserId ?? userId,
+      actedAt,
+      partyId: participant.partyId ?? actor?.partyId,
+      workspaceId: participant.workspaceId ?? actor?.workspaceId,
     }
   })
   if (!found) {
@@ -167,9 +183,16 @@ function isOneWayQuorumMet(participants: readonly Participant[]): boolean {
 }
 
 function allParticipantsAccepted(participants: readonly Participant[]): boolean {
+  // Prefer party-level uniqueness when partyId is present.
+  const byParty = new Map<string, Participant>()
+  for (const participant of participants) {
+    const key = participant.partyId ?? participant.userId
+    if (!byParty.has(key)) byParty.set(key, participant)
+  }
+  const unique = [...byParty.values()]
   return (
-    participants.length > 0 &&
-    participants.every((participant) =>
+    unique.length > 0 &&
+    unique.every((participant) =>
       isParticipantStatus(participant, 'accepted'),
     )
   )
@@ -413,8 +436,12 @@ export class PostMatchCommandHandler {
       ])
     }
 
+    const actor = getCommandPermissionActor()
     const participant = postMatch.participants.find(
-      (p) => p.userId === command.userId,
+      (p) =>
+        p.userId === command.userId ||
+        p.representativeUserIds?.includes(command.userId) ||
+        (actor?.activePartyId && p.partyId === actor.activePartyId),
     )
     if (!participant) {
       return failure(command.commandType, command.aggregateId, [
@@ -426,6 +453,11 @@ export class PostMatchCommandHandler {
       postMatch.participants,
       command.userId,
       'accepted',
+      {
+        actorUserId: command.userId,
+        partyId: actor?.activePartyId ?? participant.partyId,
+        workspaceId: actor?.activeWorkspaceId ?? participant.workspaceId,
+      },
     )
 
     const targetStatus = resolveAggregateStatusAfterAccept(
@@ -515,8 +547,12 @@ export class PostMatchCommandHandler {
       ])
     }
 
+    const actor = getCommandPermissionActor()
     const participant = postMatch.participants.find(
-      (p) => p.userId === command.userId,
+      (p) =>
+        p.userId === command.userId ||
+        p.representativeUserIds?.includes(command.userId) ||
+        (actor?.activePartyId && p.partyId === actor.activePartyId),
     )
     if (!participant) {
       return failure(command.commandType, command.aggregateId, [
@@ -528,6 +564,11 @@ export class PostMatchCommandHandler {
       postMatch.participants,
       command.userId,
       'declined',
+      {
+        actorUserId: command.userId,
+        partyId: actor?.activePartyId ?? participant.partyId,
+        workspaceId: actor?.activeWorkspaceId ?? participant.workspaceId,
+      },
     )
 
     emitParticipantNotifications(this.notificationRepository, {

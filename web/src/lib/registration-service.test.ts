@@ -102,6 +102,7 @@ describe('registration-service request path', () => {
         called = true
         return {
           userId: 'user-1',
+          workspaceId: 'workspace-1',
           partyId: 'party-1',
           membershipId: 'user-1::party-1',
           partyType: 'individual',

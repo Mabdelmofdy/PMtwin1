@@ -28,6 +28,11 @@ export type Party = {
   readonly sourceEntityId: string
   readonly sourceEntityType: SourceEntityType
   readonly primaryContactId?: string
+  /** Canonical business workspace link (identity refactor). */
+  readonly workspaceId?: string
+  readonly createdByUserId?: string
+  readonly individualProfileId?: string
+  readonly companyProfileId?: string
   readonly createdAt?: string
   readonly updatedAt?: string
 }
@@ -124,6 +129,9 @@ export type SourceEntityAccount = {
 
 export type OwnerResolvableEntity = {
   readonly ownerPartyId?: string
+  readonly workspaceId?: string
+  readonly createdByUserId?: string
   readonly creatorId?: string
+  /** @deprecated Legacy ownership fallback only — not authoritative. */
   readonly companyId?: string
 }

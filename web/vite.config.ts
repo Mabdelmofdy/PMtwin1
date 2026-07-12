@@ -15,6 +15,8 @@ export default defineConfig({
       '@pm-twin/collaboration-models': path.resolve(__dirname, '../packages/collaboration-models/dist/index.js'),
       '@pm-twin/workflows': path.resolve(__dirname, '../packages/workflows/dist/index.js'),
       '@pm-twin/validation': path.resolve(__dirname, '../packages/validation/dist/index.js'),
+      '@pm-twin/identity': path.resolve(__dirname, '../packages/identity/src/index.ts'),
+      '@pm-twin/party': path.resolve(__dirname, '../packages/party/src/index.ts'),
       // Phase 10.2 — neutral seed alias; physical root remains POC/data until extraction.
       '@seed-data': path.resolve(__dirname, '../POC/data'),
     },

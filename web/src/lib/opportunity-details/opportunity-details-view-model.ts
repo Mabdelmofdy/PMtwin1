@@ -13,6 +13,7 @@ export type ExecutiveHeaderViewModel = {
   readonly commercialLabel?: string
   readonly matchingTopology?: string
   readonly ownerLabel?: string
+  readonly createdByLabel?: string
   readonly location?: string
   readonly readinessLabel?: string
   readonly workPackageCount?: number
@@ -33,7 +34,8 @@ export function buildExecutiveHeaderViewModel(
     subModel: collaboration.subModel,
     commercialLabel: collaboration.commercialLabel,
     matchingTopology: collaboration.matchingTopology,
-    ownerLabel: creatorName,
+    ownerLabel: model.ownerPartyName ?? creatorName,
+    createdByLabel: creatorName,
     location: opportunity.location ?? opportunity.city,
     readinessLabel: capabilities.canViewReadinessDetails
       ? `${formatReadinessScorePercent(kpis.readiness.score)} Ready`

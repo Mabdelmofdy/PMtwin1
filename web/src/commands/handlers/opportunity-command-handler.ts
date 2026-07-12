@@ -26,6 +26,7 @@ import type { AuditEntry, Opportunity } from '@/types/domain.ts'
 import type { AuditRepository } from '@/repositories/audit-repository.ts'
 import type { OpportunityRepository } from '@/repositories/opportunity-repository.ts'
 import type { ProfileKind } from '@/domain/profile-readiness/types.ts'
+import type { CommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
 import {
   evaluatePublishReadiness,
   formatPublishReadinessCommandErrors,
@@ -57,6 +58,7 @@ export type OpportunityCommandHandlerDeps = {
   readonly resolvePublishReadinessContext?: (
     opportunity: Opportunity,
   ) => PublishReadinessContext
+  readonly resolveCommandActor?: () => CommandPermissionActor | null
 }
 
 function failure(
@@ -193,11 +195,13 @@ export class OpportunityCommandHandler {
   private readonly resolvePublishReadinessContext?: (
     opportunity: Opportunity,
   ) => PublishReadinessContext
+  private readonly resolveCommandActor?: () => CommandPermissionActor | null
 
   constructor(deps: OpportunityCommandHandlerDeps) {
     this.opportunityRepository = deps.opportunityRepository
     this.auditRepository = deps.auditRepository ?? null
     this.resolvePublishReadinessContext = deps.resolvePublishReadinessContext
+    this.resolveCommandActor = deps.resolveCommandActor
   }
 
   handle(command: Command): CommandResult {
@@ -262,6 +266,8 @@ export class OpportunityCommandHandler {
     }
 
     const fields = payloadToOpportunityFields(payload)
+    const actor = this.resolveCommandActor?.()
+    const createdByUserId = actor?.userId ?? payload.creatorId
     const draftCheck = runDraftValidation(fields, {
       taxonomyValid: hasCollaborationSelection ? true : undefined,
     })
@@ -273,6 +279,12 @@ export class OpportunityCommandHandler {
       ...fields,
       id: command.aggregateId,
       status: 'draft',
+      workspaceId: actor?.activeWorkspaceId,
+      ownerPartyId: actor?.activePartyId,
+      createdByUserId,
+      creatorId: createdByUserId,
+      lastModifiedByUserId: createdByUserId,
+      createdByActorType: actor?.actorType ?? 'marketplace_user',
     } as Omit<Opportunity, 'createdAt' | 'updatedAt'>)
 
     this.appendAudit({
@@ -299,6 +311,7 @@ export class OpportunityCommandHandler {
     }
 
     const payload = command.payload ?? {}
+    const actor = this.resolveCommandActor?.()
     const merged = {
       ...existing,
       ...payloadToOpportunityFields({
@@ -360,7 +373,16 @@ export class OpportunityCommandHandler {
     }
 
     const { status: _status, id: _id, createdAt: _createdAt, ...patch } = merged
-    this.opportunityRepository.update(command.aggregateId, patch)
+    this.opportunityRepository.update(command.aggregateId, {
+      ...patch,
+      workspaceId: existing.workspaceId ?? actor?.activeWorkspaceId,
+      ownerPartyId: existing.ownerPartyId ?? actor?.activePartyId,
+      lastModifiedByUserId:
+        actor?.userId ??
+        payload.creatorId ??
+        existing.lastModifiedByUserId ??
+        existing.createdByUserId,
+    })
 
     this.appendAudit({
       action: 'opportunity.updated',

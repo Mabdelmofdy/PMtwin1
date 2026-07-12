@@ -12,13 +12,20 @@ import {
 } from '@/components/layout/pm-layout-index'
 import { PmButton, PmSurface } from '@/components/ui/pm-index'
 import { useAuth } from '@/providers/auth-provider'
+import { isOpportunityOwnedByContext } from '@/domain/identity/ownership-adapters.ts'
 
 /** Opportunity-focused dashboard section — recent postings and quick actions. */
 export function OpportunityDashboardSection() {
-  const { user } = useAuth()
+  const { user, activeWorkspace, activeParty } = useAuth()
   const opportunities = opportunitiesApi.list()
   const myRecent = opportunities
-    .filter((o) => o.creatorId === user?.id)
+    .filter((opportunity) =>
+      isOpportunityOwnedByContext(opportunity, {
+        userId: user?.id,
+        activeWorkspaceId: activeWorkspace?.id,
+        activePartyId: activeParty?.id,
+      }),
+    )
     .sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
     .slice(0, 3)
 

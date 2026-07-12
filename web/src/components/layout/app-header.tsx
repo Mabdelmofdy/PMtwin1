@@ -14,11 +14,12 @@ import { pmTypography } from '@/tokens'
 
 export function AppHeader() {
   const { pathname } = useLocation()
-  const { isCompanyUser, canAccessAdmin } = useAuth()
-  const isAdminArea = pathname.startsWith('/admin') && canAccessAdmin
+  const { isCompanyUser, activeWorkspace, platformContextActive } = useAuth()
+  const isAdminArea = pathname.startsWith('/admin') && platformContextActive
   const workspace = resolveWorkspaceContext(pathname, {
     isCompanyUser,
     isAdminArea,
+    activeWorkspaceName: activeWorkspace?.name,
   })
 
   return (

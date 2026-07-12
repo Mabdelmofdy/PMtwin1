@@ -174,7 +174,10 @@ describe('evaluateCommandRbac', () => {
     )
 
     assert.equal(result.allowed, true)
-    assert.ok(result.matchedPolicies.includes('command-rbac:role-matrix'))
+    assert.ok(
+      result.matchedPolicies.includes('command-rbac:role-matrix') ||
+        result.matchedPolicies.includes('command-rbac:workspace-capability'),
+    )
   })
 
   it('legacy professional role alias can create opportunity drafts', () => {

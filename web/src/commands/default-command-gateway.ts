@@ -155,6 +155,7 @@ export class DefaultCommandGateway implements CommandGateway {
         this.resolveCommandPermissionActor(),
         command.commandType === 'TransitionOpportunityStatus'
         || command.commandType === 'PublishOpportunity'
+        || command.commandType === 'UpdateOpportunity'
           ? {
               opportunity: this.resolveOpportunityForCommandRbac(
                 command.aggregateId,

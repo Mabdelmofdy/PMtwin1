@@ -16,6 +16,10 @@ export type NegotiationMessage = {
   readonly senderId: string
   readonly senderRole: string
   readonly senderCompanyId?: string
+  /** Canonical party the sender represented. */
+  readonly partyId?: string
+  readonly workspaceId?: string
+  readonly actorUserId?: string
   readonly body: string
   readonly visibility: NegotiationMessageVisibility
   readonly createdAt: string
@@ -36,6 +40,9 @@ export type NegotiationOffer = {
   readonly id: string
   readonly negotiationId: string
   readonly submittedBy: string
+  readonly partyId?: string
+  readonly workspaceId?: string
+  readonly actorUserId?: string
   readonly version: number
   readonly terms: CommercialTerms
   readonly changeSummary?: string
@@ -61,6 +68,10 @@ export type NegotiationTranscriptEvent = {
   readonly eventType: NegotiationTranscriptEventType
   readonly actorId: string
   readonly actorRole: string
+  readonly actorType?: 'marketplace_user' | 'platform_operator' | 'system'
+  readonly partyId?: string
+  readonly workspaceId?: string
+  readonly actorUserId?: string
   readonly timestamp: string
   readonly summary: string
   readonly metadata?: Readonly<Record<string, unknown>>

@@ -18,16 +18,25 @@ import { PmBadge, PmButton, PmReadinessScoreBadge, PmSurface, PmWorkflowBadge } 
 import { useAuth } from '@/providers/auth-provider'
 import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
+import { isOpportunityOwnedByContext } from '@/domain/identity/ownership-adapters.ts'
 
 /** User-focused dashboard widgets — recent activity across workspace. */
 export function UserDashboardSection() {
-  const { user, isCompanyUser } = useAuth()
+  const { user, activeWorkspace, activeParty, isCompanyUser } = useAuth()
   const userId = user?.id
   const profileKind = isCompanyUser ? 'company' : 'individual'
 
+  const ownsOpportunity = (
+    opportunity: ReturnType<typeof opportunitiesApi.list>[number],
+  ) =>
+    isOpportunityOwnedByContext(opportunity, {
+      userId,
+      activeWorkspaceId: activeWorkspace?.id,
+      activePartyId: activeParty?.id,
+    })
   const recentOpportunities = opportunitiesApi
     .list()
-    .filter((o) => !userId || o.creatorId === userId)
+    .filter((opportunity) => !userId || ownsOpportunity(opportunity))
     .sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
     .slice(0, 3)
 
@@ -126,8 +135,8 @@ export function UserDashboardSection() {
               opportunity={opp}
               showActions
               viewerUserId={userId}
-              showOwnerInsights={userId === opp.creatorId}
-              canEdit={userId === opp.creatorId}
+              showOwnerInsights={ownsOpportunity(opp)}
+              canEdit={ownsOpportunity(opp)}
             />
           ))}
         </div>
