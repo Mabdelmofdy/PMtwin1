@@ -345,19 +345,40 @@ export function AdminOpportunitiesPage() {
         return [view.name, view.reference, o.status, o.location].filter(Boolean).join(' ')
       }}
       searchPlaceholder="Search opportunities…"
-      getRowActions={() => [
+      getRowActions={(o) => [
+        {
+          id: 'open',
+          label: 'Open',
+          onSelect: () => {
+            window.location.assign(`/admin/opportunities/${o.id}`)
+          },
+        },
+        {
+          id: 'timeline',
+          label: 'Timeline',
+          onSelect: () => {
+            window.location.assign(`/admin/opportunities/${o.id}`)
+          },
+        },
+        {
+          id: 'related',
+          label: 'Related Objects',
+          onSelect: () => {
+            window.location.assign(`/admin/opportunities/${o.id}`)
+          },
+        },
+        {
+          id: 'audit',
+          label: 'Audit',
+          onSelect: () => {
+            window.location.assign('/admin/audit')
+          },
+        },
         {
           id: 'moderate',
           label: 'Moderate',
           onSelect: () => {
             window.location.assign('/admin/moderation')
-          },
-        },
-        {
-          id: 'matching',
-          label: 'Matching',
-          onSelect: () => {
-            window.location.assign('/admin/matching')
           },
         },
       ]}
@@ -366,18 +387,26 @@ export function AdminOpportunitiesPage() {
           id: 'title',
           label: `${productLanguage.label('opportunity')} Name`,
           cell: (o) => formatOpportunityPresentation(o).name,
+          exportValue: (o) => formatOpportunityPresentation(o).name,
         },
         {
           id: 'reference',
           label: 'Reference Number',
           cell: (o) => formatOpportunityPresentation(o).reference,
+          exportValue: (o) => formatOpportunityPresentation(o).reference,
         },
         {
           id: 'status',
           label: 'Status',
           cell: (o) => <AdminStatusBadge status={o.status} entity="opportunity" />,
+          exportValue: (o) => String(o.status ?? ''),
         },
-        { id: 'location', label: 'Location', cell: (o) => o.location },
+        {
+          id: 'location',
+          label: 'Location',
+          cell: (o) => o.location,
+          exportValue: (o) => String(o.location ?? ''),
+        },
         {
           id: 'readiness',
           label: 'Readiness',
@@ -394,8 +423,14 @@ export function AdminOpportunitiesPage() {
               />
             )
           },
+          exportValue: (o) => String(resolveOpportunityReadiness(o).score),
         },
-        { id: 'updated', label: 'Updated', cell: (o) => formatDate(o.updatedAt) },
+        {
+          id: 'updated',
+          label: 'Updated',
+          cell: (o) => formatDate(o.updatedAt),
+          exportValue: (o) => String(o.updatedAt ?? ''),
+        },
       ]}
     />
   )
@@ -605,16 +640,55 @@ export function AdminDealsPage() {
         const view = formatCommercialAgreementPresentation(d)
         return [view.name, view.reference, d.status].filter(Boolean).join(' ')
       }}
+      getRowActions={(d) => [
+        {
+          id: 'open',
+          label: 'Open',
+          onSelect: () => {
+            window.location.assign(`/admin/commercial-agreements/${d.id}`)
+          },
+        },
+        {
+          id: 'approvals',
+          label: 'Approvals',
+          onSelect: () => {
+            window.location.assign('/admin/approvals')
+          },
+        },
+        {
+          id: 'award',
+          label: 'Award',
+          onSelect: () => {
+            window.location.assign('/admin/awards')
+          },
+        },
+        {
+          id: 'contract',
+          label: productLanguage.label('contract'),
+          onSelect: () => {
+            window.location.assign('/admin/contracts')
+          },
+        },
+        {
+          id: 'audit',
+          label: 'Audit',
+          onSelect: () => {
+            window.location.assign('/admin/audit')
+          },
+        },
+      ]}
       columns={[
         {
           id: 'name',
           label: 'Agreement Name',
           cell: (d) => formatCommercialAgreementPresentation(d).name,
+          exportValue: (d) => formatCommercialAgreementPresentation(d).name,
         },
         {
           id: 'reference',
           label: 'Reference Number',
           cell: (d) => formatCommercialAgreementPresentation(d).reference,
+          exportValue: (d) => formatCommercialAgreementPresentation(d).reference,
         },
         {
           id: 'status',
@@ -622,6 +696,7 @@ export function AdminDealsPage() {
           cell: (d) => (
             <AdminStatusBadge status={d.status ?? 'pending'} entity="deal" />
           ),
+          exportValue: (d) => String(d.status ?? ''),
         },
       ]}
     />

@@ -94,6 +94,8 @@ export type AdminOpsActionCard = {
   readonly destinationHref: string
   readonly quickActions: readonly string[]
   readonly requiredPermission: string
+  /** Decision = explicit approve/reject/award; Attention = monitoring/follow-up */
+  readonly attentionKind: 'decision' | 'attention'
 }
 
 export type AdminCommandCenterSummary = {

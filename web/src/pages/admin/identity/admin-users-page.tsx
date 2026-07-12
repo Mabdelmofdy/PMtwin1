@@ -54,14 +54,29 @@ export function AdminUsersPage() {
       searchPlaceholder="Search users…"
       getRowActions={(u) => [
         {
-          id: 'audit',
-          label: 'Audit',
-          onSelect: () => navigate(`/admin/audit?entity=${u.id}`),
+          id: 'open',
+          label: 'Open',
+          onSelect: () => navigate(`/admin/users/${u.id}`),
         },
         {
           id: 'memberships',
           label: 'Memberships',
           onSelect: () => navigate('/admin/memberships'),
+        },
+        {
+          id: 'timeline',
+          label: 'Timeline',
+          onSelect: () => navigate(`/admin/users/${u.id}`),
+        },
+        {
+          id: 'audit',
+          label: 'Audit',
+          onSelect: () => navigate(`/admin/audit?entity=${u.id}`),
+        },
+        {
+          id: 'suspend',
+          label: 'Suspend',
+          onSelect: () => navigate(`/admin/users/${u.id}`),
         },
       ]}
       toolbarExtra={

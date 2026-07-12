@@ -27,7 +27,8 @@ export function AdminDistributionChart({
       ) : (
         <ul className="space-y-2" aria-label={title}>
           {buckets.map((bucket) => {
-            const width = Math.max(4, Math.round((bucket.count / max) * 100))
+            const width =
+              bucket.count <= 0 ? 0 : Math.round((bucket.count / max) * 100)
             return (
               <li key={bucket.id}>
                 <Link
@@ -40,14 +41,16 @@ export function AdminDistributionChart({
                   <div className="flex justify-between gap-2">
                     <span className={pmTypography.label}>{bucket.label}</span>
                     <span className={cn(pmTypography.caption, 'text-muted-foreground')}>
-                      {bucket.count}
+                      {bucket.count <= 0 ? 'No data' : bucket.count}
                     </span>
                   </div>
                   <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary"
-                      style={{ width: `${width}%` }}
-                    />
+                    {width > 0 ? (
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${width}%` }}
+                      />
+                    ) : null}
                   </div>
                 </Link>
               </li>
@@ -87,8 +90,8 @@ export function AdminTrendChart({
 
   const chart = (
     <PmContentCard title={title} description={description} className={className}>
-      {points.length === 0 ? (
-        <PmEmptyState title="No trend data available" size="compact" />
+      {points.length === 0 || points.every((p) => p.value <= 0) ? (
+        <PmEmptyState title="Awaiting activity" description="Not enough data to chart yet." size="compact" />
       ) : (
         <div>
           <svg
@@ -98,7 +101,22 @@ export function AdminTrendChart({
             aria-label={title}
           >
             {points.map((point, index) => {
-              const h = Math.max(2, (point.value / max) * (height - pad * 2))
+              if (point.value <= 0) {
+                const x = pad + index * (barWidth + barGap)
+                return (
+                  <g key={point.id}>
+                    <text
+                      x={x + barWidth / 2}
+                      y={height - 2}
+                      textAnchor="middle"
+                      className="fill-muted-foreground text-[9px]"
+                    >
+                      {point.label}
+                    </text>
+                  </g>
+                )
+              }
+              const h = (point.value / max) * (height - pad * 2)
               const x = pad + index * (barWidth + barGap)
               const y = height - pad - h
               return (
@@ -146,14 +164,26 @@ export type AdminConversionFunnelProps = {
 }
 
 export function AdminConversionFunnel({
-  title = 'Conversion funnel',
+  title = 'Pipeline composition',
   stages,
   className,
 }: AdminConversionFunnelProps) {
+  const hasActivity = stages.some((s) => s.count > 0)
+  if (!hasActivity) {
+    return (
+      <PmContentCard title={title} className={className}>
+        <PmEmptyState
+          title="Awaiting activity"
+          description="Pipeline stages will appear when marketplace records exist."
+          size="compact"
+        />
+      </PmContentCard>
+    )
+  }
   return (
     <AdminDistributionChart
       title={title}
-      description="Drill into any stage to open the related operational list."
+      description="Current distribution across operational stages. Drill into any stage to open the related list."
       buckets={stages}
       className={className}
     />

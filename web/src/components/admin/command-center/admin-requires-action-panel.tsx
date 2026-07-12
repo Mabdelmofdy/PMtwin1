@@ -11,34 +11,63 @@ export type AdminRequiresActionPanelProps = {
   readonly className?: string
 }
 
-/** Primary "Requires My Action" band for the Executive Command Center. */
+/**
+ * Split operational queues into Needs Decision (primary) and Needs Attention (secondary).
+ */
 export function AdminRequiresActionPanel({ cards, className }: AdminRequiresActionPanelProps) {
-  const actionable = cards.filter((c) => c.count > 0)
-  const display = actionable.length > 0 ? actionable : cards
+  const withWork = cards.filter((c) => c.count > 0)
+  const decisions = withWork.filter((c) => c.attentionKind === 'decision')
+  const attention = withWork.filter((c) => c.attentionKind !== 'decision')
 
   return (
-    <PmContentCard
-      title="Requires My Action"
-      description="Queues that need administrator intervention now."
-      className={cn('border-primary/20', className)}
-      actions={
-        <Link
-          to="/admin/command-center/operations"
-          className={cn(pmTypography.caption, 'text-primary underline-offset-4 hover:underline')}
-        >
-          All operations
-        </Link>
-      }
-    >
-      {display.length === 0 ? (
-        <PmEmptyState title="No pending actions" description="Operational queues are clear." size="compact" />
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {display.map((card) => (
-            <AdminOpsActionCard key={card.id} card={card} />
-          ))}
-        </div>
-      )}
-    </PmContentCard>
+    <div className={cn('flex flex-col gap-4', className)}>
+      <PmContentCard
+        title="Needs Decision"
+        description="Actions that require an explicit approve, reject, award, or moderate decision."
+        className="border-primary/30 bg-primary/[0.03]"
+        actions={
+          <Link
+            to="/admin/command-center/operations"
+            className={cn(pmTypography.caption, 'text-primary underline-offset-4 hover:underline')}
+          >
+            All operations
+          </Link>
+        }
+      >
+        {decisions.length === 0 ? (
+          <PmEmptyState
+            title="No decisions pending"
+            description="Decision queues are clear."
+            size="compact"
+          />
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {decisions.map((card) => (
+              <AdminOpsActionCard key={card.id} card={card} />
+            ))}
+          </div>
+        )}
+      </PmContentCard>
+
+      <PmContentCard
+        title="Needs Attention"
+        description="Monitoring and follow-up work — review when capacity allows."
+        className="border-border/60"
+      >
+        {attention.length === 0 ? (
+          <PmEmptyState
+            title="Nothing needs attention"
+            description="No monitoring queues are elevated."
+            size="compact"
+          />
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {attention.map((card) => (
+              <AdminOpsActionCard key={card.id} card={card} />
+            ))}
+          </div>
+        )}
+      </PmContentCard>
+    </div>
   )
 }

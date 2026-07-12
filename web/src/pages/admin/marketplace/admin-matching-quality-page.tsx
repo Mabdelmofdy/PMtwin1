@@ -40,14 +40,18 @@ export function AdminMatchingQualityPage() {
       <PmMetricGrid columns={3}>
         <PmStatCard
           label="Average match score"
-          value={`${Math.round(quality.averageMatchScore)}%`}
+          value={
+            quality.totalMatches <= 0 ? 'N/A' : `${Math.round(quality.averageMatchScore)}%`
+          }
           dense
         />
         <PmStatCard label="Total matches" value={quality.totalMatches} dense />
         <PmStatCard label="Accepted matches" value={quality.acceptedMatches} dense />
         <PmStatCard
           label="Acceptance rate"
-          value={`${Math.round(quality.acceptanceRate)}%`}
+          value={
+            quality.totalMatches <= 0 ? 'N/A' : `${Math.round(quality.acceptanceRate)}%`
+          }
           dense
         />
         <PmStatCard
@@ -61,16 +65,24 @@ export function AdminMatchingQualityPage() {
           dense
         />
       </PmMetricGrid>
-      <PmContentCard title="Conversion" className="mt-6">
+      <PmContentCard title="Current rates" className="mt-6">
         <PmMetricGrid columns={3}>
           <PmStatCard
             label="Negotiation rate"
-            value={`${Math.round(quality.negotiationRate)}%`}
+            value={
+              quality.acceptedMatches <= 0
+                ? 'N/A'
+                : `${Math.round(quality.negotiationRate)}%`
+            }
             dense
           />
           <PmStatCard
-            label="CA conversion"
-            value={`${Math.round(quality.dealConversionRate)}%`}
+            label="CA rate"
+            value={
+              quality.negotiationsStarted <= 0
+                ? 'N/A'
+                : `${Math.round(quality.dealConversionRate)}%`
+            }
             dense
           />
           <PmStatCard

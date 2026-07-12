@@ -19,27 +19,46 @@ export function AdminPostMatchesPage() {
       storageKey="post-matches"
       data={matches}
       getRowId={(m) => m.id}
-      getRowHref={() => '/admin/matching'}
+      getRowHref={(m) => `/admin/post-matches/${m.id}`}
       getSearchText={(m) => {
         const view = formatPostMatchPresentation(m, getOpportunity)
         return [view.title, view.reference, m.status, m.matchType].filter(Boolean).join(' ')
       }}
       searchPlaceholder="Search PostMatches…"
+      getRowActions={() => [
+        {
+          id: 'matching',
+          label: 'Matching',
+          onSelect: () => {
+            window.location.assign('/admin/matching')
+          },
+        },
+        {
+          id: 'audit',
+          label: 'Audit',
+          onSelect: () => {
+            window.location.assign('/admin/audit')
+          },
+        },
+      ]}
       columns={[
         {
           id: 'title',
           label: 'Match Title',
           cell: (m) => formatPostMatchPresentation(m, getOpportunity).title,
+          exportValue: (m) => formatPostMatchPresentation(m, getOpportunity).title,
         },
         {
           id: 'reference',
           label: 'Reference Number',
           cell: (m) => formatPostMatchPresentation(m, getOpportunity).reference,
+          exportValue: (m) => formatPostMatchPresentation(m, getOpportunity).reference,
         },
         {
           id: 'topology',
           label: 'Topology',
           cell: (m) => resolvePostMatchTopologyLabel(m),
+          exportValue: (m) => resolvePostMatchTopologyLabel(m),
         },
         {
           id: 'score',
@@ -50,11 +69,14 @@ export function AdminPostMatchesPage() {
             ) : (
               '—'
             ),
+          exportValue: (m) =>
+            typeof m.matchScore === 'number' ? String(m.matchScore) : '',
         },
         {
           id: 'status',
           label: 'Status',
           cell: (m) => <AdminStatusBadge status={String(m.status)} entity="match" />,
+          exportValue: (m) => String(m.status ?? ''),
         },
       ]}
     />

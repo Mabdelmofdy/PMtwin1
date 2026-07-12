@@ -55,7 +55,7 @@ export function AdminReportsPage() {
         <PmPageHeader
           label="Reports"
           title="Analytics"
-          description="Trends, distribution, conversion, and velocity from live repositories — no fabricated metrics."
+          description="Current distribution, pipeline composition, and activity from live repositories — no fabricated metrics."
           badges={<PmBadge tone="muted">{summary.environment}</PmBadge>}
         />
       }
@@ -71,14 +71,17 @@ export function AdminReportsPage() {
             },
             {
               label: 'Acceptance rate',
-              value: `${Math.round(matchingQuality.acceptanceRate)}%`,
+              value:
+                matchingQuality.totalMatches <= 0
+                  ? 'N/A'
+                  : `${Math.round(matchingQuality.acceptanceRate)}%`,
               href: '/admin/matching/quality',
             },
             {
               label: 'Completion rate',
               value:
                 analytics.completionRate == null
-                  ? '—'
+                  ? 'N/A'
                   : `${Math.round(analytics.completionRate)}%`,
               href: '/admin/contracts?status=completed',
             },
@@ -87,7 +90,7 @@ export function AdminReportsPage() {
 
         <div className="grid gap-4 lg:grid-cols-2">
           <AdminConversionFunnel
-            title="Pipeline conversion"
+            title="Pipeline composition"
             stages={pipeline.stages.map((s) => ({
               id: s.id,
               label: s.label,
@@ -96,14 +99,17 @@ export function AdminReportsPage() {
             }))}
           />
           <AdminTrendChart
-            title="Matching trend"
-            description="Live match status buckets"
+            title="Match status mix"
+            description="Current distribution of match statuses (not a historical trend)."
             points={analytics.matchingTrend}
             href="/admin/post-matches"
           />
         </div>
 
-        <PmContentCard title="Velocity" description="Average age from available timestamps.">
+        <PmContentCard
+          title="Activity age"
+          description="Average age from available timestamps — informational only."
+        >
           <div className="grid gap-3 sm:grid-cols-3">
             <AdminMetricTile
               label="Opportunity age"

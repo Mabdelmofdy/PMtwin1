@@ -40,7 +40,17 @@ export function AdminWorkspacePage() {
             description="Actions that require attention in this workspace."
           >
             {summary.actionCards.length === 0 ? (
-              <PmEmptyState title="Queue clear" size="compact" />
+              <PmEmptyState
+                title="No workspace queues"
+                description={
+                  summary.workspaceId === 'system' ||
+                  summary.workspaceId === 'configuration' ||
+                  summary.workspaceId === 'reports'
+                    ? 'Use domain navigation for system administration tools.'
+                    : 'No operational items for this workspace.'
+                }
+                size="compact"
+              />
             ) : (
               <div className="grid gap-2 sm:grid-cols-2">
                 {summary.actionCards.map((card) => (

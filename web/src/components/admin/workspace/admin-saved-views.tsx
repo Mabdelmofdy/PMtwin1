@@ -4,6 +4,8 @@ import { cn } from '@/lib/utils'
 export type AdminSavedView = {
   readonly id: string
   readonly label: string
+  /** Optional density applied when selecting this view */
+  readonly density?: 'compact' | 'comfortable' | 'spacious'
 }
 
 export type AdminSavedViewsProps = {

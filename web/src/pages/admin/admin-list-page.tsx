@@ -88,10 +88,12 @@ function exportRowsAsCsv<T>(
   const lines = rows.map((row) =>
     columns
       .map((col) => {
+        if (col.exportValue) return csvEscape(col.exportValue(row))
         const raw = col.cell(row)
-        const text =
-          typeof raw === 'string' || typeof raw === 'number' ? String(raw) : col.label
-        return csvEscape(text)
+        if (typeof raw === 'string' || typeof raw === 'number' || typeof raw === 'boolean') {
+          return csvEscape(String(raw))
+        }
+        return csvEscape('')
       })
       .join(','),
   )
@@ -285,19 +287,15 @@ export function AdminListPage<T>({
     return filtered.filter((row) => selection.selectedIds.has(getRowId(row)))
   }, [filtered, selection, getRowId])
 
-  const defaultViews: readonly AdminSavedView[] = savedViews ?? [
-    { id: 'all', label: 'All' },
-    { id: 'dense', label: 'Dense' },
-  ]
+  /** Only show saved views when the page provides real views — hide stub All/Dense. */
+  const viewsToShow = savedViews && savedViews.length > 0 ? savedViews : null
 
   function handleViewSelect(id: string): void {
     setActiveViewId(id)
-    if (id === 'dense') {
-      setDensity('compact')
-      persistPrefs({ density: 'compact' })
-    } else if (id === 'comfortable') {
-      setDensity('comfortable')
-      persistPrefs({ density: 'comfortable' })
+    const view = viewsToShow?.find((v) => v.id === id)
+    if (view?.density) {
+      setDensity(normalizeTableDensity(view.density, 'compact'))
+      persistPrefs({ density: normalizeTableDensity(view.density, 'compact') })
     }
   }
 
@@ -327,11 +325,13 @@ export function AdminListPage<T>({
       }
     >
       <div className="sticky top-0 z-10 -mx-1 mb-2 bg-background/95 px-1 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <AdminSavedViews
-          views={defaultViews}
-          activeId={activeViewId}
-          onSelect={handleViewSelect}
-        />
+        {viewsToShow ? (
+          <AdminSavedViews
+            views={viewsToShow}
+            activeId={activeViewId}
+            onSelect={handleViewSelect}
+          />
+        ) : null}
       </div>
 
       <PmDataTable

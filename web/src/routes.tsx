@@ -110,6 +110,9 @@ import {
   AdminVettingPage,
   AdminWorkspacePage,
 } from '@/pages/admin/admin-pages'
+import { AdminCommercialAgreementDetailPage } from '@/pages/admin/commercial/admin-commercial-agreement-detail-page.tsx'
+import { AdminContractDetailPage } from '@/pages/admin/commercial/admin-contract-detail-page.tsx'
+import { AdminPostMatchDetailPage } from '@/pages/admin/marketplace/admin-post-match-detail-page.tsx'
 function CommercialAgreementLegacyRedirect() {
   const { id } = useParams()
   return <Navigate to={`/commercial-agreements/${id ?? ''}`} replace />
@@ -238,13 +241,14 @@ export function AppRoutes() {
           <Route path="/admin/negotiations/:id" element={<AdminNegotiationDetailPage />} />
           <Route path="/admin/disputes" element={<AdminDisputesPage />} />
           <Route path="/admin/commercial-agreements" element={<AdminDealsPage />} />
-          <Route path="/admin/commercial-agreements/:id" element={<CommercialAgreementDetailPage />} />
+          <Route path="/admin/commercial-agreements/:id" element={<AdminCommercialAgreementDetailPage />} />
           <Route path="/admin/deals" element={<Navigate to="/admin/commercial-agreements" replace />} />
           <Route path="/admin/deals/:id" element={<AdminCommercialAgreementLegacyRedirect />} />
           <Route path="/admin/approvals" element={<AdminApprovalsPage />} />
           <Route path="/admin/awards" element={<AdminAwardsPage />} />
           <Route path="/admin/contracts" element={<AdminContractsPage />} />
-          <Route path="/admin/contracts/:id" element={<ContractDetailPage />} />
+          <Route path="/admin/contracts/:id" element={<AdminContractDetailPage />} />
+          <Route path="/admin/post-matches/:id" element={<AdminPostMatchDetailPage />} />
           <Route path="/admin/legal-review" element={<AdminLegalReviewPage />} />
           <Route path="/admin/consortium" element={<AdminConsortiumPage />} />
           <Route path="/admin/audit" element={<AdminAuditPage />} />

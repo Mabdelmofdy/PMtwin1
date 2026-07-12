@@ -138,6 +138,7 @@ function buildOpsCard(
     destinationHref: partial.destinationHref,
     quickActions: partial.quickActions,
     requiredPermission: partial.requiredPermission,
+    attentionKind: partial.attentionKind,
   }
 }
 
@@ -180,6 +181,7 @@ export function buildOperationsSummary(): AdminOperationsSummary {
       destinationHref: '/admin/moderation',
       quickActions: ['opportunity.moderate'],
       requiredPermission: 'admin.opportunities.moderate',
+      attentionKind: 'decision',
       highAt: 5,
     }),
     buildOpsCard({
@@ -191,6 +193,7 @@ export function buildOperationsSummary(): AdminOperationsSummary {
       destinationHref: '/admin/vetting',
       quickActions: ['vetting.approve', 'vetting.reject'],
       requiredPermission: 'admin.vetting.manage',
+      attentionKind: 'decision',
       highAt: 5,
     }),
     buildOpsCard({
@@ -202,6 +205,7 @@ export function buildOperationsSummary(): AdminOperationsSummary {
       destinationHref: '/admin/users?status=suspended',
       quickActions: ['user.unsuspend'],
       requiredPermission: 'admin.users.manage',
+      attentionKind: 'attention',
       highAt: 3,
     }),
     buildOpsCard({
@@ -213,6 +217,7 @@ export function buildOperationsSummary(): AdminOperationsSummary {
       destinationHref: '/admin/negotiations',
       quickActions: [],
       requiredPermission: 'admin.negotiations.read',
+      attentionKind: 'attention',
       highAt: 5,
     }),
     buildOpsCard({
@@ -224,6 +229,7 @@ export function buildOperationsSummary(): AdminOperationsSummary {
       destinationHref: '/admin/approvals',
       quickActions: ['commercial_agreement.approve'],
       requiredPermission: 'admin.commercial_agreements.approve',
+      attentionKind: 'decision',
       highAt: 5,
     }),
     buildOpsCard({
@@ -235,6 +241,7 @@ export function buildOperationsSummary(): AdminOperationsSummary {
       destinationHref: '/admin/awards',
       quickActions: ['commercial_agreement.award'],
       requiredPermission: 'admin.commercial_agreements.award',
+      attentionKind: 'decision',
       highAt: 3,
     }),
     buildOpsCard({
@@ -246,6 +253,7 @@ export function buildOperationsSummary(): AdminOperationsSummary {
       destinationHref: '/admin/legal-review',
       quickActions: [],
       requiredPermission: 'admin.contracts.legal_review',
+      attentionKind: 'decision',
       highAt: 5,
     }),
   ]

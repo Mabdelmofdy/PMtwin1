@@ -21,7 +21,8 @@ export function AdminPipelinePanel({ summary, className }: AdminPipelinePanelPro
     >
       <ol className="space-y-2" aria-label="Collaboration pipeline">
         {summary.stages.map((stage, index) => {
-          const width = Math.max(4, Math.round((stage.count / maxCount) * 100))
+          const width =
+            stage.count <= 0 ? 0 : Math.round((stage.count / maxCount) * 100)
           return (
             <li key={stage.id}>
               <Link
@@ -41,7 +42,7 @@ export function AdminPipelinePanel({ summary, className }: AdminPipelinePanelPro
                     {stage.label}
                   </span>
                   <span className={cn(pmTypography.caption, 'text-muted-foreground')}>
-                    {stage.count}
+                    {stage.count <= 0 ? 'No data' : stage.count}
                   </span>
                 </div>
                 <div
@@ -49,10 +50,12 @@ export function AdminPipelinePanel({ summary, className }: AdminPipelinePanelPro
                   role="img"
                   aria-label={`${stage.label}: ${stage.count}`}
                 >
-                  <div
-                    className="h-full rounded-full bg-primary transition-[width]"
-                    style={{ width: `${width}%` }}
-                  />
+                  {width > 0 ? (
+                    <div
+                      className="h-full rounded-full bg-primary transition-[width]"
+                      style={{ width: `${width}%` }}
+                    />
+                  ) : null}
                 </div>
               </Link>
             </li>

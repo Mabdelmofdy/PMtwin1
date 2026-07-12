@@ -38,6 +38,8 @@ export type PmDataTableColumn<T> = {
   label: string
   header?: ReactNode
   cell: (row: T) => ReactNode
+  /** Plain text for CSV export — prefer over rendering cell() when JSX badges are used. */
+  exportValue?: (row: T) => string
   /** Label shown in mobile card layout. Defaults to `label`. */
   mobileLabel?: string
   sortable?: boolean

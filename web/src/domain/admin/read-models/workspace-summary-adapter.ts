@@ -1,7 +1,10 @@
 /**
  * Workspace summary builder for admin workspace shells (EOX operational homes).
+ * Queues are strictly workspace-scoped — never fall back to global ops/inbox.
  */
 
+import { listFailedLocalCommands } from '@/domain/admin/diagnostics/failed-command-log.ts'
+import { buildDemoUatHealthSnapshot } from '@/domain/admin/diagnostics/demo-uat-health.ts'
 import { buildAdminInbox } from './inbox-adapter.ts'
 import {
   buildCommandCenterSummary,
@@ -11,7 +14,9 @@ import {
 } from './command-center-adapter.ts'
 import type {
   AdminHealthTone,
+  AdminInboxItem,
   AdminOpsActionCard,
+  AdminRecentOperation,
   AdminWorkspaceSummary,
 } from './types.ts'
 
@@ -24,6 +29,8 @@ type WorkspaceDef = {
     readonly description?: string
   }[]
   readonly actionCardIds: readonly string[]
+  /** When true, never show business ops cards (system/config/reports). */
+  readonly systemOnly?: boolean
 }
 
 const WORKSPACE_DEFS: Readonly<Record<string, WorkspaceDef>> = {
@@ -85,6 +92,7 @@ const WORKSPACE_DEFS: Readonly<Record<string, WorkspaceDef>> = {
       { label: 'Command Center', href: '/admin', description: 'Executive overview' },
     ],
     actionCardIds: [],
+    systemOnly: true,
   },
   configuration: {
     title: 'Configuration Workspace',
@@ -95,6 +103,7 @@ const WORKSPACE_DEFS: Readonly<Record<string, WorkspaceDef>> = {
       { label: 'Environments', href: '/admin/environments', description: 'Demo/UAT environments' },
     ],
     actionCardIds: [],
+    systemOnly: true,
   },
   system: {
     title: 'System Workspace',
@@ -108,6 +117,7 @@ const WORKSPACE_DEFS: Readonly<Record<string, WorkspaceDef>> = {
       { label: 'Audit', href: '/admin/audit', description: 'Audit trail' },
     ],
     actionCardIds: [],
+    systemOnly: true,
   },
 }
 
@@ -122,30 +132,172 @@ function workspaceRiskTone(cards: readonly AdminOpsActionCard[]): AdminHealthTon
   return 'healthy'
 }
 
+function filterInboxForWorkspace(
+  workspaceId: string,
+  items: readonly AdminInboxItem[],
+): readonly AdminInboxItem[] {
+  return items
+    .filter((item) => {
+      if (workspaceId === 'identity') {
+        return (
+          item.sourceWorkspace === 'identity' ||
+          item.entityType === 'user' ||
+          item.itemType === 'user_suspended' ||
+          item.itemType === 'vetting_pending'
+        )
+      }
+      if (workspaceId === 'compliance') {
+        return (
+          item.sourceWorkspace === 'compliance' ||
+          item.itemType.includes('vetting') ||
+          item.itemType === 'vetting_pending'
+        )
+      }
+      if (workspaceId === 'marketplace') {
+        return (
+          item.sourceWorkspace === 'marketplace' ||
+          item.itemType === 'matching_run_error'
+        )
+      }
+      if (workspaceId === 'commercial') {
+        return (
+          item.sourceWorkspace === 'commercial' ||
+          item.entityType === 'commercial_agreement' ||
+          item.entityType === 'negotiation'
+        )
+      }
+      // reports / configuration / system — no business inbox leakage
+      return false
+    })
+    .slice(0, 8)
+}
+
+function systemWorkspaceActionCards(workspaceId: string): readonly AdminOpsActionCard[] {
+  if (workspaceId === 'reports') return []
+
+  const health = buildDemoUatHealthSnapshot()
+  const failed = listFailedLocalCommands()
+  const risk = buildRiskSummary()
+  const cards: AdminOpsActionCard[] = []
+
+  if (workspaceId === 'system' || workspaceId === 'configuration') {
+    const warnCount = health.checks.filter(
+      (c) => c.status === 'warning' || c.status === 'error',
+    ).length
+    if (warnCount > 0 || workspaceId === 'system') {
+      cards.push({
+        id: 'health_diagnostics',
+        title: 'Health diagnostics',
+        count: warnCount,
+        severity: warnCount > 0 ? 'high' : 'low',
+        sla: warnCount > 0 ? 'warning' : 'none',
+        oldestAgeMs: 0,
+        assignedTeam: 'System',
+        destinationHref: '/admin/health',
+        quickActions: [],
+        requiredPermission: 'admin.health.read',
+        attentionKind: 'attention',
+      })
+    }
+  }
+
+  if (workspaceId === 'system') {
+    cards.push({
+      id: 'failed_commands',
+      title: 'Failed commands',
+      count: failed.length,
+      severity: failed.length > 0 ? 'high' : 'low',
+      sla: failed.length > 0 ? 'warning' : 'none',
+      oldestAgeMs: 0,
+      assignedTeam: 'System',
+      destinationHref: '/admin/failed-commands',
+      quickActions: [],
+      requiredPermission: 'admin.health.read',
+      attentionKind: 'attention',
+    })
+    cards.push({
+      id: 'data_quality',
+      title: 'Data quality hints',
+      count: risk.orphanHints,
+      severity: risk.orphanHints > 0 ? 'medium' : 'low',
+      sla: risk.orphanHints > 0 ? 'warning' : 'none',
+      oldestAgeMs: 0,
+      assignedTeam: 'System',
+      destinationHref: '/admin/data-quality',
+      quickActions: [],
+      requiredPermission: 'admin.health.read',
+      attentionKind: 'attention',
+    })
+  }
+
+  return cards
+}
+
+function filterRecentOpsForWorkspace(
+  workspaceId: string,
+  ops: readonly AdminRecentOperation[],
+): readonly AdminRecentOperation[] {
+  if (
+    workspaceId === 'reports' ||
+    workspaceId === 'configuration' ||
+    workspaceId === 'system'
+  ) {
+    return ops.filter((o) => {
+      const k = o.kind.toLowerCase()
+      return (
+        k.includes('audit') ||
+        k.includes('setting') ||
+        k.includes('flag') ||
+        k.includes('environment') ||
+        k.includes('system') ||
+        k.includes('health') ||
+        k.includes('import') ||
+        k.includes('export')
+      )
+    })
+  }
+  if (workspaceId === 'identity') {
+    return ops.filter((o) =>
+      /user|party|membership|vetting|identity/i.test(`${o.kind} ${o.title} ${o.summary}`),
+    )
+  }
+  if (workspaceId === 'compliance') {
+    return ops.filter((o) =>
+      /vetting|compliance|document|clarification/i.test(`${o.kind} ${o.title} ${o.summary}`),
+    )
+  }
+  if (workspaceId === 'marketplace') {
+    return ops.filter((o) =>
+      /opportunit|match|moderat|market/i.test(`${o.kind} ${o.title} ${o.summary}`),
+    )
+  }
+  if (workspaceId === 'commercial') {
+    return ops.filter((o) =>
+      /negotiat|commercial|contract|award|approval|deal/i.test(
+        `${o.kind} ${o.title} ${o.summary}`,
+      ),
+    )
+  }
+  return []
+}
+
 export function buildWorkspaceSummary(workspaceId: string): AdminWorkspaceSummary {
   const def = WORKSPACE_DEFS[workspaceId] ?? {
     title: `Workspace: ${workspaceId}`,
     description: 'Admin workspace overview.',
     domainLinks: [{ label: 'Command Center', href: '/admin', description: 'Return home' }],
     actionCardIds: [],
+    systemOnly: true,
   }
 
   const summary = buildCommandCenterSummary()
   const ops = buildOperationsSummary()
   const risk = buildRiskSummary()
-  const inbox = buildAdminInbox().filter((item) => {
-    if (workspaceId === 'identity') return item.sourceWorkspace === 'identity' || item.entityType === 'user'
-    if (workspaceId === 'compliance') return item.sourceWorkspace === 'compliance' || item.itemType.includes('vetting')
-    if (workspaceId === 'marketplace') return item.sourceWorkspace === 'marketplace'
-    if (workspaceId === 'commercial') return item.sourceWorkspace === 'commercial'
-    if (workspaceId === 'system') return item.sourceWorkspace === 'system'
-    return true
-  }).slice(0, 8)
+  const inbox = filterInboxForWorkspace(workspaceId, buildAdminInbox())
 
-  const actionCards =
-    def.actionCardIds.length > 0
-      ? ops.cards.filter((c) => def.actionCardIds.includes(c.id))
-      : ops.cards.filter((c) => c.count > 0).slice(0, 4)
+  const actionCards: readonly AdminOpsActionCard[] = def.systemOnly
+    ? systemWorkspaceActionCards(workspaceId)
+    : ops.cards.filter((c) => def.actionCardIds.includes(c.id))
 
   const kpiByWorkspace: Record<string, AdminWorkspaceSummary['kpiLabels']> = {
     identity: [
@@ -209,16 +361,22 @@ export function buildWorkspaceSummary(workspaceId: string): AdminWorkspaceSummar
       { label: 'Rejected', value: risk.rejectedDocuments, href: '/admin/vetting' },
     ],
     marketplace: [
-      { label: 'Published → Matches', value: `${summary.publishedOpportunities} → ${summary.activeMatches}`, href: '/admin/matching/quality' },
+      {
+        label: 'Published → Matches',
+        value: `${summary.publishedOpportunities} → ${summary.activeMatches}`,
+        href: '/admin/matching/quality',
+      },
       { label: 'Active matches', value: summary.activeMatches, href: '/admin/post-matches' },
     ],
     commercial: [
-      { label: 'Negotiation → CA', value: `${summary.activeNegotiations} → ${summary.commercialAgreements}`, href: '/admin/reports' },
+      {
+        label: 'Negotiation → CA',
+        value: `${summary.activeNegotiations} → ${summary.commercialAgreements}`,
+        href: '/admin/reports',
+      },
       { label: 'Active contracts', value: summary.activeContracts, href: '/admin/contracts' },
     ],
-    reports: [
-      { label: 'Open reports', value: 'Live metrics', href: '/admin/reports' },
-    ],
+    reports: [{ label: 'Open reports', value: 'Live metrics', href: '/admin/reports' }],
     configuration: [
       { label: 'Runtime', value: summary.environment, href: '/admin/environments' },
     ],
@@ -236,12 +394,12 @@ export function buildWorkspaceSummary(workspaceId: string): AdminWorkspaceSummar
       { label: 'Users', value: summary.totalUsers },
       { label: 'Health', value: summary.platformHealthLabel },
     ],
-    inboxPreview: inbox.length > 0 ? inbox : buildAdminInbox().slice(0, 5),
+    inboxPreview: inbox,
     domainLinks: def.domainLinks,
     actionCards,
     riskTone: workspaceRiskTone(actionCards),
     analytics: analyticsByWorkspace[workspaceId] ?? [],
-    recentOps: buildRecentOperations(5),
+    recentOps: filterRecentOpsForWorkspace(workspaceId, buildRecentOperations(8)),
   }
 }
 
