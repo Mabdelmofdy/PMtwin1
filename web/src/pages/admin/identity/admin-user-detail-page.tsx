@@ -53,11 +53,12 @@ export function AdminUserDetailPage() {
       toast.error('Signed-in admin required')
       return
     }
+    const role = actor.role
     switch (actionId) {
       case 'user.activate': {
         const reason = promptReason('Activate user')
         if (reason == null) return
-        const result = activateUser(id, actor.id, reason)
+        const result = activateUser(id, actor.id, reason, role)
         if (!result.ok) toast.error(result.error ?? 'Failed')
         else {
           toast.success('User activated')
@@ -68,7 +69,7 @@ export function AdminUserDetailPage() {
       case 'user.suspend': {
         const reason = promptReason('Suspend user')
         if (reason == null) return
-        const result = suspendUser(id, actor.id, reason)
+        const result = suspendUser(id, actor.id, reason, role)
         if (!result.ok) toast.error(result.error ?? 'Failed')
         else {
           toast.success('User suspended')
@@ -79,7 +80,7 @@ export function AdminUserDetailPage() {
       case 'user.unsuspend': {
         const reason = promptReason('Unsuspend user')
         if (reason == null) return
-        const result = unsuspendUser(id, actor.id, reason)
+        const result = unsuspendUser(id, actor.id, reason, role)
         if (!result.ok) toast.error(result.error ?? 'Failed')
         else {
           toast.success('User unsuspended')
@@ -90,7 +91,7 @@ export function AdminUserDetailPage() {
       case 'user.lock': {
         const reason = promptReason('Lock user')
         if (reason == null) return
-        const result = lockUser(id, actor.id, reason)
+        const result = lockUser(id, actor.id, reason, role)
         if (!result.ok) toast.error(result.error ?? 'Failed')
         else {
           toast.success('User locked')
@@ -99,7 +100,7 @@ export function AdminUserDetailPage() {
         break
       }
       case 'user.unlock': {
-        const result = unlockUser(id, actor.id)
+        const result = unlockUser(id, actor.id, undefined, role)
         if (!result.ok) toast.error(result.error ?? 'Failed')
         else {
           toast.success('User unlocked')
@@ -110,7 +111,7 @@ export function AdminUserDetailPage() {
       case 'user.add_note': {
         const note = window.prompt('Internal note')
         if (note == null) return
-        const result = addUserInternalNote(id, actor.id, note)
+        const result = addUserInternalNote(id, actor.id, note, role)
         if (!result.ok) toast.error(result.error ?? 'Failed')
         else {
           toast.success('Note recorded in audit')

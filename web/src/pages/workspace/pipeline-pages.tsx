@@ -84,7 +84,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import type { CollaborationTimelineEvent } from '@/components/collaboration/collaboration-timeline'
 import type { Negotiation, PostMatch } from '@/types/domain.ts'
-import { productFlags } from '@/config/product-flags.ts'
+import { getEffectiveProductFlags } from '@/domain/admin/settings/effective-settings.ts'
 import { formatNegotiationDisplayTitle } from '@/lib/entity-display-titles.ts'
 import { formatMatchDisplayTitle } from '@/lib/match-display.ts'
 import {
@@ -360,7 +360,7 @@ export function PipelinePage() {
   const { tab } = useParams()
   const navigate = useNavigate()
   const { user, canAccessAdmin } = useAuth()
-  const showLegacyApplications = productFlags.showLegacyApplications
+  const showLegacyApplications = getEffectiveProductFlags().showLegacyApplications
   const { productLanguage } = useProductLanguage()
   const pipelineTabs = getVisiblePipelineTabs(showLegacyApplications)
   const activeTab =

@@ -9,7 +9,7 @@ import { pmTypography } from '@/tokens'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
-import { productFlags } from '@/config/product-flags.ts'
+import { getEffectiveProductFlags } from '@/domain/admin/settings/effective-settings.ts'
 
 const STEPS = ['Proposal', 'Value', 'Review'] as const
 
@@ -32,7 +32,7 @@ export function ApplyWizard({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isSubmittingRef = useRef(false)
 
-  if (!productFlags.showLegacyApplications) {
+  if (!getEffectiveProductFlags().showLegacyApplications) {
     return null
   }
 

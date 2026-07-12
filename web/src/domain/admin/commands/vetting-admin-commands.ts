@@ -3,11 +3,16 @@
  * Thin path for a future command gateway.
  */
 
+import { denyUnlessAuthorized } from '@/domain/admin/auth/admin-mutation-auth.ts'
 import { vettingService } from '@/lib/vetting-service.ts'
 import { auditRepository } from '@/repositories/index.ts'
 import type { PlatformUser } from '@/types/domain.ts'
 import type { PartyDocument } from '@/types/party-document.ts'
 import type { RequestVettingChangesInput } from '@/lib/vetting-service.ts'
+
+function requireVettingManage(actorRole: string | undefined | null): string | null {
+  return denyUnlessAuthorized(actorRole, 'admin.vetting.manage')
+}
 
 export type VettingAdminCommandResult<T = PlatformUser | undefined> = {
   readonly ok: boolean
@@ -35,7 +40,10 @@ export function executeApproveVetting(
   userId: string,
   partyId: string,
   reviewerId: string,
+  actorRole?: string | null,
 ): VettingAdminCommandResult {
+  const denied = requireVettingManage(actorRole)
+  if (denied) return { ok: false, error: denied }
   if (!userId || !partyId || !reviewerId) {
     return { ok: false, error: 'userId, partyId, and reviewerId are required' }
   }
@@ -50,7 +58,10 @@ export function executeRejectVetting(
   partyId: string,
   reviewerId: string,
   reason?: string,
+  actorRole?: string | null,
 ): VettingAdminCommandResult {
+  const denied = requireVettingManage(actorRole)
+  if (denied) return { ok: false, error: denied }
   if (!userId || !partyId || !reviewerId) {
     return { ok: false, error: 'userId, partyId, and reviewerId are required' }
   }
@@ -61,8 +72,10 @@ export function executeRejectVetting(
 }
 
 export function executeRequestVettingClarification(
-  input: RequestVettingChangesInput,
+  input: RequestVettingChangesInput & { readonly actorRole?: string | null },
 ): VettingAdminCommandResult {
+  const denied = requireVettingManage(input.actorRole)
+  if (denied) return { ok: false, error: denied }
   if (!input.userId || !input.partyId || !input.reviewerId) {
     return { ok: false, error: 'userId, partyId, and reviewerId are required' }
   }
@@ -85,8 +98,11 @@ export function executeReviewVettingDocument(
     readonly reviewerId: string
     readonly decision: 'approved' | 'rejected'
     readonly notes?: string
+    readonly actorRole?: string | null
   },
 ): VettingAdminCommandResult<PartyDocument | undefined> {
+  const denied = requireVettingManage(input.actorRole)
+  if (denied) return { ok: false, error: denied }
   if (!documentId || !input.reviewerId) {
     return { ok: false, error: 'documentId and reviewerId are required' }
   }

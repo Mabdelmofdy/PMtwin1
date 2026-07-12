@@ -286,6 +286,36 @@ export function validateEnvironmentImportPayload(raw: unknown): EnvironmentExpor
   }
 
   const payload = raw as EnvironmentExportPayload
+
+  if (raw.adminSettings !== undefined) {
+    if (!isRecord(raw.adminSettings) || typeof raw.adminSettings.schemaVersion !== 'string') {
+      throw new EnvironmentImportError(
+        'INVALID_METADATA',
+        'adminSettings must be an object with schemaVersion when provided.',
+      )
+    }
+    if (raw.adminSettings.schemaVersion !== '1.0') {
+      throw new EnvironmentImportError(
+        'INCOMPATIBLE_SCHEMA',
+        `adminSettings.schemaVersion ${String(raw.adminSettings.schemaVersion)} is not supported.`,
+      )
+    }
+    if (isRecord(raw.adminSettings.featureFlagOverrides)) {
+      for (const key of Object.keys(raw.adminSettings.featureFlagOverrides)) {
+        if (
+          key === 'runtimeMode' ||
+          key === 'usesNamespacedLocalStorage' ||
+          key === 'storageTypeLabel'
+        ) {
+          throw new EnvironmentImportError(
+            'ENTITY_INTEGRITY',
+            `Import cannot override locked feature flag: ${key}.`,
+          )
+        }
+      }
+    }
+  }
+
   validateEntityRelationships(payload)
   validateTaxonomyIntegrity(payload)
   return payload

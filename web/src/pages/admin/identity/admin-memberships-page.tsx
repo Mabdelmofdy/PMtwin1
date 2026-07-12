@@ -11,19 +11,27 @@ import {
   suspendMembership,
   changeMembershipRole,
 } from '@/domain/admin/commands/membership-admin-commands.ts'
+import { denyUnlessAuthorized } from '@/domain/admin/auth/admin-mutation-auth.ts'
+import { getEffectiveSettingsSections } from '@/domain/admin/settings/effective-settings.ts'
 import { useAuth } from '@/providers/auth-provider.tsx'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
 import { AdminStatusBadge } from '@/pages/admin/admin-display'
-import { PmButton } from '@/components/ui/pm-index'
+import { PmBadge, PmButton } from '@/components/ui/pm-index'
 
 export function AdminMembershipsPage() {
   const version = useDataStoreVersion()
   const { user } = useAuth()
   const [, bump] = useState(0)
   const memberships = useMemo(() => partyMembershipRepository.getAll(), [version, bump])
+  const canManage = !denyUnlessAuthorized(user?.role, 'admin.memberships.manage')
 
   function handleInvite(): void {
+    const denied = denyUnlessAuthorized(user?.role, 'admin.memberships.manage')
+    if (denied) {
+      toast.error(denied)
+      return
+    }
     if (!user?.id) {
       toast.error('Signed-in admin required')
       return
@@ -35,8 +43,9 @@ export function AdminMembershipsPage() {
     const result = inviteMember({
       partyId: partyId.trim(),
       userId: userId.trim(),
-      role: role?.trim() || 'member',
+      role: role?.trim() || getEffectiveSettingsSections().access.defaultInviteRole || 'member',
       actorId: user.id,
+      actorRole: user.role,
     })
     if (!result.ok) toast.error(result.error ?? 'Invite failed')
     else {
@@ -47,6 +56,7 @@ export function AdminMembershipsPage() {
 
   return (
     <AdminListPage
+      label="Identity"
       title="Memberships"
       description="User–party memberships, invitations, and role changes (Demo/UAT overrides)."
       data={memberships}
@@ -57,9 +67,13 @@ export function AdminMembershipsPage() {
       }
       searchPlaceholder="Search memberships…"
       headerActions={
-        <PmButton size="sm" onClick={handleInvite}>
-          Invite member
-        </PmButton>
+        canManage ? (
+          <PmButton size="sm" onClick={handleInvite}>
+            Invite member
+          </PmButton>
+        ) : (
+          <PmBadge tone="warning">Read-only</PmBadge>
+        )
       }
       columns={[
         {
@@ -86,60 +100,75 @@ export function AdminMembershipsPage() {
         {
           id: 'actions',
           label: 'Actions',
-          cell: (m) => (
-            <div className="flex flex-wrap gap-1">
-              <PmButton
-                size="sm"
-                variant="outline"
-                onClick={(event) => {
-                  event.preventDefault()
-                  event.stopPropagation()
-                  if (!user?.id) return
-                  const role = window.prompt('New role', String(m.membershipRole))
-                  const reason = window.prompt('Reason')
-                  if (!role || reason == null) return
-                  const result = changeMembershipRole({
-                    partyId: m.partyId,
-                    userId: m.userId,
-                    role,
-                    actorId: user.id,
-                    reason,
-                  })
-                  if (!result.ok) toast.error(result.error ?? 'Failed')
-                  else {
-                    toast.success('Role updated')
-                    bump((n) => n + 1)
-                  }
-                }}
-              >
-                Change role
-              </PmButton>
-              <PmButton
-                size="sm"
-                variant="destructive"
-                onClick={(event) => {
-                  event.preventDefault()
-                  event.stopPropagation()
-                  if (!user?.id) return
-                  const reason = window.prompt('Suspend membership — reason')
-                  if (reason == null) return
-                  const result = suspendMembership({
-                    partyId: m.partyId,
-                    userId: m.userId,
-                    actorId: user.id,
-                    reason,
-                  })
-                  if (!result.ok) toast.error(result.error ?? 'Failed')
-                  else {
-                    toast.success('Membership suspended')
-                    bump((n) => n + 1)
-                  }
-                }}
-              >
-                Suspend
-              </PmButton>
-            </div>
-          ),
+          cell: (m) =>
+            canManage ? (
+              <div className="flex flex-wrap gap-1">
+                <PmButton
+                  size="sm"
+                  variant="outline"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    const denied = denyUnlessAuthorized(user?.role, 'admin.memberships.manage')
+                    if (denied) {
+                      toast.error(denied)
+                      return
+                    }
+                    if (!user?.id) return
+                    const role = window.prompt('New role', String(m.membershipRole))
+                    const reason = window.prompt('Reason')
+                    if (!role || reason == null) return
+                    const result = changeMembershipRole({
+                      partyId: m.partyId,
+                      userId: m.userId,
+                      role,
+                      actorId: user.id,
+                      reason,
+                      actorRole: user.role,
+                    })
+                    if (!result.ok) toast.error(result.error ?? 'Failed')
+                    else {
+                      toast.success('Role updated')
+                      bump((n) => n + 1)
+                    }
+                  }}
+                >
+                  Change role
+                </PmButton>
+                <PmButton
+                  size="sm"
+                  variant="destructive"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    const denied = denyUnlessAuthorized(user?.role, 'admin.memberships.manage')
+                    if (denied) {
+                      toast.error(denied)
+                      return
+                    }
+                    if (!user?.id) return
+                    const reason = window.prompt('Suspend membership — reason')
+                    if (reason == null) return
+                    const result = suspendMembership({
+                      partyId: m.partyId,
+                      userId: m.userId,
+                      actorId: user.id,
+                      reason,
+                      actorRole: user.role,
+                    })
+                    if (!result.ok) toast.error(result.error ?? 'Failed')
+                    else {
+                      toast.success('Membership suspended')
+                      bump((n) => n + 1)
+                    }
+                  }}
+                >
+                  Suspend
+                </PmButton>
+              </div>
+            ) : (
+              '—'
+            ),
         },
       ]}
     />

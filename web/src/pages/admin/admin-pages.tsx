@@ -68,6 +68,7 @@ import {
   executeRejectVetting,
   executeRequestVettingClarification,
 } from '@/domain/admin/commands/vetting-admin-commands.ts'
+import { denyUnlessAuthorized } from '@/domain/admin/auth/admin-mutation-auth.ts'
 import {
   PmDataTable,
   PmTableEmpty,
@@ -92,8 +93,9 @@ export function AdminVettingPage() {
   const { user } = useAuth()
   const version = useDataStoreVersion()
   const workflow = useMemo(() => adminApi.getVettingWorkflow(), [version])
-  const kpiMetrics = useMemo(() => computeAdminVettingKpiMetrics(workflow), [workflow])
+  const kpiMetrics = useMemo(() => computeAdminVettingKpiMetrics(workflow), [version])
   const [reviewing, setReviewing] = useState<VettingWorkflowEntry | null>(null)
+  const canManageVetting = !denyUnlessAuthorized(user?.role, 'admin.vetting.manage')
 
   const reviewerId = user?.id ?? 'admin'
 
@@ -172,7 +174,11 @@ export function AdminVettingPage() {
                   <PmButton
                     size="sm"
                     onClick={() => setReviewing(entry)}
-                    disabled={entry.user.status === 'active' || entry.user.status === 'rejected'}
+                    disabled={
+                      !canManageVetting ||
+                      entry.user.status === 'active' ||
+                      entry.user.status === 'rejected'
+                    }
                   >
                     Review
                   </PmButton>
@@ -192,6 +198,11 @@ export function AdminVettingPage() {
           label="Queue"
           title="Vetting"
           description="Pre-approval user workflow — pending, changes requested, resubmitted, and history."
+          badges={
+            canManageVetting ? undefined : (
+              <PmBadge tone="warning">Read-only — missing admin.vetting.manage</PmBadge>
+            )
+          }
         />
       }
     >
@@ -230,9 +241,19 @@ export function AdminVettingPage() {
         userLabel={reviewing?.user.profile?.name ?? reviewing?.user.email ?? 'User'}
         onSubmit={(payload) => {
           if (!reviewing) return
+          const denied = denyUnlessAuthorized(user?.role, 'admin.vetting.manage')
+          if (denied) {
+            toast.error(denied)
+            return
+          }
           const partyId = reviewing.activeParty?.id ?? reviewing.user.id
           if (payload.action === 'approve') {
-            const result = executeApproveVetting(reviewing.user.id, partyId, reviewerId)
+            const result = executeApproveVetting(
+              reviewing.user.id,
+              partyId,
+              reviewerId,
+              user?.role,
+            )
             if (!result.ok) {
               toast.error(result.error ?? 'Approve failed')
               return
@@ -244,6 +265,7 @@ export function AdminVettingPage() {
               partyId,
               reviewerId,
               payload.reviewNotes,
+              user?.role,
             )
             if (!result.ok) {
               toast.error(result.error ?? 'Reject failed')
@@ -262,6 +284,7 @@ export function AdminVettingPage() {
               reason: payload.reviewNotes,
               requestedItems: payload.requestedItems,
               dueDate: payload.dueDate,
+              actorRole: user?.role,
             })
             if (!result.ok) {
               toast.error(result.error ?? 'Request failed')
@@ -475,18 +498,10 @@ export function AdminNegotiationsPage() {
 
 export function AdminDisputesPage() {
   return (
-    <AdminListPage
+    <AdminPlannedShell
       title="Disputes"
-      description="Dispute resolution queue."
-      data={[] as { id: string; status: string }[]}
-      getRowId={(d) => d.id}
-      emptyTitle="No disputes in seed"
-      emptyDescription="Dispute queue is empty in the current dataset."
-      showPagination={false}
-      columns={[
-        { id: 'id', label: 'ID', cell: (d) => d.id },
-        { id: 'status', label: 'Status', cell: (d) => d.status },
-      ]}
+      description="Dispute resolution"
+      plannedMessage="Dispute workflow is not implemented in Demo/UAT. This route is retained for navigation compatibility only."
     />
   )
 }
@@ -625,26 +640,11 @@ export function AdminSiteContentPage() {
 }
 
 export function AdminSubscriptionsPage() {
-  const rows = [
-    { id: 'professional', plan: 'Professional', status: 'Active' },
-    { id: 'enterprise', plan: 'Enterprise', status: 'Active' },
-  ] as const
-
   return (
-    <AdminListPage
+    <AdminPlannedShell
       title="Subscriptions"
-      description="Plans and assignments (POC)."
-      data={rows}
-      getRowId={(r) => r.id}
-      showPagination={false}
-      columns={[
-        { id: 'plan', label: 'Plan', cell: (r) => r.plan },
-        {
-          id: 'status',
-          label: 'Status',
-          cell: (r) => <AdminStatusBadge status={r.status.toLowerCase()} />,
-        },
-      ]}
+      description="Plans and assignments"
+      plannedMessage="Subscription billing is not wired in Demo/UAT. Hardcoded plan rows were removed to avoid presenting fake commercial status."
     />
   )
 }

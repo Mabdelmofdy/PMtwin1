@@ -263,8 +263,6 @@ export const adminNavigationGroups: NavGroup[] = [
     title: 'Platform Configuration',
     items: [
       { title: 'Settings', href: '/admin/settings', icon: Settings },
-      { title: 'Skills', href: '/admin/skills', icon: Wrench },
-      { title: 'Site content', href: '/admin/site-content', icon: FileText },
     ],
   },
   {

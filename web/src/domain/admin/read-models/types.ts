@@ -118,7 +118,6 @@ export type AdminRiskSummary = {
   readonly suspendedUsers: number
   readonly rejectedDocuments: number
   readonly orphanHints: number
-  readonly matchingOverrides: number
   readonly items: readonly AdminOpsActionCard[]
 }
 

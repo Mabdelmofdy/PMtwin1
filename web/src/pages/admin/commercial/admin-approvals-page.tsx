@@ -19,7 +19,7 @@ export function AdminApprovalsPage() {
   return (
     <AdminListPage
       title="Approvals"
-      description={`${productLanguage.plural('commercialAgreement')} awaiting commercial review.`}
+      description={`Filtered queue of ${productLanguage.plural('commercialAgreement').toLowerCase()} in review-related statuses. Decision actions are not wired on this page — open a detail record to inspect.`}
       data={rows}
       getRowId={(d) => d.id}
       getRowHref={(d) => `/admin/commercial-agreements/${d.id}`}

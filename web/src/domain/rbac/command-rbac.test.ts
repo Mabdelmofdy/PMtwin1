@@ -38,6 +38,22 @@ describe('evaluateCommandRbac', () => {
     assert.equal(result.allowed, true)
   })
 
+  it('moderator can execute platform admin commands via capability', () => {
+    const result = evaluateCommandRbac(confirmCommand, {
+      userId: 'mod-1',
+      userRole: 'moderator',
+    })
+    assert.equal(result.allowed, true)
+  })
+
+  it('auditor cannot execute platform admin commands', () => {
+    const result = evaluateCommandRbac(confirmCommand, {
+      userId: 'aud-1',
+      userRole: 'auditor',
+    })
+    assert.equal(result.allowed, false)
+  })
+
   it('participant command is not blocked at gateway', () => {
     const result = evaluateCommandRbac(
       {

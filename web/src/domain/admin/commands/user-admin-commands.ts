@@ -4,8 +4,13 @@
  */
 
 import { auditRepository, userRepository } from '@/repositories/index.ts'
+import { denyUnlessAuthorized } from '@/domain/admin/auth/admin-mutation-auth.ts'
 import { recordFailedLocalCommand } from '@/domain/admin/diagnostics/failed-command-log.ts'
 import type { PlatformUser } from '@/types/domain.ts'
+
+function requireUserManage(actorRole: string | undefined | null): string | null {
+  return denyUnlessAuthorized(actorRole, 'admin.users.manage')
+}
 
 export type UserAdminCommandResult = {
   readonly ok: boolean
@@ -59,7 +64,10 @@ export function activateUser(
   userId: string,
   actorId: string,
   reason: string,
+  actorRole?: string | null,
 ): UserAdminCommandResult {
+  const denied = requireUserManage(actorRole)
+  if (denied) return { ok: false, error: denied }
   if (!reason.trim()) return { ok: false, error: 'Reason is required' }
   return mutateStatus(userId, 'active', actorId, 'ActivateUser', reason)
 }
@@ -68,7 +76,10 @@ export function suspendUser(
   userId: string,
   actorId: string,
   reason: string,
+  actorRole?: string | null,
 ): UserAdminCommandResult {
+  const denied = requireUserManage(actorRole)
+  if (denied) return { ok: false, error: denied }
   if (!reason.trim()) return { ok: false, error: 'Reason is required' }
   return mutateStatus(userId, 'suspended', actorId, 'SuspendUser', reason)
 }
@@ -77,7 +88,10 @@ export function unsuspendUser(
   userId: string,
   actorId: string,
   reason: string,
+  actorRole?: string | null,
 ): UserAdminCommandResult {
+  const denied = requireUserManage(actorRole)
+  if (denied) return { ok: false, error: denied }
   if (!reason.trim()) return { ok: false, error: 'Reason is required' }
   return mutateStatus(userId, 'active', actorId, 'UnsuspendUser', reason)
 }
@@ -86,7 +100,10 @@ export function lockUser(
   userId: string,
   actorId: string,
   reason: string,
+  actorRole?: string | null,
 ): UserAdminCommandResult {
+  const denied = requireUserManage(actorRole)
+  if (denied) return { ok: false, error: denied }
   if (!reason.trim()) return { ok: false, error: 'Reason is required' }
   return mutateStatus(userId, 'locked', actorId, 'LockUser', reason)
 }
@@ -95,7 +112,10 @@ export function unlockUser(
   userId: string,
   actorId: string,
   reason?: string,
+  actorRole?: string | null,
 ): UserAdminCommandResult {
+  const denied = requireUserManage(actorRole)
+  if (denied) return { ok: false, error: denied }
   return mutateStatus(userId, 'active', actorId, 'UnlockUser', reason)
 }
 
@@ -103,7 +123,10 @@ export function addUserInternalNote(
   userId: string,
   actorId: string,
   note: string,
+  actorRole?: string | null,
 ): UserAdminCommandResult {
+  const denied = requireUserManage(actorRole)
+  if (denied) return { ok: false, error: denied }
   const existing = userRepository.getById(userId)
   if (!existing) return { ok: false, error: 'User not found' }
   if (!note.trim()) return { ok: false, error: 'Note is required' }
@@ -123,7 +146,10 @@ export function assignUserRole(
   actorId: string,
   role: string,
   reason: string,
+  actorRole?: string | null,
 ): UserAdminCommandResult {
+  const denied = denyUnlessAuthorized(actorRole, 'admin.roles.assign')
+  if (denied) return { ok: false, error: denied }
   const existing = userRepository.getById(userId)
   if (!existing) return { ok: false, error: 'User not found' }
   if (!role.trim()) return { ok: false, error: 'Role is required' }

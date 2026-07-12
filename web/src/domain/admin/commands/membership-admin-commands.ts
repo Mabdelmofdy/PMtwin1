@@ -6,7 +6,12 @@ import {
   auditRepository,
   partyMembershipRepository,
 } from '@/repositories/index.ts'
+import { denyUnlessAuthorized } from '@/domain/admin/auth/admin-mutation-auth.ts'
 import type { PartyMembership } from '@pm-twin/party'
+
+function requireMembershipManage(actorRole: string | undefined | null): string | null {
+  return denyUnlessAuthorized(actorRole, 'admin.memberships.manage')
+}
 
 export type MembershipCommandResult = {
   readonly ok: boolean
@@ -35,7 +40,10 @@ export function inviteMember(input: {
   readonly userId: string
   readonly role: string
   readonly actorId: string
+  readonly actorRole?: string | null
 }): MembershipCommandResult {
+  const denied = requireMembershipManage(input.actorRole)
+  if (denied) return { ok: false, error: denied }
   const { partyId, userId, role, actorId } = input
   if (!partyId || !userId || !actorId) {
     return { ok: false, error: 'partyId, userId, and actorId are required' }
@@ -63,7 +71,10 @@ export function acceptInvitation(input: {
   readonly partyId: string
   readonly userId: string
   readonly actorId: string
+  readonly actorRole?: string | null
 }): MembershipCommandResult {
+  const denied = requireMembershipManage(input.actorRole)
+  if (denied) return { ok: false, error: denied }
   const current = partyMembershipRepository
     .getAll()
     .find((m) => m.partyId === input.partyId && m.userId === input.userId)
@@ -81,7 +92,10 @@ export function cancelInvitation(input: {
   readonly partyId: string
   readonly userId: string
   readonly actorId: string
+  readonly actorRole?: string | null
 }): MembershipCommandResult {
+  const denied = requireMembershipManage(input.actorRole)
+  if (denied) return { ok: false, error: denied }
   const current = partyMembershipRepository
     .getAll()
     .find((m) => m.partyId === input.partyId && m.userId === input.userId)
@@ -100,7 +114,10 @@ export function changeMembershipRole(input: {
   readonly role: string
   readonly actorId: string
   readonly reason: string
+  readonly actorRole?: string | null
 }): MembershipCommandResult {
+  const denied = requireMembershipManage(input.actorRole)
+  if (denied) return { ok: false, error: denied }
   if (!input.reason.trim()) return { ok: false, error: 'Reason is required' }
   const current = partyMembershipRepository
     .getAll()
@@ -124,7 +141,10 @@ export function suspendMembership(input: {
   readonly userId: string
   readonly actorId: string
   readonly reason: string
+  readonly actorRole?: string | null
 }): MembershipCommandResult {
+  const denied = requireMembershipManage(input.actorRole)
+  if (denied) return { ok: false, error: denied }
   if (!input.reason.trim()) return { ok: false, error: 'Reason is required' }
   const current = partyMembershipRepository
     .getAll()
@@ -143,7 +163,10 @@ export function removeMember(input: {
   readonly userId: string
   readonly actorId: string
   readonly reason: string
+  readonly actorRole?: string | null
 }): MembershipCommandResult {
+  const denied = requireMembershipManage(input.actorRole)
+  if (denied) return { ok: false, error: denied }
   if (!input.reason.trim()) return { ok: false, error: 'Reason is required' }
   const current = partyMembershipRepository
     .getAll()
@@ -162,7 +185,10 @@ export function transferOwnership(input: {
   readonly toUserId: string
   readonly actorId: string
   readonly reason: string
+  readonly actorRole?: string | null
 }): MembershipCommandResult {
+  const denied = requireMembershipManage(input.actorRole)
+  if (denied) return { ok: false, error: denied }
   if (!input.reason.trim()) return { ok: false, error: 'Reason is required' }
   const from = partyMembershipRepository
     .getAll()

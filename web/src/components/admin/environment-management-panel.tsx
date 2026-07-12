@@ -42,6 +42,7 @@ import { dealsApi } from '@/api/deals.ts'
 import { peopleApi } from '@/api/people.ts'
 import { formatDate } from '@/lib/format'
 import { useAuth } from '@/providers/auth-provider.tsx'
+import { denyUnlessAuthorized } from '@/domain/admin/auth/admin-mutation-auth.ts'
 
 export type EnvironmentMetadataSnapshot = {
   runtimeMode: string
@@ -126,6 +127,7 @@ function mapScenarioOption(scenario: DemoScenarioDefinition): { value: string; l
 
 export function EnvironmentManagementPanel() {
   const { user } = useAuth()
+  const canManageEnvironment = !denyUnlessAuthorized(user?.role, 'admin.environment.manage')
   const scenarioRegistry = useMemo(() => getDemoScenarioRegistry(), [])
   const scenarioOptions = useMemo(
     () => scenarioRegistry.map(mapScenarioOption),
@@ -144,6 +146,11 @@ export function EnvironmentManagementPanel() {
   const metadata = buildEnvironmentMetadataSnapshot()
 
   function handleRestoreScenario() {
+    const denied = denyUnlessAuthorized(user?.role, 'admin.environment.manage')
+    if (denied) {
+      toast.error(denied)
+      return
+    }
     if (!selectedScenarioId || isRestoring) return
     if (!environmentContext.canRestoreScenario) return
 
@@ -163,6 +170,11 @@ export function EnvironmentManagementPanel() {
   }
 
   function handleExportEnvironment() {
+    const denied = denyUnlessAuthorized(user?.role, 'admin.environment.manage')
+    if (denied) {
+      toast.error(denied)
+      return
+    }
     if (isExporting) return
     if (!canRenderEnvironmentExportControls()) return
 
@@ -183,6 +195,11 @@ export function EnvironmentManagementPanel() {
   }
 
   async function handleImportFileSelected(event: React.ChangeEvent<HTMLInputElement>) {
+    const denied = denyUnlessAuthorized(user?.role, 'admin.environment.manage')
+    if (denied) {
+      toast.error(denied)
+      return
+    }
     const file = event.target.files?.[0]
     event.target.value = ''
     if (!file || isImporting) return
@@ -218,12 +235,22 @@ export function EnvironmentManagementPanel() {
   }
 
   function handleImportEnvironmentClick() {
+    const denied = denyUnlessAuthorized(user?.role, 'admin.environment.manage')
+    if (denied) {
+      toast.error(denied)
+      return
+    }
     if (isImporting) return
     if (!canRenderEnvironmentImportControls()) return
     importInputRef.current?.click()
   }
 
   function handleResetEnvironment() {
+    const denied = denyUnlessAuthorized(user?.role, 'admin.environment.manage')
+    if (denied) {
+      toast.error(denied)
+      return
+    }
     if (isResetting) return
     if (!canRenderEnvironmentResetControls()) return
 
@@ -287,7 +314,7 @@ export function EnvironmentManagementPanel() {
           </ul>
         </PmContentCard>
 
-        {canRenderScenarioRestoreControls() ? (
+        {canRenderScenarioRestoreControls() && canManageEnvironment ? (
           <div className="space-y-3">
             <label htmlFor="scenario-picker" className="text-sm font-medium">
               Scenario picker
@@ -340,6 +367,10 @@ export function EnvironmentManagementPanel() {
               </PmButton>
             </div>
           </div>
+        ) : canRenderScenarioRestoreControls() ? (
+          <PmBadge tone="warning">
+            Environment mutations require admin.environment.manage — metadata is read-only for this role.
+          </PmBadge>
         ) : (
           <PmBadge tone="warning">
             Scenario restore, export, import, and reset controls are hidden in production runtime.

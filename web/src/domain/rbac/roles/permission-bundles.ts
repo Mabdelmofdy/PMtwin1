@@ -48,6 +48,18 @@ export type AdminCapability =
   | 'admin.contracts.legal_review'
   | 'admin.reports.read'
   | 'admin.settings.manage'
+  | 'settings.general.manage'
+  | 'settings.access.manage'
+  | 'settings.vetting.manage'
+  | 'settings.marketplace.manage'
+  | 'settings.matching.manage'
+  | 'settings.readiness.manage'
+  | 'settings.commercial.manage'
+  | 'settings.contract.manage'
+  | 'settings.notifications.manage'
+  | 'settings.localization.manage'
+  | 'settings.branding.manage'
+  | 'feature-flags.manage'
   | 'admin.audit.read'
   | 'admin.audit.export'
   | 'admin.environment.manage'
@@ -85,6 +97,18 @@ const ALL_CAPABILITIES: readonly AdminCapability[] = [
   'admin.contracts.legal_review',
   'admin.reports.read',
   'admin.settings.manage',
+  'settings.general.manage',
+  'settings.access.manage',
+  'settings.vetting.manage',
+  'settings.marketplace.manage',
+  'settings.matching.manage',
+  'settings.readiness.manage',
+  'settings.commercial.manage',
+  'settings.contract.manage',
+  'settings.notifications.manage',
+  'settings.localization.manage',
+  'settings.branding.manage',
+  'feature-flags.manage',
   'admin.audit.read',
   'admin.audit.export',
   'admin.environment.manage',
@@ -144,7 +168,15 @@ const STAFF_BUNDLES: Readonly<Record<PlatformStaffRole, readonly AdminCapability
     'admin.commercial_agreements.approve',
     'admin.commercial_agreements.award',
   ],
-  content_admin: [...READ_BUNDLE, 'admin.settings.manage'],
+  content_admin: [
+    ...READ_BUNDLE,
+    'admin.settings.manage',
+    'settings.general.manage',
+    'settings.localization.manage',
+    'settings.branding.manage',
+    'settings.notifications.manage',
+    'feature-flags.manage',
+  ],
   support_admin: [
     ...READ_BUNDLE,
     'admin.inbox.act',
@@ -158,6 +190,8 @@ const STAFF_BUNDLES: Readonly<Record<PlatformStaffRole, readonly AdminCapability
     'admin.vetting.manage',
     'admin.matching.execute',
     'admin.platform.execute',
+    'settings.marketplace.manage',
+    'settings.vetting.manage',
   ],
   auditor: [
     ...READ_BUNDLE,

@@ -1,6 +1,7 @@
 import type { CanonicalData, MatchingConfig } from '@pm-twin/matching'
 import { EMPTY_CANONICAL_DATA, withMatchingDefaults } from '@pm-twin/matching'
 import skillCanonicalJson from '@seed-data/skill-canonical.json'
+import { getMatchingConfigFromSettings } from '@/domain/admin/settings/effective-settings.ts'
 
 type SkillCanonicalJson = {
   readonly skillSynonyms?: CanonicalData['skillSynonyms']
@@ -32,13 +33,19 @@ export function loadMatchingCanonicalData(): CanonicalData {
 export function getMatchingEngineContext(
   configOverride?: Partial<MatchingConfig>,
 ): MatchingEngineContext {
+  const settingsConfig = getMatchingConfigFromSettings()
+  const mergedOverride: Partial<MatchingConfig> = {
+    ...settingsConfig,
+    ...configOverride,
+  }
+
   if (!configOverride && cachedContext) {
     return cachedContext
   }
 
   const context: MatchingEngineContext = {
     canonical: loadMatchingCanonicalData(),
-    config: withMatchingDefaults(configOverride),
+    config: withMatchingDefaults(mergedOverride),
   }
 
   if (!configOverride) {
@@ -48,7 +55,7 @@ export function getMatchingEngineContext(
   return context
 }
 
-/** Test hook — reset cached canonical/config singleton. */
+/** Reset cached canonical/config singleton (tests + settings mutations). */
 export function resetMatchingEngineContextCacheForTests(): void {
   cachedContext = null
 }

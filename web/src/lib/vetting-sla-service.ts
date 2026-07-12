@@ -1,11 +1,20 @@
 import type { PlatformUser } from '@/types/domain.ts'
 import type { VettingSlaStatus } from '@/types/vetting.ts'
+import { getVettingSlaFromSettings } from '@/domain/admin/settings/effective-settings.ts'
 
+/** Default compile-time SLA (tests + fallback). Runtime prefers Admin Settings. */
 export const VETTING_SLA_CONFIG = {
   atRiskDays: 3,
   overdueDays: 7,
 } as const
 
+function resolveSlaConfig(): { readonly atRiskDays: number; readonly overdueDays: number } {
+  try {
+    return getVettingSlaFromSettings()
+  } catch {
+    return VETTING_SLA_CONFIG
+  }
+}
 function daysSince(isoDate: string | undefined): number | null {
   if (!isoDate) return null
   const ms = Date.now() - new Date(isoDate).getTime()
@@ -26,11 +35,12 @@ export function resolveVettingSlaStatus(user: PlatformUser): VettingSlaStatus {
     return 'on_track'
   }
 
+  const sla = resolveSlaConfig()
   const anchor = resolveVettingReviewAnchor(user)
   const elapsed = daysSince(anchor)
   if (elapsed === null) return 'on_track'
-  if (elapsed >= VETTING_SLA_CONFIG.overdueDays) return 'overdue'
-  if (elapsed >= VETTING_SLA_CONFIG.atRiskDays) return 'at_risk'
+  if (elapsed >= sla.overdueDays) return 'overdue'
+  if (elapsed >= sla.atRiskDays) return 'at_risk'
   return 'on_track'
 }
 
@@ -53,7 +63,7 @@ export function formatVettingSlaDisplay(
   user: PlatformUser,
   status: VettingSlaStatus,
 ): VettingSlaDisplay {
-  const targetDays = VETTING_SLA_CONFIG.overdueDays
+  const targetDays = resolveSlaConfig().overdueDays
   const anchor = resolveVettingReviewAnchor(user)
   const elapsed = daysSince(anchor) ?? 0
 

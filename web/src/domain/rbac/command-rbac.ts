@@ -1,6 +1,5 @@
 import type { Command, TransitionOpportunityStatusCommand } from '@pm-twin/commands'
 import { toCanonical } from '@pm-twin/lifecycle'
-import { canAccessAdminForRole } from '@/domain/rbac/admin-access.ts'
 import { buildPermissionContext } from '@/domain/rbac/context/build-context.ts'
 import { isAdmin } from '@/domain/rbac/policies/policy-utils.ts'
 import {
@@ -10,6 +9,7 @@ import {
 import type { CommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
 import type { PermissionAction, PermissionContext } from '@/domain/rbac/types.ts'
 import { toCanonicalRole } from '@/domain/rbac/legacy-role-map.ts'
+import { hasAdminCapability } from '@/domain/rbac/roles/permission-bundles.ts'
 
 /** Platform-only commands that require admin route access. */
 export const ADMIN_ONLY_COMMAND_TYPES = new Set([
@@ -84,27 +84,10 @@ function evaluateAdminPlatformCommand(
     )
   }
 
-  if (!canAccessAdminForRole(actor.userRole)) {
-    return deny(
-      'Admin permission required.',
-      capability,
-      ['command-rbac:admin-role-denied'],
-    )
-  }
-
-  const context: PermissionContext = {
-    userId: actor.userId,
-    userRole: actor.userRole,
-    entityType: 'match',
-    workflowState: '',
-  }
-
-  if (isAdmin(context)) {
-    return allow(['command-rbac:admin-policy-override'])
-  }
-
-  if (canAccessAdminForRole(actor.userRole)) {
-    return allow(['command-rbac:admin-route-role'])
+  // Capability-driven: do not elevate via legacy moderator→admin isAdmin() map.
+  // Auditor can open Admin routes but must not execute platform mutations.
+  if (hasAdminCapability(actor.userRole, 'admin.platform.execute')) {
+    return allow(['command-rbac:admin-platform-capability'])
   }
 
   return deny(

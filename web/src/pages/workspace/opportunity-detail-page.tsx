@@ -94,7 +94,7 @@ import { OpportunityIdentityBadges } from '@/components/opportunity/opportunity-
 import { formatOpportunityIntent } from '@/components/opportunity/opportunity-display'
 import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
-import { productFlags } from '@/config/product-flags.ts'
+import { getEffectiveProductFlags } from '@/domain/admin/settings/effective-settings.ts'
 import {
   buildViewerContext,
   findParticipantMatchForOpportunity,
@@ -227,7 +227,7 @@ export function OpportunityDetailPage() {
     if (!opp) return null
     return resolveOpportunityDetailVisibility(opp, viewer, {
       postMatches: postMatchesForOpp,
-      showLegacyApplicationsFlag: productFlags.showLegacyApplications,
+      showLegacyApplicationsFlag: getEffectiveProductFlags().showLegacyApplications,
     })
   }, [opp, viewer, postMatchesForOpp])
 
@@ -995,7 +995,7 @@ export function OpportunityDetailPage() {
               />
             ) : null}
 
-            {productFlags.showLegacyApplications && !isOwner && application && !canApply ? (
+            {getEffectiveProductFlags().showLegacyApplications && !isOwner && application && !canApply ? (
               <PmContentCard title="Direct application (legacy)">
                 <PmBadge tone="neutral" size="sm" className="mb-2">
                   {application.status}
@@ -1021,7 +1021,7 @@ export function OpportunityDetailPage() {
               </PmContentCard>
             ) : null}
 
-            {productFlags.showLegacyApplications && !isOwner && canApply && !isPendingApproval ? (
+            {getEffectiveProductFlags().showLegacyApplications && !isOwner && canApply && !isPendingApproval ? (
               showWizard ? (
                 <ApplyWizard
                   opportunityId={opp.id}

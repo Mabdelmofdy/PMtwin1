@@ -114,8 +114,6 @@ export const ADMIN_IA_SECTIONS: readonly AdminNavSection[] = [
     title: 'Platform Configuration',
     items: [
       { title: 'Settings', href: '/admin/settings', capability: 'admin.settings.manage' },
-      { title: 'Skills', href: '/admin/skills', capability: 'admin.settings.manage' },
-      { title: 'Site content', href: '/admin/site-content', capability: 'admin.settings.manage' },
     ],
   },
   {

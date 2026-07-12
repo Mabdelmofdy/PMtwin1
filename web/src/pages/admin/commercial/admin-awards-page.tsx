@@ -2,12 +2,14 @@ import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { dealsApi } from '@/api/deals.ts'
 import { commercialAgreementCommandService } from '@/services/commercial-agreement-command-service.ts'
+import { denyUnlessAuthorized } from '@/domain/admin/auth/admin-mutation-auth.ts'
+import { getEffectiveSettingsSections } from '@/domain/admin/settings/effective-settings.ts'
 import { useAuth } from '@/providers/auth-provider.tsx'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useProductLanguage } from '@/providers/product-language-provider.tsx'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
 import { AdminStatusBadge } from '@/pages/admin/admin-display'
-import { PmButton } from '@/components/ui/pm-index'
+import { PmBadge, PmButton } from '@/components/ui/pm-index'
 import type { CommercialAgreement } from '@/types/domain.ts'
 
 type AwardGroup = {
@@ -20,6 +22,7 @@ export function AdminAwardsPage() {
   const { user } = useAuth()
   const version = useDataStoreVersion()
   const [, bump] = useState(0)
+  const canAward = !denyUnlessAuthorized(user?.role, 'admin.commercial_agreements.award')
 
   const groups = useMemo((): readonly AwardGroup[] => {
     const byOpp = new Map<string, CommercialAgreement[]>()
@@ -46,8 +49,22 @@ export function AdminAwardsPage() {
   )
 
   function handleAward(caId: string): void {
-    const reason = window.prompt('Award Commercial Agreement — confirm reason (optional)')
+    const denied = denyUnlessAuthorized(user?.role, 'admin.commercial_agreements.award')
+    if (denied) {
+      toast.error(denied)
+      return
+    }
+    const requireReason = getEffectiveSettingsSections().commercial.requireAwardConfirmReason
+    const reason = window.prompt(
+      requireReason
+        ? 'Award Commercial Agreement — reason required'
+        : 'Award Commercial Agreement — confirm reason (optional)',
+    )
     if (reason === null) return
+    if (requireReason && !reason.trim()) {
+      toast.error('Reason is required by commercial settings')
+      return
+    }
     const result = commercialAgreementCommandService.awardCommercialAgreement(
       caId,
       user?.id,
@@ -71,6 +88,7 @@ export function AdminAwardsPage() {
       getSearchText={(d) => [d.id, d.title, d.status, d.opportunityId].filter(Boolean).join(' ')}
       emptyTitle="No multi-CA opportunities"
       emptyDescription="Award candidates appear when an opportunity has more than one Commercial Agreement."
+      headerActions={canAward ? undefined : <PmBadge tone="warning">Read-only</PmBadge>}
       columns={[
         { id: 'title', label: 'Title', cell: (d) => d.title || d.id },
         { id: 'opportunity', label: 'Opportunity', cell: (d) => d.opportunityId },
@@ -89,21 +107,24 @@ export function AdminAwardsPage() {
         {
           id: 'award',
           label: 'Award',
-          cell: (d) => (
-            <PmButton
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                handleAward(d.id)
-              }}
-              disabled={(d.awardStatus ?? '').toLowerCase() === 'awarded'}
-            >
-              Award
-            </PmButton>
-          ),
+          cell: (d) =>
+            canAward ? (
+              <PmButton
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleAward(d.id)
+                }}
+                disabled={(d.awardStatus ?? '').toLowerCase() === 'awarded'}
+              >
+                Award
+              </PmButton>
+            ) : (
+              '—'
+            ),
         },
       ]}
     />

@@ -21,7 +21,7 @@ export function AdminLegalReviewPage() {
   return (
     <AdminListPage
       title="Legal Review"
-      description={`${productLanguage.plural('contract')} pending legal review.`}
+      description={`Filtered queue of ${productLanguage.plural('contract').toLowerCase()} in draft/pending statuses. Legal decision commands are not wired on this page — open a contract detail to inspect.`}
       data={rows}
       getRowId={(c) => c.id}
       getRowHref={(c) => `/admin/contracts/${c.id}`}

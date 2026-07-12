@@ -47,6 +47,8 @@ export const ADMIN_PAGE_REGISTRY: readonly AdminPageRegistryEntry[] = [
   { id: 'settings', href: '/admin/settings', title: 'Settings', section: 'configuration', capability: 'admin.settings.manage' },
   { id: 'skills', href: '/admin/skills', title: 'Skills', section: 'configuration', capability: 'admin.settings.manage', plannedShell: true },
   { id: 'site_content', href: '/admin/site-content', title: 'Site content', section: 'configuration', capability: 'admin.settings.manage', plannedShell: true },
+  { id: 'subscriptions', href: '/admin/subscriptions', title: 'Subscriptions', section: 'configuration', capability: 'admin.settings.manage', plannedShell: true },
+  { id: 'disputes', href: '/admin/disputes', title: 'Disputes', section: 'commercial', capability: 'admin.commercial_agreements.read', plannedShell: true },
   { id: 'audit', href: '/admin/audit', title: 'Audit', section: 'system', capability: 'admin.audit.read' },
   { id: 'environments', href: '/admin/environments', title: 'Environments', section: 'system', capability: 'admin.environment.manage' },
   { id: 'health', href: '/admin/health', title: 'Health', section: 'system', capability: 'admin.health.read' },

@@ -19,11 +19,10 @@ export function AdminRiskPage() {
         />
       }
     >
-      <PmMetricGrid columns={4}>
+      <PmMetricGrid columns={3}>
         <PmStatCard label="Suspended users" value={risk.suspendedUsers} dense />
         <PmStatCard label="Rejected vetting" value={risk.rejectedDocuments} dense />
         <PmStatCard label="Orphan hints" value={risk.orphanHints} dense />
-        <PmStatCard label="Matching overrides" value={risk.matchingOverrides} dense />
       </PmMetricGrid>
       <PmContentCard title="Risk queues" className="mt-6">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

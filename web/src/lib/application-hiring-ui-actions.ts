@@ -15,7 +15,7 @@ import {
   isWorkflowActionAvailable,
   toWorkflowEntitySnapshot,
 } from '@/domain/workflows/workflow-bridge.ts'
-import { productFlags } from '@/config/product-flags.ts'
+import { getEffectiveProductFlags } from '@/domain/admin/settings/effective-settings.ts'
 
 export type ApplicationHiringUiActionResult =
   | { readonly success: true; readonly negotiationId: string }
@@ -80,7 +80,7 @@ function buildApplicationWorkflowContext(
     application,
     linkage: {
       legacyApplicationsEnabled:
-        deps?.legacyApplicationsEnabled ?? productFlags.showLegacyApplications,
+        deps?.legacyApplicationsEnabled ?? getEffectiveProductFlags().showLegacyApplications,
       negotiationsForApplication: getNegotiations(application.id).map((negotiation) =>
         toWorkflowEntitySnapshot(negotiation) ?? { id: negotiation.id, status: negotiation.status },
       ),

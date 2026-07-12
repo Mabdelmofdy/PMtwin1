@@ -62,11 +62,11 @@ const WORKSPACE_DEFS: Readonly<Record<string, WorkspaceDef>> = {
   },
   configuration: {
     title: 'Configuration Workspace',
-    description: 'Platform settings and content configuration.',
+    description: 'Functional Demo/UAT platform settings, feature flags, and environments.',
     domainLinks: [
       { label: 'Settings', href: '/admin/settings' },
-      { label: 'Skills', href: '/admin/skills' },
-      { label: 'Site content', href: '/admin/site-content' },
+      { label: 'Feature Flags', href: '/admin/feature-flags' },
+      { label: 'Environments', href: '/admin/environments' },
     ],
   },
   system: {

@@ -41,6 +41,8 @@ import {
   opportunityRepository,
   postMatchRepository,
   userRepository,
+  adminSettingsRepository,
+  productLanguageSettingsRepository,
 } from '@/repositories/index.ts'
 
 export const EXPORT_SCHEMA_VERSION = '1.0'
@@ -71,6 +73,13 @@ export type EnvironmentExportPayload = {
   applications: Application[]
   audit: AuditEntry[]
   notifications: AppNotification[]
+  /** Optional — Admin Settings document (schema 1.0 compatible extension). */
+  adminSettings?: import('@/domain/admin/settings/types.ts').AdminSettingsDocument
+  /** Optional — product language overrides map. */
+  productLanguageSettings?: Record<
+    string,
+    import('@/types/domain.ts').ProductLanguageSettings
+  >
 }
 
 export const ENVIRONMENT_EXPORT_COLLECTION_KEYS = [
@@ -106,6 +115,11 @@ type EnvironmentExportDeps = {
   readonly readApplications: () => Application[]
   readonly readAudit: () => AuditEntry[]
   readonly readNotifications: () => AppNotification[]
+  readonly readAdminSettings: () => import('@/domain/admin/settings/types.ts').AdminSettingsDocument
+  readonly readProductLanguageSettings: () => Record<
+    string,
+    import('@/types/domain.ts').ProductLanguageSettings
+  >
 }
 
 function resolveApplicationVersion(): string {
@@ -156,6 +170,14 @@ function createDefaultDeps(exportedBy: string): EnvironmentExportDeps {
     readApplications: () => applicationRepository.getAll(),
     readAudit: () => auditRepository.getAll(),
     readNotifications: () => notificationRepository.getAll(),
+    readAdminSettings: () => adminSettingsRepository.get(),
+    readProductLanguageSettings: () => {
+      const map: Record<string, import('@/types/domain.ts').ProductLanguageSettings> = {}
+      for (const entry of productLanguageSettingsRepository.getAll()) {
+        map[`${entry.tenantId}:${entry.locale}`] = entry
+      }
+      return map
+    },
   }
 }
 
@@ -198,6 +220,8 @@ export function buildEnvironmentExportPayload(
     applications: resolvedDeps.readApplications(),
     audit: resolvedDeps.readAudit(),
     notifications: resolvedDeps.readNotifications(),
+    adminSettings: resolvedDeps.readAdminSettings(),
+    productLanguageSettings: resolvedDeps.readProductLanguageSettings(),
   }
 }
 

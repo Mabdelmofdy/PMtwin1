@@ -227,8 +227,6 @@ export function buildRiskSummary(): AdminRiskSummary {
     return !userIds.has(o.creatorId)
   }).length
 
-  const matchingOverrides = 0
-
   const ops = buildOperationsSummary()
   const riskCards = ops.cards.filter(
     (c) => c.id === 'suspended_users' || c.id === 'pending_vetting' || c.count > 0,
@@ -238,7 +236,6 @@ export function buildRiskSummary(): AdminRiskSummary {
     suspendedUsers,
     rejectedDocuments,
     orphanHints,
-    matchingOverrides,
     items: riskCards,
   }
 }

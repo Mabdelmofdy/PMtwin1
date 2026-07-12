@@ -14,7 +14,7 @@ import type {
   WorkflowLinkageContext,
   WorkflowUserContext,
 } from '@pm-twin/workflows'
-import { productFlags } from '@/config/product-flags.ts'
+import { getEffectiveProductFlags } from '@/domain/admin/settings/effective-settings.ts'
 
 export function toWorkflowEntitySnapshot(
   entity: {
@@ -125,7 +125,7 @@ export function buildWorkflowContext(
       matchType: postMatch?.matchType,
     },
     linkage: {
-      legacyApplicationsEnabled: productFlags.showLegacyApplications,
+      legacyApplicationsEnabled: getEffectiveProductFlags().showLegacyApplications,
       contractDecisionRequired: true,
       contractDecisionStatus: decisionStatus as WorkflowLinkageContext['contractDecisionStatus'],
       ...input.linkage,

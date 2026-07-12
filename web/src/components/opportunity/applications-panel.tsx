@@ -27,7 +27,7 @@ import { PmContentCard } from '@/components/layout/pm-layout-index'
 import { PmBadge, PmButton, PmEmptyState, PmSurface, PmWorkflowBadge } from '@/components/ui/pm-index'
 import { PmCardActions } from '@/components/ui/pm-more-actions'
 import { cn } from '@/lib/utils'
-import { productFlags } from '@/config/product-flags.ts'
+import { getEffectiveProductFlags } from '@/domain/admin/settings/effective-settings.ts'
 import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import {
   Select,
@@ -156,7 +156,7 @@ export function ApplicationsPanel({
   opportunityClosed: boolean
   variant?: 'legacy' | 'default'
 }) {
-  if (!productFlags.showLegacyApplications) {
+  if (!getEffectiveProductFlags().showLegacyApplications) {
     return null
   }
 

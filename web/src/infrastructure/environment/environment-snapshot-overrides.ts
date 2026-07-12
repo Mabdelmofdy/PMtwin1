@@ -90,5 +90,9 @@ export function buildEnvironmentSnapshotOverrides(
     deletedNotifications: notifications.deletedIds,
     auditSnapshot: payload.audit,
     newAuditEntries: [],
+    ...(payload.adminSettings ? { adminSettings: payload.adminSettings } : {}),
+    ...(payload.productLanguageSettings
+      ? { productLanguageSettings: payload.productLanguageSettings }
+      : {}),
   }
 }

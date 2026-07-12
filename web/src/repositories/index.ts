@@ -33,6 +33,8 @@ import { ContractRepository } from './contract-repository.ts'
 import { NotificationRepository } from './notification-repository.ts'
 import { AuditRepository } from './audit-repository.ts'
 import { ProductLanguageSettingsRepository } from './product-language-settings-repository.ts'
+import { AdminSettingsRepository } from './admin-settings-repository.ts'
+import { adminSettingsRepository } from './admin-settings-repository.ts'
 import { PartyRepository } from './party-repository.ts'
 import { PartyMembershipRepository } from './party-membership-repository.ts'
 import { formatMembershipId } from './party-membership-repository.ts'
@@ -117,6 +119,8 @@ export const productLanguageSettingsRepository = new ProductLanguageSettingsRepo
   storageAdapter,
 )
 
+export { adminSettingsRepository }
+
 export const partyRepository = new PartyRepository(
   storageAdapter,
   loadUsers,
@@ -147,6 +151,7 @@ export {
   NotificationRepository,
   AuditRepository,
   ProductLanguageSettingsRepository,
+  AdminSettingsRepository,
   PartyRepository,
   PartyMembershipRepository,
   PartyDocumentRepository,
