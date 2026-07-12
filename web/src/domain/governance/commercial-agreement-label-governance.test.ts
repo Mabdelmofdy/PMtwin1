@@ -65,13 +65,18 @@ describe('commercial agreement label governance', () => {
   it('uses Commercial Agreement wording on admin surfaces', () => {
     const adminGroup = adminNavigationGroups.find((group) =>
       group.items.some((item) => item.href === '/admin/commercial-agreements'))
-    assert.equal(adminGroup?.title, 'Commercial agreements & legal')
+    assert.equal(adminGroup?.title, 'Commercial Operations')
+
+    const adminItem = adminGroup?.items.find(
+      (item) => item.href === '/admin/commercial-agreements',
+    )
+    assert.equal(adminItem?.title, 'Commercial Agreements')
 
     const adminPagesSource = readFileSync(
       join(webRoot, 'pages/admin/admin-pages.tsx'),
       'utf8',
     )
-    assert.match(adminPagesSource, /commercial agreements\./i)
+    assert.match(adminPagesSource, /commercial agreements/i)
     assert.doesNotMatch(adminPagesSource, /\bplatform deals\b/i)
   })
 

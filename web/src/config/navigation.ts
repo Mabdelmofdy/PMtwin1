@@ -193,17 +193,41 @@ export const mainNavigation: NavGroup[] = [
 
 export const adminNavigationGroups: NavGroup[] = [
   {
-    title: 'Overview',
+    title: 'Command Center',
     items: [
-      { title: 'Dashboard', href: '/admin', icon: ShieldCheck, keywords: ['admin', 'home'] },
-      { title: 'Reports', href: '/admin/reports', icon: ChartBar, keywords: ['analytics'] },
-      { title: 'Health', href: '/admin/health', icon: Activity, keywords: ['status', 'system'] },
+      { title: 'Executive', href: '/admin', icon: ShieldCheck, keywords: ['admin', 'home', 'dashboard', 'command'] },
+      { title: 'Operations', href: '/admin/command-center/operations', icon: Activity, keywords: ['ops', 'queue'] },
+      { title: 'Risk & Compliance', href: '/admin/command-center/risk', icon: ShieldAlert, keywords: ['risk'] },
+      { title: 'My Queue', href: '/admin/command-center/my-queue', icon: User, keywords: ['assigned'] },
+      { title: 'Admin Inbox', href: '/admin/inbox', icon: Bell, keywords: ['inbox', 'work'] },
     ],
   },
   {
-    title: 'Users & access',
+    title: 'Workspaces',
+    items: [
+      { title: 'Identity', href: '/admin/workspaces/identity', icon: Users, keywords: ['users', 'parties'] },
+      { title: 'Compliance', href: '/admin/workspaces/compliance', icon: ShieldCheck, keywords: ['vetting'] },
+      { title: 'Marketplace', href: '/admin/workspaces/marketplace', icon: Briefcase, keywords: ['opportunities', 'matching'] },
+      { title: 'Commercial', href: '/admin/workspaces/commercial', icon: Handshake, keywords: ['agreements', 'contracts'] },
+      { title: 'Reports', href: '/admin/workspaces/reports', icon: ChartBar, keywords: ['analytics'] },
+      { title: 'Configuration', href: '/admin/workspaces/configuration', icon: Settings, keywords: ['settings'] },
+      { title: 'System', href: '/admin/workspaces/system', icon: Wrench, keywords: ['health', 'audit'] },
+    ],
+  },
+  {
+    title: 'Explore',
+    items: [
+      { title: 'Global Search', href: '/admin/search', icon: Compass, keywords: ['search', 'find'] },
+      { title: 'Platform Explorer', href: '/admin/explorer', icon: BookOpen, keywords: ['explorer', 'catalogue'] },
+    ],
+  },
+  {
+    title: 'Identity & Access',
     items: [
       { title: 'Users', href: '/admin/users', icon: Users, keywords: ['accounts'] },
+      { title: 'Parties', href: '/admin/parties', icon: Building2, keywords: ['companies'] },
+      { title: 'Memberships', href: '/admin/memberships', icon: Users, keywords: ['members'] },
+      { title: 'Roles', href: '/admin/roles', icon: ShieldCheck, keywords: ['permissions'] },
       { title: 'Vetting', href: '/admin/vetting', icon: User, keywords: ['approval', 'queue'] },
     ],
   },
@@ -212,27 +236,46 @@ export const adminNavigationGroups: NavGroup[] = [
     items: [
       { title: 'Opportunities', href: '/admin/opportunities', icon: Briefcase },
       { title: 'Matching', href: '/admin/matching', icon: Sparkles },
-      { title: 'Negotiations', href: '/admin/negotiations', icon: Handshake },
-      { title: 'Disputes', href: '/admin/disputes', icon: ShieldAlert },
+      { title: 'PostMatches', href: '/admin/post-matches', icon: Heart },
+      { title: 'Matching Quality', href: '/admin/matching/quality', icon: ChartBar },
+      { title: 'Taxonomy', href: '/admin/taxonomy', icon: GitBranch },
+      { title: 'Moderation', href: '/admin/moderation', icon: ShieldAlert },
+      { title: 'Negotiations', href: '/admin/negotiations', icon: Scale },
     ],
   },
   {
-    title: 'Commercial agreements & legal',
+    title: 'Commercial Operations',
     items: [
       { title: 'Commercial Agreements', href: '/admin/commercial-agreements', icon: Handshake },
+      { title: 'Approvals', href: '/admin/approvals', icon: ShieldCheck },
+      { title: 'Award Management', href: '/admin/awards', icon: Sparkles },
       { title: 'Contracts', href: '/admin/contracts', icon: FileText },
-      { title: 'Consortium', href: '/admin/consortium', icon: Building2 },
+      { title: 'Legal Review', href: '/admin/legal-review', icon: Scale },
     ],
   },
   {
-    title: 'Platform',
+    title: 'Reports',
     items: [
-      { title: 'Audit', href: '/admin/audit', icon: BookOpen },
+      { title: 'Reports', href: '/admin/reports', icon: ChartBar, keywords: ['analytics'] },
+    ],
+  },
+  {
+    title: 'Platform Configuration',
+    items: [
       { title: 'Settings', href: '/admin/settings', icon: Settings },
       { title: 'Skills', href: '/admin/skills', icon: Wrench },
-      { title: 'Collaboration models', href: '/admin/collaboration-models', icon: GitBranch },
       { title: 'Site content', href: '/admin/site-content', icon: FileText },
-      { title: 'Subscriptions', href: '/admin/subscriptions', icon: Bell },
+    ],
+  },
+  {
+    title: 'System Administration',
+    items: [
+      { title: 'Audit', href: '/admin/audit', icon: BookOpen },
+      { title: 'Environments', href: '/admin/environments', icon: MapIcon, keywords: ['scenario', 'restore'] },
+      { title: 'Health', href: '/admin/health', icon: Activity, keywords: ['status', 'diagnostics'] },
+      { title: 'Feature Flags', href: '/admin/feature-flags', icon: Sparkles },
+      { title: 'Data Quality', href: '/admin/data-quality', icon: ShieldAlert },
+      { title: 'Failed Commands', href: '/admin/failed-commands', icon: Activity },
     ],
   },
 ]

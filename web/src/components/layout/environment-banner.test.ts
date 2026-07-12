@@ -2,48 +2,54 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import {
   DEMO_ENVIRONMENT_BANNER_MESSAGE,
+  ENVIRONMENT_BANNER_LAYOUT_HEIGHT_PX,
   resolveEnvironmentBannerContent,
   shouldShowEnvironmentBanner,
   UAT_ENVIRONMENT_BANNER_MESSAGE,
 } from '@/components/layout/environment-banner.tsx'
+import { runtimeFeatureFlags } from '@/config/runtime-feature-flags.ts'
+import { pmWizardSticky } from '@/tokens/layers/layout.ts'
+import { buildEnvironmentMetadataSnapshot } from '@/components/admin/environment-management-panel.tsx'
 
-describe('EnvironmentBanner helpers', () => {
-  it('shows banner in demo mode', () => {
-    assert.equal(shouldShowEnvironmentBanner('demo'), true)
-    const content = resolveEnvironmentBannerContent('demo', 'LocalStorage')
-    assert.ok(content)
-    assert.equal(content.runtimeMode, 'demo')
+describe('EnvironmentBanner — customer workspace visibility', () => {
+  it('does not render the global environment banner in demo workspace', () => {
+    assert.equal(shouldShowEnvironmentBanner('demo'), false)
+    assert.equal(resolveEnvironmentBannerContent('demo', 'LocalStorage'), null)
   })
 
-  it('shows banner in uat mode', () => {
-    assert.equal(shouldShowEnvironmentBanner('uat'), true)
-    const content = resolveEnvironmentBannerContent('uat', 'LocalStorage')
-    assert.ok(content)
-    assert.equal(content.runtimeMode, 'uat')
+  it('does not render the global environment banner in UAT workspace', () => {
+    assert.equal(shouldShowEnvironmentBanner('uat'), false)
+    assert.equal(resolveEnvironmentBannerContent('uat', 'LocalStorage'), null)
   })
 
-  it('hides banner in production mode', () => {
+  it('does not render the global environment banner in production', () => {
     assert.equal(shouldShowEnvironmentBanner('production'), false)
     assert.equal(resolveEnvironmentBannerContent('production', 'Future API'), null)
   })
 
-  it('displays storage type in banner content', () => {
-    const content = resolveEnvironmentBannerContent('uat', 'LocalStorage')
-    assert.ok(content)
-    assert.equal(content.storageType, 'LocalStorage')
+  it('keeps Admin Environment metadata available independently of the banner', () => {
+    const snapshot = buildEnvironmentMetadataSnapshot()
+    assert.ok(snapshot.runtimeMode.length > 0)
+    assert.ok(snapshot.storageType.length > 0)
+    assert.ok(snapshot.namespace.length > 0)
+    assert.equal(runtimeFeatureFlags.showEnvironmentBanner, false)
   })
 
-  it('uses demo copy for demo mode', () => {
-    const content = resolveEnvironmentBannerContent('demo', 'LocalStorage')
-    assert.ok(content)
-    assert.equal(content.message, DEMO_ENVIRONMENT_BANNER_MESSAGE)
-    assert.match(content.message, /Demo Mode/)
+  it('reserves no environment-banner layout height in customer workspace', () => {
+    assert.equal(ENVIRONMENT_BANNER_LAYOUT_HEIGHT_PX, 0)
+    assert.match(
+      pmWizardSticky.stepper,
+      /top-\[calc\(var\(--environment-banner-height,0px\)\+var\(--app-header-height\)\)\]/,
+    )
   })
 
-  it('uses uat copy for uat mode', () => {
-    const content = resolveEnvironmentBannerContent('uat', 'LocalStorage')
-    assert.ok(content)
-    assert.equal(content.message, UAT_ENVIRONMENT_BANNER_MESSAGE)
-    assert.match(content.message, /UAT Mode/)
+  it('keeps wizard sticky offsets correct after banner removal', () => {
+    assert.match(pmWizardSticky.stepper, /--environment-banner-height,0px/)
+    assert.match(pmWizardSticky.stepper, /--app-header-height/)
+    assert.match(pmWizardSticky.footer, /sticky bottom-0/)
+    // Historical copy must not leak into customer chrome via the global banner helpers.
+    assert.equal(shouldShowEnvironmentBanner('demo'), false)
+    assert.ok(DEMO_ENVIRONMENT_BANNER_MESSAGE.includes('Demo Mode'))
+    assert.ok(UAT_ENVIRONMENT_BANNER_MESSAGE.includes('UAT Mode'))
   })
 })

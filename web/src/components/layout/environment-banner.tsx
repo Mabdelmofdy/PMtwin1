@@ -14,9 +14,18 @@ export type EnvironmentBannerContent = {
   message: string
 }
 
-export function shouldShowEnvironmentBanner(runtimeMode: string): boolean {
-  return runtimeMode === 'demo' || runtimeMode === 'uat'
+/**
+ * Centralized visibility rule for the global customer-facing environment banner.
+ *
+ * Customer workspace routes must never render this banner (demo, UAT, or production).
+ * Environment metadata remains available only inside the Admin Environment Panel.
+ */
+export function shouldShowEnvironmentBanner(_runtimeMode: string): boolean {
+  return false
 }
+
+/** Customer workspace never reserves layout height for an environment banner. */
+export const ENVIRONMENT_BANNER_LAYOUT_HEIGHT_PX = 0
 
 export function resolveEnvironmentBannerContent(
   runtimeMode: string,
@@ -34,11 +43,15 @@ export function resolveEnvironmentBannerContent(
     }
   }
 
-  return {
-    runtimeMode: 'uat',
-    storageType,
-    message: UAT_ENVIRONMENT_BANNER_MESSAGE,
+  if (runtimeMode === 'uat') {
+    return {
+      runtimeMode: 'uat',
+      storageType,
+      message: UAT_ENVIRONMENT_BANNER_MESSAGE,
+    }
   }
+
+  return null
 }
 
 export function EnvironmentBanner() {

@@ -1,4 +1,40 @@
-import { useParams } from 'react-router-dom'
+/**
+ * Legacy admin pages still hosted here + compatibility re-exports.
+ * Prefer imports from '@/pages/admin' or specific page modules.
+ */
+
+export { AdminDashboardPage, AdminExecutivePage } from './command-center/admin-executive-page.tsx'
+export { AdminReportsPage } from './reports/admin-reports-page.tsx'
+export { AdminHealthPage } from './system/admin-health-page.tsx'
+export { AdminUsersPage } from './identity/admin-users-page.tsx'
+export { AdminUserDetailPage } from './identity/admin-user-detail-page.tsx'
+export { AdminSettingsPage } from './platform/admin-settings-page.tsx'
+export { AdminOperationsPage } from './command-center/admin-operations-page.tsx'
+export { AdminRiskPage } from './command-center/admin-risk-page.tsx'
+export { AdminMyQueuePage } from './command-center/admin-my-queue-page.tsx'
+export { AdminInboxPage } from './inbox/admin-inbox-page.tsx'
+export { AdminSearchPage } from './search/admin-search-page.tsx'
+export { AdminExplorerPage } from './explorer/admin-explorer-page.tsx'
+export { AdminWorkspacePage } from './workspaces/admin-workspace-page.tsx'
+export { AdminEnvironmentsPage } from './system/admin-environments-page.tsx'
+export { AdminFeatureFlagsPage } from './system/admin-feature-flags-page.tsx'
+export { AdminDataQualityPage } from './system/admin-data-quality-page.tsx'
+export { AdminPartiesPage } from './identity/admin-parties-page.tsx'
+export { AdminPartyDetailPage } from './identity/admin-party-detail-page.tsx'
+export { AdminMembershipsPage } from './identity/admin-memberships-page.tsx'
+export { AdminRolesPage } from './identity/admin-roles-page.tsx'
+export { AdminTaxonomyPage } from './marketplace/admin-taxonomy-page.tsx'
+export { AdminPostMatchesPage } from './marketplace/admin-post-matches-page.tsx'
+export { AdminMatchingQualityPage } from './marketplace/admin-matching-quality-page.tsx'
+export { AdminModerationPage } from './marketplace/admin-moderation-page.tsx'
+export { AdminApprovalsPage } from './commercial/admin-approvals-page.tsx'
+export { AdminAwardsPage } from './commercial/admin-awards-page.tsx'
+export { AdminLegalReviewPage } from './commercial/admin-legal-review-page.tsx'
+export { AdminVettingConfigPage } from './onboarding/admin-vetting-config-page.tsx'
+
+export { AdminFailedCommandsPage } from './system/admin-failed-commands-page.tsx'
+export { AdminNegotiationDetailPage } from './commercial/admin-negotiation-detail-page.tsx'
+
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { adminApi } from '@/api/admin.ts'
@@ -7,13 +43,6 @@ import { dealsApi } from '@/api/deals.ts'
 import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
 import { opportunitiesApi } from '@/api/opportunities.ts'
-import { peopleApi } from '@/api/people.ts'
-import {
-  buildReadinessAnalytics,
-  createCreatorProfileResolver,
-} from '@/domain/readiness-analytics/index.ts'
-import { buildMatchingQualityAnalytics } from '@/domain/matching-quality/index.ts'
-import { MATCHING_MODELS, MATCHING_MODEL_KEYS } from '@/config/need-offer-framework.ts'
 import { resolvePostMatchTopologyLabel } from '@/lib/collaboration-taxonomy-display.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { formatDate } from '@/lib/format'
@@ -35,413 +64,29 @@ import {
 } from '@/components/admin/admin-vetting-kpi-strip.tsx'
 import type { VettingWorkflowEntry } from '@/lib/vetting-admin-workflow.ts'
 import {
+  executeApproveVetting,
+  executeRejectVetting,
+  executeRequestVettingClarification,
+} from '@/domain/admin/commands/vetting-admin-commands.ts'
+import {
   PmDataTable,
   PmTableEmpty,
   PmTableToolbar,
   type PmDataTableColumn,
 } from '@/components/data/pm-data-index'
 import {
-  PmForm,
-  PmFormReadonly,
-  PmFormReadonlyField,
-  PmFormReadonlySection,
-  PmFormSection,
-} from '@/components/forms/pm-form-index'
-import {
   PmContentCard,
-  PmDashboardLayout,
-  PmMetricGrid,
   PmSectionHeader,
-  formatPlatformHealthMetric,
 } from '@/components/layout/pm-layout-index'
-import { PmBadge, PmButton, PmEmptyState, PmPage, PmPageActions, PmPageHeader, PmPageHeroMetric, PmReadinessScoreBadge, PmStatCard, PmMatchScoreBadge } from '@/components/ui/pm-index'
+import { PmBadge, PmButton, PmPage, PmPageHeader, PmPageHeroMetric, PmReadinessScoreBadge, PmMatchScoreBadge } from '@/components/ui/pm-index'
 import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
 import { AdminStatusBadge } from '@/pages/admin/admin-display'
-import { pmTypography, resolveMatchTypeStyle } from '@/tokens'
+import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 import { useProductLanguage } from '@/providers/product-language-provider.tsx'
-import { EnvironmentManagementPanel } from '@/components/admin/environment-management-panel.tsx'
-
-type AdminFunnelStage = {
-  readonly id: string
-  readonly label: string
-  readonly count: number
-  readonly rate: number
-  readonly hint: string
-}
-
-/** Horizontal conversion funnel bars — presentation only. */
-function AdminFunnelBars({ stages }: { readonly stages: readonly AdminFunnelStage[] }) {
-  const maxCount = Math.max(1, ...stages.map((stage) => stage.count))
-
-  return (
-    <ol className="space-y-3" aria-label="Collaboration funnel">
-      {stages.map((stage) => {
-        const width = Math.max(4, Math.round((stage.count / maxCount) * 100))
-        return (
-          <li key={stage.id} className="space-y-1">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <span className={cn(pmTypography.label)}>{stage.label}</span>
-              <span className={cn(pmTypography.caption, 'text-muted-foreground')}>
-                {stage.count} · {stage.hint}
-              </span>
-            </div>
-            <div
-              className="h-2.5 w-full overflow-hidden rounded-full bg-muted"
-              role="img"
-              aria-label={`${stage.label}: ${stage.count}`}
-            >
-              <div
-                className="h-full rounded-full bg-primary transition-[width]"
-                style={{ width: `${width}%` }}
-              />
-            </div>
-          </li>
-        )
-      })}
-    </ol>
-  )
-}
-
-export function AdminDashboardPage() {
-  const { productLanguage } = useProductLanguage()
-  const version = useDataStoreVersion()
-  const opps = opportunitiesApi.list().length
-  const users = peopleApi.listUsers().length
-  const matches = matchesApi.list().length
-  const pendingVetting = adminApi.getPendingUsers().length
-
-  const readinessAnalytics = useMemo(() => {
-    const profiles = peopleApi.listAll().map((person) => ({
-      profile: person.profile,
-      profileKind: person.profile?.type === 'company' ? 'company' as const : 'individual' as const,
-    }))
-
-    return buildReadinessAnalytics({
-      profiles,
-      opportunities: opportunitiesApi.list(),
-      resolveProfileForOpportunity: createCreatorProfileResolver((id) => peopleApi.get(id)),
-    })
-  }, [version])
-
-  const matchingQuality = useMemo(() => {
-    const profiles = peopleApi.listAll().map((person) => ({
-      profile: person.profile,
-      profileKind: person.profile?.type === 'company' ? 'company' as const : 'individual' as const,
-    }))
-
-    return buildMatchingQualityAnalytics({
-      profiles,
-      opportunities: opportunitiesApi.list(),
-      matches: matchesApi.list(),
-      negotiations: negotiationsApi.list(),
-      deals: dealsApi.list(),
-    })
-  }, [version])
-
-  const auditEntries = adminApi.getAuditLog().slice(0, 5)
-  const platformHealth = formatPlatformHealthMetric(
-    readinessAnalytics.profiles.averageScore,
-    matchingQuality.averageMatchScore,
-  )
-
-  return (
-    <PmDashboardLayout
-      header={
-        <PmPageHeader
-          label="Admin"
-          title="Command center"
-          description="Platform KPIs, queues, and quick actions."
-          metric={
-            <PmPageHeroMetric value={platformHealth} label="Platform health" />
-          }
-          badges={
-            <>
-              <PmBadge tone="success">
-                {Math.round(readinessAnalytics.profiles.averageScore)}% readiness
-              </PmBadge>
-              <PmBadge tone="info">
-                {Math.round(matchingQuality.averageMatchScore)}% match quality
-              </PmBadge>
-              {pendingVetting > 0 ? (
-                <PmBadge tone="warning">{pendingVetting} pending vetting</PmBadge>
-              ) : null}
-            </>
-          }
-        />
-      }
-      metrics={
-        <PmMetricGrid columns={4}>
-          <PmStatCard label={productLanguage.plural('opportunity')} value={opps} dense />
-          <PmStatCard label="Users" value={users} dense />
-          <PmStatCard label="Matches" value={matches} dense />
-          <PmStatCard label="Pending vetting" value={pendingVetting} dense />
-        </PmMetricGrid>
-      }
-      quickActions={
-        <PmContentCard title="Quick actions">
-          <PmPageActions
-            primary={{ label: 'Run matching', href: '/admin/matching' }}
-            more={[
-              { id: 'vetting', label: 'Review vetting', href: '/admin/vetting' },
-              { id: 'audit', label: 'Open audit log', href: '/admin/audit' },
-            ]}
-          />
-        </PmContentCard>
-      }
-      recentActivity={
-        <PmContentCard title="Recent activity">
-          {auditEntries.length === 0 ? (
-            <PmEmptyState title="No recent audit entries" size="compact" />
-          ) : (
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              {auditEntries.map((a) => (
-                <li key={a.id}>
-                  {a.action} — {formatDate(a.timestamp)}
-                </li>
-              ))}
-            </ul>
-          )}
-        </PmContentCard>
-      }
-    >
-      <PmSectionHeader
-        title="Matching Readiness Overview"
-        description="Readiness quality across profiles and opportunities using current domain evaluators."
-      />
-      <div className="grid gap-4 lg:grid-cols-2">
-        <PmContentCard title="Profiles">
-          <PmMetricGrid columns={3}>
-            <PmStatCard label="Total profiles" value={readinessAnalytics.profiles.total} dense />
-            <PmStatCard label="Average score" value={`${Math.round(readinessAnalytics.profiles.averageScore)}%`} dense />
-            <PmStatCard label="Ready" value={readinessAnalytics.profiles.ready} dense />
-            <PmStatCard label="Needs review" value={readinessAnalytics.profiles.needsReview} dense />
-            <PmStatCard label="Incomplete" value={readinessAnalytics.profiles.incomplete} dense />
-          </PmMetricGrid>
-        </PmContentCard>
-        <PmContentCard title={productLanguage.plural('opportunity')}>
-          <PmMetricGrid columns={3}>
-            <PmStatCard label="Total opportunities" value={readinessAnalytics.opportunities.total} dense />
-            <PmStatCard label="Average score" value={`${Math.round(readinessAnalytics.opportunities.averageScore)}%`} dense />
-            <PmStatCard label="Ready" value={readinessAnalytics.opportunities.ready} dense />
-            <PmStatCard label="Needs review" value={readinessAnalytics.opportunities.needsReview} dense />
-            <PmStatCard label="Incomplete" value={readinessAnalytics.opportunities.incomplete} dense />
-            <PmStatCard label="Draft" value={readinessAnalytics.opportunities.draft} dense />
-            <PmStatCard label="Publish blocked" value={readinessAnalytics.opportunities.publishBlocked} dense />
-          </PmMetricGrid>
-        </PmContentCard>
-      </div>
-
-      <PmSectionHeader
-        title="Matching Quality Metrics"
-        description="Outcome quality across readiness scores, match scores, and collaboration funnel conversion."
-        className="mt-6"
-      />
-      <PmMetricGrid columns={3}>
-        <PmStatCard
-          label="Average profile readiness"
-          value={`${Math.round(matchingQuality.averageProfileReadiness)}%`}
-          dense
-        />
-        <PmStatCard
-          label="Average opportunity readiness"
-          value={Math.round(matchingQuality.averageOpportunityReadiness).toString() + '%'}
-          dense
-        />
-        <PmStatCard
-          label="Average match score"
-          value={`${Math.round(matchingQuality.averageMatchScore)}%`}
-          dense
-        />
-      </PmMetricGrid>
-      <PmContentCard
-        title="Collaboration funnel"
-        description="Conversion from discovered matches through negotiations to commercial agreements."
-      >
-        <AdminFunnelBars
-          stages={[
-            {
-              id: 'matches',
-              label: 'Matches',
-              count: matchingQuality.totalMatches,
-              rate: 100,
-              hint: 'All discovered matches',
-            },
-            {
-              id: 'accepted',
-              label: 'Accepted',
-              count: matchingQuality.acceptedMatches,
-              rate: matchingQuality.acceptanceRate,
-              hint: `${Math.round(matchingQuality.acceptanceRate)}% acceptance rate`,
-            },
-            {
-              id: 'negotiations',
-              label: productLanguage.plural('negotiation'),
-              count: matchingQuality.negotiationsStarted,
-              rate: matchingQuality.negotiationRate,
-              hint: `${Math.round(matchingQuality.negotiationRate)}% of accepted matches`,
-            },
-            {
-              id: 'deals',
-              label: productLanguage.plural('commercialAgreement'),
-              count: matchingQuality.dealsCreated,
-              rate: matchingQuality.dealConversionRate,
-              hint: `${Math.round(matchingQuality.dealConversionRate)}% of negotiations`,
-            },
-          ]}
-        />
-      </PmContentCard>
-
-      <PmSectionHeader
-        title="Matching models (Need/Offer framework)"
-        description="Breakdown by topology model — One Way, Two-Way, Group Formation, Circular Exchange."
-        className="mt-6"
-      />
-      <PmMetricGrid columns={4}>
-        {MATCHING_MODEL_KEYS.map((key) => {
-          const entry = matchingQuality.byMatchType[key]
-          const model = MATCHING_MODELS[key]
-          return (
-            <PmStatCard
-              key={key}
-              label={model.label}
-              value={entry.total}
-              hint={`${entry.accepted} accepted · ${entry.confirmed} confirmed`}
-              trend={
-                <span
-                  className={cn(
-                    pmTypography.badge,
-                    'inline-flex items-center rounded-md px-1.5 py-0.5',
-                    resolveMatchTypeStyle(key),
-                  )}
-                >
-                  {model.subtitle}
-                </span>
-              }
-              dense
-            />
-          )
-        })}
-      </PmMetricGrid>
-    </PmDashboardLayout>
-  )
-}
-
-export function AdminReportsPage() {
-  const { productLanguage } = useProductLanguage()
-  const publishedCount = opportunitiesApi
-    .list()
-    .filter((o) => (o.visibilityStatus ?? '').toLowerCase() === 'published').length
-
-  return (
-    <PmPage
-      header={
-        <PmPageHeader
-          label="Admin"
-          title="Reports"
-          description="Platform analytics and export tools."
-          metric={<PmPageHeroMetric value={publishedCount} label={`Published ${productLanguage.plural('opportunity').toLowerCase()}`} />}
-        />
-      }
-    >
-      <PmMetricGrid columns={3}>
-        <PmStatCard label="New users (30d)" value="12" hint="Demo metric" dense />
-        <PmStatCard label={`Published ${productLanguage.plural('opportunity').toLowerCase()}`} value={publishedCount} dense />
-        <PmStatCard label="Match rate" value="78%" hint="Demo metric" dense />
-      </PmMetricGrid>
-    </PmPage>
-  )
-}
-
-export function AdminHealthPage() {
-  const services = ['Data service', 'Matching engine', 'Notifications', 'Auth'] as const
-
-  return (
-    <PmPage
-      header={
-        <PmPageHeader
-          label="Admin"
-          title="System health"
-          description="Service status and data store snapshot."
-          metric={<PmPageHeroMetric value={services.length} label="Services" />}
-          badges={<PmBadge tone="success">All operational</PmBadge>}
-        />
-      }
-    >
-      <PmContentCard title="Services" noPadding>
-        <ul className="divide-y divide-border/60">
-          {services.map((service) => (
-            <li
-              key={service}
-              className="flex items-center justify-between px-4 py-3 md:px-5"
-            >
-              <span className="font-medium">{service}</span>
-              <AdminStatusBadge status="active" />
-            </li>
-          ))}
-        </ul>
-      </PmContentCard>
-    </PmPage>
-  )
-}
-
-export function AdminUsersPage() {
-  const users = peopleApi.listAll()
-
-  return (
-    <AdminListPage
-      title="Users"
-      description="Managed accounts after vetting."
-      data={users}
-      getRowId={(u) => u.id}
-      getRowHref={(u) => `/admin/users/${u.id}`}
-      getSearchText={(u) =>
-        [u.profile?.name, u.email, u.role, u.status].filter(Boolean).join(' ')
-      }
-      searchPlaceholder="Search users…"
-      columns={[
-        { id: 'name', label: 'Name', cell: (u) => u.profile?.name ?? u.id },
-        { id: 'email', label: 'Email', cell: (u) => u.email },
-        { id: 'role', label: 'Role', cell: (u) => u.role },
-        {
-          id: 'status',
-          label: 'Status',
-          cell: (u) => <AdminStatusBadge status={u.status} />,
-        },
-      ]}
-    />
-  )
-}
-
-export function AdminUserDetailPage() {
-  const { id } = useParams()
-  const user = id ? peopleApi.get(id) : undefined
-
-  return (
-    <PmPage
-      header={
-        <PmPageHeader
-          title={user?.profile?.name ?? 'User detail'}
-          description={user?.email}
-        />
-      }
-    >
-      <PmFormReadonly>
-        <PmFormReadonlySection title="Account" description="Admin user inspector — documents, activity, decisions">
-          <PmFormReadonlyField label="User ID" value={user?.id} />
-          <PmFormReadonlyField label="Email" value={user?.email} />
-          <PmFormReadonlyField label="Role" value={user?.role} />
-          <PmFormReadonlyField label="Status">
-            {user?.status ? <AdminStatusBadge status={user.status} /> : null}
-          </PmFormReadonlyField>
-          <PmFormReadonlyField label="Created" value={user?.createdAt ? formatDate(user.createdAt) : null} />
-        </PmFormReadonlySection>
-      </PmFormReadonly>
-    </PmPage>
-  )
-}
+import { AdminPlannedShell } from '@/pages/admin/admin-planned-shell.tsx'
 
 export function AdminVettingPage() {
   const { user } = useAuth()
@@ -587,22 +232,30 @@ export function AdminVettingPage() {
           if (!reviewing) return
           const partyId = reviewing.activeParty?.id ?? reviewing.user.id
           if (payload.action === 'approve') {
-            adminApi.approveVetting(reviewing.user.id, partyId, reviewerId)
+            const result = executeApproveVetting(reviewing.user.id, partyId, reviewerId)
+            if (!result.ok) {
+              toast.error(result.error ?? 'Approve failed')
+              return
+            }
             toast.success('Vetting approved')
           } else if (payload.action === 'reject') {
-            adminApi.rejectVetting(
+            const result = executeRejectVetting(
               reviewing.user.id,
               partyId,
               reviewerId,
               payload.reviewNotes,
             )
+            if (!result.ok) {
+              toast.error(result.error ?? 'Reject failed')
+              return
+            }
             toast.success('Vetting rejected')
           } else {
             if (!payload.reviewNotes || payload.requestedItems.length === 0) {
               toast.error('Review notes and requested items are required.')
               return
             }
-            adminApi.requestVettingChanges({
+            const result = executeRequestVettingClarification({
               userId: reviewing.user.id,
               partyId,
               reviewerId,
@@ -610,6 +263,10 @@ export function AdminVettingPage() {
               requestedItems: payload.requestedItems,
               dueDate: payload.dueDate,
             })
+            if (!result.ok) {
+              toast.error(result.error ?? 'Request failed')
+              return
+            }
             toast.success('Changes requested')
           }
           setReviewing(null)
@@ -816,26 +473,6 @@ export function AdminNegotiationsPage() {
   )
 }
 
-export function AdminNegotiationDetailPage() {
-  const { productLanguage } = useProductLanguage()
-  return (
-    <PmPage
-      header={
-        <PmPageHeader
-          title={`${productLanguage.label('negotiation')} detail`}
-          description="Admin inspector with transcript export."
-        />
-      }
-    >
-      <PmContentCard>
-        <p className="text-sm text-muted-foreground">
-          {`${productLanguage.label('negotiation')} inspector — wire transcript export on migration.`}
-        </p>
-      </PmContentCard>
-    </PmPage>
-  )
-}
-
 export function AdminDisputesPage() {
   return (
     <AdminListPage
@@ -950,36 +587,6 @@ export function AdminAuditPage() {
   )
 }
 
-export function AdminSettingsPage() {
-  return (
-    <PmPage
-      header={
-        <PmPageHeader
-          title="Platform settings"
-          description="General, branding, security, matching, and feature flags."
-        />
-      }
-    >
-      <div className="space-y-6">
-        <EnvironmentManagementPanel />
-        <PmForm onSubmit={(e) => e.preventDefault()} readOnly>
-          <PmFormSection
-            title="General"
-            description="Vertical settings tabs — wire to system_settings."
-          >
-            <p className="text-sm text-muted-foreground">
-              Settings form migration placeholder. Connect fields when backend wiring is ready.
-            </p>
-          </PmFormSection>
-          <PmFormSection title="Security" description="Authentication and access policies.">
-            <p className="text-sm text-muted-foreground">Read-only until settings API is connected.</p>
-          </PmFormSection>
-        </PmForm>
-      </div>
-    </PmPage>
-  )
-}
-
 function AdminPlaceholderPage({
   title,
   description,
@@ -987,13 +594,7 @@ function AdminPlaceholderPage({
   title: string
   description: string
 }) {
-  return (
-    <PmPage
-      header={<PmPageHeader title={title} description={description} />}
-    >
-      <PmTableEmpty variant="no-data" title={`${title} — coming soon`} description={description} />
-    </PmPage>
-  )
+  return <AdminPlannedShell title={title} description={description} />
 }
 
 export function AdminSkillsPage() {

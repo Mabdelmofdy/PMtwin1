@@ -65,26 +65,49 @@ import {
   SettingsPage,
 } from '@/pages/workspace/people-pages'
 import {
+  AdminApprovalsPage,
   AdminAuditPage,
+  AdminAwardsPage,
   AdminCollaborationModelsPage,
   AdminConsortiumPage,
   AdminContractsPage,
   AdminDashboardPage,
+  AdminDataQualityPage,
   AdminDealsPage,
   AdminDisputesPage,
+  AdminEnvironmentsPage,
+  AdminExplorerPage,
+  AdminFailedCommandsPage,
+  AdminFeatureFlagsPage,
   AdminHealthPage,
+  AdminInboxPage,
+  AdminLegalReviewPage,
   AdminMatchingPage,
+  AdminMatchingQualityPage,
+  AdminMembershipsPage,
+  AdminModerationPage,
+  AdminMyQueuePage,
   AdminNegotiationDetailPage,
   AdminNegotiationsPage,
   AdminOpportunitiesPage,
+  AdminOperationsPage,
+  AdminPartiesPage,
+  AdminPartyDetailPage,
+  AdminPostMatchesPage,
   AdminReportsPage,
+  AdminRiskPage,
+  AdminRolesPage,
+  AdminSearchPage,
   AdminSettingsPage,
   AdminSiteContentPage,
   AdminSkillsPage,
   AdminSubscriptionsPage,
+  AdminTaxonomyPage,
   AdminUserDetailPage,
   AdminUsersPage,
+  AdminVettingConfigPage,
   AdminVettingPage,
+  AdminWorkspacePage,
 } from '@/pages/admin/admin-pages'
 function CommercialAgreementLegacyRedirect() {
   const { id } = useParams()
@@ -180,15 +203,35 @@ export function AppRoutes() {
 
         <Route element={<AdminRouteGuard />}>
           <Route path="/admin" element={<AdminDashboardPage />} />
+          <Route path="/admin/command-center/operations" element={<AdminOperationsPage />} />
+          <Route path="/admin/command-center/risk" element={<AdminRiskPage />} />
+          <Route path="/admin/command-center/my-queue" element={<AdminMyQueuePage />} />
+          <Route path="/admin/inbox" element={<AdminInboxPage />} />
+          <Route path="/admin/search" element={<AdminSearchPage />} />
+          <Route path="/admin/explorer" element={<AdminExplorerPage />} />
+          <Route path="/admin/workspaces/:workspaceId" element={<AdminWorkspacePage />} />
           <Route path="/admin/reports" element={<AdminReportsPage />} />
           <Route path="/admin/health" element={<AdminHealthPage />} />
+          <Route path="/admin/environments" element={<AdminEnvironmentsPage />} />
+          <Route path="/admin/feature-flags" element={<AdminFeatureFlagsPage />} />
+          <Route path="/admin/data-quality" element={<AdminDataQualityPage />} />
+          <Route path="/admin/failed-commands" element={<AdminFailedCommandsPage />} />
           <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route path="/admin/people" element={<AdminUsersPage />} />
           <Route path="/admin/users/:id" element={<AdminUserDetailPage />} />
           <Route path="/admin/people/:id" element={<AdminUserDetailPage />} />
+          <Route path="/admin/parties" element={<AdminPartiesPage />} />
+          <Route path="/admin/parties/:id" element={<AdminPartyDetailPage />} />
+          <Route path="/admin/memberships" element={<AdminMembershipsPage />} />
+          <Route path="/admin/roles" element={<AdminRolesPage />} />
           <Route path="/admin/vetting" element={<AdminVettingPage />} />
+          <Route path="/admin/vetting/config" element={<AdminVettingConfigPage />} />
           <Route path="/admin/opportunities" element={<AdminOpportunitiesPage />} />
           <Route path="/admin/matching" element={<AdminMatchingPage />} />
+          <Route path="/admin/post-matches" element={<AdminPostMatchesPage />} />
+          <Route path="/admin/matching/quality" element={<AdminMatchingQualityPage />} />
+          <Route path="/admin/taxonomy" element={<AdminTaxonomyPage />} />
+          <Route path="/admin/moderation" element={<AdminModerationPage />} />
           <Route path="/admin/negotiations" element={<AdminNegotiationsPage />} />
           <Route path="/admin/negotiations/:id" element={<AdminNegotiationDetailPage />} />
           <Route path="/admin/disputes" element={<AdminDisputesPage />} />
@@ -196,8 +239,11 @@ export function AppRoutes() {
           <Route path="/admin/commercial-agreements/:id" element={<CommercialAgreementDetailPage />} />
           <Route path="/admin/deals" element={<Navigate to="/admin/commercial-agreements" replace />} />
           <Route path="/admin/deals/:id" element={<AdminCommercialAgreementLegacyRedirect />} />
+          <Route path="/admin/approvals" element={<AdminApprovalsPage />} />
+          <Route path="/admin/awards" element={<AdminAwardsPage />} />
           <Route path="/admin/contracts" element={<AdminContractsPage />} />
           <Route path="/admin/contracts/:id" element={<ContractDetailPage />} />
+          <Route path="/admin/legal-review" element={<AdminLegalReviewPage />} />
           <Route path="/admin/consortium" element={<AdminConsortiumPage />} />
           <Route path="/admin/audit" element={<AdminAuditPage />} />
           <Route path="/admin/settings" element={<AdminSettingsPage />} />

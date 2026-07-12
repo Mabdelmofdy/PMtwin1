@@ -89,6 +89,20 @@ export class PartyMembershipRepository {
     return membership
   }
 
+  upsertMembership(membership: PartyMembership): PartyMembership {
+    const overrides = this.readOverrides()
+    const remaining = (overrides.newPartyMemberships ?? []).filter(
+      (entry) =>
+        !(entry.userId === membership.userId && entry.partyId === membership.partyId),
+    )
+    const deleted = new Set(overrides.deletedPartyMemberships ?? [])
+    deleted.delete(formatMembershipId(membership))
+    overrides.deletedPartyMemberships = [...deleted]
+    overrides.newPartyMemberships = [...remaining, membership]
+    this.writeOverrides(overrides)
+    return membership
+  }
+
   suppressSynthesizedMembership(userId: string, partyId: string): void {
     const overrides = this.readOverrides()
     const deleted = new Set(overrides.deletedPartyMemberships ?? [])

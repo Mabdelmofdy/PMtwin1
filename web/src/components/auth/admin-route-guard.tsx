@@ -14,6 +14,7 @@ export function AdminRouteGuard() {
     isLoading,
     isAuthenticated,
     userRole: user?.role,
+    pathname: location.pathname,
   })
 
   if (decision === 'loading') {

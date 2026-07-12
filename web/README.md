@@ -116,5 +116,6 @@ Set this per Vercel environment/project:
 - [ ] Demo reset controls are not visible in production.
 - [ ] Import/export controls are not visible in production.
 - [ ] Scenario restore controls are not visible in production.
+- [ ] Demo/UAT environment banner is not visible to customers (admin Environment panel only).
 - [ ] Demo/UAT environment banner is not visible in production.
 - [ ] Production runtime does not allocate a `PMTWIN_PRODUCTION` LocalStorage namespace.

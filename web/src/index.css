@@ -167,7 +167,9 @@
   --pm-space-table-y: 0.75rem;
   --pm-space-table-x: 0.75rem;
 
-  /* Opportunity Creation 3.0 — sticky stack offsets */
+  /* Opportunity Creation 3.0 — sticky stack offsets
+     Customer workspace never renders a global environment banner;
+     keep --environment-banner-height at 0px (no reserved blank space). */
   --environment-banner-height: 0px;
   --app-header-height: 3.5rem;
   --wizard-stepper-height: 5.5rem;

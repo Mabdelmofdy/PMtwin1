@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Clock, Sparkles } from 'lucide-react'
+import { Bell, BookOpen, Clock, Compass, Sparkles } from 'lucide-react'
 import {
   adminNavigationGroups,
   commandActions,
@@ -25,9 +25,7 @@ import {
 } from '@/components/ui/command'
 
 const futureCommandPlaceholders = [
-  { title: 'Run matching (soon)', keywords: ['matching', 'engine'] },
   { title: 'Export report (soon)', keywords: ['export', 'report'] },
-  { title: 'Invite teammate (soon)', keywords: ['invite', 'team'] },
 ] as const
 
 export function CommandMenu() {
@@ -156,6 +154,32 @@ export function CommandMenu() {
         {canAccessAdmin ? (
           <>
             <CommandSeparator />
+            <CommandGroup heading="Admin Explore">
+              <CommandItem
+                className="cursor-pointer"
+                onSelect={() => runCommand('/admin/search')}
+                keywords={['admin', 'search', 'global', 'find']}
+              >
+                <Compass className="size-4" aria-hidden />
+                <span>Admin Global Search</span>
+              </CommandItem>
+              <CommandItem
+                className="cursor-pointer"
+                onSelect={() => runCommand('/admin/inbox')}
+                keywords={['admin', 'inbox', 'queue']}
+              >
+                <Bell className="size-4" aria-hidden />
+                <span>Admin Inbox</span>
+              </CommandItem>
+              <CommandItem
+                className="cursor-pointer"
+                onSelect={() => runCommand('/admin/explorer')}
+                keywords={['admin', 'explorer', 'catalogue']}
+              >
+                <BookOpen className="size-4" aria-hidden />
+                <span>Platform Explorer</span>
+              </CommandItem>
+            </CommandGroup>
             {adminNavigationGroups.map((group) => (
               <CommandGroup key={group.title} heading={group.title}>
                 {group.items.map((item) => {

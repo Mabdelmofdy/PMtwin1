@@ -61,9 +61,13 @@ export const pmWizardLayoutVars = {
   workspaceSidebarWidth: '--workspace-sidebar-width',
 } as const
 
+/**
+ * Sticky stack (customer workspace): App Header → Wizard Stepper → Content → Footer.
+ * `--environment-banner-height` stays 0px — the global environment banner is never rendered.
+ */
 export const pmWizardSticky = {
   stepper:
-    'sticky z-20 border-b border-border/60 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/90 top-[calc(var(--environment-banner-height)+var(--app-header-height))]',
+    'sticky z-20 border-b border-border/60 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/90 top-[calc(var(--environment-banner-height,0px)+var(--app-header-height))]',
   footer:
     'sticky bottom-0 z-20 border-t border-border/60 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/90',
   contentPad:

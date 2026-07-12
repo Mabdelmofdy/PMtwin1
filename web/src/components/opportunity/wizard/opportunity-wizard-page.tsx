@@ -12,11 +12,16 @@ import { EntityAccessDenied } from '@/components/auth/entity-access-state'
 import { PmPage, PmPageHeader } from '@/components/ui/pm-index'
 import { trackOcxEvent } from '@/lib/ocx-analytics.ts'
 import {
+  clearLocalDraftRecoveryDismissal,
   clearLocalDraftSnapshot,
+  dismissLocalDraftRecovery,
   formatLastSavedAt,
+  readLocalDraftRecoveryDismissal,
   readLocalDraftSnapshot,
   saveLocalDraftSnapshot,
+  shouldOfferLocalDraftRecovery,
   type AutosaveStatus,
+  type LocalDraftSnapshot,
 } from '@/lib/wizard-local-draft.ts'
 import { evaluateLiveOpportunityValidation } from '@/domain/opportunity-validation/index.ts'
 import { resolveStepForValidationIssue } from '@/domain/opportunity-validation/validation-step-map.ts'
@@ -137,10 +142,11 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
   const [dirty, setDirty] = useState(false)
   const [allowNavigation, setAllowNavigation] = useState(false)
+  const [recoverySnapshot, setRecoverySnapshot] = useState<LocalDraftSnapshot | null>(
+    null,
+  )
   const [showRecovery, setShowRecovery] = useState(false)
-  const [recoverySnapshot, setRecoverySnapshot] = useState<
-    ReturnType<typeof readLocalDraftSnapshot>
-  >(null)
+  const [recoveryResolved, setRecoveryResolved] = useState(false)
   const [duplicateOpen, setDuplicateOpen] = useState(false)
   const [suppressDuplicate, setSuppressDuplicate] = useState(false)
   const [readinessDrawerOpen, setReadinessDrawerOpen] = useState(false)
@@ -203,10 +209,26 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
 
   useEffect(() => {
     const snapshot = readLocalDraftSnapshot(mode, opportunityId)
-    if (!snapshot) return
-    setRecoverySnapshot(snapshot)
-    setShowRecovery(true)
-  }, [mode, opportunityId])
+    const authoritativeDraft = existingOpportunity
+      ? opportunityToDraft(existingOpportunity)
+      : initialDraft
+    const dismissal = readLocalDraftRecoveryDismissal(mode, opportunityId)
+    const offer = shouldOfferLocalDraftRecovery({
+      snapshot,
+      authoritativeDraft,
+      opportunityStatus: existingOpportunity?.status,
+      opportunityMissing: mode === 'edit' && Boolean(opportunityId) && !existingOpportunity,
+      dismissal,
+    })
+    if (offer && snapshot) {
+      setRecoverySnapshot(snapshot)
+      setShowRecovery(true)
+    } else {
+      setRecoverySnapshot(null)
+      setShowRecovery(false)
+    }
+    setRecoveryResolved(true)
+  }, [mode, opportunityId, existingOpportunity])
 
   const opportunityDraft = useMemo(() => {
     const built = buildOpportunityDraftInput(draft)
@@ -238,8 +260,9 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
     }
   }, [liveValidation.duplicateDraftWarning, suppressDuplicate, duplicateOpen])
 
-  // Local autosave every draft/step change
+  // Local autosave every draft/step change (paused while recovery is pending)
   useEffect(() => {
+    if (!recoveryResolved || showRecovery) return
     saveLocalDraftSnapshot({
       savedAt: new Date().toISOString(),
       mode,
@@ -247,7 +270,14 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       draft,
       activeStepId,
     })
-  }, [draft, activeStepId, mode, resolvedOpportunityId])
+  }, [
+    draft,
+    activeStepId,
+    mode,
+    resolvedOpportunityId,
+    recoveryResolved,
+    showRecovery,
+  ])
 
   // Server autosave 2s after id exists
   useEffect(() => {
@@ -403,6 +433,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         const newId = result.aggregateId
         setCreatedOpportunityId(newId)
         clearLocalDraftSnapshot(mode, opportunityId)
+        clearLocalDraftRecoveryDismissal(mode, opportunityId)
         trackOcxEvent('draft_saved', { opportunityId: newId })
         setDirty(false)
         setAllowNavigation(true)
@@ -421,6 +452,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         return
       }
       clearLocalDraftSnapshot(mode, opportunityId)
+      clearLocalDraftRecoveryDismissal(mode, opportunityId)
       trackOcxEvent('draft_saved', { opportunityId: resolvedOpportunityId })
       setDirty(false)
       setAllowNavigation(true)
@@ -475,6 +507,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       setDirty(false)
       setAllowNavigation(true)
       clearLocalDraftSnapshot(mode, opportunityId)
+      clearLocalDraftRecoveryDismissal(mode, opportunityId)
       toast.success('Opportunity published')
       navigate(`/opportunities/${resolvedOpportunityId}`)
     } finally {
@@ -534,13 +567,26 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
               milestones: recoverySnapshot.draft.milestones ?? [],
             })
             setActiveStepId(normalizeWizardStepId(recoverySnapshot.activeStepId))
+            dismissLocalDraftRecovery({
+              mode,
+              opportunityId,
+              decision: 'continue',
+              snapshot: recoverySnapshot,
+            })
+            setRecoverySnapshot(null)
             setShowRecovery(false)
             setDirty(true)
             trackOcxEvent('draft_recovered')
             toast.success('Draft recovered')
           }}
           onDiscard={() => {
-            clearLocalDraftSnapshot(mode, opportunityId)
+            dismissLocalDraftRecovery({
+              mode,
+              opportunityId,
+              decision: 'discard',
+              snapshot: recoverySnapshot,
+            })
+            setRecoverySnapshot(null)
             setShowRecovery(false)
             trackOcxEvent('draft_discarded')
           }}
@@ -585,7 +631,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
           ) : null}
         </div>
 
-        <aside className="min-w-0 space-y-4 lg:sticky lg:top-[calc(var(--environment-banner-height)+var(--app-header-height)+var(--wizard-stepper-height))] lg:self-start">
+        <aside className="min-w-0 space-y-4 lg:sticky lg:top-[calc(var(--environment-banner-height,0px)+var(--app-header-height)+var(--wizard-stepper-height))] lg:self-start">
           <ReadinessSummaryCard
             score={wizardReadiness.readinessScore}
             requiredCount={readinessGroups.required.length}
