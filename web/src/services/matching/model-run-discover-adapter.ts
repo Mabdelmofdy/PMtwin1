@@ -22,13 +22,45 @@ import type { Opportunity } from '@/types/domain.ts'
 import { discoverPostMatchStrongKey } from '@/domain/normalized/post-match-discover-validation.ts'
 import type { DiscoverPostMatchInput } from '@/services/post-match-command-service.ts'
 import { opportunityToPost } from '@/services/matching/opportunity-post-adapter.ts'
+import {
+  buildDiscoverParticipant,
+  buildMatchingDiscoveryContextFromOpportunities,
+  filterCrossOwnerPartyMatches,
+  resolveOpportunityOwner,
+  resolvePostOwnerPartyId,
+  sameOwnerParty,
+  type MatchingDiscoveryOwnershipContext,
+} from '@/domain/identity/matching-discovery-context.ts'
 
 export type ModelRunDiscoverContext = {
   readonly anchorOpportunity: Opportunity
   readonly opportunityById: ReadonlyMap<string, Opportunity>
   readonly postById: ReadonlyMap<string, OpportunityPost>
+  readonly ownershipContext?: MatchingDiscoveryOwnershipContext
   readonly runId: string
   readonly createAggregateId: () => string
+}
+
+type ResolvedDiscoverContext = ModelRunDiscoverContext & {
+  readonly ownershipContext: MatchingDiscoveryOwnershipContext
+}
+
+function resolveContextOwnership(
+  context: ModelRunDiscoverContext,
+): MatchingDiscoveryOwnershipContext {
+  if (context.ownershipContext) return context.ownershipContext
+  return buildMatchingDiscoveryContextFromOpportunities([
+    ...context.opportunityById.values(),
+  ])
+}
+
+function withResolvedOwnership(
+  context: ModelRunDiscoverContext,
+): ResolvedDiscoverContext {
+  return {
+    ...context,
+    ownershipContext: resolveContextOwnership(context),
+  }
 }
 
 function toMatchCriteria(
@@ -54,20 +86,32 @@ function isPublishedOffer(post: OpportunityPost): boolean {
   return intent === 'offer' || intent === 'hybrid'
 }
 
-function hydrateBarterSide(
-  creatorId: string,
+function hydrateBarterSideByOwner(
+  ownerPartyId: string,
+  representativeUserId: string | undefined,
   anchorOpportunity: Opportunity | undefined,
   allPosts: readonly OpportunityPost[],
+  opportunityById: ReadonlyMap<string, Opportunity>,
+  ctx: MatchingDiscoveryOwnershipContext,
   pairHints: {
     readonly matchedNeed?: OpportunityPost
     readonly matchedOffer?: OpportunityPost
   } = {},
-): { userId: string; needId: string; offerId: string } | null {
-  if (!creatorId) return null
+): {
+  userId: string
+  partyId: string
+  workspaceId: string
+  needId: string
+  offerId: string
+} | null {
+  if (!ownerPartyId) return null
+
+  const postMatchesOwner = (post: OpportunityPost) =>
+    resolvePostOwnerPartyId(post, opportunityById, ctx) === ownerPartyId
 
   const published = allPosts.filter((post) => (post.status ?? '') === 'published')
-  const needs = published.filter((post) => isPublishedNeed(post) && post.creatorId === creatorId)
-  const offers = published.filter((post) => isPublishedOffer(post) && post.creatorId === creatorId)
+  const needs = published.filter((post) => isPublishedNeed(post) && postMatchesOwner(post))
+  const offers = published.filter((post) => isPublishedOffer(post) && postMatchesOwner(post))
 
   let needId = pairHints.matchedNeed?.id ?? null
   let offerId = pairHints.matchedOffer?.id ?? null
@@ -95,48 +139,69 @@ function hydrateBarterSide(
   if (!offerId) offerId = offers[0]?.id ?? null
 
   if (!needId || !offerId) return null
-  return { userId: creatorId, needId, offerId }
+
+  const anchorOwner = anchorOpportunity
+    ? resolveOpportunityOwner(anchorOpportunity, ctx)
+    : null
+  const userId =
+    representativeUserId ??
+    anchorOwner?.representativeUserId ??
+    anchorOpportunity?.createdByUserId ??
+    anchorOpportunity?.creatorId ??
+    ''
+
+  if (!userId) return null
+
+  return {
+    userId,
+    partyId: ownerPartyId,
+    workspaceId: anchorOwner?.workspaceId ?? '',
+    needId,
+    offerId,
+  }
 }
 
 function buildOneWayParticipants(
   needId: string,
   offerId: string,
   opportunityById: ReadonlyMap<string, Opportunity>,
+  ctx: MatchingDiscoveryOwnershipContext,
 ): PostMatchParticipant[] {
   const needOpp = opportunityById.get(needId)
   const offerOpp = opportunityById.get(offerId)
-  if (!needOpp?.creatorId || !offerOpp?.creatorId) return []
+  if (!needOpp || !offerOpp) return []
 
-  return [
-    {
-      userId: needOpp.creatorId,
-      role: 'need_owner',
-      opportunityId: needId,
-      participantStatus: 'pending',
-      respondedAt: null,
-    },
-    {
-      userId: offerOpp.creatorId,
-      role: 'offer_provider',
-      opportunityId: offerId,
-      participantStatus: 'pending',
-      respondedAt: null,
-    },
-  ]
+  const needParticipant = buildDiscoverParticipant(needOpp, 'need_owner', ctx)
+  const offerParticipant = buildDiscoverParticipant(offerOpp, 'offer_provider', ctx)
+  if (!needParticipant || !offerParticipant) return []
+
+  return [needParticipant, offerParticipant]
 }
 
 function mapOneWayMatch(
   match: ScoredMatch,
-  context: ModelRunDiscoverContext,
+  context: ResolvedDiscoverContext,
 ): DiscoverPostMatchInput | null {
   const needId = match.needOpportunityId
   const offerId = match.offerOpportunityId
   if (!needId || !offerId) return null
 
+  if (
+    !filterCrossOwnerPartyMatches(
+      needId,
+      offerId,
+      context.opportunityById,
+      context.ownershipContext,
+    )
+  ) {
+    return null
+  }
+
   const participants = buildOneWayParticipants(
     needId,
     offerId,
     context.opportunityById,
+    context.ownershipContext,
   )
   if (participants.length < 2) return null
 
@@ -155,29 +220,45 @@ function mapOneWayMatch(
 function mapTwoWayMatch(
   match: ScoredMatch,
   _result: TwoWayMatchResult,
-  context: ModelRunDiscoverContext,
+  context: ResolvedDiscoverContext,
   allPosts: readonly OpportunityPost[],
 ): DiscoverPostMatchInput | null {
   const needBId = match.needOpportunityId
   const offerBId = match.offerOpportunityId
   if (!needBId || !offerBId) return null
 
-  const needB = context.postById.get(needBId)
-  const offerB = context.postById.get(offerBId)
-  if (!needB?.creatorId || !offerB?.creatorId) return null
+  const needB = context.opportunityById.get(needBId)
+  const offerB = context.opportunityById.get(offerBId)
+  if (!needB || !offerB) return null
 
-  const ourUserId = context.anchorOpportunity.creatorId
-  if (!ourUserId || needB.creatorId === ourUserId) return null
+  const anchorOwner = resolveOpportunityOwner(
+    context.anchorOpportunity,
+    context.ownershipContext,
+  )
+  const sideBOwner = resolveOpportunityOwner(needB, context.ownershipContext)
+  if (!anchorOwner || !sideBOwner) return null
+  if (sameOwnerParty(anchorOwner.ownerPartyId, sideBOwner.ownerPartyId)) return null
 
-  const sideA = hydrateBarterSide(
-    ourUserId,
+  const sideA = hydrateBarterSideByOwner(
+    anchorOwner.ownerPartyId,
+    anchorOwner.representativeUserId,
     context.anchorOpportunity,
     allPosts,
+    context.opportunityById,
+    context.ownershipContext,
   )
-  const sideB = hydrateBarterSide(needB.creatorId, context.opportunityById.get(needBId), allPosts, {
-    matchedNeed: needB,
-    matchedOffer: offerB,
-  })
+  const sideB = hydrateBarterSideByOwner(
+    sideBOwner.ownerPartyId,
+    sideBOwner.representativeUserId,
+    needB,
+    allPosts,
+    context.opportunityById,
+    context.ownershipContext,
+    {
+      matchedNeed: context.postById.get(needBId),
+      matchedOffer: context.postById.get(offerBId),
+    },
+  )
   if (!sideA || !sideB) return null
 
   const participants: PostMatchParticipant[] = [
@@ -187,6 +268,8 @@ function mapTwoWayMatch(
       opportunityId: sideA.needId,
       participantStatus: 'pending',
       respondedAt: null,
+      partyId: sideA.partyId,
+      workspaceId: sideA.workspaceId,
     },
     {
       userId: sideA.userId,
@@ -194,6 +277,8 @@ function mapTwoWayMatch(
       opportunityId: sideA.offerId,
       participantStatus: 'pending',
       respondedAt: null,
+      partyId: sideA.partyId,
+      workspaceId: sideA.workspaceId,
     },
     {
       userId: sideB.userId,
@@ -201,6 +286,8 @@ function mapTwoWayMatch(
       opportunityId: sideB.needId,
       participantStatus: 'pending',
       respondedAt: null,
+      partyId: sideB.partyId,
+      workspaceId: sideB.workspaceId,
     },
     {
       userId: sideB.userId,
@@ -208,6 +295,8 @@ function mapTwoWayMatch(
       opportunityId: sideB.offerId,
       participantStatus: 'pending',
       respondedAt: null,
+      partyId: sideB.partyId,
+      workspaceId: sideB.workspaceId,
     },
   ]
 
@@ -216,8 +305,8 @@ function mapTwoWayMatch(
     aggregateId: context.createAggregateId(),
     matchType: 'two_way',
     matchScore: match.matchScore,
-    sideA,
-    sideB,
+    sideA: { userId: sideA.userId, needId: sideA.needId, offerId: sideA.offerId },
+    sideB: { userId: sideB.userId, needId: sideB.needId, offerId: sideB.offerId },
     scoreAtoB: breakdown.scoreAtoB,
     scoreBtoA: breakdown.scoreBtoA,
     valueEquivalence: match.valueEquivalence ?? null,
@@ -229,40 +318,76 @@ function mapTwoWayMatch(
 function mapConsortiumMatch(
   match: ScoredMatch,
   result: ConsortiumMatchResult,
-  context: ModelRunDiscoverContext,
+  context: ResolvedDiscoverContext,
 ): DiscoverPostMatchInput | null {
   const leadNeedId = context.anchorOpportunity.id
-  const leadCreatorId = context.anchorOpportunity.creatorId
-  if (!leadCreatorId) return null
+  const leadOwner = resolveOpportunityOwner(
+    context.anchorOpportunity,
+    context.ownershipContext,
+  )
+  if (!leadOwner?.representativeUserId && !context.anchorOpportunity.creatorId) {
+    return null
+  }
 
-  const roles: PostMatchConsortiumRole[] = (match.suggestedPartners ?? []).map((partner) => ({
-    role: partner.role ?? 'General',
-    opportunityId: partner.opportunityId ?? '',
-    userId: partner.creatorId ?? '',
-    score: result.roleResults?.find((roleResult) => roleResult.role === partner.role)?.matchScore,
-  })).filter((role) => role.opportunityId && role.userId)
+  const leadUserId =
+    leadOwner?.representativeUserId ?? context.anchorOpportunity.creatorId ?? ''
+
+  const roles: PostMatchConsortiumRole[] = []
+  for (const partner of match.suggestedPartners ?? []) {
+    const partnerOpp = partner.opportunityId
+      ? context.opportunityById.get(partner.opportunityId)
+      : undefined
+    const partnerOwner = partnerOpp
+      ? resolveOpportunityOwner(partnerOpp, context.ownershipContext)
+      : null
+    if (
+      partnerOwner &&
+      sameOwnerParty(leadOwner?.ownerPartyId, partnerOwner.ownerPartyId)
+    ) {
+      continue
+    }
+    const userId =
+      partnerOwner?.representativeUserId ??
+      partner.creatorId ??
+      partnerOpp?.createdByUserId ??
+      partnerOpp?.creatorId ??
+      ''
+    if (!partner.opportunityId || !userId) continue
+    roles.push({
+      role: partner.role ?? 'General',
+      opportunityId: partner.opportunityId,
+      userId,
+      score: result.roleResults?.find((roleResult) => roleResult.role === partner.role)
+        ?.matchScore,
+    })
+  }
 
   if (roles.length === 0) return null
 
-  const participants: PostMatchParticipant[] = [
-    {
-      userId: leadCreatorId,
-      role: 'consortium_lead',
-      opportunityId: leadNeedId,
-      participantStatus: 'pending',
-      respondedAt: null,
-    },
-  ]
+  const leadParticipant = buildDiscoverParticipant(
+    context.anchorOpportunity,
+    'consortium_lead',
+    context.ownershipContext,
+  )
+  if (!leadParticipant) return null
+
+  const participants: PostMatchParticipant[] = [leadParticipant]
 
   for (const role of roles) {
-    if (role.userId === leadCreatorId) continue
-    participants.push({
-      userId: role.userId,
-      role: 'consortium_member',
-      opportunityId: role.opportunityId,
-      participantStatus: 'pending',
-      respondedAt: null,
-    })
+    if (role.userId === leadUserId) continue
+    const roleOpp = context.opportunityById.get(role.opportunityId)
+    const memberParticipant = roleOpp
+      ? buildDiscoverParticipant(roleOpp, 'consortium_member', context.ownershipContext)
+      : null
+    participants.push(
+      memberParticipant ?? {
+        userId: role.userId,
+        role: 'consortium_member',
+        opportunityId: role.opportunityId,
+        participantStatus: 'pending',
+        respondedAt: null,
+      },
+    )
   }
 
   return {
@@ -280,10 +405,16 @@ function mapConsortiumMatch(
 function mapCircularMatch(
   match: ScoredMatch,
   _result: CircularMatchResult,
-  context: ModelRunDiscoverContext,
+  context: ResolvedDiscoverContext,
 ): DiscoverPostMatchInput | null {
-  const anchorCreatorId = context.anchorOpportunity.creatorId
+  const anchorOwner = resolveOpportunityOwner(
+    context.anchorOpportunity,
+    context.ownershipContext,
+  )
   const rawCycle = match.cycle ?? []
+  if (!anchorOwner || rawCycle.length === 0) return null
+
+  const anchorCreatorId = context.anchorOpportunity.creatorId
   if (!anchorCreatorId || !rawCycle.includes(anchorCreatorId)) return null
 
   const links = (match.links ?? match.linkScores ?? []) as PostMatchCircularLink[]
@@ -299,21 +430,34 @@ function mapCircularMatch(
   }
 
   const participants: PostMatchParticipant[] = []
-  const seenUser = new Set<string>()
+  const seenParty = new Set<string>()
   for (const userId of cycle) {
-    if (seenUser.has(userId)) continue
-    seenUser.add(userId)
     const link =
       links.find((entry) => entry.toCreatorId === userId)
       ?? links.find((entry) => entry.fromCreatorId === userId)
     const opportunityId = link?.offerId ?? link?.needId
-    participants.push({
-      userId,
-      role: 'chain_participant',
-      opportunityId,
-      participantStatus: 'pending',
-      respondedAt: null,
-    })
+    const opportunity = opportunityId
+      ? context.opportunityById.get(opportunityId)
+      : undefined
+    const owner = opportunity
+      ? resolveOpportunityOwner(opportunity, context.ownershipContext)
+      : null
+    const partyKey = owner?.ownerPartyId ?? userId
+    if (seenParty.has(partyKey)) continue
+    seenParty.add(partyKey)
+
+    const participant = opportunity
+      ? buildDiscoverParticipant(opportunity, 'chain_participant', context.ownershipContext)
+      : null
+    participants.push(
+      participant ?? {
+        userId,
+        role: 'chain_participant',
+        opportunityId,
+        participantStatus: 'pending',
+        respondedAt: null,
+      },
+    )
   }
 
   return {
@@ -333,22 +477,23 @@ export function modelRunResultToDiscoverCommands(
   context: ModelRunDiscoverContext,
   allPosts: readonly OpportunityPost[],
 ): DiscoverPostMatchInput[] {
+  const enrichedContext = withResolvedOwnership(context)
   const commands: DiscoverPostMatchInput[] = []
 
   for (const match of result.matches) {
     let command: DiscoverPostMatchInput | null = null
     switch (result.model) {
       case 'one_way':
-        command = mapOneWayMatch(match, context)
+        command = mapOneWayMatch(match, enrichedContext)
         break
       case 'two_way':
-        command = mapTwoWayMatch(match, result, context, allPosts)
+        command = mapTwoWayMatch(match, result, enrichedContext, allPosts)
         break
       case 'consortium':
-        command = mapConsortiumMatch(match, result, context)
+        command = mapConsortiumMatch(match, result, enrichedContext)
         break
       case 'circular':
-        command = mapCircularMatch(match, result, context)
+        command = mapCircularMatch(match, result, enrichedContext)
         break
       default:
         break

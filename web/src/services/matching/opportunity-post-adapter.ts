@@ -29,6 +29,8 @@ export function opportunityToPost(opportunity: Opportunity): OpportunityPost {
     intent: mapIntentToEngine(record.intent),
     status: record.status,
     creatorId: record.creatorId,
+    ownerPartyId: record.ownerPartyId,
+    workspaceId: record.workspaceId,
     exchangeMode: record.exchangeMode,
     subModelType: record.subModelType,
     modelType: record.modelType,

@@ -30,6 +30,12 @@ import type { NegotiationOfferRepository } from '@/repositories/negotiation-offe
 import type { NegotiationRepository } from '@/repositories/negotiation-repository.ts'
 import type { NegotiationTranscriptRepository } from '@/repositories/negotiation-transcript-repository.ts'
 import type { UserRepository } from '@/repositories/user-repository.ts'
+import {
+  resolveWriteActorFromCommand,
+  stampNegotiationMessage,
+  stampNegotiationOffer,
+  stampTranscriptEvent,
+} from '@/domain/identity/command-actor-stamping.ts'
 
 const NEGOTIATION_ENTITY = 'negotiation' as const
 const WRITABLE_STATUSES = new Set(['active', 'countered'])
@@ -130,9 +136,11 @@ export class NegotiationRoomCommandHandler {
 
   private appendTranscript(
     event: Omit<NegotiationTranscriptEvent, 'id' | 'timestamp'>,
+    userId: string,
   ): NegotiationTranscriptEvent {
+    const actor = resolveWriteActorFromCommand(userId)
     return this.deps.transcriptRepository.append({
-      ...event,
+      ...stampTranscriptEvent(event, actor),
       id: createId('tx'),
       timestamp: new Date().toISOString(),
     })
@@ -162,7 +170,8 @@ export class NegotiationRoomCommandHandler {
     }
 
     const role = this.resolveParticipantRole(negotiation, command.userId) ?? 'participant'
-    const message: NegotiationMessage = {
+    const actor = resolveWriteActorFromCommand(command.userId)
+    const message: NegotiationMessage = stampNegotiationMessage({
       id: createId('msg'),
       negotiationId,
       senderId: command.userId,
@@ -174,7 +183,7 @@ export class NegotiationRoomCommandHandler {
         id: createId('att'),
         ...attachment,
       })),
-    }
+    }, actor)
 
     this.deps.messageRepository.append(message)
     this.appendTranscript({
@@ -184,7 +193,7 @@ export class NegotiationRoomCommandHandler {
       actorRole: role,
       summary: 'Negotiation message sent',
       metadata: { messageId: message.id },
-    })
+    }, command.userId)
     this.appendAudit({
       action: 'negotiation.message.sent',
       entityType: 'negotiation',
@@ -243,7 +252,7 @@ export class NegotiationRoomCommandHandler {
         previousBody: originalBody,
         nextBody: command.body.trim(),
       },
-    })
+    }, command.userId)
     this.appendAudit({
       action: 'negotiation.message.edited',
       entityType: 'negotiation',
@@ -289,7 +298,7 @@ export class NegotiationRoomCommandHandler {
       actorRole: message.senderRole,
       summary: `Attachment added: ${attachment.fileName}`,
       metadata: { messageId: message.id, attachmentId: attachment.id },
-    })
+    }, command.userId)
     this.appendAudit({
       action: 'negotiation.attachment.added',
       entityType: 'negotiation',
@@ -341,7 +350,8 @@ export class NegotiationRoomCommandHandler {
       ?? diffCommercialTerms(previousTerms, terms).join('; ')
       ?? undefined
 
-    const offer: NegotiationOffer = {
+    const actor = resolveWriteActorFromCommand(command.userId)
+    const offer: NegotiationOffer = stampNegotiationOffer({
       id: createId('offer'),
       negotiationId,
       submittedBy: command.userId,
@@ -350,7 +360,7 @@ export class NegotiationRoomCommandHandler {
       changeSummary,
       status: 'submitted',
       createdAt: new Date().toISOString(),
-    }
+    }, actor)
     this.deps.offerRepository.append(offer)
 
     const targetStatus = isCounter ? 'countered' : 'active'
@@ -362,14 +372,19 @@ export class NegotiationRoomCommandHandler {
         this.deps.negotiationRepository.update(negotiationId, {
           status: targetStatus,
           commercialTerms: terms,
+          lastModifiedByUserId: actor.actorUserId,
         })
       } else if (isCounter) {
         this.deps.negotiationRepository.update(negotiationId, {
           commercialTerms: terms,
+          lastModifiedByUserId: actor.actorUserId,
         })
       }
     } else {
-      this.deps.negotiationRepository.update(negotiationId, { commercialTerms: terms })
+      this.deps.negotiationRepository.update(negotiationId, {
+        commercialTerms: terms,
+        lastModifiedByUserId: actor.actorUserId,
+      })
     }
 
     const role = this.resolveParticipantRole(negotiation, command.userId) ?? 'participant'
@@ -382,7 +397,7 @@ export class NegotiationRoomCommandHandler {
         ? `Counter offer v${version} submitted`
         : `Offer v${version} submitted`,
       metadata: { offerId: offer.id, version, changeSummary },
-    })
+    }, command.userId)
     this.appendTranscript({
       negotiationId,
       eventType: 'terms.changed',
@@ -390,7 +405,7 @@ export class NegotiationRoomCommandHandler {
       actorRole: role,
       summary: 'Commercial terms updated from offer',
       metadata: { offerId: offer.id, terms },
-    })
+    }, command.userId)
     this.appendAudit({
       action: isCounter ? 'negotiation.counter.submitted' : 'negotiation.offer.submitted',
       entityType: 'negotiation',
@@ -441,6 +456,7 @@ export class NegotiationRoomCommandHandler {
       status: AGREED_STATUS,
       commercialTerms: offer.terms,
       agreedTerms: offer.terms,
+      lastModifiedByUserId: resolveWriteActorFromCommand(command.userId).actorUserId,
     })
 
     const role = this.resolveParticipantRole(negotiation, command.userId) ?? 'participant'
@@ -451,7 +467,7 @@ export class NegotiationRoomCommandHandler {
       actorRole: role,
       summary: `Offer v${offer.version} accepted`,
       metadata: { offerId: offer.id },
-    })
+    }, command.userId)
     this.appendAudit({
       action: 'negotiation.offer.accepted',
       entityType: 'negotiation',
@@ -498,7 +514,7 @@ export class NegotiationRoomCommandHandler {
       actorRole: role,
       summary: `Offer v${offer.version} rejected`,
       metadata: { offerId: offer.id, reason: command.reason },
-    })
+    }, command.userId)
 
     return success(command.commandType, negotiationId)
   }
@@ -530,7 +546,7 @@ export class NegotiationRoomCommandHandler {
       actorId: command.userId,
       actorRole: role,
       summary: 'Negotiation transcript locked',
-    })
+    }, command.userId)
     this.appendAudit({
       action: 'negotiation.transcript.locked',
       entityType: 'negotiation',

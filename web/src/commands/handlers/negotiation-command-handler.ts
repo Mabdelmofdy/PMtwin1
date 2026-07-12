@@ -28,6 +28,20 @@ import type { ApplicationRepository } from '@/repositories/application-repositor
 import type { NegotiationRepository } from '@/repositories/negotiation-repository.ts'
 import type { OpportunityRepository } from '@/repositories/opportunity-repository.ts'
 import type { PostMatchRepository } from '@/repositories/post-match-repository.ts'
+import {
+  companyRepository,
+  userRepository,
+} from '@/repositories/index.ts'
+import {
+  buildMatchingDiscoveryContext,
+} from '@/domain/identity/matching-discovery-context.ts'
+import {
+  resolveWriteActorFromCommand,
+  stampNegotiationCreateMetadata,
+  stampParticipants,
+} from '@/domain/identity/command-actor-stamping.ts'
+import { getCommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
+import { resolveOpportunityOwner } from '@/domain/identity/matching-discovery-context.ts'
 
 const POST_MATCH_ENTITY = 'match' as const
 const NEGOTIATION_ENTITY = 'negotiation' as const
@@ -147,14 +161,34 @@ function resolveNegotiationPostMatchId(
   return negotiation.postMatchId ?? negotiation.matchId
 }
 
-function mapParticipants(participants: readonly Participant[]): Participant[] {
-  return participants
-    .filter((participant) => participant.userId)
-    .map((participant) => ({
-      userId: participant.userId,
-      role: participant.role ?? 'participant',
-      opportunityId: participant.opportunityId,
-    }))
+function ownershipContextForHandlers(): ReturnType<typeof buildMatchingDiscoveryContext> {
+  return buildMatchingDiscoveryContext(
+    userRepository.getAll().map((user) => user.id),
+    companyRepository.getAll().map((company) => company.id),
+  )
+}
+
+function resolveInitiatingActor(fallbackUserId?: string): ReturnType<typeof resolveWriteActorFromCommand> {
+  const sessionActor = getCommandPermissionActor()
+  return resolveWriteActorFromCommand(sessionActor?.userId ?? fallbackUserId ?? '')
+}
+
+function mapParticipants(
+  participants: readonly Participant[],
+  ctx: ReturnType<typeof buildMatchingDiscoveryContext> = ownershipContextForHandlers(),
+): Participant[] {
+  return stampParticipants(
+    participants
+      .filter((participant) => participant.userId)
+      .map((participant) => ({
+        userId: participant.userId,
+        role: participant.role ?? 'participant',
+        opportunityId: participant.opportunityId,
+        partyId: participant.partyId,
+        workspaceId: participant.workspaceId,
+      })),
+    ctx,
+  )
 }
 
 export class NegotiationCommandHandler {
@@ -264,6 +298,7 @@ export class NegotiationCommandHandler {
       this.opportunityRepository,
       opportunityId,
     )
+    const actor = resolveInitiatingActor(participants[0]?.userId)
     const negotiation = this.negotiationRepository.create({
       opportunityId,
       postMatchId,
@@ -278,6 +313,11 @@ export class NegotiationCommandHandler {
       initialTerms: termsSeed?.initialTerms ?? {
         message: buildNegotiationOpenMessage(matchType),
       } as NegotiationTerms,
+      ...stampNegotiationCreateMetadata(actor),
+      originatingOwnerPartyId: resolveOpportunityOwner(
+        this.opportunityRepository?.getById(opportunityId) ?? { id: opportunityId },
+        ownershipContextForHandlers(),
+      )?.ownerPartyId,
     })
 
     this.postMatchRepository.update(postMatchId, {
@@ -356,20 +396,31 @@ export class NegotiationCommandHandler {
       ])
     }
 
-    const participants: Participant[] = [
+    const ownershipContext = ownershipContextForHandlers()
+    const opportunityOwner = resolveOpportunityOwner(opportunity, ownershipContext)
+    const hiringUserId =
+      opportunity.createdByUserId ??
+      (opportunity.creatorId && ownershipContext.userIds.has(opportunity.creatorId)
+        ? opportunity.creatorId
+        : undefined)
+
+    const rawParticipants: Participant[] = [
       {
         userId: application.applicantId,
         role: 'applicant',
         opportunityId: application.opportunityId,
       },
-      ...(opportunity.creatorId
+      ...(hiringUserId && opportunityOwner
         ? [{
-            userId: opportunity.creatorId,
+            userId: hiringUserId,
             role: 'hiring_party',
             opportunityId: application.opportunityId,
+            partyId: opportunityOwner.ownerPartyId,
+            workspaceId: opportunityOwner.workspaceId,
           }]
         : []),
     ]
+    const participants = mapParticipants(rawParticipants, ownershipContext)
 
     if (participants.length === 0) {
       return failure(command.commandType, applicationId, [
@@ -395,6 +446,7 @@ export class NegotiationCommandHandler {
         }
       : termsSeed
 
+    const actor = resolveInitiatingActor(application.applicantId)
     const negotiation = this.negotiationRepository.create({
       opportunityId: application.opportunityId,
       applicationId,
@@ -405,6 +457,8 @@ export class NegotiationCommandHandler {
       initialTerms: mergedTerms?.initialTerms ?? {
         message: 'Negotiation opened from accepted application.',
       } as NegotiationTerms,
+      ...stampNegotiationCreateMetadata(actor),
+      originatingOwnerPartyId: opportunityOwner?.ownerPartyId,
     })
 
     this.applicationRepository.update(applicationId, {
@@ -464,10 +518,16 @@ export class NegotiationCommandHandler {
       negotiation.agreedTerms ??
       negotiation.initialTerms
 
+    const actor = resolveWriteActorFromCommand(
+      (command as { userId?: string }).userId ??
+        getCommandPermissionActor()?.userId ??
+        '',
+    )
     this.negotiationRepository.update(negotiationId, {
       status: AGREED_STATUS,
       agreedTerms: terms ?? null,
       commercialTerms: negotiation.commercialTerms ?? undefined,
+      lastModifiedByUserId: actor.actorUserId,
     })
 
     this.appendAudit({

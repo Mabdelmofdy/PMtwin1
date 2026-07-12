@@ -28,6 +28,21 @@ import type { ContractRepository } from '@/repositories/contract-repository.ts'
 import type { NegotiationRepository } from '@/repositories/negotiation-repository.ts'
 import type { OpportunityRepository } from '@/repositories/opportunity-repository.ts'
 import type { PostMatchRepository } from '@/repositories/post-match-repository.ts'
+import {
+  companyRepository,
+  userRepository,
+} from '@/repositories/index.ts'
+import {
+  buildMatchingDiscoveryContext,
+  resolveOpportunityOwner,
+} from '@/domain/identity/matching-discovery-context.ts'
+import {
+  resolveWriteActorFromCommand,
+  stampCommercialAgreementCreateMetadata,
+  stampCommercialAgreementDecisionMetadata,
+  stampParticipants,
+} from '@/domain/identity/command-actor-stamping.ts'
+import { getCommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
 
 const POST_MATCH_ENTITY = 'match' as const
 const NEGOTIATION_ENTITY = 'negotiation' as const
@@ -74,14 +89,26 @@ function resolveNegotiationPostMatchId(negotiation: Negotiation): string | undef
   return negotiation.postMatchId ?? negotiation.matchId
 }
 
+function ownershipContextForHandlers(): ReturnType<typeof buildMatchingDiscoveryContext> {
+  return buildMatchingDiscoveryContext(
+    userRepository.getAll().map((user) => user.id),
+    companyRepository.getAll().map((company) => company.id),
+  )
+}
+
 function mapParticipants(participants: readonly Participant[]): Participant[] {
-  return participants
-    .filter((participant) => participant.userId)
-    .map((participant) => ({
-      userId: participant.userId,
-      role: participant.role ?? 'participant',
-      opportunityId: participant.opportunityId,
-    }))
+  return stampParticipants(
+    participants
+      .filter((participant) => participant.userId)
+      .map((participant) => ({
+        userId: participant.userId,
+        role: participant.role ?? 'participant',
+        opportunityId: participant.opportunityId,
+        partyId: participant.partyId,
+        workspaceId: participant.workspaceId,
+      })),
+    ownershipContextForHandlers(),
+  )
 }
 
 function validateDealTransition(
@@ -523,13 +550,22 @@ export class DealCommandHandler {
         negotiation.initialTerms,
     )
 
+    const primaryOpportunityId = needOpportunityId ?? opportunityIds[0]
+    const opportunity = this.opportunityRepository?.getById(primaryOpportunityId)
+    const originatingOwnerPartyId = opportunity
+      ? resolveOpportunityOwner(opportunity, ownershipContextForHandlers())?.ownerPartyId
+      : negotiation.originatingOwnerPartyId
+    const actor = resolveWriteActorFromCommand(
+      getCommandPermissionActor()?.userId ?? participants[0]?.userId ?? '',
+    )
+
     const deal = this.dealRepository.create({
       negotiationId,
       postMatchId,
       needOpportunityId,
       offerOpportunityId,
       matchId: postMatchId,
-      opportunityId: needOpportunityId ?? opportunityIds[0],
+      opportunityId: primaryOpportunityId,
       opportunityIds: [...opportunityIds],
       matchType: postMatch.matchType,
       title: `Commercial Agreement – ${postMatchId}`,
@@ -539,6 +575,7 @@ export class DealCommandHandler {
       commercialTerms,
       terms: commercialTerms,
       applicationId: negotiation.applicationId ?? null,
+      ...stampCommercialAgreementCreateMetadata(actor, originatingOwnerPartyId),
     })
 
     this.postMatchRepository.update(postMatchId, {
@@ -611,7 +648,13 @@ export class DealCommandHandler {
       return failure(command.commandType, dealId, transitionErrors)
     }
 
-    this.dealRepository.update(dealId, { status: canonicalTarget })
+    const actor = resolveWriteActorFromCommand(
+      getCommandPermissionActor()?.userId ?? '',
+    )
+    this.dealRepository.update(dealId, {
+      status: canonicalTarget,
+      lastModifiedByUserId: actor.actorUserId,
+    })
 
     this.appendAudit({
       action: 'commercial_agreement.status_changed',
@@ -681,9 +724,15 @@ export class DealCommandHandler {
       .map((item) => ({ id: item.id, status: item.status }))
     const opportunityBefore = this.opportunityRepository?.getById(opportunityId)
 
+    const awardActor = resolveWriteActorFromCommand(
+      command.actorUserId ?? getCommandPermissionActor()?.userId ?? '',
+    )
+    const awardMetadata = stampCommercialAgreementDecisionMetadata(awardActor)
+
     this.dealRepository.update(winner.id, {
       awardStatus: 'awarded',
       status: 'signing',
+      ...awardMetadata,
     })
 
     const winnerNegotiation = winner.negotiationId
@@ -722,6 +771,8 @@ export class DealCommandHandler {
           terms: winner.terms as Record<string, unknown> | undefined,
           scope: winner.scope,
           status: 'draft',
+          createdByUserId: awardActor.actorUserId,
+          createdByActorType: awardActor.actorType ?? 'marketplace_user',
         })
       }
     } catch (error) {

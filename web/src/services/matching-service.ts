@@ -11,7 +11,13 @@ import {
   postMatchRepository,
   applicationRepository,
   auditRepository,
+  userRepository,
+  companyRepository,
 } from '@/repositories/index.ts'
+import {
+  buildMatchingDiscoveryContext,
+  resolveOpportunityOwner,
+} from '@/domain/identity/matching-discovery-context.ts'
 import {
   discoverInputStrongKey,
   modelRunResultToDiscoverCommands,
@@ -31,6 +37,21 @@ import {
   resolveMatchingRunStatus,
   type RecordMatchingRunAuditInput,
 } from '@/services/matching/matching-run-audit.ts'
+
+function buildMatchingOwnershipContext(): ReturnType<typeof buildMatchingDiscoveryContext> {
+  return buildMatchingDiscoveryContext(
+    userRepository.getAll().map((user) => user.id),
+    companyRepository.getAll().map((company) => company.id),
+  )
+}
+
+function resolveAnchorOwnerPartyKey(
+  opportunity: Opportunity,
+  ownershipContext: ReturnType<typeof buildMatchingDiscoveryContext>,
+): string | undefined {
+  if (opportunity.ownerPartyId) return opportunity.ownerPartyId
+  return resolveOpportunityOwner(opportunity, ownershipContext)?.ownerPartyId
+}
 
 export type DiscoverNeedOfferMatchInput = {
   readonly needOpportunityId: string
@@ -280,10 +301,12 @@ function runPublishMatchingForOpportunity(
   let discoveredMatchesCount = 0
   let skippedDuplicatesCount = 0
 
+  const ownershipContext = buildMatchingOwnershipContext()
   const discoverContext = {
     anchorOpportunity,
     opportunityById,
     postById,
+    ownershipContext,
     runId,
     createAggregateId: createPostMatchId,
   }
@@ -369,14 +392,16 @@ function runCircularMatchingForPublishedOpportunities(
     let discoveredMatchesCount = 0
     let skippedDuplicatesCount = 0
 
-    const anchorsByCreator = new Map<string, Opportunity>()
+    const ownershipContext = buildMatchingOwnershipContext()
+    const anchorsByOwnerParty = new Map<string, Opportunity>()
     for (const opportunity of publishedPool) {
-      if (opportunity.creatorId && !anchorsByCreator.has(opportunity.creatorId)) {
-        anchorsByCreator.set(opportunity.creatorId, opportunity)
+      const ownerPartyKey = resolveAnchorOwnerPartyKey(opportunity, ownershipContext)
+      if (ownerPartyKey && !anchorsByOwnerParty.has(ownerPartyKey)) {
+        anchorsByOwnerParty.set(ownerPartyKey, opportunity)
       }
     }
 
-    for (const anchorOpportunity of anchorsByCreator.values()) {
+    for (const anchorOpportunity of anchorsByOwnerParty.values()) {
       const engineResults = runMatching({
         anchorPost: opportunityToPost(anchorOpportunity),
         opportunities: posts,
@@ -389,6 +414,7 @@ function runCircularMatchingForPublishedOpportunities(
         anchorOpportunity,
         opportunityById,
         postById,
+        ownershipContext,
         runId,
         createAggregateId: createPostMatchId,
       }
@@ -509,10 +535,12 @@ function runCircularMatchingForOpportunity(
     options: deps?.engineOptions ?? { model: 'circular', minCycleLength: 3 },
   })
 
+  const ownershipContext = buildMatchingOwnershipContext()
   const discoverContext = {
     anchorOpportunity,
     opportunityById,
     postById,
+    ownershipContext,
     runId,
     createAggregateId: createPostMatchId,
   }

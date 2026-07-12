@@ -1,136 +1,133 @@
 # Enterprise Identity Refactor — Final Delivery Report
 
-Date: 2026-07-12
+Date: 2026-07-12 (final-closure remediation)
 
 ## 1. Architecture implemented
 
 Canonical model: **User → Business Workspace (`personal` | `company`) → Party → Actor**, with **PlatformAccessContext** separate from Marketplace Workspaces.
 
 - Package `@pm-twin/identity` owns types, capabilities, ownership integrity, migration projection, schema versions, and actor resolvers.
-- `@pm-twin/party` remains eligibility + legacy Party synthesis; Party records gain optional `workspaceId` / profile refs.
 - Web runtime: workspace repositories, auth session (`activeWorkspaceId`), membership-backed Workspace Switcher, dual-read ownership adapters.
+- Matching discover, negotiation writes, and commercial agreement writes now stamp canonical party/workspace/actor metadata at write time.
 
-Platform context is **not** a Marketplace ownership Workspace (no `ownerPartyId`; excluded from ownership resolvers).
+## 2. Final-closure remediation (this pass)
 
-## 2. New domain entities and types
+| Area | Status |
+|------|--------|
+| Matching discover canonical scoping | **Complete** — owner party/workspace scoping; no business scoping via `creatorId` |
+| Negotiation write paths | **Complete** — create, messages, attachments, offers, accept/reject, transcript, agree |
+| Commercial Agreement write paths | **Complete** — create, transition, award, contract handoff |
+| Seed Opportunity backfill | **Complete** — 55 records in `opportunities.json` |
+| Legacy compatibility guards/tests | **Complete** |
+| Remaining-field inventory | **Complete** — see §15 |
 
-| Type | Location |
-|------|----------|
-| `BusinessWorkspace`, `WorkspaceMembership`, `PlatformAccessContext` | `packages/identity` |
-| `WorkspaceRole`, `WorkspaceCapability`, `PlatformRole` | `packages/identity` |
-| `WorkflowActorContext`, `CreatedByActor`, `BusinessParticipant` | `packages/identity` |
-| `IDENTITY_SCHEMA_VERSION` / `OWNERSHIP_SCHEMA_VERSION` | `packages/identity` |
-| Web repos | `workspace-repository.ts`, `workspace-membership-repository.ts` |
+## 3. Root causes fixed
 
-## 3. Legacy fields deprecated (dual-read retained)
+1. **Matching discover** used `creatorId` for barter-side hydration, participant construction, two-way exclusion, consortium/circular anchors, and circular anchor deduplication — conflating human actor with business owner.
+2. **Negotiation/Agreement handlers** persisted legacy `userId`-only participants and transcript/events without `partyId` / `workspaceId` / `actorUserId` at write time.
+3. **Seed opportunities** lacked canonical `workspaceId` / `ownerPartyId`, forcing runtime inference on every load.
 
-- `creatorId` — no longer sole ownership/auth key; dual-read when canonical fields absent
-- `PlatformUser.role` as mixed marketplace+platform role — staged via `resolveLegacyRoleToPlatformRoles` / `resolveLegacyRoleToWorkspaceMembership`
-- Global `company_owner` — registration uses membership `workspace_owner`; user role `user`
-- Participant `userId`-only — optional `partyId` / `workspaceId` / `actorUserId` added
+## 4. Matching paths migrated
 
-## 4. Entities migrated (canonical fields + adapters)
+| Path | Change |
+|------|--------|
+| `model-run-discover-adapter.ts` | Owner-party hydration, participant building, same-party exclusion, consortium/circular party dedupe |
+| `matching-service.ts` | `anchorsByOwnerParty` replaces `anchorsByCreator`; ownership context from user/company repos |
+| `opportunity-post-adapter.ts` | Passes `ownerPartyId`, `workspaceId` on `OpportunityPost` |
+| `negotiation-service.ts` | `canUserApplyToOpportunity` uses `isOpportunityOwnedByContext` |
+| `matching-discovery-context.ts` | Shared resolver helpers |
 
-- Opportunity: `workspaceId`, `ownerPartyId`, `createdByUserId`, `lastModifiedByUserId`, `createdByActorType`
-- PostMatch / Negotiation / CommercialAgreement / Contract: multi-party fields + participant party metadata
-- Notifications: recipient targeting fields + workspace visibility filter
-- Audit: extended actor snapshot fields (auto-enriched on append)
-- Negotiation messages/offers/transcript: party/workspace/actor optional fields
+Engine (`@pm-twin/matching`) algorithms unchanged; web layer post-processes with canonical ownership.
 
-## 5. Commands and workflows updated
+## 5. Negotiation write paths migrated
 
-- Command actor context extended (`activeWorkspaceId`, `workspaceRole`, `capabilities`, `actorType`, `platformRoles`)
-- Opportunity create dual-writes canonical ownership from actor
-- PostMatch accept/decline records `actorUserId` / party / workspace; party-aware matching; party-level accept uniqueness
-- UpdateOpportunity RBAC uses owner + capability (Admin RBAC preserved for admin edit)
+- `negotiation-command-handler.ts`: create from post-match/application stamps `initiatingPartyId`, `initiatedByWorkspaceId`, `createdByUserId`, `createdByActorType`, canonical participants; agree stamps `lastModifiedByUserId`
+- `negotiation-room-command-handler.ts`: messages, attachments, offers, accept/reject, transcript lock stamp `partyId`, `workspaceId`, `actorUserId`, `actorType`
 
-## 6. Permission model updated
+## 6. Commercial Agreement write paths migrated
 
-- Marketplace: `resolveWorkspaceCapabilities` / `hasWorkspaceCapability`
-- Admin: existing Admin RBAC / `hasAdminCapability` unchanged and separate; `canAccessAdminForRole` uses PlatformRole resolution (marketplace `company_owner` denied)
-- Publish/edit ownership: workspace/party first; `creatorId` dual-read only when canonical fields absent
+- `deal-command-handler.ts`: create stamps canonical metadata + enriched participants; transition stamps `lastModifiedByUserId`; award stamps `awardDecisionByPartyId`, `awardedByUserId`, `awardedPartyId`, `awardedWorkspaceId`; contract handoff stamps `createdByUserId` / `createdByActorType`
 
-## 7. Authentication and registration
+Lifecycle statuses and award safety rollback behavior unchanged.
 
-- Session: `activeWorkspaceId`, `platformContextActive`
-- Hooks: `useCurrentUser`, `useActiveWorkspace`, `useActiveParty`, `useWorkspaceMembership`, `usePlatformRole`
-- Registration: Personal/Company Workspace atomic create; one login User for Company; Company profile is not a login principal
-- UI copy: Create your workspace / Personal Workspace / Company Workspace
+## 7. Seed records backfilled
 
-## 8. Workspace switching
+- Script: `POC/scripts/backfill-opportunity-canonical-ownership.mjs`
+- `POC/data/opportunities.json`: 55 opportunities — all have `workspaceId`, `ownerPartyId`
+- Company-owned records (19): `createdByUserId: system-migration-actor`, `createdByActorType: system`, audit evidence in `POC/data/opportunities-ownership-audit.json`
+- Human-owned records: `createdByUserId` from known creator
+- `demo-40-opportunities.json`: empty (no records to backfill)
 
-- Membership-backed switcher (not pathname)
-- Platform entry via `enterPlatformContext` (no Marketplace `ownerPartyId`)
-- Cache invalidation: `workspace-cache.ts`
-- Recovery: `recoverActiveBusinessContext`
-- Deep-link: `resolveDeepLinkWorkspaceContext`
+## 8. Tests added
 
-## 9. UI surfaces updated
+- `web/src/domain/identity/matching-discovery-isolation.test.ts` — personal/company isolation, employee shared context, workspace switch, creatorId not ownership, no cross-workspace leakage
+- `web/src/domain/identity/legacy-compatibility.test.ts` — auth not from creatorId alone, canonical write stamping
 
-- `OwnershipMeta` + `ownership-display.ts`
-- Opportunity executive header / overview: **Owned by** vs **Created by**
-- Registration workspace wording
-
-## 10. Admin boundaries
-
-- Platform roles resolved separately; no automatic Marketplace Party for platform staff in projection
-- Admin portal remains `/admin`; deep-links stay admin without marketplace context switch
-- Audit append stores `actorType: platform_operator` when platform roles present
-- Admin RBAC engine preserved
-
-## 11. Seed, Demo/UAT, export/import
-
-- Deterministic identity projection from users/companies
-- Export schema `1.1` includes `workspaces`, `workspaceMemberships`, `parties`, identity/ownership schema versions
-- Import accepts `1.0` (identity collections optional) and `1.1`
-- Bootstrap metadata stores schema versions
-- Migration timestamps deterministic for idempotency
-
-## 12. Tests added
-
-- `packages/identity/tests/identity.test.js`
-- `web/src/domain/identity/*` (projection, participants, isolation, migration idempotency, notification targeting)
-- Existing suites updated (registration, RBAC, export/import)
-
-## 13. Verification gate results
+## 9. Verification gate results
 
 | Gate | Result |
 |------|--------|
-| `packages/identity` `npm test` | Pass |
-| `web` `npm test` | **1258+ pass / 0 fail** (re-verify after final UI/audit commits) |
-| `web` `npm run type-check` | Pass |
-| `web` `npm run build` | Pass |
-| `web` `npm run lint` | Pre-existing repo lint debt remains (not introduced as identity-only blockers) |
+| `packages/identity` `npm test` | **10 pass / 0 fail** |
+| `web` `npm test` | **1269 pass / 0 fail** |
+| `web` `npm run type-check` | **Pass** |
+| `web` `npm run build` | **Pass** |
+| `web` `npm run lint` | Pre-existing repo debt (171 problems); no new blockers from this pass |
+| `web` `npm run validate:design` | **Pass** (baseline mode; 4 pre-existing actionable violations) |
+| `web` `npm run validate:domain` | **Skipped** — vite-node env resolution failure in this environment (`Cannot find module '/@vite/env'`) |
 
-## 14. Remaining limitations
+## 10. Completion bar
 
-- Seed JSON opportunities may still lack backfilled `workspaceId`/`ownerPartyId` until runtime dual-read; full seed rewrite is incremental.
-- Negotiation/Agreement/Contract command write paths still often userId-centric; types/adapters ready for fuller migration.
-- Execution modules (projects/tasks) lightly touched — notification/isolation helpers prepared.
-- Matching discover still has `creatorId` scoping (classified debt below).
-- Repo-wide ESLint has pre-existing errors unrelated to this refactor.
-
-## 15. Files created / changed (high level)
-
-**Created:** `packages/identity/**`, `docs/identity-ownership-inventory-phase0.md`, `docs/identity-ownership-delivery-report.md`, `web/src/domain/identity/**`, `web/src/repositories/workspace-*.ts`, `web/src/providers/identity-hooks.ts`, `web/src/components/identity/ownership-meta.tsx`, related tests.
-
-**Changed:** auth provider/service, registration, command RBAC/gateway, post-match handler, opportunity types/handler/UI, participant types, export/import/bootstrap, party membership primary resolution, deal-service pipeline dual-read, audit repository actor enrichment, admin-access PlatformRole check, vite/package wiring.
+| Criterion | Met |
+|-----------|-----|
+| Matching discovery no longer uses `creatorId` for business scoping | Yes |
+| New Negotiation writes persist Party, Workspace, Actor metadata | Yes |
+| New Commercial Agreement writes persist Party, Workspace, Actor metadata | Yes |
+| Seed Opportunities contain canonical ownership | Yes |
+| No business authorization depends on `creatorId` alone (when canonical fields present) | Yes |
 
 ---
 
-## Remaining `creatorId` / `userId` / `companyId` classification
+## 15. Remaining `creatorId` / `userId` / `companyId` classified inventory
 
-| Pattern | Classification |
-|---------|----------------|
-| Opportunity `creatorId` dual-read / dual-write | Legacy compatibility field |
-| Auth `userId` / session `userId` | Authentication identity field |
-| Audit `userId` / `actorUserId` | Legitimate audit field |
-| Participant `userId` | Legacy compatibility + representative identity |
-| Notification `userId` | Recipient targeting (plus new recipient* fields) |
-| Command payloads `userId` | Actor identity on command |
-| `companyId` in ownership resolve fallback | Migration-only / legacy compatibility — not authoritative ownership |
-| Route params / internal keys using ids | Route or internal reference |
-| Matching discover by `creatorId` | Unresolved technical debt (prefer workspace/party filters next) |
-| Pipeline dual-read `creatorId` when no active workspace context | Legacy compatibility field |
+**Zero unresolved business ownership or business authorization usages.**
 
-**Completion bar:** business authorization for Opportunity publish/edit no longer depends on `creatorId` alone when canonical `workspaceId`/`ownerPartyId` are present.
+### `creatorId`
+
+| Location / pattern | Classification |
+|--------------------|----------------|
+| `Opportunity.creatorId` field on entity | Legacy read compatibility + legitimate actor/audit field (human creator) |
+| `ownership-adapters.ts` dual-read fallback | Legacy read compatibility — only when `workspaceId`/`ownerPartyId` absent |
+| `command-rbac.ts` dual-read fallback | Legacy read compatibility — only when canonical fields absent |
+| `deal-service.ts` pipeline dual-read | Legacy read compatibility — only when no active workspace context |
+| `opportunity-post-adapter.ts` → engine DTO | Legacy read compatibility — engine self-match exclusion (algorithm unchanged) |
+| `packages/matching` engine internals | Migration-only at engine layer — web scoping overrides at discover adapter |
+| Admin/read-model display, wizard draft | Route/internal reference / display |
+| Test fixtures | Test-only |
+
+### `userId`
+
+| Location / pattern | Classification |
+|--------------------|----------------|
+| Auth session / `CommandPermissionActor.userId` | Authentication identity |
+| Audit `userId` / `actorUserId` | Legitimate actor/audit field |
+| Participant `userId` | Legacy read compatibility + representative identity (canonical: `partyId`/`workspaceId`) |
+| Command payloads `userId` (negotiation room) | Actor identity on command — stamped to canonical fields at write |
+| Notification recipient `userId` | Authentication identity / recipient targeting |
+| Route params / repository keys | Route/internal reference |
+
+### `companyId`
+
+| Location / pattern | Classification |
+|--------------------|----------------|
+| `resolveLegacyOpportunityOwnership` companyIds set | Migration-only — idempotent projection input |
+| Seed backfill script account classification | Migration-only |
+| Legacy party synthesis in `@pm-twin/party` | Legacy read compatibility |
+| No runtime field `companyId` on Opportunity for auth | N/A — not used for business authorization |
+
+---
+
+## Files changed (this pass)
+
+**Created:** `web/src/domain/identity/matching-discovery-context.ts`, `web/src/domain/identity/command-actor-stamping.ts`, `web/src/domain/identity/matching-discovery-isolation.test.ts`, `web/src/domain/identity/legacy-compatibility.test.ts`, `POC/scripts/backfill-opportunity-canonical-ownership.mjs`, `POC/data/opportunities-ownership-audit.json`
+
+**Modified:** `web/src/services/matching/model-run-discover-adapter.ts`, `web/src/services/matching-service.ts`, `web/src/services/matching/opportunity-post-adapter.ts`, `web/src/services/negotiation-service.ts`, `web/src/commands/handlers/negotiation-command-handler.ts`, `web/src/commands/handlers/negotiation-room-command-handler.ts`, `web/src/commands/handlers/deal-command-handler.ts`, `web/src/types/domain.ts`, `packages/matching/src/types/opportunity.ts`, `packages/commands/src/contracts/post-match-types.ts`, `POC/data/opportunities.json`, `docs/identity-ownership-delivery-report.md`

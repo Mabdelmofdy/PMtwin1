@@ -107,7 +107,11 @@
         "intent": "request",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-001",
+      "ownerPartyId": "party-individual-seed-user-001",
+      "createdByUserId": "seed-user-001",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-002",
@@ -203,7 +207,11 @@
         "intent": "offer",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-002",
+      "ownerPartyId": "party-individual-seed-user-002",
+      "createdByUserId": "seed-user-002",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-003",
@@ -305,7 +313,11 @@
         "intent": "offer",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-002",
+      "ownerPartyId": "party-individual-seed-user-002",
+      "createdByUserId": "seed-user-002",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-004",
@@ -401,7 +413,11 @@
         "intent": "offer",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-002",
+      "ownerPartyId": "party-individual-seed-user-002",
+      "createdByUserId": "seed-user-002",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-005",
@@ -493,7 +509,11 @@
         "intent": "request",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-company-seed-co-corp-002",
+      "ownerPartyId": "party-company-seed-co-corp-002",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-006",
@@ -580,7 +600,11 @@
         "intent": "offer",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-004",
+      "ownerPartyId": "party-individual-seed-user-004",
+      "createdByUserId": "seed-user-004",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-007",
@@ -671,7 +695,11 @@
         "intent": "request",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-company-seed-co-corp-001",
+      "ownerPartyId": "party-company-seed-co-corp-001",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-008",
@@ -758,7 +786,11 @@
         "intent": "offer",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-006",
+      "ownerPartyId": "party-individual-seed-user-006",
+      "createdByUserId": "seed-user-006",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-009",
@@ -842,7 +874,11 @@
         "intent": "request",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-007",
+      "ownerPartyId": "party-individual-seed-user-007",
+      "createdByUserId": "seed-user-007",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-010",
@@ -934,7 +970,11 @@
         "intent": "request",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-008",
+      "ownerPartyId": "party-individual-seed-user-008",
+      "createdByUserId": "seed-user-008",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-011",
@@ -1030,7 +1070,11 @@
         "intent": "offer",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-008",
+      "ownerPartyId": "party-individual-seed-user-008",
+      "createdByUserId": "seed-user-008",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-012",
@@ -1122,7 +1166,11 @@
         "intent": "request",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-009",
+      "ownerPartyId": "party-individual-seed-user-009",
+      "createdByUserId": "seed-user-009",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-013",
@@ -1218,7 +1266,11 @@
         "intent": "offer",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-009",
+      "ownerPartyId": "party-individual-seed-user-009",
+      "createdByUserId": "seed-user-009",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-014",
@@ -1316,7 +1368,11 @@
         "intent": "request",
         "modelType": "project_based",
         "subModelType": "consortium"
-      }
+      },
+      "workspaceId": "ws-company-seed-co-corp-005",
+      "ownerPartyId": "party-company-seed-co-corp-005",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-015",
@@ -1412,7 +1468,11 @@
         "intent": "offer",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-011",
+      "ownerPartyId": "party-individual-seed-user-011",
+      "createdByUserId": "seed-user-011",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-016",
@@ -1508,7 +1568,11 @@
         "intent": "offer",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-012",
+      "ownerPartyId": "party-individual-seed-user-012",
+      "createdByUserId": "seed-user-012",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-017",
@@ -1593,7 +1657,11 @@
         "intent": "request",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-013",
+      "ownerPartyId": "party-individual-seed-user-013",
+      "createdByUserId": "seed-user-013",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-018",
@@ -1683,7 +1751,11 @@
         "intent": "offer",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-013",
+      "ownerPartyId": "party-individual-seed-user-013",
+      "createdByUserId": "seed-user-013",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-019",
@@ -1768,7 +1840,11 @@
         "intent": "request",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-014",
+      "ownerPartyId": "party-individual-seed-user-014",
+      "createdByUserId": "seed-user-014",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-020",
@@ -1858,7 +1934,11 @@
         "intent": "offer",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-014",
+      "ownerPartyId": "party-individual-seed-user-014",
+      "createdByUserId": "seed-user-014",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-021",
@@ -1943,7 +2023,11 @@
         "intent": "request",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-015",
+      "ownerPartyId": "party-individual-seed-user-015",
+      "createdByUserId": "seed-user-015",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-022",
@@ -2033,7 +2117,11 @@
         "intent": "offer",
         "modelType": "project_based",
         "subModelType": "project"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-015",
+      "ownerPartyId": "party-individual-seed-user-015",
+      "createdByUserId": "seed-user-015",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-023",
@@ -2121,7 +2209,11 @@
         "intent": "request",
         "modelType": "strategic_partnership",
         "subModelType": "joint_venture"
-      }
+      },
+      "workspaceId": "ws-company-seed-co-corp-001",
+      "ownerPartyId": "party-company-seed-co-corp-001",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-024",
@@ -2209,7 +2301,11 @@
         "intent": "request",
         "modelType": "resource_pooling",
         "subModelType": "shared_resources"
-      }
+      },
+      "workspaceId": "ws-company-seed-co-corp-002",
+      "ownerPartyId": "party-company-seed-co-corp-002",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-025",
@@ -2302,7 +2398,11 @@
         "intent": "offer",
         "modelType": "hiring",
         "subModelType": "professional_hiring"
-      }
+      },
+      "workspaceId": "ws-company-seed-co-corp-003",
+      "ownerPartyId": "party-company-seed-co-corp-003",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-026",
@@ -2397,7 +2497,11 @@
         "intent": "request",
         "modelType": "project_based",
         "subModelType": "task_based"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-001",
+      "ownerPartyId": "party-individual-seed-user-001",
+      "createdByUserId": "seed-user-001",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-027",
@@ -2496,7 +2600,11 @@
         "intent": "offer",
         "modelType": "project_based",
         "subModelType": "task_based"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-002",
+      "ownerPartyId": "party-individual-seed-user-002",
+      "createdByUserId": "seed-user-002",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-028",
@@ -2587,7 +2695,11 @@
         "intent": "request",
         "modelType": "project_based",
         "subModelType": "project_jv"
-      }
+      },
+      "workspaceId": "ws-company-seed-co-corp-004",
+      "ownerPartyId": "party-company-seed-co-corp-004",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-029",
@@ -2681,7 +2793,11 @@
         "intent": "request",
         "modelType": "project_based",
         "subModelType": "spv"
-      }
+      },
+      "workspaceId": "ws-company-seed-co-corp-006",
+      "ownerPartyId": "party-company-seed-co-corp-006",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-030",
@@ -2772,7 +2888,11 @@
         "intent": "request",
         "modelType": "strategic_partnership",
         "subModelType": "strategic_jv"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-005",
+      "ownerPartyId": "party-individual-seed-user-005",
+      "createdByUserId": "seed-user-005",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-031",
@@ -2863,7 +2983,11 @@
         "intent": "request",
         "modelType": "strategic_partnership",
         "subModelType": "strategic_alliance"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-006",
+      "ownerPartyId": "party-individual-seed-user-006",
+      "createdByUserId": "seed-user-006",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-032",
@@ -2958,7 +3082,11 @@
         "intent": "request",
         "modelType": "strategic_partnership",
         "subModelType": "mentorship"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-007",
+      "ownerPartyId": "party-individual-seed-user-007",
+      "createdByUserId": "seed-user-007",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-033",
@@ -3060,7 +3188,11 @@
         "intent": "offer",
         "modelType": "strategic_partnership",
         "subModelType": "mentorship"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-017",
+      "ownerPartyId": "party-individual-seed-user-017",
+      "createdByUserId": "seed-user-017",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-034",
@@ -3155,7 +3287,11 @@
         "intent": "request",
         "modelType": "resource_pooling",
         "subModelType": "bulk_purchasing"
-      }
+      },
+      "workspaceId": "ws-company-seed-co-corp-006",
+      "ownerPartyId": "party-company-seed-co-corp-006",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-035",
@@ -3250,7 +3386,11 @@
         "intent": "offer",
         "modelType": "resource_pooling",
         "subModelType": "equipment_sharing"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-013",
+      "ownerPartyId": "party-individual-seed-user-013",
+      "createdByUserId": "seed-user-013",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-036",
@@ -3349,7 +3489,11 @@
         "intent": "offer",
         "modelType": "resource_pooling",
         "subModelType": "resource_sharing"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-014",
+      "ownerPartyId": "party-individual-seed-user-014",
+      "createdByUserId": "seed-user-014",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-037",
@@ -3444,7 +3588,11 @@
         "intent": "request",
         "modelType": "hiring",
         "subModelType": "consultant_hiring"
-      }
+      },
+      "workspaceId": "ws-company-seed-co-corp-004",
+      "ownerPartyId": "party-company-seed-co-corp-004",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-038",
@@ -3535,7 +3683,11 @@
         "intent": "request",
         "modelType": "competition",
         "subModelType": "competition_rfp"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-011",
+      "ownerPartyId": "party-individual-seed-user-011",
+      "createdByUserId": "seed-user-011",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-039",
@@ -3636,7 +3788,11 @@
         "intent": "request",
         "modelType": "project_based",
         "subModelType": "consortium"
-      }
+      },
+      "workspaceId": "ws-company-seed-co-corp-005",
+      "ownerPartyId": "party-company-seed-co-corp-005",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-040",
@@ -3731,7 +3887,11 @@
         "intent": "offer",
         "modelType": "project_based",
         "subModelType": "project_jv"
-      }
+      },
+      "workspaceId": "ws-personal-seed-user-009",
+      "ownerPartyId": "party-individual-seed-user-009",
+      "createdByUserId": "seed-user-009",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-demo-task-need",
@@ -3790,7 +3950,11 @@
         "estimated_value": 220000
       },
       "createdAt": "2026-06-28T10:00:00.000Z",
-      "updatedAt": "2026-06-28T10:00:00.000Z"
+      "updatedAt": "2026-06-28T10:00:00.000Z",
+      "workspaceId": "ws-company-seed-co-corp-002",
+      "ownerPartyId": "party-company-seed-co-corp-002",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-demo-task-offer",
@@ -3849,7 +4013,11 @@
         "estimated_value": 220000
       },
       "createdAt": "2026-06-28T10:00:00.000Z",
-      "updatedAt": "2026-06-28T10:00:00.000Z"
+      "updatedAt": "2026-06-28T10:00:00.000Z",
+      "workspaceId": "ws-personal-seed-user-004",
+      "ownerPartyId": "party-individual-seed-user-004",
+      "createdByUserId": "seed-user-004",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-demo-alliance-a",
@@ -3908,7 +4076,11 @@
         "estimated_value": 220000
       },
       "createdAt": "2026-06-28T10:00:00.000Z",
-      "updatedAt": "2026-06-28T10:00:00.000Z"
+      "updatedAt": "2026-06-28T10:00:00.000Z",
+      "workspaceId": "ws-personal-seed-user-005",
+      "ownerPartyId": "party-individual-seed-user-005",
+      "createdByUserId": "seed-user-005",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-demo-alliance-b",
@@ -3967,7 +4139,11 @@
         "estimated_value": 220000
       },
       "createdAt": "2026-06-28T10:00:00.000Z",
-      "updatedAt": "2026-06-28T10:00:00.000Z"
+      "updatedAt": "2026-06-28T10:00:00.000Z",
+      "workspaceId": "ws-personal-seed-user-006",
+      "ownerPartyId": "party-individual-seed-user-006",
+      "createdByUserId": "seed-user-006",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-demo-mentor",
@@ -4029,7 +4205,11 @@
         "estimated_value": 220000
       },
       "createdAt": "2026-06-28T10:00:00.000Z",
-      "updatedAt": "2026-06-28T10:00:00.000Z"
+      "updatedAt": "2026-06-28T10:00:00.000Z",
+      "workspaceId": "ws-personal-seed-user-007",
+      "ownerPartyId": "party-individual-seed-user-007",
+      "createdByUserId": "seed-user-007",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-demo-consortium-lead",
@@ -4091,7 +4271,11 @@
         "estimated_value": 220000
       },
       "createdAt": "2026-06-28T10:00:00.000Z",
-      "updatedAt": "2026-06-28T10:00:00.000Z"
+      "updatedAt": "2026-06-28T10:00:00.000Z",
+      "workspaceId": "ws-company-seed-co-corp-005",
+      "ownerPartyId": "party-company-seed-co-corp-005",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-demo-project-jv",
@@ -4153,7 +4337,11 @@
         "estimated_value": 220000
       },
       "createdAt": "2026-06-28T10:00:00.000Z",
-      "updatedAt": "2026-06-28T10:00:00.000Z"
+      "updatedAt": "2026-06-28T10:00:00.000Z",
+      "workspaceId": "ws-company-seed-co-corp-006",
+      "ownerPartyId": "party-company-seed-co-corp-006",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-demo-spv",
@@ -4215,7 +4403,11 @@
         "estimated_value": 220000
       },
       "createdAt": "2026-06-28T10:00:00.000Z",
-      "updatedAt": "2026-06-28T10:00:00.000Z"
+      "updatedAt": "2026-06-28T10:00:00.000Z",
+      "workspaceId": "ws-company-seed-co-corp-003",
+      "ownerPartyId": "party-company-seed-co-corp-003",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-demo-strategic-jv",
@@ -4277,7 +4469,11 @@
         "estimated_value": 220000
       },
       "createdAt": "2026-06-28T10:00:00.000Z",
-      "updatedAt": "2026-06-28T10:00:00.000Z"
+      "updatedAt": "2026-06-28T10:00:00.000Z",
+      "workspaceId": "ws-company-seed-co-corp-001",
+      "ownerPartyId": "party-company-seed-co-corp-001",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-demo-bulk",
@@ -4336,7 +4532,11 @@
         "estimated_value": 220000
       },
       "createdAt": "2026-06-28T10:00:00.000Z",
-      "updatedAt": "2026-06-28T10:00:00.000Z"
+      "updatedAt": "2026-06-28T10:00:00.000Z",
+      "workspaceId": "ws-company-seed-co-corp-004",
+      "ownerPartyId": "party-company-seed-co-corp-004",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-demo-equip",
@@ -4398,7 +4598,11 @@
         "estimated_value": 220000
       },
       "createdAt": "2026-06-28T10:00:00.000Z",
-      "updatedAt": "2026-06-28T10:00:00.000Z"
+      "updatedAt": "2026-06-28T10:00:00.000Z",
+      "workspaceId": "ws-personal-seed-user-010",
+      "ownerPartyId": "party-individual-seed-user-010",
+      "createdByUserId": "seed-user-010",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-demo-resource",
@@ -4460,7 +4664,11 @@
         "estimated_value": 220000
       },
       "createdAt": "2026-06-28T10:00:00.000Z",
-      "updatedAt": "2026-06-28T10:00:00.000Z"
+      "updatedAt": "2026-06-28T10:00:00.000Z",
+      "workspaceId": "ws-personal-seed-user-011",
+      "ownerPartyId": "party-individual-seed-user-011",
+      "createdByUserId": "seed-user-011",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-demo-prof-hiring",
@@ -4519,7 +4727,11 @@
         "estimated_value": 220000
       },
       "createdAt": "2026-06-28T10:00:00.000Z",
-      "updatedAt": "2026-06-28T10:00:00.000Z"
+      "updatedAt": "2026-06-28T10:00:00.000Z",
+      "workspaceId": "ws-company-seed-co-corp-002",
+      "ownerPartyId": "party-company-seed-co-corp-002",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     },
     {
       "id": "seed-opp-demo-consultant",
@@ -4581,7 +4793,11 @@
         "estimated_value": 220000
       },
       "createdAt": "2026-06-28T10:00:00.000Z",
-      "updatedAt": "2026-06-28T10:00:00.000Z"
+      "updatedAt": "2026-06-28T10:00:00.000Z",
+      "workspaceId": "ws-personal-seed-user-012",
+      "ownerPartyId": "party-individual-seed-user-012",
+      "createdByUserId": "seed-user-012",
+      "createdByActorType": "marketplace_user"
     },
     {
       "id": "seed-opp-demo-rfp",
@@ -4640,7 +4856,11 @@
         "estimated_value": 220000
       },
       "createdAt": "2026-06-28T10:00:00.000Z",
-      "updatedAt": "2026-06-28T10:00:00.000Z"
+      "updatedAt": "2026-06-28T10:00:00.000Z",
+      "workspaceId": "ws-company-seed-co-corp-003",
+      "ownerPartyId": "party-company-seed-co-corp-003",
+      "createdByUserId": "system-migration-actor",
+      "createdByActorType": "system"
     }
   ]
 }

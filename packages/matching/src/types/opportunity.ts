@@ -50,6 +50,10 @@ export interface OpportunityPost {
   readonly intent?: string
   readonly status?: string
   readonly creatorId?: string
+  /** Canonical business owner party — web runtime scoping; engine may ignore. */
+  readonly ownerPartyId?: string
+  /** Canonical owning workspace — web runtime scoping; engine may ignore. */
+  readonly workspaceId?: string
   readonly exchangeMode?: string
   readonly subModelType?: string
   readonly modelType?: string

@@ -7,6 +7,7 @@ import type {
 import type { Application } from '@/types/domain.ts'
 import { getApplicationCommandGateway } from '@/commands/application-command-gateway.ts'
 import { applicationRepository } from '@/repositories/index.ts'
+import { isOpportunityOwnedByContext } from '@/domain/identity/ownership-adapters.ts'
 
 const TERMINAL_OPPORTUNITY_STATUSES = new Set([
   'contracted',
@@ -55,16 +56,31 @@ function executeApplicationCommand(
 
 export const negotiationService = {
   canUserApplyToOpportunity(
-    opportunity: { status?: string; creatorId?: string } | null | undefined,
+    opportunity: {
+      status?: string
+      creatorId?: string
+      ownerPartyId?: string
+      workspaceId?: string
+    } | null | undefined,
     user: { id: string } | null | undefined,
     context: {
       application?: Application | null
       canReapply?: boolean
       hasDeal?: boolean
+      activeWorkspaceId?: string | null
+      activePartyId?: string | null
     } = {},
   ): boolean {
     if (!user || !opportunity) return false
-    if (opportunity.creatorId === user.id) return false
+    if (
+      isOpportunityOwnedByContext(opportunity, {
+        activeWorkspaceId: context.activeWorkspaceId,
+        activePartyId: context.activePartyId,
+        userId: user.id,
+      })
+    ) {
+      return false
+    }
     const status = (opportunity.status || '').toLowerCase()
     if (TERMINAL_OPPORTUNITY_STATUSES.has(status)) return false
     if (!['published', 'in_negotiation'].includes(status)) return false

@@ -1,0 +1,100 @@
+{
+  "domain": "migration",
+  "evidence": [
+    {
+      "opportunityId": "seed-opp-005",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-002"
+    },
+    {
+      "opportunityId": "seed-opp-007",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-001"
+    },
+    {
+      "opportunityId": "seed-opp-014",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-005"
+    },
+    {
+      "opportunityId": "seed-opp-023",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-001"
+    },
+    {
+      "opportunityId": "seed-opp-024",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-002"
+    },
+    {
+      "opportunityId": "seed-opp-025",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-003"
+    },
+    {
+      "opportunityId": "seed-opp-028",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-004"
+    },
+    {
+      "opportunityId": "seed-opp-029",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-006"
+    },
+    {
+      "opportunityId": "seed-opp-034",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-006"
+    },
+    {
+      "opportunityId": "seed-opp-037",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-004"
+    },
+    {
+      "opportunityId": "seed-opp-039",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-005"
+    },
+    {
+      "opportunityId": "seed-opp-demo-task-need",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-002"
+    },
+    {
+      "opportunityId": "seed-opp-demo-consortium-lead",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-005"
+    },
+    {
+      "opportunityId": "seed-opp-demo-project-jv",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-006"
+    },
+    {
+      "opportunityId": "seed-opp-demo-spv",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-003"
+    },
+    {
+      "opportunityId": "seed-opp-demo-strategic-jv",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-001"
+    },
+    {
+      "opportunityId": "seed-opp-demo-bulk",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-004"
+    },
+    {
+      "opportunityId": "seed-opp-demo-prof-hiring",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-002"
+    },
+    {
+      "opportunityId": "seed-opp-demo-rfp",
+      "reason": "migration.actor_unresolved",
+      "creatorId": "seed-co-corp-003"
+    }
+  ]
+}

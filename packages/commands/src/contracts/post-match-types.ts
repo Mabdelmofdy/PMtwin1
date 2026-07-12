@@ -12,6 +12,13 @@ export interface PostMatchParticipant {
 
   readonly respondedAt?: string | null
 
+  /** Canonical business party represented by this participant. */
+  readonly partyId?: string
+
+  readonly workspaceId?: string
+
+  readonly representativeUserIds?: readonly string[]
+
 }
 
 

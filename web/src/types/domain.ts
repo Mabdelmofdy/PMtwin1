@@ -336,6 +336,7 @@ export type Negotiation = TenantScoped & {
   /** @deprecated Use participants — legacy seed field */
   parties?: Participant[]
   initiatingPartyId?: string
+  initiatedByWorkspaceId?: string
   originatingOwnerPartyId?: string
   createdByUserId?: string
   lastModifiedByUserId?: string
