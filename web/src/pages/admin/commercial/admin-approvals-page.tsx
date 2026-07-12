@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { dealsApi } from '@/api/deals.ts'
+import { formatCommercialAgreementPresentation } from '@/lib/enterprise-display.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useProductLanguage } from '@/providers/product-language-provider.tsx'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
@@ -20,12 +21,25 @@ export function AdminApprovalsPage() {
     <AdminListPage
       title="Approvals"
       description={`Filtered queue of ${productLanguage.plural('commercialAgreement').toLowerCase()} in review-related statuses. Decision actions are not wired on this page — open a detail record to inspect.`}
+      storageKey="approvals"
       data={rows}
       getRowId={(d) => d.id}
       getRowHref={(d) => `/admin/commercial-agreements/${d.id}`}
-      getSearchText={(d) => [d.id, d.title, d.status].filter(Boolean).join(' ')}
+      getSearchText={(d) => {
+        const view = formatCommercialAgreementPresentation(d)
+        return [view.name, view.reference, d.status].filter(Boolean).join(' ')
+      }}
       columns={[
-        { id: 'title', label: 'Title', cell: (d) => d.title || d.id },
+        {
+          id: 'title',
+          label: 'Agreement Name',
+          cell: (d) => formatCommercialAgreementPresentation(d).name,
+        },
+        {
+          id: 'reference',
+          label: 'Reference Number',
+          cell: (d) => formatCommercialAgreementPresentation(d).reference,
+        },
         {
           id: 'status',
           label: 'Status',

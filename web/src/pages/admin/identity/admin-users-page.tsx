@@ -39,10 +39,13 @@ export function AdminUsersPage() {
       getRowId={(u) => u.id}
       getRowHref={(u) => `/admin/users/${u.id}`}
       getSearchText={(u) =>
-        [u.fullName, u.email, u.role, u.accountStatus].filter(Boolean).join(' ')
+        [u.fullName, u.employeeNumber, u.email, u.role, u.accountStatus, u.primaryPartyLabel]
+          .filter(Boolean)
+          .join(' ')
       }
       getSortValue={(u, columnId) => {
         if (columnId === 'name') return u.fullName
+        if (columnId === 'employeeNumber') return u.employeeNumber
         if (columnId === 'email') return u.email
         if (columnId === 'role') return u.roleLabel
         if (columnId === 'status') return u.accountStatus
@@ -114,7 +117,8 @@ export function AdminUsersPage() {
         </PmToolbarSurface>
       }
       columns={[
-        { id: 'name', label: 'Name', cell: (u) => u.fullName },
+        { id: 'name', label: 'Full Name', cell: (u) => u.fullName },
+        { id: 'employeeNumber', label: 'User Number', cell: (u) => u.employeeNumber },
         { id: 'email', label: 'Email', cell: (u) => u.email },
         { id: 'role', label: 'Role', cell: (u) => u.roleLabel },
         {

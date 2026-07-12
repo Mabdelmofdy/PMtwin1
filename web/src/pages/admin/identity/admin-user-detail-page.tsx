@@ -148,12 +148,13 @@ export function AdminUserDetailPage() {
     <AdminEntityDetailShell
       label="Identity"
       title={detail.fullName}
-      description={detail.email}
+      description={detail.employeeNumber}
       statusBadge={<AdminStatusBadge status={detail.accountStatus} />}
       statusSummary={
         <AdminStatusSummaryRow
           items={[
             { label: 'Status', value: <AdminStatusBadge status={detail.accountStatus} /> },
+            { label: 'User Number', value: detail.employeeNumber },
             { label: 'Role', value: detail.roleLabel },
             { label: 'Memberships', value: String(detail.membershipCount) },
             {
@@ -173,7 +174,8 @@ export function AdminUserDetailPage() {
       overview={
         <PmFormReadonly>
           <PmFormReadonlySection title="Overview" description="Admin user inspector">
-            <PmFormReadonlyField label="User ID" value={detail.id} />
+            <PmFormReadonlyField label="Full Name" value={detail.fullName} />
+            <PmFormReadonlyField label="User Number" value={detail.employeeNumber} />
             <PmFormReadonlyField label="Email" value={detail.email} />
             <PmFormReadonlyField label="Role" value={detail.roleLabel} />
             <PmFormReadonlyField label="Status">

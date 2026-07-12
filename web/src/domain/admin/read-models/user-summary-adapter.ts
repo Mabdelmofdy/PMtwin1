@@ -11,6 +11,11 @@ import {
 import { partyMembershipRepository } from '@/repositories/index.ts'
 import type { PlatformUser } from '@/types/domain.ts'
 import type { AdminUserDetail, AdminUserSummary } from './types.ts'
+import {
+  formatPartyCompanyCode,
+  formatUserPresentation,
+  looksLikeInternalId,
+} from '@/lib/enterprise-display.ts'
 
 export type AdminUserSummaryFilters = {
   readonly status?: string
@@ -26,17 +31,25 @@ function primaryPartyLabel(userId: string): { id?: string; label?: string } {
   const primary = partiesApi.getPrimaryMembership(userId)
   if (!primary) return {}
   const party = partiesApi.getParty(primary.partyId)
+  const label = party?.displayName?.trim()
   return {
     id: primary.partyId,
-    label: party?.displayName ?? primary.partyId,
+    label:
+      label && !looksLikeInternalId(label)
+        ? label
+        : party
+          ? formatPartyCompanyCode(party.id)
+          : undefined,
   }
 }
 
 export function toAdminUserSummary(user: PlatformUser): AdminUserSummary {
   const party = primaryPartyLabel(user.id)
+  const presentation = formatUserPresentation(user)
   return {
     id: user.id,
-    fullName: user.profile?.name ?? user.email ?? user.id,
+    fullName: presentation.fullName,
+    employeeNumber: presentation.employeeNumber,
     email: user.email,
     accountType: user.profile?.type,
     primaryPartyId: party.id,
@@ -81,12 +94,13 @@ export function listAdminUserSummaries(
   if (filters?.query?.trim()) {
     const q = filters.query.trim().toLowerCase()
     users = users.filter((u) => {
+      const presentation = formatUserPresentation(u)
       const hay = [
-        u.profile?.name,
+        presentation.fullName,
+        presentation.employeeNumber,
         u.email,
         u.role,
         u.status,
-        u.id,
       ]
         .filter(Boolean)
         .join(' ')

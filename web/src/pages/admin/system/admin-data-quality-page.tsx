@@ -6,6 +6,10 @@ import {
   partyRepository,
   userRepository,
 } from '@/repositories/index.ts'
+import {
+  formatContractPresentation,
+  formatOpportunityPresentation,
+} from '@/lib/enterprise-display.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { PmContentCard, PmMetricGrid } from '@/components/layout/pm-layout-index'
 import { PmPage, PmPageHeader, PmStatCard, PmEmptyState } from '@/components/ui/pm-index'
@@ -26,39 +30,41 @@ export function AdminDataQualityPage() {
     const cas = new Set(commercialAgreementRepository.getAll().map((c) => c.id))
 
     for (const opp of opportunityRepository.getAll()) {
+      const view = formatOpportunityPresentation(opp)
       if (!opp.creatorId) {
         list.push({
           id: `opp-missing-creator-${opp.id}`,
           category: 'orphan',
-          label: `Opportunity ${opp.title || opp.id}`,
-          detail: 'Missing creatorId',
+          label: `${view.name} (${view.reference})`,
+          detail: 'Missing creator account',
         })
       } else if (!users.has(opp.creatorId)) {
         list.push({
           id: `opp-orphan-creator-${opp.id}`,
           category: 'orphan',
-          label: `Opportunity ${opp.title || opp.id}`,
-          detail: `creatorId ${opp.creatorId} not found in users`,
+          label: `${view.name} (${view.reference})`,
+          detail: 'Creator account is missing from identity records',
         })
       }
       if (opp.ownerPartyId && !parties.has(opp.ownerPartyId)) {
         list.push({
           id: `opp-orphan-party-${opp.id}`,
           category: 'ref',
-          label: `Opportunity ${opp.title || opp.id}`,
-          detail: `ownerPartyId ${opp.ownerPartyId} not found`,
+          label: `${view.name} (${view.reference})`,
+          detail: 'Owner party reference is missing',
         })
       }
     }
 
     for (const c of contractRepository.getAll()) {
+      const view = formatContractPresentation(c)
       const caId = c.commercialAgreementId ?? c.dealId
       if (caId && !cas.has(caId)) {
         list.push({
           id: `contract-orphan-ca-${c.id}`,
           category: 'ref',
-          label: `Contract ${c.id}`,
-          detail: `Commercial Agreement ${caId} not found`,
+          label: `${view.name} (${view.reference})`,
+          detail: 'Linked commercial agreement is missing',
         })
       }
     }

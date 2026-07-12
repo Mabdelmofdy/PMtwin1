@@ -14,6 +14,15 @@ import {
   partyRepository,
   userRepository,
 } from '@/repositories/index.ts'
+import {
+  formatCommercialAgreementPresentation,
+  formatContractPresentation,
+  formatNegotiationPresentation,
+  formatOpportunityPresentation,
+  formatPartyPresentation,
+  formatUserPresentation,
+} from '@/lib/enterprise-display.ts'
+import { formatEnterpriseSubjectLine } from './enterprise-subject-adapter.ts'
 import type { AdminGlobalSearchResult } from './types.ts'
 
 export type AdminSearchOptions = {
@@ -45,16 +54,27 @@ export function searchAdminEntities(
     options.actorRole?.toLowerCase() === 'auditor'
   const env = runtimeEnvironment.mode
   const results: AdminGlobalSearchResult[] = []
+  const getOpportunity = (id: string) => opportunityRepository.getById(id)
 
   for (const user of userRepository.getAll()) {
     const email = user.email ?? ''
-    const name = user.profile?.name ?? ''
-    if (!matchesQuery(`${name} ${email} ${user.id} ${user.role} ${user.status}`, q)) continue
+    const view = formatUserPresentation(user)
+    // Match on repository id for operators, but never display it.
+    if (
+      !matchesQuery(
+        `${view.fullName} ${view.employeeNumber} ${email} ${user.id} ${user.role} ${user.status}`,
+        q,
+      )
+    ) {
+      continue
+    }
     results.push({
       id: `user-${user.id}`,
       entityType: 'user',
-      primaryLabel: name || email || user.id,
-      secondaryContext: maskSensitive ? maskEmail(email) : email,
+      primaryLabel: view.fullName,
+      secondaryContext: maskSensitive
+        ? `${view.employeeNumber} · ${maskEmail(email)}`
+        : `${view.employeeNumber}${email ? ` · ${email}` : ''}`,
       status: user.status,
       environment: env,
       lastUpdated: user.updatedAt ?? user.createdAt,
@@ -65,12 +85,20 @@ export function searchAdminEntities(
   }
 
   for (const party of partyRepository.getAll()) {
-    if (!matchesQuery(`${party.displayName} ${party.id} ${party.partyType} ${party.status}`, q)) continue
+    const view = formatPartyPresentation(party)
+    if (
+      !matchesQuery(
+        `${view.companyName} ${view.companyCode} ${party.id} ${party.partyType} ${party.status}`,
+        q,
+      )
+    ) {
+      continue
+    }
     results.push({
       id: `party-${party.id}`,
       entityType: 'party',
-      primaryLabel: party.displayName,
-      secondaryContext: party.partyType,
+      primaryLabel: view.companyName,
+      secondaryContext: `${view.companyCode} · ${party.partyType}`,
       status: party.status,
       environment: env,
       lastUpdated: party.updatedAt,
@@ -80,27 +108,46 @@ export function searchAdminEntities(
   }
 
   for (const opp of opportunityRepository.getAll()) {
-    if (!matchesQuery(`${opp.title} ${opp.id} ${opp.status} ${opp.location ?? ''}`, q)) continue
+    const view = formatOpportunityPresentation(opp)
+    if (
+      !matchesQuery(
+        `${view.name} ${view.reference} ${opp.id} ${opp.status} ${opp.location ?? ''}`,
+        q,
+      )
+    ) {
+      continue
+    }
     results.push({
       id: `opportunity-${opp.id}`,
       entityType: 'opportunity',
-      primaryLabel: opp.title,
-      secondaryContext: opp.location,
+      primaryLabel: view.name,
+      secondaryContext: view.reference,
       status: String(opp.status),
       environment: env,
       lastUpdated: opp.updatedAt,
-      href: `/admin/opportunities`,
+      href: `/admin/opportunities/${opp.id}`,
       rank: 30,
     })
   }
 
   for (const n of negotiationRepository.getAll()) {
-    if (!matchesQuery(`${n.id} ${n.status} ${n.opportunityId ?? ''}`, q)) continue
+    const view = formatNegotiationPresentation(n, getOpportunity)
+    const oppLine = n.opportunityId
+      ? formatEnterpriseSubjectLine('opportunity', n.opportunityId)
+      : undefined
+    if (
+      !matchesQuery(
+        `${view.title} ${view.reference} ${n.id} ${n.status} ${oppLine ?? ''}`,
+        q,
+      )
+    ) {
+      continue
+    }
     results.push({
       id: `negotiation-${n.id}`,
       entityType: 'negotiation',
-      primaryLabel: `Negotiation ${n.id}`,
-      secondaryContext: n.opportunityId,
+      primaryLabel: view.title,
+      secondaryContext: oppLine ? `${view.reference} · ${oppLine}` : view.reference,
       status: String(n.status),
       environment: env,
       lastUpdated: n.updatedAt,
@@ -110,12 +157,13 @@ export function searchAdminEntities(
   }
 
   for (const ca of commercialAgreementRepository.getAll()) {
-    if (!matchesQuery(`${ca.title} ${ca.id} ${ca.status}`, q)) continue
+    const view = formatCommercialAgreementPresentation(ca)
+    if (!matchesQuery(`${view.name} ${view.reference} ${ca.id} ${ca.status}`, q)) continue
     results.push({
       id: `ca-${ca.id}`,
       entityType: 'commercial_agreement',
-      primaryLabel: ca.title || `Commercial Agreement ${ca.id}`,
-      secondaryContext: ca.opportunityId,
+      primaryLabel: view.name,
+      secondaryContext: view.reference,
       status: String(ca.status),
       environment: env,
       lastUpdated: ca.updatedAt,
@@ -125,12 +173,20 @@ export function searchAdminEntities(
   }
 
   for (const c of contractRepository.getAll()) {
-    if (!matchesQuery(`${c.id} ${c.status} ${c.paymentMode ?? ''}`, q)) continue
+    const view = formatContractPresentation(c)
+    if (
+      !matchesQuery(
+        `${view.name} ${view.reference} ${c.id} ${c.status} ${c.paymentMode ?? ''}`,
+        q,
+      )
+    ) {
+      continue
+    }
     results.push({
       id: `contract-${c.id}`,
       entityType: 'contract',
-      primaryLabel: `Contract ${c.id}`,
-      secondaryContext: c.commercialAgreementId ?? c.dealId,
+      primaryLabel: view.name,
+      secondaryContext: view.reference,
       status: String(c.status),
       environment: env,
       lastUpdated: c.updatedAt,
@@ -140,14 +196,23 @@ export function searchAdminEntities(
   }
 
   for (const entry of auditRepository.getAll()) {
-    if (!matchesQuery(`${entry.action} ${entry.userId ?? ''} ${entry.entityId ?? ''} ${entry.id}`, q)) continue
+    const subject = formatEnterpriseSubjectLine(entry.entityType, entry.entityId)
+    const actor = entry.userId
+      ? formatEnterpriseSubjectLine('user', entry.userId)
+      : undefined
+    if (
+      !matchesQuery(
+        `${entry.action} ${subject ?? ''} ${actor ?? ''} ${entry.entityType ?? ''} ${entry.id}`,
+        q,
+      )
+    ) {
+      continue
+    }
     results.push({
       id: `audit-${entry.id}`,
       entityType: 'audit',
       primaryLabel: entry.action,
-      secondaryContext: entry.entityType
-        ? `${entry.entityType}:${entry.entityId ?? ''}`
-        : entry.userId,
+      secondaryContext: subject ?? actor ?? entry.entityType ?? 'Platform event',
       environment: env,
       lastUpdated: entry.timestamp,
       href: '/admin/audit',
@@ -156,12 +221,20 @@ export function searchAdminEntities(
   }
 
   for (const n of notificationRepository.getAll()) {
-    if (!matchesQuery(`${n.title} ${n.message ?? ''} ${n.userId} ${n.id}`, q)) continue
+    const recipient = formatEnterpriseSubjectLine('user', n.userId)
+    if (
+      !matchesQuery(
+        `${n.title} ${n.message ?? ''} ${recipient ?? ''} ${n.id}`,
+        q,
+      )
+    ) {
+      continue
+    }
     results.push({
       id: `notification-${n.id}`,
       entityType: 'notification',
       primaryLabel: n.title,
-      secondaryContext: n.userId,
+      secondaryContext: recipient ?? 'Notification',
       status: n.read ? 'read' : 'unread',
       environment: env,
       lastUpdated: n.createdAt,

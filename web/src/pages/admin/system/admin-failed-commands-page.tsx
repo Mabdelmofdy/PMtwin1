@@ -3,6 +3,7 @@ import {
   clearFailedLocalCommands,
   listFailedLocalCommands,
 } from '@/domain/admin/diagnostics/failed-command-log.ts'
+import { formatEnterpriseSubjectLineById } from '@/domain/admin/read-models/enterprise-subject-adapter.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { formatDate } from '@/lib/format'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
@@ -20,7 +21,15 @@ export function AdminFailedCommandsPage() {
       description="Demo/UAT command failures recorded in LocalStorage — not a server dead-letter queue."
       data={entries}
       getRowId={(e) => e.id}
-      getSearchText={(e) => [e.commandType, e.message, e.aggregateId].filter(Boolean).join(' ')}
+      getSearchText={(e) =>
+        [
+          e.commandType,
+          e.message,
+          e.aggregateId ? formatEnterpriseSubjectLineById(e.aggregateId) : '',
+        ]
+          .filter(Boolean)
+          .join(' ')
+      }
       emptyTitle="No failed commands"
       emptyDescription="Failures will appear here when recorded by admin command wrappers."
       headerActions={
@@ -38,7 +47,14 @@ export function AdminFailedCommandsPage() {
       columns={[
         { id: 'type', label: 'Command', cell: (e) => e.commandType },
         { id: 'message', label: 'Message', cell: (e) => e.message },
-        { id: 'aggregate', label: 'Aggregate', cell: (e) => e.aggregateId ?? '—' },
+        {
+          id: 'aggregate',
+          label: 'Record',
+          cell: (e) =>
+            e.aggregateId
+              ? formatEnterpriseSubjectLineById(e.aggregateId) ?? 'Platform record'
+              : '—',
+        },
         { id: 'time', label: 'Time', cell: (e) => formatDate(e.timestamp) },
       ]}
     />

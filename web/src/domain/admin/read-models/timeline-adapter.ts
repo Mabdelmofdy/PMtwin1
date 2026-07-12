@@ -33,7 +33,7 @@ function auditEventsFor(
     timestamp: e.timestamp ?? new Date(0).toISOString(),
     sequence: startSeq + i,
     title: e.action,
-    description: e.details ? JSON.stringify(e.details).slice(0, 160) : undefined,
+    description: e.details ? 'Details recorded in audit trail' : undefined,
     entityType: e.entityType,
     entityId: e.entityId,
     actorId: e.userId,

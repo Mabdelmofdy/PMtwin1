@@ -12,6 +12,7 @@ import {
   postMatchRepository,
   userRepository,
 } from '@/repositories/index.ts'
+import { formatPartyPresentation, formatUserPresentation } from '@/lib/enterprise-display.ts'
 import type { AdminRelatedObject } from './types.ts'
 
 function summarizeStatuses(statuses: readonly string[]): string | undefined {
@@ -149,7 +150,7 @@ export function relatedObjectsForOpportunity(
       entityType: 'user',
       label: 'Creator',
       count: creator ? 1 : 0,
-      statusSummary: creator?.status,
+      statusSummary: creator ? formatUserPresentation(creator).fullName : undefined,
       permission: 'admin.users.read',
       href: creator ? `/admin/users/${creator.id}` : '/admin/users',
       emptyLabel: 'Missing creator',
@@ -158,7 +159,12 @@ export function relatedObjectsForOpportunity(
       entityType: 'party',
       label: 'Owner party',
       count: party ? 1 : 0,
-      statusSummary: party?.displayName,
+      statusSummary: party
+        ? (() => {
+            const view = formatPartyPresentation(party)
+            return `${view.companyName} · ${view.companyCode}`
+          })()
+        : undefined,
       permission: 'admin.parties.read',
       href: party ? `/admin/parties/${party.id}` : '/admin/parties',
       emptyLabel: 'No owner party',

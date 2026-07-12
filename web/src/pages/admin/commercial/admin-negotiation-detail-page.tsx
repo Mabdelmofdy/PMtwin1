@@ -2,6 +2,8 @@ import { Link, useParams } from 'react-router-dom'
 import { useMemo } from 'react'
 import { negotiationsApi } from '@/api/negotiations.ts'
 import { dealsApi } from '@/api/deals.ts'
+import { opportunitiesApi } from '@/api/opportunities.ts'
+import { peopleApi } from '@/api/people.ts'
 import {
   negotiationMessageRepository,
   negotiationOfferRepository,
@@ -13,6 +15,14 @@ import { buildCommercialTimeline } from '@/domain/admin/read-models/timeline-ada
 import type { AdminRelatedObject } from '@/domain/admin/read-models/types.ts'
 import type { NegotiationOffer } from '@/types/negotiation-discussion.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
+import {
+  formatEnterpriseReference,
+  formatNegotiationPresentation,
+  formatOpportunityPresentation,
+  formatUserPresentation,
+  presentationYear,
+  stableHash32,
+} from '@/lib/enterprise-display.ts'
 import { formatDate } from '@/lib/format'
 import { useProductLanguage } from '@/providers/product-language-provider.tsx'
 import { useAuth } from '@/providers/auth-provider.tsx'
@@ -21,6 +31,12 @@ import { PmContentCard } from '@/components/layout/pm-layout-index'
 import { PmBadge, PmButton, PmEmptyState, PmPage, PmPageHeader } from '@/components/ui/pm-index'
 import { AdminStatusBadge } from '@/pages/admin/admin-display'
 import { PmDataTable, PmTableEmpty } from '@/components/data/pm-data-index'
+
+function formatOfferReference(offer: NegotiationOffer): string {
+  const year = presentationYear(offer.createdAt, offer.id)
+  const seq = String(Math.abs(stableHash32(`offer:${offer.id}`)) % 100000).padStart(5, '0')
+  return `OFF-${year}-${seq}`
+}
 
 export function AdminNegotiationDetailPage() {
   const { id } = useParams()
@@ -59,14 +75,41 @@ export function AdminNegotiationDetailPage() {
     return buildCommercialTimeline(relatedCas[0].id)
   }, [relatedCas, version])
 
+  const presentation = negotiation
+    ? formatNegotiationPresentation(negotiation, (oid) => opportunitiesApi.get(oid))
+    : null
+
+  const opportunityLabel = negotiation?.opportunityId
+    ? (() => {
+        const opp = opportunitiesApi.get(negotiation.opportunityId)
+        return opp
+          ? formatOpportunityPresentation(opp)
+          : {
+              name: productLanguage.label('opportunity'),
+              reference: formatEnterpriseReference(
+                'opportunity',
+                negotiation.opportunityId,
+              ),
+            }
+      })()
+    : null
+
+  const matchLabel = negotiation?.matchId
+    ? formatEnterpriseReference('post_match', negotiation.matchId, negotiation.createdAt)
+    : null
+
   const related: AdminRelatedObject[] = [
     {
       entityType: 'opportunity',
-      label: 'Opportunity',
+      label: productLanguage.label('opportunity'),
       count: negotiation?.opportunityId ? 1 : 0,
-      href: '/admin/opportunities',
+      href: negotiation?.opportunityId
+        ? `/admin/opportunities/${negotiation.opportunityId}`
+        : '/admin/opportunities',
       permission: 'admin.opportunities.read',
-      statusSummary: negotiation?.opportunityId ?? '—',
+      statusSummary: opportunityLabel
+        ? `${opportunityLabel.name} · ${opportunityLabel.reference}`
+        : '—',
     },
     {
       entityType: 'commercial_agreement',
@@ -86,7 +129,7 @@ export function AdminNegotiationDetailPage() {
     },
   ]
 
-  if (!negotiation) {
+  if (!negotiation || !presentation) {
     return (
       <PmPage header={<PmPageHeader title={`${productLanguage.label('negotiation')} detail`} />}>
         <PmEmptyState title="Negotiation not found" />
@@ -99,8 +142,8 @@ export function AdminNegotiationDetailPage() {
       header={
         <PmPageHeader
           label="Commercial"
-          title={negotiation.id}
-          description={`${productLanguage.label('negotiation')} admin oversight — transcript access is permission-gated.`}
+          title={presentation.title}
+          description={presentation.reference}
           badges={<AdminStatusBadge status={negotiation.status ?? 'pending'} entity="negotiation" />}
           actions={
             <PmButton variant="outline" size="sm" asChild>
@@ -114,6 +157,16 @@ export function AdminNegotiationDetailPage() {
         <PmContentCard title="Summary">
           <dl className="grid gap-2 text-sm sm:grid-cols-2">
             <div>
+              <dt className="text-muted-foreground">
+                {productLanguage.label('negotiation')} Title
+              </dt>
+              <dd>{presentation.title}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Reference Number</dt>
+              <dd>{presentation.reference}</dd>
+            </div>
+            <div>
               <dt className="text-muted-foreground">Status</dt>
               <dd>{negotiation.status}</dd>
             </div>
@@ -122,12 +175,18 @@ export function AdminNegotiationDetailPage() {
               <dd>{formatDate(negotiation.updatedAt)}</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Opportunity</dt>
-              <dd>{negotiation.opportunityId ?? '—'}</dd>
+              <dt className="text-muted-foreground">
+                {productLanguage.label('opportunity')}
+              </dt>
+              <dd>
+                {opportunityLabel
+                  ? `${opportunityLabel.name} · ${opportunityLabel.reference}`
+                  : '—'}
+              </dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Match</dt>
-              <dd>{negotiation.matchId ?? '—'}</dd>
+              <dt className="text-muted-foreground">Post Match</dt>
+              <dd>{matchLabel ?? '—'}</dd>
             </div>
           </dl>
         </PmContentCard>
@@ -140,7 +199,11 @@ export function AdminNegotiationDetailPage() {
               data={[...offers]}
               getRowId={(o) => o.id}
               columns={[
-                { id: 'id', label: 'ID', cell: (o) => o.id },
+                {
+                  id: 'reference',
+                  label: 'Reference',
+                  cell: (o) => formatOfferReference(o),
+                },
                 { id: 'status', label: 'Status', cell: (o) => o.status ?? '—' },
                 {
                   id: 'created',
@@ -164,15 +227,21 @@ export function AdminNegotiationDetailPage() {
             />
           ) : (
             <div className="space-y-4">
-              {messages.map((m) => (
-                <div key={m.id} className="rounded-md border border-border/60 p-3 text-sm">
-                  <div className="mb-1 flex flex-wrap gap-2 text-muted-foreground">
-                    <span>{m.senderId}</span>
-                    <span>{formatDate(m.createdAt)}</span>
+              {messages.map((m) => {
+                const sender = peopleApi.get(m.senderId)
+                const senderLabel = sender
+                  ? formatUserPresentation(sender).fullName
+                  : 'Participant'
+                return (
+                  <div key={m.id} className="rounded-md border border-border/60 p-3 text-sm">
+                    <div className="mb-1 flex flex-wrap gap-2 text-muted-foreground">
+                      <span>{senderLabel}</span>
+                      <span>{formatDate(m.createdAt)}</span>
+                    </div>
+                    <p>{m.body}</p>
                   </div>
-                  <p>{m.body}</p>
-                </div>
-              ))}
+                )
+              })}
               {transcriptEvents.map((e) => (
                 <div
                   key={e.id}

@@ -45,6 +45,19 @@ import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { resolvePostMatchTopologyLabel } from '@/lib/collaboration-taxonomy-display.ts'
+import {
+  formatCommercialAgreementPresentation,
+  formatContractPresentation,
+  formatNegotiationPresentation,
+  formatOpportunityPresentation,
+  formatPostMatchPresentation,
+  formatUserEmployeeNumber,
+  formatUserPresentation,
+  looksLikeInternalId,
+  safeEnterpriseLabel,
+} from '@/lib/enterprise-display.ts'
+import { formatEnterpriseSubjectLine } from '@/domain/admin/read-models/enterprise-subject-adapter.ts'
+import { peopleApi } from '@/api/people.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { formatDate } from '@/lib/format'
 import {
@@ -122,8 +135,13 @@ export function AdminVettingPage() {
             columns={[
               {
                 id: 'name',
-                label: 'Name',
-                cell: (entry) => entry.user.profile?.name ?? entry.user.id,
+                label: 'Full Name',
+                cell: (entry) => formatUserPresentation(entry.user).fullName,
+              },
+              {
+                id: 'employeeNumber',
+                label: 'User Number',
+                cell: (entry) => formatUserPresentation(entry.user).employeeNumber,
               },
               { id: 'email', label: 'Email', cell: (entry) => entry.user.email },
               {
@@ -146,7 +164,17 @@ export function AdminVettingPage() {
                   const reviewNotes = vetting?.reviewNotes ?? vetting?.reason
                   const requestedItems = vetting?.requestedChanges ?? vetting?.requestedItems ?? []
                   const reviewedBy = vetting?.reviewedBy ?? vetting?.reviewerId
-                  if (!reviewNotes && requestedItems.length === 0 && !reviewedBy) {
+                  const reviewerLabel = reviewedBy
+                    ? (() => {
+                        const reviewer = peopleApi.get(reviewedBy)
+                        return reviewer
+                          ? formatUserPresentation(reviewer).fullName
+                          : looksLikeInternalId(reviewedBy)
+                            ? formatUserEmployeeNumber(reviewedBy)
+                            : reviewedBy
+                      })()
+                    : null
+                  if (!reviewNotes && requestedItems.length === 0 && !reviewerLabel) {
                     return '—'
                   }
                   return (
@@ -161,8 +189,8 @@ export function AdminVettingPage() {
                           ))}
                         </div>
                       ) : null}
-                      {reviewedBy ? (
-                        <p className={cn(pmTypography.caption)}>Reviewed by {reviewedBy}</p>
+                      {reviewerLabel ? (
+                        <p className={cn(pmTypography.caption)}>Reviewed by {reviewerLabel}</p>
                       ) : null}
                     </div>
                   )
@@ -312,7 +340,10 @@ export function AdminOpportunitiesPage() {
       data={opps}
       getRowId={(o) => o.id}
       getRowHref={(o) => `/admin/opportunities/${o.id}`}
-      getSearchText={(o) => [o.title, o.status, o.location].filter(Boolean).join(' ')}
+      getSearchText={(o) => {
+        const view = formatOpportunityPresentation(o)
+        return [view.name, view.reference, o.status, o.location].filter(Boolean).join(' ')
+      }}
       searchPlaceholder="Search opportunities…"
       getRowActions={() => [
         {
@@ -331,7 +362,16 @@ export function AdminOpportunitiesPage() {
         },
       ]}
       columns={[
-        { id: 'title', label: 'Title', cell: (o) => o.title },
+        {
+          id: 'title',
+          label: `${productLanguage.label('opportunity')} Name`,
+          cell: (o) => formatOpportunityPresentation(o).name,
+        },
+        {
+          id: 'reference',
+          label: 'Reference Number',
+          cell: (o) => formatOpportunityPresentation(o).reference,
+        },
         {
           id: 'status',
           label: 'Status',
@@ -401,7 +441,7 @@ export function AdminMatchingPage() {
   }
 
   const runColumns: PmDataTableColumn<(typeof matchingRuns)[number]>[] = [
-    { id: 'runId', label: 'Run ID', cell: (r) => r.runId },
+    { id: 'runId', label: 'Run', cell: (r) => `Run ${formatDate(r.completedAt)}` },
     { id: 'status', label: 'Status', cell: (r) => <AdminStatusBadge status={r.status} /> },
     { id: 'discovered', label: 'Discovered', cell: (r) => String(r.discoveredMatchesCount) },
     { id: 'skipped', label: 'Skipped', cell: (r) => String(r.skippedDuplicatesCount) },
@@ -409,8 +449,18 @@ export function AdminMatchingPage() {
     { id: 'completed', label: 'Completed', cell: (r) => formatDate(r.completedAt) },
   ]
 
+  const getOpportunity = (id: string) => opportunitiesApi.get(id)
   const matchColumns: PmDataTableColumn<(typeof matches)[number]>[] = [
-    { id: 'id', label: 'ID', cell: (m) => m.id },
+    {
+      id: 'title',
+      label: 'Match Title',
+      cell: (m) => formatPostMatchPresentation(m, getOpportunity).title,
+    },
+    {
+      id: 'reference',
+      label: 'Reference Number',
+      cell: (m) => formatPostMatchPresentation(m, getOpportunity).reference,
+    },
     { id: 'type', label: 'Type', cell: (m) => resolvePostMatchTopologyLabel(m) },
     { id: 'score', label: 'Score', cell: (m) => (
       <PmMatchScoreBadge
@@ -491,17 +541,31 @@ export function AdminMatchingPage() {
 export function AdminNegotiationsPage() {
   const { productLanguage } = useProductLanguage()
   const negs = negotiationsApi.list()
+  const getOpportunity = (id: string) => opportunitiesApi.get(id)
 
   return (
     <AdminListPage
       title={productLanguage.plural('negotiation')}
       description={`${productLanguage.label('negotiation')} command center.`}
+      storageKey="negotiations"
       data={negs}
       getRowId={(n) => n.id}
       getRowHref={(n) => `/admin/negotiations/${n.id}`}
-      getSearchText={(n) => [n.id, n.status].filter(Boolean).join(' ')}
+      getSearchText={(n) => {
+        const view = formatNegotiationPresentation(n, getOpportunity)
+        return [view.title, view.reference, n.status].filter(Boolean).join(' ')
+      }}
       columns={[
-        { id: 'id', label: 'ID', cell: (n) => n.id },
+        {
+          id: 'title',
+          label: `${productLanguage.label('negotiation')} Title`,
+          cell: (n) => formatNegotiationPresentation(n, getOpportunity).title,
+        },
+        {
+          id: 'reference',
+          label: 'Reference Number',
+          cell: (n) => formatNegotiationPresentation(n, getOpportunity).reference,
+        },
         {
           id: 'status',
           label: 'Status',
@@ -533,12 +597,25 @@ export function AdminDealsPage() {
     <AdminListPage
       title={productLanguage.plural('commercialAgreement')}
       description="All platform commercial agreements."
+      storageKey="commercial-agreements"
       data={deals}
       getRowId={(d) => d.id}
       getRowHref={(d) => `/admin/commercial-agreements/${d.id}`}
-      getSearchText={(d) => [d.id, d.status].filter(Boolean).join(' ')}
+      getSearchText={(d) => {
+        const view = formatCommercialAgreementPresentation(d)
+        return [view.name, view.reference, d.status].filter(Boolean).join(' ')
+      }}
       columns={[
-        { id: 'id', label: 'ID', cell: (d) => d.id },
+        {
+          id: 'name',
+          label: 'Agreement Name',
+          cell: (d) => formatCommercialAgreementPresentation(d).name,
+        },
+        {
+          id: 'reference',
+          label: 'Reference Number',
+          cell: (d) => formatCommercialAgreementPresentation(d).reference,
+        },
         {
           id: 'status',
           label: 'Status',
@@ -559,13 +636,26 @@ export function AdminContractsPage() {
     <AdminListPage
       title={productLanguage.plural('contract')}
       description="All platform contracts."
+      storageKey="contracts"
       data={contracts}
       getRowId={(c) => c.id}
       getRowHref={(c) => `/admin/contracts/${c.id}`}
-      getSearchText={(c) => [c.id, c.status, c.paymentMode].filter(Boolean).join(' ')}
+      getSearchText={(c) => {
+        const view = formatContractPresentation(c)
+        return [view.name, view.reference, c.status, c.paymentMode].filter(Boolean).join(' ')
+      }}
       searchPlaceholder="Search contracts…"
       columns={[
-        { id: 'id', label: 'ID', cell: (c) => c.id },
+        {
+          id: 'name',
+          label: `${productLanguage.label('contract')} Name`,
+          cell: (c) => formatContractPresentation(c).name,
+        },
+        {
+          id: 'reference',
+          label: 'Reference Number',
+          cell: (c) => formatContractPresentation(c).reference,
+        },
         {
           id: 'paymentMode',
           label: 'Payment mode',
@@ -585,16 +675,30 @@ export function AdminConsortiumPage() {
   const consortiumMatches = matchesApi.list().filter((m) =>
     m.matchType.includes('consortium'),
   )
+  const getOpportunity = (id: string) => opportunitiesApi.get(id)
 
   return (
     <AdminListPage
       title="Consortium"
       description="Consortium commercial agreements subset."
+      storageKey="consortium"
       data={consortiumMatches}
       getRowId={(m) => m.id}
-      getSearchText={(m) => [m.id, m.matchType].join(' ')}
+      getSearchText={(m) => {
+        const view = formatPostMatchPresentation(m, getOpportunity)
+        return [view.title, view.reference, m.matchType].join(' ')
+      }}
       columns={[
-        { id: 'match', label: 'Match', cell: (m) => m.id },
+        {
+          id: 'match',
+          label: 'Match Title',
+          cell: (m) => formatPostMatchPresentation(m, getOpportunity).title,
+        },
+        {
+          id: 'reference',
+          label: 'Reference Number',
+          cell: (m) => formatPostMatchPresentation(m, getOpportunity).reference,
+        },
         { id: 'type', label: 'Type', cell: (m) => resolvePostMatchTopologyLabel(m) },
       ]}
     />
@@ -608,13 +712,45 @@ export function AdminAuditPage() {
     <AdminListPage
       title="Audit log"
       description="Compliance and activity trail."
+      storageKey="audit"
       data={logs}
       getRowId={(l) => l.id}
-      getSearchText={(l) => [l.action, l.userId].filter(Boolean).join(' ')}
+      getSearchText={(l) => {
+        const actor = l.userId ? peopleApi.get(l.userId) : undefined
+        const actorLabel = actor
+          ? formatUserPresentation(actor).fullName
+          : ''
+        return [l.action, actorLabel, l.entityType].filter(Boolean).join(' ')
+      }}
       searchPlaceholder="Search audit log…"
       columns={[
         { id: 'action', label: 'Action', cell: (l) => l.action },
-        { id: 'actor', label: 'Actor', cell: (l) => l.userId ?? '—' },
+        {
+          id: 'actor',
+          label: 'Actor',
+          cell: (l) => {
+            if (!l.userId) return 'System'
+            const actor = peopleApi.get(l.userId)
+            return actor
+              ? formatUserPresentation(actor).fullName
+              : looksLikeInternalId(l.userId)
+                ? formatUserEmployeeNumber(l.userId)
+                : 'Platform user'
+          },
+        },
+        {
+          id: 'entity',
+          label: 'Record',
+          cell: (l) => {
+            const subject = formatEnterpriseSubjectLine(l.entityType, l.entityId)
+            if (subject) return subject
+            if (!l.entityType) return '—'
+            return safeEnterpriseLabel(
+              String(l.entityType).replace(/_/g, ' '),
+              'Platform record',
+            )
+          },
+        },
         { id: 'time', label: 'Time', cell: (l) => formatDate(l.timestamp) },
       ]}
     />

@@ -12,8 +12,14 @@ import {
   auditRepository,
   commercialAgreementRepository,
   negotiationRepository,
+  opportunityRepository,
   userRepository,
 } from '@/repositories/index.ts'
+import {
+  formatCommercialAgreementPresentation,
+  formatNegotiationPresentation,
+  formatUserPresentation,
+} from '@/lib/enterprise-display.ts'
 import type { AdminInboxItem, AdminSeverity, AdminSlaState } from './types.ts'
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -58,15 +64,16 @@ export function buildAdminInbox(
   for (const entry of adminApi.getPendingUsers()) {
     const created = entry.user.updatedAt ?? entry.user.createdAt ?? nowIso
     const age = ageMsFrom(created)
+    const userView = formatUserPresentation(entry.user)
     items.push({
       id: `vetting-${entry.user.id}`,
       itemType: 'vetting_pending',
       entityType: 'vetting',
       entityId: entry.user.id,
-      title: `Vetting: ${entry.user.profile?.name ?? entry.user.email}`,
+      title: `Vetting: ${userView.fullName}`,
       summary: entry.partyLabel
-        ? `Party ${entry.partyLabel} awaiting review`
-        : 'User awaiting vetting review',
+        ? `${entry.partyLabel} awaiting review`
+        : `User ${userView.employeeNumber} awaiting vetting review`,
       priority: priorityFromAge(age),
       severity: severityFromAge(age),
       sla: slaFromAge(age),
@@ -86,13 +93,14 @@ export function buildAdminInbox(
     if ((user.status ?? '').toLowerCase() !== 'suspended') continue
     const created = user.updatedAt ?? user.createdAt ?? nowIso
     const age = ageMsFrom(created)
+    const userView = formatUserPresentation(user)
     items.push({
       id: `suspended-${user.id}`,
       itemType: 'user_suspended',
       entityType: 'user',
       entityId: user.id,
-      title: `Suspended: ${user.profile?.name ?? user.email}`,
-      summary: 'Account is suspended — review for unsuspend or lock',
+      title: `Suspended: ${userView.fullName}`,
+      summary: `${userView.employeeNumber} — review for unsuspend or lock`,
       priority: 'high',
       severity: 'high',
       sla: slaFromAge(age),
@@ -113,13 +121,16 @@ export function buildAdminInbox(
     if (!(s === 'active' || s === 'countered' || s === 'open')) continue
     const age = ageMsFrom(n.updatedAt)
     if (age <= 14 * DAY_MS) continue
+    const view = formatNegotiationPresentation(n, (oid) =>
+      opportunityRepository.getById(oid),
+    )
     items.push({
       id: `negotiation-stale-${n.id}`,
       itemType: 'negotiation_inactive',
       entityType: 'negotiation',
       entityId: n.id,
-      title: `Inactive negotiation ${n.id}`,
-      summary: `No updates for ${Math.floor(age / DAY_MS)} days`,
+      title: `Inactive: ${view.title}`,
+      summary: `${view.reference} — no updates for ${Math.floor(age / DAY_MS)} days`,
       priority: priorityFromAge(age),
       severity: severityFromAge(age),
       sla: slaFromAge(age),
@@ -139,13 +150,14 @@ export function buildAdminInbox(
     if (!(s === 'draft' || s === 'negotiating' || s === 'review' || s === 'signing')) continue
     const created = ca.updatedAt ?? ca.createdAt ?? nowIso
     const age = ageMsFrom(created)
+    const view = formatCommercialAgreementPresentation(ca)
     items.push({
       id: `ca-review-${ca.id}`,
       itemType: 'commercial_agreement_review',
       entityType: 'commercial_agreement',
       entityId: ca.id,
-      title: ca.title || `Commercial Agreement ${ca.id}`,
-      summary: `Status ${ca.status} — awaiting commercial review`,
+      title: view.name,
+      summary: `${view.reference} · status ${ca.status} — awaiting commercial review`,
       priority: priorityFromAge(age),
       severity: severityFromAge(age),
       sla: slaFromAge(age),

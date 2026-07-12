@@ -14,6 +14,7 @@ import { opportunityRepository } from '@/repositories/index.ts'
 import { hasAdminCapability } from '@/domain/rbac/roles/permission-bundles.ts'
 import { useAuth } from '@/providers/auth-provider.tsx'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
+import { formatOpportunityPresentation } from '@/lib/enterprise-display.ts'
 import { formatDate } from '@/lib/format'
 import {
   PmFormReadonly,
@@ -72,13 +73,14 @@ export function AdminOpportunityDetailPage() {
     )
   }
 
-  const title = opportunity.title || `Opportunity ${opportunity.id}`
+  const presentation = formatOpportunityPresentation(opportunity)
+  const title = presentation.name
 
   return (
     <AdminEntityDetailShell
       label="Marketplace"
       title={title}
-      description={opportunity.id}
+      description={presentation.reference}
       statusBadge={<AdminStatusBadge status={String(opportunity.status ?? 'unknown')} />}
       statusSummary={
         <AdminStatusSummaryRow
@@ -86,6 +88,10 @@ export function AdminOpportunityDetailPage() {
             {
               label: 'Status',
               value: <AdminStatusBadge status={String(opportunity.status ?? 'unknown')} />,
+            },
+            {
+              label: 'Reference Number',
+              value: presentation.reference,
             },
             {
               label: 'Visibility',
@@ -102,7 +108,7 @@ export function AdminOpportunityDetailPage() {
                   to={`/admin/users/${opportunity.creatorId}`}
                   className="text-primary underline-offset-4 hover:underline"
                 >
-                  {opportunity.creatorId}
+                  Open creator
                 </Link>
               ) : (
                 '—'
@@ -121,8 +127,8 @@ export function AdminOpportunityDetailPage() {
       overview={
         <PmFormReadonly>
           <PmFormReadonlySection title="Overview" description="Admin opportunity inspector">
-            <PmFormReadonlyField label="Opportunity ID" value={opportunity.id} />
-            <PmFormReadonlyField label="Title" value={title} />
+            <PmFormReadonlyField label="Opportunity Name" value={title} />
+            <PmFormReadonlyField label="Reference Number" value={presentation.reference} />
             <PmFormReadonlyField
               label="Collaboration model"
               value={String(opportunity.mainCollaborationModel ?? opportunity.modelType ?? '—')}

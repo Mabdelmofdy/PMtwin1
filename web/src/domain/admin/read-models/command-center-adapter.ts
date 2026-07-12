@@ -15,6 +15,7 @@ import {
   postMatchRepository,
   userRepository,
 } from '@/repositories/index.ts'
+import { formatEnterpriseSubjectLine } from './enterprise-subject-adapter.ts'
 import type {
   AdminCommandCenterSummary,
   AdminHealthTone,
@@ -474,12 +475,22 @@ export function buildRecentOperations(limit = 8): readonly AdminRecentOperation[
   })
 
   const source = operational.length > 0 ? operational : audit
-  return source.slice(0, limit).map((entry) => ({
-    id: entry.id,
-    title: entry.action ?? 'Operation',
-    summary: [entry.entityType, entry.entityId].filter(Boolean).join(' · ') || 'Platform event',
-    timestamp: entry.timestamp ?? new Date().toISOString(),
-    href: '/admin/audit',
-    kind: String(entry.entityType ?? 'audit'),
-  }))
+  return source.slice(0, limit).map((entry) => {
+    const subject = formatEnterpriseSubjectLine(entry.entityType, entry.entityId)
+    const typeLabel = entry.entityType
+      ? String(entry.entityType).replace(/_/g, ' ')
+      : undefined
+    return {
+      id: entry.id,
+      title: entry.action ?? 'Operation',
+      summary: subject
+        ? typeLabel
+          ? `${typeLabel} · ${subject}`
+          : subject
+        : typeLabel || 'Platform event',
+      timestamp: entry.timestamp ?? new Date().toISOString(),
+      href: '/admin/audit',
+      kind: String(entry.entityType ?? 'audit'),
+    }
+  })
 }

@@ -1,5 +1,6 @@
 import { partiesApi } from '@/api/parties.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
+import { formatPartyPresentation } from '@/lib/enterprise-display.ts'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
 import { AdminStatusBadge } from '@/pages/admin/admin-display'
 
@@ -11,13 +12,26 @@ export function AdminPartiesPage() {
     <AdminListPage
       title="Parties"
       description="Legal and operating parties on the platform."
+      storageKey="parties"
       data={parties}
       getRowId={(p) => p.id}
       getRowHref={(p) => `/admin/parties/${p.id}`}
-      getSearchText={(p) => [p.displayName, p.partyType, p.status, p.id].join(' ')}
+      getSearchText={(p) => {
+        const view = formatPartyPresentation(p)
+        return [view.companyName, view.companyCode, p.partyType, p.status].join(' ')
+      }}
       searchPlaceholder="Search parties…"
       columns={[
-        { id: 'name', label: 'Name', cell: (p) => p.displayName },
+        {
+          id: 'name',
+          label: 'Company Name',
+          cell: (p) => formatPartyPresentation(p).companyName,
+        },
+        {
+          id: 'code',
+          label: 'Company Code',
+          cell: (p) => formatPartyPresentation(p).companyCode,
+        },
         { id: 'type', label: 'Type', cell: (p) => p.partyType },
         {
           id: 'status',

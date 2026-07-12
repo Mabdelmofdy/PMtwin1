@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { opportunitiesApi } from '@/api/opportunities.ts'
+import { formatOpportunityPresentation } from '@/lib/enterprise-display.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useProductLanguage } from '@/providers/product-language-provider.tsx'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
@@ -31,9 +32,21 @@ export function AdminModerationPage() {
       getRowId={(o) => o.id}
       getRowHref={(o) => `/admin/opportunities/${o.id}`}
       storageKey="moderation"
-      getSearchText={(o) => [o.title, o.status, o.visibilityStatus, o.id].filter(Boolean).join(' ')}
+      getSearchText={(o) => {
+        const view = formatOpportunityPresentation(o)
+        return [view.name, view.reference, o.status, o.visibilityStatus].filter(Boolean).join(' ')
+      }}
       columns={[
-        { id: 'title', label: 'Title', cell: (o) => o.title },
+        {
+          id: 'title',
+          label: 'Opportunity Name',
+          cell: (o) => formatOpportunityPresentation(o).name,
+        },
+        {
+          id: 'reference',
+          label: 'Reference Number',
+          cell: (o) => formatOpportunityPresentation(o).reference,
+        },
         {
           id: 'status',
           label: 'Status',

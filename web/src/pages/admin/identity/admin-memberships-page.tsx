@@ -7,6 +7,12 @@ import {
   userRepository,
 } from '@/repositories/index.ts'
 import {
+  formatPartyCompanyCode,
+  formatPartyPresentation,
+  formatUserEmployeeNumber,
+  formatUserPresentation,
+} from '@/lib/enterprise-display.ts'
+import {
   inviteMember,
   suspendMembership,
   changeMembershipRole,
@@ -36,13 +42,13 @@ export function AdminMembershipsPage() {
       toast.error('Signed-in admin required')
       return
     }
-    const partyId = window.prompt('Party ID')
-    const userId = window.prompt('User ID to invite')
+    const partyKey = window.prompt('Party routing key (for invite command)')
+    const userKey = window.prompt('User routing key (for invite command)')
     const role = window.prompt('Membership role (owner|admin|member|viewer)', 'member')
-    if (!partyId || !userId) return
+    if (!partyKey || !userKey) return
     const result = inviteMember({
-      partyId: partyId.trim(),
-      userId: userId.trim(),
+      partyId: partyKey.trim(),
+      userId: userKey.trim(),
       role: role?.trim() || getEffectiveSettingsSections().access.defaultInviteRole || 'member',
       actorId: user.id,
       actorRole: user.role,
@@ -62,9 +68,22 @@ export function AdminMembershipsPage() {
       data={memberships}
       getRowId={(m) => formatMembershipId({ userId: m.userId, partyId: m.partyId })}
       getRowHref={(m) => `/admin/parties/${m.partyId}`}
-      getSearchText={(m) =>
-        [m.userId, m.partyId, m.membershipRole, m.status].join(' ')
-      }
+      getSearchText={(m) => {
+        const u = userRepository.getById(m.userId)
+        const p = partyRepository.getById(m.partyId)
+        const userView = u ? formatUserPresentation(u) : null
+        const partyView = p ? formatPartyPresentation(p) : null
+        return [
+          userView?.fullName,
+          userView?.employeeNumber,
+          partyView?.companyName,
+          partyView?.companyCode,
+          m.membershipRole,
+          m.status,
+        ]
+          .filter(Boolean)
+          .join(' ')
+      }}
       searchPlaceholder="Search memberships…"
       headerActions={
         canManage ? (
@@ -78,13 +97,43 @@ export function AdminMembershipsPage() {
       columns={[
         {
           id: 'user',
-          label: 'User',
-          cell: (m) => userRepository.getById(m.userId)?.profile?.name ?? m.userId,
+          label: 'Full Name',
+          cell: (m) => {
+            const u = userRepository.getById(m.userId)
+            return u
+              ? formatUserPresentation(u).fullName
+              : formatUserEmployeeNumber(m.userId)
+          },
+        },
+        {
+          id: 'userNumber',
+          label: 'User Number',
+          cell: (m) => {
+            const u = userRepository.getById(m.userId)
+            return u
+              ? formatUserPresentation(u).employeeNumber
+              : formatUserEmployeeNumber(m.userId)
+          },
         },
         {
           id: 'party',
-          label: 'Party',
-          cell: (m) => partyRepository.getById(m.partyId)?.displayName ?? m.partyId,
+          label: 'Company Name',
+          cell: (m) => {
+            const p = partyRepository.getById(m.partyId)
+            return p
+              ? formatPartyPresentation(p).companyName
+              : 'Party'
+          },
+        },
+        {
+          id: 'companyCode',
+          label: 'Company Code',
+          cell: (m) => {
+            const p = partyRepository.getById(m.partyId)
+            return p
+              ? formatPartyPresentation(p).companyCode
+              : formatPartyCompanyCode(m.partyId)
+          },
         },
         { id: 'role', label: 'Role', cell: (m) => m.membershipRole },
         {

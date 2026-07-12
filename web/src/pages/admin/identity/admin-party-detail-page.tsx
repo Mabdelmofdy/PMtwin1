@@ -10,6 +10,7 @@ import { AdminUniversalTimeline } from '@/components/admin/timeline/admin-univer
 import { relatedObjectsForParty } from '@/domain/admin/read-models/related-objects-adapter.ts'
 import { auditRepository } from '@/repositories/index.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
+import { formatPartyPresentation } from '@/lib/enterprise-display.ts'
 import { formatDate } from '@/lib/format'
 import {
   PmFormReadonly,
@@ -68,16 +69,19 @@ export function AdminPartyDetailPage() {
     )
   }
 
+  const presentation = formatPartyPresentation(party)
+
   return (
     <AdminEntityDetailShell
       label="Identity"
-      title={party.displayName}
-      description={party.id}
+      title={presentation.companyName}
+      description={presentation.companyCode}
       statusBadge={<AdminStatusBadge status={party.status} />}
       statusSummary={
         <AdminStatusSummaryRow
           items={[
             { label: 'Status', value: <AdminStatusBadge status={party.status} /> },
+            { label: 'Company Code', value: presentation.companyCode },
             { label: 'Type', value: party.partyType },
             {
               label: 'Created',
@@ -97,8 +101,8 @@ export function AdminPartyDetailPage() {
       overview={
         <PmFormReadonly>
           <PmFormReadonlySection title="Overview">
-            <PmFormReadonlyField label="Party ID" value={party.id} />
-            <PmFormReadonlyField label="Display name" value={party.displayName} />
+            <PmFormReadonlyField label="Company Name" value={presentation.companyName} />
+            <PmFormReadonlyField label="Company Code" value={presentation.companyCode} />
             <PmFormReadonlyField label="Type" value={party.partyType} />
             <PmFormReadonlyField label="Status">
               <AdminStatusBadge status={party.status} />

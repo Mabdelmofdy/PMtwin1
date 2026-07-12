@@ -200,6 +200,7 @@ export type AdminPlatformEntityRecord = {
 export type AdminUserSummary = {
   readonly id: string
   readonly fullName: string
+  readonly employeeNumber: string
   readonly email: string
   readonly mobile?: string
   readonly accountType?: string

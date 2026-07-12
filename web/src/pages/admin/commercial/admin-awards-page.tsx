@@ -1,9 +1,14 @@
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { dealsApi } from '@/api/deals.ts'
+import { opportunitiesApi } from '@/api/opportunities.ts'
 import { commercialAgreementCommandService } from '@/services/commercial-agreement-command-service.ts'
 import { denyUnlessAuthorized } from '@/domain/admin/auth/admin-mutation-auth.ts'
 import { getEffectiveSettingsSections } from '@/domain/admin/settings/effective-settings.ts'
+import {
+  formatCommercialAgreementPresentation,
+  formatOpportunityPresentation,
+} from '@/lib/enterprise-display.ts'
 import { useAuth } from '@/providers/auth-provider.tsx'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useProductLanguage } from '@/providers/product-language-provider.tsx'
@@ -85,13 +90,35 @@ export function AdminAwardsPage() {
       data={flatRows}
       getRowId={(d) => d.id}
       getRowHref={(d) => `/admin/commercial-agreements/${d.id}`}
-      getSearchText={(d) => [d.id, d.title, d.status, d.opportunityId].filter(Boolean).join(' ')}
+      getSearchText={(d) => {
+        const view = formatCommercialAgreementPresentation(d)
+        const opp = d.opportunityId ? opportunitiesApi.get(d.opportunityId) : undefined
+        const oppLabel = opp ? formatOpportunityPresentation(opp).name : ''
+        return [view.name, view.reference, d.status, oppLabel].filter(Boolean).join(' ')
+      }}
       emptyTitle="No multi-CA opportunities"
       emptyDescription="Award candidates appear when an opportunity has more than one Commercial Agreement."
       headerActions={canAward ? undefined : <PmBadge tone="warning">Read-only</PmBadge>}
       columns={[
-        { id: 'title', label: 'Title', cell: (d) => d.title || d.id },
-        { id: 'opportunity', label: 'Opportunity', cell: (d) => d.opportunityId },
+        {
+          id: 'title',
+          label: 'Agreement Name',
+          cell: (d) => formatCommercialAgreementPresentation(d).name,
+        },
+        {
+          id: 'reference',
+          label: 'Reference Number',
+          cell: (d) => formatCommercialAgreementPresentation(d).reference,
+        },
+        {
+          id: 'opportunity',
+          label: 'Opportunity',
+          cell: (d) => {
+            if (!d.opportunityId) return '—'
+            const opp = opportunitiesApi.get(d.opportunityId)
+            return opp ? formatOpportunityPresentation(opp).name : 'Linked opportunity'
+          },
+        },
         {
           id: 'group',
           label: 'CAs on opportunity',
