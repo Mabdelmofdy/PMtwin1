@@ -32,6 +32,12 @@ import {
 import { CollaborationSummaryCard } from '@/components/opportunity/collaboration-summary-card.tsx'
 import { DraftMetadataCard } from '@/components/opportunity/ocx/draft-metadata-card.tsx'
 import { MarketplacePreviewPanel } from '@/components/opportunity/wizard/marketplace-preview-panel.tsx'
+import {
+  buildCommercialStructureSummary,
+  migrateLegacyExchangeModeToCommercialStructure,
+  presentCommercialForAudience,
+} from '@/domain/opportunity-commercial-structure'
+import { normalizeMilestones, normalizeWorkPackages } from '@/domain/opportunity-creation'
 import { evaluateLiveOpportunityValidation } from '@/domain/opportunity-validation/index.ts'
 import { trackOcxEvent } from '@/lib/ocx-analytics.ts'
 import { formatDate } from '@/lib/format'
@@ -859,6 +865,81 @@ export function OpportunityDetailPage() {
                 </PmFormReadonlySection>
               </PmFormReadonly>
             ) : null}
+
+            {(() => {
+              const attrs = opp.collaborationAttributes ?? {}
+              const packages = normalizeWorkPackages(attrs.workPackages)
+              const milestones = normalizeMilestones(
+                attrs.milestones ?? opp.deliveryMilestones ?? [],
+              )
+              const taskCount = packages.reduce(
+                (sum, pkg) => sum + (pkg.tasks?.length ?? 0),
+                0,
+              )
+              if (packages.length === 0 && milestones.length === 0) return null
+              return (
+                <PmContentCard title="Work Packages" className="border-border/60 bg-surface-muted/30">
+                  <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
+                    {packages.length} Work Packages · {taskCount} Tasks · {milestones.length} Milestones
+                  </p>
+                  <ul className="mt-3 space-y-2">
+                    {packages.map((pkg) => (
+                      <li key={pkg.id} className={cn(pmTypography.bodySm)}>
+                        <span className="font-medium text-foreground">
+                          {pkg.title || 'Untitled package'}
+                        </span>
+                        {pkg.tasks?.length
+                          ? ` · ${pkg.tasks.length} task(s)`
+                          : ''}
+                        {pkg.deliverables.length
+                          ? ` · ${pkg.deliverables.length} deliverable(s)`
+                          : ''}
+                      </li>
+                    ))}
+                  </ul>
+                </PmContentCard>
+              )
+            })()}
+
+            {visibility.showBudgetAndTimeline
+              ? (() => {
+                  const structure = migrateLegacyExchangeModeToCommercialStructure({
+                    exchangeMode: opp.exchangeMode,
+                    acceptedExchangeModes: opp.acceptedExchangeModes,
+                    paymentModes: opp.paymentModes,
+                    exchangeData: opp.exchangeData,
+                    collaborationAttributes: opp.collaborationAttributes,
+                  })
+                  if (!structure.components.some((c) => c.enabled)) return null
+                  const audience = isOwner ? 'owner' : 'marketplace'
+                  const presented = presentCommercialForAudience(structure, audience)
+                  const summary = buildCommercialStructureSummary(structure)
+                  return (
+                    <PmContentCard
+                      title="Commercial Structure"
+                      className="border-border/60 bg-surface-muted/30"
+                    >
+                      <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
+                        {presented?.isHybrid ? 'Hybrid' : presented?.derivedExchangeMode} —{' '}
+                        {presented?.componentTypes.join(' + ')}
+                      </p>
+                      {presented?.showAmounts ? (
+                        <ul className="mt-2 space-y-1">
+                          {summary.previewLines.map((line) => (
+                            <li key={line} className={cn(pmTypography.caption)}>
+                              {line}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className={cn(pmTypography.caption, 'mt-2 text-muted-foreground')}>
+                          Detailed commercial values are visible to owners and participants.
+                        </p>
+                      )}
+                    </PmContentCard>
+                  )
+                })()
+              : null}
 
             {visibility.showFullDescription && opportunitySemantic ? (
               <PmDisclosureSection

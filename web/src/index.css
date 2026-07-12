@@ -167,6 +167,13 @@
   --pm-space-table-y: 0.75rem;
   --pm-space-table-x: 0.75rem;
 
+  /* Opportunity Creation 3.0 — sticky stack offsets */
+  --environment-banner-height: 0px;
+  --app-header-height: 3.5rem;
+  --wizard-stepper-height: 5.5rem;
+  --wizard-footer-height: 4.25rem;
+  --workspace-sidebar-width: 16rem;
+
   /* Layer 7: Elevation — soft enterprise depth */
   --shadow-card: 0 1px 2px oklch(0.145 0.03 262 / 4%), 0 8px 20px oklch(0.145 0.03 262 / 5%);
   --shadow-panel: 0 2px 6px oklch(0.145 0.03 262 / 6%), 0 12px 32px oklch(0.145 0.03 262 / 9%);

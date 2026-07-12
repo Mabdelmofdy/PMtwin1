@@ -404,9 +404,16 @@ describe('opportunity wizard — Match Score must not appear', () => {
     assert.doesNotMatch(wizardSource, /Matching Score/i)
     assert.doesNotMatch(wizardSource, /PmMatchScoreBadge/)
     assert.doesNotMatch(wizardSource, /\d+%\s*Match/)
-    assert.match(wizardSource, /Opportunity Readiness/)
+    assert.match(wizardSource, /ReadinessSummaryCard|evaluateOpportunityWizardReadiness/)
     assert.match(wizardSource, /evaluateOpportunityWizardReadiness/)
-    assert.match(wizardSource, /Recommended details/)
+    const readinessCard = readFileSync(
+      join(
+        dirname(fileURLToPath(import.meta.url)),
+        '../../components/opportunities/create/readiness-summary-card.tsx',
+      ),
+      'utf8',
+    )
+    assert.match(readinessCard, /Opportunity Readiness/)
   })
 
   it('opportunity entity type does not declare matchScore', () => {

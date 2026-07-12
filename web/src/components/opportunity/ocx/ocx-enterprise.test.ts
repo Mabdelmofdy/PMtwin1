@@ -64,7 +64,7 @@ describe('validation step map', () => {
     assert.equal(step, 'commercial')
   })
 
-  it('maps skill issues to attributes', () => {
+  it('maps skill issues to scope_work', () => {
     const step = resolveStepForValidationIssue({
       code: 'VAL_SKILL_DUPLICATE',
       source: 'business',
@@ -75,7 +75,7 @@ describe('validation step map', () => {
       layer: 'business',
       group: 'skills',
     })
-    assert.equal(step, 'attributes')
+    assert.equal(step, 'scope_work')
   })
 
   it('maps taxonomy issues to collaboration', () => {
@@ -84,12 +84,26 @@ describe('validation step map', () => {
       source: 'business',
       severity: 'error',
       scope: ['draft'],
-      fieldPaths: ['mainCollaborationModel', 'subModelType', 'exchangeMode'],
+      fieldPaths: ['mainCollaborationModel', 'subModelType'],
       message: 'Select a complete collaboration model.',
+      layer: 'business',
+      group: 'needOffer',
+    })
+    assert.equal(step, 'opportunity')
+  })
+
+  it('maps exchange commercial issues to commercial step', () => {
+    const step = resolveStepForValidationIssue({
+      code: 'VAL_EXCHANGE_MODE',
+      source: 'business',
+      severity: 'error',
+      scope: ['draft'],
+      fieldPaths: ['exchangeMode'],
+      message: 'Select an exchange mode.',
       layer: 'business',
       group: 'exchange',
     })
-    assert.equal(step, 'collaboration')
+    assert.equal(step, 'commercial')
   })
 })
 

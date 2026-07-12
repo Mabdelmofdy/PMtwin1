@@ -1,44 +1,48 @@
 import type { ValidationIssue } from '@pm-twin/validation'
 import type { WizardStepId } from '@/components/opportunity/wizard/wizard-steps.ts'
-import { FIELD_TO_WIZARD_STEP } from '@/components/opportunity/wizard/wizard-steps.ts'
+import {
+  FIELD_TO_WIZARD_STEP,
+  normalizeWizardStepId,
+} from '@/components/opportunity/wizard/wizard-steps.ts'
 
-/** Map validation field paths / groups to wizard step IDs. */
+/** Map validation field paths / groups to wizard step IDs (Creation 3.0). */
 const GROUP_TO_STEP: Readonly<Record<string, WizardStepId>> = {
-  field: 'basic',
-  dates: 'timeline',
+  field: 'opportunity',
+  dates: 'scope_work',
   budget: 'commercial',
   commercial: 'commercial',
-  skills: 'attributes',
-  workPackages: 'attributes',
-  capacity: 'attributes',
-  documents: 'basic',
-  location: 'timeline',
-  duplicates: 'basic',
-  needOffer: 'type',
-  exchange: 'collaboration',
+  skills: 'scope_work',
+  workPackages: 'scope_work',
+  capacity: 'scope_work',
+  documents: 'scope_work',
+  location: 'opportunity',
+  duplicates: 'opportunity',
+  needOffer: 'opportunity',
+  exchange: 'commercial',
   publish: 'review',
 }
 
 const PATH_PREFIX_TO_STEP: ReadonlyArray<readonly [string, WizardStepId]> = [
-  ['title', 'basic'],
-  ['description', 'basic'],
-  ['structuredSkills', 'attributes'],
-  ['workPackages', 'attributes'],
-  ['capacity', 'attributes'],
+  ['title', 'opportunity'],
+  ['description', 'opportunity'],
+  ['structuredSkills', 'scope_work'],
+  ['workPackages', 'scope_work'],
+  ['capacity', 'scope_work'],
   ['budget', 'commercial'],
   ['exchangeData', 'commercial'],
-  ['startDate', 'timeline'],
-  ['endDate', 'timeline'],
-  ['deliveryDeadline', 'timeline'],
-  ['duration', 'timeline'],
-  ['location', 'timeline'],
-  ['country', 'timeline'],
-  ['city', 'timeline'],
-  ['workMode', 'timeline'],
+  ['commercialStructure', 'commercial'],
+  ['startDate', 'opportunity'],
+  ['endDate', 'opportunity'],
+  ['deliveryDeadline', 'opportunity'],
+  ['duration', 'scope_work'],
+  ['location', 'opportunity'],
+  ['country', 'opportunity'],
+  ['city', 'opportunity'],
+  ['workMode', 'scope_work'],
   ['mainCollaborationModel', 'collaboration'],
   ['subModelType', 'collaboration'],
-  ['exchangeMode', 'collaboration'],
-  ['intent', 'type'],
+  ['exchangeMode', 'commercial'],
+  ['intent', 'opportunity'],
 ]
 
 /**
@@ -48,26 +52,19 @@ const PATH_PREFIX_TO_STEP: ReadonlyArray<readonly [string, WizardStepId]> = [
 export function resolveStepForValidationIssue(
   issue: ValidationIssue,
 ): WizardStepId {
-  if (issue.group && GROUP_TO_STEP[issue.group]) {
-    return GROUP_TO_STEP[issue.group]!
-  }
-  for (const path of issue.fieldPaths) {
-    const readinessKey = path.split('.')[0] ?? path
-    const fromFieldMap = FIELD_TO_WIZARD_STEP[readinessKey]
-    if (fromFieldMap) return fromFieldMap
-    for (const [prefix, step] of PATH_PREFIX_TO_STEP) {
-      if (path === prefix || path.startsWith(`${prefix}.`) || path.startsWith(`${prefix}[`)) {
-        return step
-      }
+  const group = (issue as { group?: string }).group
+  if (group && GROUP_TO_STEP[group]) return GROUP_TO_STEP[group]!
+
+  const path = String(
+    (issue as { path?: string; field?: string }).path
+      ?? (issue as { field?: string }).field
+      ?? '',
+  )
+  for (const [prefix, step] of PATH_PREFIX_TO_STEP) {
+    if (path === prefix || path.startsWith(`${prefix}.`) || path.startsWith(`${prefix}[`)) {
+      return step
     }
   }
-  return 'review'
-}
-
-export function humanValidationMessages(
-  issues: readonly ValidationIssue[],
-): readonly string[] {
-  return issues
-    .map((i) => i.message)
-    .filter((m) => typeof m === 'string' && !m.includes('VAL_'))
+  if (FIELD_TO_WIZARD_STEP[path]) return FIELD_TO_WIZARD_STEP[path]!
+  return normalizeWizardStepId('review')
 }

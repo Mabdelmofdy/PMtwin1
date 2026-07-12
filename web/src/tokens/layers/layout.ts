@@ -52,6 +52,24 @@ export const pmShellDimensions = {
   inspectorMaxWidth: '22rem',
 } as const
 
+/** Opportunity Creation 3.0 sticky stack — pair with CSS vars in index.css. */
+export const pmWizardLayoutVars = {
+  environmentBannerHeight: '--environment-banner-height',
+  appHeaderHeight: '--app-header-height',
+  wizardStepperHeight: '--wizard-stepper-height',
+  wizardFooterHeight: '--wizard-footer-height',
+  workspaceSidebarWidth: '--workspace-sidebar-width',
+} as const
+
+export const pmWizardSticky = {
+  stepper:
+    'sticky z-20 border-b border-border/60 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/90 top-[calc(var(--environment-banner-height)+var(--app-header-height))]',
+  footer:
+    'sticky bottom-0 z-20 border-t border-border/60 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/90',
+  contentPad:
+    'pb-[calc(var(--wizard-footer-height)+1.5rem)]',
+} as const
+
 export const pmLayoutGrid = {
   pageStack: 'flex flex-col pm-section-gap',
   detail: 'grid min-w-0 gap-6 lg:grid-cols-3',

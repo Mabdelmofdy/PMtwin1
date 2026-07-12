@@ -1,6 +1,8 @@
 import type {
-  Deliverable,
+  OpportunityDeliverable,
+  OpportunityMilestone,
   OpportunityResource,
+  OpportunityTask,
   OfferCapacity,
   StructuredSkill,
   WorkPackage,
@@ -10,6 +12,7 @@ import type {
   CommercialTermsByMode,
   TemplateMetadata,
 } from './types.ts'
+import { createId } from './types.ts'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
@@ -57,34 +60,82 @@ export function skillNames(skills: readonly StructuredSkill[]): string[] {
   return skills.map((s) => s.name.trim()).filter(Boolean)
 }
 
-/** Coerce legacy string / Deliverable[] into Deliverable[]. */
-export function normalizeDeliverables(value: unknown): Deliverable[] {
+/** Coerce legacy string / Deliverable[] into OpportunityDeliverable[]. */
+export function normalizeDeliverables(
+  value: unknown,
+  workPackageId?: string | null,
+): OpportunityDeliverable[] {
   if (!Array.isArray(value)) {
     if (typeof value === 'string' && value.trim()) {
-      return [{ title: value.trim(), acceptanceCriteria: '', mandatory: true }]
+      return [
+        {
+          id: createId('dlv'),
+          title: value.trim(),
+          acceptanceCriteria: '',
+          mandatory: true,
+          sortOrder: 0,
+          workPackageId: workPackageId ?? null,
+        },
+      ]
     }
     return []
   }
   return value
-    .map((item): Deliverable | null => {
+    .map((item, index): OpportunityDeliverable | null => {
       if (typeof item === 'string') {
         const title = item.trim()
         if (!title) return null
-        return { title, acceptanceCriteria: '', mandatory: true }
+        return {
+          id: createId('dlv'),
+          title,
+          acceptanceCriteria: '',
+          mandatory: true,
+          sortOrder: index,
+          workPackageId: workPackageId ?? null,
+        }
       }
       if (!isRecord(item)) return null
       const title = String(item.title ?? '').trim()
       if (!title) return null
       return {
+        id: String(item.id ?? createId('dlv')),
         title,
+        description: item.description ? String(item.description) : undefined,
+        type: item.type ? String(item.type) : undefined,
+        quantity:
+          item.quantity != null ? Number(item.quantity) || undefined : undefined,
+        unit: item.unit ? String(item.unit) : undefined,
+        dueDate: item.dueDate ? String(item.dueDate) : undefined,
         acceptanceCriteria: String(item.acceptanceCriteria ?? ''),
+        requiredDocuments: Array.isArray(item.requiredDocuments)
+          ? item.requiredDocuments.map(String)
+          : undefined,
+        reviewMethod: item.reviewMethod ? String(item.reviewMethod) : undefined,
+        approvalRequired: Boolean(item.approvalRequired),
+        workPackageId:
+          item.workPackageId != null
+            ? String(item.workPackageId)
+            : workPackageId ?? null,
+        taskId: item.taskId != null ? String(item.taskId) : null,
+        milestoneId: item.milestoneId != null ? String(item.milestoneId) : null,
+        deliveryLocation: item.deliveryLocation
+          ? String(item.deliveryLocation)
+          : undefined,
+        responsiblePartyType: item.responsiblePartyType
+          ? String(item.responsiblePartyType)
+          : undefined,
+        attachmentRequirements: item.attachmentRequirements
+          ? String(item.attachmentRequirements)
+          : undefined,
+        notes: item.notes ? String(item.notes) : undefined,
+        mandatory: item.mandatory !== false,
+        sortOrder: typeof item.sortOrder === 'number' ? item.sortOrder : index,
         milestoneReference: item.milestoneReference
           ? String(item.milestoneReference)
           : undefined,
-        mandatory: item.mandatory !== false,
       }
     })
-    .filter((item): item is Deliverable => item != null)
+    .filter((item): item is OpportunityDeliverable => item != null)
 }
 
 function normalizeDocReqs(value: unknown): WorkPackageDocumentRequirement[] {
@@ -106,6 +157,124 @@ function normalizeDocReqs(value: unknown): WorkPackageDocumentRequirement[] {
     .filter((item): item is WorkPackageDocumentRequirement => item != null)
 }
 
+export function normalizeTasks(
+  value: unknown,
+  workPackageId: string,
+): OpportunityTask[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .map((item, index): OpportunityTask | null => {
+      if (!isRecord(item)) return null
+      const title = String(item.title ?? '').trim()
+      return {
+        id: String(item.id ?? createId('task')),
+        workPackageId: String(item.workPackageId ?? workPackageId),
+        title,
+        description: item.description ? String(item.description) : undefined,
+        taskType: item.taskType ? String(item.taskType) : undefined,
+        requiredSkills: normalizeStructuredSkills(item.requiredSkills),
+        requiredServices: Array.isArray(item.requiredServices)
+          ? item.requiredServices.map(String)
+          : undefined,
+        ownerType: item.ownerType ? String(item.ownerType) : undefined,
+        duration: item.duration ? String(item.duration) : undefined,
+        startDate: item.startDate ? String(item.startDate) : undefined,
+        endDate: item.endDate ? String(item.endDate) : undefined,
+        dependencyTaskId: item.dependencyTaskId
+          ? String(item.dependencyTaskId)
+          : undefined,
+        priority: item.priority ? String(item.priority) : undefined,
+        acceptanceCriteria: item.acceptanceCriteria
+          ? String(item.acceptanceCriteria)
+          : undefined,
+        estimatedEffort: item.estimatedEffort
+          ? String(item.estimatedEffort)
+          : undefined,
+        estimatedQuantity:
+          item.estimatedQuantity != null
+            ? Number(item.estimatedQuantity) || undefined
+            : undefined,
+        location: item.location ? String(item.location) : undefined,
+        relatedDeliverableIds: Array.isArray(item.relatedDeliverableIds)
+          ? item.relatedDeliverableIds.map(String)
+          : undefined,
+        relatedMilestoneIds: Array.isArray(item.relatedMilestoneIds)
+          ? item.relatedMilestoneIds.map(String)
+          : undefined,
+        requiredResources: item.requiredResources
+          ? String(item.requiredResources)
+          : undefined,
+        status: item.status ? String(item.status) : undefined,
+        notes: item.notes ? String(item.notes) : undefined,
+        sortOrder: typeof item.sortOrder === 'number' ? item.sortOrder : index,
+      }
+    })
+    .filter((item): item is OpportunityTask => item != null)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+}
+
+export function normalizeMilestones(value: unknown): OpportunityMilestone[] {
+  if (!Array.isArray(value)) {
+    if (typeof value === 'string' && value.trim()) {
+      return value
+        .split(',')
+        .map((title, index) => ({
+          id: createId('ms'),
+          title: title.trim(),
+          sortOrder: index,
+          relatedWorkPackageIds: [],
+          relatedTaskIds: [],
+          relatedDeliverableIds: [],
+        }))
+        .filter((m) => m.title)
+    }
+    return []
+  }
+  return value
+    .map((item, index): OpportunityMilestone | null => {
+      if (typeof item === 'string') {
+        const title = item.trim()
+        if (!title) return null
+        return {
+          id: createId('ms'),
+          title,
+          sortOrder: index,
+          relatedWorkPackageIds: [],
+          relatedTaskIds: [],
+          relatedDeliverableIds: [],
+        }
+      }
+      if (!isRecord(item)) return null
+      const title = String(item.title ?? '').trim()
+      if (!title && !item.id) return null
+      return {
+        id: String(item.id ?? createId('ms')),
+        title: title || 'Milestone',
+        description: item.description ? String(item.description) : undefined,
+        targetDate: item.targetDate ? String(item.targetDate) : undefined,
+        completionCriteria: item.completionCriteria
+          ? String(item.completionCriteria)
+          : undefined,
+        relatedWorkPackageIds: Array.isArray(item.relatedWorkPackageIds)
+          ? item.relatedWorkPackageIds.map(String)
+          : [],
+        relatedTaskIds: Array.isArray(item.relatedTaskIds)
+          ? item.relatedTaskIds.map(String)
+          : [],
+        relatedDeliverableIds: Array.isArray(item.relatedDeliverableIds)
+          ? item.relatedDeliverableIds.map(String)
+          : [],
+        approvalRequired: Boolean(item.approvalRequired),
+        commercialTrigger: Boolean(item.commercialTrigger),
+        paymentTrigger: Boolean(item.paymentTrigger),
+        notes: item.notes ? String(item.notes) : undefined,
+        sortOrder: typeof item.sortOrder === 'number' ? item.sortOrder : index,
+      }
+    })
+    .filter((item): item is OpportunityMilestone => item != null)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+}
+
 export function normalizeWorkPackages(value: unknown): WorkPackage[] {
   if (!Array.isArray(value)) return []
   return value
@@ -117,22 +286,60 @@ export function normalizeWorkPackages(value: unknown): WorkPackage[] {
         id,
         title,
         description: String(item.description ?? ''),
+        scope: item.scope ? String(item.scope) : undefined,
+        packageType: item.packageType ? String(item.packageType) : undefined,
         requiredSkills: normalizeStructuredSkills(item.requiredSkills),
-        deliverables: normalizeDeliverables(item.deliverables),
+        requiredServices: Array.isArray(item.requiredServices)
+          ? item.requiredServices.map(String)
+          : undefined,
+        deliverables: normalizeDeliverables(item.deliverables, id),
+        tasks: normalizeTasks(item.tasks, id),
         requiredDocuments: normalizeDocReqs(item.requiredDocuments),
         optionalDocuments: normalizeDocReqs(item.optionalDocuments),
         location: item.location ? String(item.location) : undefined,
+        serviceArea: item.serviceArea ? String(item.serviceArea) : undefined,
         startDate: item.startDate ? String(item.startDate) : undefined,
         deadline: item.deadline ? String(item.deadline) : undefined,
+        duration: item.duration ? String(item.duration) : undefined,
+        capacity: item.capacity ? String(item.capacity) : undefined,
         estimatedBudget:
           typeof item.estimatedBudget === 'number'
             ? item.estimatedBudget
             : item.estimatedBudget != null
               ? Number(item.estimatedBudget) || undefined
               : undefined,
+        estimatedEffort: item.estimatedEffort
+          ? String(item.estimatedEffort)
+          : undefined,
         currency: item.currency ? String(item.currency) : undefined,
+        requiredResources: item.requiredResources
+          ? String(item.requiredResources)
+          : undefined,
+        offeredResources: item.offeredResources
+          ? String(item.offeredResources)
+          : undefined,
+        dependencyPackageIds: Array.isArray(item.dependencyPackageIds)
+          ? item.dependencyPackageIds.map(String)
+          : undefined,
+        priority: item.priority ? String(item.priority) : undefined,
+        status: item.status ? String(item.status) : undefined,
+        relatedMilestoneIds: Array.isArray(item.relatedMilestoneIds)
+          ? item.relatedMilestoneIds.map(String)
+          : undefined,
+        acceptanceCriteria: item.acceptanceCriteria
+          ? String(item.acceptanceCriteria)
+          : undefined,
+        complianceRequirements: item.complianceRequirements
+          ? String(item.complianceRequirements)
+          : undefined,
+        applicableCommercialComponentIds: Array.isArray(
+          item.applicableCommercialComponentIds,
+        )
+          ? item.applicableCommercialComponentIds.map(String)
+          : undefined,
         mandatory: item.mandatory !== false,
         sortOrder: typeof item.sortOrder === 'number' ? item.sortOrder : index,
+        collapsed: Boolean(item.collapsed),
       }
     })
     .filter((item): item is WorkPackage => item != null)
@@ -239,6 +446,18 @@ export function normalizeRichTimeline(value: unknown): RichTimeline {
     workingDays: value.workingDays ? String(value.workingDays) : undefined,
     weekendAllowed: Boolean(value.weekendAllowed),
     shiftType: value.shiftType ? String(value.shiftType) : undefined,
+    deliveryMethod: value.deliveryMethod
+      ? String(value.deliveryMethod)
+      : undefined,
+    serviceAreas: Array.isArray(value.serviceAreas)
+      ? value.serviceAreas.map(String)
+      : undefined,
+    workLocations: Array.isArray(value.workLocations)
+      ? value.workLocations.map(String)
+      : undefined,
+    availabilityWindows: value.availabilityWindows
+      ? String(value.availabilityWindows)
+      : undefined,
   }
 }
 

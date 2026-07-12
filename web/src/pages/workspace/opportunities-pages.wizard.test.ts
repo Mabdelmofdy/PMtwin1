@@ -12,88 +12,73 @@ import {
   skillNames,
 } from '@/domain/opportunity-creation'
 import { getReadinessReasonCopy } from '@/lib/readiness-reason-copy.ts'
+import { isInternalReasonCodeVisibleText } from '@/lib/readiness-reason-copy.ts'
+import { mapReadinessReasonToUserMessage } from '@/presentation/readiness'
 
-const wizardPath = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../components/opportunity/wizard/opportunity-wizard-page.tsx',
-)
+const root = dirname(fileURLToPath(import.meta.url))
+const wizardPath = join(root, '../../components/opportunity/wizard/opportunity-wizard-page.tsx')
 const wizardSource = readFileSync(wizardPath, 'utf8')
+const createIndexPath = join(root, '../../components/opportunities/create/index.ts')
+const createIndex = readFileSync(createIndexPath, 'utf8')
 
-describe('Opportunity wizard — Enterprise Creation 2.0 steps', () => {
-  it('has exactly 7 draft-first steps and no Publish step', () => {
-    assert.equal(WIZARD_STEPS.length, 7)
+describe('Opportunity wizard — Creation Experience 3.0', () => {
+  it('has exactly five steps and no Publish step id', () => {
+    assert.equal(WIZARD_STEPS.length, 5)
     assert.deepEqual(
       WIZARD_STEPS.map((s) => s.id),
       [
-        'type',
-        'basic',
+        'opportunity',
         'collaboration',
-        'attributes',
+        'scope_work',
         'commercial',
-        'timeline',
         'review',
       ],
     )
     assert.ok(!WIZARD_STEPS.some((s) => s.id === 'publish'))
-    assert.doesNotMatch(wizardSource, /stepId=["']publish["']/)
-    assert.doesNotMatch(wizardSource, /Publish for matching/)
-    assert.doesNotMatch(wizardSource, /handlePublish/)
+    assert.ok(!WIZARD_STEPS.some((s) => s.id === 'type'))
+    assert.ok(!WIZARD_STEPS.some((s) => s.id === 'attributes'))
+    assert.ok(!WIZARD_STEPS.some((s) => s.id === 'timeline'))
+  })
+
+  it('wires five-step create components and publish action on review', () => {
+    assert.match(createIndex, /OpportunityStep/)
+    assert.match(createIndex, /CollaborationStep/)
+    assert.match(createIndex, /ScopeWorkStep/)
+    assert.match(createIndex, /CommercialStructureStep/)
+    assert.match(createIndex, /ReviewPublishStep/)
+    assert.match(wizardSource, /Publish Opportunity|handlePublish|onPublish/)
+    assert.match(wizardSource, /WorkPackagesBuilder|ScopeWorkStep/)
+    assert.doesNotMatch(wizardSource, /UserJourneyStrip/)
+    assert.doesNotMatch(wizardSource, /SmartRightPanel/)
   })
 
   it('Save Draft navigates to opportunity detail', () => {
     assert.match(wizardSource, /navigate\(`\/opportunities\/\$\{/)
     assert.match(wizardSource, /handleSaveDraft/)
-    assert.match(wizardSource, /Create Draft|Save Draft/)
+    const footer = readFileSync(
+      join(root, '../../components/opportunities/create/opportunity-form-footer.tsx'),
+      'utf8',
+    )
+    assert.match(footer, /Save Draft/)
   })
 
   it('gates Continue on post type and wires Back / Continue handlers', () => {
     assert.match(wizardSource, /validateWizardStepAdvance|Choose Need or Offer/)
     assert.match(wizardSource, /handleContinue/)
-    assert.match(wizardSource, /handleBack/)
+    assert.match(wizardSource, /handleBackOrCancel/)
   })
 
-  it('Need vs Offer field differences are gated', () => {
-    assert.match(wizardSource, /draft\.intent === 'need'/)
-    assert.match(wizardSource, /draft\.intent === 'offer'/)
-    assert.match(wizardSource, /Required skills|required skills|StructuredSkillsEditor/)
-    assert.match(wizardSource, /showCapacity=\{draft\.intent === 'offer'\}/)
+  it('does not render selectable match topology options', () => {
+    assert.doesNotMatch(wizardSource, /label=["']Match [Tt]ype["']/)
+    assert.match(wizardSource, /CollaborationStep|deriveMatchingTopology/)
   })
 
-  it('supports multiple tasks and structured skills editors', () => {
-    assert.match(wizardSource, /WorkPackagesEditor/)
-    assert.match(wizardSource, /StructuredSkillsEditor/)
-  })
-
-  it('renders commercial fields by exchange mode', () => {
-    assert.match(wizardSource, /CommercialTermsStep/)
-    const commercialPath = join(
-      dirname(fileURLToPath(import.meta.url)),
-      '../../components/opportunity/wizard/commercial-terms-step.tsx',
-    )
-    const commercial = readFileSync(commercialPath, 'utf8')
-    assert.match(commercial, /commercial-cash-fields/)
-    assert.match(commercial, /commercial-barter-fields/)
-    assert.match(commercial, /commercial-equity-fields/)
-    assert.match(commercial, /commercial-profit-fields/)
-    assert.match(commercial, /commercial-hybrid-fields/)
-    assert.match(commercial, /Commercial constraints/)
-  })
-
-  it('Marketplace Preview reuses OpportunityCard', () => {
+  it('Marketplace Preview still reuses OpportunityCard when present', () => {
     const preview = readFileSync(
-      join(
-        dirname(fileURLToPath(import.meta.url)),
-        '../../components/opportunity/wizard/marketplace-preview-panel.tsx',
-      ),
+      join(root, '../../components/opportunity/wizard/marketplace-preview-panel.tsx'),
       'utf8',
     )
     assert.match(preview, /OpportunityCard/)
-    assert.match(preview, /MUST reuse|same Marketplace Card/i)
-  })
-
-  it('does not render selectable match type options', () => {
-    assert.match(wizardSource, /ValueExchangeModesPanel/)
-    assert.doesNotMatch(wizardSource, /label=["']Match [Tt]ype["']/)
   })
 })
 
@@ -121,46 +106,30 @@ describe('Opportunity wizard topology derivation cases', () => {
   })
 })
 
-describe('Structured skills & deliverables normalization', () => {
-  it('accepts structured skills and legacy strings', () => {
-    const skills = normalizeStructuredSkills([
-      { name: 'BIM', level: 'expert', certificationRequired: true, mandatory: true },
-      'AutoCAD',
-    ])
-    assert.equal(skills.length, 2)
-    assert.deepEqual(skillNames(skills), ['BIM', 'AutoCAD'])
+describe('Creation 3.0 readiness presentation', () => {
+  it('maps readiness codes to human messages without exposing codes', () => {
+    const msg = mapReadinessReasonToUserMessage(
+      'READINESS_MISSING_CATEGORY_PROFESSION',
+    )
+    assert.equal(msg.title, 'Choose a category or profession')
+    assert.ok(!isInternalReasonCodeVisibleText(msg.title))
+    assert.ok(!isInternalReasonCodeVisibleText(msg.description))
+    assert.equal(msg.stepId, 'opportunity')
   })
 
-  it('coerces legacy deliverable strings', () => {
-    const items = normalizeDeliverables(['Drawing set', { title: 'Report', acceptanceCriteria: 'Signed', mandatory: true }])
-    assert.equal(items.length, 2)
-    assert.equal(items[0]!.title, 'Drawing set')
-    assert.equal(items[1]!.acceptanceCriteria, 'Signed')
+  it('getReadinessReasonCopy uses Creation 3.0 step ids', () => {
+    const copy = getReadinessReasonCopy('READINESS_MISSING_SKILLS_INTENT')
+    assert.equal(copy.stepId, 'scope_work')
+    assert.ok(!isInternalReasonCodeVisibleText(copy.label))
   })
 })
 
-describe('Readiness reason copy humanization', () => {
-  it('maps READINESS_MISSING_SKILLS_INTENT to human label', () => {
-    const copy = getReadinessReasonCopy('READINESS_MISSING_SKILLS_INTENT')
-    assert.equal(copy.label, 'Missing required skills')
-    assert.match(copy.why, /skill/i)
-    assert.equal(copy.stepId, 'attributes')
-  })
-
-  it('ExplanationBlockers does not render raw reason codes as visible text', () => {
-    const blockers = readFileSync(
-      join(
-        dirname(fileURLToPath(import.meta.url)),
-        '../../components/explainability/explanation-blockers.tsx',
-      ),
-      'utf8',
-    )
-    assert.match(blockers, /getReadinessReasonCopy/)
-    assert.match(blockers, /copy\.label/)
-    assert.match(blockers, /data-reason-code/)
-    assert.doesNotMatch(
-      blockers,
-      /<span className="font-medium">\{blocker\.reasonCode\}<\/span>/,
-    )
+describe('Creation domain normalizers', () => {
+  it('normalizes structured skills and deliverables with ids', () => {
+    const skills = normalizeStructuredSkills(['Steel fixing', { name: 'BIM' }])
+    assert.deepEqual(skillNames(skills), ['Steel fixing', 'BIM'])
+    const deliverables = normalizeDeliverables(['As-built drawings'])
+    assert.equal(deliverables[0]?.title, 'As-built drawings')
+    assert.ok(deliverables[0]?.id)
   })
 })

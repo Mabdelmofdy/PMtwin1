@@ -17,6 +17,11 @@ import type { Opportunity } from '@/types/domain.ts'
 import { cn } from '@/lib/utils'
 import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'
 import { buildOpportunityExplanationFromForm } from '@/services/explainability/index.ts'
+import {
+  migrateLegacyExchangeModeToCommercialStructure,
+  redactCommercialForMarketplace,
+} from '@/domain/opportunity-commercial-structure'
+import { normalizeWorkPackages } from '@/domain/opportunity-creation'
 
 export type OpportunityCardProps = {
   opportunity: Opportunity
@@ -52,6 +57,26 @@ export function OpportunityCard({
   const category = opportunity.scope?.sectors?.[0]
   const href = `/opportunities/${opportunity.id}`
   const taxonomy = resolveOpportunityTaxonomyLabels(opportunity)
+
+  const attrs = opportunity.collaborationAttributes ?? {}
+  const workPackages = normalizeWorkPackages(attrs.workPackages)
+  const taskCount = workPackages.reduce(
+    (sum, pkg) => sum + (pkg.tasks?.length ?? 0),
+    0,
+  )
+  const deliverableCount =
+    workPackages.reduce((sum, pkg) => sum + pkg.deliverables.length, 0)
+    + (Array.isArray(attrs.deliverables) ? attrs.deliverables.length : 0)
+
+  const commercial = redactCommercialForMarketplace(
+    migrateLegacyExchangeModeToCommercialStructure({
+      exchangeMode: opportunity.exchangeMode,
+      acceptedExchangeModes: opportunity.acceptedExchangeModes,
+      paymentModes: opportunity.paymentModes,
+      exchangeData: opportunity.exchangeData,
+      collaborationAttributes: attrs,
+    }),
+  )
 
   return (
     <PmSurface
@@ -102,8 +127,23 @@ export function OpportunityCard({
       <div className={cn(pmTypography.caption, 'mt-3 space-y-1 text-muted-foreground')}>
         <p>{taxonomy.mainModel}</p>
         <p>{taxonomy.subModel}</p>
-        <p>{taxonomy.exchangeMode}</p>
-        <p>{taxonomy.matchingTopology}</p>
+        {commercial ? (
+          <p>
+            {commercial.isHybrid ? 'Hybrid' : commercial.derivedMode}
+            {commercial.componentTypes.length > 0
+              ? ` · ${commercial.componentTypes.join(' + ')}`
+              : ''}
+          </p>
+        ) : (
+          <p>{taxonomy.exchangeMode}</p>
+        )}
+        {(workPackages.length > 0 || taskCount > 0 || deliverableCount > 0) && (
+          <p>
+            {workPackages.length} Work Packages
+            {taskCount > 0 ? ` · ${taskCount} Tasks` : ''}
+            {deliverableCount > 0 ? ` · ${deliverableCount} Deliverables` : ''}
+          </p>
+        )}
       </div>
 
       <div

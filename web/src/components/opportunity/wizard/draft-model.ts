@@ -12,6 +12,8 @@ import {
   commercialTermsToExchangeData,
   normalizeCommercialConstraints,
   normalizeCommercialTerms,
+  normalizeDeliverables,
+  normalizeMilestones,
   normalizeOfferCapacity,
   normalizeResources,
   normalizeRichTimeline,
@@ -22,12 +24,21 @@ import {
   type CommercialConstraints,
   type CommercialTermsByMode,
   type OfferCapacity,
+  type OpportunityDeliverable,
+  type OpportunityMilestone,
   type OpportunityResource,
   type RichTimeline,
   type StructuredSkill,
   type TemplateMetadata,
   type WorkPackage,
 } from '@/domain/opportunity-creation'
+import {
+  deriveLegacyExchangeMode,
+  migrateLegacyExchangeModeToCommercialStructure,
+  syncCommercialStructureDerivedFields,
+  type OpportunityCommercialStructure,
+  emptyCommercialStructure,
+} from '@/domain/opportunity-commercial-structure'
 import type { Opportunity } from '@/types/domain.ts'
 
 export type OpportunityDraft = {
@@ -35,6 +46,7 @@ export type OpportunityDraft = {
   intent: 'need' | 'offer' | ''
   description: string
   location: string
+  serviceArea: string
   mainCollaborationModel: string
   modelType: string
   subModelType: string
@@ -47,6 +59,7 @@ export type OpportunityDraft = {
   services: string
   startDate: string
   tenderDeadline: string
+  availabilityEndDate: string
   collaborationAttributes: Record<string, unknown>
   preferredPartnerType: string
   attachmentsText: string
@@ -54,14 +67,19 @@ export type OpportunityDraft = {
   deliveryMilestonesText: string
   structuredSkills: StructuredSkill[]
   workPackages: WorkPackage[]
+  deliverables: OpportunityDeliverable[]
+  milestones: OpportunityMilestone[]
   resources: OpportunityResource[]
   capacity: OfferCapacity
   commercialTerms: CommercialTermsByMode
   commercialConstraints: CommercialConstraints
+  commercialStructure: OpportunityCommercialStructure
   richTimeline: RichTimeline
   minimumQualifications: string
   certificationsText: string
   portfolioText: string
+  experienceLevel: string
+  teamSize: string
   templateMetadata: TemplateMetadata
 }
 
@@ -70,6 +88,7 @@ export const initialDraft: OpportunityDraft = {
   intent: '',
   description: EMPTY_OPPORTUNITY_WIZARD_DRAFT.description ?? '',
   location: EMPTY_OPPORTUNITY_WIZARD_DRAFT.location ?? '',
+  serviceArea: '',
   mainCollaborationModel: EMPTY_OPPORTUNITY_WIZARD_DRAFT.mainCollaborationModel ?? '',
   modelType: EMPTY_OPPORTUNITY_WIZARD_DRAFT.modelType ?? '',
   subModelType: EMPTY_OPPORTUNITY_WIZARD_DRAFT.subModelType ?? '',
@@ -78,9 +97,10 @@ export const initialDraft: OpportunityDraft = {
   targetRole: EMPTY_OPPORTUNITY_WIZARD_DRAFT.targetRole ?? '',
   sector: EMPTY_OPPORTUNITY_WIZARD_DRAFT.sector ?? '',
   skills: EMPTY_OPPORTUNITY_WIZARD_DRAFT.skills ?? '',
-  services: EMPTY_OPPORTUNITY_WIZARD_DRAFT.services ?? '',
+  services: '',
   startDate: EMPTY_OPPORTUNITY_WIZARD_DRAFT.startDate ?? '',
   tenderDeadline: EMPTY_OPPORTUNITY_WIZARD_DRAFT.tenderDeadline ?? '',
+  availabilityEndDate: '',
   collaborationAttributes: {},
   preferredPartnerType: '',
   attachmentsText: '',
@@ -88,14 +108,19 @@ export const initialDraft: OpportunityDraft = {
   deliveryMilestonesText: '',
   structuredSkills: [],
   workPackages: [],
+  deliverables: [],
+  milestones: [],
   resources: [],
   capacity: {},
   commercialTerms: {},
   commercialConstraints: {},
+  commercialStructure: emptyCommercialStructure(),
   richTimeline: {},
   minimumQualifications: '',
   certificationsText: '',
   portfolioText: '',
+  experienceLevel: '',
+  teamSize: '',
   templateMetadata: {},
 }
 
@@ -104,6 +129,36 @@ function splitCsv(value: string): string[] {
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean)
+}
+
+/** Sync legacy exchangeMode / paymentModes from commercial structure. */
+export function syncDraftExchangeFromCommercialStructure(
+  draft: OpportunityDraft,
+): OpportunityDraft {
+  const structure = syncCommercialStructureDerivedFields(draft.commercialStructure)
+  const legacyMode = deriveLegacyExchangeMode(structure)
+  const enabledTypes = structure.components
+    .filter((c) => c.enabled)
+    .map((c) => c.type)
+  const paymentModes = enabledTypes.filter((t) =>
+    ['cash', 'barter', 'equity', 'profit_sharing'].includes(t),
+  )
+  // revenue_sharing / custom contribute to hybrid via deriveLegacyExchangeMode
+  const modesForPayment =
+    paymentModes.length > 0
+      ? paymentModes
+      : legacyMode === 'hybrid'
+        ? ['hybrid']
+        : legacyMode
+          ? [legacyMode]
+          : []
+
+  return {
+    ...draft,
+    commercialStructure: structure,
+    exchangeMode: legacyMode || draft.exchangeMode,
+    paymentModes: modesForPayment.length > 0 ? modesForPayment : draft.paymentModes,
+  }
 }
 
 export function toWizardDraft(draft: OpportunityDraft): OpportunityWizardDraft {
@@ -124,11 +179,39 @@ export function opportunityToDraft(existing: Opportunity): OpportunityDraft {
     attrs.structuredSkills ?? scopeSkills ?? existing.attributes?.coreSkills ?? [],
   )
   const exchange = existing.exchangeData ?? {}
-  return {
+  const commercialTerms = normalizeCommercialTerms(
+    exchange.commercialTerms ?? exchange,
+  )
+  const commercialStructure = migrateLegacyExchangeModeToCommercialStructure({
+    exchangeMode: existing.exchangeMode,
+    acceptedExchangeModes: existing.acceptedExchangeModes,
+    paymentModes: existing.paymentModes,
+    commercialStructure: attrs.commercialStructure as
+      | OpportunityCommercialStructure
+      | undefined,
+    exchangeData: exchange,
+    collaborationAttributes: attrs,
+    commercialTerms,
+  })
+
+  const milestonesFromAttrs = normalizeMilestones(
+    attrs.milestones
+      ?? existing.deliveryMilestones
+      ?? [],
+  )
+  const deliveryMilestonesText = Array.isArray(existing.deliveryMilestones)
+    ? existing.deliveryMilestones
+        .map((item) => (typeof item === 'string' ? item : item.title ?? ''))
+        .filter(Boolean)
+        .join(', ')
+    : ''
+
+  const draft: OpportunityDraft = {
     title: existing.title ?? '',
     intent: existing.intent === 'offer' ? 'offer' : existing.intent === 'need' ? 'need' : '',
     description: existing.description ?? '',
     location: existing.location ?? '',
+    serviceArea: String(attrs.serviceArea ?? ''),
     mainCollaborationModel: existing.mainCollaborationModel ?? '',
     modelType: existing.modelType ?? '',
     subModelType: existing.subModelType ?? '',
@@ -144,6 +227,7 @@ export function opportunityToDraft(existing: Opportunity): OpportunityDraft {
     services: '',
     startDate: existing.attributes?.startDate ?? '',
     tenderDeadline: existing.attributes?.tenderDeadline ?? '',
+    availabilityEndDate: String(attrs.availabilityEndDate ?? ''),
     collaborationAttributes: attrs,
     preferredPartnerType:
       existing.preferredPartnerType ??
@@ -156,78 +240,86 @@ export function opportunityToDraft(existing: Opportunity): OpportunityDraft {
           .join(', ')
       : '',
     complianceRequirementsText: (existing.complianceRequirements ?? []).join(', '),
-    deliveryMilestonesText: Array.isArray(existing.deliveryMilestones)
-      ? existing.deliveryMilestones
-          .map((item) => (typeof item === 'string' ? item : item.title ?? ''))
-          .filter(Boolean)
-          .join(', ')
-      : '',
+    deliveryMilestonesText,
     structuredSkills,
     workPackages: normalizeWorkPackages(attrs.workPackages),
+    deliverables: normalizeDeliverables(attrs.deliverables),
+    milestones:
+      milestonesFromAttrs.length > 0
+        ? milestonesFromAttrs
+        : normalizeMilestones(deliveryMilestonesText),
     resources: normalizeResources(attrs.resources),
     capacity: normalizeOfferCapacity(attrs.capacity),
-    commercialTerms: normalizeCommercialTerms(
-      exchange.commercialTerms ?? exchange,
-    ),
+    commercialTerms,
     commercialConstraints: normalizeCommercialConstraints(
       exchange.commercialConstraints ?? attrs.commercialConstraints,
     ),
+    commercialStructure,
     richTimeline: normalizeRichTimeline(attrs.richTimeline),
     minimumQualifications: String(attrs.minimumQualifications ?? ''),
     certificationsText: Array.isArray(attrs.certifications)
       ? (attrs.certifications as string[]).join(', ')
       : String(attrs.certifications ?? ''),
     portfolioText: String(attrs.portfolio ?? ''),
+    experienceLevel: String(attrs.experienceLevel ?? ''),
+    teamSize: String(attrs.teamSize ?? ''),
     templateMetadata: normalizeTemplateMetadata(attrs.templateMetadata),
   }
+
+  return syncDraftExchangeFromCommercialStructure(draft)
 }
 
 export function buildOpportunityDraftInput(
   draft: OpportunityDraft,
 ): Record<string, unknown> {
-  const skills = skillNames(draft.structuredSkills)
-  const legacySkills = skills.length > 0 ? skills : splitCsv(draft.skills)
-  const services = splitCsv(draft.services)
-  const sectors = draft.sector ? [draft.sector] : []
+  const synced = syncDraftExchangeFromCommercialStructure(draft)
+  const skills = skillNames(synced.structuredSkills)
+  const legacySkills = skills.length > 0 ? skills : splitCsv(synced.skills)
+  const services = splitCsv(synced.services)
+  const sectors = synced.sector ? [synced.sector] : []
   const hasCollaborationSelection =
-    Boolean(draft.mainCollaborationModel?.trim()) &&
-    Boolean(draft.subModelType?.trim()) &&
-    Boolean(draft.exchangeMode?.trim())
+    Boolean(synced.mainCollaborationModel?.trim()) &&
+    Boolean(synced.subModelType?.trim()) &&
+    Boolean(synced.exchangeMode?.trim())
 
   const collaborationPatch = hasCollaborationSelection
     ? buildOpportunityCollaborationPatch({
-        mainCollaborationModel: draft.mainCollaborationModel,
-        modelType: draft.modelType,
-        subModelType: draft.subModelType,
-        exchangeMode: draft.exchangeMode,
-        acceptedExchangeModes: draft.paymentModes,
+        mainCollaborationModel: synced.mainCollaborationModel,
+        modelType: synced.modelType,
+        subModelType: synced.subModelType,
+        exchangeMode: synced.exchangeMode,
+        acceptedExchangeModes: synced.paymentModes,
       })
     : {}
 
-  const base = buildOpportunityWizardReadinessInput(toWizardDraft(draft))
+  const base = buildOpportunityWizardReadinessInput(toWizardDraft(synced))
   const exchangePayload = hasCollaborationSelection
     ? buildValueExchangeDraftPayload({
-        exchangeMode: draft.exchangeMode,
-        paymentModes: draft.paymentModes,
-        collaborationAttributes: draft.collaborationAttributes,
+        exchangeMode: synced.exchangeMode,
+        paymentModes: synced.paymentModes,
+        collaborationAttributes: synced.collaborationAttributes,
       })
     : {}
   const commercialExchange = commercialTermsToExchangeData(
-    draft.commercialTerms,
-    draft.exchangeMode,
-    draft.commercialConstraints,
+    synced.commercialTerms,
+    synced.exchangeMode,
+    synced.commercialConstraints,
   )
+
+  const milestoneTitles = synced.milestones
+    .map((m) => m.title.trim())
+    .filter(Boolean)
 
   return {
     ...base,
     ...collaborationPatch,
-    structuredSkills: draft.structuredSkills,
-    workPackages: draft.workPackages,
-    capacity: draft.intent === 'offer' ? draft.capacity : undefined,
+    structuredSkills: synced.structuredSkills,
+    workPackages: synced.workPackages,
+    capacity: synced.intent === 'offer' ? synced.capacity : undefined,
     scope: {
       ...(base.scope as Record<string, unknown>),
       sectors,
-      ...(draft.intent === 'offer'
+      ...(synced.intent === 'offer'
         ? {
             offeredSkills: legacySkills,
             coreSkills: legacySkills,
@@ -239,43 +331,58 @@ export function buildOpportunityDraftInput(
     },
     attributes: {
       ...(base.attributes as Record<string, unknown>),
-      targetRole: draft.targetRole,
-      startDate: draft.startDate || undefined,
-      tenderDeadline: draft.tenderDeadline || undefined,
+      targetRole: synced.targetRole,
+      startDate: synced.startDate || undefined,
+      tenderDeadline: synced.tenderDeadline || undefined,
       requiredSkills: legacySkills,
-      ...(draft.intent === 'offer'
-        ? { availabilityDate: draft.startDate || undefined }
+      ...(synced.intent === 'offer'
+        ? { availabilityDate: synced.startDate || undefined }
         : {}),
     },
     collaborationAttributes: {
-      ...draft.collaborationAttributes,
+      ...synced.collaborationAttributes,
       detailedScope:
-        draft.collaborationAttributes.detailedScope ?? draft.description,
+        synced.collaborationAttributes.detailedScope ?? synced.description,
       requiredSkills:
-        draft.collaborationAttributes.requiredSkills ??
+        synced.collaborationAttributes.requiredSkills ??
         (legacySkills.length > 0 ? legacySkills : undefined),
-      structuredSkills: draft.structuredSkills,
-      workPackages: draft.workPackages,
-      resources: draft.resources,
-      capacity: draft.intent === 'offer' ? draft.capacity : undefined,
-      richTimeline: draft.richTimeline,
-      commercialConstraints: draft.commercialConstraints,
-      minimumQualifications: draft.minimumQualifications || undefined,
-      certifications: splitCsv(draft.certificationsText),
-      portfolio: draft.portfolioText || undefined,
-      templateMetadata: draft.templateMetadata,
+      structuredSkills: synced.structuredSkills,
+      workPackages: synced.workPackages,
+      deliverables: synced.deliverables,
+      milestones: synced.milestones,
+      resources: synced.resources,
+      capacity: synced.intent === 'offer' ? synced.capacity : undefined,
+      richTimeline: synced.richTimeline,
+      commercialConstraints: synced.commercialConstraints,
+      commercialStructure: synced.commercialStructure,
+      serviceArea: synced.serviceArea || undefined,
+      availabilityEndDate: synced.availabilityEndDate || undefined,
+      experienceLevel: synced.experienceLevel || undefined,
+      teamSize: synced.teamSize || undefined,
+      minimumQualifications: synced.minimumQualifications || undefined,
+      certifications: splitCsv(synced.certificationsText),
+      portfolio: synced.portfolioText || undefined,
+      templateMetadata: synced.templateMetadata,
       startDate:
-        (draft.collaborationAttributes.startDate ?? draft.startDate) ||
+        (synced.collaborationAttributes.startDate ?? synced.startDate) ||
         undefined,
     },
     exchangeData: {
       ...(base.exchangeData as Record<string, unknown>),
       ...exchangePayload,
       ...commercialExchange,
-      ...(draft.exchangeMode ? { exchangeMode: draft.exchangeMode } : {}),
+      ...(synced.exchangeMode ? { exchangeMode: synced.exchangeMode } : {}),
+      commercialStructure: synced.commercialStructure,
     },
+    deliveryMilestones:
+      milestoneTitles.length > 0
+        ? synced.milestones.map((m) => ({
+            title: m.title,
+            targetDate: m.targetDate,
+          }))
+        : base.deliveryMilestones,
     normalized: {
-      ...(draft.intent === 'offer'
+      ...(synced.intent === 'offer'
         ? { offeredServices: services }
         : { requiredServices: services }),
     },
@@ -286,21 +393,22 @@ export function buildCollaborationCommandPayload(
   draft: OpportunityDraft,
   creatorId?: string,
 ): OpportunityCollaborationPayload {
-  const built = buildOpportunityDraftInput(draft)
+  const synced = syncDraftExchangeFromCommercialStructure(draft)
+  const built = buildOpportunityDraftInput(synced)
   return {
-    title: draft.title,
-    description: draft.description,
+    title: synced.title,
+    description: synced.description,
     intent:
-      draft.intent === 'offer' || draft.intent === 'need'
-        ? draft.intent
+      synced.intent === 'offer' || synced.intent === 'need'
+        ? synced.intent
         : undefined,
-    location: draft.location,
+    location: synced.location,
     creatorId,
-    mainCollaborationModel: draft.mainCollaborationModel,
-    modelType: draft.modelType,
-    subModelType: draft.subModelType,
-    exchangeMode: draft.exchangeMode,
-    acceptedExchangeModes: draft.paymentModes,
+    mainCollaborationModel: synced.mainCollaborationModel,
+    modelType: synced.modelType,
+    subModelType: synced.subModelType,
+    exchangeMode: synced.exchangeMode,
+    acceptedExchangeModes: synced.paymentModes,
     collaborationAttributes: built.collaborationAttributes as Record<
       string,
       unknown
@@ -309,8 +417,8 @@ export function buildCollaborationCommandPayload(
     attributes: built.attributes as Record<string, unknown>,
     normalized: built.normalized as Record<string, unknown>,
     exchangeData: built.exchangeData as Record<string, unknown>,
-    paymentModes: draft.paymentModes,
-    preferredPartnerType: draft.preferredPartnerType || undefined,
+    paymentModes: synced.paymentModes,
+    preferredPartnerType: synced.preferredPartnerType || undefined,
     attachments: built.attachments as OpportunityCollaborationPayload['attachments'],
     complianceRequirements: built.complianceRequirements as string[] | undefined,
     deliveryMilestones:

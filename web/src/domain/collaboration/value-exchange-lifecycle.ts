@@ -6,6 +6,11 @@ import type { CommercialTerms } from '@/types/commercial-terms.ts'
 import { commercialTermsFromLegacyTerms } from '@/types/commercial-terms.ts'
 import { formatCollaborationExchangeMode } from '@/lib/collaboration-taxonomy-display.ts'
 import type { Opportunity } from '@/types/domain.ts'
+import {
+  commercialStructureToProposedTerms,
+  migrateLegacyExchangeModeToCommercialStructure,
+  type OpportunityCommercialStructure,
+} from '@/domain/opportunity-commercial-structure'
 
 function normalizeExchangeMode(mode?: string): ExchangeMode | undefined {
   if (!mode) return undefined
@@ -44,12 +49,33 @@ function amountFromBudget(
 export function buildCommercialTermsFromOpportunity(
   opportunity: Opportunity,
 ): CommercialTerms {
-  const mode = normalizeExchangeMode(opportunity.exchangeMode) ?? 'cash'
+  const attrs = opportunity.collaborationAttributes ?? {}
   const exchangeData = {
     ...(opportunity.exchangeData ?? {}),
-    ...(opportunity.collaborationAttributes ?? {}),
+    ...attrs,
   }
 
+  const structure = migrateLegacyExchangeModeToCommercialStructure({
+    exchangeMode: opportunity.exchangeMode,
+    acceptedExchangeModes: opportunity.acceptedExchangeModes,
+    paymentModes: opportunity.paymentModes,
+    commercialStructure: attrs.commercialStructure as
+      | OpportunityCommercialStructure
+      | undefined,
+    exchangeData,
+    collaborationAttributes: attrs,
+  })
+
+  if (structure.components.some((c) => c.enabled)) {
+    const proposed = commercialStructureToProposedTerms(structure)
+    // Preserve explicit legacy hybrid intent for matching/negotiation handoff.
+    if (normalizeExchangeMode(opportunity.exchangeMode) === 'hybrid') {
+      return { ...proposed, exchangeMode: 'hybrid' }
+    }
+    return proposed
+  }
+
+  const mode = normalizeExchangeMode(opportunity.exchangeMode) ?? 'cash'
   const extracted = extractCommercialTermsFromExchange(exchangeData, mode)
   const fromLegacy = commercialTermsFromLegacyTerms(extracted as CommercialTerms)
   const budgetAmount = amountFromBudget(extracted.budget ?? exchangeData.budgetRange)
