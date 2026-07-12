@@ -27,6 +27,7 @@ export { AdminTaxonomyPage } from './marketplace/admin-taxonomy-page.tsx'
 export { AdminPostMatchesPage } from './marketplace/admin-post-matches-page.tsx'
 export { AdminMatchingQualityPage } from './marketplace/admin-matching-quality-page.tsx'
 export { AdminModerationPage } from './marketplace/admin-moderation-page.tsx'
+export { AdminOpportunityDetailPage } from './marketplace/admin-opportunity-detail-page.tsx'
 export { AdminApprovalsPage } from './commercial/admin-approvals-page.tsx'
 export { AdminAwardsPage } from './commercial/admin-awards-page.tsx'
 export { AdminLegalReviewPage } from './commercial/admin-legal-review-page.tsx'
@@ -307,10 +308,28 @@ export function AdminOpportunitiesPage() {
     <AdminListPage
       title={productLanguage.plural('opportunity')}
       description="Platform opportunity oversight."
+      storageKey="opportunities"
       data={opps}
       getRowId={(o) => o.id}
+      getRowHref={(o) => `/admin/opportunities/${o.id}`}
       getSearchText={(o) => [o.title, o.status, o.location].filter(Boolean).join(' ')}
       searchPlaceholder="Search opportunities…"
+      getRowActions={() => [
+        {
+          id: 'moderate',
+          label: 'Moderate',
+          onSelect: () => {
+            window.location.assign('/admin/moderation')
+          },
+        },
+        {
+          id: 'matching',
+          label: 'Matching',
+          onSelect: () => {
+            window.location.assign('/admin/matching')
+          },
+        },
+      ]}
       columns={[
         { id: 'title', label: 'Title', cell: (o) => o.title },
         {

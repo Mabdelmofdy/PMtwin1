@@ -5,6 +5,7 @@ export type AdminWorkspaceHeaderProps = {
   readonly title: string
   readonly description?: string
   readonly badges?: ReactNode
+  readonly riskBadge?: ReactNode
   readonly actions?: ReactNode
   readonly environmentLabel?: string
   readonly className?: string
@@ -14,14 +15,16 @@ export function AdminWorkspaceHeader({
   title,
   description,
   badges,
+  riskBadge,
   actions,
   environmentLabel,
   className,
 }: AdminWorkspaceHeaderProps) {
   const badgeRow =
-    environmentLabel || badges ? (
+    environmentLabel || badges || riskBadge ? (
       <>
         {environmentLabel ? <PmBadge tone="info">{environmentLabel}</PmBadge> : null}
+        {riskBadge}
         {badges}
       </>
     ) : undefined

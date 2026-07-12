@@ -1,6 +1,10 @@
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import {
+  AdminEntityDetailShell,
+  AdminStatusSummaryRow,
+} from '@/components/admin/entity/admin-entity-detail-shell.tsx'
 import { AdminRelatedObjects } from '@/components/admin/related-objects/admin-related-objects.tsx'
 import { AdminUniversalTimeline } from '@/components/admin/timeline/admin-universal-timeline.tsx'
 import { AdminQuickActions } from '@/components/admin/quick-actions/admin-quick-actions.tsx'
@@ -31,6 +35,7 @@ import { AdminStatusBadge } from '@/pages/admin/admin-display'
 
 export function AdminUserDetailPage() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const { user: actor } = useAuth()
   const version = useDataStoreVersion()
   const [, bump] = useState(0)
@@ -44,8 +49,7 @@ export function AdminUserDetailPage() {
   }
 
   function promptReason(label: string): string | null {
-    const reason = window.prompt(`${label} — enter reason`)
-    return reason
+    return window.prompt(`${label} — enter reason`)
   }
 
   function handleAction(actionId: string): void {
@@ -120,10 +124,12 @@ export function AdminUserDetailPage() {
         break
       }
       case 'user.open_party':
-        window.location.assign(detail?.primaryPartyId ? `/admin/parties/${detail.primaryPartyId}` : '/admin/parties')
+        navigate(detail?.primaryPartyId ? `/admin/parties/${detail.primaryPartyId}` : '/admin/memberships')
+        break
+      case 'user.open_timeline':
         break
       case 'user.open_audit':
-        window.location.assign('/admin/audit')
+        navigate('/admin/audit')
         break
       default:
         toast.message('Action not wired in Demo/UAT yet')
@@ -139,60 +145,67 @@ export function AdminUserDetailPage() {
   }
 
   return (
-    <PmPage
-      header={
-        <PmPageHeader
-          title={detail.fullName}
-          description={detail.email}
-          badges={<AdminStatusBadge status={detail.accountStatus} />}
+    <AdminEntityDetailShell
+      label="Identity"
+      title={detail.fullName}
+      description={detail.email}
+      statusBadge={<AdminStatusBadge status={detail.accountStatus} />}
+      statusSummary={
+        <AdminStatusSummaryRow
+          items={[
+            { label: 'Status', value: <AdminStatusBadge status={detail.accountStatus} /> },
+            { label: 'Role', value: detail.roleLabel },
+            { label: 'Memberships', value: String(detail.membershipCount) },
+            {
+              label: 'Registered',
+              value: detail.registeredAt ? formatDate(detail.registeredAt) : '—',
+            },
+          ]}
         />
       }
-    >
-      <div className="mb-4">
+      primaryActions={
         <AdminQuickActions
           actions={actions}
           onAction={handleAction}
           hasPermission={(cap) => hasAdminCapability(actor?.role, cap as never)}
         />
-      </div>
-
-      <PmFormReadonly>
-        <PmFormReadonlySection title="Overview" description="Admin user inspector">
-          <PmFormReadonlyField label="User ID" value={detail.id} />
-          <PmFormReadonlyField label="Email" value={detail.email} />
-          <PmFormReadonlyField label="Role" value={detail.roleLabel} />
-          <PmFormReadonlyField label="Status">
-            <AdminStatusBadge status={detail.accountStatus} />
-          </PmFormReadonlyField>
-          <PmFormReadonlyField label="Primary party" value={detail.primaryPartyLabel ?? '—'} />
-          <PmFormReadonlyField label="Memberships" value={String(detail.membershipCount)} />
-          <PmFormReadonlyField
-            label="Registered"
-            value={detail.registeredAt ? formatDate(detail.registeredAt) : null}
-          />
-        </PmFormReadonlySection>
-      </PmFormReadonly>
-
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <AdminRelatedObjects groups={related} title="Related objects" />
-        <AdminUniversalTimeline events={timeline} title="Timeline" />
-      </div>
-
-      {detail.notes && detail.notes.length > 0 ? (
-        <PmContentCard title="Notes" className="mt-6">
-          <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-            {detail.notes.map((note) => (
-              <li key={note}>{note}</li>
-            ))}
-          </ul>
-        </PmContentCard>
-      ) : null}
-
-      <div className="mt-4">
+      }
+      overview={
+        <PmFormReadonly>
+          <PmFormReadonlySection title="Overview" description="Admin user inspector">
+            <PmFormReadonlyField label="User ID" value={detail.id} />
+            <PmFormReadonlyField label="Email" value={detail.email} />
+            <PmFormReadonlyField label="Role" value={detail.roleLabel} />
+            <PmFormReadonlyField label="Status">
+              <AdminStatusBadge status={detail.accountStatus} />
+            </PmFormReadonlyField>
+            <PmFormReadonlyField label="Primary party" value={detail.primaryPartyLabel ?? '—'} />
+            <PmFormReadonlyField label="Memberships" value={String(detail.membershipCount)} />
+            <PmFormReadonlyField
+              label="Registered"
+              value={detail.registeredAt ? formatDate(detail.registeredAt) : null}
+            />
+          </PmFormReadonlySection>
+        </PmFormReadonly>
+      }
+      timeline={<AdminUniversalTimeline events={timeline} title="Timeline" />}
+      related={<AdminRelatedObjects groups={related} title="Related objects" />}
+      notes={
+        detail.notes && detail.notes.length > 0 ? (
+          <PmContentCard title="Internal notes">
+            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+              {detail.notes.map((note) => (
+                <li key={note}>{note}</li>
+              ))}
+            </ul>
+          </PmContentCard>
+        ) : undefined
+      }
+      history={
         <PmButton type="button" variant="outline" size="sm" onClick={refresh}>
           Refresh
         </PmButton>
-      </div>
-    </PmPage>
+      }
+    />
   )
 }

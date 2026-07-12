@@ -6,8 +6,11 @@ export type AdminWorkspaceShellProps = {
   readonly title: string
   readonly description?: string
   readonly environmentLabel?: string
+  readonly riskBadge?: ReactNode
   readonly kpi?: ReactNode
   readonly actionQueue?: ReactNode
+  readonly analytics?: ReactNode
+  readonly riskSummary?: ReactNode
   readonly filters?: ReactNode
   readonly primary?: ReactNode
   readonly related?: ReactNode
@@ -18,12 +21,19 @@ export type AdminWorkspaceShellProps = {
   readonly className?: string
 }
 
+/**
+ * Workspace composition shell:
+ * Header → KPIs → Action Queue → Analytics → Risk → Main → Related → Timeline → Audit
+ */
 export function AdminWorkspaceShell({
   title,
   description,
   environmentLabel,
+  riskBadge,
   kpi,
   actionQueue,
+  analytics,
+  riskSummary,
   filters,
   primary,
   related,
@@ -40,13 +50,16 @@ export function AdminWorkspaceShell({
           title={title}
           description={description}
           environmentLabel={environmentLabel}
+          riskBadge={riskBadge}
         />
       }
       className={className}
     >
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
         {kpi}
         {actionQueue}
+        {analytics}
+        {riskSummary}
         {filters}
         {primary}
         {children}

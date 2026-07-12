@@ -11,6 +11,13 @@ export type {
   AdminCommandCenterSummary,
   AdminOperationsSummary,
   AdminRiskSummary,
+  AdminHealthTone,
+  AdminPlatformHealthFacet,
+  AdminPlatformHealthSummary,
+  AdminPipelineStage,
+  AdminPipelineSummary,
+  AdminRiskBucket,
+  AdminRecentOperation,
   AdminWorkspaceSummary,
   AdminPlatformEntityDefinition,
   AdminPlatformEntityRecord,
@@ -33,6 +40,9 @@ export {
   buildCommandCenterSummary,
   buildOperationsSummary,
   buildRiskSummary,
+  buildPlatformHealthSummary,
+  buildPipelineSummary,
+  buildRecentOperations,
 } from './command-center-adapter.ts'
 
 export {
@@ -64,5 +74,12 @@ export {
   buildWorkspaceSummary,
   listKnownWorkspaceIds,
 } from './workspace-summary-adapter.ts'
+
+export { buildAdminAnalyticsBundle } from './admin-analytics-adapter.ts'
+export type {
+  AdminDistributionBucket,
+  AdminTrendPoint,
+  AdminAnalyticsBundle,
+} from './admin-analytics-adapter.ts'
 
 export { listExplorerEntities } from './explorer-adapter.ts'

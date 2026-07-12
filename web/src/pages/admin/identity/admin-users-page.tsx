@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   listAdminUserSummaries,
   uniqueUserRoles,
@@ -11,6 +11,7 @@ import { AdminStatusBadge } from '@/pages/admin/admin-display'
 import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
 
 export function AdminUsersPage() {
+  const navigate = useNavigate()
   const version = useDataStoreVersion()
   const [params, setParams] = useSearchParams()
   const statusFilter = params.get('status') ?? ''
@@ -33,13 +34,33 @@ export function AdminUsersPage() {
     <AdminListPage
       title="Users"
       description="Managed accounts after vetting."
+      storageKey="users"
       data={users}
       getRowId={(u) => u.id}
       getRowHref={(u) => `/admin/users/${u.id}`}
       getSearchText={(u) =>
         [u.fullName, u.email, u.role, u.accountStatus].filter(Boolean).join(' ')
       }
+      getSortValue={(u, columnId) => {
+        if (columnId === 'name') return u.fullName
+        if (columnId === 'email') return u.email
+        if (columnId === 'role') return u.roleLabel
+        if (columnId === 'status') return u.accountStatus
+        return undefined
+      }}
       searchPlaceholder="Search users…"
+      getRowActions={(u) => [
+        {
+          id: 'audit',
+          label: 'Audit',
+          onSelect: () => navigate(`/admin/audit?entity=${u.id}`),
+        },
+        {
+          id: 'memberships',
+          label: 'Memberships',
+          onSelect: () => navigate('/admin/memberships'),
+        },
+      ]}
       toolbarExtra={
         <PmToolbarSurface className="flex flex-wrap items-center gap-2">
           <label className="text-sm text-muted-foreground">

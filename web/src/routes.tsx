@@ -90,6 +90,7 @@ import {
   AdminNegotiationDetailPage,
   AdminNegotiationsPage,
   AdminOpportunitiesPage,
+  AdminOpportunityDetailPage,
   AdminOperationsPage,
   AdminPartiesPage,
   AdminPartyDetailPage,
@@ -227,6 +228,7 @@ export function AppRoutes() {
           <Route path="/admin/vetting" element={<AdminVettingPage />} />
           <Route path="/admin/vetting/config" element={<AdminVettingConfigPage />} />
           <Route path="/admin/opportunities" element={<AdminOpportunitiesPage />} />
+          <Route path="/admin/opportunities/:id" element={<AdminOpportunityDetailPage />} />
           <Route path="/admin/matching" element={<AdminMatchingPage />} />
           <Route path="/admin/post-matches" element={<AdminPostMatchesPage />} />
           <Route path="/admin/matching/quality" element={<AdminMatchingQualityPage />} />

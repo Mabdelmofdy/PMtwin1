@@ -29,6 +29,17 @@ export type OcxAnalyticsEventName =
   | 'milestone_added'
   | 'commercial_component_added'
   | 'commercial_structure_completed'
+  | 'opportunity_details_opened'
+  | 'opportunity_workspace_viewed'
+  | 'opportunity_action_clicked'
+  | 'opportunity_readiness_opened'
+  | 'opportunity_scope_package_expanded'
+  | 'opportunity_commercial_component_viewed'
+  | 'opportunity_marketplace_preview_viewed'
+  | 'opportunity_match_opened'
+  | 'opportunity_related_object_opened'
+  | 'opportunity_history_viewed'
+  | 'opportunity_command_center_opened'
 
 export type OcxAnalyticsEvent = {
   readonly name: OcxAnalyticsEventName

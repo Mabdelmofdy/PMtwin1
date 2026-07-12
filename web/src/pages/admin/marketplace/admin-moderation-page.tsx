@@ -29,7 +29,8 @@ export function AdminModerationPage() {
       description={`${productLanguage.plural('opportunity')} that may need moderation review.`}
       data={rows}
       getRowId={(o) => o.id}
-      getRowHref={() => '/admin/opportunities'}
+      getRowHref={(o) => `/admin/opportunities/${o.id}`}
+      storageKey="moderation"
       getSearchText={(o) => [o.title, o.status, o.visibilityStatus, o.id].filter(Boolean).join(' ')}
       columns={[
         { id: 'title', label: 'Title', cell: (o) => o.title },

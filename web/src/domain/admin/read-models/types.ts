@@ -119,6 +119,51 @@ export type AdminRiskSummary = {
   readonly rejectedDocuments: number
   readonly orphanHints: number
   readonly items: readonly AdminOpsActionCard[]
+  readonly buckets: readonly AdminRiskBucket[]
+}
+
+export type AdminHealthTone = 'critical' | 'warning' | 'healthy' | 'blocked' | 'info' | 'success'
+
+export type AdminPlatformHealthFacet = {
+  readonly id: string
+  readonly label: string
+  readonly tone: AdminHealthTone
+  readonly detail: string
+  readonly href: string
+  readonly value?: string | number
+}
+
+export type AdminPlatformHealthSummary = {
+  readonly facets: readonly AdminPlatformHealthFacet[]
+  readonly overallTone: AdminHealthTone
+  readonly overallLabel: string
+}
+
+export type AdminPipelineStage = {
+  readonly id: string
+  readonly label: string
+  readonly count: number
+  readonly href: string
+}
+
+export type AdminPipelineSummary = {
+  readonly stages: readonly AdminPipelineStage[]
+}
+
+export type AdminRiskBucket = {
+  readonly id: AdminHealthTone
+  readonly label: string
+  readonly count: number
+  readonly items: readonly AdminOpsActionCard[]
+}
+
+export type AdminRecentOperation = {
+  readonly id: string
+  readonly title: string
+  readonly summary: string
+  readonly timestamp: string
+  readonly href: string
+  readonly kind: string
 }
 
 export type AdminWorkspaceSummary = {
@@ -127,7 +172,11 @@ export type AdminWorkspaceSummary = {
   readonly description: string
   readonly kpiLabels: readonly { readonly label: string; readonly value: string | number; readonly href?: string }[]
   readonly inboxPreview: readonly AdminInboxItem[]
-  readonly domainLinks: readonly { readonly label: string; readonly href: string }[]
+  readonly domainLinks: readonly { readonly label: string; readonly href: string; readonly description?: string }[]
+  readonly actionCards: readonly AdminOpsActionCard[]
+  readonly riskTone: AdminHealthTone
+  readonly analytics: readonly { readonly label: string; readonly value: string | number; readonly href?: string }[]
+  readonly recentOps: readonly AdminRecentOperation[]
 }
 
 export type AdminPlatformEntityDefinition = {

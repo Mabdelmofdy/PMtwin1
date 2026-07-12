@@ -157,6 +157,22 @@ export function CommandMenu() {
             <CommandGroup heading="Admin Explore">
               <CommandItem
                 className="cursor-pointer"
+                onSelect={() => runCommand('/admin')}
+                keywords={['admin', 'command', 'center', 'executive', 'operations']}
+              >
+                <Sparkles className="size-4" aria-hidden />
+                <span>Executive Command Center</span>
+              </CommandItem>
+              <CommandItem
+                className="cursor-pointer"
+                onSelect={() => runCommand('/admin/command-center/operations')}
+                keywords={['admin', 'operations', 'queue', 'action']}
+              >
+                <Bell className="size-4" aria-hidden />
+                <span>Requires My Action / Operations</span>
+              </CommandItem>
+              <CommandItem
+                className="cursor-pointer"
                 onSelect={() => runCommand('/admin/search')}
                 keywords={['admin', 'search', 'global', 'find']}
               >
@@ -178,6 +194,14 @@ export function CommandMenu() {
               >
                 <BookOpen className="size-4" aria-hidden />
                 <span>Platform Explorer</span>
+              </CommandItem>
+              <CommandItem
+                className="cursor-pointer"
+                onSelect={() => runCommand('/admin/reports')}
+                keywords={['admin', 'reports', 'analytics', 'pipeline']}
+              >
+                <Sparkles className="size-4" aria-hidden />
+                <span>Analytics / Reports</span>
               </CommandItem>
             </CommandGroup>
             {adminNavigationGroups.map((group) => (

@@ -1,6 +1,10 @@
 import { useParams } from 'react-router-dom'
 import { useMemo } from 'react'
 import { partiesApi } from '@/api/parties.ts'
+import {
+  AdminEntityDetailShell,
+  AdminStatusSummaryRow,
+} from '@/components/admin/entity/admin-entity-detail-shell.tsx'
 import { AdminRelatedObjects } from '@/components/admin/related-objects/admin-related-objects.tsx'
 import { AdminUniversalTimeline } from '@/components/admin/timeline/admin-universal-timeline.tsx'
 import { relatedObjectsForParty } from '@/domain/admin/read-models/related-objects-adapter.ts'
@@ -15,6 +19,7 @@ import {
 import { PmPage, PmPageHeader, PmEmptyState } from '@/components/ui/pm-index'
 import { AdminStatusBadge } from '@/pages/admin/admin-display'
 import type { AdminTimelineEvent } from '@/domain/admin/read-models/types.ts'
+import { Link } from 'react-router-dom'
 
 export function AdminPartyDetailPage() {
   const { id } = useParams()
@@ -40,22 +45,19 @@ export function AdminPartyDetailPage() {
       })
     }
     for (const entry of auditRepository.getAll()) {
-      if (entry.entityId !== id) continue
+      if (entry.entityId !== id && entry.entityType !== 'party') continue
+      if (entry.entityId && entry.entityId !== id) continue
       events.push({
-        id: `audit-${entry.id}`,
+        id: entry.id,
         kind: 'audit',
-        timestamp: entry.timestamp ?? new Date(0).toISOString(),
+        timestamp: entry.timestamp ?? new Date().toISOString(),
         sequence: seq++,
         title: entry.action,
-        actorId: entry.userId,
-        entityType: entry.entityType,
-        entityId: entry.entityId,
-        href: '/admin/audit',
+        entityType: String(entry.entityType ?? 'party'),
+        entityId: id,
       })
     }
-    return [...events].sort(
-      (a, b) => (Date.parse(b.timestamp) || 0) - (Date.parse(a.timestamp) || 0),
-    )
+    return events.sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp))
   }, [id, party, version])
 
   if (!party) {
@@ -67,31 +69,56 @@ export function AdminPartyDetailPage() {
   }
 
   return (
-    <PmPage
-      header={
-        <PmPageHeader
-          title={party.displayName}
-          description={`${party.partyType} · ${party.id}`}
+    <AdminEntityDetailShell
+      label="Identity"
+      title={party.displayName}
+      description={party.id}
+      statusBadge={<AdminStatusBadge status={party.status} />}
+      statusSummary={
+        <AdminStatusSummaryRow
+          items={[
+            { label: 'Status', value: <AdminStatusBadge status={party.status} /> },
+            { label: 'Type', value: party.partyType },
+            {
+              label: 'Created',
+              value: party.createdAt ? formatDate(party.createdAt) : '—',
+            },
+            {
+              label: 'Memberships',
+              value: (
+                <Link to="/admin/memberships" className="text-primary underline-offset-4 hover:underline">
+                  Open
+                </Link>
+              ),
+            },
+          ]}
         />
       }
-    >
-      <PmFormReadonly>
-        <PmFormReadonlySection title="Overview">
-          <PmFormReadonlyField label="Party ID" value={party.id} />
-          <PmFormReadonlyField label="Type" value={party.partyType} />
-          <PmFormReadonlyField label="Status">
-            <AdminStatusBadge status={party.status} />
-          </PmFormReadonlyField>
-          <PmFormReadonlyField
-            label="Updated"
-            value={party.updatedAt ? formatDate(party.updatedAt) : null}
-          />
-        </PmFormReadonlySection>
-      </PmFormReadonly>
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <AdminRelatedObjects groups={related} />
-        <AdminUniversalTimeline events={timeline} />
-      </div>
-    </PmPage>
+      overview={
+        <PmFormReadonly>
+          <PmFormReadonlySection title="Overview">
+            <PmFormReadonlyField label="Party ID" value={party.id} />
+            <PmFormReadonlyField label="Display name" value={party.displayName} />
+            <PmFormReadonlyField label="Type" value={party.partyType} />
+            <PmFormReadonlyField label="Status">
+              <AdminStatusBadge status={party.status} />
+            </PmFormReadonlyField>
+          </PmFormReadonlySection>
+        </PmFormReadonly>
+      }
+      timeline={<AdminUniversalTimeline events={timeline} title="Timeline" />}
+      related={<AdminRelatedObjects groups={related} title="Related objects" />}
+      audit={
+        <PmFormReadonly>
+          <PmFormReadonlySection title="Audit">
+            <PmFormReadonlyField label="Open audit">
+              <Link to="/admin/audit" className="text-primary underline-offset-4 hover:underline">
+                Platform audit log
+              </Link>
+            </PmFormReadonlyField>
+          </PmFormReadonlySection>
+        </PmFormReadonly>
+      }
+    />
   )
 }
