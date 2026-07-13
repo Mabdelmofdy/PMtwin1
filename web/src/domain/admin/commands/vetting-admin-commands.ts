@@ -118,3 +118,48 @@ export function executeReviewVettingDocument(
   })
   return { ok: true, data }
 }
+
+export function executeSuspendVetting(
+  userId: string,
+  partyId: string,
+  reviewerId: string,
+  reason?: string,
+  actorRole?: string | null,
+): VettingAdminCommandResult {
+  const denied = requireVettingManage(actorRole)
+  if (denied) return { ok: false, error: denied }
+  if (!userId || !partyId || !reviewerId) {
+    return { ok: false, error: 'userId, partyId, and reviewerId are required' }
+  }
+  const data = vettingService.suspend(userId, partyId, reviewerId, reason)
+  if (!data) return { ok: false, error: 'Suspend vetting failed' }
+  appendAudit('SuspendVetting', reviewerId, userId, { partyId, reason: reason ?? null })
+  return { ok: true, data }
+}
+
+export function executeReassignVetting(
+  userId: string,
+  reviewerId: string,
+  assignedReviewerId: string,
+  actorRole?: string | null,
+): VettingAdminCommandResult {
+  const denied = requireVettingManage(actorRole)
+  if (denied) return { ok: false, error: denied }
+  const data = vettingService.reassign(userId, reviewerId, assignedReviewerId)
+  if (!data) return { ok: false, error: 'Reassign failed' }
+  appendAudit('ReassignVetting', reviewerId, userId, { assignedReviewerId })
+  return { ok: true, data }
+}
+
+export function executeSubmitVetting(
+  userId: string,
+  partyId: string,
+  actorRole?: string | null,
+): VettingAdminCommandResult {
+  // Submit is a user action; admin capability not required when actor is self.
+  void actorRole
+  const data = vettingService.submitForReview(userId, partyId)
+  if (!data) return { ok: false, error: 'Submit for review failed' }
+  appendAudit('SubmitVetting', userId, userId, { partyId })
+  return { ok: true, data }
+}

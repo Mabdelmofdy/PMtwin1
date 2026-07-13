@@ -58,17 +58,37 @@ export class WorkspaceMembershipRepository {
     const users = this.loadUsers()
     const companies = this.loadCompanies()
     const companyIds = new Set(companies.map((company) => company.id))
+
+    const ownerLinks = users
+      .filter(
+        (user) => user.role === 'company_owner' && companyIds.has(user.id),
+      )
+      .map((user) => ({ userId: user.id, companyId: user.id as string, role: 'workspace_owner' as const }))
+
+    const employeeLinks = users
+      .map((user) => {
+        const employerId =
+          (user as { employerCompanyId?: string }).employerCompanyId ??
+          (user as { companyId?: string }).companyId ??
+          (user.profile as { employerCompanyId?: string } | undefined)?.employerCompanyId ??
+          (user.profile as { companyId?: string } | undefined)?.companyId
+        if (!employerId || !companyIds.has(employerId)) return null
+        if (user.id === employerId) return null
+        return {
+          userId: user.id,
+          companyId: employerId,
+          role: 'member' as const,
+        }
+      })
+      .filter((link): link is { userId: string; companyId: string; role: 'member' } => link != null)
+
     return projectIdentityFromLegacyAccounts({
       users,
       companies,
       platformUserIds: new Set(
         users.filter(this.isPlatformUser).map((user) => user.id),
       ),
-      companyOwnerLinks: users
-        .filter(
-          (user) => user.role === 'company_owner' && companyIds.has(user.id),
-        )
-        .map((user) => ({ userId: user.id, companyId: user.id })),
+      companyOwnerLinks: [...ownerLinks, ...employeeLinks],
     }).memberships
   }
 

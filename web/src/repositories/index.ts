@@ -16,6 +16,7 @@ import {
   loadContracts,
   loadPendingUsers,
   loadAuditLog,
+  loadPartyDocuments,
 } from '@/infrastructure/seed/seed-loader.ts'
 
 import { UserRepository } from './user-repository.ts'
@@ -166,7 +167,10 @@ export const workspaceMembershipRepository =
     () => identityProjectionService.build().memberships,
   )
 
-export const partyDocumentRepository = new PartyDocumentRepository(storageAdapter)
+export const partyDocumentRepository = new PartyDocumentRepository(
+  storageAdapter,
+  loadPartyDocuments,
+)
 
 export {
   UserRepository,

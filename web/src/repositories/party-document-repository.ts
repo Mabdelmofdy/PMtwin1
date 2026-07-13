@@ -10,9 +10,11 @@ function createPartyDocumentId(): string {
 
 export class PartyDocumentRepository {
   private readonly storage: IStorageAdapter
+  private readonly loadSeed: () => PartyDocument[]
 
-  constructor(storage: IStorageAdapter) {
+  constructor(storage: IStorageAdapter, loadSeed: () => PartyDocument[] = () => []) {
     this.storage = storage
+    this.loadSeed = loadSeed
   }
 
   private readOverrides(): Overrides {
@@ -27,7 +29,7 @@ export class PartyDocumentRepository {
   getAll(): PartyDocument[] {
     const overrides = this.readOverrides()
     return mergeSeedWithOverrides({
-      seed: [],
+      seed: this.loadSeed(),
       patches: overrides.partyDocuments,
       newItems: overrides.newPartyDocuments ?? [],
       deletedIds: overrides.deletedPartyDocuments ?? [],

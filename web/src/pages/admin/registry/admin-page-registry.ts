@@ -29,6 +29,7 @@ export const ADMIN_PAGE_REGISTRY: readonly AdminPageRegistryEntry[] = [
   { id: 'parties', href: '/admin/parties', title: 'Parties', section: 'identity', capability: 'admin.parties.read' },
   { id: 'memberships', href: '/admin/memberships', title: 'Memberships', section: 'identity', capability: 'admin.parties.read' },
   { id: 'roles', href: '/admin/roles', title: 'Roles', section: 'identity', capability: 'admin.roles.assign' },
+  { id: 'onboarding_center', href: '/admin/onboarding/new', title: 'Onboarding Center', section: 'compliance', capability: 'admin.vetting.read' },
   { id: 'vetting', href: '/admin/vetting', title: 'Vetting', section: 'compliance', capability: 'admin.vetting.read' },
   { id: 'vetting_config', href: '/admin/vetting/config', title: 'Vetting Config', section: 'compliance', capability: 'admin.vetting.manage', plannedShell: true },
   { id: 'opportunities', href: '/admin/opportunities', title: 'Opportunities', section: 'marketplace', capability: 'admin.opportunities.read' },

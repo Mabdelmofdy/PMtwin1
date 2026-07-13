@@ -74,6 +74,7 @@ export const ADMIN_IA_SECTIONS: readonly AdminNavSection[] = [
     id: 'compliance',
     title: 'Onboarding & Vetting',
     items: [
+      { title: 'Onboarding Center', href: '/admin/onboarding/new', keywords: ['onboarding', 'registrations'], capability: 'admin.vetting.read' },
       { title: 'Vetting', href: '/admin/vetting', capability: 'admin.vetting.read' },
       { title: 'Vetting Config', href: '/admin/vetting/config', capability: 'admin.vetting.manage' },
     ],

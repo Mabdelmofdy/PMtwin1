@@ -32,6 +32,7 @@ export { AdminApprovalsPage } from './commercial/admin-approvals-page.tsx'
 export { AdminAwardsPage } from './commercial/admin-awards-page.tsx'
 export { AdminLegalReviewPage } from './commercial/admin-legal-review-page.tsx'
 export { AdminVettingConfigPage } from './onboarding/admin-vetting-config-page.tsx'
+export { AdminOnboardingCenterPage } from './onboarding/admin-onboarding-center-page.tsx'
 
 export { AdminFailedCommandsPage } from './system/admin-failed-commands-page.tsx'
 export { AdminNegotiationDetailPage } from './commercial/admin-negotiation-detail-page.tsx'

@@ -1,7 +1,7 @@
 {
   "domain": "users",
-  "version": "2.0",
-  "description": "Canonical 40-opportunity workflow users. Shared password: Pmtwin@2026 (Base64 in passwordHash). Profiles enriched to clear GAP-P05 (>=70%).",
+  "version": "2.1",
+  "description": "Canonical workflow professionals (30 accounts). Shared password: Pmtwin@2026. Profiles enriched for enterprise UAT.",
   "data": [
     {
       "id": "seed-user-001",
@@ -1087,6 +1087,795 @@
         "primaryDomain": "Construction",
         "rating": 0.8,
         "avatar": null
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-user-019",
+      "email": "omar.alsubaie@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 10,
+      "profile": {
+        "name": "Omar Al-Subaie",
+        "type": "professional",
+        "headline": "PM — Mega Projects",
+        "title": "Senior Project Manager",
+        "phone": "+966 55 019 2000",
+        "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Senior Project Manager with 18+ years delivering projects across Saudi Arabia.",
+        "photoUrl": "https://i.pravatar.cc/150?img=13",
+        "specializations": [
+          "Project Management"
+        ],
+        "skills": [
+          "Project Management",
+          "Primavera P6",
+          "Earned Value",
+          "Stakeholder Management"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 18,
+        "certifications": [
+          "PMP",
+          "PMO-CP"
+        ],
+        "caseStudies": [
+          {
+            "title": "Senior Project Manager Programme",
+            "description": "Delivered project management scope on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-user-020",
+      "email": "layla.alanzi@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 10,
+      "profile": {
+        "name": "Layla Al-Anzi",
+        "type": "professional",
+        "headline": "Civil Engineer — Highways",
+        "title": "Civil Engineer",
+        "phone": "+966 55 020 2000",
+        "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Civil Engineer with 11+ years delivering projects across Saudi Arabia.",
+        "photoUrl": "https://i.pravatar.cc/150?img=24",
+        "specializations": [
+          "Civil Engineering"
+        ],
+        "skills": [
+          "Highway Design",
+          "Civil 3D",
+          "Geotechnical Coordination",
+          "Site Supervision"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 11,
+        "certifications": [
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Civil Engineer Programme",
+            "description": "Delivered civil engineering scope on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-user-021",
+      "email": "faisal.almalki@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 10,
+      "profile": {
+        "name": "Faisal Al-Malki",
+        "type": "professional",
+        "headline": "Mechanical Engineer — HVAC Systems",
+        "title": "Mechanical Engineer",
+        "phone": "+966 55 021 2000",
+        "location": "Jeddah, Saudi Arabia",
+        "locationCity": "Jeddah",
+        "bio": "Mechanical Engineer with 10+ years delivering projects across Saudi Arabia.",
+        "photoUrl": "https://i.pravatar.cc/150?img=53",
+        "specializations": [
+          "Mechanical Engineering"
+        ],
+        "skills": [
+          "HVAC Design",
+          "MEP Coordination",
+          "Energy Modelling",
+          "Revit MEP"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 10,
+        "certifications": [
+          "Saudi Council of Engineers",
+          "LEED AP"
+        ],
+        "caseStudies": [
+          {
+            "title": "Mechanical Engineer Programme",
+            "description": "Delivered mechanical engineering scope on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-user-022",
+      "email": "rania.alharthy@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 10,
+      "profile": {
+        "name": "Rania Al-Harthy",
+        "type": "professional",
+        "headline": "Electrical Engineer — Power Systems",
+        "title": "Electrical Engineer",
+        "phone": "+966 55 022 2000",
+        "location": "Dammam, Saudi Arabia",
+        "locationCity": "Dammam",
+        "bio": "Electrical Engineer with 9+ years delivering projects across Saudi Arabia.",
+        "photoUrl": "https://i.pravatar.cc/150?img=26",
+        "specializations": [
+          "Electrical Engineering"
+        ],
+        "skills": [
+          "Power Systems",
+          "Lighting Design",
+          "ETAP",
+          "Commissioning"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 9,
+        "certifications": [
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Electrical Engineer Programme",
+            "description": "Delivered electrical engineering scope on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-user-023",
+      "email": "khalid.aldossary@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 10,
+      "profile": {
+        "name": "Khalid Al-Dossary",
+        "type": "professional",
+        "headline": "Architect — Hospitality & Retail",
+        "title": "Architect",
+        "phone": "+966 55 023 2000",
+        "location": "Jeddah, Saudi Arabia",
+        "locationCity": "Jeddah",
+        "bio": "Architect with 12+ years delivering projects across Saudi Arabia.",
+        "photoUrl": "https://i.pravatar.cc/150?img=17",
+        "specializations": [
+          "Architecture"
+        ],
+        "skills": [
+          "Architectural Design",
+          "BIM",
+          "3D Visualization",
+          "Interior Coordination"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 12,
+        "certifications": [
+          "Saudi Council of Engineers",
+          "LEED AP BD+C"
+        ],
+        "caseStudies": [
+          {
+            "title": "Architect Programme",
+            "description": "Delivered architecture scope on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-user-024",
+      "email": "noura.alotaibi@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 10,
+      "profile": {
+        "name": "Noura Al-Otaibi",
+        "type": "professional",
+        "headline": "QS — Commercial Management",
+        "title": "Quantity Surveyor",
+        "phone": "+966 55 024 2000",
+        "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Quantity Surveyor with 14+ years delivering projects across Saudi Arabia.",
+        "photoUrl": "https://i.pravatar.cc/150?img=45",
+        "specializations": [
+          "Quantity Surveying"
+        ],
+        "skills": [
+          "Quantity Surveying",
+          "Contract Administration",
+          "Cost Planning",
+          "Claims"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 14,
+        "certifications": [
+          "MRICS",
+          "PMP"
+        ],
+        "caseStudies": [
+          {
+            "title": "Quantity Surveyor Programme",
+            "description": "Delivered quantity surveying scope on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-user-025",
+      "email": "sultan.alqahtani@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 10,
+      "profile": {
+        "name": "Sultan Al-Qahtani",
+        "type": "professional",
+        "headline": "Procurement — EPC Packages",
+        "title": "Procurement Lead",
+        "phone": "+966 55 025 2000",
+        "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Procurement Lead with 15+ years delivering projects across Saudi Arabia.",
+        "photoUrl": "https://i.pravatar.cc/150?img=59",
+        "specializations": [
+          "Procurement"
+        ],
+        "skills": [
+          "Procurement",
+          "Package Strategy",
+          "Vendor Prequalification",
+          "Negotiation"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 15,
+        "certifications": [
+          "CIPS Level 5"
+        ],
+        "caseStudies": [
+          {
+            "title": "Procurement Lead Programme",
+            "description": "Delivered procurement scope on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-user-026",
+      "email": "hala.alghamdi@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 10,
+      "profile": {
+        "name": "Hala Al-Ghamdi",
+        "type": "professional",
+        "headline": "Structural Engineer — Bridges",
+        "title": "Structural Engineer",
+        "phone": "+966 55 026 2000",
+        "location": "Abha, Saudi Arabia",
+        "locationCity": "Abha",
+        "bio": "Structural Engineer with 13+ years delivering projects across Saudi Arabia.",
+        "photoUrl": "https://i.pravatar.cc/150?img=28",
+        "specializations": [
+          "Structural Engineering"
+        ],
+        "skills": [
+          "Bridge Design",
+          "Structural Analysis",
+          "MIDAS",
+          "Detailing Review"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 13,
+        "certifications": [
+          "Saudi Council of Engineers",
+          "PE"
+        ],
+        "caseStudies": [
+          {
+            "title": "Structural Engineer Programme",
+            "description": "Delivered structural engineering scope on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-user-027",
+      "email": "bandar.alzahrani@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 10,
+      "profile": {
+        "name": "Bandar Al-Zahrani",
+        "type": "professional",
+        "headline": "HSE — Construction Safety",
+        "title": "HSE Manager",
+        "phone": "+966 55 027 2000",
+        "location": "Yanbu, Saudi Arabia",
+        "locationCity": "Yanbu",
+        "bio": "HSE Manager with 16+ years delivering projects across Saudi Arabia.",
+        "photoUrl": "https://i.pravatar.cc/150?img=61",
+        "specializations": [
+          "HSE"
+        ],
+        "skills": [
+          "HSE Management",
+          "ISO 45001",
+          "Incident Investigation",
+          "Training"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 16,
+        "certifications": [
+          "NEBOSH",
+          "IOSH"
+        ],
+        "caseStudies": [
+          {
+            "title": "HSE Manager Programme",
+            "description": "Delivered hse scope on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-user-028",
+      "email": "reem.alomari@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 10,
+      "profile": {
+        "name": "Reem Al-Omari",
+        "type": "professional",
+        "headline": "BIM Manager — Multi-Discipline Coordination",
+        "title": "BIM Manager",
+        "phone": "+966 55 028 2000",
+        "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "BIM Manager with 10+ years delivering projects across Saudi Arabia.",
+        "photoUrl": "https://i.pravatar.cc/150?img=36",
+        "specializations": [
+          "BIM"
+        ],
+        "skills": [
+          "BIM Management",
+          "Revit",
+          "Navisworks",
+          "ISO 19650"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 10,
+        "certifications": [
+          "Autodesk Certified Professional",
+          "ISO 19650"
+        ],
+        "caseStudies": [
+          {
+            "title": "BIM Manager Programme",
+            "description": "Delivered bim scope on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-user-029",
+      "email": "turki.alsalem@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 10,
+      "profile": {
+        "name": "Turki Al-Salem",
+        "type": "professional",
+        "headline": "Planning Engineer — Programme Controls",
+        "title": "Planning Engineer",
+        "phone": "+966 55 029 2000",
+        "location": "Khobar, Saudi Arabia",
+        "locationCity": "Khobar",
+        "bio": "Planning Engineer with 8+ years delivering projects across Saudi Arabia.",
+        "photoUrl": "https://i.pravatar.cc/150?img=62",
+        "specializations": [
+          "Planning"
+        ],
+        "skills": [
+          "Planning",
+          "Primavera P6",
+          "Delay Analysis",
+          "Progress Reporting"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 8,
+        "certifications": [
+          "PMP",
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Planning Engineer Programme",
+            "description": "Delivered planning scope on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-user-030",
+      "email": "maha.alrashidi@pmtwin.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 10,
+      "profile": {
+        "name": "Maha Al-Rashidi",
+        "type": "professional",
+        "headline": "Cost Engineer — Forecasting & Controls",
+        "title": "Cost Engineer",
+        "phone": "+966 55 030 2000",
+        "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Cost Engineer with 9+ years delivering projects across Saudi Arabia.",
+        "photoUrl": "https://i.pravatar.cc/150?img=47",
+        "specializations": [
+          "Cost Engineering"
+        ],
+        "skills": [
+          "Cost Engineering",
+          "Forecasting",
+          "Change Control",
+          "Cashflow"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 9,
+        "certifications": [
+          "AACE CCP",
+          "PMP"
+        ],
+        "caseStudies": [
+          {
+            "title": "Cost Engineer Programme",
+            "description": "Delivered cost engineering scope on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "Hybrid",
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"

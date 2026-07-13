@@ -1,8 +1,8 @@
 {
   "domain": "companies",
-  "version": "2.2",
+  "version": "2.3",
   "dataset": "workflow",
-  "description": "6 B2B workflow company accounts. Shared password: Pmtwin@2026. Own 11 of 40 seed opportunities.",
+  "description": "15 B2B workflow company accounts. Shared password: Pmtwin@2026. Categories: main contractors, specialized contractors, consultants, suppliers, equipment rental.",
   "data": [
     {
       "id": "seed-co-corp-001",
@@ -441,6 +441,768 @@
         "primaryDomain": "Construction",
         "rating": 0.82,
         "avatar": null
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-co-corp-007",
+      "email": "contact@hijaz-contracting.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "company_owner",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 28,
+      "profile": {
+        "name": "Hijaz Contracting Co",
+        "type": "company",
+        "headline": "Main Contractor — Infrastructure & Buildings",
+        "companyType": "Large Enterprise",
+        "companyRole": "Contractor",
+        "registrationNumber": "1010000007",
+        "phone": "+966 12 207 1007",
+        "location": "Makkah, Saudi Arabia",
+        "address": "Makkah, Saudi Arabia",
+        "description": "Main contractor delivering highways, civic buildings and large-scale residential compounds across the western region.",
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "industry": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "employeeCount": "500-1000",
+        "yearEstablished": 1990,
+        "certifications": [
+          "ISO 9001",
+          "ISO 14001"
+        ],
+        "financialCapacity": 95000000,
+        "preferredPaymentModes": [
+          "cash",
+          "hybrid"
+        ],
+        "preferredCollaborationModels": [
+          "project",
+          "consortium"
+        ],
+        "services": [
+          "General Contracting",
+          "Civil Works",
+          "Project Controls"
+        ],
+        "interests": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "caseStudies": [
+          {
+            "title": "Haramain Corridor Works",
+            "description": "Civil packages for corridor upgrades.",
+            "year": 2024
+          }
+        ],
+        "references": [
+          {
+            "name": "Ministry of Transport",
+            "role": "Main contractor",
+            "year": 2023
+          }
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.82,
+        "avatar": null,
+        "skills": [
+          "General Contracting",
+          "Civil Works",
+          "Project Controls"
+        ],
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-co-corp-008",
+      "email": "contact@qassim-builders.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "company_owner",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 22,
+      "profile": {
+        "name": "Qassim Builders Group",
+        "type": "company",
+        "headline": "Main Contractor — Commercial & Industrial",
+        "companyType": "Medium Enterprise",
+        "companyRole": "Contractor",
+        "registrationNumber": "1010000008",
+        "phone": "+966 16 208 1008",
+        "location": "Buraidah, Saudi Arabia",
+        "address": "Buraidah, Saudi Arabia",
+        "description": "Regional main contractor specialising in commercial shells, industrial sheds and fit-out packages in Qassim.",
+        "sectors": [
+          "Construction",
+          "Industrial"
+        ],
+        "industry": [
+          "Construction",
+          "Industrial"
+        ],
+        "employeeCount": "100-500",
+        "yearEstablished": 2001,
+        "certifications": [
+          "ISO 9001",
+          "ISO 14001"
+        ],
+        "financialCapacity": 42000000,
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project",
+          "joint_venture"
+        ],
+        "services": [
+          "General Contracting",
+          "Fit-Out",
+          "QA/QC"
+        ],
+        "interests": [
+          "Construction",
+          "Industrial"
+        ],
+        "caseStudies": [
+          {
+            "title": "Qassim Logistics Park",
+            "description": "Design-build of warehouse cluster.",
+            "year": 2023
+          }
+        ],
+        "references": [
+          {
+            "name": "Saudi Industrial Development Fund",
+            "role": "Contractor",
+            "year": 2022
+          }
+        ],
+        "primaryDomain": "Construction",
+        "rating": 0.82,
+        "avatar": null,
+        "skills": [
+          "General Contracting",
+          "Fit-Out",
+          "QA/QC"
+        ],
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-co-corp-009",
+      "email": "contact@najran-mep.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "company_owner",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 24,
+      "profile": {
+        "name": "Najran MEP Specialists",
+        "type": "company",
+        "headline": "Specialized Contractor — MEP & Building Services",
+        "companyType": "Medium Enterprise",
+        "companyRole": "Specialized Contractor",
+        "registrationNumber": "1010000009",
+        "phone": "+966 17 209 1009",
+        "location": "Najran, Saudi Arabia",
+        "address": "Najran, Saudi Arabia",
+        "description": "Specialized MEP contractor covering HVAC, electrical distribution and fire-protection systems for public and private projects.",
+        "sectors": [
+          "Construction",
+          "Energy"
+        ],
+        "industry": [
+          "Construction",
+          "Energy"
+        ],
+        "employeeCount": "100-500",
+        "yearEstablished": 2007,
+        "certifications": [
+          "ISO 9001",
+          "ISO 14001"
+        ],
+        "financialCapacity": 28000000,
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project",
+          "resource_sharing"
+        ],
+        "services": [
+          "MEP Installation",
+          "Testing & Commissioning",
+          "Maintenance"
+        ],
+        "interests": [
+          "Construction",
+          "Energy"
+        ],
+        "caseStudies": [
+          {
+            "title": "Southern Region Hospital MEP",
+            "description": "Full MEP package for a 200-bed hospital.",
+            "year": 2024
+          }
+        ],
+        "references": [
+          {
+            "name": "Ministry of Health",
+            "role": "MEP subcontractor",
+            "year": 2023
+          }
+        ],
+        "primaryDomain": "MEP",
+        "rating": 0.82,
+        "avatar": null,
+        "skills": [
+          "MEP Installation",
+          "Testing & Commissioning",
+          "Maintenance"
+        ],
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-co-corp-010",
+      "email": "contact@asir-steel.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "company_owner",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 26,
+      "profile": {
+        "name": "Asir Steel Fabricators",
+        "type": "company",
+        "headline": "Specialized Contractor — Structural Steel & Fabrication",
+        "companyType": "Medium Enterprise",
+        "companyRole": "Specialized Contractor",
+        "registrationNumber": "1010000010",
+        "phone": "+966 17 210 1010",
+        "location": "Abha, Saudi Arabia",
+        "address": "Abha, Saudi Arabia",
+        "description": "Structural steel fabricator and erector for industrial plants, bridges and high-rise frames.",
+        "sectors": [
+          "Construction",
+          "Industrial"
+        ],
+        "industry": [
+          "Construction",
+          "Industrial"
+        ],
+        "employeeCount": "100-500",
+        "yearEstablished": 2004,
+        "certifications": [
+          "ISO 9001",
+          "ISO 14001"
+        ],
+        "financialCapacity": 31000000,
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project",
+          "consortium"
+        ],
+        "services": [
+          "Steel Fabrication",
+          "Erection",
+          "Shop Detailing"
+        ],
+        "interests": [
+          "Construction",
+          "Industrial"
+        ],
+        "caseStudies": [
+          {
+            "title": "Abha Industrial Frame",
+            "description": "Fabricated 4,200 tonnes of structural steel.",
+            "year": 2023
+          }
+        ],
+        "references": [
+          {
+            "name": "Saudi Aramco Vendor",
+            "role": "Fabricator",
+            "year": 2022
+          }
+        ],
+        "primaryDomain": "Structural Steel",
+        "rating": 0.82,
+        "avatar": null,
+        "skills": [
+          "Steel Fabrication",
+          "Erection",
+          "Shop Detailing"
+        ],
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-co-corp-011",
+      "email": "contact@riyadh-eng-consult.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "company_owner",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 32,
+      "profile": {
+        "name": "Riyadh Engineering Consultants",
+        "type": "company",
+        "headline": "Consulting Engineer — Structural & Civil Design",
+        "companyType": "Medium Enterprise",
+        "companyRole": "Consultant",
+        "registrationNumber": "1010000011",
+        "phone": "+966 11 211 1011",
+        "location": "Riyadh, Saudi Arabia",
+        "address": "Riyadh, Saudi Arabia",
+        "description": "Multi-discipline consulting firm providing structural, civil and site supervision services for Vision 2030 programmes.",
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "industry": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "employeeCount": "100-500",
+        "yearEstablished": 1998,
+        "certifications": [
+          "ISO 9001",
+          "ISO 14001"
+        ],
+        "financialCapacity": 22000000,
+        "preferredPaymentModes": [
+          "cash",
+          "hybrid"
+        ],
+        "preferredCollaborationModels": [
+          "project",
+          "retainer"
+        ],
+        "services": [
+          "Structural Design",
+          "Site Supervision",
+          "Value Engineering"
+        ],
+        "interests": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "caseStudies": [
+          {
+            "title": "Riyadh Metro Interface Design",
+            "description": "Civil design packages for station interfaces.",
+            "year": 2024
+          }
+        ],
+        "references": [
+          {
+            "name": "Royal Commission for Riyadh City",
+            "role": "Design consultant",
+            "year": 2023
+          }
+        ],
+        "primaryDomain": "Engineering Consulting",
+        "rating": 0.82,
+        "avatar": null,
+        "skills": [
+          "Structural Design",
+          "Site Supervision",
+          "Value Engineering"
+        ],
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-co-corp-012",
+      "email": "contact@makkah-design.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "company_owner",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 18,
+      "profile": {
+        "name": "Makkah Design Bureau",
+        "type": "company",
+        "headline": "Architecture & Urban Design Consultant",
+        "companyType": "Small Enterprise",
+        "companyRole": "Consultant",
+        "registrationNumber": "1010000012",
+        "phone": "+966 12 212 1012",
+        "location": "Makkah, Saudi Arabia",
+        "address": "Makkah, Saudi Arabia",
+        "description": "Architecture and urban design consultancy focused on hospitality, civic and heritage-sensitive projects in the holy cities.",
+        "sectors": [
+          "Architecture",
+          "Real Estate"
+        ],
+        "industry": [
+          "Architecture",
+          "Real Estate"
+        ],
+        "employeeCount": "50-100",
+        "yearEstablished": 2011,
+        "certifications": [
+          "ISO 9001",
+          "ISO 14001"
+        ],
+        "financialCapacity": 12000000,
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project",
+          "joint_venture"
+        ],
+        "services": [
+          "Architectural Design",
+          "Urban Planning",
+          "BIM Coordination"
+        ],
+        "interests": [
+          "Architecture",
+          "Real Estate"
+        ],
+        "caseStudies": [
+          {
+            "title": "Makkah Hotel Tower Concept",
+            "description": "Concept and schematic design for a 28-storey hotel.",
+            "year": 2024
+          }
+        ],
+        "references": [
+          {
+            "name": "Holy Cities Development Authority",
+            "role": "Design consultant",
+            "year": 2023
+          }
+        ],
+        "primaryDomain": "Architecture",
+        "rating": 0.82,
+        "avatar": null,
+        "skills": [
+          "Architectural Design",
+          "Urban Planning",
+          "BIM Coordination"
+        ],
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-co-corp-013",
+      "email": "contact@diriyah-materials.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "company_owner",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 30,
+      "profile": {
+        "name": "Diriyah Building Materials",
+        "type": "company",
+        "headline": "Construction Materials Supplier — Aggregates & Cement",
+        "companyType": "Medium Enterprise",
+        "companyRole": "Supplier",
+        "registrationNumber": "1010000013",
+        "phone": "+966 11 213 1013",
+        "location": "Riyadh, Saudi Arabia",
+        "address": "Riyadh, Saudi Arabia",
+        "description": "Supplier of ready-mix concrete, aggregates and specialty cement products to contractors across central KSA.",
+        "sectors": [
+          "Construction",
+          "Industrial"
+        ],
+        "industry": [
+          "Construction",
+          "Industrial"
+        ],
+        "employeeCount": "100-500",
+        "yearEstablished": 2006,
+        "certifications": [
+          "ISO 9001",
+          "ISO 14001"
+        ],
+        "financialCapacity": 38000000,
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "preferredCollaborationModels": [
+          "project",
+          "resource_sharing",
+          "barter"
+        ],
+        "services": [
+          "Ready-Mix Supply",
+          "Aggregates",
+          "Logistics"
+        ],
+        "interests": [
+          "Construction",
+          "Industrial"
+        ],
+        "caseStudies": [
+          {
+            "title": "Diriyah Gate Concrete Supply",
+            "description": "Multi-year ready-mix supply agreement.",
+            "year": 2024
+          }
+        ],
+        "references": [
+          {
+            "name": "Diriyah Gate Development Authority",
+            "role": "Materials supplier",
+            "year": 2023
+          }
+        ],
+        "primaryDomain": "Building Materials",
+        "rating": 0.82,
+        "avatar": null,
+        "skills": [
+          "Ready-Mix Supply",
+          "Aggregates",
+          "Logistics"
+        ],
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-co-corp-014",
+      "email": "contact@yanbu-industrial-supply.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "company_owner",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 27,
+      "profile": {
+        "name": "Yanbu Industrial Supplies",
+        "type": "company",
+        "headline": "Industrial Supplier — Pipes, Valves & Fittings",
+        "companyType": "Medium Enterprise",
+        "companyRole": "Supplier",
+        "registrationNumber": "1010000014",
+        "phone": "+966 14 214 1014",
+        "location": "Yanbu, Saudi Arabia",
+        "address": "Yanbu, Saudi Arabia",
+        "description": "Industrial materials supplier serving petrochemical and infrastructure projects with pipes, valves and engineered fittings.",
+        "sectors": [
+          "Industrial",
+          "Energy"
+        ],
+        "industry": [
+          "Industrial",
+          "Energy"
+        ],
+        "employeeCount": "100-500",
+        "yearEstablished": 2003,
+        "certifications": [
+          "ISO 9001",
+          "ISO 14001"
+        ],
+        "financialCapacity": 45000000,
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project",
+          "resource_sharing"
+        ],
+        "services": [
+          "Pipe Supply",
+          "Valve Packages",
+          "Warehouse Logistics"
+        ],
+        "interests": [
+          "Industrial",
+          "Energy"
+        ],
+        "caseStudies": [
+          {
+            "title": "Yanbu Pipeline Package",
+            "description": "Supplied valves and fittings for a process line package.",
+            "year": 2023
+          }
+        ],
+        "references": [
+          {
+            "name": "SABIC Affiliate",
+            "role": "Preferred supplier",
+            "year": 2022
+          }
+        ],
+        "primaryDomain": "Industrial Supply",
+        "rating": 0.82,
+        "avatar": null,
+        "skills": [
+          "Pipe Supply",
+          "Valve Packages",
+          "Warehouse Logistics"
+        ],
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-co-corp-015",
+      "email": "contact@tabuk-crane-plant.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "company_owner",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 29,
+      "profile": {
+        "name": "Tabuk Crane & Plant",
+        "type": "company",
+        "headline": "Equipment Rental — Cranes & Earthmoving",
+        "companyType": "Medium Enterprise",
+        "companyRole": "Equipment Rental",
+        "registrationNumber": "1010000015",
+        "phone": "+966 14 215 1015",
+        "location": "Tabuk, Saudi Arabia",
+        "address": "Tabuk, Saudi Arabia",
+        "description": "Heavy equipment rental fleet covering mobile cranes, excavators and plant hire for NEOM-region and northern province projects.",
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "industry": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "employeeCount": "100-500",
+        "yearEstablished": 2009,
+        "certifications": [
+          "ISO 9001",
+          "ISO 14001"
+        ],
+        "financialCapacity": 33000000,
+        "preferredPaymentModes": [
+          "cash",
+          "barter"
+        ],
+        "preferredCollaborationModels": [
+          "project",
+          "resource_sharing",
+          "barter"
+        ],
+        "services": [
+          "Crane Hire",
+          "Earthmoving Fleet",
+          "Operator Supply"
+        ],
+        "interests": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "caseStudies": [
+          {
+            "title": "NEOM Access Road Fleet",
+            "description": "Provided crane and excavator fleet for access roads.",
+            "year": 2024
+          }
+        ],
+        "references": [
+          {
+            "name": "NEOM Contractor Consortium",
+            "role": "Equipment partner",
+            "year": 2023
+          }
+        ],
+        "primaryDomain": "Equipment Rental",
+        "rating": 0.82,
+        "avatar": null,
+        "skills": [
+          "Crane Hire",
+          "Earthmoving Fleet",
+          "Operator Supply"
+        ],
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"

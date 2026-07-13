@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   AuthMarketingColumn,
@@ -28,6 +28,13 @@ import {
   type RegistrationResult,
   type RegistrationValidationErrors,
 } from '@/lib/registration-service.ts'
+import { resolveOtpDelivery } from '@/domain/otp'
+import {
+  clearOnboardingDraft,
+  isMeaningfulOnboardingDraft,
+  readOnboardingDraft,
+  saveOnboardingDraft,
+} from '@/lib/onboarding-draft-store.ts'
 
 const STEPS = ['Account Type', 'Role', 'Profile Info', 'Documents', 'Review', 'Verification'] as const
 const NEXT_STEP: Record<WizardStep, WizardStep> = { 0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 5 }
@@ -57,6 +64,49 @@ export function LegacyRegisterPage() {
   const [notice, setNotice] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [completion, setCompletion] = useState<CompletionState | null>(null)
+  const [otpBusy, setOtpBusy] = useState(false)
+  const [otpMessage, setOtpMessage] = useState<string | null>(null)
+  const [draftNotice, setDraftNotice] = useState<string | null>(null)
+  const recoveredKeys = useRef(new Set<string>())
+
+  useEffect(() => {
+    const emailKey =
+      form.accountType === 'company'
+        ? form.businessEmail.trim()
+        : form.email.trim()
+    if (!emailKey || !isMeaningfulOnboardingDraft(form)) return
+    const kind =
+      form.accountType === 'company' ? 'company' : 'individual'
+    const handle = window.setTimeout(() => {
+      saveOnboardingDraft({
+        savedAt: new Date().toISOString(),
+        kind,
+        identityKey: emailKey,
+        activeStep: step,
+        data: form,
+        profileCompletionPercent: 0,
+      })
+    }, 600)
+    return () => window.clearTimeout(handle)
+  }, [form, step])
+
+  useEffect(() => {
+    const emailKey =
+      form.accountType === 'company'
+        ? form.businessEmail.trim()
+        : form.email.trim()
+    if (!emailKey || form.otpVerified) return
+    const recoverKey = `${form.accountType ?? 'individual'}:${emailKey}`
+    if (recoveredKeys.current.has(recoverKey)) return
+    const kind =
+      form.accountType === 'company' ? 'company' : 'individual'
+    const draft = readOnboardingDraft(kind, emailKey)
+    if (!draft || !isMeaningfulOnboardingDraft(draft.data)) return
+    recoveredKeys.current.add(recoverKey)
+    setForm(draft.data)
+    setStep(draft.activeStep as WizardStep)
+    setDraftNotice(`Draft restored from ${new Date(draft.savedAt).toLocaleString()}`)
+  }, [form.email, form.businessEmail, form.accountType, form.otpVerified])
 
   const accountTypeLabel = useMemo(() => (form.accountType === 'company' ? 'Company' : 'Individual'), [form.accountType])
   const branchTitle = useMemo(() => {
@@ -93,6 +143,61 @@ export function LegacyRegisterPage() {
     setStep((prev) => PREV_STEP[prev])
   }
 
+  const registrationEmail =
+    form.accountType === 'company' ? form.businessEmail.trim() : form.email.trim()
+
+  const sendOtp = async () => {
+    setOtpBusy(true)
+    setOtpMessage(null)
+    setFieldErrors((prev) => {
+      const next = { ...prev }
+      delete next.otpCode
+      return next
+    })
+    const otp = resolveOtpDelivery()
+    const result = await otp.send({
+      channel: 'email',
+      destination: registrationEmail,
+      purpose: 'registration',
+    })
+    setOtpBusy(false)
+    if (!result.ok) {
+      setOtpMessage(result.message)
+      return
+    }
+    update('otpChallengeId', result.challenge.challengeId)
+    update('otpVerified', false)
+    update('otpDebugHint', result.challenge.debugCode ?? '')
+    setOtpMessage(
+      result.challenge.debugCode
+        ? `Code sent. Demo/UAT code: ${result.challenge.debugCode}`
+        : 'Verification code sent to your email.',
+    )
+  }
+
+  const verifyOtp = async () => {
+    if (!form.otpChallengeId) {
+      setOtpMessage('Send a verification code first.')
+      return
+    }
+    setOtpBusy(true)
+    setOtpMessage(null)
+    const otp = resolveOtpDelivery()
+    const result = await otp.verify({
+      challengeId: form.otpChallengeId,
+      code: form.otpCode,
+    })
+    setOtpBusy(false)
+    if (!result.ok) {
+      setOtpMessage(result.message)
+      update('otpVerified', false)
+      return
+    }
+    update('otpVerified', true)
+    update('verificationChoice', 'complete')
+    setOtpMessage('Email verified successfully.')
+  }
+
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     const stepErrors = validateWizardStep(step, form)
@@ -125,6 +230,16 @@ export function LegacyRegisterPage() {
       partyType: result.partyType,
       runtimeLabel: runtimeLabel(runtimeMode),
     })
+    const emailKey =
+      form.accountType === 'company'
+        ? form.businessEmail.trim()
+        : form.email.trim()
+    if (emailKey) {
+      clearOnboardingDraft(
+        form.accountType === 'company' ? 'company' : 'individual',
+        emailKey,
+      )
+    }
   }
 
   const continueToDashboard = () => {
@@ -402,41 +517,68 @@ export function LegacyRegisterPage() {
           ) : null}
 
           {step === 5 ? (
-            <section className="reg-step-content reg-step-card mb-6" aria-label="Verification preference">
+            <section className="reg-step-content reg-step-card mb-6" aria-label="Email verification">
               <h2 className="reg-step-title mb-2 text-lg font-semibold text-gray-900">
-                {form.accountType === 'company' ? 'Vetting' : 'Verification'}
+                Verify your email
               </h2>
               <p className="mb-4 text-sm text-gray-600">
-                Choose whether to complete verification now or skip and continue later.
+                Enter the one-time code sent to <strong>{registrationEmail || 'your email'}</strong>.
+                The same verification UX will use SMS/email providers in production.
               </p>
-              <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {(
-                  [
-                    ['skip', 'Skip for now', 'You can complete verification later from profile settings.'],
-                    ['complete', 'Complete now', 'Add your primary domain for immediate onboarding readiness.'],
-                  ] as const
-                ).map(([value, title, body]) => (
-                  <label key={value} className="reg-account-card flex cursor-pointer flex-col rounded-xl border-2 border-gray-200 p-4">
-                    <input
-                      type="radio"
-                      className="sr-only"
-                      name="verification-choice"
-                      checked={form.verificationChoice === value}
-                      onChange={() => update('verificationChoice', value)}
-                    />
-                    <span className="mb-1 font-semibold text-gray-900">{title}</span>
-                    <span className="text-sm text-gray-600">{body}</span>
-                  </label>
-                ))}
+              <div className="mb-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="reg-wizard-btn reg-wizard-btn--secondary"
+                  onClick={() => void sendOtp()}
+                  disabled={otpBusy || !registrationEmail}
+                >
+                  {form.otpChallengeId ? 'Resend code' : 'Send code'}
+                </button>
               </div>
-              {form.verificationChoice === 'complete' ? (
-                <Field id="primary-domain" label="Primary domain (optional in this phase)" value={form.primaryDomain} onChange={(v) => update('primaryDomain', v)} />
+              <Field
+                id="otp-code"
+                label="Verification code"
+                value={form.otpCode}
+                onChange={(v) => {
+                  update('otpCode', v)
+                  update('otpVerified', false)
+                }}
+                autoComplete="one-time-code"
+                error={fieldErrors.otpCode}
+              />
+              <button
+                type="button"
+                className="reg-wizard-btn reg-wizard-btn--primary mb-3"
+                onClick={() => void verifyOtp()}
+                disabled={otpBusy || !form.otpCode.trim()}
+              >
+                Verify code
+              </button>
+              {form.otpVerified ? (
+                <p className="mb-2 text-sm font-medium text-emerald-700" role="status">
+                  Email verified
+                </p>
+              ) : null}
+              {otpMessage ? (
+                <p className="mb-2 text-sm text-gray-700" role="status">
+                  {otpMessage}
+                </p>
+              ) : null}
+              {isLocalSignupRuntime && form.otpDebugHint ? (
+                <p className="text-xs text-amber-700">
+                  Demo/UAT debug code: {form.otpDebugHint}
+                </p>
               ) : null}
             </section>
           ) : null}
 
           {submitError ? <div className="alert alert-error mb-4" role="alert">{submitError}</div> : null}
           {notice ? <div className="reg-preview-notice mb-4" role="status">{notice}</div> : null}
+          {draftNotice ? (
+            <div className="reg-preview-notice mb-4" role="status">
+              {draftNotice}
+            </div>
+          ) : null}
 
           <div className="reg-wizard-footer">
             <button

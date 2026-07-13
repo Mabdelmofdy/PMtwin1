@@ -25,6 +25,7 @@ import {
   RegisterPage,
   ResetPasswordPage,
 } from '@/pages/public/auth-pages'
+import { InviteAcceptPage } from '@/pages/public/invite-accept-page'
 import {
   OpportunityCreatePage,
   OpportunityEditPage,
@@ -108,6 +109,7 @@ import {
   AdminUsersPage,
   AdminVettingConfigPage,
   AdminVettingPage,
+  AdminOnboardingCenterPage,
   AdminWorkspacePage,
 } from '@/pages/admin/admin-pages'
 import { AdminCommercialAgreementDetailPage } from '@/pages/admin/commercial/admin-commercial-agreement-detail-page.tsx'
@@ -147,6 +149,7 @@ export function AppRoutes() {
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/invite/:token" element={<InviteAcceptPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Route>
@@ -230,6 +233,8 @@ export function AppRoutes() {
           <Route path="/admin/roles" element={<AdminRolesPage />} />
           <Route path="/admin/vetting" element={<AdminVettingPage />} />
           <Route path="/admin/vetting/config" element={<AdminVettingConfigPage />} />
+          <Route path="/admin/onboarding" element={<Navigate to="/admin/onboarding/new" replace />} />
+          <Route path="/admin/onboarding/:queueSlug" element={<AdminOnboardingCenterPage />} />
           <Route path="/admin/opportunities" element={<AdminOpportunitiesPage />} />
           <Route path="/admin/opportunities/:id" element={<AdminOpportunityDetailPage />} />
           <Route path="/admin/matching" element={<AdminMatchingPage />} />

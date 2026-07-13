@@ -89,6 +89,8 @@ export type RegistrationSuccess = {
 export type RegistrationFailureCode =
   | 'VALIDATION_FAILED'
   | 'DUPLICATE_EMAIL'
+  | 'DUPLICATE_PARTY'
+  | 'OTP_REQUIRED'
   | 'BACKEND_UNAVAILABLE'
   | 'REQUEST_FAILED'
 
@@ -289,6 +291,24 @@ export async function registerAccount(
       partyType: created.partyType,
     }
   } catch (error) {
+    if (error instanceof Error && error.message === 'DUPLICATE_EMAIL') {
+      return {
+        ok: false,
+        code: 'DUPLICATE_EMAIL',
+        message: 'This email is already in use.',
+        fieldErrors:
+          request.accountType === 'company'
+            ? { businessEmail: 'This email is already in use.' }
+            : { email: 'This email is already in use.' },
+      }
+    }
+    if (error instanceof Error && error.message === 'DUPLICATE_PARTY') {
+      return {
+        ok: false,
+        code: 'DUPLICATE_PARTY',
+        message: 'A party for this account already exists.',
+      }
+    }
     if (error instanceof Error && error.message === 'Registration API is not available yet.') {
       return {
         ok: false,

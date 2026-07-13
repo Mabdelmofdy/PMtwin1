@@ -1,0 +1,981 @@
+{
+  "domain": "users",
+  "version": "1.0",
+  "dataset": "enterprise-uat",
+  "description": "Company employee users linked to seed-co-corp-* accounts. Shared password: Pmtwin@2026.",
+  "data": [
+    {
+      "id": "seed-emp-001",
+      "email": "fahad.alotaibi@alriyadh-construction.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 5,
+      "companyId": "seed-co-corp-001",
+      "employerCompanyId": "seed-co-corp-001",
+      "organizationId": "seed-co-corp-001",
+      "profile": {
+        "name": "Fahad Al-Otaibi",
+        "type": "employee",
+        "headline": "Project Manager — Commercial Towers",
+        "title": "Senior Project Manager",
+        "phone": "+966 55 101 3001",
+        "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Senior Project Manager at a Saudi construction enterprise with 14+ years of delivery experience across KSA projects.",
+        "photoUrl": "https://i.pravatar.cc/150?img=12",
+        "specializations": [
+          "Project Management"
+        ],
+        "skills": [
+          "Project Management",
+          "Primavera P6",
+          "Stakeholder Management",
+          "Risk Management"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 14,
+        "certifications": [
+          "PMP",
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Senior Project Manager Delivery",
+            "description": "Led project management workstreams on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "companyId": "seed-co-corp-001",
+        "employerCompanyId": "seed-co-corp-001",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-emp-002",
+      "email": "noura.aldossary@alriyadh-construction.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 6,
+      "companyId": "seed-co-corp-001",
+      "employerCompanyId": "seed-co-corp-001",
+      "organizationId": "seed-co-corp-001",
+      "profile": {
+        "name": "Noura Al-Dossary",
+        "type": "employee",
+        "headline": "QS — Cost Planning & Tendering",
+        "title": "Quantity Surveyor",
+        "phone": "+966 55 102 3002",
+        "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Quantity Surveyor at a Saudi construction enterprise with 9+ years of delivery experience across KSA projects.",
+        "photoUrl": "https://i.pravatar.cc/150?img=16",
+        "specializations": [
+          "Quantity Surveying"
+        ],
+        "skills": [
+          "Quantity Surveying",
+          "Cost Planning",
+          "BOQ",
+          "Tender Analysis"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 9,
+        "certifications": [
+          "RICS Affiliate",
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Quantity Surveyor Delivery",
+            "description": "Led quantity surveying workstreams on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "companyId": "seed-co-corp-001",
+        "employerCompanyId": "seed-co-corp-001",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-emp-003",
+      "email": "majed.alqahtani@alriyadh-construction.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 7,
+      "companyId": "seed-co-corp-001",
+      "employerCompanyId": "seed-co-corp-001",
+      "organizationId": "seed-co-corp-001",
+      "profile": {
+        "name": "Majed Al-Qahtani",
+        "type": "employee",
+        "headline": "Civil Engineer — Structures & Earthworks",
+        "title": "Civil Engineer",
+        "phone": "+966 55 103 3003",
+        "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Civil Engineer at a Saudi construction enterprise with 11+ years of delivery experience across KSA projects.",
+        "photoUrl": "https://i.pravatar.cc/150?img=33",
+        "specializations": [
+          "Civil Engineering"
+        ],
+        "skills": [
+          "Civil Design",
+          "Structural Analysis",
+          "AutoCAD",
+          "Site Supervision"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 11,
+        "certifications": [
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Civil Engineer Delivery",
+            "description": "Led civil engineering workstreams on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "companyId": "seed-co-corp-001",
+        "employerCompanyId": "seed-co-corp-001",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-emp-004",
+      "email": "reem.alsalem@gulf-development.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 8,
+      "companyId": "seed-co-corp-002",
+      "employerCompanyId": "seed-co-corp-002",
+      "organizationId": "seed-co-corp-002",
+      "profile": {
+        "name": "Reem Al-Salem",
+        "type": "employee",
+        "headline": "Architect — Mixed-Use Developments",
+        "title": "Architect",
+        "phone": "+966 55 104 3004",
+        "location": "Jeddah, Saudi Arabia",
+        "locationCity": "Jeddah",
+        "bio": "Architect at a Saudi construction enterprise with 8+ years of delivery experience across KSA projects.",
+        "photoUrl": "https://i.pravatar.cc/150?img=20",
+        "specializations": [
+          "Architecture"
+        ],
+        "skills": [
+          "Architectural Design",
+          "BIM",
+          "Revit",
+          "Urban Design"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 8,
+        "certifications": [
+          "Saudi Council of Engineers",
+          "LEED Green Associate"
+        ],
+        "caseStudies": [
+          {
+            "title": "Architect Delivery",
+            "description": "Led architecture workstreams on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "companyId": "seed-co-corp-002",
+        "employerCompanyId": "seed-co-corp-002",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-emp-005",
+      "email": "turki.alharbi@gulf-development.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 9,
+      "companyId": "seed-co-corp-002",
+      "employerCompanyId": "seed-co-corp-002",
+      "organizationId": "seed-co-corp-002",
+      "profile": {
+        "name": "Turki Al-Harbi",
+        "type": "employee",
+        "headline": "Procurement — Vendor & Subcontract Packages",
+        "title": "Procurement Manager",
+        "phone": "+966 55 105 3005",
+        "location": "Jeddah, Saudi Arabia",
+        "locationCity": "Jeddah",
+        "bio": "Procurement Manager at a Saudi construction enterprise with 13+ years of delivery experience across KSA projects.",
+        "photoUrl": "https://i.pravatar.cc/150?img=52",
+        "specializations": [
+          "Procurement"
+        ],
+        "skills": [
+          "Procurement",
+          "Contract Administration",
+          "Vendor Management",
+          "Negotiation"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 13,
+        "certifications": [
+          "CIPS Level 4",
+          "PMP"
+        ],
+        "caseStudies": [
+          {
+            "title": "Procurement Manager Delivery",
+            "description": "Led procurement workstreams on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "companyId": "seed-co-corp-002",
+        "employerCompanyId": "seed-co-corp-002",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-emp-006",
+      "email": "hassan.alshammari@eastern-equipment.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 10,
+      "companyId": "seed-co-corp-003",
+      "employerCompanyId": "seed-co-corp-003",
+      "organizationId": "seed-co-corp-003",
+      "profile": {
+        "name": "Hassan Al-Shammari",
+        "type": "employee",
+        "headline": "Mechanical Engineer — Plant & Fleet",
+        "title": "Mechanical Engineer",
+        "phone": "+966 55 106 3006",
+        "location": "Dammam, Saudi Arabia",
+        "locationCity": "Dammam",
+        "bio": "Mechanical Engineer at a Saudi construction enterprise with 10+ years of delivery experience across KSA projects.",
+        "photoUrl": "https://i.pravatar.cc/150?img=14",
+        "specializations": [
+          "Mechanical Engineering"
+        ],
+        "skills": [
+          "Mechanical Engineering",
+          "Fleet Maintenance",
+          "Hydraulic Systems",
+          "Preventive Maintenance"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 10,
+        "certifications": [
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Mechanical Engineer Delivery",
+            "description": "Led mechanical engineering workstreams on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "companyId": "seed-co-corp-003",
+        "employerCompanyId": "seed-co-corp-003",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-emp-007",
+      "email": "lina.alzahrani@eastern-equipment.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 11,
+      "companyId": "seed-co-corp-003",
+      "employerCompanyId": "seed-co-corp-003",
+      "organizationId": "seed-co-corp-003",
+      "profile": {
+        "name": "Lina Al-Zahrani",
+        "type": "employee",
+        "headline": "Electrical Engineer — Power & Controls",
+        "title": "Electrical Engineer",
+        "phone": "+966 55 107 3007",
+        "location": "Dammam, Saudi Arabia",
+        "locationCity": "Dammam",
+        "bio": "Electrical Engineer at a Saudi construction enterprise with 7+ years of delivery experience across KSA projects.",
+        "photoUrl": "https://i.pravatar.cc/150?img=25",
+        "specializations": [
+          "Electrical Engineering"
+        ],
+        "skills": [
+          "Electrical Design",
+          "Power Distribution",
+          "PLC",
+          "Site Commissioning"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 7,
+        "certifications": [
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Electrical Engineer Delivery",
+            "description": "Led electrical engineering workstreams on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "companyId": "seed-co-corp-003",
+        "employerCompanyId": "seed-co-corp-003",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-emp-008",
+      "email": "yousef.alghamdi@hijaz-contracting.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 12,
+      "companyId": "seed-co-corp-007",
+      "employerCompanyId": "seed-co-corp-007",
+      "organizationId": "seed-co-corp-007",
+      "profile": {
+        "name": "Yousef Al-Ghamdi",
+        "type": "employee",
+        "headline": "PM — Infrastructure Packages",
+        "title": "Project Manager",
+        "phone": "+966 55 108 3008",
+        "location": "Makkah, Saudi Arabia",
+        "locationCity": "Makkah",
+        "bio": "Project Manager at a Saudi construction enterprise with 16+ years of delivery experience across KSA projects.",
+        "photoUrl": "https://i.pravatar.cc/150?img=56",
+        "specializations": [
+          "Project Management"
+        ],
+        "skills": [
+          "Project Management",
+          "Infrastructure",
+          "Primavera P6",
+          "HSE Coordination"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 16,
+        "certifications": [
+          "PMP",
+          "PRINCE2 Practitioner"
+        ],
+        "caseStudies": [
+          {
+            "title": "Project Manager Delivery",
+            "description": "Led project management workstreams on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "companyId": "seed-co-corp-007",
+        "employerCompanyId": "seed-co-corp-007",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-emp-009",
+      "email": "hala.almutairi@hijaz-contracting.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 13,
+      "companyId": "seed-co-corp-007",
+      "employerCompanyId": "seed-co-corp-007",
+      "organizationId": "seed-co-corp-007",
+      "profile": {
+        "name": "Hala Al-Mutairi",
+        "type": "employee",
+        "headline": "QS — Infrastructure Cost Control",
+        "title": "Quantity Surveyor",
+        "phone": "+966 55 109 3009",
+        "location": "Makkah, Saudi Arabia",
+        "locationCity": "Makkah",
+        "bio": "Quantity Surveyor at a Saudi construction enterprise with 10+ years of delivery experience across KSA projects.",
+        "photoUrl": "https://i.pravatar.cc/150?img=29",
+        "specializations": [
+          "Quantity Surveying"
+        ],
+        "skills": [
+          "Quantity Surveying",
+          "Cost Control",
+          "Variations",
+          "Claims"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 10,
+        "certifications": [
+          "RICS Affiliate"
+        ],
+        "caseStudies": [
+          {
+            "title": "Quantity Surveyor Delivery",
+            "description": "Led quantity surveying workstreams on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "companyId": "seed-co-corp-007",
+        "employerCompanyId": "seed-co-corp-007",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-emp-010",
+      "email": "sami.alomari@riyadh-eng-consult.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 14,
+      "companyId": "seed-co-corp-011",
+      "employerCompanyId": "seed-co-corp-011",
+      "organizationId": "seed-co-corp-011",
+      "profile": {
+        "name": "Sami Al-Omari",
+        "type": "employee",
+        "headline": "Structural Engineer — High-Rise Design",
+        "title": "Structural Engineer",
+        "phone": "+966 55 110 3010",
+        "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Structural Engineer at a Saudi construction enterprise with 12+ years of delivery experience across KSA projects.",
+        "photoUrl": "https://i.pravatar.cc/150?img=57",
+        "specializations": [
+          "Structural Engineering"
+        ],
+        "skills": [
+          "Structural Analysis",
+          "ETABS",
+          "SAP2000",
+          "BIM Coordination"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 12,
+        "certifications": [
+          "Saudi Council of Engineers",
+          "PE"
+        ],
+        "caseStudies": [
+          {
+            "title": "Structural Engineer Delivery",
+            "description": "Led structural engineering workstreams on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "companyId": "seed-co-corp-011",
+        "employerCompanyId": "seed-co-corp-011",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-emp-011",
+      "email": "dana.alrashid@riyadh-eng-consult.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 15,
+      "companyId": "seed-co-corp-011",
+      "employerCompanyId": "seed-co-corp-011",
+      "organizationId": "seed-co-corp-011",
+      "profile": {
+        "name": "Dana Al-Rashid",
+        "type": "employee",
+        "headline": "Civil Engineer — Site Development",
+        "title": "Civil Engineer",
+        "phone": "+966 55 111 3011",
+        "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Civil Engineer at a Saudi construction enterprise with 8+ years of delivery experience across KSA projects.",
+        "photoUrl": "https://i.pravatar.cc/150?img=32",
+        "specializations": [
+          "Civil Engineering"
+        ],
+        "skills": [
+          "Civil Design",
+          "Drainage",
+          "Earthworks",
+          "AutoCAD Civil 3D"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 8,
+        "certifications": [
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Civil Engineer Delivery",
+            "description": "Led civil engineering workstreams on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "companyId": "seed-co-corp-011",
+        "employerCompanyId": "seed-co-corp-011",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-emp-012",
+      "email": "bandar.alsubaie@diriyah-materials.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 16,
+      "companyId": "seed-co-corp-013",
+      "employerCompanyId": "seed-co-corp-013",
+      "organizationId": "seed-co-corp-013",
+      "profile": {
+        "name": "Bandar Al-Subaie",
+        "type": "employee",
+        "headline": "Procurement — Materials & Logistics",
+        "title": "Procurement Specialist",
+        "phone": "+966 55 112 3012",
+        "location": "Riyadh, Saudi Arabia",
+        "locationCity": "Riyadh",
+        "bio": "Procurement Specialist at a Saudi construction enterprise with 9+ years of delivery experience across KSA projects.",
+        "photoUrl": "https://i.pravatar.cc/150?img=68",
+        "specializations": [
+          "Procurement"
+        ],
+        "skills": [
+          "Procurement",
+          "Logistics",
+          "Inventory Planning",
+          "Supplier Evaluation"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 9,
+        "certifications": [
+          "CIPS Level 3"
+        ],
+        "caseStudies": [
+          {
+            "title": "Procurement Specialist Delivery",
+            "description": "Led procurement workstreams on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "companyId": "seed-co-corp-013",
+        "employerCompanyId": "seed-co-corp-013",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-emp-013",
+      "email": "maha.alanazi@qassim-builders.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 17,
+      "companyId": "seed-co-corp-008",
+      "employerCompanyId": "seed-co-corp-008",
+      "organizationId": "seed-co-corp-008",
+      "profile": {
+        "name": "Maha Al-Anazi",
+        "type": "employee",
+        "headline": "Architect — Commercial Fit-Out",
+        "title": "Architect",
+        "phone": "+966 55 113 3013",
+        "location": "Buraidah, Saudi Arabia",
+        "locationCity": "Buraidah",
+        "bio": "Architect at a Saudi construction enterprise with 6+ years of delivery experience across KSA projects.",
+        "photoUrl": "https://i.pravatar.cc/150?img=44",
+        "specializations": [
+          "Architecture"
+        ],
+        "skills": [
+          "Architectural Design",
+          "Interior Coordination",
+          "Revit",
+          "Shop Drawings"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 6,
+        "certifications": [
+          "Saudi Council of Engineers"
+        ],
+        "caseStudies": [
+          {
+            "title": "Architect Delivery",
+            "description": "Led architecture workstreams on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "companyId": "seed-co-corp-008",
+        "employerCompanyId": "seed-co-corp-008",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    },
+    {
+      "id": "seed-emp-014",
+      "email": "waleed.albalawi@tabuk-crane-plant.test",
+      "passwordHash": "UG10d2luQDIwMjY=",
+      "role": "professional",
+      "status": "active",
+      "isPublic": true,
+      "connectionCount": 18,
+      "companyId": "seed-co-corp-015",
+      "employerCompanyId": "seed-co-corp-015",
+      "organizationId": "seed-co-corp-015",
+      "profile": {
+        "name": "Waleed Al-Balawi",
+        "type": "employee",
+        "headline": "Mechanical Engineer — Crane Operations",
+        "title": "Mechanical Engineer",
+        "phone": "+966 55 114 3014",
+        "location": "Tabuk, Saudi Arabia",
+        "locationCity": "Tabuk",
+        "bio": "Mechanical Engineer at a Saudi construction enterprise with 11+ years of delivery experience across KSA projects.",
+        "photoUrl": "https://i.pravatar.cc/150?img=15",
+        "specializations": [
+          "Mechanical Engineering"
+        ],
+        "skills": [
+          "Mechanical Engineering",
+          "Crane Operations",
+          "Plant Hire Planning",
+          "HSE"
+        ],
+        "sectors": [
+          "Construction",
+          "Infrastructure"
+        ],
+        "yearsExperience": 11,
+        "certifications": [
+          "Saudi Council of Engineers",
+          "NEBOSH"
+        ],
+        "caseStudies": [
+          {
+            "title": "Mechanical Engineer Delivery",
+            "description": "Led mechanical engineering workstreams on major KSA programmes.",
+            "year": 2024
+          }
+        ],
+        "preferredWorkMode": "On-Site",
+        "preferredPaymentModes": [
+          "cash"
+        ],
+        "preferredCollaborationModels": [
+          "project"
+        ],
+        "primaryDomain": "Construction",
+        "companyId": "seed-co-corp-015",
+        "employerCompanyId": "seed-co-corp-015",
+        "rating": 0.8,
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
+      },
+      "createdAt": "2026-06-24T12:08:02.196Z",
+      "updatedAt": "2026-06-24T12:08:02.196Z"
+    }
+  ]
+}

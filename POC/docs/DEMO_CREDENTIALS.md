@@ -28,7 +28,7 @@ Sign in through the normal **Login** page (demo picker when available).
 - **40-opportunity workflow users and companies:** `Pmtwin@2026`
 - **Legacy Demo40 and Pending accounts:** `demo123`
 
-Data is loaded automatically on first launch: the app merges demo users, demo companies, demo opportunities, demo applications, demo contracts, demo matches, demo notifications, **demo connections** (pre-accepted pairs for People and Messages), and pending users from the JSON files under `POC/data/`.
+Data is loaded automatically on first launch: the app merges demo users, **demo employees**, demo companies, demo opportunities, demo applications, demo contracts, demo matches, demo notifications, **demo party documents**, **demo connections** (pre-accepted pairs for People and Messages), and pending users from the JSON files under `POC/data/`.
 
 **Profile page data source:** Profile data (skills, certificates, experience, etc.) does not come from the JSON files directly. The data service (`POC/src/core/data/data-service.js`) loads `users.json` and `companies.json`, then merges `demo-users.json`, `demo-companies.json`, and other demo files via `mergeDemoData()` into localStorage. The profile page reads the current user via `dataService.getUserOrCompanyById(user.id)` (with fallback to `getUsers()` / `getCompanies()` when needed) after login.
 
@@ -38,7 +38,7 @@ Data is loaded automatically on first launch: the app merges demo users, demo co
 
 ## Quick reference (suggested logins)
 
-**40-opportunity workflow (current canonical dataset):** Run `npm run seed:controlled` then `npm run seed:e2e` from `POC/`. Log in with account type **Individual** (professionals) or **Company** (B2B accounts). Reset browser data with `window.resetAppData()` after seeding.
+**40-opportunity workflow (current canonical dataset):** Run `npm run seed:controlled` then `npm run seed:e2e` from `POC/`. Log in with account type **Individual** (professionals / employees) or **Company** (B2B accounts). Reset browser data with `window.resetAppData()` after seeding.
 
 | Type | Email | Password | Note |
 |------|--------|----------|------|
@@ -49,8 +49,14 @@ Data is loaded automatically on first launch: the app merges demo users, demo co
 | Company (investor) | contact@najd-investment.test | Pmtwin@2026 | Owns `seed-opp-028`, `037`; equity JV negotiation |
 | Company (infrastructure) | contact@sa-infra-partners.test | Pmtwin@2026 | Owns `seed-opp-014`, `039`; consortium deals in execution |
 | Company (developer) | contact@redsea-building.test | Pmtwin@2026 | Owns `seed-opp-029`, `034`; hybrid exchange needs |
+| Company (main contractor) | contact@hijaz-contracting.test | Pmtwin@2026 | Enterprise UAT — western region main contractor |
+| Company (consultant) | contact@riyadh-eng-consult.test | Pmtwin@2026 | Enterprise UAT — structural/civil consulting |
+| Company (supplier) | contact@diriyah-materials.test | Pmtwin@2026 | Enterprise UAT — building materials supplier |
+| Company (equipment rental) | contact@tabuk-crane-plant.test | Pmtwin@2026 | Enterprise UAT — crane & plant hire |
 | Professional | khalid.alharbi@pmtwin.test | Pmtwin@2026 | Architect; owns `seed-opp-001`; completed one-way deal |
 | Professional | sara.almutairi@pmtwin.test | Pmtwin@2026 | BIM consultant; owns `seed-opp-002`; applications on company needs |
+| Employee (PM) | fahad.alotaibi@alriyadh-construction.test | Pmtwin@2026 | Employee of Al-Riyadh Construction (`seed-co-corp-001`) |
+| Employee (QS) | noura.aldossary@alriyadh-construction.test | Pmtwin@2026 | Employee of Al-Riyadh Construction |
 
 **Legacy Demo40 (cleared from browser seed):** Use **demo06@demo.test** or **demo07@demo.test** for full profile UI testing if legacy data is restored.
 
@@ -143,18 +149,73 @@ Use these to test the **registration → vetting → activation** flow. Both can
 
 ---
 
-## Workflow companies (canonical 40-opportunity dataset)
+## Workflow companies (canonical 40-opportunity + enterprise UAT)
 
-All use password **`Pmtwin@2026`**. Log in with account type **Company**.
+All use password **`Pmtwin@2026`**. Log in with account type **Company**. Vetting: `caseStatus` / `reviewProgress` = **approved** (new UAT companies).
 
-| ID | Name | Email | Role | Owned opportunities |
-|----|------|--------|------|---------------------|
-| seed-co-corp-001 | Al-Riyadh Construction | contact@alriyadh-construction.test | company_owner | `seed-opp-007`, `023` |
-| seed-co-corp-002 | Gulf Development Co | contact@gulf-development.test | company_owner | `seed-opp-005`, `024` |
-| seed-co-corp-003 | Eastern Equipment & Supply | contact@eastern-equipment.test | company_owner | `seed-opp-025` |
-| seed-co-corp-004 | Najd Investment Group | contact@najd-investment.test | company_owner | `seed-opp-028`, `037` |
-| seed-co-corp-005 | Saudi Infrastructure Partners | contact@sa-infra-partners.test | company_owner | `seed-opp-014`, `039` |
-| seed-co-corp-006 | Red Sea Building Co | contact@redsea-building.test | company_owner | `seed-opp-029`, `034` |
+| ID | Name | Email | Category | Role |
+|----|------|--------|----------|------|
+| seed-co-corp-001 | Al-Riyadh Construction | contact@alriyadh-construction.test | Main contractor | company_owner |
+| seed-co-corp-002 | Gulf Development Co | contact@gulf-development.test | Developer | company_owner |
+| seed-co-corp-003 | Eastern Equipment & Supply | contact@eastern-equipment.test | Equipment / supplier | company_owner |
+| seed-co-corp-004 | Najd Investment Group | contact@najd-investment.test | Investor | company_owner |
+| seed-co-corp-005 | Saudi Infrastructure Partners | contact@sa-infra-partners.test | Infrastructure / consortium | company_owner |
+| seed-co-corp-006 | Red Sea Building Co | contact@redsea-building.test | Developer | company_owner |
+| seed-co-corp-007 | Hijaz Contracting Co | contact@hijaz-contracting.test | Main contractor | company_owner |
+| seed-co-corp-008 | Qassim Builders Group | contact@qassim-builders.test | Main contractor | company_owner |
+| seed-co-corp-009 | Najran MEP Specialists | contact@najran-mep.test | Specialized contractor | company_owner |
+| seed-co-corp-010 | Asir Steel Fabricators | contact@asir-steel.test | Specialized contractor | company_owner |
+| seed-co-corp-011 | Riyadh Engineering Consultants | contact@riyadh-eng-consult.test | Consultant | company_owner |
+| seed-co-corp-012 | Makkah Design Bureau | contact@makkah-design.test | Consultant | company_owner |
+| seed-co-corp-013 | Diriyah Building Materials | contact@diriyah-materials.test | Supplier | company_owner |
+| seed-co-corp-014 | Yanbu Industrial Supplies | contact@yanbu-industrial-supply.test | Supplier | company_owner |
+| seed-co-corp-015 | Tabuk Crane & Plant | contact@tabuk-crane-plant.test | Equipment rental | company_owner |
+
+Owned opportunities (original 6): `001` → `007`/`023`; `002` → `005`/`024`; `003` → `025`; `004` → `028`/`037`; `005` → `014`/`039`; `006` → `029`/`034`.
+
+## Company employees (enterprise UAT)
+
+All use password **`Pmtwin@2026`**. Log in as **Individual**. Linked via `companyId` / `employerCompanyId` to `seed-co-corp-*`.
+
+| ID | Name | Email | Profession | Company |
+|----|------|--------|------------|---------|
+| seed-emp-001 | Fahad Al-Otaibi | fahad.alotaibi@alriyadh-construction.test | Project Manager | seed-co-corp-001 |
+| seed-emp-002 | Noura Al-Dossary | noura.aldossary@alriyadh-construction.test | Quantity Surveyor | seed-co-corp-001 |
+| seed-emp-003 | Majed Al-Qahtani | majed.alqahtani@alriyadh-construction.test | Civil Engineer | seed-co-corp-001 |
+| seed-emp-004 | Reem Al-Salem | reem.alsalem@gulf-development.test | Architect | seed-co-corp-002 |
+| seed-emp-005 | Turki Al-Harbi | turki.alharbi@gulf-development.test | Procurement | seed-co-corp-002 |
+| seed-emp-006 | Hassan Al-Shammari | hassan.alshammari@eastern-equipment.test | Mechanical Engineer | seed-co-corp-003 |
+| seed-emp-007 | Lina Al-Zahrani | lina.alzahrani@eastern-equipment.test | Electrical Engineer | seed-co-corp-003 |
+| seed-emp-008 | Yousef Al-Ghamdi | yousef.alghamdi@hijaz-contracting.test | Project Manager | seed-co-corp-007 |
+| seed-emp-009 | Hala Al-Mutairi | hala.almutairi@hijaz-contracting.test | Quantity Surveyor | seed-co-corp-007 |
+| seed-emp-010 | Sami Al-Omari | sami.alomari@riyadh-eng-consult.test | Structural Engineer | seed-co-corp-011 |
+| seed-emp-011 | Dana Al-Rashid | dana.alrashid@riyadh-eng-consult.test | Civil Engineer | seed-co-corp-011 |
+| seed-emp-012 | Bandar Al-Subaie | bandar.alsubaie@diriyah-materials.test | Procurement | seed-co-corp-013 |
+| seed-emp-013 | Maha Al-Anazi | maha.alanazi@qassim-builders.test | Architect | seed-co-corp-008 |
+| seed-emp-014 | Waleed Al-Balawi | waleed.albalawi@tabuk-crane-plant.test | Mechanical Engineer | seed-co-corp-015 |
+
+## Workflow professionals (canonical + enterprise UAT)
+
+All use password **`Pmtwin@2026`**. Log in as **Individual**. `seed-user-001`…`018` retained; `019`…`030` added for enterprise certification (≥30 people users).
+
+| ID | Name | Email | Profession |
+|----|------|--------|------------|
+| seed-user-001 | Khalid Al-Harbi | khalid.alharbi@pmtwin.test | Senior Architect |
+| seed-user-002 | Sara Al-Mutairi | sara.almutairi@pmtwin.test | BIM Consultant |
+| seed-user-019 | Omar Al-Subaie | omar.alsubaie@pmtwin.test | Senior Project Manager |
+| seed-user-020 | Layla Al-Anzi | layla.alanzi@pmtwin.test | Civil Engineer |
+| seed-user-021 | Faisal Al-Malki | faisal.almalki@pmtwin.test | Mechanical Engineer |
+| seed-user-022 | Rania Al-Harthy | rania.alharthy@pmtwin.test | Electrical Engineer |
+| seed-user-023 | Khalid Al-Dossary | khalid.aldossary@pmtwin.test | Architect |
+| seed-user-024 | Noura Al-Otaibi | noura.alotaibi@pmtwin.test | Quantity Surveyor |
+| seed-user-025 | Sultan Al-Qahtani | sultan.alqahtani@pmtwin.test | Procurement Lead |
+| seed-user-026 | Hala Al-Ghamdi | hala.alghamdi@pmtwin.test | Structural Engineer |
+| seed-user-027 | Bandar Al-Zahrani | bandar.alzahrani@pmtwin.test | HSE Manager |
+| seed-user-028 | Reem Al-Omari | reem.alomari@pmtwin.test | BIM Manager |
+| seed-user-029 | Turki Al-Salem | turki.alsalem@pmtwin.test | Planning Engineer |
+| seed-user-030 | Maha Al-Rashidi | maha.alrashidi@pmtwin.test | Cost Engineer |
+
+Full list of `seed-user-001`…`018` remains in [seed-controlled-users.json](../data/seed-controlled-users.json).
 
 ## Legacy demo companies (cleared)
 
@@ -171,16 +232,20 @@ All use password **`Pmtwin@2026`**. Log in with account type **Company**.
 
 ## Data files
 
-- **Users:** [POC/data/demo-users.json](../data/demo-users.json)
+- **Users (professionals):** [POC/data/seed-controlled-users.json](../data/seed-controlled-users.json) — 30 accounts (`seed-user-001`…`030`)
+- **Employees:** [POC/data/demo-employees.json](../data/demo-employees.json) — 14 company-linked employees
 - **Pending users (vetting):** [POC/data/demo-pending-users.json](../data/demo-pending-users.json)
-- **Companies:** [POC/data/demo-companies.json](../data/demo-companies.json)
-- **Opportunities:** [POC/data/demo-40-opportunities.json](../data/demo-40-opportunities.json)
+- **Companies:** [POC/data/demo-companies.json](../data/demo-companies.json) — 15 accounts (`seed-co-corp-001`…`015`)
+- **Party documents (approved):** [POC/data/demo-party-documents.json](../data/demo-party-documents.json)
+- **Opportunities:** [POC/data/opportunities.json](../data/opportunities.json) / [demo-40-opportunities.json](../data/demo-40-opportunities.json)
 - **Applications:** [POC/data/demo-applications.json](../data/demo-applications.json)
 - **Contracts:** [POC/data/demo-contracts.json](../data/demo-contracts.json)
 - **Post matches (canonical):** [POC/data/demo-post-matches.json](../data/demo-post-matches.json)
 - **Matches (deprecated):** [POC/data/demo-matches.json](../data/demo-matches.json) — not loaded when legacy matching is off
 - **Notifications:** [POC/data/demo-notifications.json](../data/demo-notifications.json)
 - **Connections (pre-accepted demo pairs):** [POC/data/demo-connections.json](../data/demo-connections.json)
+
+**Seed merge (web):** `seed-loader.ts` merges `seed-controlled-users` + `demo-employees` into `loadUsers()`, companies into `loadCompanies()`, and `demo-party-documents` into `loadPartyDocuments()`.
 
 ---
 

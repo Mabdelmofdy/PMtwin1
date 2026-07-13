@@ -92,6 +92,15 @@ export type NotificationType =
   | 'commercial_agreement_accepted'
   | 'commercial_agreement_rejected'
   | 'contract_ready'
+  | 'registration_submitted'
+  | 'clarification_requested'
+  | 'registration_approved'
+  | 'registration_rejected'
+  | 'invitation_received'
+  | 'invitation_accepted'
+  | 'membership_activated'
+  | 'workspace_activated'
+  | 'opportunity_enabled'
 
 export type AuditActorType = 'user' | 'system' | 'admin' | 'service'
 

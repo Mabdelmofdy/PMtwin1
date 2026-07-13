@@ -29,6 +29,9 @@ import { ExplanationRecommendations } from '@/components/explainability/explanat
 import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
+import { resolveVettingCaseStatus } from '@/types/vetting.ts'
+import { useAuth } from '@/providers/auth-provider'
+import { calculateProfileCompletion } from '@/lib/profile-completion.ts'
 
 function toTitleCase(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1)
@@ -46,6 +49,7 @@ function resolveCurrentStageIndex(
 
 export function PendingVettingDashboard({ user }: { user: PlatformUser }) {
   useDataStoreVersion()
+  const { refreshUser, isCompanyUser } = useAuth()
   const profileCompletion = resolveProfileCompletionScore(user)
   const { profile: scorableProfile } = resolveScorableProfileForUser(user)
   const profileCompletionUnlocked = scorableProfile.profileCompletionUnlocked === true
@@ -53,6 +57,15 @@ export function PendingVettingDashboard({ user }: { user: PlatformUser }) {
   const vettingDocuments = partyDocumentRepository
     .listForParty(activePartyId)
     .filter((document) => document.documentCategory === 'vetting')
+
+  const checklist = calculateProfileCompletion(user, vettingDocuments, isCompanyUser)
+  const caseStatus = resolveVettingCaseStatus(user.profile?.vetting, user.status)
+  const estimatedReviewHours =
+    user.profile?.vetting?.slaStatus === 'overdue'
+      ? 0
+      : user.profile?.vetting?.slaStatus === 'at_risk'
+        ? 24
+        : 72
 
   const vetting = evaluateVettingReadiness({
     accountStatus: user.status,
@@ -109,8 +122,8 @@ export function PendingVettingDashboard({ user }: { user: PlatformUser }) {
       header={
         <PmPageHeader
           label="Dashboard"
-          title="Pending Vetting"
-          description="Complete profile and verification actions to unlock full workspace actions."
+          title="Onboarding dashboard"
+          description="Complete profile and verification actions to unlock full workspace capabilities. You are not blocked — finish the steps below."
           tone="mission"
           metric={
             <PmPageHeroMetric
@@ -119,19 +132,42 @@ export function PendingVettingDashboard({ user }: { user: PlatformUser }) {
               animate={false}
             />
           }
-          badges={<PmBadge tone="warning">Pending Vetting</PmBadge>}
+          badges={<PmBadge tone="warning">{caseStatus.replace(/_/g, ' ')}</PmBadge>}
           actions={
             <div className="flex flex-wrap gap-2">
               <PmButton asChild variant="outline">
-                <Link to="/party-documents">Upload documents</Link>
+                <Link to="/profile">Update profile</Link>
+              </PmButton>
+              <PmButton asChild variant="outline">
+                <Link to="/party-documents">Manage documents</Link>
               </PmButton>
               <PmButton asChild>
-                <Link to="/profile">Complete profile</Link>
+                <Link to="/party-documents">Upload missing documents</Link>
               </PmButton>
-              {changesRequested ? (
+              {caseStatus === 'draft' || caseStatus === 'clarification_requested' ? (
+                <PmButton
+                  onClick={() => {
+                    const updated = vettingService.submitForReview(user.id, activePartyId)
+                    if (updated) {
+                      refreshUser()
+                      toast.success(
+                        caseStatus === 'clarification_requested'
+                          ? 'Resubmitted for review'
+                          : 'Submitted for enterprise review',
+                      )
+                    } else {
+                      toast.error('Could not submit for review')
+                    }
+                  }}
+                >
+                  {caseStatus === 'clarification_requested' ? 'Resubmit' : 'Submit for review'}
+                </PmButton>
+              ) : null}
+              {changesRequested && caseStatus !== 'clarification_requested' ? (
                 <PmButton
                   onClick={() => {
                     vettingService.resubmitForReview(user.id, activePartyId)
+                    refreshUser()
                     toast.success('Resubmitted for vetting review')
                   }}
                 >
@@ -145,12 +181,12 @@ export function PendingVettingDashboard({ user }: { user: PlatformUser }) {
       metrics={
         <PmStatsStrip
           items={[
-            { label: 'Account status', value: toTitleCase(user.status.replace(/_/g, ' ')) },
+            { label: 'Case status', value: toTitleCase(caseStatus.replace(/_/g, ' ')) },
             { label: 'Profile completion', value: formatReadinessScorePercent(profileCompletion.score) },
-            { label: 'Vetting progress', value: formatReadinessScorePercent(vetting.score) },
+            { label: 'Document checklist', value: `${checklist.completeCount}/${checklist.totalCount}` },
             {
-              label: 'Stage',
-              value: `${currentStageIndex} / ${totalStages}`,
+              label: 'Est. review time',
+              value: estimatedReviewHours === 0 ? 'Overdue' : `~${estimatedReviewHours}h`,
             },
           ]}
         />
@@ -201,7 +237,7 @@ export function PendingVettingDashboard({ user }: { user: PlatformUser }) {
         </div>
 
         {changesRequested ? (
-          <PmContentCard title="Changes requested" id="vetting-review" role="status">
+          <PmContentCard title="Reviewer notes" id="vetting-review" role="status">
             <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
               {user.profile?.vetting?.reviewNotes ?? user.profile?.vetting?.reason}
             </p>
@@ -217,6 +253,16 @@ export function PendingVettingDashboard({ user }: { user: PlatformUser }) {
                 Due by {user.profile.vetting.dueDate}
               </p>
             ) : null}
+          </PmContentCard>
+        ) : null}
+
+        {checklist.missingItems.length > 0 ? (
+          <PmContentCard title="Missing documents & profile items">
+            <ul className={cn('list-disc ps-5', pmTypography.bodySm)}>
+              {checklist.missingItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
           </PmContentCard>
         ) : null}
 

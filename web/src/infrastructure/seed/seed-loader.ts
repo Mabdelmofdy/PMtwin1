@@ -17,6 +17,7 @@ import type {
   NegotiationOffer,
   NegotiationTranscriptEvent,
 } from '@/types/negotiation-discussion.ts'
+import type { PartyDocument } from '@/types/party-document.ts'
 import { normalizeOpportunities } from '@/domain/collaboration/opportunity-collaboration.ts'
 import {
   normalizeApplications,
@@ -34,7 +35,9 @@ import demoNegotiations from '@seed-data/demo-negotiations.json'
 import demoPendingUsers from '@seed-data/demo-pending-users.json'
 import demoAudit from '@seed-data/demo-audit.json'
 import seedUsers from '@seed-data/seed-controlled-users.json'
+import demoEmployees from '@seed-data/demo-employees.json'
 import demoCompanies from '@seed-data/demo-companies.json'
+import demoPartyDocuments from '@seed-data/demo-party-documents.json'
 import usersBase from '@seed-data/users.json'
 import companiesBase from '@seed-data/companies.json'
 import siteContent from '@seed-data/site-content.json'
@@ -71,7 +74,12 @@ export function loadUsers(): PlatformUser[] {
   return mergeById(
     rows(usersBase as DataEnvelope<PlatformUser>),
     rows(seedUsers as DataEnvelope<PlatformUser>),
+    rows(demoEmployees as DataEnvelope<PlatformUser>),
   )
+}
+
+export function loadPartyDocuments(): PartyDocument[] {
+  return rows(demoPartyDocuments as DataEnvelope<PartyDocument>)
 }
 
 export function loadCompanies(): Company[] {

@@ -42,6 +42,11 @@ export type RegistrationWizardData = {
   termsAccepted: boolean
   verificationChoice: 'skip' | 'complete' | null
   primaryDomain: string
+  /** Mock OTP challenge id after send. */
+  otpChallengeId: string
+  otpCode: string
+  otpVerified: boolean
+  otpDebugHint: string
 }
 
 export type WizardErrors = Record<string, string>
@@ -91,6 +96,10 @@ export function createInitialWizardData(): RegistrationWizardData {
     termsAccepted: false,
     verificationChoice: null,
     primaryDomain: '',
+    otpChallengeId: '',
+    otpCode: '',
+    otpVerified: false,
+    otpDebugHint: '',
   }
 }
 
@@ -166,6 +175,12 @@ export function validateWizardStep(step: WizardStep, data: RegistrationWizardDat
 
   if (step === 3 && !data.termsAccepted) {
     errors.termsAccepted = 'You must accept the terms to continue.'
+  }
+
+  if (step === 5) {
+    if (!data.otpVerified) {
+      errors.otpCode = 'Verify the one-time code sent to your email before submitting.'
+    }
   }
 
   return errors

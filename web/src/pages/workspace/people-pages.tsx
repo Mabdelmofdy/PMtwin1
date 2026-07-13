@@ -18,6 +18,7 @@ import {
 } from '@/components/user/notifications-list-section'
 import { ProfileView } from '@/components/user/profile-view'
 import { SettingsView } from '@/components/user/settings-view'
+import { InviteEmployeePanel } from '@/components/workspace/invite-employee-panel.tsx'
 import {
   PublicProfileNotFound,
   PublicProfileView,
@@ -387,7 +388,10 @@ export function SettingsPage() {
         />
       }
     >
-      <SettingsView />
+      <div className="space-y-6">
+        <InviteEmployeePanel />
+        <SettingsView />
+      </div>
     </PmPage>
   )
 }

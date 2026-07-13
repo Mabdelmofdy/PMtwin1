@@ -63,6 +63,8 @@ type AuthContextValue = {
   switchWorkspace: (workspaceId: string) => void
   enterPlatformContext: () => void
   exitPlatformContext: () => void
+  /** Reload user from store without recreating session (e.g. after vetting approval). */
+  refreshUser: () => void
   signOut: () => void
 }
 
@@ -177,6 +179,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(authService.getSession())
   }, [user])
 
+  const refreshUser = useCallback(() => {
+    if (!user) return
+    const latest = peopleApi.get(user.id)
+    if (latest) {
+      setUser(latest)
+      setSession(authService.getSession())
+    }
+  }, [user])
+
   const signOut = useCallback(() => {
     authService.logout()
     setUser(null)
@@ -217,6 +228,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       switchWorkspace,
       enterPlatformContext,
       exitPlatformContext,
+      refreshUser,
       signOut,
     }
   }, [
@@ -228,6 +240,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     switchWorkspace,
     enterPlatformContext,
     exitPlatformContext,
+    refreshUser,
     signOut,
   ])
 

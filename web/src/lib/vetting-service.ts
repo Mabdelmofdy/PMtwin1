@@ -1,8 +1,12 @@
 import type { Party } from '@pm-twin/party'
 import type { PlatformUser } from '@/types/domain.ts'
 import type { PartyDocument, PartyDocumentCategory } from '@/types/party-document.ts'
-import type { VettingMetadata } from '@/types/vetting.ts'
-import { VETTING_QUEUE_STATUSES } from '@/types/vetting.ts'
+import type { VettingCaseStatus, VettingMetadata } from '@/types/vetting.ts'
+import {
+  VETTING_QUEUE_STATUSES,
+  resolveVettingCaseStatus,
+  userStatusForVettingCase,
+} from '@/types/vetting.ts'
 import { resolveVettingSlaStatus } from '@/lib/vetting-sla-service.ts'
 import { partiesApi } from '@/api/parties.ts'
 import { peopleApi } from '@/api/people.ts'
@@ -13,7 +17,10 @@ import {
   partyDocumentRepository,
   partyRepository,
   userRepository,
+  workspaceMembershipRepository,
+  workspaceRepository,
 } from '@/repositories/index.ts'
+import type { NotificationType } from '@/types/enums.ts'
 
 export type VettingQueueEntry = {
   user: PlatformUser
@@ -49,6 +56,8 @@ export type VettingServiceDeps = {
   readonly partyDocumentRepository: typeof partyDocumentRepository
   readonly auditRepository: typeof auditRepository
   readonly notificationRepository: typeof notificationRepository
+  readonly workspaceRepository?: typeof workspaceRepository
+  readonly workspaceMembershipRepository?: typeof workspaceMembershipRepository
 }
 
 const defaultDeps: VettingServiceDeps = {
@@ -60,6 +69,8 @@ const defaultDeps: VettingServiceDeps = {
   partyDocumentRepository,
   auditRepository,
   notificationRepository,
+  workspaceRepository,
+  workspaceMembershipRepository,
 }
 
 function isVettingQueueStatus(status: string): boolean {
@@ -81,6 +92,7 @@ function createVettingNotification(
     title: string
     message: string
     entityId?: string
+    type?: NotificationType
   },
 ): void {
   deps.notificationRepository.create({
@@ -88,9 +100,58 @@ function createVettingNotification(
     title: input.title,
     message: input.message,
     read: false,
-    type: 'review_received',
+    type: input.type ?? 'review_received',
     entityType: 'user',
     entityId: input.entityId ?? input.userId,
+  })
+}
+
+function activateWorkspaceGraph(
+  deps: VettingServiceDeps,
+  userId: string,
+  partyId: string,
+): void {
+  try {
+    const party = deps.partyRepository.getById(partyId)
+    const workspaceId = party?.workspaceId
+    if (workspaceId && deps.workspaceRepository && deps.workspaceMembershipRepository) {
+      const workspace = deps.workspaceRepository.getById(workspaceId)
+      if (workspace && workspace.status !== 'active') {
+        deps.workspaceRepository.create({
+          ...workspace,
+          status: 'active',
+          updatedAt: new Date().toISOString(),
+        })
+      }
+      const memberships = deps.workspaceMembershipRepository
+        .listMembershipsByUserId(userId)
+        .filter((m) => m.workspaceId === workspaceId)
+      for (const membership of memberships) {
+        if (membership.status !== 'active') {
+          deps.workspaceMembershipRepository.updateStatus(membership.id, 'active')
+        }
+      }
+    }
+  } catch {
+    // Activation notifications still fire; workspace repos optional in unit tests.
+  }
+  createVettingNotification(deps, {
+    userId,
+    title: 'Workspace activated',
+    message: 'Your workspace is active. You can now use full collaboration capabilities.',
+    type: 'workspace_activated',
+  })
+  createVettingNotification(deps, {
+    userId,
+    title: 'Membership activated',
+    message: 'Your workspace membership is active.',
+    type: 'membership_activated',
+  })
+  createVettingNotification(deps, {
+    userId,
+    title: 'Opportunity creation enabled',
+    message: 'You can now create and publish opportunities.',
+    type: 'opportunity_enabled',
   })
 }
 
@@ -136,28 +197,31 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
 
     approve(userId: string, partyId: string, reviewerId: string): PlatformUser | undefined {
       const reviewedAt = new Date().toISOString()
+      const caseStatus: VettingCaseStatus = 'approved'
       const user = appendVettingMetadata(
         deps,
         userId,
         {
+          caseStatus,
           reviewProgress: 'approved',
           reviewedBy: reviewerId,
           reviewerId,
           reviewedAt,
           slaStatus: 'on_track',
         },
-        'active',
+        userStatusForVettingCase(caseStatus),
       )
       if (!user) return undefined
 
       syncPartyStatus(deps, partyId, 'active')
+      activateWorkspaceGraph(deps, userId, partyId)
 
       deps.auditRepository.append({
         action: 'vetting.approved',
         userId: reviewerId,
         entityType: 'user',
         entityId: userId,
-        details: { partyId },
+        details: { partyId, caseStatus },
       })
       deps.auditRepository.append({
         action: 'user.vetting_approved',
@@ -177,6 +241,7 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
         userId,
         title: 'Account approved',
         message: 'Your onboarding review is complete. You can now perform full platform actions.',
+        type: 'registration_approved',
       })
 
       return user
@@ -193,10 +258,12 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
       reason?: string,
     ): PlatformUser | undefined {
       const reviewedAt = new Date().toISOString()
+      const caseStatus: VettingCaseStatus = 'rejected'
       const user = appendVettingMetadata(
         deps,
         userId,
         {
+          caseStatus,
           reason,
           reviewNotes: reason,
           reviewedBy: reviewerId,
@@ -204,7 +271,7 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
           reviewedAt,
           slaStatus: 'on_track',
         },
-        'rejected',
+        userStatusForVettingCase(caseStatus),
       )
       if (!user) return undefined
 
@@ -215,7 +282,7 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
         userId: reviewerId,
         entityType: 'user',
         entityId: userId,
-        details: { partyId, reason },
+        details: { partyId, reason, caseStatus },
       })
       deps.auditRepository.append({
         action: 'user.vetting_rejected',
@@ -235,8 +302,148 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
         userId,
         title: 'Account rejected',
         message: reason || 'Your onboarding submission was rejected. Please contact support.',
+        type: 'registration_rejected',
       })
 
+      return user
+    },
+
+    submitForReview(userId: string, partyId: string): PlatformUser | undefined {
+      const existing = deps.userRepository.getById(userId)
+      if (!existing) return undefined
+      const submittedAt = new Date().toISOString()
+      const caseStatus: VettingCaseStatus = 'submitted'
+      const user = appendVettingMetadata(
+        deps,
+        userId,
+        {
+          ...existing.profile?.vetting,
+          caseStatus,
+          submittedAt,
+          reviewProgress: 'in_review',
+          slaStatus: resolveVettingSlaStatus(existing),
+        },
+        userStatusForVettingCase(caseStatus),
+      )
+      if (!user) return undefined
+      syncPartyStatus(deps, partyId, 'pending_vetting')
+      // Move to pending_review once queued
+      appendVettingMetadata(
+        deps,
+        userId,
+        {
+          caseStatus: 'pending_review',
+          submittedAt,
+          reviewProgress: 'in_review',
+        },
+        'pending_vetting',
+      )
+      deps.auditRepository.append({
+        action: 'vetting.submitted',
+        userId,
+        entityType: 'user',
+        entityId: userId,
+        details: { partyId, caseStatus: 'pending_review' },
+      })
+      createVettingNotification(deps, {
+        userId,
+        title: 'Registration submitted',
+        message: 'Your onboarding package was submitted for enterprise review.',
+        type: 'registration_submitted',
+      })
+      return deps.userRepository.getById(userId)
+    },
+
+    suspend(
+      userId: string,
+      partyId: string,
+      reviewerId: string,
+      reason?: string,
+    ): PlatformUser | undefined {
+      const caseStatus: VettingCaseStatus = 'suspended'
+      const reviewedAt = new Date().toISOString()
+      const user = appendVettingMetadata(
+        deps,
+        userId,
+        {
+          caseStatus,
+          reason,
+          reviewNotes: reason,
+          reviewedBy: reviewerId,
+          reviewerId,
+          reviewedAt,
+        },
+        userStatusForVettingCase(caseStatus),
+      )
+      if (!user) return undefined
+      syncPartyStatus(deps, partyId, 'suspended')
+      deps.auditRepository.append({
+        action: 'vetting.suspended',
+        userId: reviewerId,
+        entityType: 'user',
+        entityId: userId,
+        details: { partyId, reason, caseStatus },
+      })
+      createVettingNotification(deps, {
+        userId,
+        title: 'Account suspended',
+        message: reason || 'Your account has been suspended pending review.',
+        type: 'registration_rejected',
+      })
+      return user
+    },
+
+    reassign(
+      userId: string,
+      reviewerId: string,
+      assignedReviewerId: string,
+    ): PlatformUser | undefined {
+      const existing = deps.userRepository.getById(userId)
+      if (!existing) return undefined
+      const user = appendVettingMetadata(
+        deps,
+        userId,
+        {
+          ...existing.profile?.vetting,
+          assignedReviewerId,
+          reviewerId: assignedReviewerId,
+        },
+        existing.status,
+      )
+      if (!user) return undefined
+      deps.auditRepository.append({
+        action: 'vetting.reassigned',
+        userId: reviewerId,
+        entityType: 'user',
+        entityId: userId,
+        details: { assignedReviewerId },
+      })
+      return user
+    },
+
+    escalate(userId: string, actorId: string, reason?: string): PlatformUser | undefined {
+      const existing = deps.userRepository.getById(userId)
+      if (!existing) return undefined
+      const escalationAt = new Date().toISOString()
+      const user = appendVettingMetadata(
+        deps,
+        userId,
+        {
+          ...existing.profile?.vetting,
+          escalationAt,
+          slaStatus: 'overdue',
+          reason: reason ?? existing.profile?.vetting?.reason,
+        },
+        existing.status,
+      )
+      if (!user) return undefined
+      deps.auditRepository.append({
+        action: 'vetting.escalated',
+        userId: actorId,
+        entityType: 'user',
+        entityId: userId,
+        details: { escalationAt, reason },
+      })
       return user
     },
 
@@ -244,10 +451,12 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
       const existing = deps.userRepository.getById(input.userId)
       const reviewedAt = new Date().toISOString()
       const slaStatus = existing ? resolveVettingSlaStatus(existing) : 'on_track'
+      const caseStatus: VettingCaseStatus = 'clarification_requested'
       const user = appendVettingMetadata(
         deps,
         input.userId,
         {
+          caseStatus,
           reason: input.reason,
           reviewNotes: input.reason,
           requestedItems: input.requestedItems,
@@ -260,7 +469,7 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
           changesResolved: false,
           slaStatus,
         },
-        'pending_vetting',
+        userStatusForVettingCase(caseStatus),
       )
       if (!user) return undefined
 
@@ -276,12 +485,14 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
           reason: input.reason,
           requestedItems: input.requestedItems,
           dueDate: input.dueDate,
+          caseStatus,
         },
       })
       createVettingNotification(deps, {
         userId: input.userId,
-        title: 'Changes requested',
+        title: 'Clarification requested',
         message: input.reason,
+        type: 'clarification_requested',
       })
 
       return user
@@ -364,7 +575,9 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
     resubmitForReview(userId: string, partyId: string): PlatformUser | undefined {
       const existing = deps.userRepository.getById(userId)
       if (!existing) return undefined
+      const currentCase = resolveVettingCaseStatus(existing.profile?.vetting, existing.status)
       if (
+        currentCase !== 'clarification_requested' &&
         existing.status !== 'clarification_requested' &&
         existing.status !== 'pending' &&
         existing.status !== 'pending_vetting'
@@ -372,17 +585,19 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
         return undefined
       }
 
+      const caseStatus: VettingCaseStatus = 'resubmitted'
       const user = appendVettingMetadata(
         deps,
         userId,
         {
           ...existing.profile?.vetting,
+          caseStatus,
           lastResubmittedAt: new Date().toISOString(),
           reviewProgress: 'in_review',
           changesResolved: true,
           slaStatus: resolveVettingSlaStatus(existing),
         },
-        'pending_vetting',
+        userStatusForVettingCase(caseStatus),
       )
       if (!user) return undefined
 
@@ -393,15 +608,33 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
         userId,
         entityType: 'user',
         entityId: userId,
-        details: { partyId },
+        details: { partyId, caseStatus },
       })
       createVettingNotification(deps, {
         userId,
         title: 'Resubmission received',
         message: 'Your onboarding updates were resubmitted and queued for review.',
+        type: 'registration_submitted',
       })
 
       return user
+    },
+
+    listByCaseStatus(caseStatus: VettingCaseStatus): VettingQueueEntry[] {
+      return deps.peopleApi
+        .listAll()
+        .filter((user) => resolveVettingCaseStatus(user.profile?.vetting, user.status) === caseStatus)
+        .map((user) => {
+          const activeParty = deps.partiesApi.resolveActiveParty(user.id)
+          return {
+            user,
+            activeParty: activeParty ?? null,
+            partyLabel:
+              activeParty?.partyType === 'company'
+                ? 'Company Party'
+                : 'Individual Party',
+          }
+        })
     },
 
     listHistory(): VettingQueueEntry[] {

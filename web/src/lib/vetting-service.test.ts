@@ -129,7 +129,7 @@ describe('vetting service', () => {
       requestedItems: ['Upload valid CR'],
       dueDate: '2026-08-01',
     })
-    assert.equal(stack.users.get('u-1')?.status, 'pending_vetting')
+    assert.equal(stack.users.get('u-1')?.status, 'clarification_requested')
 
     service.resubmitForReview('u-1', 'u-1')
     assert.equal(stack.users.get('u-1')?.status, 'pending_vetting')
@@ -143,7 +143,7 @@ describe('vetting service', () => {
       stack.audits.some(
         (entry) =>
           entry.action === 'notification.created'
-          && entry.title === 'Changes requested',
+          && entry.title === 'Clarification requested',
       ),
     )
     assert.ok(

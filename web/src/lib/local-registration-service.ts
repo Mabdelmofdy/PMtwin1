@@ -89,6 +89,30 @@ export function registerLocalAccount(
   const now = new Date().toISOString()
 
   try {
+    const existingUser = deps.userRepository
+      .getAll()
+      .find((u) => u.email.trim().toLowerCase() === request.email.trim().toLowerCase())
+    if (existingUser) {
+      throw new Error('DUPLICATE_EMAIL')
+    }
+    const existingParty = deps.partyRepository
+      .getAll()
+      .find(
+        (p) =>
+          p.displayName.trim().toLowerCase() ===
+            request.profile.displayName.trim().toLowerCase() &&
+          p.partyType === partyType &&
+          p.status !== 'archived',
+      )
+    // Soft warning only for display-name collisions on company; email is authoritative.
+    void existingParty
+
+    const draftVetting = {
+      caseStatus: 'draft' as const,
+      reviewProgress: 'not_started' as const,
+      emailVerified: true,
+    }
+
     deps.userRepository.create({
       id: userId,
       email: request.email,
@@ -99,6 +123,14 @@ export function registerLocalAccount(
         accountLabel:
           request.profile.contactPerson?.trim() || request.profile.displayName,
         profileCompletionUnlocked: false,
+        name: request.profile.displayName,
+        location: [request.profile.city, request.profile.region, request.profile.country]
+          .filter(Boolean)
+          .join(', ') || undefined,
+        bio: request.profile.companyDescription,
+        skills: request.profile.skills,
+        headline: request.profile.specialty || request.profile.expertise,
+        vetting: draftVetting,
       },
     })
 
@@ -112,8 +144,20 @@ export function registerLocalAccount(
           accountLabel: request.profile.displayName,
           profileCompletionUnlocked: false,
           type: 'company',
+          name: request.profile.displayName,
+          description: request.profile.companyDescription,
+          location: [request.profile.city, request.profile.region, request.profile.country]
+            .filter(Boolean)
+            .join(', ') || undefined,
+          vetting: draftVetting,
         },
       })
+    }
+
+    // Never create a second party for the same source entity.
+    const priorParty = deps.partyRepository.getById(partyId)
+    if (priorParty) {
+      throw new Error('DUPLICATE_PARTY')
     }
 
     deps.partyRepository.create({
