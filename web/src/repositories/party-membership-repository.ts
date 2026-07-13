@@ -71,15 +71,31 @@ export class PartyMembershipRepository {
   }
 
   getPrimaryForUser(userId: string): PartyMembership | undefined {
-    const memberships = this.listForUser(userId)
-    const explicitPrimary = memberships.find(
-      (membership) =>
-        membership.isPrimary &&
-        !membership.partyId.startsWith('ws-') &&
-        membership.partyId !== userId,
+    const memberships = this.listForUser(userId).filter(
+      (membership) => membership.isPrimary && !membership.partyId.startsWith('ws-'),
     )
-    if (explicitPrimary) return explicitPrimary
-    return memberships.find((membership) => membership.isPrimary)
+    if (memberships.length === 0) return undefined
+
+    // Explicit setPrimary / invite memberships must win over synthesized defaults.
+    const overrides = this.readOverrides()
+    const overrideKeys = new Set(
+      (overrides.newPartyMemberships ?? [])
+        .filter((membership) => membership.userId === userId)
+        .map((membership) => formatMembershipId(membership)),
+    )
+    const fromOverride = memberships.find((membership) =>
+      overrideKeys.has(formatMembershipId(membership)),
+    )
+    if (fromOverride) return fromOverride
+
+    // Prefer company party when both personal and company primaries exist.
+    const companyPrimary = memberships.find((membership) =>
+      membership.partyId.includes('-company-'),
+    )
+    if (companyPrimary) return companyPrimary
+
+    const nonSelf = memberships.find((membership) => membership.partyId !== userId)
+    return nonSelf ?? memberships[0]
   }
 
   setPrimaryMembership(

@@ -203,9 +203,13 @@ export function registerLocalAccount(
       updatedAt: now,
     }
     deps.workspaceMembershipRepository.create(membership)
-    // Suppress legacy synthesized partyId===userId membership so the canonical
+    // Suppress legacy + synthesized personal membership so the registration
     // Workspace Party membership is the only primary.
     deps.partyMembershipRepository.suppressSynthesizedMembership(userId, userId)
+    deps.partyMembershipRepository.suppressSynthesizedMembership(
+      userId,
+      partyIdForSource(userId, 'individual'),
+    )
     deps.partyMembershipRepository.setPrimaryMembership(userId, partyId, 'owner')
 
     return {

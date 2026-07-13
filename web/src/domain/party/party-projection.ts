@@ -1,4 +1,5 @@
 import type { PlatformUser } from '@/types/domain.ts'
+import { partyIdForSource } from '@pm-twin/identity'
 import {
   partyFromAccount,
   resolvePartyTypeFromAccount,
@@ -20,12 +21,30 @@ export function toSourceEntityAccount(user: PlatformUser): SourceEntityAccount {
   }
 }
 
+/**
+ * Canonical party id aligned with identity workspace.ownerPartyId
+ * (`party-individual-*` / `party-company-*`).
+ */
+export function canonicalPartyIdForAccount(
+  account: PlatformUser,
+  companyIds: ReadonlySet<string>,
+): string {
+  const isCompany = companyIds.has(account.id)
+  return partyIdForSource(account.id, isCompany ? 'company' : 'individual')
+}
+
 export function projectAccountToParty(
   account: PlatformUser,
   companyIds: ReadonlySet<string>,
 ): Party {
   const isCompany = companyIds.has(account.id)
-  return partyFromAccount(toSourceEntityAccount(account), isCompany)
+  const base = partyFromAccount(toSourceEntityAccount(account), isCompany)
+  return {
+    ...base,
+    id: partyIdForSource(account.id, isCompany ? 'company' : 'individual'),
+    // Keep sourceEntityId as the account id for document/legacy lookups.
+    sourceEntityId: account.id,
+  }
 }
 
 export function projectAccountsToParties(
@@ -40,10 +59,26 @@ export function projectPrimaryMembership(
   companyIds: ReadonlySet<string>,
 ): PartyMembership {
   const partyType = resolvePartyTypeFromAccount(toSourceEntityAccount(account), companyIds)
-  const membershipRole = partyType === 'company' ? 'owner' : 'owner'
-  return synthesizePrimaryMembership(account.id, account.id, membershipRole)
+  const partyId = partyIdForSource(
+    account.id,
+    partyType === 'company' ? 'company' : 'individual',
+  )
+  return synthesizePrimaryMembership(account.id, partyId, 'owner')
 }
 
 export function buildCompanyIdSet(companyIds: readonly string[]): ReadonlySet<string> {
   return new Set(companyIds)
+}
+
+/** Resolve identity and legacy account-id party aliases for lookups. */
+export function partyIdLookupAliases(partyId: string): readonly string[] {
+  const aliases = new Set<string>([partyId])
+  const identityMatch = /^party-(individual|company)-(.+)$/.exec(partyId)
+  if (identityMatch) {
+    aliases.add(identityMatch[2])
+  } else if (partyId) {
+    aliases.add(partyIdForSource(partyId, 'individual'))
+    aliases.add(partyIdForSource(partyId, 'company'))
+  }
+  return [...aliases]
 }

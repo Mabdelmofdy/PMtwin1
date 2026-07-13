@@ -3,6 +3,7 @@ import type { IStorageAdapter, Overrides } from '@/types/storage.ts'
 import { OVERRIDES_KEY } from '@/types/storage.ts'
 import { notifyDataStore } from '@/hooks/use-data-store.ts'
 import { mergeSeedWithOverrides } from './seed-override-merge.ts'
+import { partyIdLookupAliases } from '@/domain/party/party-projection.ts'
 
 function createPartyDocumentId(): string {
   return `pdoc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -37,7 +38,8 @@ export class PartyDocumentRepository {
   }
 
   listForParty(ownerPartyId: string): PartyDocument[] {
-    return this.getAll().filter((document) => document.ownerPartyId === ownerPartyId)
+    const aliases = new Set(partyIdLookupAliases(ownerPartyId))
+    return this.getAll().filter((document) => aliases.has(document.ownerPartyId))
   }
 
   getById(id: string): PartyDocument | undefined {

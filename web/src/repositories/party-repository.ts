@@ -9,6 +9,7 @@ import { mergeSeedWithOverrides } from './seed-override-merge.ts'
 import {
   buildCompanyIdSet,
   projectAccountsToParties,
+  partyIdLookupAliases,
 } from '@/domain/party/party-projection.ts'
 
 export class PartyRepository {
@@ -61,7 +62,18 @@ export class PartyRepository {
   }
 
   getById(id: string): Party | undefined {
-    return this.getAll().find((party) => party.id === id)
+    const all = this.getAll()
+    const direct = all.find((party) => party.id === id)
+    if (direct) return direct
+
+    // Identity session party ids must resolve even when overrides/docs use legacy ids.
+    const aliases = new Set(partyIdLookupAliases(id))
+    return all.find(
+      (party) =>
+        aliases.has(party.id) ||
+        aliases.has(party.sourceEntityId) ||
+        (party.sourceEntityId != null && aliases.has(party.sourceEntityId)),
+    )
   }
 
   create(party: Party): Party {

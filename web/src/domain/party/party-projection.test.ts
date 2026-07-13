@@ -44,7 +44,15 @@ describe('party projection', () => {
     const companyIds = buildCompanyIdSet(['seed-co-corp-001'])
     const membership = projectPrimaryMembership(individualAccount, companyIds)
     assert.equal(membership.userId, 'seed-user-001')
-    assert.equal(membership.partyId, 'seed-user-001')
+    assert.equal(membership.partyId, 'party-individual-seed-user-001')
     assert.equal(membership.isPrimary, true)
+  })
+
+  it('projects accounts with canonical identity party ids', () => {
+    const companyIds = buildCompanyIdSet(['seed-co-corp-001'])
+    const companyParty = projectAccountToParty(companyAccount, companyIds)
+    const individualParty = projectAccountToParty(individualAccount, companyIds)
+    assert.equal(companyParty.id, 'party-company-seed-co-corp-001')
+    assert.equal(individualParty.id, 'party-individual-seed-user-001')
   })
 })
