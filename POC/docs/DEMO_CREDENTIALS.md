@@ -57,6 +57,11 @@ Data is loaded automatically on first launch: the app merges demo users, **demo 
 | Professional | sara.almutairi@pmtwin.test | Pmtwin@2026 | BIM consultant; owns `seed-opp-002`; applications on company needs |
 | Employee (PM) | fahad.alotaibi@alriyadh-construction.test | Pmtwin@2026 | Employee of Al-Riyadh Construction (`seed-co-corp-001`) |
 | Employee (QS) | noura.aldossary@alriyadh-construction.test | Pmtwin@2026 | Employee of Al-Riyadh Construction |
+| Pending (review) | noura.pending@pmtwin.test | Pmtwin@2026 | Civil engineer — `pending_review` (browse only until approved) |
+| Pending (clarify) | omar.clarify@pmtwin.test | Pmtwin@2026 | MEP engineer — clarification requested |
+| Pending (submit) | onboarding@najd-steelworks.test | Pmtwin@2026 | Company registrant — submitted / awaiting admin |
+
+**Demo Accounts modal tabs:** Professionals · Employees · Companies · **Pending** · Admin
 
 **Legacy Demo40 (cleared from browser seed):** Use **demo06@demo.test** or **demo07@demo.test** for full profile UI testing if legacy data is restored.
 

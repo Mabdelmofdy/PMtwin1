@@ -75,6 +75,7 @@ export function loadUsers(): PlatformUser[] {
     rows(usersBase as DataEnvelope<PlatformUser>),
     rows(seedUsers as DataEnvelope<PlatformUser>),
     rows(demoEmployees as DataEnvelope<PlatformUser>),
+    rows(demoPendingUsers as DataEnvelope<PlatformUser>),
   )
 }
 

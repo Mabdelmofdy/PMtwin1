@@ -58,7 +58,15 @@
         ],
         "primaryDomain": "Construction",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -119,7 +127,15 @@
         ],
         "primaryDomain": "Construction",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -178,7 +194,15 @@
         ],
         "primaryDomain": "Construction",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -238,7 +262,15 @@
         ],
         "primaryDomain": "Construction",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -298,7 +330,15 @@
         ],
         "primaryDomain": "Infrastructure",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -357,7 +397,15 @@
         ],
         "primaryDomain": "Infrastructure",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -417,7 +465,15 @@
         ],
         "primaryDomain": "Construction",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -478,7 +534,15 @@
         ],
         "primaryDomain": "Construction",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -538,7 +602,15 @@
         ],
         "primaryDomain": "Construction",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -600,7 +672,15 @@
         ],
         "primaryDomain": "Infrastructure",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -661,7 +741,15 @@
         ],
         "primaryDomain": "Infrastructure",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -722,7 +810,15 @@
         ],
         "primaryDomain": "Infrastructure",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -783,7 +879,15 @@
         ],
         "primaryDomain": "Infrastructure",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -844,7 +948,15 @@
         ],
         "primaryDomain": "Real Estate",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -905,7 +1017,15 @@
         ],
         "primaryDomain": "Finance",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -965,7 +1085,15 @@
         ],
         "primaryDomain": "Construction",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -1026,7 +1154,15 @@
         ],
         "primaryDomain": "Construction",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -1086,7 +1222,15 @@
         ],
         "primaryDomain": "Construction",
         "rating": 0.8,
-        "avatar": null
+        "avatar": null,
+        "vetting": {
+          "caseStatus": "approved",
+          "reviewProgress": "approved",
+          "reviewedAt": "2026-06-20T10:00:00.000Z",
+          "reviewedBy": "admin@pmtwin.com",
+          "emailVerified": true,
+          "submittedAt": "2026-06-18T09:00:00.000Z"
+        }
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"

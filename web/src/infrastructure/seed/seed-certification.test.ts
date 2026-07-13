@@ -9,26 +9,49 @@ import {
 } from '@pm-twin/identity'
 
 describe('demo/UAT seed certification', () => {
-  it('has 15+ companies and 30+ people users all approved/active', () => {
+  it('has 15+ companies and 30+ approved people users', () => {
     const companies = loadCompanies()
     const users = loadUsers()
     assert.ok(companies.length >= 15, `expected >=15 companies, got ${companies.length}`)
-    assert.ok(users.length >= 30, `expected >=30 users, got ${users.length}`)
+
+    const approvedPeople = users.filter(
+      (user) =>
+        user.role !== 'admin' &&
+        user.status === 'active' &&
+        resolveVettingCaseStatus(user.profile?.vetting, user.status) === 'approved',
+    )
+    assert.ok(
+      approvedPeople.length >= 30,
+      `expected >=30 approved people, got ${approvedPeople.length}`,
+    )
 
     for (const company of companies) {
       assert.equal(company.status, 'active', `company ${company.id} not active`)
+      assert.equal(
+        resolveVettingCaseStatus(company.profile?.vetting, company.status),
+        'approved',
+        `company ${company.id} not approved`,
+      )
     }
-    for (const user of users) {
-      if (user.role === 'admin') continue
-      assert.equal(user.status, 'active', `user ${user.id} not active`)
-      const caseStatus = resolveVettingCaseStatus(user.profile?.vetting, user.status)
-      assert.equal(caseStatus, 'approved', `user ${user.id} caseStatus=${caseStatus}`)
+  })
+
+  it('includes pending demo accounts for onboarding certification', () => {
+    const pending = loadUsers().filter((user) =>
+      ['pending_vetting', 'pending', 'clarification_requested'].includes(user.status),
+    )
+    assert.ok(pending.length >= 3, `expected >=3 pending users, got ${pending.length}`)
+    for (const user of pending) {
+      assert.notEqual(
+        resolveVettingCaseStatus(user.profile?.vetting, user.status),
+        'approved',
+        `pending user ${user.id} must not be approved`,
+      )
     }
   })
 
   it('projects employee memberships onto company workspaces', () => {
     const companies = loadCompanies()
-    const users = loadUsers()
+    const users = loadUsers().filter((user) => user.status === 'active')
     const companyIds = new Set(companies.map((c) => c.id))
     const employees = users.filter((user) => {
       const employer =
