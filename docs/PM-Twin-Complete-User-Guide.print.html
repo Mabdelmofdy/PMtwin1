@@ -1,0 +1,2524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PM-Twin Complete User Guide</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    @page { size: A4; margin: 12mm 10mm 14mm 10mm; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.4;
+      color: #0f172a;
+    }
+    .cover {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 28mm 12mm 24mm;
+      break-after: page;
+      page-break-after: always;
+    }
+    .cover-logo { width: 360px; max-width: 88%; margin-bottom: 12mm; }
+    .cover-logo svg { width: 100%; height: auto; display: block; }
+    .cover .tag {
+      display: inline-block;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 9pt;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 8mm;
+    }
+    .cover h1 {
+      border: none;
+      font-size: 28pt;
+      margin: 0 0 6mm;
+      color: #0f172a;
+      page-break-after: avoid;
+    }
+    .cover .subtitle {
+      font-size: 13pt;
+      color: #334155;
+      max-width: 150mm;
+      margin: 0 auto 10mm;
+    }
+    .cover .meta { color: #64748b; font-size: 10pt; margin: 0; }
+    .doc-body { max-width: 100%; margin: 0; padding: 0; }
+    h1 {
+      font-size: 18pt;
+      border-bottom: 2px solid #0369a1;
+      padding-bottom: 4px;
+      margin: 0.8em 0 0.45em;
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+    h2 {
+      font-size: 13.5pt;
+      color: #0369a1;
+      margin: 0.95em 0 0.35em;
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+    h3 {
+      font-size: 11.5pt;
+      color: #0f172a;
+      margin: 0.8em 0 0.3em;
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+    h4 {
+      font-size: 10.5pt;
+      color: #334155;
+      margin: 0.7em 0 0.25em;
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+    p { margin: 0.45em 0; }
+    ul, ol { margin: 0.4em 0; padding-left: 1.2em; }
+    li { margin: 0.15em 0; }
+    a { color: #0369a1; text-decoration: none; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8.8pt;
+      margin: 8px 0 12px;
+    }
+    th, td { border: 1px solid #cbd5e1; padding: 5px 7px; vertical-align: top; text-align: left; }
+    th { background: #f1f5f9; font-weight: 600; }
+    blockquote {
+      margin: 8px 0;
+      padding: 7px 10px;
+      border-left: 4px solid #0369a1;
+      background: #f0f9ff;
+      color: #0f172a;
+    }
+    code {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 8.8pt;
+      background: #f8fafc;
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+    pre:not(.mermaid) {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px;
+      overflow: hidden;
+      font-size: 8pt;
+    }
+    .mermaid-wrap {
+      margin: 10px 0 14px;
+      padding: 14px 8px 10px;
+      background: #0b1220;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      overflow: hidden;
+      text-align: center;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      max-height: 780px;
+    }
+    .mermaid-wrap .mermaid,
+    pre.mermaid {
+      background: transparent !important;
+      border: none !important;
+      margin: 0 auto !important;
+      padding: 0 !important;
+      text-align: center;
+      color: #e2e8f0;
+      display: block;
+      min-height: 0 !important;
+    }
+    .mermaid-wrap svg {
+      display: block !important;
+      margin: 0 auto !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      max-height: 720px !important;
+      min-height: 0 !important;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 10px 0;
+    }
+    .page-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 6mm;
+      padding-bottom: 3mm;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .page-header-logo { width: 130px; }
+    .page-header-logo svg { width: 100%; height: auto; display: block; }
+    .page-header-title { font-size: 9pt; color: #64748b; }
+  </style>
+</head>
+<body>
+  <section class="cover">
+    <div class="tag">Official User Manual</div>
+    <div class="cover-logo" aria-label="PM-Twin logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" role="img" aria-label="PM-Twin">
+  <defs>
+    <linearGradient id="pmTwinMark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+  </defs>
+  <!-- Twin connection mark -->
+  <g transform="translate(8, 18)">
+    <circle cx="28" cy="28" r="22" fill="url(#pmTwinMark)"/>
+    <circle cx="68" cy="56" r="22" fill="none" stroke="#0369a1" stroke-width="6"/>
+    <path d="M44 36 L52 48" stroke="#0369a1" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="28" cy="28" r="7" fill="#ffffff"/>
+    <circle cx="68" cy="56" r="7" fill="#0369a1"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="118" y="72" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="52" font-weight="700" fill="#0f172a" letter-spacing="-0.5">PM-Twin</text>
+</svg>
+</div>
+    <h1>Complete User Guide</h1>
+    <p class="subtitle">Construction Collaboration Marketplace for Saudi Arabia and the GCC</p>
+    <p class="meta">For end users, company owners, employees, administrators, trainers, and customers</p>
+  </section>
+
+  <div class="doc-body">
+    <div class="page-header">
+      <div class="page-header-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" role="img" aria-label="PM-Twin">
+  <defs>
+    <linearGradient id="pmTwinMark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+  </defs>
+  <!-- Twin connection mark -->
+  <g transform="translate(8, 18)">
+    <circle cx="28" cy="28" r="22" fill="url(#pmTwinMark)"/>
+    <circle cx="68" cy="56" r="22" fill="none" stroke="#0369a1" stroke-width="6"/>
+    <path d="M44 36 L52 48" stroke="#0369a1" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="28" cy="28" r="7" fill="#ffffff"/>
+    <circle cx="68" cy="56" r="7" fill="#0369a1"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="118" y="72" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="52" font-weight="700" fill="#0f172a" letter-spacing="-0.5">PM-Twin</text>
+</svg>
+</div>
+      <div class="page-header-title">Complete User Guide</div>
+    </div>
+    <table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Product</strong></td>
+<td>PM-Twin — Construction Collaboration Marketplace</td>
+</tr>
+<tr>
+<td><strong>Audience</strong></td>
+<td>End users, company owners, employees, administrators, sales teams, trainers, and customers</td>
+</tr>
+<tr>
+<td><strong>Purpose</strong></td>
+<td>Explain what you can see and do in PM-Twin</td>
+</tr>
+<tr>
+<td><strong>Region focus</strong></td>
+<td>Saudi Arabia and the GCC (Arabic layout, Saudi Riyal, VAT, data protection expectations)</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Training environments:</strong> Some training or acceptance environments may provide sample login accounts and practice data. Features labeled <strong>Preview</strong> in the application are available in a limited form. Your trainer or customer success contact can confirm what applies to your environment.</p>
+</blockquote>
+<hr>
+<h2>Table of contents</h2>
+<ol>
+<li><a href="#1-introduction">Introduction</a></li>
+<li><a href="#2-platform-overview">Platform overview</a></li>
+<li><a href="#3-core-concepts">Core concepts</a></li>
+<li><a href="#4-user-roles">User roles</a></li>
+<li><a href="#5-getting-started">Getting started</a></li>
+<li><a href="#6-complete-opportunity-guide">Complete opportunity guide</a></li>
+<li><a href="#7-marketplace-guide">Marketplace guide</a></li>
+<li><a href="#8-matching-guide">Matching guide</a></li>
+<li><a href="#9-negotiation-guide">Negotiation guide</a></li>
+<li><a href="#10-commercial-agreement-guide">Commercial agreement guide</a></li>
+<li><a href="#11-contract-guide">Contract guide</a></li>
+<li><a href="#12-notifications">Notifications</a></li>
+<li><a href="#13-dashboard-guide">Dashboard guide</a></li>
+<li><a href="#14-admin-portal-overview">Admin portal (overview)</a> — <a href="#demo-walkthrough-verification-demouat">Demo Walkthrough verification</a></li>
+<li><a href="#15-complete-business-journey">Complete business journey</a></li>
+<li><a href="#16-best-practices">Best practices</a></li>
+<li><a href="#17-troubleshooting">Troubleshooting</a></li>
+<li><a href="#18-frequently-asked-questions">Frequently asked questions</a></li>
+<li><a href="#19-glossary">Glossary</a></li>
+</ol>
+<hr>
+<h2>1. Introduction</h2>
+<h3>What is PM-Twin?</h3>
+<p>PM-Twin is a <strong>construction collaboration marketplace</strong> for Saudi Arabia and the GCC. It helps companies, project managers, consultants, contractors, suppliers, and independent professionals find partners, share capacity, negotiate terms, and formalize work through commercial agreements and contracts.</p>
+<p>You publish what you need or what you can offer. PM-Twin helps you find compatible partners, then guides you from match → negotiation → commercial agreement → contract.</p>
+<h3>Why it exists</h3>
+<p>Construction projects rarely succeed with a single party. Teams need:</p>
+<ul>
+<li>Short-term capacity (schedulers, BIM coordinators, site supervisors)</li>
+<li>Equipment and resource sharing</li>
+<li>Joint bids and consortia</li>
+<li>Service-for-service exchange (barter)</li>
+<li>Hiring of professionals and consultants</li>
+<li>Clear commercial terms, VAT-aware pricing, and signed contracts</li>
+</ul>
+<p>PM-Twin replaces fragmented chat threads, email RFPs, and informal introductions with a structured collaboration path.</p>
+<h3>Business problems it solves</h3>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>How PM-Twin helps</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Hard to find the right partner quickly</td>
+<td>Marketplace discovery and automatic partner suggestions</td>
+</tr>
+<tr>
+<td>Unclear scope and commercial terms</td>
+<td>Guided opportunity form with collaboration models and commercial structure</td>
+</tr>
+<tr>
+<td>No shared place for negotiations</td>
+<td>Negotiation room with messages, offers, and history</td>
+</tr>
+<tr>
+<td>Informal “handshake” deals</td>
+<td>Commercial agreements with review and award</td>
+</tr>
+<tr>
+<td>Missing legal closure</td>
+<td>Contracts with multi-party signing</td>
+</tr>
+<tr>
+<td>Incomplete profiles hurt trust</td>
+<td>Readiness guidance before you publish</td>
+</tr>
+<tr>
+<td>Company vs individual confusion</td>
+<td>Personal and Company workspaces</td>
+</tr>
+</tbody></table>
+<h3>Who should use it</h3>
+<ul>
+<li><strong>Company owners</strong> building partnerships and subcontracting pipelines  </li>
+<li><strong>Employees</strong> working inside a company workspace  </li>
+<li><strong>Individual professionals and consultants</strong> offering or seeking work  </li>
+<li><strong>Commercial, legal, and project managers</strong> reviewing terms and contracts  </li>
+<li><strong>Platform administrators</strong> reviewing accounts and overseeing the marketplace  </li>
+<li><strong>Sales and training teams</strong> onboarding customers</li>
+</ul>
+<h3>Typical users</h3>
+<table>
+<thead>
+<tr>
+<th>Persona</th>
+<th>Typical goals</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Contractor company owner</td>
+<td>Publish needs for subcontractors; award commercial agreements</td>
+</tr>
+<tr>
+<td>BIM / design consultant</td>
+<td>Publish offers; accept matches; negotiate cash or barter</td>
+</tr>
+<tr>
+<td>Developer / owner-client</td>
+<td>Form consortia or joint ventures for large packages</td>
+</tr>
+<tr>
+<td>Equipment provider</td>
+<td>Share fleet capacity through resource-sharing models</td>
+</tr>
+<tr>
+<td>Independent project manager</td>
+<td>Hire into roles or offer availability</td>
+</tr>
+<tr>
+<td>Platform admin</td>
+<td>Approve registrations, manage awards, review activity</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. Platform overview</h2>
+<p>PM-Twin is organized around two everyday ways of working:</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>How to think about it</th>
+<th>Typical language</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>My Workspace</strong></td>
+<td>Your work, ownership, and progress</td>
+<td>My opportunities, pending, needs action, executing</td>
+</tr>
+<tr>
+<td><strong>Marketplace</strong></td>
+<td>Finding partners and opportunities</td>
+<td>Explore, discover, available, recommended</td>
+</tr>
+</tbody></table>
+<h3>Major modules</h3>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>What it is</th>
+<th>Where you find it</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Dashboard</strong></td>
+<td>Home for your active workspace: summary numbers, tasks, notifications, next actions</td>
+<td>My Workspace → Dashboard</td>
+</tr>
+<tr>
+<td><strong>Workspace</strong></td>
+<td>Your Personal or Company business context (switchable)</td>
+<td>Workspace switcher in the header</td>
+</tr>
+<tr>
+<td><strong>Marketplace / Discover</strong></td>
+<td>Browse published opportunities, people, and (where available) matches</td>
+<td>Marketplace → Discover</td>
+</tr>
+<tr>
+<td><strong>Opportunities</strong></td>
+<td>Create, edit, publish, and manage needs and offers</td>
+<td>My Opportunities / Browse Opportunities</td>
+</tr>
+<tr>
+<td><strong>Matches</strong></td>
+<td>Suggested partner pairings</td>
+<td>My Matches</td>
+</tr>
+<tr>
+<td><strong>Negotiations</strong></td>
+<td>Term discussions, offers, and counter-offers</td>
+<td>My Negotiations</td>
+</tr>
+<tr>
+<td><strong>Commercial Agreements</strong></td>
+<td>Structured business agreements after terms are agreed</td>
+<td>My Commercial Agreements</td>
+</tr>
+<tr>
+<td><strong>Contracts</strong></td>
+<td>Formal agreements ready for signing</td>
+<td>My Contracts</td>
+</tr>
+<tr>
+<td><strong>Pipeline</strong></td>
+<td>Board view across matches → agreements → contracts</td>
+<td>My Pipeline</td>
+</tr>
+<tr>
+<td><strong>Notifications</strong></td>
+<td>Alerts for matches, invitations, agreements, contracts</td>
+<td>Notifications</td>
+</tr>
+<tr>
+<td><strong>Messages</strong></td>
+<td>Messaging area</td>
+<td>Messages</td>
+</tr>
+<tr>
+<td><strong>Profile</strong></td>
+<td>Your personal or company profile and readiness</td>
+<td>Profile</td>
+</tr>
+<tr>
+<td><strong>Party documents</strong></td>
+<td>Documents for account review and compliance (CR, VAT, licenses, and similar)</td>
+<td>Party documents</td>
+</tr>
+<tr>
+<td><strong>Settings</strong></td>
+<td>Language direction, password, and related preferences</td>
+<td>Settings</td>
+</tr>
+<tr>
+<td><strong>Admin Portal</strong></td>
+<td>Platform operations for administrators</td>
+<td>Admin</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>Screenshot: Sidebar showing My Workspace and Marketplace groups</p>
+</blockquote>
+<h3>How modules work together</h3>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart TB
+  A[Profile and Workspace] --&gt; B[Opportunity]
+  B --&gt; C[Marketplace]
+  B --&gt; D[Matching]
+  D --&gt; E[Match]
+  E --&gt; F[Negotiation]
+  F --&gt; G[Commercial Agreement]
+  G --&gt; H[Contract]
+  H --&gt; I[Execution / Completion]
+  N[Notifications] -.-&gt; E
+  N -.-&gt; F
+  N -.-&gt; G
+  N -.-&gt; H</pre></div><ol>
+<li>You complete a <strong>profile</strong> and work in a <strong>workspace</strong>.  </li>
+<li>You create and <strong>publish</strong> an <strong>opportunity</strong> (Need or Offer).  </li>
+<li>The <strong>marketplace</strong> shows published posts to others.  </li>
+<li>Compatible partners appear as <strong>matches</strong>.  </li>
+<li>Parties <strong>accept</strong> a match and start a <strong>negotiation</strong>.  </li>
+<li>When terms are agreed, you create a <strong>commercial agreement</strong>.  </li>
+<li>From the agreement you create and <strong>sign</strong> a <strong>contract</strong>.  </li>
+<li>Work moves through execution statuses until <strong>completed</strong>.</li>
+</ol>
+<hr>
+<h2>3. Core concepts</h2>
+<h3>Workspace</h3>
+<p>A <strong>workspace</strong> is the business context you are acting in. You may have:</p>
+<ul>
+<li>A <strong>Personal Workspace</strong> (individual professional or consultant)</li>
+<li>One or more <strong>Company Workspaces</strong> (as owner, admin, member, or viewer)</li>
+<li>Platform staff may also enter the <strong>PM-Twin Platform</strong> admin area</li>
+</ul>
+<p>Switching workspace changes what “mine” means for opportunities, matches, and agreements.</p>
+<h3>Company</h3>
+<p>A <strong>company</strong> is an organization with its own company workspace. Owners invite employees. Some collaboration options (for example Project-Specific Joint Venture, Special Purpose Vehicle, Strategic Joint Venture) are available only to companies.</p>
+<h3>Personal Workspace</h3>
+<p>A <strong>Personal Workspace</strong> is for professionals and consultants working independently. You can still collaborate with companies through matches and negotiations.</p>
+<h3>Party</h3>
+<p>A <strong>party</strong> is who participates in the marketplace: either an <strong>individual</strong> or a <strong>company</strong>. Opportunities, matches, and contracts are always linked to the parties involved.</p>
+<h3>Opportunity</h3>
+<p>An <strong>opportunity</strong> is a draft or published <strong>Need</strong> or <strong>Offer</strong> describing scope, collaboration model, commercial terms, and timeline. In simple terms: a need or offer ready for partners to find.</p>
+<h3>Match</h3>
+<p>A <strong>match</strong> is a suggested pairing between compatible opportunities (including multi-party collaborations). Matches show a score and a status such as Discovered, Accepted, Confirmed, Declined, or Expired.</p>
+<h3>Negotiation</h3>
+<p>A <strong>negotiation</strong> is the structured discussion of commercial terms after a match is accepted. It includes messages, offers, counter-offers, attachments, and a history of actions.</p>
+<h3>Commercial Agreement</h3>
+<p>A <strong>commercial agreement</strong> is the business record created once terms are agreed (or awarded). It moves through statuses such as Draft, Review, Signing, Executing, Completed, or Cancelled. It sits between negotiation and contract.</p>
+<blockquote>
+<p>Older materials may say “deal.” In the product, the preferred name is <strong>Commercial Agreement</strong>.</p>
+</blockquote>
+<h3>Contract</h3>
+<p>A <strong>contract</strong> is the formal signing record created from a commercial agreement. Parties sign it; when all required signatures are in place, it becomes <strong>Active</strong>.</p>
+<h3>Readiness</h3>
+<p><strong>Readiness</strong> is a percentage score that shows whether your <strong>profile</strong> and <strong>opportunity</strong> are complete enough to publish. Publishing usually requires both to be ready: required information filled in and a score of <strong>80%</strong> or higher.</p>
+<h3>Validation</h3>
+<p>While you fill forms, PM-Twin highlights missing or incomplete information (for example required fields, or a payment schedule that does not add up to 100%). Warnings help you improve quality; required items must be fixed before you can publish.</p>
+<h3>Marketplace</h3>
+<p>The <strong>marketplace</strong> is where you discover other people’s published opportunities, companies, and professionals. Your drafts stay under <strong>My Opportunities</strong>, not in public discovery.</p>
+<h3>Ownership</h3>
+<p>Ownership answers “whose is this?”</p>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Mine</strong></td>
+<td>Created by you in your personal context</td>
+</tr>
+<tr>
+<td><strong>Company</strong></td>
+<td>Owned by your company workspace</td>
+</tr>
+<tr>
+<td><strong>Marketplace</strong></td>
+<td>Published by others outside your organization</td>
+</tr>
+</tbody></table>
+<h3>Visibility</h3>
+<p><strong>Visibility</strong> controls whether an opportunity appears in marketplace discovery. <strong>Archive</strong> removes it from active discovery. <strong>Close</strong> ends the opportunity for new matching.</p>
+<hr>
+<h2>4. User roles</h2>
+<p>Your access depends on how you registered, which workspace you are in, and (for staff) whether you are a platform administrator.</p>
+<h3>Individual Professional (and Consultant)</h3>
+<p><strong>Who:</strong> Registered with a Personal Workspace as Professional or Consultant.</p>
+<p><strong>Can typically:</strong></p>
+<ul>
+<li>Complete personal profile and documents  </li>
+<li>Create opportunity drafts and publish when readiness and permissions allow  </li>
+<li>Browse the marketplace, view matches, accept or decline matches  </li>
+<li>Start and participate in negotiations (message, offer, counter, accept)  </li>
+<li>View commercial agreements and sign contracts when you are a signing party</li>
+</ul>
+<p><strong>Cannot typically:</strong></p>
+<ul>
+<li>Create a company without registering as Company  </li>
+<li>Use company-only collaboration options (Project Joint Venture, Special Purpose Vehicle, Strategic Joint Venture)  </li>
+<li>Access the Admin Portal</li>
+</ul>
+<h3>Company Owner</h3>
+<p><strong>Who:</strong> Registered a Company Workspace and is the <strong>owner</strong>.</p>
+<p><strong>Can typically:</strong></p>
+<ul>
+<li>Manage the full opportunity journey for company posts  </li>
+<li>Invite and manage employees (according to company permissions)  </li>
+<li>Accept matches, negotiate, and create or progress commercial agreements  </li>
+<li>Award agreements (where permitted) and create or sign contracts  </li>
+<li>Complete company profile and review documents (Commercial Registration, VAT certificate, and similar)</li>
+</ul>
+<h3>Employee</h3>
+<p><strong>Who:</strong> Joined a company through an invitation. Does <strong>not</strong> create a new company.</p>
+<p><strong>Can do:</strong> Depends on the role assigned in the company workspace. Examples:</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Typical focus</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Company admin</td>
+<td>Members, workspace settings, broad operational rights</td>
+</tr>
+<tr>
+<td>Manager / Project manager</td>
+<td>Opportunities and delivery coordination</td>
+</tr>
+<tr>
+<td>Commercial manager</td>
+<td>Negotiations, agreements, awards</td>
+</tr>
+<tr>
+<td>Legal / Finance</td>
+<td>Review, signing, commercial terms</td>
+</tr>
+<tr>
+<td>Member</td>
+<td>Day-to-day collaboration within granted permissions</td>
+</tr>
+<tr>
+<td>Viewer</td>
+<td>View only</td>
+</tr>
+</tbody></table>
+<p><strong>Cannot:</strong> Act outside the company workspace they belong to, or perform actions their role does not allow (for example publishing, signing, or awarding).</p>
+<h3>Reviewer</h3>
+<p><strong>Who:</strong> Assigned to review new registrations (often platform staff).</p>
+<p><strong>Can:</strong> Review registration packages, request clarification, approve or reject accounts.</p>
+<p><strong>Cannot:</strong> Act as a normal marketplace participant unless they also have a standard user account.</p>
+<h3>Administrator (platform staff)</h3>
+<p><strong>Who:</strong> Platform administrators, operations staff, moderators, auditors, and similar roles.</p>
+<p><strong>Can:</strong> Use the Admin Portal — users and companies, account review, marketplace oversight, commercial approvals and awards, reports, and activity review.</p>
+<p><strong>Auditors:</strong> May view information without changing records.</p>
+<blockquote>
+<p>Screenshot: Role badge in the sidebar (for example “Professional” or “Platform admin”)</p>
+</blockquote>
+<hr>
+<h2>5. Getting started</h2>
+<h3>Logging in</h3>
+<ol>
+<li>Open <strong>Sign in</strong>.  </li>
+<li>Enter your <strong>email</strong> and <strong>password</strong>.  </li>
+<li>Optionally choose to stay signed in.  </li>
+<li>After sign-in you land on your dashboard (personal or company).</li>
+</ol>
+<blockquote>
+<p>Screenshot: Sign in page<br><strong>Tip for training sessions:</strong> Your trainer may provide practice accounts.</p>
+</blockquote>
+<p><strong>New users:</strong> Use <strong>Register</strong> to create a Personal or Company workspace, complete the profile steps, accept Terms and Privacy, and verify your email. New accounts may be <strong>pending review</strong> — you can browse, but full actions unlock after approval.</p>
+<h3>Switching workspaces</h3>
+<ol>
+<li>Open the <strong>workspace switcher</strong> in the header.  </li>
+<li>Choose <strong>Personal Workspace</strong> or a <strong>Company Workspace</strong>.  </li>
+<li>You are taken to the matching dashboard for that workspace.  </li>
+<li>Platform staff may choose <strong>enter Platform</strong> to open Admin.</li>
+</ol>
+<blockquote>
+<p>Screenshot: Workspace switcher listing Personal and Company workspaces</p>
+</blockquote>
+<h3>Updating your profile</h3>
+<ol>
+<li>Go to <strong>My Profile</strong>.  </li>
+<li>Review Summary, Skills, Experience/Portfolio, and (for companies) Company information.  </li>
+<li>Improve <strong>profile readiness</strong> until required fields are complete and the score reaches the publish threshold.</li>
+</ol>
+<p><strong>Individual — required for readiness:</strong> Full Name, Role, Skills, Services, Location, Availability.<br><strong>Individual — recommended:</strong> Portfolio, Experience, Certifications, Previous Projects.  </p>
+<p><strong>Company — required:</strong> Company Name, Business Category, Services, Project Categories, Location, Contact Person.<br><strong>Company — recommended:</strong> Portfolio, Team Size, Coverage Areas, Certifications, Financial Capacity.</p>
+<h3>Completing company information</h3>
+<ol>
+<li>Ensure you are in the <strong>Company Workspace</strong>.  </li>
+<li>Complete company profile fields and contact person.  </li>
+<li>Upload required documents under <strong>Party documents</strong> (see below).  </li>
+<li>If your account is pending review, follow the guidance on the pending dashboard (for example Upload VAT, Upload CR, Resubmit for review).</li>
+</ol>
+<h3>Uploading required documents</h3>
+<p>Open <strong>Party documents</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Document categories you may see</th>
+<th>Common required items</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Profile, vetting, legal, technical, commercial, financial, insurance, certification, attachment</td>
+<td>Commercial Registration, <strong>VAT Certificate</strong>, Insurance Certificate, License, National ID</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>Screenshot: Party documents upload form</p>
+</blockquote>
+<h3>Understanding dashboard widgets</h3>
+<p>See <a href="#13-dashboard-guide">Section 13 — Dashboard guide</a>. At a glance you will see:</p>
+<ul>
+<li>Greeting and readiness / active matches  </li>
+<li>Summary counts (opportunities, matches, negotiations, agreements, contracts)  </li>
+<li>My tasks and next best actions  </li>
+<li>Notifications  </li>
+<li>Matching summary and marketplace recommendations</li>
+</ul>
+<p>If your account is <strong>pending review</strong>, you see a <strong>Pending Vetting Dashboard</strong> instead of the full workspace dashboard.</p>
+<hr>
+<h2>6. Complete opportunity guide</h2>
+<p>This is the most important section for most users.</p>
+<h3>What is an Opportunity?</h3>
+<p>An opportunity is a structured post that says either:</p>
+<ul>
+<li><strong>Need</strong> — you are requesting services, skills, resources, capacity, or project support; or  </li>
+<li><strong>Offer</strong> — you are providing services, skills, resources, equipment, or available capacity.</li>
+</ul>
+<p>Opportunities include collaboration model, scope, commercial structure, timeline, and documents so partners can evaluate fit.</p>
+<h3>When should you create one?</h3>
+<p>Create an opportunity when you have a real collaboration intent, for example:</p>
+<ul>
+<li>You need a concrete pumping subcontractor next month  </li>
+<li>You can offer BIM coordination capacity  </li>
+<li>You want partners for a consortium bid  </li>
+<li>You need to hire a senior project manager for six months  </li>
+<li>You want to exchange design capacity for site supervision (barter)</li>
+</ul>
+<p>Do <strong>not</strong> publish empty placeholders — readiness and partner quality depend on complete information.</p>
+<h3>Draft vs Published</h3>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Meaning</th>
+<th>In the marketplace</th>
+<th>Partner suggestions</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Draft</strong></td>
+<td>Work in progress; use <strong>Save Draft</strong></td>
+<td>Not shown as published</td>
+<td>Not created yet</td>
+</tr>
+<tr>
+<td><strong>Published</strong></td>
+<td>Live for discovery</td>
+<td>Visible according to ownership and visibility</td>
+<td>Created after you publish</td>
+</tr>
+</tbody></table>
+<p>If you leave the form with unsaved work, you may see <strong>Recover unsaved local draft?</strong> with options to <strong>Continue draft</strong> or <strong>Discard</strong>. Always use <strong>Save Draft</strong> or <strong>Publish Opportunity</strong> when you want to keep your work.</p>
+<h3>Opportunity lifecycle</h3>
+<div class="mermaid-wrap"><pre class="mermaid">stateDiagram-v2
+  [*] --&gt; Draft
+  Draft --&gt; Published: Publish
+  Published --&gt; Matched: Matches found / accepted
+  Matched --&gt; Negotiating: Negotiation started
+  Negotiating --&gt; Contracted: Contract linked
+  Contracted --&gt; Executing: Execution
+  Executing --&gt; Completed: Complete
+  Draft --&gt; Cancelled: Cancel / delete draft
+  Published --&gt; Cancelled: Close / cancel
+  Executing --&gt; Cancelled: Cancelled</pre></div><p>Statuses you will see: <strong>Draft → Published → Matched → Negotiating → Contracted → Executing → Completed</strong> (or <strong>Cancelled</strong>).</p>
+<p><strong>Archive</strong> removes the opportunity from active marketplace discovery. That is different from cancelling or closing the opportunity.</p>
+<blockquote>
+<p>Screenshot: Opportunity details header with status badge and journey strip</p>
+</blockquote>
+<h3>Step-by-step creation</h3>
+<ol>
+<li>From the Dashboard, click <strong>Create Opportunity</strong>.  </li>
+<li>Complete the five wizard steps below.  </li>
+<li>Use <strong>Save Draft</strong> anytime.  </li>
+<li>On <strong>Review &amp; Publish</strong>, resolve readiness items, then click <strong>Publish Opportunity</strong>.</li>
+</ol>
+<blockquote>
+<p>Screenshot: Opportunity Wizard - Step 1<br>Screenshot: Opportunity Wizard - Step 2<br>Screenshot: Opportunity Wizard - Step 3<br>Screenshot: Opportunity Wizard - Step 4<br>Screenshot: Opportunity Wizard - Review &amp; Publish</p>
+</blockquote>
+<p>Wizard steps:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Label</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Opportunity</td>
+<td>Post type and basics</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Collaboration</td>
+<td>Model and sub-model</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Scope &amp; Work</td>
+<td>Requirements and packages</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Commercial Structure</td>
+<td>How value is exchanged</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Review &amp; Publish</td>
+<td>Confirm and publish</td>
+</tr>
+</tbody></table>
+<p>Messages you may see before continuing:</p>
+<ul>
+<li>“Choose Need or Offer before continuing.”  </li>
+<li>“Add a title and description before continuing.”  </li>
+<li>“Select a collaboration model and sub-model before continuing.”</li>
+</ul>
+<hr>
+<h3>Step 1 — Opportunity (basics)</h3>
+<p><strong>On-screen help:</strong> <em>Start with the post type and the basics partners need to evaluate fit.</em></p>
+<h4>Post Type (required to continue)</h4>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Purpose</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Need</strong></td>
+<td>Request capacity</td>
+<td>You are looking for services or resources</td>
+</tr>
+<tr>
+<td><strong>Offer</strong></td>
+<td>Provide capacity</td>
+<td>You are providing services or resources</td>
+</tr>
+</tbody></table>
+<p><strong>Common mistake:</strong> Choosing Offer when you are actually hiring — use Need (or the Hiring collaboration model) when you are requesting people.</p>
+<h4>Basic Information</h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required?</th>
+<th>Purpose</th>
+<th>Best practice</th>
+<th>Common mistake</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Title</strong></td>
+<td>Required</td>
+<td>Clear name partners can find</td>
+<td>Specific: “BIM Coordination — Riyadh Tower Q3”</td>
+<td>Vague titles like “Project help”</td>
+</tr>
+<tr>
+<td><strong>Short description</strong></td>
+<td>Required</td>
+<td>Partner evaluation</td>
+<td>2–4 sentences on scope and outcome</td>
+<td>Pasting a full RFP with no summary</td>
+</tr>
+<tr>
+<td><strong>Category or profession</strong></td>
+<td>Required</td>
+<td>Discovery by sector</td>
+<td>Align with the real trade or discipline</td>
+<td>Leaving unrelated category</td>
+</tr>
+<tr>
+<td><strong>Target role</strong></td>
+<td>Required</td>
+<td>Who should respond</td>
+<td>“MEP Subcontractor”, “Planning Engineer”</td>
+<td>Leaving blank or too broad</td>
+</tr>
+<tr>
+<td><strong>Primary location</strong></td>
+<td>Required</td>
+<td>Location fit</td>
+<td>City and site context</td>
+<td>“KSA” only when city matters</td>
+</tr>
+<tr>
+<td><strong>Service area</strong></td>
+<td>Optional</td>
+<td>Coverage</td>
+<td>Regions you serve or need covered</td>
+<td>Ignoring multi-city coverage</td>
+</tr>
+<tr>
+<td><strong>Start date</strong></td>
+<td>Required</td>
+<td>Timing</td>
+<td>Realistic start</td>
+<td>Past dates without explanation</td>
+</tr>
+<tr>
+<td><strong>Deadline</strong></td>
+<td>Optional</td>
+<td>Tender or delivery cutoff</td>
+<td>Use for RFPs and hard ends</td>
+<td>Conflicting with start date</td>
+</tr>
+<tr>
+<td><strong>Availability end date (recommended)</strong></td>
+<td>Recommended</td>
+<td>Offer capacity window</td>
+<td>Especially important for Offers</td>
+<td>Omitting when capacity is time-bound</td>
+</tr>
+</tbody></table>
+<hr>
+<h3>Step 2 — Collaboration Model</h3>
+<p><strong>On-screen help:</strong> <em>Choose how parties will work together. Matching structure is shown automatically.</em></p>
+<h4>Main Collaboration Model (required)</h4>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Meaning</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Cash Subcontracting</strong></td>
+<td>Engage another party to deliver defined work for payment</td>
+<td>Concrete pumping subcontract</td>
+</tr>
+<tr>
+<td><strong>Service Exchange / Barter</strong></td>
+<td>Exchange complementary services without pure cash</td>
+<td>Design capacity for site supervision</td>
+</tr>
+<tr>
+<td><strong>Joint Venture</strong></td>
+<td>Partner for a shared project or business outcome</td>
+<td>Special Purpose Vehicle for a mixed-use bid</td>
+</tr>
+<tr>
+<td><strong>Resource Sharing</strong></td>
+<td>Share equipment, people, or materials</td>
+<td>Shared crane fleet</td>
+</tr>
+<tr>
+<td><strong>Hiring / Professional Engagement</strong></td>
+<td>Hire a professional or consultant</td>
+<td>Senior project manager for 6 months</td>
+</tr>
+</tbody></table>
+<h4>Sub-model (required)</h4>
+<p>Pick the engagement pattern under the main model. Examples:</p>
+<table>
+<thead>
+<tr>
+<th>Main model</th>
+<th>Sub-models (examples)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Cash Subcontracting</td>
+<td>Task-Based Engagement; Competition / RFP</td>
+</tr>
+<tr>
+<td>Service Exchange</td>
+<td>Long-Term Strategic Alliance; Mentorship Program; Task-Based Engagement</td>
+</tr>
+<tr>
+<td>Joint Venture</td>
+<td>Consortium; Project-Specific Joint Venture; Special Purpose Vehicle; Strategic Joint Venture</td>
+</tr>
+<tr>
+<td>Resource Sharing</td>
+<td>Bulk Purchasing; Equipment Sharing; Resource Sharing &amp; Exchange</td>
+</tr>
+<tr>
+<td>Hiring</td>
+<td>Professional Hiring; Consultant Hiring</td>
+</tr>
+</tbody></table>
+<p><strong>Company-only:</strong> Project-Specific Joint Venture, Special Purpose Vehicle, and Strategic Joint Venture require a <strong>company</strong> account.</p>
+<p>Each sub-model shows additional <strong>Collaboration Details</strong> (for example Task Title, Equity Split, Equipment Type). Complete required fields before publishing.</p>
+<h4>Recommended matching structure (read-only)</h4>
+<p>The screen shows <strong>Recommended matching structure</strong> (One Way, Two-Way, Consortium, or Circular). You do not choose this manually — it appears based on the collaboration and commercial choices you made. Use <strong>Why?</strong> if you want a short explanation.</p>
+<hr>
+<h3>Step 3 — Scope &amp; Work</h3>
+<p><strong>On-screen help:</strong> <em>Define requirements, work packages, tasks, deliverables, and milestones.</em></p>
+<h4>Skills</h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Purpose</th>
+<th>Required?</th>
+<th>Tips</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Skills Required / Skills Offered</td>
+<td>Better partner fit</td>
+<td>Needed for strong readiness</td>
+<td>Add level, years, certification, and mandatory flags where relevant</td>
+</tr>
+<tr>
+<td>Skill name</td>
+<td>Specific skill</td>
+<td>Per skill entry</td>
+<td>For example “BIM Coordination”</td>
+</tr>
+</tbody></table>
+<p><strong>Common mistake:</strong> Listing only soft skills or one vague skill.</p>
+<h4>Services</h4>
+<p>Enter <strong>Services Required</strong> or <strong>Services Offered</strong> (needed for strong readiness), usually as a comma-separated list. Example: Design Review, Coordination.</p>
+<h4>Qualifications &amp; partner preference</h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required?</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Preferred partner type</td>
+<td>Recommended</td>
+<td>Company, individual, or consultant preference</td>
+</tr>
+<tr>
+<td>Experience level</td>
+<td>Optional</td>
+<td>Seniority expectation</td>
+</tr>
+<tr>
+<td>Certifications</td>
+<td>Optional</td>
+<td>Compliance and trust</td>
+</tr>
+<tr>
+<td>Team size</td>
+<td>Optional</td>
+<td>Capacity expectation</td>
+</tr>
+<tr>
+<td>Minimum qualifications</td>
+<td>Optional</td>
+<td>Minimum standards for responders</td>
+</tr>
+</tbody></table>
+<h4>Resources</h4>
+<p>People, equipment, vehicles, materials, software, licenses — optionally linked to a work package.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Type</td>
+<td>People, equipment, vehicles, materials, software, licenses</td>
+</tr>
+<tr>
+<td>Name</td>
+<td>Required for each resource</td>
+</tr>
+<tr>
+<td>Quantity / Unit / Availability</td>
+<td>Clarity for partners</td>
+</tr>
+<tr>
+<td>Work package</td>
+<td>Whole opportunity or a specific package</td>
+</tr>
+<tr>
+<td>Mandatory</td>
+<td>Checkbox</td>
+</tr>
+</tbody></table>
+<p><strong>Available capacity</strong> (Offer only): Available, Reserved, and Maximum capacity, plus Available from. This helps partners understand your capacity.</p>
+<h4>Work Packages</h4>
+<p>Break delivery into manageable units:</p>
+<ol>
+<li>Click <strong>Add Work Package</strong>.  </li>
+<li>Enter package title and description/scope.  </li>
+<li>Add <strong>Tasks</strong> and <strong>Package deliverables</strong>.  </li>
+<li>Set package dates as needed.</li>
+</ol>
+<p><strong>Best practice:</strong> Add at least one clear package for anything beyond a very small task.</p>
+<h4>Deliverables (opportunity-level)</h4>
+<p>Add deliverables with title and acceptance criteria. Scope can be the entire opportunity or a work package.</p>
+<h4>Milestones</h4>
+<p>Add milestones with completion criteria and optional <strong>Payment trigger</strong> — important when you use cash payment schedules.</p>
+<h4>Timeline &amp; Location</h4>
+<table>
+<thead>
+<tr>
+<th>Context</th>
+<th>Typical fields</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Need</td>
+<td>Location, Start date, Deadline</td>
+</tr>
+<tr>
+<td>Offer</td>
+<td>Preferred location / service area, Availability from</td>
+</tr>
+<tr>
+<td>Additional timeline options</td>
+<td>Flexible start, Weekend allowed, Must finish before, Estimated duration, Working days, Shift type</td>
+</tr>
+</tbody></table>
+<h4>Attachments &amp; compliance</h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Purpose</th>
+<th>Best practice</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Attachments</td>
+<td>Document names</td>
+<td>List SOW, drawings, and BOQ names clearly</td>
+</tr>
+<tr>
+<td>Compliance requirements</td>
+<td>Codes, licenses, H&amp;S, data protection</td>
+<td>Be explicit for KSA projects</td>
+</tr>
+<tr>
+<td>Portfolio references</td>
+<td>Proof of capability</td>
+<td>Reference similar prior work</td>
+</tr>
+</tbody></table>
+<hr>
+<h3>Step 4 — Commercial Structure</h3>
+<p><strong>On-screen help:</strong> <em>Configure one or more value exchange components. Hybrid is shown automatically when more than one is selected.</em></p>
+<p>Enable one or more: <strong>Cash</strong>, <strong>Barter</strong>, <strong>Profit Sharing</strong>, <strong>Revenue Sharing</strong>, <strong>Equity</strong>, <strong>Custom</strong>. If more than one is enabled, the mode becomes <strong>Hybrid</strong>.</p>
+<h4>Cash (Saudi Riyal)</h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Purpose</th>
+<th>Tips</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Currency</td>
+<td>Usually <strong>SAR</strong></td>
+<td>Keep consistent across the schedule</td>
+</tr>
+<tr>
+<td>Budget type</td>
+<td>Fixed, Range, Rate-based, Milestone-based, To be negotiated</td>
+<td>Match how you really buy or sell</td>
+</tr>
+<tr>
+<td>Fixed amount</td>
+<td>Monetary value</td>
+<td>Align with milestones</td>
+</tr>
+<tr>
+<td>Advance % / Retention %</td>
+<td>Cash flow and quality holdback</td>
+<td>Common in KSA construction</td>
+</tr>
+<tr>
+<td>Payment terms</td>
+<td>When payment is due</td>
+<td>Align with deliverables</td>
+</tr>
+<tr>
+<td><strong>VAT handling</strong></td>
+<td>Tax treatment</td>
+<td>Be explicit; standard VAT in KSA is <strong>15%</strong></td>
+</tr>
+<tr>
+<td>Bank guarantee</td>
+<td>Security instruments</td>
+<td>Use when contractually required</td>
+</tr>
+<tr>
+<td>Payment schedule</td>
+<td>Milestones with % or amount</td>
+<td>Percentages should total <strong>100%</strong></td>
+</tr>
+</tbody></table>
+<h4>Barter</h4>
+<p>Offered asset or service, requested asset or service, valuation method, estimated value.</p>
+<h4>Profit / Revenue / Equity / Custom</h4>
+<p>Share percentages, calculation basis, settlement, equity type, exit strategy, or custom calculation method.</p>
+<h4>Allocation &amp; constraints</h4>
+<p>When multiple components are enabled, set allocation method (Percentage, Fixed, Mixed, Not applicable) and optional commercial constraints (for example budget ceiling).</p>
+<p><strong>Common mistakes:</strong></p>
+<ul>
+<li>Enabling Cash with empty amounts and “to be negotiated” everywhere — lowers readiness  </li>
+<li>Payment schedule percentages that do not total 100%  </li>
+<li>Barter without valuation</li>
+</ul>
+<hr>
+<h3>Step 5 — Review, Readiness, Validation, Publishing</h3>
+<p>Review shows an <strong>executive summary</strong> and section cards with <strong>Edit</strong> links:</p>
+<ul>
+<li>Opportunity Summary  </li>
+<li>Collaboration  </li>
+<li>Scope and Requirements  </li>
+<li>Work Packages and Tasks  </li>
+<li>Commercial Structure  </li>
+<li>Timeline and Location  </li>
+<li>Documents and Compliance</li>
+</ul>
+<h4>Readiness</h4>
+<p>You can publish when:</p>
+<ol>
+<li>Your <strong>profile</strong> is ready (required fields complete and score at least <strong>80%</strong>), and  </li>
+<li>Your <strong>opportunity</strong> is ready (required fields complete and score at least <strong>80%</strong>)</li>
+</ol>
+<p>Blocked message example: <em>Complete your profile and opportunity details before publishing for matching.</em></p>
+<p>Required items may include: title; Need or Offer; category; target role; skills; services; location; start or availability; collaboration model; description; commercial terms.</p>
+<p>Recommended improvements (optional, but raise your score): preferred partner type, portfolio or documents, compliance, delivery milestones.</p>
+<blockquote>
+<p>Screenshot: Opportunity Readiness panel — Required Before Publishing</p>
+</blockquote>
+<h4>Publishing</h4>
+<ol>
+<li>Resolve required readiness items.  </li>
+<li>Click <strong>Publish Opportunity</strong>.  </li>
+<li>Status becomes <strong>Published</strong>.  </li>
+<li>Compatible partners may appear as matches, and you may receive notifications.</li>
+</ol>
+<hr>
+<h3>Editing, duplicating, closing, archiving, awarding</h3>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>When available</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Edit</strong></td>
+<td>Owner; not archived or closed</td>
+<td>Update draft or published content</td>
+</tr>
+<tr>
+<td><strong>Publish</strong></td>
+<td>Owner; draft; readiness complete</td>
+<td>Enter the marketplace; partner suggestions appear</td>
+</tr>
+<tr>
+<td><strong>Duplicate as Draft</strong> / <strong>Template</strong></td>
+<td>Owner</td>
+<td>New draft copy</td>
+</tr>
+<tr>
+<td><strong>Archive</strong></td>
+<td>Owner; not draft or already archived</td>
+<td>Removed from active marketplace discovery</td>
+</tr>
+<tr>
+<td><strong>Close Opportunity</strong></td>
+<td>Owner; not draft, closed, or archived</td>
+<td>Ends the opportunity for new matching</td>
+</tr>
+<tr>
+<td><strong>Delete Draft</strong></td>
+<td>Owner; draft only</td>
+<td>Permanently deletes the draft</td>
+</tr>
+<tr>
+<td><strong>Export PDF / JSON</strong>, Print, Share, Copy Link</td>
+<td>Owner</td>
+<td>Sharing and records</td>
+</tr>
+</tbody></table>
+<p><strong>Awarding</strong> is not an opportunity button. You award from <strong>Commercial Agreements</strong> or Admin <strong>Award Management</strong> when several agreements compete on one opportunity.</p>
+<p>Opportunity detail tabs include: Overview, Scope &amp; Work, Commercial, Marketplace, Matching, Documents, Related, History.</p>
+<hr>
+<h3>Realistic example (start to finish)</h3>
+<p><strong>Scenario:</strong> A Riyadh contractor needs BIM coordination for a tower fit-out (cash subcontract, task-based).</p>
+<ol>
+<li>Sign in as company owner → Company Workspace.  </li>
+<li>Profile readiness at least 80%; VAT certificate and Commercial Registration uploaded.  </li>
+<li><strong>Create Opportunity</strong> → Post Type <strong>Need</strong>.  </li>
+<li>Title: “BIM Coordination Support — Tower Fit-out, Riyadh”.  </li>
+<li>Category: Construction / BIM; Target role: BIM Coordinator; Location: Riyadh; Start date set.  </li>
+<li>Collaboration: <strong>Cash Subcontracting</strong> → <strong>Task-Based Engagement</strong>; fill task title, scope, duration, skills, experience, payment terms.  </li>
+<li>Scope: Skills Required = BIM Coordination (Expert); Services = Clash Detection, Model Coordination; one work package “Coordination Package”; milestones with payment triggers.  </li>
+<li>Commercial: Cash, SAR, Fixed amount, Advance 20%, Retention 5%, VAT handling clear, schedule totaling 100%.  </li>
+<li>Review → readiness complete → <strong>Publish</strong>.  </li>
+<li>Matches appear → accept the best match → <strong>Start negotiation</strong> → agree terms → <strong>Create Commercial Agreement</strong> → <strong>Create contract</strong> → parties <strong>Sign</strong> → contract <strong>Active</strong>.</li>
+</ol>
+<hr>
+<h2>7. Marketplace guide</h2>
+<h3>Browsing opportunities</h3>
+<ol>
+<li>Open <strong>Marketplace → Discover</strong> for the discovery home (summary numbers and explore-by-model links), or  </li>
+<li>Open <strong>Browse Opportunities</strong>.</li>
+</ol>
+<p>Tabs commonly include:</p>
+<ul>
+<li><strong>All Marketplace</strong> — published posts from others  </li>
+<li><strong>My Opportunities</strong> — yours  </li>
+<li><strong>Company Opportunities</strong> — your organization’s</li>
+</ul>
+<blockquote>
+<p>Screenshot: Marketplace opportunity list with ownership badges</p>
+</blockquote>
+<h3>Filters and search</h3>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Typical options</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Search</td>
+<td>“Search available opportunities…” / “Search my opportunities…”</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>All / Published / Draft / Negotiating</td>
+</tr>
+<tr>
+<td>Main collaboration model</td>
+<td>Cash subcontracting, service exchange, joint venture, resource sharing, hiring</td>
+</tr>
+<tr>
+<td>Exchange mode</td>
+<td>Cash, Barter, Profit-Sharing, Equity, Hybrid</td>
+</tr>
+<tr>
+<td>Match type</td>
+<td>One Way, Two-Way, Consortium, Circular</td>
+</tr>
+</tbody></table>
+<h3>Cards and details</h3>
+<p>Cards show ownership, Need or Offer, status, and a primary action. Open a card to view details. Some previews may show limited detail until verification is complete.</p>
+<h3>Saving opportunities</h3>
+<p>There is currently <strong>no bookmark or save-for-later</strong>. Use Matches, Pipeline, or Notifications to track what matters.</p>
+<h3>Marketplace rules and visibility</h3>
+<ul>
+<li>Only <strong>published</strong> opportunities appear in marketplace discovery.  </li>
+<li><strong>Drafts</strong> remain under My or Company tabs.  </li>
+<li><strong>Archived</strong> posts are removed from active discovery.  </li>
+<li><strong>Browse Matches</strong> and <strong>Map</strong> may be labeled <strong>Preview</strong>.  </li>
+<li>Use <strong>Browse Companies</strong> or <strong>Browse Professionals</strong> to explore people and organizations.</li>
+</ul>
+<hr>
+<h2>8. Matching guide</h2>
+<h3>What matching is</h3>
+<p>After you <strong>publish</strong> an opportunity, PM-Twin suggests compatible partners. Each <strong>match</strong> shows a <strong>match score</strong> and fit areas such as Skill match, Timeline fit, and Location fit.</p>
+<h3>When it happens</h3>
+<p>Partner suggestions appear after you publish. You will see them under <strong>My Matches</strong>, in recommended areas on the dashboard, and in notifications such as <strong>New match found</strong>.</p>
+<h3>Types of matching</h3>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart TB
+  subgraph one["1. One Way Matching"]
+    direction LR
+    N1[Need] --- O1[Offer]
+  end
+  subgraph two["2. Two-Way / Barter"]
+    direction LR
+    A[Party A Need + Offer] --- B[Party B Need + Offer]
+  end
+  subgraph cons["3. Consortium / Group Formation"]
+    direction TB
+    Lead[Lead Need] --- P1[Partner Offer 1]
+    Lead --- P2[Partner Offer 2]
+  end
+  subgraph circ["4. Circular Exchange"]
+    direction LR
+    X[Party A] --&gt; Y[Party B]
+    Y --&gt; Z[Party C]
+    Z --&gt; X
+  end
+  one --&gt; two --&gt; cons --&gt; circ</pre></div><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Label you see</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>One Way</td>
+<td>One Way Matching</td>
+<td>A Need paired with Offers (or an Offer with Needs)</td>
+</tr>
+<tr>
+<td>Two-Way</td>
+<td>Two-Way Dependency (Barter)</td>
+<td>Each side has both a need and an offer</td>
+</tr>
+<tr>
+<td>Consortium</td>
+<td>Group Formation</td>
+<td>A lead Need fulfilled by several partner Offers</td>
+</tr>
+<tr>
+<td>Circular</td>
+<td>Circular Exchange</td>
+<td>A ring of three or more parties (A → B → C → A)</td>
+</tr>
+</tbody></table>
+<p>The type is shown automatically from your collaboration choices — you do not select it yourself.</p>
+<h3>What to expect after a match appears</h3>
+<ol>
+<li>You receive a notification: <strong>New match found</strong>.  </li>
+<li>Open <strong>My Matches</strong> and filter by <strong>Discovered</strong>.  </li>
+<li>Review score, confidence (High / Medium / Low), related opportunities, and participants.  </li>
+<li>Choose <strong>Accept</strong> or <strong>Decline</strong>.  </li>
+<li>When the match is ready, click <strong>Start negotiation</strong>.</li>
+</ol>
+<p>Statuses you may see: <strong>Discovered → Accepted → Confirmed</strong>, or <strong>Declined</strong>, <strong>Expired</strong>, or <strong>Superseded</strong>.</p>
+<blockquote>
+<p>Screenshot: Match detail with score and Accept / Decline actions</p>
+</blockquote>
+<hr>
+<h2>9. Negotiation guide</h2>
+<h3>Starting negotiations</h3>
+<ol>
+<li>Accept the match.  </li>
+<li>Click <strong>Start negotiation</strong>.  </li>
+<li>Open the negotiation room.</li>
+</ol>
+<h3>Negotiation room tabs</h3>
+<table>
+<thead>
+<tr>
+<th>Tab</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Overview</td>
+<td>Status, mode, and linked match, commercial agreement, and contract</td>
+</tr>
+<tr>
+<td>Discussion</td>
+<td>Send messages</td>
+</tr>
+<tr>
+<td>Offers &amp; Counter Offers</td>
+<td>Amounts in SAR; submit, accept, or reject</td>
+</tr>
+<tr>
+<td>Commercial Terms</td>
+<td>Structured terms</td>
+</tr>
+<tr>
+<td>Attachments</td>
+<td>Supporting files</td>
+</tr>
+<tr>
+<td>Audit Trail</td>
+<td>History of actions</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>Screenshot: Negotiation room — Offers &amp; Counter Offers tab</p>
+</blockquote>
+<h3>Messages, offers, and counter-offers</h3>
+<ul>
+<li><strong>Send message</strong> in Discussion.  </li>
+<li>Enter <strong>Offer amount (SAR)</strong> → <strong>Submit offer</strong> or <strong>Submit counter offer</strong>.  </li>
+<li><strong>Accept</strong> an offer → negotiation becomes <strong>Agreed</strong>; other open offers may be rejected.  </li>
+<li><strong>Reject</strong> an offer → negotiation can continue.</li>
+</ul>
+<p>Header actions may include <strong>Agree terms</strong>, <strong>Cancel negotiation</strong>, <strong>Create Commercial Agreement</strong>, <strong>Submit proposal</strong>, and <strong>Accept updated proposal</strong>.</p>
+<h3>Statuses</h3>
+<p>Statuses you may see: <strong>Active</strong>, <strong>Countered</strong>, <strong>Agreed</strong>, <strong>Expired</strong>, <strong>Cancelled</strong>.</p>
+<h3>Example conversation</h3>
+<blockquote>
+<p><strong>Contractor (Need):</strong> “We can accept 185,000 SAR including VAT handling as discussed, 20% advance, 5% retention.”<br><strong>BIM firm (Offer):</strong> Submits offer <strong>185,000 SAR</strong>.<br><strong>Contractor:</strong> Accepts offer → confirmation: “Offer accepted — negotiation agreed”.<br><strong>Next:</strong> Create Commercial Agreement → Create contract.</p>
+</blockquote>
+<h3>Cancelling and history</h3>
+<ul>
+<li><strong>Cancel negotiation</strong> sets status to Cancelled.  </li>
+<li>Use <strong>Audit Trail</strong> and list filters (Active, Countered, Agreed, Cancelled, Expired) for history.</li>
+</ul>
+<hr>
+<h2>10. Commercial Agreement guide</h2>
+<h3>Why it exists</h3>
+<p>A commercial agreement turns agreed negotiation terms into a clear business record with participants, commercial terms, and a status path for review, signing readiness, execution, award, and completion — alongside the legal contract.</p>
+<h3>Relationship with negotiations</h3>
+<p>Typical path: <strong>Match accepted → Negotiation agreed → Create Commercial Agreement</strong>. Linked records show the related match and negotiation, and later the contract.</p>
+<h3>Statuses and approval process</h3>
+<div class="mermaid-wrap"><pre class="mermaid">stateDiagram-v2
+  [*] --&gt; Draft
+  Draft --&gt; Review: Submit for review
+  Review --&gt; Signing: Move to signing
+  Signing --&gt; Executing: Start execution
+  Executing --&gt; Completed: Mark completed
+  Draft --&gt; Cancelled: Cancel
+  Review --&gt; Cancelled: Cancel
+  Signing --&gt; Cancelled: Cancel
+  Executing --&gt; Cancelled: Cancel</pre></div><table>
+<thead>
+<tr>
+<th>Button</th>
+<th>New status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Submit for review</td>
+<td>Review</td>
+</tr>
+<tr>
+<td>Move to signing</td>
+<td>Signing</td>
+</tr>
+<tr>
+<td>Start execution</td>
+<td>Executing</td>
+</tr>
+<tr>
+<td>Mark completed</td>
+<td>Completed</td>
+</tr>
+<tr>
+<td>Cancel commercial agreement</td>
+<td>Cancelled</td>
+</tr>
+</tbody></table>
+<h3>Review and award</h3>
+<ul>
+<li>The detail page shows participants, commercial terms, and recommended actions (<strong>Create contract</strong>, <strong>Review negotiation</strong>).  </li>
+<li><strong>Award commercial agreement</strong> (where permitted): the winner moves toward signing; other competing agreements may be rejected or cancelled; a contract may be created.  </li>
+<li>Admin <strong>Award Management</strong> lists opportunities that have multiple competing agreements.  </li>
+<li>Admin <strong>Approvals</strong> lists agreements awaiting review-related attention.</li>
+</ul>
+<h3>Rate participants</h3>
+<p>From a commercial agreement, open <strong>Rate participants</strong>. Criteria include Communication, Quality, Timeliness, and Collaboration. Click <strong>Submit review</strong> when finished.</p>
+<blockquote>
+<p>Screenshot: Commercial agreement detail with status actions</p>
+</blockquote>
+<hr>
+<h2>11. Contract guide</h2>
+<h3>How contracts relate to commercial agreements</h3>
+<p>Contracts are created <strong>from</strong> a commercial agreement using <strong>Create contract</strong>. The contract page links back to the agreement, match, negotiation, and related Need or Offer.</p>
+<h3>Lifecycle</h3>
+<div class="mermaid-wrap"><pre class="mermaid">stateDiagram-v2
+  [*] --&gt; Draft
+  Draft --&gt; PendingSignature: Ready for signing
+  PendingSignature --&gt; Active: All parties signed
+  Active --&gt; Completed: Complete contract
+  Active --&gt; Terminated: Terminate contract
+  Draft --&gt; Terminated: Terminate</pre></div><h3>Creating, reviewing, signing, activating, completing, closing</h3>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>User action</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Create</td>
+<td><strong>Create contract</strong> from the agreement</td>
+<td>Draft contract; notification <strong>Contract created</strong></td>
+</tr>
+<tr>
+<td>Review</td>
+<td>Open the contract</td>
+<td>Check parties, payment schedule, and links</td>
+</tr>
+<tr>
+<td>Sign</td>
+<td><strong>Sign contract</strong></td>
+<td>Your signature is recorded; when everyone has signed → <strong>Active</strong></td>
+</tr>
+<tr>
+<td>Complete</td>
+<td><strong>Complete contract</strong></td>
+<td>Status <strong>Completed</strong></td>
+</tr>
+<tr>
+<td>Terminate</td>
+<td><strong>Terminate contract</strong></td>
+<td>Status <strong>Terminated</strong></td>
+</tr>
+</tbody></table>
+<p>List filters: Draft, Pending signature, Active, Completed, Terminated.</p>
+<blockquote>
+<p><strong>Note:</strong> In some training environments, contract file upload may not be available yet. Follow on-screen guidance.</p>
+</blockquote>
+<blockquote>
+<p>Screenshot: Contract parties and signatures panel</p>
+</blockquote>
+<hr>
+<h2>12. Notifications</h2>
+<p>Open <strong>Notifications</strong>. Filter All / Unread / Read. Groups: <strong>Today</strong>, <strong>Yesterday</strong>, <strong>Earlier</strong>.</p>
+<h3>Notification types and actions</h3>
+<table>
+<thead>
+<tr>
+<th>Notification</th>
+<th>Meaning</th>
+<th>What you should do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>New match found</td>
+<td>A partner was suggested</td>
+<td>Open the match → review → Accept or Decline</td>
+</tr>
+<tr>
+<td>Match accepted</td>
+<td>A participant accepted</td>
+<td>Wait for confirmation or continue</td>
+</tr>
+<tr>
+<td>Match confirmed</td>
+<td>All required parties accepted</td>
+<td><strong>Start negotiation</strong></td>
+</tr>
+<tr>
+<td>Match declined</td>
+<td>A participant declined</td>
+<td>Review other matches</td>
+</tr>
+<tr>
+<td>Negotiation started</td>
+<td>Discussion room opened</td>
+<td>Open negotiation → respond</td>
+</tr>
+<tr>
+<td>Commercial Agreement created</td>
+<td>Agreement created from your collaboration</td>
+<td>Review terms → move to the next status</td>
+</tr>
+<tr>
+<td>Contract created</td>
+<td>Contract drafted from the agreement</td>
+<td>Review → <strong>Sign contract</strong></td>
+</tr>
+<tr>
+<td>Invitation received</td>
+<td>Invited to a company workspace</td>
+<td>Open the invitation and accept</td>
+</tr>
+<tr>
+<td>Invitation accepted</td>
+<td>Invitee accepted</td>
+<td>Activate membership if you are owner or admin</td>
+</tr>
+<tr>
+<td>Membership activated</td>
+<td>Company membership is active</td>
+<td>Switch to the company workspace</td>
+</tr>
+<tr>
+<td>Workspace activated</td>
+<td>Full collaboration unlocked</td>
+<td>Create and publish opportunities</td>
+</tr>
+<tr>
+<td>Opportunity creation enabled</td>
+<td>Posting unlocked after account review</td>
+<td>Create opportunity</td>
+</tr>
+<tr>
+<td>Registration submitted / Resubmission</td>
+<td>Onboarding package sent</td>
+<td>Wait for the reviewer</td>
+</tr>
+<tr>
+<td>Account approved</td>
+<td>Review complete</td>
+<td>Complete profile; start collaborating</td>
+</tr>
+<tr>
+<td>Account rejected / suspended</td>
+<td>Onboarding failed or suspended</td>
+<td>Read the reason; contact support or clarify</td>
+</tr>
+<tr>
+<td>Clarification requested</td>
+<td>Reviewer needs more information</td>
+<td>Upload documents or respond</td>
+</tr>
+<tr>
+<td>Review received / Document replaced</td>
+<td>Document activity</td>
+<td>Check Party documents</td>
+</tr>
+<tr>
+<td>Review overdue</td>
+<td>Account review is overdue</td>
+<td>Respond immediately</td>
+</tr>
+</tbody></table>
+<p>The dashboard card <strong>My notifications</strong> shows the latest items with <strong>View all</strong>.</p>
+<hr>
+<h2>13. Dashboard guide</h2>
+<blockquote>
+<p>Screenshot: Workspace dashboard summary strip and tasks</p>
+</blockquote>
+<h3>Header</h3>
+<ul>
+<li>Greeting (“Good morning, …”)  </li>
+<li><strong>Profile readiness</strong> or <strong>Active matches</strong> highlight  </li>
+<li>Primary action: <strong>Create Opportunity</strong>  </li>
+<li>Secondary action: <strong>My pipeline</strong></li>
+</ul>
+<h3>Summary strip</h3>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>My opportunities</td>
+<td>Your posts in this workspace</td>
+</tr>
+<tr>
+<td>My matches</td>
+<td>Matches involving you</td>
+</tr>
+<tr>
+<td>My negotiations</td>
+<td>Active term discussions</td>
+</tr>
+<tr>
+<td>My commercial agreements</td>
+<td>Your agreements</td>
+</tr>
+<tr>
+<td>My contracts</td>
+<td>Your contracts</td>
+</tr>
+</tbody></table>
+<h3>My tasks</h3>
+<p>Actionable items such as:</p>
+<ul>
+<li>Review new match → <strong>Open match</strong>  </li>
+<li>Respond to negotiation → <strong>Open negotiation</strong>  </li>
+<li>Agreement in review or signing → <strong>Open commercial agreement</strong>  </li>
+<li>Draft ready to publish → <strong>Open opportunity</strong> / <strong>Edit</strong></li>
+</ul>
+<h3>Next best actions and workspace health</h3>
+<p>Prioritized recommendations and, when available, a workspace health view that explains what needs attention.</p>
+<h3>My workflow</h3>
+<p>Active negotiations and agreements; link to <strong>Open pipeline</strong>. Empty state: “No active workflow items”.</p>
+<h3>Blocked — needs decision</h3>
+<p>Items that need a decision from you (for example a match that needs replacement). Resolve these so work can continue.</p>
+<h3>My matching summary</h3>
+<p>Counts by type: One Way, Two-Way, Group Formation, Circular Exchange.</p>
+<h3>Recommended from marketplace</h3>
+<p>Suggested match cards; browse further matches from here.</p>
+<h3>Executive intelligence snapshot</h3>
+<p>Summary views for Portfolio readiness, Funnel conversion, Risk blockers, and Execution health.</p>
+<h3>Pending vetting dashboard</h3>
+<p>Shown instead of the full dashboard until registration is approved. Follow upload and resubmit guidance.</p>
+<hr>
+<h2>14. Admin portal (overview)</h2>
+<p>For platform administrators only. This section describes what administrators can do in the application.</p>
+<blockquote>
+<p>Screenshot: Admin Command Center home</p>
+</blockquote>
+<h3>Command Center</h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Executive</td>
+<td>Overall operations home</td>
+</tr>
+<tr>
+<td>Operations</td>
+<td>Day-to-day operational queues</td>
+</tr>
+<tr>
+<td>Risk &amp; Compliance</td>
+<td>Risk-oriented views</td>
+</tr>
+<tr>
+<td>My Queue</td>
+<td>Work assigned to you</td>
+</tr>
+<tr>
+<td>Admin Inbox</td>
+<td>Admin messages and items</td>
+</tr>
+</tbody></table>
+<h3>Identity and onboarding</h3>
+<ul>
+<li><strong>Users, Parties, Memberships, Roles</strong> — manage who can act  </li>
+<li><strong>Onboarding Center / Vetting</strong> — New Registrations, Pending Review, Clarifications, Approved, Rejected, Suspended  </li>
+<li>Activate workspaces and enable opportunity creation after successful review</li>
+</ul>
+<h3>Marketplace management</h3>
+<ul>
+<li>Opportunities, Matching, Matches, Matching Quality, Taxonomy, Moderation</li>
+</ul>
+<h3>Commercial operations</h3>
+<ul>
+<li>Negotiations, Commercial Agreements, <strong>Approvals</strong>, <strong>Award Management</strong>, Contracts, Legal Review</li>
+</ul>
+<h3>Reports</h3>
+<p>Reporting views for platform performance.</p>
+<h3>Audit, environments, and settings</h3>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Audit</td>
+<td>Review important activity</td>
+</tr>
+<tr>
+<td>Environments</td>
+<td>Training tools to restore or exchange practice scenarios; includes the <strong>Demo Walkthrough</strong> panel (cast-coverage badges and login-as steps for all four matching topologies)</td>
+</tr>
+<tr>
+<td>Health and data quality</td>
+<td>Platform status checks (including cast coverage and topology chain checks in Demo/UAT)</td>
+</tr>
+<tr>
+<td>Settings</td>
+<td>Commercial defaults such as currencies and <strong>VAT rate % (default 15)</strong></td>
+</tr>
+</tbody></table>
+<p>Some configuration areas (for example Skills, Site content, Subscriptions, Disputes, Vetting Config) may appear as coming soon or limited.</p>
+<h3>Demo Walkthrough verification (Demo/UAT)</h3>
+<p>Use this checklist after seeding or before a customer training session. It confirms matching demos, demo-account casting, ownership rules, and environment reset.</p>
+<h4>Procedure</h4>
+<ol>
+<li><p><strong>Sign in as admin</strong><br>Email: <code>admin@pmtwin.com</code> · Password: <code>admin123</code>.</p>
+</li>
+<li><p><strong>Open Environments</strong><br>Go to <code>/admin/environments</code>.</p>
+</li>
+<li><p><strong>Confirm cast coverage</strong><br>On the <strong>Demo Walkthrough</strong> panel, confirm the Cast Coverage badge is complete (for example <code>Cast 63/63</code>) and that there are <strong>no missing account IDs</strong>.<br>Optionally open Admin <strong>Health</strong> and confirm <code>cast_coverage</code> and each <code>topology_chain_*</code> check are healthy.</p>
+</li>
+<li><p><strong>Walk each matching topology</strong><br>In <strong>Demo Walkthrough</strong>, open each scenario that covers the four topologies (<code>one_way</code>, <code>two_way</code>, <code>consortium</code>, <code>circular</code>) — for example Cash Subcontracting, Two-Way Barter, Joint Venture (Consortium), Circular Resource Sharing, and/or Marketplace. For every narrative step:</p>
+<ul>
+<li>Use <strong>Copy credentials</strong> for the listed account.</li>
+<li>Sign out, then sign in again with the correct account type (<strong>Individual</strong> or <strong>Company</strong>).</li>
+<li>Open the step deep link.</li>
+<li>Confirm the correct entity loads (opportunity, match, commercial agreement, or contract) and is visible to that role.</li>
+</ul>
+</li>
+<li><p><strong>Employee ownership check</strong><br>Sign in as one employee, for example <code>fahad.alotaibi@alriyadh-construction.test</code> / <code>Pmtwin@2026</code> (Individual login).<br>Open their cast match or employer-hosted opportunity.<br>Confirm ownership is the <strong>employer company</strong> workspace/party (company-owned opportunity under the company workspace), not a personally owned company opportunity.</p>
+</li>
+<li><p><strong>Pending account check</strong><br>Sign in as a Pending tab account, for example <code>noura.pending@pmtwin.test</code> / <code>Pmtwin@2026</code>.<br>Confirm their opportunity remains a <strong>draft</strong> and that <strong>publishing is blocked</strong> until onboarding is approved.</p>
+</li>
+<li><p><strong>Admin is not a marketplace participant</strong><br>Confirm <code>admin@pmtwin.com</code> is the walkthrough host only. The admin account must <strong>not</strong> appear as a need/offer counterparty on commercial marketplace post-matches. Admin presence is through Environments, notifications, and vetting — not marketplace participation.</p>
+</li>
+<li><p><strong>Reset and re-check</strong><br>Return to <code>/admin/environments</code> as admin. Run <strong>Reset Entire Environment</strong> and confirm the dialog.<br>Re-open <strong>Demo Walkthrough</strong> and confirm Cast Coverage is complete again and showcase deep links restore correctly.</p>
+</li>
+</ol>
+<h4>Pass criteria</h4>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Expected result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Topology chains</td>
+<td>All four (<code>one_way</code>, <code>two_way</code>, <code>consortium</code>, <code>circular</code>) show complete</td>
+</tr>
+<tr>
+<td>Cast coverage</td>
+<td>All demo accounts cast (no missing account IDs)</td>
+</tr>
+<tr>
+<td>Deep links</td>
+<td>Each walkthrough step opens the correct entity for that role</td>
+</tr>
+<tr>
+<td>Employee</td>
+<td>Opportunity ownership is company-scoped under the employer</td>
+</tr>
+<tr>
+<td>Pending</td>
+<td>Draft visible; publish blocked until approval</td>
+</tr>
+<tr>
+<td>Admin</td>
+<td>Not listed among marketplace match counterparties</td>
+</tr>
+<tr>
+<td>Reset</td>
+<td>Seed and walkthrough state restore after environment reset</td>
+</tr>
+</tbody></table>
+<p>Demo account passwords and suggested logins are listed in <code>POC/docs/DEMO_CREDENTIALS.md</code> and on the login <strong>Demo accounts</strong> dialog.</p>
+<hr>
+<h2>15. Complete business journey</h2>
+<p>End-to-end walkthrough of a typical successful path.</p>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart TD
+  R[Company Registration] --&gt; V[Email verification]
+  V --&gt; P[Pending review]
+  P --&gt; A[Account approved]
+  A --&gt; PR[Profile completion]
+  PR --&gt; CS[Company setup and documents]
+  CS --&gt; OC[Opportunity creation]
+  OC --&gt; PB[Publish]
+  PB --&gt; MP[Marketplace visibility]
+  MP --&gt; MT[Matching]
+  MT --&gt; NG[Negotiation]
+  NG --&gt; CA[Commercial Agreement]
+  CA --&gt; CT[Contract]
+  CT --&gt; Done[Active to Completion]</pre></div><h3>Step-by-step screens and actions</h3>
+<ol>
+<li><p><strong>Company Registration</strong>  </p>
+<ul>
+<li>Choose <strong>Company Workspace</strong> → role (Contractor, Consultant Company, Owner/Client, Supplier) → profile information → documents and terms → review → verify email.</li>
+</ul>
+</li>
+<li><p><strong>Profile Completion</strong>  </p>
+<ul>
+<li>Fill required company fields until readiness reaches at least 80%.</li>
+</ul>
+</li>
+<li><p><strong>Company Setup</strong>  </p>
+<ul>
+<li>Upload Commercial Registration, VAT Certificate, insurance or licenses as required; respond to clarifications.</li>
+</ul>
+</li>
+<li><p><strong>Opportunity Creation</strong>  </p>
+<ul>
+<li>Complete all five wizard steps; <strong>Save Draft</strong> as needed.</li>
+</ul>
+</li>
+<li><p><strong>Publish</strong> (Review step)  </p>
+<ul>
+<li>Clear readiness blockers → <strong>Publish Opportunity</strong>.</li>
+</ul>
+</li>
+<li><p><strong>Marketplace</strong>  </p>
+<ul>
+<li>Partners discover your Need under Browse Opportunities or Discover.</li>
+</ul>
+</li>
+<li><p><strong>Matching</strong>  </p>
+<ul>
+<li>Compatible partners appear; you receive <strong>New match found</strong>.</li>
+</ul>
+</li>
+<li><p><strong>Negotiation</strong>  </p>
+<ul>
+<li>Accept match → Start negotiation → discuss → submit or accept offer → Agree terms.</li>
+</ul>
+</li>
+<li><p><strong>Commercial Agreement</strong>  </p>
+<ul>
+<li>Create agreement → Submit for review → Move to signing → (optional) Award if there are competing agreements.</li>
+</ul>
+</li>
+<li><p><strong>Contract</strong>  </p>
+<ul>
+<li>Create contract → parties Sign → contract Active.</li>
+</ul>
+</li>
+<li><p><strong>Completion</strong>  </p>
+<ul>
+<li>Start execution on the agreement as applicable → Complete contract / Mark agreement completed → Close the related opportunity when appropriate.</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>Screenshot: Pipeline view showing Match → Negotiation → Agreement → Contract  </p>
+</blockquote>
+<hr>
+<h2>16. Best practices</h2>
+<h3>High-quality opportunities</h3>
+<ul>
+<li>Write specific titles and honest short descriptions.  </li>
+<li>Always set Need vs Offer correctly.  </li>
+<li>Choose the collaboration model that matches the real engagement (do not use joint-venture language for a simple subcontract).  </li>
+<li>Add skills with levels; list services clearly.  </li>
+<li>Use work packages and milestones for anything non-trivial.  </li>
+<li>Make VAT handling and SAR amounts explicit.  </li>
+<li>Reach readiness of at least 80% before publish — do not publish empty and fix later.</li>
+</ul>
+<h3>Negotiations</h3>
+<ul>
+<li>Keep commercial numbers in Offers (SAR), not only in chat.  </li>
+<li>Accept only when scope, dates, and VAT treatment are clear.  </li>
+<li>Use Cancel rather than abandoning silent threads.  </li>
+<li>After terms are agreed, create the commercial agreement promptly.</li>
+</ul>
+<h3>Profiles and trust</h3>
+<ul>
+<li>Keep availability and location current.  </li>
+<li>Upload Commercial Registration and VAT Certificate early for company accounts.  </li>
+<li>Add portfolio and certifications to improve readiness and partner confidence.</li>
+</ul>
+<h3>Collaboration success</h3>
+<ul>
+<li>Respond to matches quickly while they are still <strong>Discovered</strong>.  </li>
+<li>Prefer one clear commercial structure over many empty options.  </li>
+<li>Use Pipeline weekly as your operating rhythm.  </li>
+<li>For multi-party models (consortium or circular), align roles before publishing.</li>
+</ul>
+<hr>
+<h2>17. Troubleshooting</h2>
+<h3>Why can&#39;t I publish?</h3>
+<table>
+<thead>
+<tr>
+<th>Possible cause</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Profile readiness below threshold or missing required fields</td>
+<td>Complete Profile until ready (at least 80% and required fields)</td>
+</tr>
+<tr>
+<td>Opportunity required items incomplete</td>
+<td>Open Readiness; fix title, skills, services, commercial terms, and similar</td>
+</tr>
+<tr>
+<td>Account pending review</td>
+<td>Wait for approval or submit clarifications</td>
+</tr>
+<tr>
+<td>Your role cannot publish</td>
+<td>Ask your company owner or admin for the right role</td>
+</tr>
+<tr>
+<td>Not signed in</td>
+<td>Sign in again</td>
+</tr>
+</tbody></table>
+<h3>Why can&#39;t I edit?</h3>
+<ul>
+<li>You are not the owner.  </li>
+<li>The opportunity is <strong>archived</strong> or <strong>closed</strong>.  </li>
+<li>Your workspace role is <strong>Viewer</strong> or does not allow editing.</li>
+</ul>
+<h3>Why can&#39;t I see opportunities?</h3>
+<ul>
+<li>You are on <strong>My Opportunities</strong> looking for others’ posts — switch to <strong>All Marketplace</strong>.  </li>
+<li>Posts are still <strong>Draft</strong> (not published).  </li>
+<li>Posts were <strong>archived</strong>.  </li>
+<li>Filters hide results — reset filters.  </li>
+<li>A limited preview may hide full detail until verification is complete.</li>
+</ul>
+<h3>Why is my opportunity still a draft?</h3>
+<ul>
+<li>You clicked <strong>Save Draft</strong> but not <strong>Publish Opportunity</strong>.  </li>
+<li>Publish was blocked by readiness.  </li>
+<li>You recovered an unsaved draft that was never published.</li>
+</ul>
+<h3>Why didn&#39;t matching happen?</h3>
+<ul>
+<li>The opportunity was never successfully published.  </li>
+<li>No compatible Need or Offer exists in the marketplace yet.  </li>
+<li>Your collaboration and commercial choices may not have compatible partners yet.  </li>
+<li>Check notifications; administrators can also review matching quality.</li>
+</ul>
+<h3>Why can&#39;t I access a negotiation?</h3>
+<ul>
+<li>The match was not accepted, or negotiation was not started.  </li>
+<li>The negotiation was <strong>Cancelled</strong> or <strong>Expired</strong>.  </li>
+<li>You are not a participant.  </li>
+<li>You are in the wrong workspace.</li>
+</ul>
+<h3>Why can&#39;t I create a contract?</h3>
+<ul>
+<li>No commercial agreement exists yet (agree the negotiation first).  </li>
+<li>The agreement is not far enough along, or your role cannot create contracts.  </li>
+<li>Another agreement was awarded as the winner.  </li>
+<li>You do not have signing or create rights in this workspace.</li>
+</ul>
+<hr>
+<h2>18. Frequently asked questions</h2>
+<ol>
+<li><p><strong>What is PM-Twin?</strong><br>A construction collaboration marketplace for Saudi Arabia and the GCC that takes you from opportunity to match, negotiation, commercial agreement, and contract.</p>
+</li>
+<li><p><strong>Is PM-Twin only for companies?</strong><br>No. Individuals (professionals and consultants) use Personal Workspaces; companies use Company Workspaces.</p>
+</li>
+<li><p><strong>What is the difference between Need and Offer?</strong><br>Need requests capacity; Offer provides capacity.</p>
+</li>
+<li><p><strong>Do I need to publish to get matches?</strong><br>Yes. Partner suggestions appear after you publish.</p>
+</li>
+<li><p><strong>Can I edit after publishing?</strong><br>Owners can edit if the opportunity is not archived or closed. Major changes may affect partner fit; review matches afterward.</p>
+</li>
+<li><p><strong>What readiness score do I need?</strong><br>Publishing expects profile and opportunity readiness with required fields complete and scores at or above <strong>80%</strong>.</p>
+</li>
+<li><p><strong>What currency should I use?</strong><br><strong>SAR</strong> (Saudi Riyal) is the usual commercial currency.</p>
+</li>
+<li><p><strong>How is VAT handled?</strong><br>Cash commercial fields include VAT handling. Platform commercial settings commonly use <strong>15%</strong>. Be explicit in your terms.</p>
+</li>
+<li><p><strong>Can I use Arabic?</strong><br>Settings support <strong>العربية</strong> (right-to-left layout). You can also write Arabic content in titles and descriptions.</p>
+</li>
+<li><p><strong>What is a workspace?</strong><br>The Personal or Company context you act in; switch it from the header.</p>
+</li>
+<li><p><strong>How do employees join?</strong><br>Owners send invitations; employees open the invitation link and accept.</p>
+</li>
+<li><p><strong>Why am I pending review?</strong><br>New registrations may require administrator review before full collaboration rights.</p>
+</li>
+<li><p><strong>What documents do companies need?</strong><br>Typically Commercial Registration, VAT Certificate, insurance, licenses, and related identity documents.</p>
+</li>
+<li><p><strong>Where should I upload company documents?</strong><br>Use <strong>Party documents</strong>, and follow any pending-review shortcuts such as Upload VAT or Upload CR.</p>
+</li>
+<li><p><strong>What collaboration model should I pick for a simple subcontract?</strong><br>Cash Subcontracting → Task-Based Engagement.</p>
+</li>
+<li><p><strong>When do I use Service Exchange?</strong><br>When value is primarily traded services or resources rather than pure cash.</p>
+</li>
+<li><p><strong>Who can create a Special Purpose Vehicle opportunity?</strong><br>Company accounts only (not personal workspaces).</p>
+</li>
+<li><p><strong>What is hybrid commercial structure?</strong><br>More than one value component enabled (for example Cash + Barter); Hybrid is shown automatically.</p>
+</li>
+<li><p><strong>Can I bookmark marketplace items?</strong><br>No. Bookmarks are not available currently.</p>
+</li>
+<li><p><strong>What does Archive do?</strong><br>Removes the opportunity from active marketplace discovery.</p>
+</li>
+<li><p><strong>What does Close Opportunity do?</strong><br>Ends the opportunity for new matching.</p>
+</li>
+<li><p><strong>Can I duplicate an opportunity?</strong><br>Yes — Duplicate as Draft or as Template.</p>
+</li>
+<li><p><strong>Where do I award a winner?</strong><br>On commercial agreement award actions or Admin Award Management — not on the opportunity action menu.</p>
+</li>
+<li><p><strong>What is a Match?</strong><br>A suggested pairing between compatible Needs and Offers (or multi-party collaborations).</p>
+</li>
+<li><p><strong>What do match confidence labels mean?</strong><br>High, Medium, or Low — a simple guide to how strong the fit appears.</p>
+</li>
+<li><p><strong>Must both sides accept a match?</strong><br>Required participants must accept before the match is confirmed; declining ends that match path.</p>
+</li>
+<li><p><strong>How do I start talking about price?</strong><br>Start negotiation → Offers &amp; Counter Offers → submit amounts in SAR.</p>
+</li>
+<li><p><strong>What happens when I accept an offer?</strong><br>That offer is accepted, the negotiation becomes Agreed, and you can create a commercial agreement.</p>
+</li>
+<li><p><strong>Can I reject an offer without cancelling the negotiation?</strong><br>Yes. Reject keeps the negotiation open for further offers.</p>
+</li>
+<li><p><strong>How do I cancel a negotiation?</strong><br>Use <strong>Cancel negotiation</strong> on the detail or more menu.</p>
+</li>
+<li><p><strong>Should I use Messages or Negotiation Discussion for deal talks?</strong><br>Prefer <strong>Negotiation → Discussion</strong> for conversations tied to a deal. Messages is a separate messaging area.</p>
+</li>
+<li><p><strong>What is the Pipeline?</strong><br>A board view across your workspace items, matches, negotiations, agreements, and contracts.</p>
+</li>
+<li><p><strong>What are Applications?</strong><br>An older apply path you may still see in some views. Primary collaboration runs through Matches.</p>
+</li>
+<li><p><strong>Can Viewers publish opportunities?</strong><br>No. The Viewer role is view-only.</p>
+</li>
+<li><p><strong>What is the difference between commercial agreement and contract?</strong><br>The agreement is the business record; the contract is the formal signing record created from it.</p>
+</li>
+<li><p><strong>Who must sign a contract?</strong><br>The signing parties listed on the contract; status becomes Active when all required signatures are recorded.</p>
+</li>
+<li><p><strong>Can I terminate a contract?</strong><br>Yes — <strong>Terminate contract</strong> sets status to Terminated.</p>
+</li>
+<li><p><strong>Where do notifications appear?</strong><br>Under <strong>Notifications</strong> and on the dashboard <strong>My notifications</strong> card.</p>
+</li>
+<li><p><strong>I got “Clarification requested.” What now?</strong><br>Read the reason, upload or update documents, and resubmit for review.</p>
+</li>
+<li><p><strong>Why is Browse Matches marked Preview?</strong><br>That marketplace view is available in a limited form.</p>
+</li>
+<li><p><strong>Why is Map marked Preview?</strong><br>Map browsing is available in a limited form.</p>
+</li>
+<li><p><strong>If I edit a published opportunity, will new matches appear?</strong><br>Publishing is when partner suggestions are created. After major edits, review your matches; publish again if your process requires it.</p>
+</li>
+<li><p><strong>What does Ownership “Marketplace” mean on a card?</strong><br>The post was published by someone outside your organization.</p>
+</li>
+<li><p><strong>How do intelligence pages help?</strong><br>Portfolio, Funnel, Risk, and Execution views summarize readiness and workflow health.</p>
+</li>
+<li><p><strong>Can auditors edit negotiations?</strong><br>Auditor views may be read-only: you can see the transcript and offers, but cannot change them.</p>
+</li>
+<li><p><strong>What is Award Management?</strong><br>An admin tool to award one commercial agreement among several on the same opportunity.</p>
+</li>
+<li><p><strong>What VAT rate do commercial settings commonly use?</strong><br><strong>15%</strong>.</p>
+</li>
+<li><p><strong>Can I export an opportunity?</strong><br>Yes — Export JSON or Export PDF (for PDF, use Print and choose Save as PDF).</p>
+</li>
+<li><p><strong>What if I see “Recover unsaved local draft?”</strong><br>Choose <strong>Continue draft</strong> or <strong>Discard</strong>. Use <strong>Save Draft</strong> or <strong>Publish Opportunity</strong> to keep your work.</p>
+</li>
+<li><p><strong>Is practice data permanent?</strong><br>In training environments, administrators may restore practice scenarios. Treat practice data as temporary unless told otherwise.</p>
+</li>
+<li><p><strong>How do trainers verify matching demos?</strong><br>Follow <a href="#demo-walkthrough-verification-demouat">Demo Walkthrough verification (Demo/UAT)</a>: admin → <code>/admin/environments</code> → confirm cast coverage, walk all four topologies with copied credentials, check employee/pending/admin rules, then reset and re-check.</p>
+</li>
+<li><p><strong>How do I switch language direction?</strong><br>Settings → English (left to right) or العربية (right to left).</p>
+</li>
+<li><p><strong>What is product language customization?</strong><br>Staff or owner settings can rename labels such as Opportunity, Negotiation, Commercial Agreement, and Contract for presentation.</p>
+</li>
+<li><p><strong>Can I create a contract without a commercial agreement?</strong><br>The supported path is from a commercial agreement.</p>
+</li>
+<li><p><strong>Why do joint venture options ask for equity split?</strong><br>Those engagements share capital and governance; equity fields capture the commercial terms.</p>
+</li>
+<li><p><strong>What payment schedule mistake should I avoid?</strong><br>Milestone percentages that do not total 100%.</p>
+</li>
+<li><p><strong>What are Offer capacity fields for?</strong><br>They help partners understand how much capacity you can provide.</p>
+</li>
+<li><p><strong>Where do I rate partners?</strong><br>Commercial agreement → Rate participants.</p>
+</li>
+<li><p><strong>What should sales teams demonstrate first?</strong><br>Create Need → Publish → Show match → Negotiation offer → Agreement → Contract sign.</p>
+</li>
+<li><p><strong>What should trainers emphasize?</strong><br>Workspace switch, readiness of at least 80%, correct collaboration model, and the Match → Contract journey.</p>
+</li>
+<li><p><strong>Who do I contact if account review is stuck?</strong><br>Platform administrators or Onboarding Center reviewers through your customer success contact.</p>
+</li>
+</ol>
+<hr>
+<h2>19. Glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Accept (match)</strong></td>
+<td>Agree to proceed with a suggested match</td>
+</tr>
+<tr>
+<td><strong>Accept (offer)</strong></td>
+<td>Accept a negotiation offer and typically agree the negotiation</td>
+</tr>
+<tr>
+<td><strong>Admin Portal</strong></td>
+<td>Operations area for platform administrators</td>
+</tr>
+<tr>
+<td><strong>Archive</strong></td>
+<td>Remove an opportunity from active marketplace discovery</td>
+</tr>
+<tr>
+<td><strong>Audit Trail</strong></td>
+<td>Chronological history of negotiation (or admin) actions</td>
+</tr>
+<tr>
+<td><strong>Award</strong></td>
+<td>Select a winning commercial agreement among competitors</td>
+</tr>
+<tr>
+<td><strong>Barter</strong></td>
+<td>Non-cash exchange of services, capacity, or resources</td>
+</tr>
+<tr>
+<td><strong>BIM</strong></td>
+<td>Building Information Modeling — a common collaboration area on PM-Twin</td>
+</tr>
+<tr>
+<td><strong>Cash Subcontracting</strong></td>
+<td>Paid delivery for a defined scope</td>
+</tr>
+<tr>
+<td><strong>Circular Exchange</strong></td>
+<td>Multi-party ring matching (A → B → C → A)</td>
+</tr>
+<tr>
+<td><strong>Close Opportunity</strong></td>
+<td>End the opportunity for new matching</td>
+</tr>
+<tr>
+<td><strong>Commercial Agreement</strong></td>
+<td>Business agreement after negotiation (sometimes called a “deal” in older materials)</td>
+</tr>
+<tr>
+<td><strong>Commercial Structure</strong></td>
+<td>How value is exchanged (cash, barter, equity, and similar)</td>
+</tr>
+<tr>
+<td><strong>Company Workspace</strong></td>
+<td>Workspace for an organization</td>
+</tr>
+<tr>
+<td><strong>Consortium</strong></td>
+<td>Multi-party group formation around a lead need</td>
+</tr>
+<tr>
+<td><strong>Contract</strong></td>
+<td>Formal signing record created from a commercial agreement</td>
+</tr>
+<tr>
+<td><strong>Counter-offer</strong></td>
+<td>Revised offer submitted during negotiation</td>
+</tr>
+<tr>
+<td><strong>CR (Commercial Registration)</strong></td>
+<td>Company registration document used in KSA account review</td>
+</tr>
+<tr>
+<td><strong>Dashboard</strong></td>
+<td>Workspace home with summaries, tasks, and recommendations</td>
+</tr>
+<tr>
+<td><strong>Deliverable</strong></td>
+<td>Agreed output with acceptance criteria</td>
+</tr>
+<tr>
+<td><strong>Draft</strong></td>
+<td>Unpublished opportunity (or agreement or contract) still being prepared</td>
+</tr>
+<tr>
+<td><strong>Employee</strong></td>
+<td>User invited into a company workspace</td>
+</tr>
+<tr>
+<td><strong>Equity</strong></td>
+<td>Ownership stake as part of the commercial structure</td>
+</tr>
+<tr>
+<td><strong>Hybrid</strong></td>
+<td>More than one value exchange option enabled</td>
+</tr>
+<tr>
+<td><strong>Individual Professional</strong></td>
+<td>Personal-workspace user offering or seeking work</td>
+</tr>
+<tr>
+<td><strong>Joint Venture</strong></td>
+<td>Shared delivery and governance collaboration model</td>
+</tr>
+<tr>
+<td><strong>Marketplace</strong></td>
+<td>Discovery area for published opportunities and people</td>
+</tr>
+<tr>
+<td><strong>Match</strong></td>
+<td>Suggested pairing of compatible opportunities</td>
+</tr>
+<tr>
+<td><strong>Match score</strong></td>
+<td>Fit indicator shown on a match</td>
+</tr>
+<tr>
+<td><strong>Matching</strong></td>
+<td>Automatic partner suggestions after publish</td>
+</tr>
+<tr>
+<td><strong>Milestone</strong></td>
+<td>Delivery checkpoint; may trigger payment</td>
+</tr>
+<tr>
+<td><strong>Need</strong></td>
+<td>Opportunity post requesting capacity</td>
+</tr>
+<tr>
+<td><strong>Negotiation</strong></td>
+<td>Structured term discussion after match acceptance</td>
+</tr>
+<tr>
+<td><strong>Offer (post type)</strong></td>
+<td>Opportunity post providing capacity</td>
+</tr>
+<tr>
+<td><strong>Offer (negotiation)</strong></td>
+<td>Priced proposal inside a negotiation</td>
+</tr>
+<tr>
+<td><strong>One Way Matching</strong></td>
+<td>Simple Need ↔ Offer pairing</td>
+</tr>
+<tr>
+<td><strong>Opportunity</strong></td>
+<td>Structured Need or Offer post</td>
+</tr>
+<tr>
+<td><strong>Ownership</strong></td>
+<td>Whether a record is Mine, Company, or Marketplace</td>
+</tr>
+<tr>
+<td><strong>Party</strong></td>
+<td>Individual or company participating in the marketplace</td>
+</tr>
+<tr>
+<td><strong>Party documents</strong></td>
+<td>Uploaded compliance and profile documents</td>
+</tr>
+<tr>
+<td><strong>PDPL</strong></td>
+<td>Personal Data Protection Law (KSA)</td>
+</tr>
+<tr>
+<td><strong>Personal Workspace</strong></td>
+<td>Workspace for an independent professional or consultant</td>
+</tr>
+<tr>
+<td><strong>Pipeline</strong></td>
+<td>Board view across your collaboration journey</td>
+</tr>
+<tr>
+<td><strong>Preview</strong></td>
+<td>Feature available in a limited form</td>
+</tr>
+<tr>
+<td><strong>Profit sharing</strong></td>
+<td>Split of profit as part of the commercial structure</td>
+</tr>
+<tr>
+<td><strong>Publish</strong></td>
+<td>Make a draft opportunity live so partners can find it</td>
+</tr>
+<tr>
+<td><strong>Readiness</strong></td>
+<td>Completeness score for profile and/or opportunity</td>
+</tr>
+<tr>
+<td><strong>Resource Sharing</strong></td>
+<td>Collaboration model for pooling equipment, people, or materials</td>
+</tr>
+<tr>
+<td><strong>Revenue sharing</strong></td>
+<td>Split of revenue as part of the commercial structure</td>
+</tr>
+<tr>
+<td><strong>Reviewer</strong></td>
+<td>Role that reviews onboarding packages</td>
+</tr>
+<tr>
+<td><strong>SAR</strong></td>
+<td>Saudi Riyal — usual commercial currency</td>
+</tr>
+<tr>
+<td><strong>Service Exchange</strong></td>
+<td>Barter-oriented collaboration model</td>
+</tr>
+<tr>
+<td><strong>SPV</strong></td>
+<td>Special Purpose Vehicle — company-only joint venture option</td>
+</tr>
+<tr>
+<td><strong>Sub-model</strong></td>
+<td>Specific engagement pattern under a main collaboration model</td>
+</tr>
+<tr>
+<td><strong>Two-Way Dependency</strong></td>
+<td>Reciprocal need and offer (barter) pairing</td>
+</tr>
+<tr>
+<td><strong>Validation</strong></td>
+<td>On-screen checks that required information is complete and consistent</td>
+</tr>
+<tr>
+<td><strong>VAT</strong></td>
+<td>Value Added Tax; commonly <strong>15%</strong> in KSA</td>
+</tr>
+<tr>
+<td><strong>Vetting</strong></td>
+<td>Account review before full platform access</td>
+</tr>
+<tr>
+<td><strong>Visibility</strong></td>
+<td>Whether a post is discoverable in the marketplace</td>
+</tr>
+<tr>
+<td><strong>Work package</strong></td>
+<td>Unit of scope containing tasks and deliverables</td>
+</tr>
+<tr>
+<td><strong>Workspace</strong></td>
+<td>Personal or company business context for your actions</td>
+</tr>
+<tr>
+<td><strong>Workspace role</strong></td>
+<td>Permission set inside a company workspace (owner, admin, member, viewer, and similar)</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>End of PM-Twin Complete User Guide</em></p>
+
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      securityLevel: 'loose',
+      fontFamily: 'Segoe UI, Arial, Helvetica, sans-serif',
+      themeVariables: {
+        fontSize: '16px',
+        darkMode: true,
+        background: '#0b1220',
+        primaryColor: '#1e293b',
+        primaryTextColor: '#f8fafc',
+        primaryBorderColor: '#94a3b8',
+        lineColor: '#cbd5e1',
+        secondaryColor: '#334155',
+        tertiaryColor: '#0f172a',
+      },
+      flowchart: {
+        curve: 'basis',
+        htmlLabels: true,
+        useMaxWidth: true,
+        nodeSpacing: 28,
+        rankSpacing: 36,
+        padding: 12,
+      },
+      state: {
+        useMaxWidth: true,
+      },
+    });
+
+    function enlargeDiagrams() {
+      document.querySelectorAll('.mermaid-wrap svg').forEach(function (svg) {
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        svg.style.width = '100%';
+        svg.style.maxWidth = '100%';
+        svg.style.height = 'auto';
+        svg.style.maxHeight = '720px';
+        svg.style.minHeight = '0';
+      });
+    }
+
+    mermaid.run({ querySelector: '.mermaid' })
+      .then(function () {
+        enlargeDiagrams();
+        document.documentElement.setAttribute('data-mermaid', 'ready');
+      })
+      .catch(function (err) {
+        console.error(err);
+        document.documentElement.setAttribute('data-mermaid', 'error');
+      });
+  </script>
+</body>
+</html>

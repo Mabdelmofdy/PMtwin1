@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/pmtwin-logo.svg" alt="PM-Twin logo" width="320" />
+</p>
+
 # PM-Twin Complete User Guide
 
 **Official User Manual for onboarding, training, and day-to-day use**
@@ -126,8 +130,8 @@ PM-Twin is organized around two everyday ways of working:
 ### How modules work together
 
 ```mermaid
-flowchart LR
-  A[Profile & Workspace] --> B[Opportunity]
+flowchart TB
+  A[Profile and Workspace] --> B[Opportunity]
   B --> C[Marketplace]
   B --> D[Matching]
   D --> E[Match]
@@ -760,19 +764,26 @@ Partner suggestions appear after you publish. You will see them under **My Match
 
 ```mermaid
 flowchart TB
-  subgraph one["One Way"]
+  subgraph one["1. One Way Matching"]
+    direction LR
     N1[Need] --- O1[Offer]
   end
-  subgraph two["Two-Way / Barter"]
+  subgraph two["2. Two-Way / Barter"]
+    direction LR
     A[Party A Need + Offer] --- B[Party B Need + Offer]
   end
-  subgraph cons["Consortium"]
-    Lead[Lead Need] --- P1[Partner Offer]
-    Lead --- P2[Partner Offer]
+  subgraph cons["3. Consortium / Group Formation"]
+    direction TB
+    Lead[Lead Need] --- P1[Partner Offer 1]
+    Lead --- P2[Partner Offer 2]
   end
-  subgraph circ["Circular"]
-    X[A] --> Y[B] --> Z[C] --> X
+  subgraph circ["4. Circular Exchange"]
+    direction LR
+    X[Party A] --> Y[Party B]
+    Y --> Z[Party C]
+    Z --> X
   end
+  one --> two --> cons --> circ
 ```
 
 | Type | Label you see | Meaning |

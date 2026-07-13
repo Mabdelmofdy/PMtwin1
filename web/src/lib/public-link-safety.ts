@@ -23,7 +23,7 @@ export function sanitizeAnonymousPublicLinks(root: HTMLElement | null): void {
       return
     }
     if (href === '/register' && /register/i.test(anchor.textContent ?? '')) {
-      anchor.textContent = 'Registration preview'
+      anchor.textContent = 'Registration'
     }
     if (href === '/collaboration-wizard' && /wizard/i.test(anchor.textContent ?? '')) {
       anchor.textContent = 'Guided model selector'

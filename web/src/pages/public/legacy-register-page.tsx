@@ -306,12 +306,6 @@ export function LegacyRegisterPage() {
           </p>
         </header>
 
-        {isLocalSignupRuntime ? (
-          <div className="reg-preview-notice mb-4 text-sm" role="status">
-            Demo/UAT: data stays in this browser only.
-          </div>
-        ) : null}
-
         <div className="reg-wizard-progress" aria-label="Registration progress">
           <div className="reg-wizard-progress-track">
             <div

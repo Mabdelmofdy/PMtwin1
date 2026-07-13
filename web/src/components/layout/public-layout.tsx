@@ -87,7 +87,7 @@ export function PublicLayout() {
                   to="/register"
                   className="hidden cursor-pointer text-gray-900 no-underline transition-colors hover:text-[#0369a1] md:inline"
                 >
-                  Registration preview
+                  Registration
                 </Link>
                 <Link
                   to="/login"

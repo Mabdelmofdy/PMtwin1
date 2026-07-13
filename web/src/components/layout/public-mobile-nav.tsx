@@ -112,7 +112,7 @@ export function PublicMobileNav() {
                   className={authLinkClass}
                   onClick={() => setOpen(false)}
                 >
-                  Registration preview
+                  Registration
                 </Link>
               </div>
             )}

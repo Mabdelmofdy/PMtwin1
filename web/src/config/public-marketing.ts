@@ -10,7 +10,7 @@ export const PUBLIC_CTA = {
   exploreMarketplace: 'Explore marketplace',
   signIn: 'Sign in',
   signInDemo: 'Sign in to demo workspace',
-  registrationPreview: 'Registration preview',
+  registrationPreview: 'Registration',
   guidedModelSelector: 'Guided model selector',
   wizardPreview: 'Guided model selector',
   contactSales: 'Contact sales',
