@@ -60,6 +60,34 @@ describe('opportunity-display', () => {
     )
     assert.equal(
       resolveOpportunityOwnershipScope({
+        opportunity: {
+          creatorId: 'u1',
+          organizationId: 'org-1',
+          workspaceId: 'ws-personal-u1',
+          ownerPartyId: 'party-individual-u1',
+        },
+        viewerUserId: 'u1',
+        viewerWorkspaceId: 'ws-personal-u1',
+        viewerPartyId: 'party-individual-u1',
+        viewerOrganizationId: 'org-1',
+      }),
+      'mine',
+    )
+    assert.equal(
+      resolveOpportunityOwnershipScope({
+        opportunity: {
+          creatorId: 'u1',
+          organizationId: 'org-1',
+          workspaceId: 'ws-personal-u1',
+          ownerPartyId: 'party-individual-u1',
+        },
+        viewerUserId: 'u1',
+        viewerOrganizationId: 'org-1',
+      }),
+      'company',
+    )
+    assert.equal(
+      resolveOpportunityOwnershipScope({
         opportunity: { creatorId: 'u2', organizationId: 'org-1' },
         viewerUserId: 'u1',
         viewerOrganizationId: 'org-1',

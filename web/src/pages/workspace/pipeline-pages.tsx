@@ -684,7 +684,7 @@ export function MatchesPage() {
 
 export function MatchDetailPage() {
   const { id } = useParams()
-  const { user, isPendingApproval, canAccessAdmin } = useAuth()
+  const { user, isPendingApproval, canAccessAdmin, activeWorkspace, activeParty } = useAuth()
   const version = useDataStoreVersion()
   const match = id ? matchesApi.get(id) : undefined
   const [pendingAction, setPendingAction] = useState<'accept' | 'decline' | null>(null)
@@ -696,9 +696,11 @@ export function MatchDetailPage() {
         role: user?.role,
         status: user?.status,
         canAccessAdmin,
+        activeWorkspaceId: activeWorkspace?.id,
+        activePartyId: activeParty?.id,
         profile: user?.profile,
       }),
-    [user, canAccessAdmin],
+    [user, canAccessAdmin, activeWorkspace?.id, activeParty?.id],
   )
 
   const model = useMemo(() => {
@@ -1002,7 +1004,7 @@ export function MatchDetailPage() {
 }
 
 export function NegotiationsPage() {
-  const { user, canAccessAdmin } = useAuth()
+  const { user, canAccessAdmin, activeWorkspace, activeParty } = useAuth()
   const { productLanguage } = useProductLanguage()
   const filters = useExecutiveListFilters('negotiations', {
     statusLabel: (value) => value.charAt(0).toUpperCase() + value.slice(1),
@@ -1017,9 +1019,11 @@ export function NegotiationsPage() {
         role: user?.role,
         status: user?.status,
         canAccessAdmin,
+        activeWorkspaceId: activeWorkspace?.id,
+        activePartyId: activeParty?.id,
         profile: user?.profile,
       }),
-    [user, canAccessAdmin],
+    [user, canAccessAdmin, activeWorkspace?.id, activeParty?.id],
   )
   const negotiations = useMemo(
     () => allNegotiations.filter((n) => canViewNegotiationDetail(n, viewer)),
@@ -1217,7 +1221,7 @@ export function NegotiationsPage() {
 
 export function NegotiationDetailPage() {
   const { id } = useParams()
-  const { user, canAccessAdmin } = useAuth()
+  const { user, canAccessAdmin, activeWorkspace, activeParty } = useAuth()
   const version = useDataStoreVersion()
   const neg = id ? negotiationsApi.get(id) : undefined
   const [proposalPending, setProposalPending] = useState(false)
@@ -1230,9 +1234,11 @@ export function NegotiationDetailPage() {
         role: user?.role,
         status: user?.status,
         canAccessAdmin,
+        activeWorkspaceId: activeWorkspace?.id,
+        activePartyId: activeParty?.id,
         profile: user?.profile,
       }),
-    [user, canAccessAdmin],
+    [user, canAccessAdmin, activeWorkspace?.id, activeParty?.id],
   )
 
   const linkedDeal = useMemo(() => {

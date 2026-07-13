@@ -26,6 +26,24 @@ describe('legacy compatibility restrictions', () => {
     )
   })
 
+  it('matches owner when active party id is an alias of opportunity ownerPartyId', () => {
+    assert.equal(
+      isOpportunityOwnedByContext(
+        {
+          workspaceId: 'ws-personal-seed-user-002',
+          ownerPartyId: 'party-individual-seed-user-002',
+          creatorId: 'seed-user-002',
+        },
+        {
+          activeWorkspaceId: 'ws-personal-seed-user-002',
+          activePartyId: 'seed-user-002',
+          userId: 'seed-user-002',
+        },
+      ),
+      true,
+    )
+  })
+
   it('stamps canonical metadata on new negotiation writes', () => {
     setCommandPermissionActor({
       userId: 'actor-1',

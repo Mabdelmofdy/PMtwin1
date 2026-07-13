@@ -189,7 +189,7 @@ function ContractListCard({ contract }: { contract: Contract }) {
 
 export function ContractsPage() {
   const navigate = useNavigate()
-  const { user, canAccessAdmin } = useAuth()
+  const { user, canAccessAdmin, activeWorkspace, activeParty } = useAuth()
   const filters = useExecutiveListFilters('contracts', {
     statusLabel: (value) => value.replace(/_/g, ' '),
     modeLabel: (value) => formatCollaborationExchangeMode(value),
@@ -204,9 +204,11 @@ export function ContractsPage() {
         role: user?.role,
         status: user?.status,
         canAccessAdmin,
+        activeWorkspaceId: activeWorkspace?.id,
+        activePartyId: activeParty?.id,
         profile: user?.profile,
       }),
-    [user, canAccessAdmin],
+    [user, canAccessAdmin, activeWorkspace?.id, activeParty?.id],
   )
   const contracts = useMemo(
     () => filterContractsForViewer(contractsApi.list(), viewer),
@@ -452,7 +454,7 @@ export function ContractsPage() {
 
 export function ContractDetailPage() {
   const version = useDataStoreVersion()
-  const { user, canAccessAdmin } = useAuth()
+  const { user, canAccessAdmin, activeWorkspace, activeParty } = useAuth()
   const { productLanguage } = useProductLanguage()
   const { id } = useParams()
 
@@ -463,9 +465,11 @@ export function ContractDetailPage() {
         role: user?.role,
         status: user?.status,
         canAccessAdmin,
+        activeWorkspaceId: activeWorkspace?.id,
+        activePartyId: activeParty?.id,
         profile: user?.profile,
       }),
-    [user, canAccessAdmin],
+    [user, canAccessAdmin, activeWorkspace?.id, activeParty?.id],
   )
 
   const model =

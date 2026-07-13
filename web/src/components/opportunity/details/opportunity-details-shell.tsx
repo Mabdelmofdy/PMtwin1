@@ -121,7 +121,7 @@ export function OpportunityDetailsShell({
 }) {
   const version = useDataStoreVersion()
   const navigate = useNavigate()
-  const { user, isPendingApproval, canAccessAdmin } = useAuth()
+  const { user, isPendingApproval, canAccessAdmin, activeWorkspace, activeParty } = useAuth()
   const [publishDetails, setPublishDetails] = useState<readonly string[] | null>(null)
   const [publishBundles, setPublishBundles] = useState<readonly ExplanationBundle[] | null>(null)
   const [highlightRelatedMatches, setHighlightRelatedMatches] = useState(false)
@@ -133,9 +133,11 @@ export function OpportunityDetailsShell({
         role: user?.role,
         status: user?.status,
         canAccessAdmin,
+        activeWorkspaceId: activeWorkspace?.id,
+        activePartyId: activeParty?.id,
         profile: user?.profile,
       }),
-    [user, canAccessAdmin],
+    [user, canAccessAdmin, activeWorkspace?.id, activeParty?.id],
   )
 
   const model = useMemo(

@@ -4,6 +4,7 @@ import {
   type CreatedByActor,
 } from '@pm-twin/identity'
 import type { Opportunity } from '@/types/domain.ts'
+import { partyIdLookupAliases } from '@/domain/party/party-projection.ts'
 
 export type OpportunityOwnershipContext = {
   readonly companyIds: ReadonlySet<string>
@@ -81,12 +82,15 @@ export type OpportunityOwnershipMatchContext = {
  * opportunity has no canonical workspace or party owner.
  */
 export function isOpportunityOwnedByContext(
-  opportunity: Pick<Opportunity, 'workspaceId' | 'ownerPartyId' | 'creatorId'>,
+  opportunity: Pick<Opportunity, 'workspaceId' | 'ownerPartyId' | 'creatorId'> & {
+    readonly createdByUserId?: string
+  },
   context: OpportunityOwnershipMatchContext,
 ): boolean {
   if (
     context.activePartyId &&
-    opportunity.ownerPartyId === context.activePartyId
+    opportunity.ownerPartyId &&
+    partyIdsMatch(opportunity.ownerPartyId, context.activePartyId)
   ) {
     return true
   }
@@ -96,10 +100,17 @@ export function isOpportunityOwnedByContext(
   ) {
     return true
   }
-  return Boolean(
-    !opportunity.workspaceId &&
-      !opportunity.ownerPartyId &&
-      context.userId &&
-      opportunity.creatorId === context.userId,
-  )
+  // Legacy creator fallback only when canonical ownership fields are absent.
+  if (!opportunity.workspaceId && !opportunity.ownerPartyId) {
+    const creator =
+      opportunity.createdByUserId ?? opportunity.creatorId
+    return Boolean(context.userId && creator === context.userId)
+  }
+  return false
+}
+
+function partyIdsMatch(left: string, right: string): boolean {
+  if (left === right) return true
+  const leftAliases = new Set(partyIdLookupAliases(left))
+  return partyIdLookupAliases(right).some((alias) => leftAliases.has(alias))
 }

@@ -132,7 +132,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   const opportunityId = mode === 'edit' ? id : undefined
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const { user, isPendingApproval } = useAuth()
+  const { user, isPendingApproval, activeWorkspace, activeParty, canAccessAdmin } = useAuth()
   const [draft, setDraft] = useState<OpportunityDraft>(initialDraft)
   const [activeStepId, setActiveStepId] = useState<WizardStepId>('opportunity')
   const [createdOpportunityId, setCreatedOpportunityId] = useState<string | undefined>()
@@ -531,7 +531,15 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   }
 
   if (mode === 'edit' && existingOpportunity && user) {
-    const viewer = buildViewerContext(user)
+    const viewer = buildViewerContext({
+      userId: user.id,
+      role: user.role,
+      status: user.status,
+      canAccessAdmin,
+      activeWorkspaceId: activeWorkspace?.id,
+      activePartyId: activeParty?.id,
+      profile: user.profile,
+    })
     if (!canEditOpportunity(existingOpportunity, viewer)) {
       return (
         <PmPage>

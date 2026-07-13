@@ -185,7 +185,7 @@ function CommercialAgreementListCard({ commercialAgreement }: { commercialAgreem
 
 export function CommercialAgreementsPage() {
   const navigate = useNavigate()
-  const { user, canAccessAdmin } = useAuth()
+  const { user, canAccessAdmin, activeWorkspace, activeParty } = useAuth()
   const filters = useExecutiveListFilters('agreements', {
     statusLabel: (value) => value.charAt(0).toUpperCase() + value.slice(1),
     modeLabel: (value) => formatCollaborationExchangeMode(value),
@@ -200,9 +200,11 @@ export function CommercialAgreementsPage() {
         role: user?.role,
         status: user?.status,
         canAccessAdmin,
+        activeWorkspaceId: activeWorkspace?.id,
+        activePartyId: activeParty?.id,
         profile: user?.profile,
       }),
-    [user, canAccessAdmin],
+    [user, canAccessAdmin, activeWorkspace?.id, activeParty?.id],
   )
   const commercialAgreements = useMemo(
     () => filterDealsForViewer(commercialAgreementsApi.list(), viewer),
@@ -438,7 +440,7 @@ export function CommercialAgreementsPage() {
 export function CommercialAgreementDetailPage() {
   const version = useDataStoreVersion()
   const { id } = useParams()
-  const { user, canAccessAdmin } = useAuth()
+  const { user, canAccessAdmin, activeWorkspace, activeParty } = useAuth()
   const { productLanguage } = useProductLanguage()
 
   const viewer = useMemo(
@@ -448,9 +450,11 @@ export function CommercialAgreementDetailPage() {
         role: user?.role,
         status: user?.status,
         canAccessAdmin,
+        activeWorkspaceId: activeWorkspace?.id,
+        activePartyId: activeParty?.id,
         profile: user?.profile,
       }),
-    [user, canAccessAdmin],
+    [user, canAccessAdmin, activeWorkspace?.id, activeParty?.id],
   )
 
   const model =

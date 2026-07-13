@@ -14,6 +14,7 @@ import type { CommandPermissionActor } from '@/domain/rbac/context/command-permi
 import type { PermissionAction, PermissionContext } from '@/domain/rbac/types.ts'
 import { toCanonicalRole } from '@/domain/rbac/legacy-role-map.ts'
 import { hasAdminCapability } from '@/domain/rbac/roles/permission-bundles.ts'
+import { partyIdLookupAliases } from '@/domain/party/party-projection.ts'
 
 /** Platform-only commands that require admin route access. */
 export const ADMIN_ONLY_COMMAND_TYPES = new Set([
@@ -149,7 +150,8 @@ function isOpportunityOwner(
   }
   if (
     opportunity.ownerPartyId &&
-    opportunity.ownerPartyId === actor.activePartyId
+    actor.activePartyId &&
+    partyIdsMatchForRbac(opportunity.ownerPartyId, actor.activePartyId)
   ) {
     return true
   }
@@ -163,6 +165,12 @@ function isOpportunityOwner(
     return true
   }
   return false
+}
+
+function partyIdsMatchForRbac(left: string, right: string): boolean {
+  if (left === right) return true
+  const leftAliases = new Set(partyIdLookupAliases(left))
+  return partyIdLookupAliases(right).some((alias) => leftAliases.has(alias))
 }
 
 function hasActorWorkspaceCapability(

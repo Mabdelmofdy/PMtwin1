@@ -55,6 +55,8 @@ export function filterOpportunitiesByOwnershipFilter(
     const ownership = resolveOpportunityOwnershipScope({
       opportunity,
       viewerUserId: viewer.userId,
+      viewerWorkspaceId: viewer.activeWorkspaceId,
+      viewerPartyId: viewer.activePartyId,
       viewerOrganizationId,
       creatorOrganizationId: opportunity.creatorId
         ? resolveCreatorOrganizationId(opportunity.creatorId)

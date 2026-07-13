@@ -52,7 +52,7 @@ function parseCsvParam(raw: string | null): string[] {
 }
 
 export function OpportunitiesPage() {
-  const { user, canMutate, isPendingApproval } = useAuth()
+  const { user, canMutate, isPendingApproval, activeWorkspace, activeParty } = useAuth()
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const navState = readProductNavState(location.state)
@@ -91,6 +91,8 @@ export function OpportunitiesPage() {
       userId: user?.id,
       role: user?.role,
       status: user?.status,
+      activeWorkspaceId: activeWorkspace?.id,
+      activePartyId: activeParty?.id,
     })
     const scoped = filterOpportunitiesByOwnershipFilter(
       allOpportunities,
@@ -141,6 +143,8 @@ export function OpportunitiesPage() {
     user?.role,
     user?.status,
     user?.organizationId,
+    activeWorkspace?.id,
+    activeParty?.id,
     mainModels,
     subModels,
     exchangeModes,
@@ -157,6 +161,8 @@ export function OpportunitiesPage() {
       userId: user?.id,
       role: user?.role,
       status: user?.status,
+      activeWorkspaceId: activeWorkspace?.id,
+      activePartyId: activeParty?.id,
     })
     return filterOpportunitiesByOwnershipFilter(
       allOpportunities,
@@ -165,7 +171,16 @@ export function OpportunitiesPage() {
       (creatorId) => peopleApi.get(creatorId)?.organizationId,
       user?.organizationId,
     ).length
-  }, [allOpportunities, ownershipFilter, user?.id, user?.role, user?.status, user?.organizationId])
+  }, [
+    allOpportunities,
+    ownershipFilter,
+    user?.id,
+    user?.role,
+    user?.status,
+    user?.organizationId,
+    activeWorkspace?.id,
+    activeParty?.id,
+  ])
 
   const listEmpty = resolveListEmptyState({
     hasSourceData: scopedSourceCount > 0,
