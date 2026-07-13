@@ -63,7 +63,9 @@ Data is loaded automatically on first launch: the app merges demo users, **demo 
 
 **Demo Accounts modal tabs:** Professionals · Employees · Companies · **Pending** · Admin
 
-**Demo Walkthrough:** Admin → Environments → **Demo Walkthrough** guides login-as-role steps for all four matching topologies (`one_way`, `two_way`, `consortium`, `circular`). Every demo account owns or participates in at least one cast-coverage opportunity/match (or pending draft / admin walkthrough host).
+**Demo Walkthrough:** Admin → Environments (`/admin/environments`) → **Demo Walkthrough** guides login-as-role steps for all four matching topologies (`one_way`, `two_way`, `consortium`, `circular`). Every demo account owns or participates in at least one cast-coverage opportunity/match (or pending draft / admin walkthrough host).
+
+**Trainer verification procedure:** Follow **Demo Walkthrough verification (Demo/UAT)** in [`docs/PM-Twin-Complete-User-Guide.md`](../../docs/PM-Twin-Complete-User-Guide.md#demo-walkthrough-verification-demouat) — cast coverage, topology deep links, employee company ownership, pending publish block, admin not a marketplace participant, then environment reset.
 
 **Legacy Demo40 (cleared from browser seed):** Use **demo06@demo.test** or **demo07@demo.test** for full profile UI testing if legacy data is restored.
 

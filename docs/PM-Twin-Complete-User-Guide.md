@@ -1,15 +1,15 @@
 # PM-Twin Complete User Guide
 
-**Official end-user manual for customer onboarding, training, and day-to-day use**
+**Official User Manual for onboarding, training, and day-to-day use**
 
 | | |
 |---|---|
 | **Product** | PM-Twin — Construction Collaboration Marketplace |
 | **Audience** | End users, company owners, employees, administrators, sales teams, trainers, and customers |
-| **Scope** | How the platform works today in the live web application |
-| **Region focus** | Saudi Arabia and the GCC (Arabic RTL, SAR, VAT, PDPL-aware flows) |
+| **Purpose** | Explain what you can see and do in PM-Twin |
+| **Region focus** | Saudi Arabia and the GCC (Arabic layout, Saudi Riyal, VAT, data protection expectations) |
 
-> **Note (Demo / UAT):** In Demo and UAT environments, data may be stored in the browser and reset through admin Environment tools. Demo credentials may appear on the login and marketing screens. Features marked **Preview** or **Demo/UAT-only** in this guide are not fully production-backed yet.
+> **Training environments:** Some training or acceptance environments may provide sample login accounts and practice data. Features labeled **Preview** in the application are available in a limited form. Your trainer or customer success contact can confirm what applies to your environment.
 
 ---
 
@@ -28,7 +28,7 @@
 11. [Contract guide](#11-contract-guide)
 12. [Notifications](#12-notifications)
 13. [Dashboard guide](#13-dashboard-guide)
-14. [Admin portal (overview)](#14-admin-portal-overview)
+14. [Admin portal (overview)](#14-admin-portal-overview) — [Demo Walkthrough verification](#demo-walkthrough-verification-demouat)
 15. [Complete business journey](#15-complete-business-journey)
 16. [Best practices](#16-best-practices)
 17. [Troubleshooting](#17-troubleshooting)
@@ -43,7 +43,7 @@
 
 PM-Twin is a **construction collaboration marketplace** for Saudi Arabia and the GCC. It helps companies, project managers, consultants, contractors, suppliers, and independent professionals find partners, share capacity, negotiate terms, and formalize work through commercial agreements and contracts.
 
-The platform brings **3D design, BIM, construction delivery, equipment, and professional services** into one deal-ready workspace: you publish what you need or what you can offer, the system finds compatible partners, and you move from match → negotiation → commercial agreement → contract.
+You publish what you need or what you can offer. PM-Twin helps you find compatible partners, then guides you from match → negotiation → commercial agreement → contract.
 
 ### Why it exists
 
@@ -56,27 +56,27 @@ Construction projects rarely succeed with a single party. Teams need:
 - Hiring of professionals and consultants
 - Clear commercial terms, VAT-aware pricing, and signed contracts
 
-PM-Twin replaces fragmented WhatsApp threads, email RFPs, and informal introductions with a structured collaboration path.
+PM-Twin replaces fragmented chat threads, email RFPs, and informal introductions with a structured collaboration path.
 
 ### Business problems it solves
 
 | Problem | How PM-Twin helps |
 |---------|-------------------|
-| Hard to find the right partner quickly | Marketplace discovery + automated matching |
-| Unclear scope and commercial terms | Opportunity wizard with collaboration models and commercial structure |
-| No shared workspace for negotiations | Negotiation room with messages, offers, and audit trail |
+| Hard to find the right partner quickly | Marketplace discovery and automatic partner suggestions |
+| Unclear scope and commercial terms | Guided opportunity form with collaboration models and commercial structure |
+| No shared place for negotiations | Negotiation room with messages, offers, and history |
 | Informal “handshake” deals | Commercial agreements with review and award |
 | Missing legal closure | Contracts with multi-party signing |
-| Incomplete profiles hurt trust | Readiness scoring before publish |
+| Incomplete profiles hurt trust | Readiness guidance before you publish |
 | Company vs individual confusion | Personal and Company workspaces |
 
 ### Who should use it
 
 - **Company owners** building partnerships and subcontracting pipelines  
-- **Employees** operating inside a company workspace  
+- **Employees** working inside a company workspace  
 - **Individual professionals and consultants** offering or seeking work  
 - **Commercial, legal, and project managers** reviewing terms and contracts  
-- **Platform administrators** vetting accounts and moderating the marketplace  
+- **Platform administrators** reviewing accounts and overseeing the marketplace  
 - **Sales and training teams** onboarding customers  
 
 ### Typical users
@@ -85,41 +85,41 @@ PM-Twin replaces fragmented WhatsApp threads, email RFPs, and informal introduct
 |---------|----------------|
 | Contractor company owner | Publish needs for subcontractors; award commercial agreements |
 | BIM / design consultant | Publish offers; accept matches; negotiate cash or barter |
-| Developer / owner-client | Form consortia or JVs for large packages |
-| Equipment provider | Share fleet capacity via resource-sharing models |
+| Developer / owner-client | Form consortia or joint ventures for large packages |
+| Equipment provider | Share fleet capacity through resource-sharing models |
 | Independent project manager | Hire into roles or offer availability |
-| Platform admin | Approve registrations, manage awards, audit activity |
+| Platform admin | Approve registrations, manage awards, review activity |
 
 ---
 
 ## 2. Platform overview
 
-PM-Twin is organized around two mental models:
+PM-Twin is organized around two everyday ways of working:
 
-| Domain | Mental model | Typical language |
-|--------|--------------|------------------|
-| **My Workspace** | Ownership and execution | My opportunities, pending, needs action, executing |
-| **Marketplace** | Discovery | Explore, discover, available, recommended |
+| Area | How to think about it | Typical language |
+|------|----------------------|------------------|
+| **My Workspace** | Your work, ownership, and progress | My opportunities, pending, needs action, executing |
+| **Marketplace** | Finding partners and opportunities | Explore, discover, available, recommended |
 
 ### Major modules
 
 | Module | What it is | Where you find it |
 |--------|------------|-------------------|
-| **Dashboard** | Home for your active workspace: KPIs, tasks, notifications, next actions | My Workspace → Dashboard (`/dashboard` or `/company-dashboard`) |
+| **Dashboard** | Home for your active workspace: summary numbers, tasks, notifications, next actions | My Workspace → Dashboard |
 | **Workspace** | Your Personal or Company business context (switchable) | Workspace switcher in the header |
-| **Marketplace / Discover** | Browse published opportunities, people, and (preview) matches | Marketplace → Discover (`/marketplace`) |
-| **Opportunities** | Create, edit, publish, and manage needs and offers | My Opportunities / Browse Opportunities (`/opportunities`) |
-| **Matches** | System-discovered partner pairings | My Matches (`/matches`) |
-| **Negotiations** | Term discussions, offers, and counter-offers | My Negotiations (`/negotiations`) |
-| **Commercial Agreements** | Structured business agreements after terms are agreed | My Commercial Agreements (`/commercial-agreements`) |
-| **Contracts** | Formal legal records with signing | My Contracts (`/contracts`) |
-| **Pipeline** | Cross-workflow board across matches → agreements → contracts | My Pipeline (`/pipeline`) |
-| **Notifications** | Alerts for matches, invitations, agreements, contracts | Notifications (`/notifications`) |
-| **Messages** | Messaging surface | Messages (`/messages`) — **Demo/UAT:** threads may be mock data |
-| **Profile** | Your personal or company profile and readiness | Profile (`/profile`) |
-| **Company / Party documents** | Documents for vetting and compliance (CR, VAT, licenses, etc.) | Party documents (`/party-documents`) |
-| **Settings** | Language direction (LTR/RTL), password, product language (staff) | Settings (`/settings`) |
-| **Admin Portal** | Platform operations for administrators | Admin (`/admin/*`) |
+| **Marketplace / Discover** | Browse published opportunities, people, and (where available) matches | Marketplace → Discover |
+| **Opportunities** | Create, edit, publish, and manage needs and offers | My Opportunities / Browse Opportunities |
+| **Matches** | Suggested partner pairings | My Matches |
+| **Negotiations** | Term discussions, offers, and counter-offers | My Negotiations |
+| **Commercial Agreements** | Structured business agreements after terms are agreed | My Commercial Agreements |
+| **Contracts** | Formal agreements ready for signing | My Contracts |
+| **Pipeline** | Board view across matches → agreements → contracts | My Pipeline |
+| **Notifications** | Alerts for matches, invitations, agreements, contracts | Notifications |
+| **Messages** | Messaging area | Messages |
+| **Profile** | Your personal or company profile and readiness | Profile |
+| **Party documents** | Documents for account review and compliance (CR, VAT, licenses, and similar) | Party documents |
+| **Settings** | Language direction, password, and related preferences | Settings |
+| **Admin Portal** | Platform operations for administrators | Admin |
 
 > Screenshot: Sidebar showing My Workspace and Marketplace groups
 
@@ -144,7 +144,7 @@ flowchart LR
 1. You complete a **profile** and work in a **workspace**.  
 2. You create and **publish** an **opportunity** (Need or Offer).  
 3. The **marketplace** shows published posts to others.  
-4. **Matching** creates **matches** between compatible needs and offers.  
+4. Compatible partners appear as **matches**.  
 5. Parties **accept** a match and start a **negotiation**.  
 6. When terms are agreed, you create a **commercial agreement**.  
 7. From the agreement you create and **sign** a **contract**.  
@@ -160,13 +160,13 @@ A **workspace** is the business context you are acting in. You may have:
 
 - A **Personal Workspace** (individual professional or consultant)
 - One or more **Company Workspaces** (as owner, admin, member, or viewer)
-- Platform staff may also enter the **PM-Twin Platform** admin context
+- Platform staff may also enter the **PM-Twin Platform** admin area
 
 Switching workspace changes what “mine” means for opportunities, matches, and agreements.
 
 ### Company
 
-A **company** is an organization party with its own company workspace. Owners invite employees. Some collaboration sub-models (for example Project-Specific JV, SPV, Strategic JV) require a company entity.
+A **company** is an organization with its own company workspace. Owners invite employees. Some collaboration options (for example Project-Specific Joint Venture, Special Purpose Vehicle, Strategic Joint Venture) are available only to companies.
 
 ### Personal Workspace
 
@@ -174,47 +174,47 @@ A **Personal Workspace** is for professionals and consultants working independen
 
 ### Party
 
-A **party** is a marketplace actor: either an **individual** or a **company**. Opportunities, matches, and contracts are always tied to parties (and the users acting for them).
+A **party** is who participates in the marketplace: either an **individual** or a **company**. Opportunities, matches, and contracts are always linked to the parties involved.
 
 ### Opportunity
 
-An **opportunity** is a published (or draft) **Need** or **Offer** describing scope, collaboration model, commercial terms, and timeline. Product language: *a published need or offer ready for matching*.
+An **opportunity** is a draft or published **Need** or **Offer** describing scope, collaboration model, commercial terms, and timeline. In simple terms: a need or offer ready for partners to find.
 
 ### Match
 
-A **match** (also called PostMatch) is a pairing between compatible opportunities (or multi-party topologies). Matches have a score and status (discovered → accepted → confirmed, or declined/expired).
+A **match** is a suggested pairing between compatible opportunities (including multi-party collaborations). Matches show a score and a status such as Discovered, Accepted, Confirmed, Declined, or Expired.
 
 ### Negotiation
 
-A **negotiation** is the structured discussion of commercial terms after a match is accepted. It includes messages, offers, counter-offers, attachments, and an audit trail.
+A **negotiation** is the structured discussion of commercial terms after a match is accepted. It includes messages, offers, counter-offers, attachments, and a history of actions.
 
 ### Commercial Agreement
 
-A **commercial agreement** is the business record created once terms are agreed (or awarded). It moves through draft → review → signing → executing → completed (or cancelled). It is the bridge between negotiation and contract.
+A **commercial agreement** is the business record created once terms are agreed (or awarded). It moves through statuses such as Draft, Review, Signing, Executing, Completed, or Cancelled. It sits between negotiation and contract.
 
-> Older documentation may say “deal.” In the product UI, the preferred term is **Commercial Agreement**.
+> Older materials may say “deal.” In the product, the preferred name is **Commercial Agreement**.
 
 ### Contract
 
-A **contract** is the formal legal snapshot created from a commercial agreement. Parties sign it; when all required signatures are in place, it becomes **active**.
+A **contract** is the formal signing record created from a commercial agreement. Parties sign it; when all required signatures are in place, it becomes **Active**.
 
 ### Readiness
 
-**Readiness** is a score (0–100%) that measures whether your **profile** and **opportunity** are complete enough for publishing and quality matching. Publishing typically requires both profile and opportunity readiness to be ready (required fields complete and score at or above **80%**).
+**Readiness** is a percentage score that shows whether your **profile** and **opportunity** are complete enough to publish. Publishing usually requires both to be ready: required information filled in and a score of **80%** or higher.
 
 ### Validation
 
-**Validation** checks required fields, commercial structure consistency (for example payment schedule percentages totaling 100%), and duplicate-draft warnings while you edit. Soft warnings guide quality; hard gates block publish.
+While you fill forms, PM-Twin highlights missing or incomplete information (for example required fields, or a payment schedule that does not add up to 100%). Warnings help you improve quality; required items must be fixed before you can publish.
 
 ### Marketplace
 
-The **marketplace** is the discovery side of PM-Twin: browsing others’ published opportunities, companies, and professionals. Your drafts stay under **My Opportunities**, not the public marketplace.
+The **marketplace** is where you discover other people’s published opportunities, companies, and professionals. Your drafts stay under **My Opportunities**, not in public discovery.
 
 ### Ownership
 
 Ownership answers “whose is this?”
 
-| Scope | Meaning |
+| Label | Meaning |
 |-------|---------|
 | **Mine** | Created by you in your personal context |
 | **Company** | Owned by your company workspace |
@@ -222,13 +222,13 @@ Ownership answers “whose is this?”
 
 ### Visibility
 
-**Visibility** controls whether an opportunity appears in active marketplace discovery (for example published vs archived). Archiving withdraws marketplace visibility; closing ends the lifecycle for new matching.
+**Visibility** controls whether an opportunity appears in marketplace discovery. **Archive** removes it from active discovery. **Close** ends the opportunity for new matching.
 
 ---
 
 ## 4. User roles
 
-Roles combine **account type**, **workspace role**, and (for staff) **platform admin** permissions.
+Your access depends on how you registered, which workspace you are in, and (for staff) whether you are a platform administrator.
 
 ### Individual Professional (and Consultant)
 
@@ -237,61 +237,61 @@ Roles combine **account type**, **workspace role**, and (for staff) **platform a
 **Can typically:**
 
 - Complete personal profile and documents  
-- Create opportunity drafts and publish when readiness and capabilities allow  
-- Browse marketplace, view matches, accept/decline matches  
+- Create opportunity drafts and publish when readiness and permissions allow  
+- Browse the marketplace, view matches, accept or decline matches  
 - Start and participate in negotiations (message, offer, counter, accept)  
-- View commercial agreements and sign contracts when invited as a party  
+- View commercial agreements and sign contracts when you are a signing party  
 
 **Cannot typically:**
 
-- Create a company party without registering as Company  
-- Use company-only sub-models (Project JV, SPV, Strategic JV)  
+- Create a company without registering as Company  
+- Use company-only collaboration options (Project Joint Venture, Special Purpose Vehicle, Strategic Joint Venture)  
 - Access the Admin Portal  
 
 ### Company Owner
 
-**Who:** Registered a Company Workspace; membership role **owner**.
+**Who:** Registered a Company Workspace and is the **owner**.
 
 **Can typically:**
 
-- Full opportunity lifecycle for company posts  
-- Invite and manage employees (subject to workspace capabilities)  
-- Accept matches, negotiate, create/execute commercial agreements  
-- Award (where permitted) and create/sign contracts  
-- Complete company profile and vetting documents (CR, VAT certificate, etc.)  
+- Manage the full opportunity journey for company posts  
+- Invite and manage employees (according to company permissions)  
+- Accept matches, negotiate, and create or progress commercial agreements  
+- Award agreements (where permitted) and create or sign contracts  
+- Complete company profile and review documents (Commercial Registration, VAT certificate, and similar)  
 
 ### Employee
 
-**Who:** Joined a company via invitation (`/invite/:token`). Does **not** create a new company.
+**Who:** Joined a company through an invitation. Does **not** create a new company.
 
-**Can do:** Depends on **workspace role**, for example:
+**Can do:** Depends on the role assigned in the company workspace. Examples:
 
-| Workspace role | Typical focus |
-|----------------|---------------|
-| `company_admin` | Members, workspace settings, broad operational rights |
-| `manager` / `project_manager` | Opportunities and delivery coordination |
-| `commercial_manager` | Negotiations, agreements, awards |
-| `legal` / `finance` | Review, signing, commercial terms |
-| `member` | Day-to-day collaboration within granted capabilities |
-| `viewer` | Read-only (no write capabilities) |
+| Role | Typical focus |
+|------|---------------|
+| Company admin | Members, workspace settings, broad operational rights |
+| Manager / Project manager | Opportunities and delivery coordination |
+| Commercial manager | Negotiations, agreements, awards |
+| Legal / Finance | Review, signing, commercial terms |
+| Member | Day-to-day collaboration within granted permissions |
+| Viewer | View only |
 
-**Cannot:** Act outside the company workspace they belong to, or perform actions their role lacks (for example `opportunity.publish`, `contract.sign`, `agreement.award`).
+**Cannot:** Act outside the company workspace they belong to, or perform actions their role does not allow (for example publishing, signing, or awarding).
 
 ### Reviewer
 
-**Who:** Assigned reviewer in onboarding/vetting (often platform staff).
+**Who:** Assigned to review new registrations (often platform staff).
 
 **Can:** Review registration packages, request clarification, approve or reject accounts.
 
-**Cannot:** Act as a marketplace seller/buyer unless they also have a normal user membership.
+**Cannot:** Act as a normal marketplace participant unless they also have a standard user account.
 
 ### Administrator (platform staff)
 
-**Who:** Roles such as platform admin, operations admin, moderator, auditor.
+**Who:** Platform administrators, operations staff, moderators, auditors, and similar roles.
 
-**Can:** Use the Admin Portal — identity, vetting, marketplace moderation, commercial approvals/awards, reports, audit, environments.
+**Can:** Use the Admin Portal — users and companies, account review, marketplace oversight, commercial approvals and awards, reports, and activity review.
 
-**Auditors / read-only analysts:** May view queues without mutating records.
+**Auditors:** May view information without changing records.
 
 > Screenshot: Role badge in the sidebar (for example “Professional” or “Platform admin”)
 
@@ -301,53 +301,51 @@ Roles combine **account type**, **workspace role**, and (for staff) **platform a
 
 ### Logging in
 
-1. Open **Sign in** (`/login`).  
-2. Enter **email** and **password**.  
-3. Optionally use remember-me (keeps session across browser restarts where enabled).  
+1. Open **Sign in**.  
+2. Enter your **email** and **password**.  
+3. Optionally choose to stay signed in.  
 4. After sign-in you land on your dashboard (personal or company).
 
 > Screenshot: Sign in page  
-> **Demo/UAT:** A demo credentials dialog may list seeded accounts for training.
+> **Tip for training sessions:** Your trainer may provide practice accounts.
 
-**New users:** Use **Register** (`/register`) to create a Personal or Company workspace, complete profile steps, accept Terms and Privacy, and verify email. New accounts may be **pending vetting** — you can browse, but full actions unlock after approval.
+**New users:** Use **Register** to create a Personal or Company workspace, complete the profile steps, accept Terms and Privacy, and verify your email. New accounts may be **pending review** — you can browse, but full actions unlock after approval.
 
 ### Switching workspaces
 
 1. Open the **workspace switcher** in the header.  
 2. Choose **Personal Workspace** or a **Company Workspace**.  
-3. Company selection typically opens `/company-dashboard`; personal opens `/dashboard`.  
-4. Platform staff may **enter Platform** to open Admin.
+3. You are taken to the matching dashboard for that workspace.  
+4. Platform staff may choose **enter Platform** to open Admin.
 
 > Screenshot: Workspace switcher listing Personal and Company workspaces
 
 ### Updating your profile
 
-1. Go to **My Profile** (`/profile`).  
+1. Go to **My Profile**.  
 2. Review Summary, Skills, Experience/Portfolio, and (for companies) Company information.  
 3. Improve **profile readiness** until required fields are complete and the score reaches the publish threshold.
 
-**Individual required (readiness):** Full Name, Role, Skills, Services, Location, Availability.  
-**Individual recommended:** Portfolio, Experience, Certifications, Previous Projects.  
+**Individual — required for readiness:** Full Name, Role, Skills, Services, Location, Availability.  
+**Individual — recommended:** Portfolio, Experience, Certifications, Previous Projects.  
 
-**Company required:** Company Name, Business Category, Services, Project Categories, Location, Contact Person.  
-**Company recommended:** Portfolio, Team Size, Coverage Areas, Certifications, Financial Capacity.
+**Company — required:** Company Name, Business Category, Services, Project Categories, Location, Contact Person.  
+**Company — recommended:** Portfolio, Team Size, Coverage Areas, Certifications, Financial Capacity.
 
 ### Completing company information
 
 1. Ensure you are in the **Company Workspace**.  
 2. Complete company profile fields and contact person.  
 3. Upload required documents under **Party documents** (see below).  
-4. If pending vetting, follow the pending dashboard guidance (upload VAT, CR, resubmit for review).
+4. If your account is pending review, follow the guidance on the pending dashboard (for example Upload VAT, Upload CR, Resubmit for review).
 
 ### Uploading required documents
 
-Open **Party documents** (`/party-documents`).
+Open **Party documents**.
 
-| Category examples | Typical required badges |
-|-------------------|-------------------------|
-| profile, vetting, legal, technical, commercial, financial, insurance, certification, attachment | Commercial Registration, **VAT Certificate**, Insurance Certificate, License, National ID |
-
-> **Note:** In some Demo/UAT registration steps, document cards may be **UI collection only** until production upload APIs are active. Party documents and pending-vetting shortcuts (Upload VAT, Upload CR) are the operational surfaces for metadata upload.
+| Document categories you may see | Common required items |
+|---------------------------------|------------------------|
+| Profile, vetting, legal, technical, commercial, financial, insurance, certification, attachment | Commercial Registration, **VAT Certificate**, Insurance Certificate, License, National ID |
 
 > Screenshot: Party documents upload form
 
@@ -356,18 +354,18 @@ Open **Party documents** (`/party-documents`).
 See [Section 13 — Dashboard guide](#13-dashboard-guide). At a glance you will see:
 
 - Greeting and readiness / active matches  
-- KPI strip (opportunities, matches, negotiations, agreements, contracts)  
+- Summary counts (opportunities, matches, negotiations, agreements, contracts)  
 - My tasks and next best actions  
 - Notifications  
 - Matching summary and marketplace recommendations  
 
-If your account is **pending vetting**, you see a **Pending Vetting Dashboard** instead of the full workspace dashboard.
+If your account is **pending review**, you see a **Pending Vetting Dashboard** instead of the full workspace dashboard.
 
 ---
 
 ## 6. Complete opportunity guide
 
-This is the most important operational section for most users.
+This is the most important section for most users.
 
 ### What is an Opportunity?
 
@@ -376,7 +374,7 @@ An opportunity is a structured post that says either:
 - **Need** — you are requesting services, skills, resources, capacity, or project support; or  
 - **Offer** — you are providing services, skills, resources, equipment, or available capacity.
 
-Opportunities carry collaboration model, scope, commercial structure, timeline, and documents so matching and partners can evaluate fit.
+Opportunities include collaboration model, scope, commercial structure, timeline, and documents so partners can evaluate fit.
 
 ### When should you create one?
 
@@ -388,42 +386,42 @@ Create an opportunity when you have a real collaboration intent, for example:
 - You need to hire a senior project manager for six months  
 - You want to exchange design capacity for site supervision (barter)
 
-Do **not** publish empty placeholders — readiness and matching quality depend on complete data.
+Do **not** publish empty placeholders — readiness and partner quality depend on complete information.
 
 ### Draft vs Published
 
-| State | Meaning | Marketplace | Matching |
-|-------|---------|-------------|----------|
-| **Draft** | Work in progress; autosave / Save Draft | Not discoverable as published | Does not run matching |
-| **Published** | Live for discovery | Visible per ownership/visibility rules | Matching runs on publish |
+| State | Meaning | In the marketplace | Partner suggestions |
+|-------|---------|--------------------|---------------------|
+| **Draft** | Work in progress; use **Save Draft** | Not shown as published | Not created yet |
+| **Published** | Live for discovery | Visible according to ownership and visibility | Created after you publish |
 
-You can recover a **local autosave** if the browser has a newer snapshot than the last saved draft (“Recover unsaved local draft?”).
+If you leave the form with unsaved work, you may see **Recover unsaved local draft?** with options to **Continue draft** or **Discard**. Always use **Save Draft** or **Publish Opportunity** when you want to keep your work.
 
 ### Opportunity lifecycle
 
 ```mermaid
 stateDiagram-v2
-  [*] --> draft
-  draft --> published: Publish
-  published --> matched: Matches found / accepted
-  matched --> negotiating: Negotiation started
-  negotiating --> contracted: Contract linked
-  contracted --> executing: Execution
-  executing --> completed: Complete
-  draft --> cancelled: Cancel / delete draft
-  published --> cancelled: Close / cancel path
-  executing --> cancelled: Cancelled
+  [*] --> Draft
+  Draft --> Published: Publish
+  Published --> Matched: Matches found / accepted
+  Matched --> Negotiating: Negotiation started
+  Negotiating --> Contracted: Contract linked
+  Contracted --> Executing: Execution
+  Executing --> Completed: Complete
+  Draft --> Cancelled: Cancel / delete draft
+  Published --> Cancelled: Close / cancel
+  Executing --> Cancelled: Cancelled
 ```
 
-Canonical statuses: **draft → published → matched → negotiating → contracted → executing → completed | cancelled**.
+Statuses you will see: **Draft → Published → Matched → Negotiating → Contracted → Executing → Completed** (or **Cancelled**).
 
-Visibility actions such as **Archive** withdraw marketplace visibility without necessarily meaning the same as lifecycle **cancelled**.
+**Archive** removes the opportunity from active marketplace discovery. That is different from cancelling or closing the opportunity.
 
-> Screenshot: Opportunity details header with status badge and lifecycle strip
+> Screenshot: Opportunity details header with status badge and journey strip
 
 ### Step-by-step creation
 
-1. From Dashboard, click **Create Opportunity** (or go to `/opportunities/create`).  
+1. From the Dashboard, click **Create Opportunity**.  
 2. Complete the five wizard steps below.  
 3. Use **Save Draft** anytime.  
 4. On **Review & Publish**, resolve readiness items, then click **Publish Opportunity**.
@@ -441,10 +439,10 @@ Wizard steps:
 | 1 | Opportunity | Post type and basics |
 | 2 | Collaboration | Model and sub-model |
 | 3 | Scope & Work | Requirements and packages |
-| 4 | Commercial Structure | Value exchange |
+| 4 | Commercial Structure | How value is exchanged |
 | 5 | Review & Publish | Confirm and publish |
 
-Advance guards include:
+Messages you may see before continuing:
 
 - “Choose Need or Offer before continuing.”  
 - “Add a title and description before continuing.”  
@@ -454,36 +452,36 @@ Advance guards include:
 
 ### Step 1 — Opportunity (basics)
 
-**Screen help:** *Start with the post type and the basics partners need to evaluate fit.*
+**On-screen help:** *Start with the post type and the basics partners need to evaluate fit.*
 
-#### Post Type (required to advance)
+#### Post Type (required to continue)
 
 | Option | Purpose | When to use |
 |--------|---------|-------------|
-| **Need** | Request capacity | You are the buyer of services/resources |
-| **Offer** | Provide capacity | You are the seller of services/resources |
+| **Need** | Request capacity | You are looking for services or resources |
+| **Offer** | Provide capacity | You are providing services or resources |
 
-**Common mistake:** Choosing Offer when you are actually hiring — use Need (or Hiring model) when you are requesting people.
+**Common mistake:** Choosing Offer when you are actually hiring — use Need (or the Hiring collaboration model) when you are requesting people.
 
 #### Basic Information
 
 | Field | Required? | Purpose | Best practice | Common mistake |
 |-------|-----------|---------|---------------|----------------|
-| **Title** | Required | Searchable name | Specific: “BIM Coordination — Riyadh Tower Q3” | Vague titles like “Project help” |
-| **Short description** | Required | Partner evaluation | 2–4 sentences on scope and outcome | Copy-paste of full RFP with no summary |
-| **Category or profession** | Required | Discovery / sector | Align with real trade or discipline | Leaving default or unrelated category |
+| **Title** | Required | Clear name partners can find | Specific: “BIM Coordination — Riyadh Tower Q3” | Vague titles like “Project help” |
+| **Short description** | Required | Partner evaluation | 2–4 sentences on scope and outcome | Pasting a full RFP with no summary |
+| **Category or profession** | Required | Discovery by sector | Align with the real trade or discipline | Leaving unrelated category |
 | **Target role** | Required | Who should respond | “MEP Subcontractor”, “Planning Engineer” | Leaving blank or too broad |
-| **Primary location** | Required | Geography fit | City + site context | “KSA” only when city matters |
-| **Service area** | Optional | Coverage | Regions you can serve or need covered | Ignoring multi-city coverage |
-| **Start date** | Required | Timeline matching | Realistic start | Past dates without explanation |
-| **Deadline** | Optional | Tender / delivery cutoff | Use for RFPs and hard ends | Conflicting with start date |
+| **Primary location** | Required | Location fit | City and site context | “KSA” only when city matters |
+| **Service area** | Optional | Coverage | Regions you serve or need covered | Ignoring multi-city coverage |
+| **Start date** | Required | Timing | Realistic start | Past dates without explanation |
+| **Deadline** | Optional | Tender or delivery cutoff | Use for RFPs and hard ends | Conflicting with start date |
 | **Availability end date (recommended)** | Recommended | Offer capacity window | Especially important for Offers | Omitting when capacity is time-bound |
 
 ---
 
 ### Step 2 — Collaboration Model
 
-**Screen help:** *Choose how parties will work together. Matching structure is derived automatically.*
+**On-screen help:** *Choose how parties will work together. Matching structure is shown automatically.*
 
 #### Main Collaboration Model (required)
 
@@ -491,9 +489,9 @@ Advance guards include:
 |-------|---------|---------|
 | **Cash Subcontracting** | Engage another party to deliver defined work for payment | Concrete pumping subcontract |
 | **Service Exchange / Barter** | Exchange complementary services without pure cash | Design capacity for site supervision |
-| **Joint Venture** | Partner for shared project or business outcome | SPV for mixed-use development bid |
+| **Joint Venture** | Partner for a shared project or business outcome | Special Purpose Vehicle for a mixed-use bid |
 | **Resource Sharing** | Share equipment, people, or materials | Shared crane fleet |
-| **Hiring / Professional Engagement** | Hire a professional or consultant | Senior PM for 6 months |
+| **Hiring / Professional Engagement** | Hire a professional or consultant | Senior project manager for 6 months |
 
 #### Sub-model (required)
 
@@ -503,46 +501,46 @@ Pick the engagement pattern under the main model. Examples:
 |------------|------------------------|
 | Cash Subcontracting | Task-Based Engagement; Competition / RFP |
 | Service Exchange | Long-Term Strategic Alliance; Mentorship Program; Task-Based Engagement |
-| Joint Venture | Consortium; Project-Specific Joint Venture; SPV; Strategic Joint Venture |
+| Joint Venture | Consortium; Project-Specific Joint Venture; Special Purpose Vehicle; Strategic Joint Venture |
 | Resource Sharing | Bulk Purchasing; Equipment Sharing; Resource Sharing & Exchange |
 | Hiring | Professional Hiring; Consultant Hiring |
 
-**Company-only:** Project-Specific JV, SPV, and Strategic JV require a **company entity**.
+**Company-only:** Project-Specific Joint Venture, Special Purpose Vehicle, and Strategic Joint Venture require a **company** account.
 
-Each sub-model shows additional **Collaboration Details** fields (for example Task Title, Equity Split, Equipment Type). Required sub-model fields must be completed for a quality publish.
+Each sub-model shows additional **Collaboration Details** (for example Task Title, Equity Split, Equipment Type). Complete required fields before publishing.
 
-#### Matching structure (read-only)
+#### Recommended matching structure (read-only)
 
-The system shows **Recommended matching structure** (One Way, Two-Way, Consortium, or Circular). You cannot pick this manually — it is derived from model, sub-model, and value exchange. Use **Why?** for explainability.
+The screen shows **Recommended matching structure** (One Way, Two-Way, Consortium, or Circular). You do not choose this manually — it appears based on the collaboration and commercial choices you made. Use **Why?** if you want a short explanation.
 
 ---
 
 ### Step 3 — Scope & Work
 
-**Screen help:** *Define requirements, work packages, tasks, deliverables, and milestones.*
+**On-screen help:** *Define requirements, work packages, tasks, deliverables, and milestones.*
 
 #### Skills
 
 | Field | Purpose | Required? | Tips |
 |-------|---------|-----------|------|
-| Skills Required / Skills Offered | Matching quality | Soft-required for readiness | Add level, years, certification, mandatory flags |
-| Skill name | Specific capability | Per skill | e.g. “BIM Coordination” |
+| Skills Required / Skills Offered | Better partner fit | Needed for strong readiness | Add level, years, certification, and mandatory flags where relevant |
+| Skill name | Specific skill | Per skill entry | For example “BIM Coordination” |
 
 **Common mistake:** Listing only soft skills or one vague skill.
 
 #### Services
 
-Comma-separated **Services Required** or **Services Offered** (soft-required for readiness). Example: `Design Review, Coordination`.
+Enter **Services Required** or **Services Offered** (needed for strong readiness), usually as a comma-separated list. Example: Design Review, Coordination.
 
 #### Qualifications & partner preference
 
 | Field | Required? | Purpose |
 |-------|-----------|---------|
-| Preferred partner type | Recommended | Company / individual / consultant preference |
-| Experience level | Optional | Seniority filter |
+| Preferred partner type | Recommended | Company, individual, or consultant preference |
+| Experience level | Optional | Seniority expectation |
 | Certifications | Optional | Compliance and trust |
 | Team size | Optional | Capacity expectation |
-| Minimum qualifications | Optional | Hard floors for responders |
+| Minimum qualifications | Optional | Minimum standards for responders |
 
 #### Resources
 
@@ -550,13 +548,13 @@ People, equipment, vehicles, materials, software, licenses — optionally linked
 
 | Field | Notes |
 |-------|-------|
-| Type | people, equipment, vehicles, materials, software, licenses |
-| Name | Required per resource |
+| Type | People, equipment, vehicles, materials, software, licenses |
+| Name | Required for each resource |
 | Quantity / Unit / Availability | Clarity for partners |
-| Work package | Global or package-specific |
+| Work package | Whole opportunity or a specific package |
 | Mandatory | Checkbox |
 
-**Offer capacity** (Offer only): Available / Reserved / Maximum capacity and Available from — metadata for partners (not used as the matching engine input by itself).
+**Available capacity** (Offer only): Available, Reserved, and Maximum capacity, plus Available from. This helps partners understand your capacity.
 
 #### Work Packages
 
@@ -567,15 +565,15 @@ Break delivery into manageable units:
 3. Add **Tasks** and **Package deliverables**.  
 4. Set package dates as needed.
 
-**Best practice:** At least one clear package for anything beyond a tiny task engagement.
+**Best practice:** Add at least one clear package for anything beyond a very small task.
 
 #### Deliverables (opportunity-level)
 
-Add deliverables with title and acceptance criteria; scope can be entire opportunity or a work package.
+Add deliverables with title and acceptance criteria. Scope can be the entire opportunity or a work package.
 
 #### Milestones
 
-Add milestones with completion criteria and optional **Payment trigger** — important for cash schedules.
+Add milestones with completion criteria and optional **Payment trigger** — important when you use cash payment schedules.
 
 #### Timeline & Location
 
@@ -583,40 +581,40 @@ Add milestones with completion criteria and optional **Payment trigger** — imp
 |---------|----------------|
 | Need | Location, Start date, Deadline |
 | Offer | Preferred location / service area, Availability from |
-| Rich timeline (presentation) | Flexible start, Weekend allowed, Must finish before, Estimated duration, Working days, Shift type |
+| Additional timeline options | Flexible start, Weekend allowed, Must finish before, Estimated duration, Working days, Shift type |
 
 #### Attachments & compliance
 
 | Field | Purpose | Best practice |
 |-------|---------|---------------|
-| Attachments | Document names (comma-separated in wizard) | List SOW, drawings, BOQ names clearly |
-| Compliance requirements | SBC, PDPL, H&S, licenses | Be explicit for KSA projects |
-| Portfolio references | Proof of capability | Link prior similar work |
+| Attachments | Document names | List SOW, drawings, and BOQ names clearly |
+| Compliance requirements | Codes, licenses, H&S, data protection | Be explicit for KSA projects |
+| Portfolio references | Proof of capability | Reference similar prior work |
 
 ---
 
 ### Step 4 — Commercial Structure
 
-**Screen help:** *Configure one or more value exchange components. Hybrid is derived automatically.*
+**On-screen help:** *Configure one or more value exchange components. Hybrid is shown automatically when more than one is selected.*
 
-Enable one or more: **Cash**, **Barter**, **Profit Sharing**, **Revenue Sharing**, **Equity**, **Custom**. If more than one is enabled, mode becomes **Hybrid**.
+Enable one or more: **Cash**, **Barter**, **Profit Sharing**, **Revenue Sharing**, **Equity**, **Custom**. If more than one is enabled, the mode becomes **Hybrid**.
 
-#### Cash (SAR-focused)
+#### Cash (Saudi Riyal)
 
 | Field | Purpose | Tips |
 |-------|---------|------|
-| Currency | Usually **SAR** | Keep consistent across schedule |
-| Budget type | Fixed, Range, Rate-based, Milestone-based, To be negotiated | Match how you really buy/sell |
+| Currency | Usually **SAR** | Keep consistent across the schedule |
+| Budget type | Fixed, Range, Rate-based, Milestone-based, To be negotiated | Match how you really buy or sell |
 | Fixed amount | Monetary value | Align with milestones |
 | Advance % / Retention % | Cash flow and quality holdback | Common in KSA construction |
-| Payment terms | When paid | Align with deliverables |
-| **VAT handling** | Tax treatment | Be explicit; KSA standard VAT is **15%** at platform settings level |
+| Payment terms | When payment is due | Align with deliverables |
+| **VAT handling** | Tax treatment | Be explicit; standard VAT in KSA is **15%** |
 | Bank guarantee | Security instruments | Use when contractually required |
-| Payment schedule | Milestones with % / amount | Percentages should total **100%** |
+| Payment schedule | Milestones with % or amount | Percentages should total **100%** |
 
 #### Barter
 
-Offered asset/service, requested asset/service, valuation method, estimated value.
+Offered asset or service, requested asset or service, valuation method, estimated value.
 
 #### Profit / Revenue / Equity / Custom
 
@@ -628,7 +626,7 @@ When multiple components are enabled, set allocation method (Percentage, Fixed, 
 
 **Common mistakes:**
 
-- Enabling Cash with empty amounts and “to be negotiated” everywhere — hurts readiness  
+- Enabling Cash with empty amounts and “to be negotiated” everywhere — lowers readiness  
 - Payment schedule percentages that do not total 100%  
 - Barter without valuation  
 
@@ -648,25 +646,25 @@ Review shows an **executive summary** and section cards with **Edit** links:
 
 #### Readiness
 
-Publish is allowed when:
+You can publish when:
 
-1. **Profile** is ready for matching (required fields + score ≥ **80%**), and  
-2. **Opportunity** is publish-ready (required fields + score ≥ **80%**)
+1. Your **profile** is ready (required fields complete and score at least **80%**), and  
+2. Your **opportunity** is ready (required fields complete and score at least **80%**)
 
 Blocked message example: *Complete your profile and opportunity details before publishing for matching.*
 
-Required opportunity messages include: add title; choose Need or Offer; category; target role; skills; services; location; start/availability; collaboration model; description; commercial terms.
+Required items may include: title; Need or Offer; category; target role; skills; services; location; start or availability; collaboration model; description; commercial terms.
 
-Recommended improvements (optional but raise score): preferred partner type, portfolio/documents, compliance, delivery milestones.
+Recommended improvements (optional, but raise your score): preferred partner type, portfolio or documents, compliance, delivery milestones.
 
-> Screenshot: Opportunity Readiness drawer — Required Before Publishing
+> Screenshot: Opportunity Readiness panel — Required Before Publishing
 
 #### Publishing
 
 1. Resolve required readiness items.  
 2. Click **Publish Opportunity**.  
-3. Status becomes **published**.  
-4. Matching runs and may create matches + notifications.
+3. Status becomes **Published**.  
+4. Compatible partners may appear as matches, and you may receive notifications.
 
 ---
 
@@ -674,17 +672,17 @@ Recommended improvements (optional but raise score): preferred partner type, por
 
 | Action | When available | Effect |
 |--------|----------------|--------|
-| **Edit** | Owner; not archived/closed | Update draft or published content |
-| **Publish** | Owner + draft + readiness | Enter marketplace; trigger matching |
+| **Edit** | Owner; not archived or closed | Update draft or published content |
+| **Publish** | Owner; draft; readiness complete | Enter the marketplace; partner suggestions appear |
 | **Duplicate as Draft** / **Template** | Owner | New draft copy |
-| **Archive** | Owner; not draft/archived | Withdrawn from active marketplace visibility |
-| **Close Opportunity** | Owner; not draft/closed/archived | Ends lifecycle for new matching |
-| **Delete Draft** | Owner + draft | Permanent delete of draft |
-| **Export PDF / JSON**, Print, Share, Copy Link | Owner tooling | Sharing and records |
+| **Archive** | Owner; not draft or already archived | Removed from active marketplace discovery |
+| **Close Opportunity** | Owner; not draft, closed, or archived | Ends the opportunity for new matching |
+| **Delete Draft** | Owner; draft only | Permanently deletes the draft |
+| **Export PDF / JSON**, Print, Share, Copy Link | Owner | Sharing and records |
 
-**Awarding** is **not** an opportunity detail button. Awarding happens on **Commercial Agreements** / Admin **Award Management** when multiple agreements compete on one opportunity.
+**Awarding** is not an opportunity button. You award from **Commercial Agreements** or Admin **Award Management** when several agreements compete on one opportunity.
 
-Opportunity detail workspaces include: Overview, Scope & Work, Commercial, Marketplace, Matching, Documents, Related, History.
+Opportunity detail tabs include: Overview, Scope & Work, Commercial, Marketplace, Matching, Documents, Related, History.
 
 ---
 
@@ -692,16 +690,16 @@ Opportunity detail workspaces include: Overview, Scope & Work, Commercial, Marke
 
 **Scenario:** A Riyadh contractor needs BIM coordination for a tower fit-out (cash subcontract, task-based).
 
-1. Log in as company owner → Company Workspace.  
-2. Profile readiness ≥ 80%; VAT certificate and CR uploaded.  
+1. Sign in as company owner → Company Workspace.  
+2. Profile readiness at least 80%; VAT certificate and Commercial Registration uploaded.  
 3. **Create Opportunity** → Post Type **Need**.  
 4. Title: “BIM Coordination Support — Tower Fit-out, Riyadh”.  
 5. Category: Construction / BIM; Target role: BIM Coordinator; Location: Riyadh; Start date set.  
 6. Collaboration: **Cash Subcontracting** → **Task-Based Engagement**; fill task title, scope, duration, skills, experience, payment terms.  
 7. Scope: Skills Required = BIM Coordination (Expert); Services = Clash Detection, Model Coordination; one work package “Coordination Package”; milestones with payment triggers.  
-8. Commercial: Cash, SAR, Fixed amount, Advance 20%, Retention 5%, VAT handling explicit, schedule totaling 100%.  
-9. Review → readiness green → **Publish**.  
-10. Matches appear → accept best match → **Start negotiation** → agree terms → **Create Commercial Agreement** → **Create contract** → parties **Sign** → contract **Active**.
+8. Commercial: Cash, SAR, Fixed amount, Advance 20%, Retention 5%, VAT handling clear, schedule totaling 100%.  
+9. Review → readiness complete → **Publish**.  
+10. Matches appear → accept the best match → **Start negotiation** → agree terms → **Create Commercial Agreement** → **Create contract** → parties **Sign** → contract **Active**.
 
 ---
 
@@ -709,8 +707,8 @@ Opportunity detail workspaces include: Overview, Scope & Work, Commercial, Marke
 
 ### Browsing opportunities
 
-1. Open **Marketplace → Discover** (`/marketplace`) for the discovery hub (KPIs and explore-by-model links), or  
-2. Open **Browse Opportunities** (`/opportunities` in marketplace presentation).
+1. Open **Marketplace → Discover** for the discovery home (summary numbers and explore-by-model links), or  
+2. Open **Browse Opportunities**.
 
 Tabs commonly include:
 
@@ -726,25 +724,25 @@ Tabs commonly include:
 |---------|-----------------|
 | Search | “Search available opportunities…” / “Search my opportunities…” |
 | Status | All / Published / Draft / Negotiating |
-| Main collaboration model | Cash subcontracting, service exchange, JV, resource sharing, hiring |
+| Main collaboration model | Cash subcontracting, service exchange, joint venture, resource sharing, hiring |
 | Exchange mode | Cash, Barter, Profit-Sharing, Equity, Hybrid |
 | Match type | One Way, Two-Way, Consortium, Circular |
 
 ### Cards and details
 
-Cards emphasize ownership → need/offer → status → primary action. Open a card to view opportunity details (full fields may require verification for some teaser views).
+Cards show ownership, Need or Offer, status, and a primary action. Open a card to view details. Some previews may show limited detail until verification is complete.
 
 ### Saving opportunities
 
-**Bookmark / save-for-later is not supported** in the current product. Use Matches, Pipeline, or notifications to track what matters.
+There is currently **no bookmark or save-for-later**. Use Matches, Pipeline, or Notifications to track what matters.
 
 ### Marketplace rules and visibility
 
 - Only **published** opportunities appear in marketplace discovery.  
-- **Drafts** remain under My / Company ownership tabs.  
-- **Archived** posts are withdrawn from active marketplace visibility.  
-- **Browse Matches** and **Map** are marked **Preview**.  
-- Browse Companies / Professionals uses the People routes with scope (companies vs professionals).
+- **Drafts** remain under My or Company tabs.  
+- **Archived** posts are removed from active discovery.  
+- **Browse Matches** and **Map** may be labeled **Preview**.  
+- Use **Browse Companies** or **Browse Professionals** to explore people and organizations.
 
 ---
 
@@ -752,13 +750,13 @@ Cards emphasize ownership → need/offer → status → primary action. Open a c
 
 ### What matching is
 
-Matching is the automatic pairing of compatible Needs and Offers (and multi-party structures) after an opportunity is **published**. Each match includes a **match score** and fit breakdowns (for example Skill match, Timeline fit, Location fit).
+After you **publish** an opportunity, PM-Twin suggests compatible partners. Each **match** shows a **match score** and fit areas such as Skill match, Timeline fit, and Location fit.
 
 ### When it happens
 
-Matching runs when you **publish** an opportunity. Users then see matches under **My Matches**, recommended areas on the dashboard, and notifications such as **New match found**.
+Partner suggestions appear after you publish. You will see them under **My Matches**, in recommended areas on the dashboard, and in notifications such as **New match found**.
 
-### Matching topologies
+### Types of matching
 
 ```mermaid
 flowchart TB
@@ -766,7 +764,7 @@ flowchart TB
     N1[Need] --- O1[Offer]
   end
   subgraph two["Two-Way / Barter"]
-    A[Party A Need+Offer] --- B[Party B Need+Offer]
+    A[Party A Need + Offer] --- B[Party B Need + Offer]
   end
   subgraph cons["Consortium"]
     Lead[Lead Need] --- P1[Partner Offer]
@@ -777,24 +775,24 @@ flowchart TB
   end
 ```
 
-| Topology | Label | Meaning |
-|----------|-------|---------|
-| `one_way` | One Way Matching | A Need matched to Offers (or Offer to Needs) |
-| `two_way` | Two-Way Dependency (Barter) | Reciprocal need + offer |
-| `consortium` | Group Formation | Lead need fulfilled by multiple partner offers |
-| `circular` | Circular Exchange | Ring A → B → C → A |
+| Type | Label you see | Meaning |
+|------|---------------|---------|
+| One Way | One Way Matching | A Need paired with Offers (or an Offer with Needs) |
+| Two-Way | Two-Way Dependency (Barter) | Each side has both a need and an offer |
+| Consortium | Group Formation | A lead Need fulfilled by several partner Offers |
+| Circular | Circular Exchange | A ring of three or more parties (A → B → C → A) |
 
-Topology is **derived** from collaboration configuration — users do not pick it manually.
+The type is shown automatically from your collaboration choices — you do not select it yourself.
 
 ### What to expect after a match appears
 
-1. Notification: **New match found**.  
-2. Open **My Matches** → filter **Discovered**.  
+1. You receive a notification: **New match found**.  
+2. Open **My Matches** and filter by **Discovered**.  
 3. Review score, confidence (High / Medium / Low), related opportunities, and participants.  
-4. **Accept** or **Decline**.  
-5. When accepted (and confirmed as required by flow), click **Start negotiation**.  
+4. Choose **Accept** or **Decline**.  
+5. When the match is ready, click **Start negotiation**.  
 
-Statuses: **discovered → accepted → confirmed | declined | expired | superseded**.
+Statuses you may see: **Discovered → Accepted → Confirmed**, or **Declined**, **Expired**, or **Superseded**.
 
 > Screenshot: Match detail with score and Accept / Decline actions
 
@@ -806,17 +804,17 @@ Statuses: **discovered → accepted → confirmed | declined | expired | superse
 
 1. Accept the match.  
 2. Click **Start negotiation**.  
-3. You are taken to the negotiation detail / room (`/negotiations/:id`).
+3. Open the negotiation room.
 
 ### Negotiation room tabs
 
 | Tab | Use it for |
 |-----|------------|
-| Overview | Status, mode, linked records (match, commercial agreement, contract) |
+| Overview | Status, mode, and linked match, commercial agreement, and contract |
 | Discussion | Send messages |
-| Offers & Counter Offers | Amounts in SAR, submit/accept/reject |
+| Offers & Counter Offers | Amounts in SAR; submit, accept, or reject |
 | Commercial Terms | Structured terms |
-| Attachments | Supporting files/metadata |
+| Attachments | Supporting files |
 | Audit Trail | History of actions |
 
 > Screenshot: Negotiation room — Offers & Counter Offers tab
@@ -825,25 +823,25 @@ Statuses: **discovered → accepted → confirmed | declined | expired | superse
 
 - **Send message** in Discussion.  
 - Enter **Offer amount (SAR)** → **Submit offer** or **Submit counter offer**.  
-- **Accept** an offer → negotiation becomes **agreed**; other submitted offers may be rejected.  
+- **Accept** an offer → negotiation becomes **Agreed**; other open offers may be rejected.  
 - **Reject** an offer → negotiation can continue.  
 
-Header actions may include **Agree terms**, **Cancel negotiation**, **Create Commercial Agreement**, **Submit proposal**, **Accept updated proposal**.
+Header actions may include **Agree terms**, **Cancel negotiation**, **Create Commercial Agreement**, **Submit proposal**, and **Accept updated proposal**.
 
 ### Statuses
 
-**active ↔ countered → agreed | expired | cancelled**
+Statuses you may see: **Active**, **Countered**, **Agreed**, **Expired**, **Cancelled**.
 
 ### Example conversation
 
 > **Contractor (Need):** “We can accept 185,000 SAR including VAT handling as discussed, 20% advance, 5% retention.”  
 > **BIM firm (Offer):** Submits offer **185,000 SAR**.  
-> **Contractor:** Accepts offer → toast: “Offer accepted — negotiation agreed”.  
+> **Contractor:** Accepts offer → confirmation: “Offer accepted — negotiation agreed”.  
 > **Next:** Create Commercial Agreement → Create contract.
 
 ### Cancelling and history
 
-- **Cancel negotiation** sets status to cancelled.  
+- **Cancel negotiation** sets status to Cancelled.  
 - Use **Audit Trail** and list filters (Active, Countered, Agreed, Cancelled, Expired) for history.
 
 ---
@@ -852,47 +850,47 @@ Header actions may include **Agree terms**, **Cancel negotiation**, **Create Com
 
 ### Why it exists
 
-A commercial agreement turns agreed negotiation terms into a governed business record with participants, commercial terms, and a lifecycle that supports review, signing readiness, execution, award, and completion — before or alongside the legal contract.
+A commercial agreement turns agreed negotiation terms into a clear business record with participants, commercial terms, and a status path for review, signing readiness, execution, award, and completion — alongside the legal contract.
 
 ### Relationship with negotiations
 
-Typically: **Match accepted → Negotiation agreed → Create Commercial Agreement**. Linked records show the source match/negotiation and later the contract.
+Typical path: **Match accepted → Negotiation agreed → Create Commercial Agreement**. Linked records show the related match and negotiation, and later the contract.
 
 ### Statuses and approval process
 
 ```mermaid
 stateDiagram-v2
-  [*] --> draft
-  draft --> review: Submit for review
-  review --> signing: Move to signing
-  signing --> executing: Start execution
-  executing --> completed: Mark completed
-  draft --> cancelled: Cancel
-  review --> cancelled: Cancel
-  signing --> cancelled: Cancel
-  executing --> cancelled: Cancel
+  [*] --> Draft
+  Draft --> Review: Submit for review
+  Review --> Signing: Move to signing
+  Signing --> Executing: Start execution
+  Executing --> Completed: Mark completed
+  Draft --> Cancelled: Cancel
+  Review --> Cancelled: Cancel
+  Signing --> Cancelled: Cancel
+  Executing --> Cancelled: Cancel
 ```
 
-| Button | Moves to |
-|--------|----------|
-| Submit for review | review |
-| Move to signing | signing |
-| Start execution | executing |
-| Mark completed | completed |
-| Cancel commercial agreement | cancelled |
+| Button | New status |
+|--------|------------|
+| Submit for review | Review |
+| Move to signing | Signing |
+| Start execution | Executing |
+| Mark completed | Completed |
+| Cancel commercial agreement | Cancelled |
 
 ### Review and award
 
-- Detail page shows participants, commercial terms, and recommended actions (**Create contract**, **Review negotiation**).  
-- **Award commercial agreement** (where permitted): winner moves toward signing; sibling agreements may be rejected/cancelled; a contract may be created.  
-- Admin **Award Management** groups opportunities that have multiple competing agreements.  
-- Admin **Approvals** lists agreements in review-related statuses (decision actions on the list page may be limited depending on environment).
+- The detail page shows participants, commercial terms, and recommended actions (**Create contract**, **Review negotiation**).  
+- **Award commercial agreement** (where permitted): the winner moves toward signing; other competing agreements may be rejected or cancelled; a contract may be created.  
+- Admin **Award Management** lists opportunities that have multiple competing agreements.  
+- Admin **Approvals** lists agreements awaiting review-related attention.
 
 ### Rate participants
 
-At `/commercial-agreements/:id/rate`, parties can open **Rate participants** (criteria: Communication · Quality · Timeliness · Collaboration). Treat as a feedback surface; confirm with your trainer whether reviews are fully persisted in your environment.
+From a commercial agreement, open **Rate participants**. Criteria include Communication, Quality, Timeliness, and Collaboration. Click **Submit review** when finished.
 
-> Screenshot: Commercial agreement detail with lifecycle actions
+> Screenshot: Commercial agreement detail with status actions
 
 ---
 
@@ -900,89 +898,89 @@ At `/commercial-agreements/:id/rate`, parties can open **Rate participants** (cr
 
 ### How contracts relate to commercial agreements
 
-Contracts are created **from** a commercial agreement (**Create contract**). The contract detail links back to the agreement, match, negotiation, and related need/offer opportunities.
+Contracts are created **from** a commercial agreement using **Create contract**. The contract page links back to the agreement, match, negotiation, and related Need or Offer.
 
 ### Lifecycle
 
 ```mermaid
 stateDiagram-v2
-  [*] --> draft
-  draft --> pending_signature: Ready for signing
-  pending_signature --> active: All parties signed
-  active --> completed: Complete contract
-  active --> terminated: Terminate contract
-  draft --> terminated: Terminate
+  [*] --> Draft
+  Draft --> PendingSignature: Ready for signing
+  PendingSignature --> Active: All parties signed
+  Active --> Completed: Complete contract
+  Active --> Terminated: Terminate contract
+  Draft --> Terminated: Terminate
 ```
 
 ### Creating, reviewing, signing, activating, completing, closing
 
 | Step | User action | Result |
 |------|-------------|--------|
-| Create | **Create contract** from agreement | Draft contract; notification **Contract created** |
-| Review | Open contract detail | Check parties, payment schedule, links |
-| Sign | **Sign contract** | Records your signature; when all signed → **active** |
-| Complete | **Complete contract** | Status **completed** |
-| Terminate | **Terminate contract** | Status **terminated** |
+| Create | **Create contract** from the agreement | Draft contract; notification **Contract created** |
+| Review | Open the contract | Check parties, payment schedule, and links |
+| Sign | **Sign contract** | Your signature is recorded; when everyone has signed → **Active** |
+| Complete | **Complete contract** | Status **Completed** |
+| Terminate | **Terminate contract** | Status **Terminated** |
 
 List filters: Draft, Pending signature, Active, Completed, Terminated.
 
-> **Note (Demo/UAT):** Attachment uploads on contracts may show that file uploads are not available in the preview build.
+> **Note:** In some training environments, contract file upload may not be available yet. Follow on-screen guidance.
 
-> Screenshot: Contract parties & signatures panel
+> Screenshot: Contract parties and signatures panel
 
 ---
 
 ## 12. Notifications
 
-Open **Notifications** (`/notifications`). Filter All / Unread / Read. Groups: **Today**, **Yesterday**, **Earlier**.
+Open **Notifications**. Filter All / Unread / Read. Groups: **Today**, **Yesterday**, **Earlier**.
 
 ### Notification types and actions
 
 | Notification | Meaning | What you should do |
 |--------------|---------|-------------------|
-| New match found | Matching discovered a partner | Open match → review → Accept or Decline |
-| Match accepted | A participant accepted | Wait for confirmation or continue workflow |
+| New match found | A partner was suggested | Open the match → review → Accept or Decline |
+| Match accepted | A participant accepted | Wait for confirmation or continue |
 | Match confirmed | All required parties accepted | **Start negotiation** |
-| Match declined | A participant declined | Review alternatives / other matches |
+| Match declined | A participant declined | Review other matches |
 | Negotiation started | Discussion room opened | Open negotiation → respond |
-| Commercial Agreement created | Agreement created from match/application | Review terms → advance lifecycle |
-| Contract created | Contract drafted from agreement | Review → **Sign contract** |
-| Invitation received | Invited to a company workspace | Open invite link / accept |
-| Invitation accepted | Invitee accepted | Activate membership if you are owner/admin |
-| Membership activated | Company membership is active | Switch to company workspace |
-| Workspace activated | Full collaboration unlocked | Create/publish opportunities |
-| Opportunity creation enabled | Posting unlocked after vetting | Create opportunity |
-| Registration submitted / Resubmission | Onboarding package sent | Wait for reviewer |
-| Account approved | Vetting complete | Complete profile; start collaborating |
-| Account rejected / suspended | Onboarding failed or suspended | Read reason; contact support / clarify |
-| Clarification requested | Reviewer needs more info | Upload docs / respond |
-| Review received / Document replaced | Document activity | Check party documents |
-| Review overdue | Onboarding SLA pressure | Respond immediately |
+| Commercial Agreement created | Agreement created from your collaboration | Review terms → move to the next status |
+| Contract created | Contract drafted from the agreement | Review → **Sign contract** |
+| Invitation received | Invited to a company workspace | Open the invitation and accept |
+| Invitation accepted | Invitee accepted | Activate membership if you are owner or admin |
+| Membership activated | Company membership is active | Switch to the company workspace |
+| Workspace activated | Full collaboration unlocked | Create and publish opportunities |
+| Opportunity creation enabled | Posting unlocked after account review | Create opportunity |
+| Registration submitted / Resubmission | Onboarding package sent | Wait for the reviewer |
+| Account approved | Review complete | Complete profile; start collaborating |
+| Account rejected / suspended | Onboarding failed or suspended | Read the reason; contact support or clarify |
+| Clarification requested | Reviewer needs more information | Upload documents or respond |
+| Review received / Document replaced | Document activity | Check Party documents |
+| Review overdue | Account review is overdue | Respond immediately |
 
-Dashboard card **My notifications** shows the latest items with **View all**.
+The dashboard card **My notifications** shows the latest items with **View all**.
 
 ---
 
 ## 13. Dashboard guide
 
-> Screenshot: Workspace dashboard KPI strip and tasks
+> Screenshot: Workspace dashboard summary strip and tasks
 
 ### Header
 
 - Greeting (“Good morning, …”)  
 - **Profile readiness** or **Active matches** highlight  
-- Primary CTA: **Create Opportunity**  
-- Secondary: **My pipeline**
+- Primary action: **Create Opportunity**  
+- Secondary action: **My pipeline**
 
-### KPI strip
+### Summary strip
 
-| KPI | Meaning |
-|-----|---------|
+| Item | Meaning |
+|------|---------|
 | My opportunities | Your posts in this workspace |
-| My matches | Match records involving you |
+| My matches | Matches involving you |
 | My negotiations | Active term discussions |
-| My commercial agreements | Agreement records |
-| My contracts | Contract records |
+| My commercial agreements | Your agreements |
+| My contracts | Your contracts |
 
 ### My tasks
 
@@ -990,24 +988,24 @@ Actionable items such as:
 
 - Review new match → **Open match**  
 - Respond to negotiation → **Open negotiation**  
-- Agreement in review/signing → **Open commercial agreement**  
+- Agreement in review or signing → **Open commercial agreement**  
 - Draft ready to publish → **Open opportunity** / **Edit**
 
-### Next best actions & explainability
+### Next best actions and workspace health
 
-Prioritized recommendations and (when available) **Dashboard explainability** with a workspace health score.
+Prioritized recommendations and, when available, a workspace health view that explains what needs attention.
 
 ### My workflow
 
-Active negotiations and agreements; link to **Open pipeline**. Empty: “No active workflow items”.
+Active negotiations and agreements; link to **Open pipeline**. Empty state: “No active workflow items”.
 
 ### Blocked — needs decision
 
-Items that need a human decision (for example match needs replacement). Address blockers before the pipeline stalls.
+Items that need a decision from you (for example a match that needs replacement). Resolve these so work can continue.
 
 ### My matching summary
 
-Counts by topology: One Way, Two-Way, Group Formation, Circular Exchange.
+Counts by type: One Way, Two-Way, Group Formation, Circular Exchange.
 
 ### Recommended from marketplace
 
@@ -1015,7 +1013,7 @@ Suggested match cards; browse further matches from here.
 
 ### Executive intelligence snapshot
 
-Links/summary for Portfolio readiness, Funnel conversion, Risk blockers, Execution health (intelligence module).
+Summary views for Portfolio readiness, Funnel conversion, Risk blockers, and Execution health.
 
 ### Pending vetting dashboard
 
@@ -1025,7 +1023,7 @@ Shown instead of the full dashboard until registration is approved. Follow uploa
 
 ## 14. Admin portal (overview)
 
-For platform administrators only (`/admin/*`). Functional overview — not a developer manual.
+For platform administrators only. This section describes what administrators can do in the application.
 
 > Screenshot: Admin Command Center home
 
@@ -1033,13 +1031,13 @@ For platform administrators only (`/admin/*`). Functional overview — not a dev
 
 | Page | Purpose |
 |------|---------|
-| Executive | Ops command home |
-| Operations | Operational queues |
+| Executive | Overall operations home |
+| Operations | Day-to-day operational queues |
 | Risk & Compliance | Risk-oriented views |
 | My Queue | Work assigned to you |
-| Admin Inbox | Admin messages / items |
+| Admin Inbox | Admin messages and items |
 
-### Identity & access / onboarding
+### Identity and onboarding
 
 - **Users, Parties, Memberships, Roles** — manage who can act  
 - **Onboarding Center / Vetting** — New Registrations, Pending Review, Clarifications, Approved, Rejected, Suspended  
@@ -1047,7 +1045,7 @@ For platform administrators only (`/admin/*`). Functional overview — not a dev
 
 ### Marketplace management
 
-- Opportunities, Matching, PostMatches, Matching Quality, Taxonomy, Moderation  
+- Opportunities, Matching, Matches, Matching Quality, Taxonomy, Moderation  
 
 ### Commercial operations
 
@@ -1055,32 +1053,85 @@ For platform administrators only (`/admin/*`). Functional overview — not a dev
 
 ### Reports
 
-Analytics and reporting views for platform performance.
+Reporting views for platform performance.
 
-### Audit, environment, settings
+### Audit, environments, and settings
 
 | Area | Purpose |
 |------|---------|
-| Audit | Trace sensitive actions |
-| Environments | **Demo/UAT:** scenario restore, export/import |
-| Health / Feature Flags / Data Quality / Failed Commands | Platform operability |
-| Settings | Includes commercial defaults such as currencies and **VAT rate % (default 15)** |
+| Audit | Review important activity |
+| Environments | Training tools to restore or exchange practice scenarios; includes the **Demo Walkthrough** panel (cast-coverage badges and login-as steps for all four matching topologies) |
+| Health and data quality | Platform status checks (including cast coverage and topology chain checks in Demo/UAT) |
+| Settings | Commercial defaults such as currencies and **VAT rate % (default 15)** |
 
-Some configuration shells (Skills, Site content, Subscriptions, Disputes, Vetting Config) may appear as **planned** or limited in the current build.
+Some configuration areas (for example Skills, Site content, Subscriptions, Disputes, Vetting Config) may appear as coming soon or limited.
+
+### Demo Walkthrough verification (Demo/UAT)
+
+Use this checklist after seeding or before a customer training session. It confirms matching demos, demo-account casting, ownership rules, and environment reset.
+
+#### Procedure
+
+1. **Sign in as admin**  
+   Email: `admin@pmtwin.com` · Password: `admin123`.
+
+2. **Open Environments**  
+   Go to `/admin/environments`.
+
+3. **Confirm cast coverage**  
+   On the **Demo Walkthrough** panel, confirm the Cast Coverage badge is complete (for example `Cast 63/63`) and that there are **no missing account IDs**.  
+   Optionally open Admin **Health** and confirm `cast_coverage` and each `topology_chain_*` check are healthy.
+
+4. **Walk each matching topology**  
+   In **Demo Walkthrough**, open each scenario that covers the four topologies (`one_way`, `two_way`, `consortium`, `circular`) — for example Cash Subcontracting, Two-Way Barter, Joint Venture (Consortium), Circular Resource Sharing, and/or Marketplace. For every narrative step:
+   - Use **Copy credentials** for the listed account.
+   - Sign out, then sign in again with the correct account type (**Individual** or **Company**).
+   - Open the step deep link.
+   - Confirm the correct entity loads (opportunity, match, commercial agreement, or contract) and is visible to that role.
+
+5. **Employee ownership check**  
+   Sign in as one employee, for example `fahad.alotaibi@alriyadh-construction.test` / `Pmtwin@2026` (Individual login).  
+   Open their cast match or employer-hosted opportunity.  
+   Confirm ownership is the **employer company** workspace/party (company-owned opportunity under the company workspace), not a personally owned company opportunity.
+
+6. **Pending account check**  
+   Sign in as a Pending tab account, for example `noura.pending@pmtwin.test` / `Pmtwin@2026`.  
+   Confirm their opportunity remains a **draft** and that **publishing is blocked** until onboarding is approved.
+
+7. **Admin is not a marketplace participant**  
+   Confirm `admin@pmtwin.com` is the walkthrough host only. The admin account must **not** appear as a need/offer counterparty on commercial marketplace post-matches. Admin presence is through Environments, notifications, and vetting — not marketplace participation.
+
+8. **Reset and re-check**  
+   Return to `/admin/environments` as admin. Run **Reset Entire Environment** and confirm the dialog.  
+   Re-open **Demo Walkthrough** and confirm Cast Coverage is complete again and showcase deep links restore correctly.
+
+#### Pass criteria
+
+| Check | Expected result |
+|-------|-----------------|
+| Topology chains | All four (`one_way`, `two_way`, `consortium`, `circular`) show complete |
+| Cast coverage | All demo accounts cast (no missing account IDs) |
+| Deep links | Each walkthrough step opens the correct entity for that role |
+| Employee | Opportunity ownership is company-scoped under the employer |
+| Pending | Draft visible; publish blocked until approval |
+| Admin | Not listed among marketplace match counterparties |
+| Reset | Seed and walkthrough state restore after environment reset |
+
+Demo account passwords and suggested logins are listed in `POC/docs/DEMO_CREDENTIALS.md` and on the login **Demo accounts** dialog.
 
 ---
 
 ## 15. Complete business journey
 
-End-to-end walkthrough of the happy path.
+End-to-end walkthrough of a typical successful path.
 
 ```mermaid
 flowchart TD
   R[Company Registration] --> V[Email verification]
-  V --> P[Pending vetting]
+  V --> P[Pending review]
   P --> A[Account approved]
   A --> PR[Profile completion]
-  PR --> CS[Company setup & documents]
+  PR --> CS[Company setup and documents]
   CS --> OC[Opportunity creation]
   OC --> PB[Publish]
   PB --> MP[Marketplace visibility]
@@ -1088,43 +1139,43 @@ flowchart TD
   MT --> NG[Negotiation]
   NG --> CA[Commercial Agreement]
   CA --> CT[Contract]
-  CT --> Done[Active → Completion]
+  CT --> Done[Active to Completion]
 ```
 
 ### Step-by-step screens and actions
 
-1. **Company Registration** (`/register`)  
-   - Choose **Company Workspace** → role (Contractor, Consultant Company, Owner/Client, Supplier) → profile info → documents & terms → review → verify email.  
+1. **Company Registration**  
+   - Choose **Company Workspace** → role (Contractor, Consultant Company, Owner/Client, Supplier) → profile information → documents and terms → review → verify email.  
 
-2. **Profile Completion** (`/profile`)  
-   - Fill required company fields until readiness ≥ 80%.  
+2. **Profile Completion**  
+   - Fill required company fields until readiness reaches at least 80%.  
 
-3. **Company Setup** (`/party-documents`)  
-   - Upload CR, VAT Certificate, insurance/licenses as required; respond to clarifications.  
+3. **Company Setup**  
+   - Upload Commercial Registration, VAT Certificate, insurance or licenses as required; respond to clarifications.  
 
-4. **Opportunity Creation** (`/opportunities/create`)  
+4. **Opportunity Creation**  
    - Complete all five wizard steps; **Save Draft** as needed.  
 
 5. **Publish** (Review step)  
    - Clear readiness blockers → **Publish Opportunity**.  
 
 6. **Marketplace**  
-   - Partners discover your Need under Browse Opportunities / Discover.  
+   - Partners discover your Need under Browse Opportunities or Discover.  
 
 7. **Matching**  
-   - System creates matches; you receive **New match found**.  
+   - Compatible partners appear; you receive **New match found**.  
 
 8. **Negotiation**  
-   - Accept match → Start negotiation → discuss → submit/accept offer → Agree terms.  
+   - Accept match → Start negotiation → discuss → submit or accept offer → Agree terms.  
 
 9. **Commercial Agreement**  
-   - Create agreement → Submit for review → Move to signing → (optional) Award if competing.  
+   - Create agreement → Submit for review → Move to signing → (optional) Award if there are competing agreements.  
 
 10. **Contract**  
     - Create contract → parties Sign → contract Active.  
 
 11. **Completion**  
-    - Start execution on agreement as applicable → Complete contract / Mark agreement completed → Close related opportunity when appropriate.  
+    - Start execution on the agreement as applicable → Complete contract / Mark agreement completed → Close the related opportunity when appropriate.  
 
 > Screenshot: Pipeline view showing Match → Negotiation → Agreement → Contract  
 
@@ -1136,31 +1187,31 @@ flowchart TD
 
 - Write specific titles and honest short descriptions.  
 - Always set Need vs Offer correctly.  
-- Choose the collaboration model that matches the real engagement (do not force JV language onto a simple subcontract).  
-- Add structured skills with levels; list services clearly.  
+- Choose the collaboration model that matches the real engagement (do not use joint-venture language for a simple subcontract).  
+- Add skills with levels; list services clearly.  
 - Use work packages and milestones for anything non-trivial.  
 - Make VAT handling and SAR amounts explicit.  
-- Reach readiness ≥ 80% before publish — do not “publish empty and fix later.”
+- Reach readiness of at least 80% before publish — do not publish empty and fix later.
 
 ### Negotiations
 
 - Keep commercial numbers in Offers (SAR), not only in chat.  
 - Accept only when scope, dates, and VAT treatment are clear.  
 - Use Cancel rather than abandoning silent threads.  
-- After agree, create the commercial agreement promptly.
+- After terms are agreed, create the commercial agreement promptly.
 
 ### Profiles and trust
 
 - Keep availability and location current.  
-- Upload CR and VAT Certificate early for company accounts.  
+- Upload Commercial Registration and VAT Certificate early for company accounts.  
 - Add portfolio and certifications to improve readiness and partner confidence.
 
 ### Collaboration success
 
-- Respond to matches quickly while they are still **discovered**.  
-- Prefer one clear commercial structure over many empty hybrid toggles.  
-- Use Pipeline weekly as your operating cadence.  
-- For multi-party models (consortium/circular), align roles before publishing.
+- Respond to matches quickly while they are still **Discovered**.  
+- Prefer one clear commercial structure over many empty options.  
+- Use Pipeline weekly as your operating rhythm.  
+- For multi-party models (consortium or circular), align roles before publishing.
 
 ---
 
@@ -1170,59 +1221,59 @@ flowchart TD
 
 | Possible cause | What to do |
 |----------------|------------|
-| Profile readiness below threshold or missing required fields | Complete Profile until ready (≥ 80% + required) |
-| Opportunity required items incomplete | Open Readiness drawer; fix title, skills, services, commercial, etc. |
-| Account pending vetting | Wait for approval or submit clarifications |
-| Missing capability `opportunity.publish` | Ask company owner/admin for a role with publish rights |
+| Profile readiness below threshold or missing required fields | Complete Profile until ready (at least 80% and required fields) |
+| Opportunity required items incomplete | Open Readiness; fix title, skills, services, commercial terms, and similar |
+| Account pending review | Wait for approval or submit clarifications |
+| Your role cannot publish | Ask your company owner or admin for the right role |
 | Not signed in | Sign in again |
 
 ### Why can't I edit?
 
 - You are not the owner.  
-- Opportunity is **archived** or **closed**.  
-- Your workspace role is **viewer** or lacks edit capability.
+- The opportunity is **archived** or **closed**.  
+- Your workspace role is **Viewer** or does not allow editing.
 
 ### Why can't I see opportunities?
 
 - You are on **My Opportunities** looking for others’ posts — switch to **All Marketplace**.  
-- Posts are still **draft** (not published).  
+- Posts are still **Draft** (not published).  
 - Posts were **archived**.  
-- Filters (status/model) hide results — reset filters.  
-- Preview teaser may limit detail until verification is complete.
+- Filters hide results — reset filters.  
+- A limited preview may hide full detail until verification is complete.
 
 ### Why is my opportunity still a draft?
 
 - You clicked **Save Draft** but not **Publish Opportunity**.  
 - Publish was blocked by readiness.  
-- Autosave recovered a local draft that was never published.
+- You recovered an unsaved draft that was never published.
 
 ### Why didn't matching happen?
 
-- Opportunity was never successfully published.  
-- No compatible Need/Offer exists in the marketplace yet.  
-- Collaboration/commercial configuration yields a topology with no partners.  
-- Check notifications and Matching Quality (admin) in Demo/UAT seed scenarios.
+- The opportunity was never successfully published.  
+- No compatible Need or Offer exists in the marketplace yet.  
+- Your collaboration and commercial choices may not have compatible partners yet.  
+- Check notifications; administrators can also review matching quality.
 
 ### Why can't I access a negotiation?
 
-- Match was not accepted / negotiation not started.  
-- Negotiation was **cancelled** or **expired**.  
+- The match was not accepted, or negotiation was not started.  
+- The negotiation was **Cancelled** or **Expired**.  
 - You are not a participant.  
-- Wrong workspace selected.
+- You are in the wrong workspace.
 
 ### Why can't I create a contract?
 
-- No commercial agreement exists yet (agree negotiation first).  
-- Agreement not advanced far enough / missing capability.  
-- Award selected a different agreement as winner.  
-- You lack `contract.sign` / create rights in this workspace.
+- No commercial agreement exists yet (agree the negotiation first).  
+- The agreement is not far enough along, or your role cannot create contracts.  
+- Another agreement was awarded as the winner.  
+- You do not have signing or create rights in this workspace.
 
 ---
 
 ## 18. Frequently asked questions
 
 1. **What is PM-Twin?**  
-   A construction collaboration marketplace for KSA/GCC that takes you from opportunity to match, negotiation, commercial agreement, and contract.
+   A construction collaboration marketplace for Saudi Arabia and the GCC that takes you from opportunity to match, negotiation, commercial agreement, and contract.
 
 2. **Is PM-Twin only for companies?**  
    No. Individuals (professionals and consultants) use Personal Workspaces; companies use Company Workspaces.
@@ -1231,175 +1282,178 @@ flowchart TD
    Need requests capacity; Offer provides capacity.
 
 4. **Do I need to publish to get matches?**  
-   Yes. Matching runs after publish.
+   Yes. Partner suggestions appear after you publish.
 
 5. **Can I edit after publishing?**  
    Owners can edit if the opportunity is not archived or closed. Major changes may affect partner fit; review matches afterward.
 
 6. **What readiness score do I need?**  
-   Publish expects profile and opportunity readiness with required fields complete and scores at or above **80%**.
+   Publishing expects profile and opportunity readiness with required fields complete and scores at or above **80%**.
 
 7. **What currency should I use?**  
-   **SAR** is the default commercial currency in the product.
+   **SAR** (Saudi Riyal) is the usual commercial currency.
 
 8. **How is VAT handled?**  
-   Cash commercial fields include VAT handling. Platform commercial settings default VAT rate to **15%**. Be explicit in your terms.
+   Cash commercial fields include VAT handling. Platform commercial settings commonly use **15%**. Be explicit in your terms.
 
 9. **Can I use Arabic?**  
-   Settings support **العربية (RTL)** layout direction. Use Arabic content in titles/descriptions as needed for your audience.
+   Settings support **العربية** (right-to-left layout). You can also write Arabic content in titles and descriptions.
 
 10. **What is a workspace?**  
     The Personal or Company context you act in; switch it from the header.
 
 11. **How do employees join?**  
-    Owners send invitations; employees open `/invite/:token` and accept.
+    Owners send invitations; employees open the invitation link and accept.
 
-12. **Why am I pending vetting?**  
-    New registrations may require admin review before full collaboration rights.
+12. **Why am I pending review?**  
+    New registrations may require administrator review before full collaboration rights.
 
 13. **What documents do companies need?**  
     Typically Commercial Registration, VAT Certificate, insurance, licenses, and related identity documents.
 
-14. **Are registration document uploads always stored?**  
-    In some Demo/UAT registration steps, documents may be UI-only until production upload is active. Use Party documents / vetting flows for operational uploads.
+14. **Where should I upload company documents?**  
+    Use **Party documents**, and follow any pending-review shortcuts such as Upload VAT or Upload CR.
 
 15. **What collaboration model should I pick for a simple subcontract?**  
     Cash Subcontracting → Task-Based Engagement.
 
 16. **When do I use Service Exchange?**  
-    When value is primarily traded services/resources rather than pure cash.
+    When value is primarily traded services or resources rather than pure cash.
 
-17. **Who can create an SPV opportunity?**  
-    Company entities only (not personal workspaces).
+17. **Who can create a Special Purpose Vehicle opportunity?**  
+    Company accounts only (not personal workspaces).
 
 18. **What is hybrid commercial structure?**  
-    More than one value component enabled (for example Cash + Barter); mode is derived automatically.
+    More than one value component enabled (for example Cash + Barter); Hybrid is shown automatically.
 
 19. **Can I bookmark marketplace items?**  
-    No. Bookmarks/saves are not supported currently.
+    No. Bookmarks are not available currently.
 
 20. **What does Archive do?**  
-    Withdraws the opportunity from active marketplace visibility.
+    Removes the opportunity from active marketplace discovery.
 
 21. **What does Close Opportunity do?**  
-    Ends the opportunity lifecycle for new matching.
+    Ends the opportunity for new matching.
 
 22. **Can I duplicate an opportunity?**  
     Yes — Duplicate as Draft or as Template.
 
 23. **Where do I award a winner?**  
-    On commercial agreement award actions / Admin Award Management — not on the opportunity action menu.
+    On commercial agreement award actions or Admin Award Management — not on the opportunity action menu.
 
-24. **What is a PostMatch?**  
-    The system record for a match between posts (shown to users as a Match).
+24. **What is a Match?**  
+    A suggested pairing between compatible Needs and Offers (or multi-party collaborations).
 
 25. **What do match confidence labels mean?**  
-    High / Medium / Low based on score thresholds (for example ≥0.9 / ≥0.75).
+    High, Medium, or Low — a simple guide to how strong the fit appears.
 
 26. **Must both sides accept a match?**  
-    Flows move through accepted toward confirmed when all required participants accept; declining ends that match path.
+    Required participants must accept before the match is confirmed; declining ends that match path.
 
 27. **How do I start talking about price?**  
-    Start negotiation → Offers & Counter Offers → submit SAR amounts.
+    Start negotiation → Offers & Counter Offers → submit amounts in SAR.
 
 28. **What happens when I accept an offer?**  
-    That offer is accepted, negotiation becomes agreed, and you can create a commercial agreement.
+    That offer is accepted, the negotiation becomes Agreed, and you can create a commercial agreement.
 
 29. **Can I reject an offer without cancelling the negotiation?**  
     Yes. Reject keeps the negotiation open for further offers.
 
 30. **How do I cancel a negotiation?**  
-    Use **Cancel negotiation** on the detail/more menu.
+    Use **Cancel negotiation** on the detail or more menu.
 
-31. **Is Messages fully live?**  
-    In Demo/UAT, Messages may show mock threads. Prefer Negotiation Discussion for deal conversations.
+31. **Should I use Messages or Negotiation Discussion for deal talks?**  
+    Prefer **Negotiation → Discussion** for conversations tied to a deal. Messages is a separate messaging area.
 
 32. **What is the Pipeline?**  
-    A workflow board across workspace items, matches, and (optionally legacy) applications.
+    A board view across your workspace items, matches, negotiations, agreements, and contracts.
 
-33. **What are legacy applications?**  
-    An older apply path. Primary collaboration runs through matches; legacy may appear only when enabled.
+33. **What are Applications?**  
+    An older apply path you may still see in some views. Primary collaboration runs through Matches.
 
-34. **Can viewers publish opportunities?**  
-    No. Viewer workspace role has no write capabilities.
+34. **Can Viewers publish opportunities?**  
+    No. The Viewer role is view-only.
 
 35. **What is the difference between commercial agreement and contract?**  
-    The agreement is the business record; the contract is the legal signing record created from it.
+    The agreement is the business record; the contract is the formal signing record created from it.
 
 36. **Who must sign a contract?**  
-    The signing parties listed on the contract; status becomes active when all required signatures are recorded.
+    The signing parties listed on the contract; status becomes Active when all required signatures are recorded.
 
 37. **Can I terminate a contract?**  
-    Yes — **Terminate contract** sets status to terminated.
+    Yes — **Terminate contract** sets status to Terminated.
 
 38. **Where do notifications appear?**  
-    `/notifications` and the dashboard **My notifications** card.
+    Under **Notifications** and on the dashboard **My notifications** card.
 
 39. **I got “Clarification requested.” What now?**  
     Read the reason, upload or update documents, and resubmit for review.
 
 40. **Why is Browse Matches marked Preview?**  
-    Marketplace match browsing is preview-scoped in the current product.
+    That marketplace view is available in a limited form.
 
 41. **Why is Map marked Preview?**  
-    Geospatial map browsing is preview / not fully configured for production coordinates.
+    Map browsing is available in a limited form.
 
-42. **Does editing always re-run matching?**  
-    Publishing triggers matching. Do not assume every edit re-runs matching unless you publish again or your trainer confirms environment behavior.
+42. **If I edit a published opportunity, will new matches appear?**  
+    Publishing is when partner suggestions are created. After major edits, review your matches; publish again if your process requires it.
 
-43. **What is Ownership “Marketplace” on a card?**  
+43. **What does Ownership “Marketplace” mean on a card?**  
     The post was published by someone outside your organization.
 
 44. **How do intelligence pages help?**  
-    Portfolio, Funnel, Risk, and Execution intelligence summarize readiness and workflow health for operators.
+    Portfolio, Funnel, Risk, and Execution views summarize readiness and workflow health.
 
 45. **Can auditors edit negotiations?**  
-    Auditor views may be read-only: transcript visible, write actions disabled.
+    Auditor views may be read-only: you can see the transcript and offers, but cannot change them.
 
 46. **What is Award Management?**  
-    Admin tool to award one commercial agreement among several on the same opportunity.
+    An admin tool to award one commercial agreement among several on the same opportunity.
 
-47. **What VAT rate does Admin Settings default to?**  
+47. **What VAT rate do commercial settings commonly use?**  
     **15%**.
 
 48. **Can I export an opportunity?**  
-    Yes — Export JSON / Export PDF (PDF via print dialog tip).
+    Yes — Export JSON or Export PDF (for PDF, use Print and choose Save as PDF).
 
-49. **What if local autosave differs from saved draft?**  
-    Use **Continue draft** or **Discard** on the recovery banner; final persistence still uses Save Draft / publish.
+49. **What if I see “Recover unsaved local draft?”**  
+    Choose **Continue draft** or **Discard**. Use **Save Draft** or **Publish Opportunity** to keep your work.
 
-50. **Is Demo data permanent?**  
-    In Demo/UAT, admins may restore environments/scenarios; treat data as training data unless told otherwise.
+50. **Is practice data permanent?**  
+    In training environments, administrators may restore practice scenarios. Treat practice data as temporary unless told otherwise.
 
-51. **How do I switch language direction?**  
-    Settings → English (LTR) or العربية (RTL).
+51. **How do trainers verify matching demos?**  
+    Follow [Demo Walkthrough verification (Demo/UAT)](#demo-walkthrough-verification-demouat): admin → `/admin/environments` → confirm cast coverage, walk all four topologies with copied credentials, check employee/pending/admin rules, then reset and re-check.
 
-52. **What is product language customization?**  
-    Staff/owner settings can rename entity labels (Opportunity, Negotiation, etc.) for presentation.
+52. **How do I switch language direction?**  
+    Settings → English (left to right) or العربية (right to left).
 
-53. **Can I create a contract without a commercial agreement?**  
+53. **What is product language customization?**  
+    Staff or owner settings can rename labels such as Opportunity, Negotiation, Commercial Agreement, and Contract for presentation.
+
+54. **Can I create a contract without a commercial agreement?**  
     The supported path is from a commercial agreement.
 
-54. **Why do JV sub-models ask for equity split?**  
-    Those engagements share capital/governance; equity fields capture the commercial reality.
+55. **Why do joint venture options ask for equity split?**  
+    Those engagements share capital and governance; equity fields capture the commercial terms.
 
-55. **What payment schedule mistake blocks quality?**  
+56. **What payment schedule mistake should I avoid?**  
     Milestone percentages that do not total 100%.
 
-56. **Do Offer capacity fields drive matching alone?**  
-    Offer capacity is metadata for partners; matching uses broader opportunity configuration.
+57. **What are Offer capacity fields for?**  
+    They help partners understand how much capacity you can provide.
 
-57. **Where do I rate partners?**  
+58. **Where do I rate partners?**  
     Commercial agreement → Rate participants.
 
-58. **What should sales teams demo first?**  
+59. **What should sales teams demonstrate first?**  
     Create Need → Publish → Show match → Negotiation offer → Agreement → Contract sign.
 
-59. **What should trainers emphasize?**  
-    Workspace switch, readiness ≥ 80%, correct collaboration model, and the Match → Contract chain.
+60. **What should trainers emphasize?**  
+    Workspace switch, readiness of at least 80%, correct collaboration model, and the Match → Contract journey.
 
-60. **Who do I contact if vetting is stuck?**  
-    Platform administrators / Onboarding Center reviewers via your customer success contact.
+61. **Who do I contact if account review is stuck?**  
+    Platform administrators or Onboarding Center reviewers through your customer success contact.
 
 ---
 
@@ -1407,83 +1461,68 @@ flowchart TD
 
 | Term | Definition |
 |------|------------|
-| **Accept (match)** | Participant agrees to proceed with a discovered match |
-| **Accept (offer)** | Accepts a negotiation offer and typically agrees the negotiation |
-| **Admin Portal** | Platform operations area for administrators |
-| **Archive** | Withdraw an opportunity from active marketplace visibility |
-| **Audit Trail** | Chronological record of negotiation (or admin) actions |
+| **Accept (match)** | Agree to proceed with a suggested match |
+| **Accept (offer)** | Accept a negotiation offer and typically agree the negotiation |
+| **Admin Portal** | Operations area for platform administrators |
+| **Archive** | Remove an opportunity from active marketplace discovery |
+| **Audit Trail** | Chronological history of negotiation (or admin) actions |
 | **Award** | Select a winning commercial agreement among competitors |
 | **Barter** | Non-cash exchange of services, capacity, or resources |
-| **BIM** | Building Information Modeling — a common collaboration domain on PM-Twin |
+| **BIM** | Building Information Modeling — a common collaboration area on PM-Twin |
 | **Cash Subcontracting** | Paid delivery for a defined scope |
-| **Circular Exchange** | Multi-party ring matching (A→B→C→A) |
-| **Close Opportunity** | End the opportunity lifecycle for new matching |
-| **Commercial Agreement** | Business agreement record after negotiation (formerly often called “deal”) |
-| **Commercial Structure** | Value exchange configuration (cash, barter, equity, etc.) |
-| **Company Workspace** | Workspace for an organization party |
+| **Circular Exchange** | Multi-party ring matching (A → B → C → A) |
+| **Close Opportunity** | End the opportunity for new matching |
+| **Commercial Agreement** | Business agreement after negotiation (sometimes called a “deal” in older materials) |
+| **Commercial Structure** | How value is exchanged (cash, barter, equity, and similar) |
+| **Company Workspace** | Workspace for an organization |
 | **Consortium** | Multi-party group formation around a lead need |
-| **Contract** | Legal record created from a commercial agreement for signing |
+| **Contract** | Formal signing record created from a commercial agreement |
 | **Counter-offer** | Revised offer submitted during negotiation |
-| **CR (Commercial Registration)** | Company registration document used in KSA vetting |
-| **Dashboard** | Workspace home with KPIs, tasks, and recommendations |
+| **CR (Commercial Registration)** | Company registration document used in KSA account review |
+| **Dashboard** | Workspace home with summaries, tasks, and recommendations |
 | **Deliverable** | Agreed output with acceptance criteria |
-| **Demo / UAT** | Training or acceptance environments; may use browser persistence and demo tools |
-| **Draft** | Unpublished opportunity (or contract/agreement) still being prepared |
+| **Draft** | Unpublished opportunity (or agreement or contract) still being prepared |
 | **Employee** | User invited into a company workspace |
-| **Equity** | Ownership stake as a value exchange component |
-| **Hybrid** | More than one value exchange component enabled |
+| **Equity** | Ownership stake as part of the commercial structure |
+| **Hybrid** | More than one value exchange option enabled |
 | **Individual Professional** | Personal-workspace user offering or seeking work |
-| **Joint Venture** | Shared delivery/governance collaboration model |
-| **Marketplace** | Discovery domain for published opportunities and people |
-| **Match / PostMatch** | Pairing of compatible opportunities |
-| **Match score** | Numeric fit indicator for a match |
-| **Matching** | Automatic process that creates matches after publish |
+| **Joint Venture** | Shared delivery and governance collaboration model |
+| **Marketplace** | Discovery area for published opportunities and people |
+| **Match** | Suggested pairing of compatible opportunities |
+| **Match score** | Fit indicator shown on a match |
+| **Matching** | Automatic partner suggestions after publish |
 | **Milestone** | Delivery checkpoint; may trigger payment |
 | **Need** | Opportunity post requesting capacity |
 | **Negotiation** | Structured term discussion after match acceptance |
 | **Offer (post type)** | Opportunity post providing capacity |
 | **Offer (negotiation)** | Priced proposal inside a negotiation |
-| **One Way Matching** | Simple Need↔Offer matching |
+| **One Way Matching** | Simple Need ↔ Offer pairing |
 | **Opportunity** | Structured Need or Offer post |
-| **Ownership** | Whether a record is mine, company, or marketplace |
-| **Party** | Individual or company marketplace actor |
+| **Ownership** | Whether a record is Mine, Company, or Marketplace |
+| **Party** | Individual or company participating in the marketplace |
 | **Party documents** | Uploaded compliance and profile documents |
-| **PDPL** | Personal Data Protection Law (KSA) — data handling expectation |
-| **Personal Workspace** | Workspace for an independent professional/consultant |
-| **Pipeline** | Cross-entity workflow board |
-| **Preview** | Feature available in limited/preview form |
-| **Profit sharing** | Split of profit as commercial component |
-| **Publish** | Make a draft opportunity live and trigger matching |
+| **PDPL** | Personal Data Protection Law (KSA) |
+| **Personal Workspace** | Workspace for an independent professional or consultant |
+| **Pipeline** | Board view across your collaboration journey |
+| **Preview** | Feature available in a limited form |
+| **Profit sharing** | Split of profit as part of the commercial structure |
+| **Publish** | Make a draft opportunity live so partners can find it |
 | **Readiness** | Completeness score for profile and/or opportunity |
-| **Resource Sharing** | Collaboration model for pooling equipment/people/materials |
-| **Revenue sharing** | Split of revenue as commercial component |
-| **Reviewer** | Role that vets onboarding packages |
-| **RTL** | Right-to-left layout (Arabic) |
-| **SAR** | Saudi Riyal — default commercial currency |
+| **Resource Sharing** | Collaboration model for pooling equipment, people, or materials |
+| **Revenue sharing** | Split of revenue as part of the commercial structure |
+| **Reviewer** | Role that reviews onboarding packages |
+| **SAR** | Saudi Riyal — usual commercial currency |
 | **Service Exchange** | Barter-oriented collaboration model |
-| **SPV** | Special Purpose Vehicle — company-only JV sub-model |
+| **SPV** | Special Purpose Vehicle — company-only joint venture option |
 | **Sub-model** | Specific engagement pattern under a main collaboration model |
-| **Two-Way Dependency** | Reciprocal need+offer (barter) matching topology |
-| **Validation** | Checks that fields and commercial structures are consistent |
-| **VAT** | Value Added Tax; KSA standard rate reflected as 15% in settings |
-| **Vetting** | Onboarding review before full platform activation |
+| **Two-Way Dependency** | Reciprocal need and offer (barter) pairing |
+| **Validation** | On-screen checks that required information is complete and consistent |
+| **VAT** | Value Added Tax; commonly **15%** in KSA |
+| **Vetting** | Account review before full platform access |
 | **Visibility** | Whether a post is discoverable in the marketplace |
 | **Work package** | Unit of scope containing tasks and deliverables |
-| **Workspace** | Personal or company business context for actions |
-| **Workspace role** | Permission set inside a company workspace (owner, admin, member, viewer, etc.) |
-
----
-
-## Document control
-
-| | |
-|---|---|
-| **Document** | PM-Twin Complete User Guide |
-| **Location** | `docs/PM-Twin-Complete-User-Guide.md` |
-| **Based on** | Current `web/` product implementation and lifecycle vocabulary |
-| **Not included** | Developer APIs, repository internals, or invented features |
-
-For admin deep-dives, also see training materials under `docs/manuals/` when provided by your delivery team.
+| **Workspace** | Personal or company business context for your actions |
+| **Workspace role** | Permission set inside a company workspace (owner, admin, member, viewer, and similar) |
 
 ---
 
