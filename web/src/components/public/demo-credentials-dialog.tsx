@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { buildDemoAccountScenarioTags } from '@/domain/admin/diagnostics/demo-account-scenario-tags.ts'
 
 const DEMO_WORKFLOW_PASSWORD = 'Pmtwin@2026'
 
@@ -24,6 +25,7 @@ export type DemoCredentialRow = {
   status: string
   caseStatus: string
   isPending: boolean
+  scenarioTags: readonly string[]
 }
 
 const TABS = [
@@ -83,6 +85,7 @@ function isEmployeeUser(user: {
 
 function buildDemoCredentials(): DemoCredentialRow[] {
   const rows = new Map<string, DemoCredentialRow>()
+  const tagsByEmail = buildDemoAccountScenarioTags()
 
   const add = (row: DemoCredentialRow) => {
     if (row.email) rows.set(row.email.toLowerCase(), row)
@@ -116,6 +119,7 @@ function buildDemoCredentials(): DemoCredentialRow[] {
       status: user.status,
       caseStatus,
       isPending: pending,
+      scenarioTags: tagsByEmail.get(email.toLowerCase()) ?? [],
     })
   }
 
@@ -140,6 +144,7 @@ function buildDemoCredentials(): DemoCredentialRow[] {
       status: company.status,
       caseStatus,
       isPending: pending,
+      scenarioTags: tagsByEmail.get(email.toLowerCase()) ?? [],
     })
   }
 
@@ -195,7 +200,7 @@ export function DemoCredentialsDialog({ open, onOpenChange, onSelect }: DemoCred
   const visible = buckets[activeTab].filter((row) => {
     const q = query.trim().toLowerCase()
     if (!q) return true
-    return `${row.name} ${row.role} ${row.email} ${row.status} ${row.caseStatus}`
+    return `${row.name} ${row.role} ${row.email} ${row.status} ${row.caseStatus} ${row.scenarioTags.join(' ')}`
       .toLowerCase()
       .includes(q)
   })
@@ -274,6 +279,12 @@ export function DemoCredentialsDialog({ open, onOpenChange, onSelect }: DemoCred
                     <span className="pm-demo-credentials-name">{row.name}</span>
                     <span className="pm-demo-credentials-role">{row.role}</span>
                     <span className="pm-demo-credentials-email">{row.email}</span>
+                    {row.scenarioTags.length > 0 ? (
+                      <span className="pm-demo-credentials-role">
+                        Cast in: {row.scenarioTags.slice(0, 2).join(' · ')}
+                        {row.scenarioTags.length > 2 ? '…' : ''}
+                      </span>
+                    ) : null}
                     <span
                       className={`pm-demo-credentials-status${row.isPending ? ' is-pending' : ' is-approved'}`}
                     >

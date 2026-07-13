@@ -326,6 +326,18 @@
       "entityType": "contract",
       "entityId": "seed-contract-exchange-01",
       "createdAt": "2026-03-15T09:00:00.000Z"
+    },
+    {
+      "id": "seed-notif-cast-admin-walkthrough",
+      "userId": "user-admin-001",
+      "type": "system",
+      "title": "Demo Walkthrough host",
+      "message": "You are the Demo Walkthrough host. Open Admin → Environments to guide trainers through all four matching topologies.",
+      "read": false,
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "link": "/admin/environments",
+      "entityType": "environment",
+      "entityId": "demo-walkthrough"
     }
   ]
 }

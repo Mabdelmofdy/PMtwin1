@@ -1,0 +1,1454 @@
+{
+  "domain": "post_matches",
+  "version": "1.0",
+  "description": "Cast-coverage post-matches linking unused demo accounts into realistic scenarios",
+  "data": [
+    {
+      "id": "demo-pm-cast-seed-user-003",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-user-003",
+          "opportunityId": "seed-opp-cast-seed-user-003-need",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-016",
+          "opportunityId": "seed-opp-cast-seed-user-016-offer",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-user-003-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-016-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-user-018",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-user-018",
+          "opportunityId": "seed-opp-cast-seed-user-018-need",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-019",
+          "opportunityId": "seed-opp-cast-seed-user-019-offer",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-user-018-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-019-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-user-020",
+      "matchType": "two_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-user-020",
+          "opportunityId": "seed-opp-cast-seed-user-020-need",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-021",
+          "opportunityId": "seed-opp-cast-seed-user-021-offer",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-user-020-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-021-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-user-022",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-user-022",
+          "opportunityId": "seed-opp-cast-seed-user-022-need",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-023",
+          "opportunityId": "seed-opp-cast-seed-user-023-offer",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-user-022-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-023-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-user-024",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-user-024",
+          "opportunityId": "seed-opp-cast-seed-user-024-need",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-025",
+          "opportunityId": "seed-opp-cast-seed-user-025-offer",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-user-024-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-025-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-user-026",
+      "matchType": "two_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-user-026",
+          "opportunityId": "seed-opp-cast-seed-user-026-need",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-027",
+          "opportunityId": "seed-opp-cast-seed-user-027-offer",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-user-026-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-027-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-user-028",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-user-028",
+          "opportunityId": "seed-opp-cast-seed-user-028-need",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-029",
+          "opportunityId": "seed-opp-cast-seed-user-029-offer",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-user-028-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-029-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-user-030",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-user-030",
+          "opportunityId": "seed-opp-cast-seed-user-030-need",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-003",
+          "opportunityId": "seed-opp-cast-seed-user-003-offer",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-user-030-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-003-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-co-corp-007",
+      "matchType": "consortium",
+      "status": "discovered",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-co-corp-007",
+          "opportunityId": "seed-opp-cast-seed-co-corp-007-need",
+          "role": "consortium_lead",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-019",
+          "opportunityId": "seed-opp-cast-seed-user-019-co-offer",
+          "role": "consortium_member",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-co-corp-007-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-019-co-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-co-corp-008",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-co-corp-008",
+          "opportunityId": "seed-opp-cast-seed-co-corp-008-need",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-020",
+          "opportunityId": "seed-opp-cast-seed-user-020-co-offer",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-co-corp-008-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-020-co-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-co-corp-009",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-co-corp-009",
+          "opportunityId": "seed-opp-cast-seed-co-corp-009-need",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-021",
+          "opportunityId": "seed-opp-cast-seed-user-021-co-offer",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-co-corp-009-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-021-co-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-co-corp-010",
+      "matchType": "consortium",
+      "status": "discovered",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-co-corp-010",
+          "opportunityId": "seed-opp-cast-seed-co-corp-010-need",
+          "role": "consortium_lead",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-022",
+          "opportunityId": "seed-opp-cast-seed-user-022-co-offer",
+          "role": "consortium_member",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-co-corp-010-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-022-co-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-co-corp-011",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-co-corp-011",
+          "opportunityId": "seed-opp-cast-seed-co-corp-011-need",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-023",
+          "opportunityId": "seed-opp-cast-seed-user-023-co-offer",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-co-corp-011-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-023-co-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-co-corp-012",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-co-corp-012",
+          "opportunityId": "seed-opp-cast-seed-co-corp-012-need",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-024",
+          "opportunityId": "seed-opp-cast-seed-user-024-co-offer",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-co-corp-012-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-024-co-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-co-corp-013",
+      "matchType": "consortium",
+      "status": "discovered",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-co-corp-013",
+          "opportunityId": "seed-opp-cast-seed-co-corp-013-need",
+          "role": "consortium_lead",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:00:00.000Z"
+        },
+        {
+          "userId": "seed-user-025",
+          "opportunityId": "seed-opp-cast-seed-user-025-co-offer",
+          "role": "consortium_member",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-co-corp-013-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-025-co-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-co-corp-014",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-co-corp-014",
+          "opportunityId": "seed-opp-cast-seed-co-corp-014-need",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-026",
+          "opportunityId": "seed-opp-cast-seed-user-026-co-offer",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-co-corp-014-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-026-co-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-seed-co-corp-015",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-co-corp-015",
+          "opportunityId": "seed-opp-cast-seed-co-corp-015-need",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-027",
+          "opportunityId": "seed-opp-cast-seed-user-027-co-offer",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-seed-co-corp-015-need",
+        "offerOpportunityId": "seed-opp-cast-seed-user-027-co-offer",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-circular-enterprise",
+      "matchType": "circular",
+      "status": "discovered",
+      "matchScore": 0.86,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-co-corp-015",
+          "opportunityId": "seed-opp-cast-circular-015",
+          "role": "need_owner",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-028",
+          "opportunityId": "seed-opp-cast-circular-028",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        },
+        {
+          "userId": "seed-user-029",
+          "opportunityId": "seed-opp-cast-circular-029",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-circular-015",
+        "offerOpportunityId": "seed-opp-cast-circular-028",
+        "ring": [
+          "seed-opp-cast-circular-015",
+          "seed-opp-cast-circular-028",
+          "seed-opp-cast-circular-029"
+        ],
+        "castCoverage": true,
+        "breakdown": {
+          "skillMatch": 0.85,
+          "attributeOverlap": 0.8,
+          "serviceOverlapPct": 0.82,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.85,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        }
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-emp-seed-emp-001",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-emp-001",
+          "opportunityId": "seed-opp-cast-emp-host-seed-co-corp-001",
+          "role": "need_owner",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:30:00.000Z",
+          "actingForPartyId": "party-company-seed-co-corp-001",
+          "actingForWorkspaceId": "ws-company-seed-co-corp-001"
+        },
+        {
+          "userId": "seed-user-003",
+          "opportunityId": "seed-opp-cast-emp-partner-seed-emp-001",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-emp-host-seed-co-corp-001",
+        "offerOpportunityId": "seed-opp-cast-emp-partner-seed-emp-001",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-emp-seed-emp-002",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-emp-002",
+          "opportunityId": "seed-opp-cast-emp-host-seed-co-corp-001",
+          "role": "need_owner",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:30:00.000Z",
+          "actingForPartyId": "party-company-seed-co-corp-001",
+          "actingForWorkspaceId": "ws-company-seed-co-corp-001"
+        },
+        {
+          "userId": "seed-user-016",
+          "opportunityId": "seed-opp-cast-emp-partner-seed-emp-002",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-emp-host-seed-co-corp-001",
+        "offerOpportunityId": "seed-opp-cast-emp-partner-seed-emp-002",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-emp-seed-emp-003",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-emp-003",
+          "opportunityId": "seed-opp-cast-emp-host-seed-co-corp-001",
+          "role": "need_owner",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:30:00.000Z",
+          "actingForPartyId": "party-company-seed-co-corp-001",
+          "actingForWorkspaceId": "ws-company-seed-co-corp-001"
+        },
+        {
+          "userId": "seed-user-018",
+          "opportunityId": "seed-opp-cast-emp-partner-seed-emp-003",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-emp-host-seed-co-corp-001",
+        "offerOpportunityId": "seed-opp-cast-emp-partner-seed-emp-003",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-emp-seed-emp-004",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-emp-004",
+          "opportunityId": "seed-opp-cast-emp-host-seed-co-corp-002",
+          "role": "need_owner",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:30:00.000Z",
+          "actingForPartyId": "party-company-seed-co-corp-002",
+          "actingForWorkspaceId": "ws-company-seed-co-corp-002"
+        },
+        {
+          "userId": "seed-user-019",
+          "opportunityId": "seed-opp-cast-emp-partner-seed-emp-004",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-emp-host-seed-co-corp-002",
+        "offerOpportunityId": "seed-opp-cast-emp-partner-seed-emp-004",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-emp-seed-emp-005",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-emp-005",
+          "opportunityId": "seed-opp-cast-emp-host-seed-co-corp-002",
+          "role": "need_owner",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:30:00.000Z",
+          "actingForPartyId": "party-company-seed-co-corp-002",
+          "actingForWorkspaceId": "ws-company-seed-co-corp-002"
+        },
+        {
+          "userId": "seed-user-020",
+          "opportunityId": "seed-opp-cast-emp-partner-seed-emp-005",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-emp-host-seed-co-corp-002",
+        "offerOpportunityId": "seed-opp-cast-emp-partner-seed-emp-005",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-emp-seed-emp-006",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-emp-006",
+          "opportunityId": "seed-opp-cast-emp-host-seed-co-corp-003",
+          "role": "need_owner",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:30:00.000Z",
+          "actingForPartyId": "party-company-seed-co-corp-003",
+          "actingForWorkspaceId": "ws-company-seed-co-corp-003"
+        },
+        {
+          "userId": "seed-user-021",
+          "opportunityId": "seed-opp-cast-emp-partner-seed-emp-006",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-emp-host-seed-co-corp-003",
+        "offerOpportunityId": "seed-opp-cast-emp-partner-seed-emp-006",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-emp-seed-emp-007",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-emp-007",
+          "opportunityId": "seed-opp-cast-emp-host-seed-co-corp-003",
+          "role": "need_owner",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:30:00.000Z",
+          "actingForPartyId": "party-company-seed-co-corp-003",
+          "actingForWorkspaceId": "ws-company-seed-co-corp-003"
+        },
+        {
+          "userId": "seed-user-022",
+          "opportunityId": "seed-opp-cast-emp-partner-seed-emp-007",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-emp-host-seed-co-corp-003",
+        "offerOpportunityId": "seed-opp-cast-emp-partner-seed-emp-007",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-emp-seed-emp-008",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-emp-008",
+          "opportunityId": "seed-opp-cast-emp-host-seed-co-corp-007",
+          "role": "need_owner",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:30:00.000Z",
+          "actingForPartyId": "party-company-seed-co-corp-007",
+          "actingForWorkspaceId": "ws-company-seed-co-corp-007"
+        },
+        {
+          "userId": "seed-user-023",
+          "opportunityId": "seed-opp-cast-emp-partner-seed-emp-008",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-emp-host-seed-co-corp-007",
+        "offerOpportunityId": "seed-opp-cast-emp-partner-seed-emp-008",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-emp-seed-emp-009",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-emp-009",
+          "opportunityId": "seed-opp-cast-emp-host-seed-co-corp-007",
+          "role": "need_owner",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:30:00.000Z",
+          "actingForPartyId": "party-company-seed-co-corp-007",
+          "actingForWorkspaceId": "ws-company-seed-co-corp-007"
+        },
+        {
+          "userId": "seed-user-024",
+          "opportunityId": "seed-opp-cast-emp-partner-seed-emp-009",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-emp-host-seed-co-corp-007",
+        "offerOpportunityId": "seed-opp-cast-emp-partner-seed-emp-009",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-emp-seed-emp-010",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-emp-010",
+          "opportunityId": "seed-opp-cast-emp-host-seed-co-corp-011",
+          "role": "need_owner",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:30:00.000Z",
+          "actingForPartyId": "party-company-seed-co-corp-011",
+          "actingForWorkspaceId": "ws-company-seed-co-corp-011"
+        },
+        {
+          "userId": "seed-user-025",
+          "opportunityId": "seed-opp-cast-emp-partner-seed-emp-010",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-emp-host-seed-co-corp-011",
+        "offerOpportunityId": "seed-opp-cast-emp-partner-seed-emp-010",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-emp-seed-emp-011",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-emp-011",
+          "opportunityId": "seed-opp-cast-emp-host-seed-co-corp-011",
+          "role": "need_owner",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:30:00.000Z",
+          "actingForPartyId": "party-company-seed-co-corp-011",
+          "actingForWorkspaceId": "ws-company-seed-co-corp-011"
+        },
+        {
+          "userId": "seed-user-026",
+          "opportunityId": "seed-opp-cast-emp-partner-seed-emp-011",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-emp-host-seed-co-corp-011",
+        "offerOpportunityId": "seed-opp-cast-emp-partner-seed-emp-011",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-emp-seed-emp-012",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-emp-012",
+          "opportunityId": "seed-opp-cast-emp-host-seed-co-corp-013",
+          "role": "need_owner",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:30:00.000Z",
+          "actingForPartyId": "party-company-seed-co-corp-013",
+          "actingForWorkspaceId": "ws-company-seed-co-corp-013"
+        },
+        {
+          "userId": "seed-user-027",
+          "opportunityId": "seed-opp-cast-emp-partner-seed-emp-012",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-emp-host-seed-co-corp-013",
+        "offerOpportunityId": "seed-opp-cast-emp-partner-seed-emp-012",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-emp-seed-emp-013",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-emp-013",
+          "opportunityId": "seed-opp-cast-emp-host-seed-co-corp-008",
+          "role": "need_owner",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:30:00.000Z",
+          "actingForPartyId": "party-company-seed-co-corp-008",
+          "actingForWorkspaceId": "ws-company-seed-co-corp-008"
+        },
+        {
+          "userId": "seed-user-028",
+          "opportunityId": "seed-opp-cast-emp-partner-seed-emp-013",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-emp-host-seed-co-corp-008",
+        "offerOpportunityId": "seed-opp-cast-emp-partner-seed-emp-013",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    },
+    {
+      "id": "demo-pm-cast-emp-seed-emp-014",
+      "matchType": "one_way",
+      "status": "pending",
+      "matchScore": 0.88,
+      "runId": "seed-run-cast-coverage",
+      "participants": [
+        {
+          "userId": "seed-emp-014",
+          "opportunityId": "seed-opp-cast-emp-host-seed-co-corp-015",
+          "role": "need_owner",
+          "participantStatus": "accepted",
+          "respondedAt": "2026-07-13T12:30:00.000Z",
+          "actingForPartyId": "party-company-seed-co-corp-015",
+          "actingForWorkspaceId": "ws-company-seed-co-corp-015"
+        },
+        {
+          "userId": "seed-user-029",
+          "opportunityId": "seed-opp-cast-emp-partner-seed-emp-014",
+          "role": "offer_provider",
+          "participantStatus": "pending",
+          "respondedAt": null
+        }
+      ],
+      "payload": {
+        "needOpportunityId": "seed-opp-cast-emp-host-seed-co-corp-015",
+        "offerOpportunityId": "seed-opp-cast-emp-partner-seed-emp-014",
+        "breakdown": {
+          "skillMatch": 0.9,
+          "attributeOverlap": 0.85,
+          "serviceOverlapPct": 0.88,
+          "exchangeCompatibility": 1,
+          "valueCompatibility": 0.7,
+          "budgetFit": 0.9,
+          "timelineFit": 0.9,
+          "locationFit": 1,
+          "reputation": 0.5
+        },
+        "valueAnalysis": null,
+        "castCoverage": true
+      },
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "updatedAt": "2026-07-13T12:00:00.000Z",
+      "expiresAt": "2026-08-13T12:00:00.000Z",
+      "isReplacement": false
+    }
+  ]
+}

@@ -6,6 +6,7 @@ export type DemoScenarioId =
   | 'hiring'
   | 'circular-resource-sharing'
   | 'marketplace'
+  | 'two-way-barter'
 
 export type DemoScenarioEntityType =
   | 'users'
@@ -44,10 +45,19 @@ export type DemoScenarioTargetAudience =
   | 'procurement-team'
   | 'technical-review'
 
+export type DemoScenarioLoginAs = {
+  readonly email: string
+  readonly passwordHint: string
+  readonly accountType: 'individual' | 'company' | 'admin'
+  readonly roleLabel: string
+}
+
 export type DemoScenarioNarrativeStep = {
   readonly id: string
   readonly title: string
   readonly description: string
+  readonly entityRoute?: string
+  readonly loginAs?: DemoScenarioLoginAs
 }
 
 export type DemoScenarioSeedSubsetReference = {
@@ -82,12 +92,14 @@ export type DemoScenarioDefinition = {
   readonly entityPatchSet?: DemoScenarioEntityPatchSet
 }
 
+const PW = 'Pmtwin@2026'
+
 export const DEMO_SCENARIO_REGISTRY: readonly DemoScenarioDefinition[] = [
   {
     id: 'cash-subcontracting',
-    title: 'Cash Subcontracting',
+    title: 'Cash Subcontracting (One-Way)',
     description:
-      'Show one-way subcontracting flow from match discovery through commercial agreement and contract completion.',
+      'Complete one-way subcontracting flow: published need/offer → confirmed match → negotiation → commercial agreement → contract.',
     targetAudience: ['client-executive', 'sales-team'],
     includedEntities: [
       'opportunities',
@@ -100,18 +112,51 @@ export const DEMO_SCENARIO_REGISTRY: readonly DemoScenarioDefinition[] = [
     narrativeSteps: [
       {
         id: 'cs-1',
-        title: 'Publish need and offer',
-        description: 'Start from seed opportunities representing a buyer need and supplier offer.',
+        title: 'Open buyer need (company)',
+        description: 'Login as Gulf Development and open the cash subcontracting task package need.',
+        entityRoute: '/opportunities/seed-opp-demo-task-need',
+        loginAs: {
+          email: 'contact@gulf-development.test',
+          passwordHint: PW,
+          accountType: 'company',
+          roleLabel: 'Company owner — need side',
+        },
       },
       {
         id: 'cs-2',
-        title: 'Show one-way match progression',
-        description: 'Walk through discovered -> accepted -> confirmed one_way post-match records.',
+        title: 'Open supplier offer (professional)',
+        description: 'Switch to Noura Al-Dossari and open the matching task-package offer.',
+        entityRoute: '/opportunities/seed-opp-demo-task-offer',
+        loginAs: {
+          email: 'noura.aldossari@pmtwin.test',
+          passwordHint: PW,
+          accountType: 'individual',
+          roleLabel: 'Professional — offer side',
+        },
       },
       {
         id: 'cs-3',
-        title: 'Close to agreement and contract',
-        description: 'Open linked negotiation, then show commercial agreement and completed contract.',
+        title: 'Inspect one-way confirmed match',
+        description: 'Open the confirmed one_way post-match linking need and offer.',
+        entityRoute: '/matches/seed-pm-demo-oneway-cash',
+        loginAs: {
+          email: 'contact@gulf-development.test',
+          passwordHint: PW,
+          accountType: 'company',
+          roleLabel: 'Company owner — match participant',
+        },
+      },
+      {
+        id: 'cs-4',
+        title: 'Close commercial agreement and contract',
+        description: 'Walk negotiation → commercial agreement → completed contract.',
+        entityRoute: '/commercial-agreements/seed-deal-demo-cash-subcontract',
+        loginAs: {
+          email: 'admin@pmtwin.com',
+          passwordHint: 'admin123',
+          accountType: 'admin',
+          roleLabel: 'Walkthrough host',
+        },
       },
     ],
     matchTypes: ['one_way'],
@@ -120,35 +165,128 @@ export const DEMO_SCENARIO_REGISTRY: readonly DemoScenarioDefinition[] = [
       {
         entityType: 'opportunities',
         loader: 'loadOpportunities',
-        ids: ['seed-opp-001', 'seed-opp-003'],
+        ids: ['seed-opp-demo-task-need', 'seed-opp-demo-task-offer'],
       },
       {
         entityType: 'postMatches',
         loader: 'loadPostMatches',
-        ids: ['demo-pm-oneway-01', 'demo-pm-oneway-15'],
+        ids: ['seed-pm-demo-oneway-cash'],
       },
       {
         entityType: 'negotiations',
         loader: 'loadNegotiations',
-        ids: ['seed-neg-02'],
+        ids: ['seed-neg-demo-oneway-cash'],
       },
       {
         entityType: 'commercialAgreements',
         loader: 'loadCommercialAgreements',
-        ids: ['seed-deal-oneway-01'],
+        ids: ['seed-deal-demo-cash-subcontract'],
       },
       {
         entityType: 'contracts',
         loader: 'loadContracts',
-        ids: ['seed-contract-oneway-01'],
+        ids: ['seed-contract-demo-cash'],
+      },
+    ],
+  },
+  {
+    id: 'two-way-barter',
+    title: 'Two-Way Barter',
+    description:
+      'Complete two_way service exchange: alliance partners → barter match → agreed negotiation → commercial agreement → contract.',
+    targetAudience: ['operations-team', 'technical-review'],
+    includedEntities: [
+      'opportunities',
+      'postMatches',
+      'negotiations',
+      'commercialAgreements',
+      'contracts',
+    ],
+    narrativeSteps: [
+      {
+        id: 'tw-1',
+        title: 'Open alliance partner A',
+        description: 'Login as Omar Al-Shehri and open the alliance-A opportunity.',
+        entityRoute: '/opportunities/seed-opp-demo-alliance-a',
+        loginAs: {
+          email: 'omar.alshehri@pmtwin.test',
+          passwordHint: PW,
+          accountType: 'individual',
+          roleLabel: 'Professional — side A',
+        },
+      },
+      {
+        id: 'tw-2',
+        title: 'Open alliance partner B',
+        description: 'Switch to Hessa Al-Qahtani and open the alliance-B opportunity.',
+        entityRoute: '/opportunities/seed-opp-demo-alliance-b',
+        loginAs: {
+          email: 'hessa.alqahtani@pmtwin.test',
+          passwordHint: PW,
+          accountType: 'individual',
+          roleLabel: 'Professional — side B',
+        },
+      },
+      {
+        id: 'tw-3',
+        title: 'Inspect two-way match',
+        description: 'Open the confirmed two_way barter post-match.',
+        entityRoute: '/matches/seed-pm-demo-twoway-barter',
+        loginAs: {
+          email: 'omar.alshehri@pmtwin.test',
+          passwordHint: PW,
+          accountType: 'individual',
+          roleLabel: 'Professional — match participant',
+        },
+      },
+      {
+        id: 'tw-4',
+        title: 'Review agreement and contract',
+        description: 'Open commercial agreement and barter contract.',
+        entityRoute: '/contracts/seed-contract-demo-barter',
+        loginAs: {
+          email: 'admin@pmtwin.com',
+          passwordHint: 'admin123',
+          accountType: 'admin',
+          roleLabel: 'Walkthrough host',
+        },
+      },
+    ],
+    matchTypes: ['two_way'],
+    mainCollaborationModels: ['service_exchange'],
+    seedSubsetRefs: [
+      {
+        entityType: 'opportunities',
+        loader: 'loadOpportunities',
+        ids: ['seed-opp-demo-alliance-a', 'seed-opp-demo-alliance-b'],
+      },
+      {
+        entityType: 'postMatches',
+        loader: 'loadPostMatches',
+        ids: ['seed-pm-demo-twoway-barter'],
+      },
+      {
+        entityType: 'negotiations',
+        loader: 'loadNegotiations',
+        ids: ['seed-neg-demo-barter-agreed'],
+      },
+      {
+        entityType: 'commercialAgreements',
+        loader: 'loadCommercialAgreements',
+        ids: ['seed-deal-demo-barter-service'],
+      },
+      {
+        entityType: 'contracts',
+        loader: 'loadContracts',
+        ids: ['seed-contract-demo-barter'],
       },
     ],
   },
   {
     id: 'joint-venture',
-    title: 'Joint Venture',
+    title: 'Joint Venture (Consortium)',
     description:
-      'Demonstrate multi-party JV formation and execution using consortium topology with shared delivery responsibilities.',
+      'Multi-party JV formation using consortium topology through commercial agreement and contract execution.',
     targetAudience: ['client-executive', 'operations-team', 'technical-review'],
     includedEntities: [
       'opportunities',
@@ -161,18 +299,39 @@ export const DEMO_SCENARIO_REGISTRY: readonly DemoScenarioDefinition[] = [
     narrativeSteps: [
       {
         id: 'jv-1',
-        title: 'Introduce lead opportunity',
-        description: 'Present lead demand and partner capabilities within a joint venture storyline.',
+        title: 'Open consortium lead',
+        description: 'Login as SA Infra Partners and open the consortium lead opportunity.',
+        entityRoute: '/opportunities/seed-opp-demo-consortium-lead',
+        loginAs: {
+          email: 'contact@sa-infra-partners.test',
+          passwordHint: PW,
+          accountType: 'company',
+          roleLabel: 'Company — consortium lead',
+        },
       },
       {
         id: 'jv-2',
         title: 'Review consortium match',
-        description: 'Use consortium post-match to show role-based partner composition.',
+        description: 'Inspect role-based partner composition on the consortium post-match.',
+        entityRoute: '/matches/seed-pm-demo-consortium-jv',
+        loginAs: {
+          email: 'contact@sa-infra-partners.test',
+          passwordHint: PW,
+          accountType: 'company',
+          roleLabel: 'Company — consortium lead',
+        },
       },
       {
         id: 'jv-3',
         title: 'Transition to execution',
-        description: 'Navigate from agreement to active contract and ongoing delivery.',
+        description: 'Navigate commercial agreement and active JV contract.',
+        entityRoute: '/contracts/seed-contract-demo-profit-sharing',
+        loginAs: {
+          email: 'contact@redsea-building.test',
+          passwordHint: PW,
+          accountType: 'company',
+          roleLabel: 'Company — consortium member',
+        },
       },
     ],
     matchTypes: ['consortium'],
@@ -181,33 +340,43 @@ export const DEMO_SCENARIO_REGISTRY: readonly DemoScenarioDefinition[] = [
       {
         entityType: 'opportunities',
         loader: 'loadOpportunities',
-        ids: ['seed-opp-005', 'seed-opp-023'],
+        ids: [
+          'seed-opp-demo-consortium-lead',
+          'seed-opp-demo-project-jv',
+          'seed-opp-demo-spv',
+        ],
       },
       {
         entityType: 'postMatches',
         loader: 'loadPostMatches',
-        ids: ['demo-pm-consortium-01'],
+        ids: ['seed-pm-demo-consortium-jv'],
+      },
+      {
+        entityType: 'negotiations',
+        loader: 'loadNegotiations',
+        ids: ['seed-neg-demo-consortium-jv'],
       },
       {
         entityType: 'commercialAgreements',
         loader: 'loadCommercialAgreements',
-        ids: ['seed-deal-consortium-01'],
+        ids: ['seed-deal-demo-jv-profit'],
       },
       {
         entityType: 'contracts',
         loader: 'loadContracts',
-        ids: ['seed-contract-consortium-01'],
+        ids: ['seed-contract-demo-profit-sharing'],
       },
     ],
   },
   {
     id: 'hiring',
-    title: 'Hiring',
+    title: 'Hiring (One-Way)',
     description:
-      'Highlight hiring-first collaboration where accepted applications progress into negotiation and formal agreement.',
+      'Hiring-first collaboration where professional hiring need progresses into match, negotiation, agreement, and contract.',
     targetAudience: ['operations-team', 'sales-team'],
     includedEntities: [
       'opportunities',
+      'postMatches',
       'applications',
       'negotiations',
       'commercialAgreements',
@@ -218,18 +387,39 @@ export const DEMO_SCENARIO_REGISTRY: readonly DemoScenarioDefinition[] = [
     narrativeSteps: [
       {
         id: 'hr-1',
-        title: 'Start from hiring opportunity',
-        description: 'Open hiring-oriented opportunity and accepted application pair.',
+        title: 'Open hiring opportunity',
+        description: 'Login as Gulf Development and open the senior scheduler hiring need.',
+        entityRoute: '/opportunities/seed-opp-demo-prof-hiring',
+        loginAs: {
+          email: 'contact@gulf-development.test',
+          passwordHint: PW,
+          accountType: 'company',
+          roleLabel: 'Company — hiring need',
+        },
       },
       {
         id: 'hr-2',
-        title: 'Advance through negotiation',
-        description: 'Show application-to-negotiation handoff with auditable status flow.',
+        title: 'Open consultant offer',
+        description: 'Switch to Tariq Al-Maliki and open the claims/consultant offer.',
+        entityRoute: '/opportunities/seed-opp-demo-consultant',
+        loginAs: {
+          email: 'tariq.almaliki@pmtwin.test',
+          passwordHint: PW,
+          accountType: 'individual',
+          roleLabel: 'Professional — hire candidate',
+        },
       },
       {
         id: 'hr-3',
         title: 'Finalize contractual path',
-        description: 'Conclude with commercial agreement and contract to complete hiring workflow.',
+        description: 'Open hiring match, then commercial agreement and contract.',
+        entityRoute: '/contracts/seed-contract-demo-equity',
+        loginAs: {
+          email: 'admin@pmtwin.com',
+          passwordHint: 'admin123',
+          accountType: 'admin',
+          roleLabel: 'Walkthrough host',
+        },
       },
     ],
     matchTypes: ['one_way'],
@@ -238,7 +428,12 @@ export const DEMO_SCENARIO_REGISTRY: readonly DemoScenarioDefinition[] = [
       {
         entityType: 'opportunities',
         loader: 'loadOpportunities',
-        ids: ['seed-opp-001'],
+        ids: ['seed-opp-demo-prof-hiring', 'seed-opp-demo-consultant'],
+      },
+      {
+        entityType: 'postMatches',
+        loader: 'loadPostMatches',
+        ids: ['seed-pm-demo-hiring'],
       },
       {
         entityType: 'applications',
@@ -248,17 +443,17 @@ export const DEMO_SCENARIO_REGISTRY: readonly DemoScenarioDefinition[] = [
       {
         entityType: 'negotiations',
         loader: 'loadNegotiations',
-        ids: ['seed-neg-02'],
+        ids: ['seed-neg-demo-hiring-path'],
       },
       {
         entityType: 'commercialAgreements',
         loader: 'loadCommercialAgreements',
-        ids: ['seed-deal-oneway-01'],
+        ids: ['seed-deal-demo-hiring'],
       },
       {
         entityType: 'contracts',
         loader: 'loadContracts',
-        ids: ['seed-contract-oneway-01'],
+        ids: ['seed-contract-demo-equity'],
       },
     ],
   },
@@ -266,7 +461,7 @@ export const DEMO_SCENARIO_REGISTRY: readonly DemoScenarioDefinition[] = [
     id: 'circular-resource-sharing',
     title: 'Circular Resource Sharing',
     description:
-      'Demonstrate circular exchange among multiple parties where resources are exchanged in a closed loop.',
+      'Complete circular exchange among bulk / equipment / crew parties through match, negotiation, agreement, and hybrid contract.',
     targetAudience: ['procurement-team', 'operations-team', 'technical-review'],
     includedEntities: [
       'opportunities',
@@ -275,23 +470,46 @@ export const DEMO_SCENARIO_REGISTRY: readonly DemoScenarioDefinition[] = [
       'negotiationMessages',
       'negotiationOffers',
       'negotiationTranscriptEvents',
+      'commercialAgreements',
+      'contracts',
       'audit',
     ],
     narrativeSteps: [
       {
         id: 'crs-1',
-        title: 'Frame multi-party needs and offers',
-        description: 'Introduce participants contributing and consuming resources in a chain.',
+        title: 'Open bulk purchasing node',
+        description: 'Login as Najd Investment and open the bulk steel/concrete opportunity.',
+        entityRoute: '/opportunities/seed-opp-demo-bulk',
+        loginAs: {
+          email: 'contact@najd-investment.test',
+          passwordHint: PW,
+          accountType: 'company',
+          roleLabel: 'Company — circular node',
+        },
       },
       {
         id: 'crs-2',
         title: 'Inspect circular match topology',
-        description: 'Visualize circular links that close the exchange loop.',
+        description: 'Open the circular resource post-match (three-party ring).',
+        entityRoute: '/matches/seed-pm-demo-circular-resource',
+        loginAs: {
+          email: 'abdullah.alrashid@pmtwin.test',
+          passwordHint: PW,
+          accountType: 'individual',
+          roleLabel: 'Professional — equipment node',
+        },
       },
       {
         id: 'crs-3',
-        title: 'Audit negotiation discussion',
-        description: 'Review messages/offers/transcript for transparent decision history.',
+        title: 'Close hybrid contract',
+        description: 'Review circular commercial agreement and hybrid contract.',
+        entityRoute: '/contracts/seed-contract-demo-hybrid',
+        loginAs: {
+          email: 'admin@pmtwin.com',
+          passwordHint: 'admin123',
+          accountType: 'admin',
+          roleLabel: 'Walkthrough host',
+        },
       },
     ],
     matchTypes: ['circular'],
@@ -300,35 +518,35 @@ export const DEMO_SCENARIO_REGISTRY: readonly DemoScenarioDefinition[] = [
       {
         entityType: 'opportunities',
         loader: 'loadOpportunities',
-        ids: ['seed-opp-023', 'seed-opp-005'],
+        ids: ['seed-opp-demo-bulk', 'seed-opp-demo-equip', 'seed-opp-demo-resource'],
       },
       {
         entityType: 'postMatches',
         loader: 'loadPostMatches',
-        ids: ['demo-pm-circular-01'],
+        ids: ['seed-pm-demo-circular-resource'],
       },
       {
-        entityType: 'negotiationMessages',
-        loader: 'loadNegotiationMessages',
-        ids: ['seed-msg-demo-001'],
+        entityType: 'negotiations',
+        loader: 'loadNegotiations',
+        ids: ['seed-neg-demo-circular-agreed'],
       },
       {
-        entityType: 'negotiationOffers',
-        loader: 'loadNegotiationOffers',
-        ids: ['seed-offer-demo-001'],
+        entityType: 'commercialAgreements',
+        loader: 'loadCommercialAgreements',
+        ids: ['seed-deal-demo-resource-circular'],
       },
       {
-        entityType: 'negotiationTranscriptEvents',
-        loader: 'loadNegotiationTranscriptEvents',
-        ids: ['seed-event-demo-001'],
+        entityType: 'contracts',
+        loader: 'loadContracts',
+        ids: ['seed-contract-demo-hybrid'],
       },
     ],
   },
   {
     id: 'marketplace',
-    title: 'Marketplace',
+    title: 'Marketplace (All 4 Topologies)',
     description:
-      'Provide an executive end-to-end marketplace tour covering all matching topologies and primary collaboration models.',
+      'Executive tour covering one_way, two_way, consortium, and circular complete demo chains.',
     targetAudience: ['client-executive', 'sales-team', 'technical-review'],
     includedEntities: [
       'users',
@@ -345,18 +563,51 @@ export const DEMO_SCENARIO_REGISTRY: readonly DemoScenarioDefinition[] = [
     narrativeSteps: [
       {
         id: 'mk-1',
-        title: 'Show model breadth',
-        description: 'Browse opportunities spanning cash subcontracting, exchange, JV, resource sharing, and hiring.',
+        title: 'One-way cash chain',
+        description: 'Start from the complete one_way cash subcontracting match.',
+        entityRoute: '/matches/seed-pm-demo-oneway-cash',
+        loginAs: {
+          email: 'contact@gulf-development.test',
+          passwordHint: PW,
+          accountType: 'company',
+          roleLabel: 'Company — one_way',
+        },
       },
       {
         id: 'mk-2',
-        title: 'Show topology breadth',
-        description: 'Highlight one_way, two_way, consortium, and circular match examples.',
+        title: 'Two-way barter chain',
+        description: 'Open the complete two_way barter match.',
+        entityRoute: '/matches/seed-pm-demo-twoway-barter',
+        loginAs: {
+          email: 'omar.alshehri@pmtwin.test',
+          passwordHint: PW,
+          accountType: 'individual',
+          roleLabel: 'Professional — two_way',
+        },
       },
       {
         id: 'mk-3',
-        title: 'Show lifecycle depth',
-        description: 'Move from matching to negotiation, commercial agreement, and contract views.',
+        title: 'Consortium JV chain',
+        description: 'Open the complete consortium JV match.',
+        entityRoute: '/matches/seed-pm-demo-consortium-jv',
+        loginAs: {
+          email: 'contact@sa-infra-partners.test',
+          passwordHint: PW,
+          accountType: 'company',
+          roleLabel: 'Company — consortium',
+        },
+      },
+      {
+        id: 'mk-4',
+        title: 'Circular resource chain',
+        description: 'Open the complete circular resource match.',
+        entityRoute: '/matches/seed-pm-demo-circular-resource',
+        loginAs: {
+          email: 'contact@najd-investment.test',
+          passwordHint: PW,
+          accountType: 'company',
+          roleLabel: 'Company — circular',
+        },
       },
     ],
     matchTypes: ['one_way', 'two_way', 'consortium', 'circular'],
@@ -371,26 +622,31 @@ export const DEMO_SCENARIO_REGISTRY: readonly DemoScenarioDefinition[] = [
       {
         entityType: 'users',
         loader: 'loadUsers',
-        ids: ['seed-user-001'],
+        ids: ['seed-user-004', 'seed-user-005', 'seed-user-010'],
       },
       {
         entityType: 'companies',
         loader: 'loadCompanies',
-        ids: ['seed-co-corp-001'],
+        ids: ['seed-co-corp-002', 'seed-co-corp-004', 'seed-co-corp-005'],
       },
       {
         entityType: 'opportunities',
         loader: 'loadOpportunities',
-        ids: ['seed-opp-001', 'seed-opp-003', 'seed-opp-005', 'seed-opp-023'],
+        ids: [
+          'seed-opp-demo-task-need',
+          'seed-opp-demo-alliance-a',
+          'seed-opp-demo-consortium-lead',
+          'seed-opp-demo-bulk',
+        ],
       },
       {
         entityType: 'postMatches',
         loader: 'loadPostMatches',
         ids: [
-          'demo-pm-oneway-01',
-          'demo-pm-barter-01',
-          'demo-pm-consortium-01',
-          'demo-pm-circular-01',
+          'seed-pm-demo-oneway-cash',
+          'seed-pm-demo-twoway-barter',
+          'seed-pm-demo-consortium-jv',
+          'seed-pm-demo-circular-resource',
         ],
       },
       {
@@ -406,3 +662,14 @@ export function getDemoScenarioRegistry(): readonly DemoScenarioDefinition[] {
   return DEMO_SCENARIO_REGISTRY
 }
 
+export function getDemoScenarioById(id: string): DemoScenarioDefinition | undefined {
+  return DEMO_SCENARIO_REGISTRY.find((scenario) => scenario.id === id)
+}
+
+export function listRegistryMatchTypes(): readonly MatchingModelKey[] {
+  const set = new Set<MatchingModelKey>()
+  for (const scenario of DEMO_SCENARIO_REGISTRY) {
+    for (const matchType of scenario.matchTypes) set.add(matchType)
+  }
+  return [...set]
+}

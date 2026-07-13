@@ -28,7 +28,9 @@ import {
 
 import opportunitiesBase from '@seed-data/opportunities.json'
 import demoOpportunities from '@seed-data/demo-40-opportunities.json'
+import castCoverageOpportunities from '@seed-data/demo-cast-coverage-opportunities.json'
 import postMatches from '@seed-data/demo-post-matches.json'
+import castCoverageMatches from '@seed-data/demo-cast-coverage-matches.json'
 import demoNotifications from '@seed-data/demo-notifications.json'
 import demoApplications from '@seed-data/demo-applications.json'
 import demoNegotiations from '@seed-data/demo-negotiations.json'
@@ -66,6 +68,7 @@ export function loadOpportunities(): Opportunity[] {
     mergeById(
       rows(opportunitiesBase as DataEnvelope<Opportunity>),
       rows(demoOpportunities as DataEnvelope<Opportunity>),
+      rows(castCoverageOpportunities as DataEnvelope<Opportunity>),
     ),
   )
 }
@@ -97,7 +100,10 @@ export function loadApplications(): Application[] {
 }
 
 export function loadPostMatches(): PostMatch[] {
-  return rows(postMatches as DataEnvelope<PostMatch>)
+  return mergeById(
+    rows(postMatches as DataEnvelope<PostMatch>),
+    rows(castCoverageMatches as DataEnvelope<PostMatch>),
+  )
 }
 
 export function loadNegotiations(): Negotiation[] {

@@ -3921,16 +3921,25 @@
       "skills": [
         "Project Management",
         "Coordination",
-        "task based"
+        "Subcontracting"
       ],
       "scope": {
         "coreSkills": [
           "Project Management",
-          "Coordination"
+          "Coordination",
+          "Subcontracting"
         ],
         "sectors": [
           "Construction"
-        ]
+        ],
+        "requiredSkills": [
+          "Project Management",
+          "Coordination",
+          "Subcontracting"
+        ],
+        "offeredSkills": [],
+        "certifications": [],
+        "targetRole": "Construction Manager"
       },
       "exchangeData": {
         "exchangeMode": "cash",
@@ -3954,14 +3963,68 @@
       "workspaceId": "ws-company-seed-co-corp-002",
       "ownerPartyId": "party-company-seed-co-corp-002",
       "createdByUserId": "system-migration-actor",
-      "createdByActorType": "system"
+      "createdByActorType": "system",
+      "attributes": {
+        "startDate": "2026-07-01",
+        "tenderDeadline": "2026-12-31",
+        "locationRequirement": "Riyadh, Saudi Arabia",
+        "targetRole": "Construction Manager",
+        "coreSkills": [
+          "Project Management",
+          "Coordination",
+          "Subcontracting"
+        ]
+      },
+      "normalized": {
+        "skills": [
+          "Project Management",
+          "Coordination",
+          "Subcontracting"
+        ],
+        "requiredServices": [
+          "Project Management",
+          "Coordination",
+          "Subcontracting"
+        ],
+        "offeredServices": [],
+        "role": "Construction Manager",
+        "coreSkills": [
+          "Project Management",
+          "Coordination",
+          "Subcontracting"
+        ],
+        "categories": [
+          "project_based",
+          "task_based",
+          "Construction"
+        ],
+        "budget": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh, Saudi Arabia",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "task_based"
+      }
     },
     {
       "id": "seed-opp-demo-task-offer",
       "title": "Task package delivery specialist (offer)",
       "description": "Demo scenario for task_based under cash_subcontracting.",
       "creatorId": "seed-user-004",
-      "intent": "need",
+      "intent": "offer",
       "status": "published",
       "mainCollaborationModel": "cash_subcontracting",
       "modelType": "project_based",
@@ -3984,16 +4047,25 @@
       "skills": [
         "Project Management",
         "Coordination",
-        "task based"
+        "Subcontracting"
       ],
       "scope": {
         "coreSkills": [
           "Project Management",
-          "Coordination"
+          "Coordination",
+          "Subcontracting"
         ],
         "sectors": [
           "Construction"
-        ]
+        ],
+        "requiredSkills": [],
+        "offeredSkills": [
+          "Project Management",
+          "Coordination",
+          "Subcontracting"
+        ],
+        "certifications": [],
+        "targetRole": "Construction Manager"
       },
       "exchangeData": {
         "exchangeMode": "cash",
@@ -4017,7 +4089,61 @@
       "workspaceId": "ws-personal-seed-user-004",
       "ownerPartyId": "party-individual-seed-user-004",
       "createdByUserId": "seed-user-004",
-      "createdByActorType": "marketplace_user"
+      "createdByActorType": "marketplace_user",
+      "attributes": {
+        "startDate": "2026-07-01",
+        "tenderDeadline": "2026-12-31",
+        "locationRequirement": "Riyadh, Saudi Arabia",
+        "targetRole": "Construction Manager",
+        "coreSkills": [
+          "Project Management",
+          "Coordination",
+          "Subcontracting"
+        ]
+      },
+      "normalized": {
+        "skills": [
+          "Project Management",
+          "Coordination",
+          "Subcontracting"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Project Management",
+          "Coordination",
+          "Subcontracting"
+        ],
+        "role": "Construction Manager",
+        "coreSkills": [
+          "Project Management",
+          "Coordination",
+          "Subcontracting"
+        ],
+        "categories": [
+          "project_based",
+          "task_based",
+          "Construction"
+        ],
+        "budget": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh, Saudi Arabia",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "task_based"
+      }
     },
     {
       "id": "seed-opp-demo-alliance-a",
@@ -4045,18 +4171,27 @@
       },
       "location": "Riyadh, Saudi Arabia",
       "skills": [
-        "Project Management",
-        "Coordination",
-        "strategic alliance"
+        "Civil Engineering",
+        "Site Supervision",
+        "Barter Coordination"
       ],
       "scope": {
         "coreSkills": [
-          "Project Management",
-          "Coordination"
+          "Civil Engineering",
+          "Site Supervision",
+          "Barter Coordination"
         ],
         "sectors": [
           "Construction"
-        ]
+        ],
+        "requiredSkills": [
+          "Civil Engineering",
+          "Site Supervision",
+          "Barter Coordination"
+        ],
+        "offeredSkills": [],
+        "certifications": [],
+        "targetRole": "Civil Engineer"
       },
       "exchangeData": {
         "exchangeMode": "barter",
@@ -4080,14 +4215,68 @@
       "workspaceId": "ws-personal-seed-user-005",
       "ownerPartyId": "party-individual-seed-user-005",
       "createdByUserId": "seed-user-005",
-      "createdByActorType": "marketplace_user"
+      "createdByActorType": "marketplace_user",
+      "attributes": {
+        "startDate": "2026-07-01",
+        "tenderDeadline": "2026-12-31",
+        "locationRequirement": "Riyadh, Saudi Arabia",
+        "targetRole": "Civil Engineer",
+        "coreSkills": [
+          "Civil Engineering",
+          "Site Supervision",
+          "Barter Coordination"
+        ]
+      },
+      "normalized": {
+        "skills": [
+          "Civil Engineering",
+          "Site Supervision",
+          "Barter Coordination"
+        ],
+        "requiredServices": [
+          "Civil Engineering",
+          "Site Supervision",
+          "Barter Coordination"
+        ],
+        "offeredServices": [],
+        "role": "Civil Engineer",
+        "coreSkills": [
+          "Civil Engineering",
+          "Site Supervision",
+          "Barter Coordination"
+        ],
+        "categories": [
+          "strategic_partnership",
+          "strategic_alliance",
+          "Construction"
+        ],
+        "budget": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh, Saudi Arabia",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "strategic_partnership",
+        "subModelType": "strategic_alliance"
+      }
     },
     {
       "id": "seed-opp-demo-alliance-b",
       "title": "Strategic alliance partner B services",
       "description": "Demo scenario for strategic_alliance under service_exchange.",
       "creatorId": "seed-user-006",
-      "intent": "need",
+      "intent": "offer",
       "status": "published",
       "mainCollaborationModel": "service_exchange",
       "modelType": "strategic_partnership",
@@ -4108,18 +4297,27 @@
       },
       "location": "Riyadh, Saudi Arabia",
       "skills": [
-        "Project Management",
-        "Coordination",
-        "strategic alliance"
+        "MEP Design",
+        "HVAC",
+        "Barter Coordination"
       ],
       "scope": {
         "coreSkills": [
-          "Project Management",
-          "Coordination"
+          "MEP Design",
+          "HVAC",
+          "Barter Coordination"
         ],
         "sectors": [
           "Construction"
-        ]
+        ],
+        "requiredSkills": [],
+        "offeredSkills": [
+          "MEP Design",
+          "HVAC",
+          "Barter Coordination"
+        ],
+        "certifications": [],
+        "targetRole": "MEP Engineer"
       },
       "exchangeData": {
         "exchangeMode": "barter",
@@ -4143,7 +4341,61 @@
       "workspaceId": "ws-personal-seed-user-006",
       "ownerPartyId": "party-individual-seed-user-006",
       "createdByUserId": "seed-user-006",
-      "createdByActorType": "marketplace_user"
+      "createdByActorType": "marketplace_user",
+      "attributes": {
+        "startDate": "2026-07-01",
+        "tenderDeadline": "2026-12-31",
+        "locationRequirement": "Riyadh, Saudi Arabia",
+        "targetRole": "MEP Engineer",
+        "coreSkills": [
+          "MEP Design",
+          "HVAC",
+          "Barter Coordination"
+        ]
+      },
+      "normalized": {
+        "skills": [
+          "MEP Design",
+          "HVAC",
+          "Barter Coordination"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "MEP Design",
+          "HVAC",
+          "Barter Coordination"
+        ],
+        "role": "MEP Engineer",
+        "coreSkills": [
+          "MEP Design",
+          "HVAC",
+          "Barter Coordination"
+        ],
+        "categories": [
+          "strategic_partnership",
+          "strategic_alliance",
+          "Construction"
+        ],
+        "budget": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh, Saudi Arabia",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "strategic_partnership",
+        "subModelType": "strategic_alliance"
+      }
     },
     {
       "id": "seed-opp-demo-mentor",
@@ -4173,18 +4425,27 @@
       },
       "location": "Riyadh, Saudi Arabia",
       "skills": [
-        "Project Management",
-        "Coordination",
-        "mentorship"
+        "PMO Governance",
+        "Mentoring",
+        "Project Controls"
       ],
       "scope": {
         "coreSkills": [
-          "Project Management",
-          "Coordination"
+          "PMO Governance",
+          "Mentoring",
+          "Project Controls"
         ],
         "sectors": [
           "Construction"
-        ]
+        ],
+        "requiredSkills": [
+          "PMO Governance",
+          "Mentoring",
+          "Project Controls"
+        ],
+        "offeredSkills": [],
+        "certifications": [],
+        "targetRole": "Project Manager"
       },
       "exchangeData": {
         "exchangeMode": "hybrid",
@@ -4209,7 +4470,61 @@
       "workspaceId": "ws-personal-seed-user-007",
       "ownerPartyId": "party-individual-seed-user-007",
       "createdByUserId": "seed-user-007",
-      "createdByActorType": "marketplace_user"
+      "createdByActorType": "marketplace_user",
+      "attributes": {
+        "startDate": "2026-07-01",
+        "tenderDeadline": "2026-12-31",
+        "locationRequirement": "Riyadh, Saudi Arabia",
+        "targetRole": "Project Manager",
+        "coreSkills": [
+          "PMO Governance",
+          "Mentoring",
+          "Project Controls"
+        ]
+      },
+      "normalized": {
+        "skills": [
+          "PMO Governance",
+          "Mentoring",
+          "Project Controls"
+        ],
+        "requiredServices": [
+          "PMO Governance",
+          "Mentoring",
+          "Project Controls"
+        ],
+        "offeredServices": [],
+        "role": "Project Manager",
+        "coreSkills": [
+          "PMO Governance",
+          "Mentoring",
+          "Project Controls"
+        ],
+        "categories": [
+          "strategic_partnership",
+          "mentorship",
+          "Construction"
+        ],
+        "budget": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh, Saudi Arabia",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "strategic_partnership",
+        "subModelType": "mentorship"
+      }
     },
     {
       "id": "seed-opp-demo-consortium-lead",
@@ -4239,18 +4554,27 @@
       },
       "location": "Riyadh, Saudi Arabia",
       "skills": [
-        "Project Management",
-        "Coordination",
-        "consortium"
+        "Consortium Management",
+        "Airport Works",
+        "Joint Venture"
       ],
       "scope": {
         "coreSkills": [
-          "Project Management",
-          "Coordination"
+          "Consortium Management",
+          "Airport Works",
+          "Joint Venture"
         ],
         "sectors": [
           "Construction"
-        ]
+        ],
+        "requiredSkills": [
+          "Consortium Management",
+          "Airport Works",
+          "Joint Venture"
+        ],
+        "offeredSkills": [],
+        "certifications": [],
+        "targetRole": "Consortium Lead"
       },
       "exchangeData": {
         "exchangeMode": "profit_sharing",
@@ -4275,14 +4599,73 @@
       "workspaceId": "ws-company-seed-co-corp-005",
       "ownerPartyId": "party-company-seed-co-corp-005",
       "createdByUserId": "system-migration-actor",
-      "createdByActorType": "system"
+      "createdByActorType": "system",
+      "attributes": {
+        "startDate": "2026-07-01",
+        "tenderDeadline": "2026-12-31",
+        "locationRequirement": "Riyadh, Saudi Arabia",
+        "targetRole": "Consortium Lead",
+        "coreSkills": [
+          "Consortium Management",
+          "Airport Works",
+          "Joint Venture"
+        ],
+        "memberRoles": [
+          "Civil Engineer",
+          "MEP Engineer",
+          "Architect"
+        ]
+      },
+      "normalized": {
+        "skills": [
+          "Consortium Management",
+          "Airport Works",
+          "Joint Venture"
+        ],
+        "requiredServices": [
+          "Consortium Management",
+          "Airport Works",
+          "Joint Venture"
+        ],
+        "offeredServices": [],
+        "role": "Consortium Lead",
+        "coreSkills": [
+          "Consortium Management",
+          "Airport Works",
+          "Joint Venture"
+        ],
+        "categories": [
+          "project_based",
+          "consortium",
+          "Construction"
+        ],
+        "budget": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh, Saudi Arabia",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "consortium"
+      }
     },
     {
       "id": "seed-opp-demo-project-jv",
       "title": "Project JV EPC partner",
       "description": "Demo scenario for project_jv under joint_venture.",
       "creatorId": "seed-co-corp-006",
-      "intent": "need",
+      "intent": "offer",
       "status": "published",
       "mainCollaborationModel": "joint_venture",
       "modelType": "project_based",
@@ -4305,18 +4688,27 @@
       },
       "location": "Riyadh, Saudi Arabia",
       "skills": [
-        "Project Management",
-        "Coordination",
-        "project jv"
+        "EPC Delivery",
+        "Joint Venture",
+        "Construction Management"
       ],
       "scope": {
         "coreSkills": [
-          "Project Management",
-          "Coordination"
+          "EPC Delivery",
+          "Joint Venture",
+          "Construction Management"
         ],
         "sectors": [
           "Construction"
-        ]
+        ],
+        "requiredSkills": [],
+        "offeredSkills": [
+          "EPC Delivery",
+          "Joint Venture",
+          "Construction Management"
+        ],
+        "certifications": [],
+        "targetRole": "EPC Partner"
       },
       "exchangeData": {
         "exchangeMode": "profit_sharing",
@@ -4341,7 +4733,61 @@
       "workspaceId": "ws-company-seed-co-corp-006",
       "ownerPartyId": "party-company-seed-co-corp-006",
       "createdByUserId": "system-migration-actor",
-      "createdByActorType": "system"
+      "createdByActorType": "system",
+      "attributes": {
+        "startDate": "2026-07-01",
+        "tenderDeadline": "2026-12-31",
+        "locationRequirement": "Riyadh, Saudi Arabia",
+        "targetRole": "EPC Partner",
+        "coreSkills": [
+          "EPC Delivery",
+          "Joint Venture",
+          "Construction Management"
+        ]
+      },
+      "normalized": {
+        "skills": [
+          "EPC Delivery",
+          "Joint Venture",
+          "Construction Management"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "EPC Delivery",
+          "Joint Venture",
+          "Construction Management"
+        ],
+        "role": "EPC Partner",
+        "coreSkills": [
+          "EPC Delivery",
+          "Joint Venture",
+          "Construction Management"
+        ],
+        "categories": [
+          "project_based",
+          "project_jv",
+          "Construction"
+        ],
+        "budget": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh, Saudi Arabia",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "project_based",
+        "subModelType": "project_jv"
+      }
     },
     {
       "id": "seed-opp-demo-spv",
@@ -4371,18 +4817,27 @@
       },
       "location": "Riyadh, Saudi Arabia",
       "skills": [
-        "Project Management",
-        "Coordination",
-        "spv"
+        "SPV Structuring",
+        "Infrastructure Finance",
+        "Joint Venture"
       ],
       "scope": {
         "coreSkills": [
-          "Project Management",
-          "Coordination"
+          "SPV Structuring",
+          "Infrastructure Finance",
+          "Joint Venture"
         ],
         "sectors": [
           "Construction"
-        ]
+        ],
+        "requiredSkills": [
+          "SPV Structuring",
+          "Infrastructure Finance",
+          "Joint Venture"
+        ],
+        "offeredSkills": [],
+        "certifications": [],
+        "targetRole": "SPV Sponsor"
       },
       "exchangeData": {
         "exchangeMode": "equity",
@@ -4407,7 +4862,65 @@
       "workspaceId": "ws-company-seed-co-corp-003",
       "ownerPartyId": "party-company-seed-co-corp-003",
       "createdByUserId": "system-migration-actor",
-      "createdByActorType": "system"
+      "createdByActorType": "system",
+      "attributes": {
+        "startDate": "2026-07-01",
+        "tenderDeadline": "2026-12-31",
+        "locationRequirement": "Riyadh, Saudi Arabia",
+        "targetRole": "SPV Sponsor",
+        "coreSkills": [
+          "SPV Structuring",
+          "Infrastructure Finance",
+          "Joint Venture"
+        ],
+        "memberRoles": [
+          "Investor",
+          "Technical Partner"
+        ]
+      },
+      "normalized": {
+        "skills": [
+          "SPV Structuring",
+          "Infrastructure Finance",
+          "Joint Venture"
+        ],
+        "requiredServices": [
+          "SPV Structuring",
+          "Infrastructure Finance",
+          "Joint Venture"
+        ],
+        "offeredServices": [],
+        "role": "SPV Sponsor",
+        "coreSkills": [
+          "SPV Structuring",
+          "Infrastructure Finance",
+          "Joint Venture"
+        ],
+        "categories": [
+          "project_based",
+          "spv",
+          "Construction"
+        ],
+        "budget": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh, Saudi Arabia",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "project_based",
+        "subModelType": "spv"
+      }
     },
     {
       "id": "seed-opp-demo-strategic-jv",
@@ -4437,18 +4950,27 @@
       },
       "location": "Riyadh, Saudi Arabia",
       "skills": [
-        "Project Management",
-        "Coordination",
-        "strategic jv"
+        "Strategic Partnership",
+        "Market Expansion",
+        "Joint Venture"
       ],
       "scope": {
         "coreSkills": [
-          "Project Management",
-          "Coordination"
+          "Strategic Partnership",
+          "Market Expansion",
+          "Joint Venture"
         ],
         "sectors": [
           "Construction"
-        ]
+        ],
+        "requiredSkills": [
+          "Strategic Partnership",
+          "Market Expansion",
+          "Joint Venture"
+        ],
+        "offeredSkills": [],
+        "certifications": [],
+        "targetRole": "Strategic Partner"
       },
       "exchangeData": {
         "exchangeMode": "equity",
@@ -4473,7 +4995,65 @@
       "workspaceId": "ws-company-seed-co-corp-001",
       "ownerPartyId": "party-company-seed-co-corp-001",
       "createdByUserId": "system-migration-actor",
-      "createdByActorType": "system"
+      "createdByActorType": "system",
+      "attributes": {
+        "startDate": "2026-07-01",
+        "tenderDeadline": "2026-12-31",
+        "locationRequirement": "Riyadh, Saudi Arabia",
+        "targetRole": "Strategic Partner",
+        "coreSkills": [
+          "Strategic Partnership",
+          "Market Expansion",
+          "Joint Venture"
+        ],
+        "memberRoles": [
+          "Regional Partner",
+          "Delivery Partner"
+        ]
+      },
+      "normalized": {
+        "skills": [
+          "Strategic Partnership",
+          "Market Expansion",
+          "Joint Venture"
+        ],
+        "requiredServices": [
+          "Strategic Partnership",
+          "Market Expansion",
+          "Joint Venture"
+        ],
+        "offeredServices": [],
+        "role": "Strategic Partner",
+        "coreSkills": [
+          "Strategic Partnership",
+          "Market Expansion",
+          "Joint Venture"
+        ],
+        "categories": [
+          "strategic_partnership",
+          "strategic_jv",
+          "Construction"
+        ],
+        "budget": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh, Saudi Arabia",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "strategic_partnership",
+        "subModelType": "strategic_jv"
+      }
     },
     {
       "id": "seed-opp-demo-bulk",
@@ -4485,7 +5065,7 @@
       "mainCollaborationModel": "resource_sharing",
       "modelType": "resource_pooling",
       "subModelType": "bulk_purchasing",
-      "preferredMatchingTopology": "one_way",
+      "preferredMatchingTopology": "circular",
       "exchangeMode": "cash",
       "acceptedExchangeModes": [
         "cash",
@@ -4501,18 +5081,27 @@
       },
       "location": "Riyadh, Saudi Arabia",
       "skills": [
-        "Project Management",
-        "Coordination",
-        "bulk purchasing"
+        "Bulk Procurement",
+        "Steel Supply",
+        "Resource Sharing"
       ],
       "scope": {
         "coreSkills": [
-          "Project Management",
-          "Coordination"
+          "Bulk Procurement",
+          "Steel Supply",
+          "Resource Sharing"
         ],
         "sectors": [
           "Construction"
-        ]
+        ],
+        "requiredSkills": [
+          "Bulk Procurement",
+          "Steel Supply",
+          "Resource Sharing"
+        ],
+        "offeredSkills": [],
+        "certifications": [],
+        "targetRole": "Steel Supplier"
       },
       "exchangeData": {
         "exchangeMode": "cash",
@@ -4536,14 +5125,68 @@
       "workspaceId": "ws-company-seed-co-corp-004",
       "ownerPartyId": "party-company-seed-co-corp-004",
       "createdByUserId": "system-migration-actor",
-      "createdByActorType": "system"
+      "createdByActorType": "system",
+      "attributes": {
+        "startDate": "2026-07-01",
+        "tenderDeadline": "2026-12-31",
+        "locationRequirement": "Riyadh, Saudi Arabia",
+        "targetRole": "Steel Supplier",
+        "coreSkills": [
+          "Bulk Procurement",
+          "Steel Supply",
+          "Resource Sharing"
+        ]
+      },
+      "normalized": {
+        "skills": [
+          "Bulk Procurement",
+          "Steel Supply",
+          "Resource Sharing"
+        ],
+        "requiredServices": [
+          "Bulk Procurement",
+          "Steel Supply",
+          "Resource Sharing"
+        ],
+        "offeredServices": [],
+        "role": "Steel Supplier",
+        "coreSkills": [
+          "Bulk Procurement",
+          "Steel Supply",
+          "Resource Sharing"
+        ],
+        "categories": [
+          "resource_pooling",
+          "bulk_purchasing",
+          "Construction"
+        ],
+        "budget": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh, Saudi Arabia",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "resource_pooling",
+        "subModelType": "bulk_purchasing"
+      }
     },
     {
       "id": "seed-opp-demo-equip",
       "title": "Equipment sharing cranes and loaders",
       "description": "Demo scenario for equipment_sharing under resource_sharing.",
       "creatorId": "seed-user-010",
-      "intent": "need",
+      "intent": "offer",
       "status": "published",
       "mainCollaborationModel": "resource_sharing",
       "modelType": "resource_pooling",
@@ -4566,18 +5209,27 @@
       },
       "location": "Riyadh, Saudi Arabia",
       "skills": [
-        "Project Management",
-        "Coordination",
-        "equipment sharing"
+        "Crane Operations",
+        "Heavy Equipment",
+        "Resource Sharing"
       ],
       "scope": {
         "coreSkills": [
-          "Project Management",
-          "Coordination"
+          "Crane Operations",
+          "Heavy Equipment",
+          "Resource Sharing"
         ],
         "sectors": [
           "Construction"
-        ]
+        ],
+        "requiredSkills": [],
+        "offeredSkills": [
+          "Crane Operations",
+          "Heavy Equipment",
+          "Resource Sharing"
+        ],
+        "certifications": [],
+        "targetRole": "Equipment Partner"
       },
       "exchangeData": {
         "exchangeMode": "barter",
@@ -4602,14 +5254,68 @@
       "workspaceId": "ws-personal-seed-user-010",
       "ownerPartyId": "party-individual-seed-user-010",
       "createdByUserId": "seed-user-010",
-      "createdByActorType": "marketplace_user"
+      "createdByActorType": "marketplace_user",
+      "attributes": {
+        "startDate": "2026-07-01",
+        "tenderDeadline": "2026-12-31",
+        "locationRequirement": "Riyadh, Saudi Arabia",
+        "targetRole": "Equipment Partner",
+        "coreSkills": [
+          "Crane Operations",
+          "Heavy Equipment",
+          "Resource Sharing"
+        ]
+      },
+      "normalized": {
+        "skills": [
+          "Crane Operations",
+          "Heavy Equipment",
+          "Resource Sharing"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Crane Operations",
+          "Heavy Equipment",
+          "Resource Sharing"
+        ],
+        "role": "Equipment Partner",
+        "coreSkills": [
+          "Crane Operations",
+          "Heavy Equipment",
+          "Resource Sharing"
+        ],
+        "categories": [
+          "resource_pooling",
+          "equipment_sharing",
+          "Construction"
+        ],
+        "budget": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh, Saudi Arabia",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "resource_pooling",
+        "subModelType": "equipment_sharing"
+      }
     },
     {
       "id": "seed-opp-demo-resource",
       "title": "Resource sharing temporary crews",
       "description": "Demo scenario for resource_sharing under resource_sharing.",
       "creatorId": "seed-user-011",
-      "intent": "need",
+      "intent": "offer",
       "status": "published",
       "mainCollaborationModel": "resource_sharing",
       "modelType": "resource_pooling",
@@ -4632,18 +5338,27 @@
       },
       "location": "Riyadh, Saudi Arabia",
       "skills": [
-        "Project Management",
-        "Coordination",
-        "resource sharing"
+        "Temporary Crews",
+        "Labour Coordination",
+        "Resource Sharing"
       ],
       "scope": {
         "coreSkills": [
-          "Project Management",
-          "Coordination"
+          "Temporary Crews",
+          "Labour Coordination",
+          "Resource Sharing"
         ],
         "sectors": [
           "Construction"
-        ]
+        ],
+        "requiredSkills": [],
+        "offeredSkills": [
+          "Temporary Crews",
+          "Labour Coordination",
+          "Resource Sharing"
+        ],
+        "certifications": [],
+        "targetRole": "Crew Supervisor"
       },
       "exchangeData": {
         "exchangeMode": "hybrid",
@@ -4668,7 +5383,61 @@
       "workspaceId": "ws-personal-seed-user-011",
       "ownerPartyId": "party-individual-seed-user-011",
       "createdByUserId": "seed-user-011",
-      "createdByActorType": "marketplace_user"
+      "createdByActorType": "marketplace_user",
+      "attributes": {
+        "startDate": "2026-07-01",
+        "tenderDeadline": "2026-12-31",
+        "locationRequirement": "Riyadh, Saudi Arabia",
+        "targetRole": "Crew Supervisor",
+        "coreSkills": [
+          "Temporary Crews",
+          "Labour Coordination",
+          "Resource Sharing"
+        ]
+      },
+      "normalized": {
+        "skills": [
+          "Temporary Crews",
+          "Labour Coordination",
+          "Resource Sharing"
+        ],
+        "requiredServices": [],
+        "offeredServices": [
+          "Temporary Crews",
+          "Labour Coordination",
+          "Resource Sharing"
+        ],
+        "role": "Crew Supervisor",
+        "coreSkills": [
+          "Temporary Crews",
+          "Labour Coordination",
+          "Resource Sharing"
+        ],
+        "categories": [
+          "resource_pooling",
+          "resource_sharing",
+          "Construction"
+        ],
+        "budget": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh, Saudi Arabia",
+        "reputation": 0.5,
+        "intent": "offer",
+        "modelType": "resource_pooling",
+        "subModelType": "resource_sharing"
+      }
     },
     {
       "id": "seed-opp-demo-prof-hiring",
@@ -4696,18 +5465,27 @@
       },
       "location": "Riyadh, Saudi Arabia",
       "skills": [
-        "Project Management",
-        "Coordination",
-        "professional hiring"
+        "Scheduling",
+        "Primavera",
+        "Hiring"
       ],
       "scope": {
         "coreSkills": [
-          "Project Management",
-          "Coordination"
+          "Scheduling",
+          "Primavera",
+          "Hiring"
         ],
         "sectors": [
           "Construction"
-        ]
+        ],
+        "requiredSkills": [
+          "Scheduling",
+          "Primavera",
+          "Hiring"
+        ],
+        "offeredSkills": [],
+        "certifications": [],
+        "targetRole": "Planning Engineer"
       },
       "exchangeData": {
         "exchangeMode": "cash",
@@ -4731,7 +5509,61 @@
       "workspaceId": "ws-company-seed-co-corp-002",
       "ownerPartyId": "party-company-seed-co-corp-002",
       "createdByUserId": "system-migration-actor",
-      "createdByActorType": "system"
+      "createdByActorType": "system",
+      "attributes": {
+        "startDate": "2026-07-01",
+        "tenderDeadline": "2026-12-31",
+        "locationRequirement": "Riyadh, Saudi Arabia",
+        "targetRole": "Planning Engineer",
+        "coreSkills": [
+          "Scheduling",
+          "Primavera",
+          "Hiring"
+        ]
+      },
+      "normalized": {
+        "skills": [
+          "Scheduling",
+          "Primavera",
+          "Hiring"
+        ],
+        "requiredServices": [
+          "Scheduling",
+          "Primavera",
+          "Hiring"
+        ],
+        "offeredServices": [],
+        "role": "Planning Engineer",
+        "coreSkills": [
+          "Scheduling",
+          "Primavera",
+          "Hiring"
+        ],
+        "categories": [
+          "hiring",
+          "professional_hiring",
+          "Construction"
+        ],
+        "budget": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh, Saudi Arabia",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "hiring",
+        "subModelType": "professional_hiring"
+      }
     },
     {
       "id": "seed-opp-demo-consultant",
@@ -4761,18 +5593,27 @@
       },
       "location": "Riyadh, Saudi Arabia",
       "skills": [
-        "Project Management",
-        "Coordination",
-        "consultant hiring"
+        "Claims Management",
+        "Contract Administration",
+        "Consulting"
       ],
       "scope": {
         "coreSkills": [
-          "Project Management",
-          "Coordination"
+          "Claims Management",
+          "Contract Administration",
+          "Consulting"
         ],
         "sectors": [
           "Construction"
-        ]
+        ],
+        "requiredSkills": [
+          "Claims Management",
+          "Contract Administration",
+          "Consulting"
+        ],
+        "offeredSkills": [],
+        "certifications": [],
+        "targetRole": "Claims Specialist"
       },
       "exchangeData": {
         "exchangeMode": "hybrid",
@@ -4797,7 +5638,61 @@
       "workspaceId": "ws-personal-seed-user-012",
       "ownerPartyId": "party-individual-seed-user-012",
       "createdByUserId": "seed-user-012",
-      "createdByActorType": "marketplace_user"
+      "createdByActorType": "marketplace_user",
+      "attributes": {
+        "startDate": "2026-07-01",
+        "tenderDeadline": "2026-12-31",
+        "locationRequirement": "Riyadh, Saudi Arabia",
+        "targetRole": "Claims Specialist",
+        "coreSkills": [
+          "Claims Management",
+          "Contract Administration",
+          "Consulting"
+        ]
+      },
+      "normalized": {
+        "skills": [
+          "Claims Management",
+          "Contract Administration",
+          "Consulting"
+        ],
+        "requiredServices": [
+          "Claims Management",
+          "Contract Administration",
+          "Consulting"
+        ],
+        "offeredServices": [],
+        "role": "Claims Specialist",
+        "coreSkills": [
+          "Claims Management",
+          "Contract Administration",
+          "Consulting"
+        ],
+        "categories": [
+          "hiring",
+          "consultant_hiring",
+          "Construction"
+        ],
+        "budget": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh, Saudi Arabia",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "hiring",
+        "subModelType": "consultant_hiring"
+      }
     },
     {
       "id": "seed-opp-demo-rfp",
@@ -4825,18 +5720,27 @@
       },
       "location": "Riyadh, Saudi Arabia",
       "skills": [
-        "Project Management",
-        "Coordination",
-        "competition rfp"
+        "Facade Design",
+        "Architectural Design",
+        "RFP Response"
       ],
       "scope": {
         "coreSkills": [
-          "Project Management",
-          "Coordination"
+          "Facade Design",
+          "Architectural Design",
+          "RFP Response"
         ],
         "sectors": [
           "Construction"
-        ]
+        ],
+        "requiredSkills": [
+          "Facade Design",
+          "Architectural Design",
+          "RFP Response"
+        ],
+        "offeredSkills": [],
+        "certifications": [],
+        "targetRole": "Facade Designer"
       },
       "exchangeData": {
         "exchangeMode": "hybrid",
@@ -4860,7 +5764,61 @@
       "workspaceId": "ws-company-seed-co-corp-003",
       "ownerPartyId": "party-company-seed-co-corp-003",
       "createdByUserId": "system-migration-actor",
-      "createdByActorType": "system"
+      "createdByActorType": "system",
+      "attributes": {
+        "startDate": "2026-07-01",
+        "tenderDeadline": "2026-12-31",
+        "locationRequirement": "Riyadh, Saudi Arabia",
+        "targetRole": "Facade Designer",
+        "coreSkills": [
+          "Facade Design",
+          "Architectural Design",
+          "RFP Response"
+        ]
+      },
+      "normalized": {
+        "skills": [
+          "Facade Design",
+          "Architectural Design",
+          "RFP Response"
+        ],
+        "requiredServices": [
+          "Facade Design",
+          "Architectural Design",
+          "RFP Response"
+        ],
+        "offeredServices": [],
+        "role": "Facade Designer",
+        "coreSkills": [
+          "Facade Design",
+          "Architectural Design",
+          "RFP Response"
+        ],
+        "categories": [
+          "competition",
+          "competition_rfp",
+          "Construction"
+        ],
+        "budget": {
+          "min": 90000,
+          "max": 550000,
+          "currency": "SAR"
+        },
+        "timeline": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "deadline": "2026-12-31",
+        "availability": {
+          "start": "2026-07-01",
+          "end": "2026-12-31"
+        },
+        "location": "Riyadh, Saudi Arabia",
+        "reputation": 0.5,
+        "intent": "request",
+        "modelType": "competition",
+        "subModelType": "competition_rfp"
+      }
     }
   ]
 }

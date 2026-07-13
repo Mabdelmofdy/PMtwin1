@@ -29,6 +29,7 @@ import {
   parseEnvironmentImportJson,
   validateEnvironmentImportPayload,
 } from '@/infrastructure/environment/environment-import-service.ts'
+import { DemoWalkthroughPanel } from '@/components/admin/demo-walkthrough-panel.tsx'
 import {
   loadApplications,
   loadContracts,
@@ -277,6 +278,7 @@ export function EnvironmentManagementPanel() {
   }
 
   return (
+    <div className="space-y-5">
     <PmContentCard
       title="Environment management"
       description="Runtime metadata and demo scenario controls."
@@ -378,6 +380,8 @@ export function EnvironmentManagementPanel() {
         )}
       </div>
     </PmContentCard>
+    <DemoWalkthroughPanel />
+    </div>
   )
 }
 

@@ -12,6 +12,8 @@ import {
   userRepository,
 } from '@/repositories/index.ts'
 
+import { buildDemoCastCoverageSnapshot } from '@/domain/admin/diagnostics/demo-cast-coverage.ts'
+
 export type DemoUatHealthCheck = {
   readonly id: string
   readonly label: string
@@ -95,6 +97,35 @@ export function buildDemoUatHealthSnapshot(): DemoUatHealthSnapshot {
         .join(', '),
     },
   ]
+
+  const castCoverage = buildDemoCastCoverageSnapshot()
+  checks.push({
+    id: 'cast_coverage',
+    label: 'Demo account cast coverage',
+    status: castCoverage.missingAccountIds.length === 0 ? 'ok' : 'warning',
+    detail:
+      castCoverage.missingAccountIds.length === 0
+        ? `${castCoverage.castAccounts}/${castCoverage.totalAccounts} accounts cast`
+        : `Missing ${castCoverage.missingAccountIds.length}: ${castCoverage.missingAccountIds.slice(0, 8).join(', ')}${castCoverage.missingAccountIds.length > 8 ? '…' : ''}`,
+  })
+  for (const chain of castCoverage.topologyChains) {
+    checks.push({
+      id: `topology_chain_${chain.matchType}`,
+      label: `Topology chain ${chain.matchType}`,
+      status: chain.complete ? 'ok' : 'warning',
+      detail: chain.complete
+        ? `${chain.matchId} → ${chain.dealId} → ${chain.contractId}`
+        : `Incomplete showcase chain for ${chain.matchType}`,
+    })
+  }
+  checks.push({
+    id: 'registry_topologies',
+    label: 'Demo registry topology coverage',
+    status: castCoverage.registryCoversAllTopologies ? 'ok' : 'warning',
+    detail: castCoverage.registryCoversAllTopologies
+      ? 'one_way, two_way, consortium, circular'
+      : 'Registry missing one or more match topologies',
+  })
 
   if (mode === 'production') {
     checks.push({
