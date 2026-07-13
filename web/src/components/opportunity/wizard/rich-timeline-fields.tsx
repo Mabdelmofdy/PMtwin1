@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { RichTimeline } from '@/domain/opportunity-creation'
+import { todayIso } from '@pm-twin/validation'
 
 export function RichTimelineFields({
   intent,
@@ -35,6 +36,8 @@ export function RichTimelineFields({
   locationStatus?: ReactNode
   startDateStatus?: ReactNode
 }) {
+  const minDate = todayIso()
+
   return (
     <div className="space-y-4" data-testid="rich-timeline-fields">
       <PmFormSection
@@ -66,6 +69,7 @@ export function RichTimelineFields({
             >
               <Input
                 type="date"
+                min={minDate}
                 value={startDate}
                 onChange={(e) => onStartDateChange(e.target.value)}
               />
@@ -76,6 +80,7 @@ export function RichTimelineFields({
             <PmFormField id="opp-deadline" label="Deadline">
               <Input
                 type="date"
+                min={minDate}
                 value={tenderDeadline}
                 onChange={(e) => onDeadlineChange(e.target.value)}
               />

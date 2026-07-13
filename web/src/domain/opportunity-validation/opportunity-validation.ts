@@ -101,7 +101,7 @@ export function toOpportunityValidationInput(
   }
 
   const collaboration = opportunity.collaborationAttributes as
-    | { structuredSkills?: unknown }
+    | { structuredSkills?: unknown; availabilityEndDate?: unknown }
     | undefined
   const intentRole =
     opportunity.intent === 'offer'
@@ -110,6 +110,12 @@ export function toOpportunityValidationInput(
   const structuredSkills =
     mapStructuredSkills(opportunity.structuredSkills, intentRole) ??
     mapStructuredSkills(collaboration?.structuredSkills, intentRole)
+  const tenderDeadline =
+    typeof attrs.tenderDeadline === 'string' ? attrs.tenderDeadline : undefined
+  const availabilityEndDate =
+    typeof collaboration?.availabilityEndDate === 'string'
+      ? collaboration.availabilityEndDate
+      : undefined
 
   return {
     id: opportunity.id,
@@ -130,7 +136,9 @@ export function toOpportunityValidationInput(
       (typeof attrs.startDate === 'string' ? attrs.startDate : undefined),
     endDate: opportunity.endDate,
     duration: opportunity.duration,
-    deliveryDeadline: opportunity.deliveryDeadline,
+    deliveryDeadline: opportunity.deliveryDeadline ?? tenderDeadline,
+    tenderDeadline,
+    availabilityEndDate,
     budget: opportunity.budget,
     ownerId: opportunity.ownerPartyId,
     creatorId: opportunity.creatorId,

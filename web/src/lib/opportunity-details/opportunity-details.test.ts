@@ -52,6 +52,28 @@ describe('opportunity-details-formatters', () => {
   it('marks timeline unscheduled when dates missing', () => {
     assert.equal(deriveTimelineState({}), 'unscheduled')
   })
+
+  it('does not mark date-only deadline of today as overdue', () => {
+    assert.equal(
+      deriveTimelineState({
+        startDate: '2026-07-10',
+        deadline: '2026-07-10',
+        today: '2026-07-10',
+      }),
+      'active',
+    )
+  })
+
+  it('marks deadline before today as overdue', () => {
+    assert.equal(
+      deriveTimelineState({
+        startDate: '2026-07-01',
+        deadline: '2026-07-09',
+        today: '2026-07-10',
+      }),
+      'overdue',
+    )
+  })
 })
 
 describe('opportunity-details-visibility', () => {

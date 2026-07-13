@@ -1,6 +1,7 @@
 /** Presentation formatters for Opportunity Details 4.0 — no domain mutations. */
 
 import { formatDate } from '@/lib/format.ts'
+import { parseIsoDate, todayIso } from '@pm-twin/validation'
 
 export function formatRelativeUpdatedAt(iso?: string | null): string | undefined {
   if (!iso) return undefined
@@ -45,10 +46,21 @@ export function formatDurationLabel(
 
 export type TimelineState = 'upcoming' | 'active' | 'overdue' | 'unscheduled' | 'completed'
 
+function toDateOnlyIso(value?: string | null): string | null {
+  if (!value) return null
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed
+  const parsed = parseIsoDate(trimmed)
+  if (!parsed) return null
+  return todayIso(parsed)
+}
+
 export function deriveTimelineState(input: {
   readonly startDate?: string | null
   readonly deadline?: string | null
   readonly opportunityStatus?: string | null
+  readonly today?: string
 }): TimelineState {
   const status = (input.opportunityStatus ?? '').toLowerCase()
   if (['completed', 'closed', 'cancelled'].includes(status)) {
@@ -57,12 +69,12 @@ export function deriveTimelineState(input: {
   if (['contracted', 'executing', 'in_execution'].includes(status)) {
     return 'active'
   }
-  const start = input.startDate ? Date.parse(input.startDate) : NaN
-  const deadline = input.deadline ? Date.parse(input.deadline) : NaN
-  const now = Date.now()
-  if (Number.isNaN(start) && Number.isNaN(deadline)) return 'unscheduled'
-  if (!Number.isNaN(deadline) && deadline < now) return 'overdue'
-  if (!Number.isNaN(start) && start > now) return 'upcoming'
+  const today = input.today ?? todayIso()
+  const startDay = toDateOnlyIso(input.startDate)
+  const deadlineDay = toDateOnlyIso(input.deadline)
+  if (!startDay && !deadlineDay) return 'unscheduled'
+  if (deadlineDay && deadlineDay < today) return 'overdue'
+  if (startDay && startDay > today) return 'upcoming'
   return 'active'
 }
 

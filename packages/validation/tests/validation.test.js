@@ -41,6 +41,15 @@ describe('date validation', () => {
     assert.ok(result.issues.some((i) => i.code === VAL_CODES.DATE_START_IN_PAST))
   })
 
+  it('allows start date equal to today', () => {
+    const result = validateOpportunityBusiness(
+      { title: 'T', startDate: '2026-07-10' },
+      { today: '2026-07-10', operationScope: 'draft' },
+      { groups: ['dates'] },
+    )
+    assert.ok(!result.issues.some((i) => i.code === VAL_CODES.DATE_START_IN_PAST))
+  })
+
   it('allows past start date when editing existing draft', () => {
     const result = validateOpportunityBusiness(
       { title: 'T', startDate: '2020-01-01' },
@@ -61,6 +70,85 @@ describe('date validation', () => {
       { groups: ['dates'] },
     )
     assert.ok(result.issues.some((i) => i.code === VAL_CODES.DATE_END_BEFORE_START))
+  })
+
+  it('allows end date equal to start date', () => {
+    const result = validateOpportunityBusiness(
+      { title: 'T', startDate: '2026-08-01', endDate: '2026-08-01' },
+      { today: '2026-07-10', operationScope: 'draft' },
+      { groups: ['dates'] },
+    )
+    assert.ok(!result.issues.some((i) => i.code === VAL_CODES.DATE_END_BEFORE_START))
+  })
+
+  it('rejects deadline in the past', () => {
+    const result = validateOpportunityBusiness(
+      { title: 'T', tenderDeadline: '2026-07-01' },
+      { today: '2026-07-10', operationScope: 'draft' },
+      { groups: ['dates'] },
+    )
+    assert.ok(result.issues.some((i) => i.code === VAL_CODES.DATE_DEADLINE_IN_PAST))
+  })
+
+  it('allows deadline equal to today', () => {
+    const result = validateOpportunityBusiness(
+      { title: 'T', tenderDeadline: '2026-07-10' },
+      { today: '2026-07-10', operationScope: 'draft' },
+      { groups: ['dates'] },
+    )
+    assert.ok(!result.issues.some((i) => i.code === VAL_CODES.DATE_DEADLINE_IN_PAST))
+  })
+
+  it('rejects availability end date in the past', () => {
+    const result = validateOpportunityBusiness(
+      { title: 'T', availabilityEndDate: '2026-07-01' },
+      { today: '2026-07-10', operationScope: 'draft' },
+      { groups: ['dates'] },
+    )
+    assert.ok(result.issues.some((i) => i.code === VAL_CODES.DATE_AVAILABILITY_END_IN_PAST))
+  })
+
+  it('allows availability end date equal to today', () => {
+    const result = validateOpportunityBusiness(
+      { title: 'T', availabilityEndDate: '2026-07-10' },
+      { today: '2026-07-10', operationScope: 'draft' },
+      { groups: ['dates'] },
+    )
+    assert.ok(!result.issues.some((i) => i.code === VAL_CODES.DATE_AVAILABILITY_END_IN_PAST))
+  })
+
+  it('allows deadline and availability end equal to start', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        startDate: '2026-08-01',
+        tenderDeadline: '2026-08-01',
+        availabilityEndDate: '2026-08-01',
+      },
+      { today: '2026-07-10', operationScope: 'draft' },
+      { groups: ['dates'] },
+    )
+    assert.ok(!result.issues.some((i) => i.code === VAL_CODES.DATE_DEADLINE_BEFORE_START))
+    assert.ok(
+      !result.issues.some((i) => i.code === VAL_CODES.DATE_AVAILABILITY_END_BEFORE_START),
+    )
+  })
+
+  it('rejects deadline and availability end before start', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        startDate: '2026-08-10',
+        tenderDeadline: '2026-08-01',
+        availabilityEndDate: '2026-08-05',
+      },
+      { today: '2026-07-10', operationScope: 'draft' },
+      { groups: ['dates'] },
+    )
+    assert.ok(result.issues.some((i) => i.code === VAL_CODES.DATE_DEADLINE_BEFORE_START))
+    assert.ok(
+      result.issues.some((i) => i.code === VAL_CODES.DATE_AVAILABILITY_END_BEFORE_START),
+    )
   })
 
   it('warns when start is within configured hours', () => {

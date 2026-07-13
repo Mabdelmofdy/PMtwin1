@@ -9,11 +9,18 @@ const MESSAGES: Readonly<Record<string, string>> = {
   [VAL_CODES.FIELD_ARRAY_EMPTY]: 'At least one item is required.',
 
   [VAL_CODES.DATE_START_IN_PAST]: 'Start date cannot be in the past.',
-  [VAL_CODES.DATE_END_BEFORE_START]: 'End date must be after start date.',
+  [VAL_CODES.DATE_END_BEFORE_START]: 'End date cannot be before start date.',
   [VAL_CODES.DATE_DURATION_INVALID]: 'Duration must be greater than zero.',
   [VAL_CODES.DATE_DELIVERY_AFTER_END]:
     'Delivery deadline cannot be after the project end date.',
   [VAL_CODES.DATE_START_SOON]: 'Start date is within less than 48 hours.',
+  [VAL_CODES.DATE_DEADLINE_IN_PAST]: 'Deadline cannot be in the past.',
+  [VAL_CODES.DATE_AVAILABILITY_END_IN_PAST]:
+    'Availability end date cannot be in the past.',
+  [VAL_CODES.DATE_DEADLINE_BEFORE_START]:
+    'Deadline cannot be before start date.',
+  [VAL_CODES.DATE_AVAILABILITY_END_BEFORE_START]:
+    'Availability end date cannot be before start date.',
 
   [VAL_CODES.BUDGET_CASH_REQUIRED]: 'Budget is required for cash exchange.',
   [VAL_CODES.BUDGET_BELOW_MINIMUM]: 'Budget is below the configured minimum.',

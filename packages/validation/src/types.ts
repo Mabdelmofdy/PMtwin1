@@ -74,6 +74,10 @@ export type OpportunityValidationInput = {
   readonly endDate?: string
   readonly duration?: number | string
   readonly deliveryDeadline?: string
+  /** Wizard Deadline field (`attributes.tenderDeadline`). */
+  readonly tenderDeadline?: string
+  /** Availability end date (collaboration attributes). */
+  readonly availabilityEndDate?: string
   readonly budget?: number
   readonly budgetMin?: number
   readonly budgetMax?: number

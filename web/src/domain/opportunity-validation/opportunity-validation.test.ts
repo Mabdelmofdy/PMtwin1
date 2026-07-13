@@ -31,6 +31,32 @@ describe('opportunity validation web adapter', () => {
     assert.ok(result.messages.every((m) => !m.includes('VAL_')))
   })
 
+  it('allows same-day start, deadline, and availability end', () => {
+    const result = runDraftValidation(
+      {
+        title: 'Draft title',
+        startDate: '2026-07-10',
+        attributes: { tenderDeadline: '2026-07-10' },
+        collaborationAttributes: { availabilityEndDate: '2026-07-10' },
+      },
+      { today: '2026-07-10' },
+    )
+    assert.equal(result.blocked, false)
+    assert.ok(!result.messages.some((m) => /past|before start/i.test(m)))
+  })
+
+  it('blocks past tender deadline from attributes', () => {
+    const result = runDraftValidation(
+      {
+        title: 'Draft title',
+        startDate: '2026-07-10',
+        attributes: { tenderDeadline: '2026-07-01' },
+      },
+      { today: '2026-07-10' },
+    )
+    assert.equal(result.blocked, true)
+  })
+
   it('targeted groups only run selected rules', () => {
     const result = validateGroups(
       {

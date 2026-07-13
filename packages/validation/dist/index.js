@@ -46,6 +46,10 @@ var VAL_CODES = {
   DATE_DURATION_INVALID: "VAL_DATE_DURATION_INVALID",
   DATE_DELIVERY_AFTER_END: "VAL_DATE_DELIVERY_AFTER_END",
   DATE_START_SOON: "VAL_DATE_START_SOON",
+  DATE_DEADLINE_IN_PAST: "VAL_DATE_DEADLINE_IN_PAST",
+  DATE_AVAILABILITY_END_IN_PAST: "VAL_DATE_AVAILABILITY_END_IN_PAST",
+  DATE_DEADLINE_BEFORE_START: "VAL_DATE_DEADLINE_BEFORE_START",
+  DATE_AVAILABILITY_END_BEFORE_START: "VAL_DATE_AVAILABILITY_END_BEFORE_START",
   BUDGET_CASH_REQUIRED: "VAL_BUDGET_CASH_REQUIRED",
   BUDGET_BELOW_MINIMUM: "VAL_BUDGET_BELOW_MINIMUM",
   BUDGET_PROFIT_FIELDS_REQUIRED: "VAL_BUDGET_PROFIT_FIELDS_REQUIRED",
@@ -100,10 +104,14 @@ var MESSAGES = {
   [VAL_CODES.FIELD_PERCENT_RANGE]: "Percentage must be between 0 and 100.",
   [VAL_CODES.FIELD_ARRAY_EMPTY]: "At least one item is required.",
   [VAL_CODES.DATE_START_IN_PAST]: "Start date cannot be in the past.",
-  [VAL_CODES.DATE_END_BEFORE_START]: "End date must be after start date.",
+  [VAL_CODES.DATE_END_BEFORE_START]: "End date cannot be before start date.",
   [VAL_CODES.DATE_DURATION_INVALID]: "Duration must be greater than zero.",
   [VAL_CODES.DATE_DELIVERY_AFTER_END]: "Delivery deadline cannot be after the project end date.",
   [VAL_CODES.DATE_START_SOON]: "Start date is within less than 48 hours.",
+  [VAL_CODES.DATE_DEADLINE_IN_PAST]: "Deadline cannot be in the past.",
+  [VAL_CODES.DATE_AVAILABILITY_END_IN_PAST]: "Availability end date cannot be in the past.",
+  [VAL_CODES.DATE_DEADLINE_BEFORE_START]: "Deadline cannot be before start date.",
+  [VAL_CODES.DATE_AVAILABILITY_END_BEFORE_START]: "Availability end date cannot be before start date.",
   [VAL_CODES.BUDGET_CASH_REQUIRED]: "Budget is required for cash exchange.",
   [VAL_CODES.BUDGET_BELOW_MINIMUM]: "Budget is below the configured minimum.",
   [VAL_CODES.BUDGET_PROFIT_FIELDS_REQUIRED]: "Profit share percentage, revenue basis, and settlement cycle are required.",
@@ -219,7 +227,10 @@ function hasText(value) {
 }
 function todayIso(now) {
   const d = now ?? /* @__PURE__ */ new Date();
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 function parseIsoDate(value) {
   if (!hasText(value)) return null;
@@ -377,6 +388,9 @@ function dateIssue(code, fieldPaths, severity) {
     group: "dates"
   };
 }
+function resolveDeadline(input) {
+  return input.deliveryDeadline || input.tenderDeadline || void 0;
+}
 var dateStartInPast = {
   id: "date-start-in-past",
   code: VAL_CODES.DATE_START_IN_PAST,
@@ -409,7 +423,7 @@ var dateEndBeforeStart = {
     const start = parseIsoDate(input.startDate);
     const end = parseIsoDate(input.endDate);
     if (!start || !end) return null;
-    if (end.getTime() > start.getTime()) return null;
+    if (end.getTime() >= start.getTime()) return null;
     return dateIssue(VAL_CODES.DATE_END_BEFORE_START, ["endDate"], "error");
   }
 };
@@ -440,7 +454,7 @@ var dateDeliveryAfterEnd = {
   fieldPaths: ["deliveryDeadline", "endDate"],
   group: "dates",
   execute(input) {
-    const delivery = parseIsoDate(input.deliveryDeadline);
+    const delivery = parseIsoDate(resolveDeadline(input));
     const end = parseIsoDate(input.endDate);
     if (!delivery || !end) return null;
     if (delivery.getTime() <= end.getTime()) return null;
@@ -465,12 +479,98 @@ var dateStartSoon = {
     return dateIssue(VAL_CODES.DATE_START_SOON, ["startDate"], "warning");
   }
 };
+var dateDeadlineInPast = {
+  id: "date-deadline-in-past",
+  code: VAL_CODES.DATE_DEADLINE_IN_PAST,
+  layer: "business",
+  source: "business",
+  severity: "error",
+  scope: DRAFT_UPDATE_PUBLISH2,
+  fieldPaths: ["tenderDeadline", "deliveryDeadline"],
+  group: "dates",
+  execute(input, context) {
+    if (context.isExistingDraft) return null;
+    const deadline = parseIsoDate(resolveDeadline(input));
+    if (!deadline) return null;
+    const today = parseIsoDate(context.today ?? todayIso(context.now));
+    if (!today) return null;
+    if (deadline.getTime() >= today.getTime()) return null;
+    const path = input.tenderDeadline ? "tenderDeadline" : "deliveryDeadline";
+    return dateIssue(VAL_CODES.DATE_DEADLINE_IN_PAST, [path], "error");
+  }
+};
+var dateAvailabilityEndInPast = {
+  id: "date-availability-end-in-past",
+  code: VAL_CODES.DATE_AVAILABILITY_END_IN_PAST,
+  layer: "business",
+  source: "business",
+  severity: "error",
+  scope: DRAFT_UPDATE_PUBLISH2,
+  fieldPaths: ["availabilityEndDate"],
+  group: "dates",
+  execute(input, context) {
+    if (context.isExistingDraft) return null;
+    const end = parseIsoDate(input.availabilityEndDate);
+    if (!end) return null;
+    const today = parseIsoDate(context.today ?? todayIso(context.now));
+    if (!today) return null;
+    if (end.getTime() >= today.getTime()) return null;
+    return dateIssue(
+      VAL_CODES.DATE_AVAILABILITY_END_IN_PAST,
+      ["availabilityEndDate"],
+      "error"
+    );
+  }
+};
+var dateDeadlineBeforeStart = {
+  id: "date-deadline-before-start",
+  code: VAL_CODES.DATE_DEADLINE_BEFORE_START,
+  layer: "business",
+  source: "business",
+  severity: "error",
+  scope: DRAFT_UPDATE_PUBLISH2,
+  fieldPaths: ["tenderDeadline", "deliveryDeadline", "startDate"],
+  group: "dates",
+  execute(input) {
+    const start = parseIsoDate(input.startDate);
+    const deadline = parseIsoDate(resolveDeadline(input));
+    if (!start || !deadline) return null;
+    if (deadline.getTime() >= start.getTime()) return null;
+    const path = input.tenderDeadline ? "tenderDeadline" : "deliveryDeadline";
+    return dateIssue(VAL_CODES.DATE_DEADLINE_BEFORE_START, [path], "error");
+  }
+};
+var dateAvailabilityEndBeforeStart = {
+  id: "date-availability-end-before-start",
+  code: VAL_CODES.DATE_AVAILABILITY_END_BEFORE_START,
+  layer: "business",
+  source: "business",
+  severity: "error",
+  scope: DRAFT_UPDATE_PUBLISH2,
+  fieldPaths: ["availabilityEndDate", "startDate"],
+  group: "dates",
+  execute(input) {
+    const start = parseIsoDate(input.startDate);
+    const end = parseIsoDate(input.availabilityEndDate);
+    if (!start || !end) return null;
+    if (end.getTime() >= start.getTime()) return null;
+    return dateIssue(
+      VAL_CODES.DATE_AVAILABILITY_END_BEFORE_START,
+      ["availabilityEndDate"],
+      "error"
+    );
+  }
+};
 var DATE_RULES = [
   dateStartInPast,
   dateEndBeforeStart,
   dateDurationInvalid,
   dateDeliveryAfterEnd,
-  dateStartSoon
+  dateStartSoon,
+  dateDeadlineInPast,
+  dateAvailabilityEndInPast,
+  dateDeadlineBeforeStart,
+  dateAvailabilityEndBeforeStart
 ];
 
 // src/business/budget.ts
@@ -1637,8 +1737,10 @@ export {
   issuesForOperation,
   mergeValidationConfig,
   messageForCode,
+  parseIsoDate,
   runRules,
   shouldBlockOperation,
+  todayIso,
   validateOpportunityBusiness,
   validateOpportunityDraft,
   validateOpportunityFields

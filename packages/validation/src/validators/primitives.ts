@@ -9,9 +9,13 @@ export function hasText(value: unknown): boolean {
   return typeof value === 'string' && value.trim().length > 0
 }
 
+/** Local calendar day as YYYY-MM-DD (aligns with `<input type="date">`). */
 export function todayIso(now?: Date): string {
   const d = now ?? new Date()
-  return d.toISOString().slice(0, 10)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 export function parseIsoDate(value: unknown): Date | null {

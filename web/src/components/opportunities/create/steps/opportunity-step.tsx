@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/tokens'
+import { todayIso } from '@pm-twin/validation'
 
 export type OpportunityStepProps = {
   draft: OpportunityDraft
@@ -52,6 +53,7 @@ export function OpportunityStep({ draft, onChange }: OpportunityStepProps) {
   const isOffer = draft.intent === 'offer'
   const skillsHint = isOffer ? 'Skills Offered' : 'Skills Required'
   const servicesHint = isOffer ? 'Services Offered' : 'Services Required'
+  const minDate = todayIso()
 
   return (
     <div data-slot="opportunity-step" className="space-y-8">
@@ -151,6 +153,7 @@ export function OpportunityStep({ draft, onChange }: OpportunityStepProps) {
               <Input
                 data-field-id="startDate"
                 type="date"
+                min={minDate}
                 value={draft.startDate}
                 onChange={(e) => onChange({ startDate: e.target.value })}
               />
@@ -161,6 +164,7 @@ export function OpportunityStep({ draft, onChange }: OpportunityStepProps) {
               <Input
                 data-field-id="tenderDeadline"
                 type="date"
+                min={minDate}
                 value={draft.tenderDeadline}
                 onChange={(e) => onChange({ tenderDeadline: e.target.value })}
               />
@@ -169,7 +173,9 @@ export function OpportunityStep({ draft, onChange }: OpportunityStepProps) {
           <PmFormGridItem span={1}>
             <PmFormField id="availabilityEndDate" label="Availability end date (recommended)">
               <Input
+                data-field-id="availabilityEndDate"
                 type="date"
+                min={minDate}
                 value={draft.availabilityEndDate}
                 onChange={(e) => onChange({ availabilityEndDate: e.target.value })}
               />

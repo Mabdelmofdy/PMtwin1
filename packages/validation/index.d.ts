@@ -56,3 +56,5 @@ export {
   evaluatePublishValidation,
   formatPublishValidationMessages,
 } from './src/publish/evaluate-publish-validation.ts'
+
+export { todayIso, parseIsoDate } from './src/validators/primitives.ts'

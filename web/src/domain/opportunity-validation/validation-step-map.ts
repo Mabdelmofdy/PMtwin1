@@ -34,6 +34,8 @@ const PATH_PREFIX_TO_STEP: ReadonlyArray<readonly [string, WizardStepId]> = [
   ['startDate', 'opportunity'],
   ['endDate', 'opportunity'],
   ['deliveryDeadline', 'opportunity'],
+  ['tenderDeadline', 'opportunity'],
+  ['availabilityEndDate', 'opportunity'],
   ['duration', 'scope_work'],
   ['location', 'opportunity'],
   ['country', 'opportunity'],
@@ -52,19 +54,30 @@ const PATH_PREFIX_TO_STEP: ReadonlyArray<readonly [string, WizardStepId]> = [
 export function resolveStepForValidationIssue(
   issue: ValidationIssue,
 ): WizardStepId {
+  const paths = [
+    ...(issue.fieldPaths ?? []),
+    String(
+      (issue as { path?: string; field?: string }).path
+        ?? (issue as { field?: string }).field
+        ?? '',
+    ),
+  ].filter(Boolean)
+
+  for (const path of paths) {
+    for (const [prefix, step] of PATH_PREFIX_TO_STEP) {
+      if (
+        path === prefix ||
+        path.startsWith(`${prefix}.`) ||
+        path.startsWith(`${prefix}[`)
+      ) {
+        return step
+      }
+    }
+    if (FIELD_TO_WIZARD_STEP[path]) return FIELD_TO_WIZARD_STEP[path]!
+  }
+
   const group = (issue as { group?: string }).group
   if (group && GROUP_TO_STEP[group]) return GROUP_TO_STEP[group]!
 
-  const path = String(
-    (issue as { path?: string; field?: string }).path
-      ?? (issue as { field?: string }).field
-      ?? '',
-  )
-  for (const [prefix, step] of PATH_PREFIX_TO_STEP) {
-    if (path === prefix || path.startsWith(`${prefix}.`) || path.startsWith(`${prefix}[`)) {
-      return step
-    }
-  }
-  if (FIELD_TO_WIZARD_STEP[path]) return FIELD_TO_WIZARD_STEP[path]!
   return normalizeWizardStepId('review')
 }

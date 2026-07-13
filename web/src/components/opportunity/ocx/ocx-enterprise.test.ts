@@ -89,7 +89,7 @@ describe('validation step map', () => {
       layer: 'business',
       group: 'needOffer',
     })
-    assert.equal(step, 'opportunity')
+    assert.equal(step, 'collaboration')
   })
 
   it('maps exchange commercial issues to commercial step', () => {
