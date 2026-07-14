@@ -18,8 +18,6 @@ import {
   PmContentCard,
   PmBrowsePage,
   PmBrowseToolbar,
-  countAccessibleDraftOpportunities,
-  countActiveMatches,
   summarizeOpportunityListHero,
 } from '@/components/layout/pm-layout-index'
 import { PmBadge, PmButton, PmEmptyState, PmFilterChips, PmPage, PmPageHeader, PmPageHeroMetric, PmPageActions, PmSurface } from '@/components/ui/pm-index'
@@ -33,11 +31,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { matchesApi } from '@/api/matches.ts'
-import { peopleApi } from '@/api/people.ts'
 import {
   buildViewerContext,
-  filterPostMatchesForViewer,
   isDraftOpportunity,
 } from '@/lib/entity-view-visibility.ts'
 import {
@@ -55,6 +50,7 @@ import { resolveMainCollaborationModelLabel } from '@/domain/collaboration/oppor
 import { OpportunityWizardPage } from '@/components/opportunity/wizard/opportunity-wizard-page.tsx'
 import { OpportunityMapView } from '@/components/opportunity/opportunity-map-view.tsx'
 import { resolvePublishedOpportunityMapPoints } from '@/services/geospatial/location-coordinates.ts'
+import { peopleApi } from '@/api/people.ts'
 
 function parseCsvParam(raw: string | null): string[] {
   if (!raw) return []
@@ -121,35 +117,11 @@ export function OpportunitiesPage() {
     [allOpportunities, ownershipFilter, viewer, user?.organizationId],
   )
 
-  // Hero follows the same visibility rules as the list. Draft badge is always
-  // owner-scoped only — never a global draft total (0 on marketplace/company).
-  const heroSummary = useMemo(() => {
-    const tabSummary = summarizeOpportunityListHero(ownershipScoped)
-    if (ownershipFilter !== 'mine') {
-      return { ...tabSummary, draftCount: 0 }
-    }
-    return {
-      ...tabSummary,
-      draftCount: countAccessibleDraftOpportunities(allOpportunities, viewer),
-    }
-  }, [ownershipScoped, ownershipFilter, allOpportunities, viewer])
-
-  const totalMatches = useMemo(() => {
-    const ownedIds = new Set(
-      filterOpportunitiesByOwnershipFilter(
-        allOpportunities,
-        viewer,
-        'mine',
-        (creatorId) => peopleApi.get(creatorId)?.organizationId,
-        user?.organizationId,
-      ).map((opportunity) => opportunity.id),
-    )
-    return countActiveMatches(
-      filterPostMatchesForViewer(matchesApi.list(), viewer, {
-        ownedOpportunityIds: ownedIds,
-      }),
-    )
-  }, [allOpportunities, viewer, user?.organizationId])
+  // Portfolio hero uses the same scoped set as the list (before search/filters).
+  const heroSummary = useMemo(
+    () => summarizeOpportunityListHero(ownershipScoped),
+    [ownershipScoped],
+  )
 
   const opportunities = useMemo(() => {
     return ownershipScoped.filter((o) => {
@@ -250,15 +222,18 @@ export function OpportunitiesPage() {
           tone="opportunity"
           metric={
             <PmPageHeroMetric
-              value={heroSummary.activeCount}
-              label="Active"
+              value={heroSummary.totalCount}
+              label="Total"
             />
           }
           badges={
             <>
-              <PmBadge tone="muted">{heroSummary.draftCount} drafts</PmBadge>
+              {ownershipFilter === 'mine' ? (
+                <PmBadge tone="muted">{heroSummary.draftCount} draft</PmBadge>
+              ) : null}
               <PmBadge tone="primary">{heroSummary.publishedCount} published</PmBadge>
-              <PmBadge tone="info">{totalMatches} matches</PmBadge>
+              <PmBadge tone="info">{heroSummary.inProgressCount} in progress</PmBadge>
+              <PmBadge tone="success">{heroSummary.completedCount} completed</PmBadge>
             </>
           }
           actions={

@@ -15,20 +15,26 @@ import {
 import type { Opportunity } from '@/types/domain.ts'
 
 export type OpportunityListHeroSummary = {
-  readonly activeCount: number
+  /** All opportunities in the scoped portfolio — equals list source count. */
+  readonly totalCount: number
   readonly draftCount: number
   readonly publishedCount: number
+  readonly inProgressCount: number
+  readonly completedCount: number
+  /** Non-terminal opportunities (excludes completed / cancelled). */
+  readonly activeCount: number
+  /** @deprecated use inProgressCount */
   readonly inPipelineCount: number
 }
 
-/** Summarize opportunity list counts for hero metric and badges. */
+/** Summarize opportunity portfolio counts for hero metric and badges. */
 export function summarizeOpportunityListHero(
   opportunities: readonly { status?: string }[],
 ): OpportunityListHeroSummary {
-  let activeCount = 0
   let draftCount = 0
   let publishedCount = 0
-  let inPipelineCount = 0
+  let inProgressCount = 0
+  let completedCount = 0
 
   for (const opp of opportunities) {
     const canonical = resolveCanonicalStatus('opportunity', opp.status)
@@ -38,25 +44,35 @@ export function summarizeOpportunityListHero(
         break
       case 'published':
         publishedCount += 1
-        activeCount += 1
         break
       case 'matched':
       case 'negotiating':
       case 'contracted':
       case 'executing':
-        inPipelineCount += 1
-        activeCount += 1
+        inProgressCount += 1
         break
       case 'completed':
       case 'cancelled':
+        completedCount += 1
         break
       default:
-        activeCount += 1
+        inProgressCount += 1
         break
     }
   }
 
-  return { activeCount, draftCount, publishedCount, inPipelineCount }
+  const totalCount = draftCount + publishedCount + inProgressCount + completedCount
+  const activeCount = totalCount - completedCount
+
+  return {
+    totalCount,
+    draftCount,
+    publishedCount,
+    inProgressCount,
+    completedCount,
+    activeCount,
+    inPipelineCount: inProgressCount,
+  }
 }
 
 /** Drafts the current viewer may access — never a global draft total. */

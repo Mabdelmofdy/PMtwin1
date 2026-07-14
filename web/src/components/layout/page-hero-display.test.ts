@@ -14,7 +14,7 @@ import { buildViewerContext } from '@/lib/entity-view-visibility.ts'
 import type { Opportunity } from '@/types/domain.ts'
 
 describe('page-hero-display', () => {
-  it('summarizes opportunity list hero counts', () => {
+  it('summarizes opportunity portfolio hero counts', () => {
     const summary = summarizeOpportunityListHero([
       { status: 'draft' },
       { status: 'published' },
@@ -25,8 +25,20 @@ describe('page-hero-display', () => {
 
     assert.equal(summary.draftCount, 1)
     assert.equal(summary.publishedCount, 1)
-    assert.equal(summary.inPipelineCount, 2)
-    assert.equal(summary.activeCount, 3)
+    assert.equal(summary.inProgressCount, 2)
+    assert.equal(summary.completedCount, 1)
+    assert.equal(summary.totalCount, 5)
+    assert.equal(summary.activeCount, 4)
+    assert.equal(summary.inPipelineCount, summary.inProgressCount)
+  })
+
+  it('groups cancelled opportunities with completed', () => {
+    const summary = summarizeOpportunityListHero([
+      { status: 'cancelled' },
+      { status: 'completed' },
+    ])
+    assert.equal(summary.completedCount, 2)
+    assert.equal(summary.totalCount, 2)
   })
 
   it('counts only accessible drafts for the viewer', () => {
@@ -51,8 +63,12 @@ describe('page-hero-display', () => {
 
   it('counts active opportunities', () => {
     assert.equal(
-      countActiveOpportunities([{ status: 'draft' }, { status: 'published' }]),
-      1,
+      countActiveOpportunities([
+        { status: 'draft' },
+        { status: 'published' },
+        { status: 'completed' },
+      ]),
+      2,
     )
   })
 

@@ -28,6 +28,16 @@ describe('OpportunitiesPage browse layout contract', () => {
     assert.match(source, /md:grid-cols-2 xl:grid-cols-3/)
   })
 
+  it('shows portfolio lifecycle breakdown in hero badges', () => {
+    const fnStart = source.indexOf('export function OpportunitiesPage')
+    const fnEnd = source.indexOf('export function OpportunityMapPage')
+    const opportunitiesPageSource = source.slice(fnStart, fnEnd)
+    assert.match(opportunitiesPageSource, /heroSummary\.totalCount/)
+    assert.match(opportunitiesPageSource, /heroSummary\.inProgressCount/)
+    assert.match(opportunitiesPageSource, /heroSummary\.completedCount/)
+    assert.match(opportunitiesPageSource, /in progress/)
+  })
+
   it('supports enterprise taxonomy filter parameters and chips', () => {
     assert.match(source, /useSearchParams/)
     assert.match(source, /mainModel|mainModels/)
