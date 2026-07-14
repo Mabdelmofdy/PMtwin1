@@ -6,6 +6,10 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  build: {
+    // Main app chunk includes seed data and workspace routes; suppress noisy size warning on Vercel.
+    chunkSizeWarningLimit: 2500,
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
