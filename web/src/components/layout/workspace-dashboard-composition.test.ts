@@ -19,5 +19,6 @@ describe('WorkspaceDashboardComposition intelligence contract', () => {
   it('uses canonical analytics builders for dashboard KPIs', () => {
     assert.match(source, /buildReadinessAnalytics/)
     assert.match(source, /buildMatchingQualityAnalytics/)
+    assert.doesNotMatch(source, /averageScore \* 100/)
   })
 })

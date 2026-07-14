@@ -558,7 +558,7 @@ export function WorkspaceDashboardComposition() {
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <PmSurface variant="muted" shadow="card" className="p-4 md:p-5">
           <p className={cn(pmTypography.caption, 'text-muted-foreground')}>Portfolio readiness</p>
-          <p className={cn(pmTypography.stat, 'mt-1 tabular-nums')}>{Math.round(readinessAnalytics.opportunities.averageScore * 100)}%</p>
+          <p className={cn(pmTypography.stat, 'mt-1 tabular-nums')}>{Math.round(readinessAnalytics.opportunities.averageScore)}%</p>
           <p className={cn(pmTypography.caption, 'mt-1')}>{readinessAnalytics.opportunities.ready} ready opportunities</p>
           <PmButton size="sm" variant="ghost" asChild className="mt-2 px-0">
             <Link to="/intelligence/portfolio">Open portfolio</Link>
