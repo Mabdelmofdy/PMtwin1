@@ -1,20 +1,22 @@
 import { useMemo } from 'react'
 import { dealsApi } from '@/api/deals.ts'
-import { formatCommercialAgreementPresentation } from '@/lib/enterprise-display.ts'
-import { useDataStoreVersion } from '@/hooks/use-data-store'
+import { useAdminReactiveList } from '@/hooks/use-admin-reactive-list.ts'
+import {
+  adminDealSearchText,
+  buildAdminDealListColumns,
+} from '@/pages/admin/admin-portal-list-columns.tsx'
 import { useProductLanguage } from '@/providers/product-language-provider.tsx'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
-import { AdminStatusBadge } from '@/pages/admin/admin-display'
 
 const REVIEW_STATUSES = new Set(['draft', 'negotiating', 'review', 'signing'])
 
 export function AdminApprovalsPage() {
   const { productLanguage } = useProductLanguage()
-  const version = useDataStoreVersion()
+  const allDeals = useAdminReactiveList(() => dealsApi.list())
   const rows = useMemo(
     () =>
-      dealsApi.list().filter((ca) => REVIEW_STATUSES.has((ca.status ?? '').toLowerCase())),
-    [version],
+      allDeals.filter((ca) => REVIEW_STATUSES.has((ca.status ?? '').toLowerCase())),
+    [allDeals],
   )
 
   return (
@@ -25,29 +27,8 @@ export function AdminApprovalsPage() {
       data={rows}
       getRowId={(d) => d.id}
       getRowHref={(d) => `/admin/commercial-agreements/${d.id}`}
-      getSearchText={(d) => {
-        const view = formatCommercialAgreementPresentation(d)
-        return [view.name, view.reference, d.status].filter(Boolean).join(' ')
-      }}
-      columns={[
-        {
-          id: 'title',
-          label: 'Agreement Name',
-          cell: (d) => formatCommercialAgreementPresentation(d).name,
-        },
-        {
-          id: 'reference',
-          label: 'Reference Number',
-          cell: (d) => formatCommercialAgreementPresentation(d).reference,
-        },
-        {
-          id: 'status',
-          label: 'Status',
-          cell: (d) => (
-            <AdminStatusBadge status={d.status ?? 'pending'} entity="deal" />
-          ),
-        },
-      ]}
+      getSearchText={adminDealSearchText}
+      columns={buildAdminDealListColumns()}
     />
   )
 }

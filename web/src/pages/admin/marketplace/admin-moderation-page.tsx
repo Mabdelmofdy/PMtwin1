@@ -1,17 +1,21 @@
 import { useMemo } from 'react'
 import { opportunitiesApi } from '@/api/opportunities.ts'
-import { formatOpportunityPresentation } from '@/lib/enterprise-display.ts'
-import { useDataStoreVersion } from '@/hooks/use-data-store'
+import type { PmDataTableColumn } from '@/components/data/pm-data-index'
+import { useAdminReactiveList } from '@/hooks/use-admin-reactive-list.ts'
+import {
+  adminOpportunitySearchText,
+  buildAdminOpportunityListColumns,
+} from '@/pages/admin/admin-portal-list-columns.tsx'
 import { useProductLanguage } from '@/providers/product-language-provider.tsx'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
-import { AdminStatusBadge } from '@/pages/admin/admin-display'
+import type { Opportunity } from '@/types/domain.ts'
 
 /** Opportunities that may need moderation attention (draft / cancelled / unpublished). */
 export function AdminModerationPage() {
   const { productLanguage } = useProductLanguage()
-  const version = useDataStoreVersion()
+  const allOpportunities = useAdminReactiveList(() => opportunitiesApi.list())
   const rows = useMemo(() => {
-    return opportunitiesApi.list().filter((o) => {
+    return allOpportunities.filter((o) => {
       const st = (o.status ?? '').toLowerCase()
       const vis = (o.visibilityStatus ?? '').toLowerCase()
       return (
@@ -22,7 +26,19 @@ export function AdminModerationPage() {
         vis === 'hidden'
       )
     })
-  }, [version])
+  }, [allOpportunities])
+
+  const columns: PmDataTableColumn<Opportunity>[] = [
+    ...buildAdminOpportunityListColumns({
+      opportunityLabel: productLanguage.label('opportunity'),
+    }),
+    {
+      id: 'visibility',
+      label: 'Visibility',
+      cell: (o) => o.visibilityStatus ?? '—',
+      exportValue: (o) => String(o.visibilityStatus ?? ''),
+    },
+  ]
 
   return (
     <AdminListPage
@@ -32,32 +48,8 @@ export function AdminModerationPage() {
       getRowId={(o) => o.id}
       getRowHref={(o) => `/admin/opportunities/${o.id}`}
       storageKey="moderation"
-      getSearchText={(o) => {
-        const view = formatOpportunityPresentation(o)
-        return [view.name, view.reference, o.status, o.visibilityStatus].filter(Boolean).join(' ')
-      }}
-      columns={[
-        {
-          id: 'title',
-          label: 'Opportunity Name',
-          cell: (o) => formatOpportunityPresentation(o).name,
-        },
-        {
-          id: 'reference',
-          label: 'Reference Number',
-          cell: (o) => formatOpportunityPresentation(o).reference,
-        },
-        {
-          id: 'status',
-          label: 'Status',
-          cell: (o) => <AdminStatusBadge status={o.status} entity="opportunity" />,
-        },
-        {
-          id: 'visibility',
-          label: 'Visibility',
-          cell: (o) => o.visibilityStatus ?? '—',
-        },
-      ]}
+      getSearchText={adminOpportunitySearchText}
+      columns={columns}
     />
   )
 }

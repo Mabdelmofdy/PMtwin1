@@ -6,14 +6,16 @@ import { commercialAgreementCommandService } from '@/services/commercial-agreeme
 import { denyUnlessAuthorized } from '@/domain/admin/auth/admin-mutation-auth.ts'
 import { getEffectiveSettingsSections } from '@/domain/admin/settings/effective-settings.ts'
 import {
-  formatCommercialAgreementPresentation,
-  formatOpportunityPresentation,
-} from '@/lib/enterprise-display.ts'
+  formatOpportunityDisplayTitle,
+} from '@/lib/entity-display-titles.ts'
+import {
+  adminDealSearchText,
+  buildAdminDealListColumns,
+} from '@/pages/admin/admin-portal-list-columns.tsx'
 import { useAuth } from '@/providers/auth-provider.tsx'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { useProductLanguage } from '@/providers/product-language-provider.tsx'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
-import { AdminStatusBadge } from '@/pages/admin/admin-display'
 import { PmBadge, PmButton } from '@/components/ui/pm-index'
 import type { CommercialAgreement } from '@/types/domain.ts'
 
@@ -91,45 +93,28 @@ export function AdminAwardsPage() {
       getRowId={(d) => d.id}
       getRowHref={(d) => `/admin/commercial-agreements/${d.id}`}
       getSearchText={(d) => {
-        const view = formatCommercialAgreementPresentation(d)
         const opp = d.opportunityId ? opportunitiesApi.get(d.opportunityId) : undefined
-        const oppLabel = opp ? formatOpportunityPresentation(opp).name : ''
-        return [view.name, view.reference, d.status, oppLabel].filter(Boolean).join(' ')
+        const oppLabel = opp ? formatOpportunityDisplayTitle(opp) : ''
+        return [adminDealSearchText(d), oppLabel].filter(Boolean).join(' ')
       }}
       emptyTitle="No multi-CA opportunities"
       emptyDescription="Award candidates appear when an opportunity has more than one Commercial Agreement."
       headerActions={canAward ? undefined : <PmBadge tone="warning">Read-only</PmBadge>}
       columns={[
-        {
-          id: 'title',
-          label: 'Agreement Name',
-          cell: (d) => formatCommercialAgreementPresentation(d).name,
-        },
-        {
-          id: 'reference',
-          label: 'Reference Number',
-          cell: (d) => formatCommercialAgreementPresentation(d).reference,
-        },
+        ...buildAdminDealListColumns(),
         {
           id: 'opportunity',
           label: 'Opportunity',
           cell: (d) => {
             if (!d.opportunityId) return '—'
             const opp = opportunitiesApi.get(d.opportunityId)
-            return opp ? formatOpportunityPresentation(opp).name : 'Linked opportunity'
+            return opp ? formatOpportunityDisplayTitle(opp) : 'Linked opportunity'
           },
         },
         {
           id: 'group',
           label: 'CAs on opportunity',
           cell: (d) => String(d._groupSize),
-        },
-        {
-          id: 'status',
-          label: 'Status',
-          cell: (d) => (
-            <AdminStatusBadge status={d.status ?? 'pending'} entity="deal" />
-          ),
         },
         {
           id: 'award',

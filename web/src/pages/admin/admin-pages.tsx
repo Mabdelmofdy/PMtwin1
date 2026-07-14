@@ -45,18 +45,25 @@ import { dealsApi } from '@/api/deals.ts'
 import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
 import { opportunitiesApi } from '@/api/opportunities.ts'
-import { resolvePostMatchTopologyLabel } from '@/lib/collaboration-taxonomy-display.ts'
 import {
-  formatCommercialAgreementPresentation,
-  formatContractPresentation,
-  formatNegotiationPresentation,
-  formatOpportunityPresentation,
-  formatPostMatchPresentation,
   formatUserEmployeeNumber,
   formatUserPresentation,
   looksLikeInternalId,
   safeEnterpriseLabel,
 } from '@/lib/enterprise-display.ts'
+import { useAdminReactiveList } from '@/hooks/use-admin-reactive-list.ts'
+import {
+  adminContractSearchText,
+  adminDealSearchText,
+  adminNegotiationSearchText,
+  adminOpportunitySearchText,
+  adminPostMatchSearchText,
+  buildAdminContractListColumns,
+  buildAdminDealListColumns,
+  buildAdminNegotiationListColumns,
+  buildAdminOpportunityListColumns,
+  buildAdminPostMatchListColumns,
+} from '@/pages/admin/admin-portal-list-columns.tsx'
 import { formatEnterpriseSubjectLine } from '@/domain/admin/read-models/enterprise-subject-adapter.ts'
 import { peopleApi } from '@/api/people.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
@@ -94,9 +101,8 @@ import {
   PmContentCard,
   PmSectionHeader,
 } from '@/components/layout/pm-layout-index'
-import { PmBadge, PmButton, PmPage, PmPageHeader, PmPageHeroMetric, PmReadinessScoreBadge, PmMatchScoreBadge } from '@/components/ui/pm-index'
+import { PmBadge, PmButton, PmPage, PmPageHeader, PmPageHeroMetric } from '@/components/ui/pm-index'
 import { PmToolbarSurface } from '@/components/ui/pm-toolbar-surface'
-import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card'
 import { AdminListPage } from '@/pages/admin/admin-list-page'
 import { AdminStatusBadge } from '@/pages/admin/admin-display'
 import { pmTypography } from '@/tokens'
@@ -331,20 +337,18 @@ export function AdminVettingPage() {
 
 export function AdminOpportunitiesPage() {
   const { productLanguage } = useProductLanguage()
-  const opps = opportunitiesApi.list()
+  const opps = useAdminReactiveList(() => opportunitiesApi.list())
+  const opportunityLabel = productLanguage.label('opportunity')
 
   return (
     <AdminListPage
       title={productLanguage.plural('opportunity')}
-      description="Platform opportunity oversight."
+      description="Same opportunity records as the user portal, with platform oversight columns."
       storageKey="opportunities"
       data={opps}
       getRowId={(o) => o.id}
       getRowHref={(o) => `/admin/opportunities/${o.id}`}
-      getSearchText={(o) => {
-        const view = formatOpportunityPresentation(o)
-        return [view.name, view.reference, o.status, o.location].filter(Boolean).join(' ')
-      }}
+      getSearchText={adminOpportunitySearchText}
       searchPlaceholder="Search opportunities…"
       getRowActions={(o) => [
         {
@@ -383,56 +387,7 @@ export function AdminOpportunitiesPage() {
           },
         },
       ]}
-      columns={[
-        {
-          id: 'title',
-          label: `${productLanguage.label('opportunity')} Name`,
-          cell: (o) => formatOpportunityPresentation(o).name,
-          exportValue: (o) => formatOpportunityPresentation(o).name,
-        },
-        {
-          id: 'reference',
-          label: 'Reference Number',
-          cell: (o) => formatOpportunityPresentation(o).reference,
-          exportValue: (o) => formatOpportunityPresentation(o).reference,
-        },
-        {
-          id: 'status',
-          label: 'Status',
-          cell: (o) => <AdminStatusBadge status={o.status} entity="opportunity" />,
-          exportValue: (o) => String(o.status ?? ''),
-        },
-        {
-          id: 'location',
-          label: 'Location',
-          cell: (o) => o.location,
-          exportValue: (o) => String(o.location ?? ''),
-        },
-        {
-          id: 'readiness',
-          label: 'Readiness',
-          cell: (o) => {
-            const readiness = resolveOpportunityReadiness(o)
-            return (
-              <PmReadinessScoreBadge
-                score={readiness.score}
-                variant="admin"
-                explanation={{
-                  missingRequired: readiness.missingRequired,
-                  missingRecommended: readiness.missingRecommended,
-                }}
-              />
-            )
-          },
-          exportValue: (o) => String(resolveOpportunityReadiness(o).score),
-        },
-        {
-          id: 'updated',
-          label: 'Updated',
-          cell: (o) => formatDate(o.updatedAt),
-          exportValue: (o) => String(o.updatedAt ?? ''),
-        },
-      ]}
+      columns={buildAdminOpportunityListColumns({ opportunityLabel })}
     />
   )
 }
@@ -486,31 +441,7 @@ export function AdminMatchingPage() {
   ]
 
   const getOpportunity = (id: string) => opportunitiesApi.get(id)
-  const matchColumns: PmDataTableColumn<(typeof matches)[number]>[] = [
-    {
-      id: 'title',
-      label: 'Match Title',
-      cell: (m) => formatPostMatchPresentation(m, getOpportunity).title,
-    },
-    {
-      id: 'reference',
-      label: 'Reference Number',
-      cell: (m) => formatPostMatchPresentation(m, getOpportunity).reference,
-    },
-    { id: 'type', label: 'Type', cell: (m) => resolvePostMatchTopologyLabel(m) },
-    { id: 'score', label: 'Score', cell: (m) => (
-      <PmMatchScoreBadge
-        score={m.matchScore}
-        variant="tooltip"
-        breakdown={m.payload?.breakdown ?? m.matchCriteria}
-      />
-    ) },
-    {
-      id: 'status',
-      label: 'Status',
-      cell: (m) => <AdminStatusBadge status={m.status} entity="match" />,
-    },
-  ]
+  const matchColumns = buildAdminPostMatchListColumns({ getOpportunity })
 
   return (
     <PmPage
@@ -554,7 +485,7 @@ export function AdminMatchingPage() {
         </section>
 
         <section className="space-y-4">
-          <PmSectionHeader title="Recent matches" description="Latest match records." />
+          <PmSectionHeader title="Recent matches" description="Latest match records (same presentation as user portal)." />
           <PmDataTable
             density="compact"
             columns={matchColumns}
@@ -576,41 +507,22 @@ export function AdminMatchingPage() {
 
 export function AdminNegotiationsPage() {
   const { productLanguage } = useProductLanguage()
-  const negs = negotiationsApi.list()
+  const negs = useAdminReactiveList(() => negotiationsApi.list())
   const getOpportunity = (id: string) => opportunitiesApi.get(id)
 
   return (
     <AdminListPage
       title={productLanguage.plural('negotiation')}
-      description={`${productLanguage.label('negotiation')} command center.`}
+      description={`Same ${productLanguage.plural('negotiation').toLowerCase()} records as the user portal.`}
       storageKey="negotiations"
       data={negs}
       getRowId={(n) => n.id}
       getRowHref={(n) => `/admin/negotiations/${n.id}`}
-      getSearchText={(n) => {
-        const view = formatNegotiationPresentation(n, getOpportunity)
-        return [view.title, view.reference, n.status].filter(Boolean).join(' ')
-      }}
-      columns={[
-        {
-          id: 'title',
-          label: `${productLanguage.label('negotiation')} Title`,
-          cell: (n) => formatNegotiationPresentation(n, getOpportunity).title,
-        },
-        {
-          id: 'reference',
-          label: 'Reference Number',
-          cell: (n) => formatNegotiationPresentation(n, getOpportunity).reference,
-        },
-        {
-          id: 'status',
-          label: 'Status',
-          cell: (n) => (
-            <AdminStatusBadge status={n.status ?? 'pending'} entity="negotiation" />
-          ),
-        },
-        { id: 'updated', label: 'Updated', cell: (n) => formatDate(n.updatedAt) },
-      ]}
+      getSearchText={(n) => adminNegotiationSearchText(n, getOpportunity)}
+      columns={buildAdminNegotiationListColumns({
+        negotiationLabel: productLanguage.label('negotiation'),
+        getOpportunity,
+      })}
     />
   )
 }
@@ -627,20 +539,17 @@ export function AdminDisputesPage() {
 
 export function AdminDealsPage() {
   const { productLanguage } = useProductLanguage()
-  const deals = dealsApi.list()
+  const deals = useAdminReactiveList(() => dealsApi.list())
 
   return (
     <AdminListPage
       title={productLanguage.plural('commercialAgreement')}
-      description="All platform commercial agreements."
+      description={`Same ${productLanguage.plural('commercialAgreement').toLowerCase()} records as the user portal.`}
       storageKey="commercial-agreements"
       data={deals}
       getRowId={(d) => d.id}
       getRowHref={(d) => `/admin/commercial-agreements/${d.id}`}
-      getSearchText={(d) => {
-        const view = formatCommercialAgreementPresentation(d)
-        return [view.name, view.reference, d.status].filter(Boolean).join(' ')
-      }}
+      getSearchText={adminDealSearchText}
       getRowActions={(d) => [
         {
           id: 'open',
@@ -678,111 +587,53 @@ export function AdminDealsPage() {
           },
         },
       ]}
-      columns={[
-        {
-          id: 'name',
-          label: 'Agreement Name',
-          cell: (d) => formatCommercialAgreementPresentation(d).name,
-          exportValue: (d) => formatCommercialAgreementPresentation(d).name,
-        },
-        {
-          id: 'reference',
-          label: 'Reference Number',
-          cell: (d) => formatCommercialAgreementPresentation(d).reference,
-          exportValue: (d) => formatCommercialAgreementPresentation(d).reference,
-        },
-        {
-          id: 'status',
-          label: 'Status',
-          cell: (d) => (
-            <AdminStatusBadge status={d.status ?? 'pending'} entity="deal" />
-          ),
-          exportValue: (d) => String(d.status ?? ''),
-        },
-      ]}
+      columns={buildAdminDealListColumns()}
     />
   )
 }
 
 export function AdminContractsPage() {
   const { productLanguage } = useProductLanguage()
-  const contracts = contractsApi.list()
+  const contracts = useAdminReactiveList(() => contractsApi.list())
 
   return (
     <AdminListPage
       title={productLanguage.plural('contract')}
-      description="All platform contracts."
+      description={`Same ${productLanguage.plural('contract').toLowerCase()} records as the user portal.`}
       storageKey="contracts"
       data={contracts}
       getRowId={(c) => c.id}
       getRowHref={(c) => `/admin/contracts/${c.id}`}
-      getSearchText={(c) => {
-        const view = formatContractPresentation(c)
-        return [view.name, view.reference, c.status, c.paymentMode].filter(Boolean).join(' ')
-      }}
+      getSearchText={adminContractSearchText}
       searchPlaceholder="Search contracts…"
-      columns={[
-        {
-          id: 'name',
-          label: `${productLanguage.label('contract')} Name`,
-          cell: (c) => formatContractPresentation(c).name,
-        },
-        {
-          id: 'reference',
-          label: 'Reference Number',
-          cell: (c) => formatContractPresentation(c).reference,
-        },
-        {
-          id: 'paymentMode',
-          label: 'Payment mode',
-          cell: (c) => c.paymentMode ?? '—',
-        },
-        {
-          id: 'status',
-          label: 'Status',
-          cell: (c) => <AdminStatusBadge status={c.status} entity="contract" />,
-        },
-      ]}
+      columns={buildAdminContractListColumns({
+        contractLabel: productLanguage.label('contract'),
+      })}
     />
   )
 }
 
 export function AdminConsortiumPage() {
-  const consortiumMatches = matchesApi.list().filter((m) =>
-    m.matchType.includes('consortium'),
+  const consortiumMatches = useAdminReactiveList(() =>
+    matchesApi.list().filter((m) => m.matchType.includes('consortium')),
   )
   const getOpportunity = (id: string) => opportunitiesApi.get(id)
 
   return (
     <AdminListPage
       title="Consortium"
-      description="Consortium commercial agreements subset."
+      description="Consortium matches using the same presentation as the user portal."
       storageKey="consortium"
       data={consortiumMatches}
       getRowId={(m) => m.id}
-      getSearchText={(m) => {
-        const view = formatPostMatchPresentation(m, getOpportunity)
-        return [view.title, view.reference, m.matchType].join(' ')
-      }}
-      columns={[
-        {
-          id: 'match',
-          label: 'Match Title',
-          cell: (m) => formatPostMatchPresentation(m, getOpportunity).title,
-        },
-        {
-          id: 'reference',
-          label: 'Reference Number',
-          cell: (m) => formatPostMatchPresentation(m, getOpportunity).reference,
-        },
-        { id: 'type', label: 'Type', cell: (m) => resolvePostMatchTopologyLabel(m) },
-      ]}
+      getSearchText={(m) => adminPostMatchSearchText(m, getOpportunity)}
+      columns={buildAdminPostMatchListColumns({ getOpportunity })}
     />
   )
 }
 
 export function AdminAuditPage() {
-  const logs = adminApi.getAuditLog()
+  const logs = useAdminReactiveList(() => adminApi.getAuditLog())
 
   return (
     <AdminListPage
