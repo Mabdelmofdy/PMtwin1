@@ -9,7 +9,6 @@
 import { resolveCanonicalStatus } from '@/lib/status-display'
 import {
   canAccessOpportunityDraft,
-  isDraftOpportunity,
   type ViewerContext,
 } from '@/lib/entity-view-visibility.ts'
 import type { Opportunity } from '@/types/domain.ts'
@@ -85,13 +84,15 @@ export function countAccessibleDraftOpportunities(
   ).length
 }
 
+function isDraftStatus(item: { status?: string }): boolean {
+  return resolveCanonicalStatus('opportunity', item.status) === 'draft'
+}
+
 /** Marketplace / public surfaces: never include private drafts in global totals. */
 export function filterMarketplacePublicOpportunities<T extends { status?: string }>(
   opportunities: readonly T[],
 ): T[] {
-  return opportunities.filter(
-    (opportunity) => !isDraftOpportunity(opportunity as Opportunity),
-  )
+  return opportunities.filter((opportunity) => !isDraftStatus(opportunity))
 }
 
 /** Count non-terminal opportunities for hero metrics. */
