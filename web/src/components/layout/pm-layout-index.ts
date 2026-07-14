@@ -38,12 +38,14 @@ export {
   resolveMetricColumns,
 } from '@/components/shared/pm-layout-tokens'
 export {
+  countAccessibleDraftOpportunities,
   countActiveContracts,
   countActiveDeals,
   countActiveMatches,
   countActiveNegotiations,
   countActiveOpportunities,
   countPipelineWorkflowItems,
+  filterMarketplacePublicOpportunities,
   formatPlatformHealthMetric,
   summarizeOpportunityListHero,
   type OpportunityListHeroSummary,

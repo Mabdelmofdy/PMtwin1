@@ -743,3 +743,9 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Leaflet opportunity map markers */
+.pmtwin-marker {
+  background: transparent !important;
+  border: none !important;
+}

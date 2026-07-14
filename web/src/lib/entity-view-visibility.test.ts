@@ -4,6 +4,7 @@ import { productFlags } from '@/config/product-flags.ts'
 import type { Contract, Deal, Negotiation, Opportunity, PostMatch } from '@/types/domain.ts'
 import {
   buildViewerContext,
+  canAccessOpportunityDraft,
   canEditOpportunity,
   canViewContractDetail,
   canViewDealDetail,
@@ -227,6 +228,22 @@ describe('list filters', () => {
     assert.equal(filtered.some((o) => o.id === 'draft-other'), false)
     assert.equal(filtered.some((o) => o.id === 'draft-mine'), true)
     assert.equal(filtered.some((o) => o.id === 'pub-other'), true)
+  })
+
+  it('denies draft access to non-owners without admin allow flag', () => {
+    const draft = opportunity({ status: 'draft', creatorId: ownerId })
+    const outsider = buildViewerContext({ userId: outsiderId, status: 'active' })
+    assert.equal(canAccessOpportunityDraft(draft, outsider), false)
+    const owner = buildViewerContext({ userId: ownerId, status: 'active' })
+    assert.equal(canAccessOpportunityDraft(draft, owner), true)
+    const admin = buildViewerContext({
+      userId: 'admin-1',
+      role: 'admin',
+      status: 'active',
+      canAccessAdmin: true,
+    })
+    assert.equal(canAccessOpportunityDraft(draft, admin), false)
+    assert.equal(canAccessOpportunityDraft(draft, admin, { allowAdmin: true }), true)
   })
 })
 

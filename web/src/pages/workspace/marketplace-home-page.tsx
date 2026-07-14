@@ -7,7 +7,11 @@ import { dealsApi } from '@/api/deals.ts'
 import { matchesApi } from '@/api/matches.ts'
 import { resolveMainCollaborationModelLabel } from '@/domain/collaboration/opportunity-collaboration.ts'
 import { formatCollaborationExchangeMode } from '@/lib/collaboration-taxonomy-display.ts'
-import { PmContentCard, PmMetricGrid } from '@/components/layout/pm-layout-index'
+import {
+  filterMarketplacePublicOpportunities,
+  PmContentCard,
+  PmMetricGrid,
+} from '@/components/layout/pm-layout-index'
 import { PmBadge, PmButton, PmEmptyState, PmPage, PmPageHeader, PmPageHeroMetric, PmStatCard } from '@/components/ui/pm-index'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/tokens'
@@ -34,7 +38,9 @@ function toPercent(value: number): string {
 }
 
 export function MarketplaceHomePage() {
-  const opportunities = opportunitiesApi.list()
+  const allOpportunities = opportunitiesApi.list()
+  // Private drafts must never appear in marketplace totals or discovery cards.
+  const opportunities = filterMarketplacePublicOpportunities(allOpportunities)
   const matches = matchesApi.list()
   const negotiations = negotiationsApi.list()
   const deals = dealsApi.list()
@@ -97,12 +103,14 @@ export function MarketplaceHomePage() {
             const count = opportunities.filter((o) => o.mainCollaborationModel === model).length
             const activeNegotiations = negotiations.filter((n) => {
               const opp = n.opportunityId ? opportunitiesApi.get(n.opportunityId) : undefined
-              return opp?.mainCollaborationModel === model && (n.status === 'active' || n.status === 'countered')
+              if (!opp || (opp.status ?? '').toLowerCase() === 'draft') return false
+              return opp.mainCollaborationModel === model && (n.status === 'active' || n.status === 'countered')
             }).length
             const activeContracts = contracts.filter((contract) => {
               const deal = contract.dealId ? dealsApi.get(contract.dealId) : undefined
               const opp = deal?.opportunityId ? opportunitiesApi.get(deal.opportunityId) : undefined
-              return opp?.mainCollaborationModel === model && contract.status === 'active'
+              if (!opp || (opp.status ?? '').toLowerCase() === 'draft') return false
+              return opp.mainCollaborationModel === model && contract.status === 'active'
             }).length
             return (
               <PmContentCard key={model} title={resolveMainCollaborationModelLabel(model)}>

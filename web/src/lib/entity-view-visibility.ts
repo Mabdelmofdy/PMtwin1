@@ -160,6 +160,24 @@ export function isDraftOpportunity(opportunity: Opportunity): boolean {
   return opportunityCanonicalStatus(opportunity) === 'draft'
 }
 
+/**
+ * Draft opportunities are private. User-facing surfaces may show a draft only to
+ * its owner (or future explicitly authorized collaborators). Platform admin
+ * read access remains on detail/admin paths via `allowAdmin`, never marketplace.
+ */
+export function canAccessOpportunityDraft(
+  opportunity: Opportunity,
+  viewer: ViewerContext,
+  options: { readonly allowAdmin?: boolean } = {},
+): boolean {
+  if (!isDraftOpportunity(opportunity)) return false
+  if (isOpportunityOwner(opportunity, viewer)) return true
+  if (options.allowAdmin) {
+    return Boolean(viewer.canAccessAdmin) || isPlatformAdminRole(viewer.role)
+  }
+  return false
+}
+
 export function canEditOpportunity(
   opportunity: Opportunity,
   viewer: ViewerContext,
@@ -395,10 +413,11 @@ export function filterOpportunitiesForListScope(
     if (scope === 'mine') {
       return isOpportunityOwner(opportunity, viewer)
     }
-    const owner = isOpportunityOwner(opportunity, viewer)
-    if (isDraftOpportunity(opportunity) && !owner) {
-      return false
+    // Marketplace / company / "all" scopes: never leak another user’s drafts.
+    if (isDraftOpportunity(opportunity)) {
+      return canAccessOpportunityDraft(opportunity, viewer)
     }
+    const owner = isOpportunityOwner(opportunity, viewer)
     if (
       !owner
       && (opportunity.visibilityStatus ?? '').toLowerCase() !== 'published'
@@ -408,6 +427,14 @@ export function filterOpportunitiesForListScope(
     }
     return true
   })
+}
+
+/** Opportunities the viewer may see in non-admin UI (own drafts + published others). */
+export function filterOpportunitiesVisibleToViewer(
+  opportunities: readonly Opportunity[],
+  viewer: ViewerContext,
+): Opportunity[] {
+  return filterOpportunitiesForListScope(opportunities, viewer, 'all')
 }
 
 export function viewerTouchesOpportunityMatch(

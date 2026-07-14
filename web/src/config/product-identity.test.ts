@@ -95,4 +95,72 @@ describe('filterOpportunitiesByOwnershipFilter', () => {
       ['opp-company'],
     )
   })
+
+  it('never surfaces private drafts in marketplace or company filters', () => {
+    const viewer = buildViewerContext({
+      userId: 'seed-user-002',
+      status: 'active',
+      activeWorkspaceId: 'ws-personal-seed-user-002',
+      activePartyId: 'party-individual-seed-user-002',
+    })
+    const ownDraft = opportunity({
+      id: 'opp-draft-mine',
+      status: 'draft',
+      workspaceId: 'ws-personal-seed-user-002',
+      ownerPartyId: 'party-individual-seed-user-002',
+      creatorId: 'seed-user-002',
+    })
+    const colleagueDraft = opportunity({
+      id: 'opp-draft-company',
+      status: 'draft',
+      workspaceId: 'ws-company-a',
+      ownerPartyId: 'party-company-a',
+      creatorId: 'colleague-1',
+      organizationId: 'org-1',
+    })
+    const outsiderDraft = opportunity({
+      id: 'opp-draft-other',
+      status: 'draft',
+      workspaceId: 'ws-other',
+      ownerPartyId: 'party-other',
+      creatorId: 'other-user',
+      organizationId: 'org-other',
+    })
+
+    const marketplaceFiltered = filterOpportunitiesByOwnershipFilter(
+      [ownDraft, colleagueDraft, outsiderDraft, marketplace],
+      viewer,
+      'marketplace',
+      (creatorId) =>
+        creatorId === 'colleague-1' ? 'org-1' : creatorId === 'other-user' ? 'org-other' : undefined,
+      'org-1',
+    )
+    assert.deepEqual(
+      marketplaceFiltered.map((item) => item.id),
+      ['opp-market'],
+    )
+
+    const companyFiltered = filterOpportunitiesByOwnershipFilter(
+      [ownDraft, colleagueDraft, outsiderDraft, company],
+      viewer,
+      'company',
+      (creatorId) => (creatorId === 'colleague-1' ? 'org-1' : undefined),
+      'org-1',
+    )
+    assert.deepEqual(
+      companyFiltered.map((item) => item.id),
+      ['opp-company'],
+    )
+
+    const mineFiltered = filterOpportunitiesByOwnershipFilter(
+      [ownDraft, colleagueDraft, outsiderDraft, mine],
+      viewer,
+      'mine',
+      () => undefined,
+    )
+    assert.deepEqual(
+      mineFiltered.map((item) => item.id).sort(),
+      ['opp-draft-mine', 'opp-mine'],
+    )
+  })
 })

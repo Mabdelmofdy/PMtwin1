@@ -1,6 +1,6 @@
-﻿import { useMemo, useState, useEffect } from 'react'
+﻿import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
-import { Map, Plus } from 'lucide-react'
+import { Map as MapIcon, Plus } from 'lucide-react'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { truncate } from '@/lib/format'
 import { OpportunityCard } from '@/components/opportunity/opportunity-card'
@@ -14,7 +14,14 @@ import {
   resolveListEmptyState,
 } from '@/components/data/pm-data-index'
 import { PmFormField } from '@/components/forms/pm-form-index'
-import { PmContentCard, PmBrowsePage, PmBrowseToolbar, summarizeOpportunityListHero } from '@/components/layout/pm-layout-index'
+import {
+  PmContentCard,
+  PmBrowsePage,
+  PmBrowseToolbar,
+  countAccessibleDraftOpportunities,
+  countActiveMatches,
+  summarizeOpportunityListHero,
+} from '@/components/layout/pm-layout-index'
 import { PmBadge, PmButton, PmEmptyState, PmFilterChips, PmPage, PmPageHeader, PmPageHeroMetric, PmPageActions, PmSurface } from '@/components/ui/pm-index'
 import { pmTypography } from '@/tokens'
 import { pmResponsive } from '@/tokens'
@@ -28,7 +35,11 @@ import {
 } from '@/components/ui/select'
 import { matchesApi } from '@/api/matches.ts'
 import { peopleApi } from '@/api/people.ts'
-import { buildViewerContext } from '@/lib/entity-view-visibility.ts'
+import {
+  buildViewerContext,
+  filterPostMatchesForViewer,
+  isDraftOpportunity,
+} from '@/lib/entity-view-visibility.ts'
 import {
   filterOpportunitiesByOwnershipFilter,
   OPPORTUNITY_OWNERSHIP_FILTER_LABELS,
@@ -42,6 +53,8 @@ import { formatCollaborationExchangeMode } from '@/lib/collaboration-taxonomy-di
 import { formatFrameworkMatchTypeLabel } from '@/config/need-offer-framework.ts'
 import { resolveMainCollaborationModelLabel } from '@/domain/collaboration/opportunity-collaboration.ts'
 import { OpportunityWizardPage } from '@/components/opportunity/wizard/opportunity-wizard-page.tsx'
+import { OpportunityMapView } from '@/components/opportunity/opportunity-map-view.tsx'
+import { resolvePublishedOpportunityMapPoints } from '@/services/geospatial/location-coordinates.ts'
 
 function parseCsvParam(raw: string | null): string[] {
   if (!raw) return []
@@ -81,31 +94,73 @@ export function OpportunitiesPage() {
   }, [searchParams])
 
   const allOpportunities = opportunitiesApi.list()
-  const heroSummary = summarizeOpportunityListHero(allOpportunities)
-  const totalMatches = matchesApi.list().length
   const isMarketplaceBrowse =
     ownershipFilter === 'marketplace' || navState?.domain === 'marketplace'
 
-  const opportunities = useMemo(() => {
-    const viewer = buildViewerContext({
-      userId: user?.id,
-      role: user?.role,
-      status: user?.status,
-      activeWorkspaceId: activeWorkspace?.id,
-      activePartyId: activeParty?.id,
-    })
-    const scoped = filterOpportunitiesByOwnershipFilter(
-      allOpportunities,
-      viewer,
-      ownershipFilter,
-      (creatorId) => peopleApi.get(creatorId)?.organizationId,
-      user?.organizationId,
+  const viewer = useMemo(
+    () =>
+      buildViewerContext({
+        userId: user?.id,
+        role: user?.role,
+        status: user?.status,
+        activeWorkspaceId: activeWorkspace?.id,
+        activePartyId: activeParty?.id,
+      }),
+    [user?.id, user?.role, user?.status, activeWorkspace?.id, activeParty?.id],
+  )
+
+  const ownershipScoped = useMemo(
+    () =>
+      filterOpportunitiesByOwnershipFilter(
+        allOpportunities,
+        viewer,
+        ownershipFilter,
+        (creatorId) => peopleApi.get(creatorId)?.organizationId,
+        user?.organizationId,
+      ),
+    [allOpportunities, ownershipFilter, viewer, user?.organizationId],
+  )
+
+  // Hero follows the same visibility rules as the list. Draft badge is always
+  // owner-scoped only — never a global draft total (0 on marketplace/company).
+  const heroSummary = useMemo(() => {
+    const tabSummary = summarizeOpportunityListHero(ownershipScoped)
+    if (ownershipFilter !== 'mine') {
+      return { ...tabSummary, draftCount: 0 }
+    }
+    return {
+      ...tabSummary,
+      draftCount: countAccessibleDraftOpportunities(allOpportunities, viewer),
+    }
+  }, [ownershipScoped, ownershipFilter, allOpportunities, viewer])
+
+  const totalMatches = useMemo(() => {
+    const ownedIds = new Set(
+      filterOpportunitiesByOwnershipFilter(
+        allOpportunities,
+        viewer,
+        'mine',
+        (creatorId) => peopleApi.get(creatorId)?.organizationId,
+        user?.organizationId,
+      ).map((opportunity) => opportunity.id),
     )
-    return scoped.filter((o) => {
+    return countActiveMatches(
+      filterPostMatchesForViewer(matchesApi.list(), viewer, {
+        ownedOpportunityIds: ownedIds,
+      }),
+    )
+  }, [allOpportunities, viewer, user?.organizationId])
+
+  const opportunities = useMemo(() => {
+    return ownershipScoped.filter((o) => {
       if (
         ownershipFilter === 'marketplace'
         && (o.visibilityStatus ?? '').toLowerCase() !== 'published'
       ) {
+        return false
+      }
+      // Defense in depth: drafts never appear in marketplace browse results.
+      if (ownershipFilter === 'marketplace' && isDraftOpportunity(o)) {
         return false
       }
       const matchesSearch =
@@ -135,16 +190,10 @@ export function OpportunitiesPage() {
       )
     })
   }, [
-    allOpportunities,
+    ownershipScoped,
     search,
     status,
     ownershipFilter,
-    user?.id,
-    user?.role,
-    user?.status,
-    user?.organizationId,
-    activeWorkspace?.id,
-    activeParty?.id,
     mainModels,
     subModels,
     exchangeModes,
@@ -156,31 +205,7 @@ export function OpportunitiesPage() {
   const safePage = Math.min(page, pageCount)
   const paged = opportunities.slice((safePage - 1) * pageSize, safePage * pageSize)
 
-  const scopedSourceCount = useMemo(() => {
-    const viewer = buildViewerContext({
-      userId: user?.id,
-      role: user?.role,
-      status: user?.status,
-      activeWorkspaceId: activeWorkspace?.id,
-      activePartyId: activeParty?.id,
-    })
-    return filterOpportunitiesByOwnershipFilter(
-      allOpportunities,
-      viewer,
-      ownershipFilter,
-      (creatorId) => peopleApi.get(creatorId)?.organizationId,
-      user?.organizationId,
-    ).length
-  }, [
-    allOpportunities,
-    ownershipFilter,
-    user?.id,
-    user?.role,
-    user?.status,
-    user?.organizationId,
-    activeWorkspace?.id,
-    activeParty?.id,
-  ])
+  const scopedSourceCount = ownershipScoped.length
 
   const listEmpty = resolveListEmptyState({
     hasSourceData: scopedSourceCount > 0,
@@ -245,7 +270,7 @@ export function OpportunitiesPage() {
                 render: () => (
                   <PmButton variant="outline" asChild>
                     <Link to="/opportunities/map">
-                      <Map className="size-4" aria-hidden />
+                      <MapIcon className="size-4" aria-hidden />
                       Map view
                     </Link>
                   </PmButton>
@@ -526,8 +551,45 @@ export function OpportunitiesPage() {
 }
 
 export function OpportunityMapPage() {
-  const allOpportunities = opportunitiesApi.list()
-  const items = allOpportunities.slice(0, 8)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const publishedOpportunities = opportunitiesApi.listMarketplace()
+  const mapPoints = useMemo(
+    () => resolvePublishedOpportunityMapPoints(publishedOpportunities),
+    [publishedOpportunities],
+  )
+  const mapPointIds = useMemo(
+    () => new Set(mapPoints.map((point) => point.opportunity.id)),
+    [mapPoints],
+  )
+  const querySelectedId = searchParams.get('id')
+  const [selectedId, setSelectedId] = useState<string | null>(() => {
+    if (querySelectedId && mapPointIds.has(querySelectedId)) return querySelectedId
+    return mapPoints[0]?.opportunity.id ?? null
+  })
+  const sidebarItemRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+
+  useEffect(() => {
+    if (!querySelectedId || !mapPointIds.has(querySelectedId)) return
+    setSelectedId(querySelectedId)
+  }, [querySelectedId, mapPointIds])
+
+  const handleSelect = useCallback((opportunityId: string) => {
+    if (!mapPointIds.has(opportunityId)) return
+    setSelectedId(opportunityId)
+    setSearchParams({ id: opportunityId }, { replace: true })
+    sidebarItemRefs.current.get(opportunityId)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+    })
+  }, [mapPointIds, setSearchParams])
+
+  const sidebarItems = useMemo(
+    () =>
+      mapPoints.length > 0
+        ? mapPoints.map((point) => point.opportunity)
+        : publishedOpportunities.slice(0, 12),
+    [mapPoints, publishedOpportunities],
+  )
 
   return (
     <PmPage
@@ -535,10 +597,10 @@ export function OpportunityMapPage() {
         <PmPageHeader
           label="Marketplace"
           title="Opportunity map"
-          description="Explore opportunities by location. Geospatial services are not configured in this environment."
+          description="Explore published marketplace opportunities by location across Saudi Arabia."
           tone="opportunity"
           metric={
-            <PmPageHeroMetric value={allOpportunities.length} label="Listings" />
+            <PmPageHeroMetric value={mapPoints.length} label="Mapped listings" />
           }
           actions={
             <PmButton variant="outline" asChild>
@@ -554,34 +616,92 @@ export function OpportunityMapPage() {
           className="lg:col-span-2"
           noPadding
         >
-          <PmEmptyState
-            title="Feature unavailable in the current environment"
-            description="Geospatial services are not configured. Return to Marketplace to browse opportunities."
-            size="compact"
-            className="min-h-[22rem]"
-            action={
-              <PmButton size="sm" variant="outline" asChild>
-                <Link to="/opportunities">Return to Marketplace</Link>
-              </PmButton>
-            }
-          />
+          {mapPoints.length > 0 ? (
+            <OpportunityMapView
+              points={mapPoints}
+              selectedId={selectedId}
+              onSelect={handleSelect}
+              className="min-h-[22rem] w-full rounded-b-xl"
+            />
+          ) : (
+            <PmEmptyState
+              title="No mappable listings yet"
+              description="Published opportunities need a location before they can appear on the map."
+              size="compact"
+              className="min-h-[22rem]"
+              action={
+                <PmButton size="sm" variant="outline" asChild>
+                  <Link to="/opportunities">Browse Marketplace</Link>
+                </PmButton>
+              }
+            />
+          )}
         </PmContentCard>
-        <PmContentCard title="Nearby listings">
-          <div className="space-y-3">
-            {items.map((o) => (
-              <PmSurface
-                key={o.id}
-                variant="default"
-                shadow="card"
-                interactive
-                className="p-3"
-              >
-                <Link to={`/opportunities/${o.id}`} className="block">
-                  <p className={cn(pmTypography.bodySm, 'font-medium hover:text-primary')}>{truncate(o.title, 48)}</p>
-                  <p className={cn(pmTypography.caption, 'text-muted-foreground')}>{o.location}</p>
-                </Link>
-              </PmSurface>
-            ))}
+        <PmContentCard
+          title="Nearby listings"
+          description={`${mapPoints.length} published ${mapPoints.length === 1 ? 'listing' : 'listings'} with map coordinates`}
+        >
+          <div className="max-h-[22rem] space-y-3 overflow-y-auto pr-1">
+            {sidebarItems.map((opportunity) => {
+              const isSelected = opportunity.id === selectedId
+              const isOnMap = mapPointIds.has(opportunity.id)
+
+              return (
+                <div
+                  key={opportunity.id}
+                  ref={(node) => {
+                    if (node) sidebarItemRefs.current.set(opportunity.id, node)
+                    else sidebarItemRefs.current.delete(opportunity.id)
+                  }}
+                >
+                  <PmSurface
+                    variant="default"
+                    shadow="card"
+                    interactive={isOnMap}
+                    role={isOnMap ? 'button' : undefined}
+                    tabIndex={isOnMap ? 0 : undefined}
+                    aria-pressed={isOnMap ? isSelected : undefined}
+                    className={cn(
+                      'p-3',
+                      isSelected && 'ring-2 ring-primary/40',
+                      isOnMap && 'cursor-pointer',
+                    )}
+                    onClick={isOnMap ? () => handleSelect(opportunity.id) : undefined}
+                    onKeyDown={
+                      isOnMap
+                        ? (event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              handleSelect(opportunity.id)
+                            }
+                          }
+                        : undefined
+                    }
+                  >
+                    <p className={cn(pmTypography.bodySm, 'font-medium')}>
+                      {truncate(opportunity.title, 48)}
+                    </p>
+                    <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
+                      {opportunity.location ?? 'Location unavailable'}
+                    </p>
+                    <div className="mt-2 flex items-center gap-2">
+                      {isOnMap ? (
+                        <span className={cn(pmTypography.caption, 'text-primary')}>
+                          {isSelected ? 'Shown on map' : 'Show on map'}
+                        </span>
+                      ) : null}
+                      <Link
+                        to={`/opportunities/${opportunity.id}`}
+                        className={cn(pmTypography.caption, 'text-muted-foreground hover:text-primary')}
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        View details
+                      </Link>
+                    </div>
+                  </PmSurface>
+                </div>
+              )
+            })}
           </div>
         </PmContentCard>
       </div>

@@ -44,9 +44,10 @@ export class OpportunityRepository extends BaseRepository<Opportunity> {
   }
 
   listPublishedForMarketplace(): Opportunity[] {
-    return this.getAll().filter(
-      (item) => (item.visibilityStatus ?? '').toLowerCase() === 'published',
-    )
+    return this.getAll().filter((item) => {
+      if ((item.status ?? '').toLowerCase() === 'draft') return false
+      return (item.visibilityStatus ?? '').toLowerCase() === 'published'
+    })
   }
 
   listByWorkspaceId(workspaceId: string): Opportunity[] {

@@ -3,7 +3,11 @@ import {
   resolveOpportunityOwnershipScope,
   type OpportunityOwnershipScope,
 } from '@/components/opportunity/opportunity-display'
-import { filterOpportunitiesForListScope, type ViewerContext } from '@/lib/entity-view-visibility.ts'
+import {
+  filterOpportunitiesForListScope,
+  isDraftOpportunity,
+  type ViewerContext,
+} from '@/lib/entity-view-visibility.ts'
 
 export type ProductDomain = 'marketplace' | 'workspace'
 
@@ -52,6 +56,10 @@ export function filterOpportunitiesByOwnershipFilter(
   const scoped = filterOpportunitiesForListScope(opportunities, viewer, listScope)
 
   return scoped.filter((opportunity) => {
+    // Defense in depth: marketplace and company tabs never surface private drafts.
+    if (filter !== 'mine' && isDraftOpportunity(opportunity)) {
+      return false
+    }
     const ownership = resolveOpportunityOwnershipScope({
       opportunity,
       viewerUserId: viewer.userId,

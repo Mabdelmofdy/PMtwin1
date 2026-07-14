@@ -127,7 +127,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "riyadh-city"
     },
     {
       "id": "seed-opp-cast-seed-user-016-offer",
@@ -148,9 +149,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Jeddah, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "makkah",
       "skills": [
         "Structural Analysis",
         "ETABS",
@@ -239,7 +240,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Jeddah, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -253,7 +254,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "jeddah"
     },
     {
       "id": "seed-opp-cast-seed-user-018-need",
@@ -274,9 +276,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Dammam, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "eastern-province",
       "skills": [
         "MEP Design",
         "HVAC",
@@ -365,7 +367,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Dammam, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -379,7 +381,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "dammam"
     },
     {
       "id": "seed-opp-cast-seed-user-019-offer",
@@ -400,9 +403,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "NEOM, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "tabuk",
       "skills": [
         "Project Management",
         "Stakeholder Management",
@@ -491,7 +494,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "NEOM, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -505,7 +508,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "neom"
     },
     {
       "id": "seed-opp-cast-seed-user-020-need",
@@ -526,9 +530,9 @@
       "paymentModes": [
         "barter"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Al Khobar, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "eastern-province",
       "skills": [
         "Civil Engineering",
         "Site Supervision",
@@ -617,7 +621,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Al Khobar, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "strategic_partnership",
@@ -631,7 +635,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "khobar"
     },
     {
       "id": "seed-opp-cast-seed-user-021-offer",
@@ -652,9 +657,9 @@
       "paymentModes": [
         "barter"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Abha, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "asir",
       "skills": [
         "Mechanical Design",
         "HVAC",
@@ -743,7 +748,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Abha, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "strategic_partnership",
@@ -757,7 +762,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "abha"
     },
     {
       "id": "seed-opp-cast-seed-user-022-need",
@@ -778,9 +784,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Tabuk, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "tabuk",
       "skills": [
         "Electrical Design",
         "Power Distribution",
@@ -869,7 +875,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Tabuk, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -883,7 +889,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "tabuk-city"
     },
     {
       "id": "seed-opp-cast-seed-user-023-offer",
@@ -904,9 +911,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Makkah, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "makkah",
       "skills": [
         "Facade Design",
         "Concept Design",
@@ -995,7 +1002,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Makkah, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -1009,7 +1016,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "makkah-city"
     },
     {
       "id": "seed-opp-cast-seed-user-024-need",
@@ -1030,9 +1038,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Jubail, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "eastern-province",
       "skills": [
         "Quantity Surveying",
         "Cost Planning",
@@ -1121,7 +1129,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Jubail, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -1135,7 +1143,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "jubail"
     },
     {
       "id": "seed-opp-cast-seed-user-025-offer",
@@ -1156,7 +1165,7 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Diriyah, Saudi Arabia",
       "locationCountry": "sa",
       "locationRegion": "riyadh",
       "skills": [
@@ -1247,7 +1256,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Diriyah, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -1261,7 +1270,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "diriyah"
     },
     {
       "id": "seed-opp-cast-seed-user-026-need",
@@ -1282,9 +1292,9 @@
       "paymentModes": [
         "barter"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Dubai, United Arab Emirates",
+      "locationCountry": "uae",
+      "locationRegion": "dubai-emirate",
       "skills": [
         "Concrete Design",
         "Steel Design",
@@ -1373,7 +1383,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Dubai, United Arab Emirates",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "strategic_partnership",
@@ -1387,7 +1397,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "dubai"
     },
     {
       "id": "seed-opp-cast-seed-user-027-offer",
@@ -1408,9 +1419,9 @@
       "paymentModes": [
         "barter"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Abu Dhabi, United Arab Emirates",
+      "locationCountry": "uae",
+      "locationRegion": "abu-dhabi-emirate",
       "skills": [
         "HSE Management",
         "Risk Assessment",
@@ -1499,7 +1510,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Abu Dhabi, United Arab Emirates",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "strategic_partnership",
@@ -1513,7 +1524,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "abu-dhabi"
     },
     {
       "id": "seed-opp-cast-seed-user-028-need",
@@ -1534,9 +1546,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Sharjah, United Arab Emirates",
+      "locationCountry": "uae",
+      "locationRegion": "sharjah-emirate",
       "skills": [
         "BIM Coordination",
         "Revit",
@@ -1625,7 +1637,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Sharjah, United Arab Emirates",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -1639,7 +1651,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "sharjah"
     },
     {
       "id": "seed-opp-cast-seed-user-029-offer",
@@ -1660,9 +1673,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Doha, Qatar",
+      "locationCountry": "qa",
+      "locationRegion": "doha-region",
       "skills": [
         "Scheduling",
         "Primavera",
@@ -1751,7 +1764,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Doha, Qatar",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -1765,7 +1778,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "doha"
     },
     {
       "id": "seed-opp-cast-seed-user-030-need",
@@ -1786,9 +1800,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Kuwait City, Kuwait",
+      "locationCountry": "kw",
+      "locationRegion": "kuwait-region",
       "skills": [
         "Cost Engineering",
         "Estimating",
@@ -1877,7 +1891,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Kuwait City, Kuwait",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -1891,7 +1905,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "kuwait-city"
     },
     {
       "id": "seed-opp-cast-seed-user-003-offer",
@@ -1912,9 +1927,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Manama, Bahrain",
+      "locationCountry": "bh",
+      "locationRegion": "bahrain-region",
       "skills": [
         "Architectural Design",
         "BIM",
@@ -2003,7 +2018,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Manama, Bahrain",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -2017,7 +2032,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "manama"
     },
     {
       "id": "seed-opp-cast-seed-co-corp-007-need",
@@ -2038,9 +2054,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Muscat, Oman",
+      "locationCountry": "om",
+      "locationRegion": "muscat-region",
       "skills": [
         "Main Contracting",
         "Site Management",
@@ -2134,7 +2150,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Muscat, Oman",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -2148,7 +2164,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "muscat"
     },
     {
       "id": "seed-opp-cast-seed-user-019-co-offer",
@@ -2274,7 +2291,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "riyadh-city"
     },
     {
       "id": "seed-opp-cast-seed-co-corp-008-need",
@@ -2295,9 +2313,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Jeddah, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "makkah",
       "skills": [
         "Residential Construction",
         "Site Management"
@@ -2379,7 +2397,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Jeddah, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -2393,7 +2411,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "jeddah"
     },
     {
       "id": "seed-opp-cast-seed-user-020-co-offer",
@@ -2414,9 +2433,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Dammam, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "eastern-province",
       "skills": [
         "Civil Engineering",
         "Site Supervision",
@@ -2505,7 +2524,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Dammam, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -2519,7 +2538,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "dammam"
     },
     {
       "id": "seed-opp-cast-seed-co-corp-009-need",
@@ -2540,9 +2560,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "NEOM, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "tabuk",
       "skills": [
         "MEP Installation",
         "Commissioning"
@@ -2624,7 +2644,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "NEOM, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -2638,7 +2658,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "neom"
     },
     {
       "id": "seed-opp-cast-seed-user-021-co-offer",
@@ -2659,9 +2680,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Al Khobar, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "eastern-province",
       "skills": [
         "Mechanical Design",
         "HVAC",
@@ -2750,7 +2771,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Al Khobar, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -2764,7 +2785,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "khobar"
     },
     {
       "id": "seed-opp-cast-seed-co-corp-010-need",
@@ -2785,9 +2807,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Abha, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "asir",
       "skills": [
         "Steel Fabrication",
         "Structural Steel"
@@ -2874,7 +2896,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Abha, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -2888,7 +2910,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "abha"
     },
     {
       "id": "seed-opp-cast-seed-user-022-co-offer",
@@ -2909,9 +2932,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Tabuk, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "tabuk",
       "skills": [
         "Electrical Design",
         "Power Distribution",
@@ -3000,7 +3023,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Tabuk, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -3014,7 +3037,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "tabuk-city"
     },
     {
       "id": "seed-opp-cast-seed-co-corp-011-need",
@@ -3035,9 +3059,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Makkah, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "makkah",
       "skills": [
         "Structural Consulting",
         "Civil Design"
@@ -3119,7 +3143,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Makkah, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -3133,7 +3157,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "makkah-city"
     },
     {
       "id": "seed-opp-cast-seed-user-023-co-offer",
@@ -3154,9 +3179,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Jubail, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "eastern-province",
       "skills": [
         "Facade Design",
         "Concept Design",
@@ -3245,7 +3270,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Jubail, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -3259,7 +3284,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "jubail"
     },
     {
       "id": "seed-opp-cast-seed-co-corp-012-need",
@@ -3280,7 +3306,7 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Diriyah, Saudi Arabia",
       "locationCountry": "sa",
       "locationRegion": "riyadh",
       "skills": [
@@ -3364,7 +3390,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Diriyah, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -3378,7 +3404,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "diriyah"
     },
     {
       "id": "seed-opp-cast-seed-user-024-co-offer",
@@ -3399,9 +3426,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Dubai, United Arab Emirates",
+      "locationCountry": "uae",
+      "locationRegion": "dubai-emirate",
       "skills": [
         "Quantity Surveying",
         "Cost Planning",
@@ -3490,7 +3517,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Dubai, United Arab Emirates",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -3504,7 +3531,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "dubai"
     },
     {
       "id": "seed-opp-cast-seed-co-corp-013-need",
@@ -3525,9 +3553,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Abu Dhabi, United Arab Emirates",
+      "locationCountry": "uae",
+      "locationRegion": "abu-dhabi-emirate",
       "skills": [
         "Building Materials",
         "Logistics"
@@ -3614,7 +3642,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Abu Dhabi, United Arab Emirates",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -3628,7 +3656,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "abu-dhabi"
     },
     {
       "id": "seed-opp-cast-seed-user-025-co-offer",
@@ -3649,9 +3678,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Sharjah, United Arab Emirates",
+      "locationCountry": "uae",
+      "locationRegion": "sharjah-emirate",
       "skills": [
         "Procurement",
         "Vendor Management",
@@ -3740,7 +3769,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Sharjah, United Arab Emirates",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -3754,7 +3783,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "sharjah"
     },
     {
       "id": "seed-opp-cast-seed-co-corp-014-need",
@@ -3775,9 +3805,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Doha, Qatar",
+      "locationCountry": "qa",
+      "locationRegion": "doha-region",
       "skills": [
         "Industrial Supply",
         "Procurement"
@@ -3859,7 +3889,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Doha, Qatar",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -3873,7 +3903,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "doha"
     },
     {
       "id": "seed-opp-cast-seed-user-026-co-offer",
@@ -3894,9 +3925,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Kuwait City, Kuwait",
+      "locationCountry": "kw",
+      "locationRegion": "kuwait-region",
       "skills": [
         "Concrete Design",
         "Steel Design",
@@ -3985,7 +4016,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Kuwait City, Kuwait",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -3999,7 +4030,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "kuwait-city"
     },
     {
       "id": "seed-opp-cast-seed-co-corp-015-need",
@@ -4020,9 +4052,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Manama, Bahrain",
+      "locationCountry": "bh",
+      "locationRegion": "bahrain-region",
       "skills": [
         "Crane Hire",
         "Plant Hire"
@@ -4104,7 +4136,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Manama, Bahrain",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -4118,7 +4150,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "manama"
     },
     {
       "id": "seed-opp-cast-seed-user-027-co-offer",
@@ -4139,9 +4172,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Muscat, Oman",
+      "locationCountry": "om",
+      "locationRegion": "muscat-region",
       "skills": [
         "HSE Management",
         "Risk Assessment",
@@ -4230,7 +4263,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Muscat, Oman",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -4244,7 +4277,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "muscat"
     },
     {
       "id": "seed-opp-cast-circular-015",
@@ -4363,7 +4397,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "riyadh-city"
     },
     {
       "id": "seed-opp-cast-circular-028",
@@ -4384,9 +4419,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Jeddah, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "makkah",
       "skills": [
         "BIM Coordination",
         "Model Sharing"
@@ -4468,7 +4503,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Jeddah, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "resource_pooling",
@@ -4482,7 +4517,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "jeddah"
     },
     {
       "id": "seed-opp-cast-circular-029",
@@ -4503,9 +4539,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Dammam, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "eastern-province",
       "skills": [
         "Scheduling",
         "Resource Planning"
@@ -4587,7 +4623,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Dammam, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "resource_pooling",
@@ -4601,7 +4637,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "dammam"
     },
     {
       "id": "seed-opp-cast-emp-host-seed-co-corp-001",
@@ -4622,9 +4659,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "NEOM, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "tabuk",
       "skills": [
         "Project Management",
         "Coordination"
@@ -4706,7 +4743,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "NEOM, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -4720,7 +4757,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "neom"
     },
     {
       "id": "seed-opp-cast-emp-host-seed-co-corp-002",
@@ -4741,9 +4779,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Al Khobar, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "eastern-province",
       "skills": [
         "Project Management",
         "Coordination"
@@ -4825,7 +4863,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Al Khobar, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -4839,7 +4877,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "khobar"
     },
     {
       "id": "seed-opp-cast-emp-host-seed-co-corp-003",
@@ -4860,9 +4899,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Abha, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "asir",
       "skills": [
         "Project Management",
         "Coordination"
@@ -4944,7 +4983,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Abha, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -4958,7 +4997,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "abha"
     },
     {
       "id": "seed-opp-cast-emp-host-seed-co-corp-007",
@@ -4979,9 +5019,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Tabuk, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "tabuk",
       "skills": [
         "Main Contracting",
         "Site Management",
@@ -5070,7 +5110,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Tabuk, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -5084,7 +5124,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "tabuk-city"
     },
     {
       "id": "seed-opp-cast-emp-host-seed-co-corp-011",
@@ -5105,9 +5146,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Makkah, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "makkah",
       "skills": [
         "Structural Consulting",
         "Civil Design"
@@ -5189,7 +5230,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Makkah, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -5203,7 +5244,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "makkah-city"
     },
     {
       "id": "seed-opp-cast-emp-host-seed-co-corp-013",
@@ -5224,9 +5266,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Jubail, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "eastern-province",
       "skills": [
         "Building Materials",
         "Logistics"
@@ -5308,7 +5350,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Jubail, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -5322,7 +5364,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "jubail"
     },
     {
       "id": "seed-opp-cast-emp-host-seed-co-corp-008",
@@ -5343,7 +5386,7 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Diriyah, Saudi Arabia",
       "locationCountry": "sa",
       "locationRegion": "riyadh",
       "skills": [
@@ -5427,7 +5470,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Diriyah, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -5441,7 +5484,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "diriyah"
     },
     {
       "id": "seed-opp-cast-emp-host-seed-co-corp-015",
@@ -5462,9 +5506,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Dubai, United Arab Emirates",
+      "locationCountry": "uae",
+      "locationRegion": "dubai-emirate",
       "skills": [
         "Crane Hire",
         "Plant Hire"
@@ -5546,7 +5590,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Dubai, United Arab Emirates",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -5560,7 +5604,8 @@
       "createdByActorType": "system",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "dubai"
     },
     {
       "id": "seed-opp-cast-emp-partner-seed-emp-001",
@@ -5581,9 +5626,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Abu Dhabi, United Arab Emirates",
+      "locationCountry": "uae",
+      "locationRegion": "abu-dhabi-emirate",
       "skills": [
         "Architectural Design",
         "BIM",
@@ -5672,7 +5717,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Abu Dhabi, United Arab Emirates",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -5686,7 +5731,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "abu-dhabi"
     },
     {
       "id": "seed-opp-cast-emp-partner-seed-emp-002",
@@ -5707,9 +5753,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Sharjah, United Arab Emirates",
+      "locationCountry": "uae",
+      "locationRegion": "sharjah-emirate",
       "skills": [
         "Structural Analysis",
         "ETABS",
@@ -5798,7 +5844,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Sharjah, United Arab Emirates",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -5812,7 +5858,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "sharjah"
     },
     {
       "id": "seed-opp-cast-emp-partner-seed-emp-003",
@@ -5833,9 +5880,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Doha, Qatar",
+      "locationCountry": "qa",
+      "locationRegion": "doha-region",
       "skills": [
         "MEP Design",
         "HVAC",
@@ -5924,7 +5971,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Doha, Qatar",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -5938,7 +5985,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "doha"
     },
     {
       "id": "seed-opp-cast-emp-partner-seed-emp-004",
@@ -5959,9 +6007,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Kuwait City, Kuwait",
+      "locationCountry": "kw",
+      "locationRegion": "kuwait-region",
       "skills": [
         "Project Management",
         "Stakeholder Management",
@@ -6050,7 +6098,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Kuwait City, Kuwait",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -6064,7 +6112,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "kuwait-city"
     },
     {
       "id": "seed-opp-cast-emp-partner-seed-emp-005",
@@ -6085,9 +6134,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Manama, Bahrain",
+      "locationCountry": "bh",
+      "locationRegion": "bahrain-region",
       "skills": [
         "Civil Engineering",
         "Site Supervision",
@@ -6176,7 +6225,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Manama, Bahrain",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -6190,7 +6239,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "manama"
     },
     {
       "id": "seed-opp-cast-emp-partner-seed-emp-006",
@@ -6211,9 +6261,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Muscat, Oman",
+      "locationCountry": "om",
+      "locationRegion": "muscat-region",
       "skills": [
         "Mechanical Design",
         "HVAC",
@@ -6302,7 +6352,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Muscat, Oman",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -6316,7 +6366,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "muscat"
     },
     {
       "id": "seed-opp-cast-emp-partner-seed-emp-007",
@@ -6442,7 +6493,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "riyadh-city"
     },
     {
       "id": "seed-opp-cast-emp-partner-seed-emp-008",
@@ -6463,9 +6515,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Jeddah, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "makkah",
       "skills": [
         "Facade Design",
         "Concept Design",
@@ -6554,7 +6606,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Jeddah, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -6568,7 +6620,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "jeddah"
     },
     {
       "id": "seed-opp-cast-emp-partner-seed-emp-009",
@@ -6589,9 +6642,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Dammam, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "eastern-province",
       "skills": [
         "Quantity Surveying",
         "Cost Planning",
@@ -6680,7 +6733,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Dammam, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -6694,7 +6747,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "dammam"
     },
     {
       "id": "seed-opp-cast-emp-partner-seed-emp-010",
@@ -6715,9 +6769,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "NEOM, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "tabuk",
       "skills": [
         "Procurement",
         "Vendor Management",
@@ -6806,7 +6860,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "NEOM, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -6820,7 +6874,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "neom"
     },
     {
       "id": "seed-opp-cast-emp-partner-seed-emp-011",
@@ -6841,9 +6896,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Al Khobar, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "eastern-province",
       "skills": [
         "Concrete Design",
         "Steel Design",
@@ -6932,7 +6987,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Al Khobar, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -6946,7 +7001,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "khobar"
     },
     {
       "id": "seed-opp-cast-emp-partner-seed-emp-012",
@@ -6967,9 +7023,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Abha, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "asir",
       "skills": [
         "HSE Management",
         "Risk Assessment",
@@ -7058,7 +7114,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Abha, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -7072,7 +7128,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "abha"
     },
     {
       "id": "seed-opp-cast-emp-partner-seed-emp-013",
@@ -7093,9 +7150,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Tabuk, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "tabuk",
       "skills": [
         "BIM Coordination",
         "Revit",
@@ -7184,7 +7241,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Tabuk, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -7198,7 +7255,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "tabuk-city"
     },
     {
       "id": "seed-opp-cast-emp-partner-seed-emp-014",
@@ -7219,9 +7277,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Makkah, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "makkah",
       "skills": [
         "Scheduling",
         "Primavera",
@@ -7310,7 +7368,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Makkah, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -7324,7 +7382,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "makkah-city"
     },
     {
       "id": "seed-opp-cast-pending-001-draft",
@@ -7345,9 +7404,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Jubail, Saudi Arabia",
       "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "locationRegion": "eastern-province",
       "skills": [
         "Civil Engineering",
         "Site Support"
@@ -7429,7 +7488,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Jubail, Saudi Arabia",
         "reputation": 0.5,
         "intent": "request",
         "modelType": "project_based",
@@ -7443,7 +7502,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "jubail"
     },
     {
       "id": "seed-opp-cast-pending-002-draft",
@@ -7464,7 +7524,7 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
+      "location": "Diriyah, Saudi Arabia",
       "locationCountry": "sa",
       "locationRegion": "riyadh",
       "skills": [
@@ -7548,7 +7608,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Diriyah, Saudi Arabia",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "hiring",
@@ -7562,7 +7622,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "diriyah"
     },
     {
       "id": "seed-opp-cast-pending-co-001-draft",
@@ -7583,9 +7644,9 @@
       "paymentModes": [
         "cash"
       ],
-      "location": "Riyadh, Saudi Arabia",
-      "locationCountry": "sa",
-      "locationRegion": "riyadh",
+      "location": "Dubai, United Arab Emirates",
+      "locationCountry": "uae",
+      "locationRegion": "dubai-emirate",
       "skills": [
         "Steel Supply",
         "Fabrication"
@@ -7667,7 +7728,7 @@
           "start": "2026-08-01",
           "end": "2027-02-28"
         },
-        "location": "Riyadh, Saudi Arabia",
+        "location": "Dubai, United Arab Emirates",
         "reputation": 0.5,
         "intent": "offer",
         "modelType": "project_based",
@@ -7681,7 +7742,8 @@
       "createdByActorType": "marketplace_user",
       "collaborationAttributes": {
         "scenario": "demo-cast-coverage"
-      }
+      },
+      "locationCity": "dubai"
     }
   ]
 }

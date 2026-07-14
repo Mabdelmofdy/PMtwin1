@@ -1,13 +1,17 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import {
+  countAccessibleDraftOpportunities,
   countActiveDeals,
   countActiveMatches,
   countActiveOpportunities,
   countPipelineWorkflowItems,
+  filterMarketplacePublicOpportunities,
   formatPlatformHealthMetric,
   summarizeOpportunityListHero,
 } from '@/components/layout/page-hero-display.ts'
+import { buildViewerContext } from '@/lib/entity-view-visibility.ts'
+import type { Opportunity } from '@/types/domain.ts'
 
 describe('page-hero-display', () => {
   it('summarizes opportunity list hero counts', () => {
@@ -23,6 +27,26 @@ describe('page-hero-display', () => {
     assert.equal(summary.publishedCount, 1)
     assert.equal(summary.inPipelineCount, 2)
     assert.equal(summary.activeCount, 3)
+  })
+
+  it('counts only accessible drafts for the viewer', () => {
+    const opportunities = [
+      { id: 'd1', title: 'Mine', status: 'draft', creatorId: 'u1' },
+      { id: 'd2', title: 'Other', status: 'draft', creatorId: 'u2' },
+      { id: 'p1', title: 'Pub', status: 'published', creatorId: 'u2' },
+    ] as Opportunity[]
+    const viewer = buildViewerContext({ userId: 'u1', status: 'active' })
+    assert.equal(countAccessibleDraftOpportunities(opportunities, viewer), 1)
+  })
+
+  it('excludes drafts from marketplace public totals', () => {
+    const filtered = filterMarketplacePublicOpportunities([
+      { status: 'draft' },
+      { status: 'published' },
+      { status: 'in_negotiation' },
+    ])
+    assert.equal(filtered.length, 2)
+    assert.equal(filtered.some((item) => item.status === 'draft'), false)
   })
 
   it('counts active opportunities', () => {

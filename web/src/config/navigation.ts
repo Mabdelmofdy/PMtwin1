@@ -143,7 +143,6 @@ export const mainNavigation: NavGroup[] = [
         href: '/opportunities/map',
         icon: MapIcon,
         state: { domain: 'marketplace' },
-        preview: true,
         keywords: ['map', 'geo', 'location', 'discover'],
       },
       {

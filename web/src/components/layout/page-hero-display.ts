@@ -1,9 +1,18 @@
 /**
  * Page hero display helpers — counts and labels for PmPageHeader slots.
  * Display-only; no business logic or data access changes.
+ *
+ * Callers must pass visibility-filtered opportunity lists — never raw global
+ * seed/list data — so draft counts cannot leak into marketplace or other users.
  */
 
 import { resolveCanonicalStatus } from '@/lib/status-display'
+import {
+  canAccessOpportunityDraft,
+  isDraftOpportunity,
+  type ViewerContext,
+} from '@/lib/entity-view-visibility.ts'
+import type { Opportunity } from '@/types/domain.ts'
 
 export type OpportunityListHeroSummary = {
   readonly activeCount: number
@@ -48,6 +57,25 @@ export function summarizeOpportunityListHero(
   }
 
   return { activeCount, draftCount, publishedCount, inPipelineCount }
+}
+
+/** Drafts the current viewer may access — never a global draft total. */
+export function countAccessibleDraftOpportunities(
+  opportunities: readonly Opportunity[],
+  viewer: ViewerContext,
+): number {
+  return opportunities.filter((opportunity) =>
+    canAccessOpportunityDraft(opportunity, viewer),
+  ).length
+}
+
+/** Marketplace / public surfaces: never include private drafts in global totals. */
+export function filterMarketplacePublicOpportunities<T extends { status?: string }>(
+  opportunities: readonly T[],
+): T[] {
+  return opportunities.filter(
+    (opportunity) => !isDraftOpportunity(opportunity as Opportunity),
+  )
 }
 
 /** Count non-terminal opportunities for hero metrics. */
