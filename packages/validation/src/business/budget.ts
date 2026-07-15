@@ -32,6 +32,7 @@ function budgetIssue(
 function resolveBudget(input: {
   budget?: number
   exchangeData?: Readonly<Record<string, unknown>>
+  collaborationAttributes?: Readonly<Record<string, unknown>>
 }): number | null {
   if (input.budget !== undefined) return toNumber(input.budget)
   const direct = getNestedNumber(input.exchangeData, [
@@ -43,6 +44,26 @@ function resolveBudget(input: {
   const range = input.exchangeData?.budgetRange
   if (range && typeof range === 'object') {
     return getNestedNumber(range as Record<string, unknown>, ['min', 'max'])
+  }
+  for (const source of [input.exchangeData, input.collaborationAttributes]) {
+    const structure = source?.commercialStructure
+    if (!structure || typeof structure !== 'object') continue
+    const components = (structure as Record<string, unknown>).components
+    if (!Array.isArray(components)) continue
+    const cash = components.find(
+      (component) =>
+        component !== null &&
+        typeof component === 'object' &&
+        (component as Record<string, unknown>).type === 'cash' &&
+        (component as Record<string, unknown>).enabled !== false,
+    ) as Record<string, unknown> | undefined
+    if (!cash) continue
+    const amount = getNestedNumber(cash, [
+      'fixedAmount',
+      'maximumAmount',
+      'minimumAmount',
+    ])
+    if (amount !== null) return amount
   }
   return null
 }

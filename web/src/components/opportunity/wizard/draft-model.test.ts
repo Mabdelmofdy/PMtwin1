@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import type { Opportunity } from '@/types/domain.ts'
-import { opportunityToDraft } from './draft-model.ts'
+import {
+  buildCollaborationCommandPayload,
+  initialDraft,
+  opportunityToDraft,
+} from './draft-model.ts'
 
 describe('opportunityToDraft', () => {
   it('prefills the edit wizard from persisted opportunity fields', () => {
@@ -60,5 +64,32 @@ describe('opportunityToDraft', () => {
     })
 
     assert.equal(draft.intent, 'need')
+  })
+})
+
+describe('buildCollaborationCommandPayload', () => {
+  it('maps the enabled cash component amount to the command budget', () => {
+    const payload = buildCollaborationCommandPayload({
+      ...initialDraft,
+      commercialStructure: {
+        components: [
+          {
+            id: 'cash-1',
+            type: 'cash',
+            title: 'Cash',
+            enabled: true,
+            appliesTo: 'entire_opportunity',
+            currency: 'SAR',
+            budgetType: 'fixed',
+            fixedAmount: 125_000,
+          },
+        ],
+        constraints: [],
+        allocationMethod: 'fixed',
+      },
+    })
+
+    assert.equal(payload.exchangeMode, 'cash')
+    assert.equal(payload.budget, 125_000)
   })
 })

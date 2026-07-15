@@ -424,6 +424,15 @@ export function buildCollaborationCommandPayload(
 ): OpportunityCollaborationPayload {
   const synced = syncDraftExchangeFromCommercialStructure(draft)
   const built = buildOpportunityDraftInput(synced)
+  const cashComponent = synced.commercialStructure.components.find(
+    (component) => component.enabled && component.type === 'cash',
+  )
+  const budget =
+    cashComponent?.type === 'cash'
+      ? cashComponent.fixedAmount ??
+        cashComponent.maximumAmount ??
+        cashComponent.minimumAmount
+      : undefined
   return {
     title: synced.title,
     description: synced.description,
@@ -446,6 +455,7 @@ export function buildCollaborationCommandPayload(
     attributes: built.attributes as Record<string, unknown>,
     normalized: built.normalized as Record<string, unknown>,
     exchangeData: built.exchangeData as Record<string, unknown>,
+    budget,
     paymentModes: synced.paymentModes,
     preferredPartnerType: synced.preferredPartnerType || undefined,
     attachments: built.attachments as OpportunityCollaborationPayload['attachments'],

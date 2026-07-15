@@ -181,6 +181,31 @@ describe('budget and exchange', () => {
     assert.ok(result.issues.some((i) => i.code === VAL_CODES.BUDGET_CASH_REQUIRED))
   })
 
+  it('accepts a cash amount from the commercial structure', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        exchangeMode: 'cash',
+        exchangeData: {
+          commercialStructure: {
+            components: [
+              {
+                type: 'cash',
+                enabled: true,
+                budgetType: 'fixed',
+                fixedAmount: 125_000,
+              },
+            ],
+          },
+        },
+      },
+      { operationScope: 'publish' },
+      { scopes: ['publish'], groups: ['budget'] },
+    )
+
+    assert.ok(!result.issues.some((i) => i.code === VAL_CODES.BUDGET_CASH_REQUIRED))
+  })
+
   it('uses config minimumBudget', () => {
     const result = validateOpportunityBusiness(
       { title: 'T', exchangeMode: 'cash', budget: 50 },

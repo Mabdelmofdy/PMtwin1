@@ -600,6 +600,22 @@ function resolveBudget(input) {
   if (range && typeof range === "object") {
     return getNestedNumber(range, ["min", "max"]);
   }
+  for (const source of [input.exchangeData, input.collaborationAttributes]) {
+    const structure = source?.commercialStructure;
+    if (!structure || typeof structure !== "object") continue;
+    const components = structure.components;
+    if (!Array.isArray(components)) continue;
+    const cash = components.find(
+      (component) => component !== null && typeof component === "object" && component.type === "cash" && component.enabled !== false
+    );
+    if (!cash) continue;
+    const amount = getNestedNumber(cash, [
+      "fixedAmount",
+      "maximumAmount",
+      "minimumAmount"
+    ]);
+    if (amount !== null) return amount;
+  }
   return null;
 }
 var budgetCashRequired = {
