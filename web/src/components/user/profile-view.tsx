@@ -18,6 +18,7 @@ import { PmBadge, PmButton, PmEmptyState } from '@/components/ui/pm-index'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
 import type { ProfileKind } from '@/domain/profile-readiness/types.ts'
 import type { PersonProfile } from '@/types/domain.ts'
 
@@ -68,6 +69,19 @@ type ProfileDraft = {
   contactPerson: string
   coverageAreas: string
   financialCapacity: string
+  addressLine: string
+  city: string
+  region: string
+  postalCode: string
+  country: string
+  workingHoursStart: string
+  workingHoursEnd: string
+  timezone: string
+  commercialRegistrationNumber: string
+  unifiedNationalNumber: string
+  commercialRegistrationExpiresOn: string
+  vatRegistrationNumber: string
+  vatRegistered: boolean
 }
 
 function joinList(value?: string[], separator = ', '): string {
@@ -116,6 +130,19 @@ function createProfileDraft(profile?: EditableProfileFields | null): ProfileDraf
     contactPerson: profile?.contactPerson ?? '',
     coverageAreas: joinList(profile?.coverageAreas),
     financialCapacity: profile?.financialCapacity?.toString() ?? '',
+    addressLine: profile?.addressLine ?? '',
+    city: profile?.city ?? '',
+    region: profile?.region ?? '',
+    postalCode: profile?.postalCode ?? '',
+    country: profile?.country ?? 'Saudi Arabia',
+    workingHoursStart: profile?.workingHoursStart ?? '',
+    workingHoursEnd: profile?.workingHoursEnd ?? '',
+    timezone: profile?.timezone ?? 'Asia/Riyadh',
+    commercialRegistrationNumber: profile?.commercialRegistrationNumber ?? '',
+    unifiedNationalNumber: profile?.unifiedNationalNumber ?? '',
+    commercialRegistrationExpiresOn: profile?.commercialRegistrationExpiresOn ?? '',
+    vatRegistrationNumber: profile?.vatRegistrationNumber ?? '',
+    vatRegistered: profile?.vatRegistered ?? false,
   }
 }
 
@@ -156,7 +183,7 @@ export function ProfileView({
     return () => window.removeEventListener('beforeunload', warnBeforeUnload)
   }, [isEditing])
 
-  const updateDraft = (field: keyof ProfileDraft, value: string) => {
+  const updateDraft = <K extends keyof ProfileDraft>(field: K, value: ProfileDraft[K]) => {
     setDraft((current) => ({ ...current, [field]: value }))
   }
 
@@ -218,6 +245,19 @@ export function ProfileView({
       financialCapacity: draft.financialCapacity
         ? Number(draft.financialCapacity)
         : undefined,
+      addressLine: draft.addressLine.trim(),
+      city: draft.city.trim(),
+      region: draft.region.trim(),
+      postalCode: draft.postalCode.trim(),
+      country: draft.country.trim(),
+      workingHoursStart: draft.workingHoursStart.trim(),
+      workingHoursEnd: draft.workingHoursEnd.trim(),
+      timezone: draft.timezone.trim(),
+      commercialRegistrationNumber: draft.commercialRegistrationNumber.trim(),
+      unifiedNationalNumber: draft.unifiedNationalNumber.trim(),
+      commercialRegistrationExpiresOn: draft.commercialRegistrationExpiresOn.trim(),
+      vatRegistrationNumber: draft.vatRegistrationNumber.trim(),
+      vatRegistered: draft.vatRegistered,
     })
     if (saved) {
       setNameError(null)
@@ -835,6 +875,159 @@ export function ProfileView({
                         />
                       </PmFormField>
                       <PmFormGridItem span="full" gridColumns={2}>
+                        <PmFormField
+                          id="profile-address-line"
+                          label="Registered address"
+                          optional
+                        >
+                          <Input
+                            value={draft.addressLine}
+                            onChange={(event) => updateDraft('addressLine', event.target.value)}
+                            placeholder="Building, street, district"
+                            autoComplete="street-address"
+                          />
+                        </PmFormField>
+                      </PmFormGridItem>
+                      <PmFormField id="profile-city" label="City" optional>
+                        <Input
+                          value={draft.city}
+                          onChange={(event) => updateDraft('city', event.target.value)}
+                          placeholder="Riyadh"
+                          autoComplete="address-level2"
+                        />
+                      </PmFormField>
+                      <PmFormField id="profile-region" label="Region / province" optional>
+                        <Input
+                          value={draft.region}
+                          onChange={(event) => updateDraft('region', event.target.value)}
+                          placeholder="Riyadh Province"
+                          autoComplete="address-level1"
+                        />
+                      </PmFormField>
+                      <PmFormField id="profile-postal-code" label="Postal code" optional>
+                        <Input
+                          value={draft.postalCode}
+                          onChange={(event) => updateDraft('postalCode', event.target.value)}
+                          placeholder="12345"
+                          inputMode="numeric"
+                          autoComplete="postal-code"
+                          dir="ltr"
+                        />
+                      </PmFormField>
+                      <PmFormField id="profile-country" label="Country" optional>
+                        <Input
+                          value={draft.country}
+                          onChange={(event) => updateDraft('country', event.target.value)}
+                          placeholder="Saudi Arabia"
+                          autoComplete="country-name"
+                        />
+                      </PmFormField>
+                      <PmFormField id="profile-working-start" label="Working day starts" optional>
+                        <Input
+                          value={draft.workingHoursStart}
+                          onChange={(event) => updateDraft('workingHoursStart', event.target.value)}
+                          type="time"
+                          dir="ltr"
+                        />
+                      </PmFormField>
+                      <PmFormField id="profile-working-end" label="Working day ends" optional>
+                        <Input
+                          value={draft.workingHoursEnd}
+                          onChange={(event) => updateDraft('workingHoursEnd', event.target.value)}
+                          type="time"
+                          dir="ltr"
+                        />
+                      </PmFormField>
+                      <PmFormGridItem span="full" gridColumns={2}>
+                        <PmFormField id="profile-timezone" label="Timezone" optional>
+                          <Input
+                            value={draft.timezone}
+                            onChange={(event) => updateDraft('timezone', event.target.value)}
+                            placeholder="Asia/Riyadh"
+                            dir="ltr"
+                          />
+                        </PmFormField>
+                      </PmFormGridItem>
+                      <PmFormField
+                        id="profile-cr-number"
+                        label="Commercial Registration number"
+                        optional
+                      >
+                        <Input
+                          value={draft.commercialRegistrationNumber}
+                          onChange={(event) =>
+                            updateDraft('commercialRegistrationNumber', event.target.value)
+                          }
+                          inputMode="numeric"
+                          dir="ltr"
+                        />
+                      </PmFormField>
+                      <PmFormField
+                        id="profile-unified-number"
+                        label="Unified National Number (700)"
+                        optional
+                      >
+                        <Input
+                          value={draft.unifiedNationalNumber}
+                          onChange={(event) =>
+                            updateDraft('unifiedNationalNumber', event.target.value)
+                          }
+                          placeholder="700XXXXXXXX"
+                          inputMode="numeric"
+                          dir="ltr"
+                        />
+                      </PmFormField>
+                      <PmFormField id="profile-cr-expiry" label="CR expiry date" optional>
+                        <Input
+                          value={draft.commercialRegistrationExpiresOn}
+                          onChange={(event) =>
+                            updateDraft('commercialRegistrationExpiresOn', event.target.value)
+                          }
+                          type="date"
+                          dir="ltr"
+                        />
+                      </PmFormField>
+                      <PmFormField
+                        id="profile-vat-number"
+                        label="VAT registration number"
+                        optional
+                        hint="Saudi VAT is calculated explicitly at 15% where applicable."
+                      >
+                        <Input
+                          value={draft.vatRegistrationNumber}
+                          onChange={(event) =>
+                            updateDraft('vatRegistrationNumber', event.target.value)
+                          }
+                          inputMode="numeric"
+                          dir="ltr"
+                          disabled={!draft.vatRegistered}
+                        />
+                      </PmFormField>
+                      <PmFormGridItem span="full" gridColumns={2}>
+                        <PmFormField
+                          id="profile-vat-registered"
+                          label="VAT registration status"
+                          optional
+                        >
+                          <div className="flex items-center justify-between rounded-2xl border border-border p-4">
+                            <div>
+                              <p className="text-sm font-medium">Registered for Saudi VAT</p>
+                              <p className="text-xs text-muted-foreground">
+                                Uses the statutory 15% VAT rate for applicable financial records.
+                              </p>
+                            </div>
+                            <Switch
+                              id="profile-vat-registered"
+                              checked={draft.vatRegistered}
+                              onCheckedChange={(checked) =>
+                                updateDraft('vatRegistered', checked)
+                              }
+                              aria-label="Registered for Saudi VAT"
+                            />
+                          </div>
+                        </PmFormField>
+                      </PmFormGridItem>
+                      <PmFormGridItem span="full" gridColumns={2}>
                         <PmFormField id="profile-description" label="Company description" optional>
                           <Textarea
                             value={draft.description}
@@ -879,6 +1072,48 @@ export function ProfileView({
                               ? undefined
                               : `${profile.financialCapacity.toLocaleString()} SAR`
                           }
+                        />
+                        <PmFormReadonlyField
+                          label="Registered address"
+                          value={[
+                            profile?.addressLine,
+                            profile?.city,
+                            profile?.region,
+                            profile?.postalCode,
+                            profile?.country,
+                          ].filter(Boolean).join(', ')}
+                        />
+                        <PmFormReadonlyField
+                          label="Working hours"
+                          value={
+                            profile?.workingHoursStart || profile?.workingHoursEnd
+                              ? `${profile.workingHoursStart || '—'}–${profile.workingHoursEnd || '—'}`
+                              : undefined
+                          }
+                        />
+                        <PmFormReadonlyField label="Timezone" value={profile?.timezone} />
+                        <PmFormReadonlyField
+                          label="Commercial Registration"
+                          value={profile?.commercialRegistrationNumber}
+                          copyable
+                        />
+                        <PmFormReadonlyField
+                          label="Unified National Number (700)"
+                          value={profile?.unifiedNationalNumber}
+                          copyable
+                        />
+                        <PmFormReadonlyField
+                          label="CR expiry date"
+                          value={profile?.commercialRegistrationExpiresOn}
+                        />
+                        <PmFormReadonlyField
+                          label="VAT registration"
+                          value={profile?.vatRegistered ? 'Registered — 15% VAT' : 'Not registered'}
+                        />
+                        <PmFormReadonlyField
+                          label="VAT registration number"
+                          value={profile?.vatRegistrationNumber}
+                          copyable
                         />
                       </PmFormReadonlySection>
                     </PmFormReadonly>

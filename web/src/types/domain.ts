@@ -93,6 +93,19 @@ export type PersonProfile = {
   contactPerson?: string
   coverageAreas?: string[]
   financialCapacity?: number
+  addressLine?: string
+  city?: string
+  region?: string
+  postalCode?: string
+  country?: string
+  workingHoursStart?: string
+  workingHoursEnd?: string
+  timezone?: string
+  commercialRegistrationNumber?: string
+  unifiedNationalNumber?: string
+  commercialRegistrationExpiresOn?: string
+  vatRegistrationNumber?: string
+  vatRegistered?: boolean
   visibility?: {
     showPhone?: boolean
     showWebsite?: boolean

@@ -46,6 +46,14 @@ const readyCompanyProfile = {
   testimonials: ['Trusted delivery partner'],
   availability: 'Available for new projects',
   preferredWorkMode: 'On-site',
+  addressLine: 'King Fahd Road',
+  city: 'Riyadh',
+  country: 'Saudi Arabia',
+  commercialRegistrationNumber: '1010000000',
+  unifiedNationalNumber: '7000000000',
+  commercialRegistrationExpiresOn: '2028-12-31',
+  vatRegistered: true,
+  vatRegistrationNumber: '300000000000003',
 }
 
 describe('evaluateProfileReadiness — individual profiles', () => {
@@ -105,7 +113,7 @@ describe('evaluateProfileReadiness — company profiles', () => {
     assert.equal(result.status, 'incomplete')
     assert.ok(result.score < PROFILE_READINESS_STATUS_THRESHOLDS.incompleteMax)
     assert.equal(result.missingRequired.length, 6)
-    assert.equal(result.missingRecommended.length, 10)
+    assert.equal(result.missingRecommended.length, 13)
   })
 
   it('marks a fully complete company profile as ready_for_matching', () => {
@@ -135,7 +143,7 @@ describe('evaluateProfileReadiness — company profiles', () => {
 
     assert.equal(result.status, 'needs_review')
     assert.equal(result.missingRequired.length, 0)
-    assert.equal(result.missingRecommended.length, 10)
+    assert.equal(result.missingRecommended.length, 13)
     assert.equal(result.score, PROFILE_READINESS_SCORE_WEIGHTS.required)
   })
 })
@@ -281,6 +289,6 @@ describe('evaluateProfileReadiness — legacy field aliases', () => {
     })
 
     assert.equal(result.status, 'ready_for_matching')
-    assert.equal(result.score, 85)
+    assert.equal(result.score, 81.54)
   })
 })

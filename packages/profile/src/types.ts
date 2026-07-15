@@ -141,10 +141,26 @@ export type CompanyProfile = CanonicalProfileBase & {
   readonly company: {
     readonly legalName: string
     readonly commercialRegistrationNumber?: string
+    readonly unifiedNationalNumber?: string
+    readonly commercialRegistrationExpiresOn?: string
+    readonly vatRegistrationNumber?: string
+    readonly vatRegistered?: boolean
     readonly organizationType?: string
     readonly foundedYear?: number
     readonly employeeCountRange?: string
     readonly sectors: readonly string[]
+    readonly registeredAddress?: {
+      readonly addressLine?: string
+      readonly city?: string
+      readonly region?: string
+      readonly postalCode?: string
+      readonly country?: string
+    }
+    readonly workingHours?: {
+      readonly start?: string
+      readonly end?: string
+      readonly timezone?: string
+    }
   }
 }
 
@@ -199,7 +215,14 @@ export type PublicProfile = {
   readonly contact: Partial<Readonly<Record<ContactChannel, string>>>
   readonly socialLinks?: ProfileSocialLinks
   readonly individual?: IndividualProfile['individual']
-  readonly company?: Omit<CompanyProfile['company'], 'commercialRegistrationNumber'>
+  readonly company?: Omit<
+    CompanyProfile['company'],
+    | 'commercialRegistrationNumber'
+    | 'unifiedNationalNumber'
+    | 'commercialRegistrationExpiresOn'
+    | 'vatRegistrationNumber'
+    | 'vatRegistered'
+  >
 }
 
 export type MatchingProfileSnapshot = {

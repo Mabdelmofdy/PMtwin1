@@ -163,6 +163,26 @@ const COMPANY_REQUIRED_RULES: readonly ProfileFieldRule[] = [
 
 const COMPANY_RECOMMENDED_RULES: readonly ProfileFieldRule[] = [
   {
+    label: 'Registered Address',
+    isPresent: (profile) =>
+      hasAnyString(profile, ['addressLine']) &&
+      hasAnyString(profile, ['city']) &&
+      hasAnyString(profile, ['country']),
+  },
+  {
+    label: 'Legal Registration',
+    isPresent: (profile) =>
+      hasAnyString(profile, ['commercialRegistrationNumber']) &&
+      hasAnyString(profile, ['unifiedNationalNumber']) &&
+      hasAnyString(profile, ['commercialRegistrationExpiresOn']),
+  },
+  {
+    label: 'VAT Status',
+    isPresent: (profile) =>
+      typeof profile.vatRegistered === 'boolean' &&
+      (profile.vatRegistered === false || hasNonEmptyString(profile.vatRegistrationNumber)),
+  },
+  {
     label: 'Company Description',
     isPresent: (profile) => hasAnyString(profile, ['description', 'bio', 'summary']),
   },

@@ -219,6 +219,11 @@ export function validateProfile(profile: CanonicalProfile): ProfileValidationRes
     validateUnique(issues, profile.individual.languages, 'individual.languages')
   } else {
     requiredString(issues, profile.company.legalName, 'company.legalName')
+    optionalDate(
+      issues,
+      profile.company.commercialRegistrationExpiresOn,
+      'company.commercialRegistrationExpiresOn',
+    )
     if (profile.company.foundedYear !== undefined &&
         (!Number.isInteger(profile.company.foundedYear) ||
          profile.company.foundedYear < 1800 ||

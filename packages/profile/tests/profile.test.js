@@ -108,6 +108,22 @@ describe('@pm-twin/profile', () => {
         company: {
           legalName: 'Acme LLC',
           crNumber: '1010999999',
+          unifiedNationalNumber: '7000000000',
+          crExpiryDate: '2028-12-31',
+          vatRegistered: true,
+          vatNumber: '300000000000003',
+          registeredAddress: {
+            addressLine: 'King Fahd Road',
+            city: 'Riyadh',
+            region: 'Riyadh',
+            postalCode: '12345',
+            country: 'Saudi Arabia',
+          },
+          workingHours: {
+            start: '08:00',
+            end: '17:00',
+            timezone: 'Asia/Riyadh',
+          },
           yearFounded: 2018,
           companySize: '11-50',
           industries: ['technology', 'consulting'],
@@ -120,6 +136,10 @@ describe('@pm-twin/profile', () => {
     assert.equal(result.profile.kind, 'company')
     assert.equal(result.profile.company.legalName, 'Acme LLC')
     assert.equal(result.profile.company.commercialRegistrationNumber, '1010999999')
+    assert.equal(result.profile.company.unifiedNationalNumber, '7000000000')
+    assert.equal(result.profile.company.vatRegistrationNumber, '300000000000003')
+    assert.equal(result.profile.company.registeredAddress.city, 'Riyadh')
+    assert.equal(result.profile.company.workingHours.timezone, 'Asia/Riyadh')
     assert.deepEqual(result.profile.company.sectors, ['technology', 'consulting'])
   })
 
@@ -177,12 +197,20 @@ describe('@pm-twin/profile', () => {
       type: 'company',
       companyName: 'Acme',
       crNumber: '1010999999',
+      unifiedNationalNumber: '7000000000',
+      crExpiryDate: '2028-12-31',
+      vatRegistered: true,
+      vatNumber: '300000000000003',
       email: 'private@acme.sa',
       visibility: { email: false },
     })
     const publicProfile = toPublicProfile(profile)
     assert.equal(publicProfile.kind, 'company')
     assert.equal('commercialRegistrationNumber' in publicProfile.company, false)
+    assert.equal('unifiedNationalNumber' in publicProfile.company, false)
+    assert.equal('commercialRegistrationExpiresOn' in publicProfile.company, false)
+    assert.equal('vatRegistrationNumber' in publicProfile.company, false)
+    assert.equal('vatRegistered' in publicProfile.company, false)
     assert.deepEqual(publicProfile.contact, {})
   })
 

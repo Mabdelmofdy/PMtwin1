@@ -361,18 +361,75 @@ function normalizeIndividual(source: UnknownRecord, displayName: string): Indivi
 
 function normalizeCompany(source: UnknownRecord, displayName: string): CompanyProfile['company'] {
   const record = { ...source, ...asRecord(source.company) }
+  const addressRecord = asRecord(
+    first(record, ['registeredAddress', 'businessAddress', 'address']),
+  )
+  const hoursRecord = asRecord(
+    first(record, ['workingHours', 'businessHours', 'officeHours']),
+  )
   const commercialRegistrationNumber = text(
     first(record, ['commercialRegistrationNumber', 'crNumber', 'registrationNumber']),
   )
+  const unifiedNationalNumber = text(
+    first(record, ['unifiedNationalNumber', 'unifiedNumber', 'number700']),
+  )
+  const commercialRegistrationExpiresOn = text(
+    first(record, ['commercialRegistrationExpiresOn', 'crExpiryDate', 'registrationExpiresOn']),
+  )
+  const vatRegistrationNumber = text(
+    first(record, ['vatRegistrationNumber', 'vatNumber', 'taxNumber']),
+  )
+  const vatRegisteredValue = first(record, ['vatRegistered', 'isVatRegistered'])
   const organizationType = text(first(record, ['organizationType', 'companyType', 'businessType']))
   const foundedYear = numberValue(first(record, ['foundedYear', 'yearFounded']))
   const employeeCountRange = text(first(record, ['employeeCountRange', 'companySize', 'employees']))
+  const addressLine =
+    text(first(addressRecord, ['addressLine', 'line1', 'street'])) ??
+    text(first(record, ['addressLine', 'streetAddress']))
+  const city = text(first(addressRecord, ['city'])) ?? text(first(record, ['city']))
+  const region =
+    text(first(addressRecord, ['region', 'state'])) ??
+    text(first(record, ['region', 'state']))
+  const postalCode =
+    text(first(addressRecord, ['postalCode', 'zipCode'])) ??
+    text(first(record, ['postalCode', 'zipCode']))
+  const country =
+    text(first(addressRecord, ['country', 'countryCode'])) ??
+    text(first(record, ['country']))
+  const workingHoursStart =
+    text(first(hoursRecord, ['start', 'startTime'])) ??
+    text(first(record, ['workingHoursStart', 'companyStartTime']))
+  const workingHoursEnd =
+    text(first(hoursRecord, ['end', 'endTime'])) ??
+    text(first(record, ['workingHoursEnd', 'companyEndTime']))
+  const timezone =
+    text(first(hoursRecord, ['timezone'])) ?? text(first(record, ['timezone']))
+  const registeredAddress = {
+    ...(addressLine ? { addressLine } : {}),
+    ...(city ? { city } : {}),
+    ...(region ? { region } : {}),
+    ...(postalCode ? { postalCode } : {}),
+    ...(country ? { country } : {}),
+  }
+  const workingHours = {
+    ...(workingHoursStart ? { start: workingHoursStart } : {}),
+    ...(workingHoursEnd ? { end: workingHoursEnd } : {}),
+    ...(timezone ? { timezone } : {}),
+  }
   return {
     legalName: text(first(record, ['legalName', 'companyName', 'name'])) ?? displayName,
     ...(commercialRegistrationNumber ? { commercialRegistrationNumber } : {}),
+    ...(unifiedNationalNumber ? { unifiedNationalNumber } : {}),
+    ...(commercialRegistrationExpiresOn ? { commercialRegistrationExpiresOn } : {}),
+    ...(vatRegistrationNumber ? { vatRegistrationNumber } : {}),
+    ...(vatRegisteredValue !== undefined
+      ? { vatRegistered: booleanValue(vatRegisteredValue, false) }
+      : {}),
     ...(organizationType ? { organizationType } : {}),
     ...(foundedYear !== undefined ? { foundedYear } : {}),
     ...(employeeCountRange ? { employeeCountRange } : {}),
     sectors: strings(first(record, ['sectors', 'industries', 'industry'])),
+    ...(Object.keys(registeredAddress).length > 0 ? { registeredAddress } : {}),
+    ...(Object.keys(workingHours).length > 0 ? { workingHours } : {}),
   }
 }
