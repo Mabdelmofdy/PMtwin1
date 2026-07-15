@@ -130,6 +130,11 @@ function validateProfile(profile) {
   }
   optionalUrl(issues, profile.contact.website, "contact.website");
   optionalUrl(issues, profile.contact.linkedin, "contact.linkedin");
+  if (profile.socialLinks) {
+    for (const [platform, url] of Object.entries(profile.socialLinks)) {
+      optionalUrl(issues, url, `socialLinks.${platform}`);
+    }
+  }
   const preferences2 = profile.matchingPreferences;
   validateUnique(issues, preferences2.serviceCategories, "matchingPreferences.serviceCategories");
   validateUnique(issues, preferences2.skillTags, "matchingPreferences.skillTags");
@@ -365,7 +370,25 @@ function visibility(value) {
     email: booleanValue(first(record, ["email", "showEmail"]), false),
     phone: booleanValue(first(record, ["phone", "showPhone"]), false),
     website: booleanValue(first(record, ["website", "showWebsite"]), false),
-    linkedin: booleanValue(first(record, ["linkedin", "showLinkedin"]), false)
+    linkedin: booleanValue(first(record, ["linkedin", "showLinkedin"]), false),
+    socialLinks: booleanValue(first(record, ["socialLinks", "showSocialLinks"]), false)
+  };
+}
+function socialLinks(value) {
+  const record = asRecord(value);
+  const facebook = text(first(record, ["facebook", "facebookUrl"]));
+  const x = text(first(record, ["x", "twitter", "xUrl", "twitterUrl"]));
+  const instagram = text(first(record, ["instagram", "instagramUrl"]));
+  const youtube = text(first(record, ["youtube", "youtubeUrl"]));
+  const github = text(first(record, ["github", "githubUrl"]));
+  const behance = text(first(record, ["behance", "behanceUrl"]));
+  return {
+    ...facebook ? { facebook } : {},
+    ...x ? { x } : {},
+    ...instagram ? { instagram } : {},
+    ...youtube ? { youtube } : {},
+    ...github ? { github } : {},
+    ...behance ? { behance } : {}
   };
 }
 function preferences(value) {
@@ -411,6 +434,9 @@ function normalizeLegacyProfile(input) {
   const phone = text(first(contactRecord, ["phone", "phoneNumber", "mobile"])) ?? text(first(source, ["phone", "phoneNumber", "mobile"]));
   const website = text(first(contactRecord, ["website", "websiteUrl"])) ?? text(source.website);
   const linkedin = text(first(contactRecord, ["linkedin", "linkedinUrl"])) ?? text(source.linkedin);
+  const normalizedSocialLinks = socialLinks(
+    first(source, ["socialLinks", "socialMedia", "socialProfiles"]) ?? source
+  );
   const base = {
     schemaVersion: PROFILE_SCHEMA_VERSION,
     id,
@@ -432,6 +458,7 @@ function normalizeLegacyProfile(input) {
       ...website ? { website } : {},
       ...linkedin ? { linkedin } : {}
     },
+    ...Object.keys(normalizedSocialLinks).length > 0 ? { socialLinks: normalizedSocialLinks } : {},
     contactVisibility: visibility(first(source, ["contactVisibility", "visibility", "privacy"])),
     matchingPreferences: preferences(first(source, ["matchingPreferences", "matchPreferences", "preferences"]))
   };
@@ -560,7 +587,8 @@ function toPublicProfile(profile) {
     portfolio: profile.portfolio.map(copyPortfolio),
     credentials: profile.credentials.map(copyCredential),
     availability: copyAvailability(profile.availability),
-    contact
+    contact,
+    ...profile.contactVisibility.socialLinks && profile.socialLinks ? { socialLinks: { ...profile.socialLinks } } : {}
   };
   if (profile.kind === "individual") {
     return {

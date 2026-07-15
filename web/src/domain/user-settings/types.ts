@@ -13,6 +13,7 @@ export type PrivacySettings = {
     readonly showPhone: boolean
     readonly showWebsite: boolean
     readonly showLinkedIn: boolean
+    readonly showSocialLinks: boolean
   }
 }
 

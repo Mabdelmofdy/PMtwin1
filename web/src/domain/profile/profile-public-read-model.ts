@@ -1,4 +1,7 @@
-import { toPublicProfile } from '@pm-twin/profile'
+import {
+  toPublicProfile,
+  type ProfileSocialLinks,
+} from '@pm-twin/profile'
 import type { PlatformUser } from '@/types/domain.ts'
 
 export type PublicProfileProjection = {
@@ -21,6 +24,7 @@ export type PublicProfileProjection = {
     readonly website?: string
     readonly linkedIn?: string
   }
+  readonly socialLinks: ProfileSocialLinks
   readonly verified: boolean
 }
 
@@ -92,6 +96,9 @@ export function buildPublicProfileProjection(
           ? { linkedIn: profile.linkedIn }
           : {}),
     },
+    socialLinks:
+      canonical?.socialLinks ??
+      (profile?.visibility?.showSocialLinks ? { ...profile.socialLinks } : {}),
     verified: vettingStatus === 'approved',
   }
 }

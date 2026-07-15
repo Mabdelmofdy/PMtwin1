@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { FileText, Pencil, Settings } from 'lucide-react'
+import { Eye, FileText, Globe2, MapPin, Pencil, Settings, UserRound } from 'lucide-react'
 import { ProfileReadinessCard } from '@/components/readiness/profile-readiness-card.tsx'
 import { PmDetailLayout } from '@/components/layout/pm-layout-index'
 import {
@@ -44,6 +44,12 @@ type ProfileDraft = {
   phone: string
   website: string
   linkedIn: string
+  facebook: string
+  x: string
+  instagram: string
+  youtube: string
+  github: string
+  behance: string
   services: string
   languages: string
   certifications: string
@@ -86,6 +92,12 @@ function createProfileDraft(profile?: EditableProfileFields | null): ProfileDraf
     phone: profile?.phone ?? '',
     website: profile?.website ?? '',
     linkedIn: profile?.linkedIn ?? '',
+    facebook: profile?.socialLinks?.facebook ?? '',
+    x: profile?.socialLinks?.x ?? '',
+    instagram: profile?.socialLinks?.instagram ?? '',
+    youtube: profile?.socialLinks?.youtube ?? '',
+    github: profile?.socialLinks?.github ?? '',
+    behance: profile?.socialLinks?.behance ?? '',
     services: joinList(profile?.services),
     languages: joinList(profile?.languages),
     certifications: joinList(profile?.certifications),
@@ -107,6 +119,15 @@ function createProfileDraft(profile?: EditableProfileFields | null): ProfileDraf
   }
 }
 
+const SOCIAL_FIELDS = [
+  { key: 'facebook', label: 'Facebook', placeholder: 'https://facebook.com/your-page' },
+  { key: 'x', label: 'X', placeholder: 'https://x.com/your-handle' },
+  { key: 'instagram', label: 'Instagram', placeholder: 'https://instagram.com/your-profile' },
+  { key: 'youtube', label: 'YouTube', placeholder: 'https://youtube.com/@your-channel' },
+  { key: 'github', label: 'GitHub', placeholder: 'https://github.com/your-profile' },
+  { key: 'behance', label: 'Behance', placeholder: 'https://behance.net/your-profile' },
+] as const
+
 /** Authenticated profile page — summary, skills, readiness panel. */
 export function ProfileView({
   profile,
@@ -119,6 +140,12 @@ export function ProfileView({
   const [draft, setDraft] = useState<ProfileDraft>(() => createProfileDraft(profile))
   const [nameError, setNameError] = useState<string | null>(null)
   const skills = profile?.skills ?? []
+  const initials = (profile?.name ?? email ?? 'Profile')
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('')
+  const socialLinkCount = Object.values(profile?.socialLinks ?? {}).filter(Boolean).length
 
   useEffect(() => {
     if (!isEditing) return undefined
@@ -162,6 +189,14 @@ export function ProfileView({
       phone: draft.phone.trim(),
       website: draft.website.trim(),
       linkedIn: draft.linkedIn.trim(),
+      socialLinks: {
+        ...(draft.facebook.trim() ? { facebook: draft.facebook.trim() } : {}),
+        ...(draft.x.trim() ? { x: draft.x.trim() } : {}),
+        ...(draft.instagram.trim() ? { instagram: draft.instagram.trim() } : {}),
+        ...(draft.youtube.trim() ? { youtube: draft.youtube.trim() } : {}),
+        ...(draft.github.trim() ? { github: draft.github.trim() } : {}),
+        ...(draft.behance.trim() ? { behance: draft.behance.trim() } : {}),
+      },
       services: splitList(draft.services),
       languages: splitList(draft.languages),
       certifications: splitList(draft.certifications),
@@ -211,25 +246,60 @@ export function ProfileView({
             ) : undefined
           }
         >
-          <div className="flex justify-end">
-            {!isEditing ? (
-              <PmButton
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={beginEditing}
-                disabled={!onSave}
-              >
-                <Pencil className="size-4" aria-hidden />
-                {profile ? 'Edit profile' : 'Create profile'}
-              </PmButton>
-            ) : null}
+          <div className="overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/10 via-surface to-surface-muted">
+            <div className="flex flex-col gap-5 p-6 md:flex-row md:items-center md:justify-between md:p-8">
+              <div className="flex min-w-0 items-center gap-4">
+                <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-primary text-xl font-semibold text-primary-foreground shadow-sm">
+                  {initials || <UserRound className="size-7" aria-hidden />}
+                </div>
+                <div className="min-w-0 space-y-1">
+                  <p className="truncate text-xl font-semibold text-foreground">
+                    {profile?.name ?? 'Complete your professional profile'}
+                  </p>
+                  <p className="truncate text-sm text-muted-foreground">
+                    {profile?.headline ?? (profileKind === 'company' ? 'Company profile' : 'Professional profile')}
+                  </p>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                    {profile?.location ? (
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="size-3.5" aria-hidden />
+                        {profile.location}
+                      </span>
+                    ) : null}
+                    <span className="inline-flex items-center gap-1">
+                      <Globe2 className="size-3.5" aria-hidden />
+                      {socialLinkCount} social {socialLinkCount === 1 ? 'link' : 'links'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              {!isEditing ? (
+                <div className="flex flex-wrap gap-2">
+                  <PmButton type="button" size="sm" variant="outline" asChild>
+                    <Link to="/profile/preview">
+                      <Eye className="size-4" aria-hidden />
+                      Public preview
+                    </Link>
+                  </PmButton>
+                  <PmButton
+                    type="button"
+                    size="sm"
+                    onClick={beginEditing}
+                    disabled={!onSave}
+                  >
+                    <Pencil className="size-4" aria-hidden />
+                    {profile ? 'Edit profile' : 'Create profile'}
+                  </PmButton>
+                </div>
+              ) : null}
+            </div>
           </div>
           <Tabs defaultValue="summary" className="w-full">
             <TabsList className="mb-4 w-full justify-start overflow-x-auto">
-              <TabsTrigger value="summary">Summary</TabsTrigger>
-              <TabsTrigger value="skills">Skills</TabsTrigger>
+              <TabsTrigger value="summary">About</TabsTrigger>
+              <TabsTrigger value="skills">Expertise</TabsTrigger>
               <TabsTrigger value="experience">Experience</TabsTrigger>
+              <TabsTrigger value="social">Social & links</TabsTrigger>
               {profileKind === 'company' ? (
                 <TabsTrigger value="company">Company</TabsTrigger>
               ) : null}
@@ -502,6 +572,60 @@ export function ProfileView({
                       />
                     </PmFormReadonlySection>
                   </PmFormReadonly>
+                )}
+              </PmFormSection>
+            </TabsContent>
+
+            <TabsContent value="social">
+              <PmFormSection
+                title="Social media & professional links"
+                description="Add full profile URLs. Public display is controlled from Settings → Privacy."
+              >
+                {isEditing ? (
+                  <PmFormGrid columns={2}>
+                    {SOCIAL_FIELDS.map((field) => (
+                      <PmFormField
+                        key={field.key}
+                        id={`profile-${field.key}`}
+                        label={field.label}
+                        optional
+                      >
+                        <Input
+                          value={draft[field.key]}
+                          onChange={(event) => updateDraft(field.key, event.target.value)}
+                          placeholder={field.placeholder}
+                          type="url"
+                          inputMode="url"
+                          dir="ltr"
+                        />
+                      </PmFormField>
+                    ))}
+                  </PmFormGrid>
+                ) : socialLinkCount > 0 ? (
+                  <PmFormReadonly>
+                    <PmFormReadonlySection>
+                      {SOCIAL_FIELDS.map((field) => (
+                        <PmFormReadonlyField
+                          key={field.key}
+                          label={field.label}
+                          value={profile?.socialLinks?.[field.key]}
+                          copyable
+                        />
+                      ))}
+                    </PmFormReadonlySection>
+                  </PmFormReadonly>
+                ) : (
+                  <PmEmptyState
+                    size="compact"
+                    title="No social links added"
+                    description="Add Facebook, X, Instagram, YouTube, GitHub, or Behance to your professional profile."
+                    icon={<Globe2 className="size-8" />}
+                    action={
+                      <PmButton size="sm" onClick={beginEditing} disabled={!onSave}>
+                        Add social links
+                      </PmButton>
+                    }
+                  />
                 )}
               </PmFormSection>
             </TabsContent>

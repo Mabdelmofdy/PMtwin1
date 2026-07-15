@@ -106,6 +106,9 @@ function preferencesFromRepository(
         showLinkedIn:
           document.privacy.publicProfile.showLinkedIn ||
           profileAccount?.profile?.visibility?.showLinkedIn === true,
+        showSocialLinks:
+          document.privacy.publicProfile.showSocialLinks ||
+          profileAccount?.profile?.visibility?.showSocialLinks === true,
       },
     },
     notifications: {
@@ -154,6 +157,7 @@ export function SettingsView() {
           showPhone: draft.privacy.publicProfile.showPhone,
           showWebsite: draft.privacy.publicProfile.showWebsite,
           showLinkedIn: draft.privacy.publicProfile.showLinkedIn,
+          showSocialLinks: draft.privacy.publicProfile.showSocialLinks,
         },
       }
       const profileResult = updateProfileThroughCommand(subject, visibilityPatch)
@@ -241,7 +245,7 @@ export function SettingsView() {
                   }))
                 }
               />
-              {(['showPhone', 'showWebsite', 'showLinkedIn'] as const).map((field) => (
+              {(['showPhone', 'showWebsite', 'showLinkedIn', 'showSocialLinks'] as const).map((field) => (
                 <ToggleRow
                   key={field}
                   id={field}
@@ -249,6 +253,7 @@ export function SettingsView() {
                     showPhone: 'Show business phone',
                     showWebsite: 'Show website',
                     showLinkedIn: 'Show LinkedIn',
+                    showSocialLinks: 'Show social media links',
                   }[field]}
                   description="Only shown when the profile is published and this option is enabled."
                   checked={draft.privacy.publicProfile[field]}

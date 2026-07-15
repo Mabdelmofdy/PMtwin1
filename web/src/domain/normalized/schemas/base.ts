@@ -66,6 +66,16 @@ export const ProfileSchema = z
     phone: z.string().optional(),
     website: z.string().optional(),
     linkedIn: z.string().optional(),
+    socialLinks: z
+      .object({
+        facebook: z.string().optional(),
+        x: z.string().optional(),
+        instagram: z.string().optional(),
+        youtube: z.string().optional(),
+        github: z.string().optional(),
+        behance: z.string().optional(),
+      })
+      .optional(),
     services: z.array(z.string()).optional(),
     languages: z.array(z.string()).optional(),
     certifications: z.array(z.string()).optional(),
@@ -90,6 +100,7 @@ export const ProfileSchema = z
         showPhone: z.boolean().optional(),
         showWebsite: z.boolean().optional(),
         showLinkedIn: z.boolean().optional(),
+        showSocialLinks: z.boolean().optional(),
       })
       .optional(),
   })

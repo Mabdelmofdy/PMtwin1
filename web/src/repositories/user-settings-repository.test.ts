@@ -109,4 +109,34 @@ describe('UserSettingsRepository', () => {
     )
     assert.equal(storage.get(OVERRIDES_KEY), null)
   })
+
+  it('migrates stored privacy settings created before social visibility existed', () => {
+    const storage = new MemoryStorageAdapter()
+    const legacy = createDefaultUserSettings(
+      'user-a',
+      '2026-07-15T08:00:00.000Z',
+    )
+    storage.set(OVERRIDES_KEY, {
+      userSettings: {
+        'user-a': {
+          ...legacy,
+          privacy: {
+            ...legacy.privacy,
+            publicProfile: {
+              published: true,
+              showPhone: false,
+              showWebsite: true,
+              showLinkedIn: false,
+            },
+          },
+        },
+      },
+    })
+
+    const settings = new UserSettingsRepository(storage).get('user-a')
+
+    assert.equal(settings.privacy.publicProfile.published, true)
+    assert.equal(settings.privacy.publicProfile.showWebsite, true)
+    assert.equal(settings.privacy.publicProfile.showSocialLinks, false)
+  })
 })

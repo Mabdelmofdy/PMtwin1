@@ -22,6 +22,17 @@ function hasAnyArray(profile: Record<string, unknown>, keys: readonly string[]):
   return keys.some((key) => hasNonEmptyArray(profile[key]))
 }
 
+function hasSocialLinks(profile: Record<string, unknown>): boolean {
+  if (hasAnyString(profile, ['linkedIn'])) return true
+  const links = profile.socialLinks
+  return (
+    links !== null &&
+    typeof links === 'object' &&
+    !Array.isArray(links) &&
+    Object.values(links as Record<string, unknown>).some(hasNonEmptyString)
+  )
+}
+
 function hasAvailability(profile: Record<string, unknown>): boolean {
   const availability = profile.availability
   if (hasNonEmptyString(availability)) return true
@@ -73,6 +84,19 @@ const INDIVIDUAL_REQUIRED_RULES: readonly ProfileFieldRule[] = [
 
 const INDIVIDUAL_RECOMMENDED_RULES: readonly ProfileFieldRule[] = [
   {
+    label: 'Professional Bio',
+    isPresent: (profile) => hasAnyString(profile, ['bio', 'summary', 'description']),
+  },
+  {
+    label: 'Public Contact',
+    isPresent: (profile) =>
+      hasAnyString(profile, ['phone']) && hasAnyString(profile, ['website']),
+  },
+  {
+    label: 'Social Media Links',
+    isPresent: hasSocialLinks,
+  },
+  {
     label: 'Portfolio',
     isPresent: (profile) => hasAnyArray(profile, ['portfolio', 'caseStudies']),
   },
@@ -88,9 +112,22 @@ const INDIVIDUAL_RECOMMENDED_RULES: readonly ProfileFieldRule[] = [
     isPresent: (profile) => hasAnyArray(profile, ['certifications']),
   },
   {
-    label: 'Previous Projects',
+    label: 'Education',
+    isPresent: (profile) => hasAnyArray(profile, ['education']),
+  },
+  {
+    label: 'Languages',
+    isPresent: (profile) => hasAnyArray(profile, ['languages']),
+  },
+  {
+    label: 'References & Testimonials',
+    isPresent: (profile) => hasAnyArray(profile, ['testimonials', 'references']),
+  },
+  {
+    label: 'Professional Preferences',
     isPresent: (profile) =>
-      hasAnyArray(profile, ['previousProjects', 'projects', 'caseStudies', 'portfolio']),
+      hasAnyString(profile, ['preferredWorkMode']) ||
+      hasAnyArray(profile, ['collaborationPreferences']),
   },
 ]
 
@@ -126,6 +163,19 @@ const COMPANY_REQUIRED_RULES: readonly ProfileFieldRule[] = [
 
 const COMPANY_RECOMMENDED_RULES: readonly ProfileFieldRule[] = [
   {
+    label: 'Company Description',
+    isPresent: (profile) => hasAnyString(profile, ['description', 'bio', 'summary']),
+  },
+  {
+    label: 'Public Contact',
+    isPresent: (profile) =>
+      hasAnyString(profile, ['phone']) && hasAnyString(profile, ['website']),
+  },
+  {
+    label: 'Social Media Links',
+    isPresent: hasSocialLinks,
+  },
+  {
     label: 'Portfolio',
     isPresent: (profile) => hasAnyArray(profile, ['portfolio', 'caseStudies']),
   },
@@ -147,6 +197,15 @@ const COMPANY_RECOMMENDED_RULES: readonly ProfileFieldRule[] = [
   {
     label: 'Financial Capacity',
     isPresent: (profile) => hasPresentNumber(profile.financialCapacity),
+  },
+  {
+    label: 'References & Testimonials',
+    isPresent: (profile) => hasAnyArray(profile, ['testimonials', 'references']),
+  },
+  {
+    label: 'Availability & Work Mode',
+    isPresent: (profile) =>
+      hasAvailability(profile) && hasAnyString(profile, ['preferredWorkMode']),
   },
 ]
 

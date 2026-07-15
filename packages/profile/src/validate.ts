@@ -180,6 +180,11 @@ export function validateProfile(profile: CanonicalProfile): ProfileValidationRes
   }
   optionalUrl(issues, profile.contact.website, 'contact.website')
   optionalUrl(issues, profile.contact.linkedin, 'contact.linkedin')
+  if (profile.socialLinks) {
+    for (const [platform, url] of Object.entries(profile.socialLinks)) {
+      optionalUrl(issues, url, `socialLinks.${platform}`)
+    }
+  }
 
   const preferences = profile.matchingPreferences
   validateUnique(issues, preferences.serviceCategories, 'matchingPreferences.serviceCategories')

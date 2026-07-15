@@ -17,6 +17,14 @@ const readyIndividualProfile = {
   yearsExperience: 9,
   certifications: ['LEED AP BD+C'],
   previousProjects: [{ title: 'NEOM Pavilion' }],
+  bio: 'Architect and delivery advisor.',
+  phone: '+966500000000',
+  website: 'https://example.com',
+  socialLinks: { x: 'https://x.com/example' },
+  education: ['BArch'],
+  languages: ['Arabic', 'English'],
+  testimonials: ['Delivered successfully'],
+  collaborationPreferences: ['Advisory'],
 }
 
 const readyCompanyProfile = {
@@ -32,6 +40,12 @@ const readyCompanyProfile = {
   coverageAreas: ['Riyadh', 'Eastern Province'],
   certifications: ['ISO 9001'],
   financialCapacity: 75_000_000,
+  description: 'Integrated construction and project delivery company.',
+  website: 'https://example.com',
+  socialLinks: { facebook: 'https://facebook.com/example' },
+  testimonials: ['Trusted delivery partner'],
+  availability: 'Available for new projects',
+  preferredWorkMode: 'On-site',
 }
 
 describe('evaluateProfileReadiness — individual profiles', () => {
@@ -44,7 +58,7 @@ describe('evaluateProfileReadiness — individual profiles', () => {
     assert.equal(result.status, 'incomplete')
     assert.ok(result.score < PROFILE_READINESS_STATUS_THRESHOLDS.incompleteMax)
     assert.equal(result.missingRequired.length, 6)
-    assert.equal(result.missingRecommended.length, 4)
+    assert.equal(result.missingRecommended.length, 10)
   })
 
   it('marks a fully complete individual profile as ready_for_matching', () => {
@@ -91,7 +105,7 @@ describe('evaluateProfileReadiness — company profiles', () => {
     assert.equal(result.status, 'incomplete')
     assert.ok(result.score < PROFILE_READINESS_STATUS_THRESHOLDS.incompleteMax)
     assert.equal(result.missingRequired.length, 6)
-    assert.equal(result.missingRecommended.length, 5)
+    assert.equal(result.missingRecommended.length, 10)
   })
 
   it('marks a fully complete company profile as ready_for_matching', () => {
@@ -121,7 +135,7 @@ describe('evaluateProfileReadiness — company profiles', () => {
 
     assert.equal(result.status, 'needs_review')
     assert.equal(result.missingRequired.length, 0)
-    assert.equal(result.missingRecommended.length, 5)
+    assert.equal(result.missingRecommended.length, 10)
     assert.equal(result.score, PROFILE_READINESS_SCORE_WEIGHTS.required)
   })
 })
@@ -168,7 +182,7 @@ describe('evaluateProfileReadiness — score boundaries', () => {
         skills: ['Planning'],
         services: ['Project Management'],
         location: 'Riyadh',
-        preferredWorkMode: 'Hybrid',
+        availability: 'Available',
       },
     })
 
@@ -189,7 +203,7 @@ describe('evaluateProfileReadiness — score boundaries', () => {
     assert.equal(result.status, 'incomplete')
   })
 
-  it('accepts structured portfolio entries as previous project evidence', () => {
+  it('does not report 100% while optional professional sections are empty', () => {
     const almostReady = evaluateProfileReadiness({
       profileKind: 'individual',
       profile: {
@@ -205,21 +219,22 @@ describe('evaluateProfileReadiness — score boundaries', () => {
       },
     })
 
-    assert.equal(almostReady.score, 100)
+    assert.equal(almostReady.score, 79)
     assert.equal(almostReady.missingRequired.length, 0)
-    assert.equal(almostReady.missingRecommended.length, 0)
-    assert.equal(almostReady.status, 'ready_for_matching')
+    assert.ok(almostReady.missingRecommended.includes('Professional Bio'))
+    assert.ok(almostReady.missingRecommended.includes('Social Media Links'))
+    assert.equal(almostReady.status, 'needs_review')
   })
 
-  it('returns ready_for_matching only when required, recommended, and score gates pass', () => {
+  it('allows matching readiness above the score gate while still showing optional gaps', () => {
     const result = evaluateProfileReadiness({
       profileKind: 'company',
-      profile: readyCompanyProfile,
+      profile: { ...readyCompanyProfile, socialLinks: {} },
     })
 
     assert.ok(result.score >= PROFILE_READINESS_STATUS_THRESHOLDS.readyMin)
     assert.equal(result.missingRequired.length, 0)
-    assert.equal(result.missingRecommended.length, 0)
+    assert.ok(result.missingRecommended.includes('Social Media Links'))
     assert.equal(result.status, 'ready_for_matching')
   })
 })
@@ -242,8 +257,9 @@ describe('evaluateProfileReadiness — legacy field aliases', () => {
       },
     })
 
-    assert.equal(result.status, 'ready_for_matching')
-    assert.equal(result.score, 100)
+    assert.equal(result.status, 'needs_review')
+    assert.equal(result.missingRequired.length, 0)
+    assert.ok(result.score < 100)
   })
 
   it('accepts legacy POC field names for company profiles', () => {
@@ -265,6 +281,6 @@ describe('evaluateProfileReadiness — legacy field aliases', () => {
     })
 
     assert.equal(result.status, 'ready_for_matching')
-    assert.equal(result.score, 100)
+    assert.equal(result.score, 85)
   })
 })

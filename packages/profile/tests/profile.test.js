@@ -21,7 +21,11 @@ const individualBag = {
   email: 'saleh@example.com',
   phoneNumber: '+966500000000',
   website: 'https://example.com',
-  privacy: { showEmail: true, showPhone: false, showWebsite: true },
+  privacy: { showEmail: true, showPhone: false, showWebsite: true, showSocialLinks: true },
+  socialMedia: {
+    facebook: 'https://facebook.com/saleh',
+    x: 'https://x.com/saleh',
+  },
   experienceYears: '12',
   spokenLanguages: ['ar', 'en'],
   offerings: [
@@ -162,6 +166,10 @@ describe('@pm-twin/profile', () => {
     assert.equal('contactVisibility' in publicProfile, false)
     assert.equal('matchingPreferences' in publicProfile, false)
     assert.equal('phone' in publicProfile.contact, false)
+    assert.deepEqual(publicProfile.socialLinks, {
+      facebook: 'https://facebook.com/saleh',
+      x: 'https://x.com/saleh',
+    })
   })
 
   it('never exposes a company commercial registration number publicly', () => {

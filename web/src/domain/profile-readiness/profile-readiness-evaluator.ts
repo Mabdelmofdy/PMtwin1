@@ -57,7 +57,6 @@ function isHeavilyMissingRequired(missingRequiredCount: number, requiredTotal: n
 function resolveStatus(
   score: number,
   missingRequired: readonly string[],
-  missingRecommended: readonly string[],
   requiredTotal: number,
 ): ProfileReadinessStatus {
   if (
@@ -69,7 +68,6 @@ function resolveStatus(
 
   if (
     missingRequired.length > 0 ||
-    missingRecommended.length > 0 ||
     score < PROFILE_READINESS_STATUS_THRESHOLDS.readyMin
   ) {
     return 'needs_review'
@@ -117,7 +115,6 @@ export function evaluateProfileReadiness(input: ProfileReadinessInput): ProfileR
   const status = resolveStatus(
     score,
     requiredEvaluation.missing,
-    recommendedEvaluation.missing,
     required.length,
   )
 

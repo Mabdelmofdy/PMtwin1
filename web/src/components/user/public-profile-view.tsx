@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { ExternalLink } from 'lucide-react'
 import { pmTypography } from '@/tokens'
 import { PmContentCard, PmDetailLayout } from '@/components/layout/pm-layout-index'
 import {
@@ -53,6 +54,9 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
       item,
     ): item is { readonly label: string; readonly value: string; readonly href: string } =>
       item !== null,
+  )
+  const socialLinks = Object.entries(profile.socialLinks).filter(
+    (entry): entry is [string, string] => typeof entry[1] === 'string' && entry[1].length > 0,
   )
 
   return (
@@ -129,6 +133,25 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
                       )}
                     >
                       {item.label}: {item.value}
+                    </a>
+                  ))}
+                </div>
+              </PmContentCard>
+            ) : null}
+
+            {socialLinks.length > 0 ? (
+              <PmContentCard title="Social profiles">
+                <div className="grid gap-2">
+                  {socialLinks.map(([platform, url]) => (
+                    <a
+                      key={platform}
+                      href={url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex cursor-pointer items-center justify-between rounded-xl border border-border px-3 py-2 text-sm font-medium capitalize transition-colors duration-200 hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {platform === 'x' ? 'X' : platform}
+                      <ExternalLink className="size-4 text-muted-foreground" aria-hidden />
                     </a>
                   ))}
                 </div>

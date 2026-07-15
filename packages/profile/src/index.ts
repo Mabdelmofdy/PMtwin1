@@ -26,11 +26,13 @@ export type {
   ProfileLocation,
   ProfileSchemaVersion,
   ProfileService,
+  ProfileSocialLinks,
   ProfileValidationCode,
   ProfileValidationIssue,
   ProfileValidationResult,
   PublicProfile,
   PublicProfileService,
+  SocialPlatform,
 } from './types.ts'
 
 export { normalizeLegacyProfile } from './normalize.ts'

@@ -111,6 +111,9 @@ export function toPublicProfile(profile: CanonicalProfile): PublicProfile {
     credentials: profile.credentials.map(copyCredential),
     availability: copyAvailability(profile.availability),
     contact,
+    ...(profile.contactVisibility.socialLinks && profile.socialLinks
+      ? { socialLinks: { ...profile.socialLinks } }
+      : {}),
   } as const
   if (profile.kind === 'individual') {
     return {

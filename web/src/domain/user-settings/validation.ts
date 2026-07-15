@@ -83,7 +83,7 @@ function validatePrivacy(value: unknown, errors: string[]): void {
     !validateObject(
       publicProfile,
       'privacy.publicProfile',
-      ['published', 'showPhone', 'showWebsite', 'showLinkedIn'],
+      ['published', 'showPhone', 'showWebsite', 'showLinkedIn', 'showSocialLinks'],
       errors,
     )
   ) return
@@ -91,6 +91,7 @@ function validatePrivacy(value: unknown, errors: string[]): void {
   validateBoolean(publicProfile, 'showPhone', 'privacy.publicProfile', errors)
   validateBoolean(publicProfile, 'showWebsite', 'privacy.publicProfile', errors)
   validateBoolean(publicProfile, 'showLinkedIn', 'privacy.publicProfile', errors)
+  validateBoolean(publicProfile, 'showSocialLinks', 'privacy.publicProfile', errors)
 }
 
 function validateNotifications(value: unknown, errors: string[]): void {

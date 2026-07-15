@@ -8,6 +8,15 @@ export type CredentialStatus = 'active' | 'expired' | 'pending' | 'revoked'
 export type AvailabilityStatus = 'available' | 'limited' | 'unavailable'
 export type EngagementMode = 'onsite' | 'remote' | 'hybrid'
 export type ContactChannel = 'email' | 'phone' | 'website' | 'linkedin'
+export type SocialPlatform =
+  | 'facebook'
+  | 'x'
+  | 'instagram'
+  | 'youtube'
+  | 'github'
+  | 'behance'
+
+export type ProfileSocialLinks = Partial<Readonly<Record<SocialPlatform, string>>>
 
 export type LocalizedText = {
   readonly ar?: string
@@ -82,6 +91,7 @@ export type ContactVisibility = {
   readonly phone: boolean
   readonly website: boolean
   readonly linkedin: boolean
+  readonly socialLinks?: boolean
 }
 
 export type MatchingPreferences = {
@@ -111,6 +121,7 @@ export type CanonicalProfileBase = {
   readonly credentials: readonly ProfileCredential[]
   readonly availability: ProfileAvailability
   readonly contact: ProfileContact
+  readonly socialLinks?: ProfileSocialLinks
   readonly contactVisibility: ContactVisibility
   readonly matchingPreferences: MatchingPreferences
 }
@@ -186,6 +197,7 @@ export type PublicProfile = {
   readonly credentials: readonly ProfileCredential[]
   readonly availability: ProfileAvailability
   readonly contact: Partial<Readonly<Record<ContactChannel, string>>>
+  readonly socialLinks?: ProfileSocialLinks
   readonly individual?: IndividualProfile['individual']
   readonly company?: Omit<CompanyProfile['company'], 'commercialRegistrationNumber'>
 }

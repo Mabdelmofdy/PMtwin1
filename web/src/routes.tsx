@@ -63,6 +63,7 @@ import {
   PeoplePage,
   PersonProfilePage,
   ProfilePage,
+  ProfilePreviewPage,
   SettingsPage,
 } from '@/pages/workspace/people-pages'
 import {
@@ -203,6 +204,7 @@ export function AppRoutes() {
 
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/preview" element={<ProfilePreviewPage />} />
         <Route path="/party-documents" element={<PartyDocumentsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/settings/:section" element={<SettingsPage />} />

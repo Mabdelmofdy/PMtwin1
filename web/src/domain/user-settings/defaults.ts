@@ -17,6 +17,7 @@ export const DEFAULT_USER_SETTINGS_PREFERENCES: UserSettingsPreferences = {
       showPhone: false,
       showWebsite: false,
       showLinkedIn: false,
+      showSocialLinks: false,
     },
   },
   notifications: {

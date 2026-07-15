@@ -60,6 +60,7 @@ import { useProductLanguage } from '@/providers/product-language-provider'
 import { vettingService } from '@/lib/vetting-service.ts'
 import { updateProfileThroughCommand } from '@/services/profile-command-service.ts'
 import { resolveRuntimeProfileSubject } from '@/domain/profile/profile-subject-service.ts'
+import { buildPublicProfileProjection } from '@/domain/profile/profile-public-read-model.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store.ts'
 import { userSettingsRepository } from '@/repositories/index.ts'
 import { listProfileOpportunityRecommendations } from '@/services/matching/profile-fit-service.ts'
@@ -152,6 +153,58 @@ export function PersonProfilePage() {
       }
     >
       <PublicProfileView profile={person} />
+    </PmPage>
+  )
+}
+
+export function ProfilePreviewPage() {
+  const { user, activeParty, activeWorkspace } = useAuth()
+  const subject = user
+    ? resolveRuntimeProfileSubject({
+        partyId: activeParty?.id,
+        workspaceId: activeWorkspace?.id,
+        legacyAccountId: user.id,
+      })
+    : undefined
+
+  if (!subject) {
+    return (
+      <PmPage>
+        <PublicProfileNotFound />
+      </PmPage>
+    )
+  }
+
+  const companyIds =
+    subject.profileKind === 'company'
+      ? new Set([subject.account.id])
+      : new Set<string>()
+  const projection = buildPublicProfileProjection(subject.account, companyIds)
+
+  return (
+    <PmPage
+      header={
+        <PmPageHeader
+          label="Owner preview"
+          title="Public profile preview"
+          description="This preview shows only the fields and social links currently allowed by your privacy settings."
+          actions={
+            <PmButton variant="outline" asChild>
+              <Link to="/profile">Back to profile editor</Link>
+            </PmButton>
+          }
+        />
+      }
+    >
+      <PmContentCard
+        title={subject.account.isPublic === false ? 'Profile is currently private' : 'Profile is published'}
+        description={
+          subject.account.isPublic === false
+            ? 'You can still review the public projection. Publish it from Settings → Privacy when ready.'
+            : 'Marketplace visitors see the projection below.'
+        }
+      />
+      <PublicProfileView profile={projection} />
     </PmPage>
   )
 }

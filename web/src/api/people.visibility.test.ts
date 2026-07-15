@@ -19,6 +19,10 @@ function account(patch: Partial<PlatformUser> = {}): PlatformUser {
         showPhone: false,
         showWebsite: true,
         showLinkedIn: false,
+        showSocialLinks: false,
+      },
+      socialLinks: {
+        x: 'https://x.com/professional',
       },
     },
     ...patch,
@@ -40,7 +44,22 @@ describe('marketplace profile visibility', () => {
 
     assert.equal(projection.contact.phone, undefined)
     assert.equal(projection.contact.website, 'https://example.com')
+    assert.deepEqual(projection.socialLinks, {})
     assert.equal(serialized.includes('private@example.com'), false)
+  })
+
+  it('shows social links only after explicit public opt-in', () => {
+    const visibleAccount = account()
+    visibleAccount.profile = {
+      ...visibleAccount.profile,
+      visibility: {
+        ...visibleAccount.profile?.visibility,
+        showSocialLinks: true,
+      },
+    }
+    const projection = buildPublicProfileProjection(visibleAccount, new Set())
+
+    assert.equal(projection.socialLinks.x, 'https://x.com/professional')
   })
 
   it('does not claim verification without approved vetting status', () => {

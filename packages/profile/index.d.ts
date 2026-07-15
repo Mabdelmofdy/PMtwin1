@@ -31,9 +31,11 @@ export type {
   ProfileLocation,
   ProfileSchemaVersion,
   ProfileService,
+  ProfileSocialLinks,
   ProfileValidationCode,
   ProfileValidationIssue,
   ProfileValidationResult,
   PublicProfile,
   PublicProfileService,
+  SocialPlatform,
 } from './src/index.ts'

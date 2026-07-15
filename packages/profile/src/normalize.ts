@@ -17,6 +17,7 @@ import {
   type ProfileLocale,
   type ProfileLocation,
   type ProfileService,
+  type ProfileSocialLinks,
 } from './types.ts'
 
 type UnknownRecord = Readonly<Record<string, unknown>>
@@ -227,6 +228,25 @@ function visibility(value: unknown): ContactVisibility {
     phone: booleanValue(first(record, ['phone', 'showPhone']), false),
     website: booleanValue(first(record, ['website', 'showWebsite']), false),
     linkedin: booleanValue(first(record, ['linkedin', 'showLinkedin']), false),
+    socialLinks: booleanValue(first(record, ['socialLinks', 'showSocialLinks']), false),
+  }
+}
+
+function socialLinks(value: unknown): ProfileSocialLinks {
+  const record = asRecord(value)
+  const facebook = text(first(record, ['facebook', 'facebookUrl']))
+  const x = text(first(record, ['x', 'twitter', 'xUrl', 'twitterUrl']))
+  const instagram = text(first(record, ['instagram', 'instagramUrl']))
+  const youtube = text(first(record, ['youtube', 'youtubeUrl']))
+  const github = text(first(record, ['github', 'githubUrl']))
+  const behance = text(first(record, ['behance', 'behanceUrl']))
+  return {
+    ...(facebook ? { facebook } : {}),
+    ...(x ? { x } : {}),
+    ...(instagram ? { instagram } : {}),
+    ...(youtube ? { youtube } : {}),
+    ...(github ? { github } : {}),
+    ...(behance ? { behance } : {}),
   }
 }
 
@@ -280,6 +300,9 @@ export function normalizeLegacyProfile(input: unknown): LegacyNormalizationResul
     text(first(source, ['phone', 'phoneNumber', 'mobile']))
   const website = text(first(contactRecord, ['website', 'websiteUrl'])) ?? text(source.website)
   const linkedin = text(first(contactRecord, ['linkedin', 'linkedinUrl'])) ?? text(source.linkedin)
+  const normalizedSocialLinks = socialLinks(
+    first(source, ['socialLinks', 'socialMedia', 'socialProfiles']) ?? source,
+  )
 
   const base = {
     schemaVersion: PROFILE_SCHEMA_VERSION,
@@ -302,6 +325,9 @@ export function normalizeLegacyProfile(input: unknown): LegacyNormalizationResul
       ...(website ? { website } : {}),
       ...(linkedin ? { linkedin } : {}),
     },
+    ...(Object.keys(normalizedSocialLinks).length > 0
+      ? { socialLinks: normalizedSocialLinks }
+      : {}),
     contactVisibility: visibility(first(source, ['contactVisibility', 'visibility', 'privacy'])),
     matchingPreferences: preferences(first(source, ['matchingPreferences', 'matchPreferences', 'preferences'])),
   } as const
