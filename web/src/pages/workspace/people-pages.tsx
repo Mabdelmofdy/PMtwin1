@@ -59,6 +59,7 @@ import { readProductNavState } from '@/config/product-identity'
 import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
 import { useProductLanguage } from '@/providers/product-language-provider'
 import { vettingService } from '@/lib/vetting-service.ts'
+import { updateUserProfile } from '@/lib/profile-update-service.ts'
 
 export function PeoplePage() {
   const location = useLocation()
@@ -253,7 +254,7 @@ export function NotificationsPage() {
 
 export function ProfilePage() {
   const navigate = useNavigate()
-  const { user, isCompanyUser, isVettingRestricted } = useAuth()
+  const { user, isCompanyUser, isVettingRestricted, refreshUser } = useAuth()
   const profileKind = isCompanyUser ? 'company' : 'individual'
   const [skillsDraft, setSkillsDraft] = useState(user?.profile?.skills?.join(', ') ?? '')
   const [documentType, setDocumentType] = useState('Commercial Registration')
@@ -290,6 +291,20 @@ export function ProfilePage() {
         profileKind={profileKind}
         email={user?.email}
         userId={user?.id}
+        onSave={(profilePatch) => {
+          if (!user) {
+            toast.error('Sign in to update your profile.')
+            return false
+          }
+          const updated = updateUserProfile(user.id, profilePatch)
+          if (!updated) {
+            toast.error('Profile could not be updated.')
+            return false
+          }
+          refreshUser()
+          toast.success('Profile updated')
+          return true
+        }}
       />
       {user && isVettingRestricted ? (
         <PmContentCard
@@ -377,14 +392,13 @@ export function ProfilePage() {
 }
 
 export function SettingsPage() {
-  const { productLanguage } = useProductLanguage()
   return (
     <PmPage
       header={
         <PmPageHeader
           label="Account"
           title="Settings"
-          description={`Account security, notification preferences, and ${productLanguage.label('commercialAgreement').toLowerCase()} terminology settings.`}
+          description="Manage your account, workspace preferences, notifications, and security."
         />
       }
     >

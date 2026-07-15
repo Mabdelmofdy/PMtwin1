@@ -65,9 +65,24 @@ export type PersonProfile = {
   headline?: string
   type?: string
   location?: string
+  phone?: string
+  website?: string
+  linkedIn?: string
   bio?: string
   description?: string
   skills?: string[]
+  services?: string[]
+  languages?: string[]
+  certifications?: string[]
+  collaborationPreferences?: string[]
+  preferredWorkMode?: string
+  availability?: string
+  yearsExperience?: number
+  workHistory?: string[]
+  education?: string[]
+  portfolio?: string[]
+  testimonials?: string[]
+  teamSize?: string
   vetting?: VettingMetadata
 }
 

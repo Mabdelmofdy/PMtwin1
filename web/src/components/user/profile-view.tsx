@@ -1,42 +1,200 @@
+import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { FileText, Settings } from 'lucide-react'
+import { FileText, Pencil, Settings } from 'lucide-react'
 import { ProfileReadinessCard } from '@/components/readiness/profile-readiness-card.tsx'
 import { PmDetailLayout } from '@/components/layout/pm-layout-index'
 import {
   PmForm,
+  PmFormActions,
+  PmFormField,
+  PmFormGrid,
+  PmFormGridItem,
   PmFormReadonly,
   PmFormReadonlyField,
   PmFormReadonlySection,
   PmFormSection,
 } from '@/components/forms/pm-form-index'
 import { PmBadge, PmButton, PmEmptyState } from '@/components/ui/pm-index'
+import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
 import type { ProfileKind } from '@/domain/profile-readiness/types.ts'
+import type { PersonProfile } from '@/types/domain.ts'
+
+export type EditableProfileFields = Omit<
+  PersonProfile,
+  'accountLabel' | 'profileCompletionUnlocked' | 'vetting'
+>
 
 export type ProfileViewProps = {
-  profile?: object | null
+  profile?: EditableProfileFields | null
   profileKind: ProfileKind
   email?: string
   userId?: string
+  onSave?: (profile: EditableProfileFields) => boolean
+}
+
+type ProfileDraft = {
+  name: string
+  headline: string
+  location: string
+  bio: string
+  description: string
+  skills: string
+  phone: string
+  website: string
+  linkedIn: string
+  services: string
+  languages: string
+  certifications: string
+  collaborationPreferences: string
+  preferredWorkMode: string
+  availability: string
+  yearsExperience: string
+  workHistory: string
+  education: string
+  portfolio: string
+  testimonials: string
+  teamSize: string
+}
+
+function joinList(value?: string[], separator = ', '): string {
+  return value?.join(separator) ?? ''
+}
+
+function splitList(value: string, separator: ',' | '\n' = ','): string[] {
+  return value
+    .split(separator)
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function createProfileDraft(profile?: EditableProfileFields | null): ProfileDraft {
+  return {
+    name: profile?.name ?? '',
+    headline: profile?.headline ?? '',
+    location: profile?.location ?? '',
+    bio: profile?.bio ?? '',
+    description: profile?.description ?? '',
+    skills: joinList(profile?.skills),
+    phone: profile?.phone ?? '',
+    website: profile?.website ?? '',
+    linkedIn: profile?.linkedIn ?? '',
+    services: joinList(profile?.services),
+    languages: joinList(profile?.languages),
+    certifications: joinList(profile?.certifications),
+    collaborationPreferences: joinList(profile?.collaborationPreferences),
+    preferredWorkMode: profile?.preferredWorkMode ?? '',
+    availability: profile?.availability ?? '',
+    yearsExperience: profile?.yearsExperience?.toString() ?? '',
+    workHistory: joinList(profile?.workHistory, '\n'),
+    education: joinList(profile?.education, '\n'),
+    portfolio: joinList(profile?.portfolio, '\n'),
+    testimonials: joinList(profile?.testimonials, '\n'),
+    teamSize: profile?.teamSize ?? '',
+  }
 }
 
 /** Authenticated profile page — summary, skills, readiness panel. */
-export function ProfileView({ profile, profileKind, email, userId }: ProfileViewProps) {
-  const personProfile = profile as {
-    name?: string
-    bio?: string
-    location?: string
-    headline?: string
-    skills?: string[]
-    description?: string
-  } | null
+export function ProfileView({
+  profile,
+  profileKind,
+  email,
+  userId,
+  onSave,
+}: ProfileViewProps) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [draft, setDraft] = useState<ProfileDraft>(() => createProfileDraft(profile))
+  const [nameError, setNameError] = useState<string | null>(null)
+  const skills = profile?.skills ?? []
 
-  const skills = personProfile?.skills ?? []
+  const updateDraft = (field: keyof ProfileDraft, value: string) => {
+    setDraft((current) => ({ ...current, [field]: value }))
+  }
+
+  const beginEditing = () => {
+    setDraft(createProfileDraft(profile))
+    setNameError(null)
+    setIsEditing(true)
+  }
+
+  const cancelEditing = () => {
+    setDraft(createProfileDraft(profile))
+    setNameError(null)
+    setIsEditing(false)
+  }
+
+  const saveProfile = () => {
+    const name = draft.name.trim()
+    if (!name) {
+      setNameError('Name is required.')
+      return
+    }
+
+    const saved = onSave?.({
+      name,
+      headline: draft.headline.trim(),
+      location: draft.location.trim(),
+      bio: draft.bio.trim(),
+      description: draft.description.trim(),
+      skills: splitList(draft.skills),
+      phone: draft.phone.trim(),
+      website: draft.website.trim(),
+      linkedIn: draft.linkedIn.trim(),
+      services: splitList(draft.services),
+      languages: splitList(draft.languages),
+      certifications: splitList(draft.certifications),
+      collaborationPreferences: splitList(draft.collaborationPreferences),
+      preferredWorkMode: draft.preferredWorkMode.trim(),
+      availability: draft.availability.trim(),
+      yearsExperience: draft.yearsExperience ? Number(draft.yearsExperience) : undefined,
+      workHistory: splitList(draft.workHistory, '\n'),
+      education: splitList(draft.education, '\n'),
+      portfolio: splitList(draft.portfolio, '\n'),
+      testimonials: splitList(draft.testimonials, '\n'),
+      teamSize: draft.teamSize.trim(),
+    })
+    if (saved) {
+      setNameError(null)
+      setIsEditing(false)
+    }
+  }
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (isEditing) saveProfile()
+  }
 
   return (
     <PmDetailLayout
       main={
-        <PmForm onSubmit={(e) => e.preventDefault()} readOnly>
+        <PmForm
+          onSubmit={handleSubmit}
+          readOnly={!isEditing}
+          footer={
+            isEditing ? (
+              <PmFormActions
+                submitLabel="Save profile"
+                onSubmit={saveProfile}
+                onCancel={cancelEditing}
+              />
+            ) : undefined
+          }
+        >
+          <div className="flex justify-end">
+            {!isEditing ? (
+              <PmButton
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={beginEditing}
+                disabled={!onSave}
+              >
+                <Pencil className="size-4" aria-hidden />
+                {profile ? 'Edit profile' : 'Create profile'}
+              </PmButton>
+            ) : null}
+          </div>
           <Tabs defaultValue="summary" className="w-full">
             <TabsList className="mb-4 w-full justify-start overflow-x-auto">
               <TabsTrigger value="summary">Summary</TabsTrigger>
@@ -52,21 +210,110 @@ export function ProfileView({ profile, profileKind, email, userId }: ProfileView
                 title="Profile summary"
                 description="Your public profile and vetting status."
               >
-                <PmFormReadonly>
-                  <PmFormReadonlySection>
-                    <PmFormReadonlyField label="Name" value={personProfile?.name} />
-                    <PmFormReadonlyField label="Email" value={email} />
-                    <PmFormReadonlyField label="Headline" value={personProfile?.headline} />
-                    <PmFormReadonlyField label="Location" value={personProfile?.location} />
-                    <PmFormReadonlyField label="Bio" value={personProfile?.bio} />
-                  </PmFormReadonlySection>
-                </PmFormReadonly>
+                {isEditing ? (
+                  <PmFormGrid columns={2}>
+                    <PmFormField id="profile-name" label="Name" required error={nameError}>
+                      <Input
+                        value={draft.name}
+                        onChange={(event) => {
+                          updateDraft('name', event.target.value)
+                          if (event.target.value.trim()) setNameError(null)
+                        }}
+                        autoComplete="name"
+                      />
+                    </PmFormField>
+                    <PmFormField id="profile-email" label="Email">
+                      <Input value={email ?? ''} disabled type="email" />
+                    </PmFormField>
+                    <PmFormField id="profile-headline" label="Headline" optional>
+                      <Input
+                        value={draft.headline}
+                        onChange={(event) => updateDraft('headline', event.target.value)}
+                        placeholder="Senior Project Manager"
+                      />
+                    </PmFormField>
+                    <PmFormField id="profile-location" label="Location" optional>
+                      <Input
+                        value={draft.location}
+                        onChange={(event) => updateDraft('location', event.target.value)}
+                        placeholder="Riyadh, Saudi Arabia"
+                        autoComplete="address-level2"
+                      />
+                    </PmFormField>
+                    <PmFormField id="profile-phone" label="Phone" optional>
+                      <Input
+                        value={draft.phone}
+                        onChange={(event) => updateDraft('phone', event.target.value)}
+                        placeholder="+966 5X XXX XXXX"
+                        type="tel"
+                        autoComplete="tel"
+                        dir="ltr"
+                      />
+                    </PmFormField>
+                    <PmFormGridItem span="full" gridColumns={2}>
+                      <PmFormField id="profile-bio" label="Bio" optional>
+                        <Textarea
+                          value={draft.bio}
+                          onChange={(event) => updateDraft('bio', event.target.value)}
+                          placeholder="Describe your experience and the work you are looking for."
+                          rows={5}
+                        />
+                      </PmFormField>
+                    </PmFormGridItem>
+                    <PmFormField id="profile-website" label="Website" optional>
+                      <Input
+                        value={draft.website}
+                        onChange={(event) => updateDraft('website', event.target.value)}
+                        placeholder="https://yourwebsite.com"
+                        type="url"
+                        autoComplete="url"
+                        dir="ltr"
+                      />
+                    </PmFormField>
+                    <PmFormField id="profile-linkedin" label="LinkedIn" optional>
+                      <Input
+                        value={draft.linkedIn}
+                        onChange={(event) => updateDraft('linkedIn', event.target.value)}
+                        placeholder="https://linkedin.com/in/your-profile"
+                        type="url"
+                        dir="ltr"
+                      />
+                    </PmFormField>
+                  </PmFormGrid>
+                ) : (
+                  <PmFormReadonly>
+                    <PmFormReadonlySection>
+                      <PmFormReadonlyField label="Name" value={profile?.name} />
+                      <PmFormReadonlyField label="Email" value={email} />
+                      <PmFormReadonlyField label="Headline" value={profile?.headline} />
+                      <PmFormReadonlyField label="Location" value={profile?.location} />
+                      <PmFormReadonlyField label="Phone" value={profile?.phone} />
+                      <PmFormReadonlyField label="Bio" value={profile?.bio} />
+                      <PmFormReadonlyField label="Website" value={profile?.website} />
+                      <PmFormReadonlyField label="LinkedIn" value={profile?.linkedIn} />
+                    </PmFormReadonlySection>
+                  </PmFormReadonly>
+                )}
               </PmFormSection>
             </TabsContent>
 
             <TabsContent value="skills">
               <PmFormSection title="Skills" description="Core capabilities shown on your profile.">
-                {skills.length > 0 ? (
+                {isEditing ? (
+                  <PmFormField
+                    id="profile-skills"
+                    label="Skills"
+                    optional
+                    hint="Separate skills with commas."
+                  >
+                    <Textarea
+                      value={draft.skills}
+                      onChange={(event) => updateDraft('skills', event.target.value)}
+                      placeholder="Project Management, Risk, Procurement"
+                      rows={4}
+                    />
+                  </PmFormField>
+                ) : skills.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {skills.map((skill) => (
                       <PmBadge key={skill} tone="neutral" size="sm">
@@ -78,11 +325,11 @@ export function ProfileView({ profile, profileKind, email, userId }: ProfileView
                   <PmEmptyState
                     size="compact"
                     title="No skills listed yet"
-                    description="Add skills in settings to improve profile readiness and matching."
+                    description="Add skills to improve profile readiness and matching."
                     icon={<FileText className="size-8" />}
                     action={
-                      <PmButton size="sm" asChild>
-                        <Link to="/settings">Open settings</Link>
+                      <PmButton size="sm" onClick={beginEditing} disabled={!onSave}>
+                        Add skills
                       </PmButton>
                     }
                     secondaryAction={
@@ -96,49 +343,306 @@ export function ProfileView({ profile, profileKind, email, userId }: ProfileView
                   />
                 )}
               </PmFormSection>
+
+              <PmFormSection
+                title="Services & expertise"
+                description="Help clients understand the work you can deliver."
+              >
+                {isEditing ? (
+                  <PmFormField
+                    id="profile-services"
+                    label="Services"
+                    optional
+                    hint="Separate services with commas."
+                  >
+                    <Textarea
+                      value={draft.services}
+                      onChange={(event) => updateDraft('services', event.target.value)}
+                      placeholder="PMO setup, Project recovery, Risk management"
+                      rows={3}
+                    />
+                  </PmFormField>
+                ) : (
+                  <PmFormReadonly>
+                    <PmFormReadonlySection>
+                      <PmFormReadonlyField
+                        label="Services"
+                        value={profile?.services?.join(', ')}
+                      />
+                    </PmFormReadonlySection>
+                  </PmFormReadonly>
+                )}
+              </PmFormSection>
+
+              <PmFormSection
+                title="Languages & certifications"
+                description="Add languages and professional credentials that strengthen your profile."
+              >
+                {isEditing ? (
+                  <PmFormGrid columns={2}>
+                    <PmFormField
+                      id="profile-languages"
+                      label="Languages"
+                      optional
+                      hint="Separate languages with commas."
+                    >
+                      <Input
+                        value={draft.languages}
+                        onChange={(event) => updateDraft('languages', event.target.value)}
+                        placeholder="Arabic, English"
+                      />
+                    </PmFormField>
+                    <PmFormField
+                      id="profile-certifications"
+                      label="Certifications"
+                      optional
+                      hint="Separate certifications with commas."
+                    >
+                      <Input
+                        value={draft.certifications}
+                        onChange={(event) => updateDraft('certifications', event.target.value)}
+                        placeholder="PMP, PMI-RMP, PRINCE2"
+                      />
+                    </PmFormField>
+                  </PmFormGrid>
+                ) : (
+                  <PmFormReadonly>
+                    <PmFormReadonlySection>
+                      <PmFormReadonlyField
+                        label="Languages"
+                        value={profile?.languages?.join(', ')}
+                      />
+                      <PmFormReadonlyField
+                        label="Certifications"
+                        value={profile?.certifications?.join(', ')}
+                      />
+                    </PmFormReadonlySection>
+                  </PmFormReadonly>
+                )}
+              </PmFormSection>
+
+              <PmFormSection
+                title="Collaboration preferences"
+                description="Set expectations for availability and preferred ways of working."
+              >
+                {isEditing ? (
+                  <PmFormGrid columns={2}>
+                    <PmFormField id="profile-work-mode" label="Preferred work mode" optional>
+                      <Input
+                        value={draft.preferredWorkMode}
+                        onChange={(event) => updateDraft('preferredWorkMode', event.target.value)}
+                        placeholder="Hybrid, remote, or on-site"
+                      />
+                    </PmFormField>
+                    <PmFormField id="profile-availability" label="Availability" optional>
+                      <Input
+                        value={draft.availability}
+                        onChange={(event) => updateDraft('availability', event.target.value)}
+                        placeholder="Available now, 20 hours/week"
+                      />
+                    </PmFormField>
+                    <PmFormGridItem span="full" gridColumns={2}>
+                      <PmFormField
+                        id="profile-collaboration-preferences"
+                        label="Preferred engagement types"
+                        optional
+                        hint="Separate preferences with commas."
+                      >
+                        <Input
+                          value={draft.collaborationPreferences}
+                          onChange={(event) =>
+                            updateDraft('collaborationPreferences', event.target.value)
+                          }
+                          placeholder="Consulting, fixed-term projects, advisory"
+                        />
+                      </PmFormField>
+                    </PmFormGridItem>
+                  </PmFormGrid>
+                ) : (
+                  <PmFormReadonly>
+                    <PmFormReadonlySection>
+                      <PmFormReadonlyField
+                        label="Work mode"
+                        value={profile?.preferredWorkMode}
+                      />
+                      <PmFormReadonlyField label="Availability" value={profile?.availability} />
+                      <PmFormReadonlyField
+                        label="Engagement types"
+                        value={profile?.collaborationPreferences?.join(', ')}
+                      />
+                    </PmFormReadonlySection>
+                  </PmFormReadonly>
+                )}
+              </PmFormSection>
             </TabsContent>
 
             <TabsContent value="experience">
-              <PmFormSection title="Services & experience" description="Offered services and work history.">
-                <PmEmptyState
-                  size="compact"
-                  title="Experience not connected yet"
-                  description="Services and work history will appear here when profile storage is connected."
-                  icon={<FileText className="size-8" />}
-                  action={
-                    <PmButton size="sm" variant="outline" asChild>
-                      <Link to="/settings">Review settings</Link>
-                    </PmButton>
-                  }
-                />
+              <PmFormSection
+                title="Work experience"
+                description="Show relevant roles, responsibilities, and measurable outcomes."
+              >
+                {isEditing ? (
+                  <PmFormGrid columns={2}>
+                    <PmFormField id="profile-years-experience" label="Years of experience" optional>
+                      <Input
+                        value={draft.yearsExperience}
+                        onChange={(event) => updateDraft('yearsExperience', event.target.value)}
+                        placeholder="10"
+                        type="number"
+                        min="0"
+                        max="70"
+                      />
+                    </PmFormField>
+                    {profileKind === 'company' ? (
+                      <PmFormField id="profile-team-size" label="Team size" optional>
+                        <Input
+                          value={draft.teamSize}
+                          onChange={(event) => updateDraft('teamSize', event.target.value)}
+                          placeholder="11–50 employees"
+                        />
+                      </PmFormField>
+                    ) : null}
+                    <PmFormGridItem span="full" gridColumns={2}>
+                      <PmFormField
+                        id="profile-work-history"
+                        label="Work history"
+                        optional
+                        hint="Add one role per line. Example: Senior PM — Company — 2022 to present"
+                      >
+                        <Textarea
+                          value={draft.workHistory}
+                          onChange={(event) => updateDraft('workHistory', event.target.value)}
+                          placeholder={'Senior Project Manager — Company — 2022 to present\nProject Manager — Company — 2018 to 2022'}
+                          rows={6}
+                        />
+                      </PmFormField>
+                    </PmFormGridItem>
+                  </PmFormGrid>
+                ) : (
+                  <PmFormReadonly>
+                    <PmFormReadonlySection>
+                      <PmFormReadonlyField
+                        label="Experience"
+                        value={
+                          profile?.yearsExperience == null
+                            ? undefined
+                            : `${profile.yearsExperience} years`
+                        }
+                      />
+                      {profileKind === 'company' ? (
+                        <PmFormReadonlyField label="Team size" value={profile?.teamSize} />
+                      ) : null}
+                      <PmFormReadonlyField
+                        label="Work history"
+                        value={profile?.workHistory?.join(' · ')}
+                      />
+                    </PmFormReadonlySection>
+                  </PmFormReadonly>
+                )}
               </PmFormSection>
 
-              <PmFormSection title="Portfolio" description="Projects and case studies.">
-                <PmEmptyState
-                  size="compact"
-                  title="No portfolio items yet"
-                  description="Portfolio entries will appear here when connected to profile storage."
-                  icon={<FileText className="size-8" />}
-                  action={
-                    <PmButton size="sm" variant="outline" asChild>
-                      <Link to="/settings">Review settings</Link>
-                    </PmButton>
-                  }
-                />
+              <PmFormSection
+                title="Education"
+                description="List degrees, diplomas, and relevant professional learning."
+              >
+                {isEditing ? (
+                  <PmFormField
+                    id="profile-education"
+                    label="Education"
+                    optional
+                    hint="Add one qualification per line."
+                  >
+                    <Textarea
+                      value={draft.education}
+                      onChange={(event) => updateDraft('education', event.target.value)}
+                      placeholder={'BSc Engineering — King Saud University — 2016\nExecutive Leadership Program — 2023'}
+                      rows={5}
+                    />
+                  </PmFormField>
+                ) : (
+                  <PmFormReadonly>
+                    <PmFormReadonlySection>
+                      <PmFormReadonlyField
+                        label="Education"
+                        value={profile?.education?.join(' · ')}
+                      />
+                    </PmFormReadonlySection>
+                  </PmFormReadonly>
+                )}
+              </PmFormSection>
+
+              <PmFormSection
+                title="Portfolio & references"
+                description="Add project highlights and testimonials that demonstrate delivery."
+              >
+                {isEditing ? (
+                  <PmFormGrid columns={2}>
+                    <PmFormField
+                      id="profile-portfolio"
+                      label="Projects & case studies"
+                      optional
+                      hint="Add one project per line."
+                    >
+                      <Textarea
+                        value={draft.portfolio}
+                        onChange={(event) => updateDraft('portfolio', event.target.value)}
+                        placeholder="PMO transformation — delivered 18% schedule improvement"
+                        rows={5}
+                      />
+                    </PmFormField>
+                    <PmFormField
+                      id="profile-testimonials"
+                      label="References & testimonials"
+                      optional
+                      hint="Add one reference per line."
+                    >
+                      <Textarea
+                        value={draft.testimonials}
+                        onChange={(event) => updateDraft('testimonials', event.target.value)}
+                        placeholder="Client name — role — short testimonial"
+                        rows={5}
+                      />
+                    </PmFormField>
+                  </PmFormGrid>
+                ) : (
+                  <PmFormReadonly>
+                    <PmFormReadonlySection>
+                      <PmFormReadonlyField
+                        label="Projects & case studies"
+                        value={profile?.portfolio?.join(' · ')}
+                      />
+                      <PmFormReadonlyField
+                        label="References"
+                        value={profile?.testimonials?.join(' · ')}
+                      />
+                    </PmFormReadonlySection>
+                  </PmFormReadonly>
+                )}
               </PmFormSection>
             </TabsContent>
 
             {profileKind === 'company' ? (
               <TabsContent value="company">
                 <PmFormSection title="Company information" description="Organization details.">
-                  <PmFormReadonly>
-                    <PmFormReadonlySection>
-                      <PmFormReadonlyField
-                        label="Description"
-                        value={personProfile?.description}
+                  {isEditing ? (
+                    <PmFormField id="profile-description" label="Company description" optional>
+                      <Textarea
+                        value={draft.description}
+                        onChange={(event) => updateDraft('description', event.target.value)}
+                        placeholder="Describe the company, its services, and delivery capabilities."
+                        rows={6}
                       />
-                    </PmFormReadonlySection>
-                  </PmFormReadonly>
+                    </PmFormField>
+                  ) : (
+                    <PmFormReadonly>
+                      <PmFormReadonlySection>
+                        <PmFormReadonlyField
+                          label="Description"
+                          value={profile?.description}
+                        />
+                      </PmFormReadonlySection>
+                    </PmFormReadonly>
+                  )}
                 </PmFormSection>
               </TabsContent>
             ) : null}

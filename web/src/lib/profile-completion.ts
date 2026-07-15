@@ -33,9 +33,9 @@ export function calculateProfileCompletion(
   const skills = profile.skills ?? []
 
   const items: ProfileCompletionItem[] = [
-    { key: 'phone', label: 'Phone', complete: Boolean((profile as { phone?: string }).phone?.trim()) },
+    { key: 'phone', label: 'Phone', complete: Boolean(profile.phone?.trim()) },
     { key: 'address', label: 'Address', complete: Boolean(profile.location?.trim()) },
-    { key: 'website', label: 'Website', complete: Boolean((profile as { website?: string }).website?.trim()) },
+    { key: 'website', label: 'Website', complete: Boolean(profile.website?.trim()) },
     { key: 'skills', label: 'Skills', complete: skills.length >= 3 },
     {
       key: 'certificates',
@@ -53,7 +53,7 @@ export function calculateProfileCompletion(
       {
         key: 'teamSize',
         label: 'Team size',
-        complete: Boolean((profile as { teamSize?: string }).teamSize?.trim()),
+        complete: Boolean(profile.teamSize?.trim()),
       },
     )
   }

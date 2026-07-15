@@ -26,6 +26,9 @@ export function PublicProfileView({ person, companyIds }: PublicProfileViewProps
   const name = resolvePersonDisplayName(person)
   const headline = resolvePersonHeadline(person)
   const skills = person.profile?.skills ?? []
+  const services = person.profile?.services ?? []
+  const portfolio = person.profile?.portfolio ?? []
+  const workHistory = person.profile?.workHistory ?? []
   const isCompany = isCompanyEntity(person, companyIds)
   const bio = person.profile?.bio ?? person.profile?.description ?? '—'
 
@@ -77,11 +80,53 @@ export function PublicProfileView({ person, companyIds }: PublicProfileViewProps
               </PmContentCard>
             ) : null}
 
-            <PmContentCard title="Portfolio & projects">
-              <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
-                Portfolio and project highlights will appear here when wired to profile data.
-              </p>
-            </PmContentCard>
+            {services.length > 0 ? (
+              <PmContentCard title="Services">
+                <div className="flex flex-wrap gap-2">
+                  {services.map((service) => (
+                    <PmBadge key={service} tone="info" size="sm">
+                      {service}
+                    </PmBadge>
+                  ))}
+                </div>
+              </PmContentCard>
+            ) : null}
+
+            {workHistory.length > 0 ? (
+              <PmContentCard title="Experience">
+                <ul className="space-y-3">
+                  {workHistory.map((entry) => (
+                    <li
+                      key={entry}
+                      className={cn(
+                        pmTypography.bodySm,
+                        'border-s-2 border-primary/30 ps-3 text-muted-foreground',
+                      )}
+                    >
+                      {entry}
+                    </li>
+                  ))}
+                </ul>
+              </PmContentCard>
+            ) : null}
+
+            {portfolio.length > 0 ? (
+              <PmContentCard title="Portfolio & projects">
+                <ul className="space-y-3">
+                  {portfolio.map((project) => (
+                    <li
+                      key={project}
+                      className={cn(
+                        pmTypography.bodySm,
+                        'rounded-xl bg-surface-muted p-3 text-muted-foreground',
+                      )}
+                    >
+                      {project}
+                    </li>
+                  ))}
+                </ul>
+              </PmContentCard>
+            ) : null}
           </>
         }
         inspector={
