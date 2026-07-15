@@ -15,7 +15,20 @@ export function resolvePersonHeadline(person: PlatformUser): string {
 export function filterPublicPeople(
   people: readonly PlatformUser[],
 ): PlatformUser[] {
-  return people.filter((p) => p.isPublic !== false)
+  return people.filter((person) => {
+    const status = person.status.toLowerCase()
+    return (
+      person.isPublic !== false &&
+      ![
+        'pending',
+        'pending_vetting',
+        'clarification_requested',
+        'rejected',
+        'suspended',
+        'archived',
+      ].includes(status)
+    )
+  })
 }
 
 export function matchesPeopleSearch(person: PlatformUser, query: string): boolean {

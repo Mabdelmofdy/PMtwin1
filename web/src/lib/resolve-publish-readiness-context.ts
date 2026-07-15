@@ -1,6 +1,6 @@
 import type { ProfileKind } from '@/domain/profile-readiness/types.ts'
 import type { Opportunity } from '@/types/domain.ts'
-import { companyRepository, userRepository } from '@/repositories/index.ts'
+import { resolveRuntimeProfileSubject } from '@/domain/profile/profile-subject-service.ts'
 
 export type PublishReadinessUiContext = {
   readonly profile?: object | null
@@ -10,8 +10,13 @@ export type PublishReadinessUiContext = {
   readonly vettingApproved?: boolean
 }
 
-function isVettingApproved(profile: { vetting?: { reviewProgress?: string } } | null | undefined): boolean {
-  const progress = profile?.vetting?.reviewProgress
+function isVettingApproved(
+  profile:
+    | { vetting?: { caseStatus?: string; reviewProgress?: string } }
+    | null
+    | undefined,
+): boolean {
+  const progress = profile?.vetting?.caseStatus ?? profile?.vetting?.reviewProgress
   // Legacy / seed profiles without vetting metadata are treated as approved.
   if (!profile?.vetting) return true
   return progress === 'approved'
@@ -21,21 +26,19 @@ export function resolvePublishReadinessContextForOpportunity(
   opportunity: Opportunity | object | null,
 ): PublishReadinessUiContext {
   const record = opportunity as Opportunity | null
-  const creatorId = record?.creatorId
-  if (!creatorId) {
-    return { profile: null, profileKind: 'individual', opportunity, vettingApproved: true }
-  }
-
-  const creator =
-    userRepository.getById(creatorId) ?? companyRepository.getById(creatorId)
-  if (!creator) {
+  const subject = resolveRuntimeProfileSubject({
+    partyId: record?.ownerPartyId,
+    workspaceId: record?.workspaceId,
+    legacyAccountId: record?.createdByUserId ?? record?.creatorId,
+  })
+  if (!subject) {
     return { profile: null, profileKind: 'individual', opportunity, vettingApproved: true }
   }
 
   return {
-    profile: creator.profile,
-    profileKind: creator.profile?.type === 'company' ? 'company' : 'individual',
+    profile: subject.account.profile,
+    profileKind: subject.profileKind,
     opportunity,
-    vettingApproved: isVettingApproved(creator.profile),
+    vettingApproved: isVettingApproved(subject.account.profile),
   }
 }

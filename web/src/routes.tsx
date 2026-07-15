@@ -205,6 +205,7 @@ export function AppRoutes() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/party-documents" element={<PartyDocumentsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/settings/:section" element={<SettingsPage />} />
 
         <Route path="/access-denied" element={<AccessDeniedPage />} />
 

@@ -25,9 +25,23 @@ export type {
   CanonicalData,
   CreatorProfile,
   SemanticProfile,
+  ProfileFitWorkMode,
+  ProfileFitGeography,
+  ProfileFitAvailability,
+  ProfileFitCounterpartPreference,
+  ProfileFitSnapshot,
+  ProfileFitFactorName,
+  ProfileFitFactorExplanation,
+  ProfileFitScore,
+  ProfileFitTarget,
 } from './dist-types/types/index'
 
-export { EMPTY_CANONICAL_DATA } from './dist-types/types/canonical'
+export {
+  EMPTY_CANONICAL_DATA,
+} from './dist-types/types/canonical'
+export {
+  PROFILE_FIT_SNAPSHOT_KIND,
+} from './dist-types/types/profile-fit'
 
 export {
   DEFAULT_WEIGHTS,
@@ -74,6 +88,10 @@ export {
   scorePair,
 } from './dist-types/scoring/post-to-post-scoring'
 export { LABEL_PARTIAL } from './dist-types/scoring/label-from-score'
+export {
+  isProfileFitSnapshot,
+  scoreProfileFit,
+} from './dist-types/scoring/profile-fit-scoring'
 
 export {
   getNormalized,

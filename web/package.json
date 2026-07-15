@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "node scripts/run-command-tests.mjs",
+    "test:e2e": "playwright test",
     "validate:domain": "npx vite-node --config vite.config.ts scripts/validate-domain-health.ts",
     "validate:domain:strict": "npx vite-node --config vite.config.ts scripts/validate-domain-health.ts --strict",
     "validate:design": "node ../scripts/design/validate-design-governance.mjs",
@@ -25,6 +26,7 @@
     "@pm-twin/lifecycle": "file:../packages/lifecycle",
     "@pm-twin/matching": "file:../packages/matching",
     "@pm-twin/party": "file:../packages/party",
+    "@pm-twin/profile": "file:../packages/profile",
     "@pm-twin/validation": "file:../packages/validation",
     "@pm-twin/workflows": "file:../packages/workflows",
     "@tailwindcss/vite": "^4.3.1",
@@ -50,6 +52,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.61.1",
     "@types/leaflet": "^1.9.21",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",

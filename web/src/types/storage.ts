@@ -12,6 +12,7 @@ import type { Party, PartyMembership } from '@pm-twin/party'
 import type { BusinessWorkspace, WorkspaceMembership } from '@pm-twin/identity'
 import type { PartyDocument } from './party-document.ts'
 import type { AdminSettingsDocument } from '@/domain/admin/settings/types.ts'
+import type { UserSettingsDocument } from '@/domain/user-settings/types.ts'
 
 export interface IStorageAdapter {
   get<T>(key: string): T | null
@@ -57,6 +58,7 @@ export type Overrides = {
   productLanguageSettings?: Record<string, ProductLanguageSettings>
   /** Demo/UAT Admin settings document (namespaced with overrides). */
   adminSettings?: AdminSettingsDocument
+  userSettings?: Record<string, UserSettingsDocument>
   parties?: Record<string, Partial<Party>>
   newParties?: Party[]
   deletedParties?: string[]

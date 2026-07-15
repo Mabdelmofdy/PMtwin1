@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
+import { evaluateProfileReadiness } from '@/domain/profile-readiness/index.ts'
 import { loadCompanies, loadUsers, loadPartyDocuments } from '@/infrastructure/seed/seed-loader.ts'
 import { resolveVettingCaseStatus } from '@/types/vetting.ts'
 import {
@@ -35,6 +36,44 @@ describe('demo/UAT seed certification', () => {
     }
   })
 
+  it('keeps every approved demo publishing profile ready for matching', () => {
+    const approvedPeople = loadUsers().filter(
+      (user) =>
+        user.role !== 'admin' &&
+        user.status === 'active' &&
+        resolveVettingCaseStatus(user.profile?.vetting, user.status) === 'approved',
+    )
+    const approvedCompanies = loadCompanies().filter(
+      (company) =>
+        company.status === 'active' &&
+        resolveVettingCaseStatus(company.profile?.vetting, company.status) === 'approved',
+    )
+
+    for (const user of approvedPeople) {
+      const readiness = evaluateProfileReadiness({
+        profileKind: 'individual',
+        profile: user.profile as Record<string, unknown> | undefined,
+      })
+      assert.equal(
+        readiness.status,
+        'ready_for_matching',
+        `approved user ${user.id} is missing: ${readiness.recommendations.join(', ')}`,
+      )
+    }
+
+    for (const company of approvedCompanies) {
+      const readiness = evaluateProfileReadiness({
+        profileKind: 'company',
+        profile: company.profile as Record<string, unknown> | undefined,
+      })
+      assert.equal(
+        readiness.status,
+        'ready_for_matching',
+        `approved company ${company.id} is missing: ${readiness.recommendations.join(', ')}`,
+      )
+    }
+  })
+
   it('includes pending demo accounts for onboarding certification', () => {
     const pending = loadUsers().filter((user) =>
       ['pending_vetting', 'pending', 'clarification_requested'].includes(user.status),
@@ -64,7 +103,8 @@ describe('demo/UAT seed certification', () => {
     const employeeLinks = employees.map((user) => {
       const employer =
         (user as { employerCompanyId?: string }).employerCompanyId ??
-        (user.profile as { employerCompanyId?: string } | undefined)?.employerCompanyId!
+        (user.profile as { employerCompanyId?: string } | undefined)?.employerCompanyId
+      assert.ok(employer, `employee ${user.id} must have an employer company`)
       return { userId: user.id, companyId: employer, role: 'member' as const }
     })
 

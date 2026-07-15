@@ -69,7 +69,10 @@
           "reviewedBy": "admin@pmtwin.com",
           "emailVerified": true,
           "submittedAt": "2026-06-18T09:00:00.000Z"
-        }
+        },
+        "services": [
+          "Project Management"
+        ]
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -139,7 +142,10 @@
           "reviewedBy": "admin@pmtwin.com",
           "emailVerified": true,
           "submittedAt": "2026-06-18T09:00:00.000Z"
-        }
+        },
+        "services": [
+          "Quantity Surveying"
+        ]
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -208,7 +214,10 @@
           "reviewedBy": "admin@pmtwin.com",
           "emailVerified": true,
           "submittedAt": "2026-06-18T09:00:00.000Z"
-        }
+        },
+        "services": [
+          "Civil Engineering"
+        ]
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -278,7 +287,10 @@
           "reviewedBy": "admin@pmtwin.com",
           "emailVerified": true,
           "submittedAt": "2026-06-18T09:00:00.000Z"
-        }
+        },
+        "services": [
+          "Architecture"
+        ]
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -348,7 +360,10 @@
           "reviewedBy": "admin@pmtwin.com",
           "emailVerified": true,
           "submittedAt": "2026-06-18T09:00:00.000Z"
-        }
+        },
+        "services": [
+          "Procurement"
+        ]
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -417,7 +432,10 @@
           "reviewedBy": "admin@pmtwin.com",
           "emailVerified": true,
           "submittedAt": "2026-06-18T09:00:00.000Z"
-        }
+        },
+        "services": [
+          "Mechanical Engineering"
+        ]
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -486,7 +504,10 @@
           "reviewedBy": "admin@pmtwin.com",
           "emailVerified": true,
           "submittedAt": "2026-06-18T09:00:00.000Z"
-        }
+        },
+        "services": [
+          "Electrical Engineering"
+        ]
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -556,7 +577,10 @@
           "reviewedBy": "admin@pmtwin.com",
           "emailVerified": true,
           "submittedAt": "2026-06-18T09:00:00.000Z"
-        }
+        },
+        "services": [
+          "Project Management"
+        ]
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -625,7 +649,10 @@
           "reviewedBy": "admin@pmtwin.com",
           "emailVerified": true,
           "submittedAt": "2026-06-18T09:00:00.000Z"
-        }
+        },
+        "services": [
+          "Quantity Surveying"
+        ]
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -695,7 +722,10 @@
           "reviewedBy": "admin@pmtwin.com",
           "emailVerified": true,
           "submittedAt": "2026-06-18T09:00:00.000Z"
-        }
+        },
+        "services": [
+          "Structural Engineering"
+        ]
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -764,7 +794,10 @@
           "reviewedBy": "admin@pmtwin.com",
           "emailVerified": true,
           "submittedAt": "2026-06-18T09:00:00.000Z"
-        }
+        },
+        "services": [
+          "Civil Engineering"
+        ]
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -833,7 +866,10 @@
           "reviewedBy": "admin@pmtwin.com",
           "emailVerified": true,
           "submittedAt": "2026-06-18T09:00:00.000Z"
-        }
+        },
+        "services": [
+          "Procurement"
+        ]
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -902,7 +938,10 @@
           "reviewedBy": "admin@pmtwin.com",
           "emailVerified": true,
           "submittedAt": "2026-06-18T09:00:00.000Z"
-        }
+        },
+        "services": [
+          "Architecture"
+        ]
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"
@@ -972,7 +1011,10 @@
           "reviewedBy": "admin@pmtwin.com",
           "emailVerified": true,
           "submittedAt": "2026-06-18T09:00:00.000Z"
-        }
+        },
+        "services": [
+          "Mechanical Engineering"
+        ]
       },
       "createdAt": "2026-06-24T12:08:02.196Z",
       "updatedAt": "2026-06-24T12:08:02.196Z"

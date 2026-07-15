@@ -63,6 +63,35 @@ export const ProfileSchema = z
     bio: z.string().optional(),
     description: z.string().optional(),
     skills: z.array(z.string()).optional(),
+    phone: z.string().optional(),
+    website: z.string().optional(),
+    linkedIn: z.string().optional(),
+    services: z.array(z.string()).optional(),
+    languages: z.array(z.string()).optional(),
+    certifications: z.array(z.string()).optional(),
+    collaborationPreferences: z.array(z.string()).optional(),
+    preferredWorkMode: z.string().optional(),
+    availability: z.string().optional(),
+    yearsExperience: z.number().optional(),
+    workHistory: z.array(z.string()).optional(),
+    education: z.array(z.string()).optional(),
+    portfolio: z.array(z.string()).optional(),
+    testimonials: z.array(z.string()).optional(),
+    teamSize: z.string().optional(),
+    employeeCount: z.string().optional(),
+    businessCategory: z.string().optional(),
+    sectors: z.array(z.string()).optional(),
+    projectCategories: z.array(z.string()).optional(),
+    contactPerson: z.string().optional(),
+    coverageAreas: z.array(z.string()).optional(),
+    financialCapacity: z.number().optional(),
+    visibility: z
+      .object({
+        showPhone: z.boolean().optional(),
+        showWebsite: z.boolean().optional(),
+        showLinkedIn: z.boolean().optional(),
+      })
+      .optional(),
   })
   .passthrough()
   .optional()

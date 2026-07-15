@@ -77,11 +77,46 @@ function isVettingQueueStatus(status: string): boolean {
   return (VETTING_QUEUE_STATUSES as readonly string[]).includes(status)
 }
 
-function syncPartyStatus(deps: VettingServiceDeps, partyId: string, status: string): void {
+function syncPartyStatus(
+  deps: VettingServiceDeps,
+  partyId: string,
+  status: string,
+  sourceUser?: PlatformUser,
+): void {
   deps.partyRepository.updateStatus(partyId, status)
-  const company = deps.companyRepository.getById(partyId)
+  const party =
+    typeof deps.partyRepository.getById === 'function'
+      ? deps.partyRepository.getById(partyId)
+      : undefined
+  const sourceEntityId = party?.sourceEntityId ?? partyId
+  const company = deps.companyRepository.getById(sourceEntityId)
   if (company) {
-    deps.companyRepository.update(partyId, { status })
+    deps.companyRepository.update(sourceEntityId, {
+      status,
+      ...(sourceUser?.profile?.vetting
+        ? {
+            profile: {
+              ...company.profile,
+              vetting: sourceUser.profile.vetting,
+            },
+          }
+        : {}),
+    })
+    return
+  }
+  const individual = deps.userRepository.getById(sourceEntityId)
+  if (individual && individual.id !== sourceUser?.id) {
+    deps.userRepository.update(sourceEntityId, {
+      status,
+      ...(sourceUser?.profile?.vetting
+        ? {
+            profile: {
+              ...individual.profile,
+              vetting: sourceUser.profile.vetting,
+            },
+          }
+        : {}),
+    })
   }
 }
 
@@ -213,7 +248,7 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
       )
       if (!user) return undefined
 
-      syncPartyStatus(deps, partyId, 'active')
+      syncPartyStatus(deps, partyId, 'active', user)
       activateWorkspaceGraph(deps, userId, partyId)
 
       deps.auditRepository.append({
@@ -275,7 +310,7 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
       )
       if (!user) return undefined
 
-      syncPartyStatus(deps, partyId, 'rejected')
+      syncPartyStatus(deps, partyId, 'rejected', user)
 
       deps.auditRepository.append({
         action: 'vetting.rejected',
@@ -326,7 +361,7 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
         userStatusForVettingCase(caseStatus),
       )
       if (!user) return undefined
-      syncPartyStatus(deps, partyId, 'pending_vetting')
+      syncPartyStatus(deps, partyId, 'pending_vetting', user)
       // Move to pending_review once queued
       appendVettingMetadata(
         deps,
@@ -376,7 +411,7 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
         userStatusForVettingCase(caseStatus),
       )
       if (!user) return undefined
-      syncPartyStatus(deps, partyId, 'suspended')
+      syncPartyStatus(deps, partyId, 'suspended', user)
       deps.auditRepository.append({
         action: 'vetting.suspended',
         userId: reviewerId,
@@ -473,7 +508,7 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
       )
       if (!user) return undefined
 
-      syncPartyStatus(deps, input.partyId, 'pending_vetting')
+      syncPartyStatus(deps, input.partyId, 'pending_vetting', user)
 
       deps.auditRepository.append({
         action: 'vetting.changes_requested',
@@ -601,7 +636,7 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
       )
       if (!user) return undefined
 
-      syncPartyStatus(deps, partyId, 'pending_vetting')
+      syncPartyStatus(deps, partyId, 'pending_vetting', user)
 
       deps.auditRepository.append({
         action: 'vetting.resubmitted',

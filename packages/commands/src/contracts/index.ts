@@ -121,3 +121,12 @@ export type {
   OpportunityWorkPackage,
   OpportunityCapacity,
 } from './opportunity-commands.ts'
+
+export type {
+  ProfileSubjectPayload,
+  UpdateProfileCommand,
+  SetProfileVisibilityCommand,
+  PublishProfileCommand,
+  UnpublishProfileCommand,
+  UpdateUserSettingsCommand,
+} from './profile-commands.ts'

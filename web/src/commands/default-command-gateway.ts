@@ -16,6 +16,8 @@ import type { NegotiationCommandHandler } from '@/commands/handlers/negotiation-
 import type { NegotiationRoomCommandHandler } from '@/commands/handlers/negotiation-room-command-handler.ts'
 import type { OpportunityCommandHandler } from '@/commands/handlers/opportunity-command-handler.ts'
 import type { PostMatchCommandHandler } from '@/commands/handlers/post-match-command-handler.ts'
+import type { ProfileCommandHandler } from '@/commands/handlers/profile-command-handler.ts'
+import type { UserSettingsCommandHandler } from '@/commands/handlers/user-settings-command-handler.ts'
 import {
   buildVettingMutationFailureResult,
   evaluateVettingMutationGuard,
@@ -94,6 +96,15 @@ const CONTRACT_COMMAND_TYPES = new Set([
   'TerminateContract',
 ])
 
+const PROFILE_COMMAND_TYPES = new Set([
+  'UpdateProfile',
+  'SetProfileVisibility',
+  'PublishProfile',
+  'UnpublishProfile',
+])
+
+const USER_SETTINGS_COMMAND_TYPES = new Set(['UpdateUserSettings'])
+
 export type DefaultCommandGatewayDeps = {
   readonly applicationHandler: ApplicationCommandHandler
   readonly opportunityHandler: OpportunityCommandHandler
@@ -102,6 +113,8 @@ export type DefaultCommandGatewayDeps = {
   readonly negotiationRoomHandler: NegotiationRoomCommandHandler
   readonly dealHandler: CommercialAgreementCommandHandler
   readonly contractHandler: ContractCommandHandler
+  readonly profileHandler?: ProfileCommandHandler
+  readonly userSettingsHandler?: UserSettingsCommandHandler
   readonly idempotencyStore?: InMemoryIdempotencyStore
   readonly resolveCommandPermissionActor?: () => CommandPermissionActor | null
   readonly resolveOpportunityForCommandRbac?: (
@@ -120,6 +133,8 @@ export class DefaultCommandGateway implements CommandGateway {
   private readonly negotiationRoomHandler: NegotiationRoomCommandHandler
   private readonly dealHandler: CommercialAgreementCommandHandler
   private readonly contractHandler: ContractCommandHandler
+  private readonly profileHandler?: ProfileCommandHandler
+  private readonly userSettingsHandler?: UserSettingsCommandHandler
   private readonly idempotencyStore: InMemoryIdempotencyStore
   private readonly resolveCommandPermissionActor: () => CommandPermissionActor | null
   private readonly resolveOpportunityForCommandRbac: (
@@ -137,6 +152,8 @@ export class DefaultCommandGateway implements CommandGateway {
     this.negotiationRoomHandler = deps.negotiationRoomHandler
     this.dealHandler = deps.dealHandler
     this.contractHandler = deps.contractHandler
+    this.profileHandler = deps.profileHandler
+    this.userSettingsHandler = deps.userSettingsHandler
     this.idempotencyStore =
       deps.idempotencyStore ?? new InMemoryIdempotencyStore()
     this.resolveCommandPermissionActor =
@@ -221,7 +238,15 @@ export class DefaultCommandGateway implements CommandGateway {
     | NegotiationRoomCommandHandler
     | CommercialAgreementCommandHandler
     | ContractCommandHandler
+    | ProfileCommandHandler
+    | UserSettingsCommandHandler
     | null {
+    if (USER_SETTINGS_COMMAND_TYPES.has(commandType)) {
+      return this.userSettingsHandler ?? null
+    }
+    if (PROFILE_COMMAND_TYPES.has(commandType)) {
+      return this.profileHandler ?? null
+    }
     if (APPLICATION_COMMAND_TYPES.has(commandType)) {
       return this.applicationHandler
     }

@@ -89,7 +89,8 @@ const INDIVIDUAL_RECOMMENDED_RULES: readonly ProfileFieldRule[] = [
   },
   {
     label: 'Previous Projects',
-    isPresent: (profile) => hasAnyArray(profile, ['previousProjects', 'projects', 'caseStudies']),
+    isPresent: (profile) =>
+      hasAnyArray(profile, ['previousProjects', 'projects', 'caseStudies', 'portfolio']),
   },
 ]
 
@@ -131,7 +132,9 @@ const COMPANY_RECOMMENDED_RULES: readonly ProfileFieldRule[] = [
   {
     label: 'Team Size',
     isPresent: (profile) =>
-      hasPresentNumber(profile.teamSize) || hasNonEmptyString(profile.employeeCount),
+      hasPresentNumber(profile.teamSize) ||
+      hasNonEmptyString(profile.teamSize) ||
+      hasNonEmptyString(profile.employeeCount),
   },
   {
     label: 'Coverage Areas',

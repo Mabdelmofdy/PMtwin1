@@ -25,6 +25,7 @@ import {
   normalizeContracts,
   normalizeNegotiations,
 } from '@/domain/normalizers.ts'
+import { normalizeLegacyProfile } from '@pm-twin/profile'
 
 import opportunitiesBase from '@seed-data/opportunities.json'
 import demoOpportunities from '@seed-data/demo-40-opportunities.json'
@@ -63,6 +64,29 @@ export function mergeById<T extends { id: string }>(...sets: T[][]): T[] {
   return Array.from(map.values())
 }
 
+function attachCanonicalProfile<T extends PlatformUser>(
+  account: T,
+  kind: 'individual' | 'company',
+): T {
+  if (!account.profile) return account
+  const canonical = normalizeLegacyProfile({
+    ...account,
+    profile: {
+      ...account.profile,
+      id: account.id,
+      partyId: `party-${kind}-${account.id}`,
+      type: kind,
+    },
+  }).profile
+  return {
+    ...account,
+    profile: {
+      ...account.profile,
+      canonical,
+    },
+  }
+}
+
 export function loadOpportunities(): Opportunity[] {
   return normalizeOpportunities(
     mergeById(
@@ -79,7 +103,7 @@ export function loadUsers(): PlatformUser[] {
     rows(seedUsers as DataEnvelope<PlatformUser>),
     rows(demoEmployees as DataEnvelope<PlatformUser>),
     rows(demoPendingUsers as DataEnvelope<PlatformUser>),
-  )
+  ).map((account) => attachCanonicalProfile(account, 'individual'))
 }
 
 export function loadPartyDocuments(): PartyDocument[] {
@@ -90,7 +114,7 @@ export function loadCompanies(): Company[] {
   return mergeById(
     rows(companiesBase as DataEnvelope<Company>),
     rows(demoCompanies as DataEnvelope<Company>),
-  )
+  ).map((account) => attachCanonicalProfile(account, 'company'))
 }
 
 export function loadApplications(): Application[] {

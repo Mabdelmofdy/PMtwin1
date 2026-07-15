@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { FileText, Pencil, Settings } from 'lucide-react'
 import { ProfileReadinessCard } from '@/components/readiness/profile-readiness-card.tsx'
@@ -56,6 +56,12 @@ type ProfileDraft = {
   portfolio: string
   testimonials: string
   teamSize: string
+  businessCategory: string
+  sectors: string
+  projectCategories: string
+  contactPerson: string
+  coverageAreas: string
+  financialCapacity: string
 }
 
 function joinList(value?: string[], separator = ', '): string {
@@ -91,7 +97,13 @@ function createProfileDraft(profile?: EditableProfileFields | null): ProfileDraf
     education: joinList(profile?.education, '\n'),
     portfolio: joinList(profile?.portfolio, '\n'),
     testimonials: joinList(profile?.testimonials, '\n'),
-    teamSize: profile?.teamSize ?? '',
+    teamSize: profile?.employeeCount ?? profile?.teamSize ?? '',
+    businessCategory: profile?.businessCategory ?? '',
+    sectors: joinList(profile?.sectors),
+    projectCategories: joinList(profile?.projectCategories),
+    contactPerson: profile?.contactPerson ?? '',
+    coverageAreas: joinList(profile?.coverageAreas),
+    financialCapacity: profile?.financialCapacity?.toString() ?? '',
   }
 }
 
@@ -107,6 +119,15 @@ export function ProfileView({
   const [draft, setDraft] = useState<ProfileDraft>(() => createProfileDraft(profile))
   const [nameError, setNameError] = useState<string | null>(null)
   const skills = profile?.skills ?? []
+
+  useEffect(() => {
+    if (!isEditing) return undefined
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+    }
+    window.addEventListener('beforeunload', warnBeforeUnload)
+    return () => window.removeEventListener('beforeunload', warnBeforeUnload)
+  }, [isEditing])
 
   const updateDraft = (field: keyof ProfileDraft, value: string) => {
     setDraft((current) => ({ ...current, [field]: value }))
@@ -153,6 +174,15 @@ export function ProfileView({
       portfolio: splitList(draft.portfolio, '\n'),
       testimonials: splitList(draft.testimonials, '\n'),
       teamSize: draft.teamSize.trim(),
+      employeeCount: draft.teamSize.trim(),
+      businessCategory: draft.businessCategory.trim(),
+      sectors: splitList(draft.sectors),
+      projectCategories: splitList(draft.projectCategories),
+      contactPerson: draft.contactPerson.trim(),
+      coverageAreas: splitList(draft.coverageAreas),
+      financialCapacity: draft.financialCapacity
+        ? Number(draft.financialCapacity)
+        : undefined,
     })
     if (saved) {
       setNameError(null)
@@ -625,20 +655,106 @@ export function ProfileView({
               <TabsContent value="company">
                 <PmFormSection title="Company information" description="Organization details.">
                   {isEditing ? (
-                    <PmFormField id="profile-description" label="Company description" optional>
-                      <Textarea
-                        value={draft.description}
-                        onChange={(event) => updateDraft('description', event.target.value)}
-                        placeholder="Describe the company, its services, and delivery capabilities."
-                        rows={6}
-                      />
-                    </PmFormField>
+                    <PmFormGrid columns={2}>
+                      <PmFormField id="profile-business-category" label="Business category" required>
+                        <Input
+                          value={draft.businessCategory}
+                          onChange={(event) => updateDraft('businessCategory', event.target.value)}
+                          placeholder="Project management consultancy"
+                        />
+                      </PmFormField>
+                      <PmFormField id="profile-contact-person" label="Authorized contact" required>
+                        <Input
+                          value={draft.contactPerson}
+                          onChange={(event) => updateDraft('contactPerson', event.target.value)}
+                          placeholder="Full name"
+                        />
+                      </PmFormField>
+                      <PmFormField id="profile-sectors" label="Sectors" required hint="Separate with commas.">
+                        <Input
+                          value={draft.sectors}
+                          onChange={(event) => updateDraft('sectors', event.target.value)}
+                          placeholder="Construction, Infrastructure"
+                        />
+                      </PmFormField>
+                      <PmFormField
+                        id="profile-project-categories"
+                        label="Project categories"
+                        required
+                        hint="Separate with commas."
+                      >
+                        <Input
+                          value={draft.projectCategories}
+                          onChange={(event) => updateDraft('projectCategories', event.target.value)}
+                          placeholder="Buildings, Transport, Utilities"
+                        />
+                      </PmFormField>
+                      <PmFormField
+                        id="profile-coverage-areas"
+                        label="Coverage areas"
+                        optional
+                        hint="Separate with commas."
+                      >
+                        <Input
+                          value={draft.coverageAreas}
+                          onChange={(event) => updateDraft('coverageAreas', event.target.value)}
+                          placeholder="Riyadh, Jeddah, Eastern Province"
+                        />
+                      </PmFormField>
+                      <PmFormField id="profile-financial-capacity" label="Financial capacity (SAR)" optional>
+                        <Input
+                          value={draft.financialCapacity}
+                          onChange={(event) => updateDraft('financialCapacity', event.target.value)}
+                          type="number"
+                          min="0"
+                          inputMode="decimal"
+                        />
+                      </PmFormField>
+                      <PmFormGridItem span="full" gridColumns={2}>
+                        <PmFormField id="profile-description" label="Company description" optional>
+                          <Textarea
+                            value={draft.description}
+                            onChange={(event) => updateDraft('description', event.target.value)}
+                            placeholder="Describe the company, its services, and delivery capabilities."
+                            rows={6}
+                          />
+                        </PmFormField>
+                      </PmFormGridItem>
+                    </PmFormGrid>
                   ) : (
                     <PmFormReadonly>
                       <PmFormReadonlySection>
                         <PmFormReadonlyField
                           label="Description"
                           value={profile?.description}
+                        />
+                        <PmFormReadonlyField
+                          label="Business category"
+                          value={profile?.businessCategory}
+                        />
+                        <PmFormReadonlyField
+                          label="Sectors"
+                          value={profile?.sectors?.join(', ')}
+                        />
+                        <PmFormReadonlyField
+                          label="Project categories"
+                          value={profile?.projectCategories?.join(', ')}
+                        />
+                        <PmFormReadonlyField
+                          label="Contact person"
+                          value={profile?.contactPerson}
+                        />
+                        <PmFormReadonlyField
+                          label="Coverage areas"
+                          value={profile?.coverageAreas?.join(', ')}
+                        />
+                        <PmFormReadonlyField
+                          label="Financial capacity"
+                          value={
+                            profile?.financialCapacity == null
+                              ? undefined
+                              : `${profile.financialCapacity.toLocaleString()} SAR`
+                          }
                         />
                       </PmFormReadonlySection>
                     </PmFormReadonly>

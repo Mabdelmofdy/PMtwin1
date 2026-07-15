@@ -7,6 +7,21 @@ export type {
   ValueExchangeNormalized,
 } from './opportunity.ts'
 
+export {
+  PROFILE_FIT_SNAPSHOT_KIND,
+} from './profile-fit.ts'
+export type {
+  ProfileFitWorkMode,
+  ProfileFitGeography,
+  ProfileFitAvailability,
+  ProfileFitCounterpartPreference,
+  ProfileFitSnapshot,
+  ProfileFitFactorName,
+  ProfileFitFactorExplanation,
+  ProfileFitScore,
+  ProfileFitTarget,
+} from './profile-fit.ts'
+
 export type {
   SkillSynonymsMap,
   LocationCanonicalMap,

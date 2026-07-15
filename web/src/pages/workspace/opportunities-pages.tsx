@@ -1,5 +1,5 @@
 ﻿import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
-import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { Map as MapIcon, Plus } from 'lucide-react'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { truncate } from '@/lib/format'
@@ -690,5 +690,6 @@ export function OpportunityCreatePage() {
 }
 
 export function OpportunityEditPage() {
-  return <OpportunityWizardPage mode="edit" />
+  const { id } = useParams()
+  return <OpportunityWizardPage key={id} mode="edit" />
 }

@@ -2,18 +2,21 @@ import type { PlatformUser } from '@/types/domain.ts'
 import type { ProfileKind } from '@/domain/profile-readiness/types.ts'
 import { evaluateProfileReadiness } from '@/domain/profile-readiness/profile-readiness-evaluator.ts'
 import { partiesApi } from '@/api/parties.ts'
-import { companyRepository } from '@/repositories/index.ts'
+import { resolveRuntimeProfileSubject } from '@/domain/profile/profile-subject-service.ts'
 
 export function resolveScorableProfileForUser(user: PlatformUser): {
   readonly profile: Record<string, unknown>
   readonly profileKind: ProfileKind
 } {
   const activeParty = partiesApi.resolveActiveParty(user.id)
-  if (activeParty?.partyType === 'company') {
-    const company = companyRepository.getById(activeParty.id)
+  const subject = resolveRuntimeProfileSubject({
+    partyId: activeParty?.id,
+    legacyAccountId: user.id,
+  })
+  if (subject) {
     return {
-      profile: (company?.profile ?? {}) as Record<string, unknown>,
-      profileKind: 'company',
+      profile: (subject.account.profile ?? {}) as Record<string, unknown>,
+      profileKind: subject.profileKind,
     }
   }
   return {

@@ -119,6 +119,7 @@ export function registerLocalAccount(
       passwordHash,
       role: 'user',
       status: 'pending_vetting',
+      isPublic: false,
       profile: {
         accountLabel:
           request.profile.contactPerson?.trim() || request.profile.displayName,
@@ -140,6 +141,7 @@ export function registerLocalAccount(
         email: `${sourceId}@internal.pmtwin`,
         role: 'user',
         status: 'pending_vetting',
+        isPublic: false,
         profile: {
           accountLabel: request.profile.displayName,
           profileCompletionUnlocked: false,

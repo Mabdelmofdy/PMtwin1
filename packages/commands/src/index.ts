@@ -86,6 +86,12 @@ export type {
   OpportunityStructuredSkill,
   OpportunityWorkPackage,
   OpportunityCapacity,
+  ProfileSubjectPayload,
+  UpdateProfileCommand,
+  SetProfileVisibilityCommand,
+  PublishProfileCommand,
+  UnpublishProfileCommand,
+  UpdateUserSettingsCommand,
 } from './contracts/index.ts'
 
 export {

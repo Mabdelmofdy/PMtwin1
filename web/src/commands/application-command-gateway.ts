@@ -16,6 +16,8 @@ import { NegotiationCommandHandler } from '@/commands/handlers/negotiation-comma
 import { NegotiationRoomCommandHandler } from '@/commands/handlers/negotiation-room-command-handler.ts'
 import { OpportunityCommandHandler } from '@/commands/handlers/opportunity-command-handler.ts'
 import { PostMatchCommandHandler } from '@/commands/handlers/post-match-command-handler.ts'
+import { ProfileCommandHandler } from '@/commands/handlers/profile-command-handler.ts'
+import { UserSettingsCommandHandler } from '@/commands/handlers/user-settings-command-handler.ts'
 import { DefaultCommandGateway } from '@/commands/default-command-gateway.ts'
 import { getCommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
 import { resolvePublishReadinessContextForOpportunity } from '@/lib/resolve-publish-readiness-context.ts'
@@ -25,7 +27,10 @@ import {
   negotiationOfferRepository,
   negotiationTranscriptRepository,
   userRepository,
+  profileRepository,
+  userSettingsRepository,
 } from '@/repositories/index.ts'
+import { resolveRuntimeProfileSubject } from '@/domain/profile/profile-subject-service.ts'
 
 let gatewayInstance: DefaultCommandGateway | null = null
 
@@ -80,6 +85,17 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
     auditRepository,
     notificationRepository,
   })
+  const profileHandler = new ProfileCommandHandler({
+    profileRepository,
+    auditRepository,
+    resolveSubject: resolveRuntimeProfileSubject,
+    resolveActor: getCommandPermissionActor,
+  })
+  const userSettingsHandler = new UserSettingsCommandHandler({
+    repository: userSettingsRepository,
+    auditRepository,
+    resolveActor: getCommandPermissionActor,
+  })
 
   return new DefaultCommandGateway({
     applicationHandler,
@@ -89,6 +105,8 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
     negotiationRoomHandler,
     dealHandler,
     contractHandler,
+    profileHandler,
+    userSettingsHandler,
     resolveCommandPermissionActor: getCommandPermissionActor,
     resolveVettingActorContext: resolveVettingActorContextForGateway,
     resolveOpportunityForCommandRbac: (aggregateId) => {

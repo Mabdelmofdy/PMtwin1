@@ -38,6 +38,15 @@ import {
   type RecordMatchingRunAuditInput,
 } from '@/services/matching/matching-run-audit.ts'
 
+export {
+  ENABLE_PROFILE_FIT_MATCH_WEIGHTING,
+  ENABLE_PROFILE_FIT_RECOMMENDATIONS,
+  buildProfileFitSnapshot,
+  scoreProfileOpportunityFit,
+  listProfileOpportunityRecommendations,
+  type ProfileOpportunityRecommendation,
+} from '@/services/matching/profile-fit-service.ts'
+
 function buildMatchingOwnershipContext(): ReturnType<typeof buildMatchingDiscoveryContext> {
   return buildMatchingDiscoveryContext(
     userRepository.getAll().map((user) => user.id),

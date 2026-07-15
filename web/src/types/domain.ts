@@ -57,8 +57,10 @@ export type TenantScoped = {
 }
 
 import type { VettingMetadata } from '@/types/vetting.ts'
+import type { CanonicalProfile } from '@pm-twin/profile'
 
 export type PersonProfile = {
+  canonical?: CanonicalProfile
   accountLabel?: string
   profileCompletionUnlocked?: boolean
   name?: string
@@ -83,6 +85,18 @@ export type PersonProfile = {
   portfolio?: string[]
   testimonials?: string[]
   teamSize?: string
+  employeeCount?: string
+  businessCategory?: string
+  sectors?: string[]
+  projectCategories?: string[]
+  contactPerson?: string
+  coverageAreas?: string[]
+  financialCapacity?: number
+  visibility?: {
+    showPhone?: boolean
+    showWebsite?: boolean
+    showLinkedIn?: boolean
+  }
   vetting?: VettingMetadata
 }
 

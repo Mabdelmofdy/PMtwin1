@@ -1,5 +1,5 @@
-export type { OpportunityPost, NormalizedPost, NormalizedBudget, NormalizedTimeline, ValueExchange, ValueExchangeNormalized, MatchingWeights, MatchingConfig, HardConstraintResult, HardConstraintContext, ScoreLabel, ScoreFactorResult, ScoreBreakdown, ScoreLabels, ScorePairResult, RankedMatch, MatchRecommendation, MatchingModelName, SkillSynonymsMap, LocationCanonicalMap, CategoryExpansionTerm, CategoryExpansionMap, SemanticTermsMap, CanonicalData, CreatorProfile, SemanticProfile, } from './types/index.ts';
-export { EMPTY_CANONICAL_DATA } from './types/index.ts';
+export type { OpportunityPost, NormalizedPost, NormalizedBudget, NormalizedTimeline, ValueExchange, ValueExchangeNormalized, MatchingWeights, MatchingConfig, HardConstraintResult, HardConstraintContext, ScoreLabel, ScoreFactorResult, ScoreBreakdown, ScoreLabels, ScorePairResult, RankedMatch, MatchRecommendation, MatchingModelName, SkillSynonymsMap, LocationCanonicalMap, CategoryExpansionTerm, CategoryExpansionMap, SemanticTermsMap, CanonicalData, CreatorProfile, SemanticProfile, ProfileFitWorkMode, ProfileFitGeography, ProfileFitAvailability, ProfileFitCounterpartPreference, ProfileFitSnapshot, ProfileFitFactorName, ProfileFitFactorExplanation, ProfileFitScore, ProfileFitTarget, } from './types/index.ts';
+export { EMPTY_CANONICAL_DATA, PROFILE_FIT_SNAPSHOT_KIND, } from './types/index.ts';
 export { DEFAULT_WEIGHTS, DEFAULT_MATCHING_CONFIG, resolveWeights, withMatchingDefaults, } from './config/defaults.ts';
 export { ROLE_COMPATIBILITY, ROLE_ALIASES, } from './constraints/role-matrix.ts';
 export { normalizeRoleLabel, getNeedRole, getOfferRole, rolesCompatible, serviceOverlapScore, passesCoreSkills, passesServiceOverlap, passesPair, } from './constraints/hard-constraints.ts';
@@ -7,6 +7,7 @@ export { budgetCompatible, locationCompatible, timelineOverlap, categoryOverlap,
 export type { CandidateGeneratorOptions } from './candidates/candidate-generator.ts';
 export { labelFromScore, attributeOverlap, exchangeCompatibilityFactor, valueCompatibilityFactor, budgetFit, timelineFit, locationFit, reputationScore, scorePair, } from './scoring/post-to-post-scoring.ts';
 export { LABEL_PARTIAL } from './scoring/label-from-score.ts';
+export { isProfileFitSnapshot, scoreProfileFit, } from './scoring/profile-fit-scoring.ts';
 export { getNormalized, exchangeCompatibility, valueCompatibility, oneWayValueFit, barterValueEquivalence, } from './value/value-compatibility.ts';
 export type { OneWayValueFit, BarterValueEquivalence, } from './value/value-compatibility.ts';
 export { detectMatchingModel } from './routing/detect-model.ts';

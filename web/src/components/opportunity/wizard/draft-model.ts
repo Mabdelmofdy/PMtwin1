@@ -171,13 +171,34 @@ export function toWizardDraft(draft: OpportunityDraft): OpportunityWizardDraft {
 
 export function opportunityToDraft(existing: Opportunity): OpportunityDraft {
   const attrs = existing.collaborationAttributes ?? {}
+  const normalized = existing.normalized ?? {}
+  const isOffer = existing.intent === 'offer'
   const scopeSkills =
-    existing.intent === 'offer'
+    isOffer
       ? existing.scope?.offeredSkills ?? existing.scope?.coreSkills
       : existing.scope?.requiredSkills ?? existing.scope?.coreSkills
   const structuredSkills = normalizeStructuredSkills(
-    attrs.structuredSkills ?? scopeSkills ?? existing.attributes?.coreSkills ?? [],
+    attrs.structuredSkills
+      ?? existing.structuredSkills
+      ?? scopeSkills
+      ?? existing.attributes?.coreSkills
+      ?? [],
   )
+  const servicesValue = isOffer
+    ? normalized.offeredServices
+    : normalized.requiredServices
+  const services = Array.isArray(servicesValue)
+    ? servicesValue.filter((item): item is string => typeof item === 'string').join(', ')
+    : typeof servicesValue === 'string'
+      ? servicesValue
+      : ''
+  const capacitySource = attrs.capacity
+    ?? (existing.capacity
+      ? {
+          availableCapacity: existing.capacity.available,
+          maximumCapacity: existing.capacity.required,
+        }
+      : undefined)
   const exchange = existing.exchangeData ?? {}
   const commercialTerms = normalizeCommercialTerms(
     exchange.commercialTerms ?? exchange,
@@ -197,10 +218,13 @@ export function opportunityToDraft(existing: Opportunity): OpportunityDraft {
   const milestonesFromAttrs = normalizeMilestones(
     attrs.milestones
       ?? existing.deliveryMilestones
+      ?? existing.attributes?.deliveryMilestones
       ?? [],
   )
-  const deliveryMilestonesText = Array.isArray(existing.deliveryMilestones)
-    ? existing.deliveryMilestones
+  const legacyDeliveryMilestones =
+    existing.deliveryMilestones ?? existing.attributes?.deliveryMilestones
+  const deliveryMilestonesText = Array.isArray(legacyDeliveryMilestones)
+    ? legacyDeliveryMilestones
         .map((item) => (typeof item === 'string' ? item : item.title ?? ''))
         .filter(Boolean)
         .join(', ')
@@ -208,7 +232,12 @@ export function opportunityToDraft(existing: Opportunity): OpportunityDraft {
 
   const draft: OpportunityDraft = {
     title: existing.title ?? '',
-    intent: existing.intent === 'offer' ? 'offer' : existing.intent === 'need' ? 'need' : '',
+    intent:
+      existing.intent === 'offer'
+        ? 'offer'
+        : existing.intent === 'need' || existing.intent === 'request'
+          ? 'need'
+          : '',
     description: existing.description ?? '',
     location: existing.location ?? '',
     serviceArea: String(attrs.serviceArea ?? ''),
@@ -224,8 +253,8 @@ export function opportunityToDraft(existing: Opportunity): OpportunityDraft {
       (existing as { attributes?: { targetRole?: string } }).attributes?.targetRole ?? '',
     sector: existing.scope?.sectors?.[0] ?? '',
     skills: skillNames(structuredSkills).join(', '),
-    services: '',
-    startDate: existing.attributes?.startDate ?? '',
+    services,
+    startDate: existing.attributes?.startDate ?? existing.startDate ?? '',
     tenderDeadline: existing.attributes?.tenderDeadline ?? '',
     availabilityEndDate: String(attrs.availabilityEndDate ?? ''),
     collaborationAttributes: attrs,
@@ -233,8 +262,8 @@ export function opportunityToDraft(existing: Opportunity): OpportunityDraft {
       existing.preferredPartnerType ??
       existing.attributes?.preferredPartnerType ??
       '',
-    attachmentsText: Array.isArray(existing.attachments)
-      ? existing.attachments
+    attachmentsText: Array.isArray(existing.attachments ?? existing.attributes?.attachments)
+      ? (existing.attachments ?? existing.attributes?.attachments ?? [])
           .map((item) => (typeof item === 'string' ? item : item.name ?? ''))
           .filter(Boolean)
           .join(', ')
@@ -242,14 +271,14 @@ export function opportunityToDraft(existing: Opportunity): OpportunityDraft {
     complianceRequirementsText: (existing.complianceRequirements ?? []).join(', '),
     deliveryMilestonesText,
     structuredSkills,
-    workPackages: normalizeWorkPackages(attrs.workPackages),
+    workPackages: normalizeWorkPackages(attrs.workPackages ?? existing.workPackages),
     deliverables: normalizeDeliverables(attrs.deliverables),
     milestones:
       milestonesFromAttrs.length > 0
         ? milestonesFromAttrs
         : normalizeMilestones(deliveryMilestonesText),
     resources: normalizeResources(attrs.resources),
-    capacity: normalizeOfferCapacity(attrs.capacity),
+    capacity: normalizeOfferCapacity(capacitySource),
     commercialTerms,
     commercialConstraints: normalizeCommercialConstraints(
       exchange.commercialConstraints ?? attrs.commercialConstraints,

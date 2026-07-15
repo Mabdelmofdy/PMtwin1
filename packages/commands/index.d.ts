@@ -83,6 +83,12 @@ export type {
   OpportunityStructuredSkill,
   OpportunityWorkPackage,
   OpportunityCapacity,
+  ProfileSubjectPayload,
+  UpdateProfileCommand,
+  SetProfileVisibilityCommand,
+  PublishProfileCommand,
+  UnpublishProfileCommand,
+  UpdateUserSettingsCommand,
 } from './src/index.ts'
 
 export {

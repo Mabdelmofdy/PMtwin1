@@ -42,6 +42,8 @@ import { formatMembershipId } from './party-membership-repository.ts'
 import { WorkspaceRepository } from './workspace-repository.ts'
 import { WorkspaceMembershipRepository } from './workspace-membership-repository.ts'
 import { IdentityProjectionService } from '@/domain/identity/identity-projection-service.ts'
+import { ProfileRepository } from './profile-repository.ts'
+import { UserSettingsRepository } from './user-settings-repository.ts'
 
 import { PartyDocumentRepository } from './party-document-repository.ts'
 
@@ -61,6 +63,13 @@ export const companyRepository = new CompanyRepository(
   storageAdapter,
   loadCompanies,
 )
+
+export const profileRepository = new ProfileRepository({
+  users: userRepository,
+  companies: companyRepository,
+})
+
+export const userSettingsRepository = new UserSettingsRepository(storageAdapter)
 
 export const opportunityRepository = new OpportunityRepository(
   storageAdapter,
@@ -194,6 +203,8 @@ export {
   WorkspaceRepository,
   WorkspaceMembershipRepository,
   PartyDocumentRepository,
+  ProfileRepository,
+  UserSettingsRepository,
   formatMembershipId,
 }
 

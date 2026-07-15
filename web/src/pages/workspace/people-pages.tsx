@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { FileText, Upload } from 'lucide-react'
 import { peopleApi } from '@/api/people.ts'
 import { notificationsApi } from '@/api/notifications.ts'
+import { opportunitiesApi } from '@/api/opportunities.ts'
 import { partiesApi } from '@/api/parties.ts'
 import { useAuth } from '@/providers/auth-provider'
 import {
@@ -18,11 +19,9 @@ import {
 } from '@/components/user/notifications-list-section'
 import { ProfileView } from '@/components/user/profile-view'
 import { SettingsView } from '@/components/user/settings-view'
-import { InviteEmployeePanel } from '@/components/workspace/invite-employee-panel.tsx'
 import {
   PublicProfileNotFound,
   PublicProfileView,
-  resolveCompanyIds,
 } from '@/components/user/public-profile-view'
 import { MOCK_MESSAGE_THREADS } from '@/components/user/user-display'
 import { PmTablePagination, PmTableEmpty } from '@/components/data/pm-data-index'
@@ -59,12 +58,16 @@ import { readProductNavState } from '@/config/product-identity'
 import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card'
 import { useProductLanguage } from '@/providers/product-language-provider'
 import { vettingService } from '@/lib/vetting-service.ts'
-import { updateUserProfile } from '@/lib/profile-update-service.ts'
+import { updateProfileThroughCommand } from '@/services/profile-command-service.ts'
+import { resolveRuntimeProfileSubject } from '@/domain/profile/profile-subject-service.ts'
+import { useDataStoreVersion } from '@/hooks/use-data-store.ts'
+import { userSettingsRepository } from '@/repositories/index.ts'
+import { listProfileOpportunityRecommendations } from '@/services/matching/profile-fit-service.ts'
 
 export function PeoplePage() {
   const location = useLocation()
   const navState = readProductNavState(location.state)
-  const profileCount = peopleApi.listAll().length
+  const profileCount = peopleApi.listMarketplaceVisible().length
   const peopleScope = navState?.peopleScope
   const listFilters = usePeopleListFilters(peopleScope ?? 'all')
   const title =
@@ -128,8 +131,7 @@ export function PeoplePage() {
 
 export function PersonProfilePage() {
   const { id } = useParams()
-  const person = id ? peopleApi.get(id) : undefined
-  const companyIds = resolveCompanyIds()
+  const person = id ? peopleApi.getPublicProfile(id) : undefined
 
   if (!person) {
     return (
@@ -144,12 +146,12 @@ export function PersonProfilePage() {
       header={
         <PmPageHeader
           label="Public profile"
-          title={person.profile?.name ?? person.email}
-          description={person.profile?.headline}
+          title={person.displayName}
+          description={person.headline}
         />
       }
     >
-      <PublicProfileView person={person} companyIds={companyIds} />
+      <PublicProfileView profile={person} />
     </PmPage>
   )
 }
@@ -254,22 +256,44 @@ export function NotificationsPage() {
 
 export function ProfilePage() {
   const navigate = useNavigate()
-  const { user, isCompanyUser, isVettingRestricted, refreshUser } = useAuth()
-  const profileKind = isCompanyUser ? 'company' : 'individual'
-  const [skillsDraft, setSkillsDraft] = useState(user?.profile?.skills?.join(', ') ?? '')
+  const { user, activeWorkspace, activeParty, isVettingRestricted, refreshUser } = useAuth()
+  useDataStoreVersion()
+  const profileSubject = user
+    ? resolveRuntimeProfileSubject({
+        partyId: activeParty?.id,
+        workspaceId: activeWorkspace?.id,
+        legacyAccountId: user.id,
+      })
+    : undefined
+  const profileKind = profileSubject?.profileKind ?? 'individual'
+  const profile = profileSubject?.account.profile
+  const [skillsDraft, setSkillsDraft] = useState(profile?.skills?.join(', ') ?? '')
   const [documentType, setDocumentType] = useState('Commercial Registration')
   const [documentFileName, setDocumentFileName] = useState('')
-  const readiness = user?.profile
-    ? resolveProfileReadiness(user.profile, profileKind)
+  const readiness = profile
+    ? resolveProfileReadiness(profile, profileKind)
     : null
+  const recommendations =
+    user && profileSubject
+      ? listProfileOpportunityRecommendations({
+          account: profileSubject.account,
+          opportunities: opportunitiesApi.listMarketplace(),
+          settings: userSettingsRepository.get(user.id),
+          limit: 3,
+        })
+      : []
 
   return (
     <PmPage
       header={
         <PmPageHeader
-          label="Account"
-          title={user?.profile?.name ?? 'Profile'}
-          description="Your public profile, readiness score, and vetting status."
+          label={profileKind === 'company' ? 'Company workspace profile' : 'My professional profile'}
+          title={profile?.name ?? 'Profile'}
+          description={
+            profileKind === 'company'
+              ? 'Manage the active company profile used for discovery, readiness, and matching.'
+              : 'Manage your professional identity, evidence, readiness, and matching profile.'
+          }
           metric={
             readiness ? (
               <PmPageHeroMetric
@@ -287,7 +311,7 @@ export function ProfilePage() {
       }
     >
       <ProfileView
-        profile={user?.profile}
+        profile={profile}
         profileKind={profileKind}
         email={user?.email}
         userId={user?.id}
@@ -296,9 +320,16 @@ export function ProfilePage() {
             toast.error('Sign in to update your profile.')
             return false
           }
-          const updated = updateUserProfile(user.id, profilePatch)
-          if (!updated) {
-            toast.error('Profile could not be updated.')
+          const commandResult = updateProfileThroughCommand(
+            {
+              partyId: profileSubject?.partyId,
+              workspaceId: profileSubject?.workspaceId,
+              legacyAccountId: user.id,
+            },
+            profilePatch,
+          )
+          if (!commandResult.success) {
+            toast.error(commandResult.errors?.[0] ?? 'Profile could not be updated.')
             return false
           }
           refreshUser()
@@ -306,6 +337,36 @@ export function ProfilePage() {
           return true
         }}
       />
+      {recommendations.length > 0 ? (
+        <PmContentCard
+          title="Recommended projects"
+          description="Profile-fit recommendations use non-sensitive capabilities and preferences. They do not change automatic match ranking yet."
+        >
+          <div className="grid gap-3 md:grid-cols-3">
+            {recommendations.map((recommendation) => {
+              const strongestFactor = [...recommendation.explanation.factors]
+                .filter((factor) => factor.applicable)
+                .sort((left, right) => right.score - left.score)[0]
+              return (
+                <PmSurface key={recommendation.opportunity.id} className="space-y-3 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="font-medium">{recommendation.opportunity.title}</p>
+                    <PmBadge tone="info" size="sm">
+                      {Math.round(recommendation.score * 100)}% fit
+                    </PmBadge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {strongestFactor?.explanation ?? 'Profile fit explanation available.'}
+                  </p>
+                  <PmButton size="sm" variant="outline" asChild>
+                    <Link to={`/opportunities/${recommendation.opportunity.id}`}>View project</Link>
+                  </PmButton>
+                </PmSurface>
+              )
+            })}
+          </div>
+        </PmContentCard>
+      ) : null}
       {user && isVettingRestricted ? (
         <PmContentCard
           title="Vetting updates"
@@ -327,9 +388,20 @@ export function ProfilePage() {
                     .split(',')
                     .map((skill) => skill.trim())
                     .filter(Boolean)
-                  vettingService.updateProfile(user.id, { skills })
+                  const result = updateProfileThroughCommand(
+                    {
+                      partyId: profileSubject?.partyId,
+                      workspaceId: profileSubject?.workspaceId,
+                      legacyAccountId: user.id,
+                    },
+                    { skills },
+                  )
+                  if (!result.success) {
+                    toast.error(result.errors?.[0] ?? 'Profile update failed')
+                    return
+                  }
+                  refreshUser()
                   toast.success('Profile updated for vetting review')
-                  navigate(0)
                 }}
               >
                 Save profile update
@@ -402,10 +474,7 @@ export function SettingsPage() {
         />
       }
     >
-      <div className="space-y-6">
-        <InviteEmployeePanel />
-        <SettingsView />
-      </div>
+      <SettingsView />
     </PmPage>
   )
 }

@@ -189,7 +189,7 @@ describe('evaluateProfileReadiness — score boundaries', () => {
     assert.equal(result.status, 'incomplete')
   })
 
-  it('requires all required fields and score >= 80 for ready_for_matching', () => {
+  it('accepts structured portfolio entries as previous project evidence', () => {
     const almostReady = evaluateProfileReadiness({
       profileKind: 'individual',
       profile: {
@@ -205,10 +205,10 @@ describe('evaluateProfileReadiness — score boundaries', () => {
       },
     })
 
-    assert.equal(almostReady.score, 92.5)
+    assert.equal(almostReady.score, 100)
     assert.equal(almostReady.missingRequired.length, 0)
-    assert.ok(almostReady.missingRecommended.includes('Previous Projects'))
-    assert.equal(almostReady.status, 'needs_review')
+    assert.equal(almostReady.missingRecommended.length, 0)
+    assert.equal(almostReady.status, 'ready_for_matching')
   })
 
   it('returns ready_for_matching only when required, recommended, and score gates pass', () => {

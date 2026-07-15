@@ -25,9 +25,21 @@ export type {
   CanonicalData,
   CreatorProfile,
   SemanticProfile,
+  ProfileFitWorkMode,
+  ProfileFitGeography,
+  ProfileFitAvailability,
+  ProfileFitCounterpartPreference,
+  ProfileFitSnapshot,
+  ProfileFitFactorName,
+  ProfileFitFactorExplanation,
+  ProfileFitScore,
+  ProfileFitTarget,
 } from './types/index.ts'
 
-export { EMPTY_CANONICAL_DATA } from './types/index.ts'
+export {
+  EMPTY_CANONICAL_DATA,
+  PROFILE_FIT_SNAPSHOT_KIND,
+} from './types/index.ts'
 
 export {
   DEFAULT_WEIGHTS,
@@ -74,6 +86,10 @@ export {
   scorePair,
 } from './scoring/post-to-post-scoring.ts'
 export { LABEL_PARTIAL } from './scoring/label-from-score.ts'
+export {
+  isProfileFitSnapshot,
+  scoreProfileFit,
+} from './scoring/profile-fit-scoring.ts'
 
 export {
   getNormalized,

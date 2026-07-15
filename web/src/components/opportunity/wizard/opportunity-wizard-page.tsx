@@ -133,7 +133,13 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { user, isPendingApproval, activeWorkspace, activeParty, canAccessAdmin } = useAuth()
-  const [draft, setDraft] = useState<OpportunityDraft>(initialDraft)
+  const existingOpportunity = useMemo(
+    () => (opportunityId ? opportunitiesApi.get(opportunityId) : undefined),
+    [opportunityId],
+  )
+  const [draft, setDraft] = useState<OpportunityDraft>(() =>
+    existingOpportunity ? opportunityToDraft(existingOpportunity) : initialDraft,
+  )
   const [activeStepId, setActiveStepId] = useState<WizardStepId>('opportunity')
   const [createdOpportunityId, setCreatedOpportunityId] = useState<string | undefined>()
   const [saving, setSaving] = useState(false)
@@ -150,11 +156,8 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   const [duplicateOpen, setDuplicateOpen] = useState(false)
   const [suppressDuplicate, setSuppressDuplicate] = useState(false)
   const [readinessDrawerOpen, setReadinessDrawerOpen] = useState(false)
-  const existingOpportunity = opportunityId
-    ? opportunitiesApi.get(opportunityId)
-    : undefined
   const resolvedOpportunityId = opportunityId ?? createdOpportunityId
-  const autosaveReadyRef = useRef(false)
+  const autosaveReadyRef = useRef(Boolean(existingOpportunity))
   const draftRef = useRef(draft)
   draftRef.current = draft
   const trackedStartRef = useRef(false)
@@ -199,13 +202,6 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
     trackOcxEvent('opportunity_step_viewed', { stepId: activeStepId })
     trackOcxEvent('step_viewed', { stepId: activeStepId })
   }, [activeStepId])
-
-  useEffect(() => {
-    if (!existingOpportunity) return
-    setDraft(opportunityToDraft(existingOpportunity))
-    autosaveReadyRef.current = true
-    setDirty(false)
-  }, [existingOpportunity])
 
   useEffect(() => {
     const snapshot = readLocalDraftSnapshot(mode, opportunityId)
