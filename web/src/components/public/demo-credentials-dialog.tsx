@@ -5,6 +5,7 @@ import { resolveVettingCaseStatus } from '@/types/vetting.ts'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -220,12 +221,12 @@ export function DemoCredentialsDialog({ open, onOpenChange, onSelect }: DemoCred
       <DialogContent className="modal-dialog modal-dialog--demo-credentials flex max-h-[88vh] flex-col sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Demo accounts</DialogTitle>
-        </DialogHeader>
-        <div className="pm-demo-credentials flex min-h-0 flex-1 flex-col overflow-hidden">
-          <p className="pm-demo-credentials-intro">
+          <DialogDescription className="pm-demo-credentials-intro">
             Approved accounts work immediately. Pending accounts can sign in to complete onboarding
             but cannot create or publish opportunities until admin approval.
-          </p>
+          </DialogDescription>
+        </DialogHeader>
+        <div className="pm-demo-credentials flex min-h-0 flex-1 flex-col overflow-hidden">
           <div className="pm-demo-credentials-passwords">
             <span className="pm-demo-credentials-pill">
               <strong>Admin</strong> <code>admin123</code>
