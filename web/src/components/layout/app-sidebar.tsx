@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ArrowLeft, LogOut, ShieldCheck } from 'lucide-react'
 import { notificationsApi } from '@/api/notifications.ts'
 import {
@@ -40,13 +40,44 @@ const navButtonClass =
   )
 
 export function AppSidebar() {
+  const navigate = useNavigate()
   const { pathname } = useLocation()
-  const { user, signOut, isCompanyUser, canAccessAdmin, exitPlatformContext } = useAuth()
+  const {
+    user,
+    signOut,
+    isCompanyUser,
+    canAccessAdmin,
+    platformContextActive,
+    enterPlatformContext,
+    exitPlatformContext,
+  } = useAuth()
   const { productLanguage } = useProductLanguage()
   if (!user) return null
   const displayName = user.profile?.name || user.email
   const isAdminArea = pathname.startsWith('/admin') && canAccessAdmin
   const dashboardHref = isCompanyUser ? '/company-dashboard' : '/dashboard'
+
+  const openAdminPortal = () => {
+    try {
+      if (!platformContextActive) {
+        enterPlatformContext()
+      }
+    } catch (error) {
+      console.error('Failed to enter platform context', error)
+    }
+    navigate('/admin')
+  }
+
+  const leaveAdminPortal = () => {
+    try {
+      if (platformContextActive) {
+        exitPlatformContext()
+      }
+    } catch (error) {
+      console.error('Failed to exit platform context', error)
+    }
+    navigate(dashboardHref)
+  }
 
   const unreadNotifications = useMemo(() => {
     if (!user.id) return 0
@@ -169,15 +200,10 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     tooltip="Back to My Workspace"
                     className={navButtonClass}
-                    asChild
+                    onClick={leaveAdminPortal}
                   >
-                    <Link
-                      to={dashboardHref}
-                      onClick={() => exitPlatformContext()}
-                    >
-                      <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden />
-                      <span>Back to My Workspace</span>
-                    </Link>
+                    <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden />
+                    <span>Back to My Workspace</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
@@ -195,14 +221,12 @@ export function AppSidebar() {
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       isActive={isNavActive(pathname, '/admin')}
-                      tooltip="Admin"
+                      tooltip="Open Admin Portal"
                       className={navButtonClass}
-                      asChild
+                      onClick={openAdminPortal}
                     >
-                      <Link to="/admin">
-                        <ShieldCheck className="size-4" aria-hidden />
-                        <span>Admin</span>
-                      </Link>
+                      <ShieldCheck className="size-4" aria-hidden />
+                      <span>Admin Portal</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>

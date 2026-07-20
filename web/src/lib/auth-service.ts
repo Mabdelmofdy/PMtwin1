@@ -218,7 +218,7 @@ export const authService = {
     if (!session || session.userId !== user.id) {
       throw new Error('Authenticated session required')
     }
-    if (resolveLegacyRoleToPlatformRoles(user.role).length === 0) {
+    if (!canAccessAdminForRole(user.role)) {
       throw new Error('Platform access denied')
     }
     const updated = { ...session, platformContextActive: true }

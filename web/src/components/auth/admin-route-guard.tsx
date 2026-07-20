@@ -25,8 +25,11 @@ export function AdminRouteGuard() {
   })
 
   useEffect(() => {
-    if (decision === 'allow' && !platformContextActive) {
+    if (decision !== 'allow' || platformContextActive) return
+    try {
       enterPlatformContext()
+    } catch (error) {
+      console.error('Failed to enter platform context', error)
     }
   }, [decision, platformContextActive, enterPlatformContext])
 

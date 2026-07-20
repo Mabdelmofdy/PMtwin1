@@ -62,7 +62,13 @@ export function WorkspaceSwitcher({
   }
 
   const selectPlatform = () => {
-    enterPlatformContext()
+    try {
+      if (!platformContextActive) {
+        enterPlatformContext()
+      }
+    } catch (error) {
+      console.error('Failed to enter platform context', error)
+    }
     navigate('/admin')
   }
 
