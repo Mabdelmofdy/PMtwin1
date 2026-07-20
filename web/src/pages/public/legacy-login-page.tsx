@@ -7,13 +7,16 @@ import {
   type DemoCredentialRow,
 } from '@/components/public/demo-credentials-dialog'
 import { getPocSectionHtml } from '@/lib/poc-site-content'
+import { authService } from '@/lib/auth-service'
+import { resolvePostLoginPath } from '@/domain/rbac/resolve-post-login-path.ts'
 import { useAuth } from '@/providers/auth-provider'
+import type { PlatformUser } from '@/types/domain.ts'
 
 const LOGIN_MARKETING = getPocSectionHtml('login', 'marketing-column')
 const LOGIN_HEADER = getPocSectionHtml('login', 'form-header')
 
 export function LegacyLoginPage() {
-  const { login, isAuthenticated } = useAuth()
+  const { login, isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const from = (location.state as { from?: string } | null)?.from ?? '/dashboard'
@@ -26,8 +29,19 @@ export function LegacyLoginPage() {
   const [loading, setLoading] = useState(false)
   const [demoOpen, setDemoOpen] = useState(false)
 
-  if (isAuthenticated) {
-    navigate(from, { replace: true })
+  const goAfterLogin = (signedIn: PlatformUser) => {
+    navigate(
+      resolvePostLoginPath({
+        userRole: signedIn.role,
+        from,
+        isCompanyUser: authService.isCompanyUser(signedIn),
+      }),
+      { replace: true },
+    )
+  }
+
+  if (isAuthenticated && user) {
+    goAfterLogin(user)
     return null
   }
 
@@ -36,9 +50,9 @@ export function LegacyLoginPage() {
     setError('')
     setLoading(true)
     try {
-      await login(email, password, { rememberMe, accountType })
+      const user = await login(email, password, { rememberMe, accountType })
       toast.success('Signed in')
-      navigate(from, { replace: true })
+      goAfterLogin(user)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {
@@ -53,12 +67,14 @@ export function LegacyLoginPage() {
     setError('')
     setLoading(true)
     try {
-      await login(row.email, row.password, {
+      const user = await login(row.email, row.password, {
         rememberMe: false,
         accountType: row.accountType,
       })
-      toast.success('Signed in')
-      navigate(from, { replace: true })
+      toast.success(
+        row.group === 'admin' ? 'Signed in — opening Admin Portal' : 'Signed in',
+      )
+      goAfterLogin(user)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {

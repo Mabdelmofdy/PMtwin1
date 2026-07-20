@@ -41,7 +41,7 @@ const navButtonClass =
 
 export function AppSidebar() {
   const { pathname } = useLocation()
-  const { user, signOut, isCompanyUser, canAccessAdmin } = useAuth()
+  const { user, signOut, isCompanyUser, canAccessAdmin, exitPlatformContext } = useAuth()
   const { productLanguage } = useProductLanguage()
   if (!user) return null
   const displayName = user.profile?.name || user.email
@@ -171,7 +171,10 @@ export function AppSidebar() {
                     className={navButtonClass}
                     asChild
                   >
-                    <Link to={dashboardHref}>
+                    <Link
+                      to={dashboardHref}
+                      onClick={() => exitPlatformContext()}
+                    >
                       <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden />
                       <span>Back to My Workspace</span>
                     </Link>

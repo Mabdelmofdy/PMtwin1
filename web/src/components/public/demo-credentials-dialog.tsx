@@ -292,7 +292,8 @@ export function DemoCredentialsDialog({ open, onOpenChange, onSelect }: DemoCred
                     </span>
                   </span>
                   <span className="pm-demo-credentials-use">
-                    Open <i className="ph-bold ph-arrow-right" aria-hidden="true" />
+                    {row.group === 'admin' ? 'Open Admin Portal' : 'Open'}{' '}
+                    <i className="ph-bold ph-arrow-right" aria-hidden="true" />
                   </span>
                 </button>
               ))}

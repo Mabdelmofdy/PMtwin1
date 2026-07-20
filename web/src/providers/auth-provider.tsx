@@ -58,7 +58,7 @@ type AuthContextValue = {
     email: string,
     password: string,
     options?: { rememberMe?: boolean; accountType?: AccountType },
-  ) => Promise<void>
+  ) => Promise<PlatformUser>
   registerAndSignIn: (input: RegistrationInput) => Promise<RegistrationResult>
   switchWorkspace: (workspaceId: string) => void
   enterPlatformContext: () => void
@@ -128,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const loggedIn = await authService.login(email, password, options)
       setUser(loggedIn)
       setSession(authService.getSession())
+      return loggedIn
     },
     [],
   )

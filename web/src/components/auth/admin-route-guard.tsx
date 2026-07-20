@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/providers/auth-provider'
 import { evaluateAdminRouteAccess } from '@/domain/rbac/admin-route-access.ts'
@@ -7,7 +8,13 @@ import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 
 export function AdminRouteGuard() {
-  const { isAuthenticated, isLoading, user } = useAuth()
+  const {
+    isAuthenticated,
+    isLoading,
+    user,
+    platformContextActive,
+    enterPlatformContext,
+  } = useAuth()
   const location = useLocation()
 
   const decision = evaluateAdminRouteAccess({
@@ -16,6 +23,12 @@ export function AdminRouteGuard() {
     userRole: user?.role,
     pathname: location.pathname,
   })
+
+  useEffect(() => {
+    if (decision === 'allow' && !platformContextActive) {
+      enterPlatformContext()
+    }
+  }, [decision, platformContextActive, enterPlatformContext])
 
   if (decision === 'loading') {
     return (
