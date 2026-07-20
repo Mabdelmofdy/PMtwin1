@@ -697,14 +697,18 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
       for (const entry of this.listQueue()) {
         const slaStatus = resolveVettingSlaStatus(entry.user)
         const existing = entry.user.profile?.vetting
-        if (existing?.slaStatus === slaStatus && slaStatus !== 'overdue') {
+        const statusChanged = existing?.slaStatus !== slaStatus
+        const needsEscalationStamp =
+          slaStatus === 'overdue' && !existing?.escalationAt
+
+        // Idempotent: never write (or notify the data store) when nothing changed.
+        if (!statusChanged && !needsEscalationStamp) {
           continue
         }
 
-        const escalationAt =
-          slaStatus === 'overdue' && !existing?.escalationAt
-            ? new Date().toISOString()
-            : existing?.escalationAt
+        const escalationAt = needsEscalationStamp
+          ? new Date().toISOString()
+          : existing?.escalationAt
 
         appendVettingMetadata(deps, entry.user.id, {
           ...existing,
@@ -712,7 +716,7 @@ export function createVettingService(deps: VettingServiceDeps = defaultDeps) {
           escalationAt,
         }, entry.user.status)
 
-        if (slaStatus === 'overdue' && !existing?.escalationAt) {
+        if (needsEscalationStamp) {
           deps.auditRepository.append({
             action: 'vetting.escalated',
             userId: entry.user.id,

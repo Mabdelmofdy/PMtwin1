@@ -19,8 +19,8 @@ import type { PartyDocument } from '@/types/party-document.ts'
 
 export const adminApi = {
   getAuditLog: () => auditRepository.getAll(),
+  /** Pure read — does not mutate vetting metadata during render. */
   getPendingUsers: () => {
-    vettingService.syncSlaEscalations()
     const seeded = loadPendingUsers().map((user) => ({
       user,
       activeParty: null,
@@ -47,8 +47,11 @@ export const adminApi = {
       return true
     })
   },
-  getVettingWorkflow: () => {
+  /** Call from effects / event handlers — never during render. */
+  syncVettingSla: () => {
     vettingService.syncSlaEscalations()
+  },
+  getVettingWorkflow: () => {
     const queue = vettingService.listQueue()
     const history = vettingService.listHistory()
     return bucketVettingWorkflow([...queue, ...history])

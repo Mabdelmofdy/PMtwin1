@@ -37,7 +37,7 @@ export { AdminOnboardingCenterPage } from './onboarding/admin-onboarding-center-
 export { AdminFailedCommandsPage } from './system/admin-failed-commands-page.tsx'
 export { AdminNegotiationDetailPage } from './commercial/admin-negotiation-detail-page.tsx'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { adminApi } from '@/api/admin.ts'
 import { contractsApi } from '@/api/contracts.ts'
@@ -117,6 +117,10 @@ export function AdminVettingPage() {
   const kpiMetrics = useMemo(() => computeAdminVettingKpiMetrics(workflow), [version])
   const [reviewing, setReviewing] = useState<VettingWorkflowEntry | null>(null)
   const canManageVetting = !denyUnlessAuthorized(user?.role, 'admin.vetting.manage')
+
+  useEffect(() => {
+    adminApi.syncVettingSla()
+  }, [])
 
   const reviewerId = user?.id ?? 'admin'
 

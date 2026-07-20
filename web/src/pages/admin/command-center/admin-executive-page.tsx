@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import {
   buildCommandCenterSummary,
   buildOperationsSummary,
@@ -14,6 +14,7 @@ import {
   createCreatorProfileResolver,
 } from '@/domain/readiness-analytics/index.ts'
 import { buildMatchingQualityAnalytics } from '@/domain/matching-quality/index.ts'
+import { adminApi } from '@/api/admin.ts'
 import { dealsApi } from '@/api/deals.ts'
 import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
@@ -45,6 +46,11 @@ import { pmTypography, resolveMatchTypeStyle } from '@/tokens'
 export function AdminExecutivePage() {
   const { productLanguage } = useProductLanguage()
   const version = useDataStoreVersion()
+
+  useEffect(() => {
+    adminApi.syncVettingSla()
+  }, [])
+
   const summary = useMemo(() => buildCommandCenterSummary(), [version])
   const ops = useMemo(() => buildOperationsSummary(), [version])
   const health = useMemo(() => buildPlatformHealthSummary(), [version])
