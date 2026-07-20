@@ -200,6 +200,7 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     tooltip="Back to My Workspace"
                     className={navButtonClass}
+                    type="button"
                     onClick={leaveAdminPortal}
                   >
                     <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden />
@@ -223,6 +224,7 @@ export function AppSidebar() {
                       isActive={isNavActive(pathname, '/admin')}
                       tooltip="Open Admin Portal"
                       className={navButtonClass}
+                      type="button"
                       onClick={openAdminPortal}
                     >
                       <ShieldCheck className="size-4" aria-hidden />

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { PocHtmlBlock } from '@/components/public/poc-html-block'
 import {
@@ -29,20 +29,20 @@ export function LegacyLoginPage() {
   const [loading, setLoading] = useState(false)
   const [demoOpen, setDemoOpen] = useState(false)
 
+  const destinationFor = (signedIn: PlatformUser): string =>
+    resolvePostLoginPath({
+      userRole: signedIn.role,
+      from,
+      isCompanyUser: authService.isCompanyUser(signedIn),
+    })
+
   const goAfterLogin = (signedIn: PlatformUser) => {
-    navigate(
-      resolvePostLoginPath({
-        userRole: signedIn.role,
-        from,
-        isCompanyUser: authService.isCompanyUser(signedIn),
-      }),
-      { replace: true },
-    )
+    navigate(destinationFor(signedIn), { replace: true })
   }
 
+  // Declarative redirect only — never call navigate() during render.
   if (isAuthenticated && user) {
-    goAfterLogin(user)
-    return null
+    return <Navigate to={destinationFor(user)} replace />
   }
 
   const submit = async (e: React.FormEvent) => {
@@ -50,9 +50,9 @@ export function LegacyLoginPage() {
     setError('')
     setLoading(true)
     try {
-      const user = await login(email, password, { rememberMe, accountType })
+      const signedIn = await login(email, password, { rememberMe, accountType })
       toast.success('Signed in')
-      goAfterLogin(user)
+      goAfterLogin(signedIn)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {
@@ -67,14 +67,14 @@ export function LegacyLoginPage() {
     setError('')
     setLoading(true)
     try {
-      const user = await login(row.email, row.password, {
+      const signedIn = await login(row.email, row.password, {
         rememberMe: false,
         accountType: row.accountType,
       })
       toast.success(
         row.group === 'admin' ? 'Signed in — opening Admin Portal' : 'Signed in',
       )
-      goAfterLogin(user)
+      goAfterLogin(signedIn)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {

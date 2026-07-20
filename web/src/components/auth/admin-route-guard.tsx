@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/providers/auth-provider'
 import { evaluateAdminRouteAccess } from '@/domain/rbac/admin-route-access.ts'
@@ -16,6 +16,7 @@ export function AdminRouteGuard() {
     enterPlatformContext,
   } = useAuth()
   const location = useLocation()
+  const activatedRef = useRef(false)
 
   const decision = evaluateAdminRouteAccess({
     isLoading,
@@ -25,13 +26,16 @@ export function AdminRouteGuard() {
   })
 
   useEffect(() => {
-    if (decision !== 'allow' || platformContextActive) return
+    if (decision !== 'allow' || platformContextActive || !user) return
+    if (activatedRef.current) return
+    activatedRef.current = true
     try {
       enterPlatformContext()
     } catch (error) {
+      activatedRef.current = false
       console.error('Failed to enter platform context', error)
     }
-  }, [decision, platformContextActive, enterPlatformContext])
+  }, [decision, platformContextActive, user, enterPlatformContext])
 
   if (decision === 'loading') {
     return (

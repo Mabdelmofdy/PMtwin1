@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import {
   AuthMarketingColumn,
   AuthMarketingShell,
@@ -116,8 +116,12 @@ export function LegacyRegisterPage() {
   }, [form.accountType, form.individualType])
 
   if (isAuthenticated && !completion) {
-    navigate(resolveBreadcrumbHomeHref('/', isCompanyUser), { replace: true })
-    return null
+    return (
+      <Navigate
+        to={resolveBreadcrumbHomeHref('/', isCompanyUser)}
+        replace
+      />
+    )
   }
 
   const update = <K extends keyof RegistrationWizardData>(key: K, value: RegistrationWizardData[K]) => {
