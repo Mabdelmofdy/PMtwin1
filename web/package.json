@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "type-check": "tsc -b",
-    "build": "tsc -b && vite build",
+    "type-check": "tsc -b tsconfig.app.json tsconfig.node.json",
+    "build": "tsc -b tsconfig.app.json tsconfig.node.json && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "node scripts/run-command-tests.mjs",
