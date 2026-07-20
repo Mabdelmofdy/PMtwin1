@@ -246,19 +246,19 @@ export class OpportunityCommandHandler {
       return failure(command.commandType, command.aggregateId, ['title is required'])
     }
 
-    // Drafts may be saved before collaboration attributes are complete (readiness starts at 0).
-    // Validate taxonomy only once the user has selected a main model / sub-model.
-    // Required collaboration attributes are enforced by readiness / publish gates — not draft create.
+    // When a collaboration model is selected, create requires taxonomy + required attributes.
+    // Incomplete drafts without a model selection remain allowed (readiness starts at 0).
     const hasCollaborationSelection = Boolean(
       payload.mainCollaborationModel?.trim() || payload.subModelType?.trim(),
     )
     if (hasCollaborationSelection) {
-      const validation = validateCollaborationTaxonomy({
+      const validation = validateOpportunityCollaborationModel({
         mainCollaborationModel: payload.mainCollaborationModel,
         modelType: payload.modelType,
         subModelType: payload.subModelType,
         exchangeMode: payload.exchangeMode,
         acceptedExchangeModes: payload.acceptedExchangeModes,
+        collaborationAttributes: payload.collaborationAttributes,
       })
       if (!validation.valid) {
         return failure(command.commandType, command.aggregateId, validation.errors)

@@ -14,6 +14,7 @@ import { todayIso } from '@pm-twin/validation'
 export type OpportunityStepProps = {
   draft: OpportunityDraft
   onChange: (patch: Partial<OpportunityDraft>) => void
+  showValidation?: boolean
 }
 
 function IntentCard({
@@ -49,7 +50,11 @@ function IntentCard({
   )
 }
 
-export function OpportunityStep({ draft, onChange }: OpportunityStepProps) {
+export function OpportunityStep({
+  draft,
+  onChange,
+  showValidation = false,
+}: OpportunityStepProps) {
   const isOffer = draft.intent === 'offer'
   const skillsHint = isOffer ? 'Skills Offered' : 'Skills Required'
   const servicesHint = isOffer ? 'Services Offered' : 'Services Required'
@@ -67,6 +72,7 @@ export function OpportunityStep({ draft, onChange }: OpportunityStepProps) {
       <PmFormSection
         id="section-post-type"
         title="Post Type"
+        required
         description="Choose whether you are requesting or providing capacity."
       >
         <div className="grid gap-3 sm:grid-cols-2">
@@ -83,6 +89,11 @@ export function OpportunityStep({ draft, onChange }: OpportunityStepProps) {
             onSelect={() => onChange({ intent: 'offer' })}
           />
         </div>
+        {showValidation && draft.intent !== 'need' && draft.intent !== 'offer' ? (
+          <p className="mt-2 text-sm text-danger" role="alert">
+            Post type (Need or Offer) is required
+          </p>
+        ) : null}
       </PmFormSection>
 
       <PmFormSection
@@ -92,7 +103,12 @@ export function OpportunityStep({ draft, onChange }: OpportunityStepProps) {
       >
         <PmFormGrid>
           <PmFormGridItem span="full">
-            <PmFormField id="title" label="Title" required>
+            <PmFormField
+              id="title"
+              label="Title"
+              required
+              error={showValidation && !draft.title.trim() ? 'Title is required' : null}
+            >
               <Input
                 data-field-id="title"
                 value={draft.title}
@@ -102,7 +118,16 @@ export function OpportunityStep({ draft, onChange }: OpportunityStepProps) {
             </PmFormField>
           </PmFormGridItem>
           <PmFormGridItem span="full">
-            <PmFormField id="description" label="Short description" required>
+            <PmFormField
+              id="description"
+              label="Short description"
+              required
+              error={
+                showValidation && !draft.description.trim()
+                  ? 'Short description is required'
+                  : null
+              }
+            >
               <Textarea
                 data-field-id="description"
                 value={draft.description}
@@ -113,7 +138,16 @@ export function OpportunityStep({ draft, onChange }: OpportunityStepProps) {
             </PmFormField>
           </PmFormGridItem>
           <PmFormGridItem span={2}>
-            <PmFormField id="sector" label="Category or profession" required>
+            <PmFormField
+              id="sector"
+              label="Category or profession"
+              required
+              error={
+                showValidation && !draft.sector.trim()
+                  ? 'Category or profession is required'
+                  : null
+              }
+            >
               <Input
                 data-field-id="sector"
                 value={draft.sector}
@@ -122,7 +156,16 @@ export function OpportunityStep({ draft, onChange }: OpportunityStepProps) {
             </PmFormField>
           </PmFormGridItem>
           <PmFormGridItem span={1}>
-            <PmFormField id="targetRole" label="Target role" required>
+            <PmFormField
+              id="targetRole"
+              label="Target role"
+              required
+              error={
+                showValidation && !draft.targetRole.trim()
+                  ? 'Target role is required'
+                  : null
+              }
+            >
               <Input
                 data-field-id="targetRole"
                 value={draft.targetRole}
@@ -131,7 +174,16 @@ export function OpportunityStep({ draft, onChange }: OpportunityStepProps) {
             </PmFormField>
           </PmFormGridItem>
           <PmFormGridItem span={2}>
-            <PmFormField id="location" label="Primary location" required>
+            <PmFormField
+              id="location"
+              label="Primary location"
+              required
+              error={
+                showValidation && !draft.location.trim()
+                  ? 'Primary location is required'
+                  : null
+              }
+            >
               <Input
                 data-field-id="location"
                 value={draft.location}
@@ -149,7 +201,16 @@ export function OpportunityStep({ draft, onChange }: OpportunityStepProps) {
             </PmFormField>
           </PmFormGridItem>
           <PmFormGridItem span={1}>
-            <PmFormField id="startDate" label="Start date" required>
+            <PmFormField
+              id="startDate"
+              label="Start date"
+              required
+              error={
+                showValidation && !draft.startDate.trim()
+                  ? 'Start date is required'
+                  : null
+              }
+            >
               <Input
                 data-field-id="startDate"
                 type="date"

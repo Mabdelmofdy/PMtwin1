@@ -7,6 +7,8 @@ export type PmFormSectionProps = ComponentProps<'section'> & {
   title?: string
   description?: string
   actions?: ReactNode
+  /** Show a required asterisk next to the section title. */
+  required?: boolean
   /** Wrap section body in a bordered surface */
   bordered?: boolean
   dense?: boolean
@@ -18,6 +20,7 @@ export function PmFormSection({
   title,
   description,
   actions,
+  required = false,
   bordered = true,
   dense = false,
   className,
@@ -34,6 +37,13 @@ export function PmFormSection({
             {title ? (
               <h3 className={dense ? pmTypography.h3 : pmTypography.h2}>
                 {title}
+                {required ? (
+                  <span className="text-danger" aria-hidden>
+                    {' '}
+                    *
+                  </span>
+                ) : null}
+                {required ? <span className="sr-only"> (required)</span> : null}
               </h3>
             ) : null}
             {description ? (

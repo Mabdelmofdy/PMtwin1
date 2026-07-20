@@ -17,6 +17,7 @@ import { pmTypography } from '@/tokens'
 export type CollaborationStepProps = {
   draft: OpportunityDraft
   onChange: (patch: Partial<OpportunityDraft>) => void
+  showValidation?: boolean
 }
 
 const MODEL_BLURBS: Record<string, { description: string; example: string }> = {
@@ -43,7 +44,11 @@ const MODEL_BLURBS: Record<string, { description: string; example: string }> = {
   },
 }
 
-export function CollaborationStep({ draft, onChange }: CollaborationStepProps) {
+export function CollaborationStep({
+  draft,
+  onChange,
+  showValidation = false,
+}: CollaborationStepProps) {
   const [whyOpen, setWhyOpen] = useState(false)
   const mainModels = useMemo(() => listMainCollaborationModels(), [])
   const subModels = useMemo(
@@ -80,6 +85,7 @@ export function CollaborationStep({ draft, onChange }: CollaborationStepProps) {
       <PmFormSection
         id="section-main-model"
         title="Main Collaboration Model"
+        required
         description="Select the engagement model that best fits this opportunity."
       >
         <div className="grid gap-3 md:grid-cols-2">
@@ -135,6 +141,7 @@ export function CollaborationStep({ draft, onChange }: CollaborationStepProps) {
         <PmFormSection
           id="section-sub-model"
           title="Sub-model"
+          required
           description="Available engagement models for the selected collaboration model."
         >
           <div className="grid gap-2 sm:grid-cols-2">
@@ -210,6 +217,7 @@ export function CollaborationStep({ draft, onChange }: CollaborationStepProps) {
             subModelType={draft.subModelType}
             values={draft.collaborationAttributes}
             exchangeMode={draft.exchangeMode}
+            showValidation={showValidation}
             onChange={(key, value) =>
               onChange({
                 collaborationAttributes: {

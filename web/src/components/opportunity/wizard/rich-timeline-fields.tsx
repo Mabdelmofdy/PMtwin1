@@ -23,6 +23,7 @@ export function RichTimelineFields({
   onTimelineChange,
   locationStatus,
   startDateStatus,
+  showValidation = false,
 }: {
   intent: 'need' | 'offer' | ''
   location: string
@@ -35,6 +36,7 @@ export function RichTimelineFields({
   onTimelineChange: (timeline: RichTimeline) => void
   locationStatus?: ReactNode
   startDateStatus?: ReactNode
+  showValidation?: boolean
 }) {
   const minDate = todayIso()
 
@@ -53,6 +55,12 @@ export function RichTimelineFields({
             <PmFormField
               id="opp-location"
               label={intent === 'need' ? 'Location' : 'Preferred location / service area'}
+              required
+              error={
+                showValidation && !location.trim()
+                  ? 'Location is required'
+                  : null
+              }
             >
               <Input
                 value={location}
@@ -66,6 +74,12 @@ export function RichTimelineFields({
             <PmFormField
               id="opp-start"
               label={intent === 'need' ? 'Start date' : 'Availability from'}
+              required
+              error={
+                showValidation && !startDate.trim()
+                  ? 'Start date is required'
+                  : null
+              }
             >
               <Input
                 type="date"
@@ -126,7 +140,16 @@ export function RichTimelineFields({
               }
             />
           </PmFormField>
-          <PmFormField id="tl-duration" label="Estimated duration">
+          <PmFormField
+            id="tl-duration"
+            label="Estimated duration"
+            required
+            error={
+              showValidation && !timeline.estimatedDuration?.trim()
+                ? 'Duration is required'
+                : null
+            }
+          >
             <Input
               value={timeline.estimatedDuration ?? ''}
               onChange={(e) =>

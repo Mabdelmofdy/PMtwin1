@@ -26,6 +26,7 @@ import {
 import { evaluateLiveOpportunityValidation } from '@/domain/opportunity-validation/index.ts'
 import { resolveStepForValidationIssue } from '@/domain/opportunity-validation/validation-step-map.ts'
 import { DuplicateDraftDialog } from '@/components/opportunity/wizard/duplicate-draft-dialog.tsx'
+import { validateCreateOpportunityDraft } from '@/components/opportunity/wizard/create-validation.ts'
 import {
   DraftRecoveryBanner,
   UnsavedChangesDialog,
@@ -117,11 +118,41 @@ function validateWizardStepAdvance(
       if (!draft.title.trim() || !draft.description.trim()) {
         return 'Add a title and description before continuing.'
       }
+      if (!draft.sector.trim()) {
+        return 'Add a category or profession before continuing.'
+      }
+      if (!draft.targetRole.trim()) {
+        return 'Add a target role before continuing.'
+      }
+      if (!draft.location.trim()) {
+        return 'Add a primary location before continuing.'
+      }
+      if (!draft.startDate.trim()) {
+        return 'Add a start date before continuing.'
+      }
       return null
     case 'collaboration':
-      return draft.mainCollaborationModel.trim() && draft.subModelType.trim()
-        ? null
-        : 'Select a collaboration model and sub-model before continuing.'
+      if (!draft.mainCollaborationModel.trim() || !draft.subModelType.trim()) {
+        return 'Select a collaboration model and sub-model before continuing.'
+      }
+      return null
+    case 'scope_work': {
+      const hasSkill = draft.structuredSkills.some((skill) => skill.name.trim())
+      if (!hasSkill) {
+        return draft.intent === 'offer'
+          ? 'Add at least one offered skill before continuing.'
+          : 'Add at least one required skill before continuing.'
+      }
+      if (!draft.services.trim()) {
+        return draft.intent === 'offer'
+          ? 'Add services offered before continuing.'
+          : 'Add services required before continuing.'
+      }
+      if (!draft.richTimeline.estimatedDuration?.trim()) {
+        return 'Add an estimated duration before continuing.'
+      }
+      return null
+    }
     default:
       return null
   }
@@ -156,6 +187,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   const [duplicateOpen, setDuplicateOpen] = useState(false)
   const [suppressDuplicate, setSuppressDuplicate] = useState(false)
   const [readinessDrawerOpen, setReadinessDrawerOpen] = useState(false)
+  const [showFieldValidation, setShowFieldValidation] = useState(false)
   const resolvedOpportunityId = opportunityId ?? createdOpportunityId
   const autosaveReadyRef = useRef(Boolean(existingOpportunity))
   const draftRef = useRef(draft)
@@ -388,6 +420,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   const handleContinue = () => {
     const gateMessage = validateWizardStepAdvance(activeStepId, draft)
     if (gateMessage) {
+      setShowFieldValidation(true)
       toast.error(gateMessage)
       trackOcxEvent('opportunity_step_validation_failed', { stepId: activeStepId })
       return
@@ -420,14 +453,22 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
     setSaving(true)
     try {
       if (!resolvedOpportunityId) {
+        const createCheck = validateCreateOpportunityDraft(draft)
+        if (!createCheck.valid) {
+          setShowFieldValidation(true)
+          toast.error(createCheck.errors.join('\n'))
+          return
+        }
         const payload = buildCollaborationCommandPayload(draft, user.id)
         const result = opportunityCommandService.createOpportunity(payload)
         if (!result.success) {
+          setShowFieldValidation(true)
           toast.error(result.errors?.join('\n') ?? 'Could not create opportunity')
           return
         }
         const newId = result.aggregateId
         setCreatedOpportunityId(newId)
+        setShowFieldValidation(false)
         clearLocalDraftSnapshot(mode, opportunityId)
         clearLocalDraftRecoveryDismissal(mode, opportunityId)
         trackOcxEvent('draft_saved', { opportunityId: newId })
@@ -616,13 +657,25 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       >
         <div className="min-w-0 space-y-6">
           {activeStepId === 'opportunity' ? (
-            <OpportunityStep draft={draft} onChange={patchDraft} />
+            <OpportunityStep
+              draft={draft}
+              onChange={patchDraft}
+              showValidation={showFieldValidation}
+            />
           ) : null}
           {activeStepId === 'collaboration' ? (
-            <CollaborationStep draft={draft} onChange={patchDraft} />
+            <CollaborationStep
+              draft={draft}
+              onChange={patchDraft}
+              showValidation={showFieldValidation}
+            />
           ) : null}
           {activeStepId === 'scope_work' ? (
-            <ScopeWorkStep draft={draft} onChange={patchDraft} />
+            <ScopeWorkStep
+              draft={draft}
+              onChange={patchDraft}
+              showValidation={showFieldValidation}
+            />
           ) : null}
           {activeStepId === 'commercial' ? (
             <CommercialStructureStep draft={draft} onChange={patchDraft} />

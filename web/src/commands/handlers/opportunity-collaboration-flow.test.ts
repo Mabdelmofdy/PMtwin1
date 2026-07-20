@@ -142,7 +142,7 @@ describe('CreateOpportunity command flow', () => {
     assert.notEqual(stored?.subModelType, 'two_way')
   })
 
-  it('allows draft create when collaboration taxonomy is set but required attributes are incomplete', () => {
+  it('rejects draft create when collaboration taxonomy is set but required attributes are incomplete', () => {
     const stack = createCommandGatewayTestStack({
       users: [
         {
@@ -173,14 +173,15 @@ describe('CreateOpportunity command flow', () => {
       collaborationAttributes: {
         detailedScope: 'Shop drawing review',
         startDate: '2026-08-01',
-        // requiredSkills + duration intentionally omitted for draft save
+        // requiredSkills + duration intentionally omitted
       },
     })
 
-    assert.equal(createResult.success, true, createResult.errors?.join('; '))
-    assert.equal(
-      stack.opportunityRepository.getById(createResult.aggregateId)?.status,
-      'draft',
+    assert.equal(createResult.success, false)
+    assert.ok(
+      createResult.errors?.some((e) => e.includes('requiredSkills'))
+        || createResult.errors?.some((e) => e.includes('duration')),
+      createResult.errors?.join('; '),
     )
   })
 })

@@ -21,19 +21,32 @@ export function StructuredSkillsEditor({
   skills,
   onChange,
   fieldStatus,
+  required = false,
+  error,
 }: {
   label: string
   skills: StructuredSkill[]
   onChange: (skills: StructuredSkill[]) => void
   fieldStatus?: ReactNode
+  required?: boolean
+  error?: string | null
 }) {
   const updateAt = (index: number, patch: Partial<StructuredSkill>) => {
     onChange(skills.map((skill, i) => (i === index ? { ...skill, ...patch } : skill)))
   }
 
   return (
-    <PmFormSection title={label} description="Structured skills with level and requirements.">
+    <PmFormSection
+      title={label}
+      required={required}
+      description="Structured skills with level and requirements."
+    >
       {fieldStatus}
+      {error ? (
+        <p className="text-sm text-danger" role="alert">
+          {error}
+        </p>
+      ) : null}
       <div className="space-y-3" data-testid="structured-skills-editor">
         {skills.map((skill, index) => (
           <div
@@ -132,14 +145,24 @@ export function ServicesField({
   value,
   onChange,
   placeholder,
+  required = false,
+  error,
 }: {
   label: string
   value: string
   onChange: (value: string) => void
   placeholder?: string
+  required?: boolean
+  error?: string | null
 }) {
   return (
-    <PmFormField id="opp-services" label={label} help="Comma-separated">
+    <PmFormField
+      id="opp-services"
+      label={label}
+      required={required}
+      help="Comma-separated"
+      error={error}
+    >
       <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}

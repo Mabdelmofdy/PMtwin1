@@ -23,10 +23,16 @@ import { pmTypography } from '@/tokens'
 export type ScopeWorkStepProps = {
   draft: OpportunityDraft
   onChange: (patch: Partial<OpportunityDraft>) => void
+  showValidation?: boolean
 }
 
-export function ScopeWorkStep({ draft, onChange }: ScopeWorkStepProps) {
+export function ScopeWorkStep({
+  draft,
+  onChange,
+  showValidation = false,
+}: ScopeWorkStepProps) {
   const isOffer = draft.intent === 'offer'
+  const hasNamedSkill = draft.structuredSkills.some((skill) => skill.name.trim())
 
   return (
     <div data-slot="scope-work-step" className="space-y-6">
@@ -46,11 +52,27 @@ export function ScopeWorkStep({ draft, onChange }: ScopeWorkStepProps) {
             label={isOffer ? 'Skills Offered' : 'Skills Required'}
             skills={draft.structuredSkills}
             onChange={(structuredSkills) => onChange({ structuredSkills })}
+            required
+            error={
+              showValidation && !hasNamedSkill
+                ? isOffer
+                  ? 'At least one offered skill is required'
+                  : 'At least one required skill is required'
+                : null
+            }
           />
           <ServicesField
             label={isOffer ? 'Services Offered' : 'Services Required'}
             value={draft.services}
             onChange={(services) => onChange({ services })}
+            required
+            error={
+              showValidation && !draft.services.trim()
+                ? isOffer
+                  ? 'Services offered are required'
+                  : 'Services required are required'
+                : null
+            }
           />
           <PmFormGrid>
             <PmFormGridItem span={2}>
@@ -142,6 +164,7 @@ export function ScopeWorkStep({ draft, onChange }: ScopeWorkStepProps) {
             startDate={draft.startDate}
             tenderDeadline={draft.tenderDeadline}
             timeline={draft.richTimeline}
+            showValidation={showValidation}
             onLocationChange={(location) => onChange({ location })}
             onStartDateChange={(startDate) => onChange({ startDate })}
             onDeadlineChange={(tenderDeadline) => onChange({ tenderDeadline })}
