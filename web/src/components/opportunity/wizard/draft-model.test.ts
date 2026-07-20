@@ -92,4 +92,64 @@ describe('buildCollaborationCommandPayload', () => {
     assert.equal(payload.exchangeMode, 'cash')
     assert.equal(payload.budget, 125_000)
   })
+
+  it('mirrors structured skills and rich-timeline duration into collaboration attributes', () => {
+    const payload = buildCollaborationCommandPayload({
+      ...initialDraft,
+      title: 'BIM coordination package',
+      description: 'Coordinate shop drawings for tower core',
+      intent: 'need',
+      mainCollaborationModel: 'cash_subcontracting',
+      modelType: 'project_based',
+      subModelType: 'task_based',
+      exchangeMode: 'cash',
+      paymentModes: ['cash'],
+      startDate: '2026-08-01',
+      structuredSkills: [
+        {
+          name: 'BIM',
+          level: 'expert',
+          certificationRequired: false,
+          mandatory: true,
+        },
+        {
+          name: 'Coordination',
+          level: 'advanced',
+          certificationRequired: false,
+          mandatory: true,
+        },
+      ],
+      richTimeline: { estimatedDuration: '12 weeks' },
+      collaborationAttributes: {
+        requiredSkills: [],
+      },
+      commercialStructure: {
+        components: [
+          {
+            id: 'cash-1',
+            type: 'cash',
+            title: 'Cash',
+            enabled: true,
+            appliesTo: 'entire_opportunity',
+            currency: 'SAR',
+            budgetType: 'fixed',
+            fixedAmount: 50_000,
+          },
+        ],
+        constraints: [],
+        allocationMethod: 'fixed',
+      },
+    })
+
+    assert.deepEqual(payload.collaborationAttributes?.requiredSkills, [
+      'BIM',
+      'Coordination',
+    ])
+    assert.equal(payload.collaborationAttributes?.duration, '12 weeks')
+    assert.equal(
+      payload.collaborationAttributes?.detailedScope,
+      'Coordinate shop drawings for tower core',
+    )
+    assert.equal(payload.collaborationAttributes?.startDate, '2026-08-01')
+  })
 })

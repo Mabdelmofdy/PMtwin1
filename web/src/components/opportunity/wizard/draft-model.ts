@@ -131,6 +131,43 @@ function splitCsv(value: string): string[] {
     .filter(Boolean)
 }
 
+/** Prefer a non-empty skills list; empty arrays are treated as absent. */
+function coalesceSkills(
+  primary: unknown,
+  fallback: readonly string[],
+): string[] | undefined {
+  if (Array.isArray(primary)) {
+    const names = primary
+      .map((item) => {
+        if (typeof item === 'string') return item.trim()
+        if (item && typeof item === 'object' && 'name' in item) {
+          return String((item as { name?: unknown }).name ?? '').trim()
+        }
+        return ''
+      })
+      .filter(Boolean)
+    if (names.length > 0) return names
+  }
+  return fallback.length > 0 ? [...fallback] : undefined
+}
+
+/** Prefer an explicit duration; fall back to rich-timeline estimate. */
+function coalesceDuration(
+  explicit: unknown,
+  estimatedDuration: string | undefined,
+): string | number | undefined {
+  if (typeof explicit === 'number' && Number.isFinite(explicit) && explicit > 0) {
+    return explicit
+  }
+  if (typeof explicit === 'string' && explicit.trim()) {
+    return explicit.trim()
+  }
+  if (estimatedDuration?.trim()) {
+    return estimatedDuration.trim()
+  }
+  return undefined
+}
+
 /** Sync legacy exchangeMode / paymentModes from commercial structure. */
 export function syncDraftExchangeFromCommercialStructure(
   draft: OpportunityDraft,
@@ -372,9 +409,14 @@ export function buildOpportunityDraftInput(
       ...synced.collaborationAttributes,
       detailedScope:
         synced.collaborationAttributes.detailedScope ?? synced.description,
-      requiredSkills:
-        synced.collaborationAttributes.requiredSkills ??
-        (legacySkills.length > 0 ? legacySkills : undefined),
+      requiredSkills: coalesceSkills(
+        synced.collaborationAttributes.requiredSkills,
+        legacySkills,
+      ),
+      duration: coalesceDuration(
+        synced.collaborationAttributes.duration,
+        synced.richTimeline.estimatedDuration,
+      ),
       structuredSkills: synced.structuredSkills,
       workPackages: synced.workPackages,
       deliverables: synced.deliverables,

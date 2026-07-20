@@ -141,4 +141,46 @@ describe('CreateOpportunity command flow', () => {
     assert.notEqual(stored?.preferredMatchingTopology, 'circular')
     assert.notEqual(stored?.subModelType, 'two_way')
   })
+
+  it('allows draft create when collaboration taxonomy is set but required attributes are incomplete', () => {
+    const stack = createCommandGatewayTestStack({
+      users: [
+        {
+          id: 'seed-user-001',
+          email: 'creator@test.com',
+          role: 'pm',
+          status: 'active',
+          profile: {
+            type: 'individual',
+            skills: ['Structural'],
+            headline: 'Structural engineer',
+          },
+        },
+      ],
+    })
+    const commandService = createOpportunityCommandService({ gateway: stack.gateway })
+
+    const createResult = commandService.createOpportunity({
+      title: 'Incomplete draft with taxonomy',
+      description: 'Attributes filled later in the wizard',
+      intent: 'need',
+      creatorId: 'seed-user-001',
+      mainCollaborationModel: 'cash_subcontracting',
+      modelType: 'project_based',
+      subModelType: 'task_based',
+      exchangeMode: 'cash',
+      acceptedExchangeModes: ['cash'],
+      collaborationAttributes: {
+        detailedScope: 'Shop drawing review',
+        startDate: '2026-08-01',
+        // requiredSkills + duration intentionally omitted for draft save
+      },
+    })
+
+    assert.equal(createResult.success, true, createResult.errors?.join('; '))
+    assert.equal(
+      stack.opportunityRepository.getById(createResult.aggregateId)?.status,
+      'draft',
+    )
+  })
 })

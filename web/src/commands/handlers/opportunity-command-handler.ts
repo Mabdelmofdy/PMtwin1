@@ -246,19 +246,19 @@ export class OpportunityCommandHandler {
       return failure(command.commandType, command.aggregateId, ['title is required'])
     }
 
-    // Drafts may be saved before collaboration taxonomy is chosen (readiness starts at 0).
+    // Drafts may be saved before collaboration attributes are complete (readiness starts at 0).
     // Validate taxonomy only once the user has selected a main model / sub-model.
+    // Required collaboration attributes are enforced by readiness / publish gates — not draft create.
     const hasCollaborationSelection = Boolean(
       payload.mainCollaborationModel?.trim() || payload.subModelType?.trim(),
     )
     if (hasCollaborationSelection) {
-      const validation = validateOpportunityCollaborationModel({
+      const validation = validateCollaborationTaxonomy({
         mainCollaborationModel: payload.mainCollaborationModel,
         modelType: payload.modelType,
         subModelType: payload.subModelType,
         exchangeMode: payload.exchangeMode,
         acceptedExchangeModes: payload.acceptedExchangeModes,
-        collaborationAttributes: payload.collaborationAttributes,
       })
       if (!validation.valid) {
         return failure(command.commandType, command.aggregateId, validation.errors)
@@ -353,14 +353,14 @@ export class OpportunityCommandHandler {
       }),
     }
 
+    // Draft updates validate taxonomy shape only. Attribute completeness is a readiness concern.
     if (payload.mainCollaborationModel || payload.subModelType || payload.modelType) {
-      const validation = validateOpportunityCollaborationModel({
+      const validation = validateCollaborationTaxonomy({
         mainCollaborationModel: merged.mainCollaborationModel,
         modelType: merged.modelType,
         subModelType: merged.subModelType,
         exchangeMode: merged.exchangeMode,
         acceptedExchangeModes: merged.acceptedExchangeModes,
-        collaborationAttributes: merged.collaborationAttributes,
       })
       if (!validation.valid) {
         return failure(command.commandType, command.aggregateId, validation.errors)
