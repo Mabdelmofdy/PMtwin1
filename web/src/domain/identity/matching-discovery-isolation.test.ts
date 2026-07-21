@@ -199,4 +199,13 @@ describe('matching discovery canonical scoping', () => {
     assert.equal(participant?.workspaceId, 'ws-personal-user-personal-a')
     assert.equal(participant?.userId, 'user-personal-a')
   })
+
+  it('refuses company creatorId as notification user when no human createdByUserId', () => {
+    const companyOwned = opp('company-no-actor', {
+      creatorId: 'seed-co-corp-001',
+      ownerPartyId: 'party-company-seed-co-corp-001',
+      workspaceId: 'ws-company-seed-co-corp-001',
+    })
+    assert.equal(buildDiscoverParticipant(companyOwned, 'need_owner', ctx), null)
+  })
 })

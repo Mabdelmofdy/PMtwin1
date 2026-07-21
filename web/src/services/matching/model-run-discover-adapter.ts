@@ -147,10 +147,11 @@ function hydrateBarterSideByOwner(
     representativeUserId ??
     anchorOwner?.representativeUserId ??
     anchorOpportunity?.createdByUserId ??
-    anchorOpportunity?.creatorId ??
-    ''
+    (anchorOpportunity?.creatorId && ctx.userIds.has(anchorOpportunity.creatorId)
+      ? anchorOpportunity.creatorId
+      : undefined)
 
-  if (!userId) return null
+  if (!userId || ctx.companyIds.has(userId)) return null
 
   return {
     userId,

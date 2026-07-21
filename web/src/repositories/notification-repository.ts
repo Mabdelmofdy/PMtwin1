@@ -22,16 +22,23 @@ export class NotificationRepository extends BaseRepository<AppNotification> {
   }
 
   getByUserId(userId: string): AppNotification[] {
-    return this.getAll().filter((n) => n.userId === userId)
+    return this.getAll().filter(
+      (n) => n.userId === userId || n.recipientUserId === userId,
+    )
   }
 
   create(
     data: Omit<AppNotification, 'id' | 'createdAt'>,
   ): AppNotification {
     const overrides = this.readOverrides()
+    const uniqueSuffix =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
     const notification: AppNotification = {
       ...data,
-      id: `notif-${Date.now()}`,
+      recipientUserId: data.recipientUserId ?? data.userId,
+      id: `notif-${uniqueSuffix}`,
       createdAt: new Date().toISOString(),
     }
     const existing =

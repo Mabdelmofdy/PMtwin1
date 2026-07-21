@@ -346,6 +346,49 @@ describe('publish matching wiring', () => {
     )
   })
 
+  it('auto-discovers a one_way match and notifies both owners on publish', () => {
+    const need = matchingNeed('need-notify-1', 'user-need', 'draft')
+    const offer = matchingOffer('offer-notify-1', 'user-offer', 'published')
+    const stack = createPublishStack([need, offer])
+    const deps = publishDeps(stack)
+
+    const result = publishOpportunityUiAction(
+      need.id,
+      {
+        profile: readyProfile,
+        profileKind: 'individual',
+        opportunity: stack.opportunityRepository.getById(need.id),
+      },
+      deps,
+    )
+
+    assert.equal(result.success, true)
+    if (!result.success) return
+    assert.ok(result.discoveredMatchesCount >= 1)
+
+    const matches = stack.postMatchRepository.getByOpportunity(need.id)
+    assert.ok(matches.some((match) => match.matchType === 'one_way'))
+
+    const needNotifications = stack.notificationRepository
+      .getByUserId('user-need')
+      .filter((n) => n.type === 'new_match_found')
+    const offerNotifications = stack.notificationRepository
+      .getByUserId('user-offer')
+      .filter((n) => n.type === 'new_match_found')
+
+    assert.ok(needNotifications.length >= 1, 'need owner should get new_match_found')
+    assert.ok(offerNotifications.length >= 1, 'offer owner should get new_match_found')
+    assert.ok(
+      needNotifications.every((n) => n.link?.startsWith('/matches/')),
+      'notification should link to the match',
+    )
+    assert.notEqual(
+      needNotifications[0]?.id,
+      offerNotifications[0]?.id,
+      'each party gets a distinct notification id',
+    )
+  })
+
   it('ready offer publish creates one_way PostMatch', () => {
     const need = matchingNeed('need-publish-2', 'user-need', 'published')
     const offer = matchingOffer('offer-publish-2', 'user-offer', 'draft')

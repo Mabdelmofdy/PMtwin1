@@ -20,7 +20,11 @@ export function mergeSeedWithOverrides<T extends { id: string }>({
   const merged = seed
     .filter((item) => !deleted.has(item.id))
     .map((item) => normalize({ ...item, ...patches[item.id] } as T))
-  const created = newItems.map((item) => normalize(item))
+  // Patches apply to runtime-created rows; tombstones remain seed-only (delete of a
+  // new item uses removal from newItems, not deletedIds).
+  const created = newItems.map((item) =>
+    normalize({ ...item, ...patches[item.id] } as T),
+  )
   return [...merged, ...created]
 }
 

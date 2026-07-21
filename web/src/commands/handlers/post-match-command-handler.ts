@@ -255,6 +255,11 @@ function pickDiscoverRecord(command: DiscoverPostMatchCommand): PostMatch {
     opportunityId: participant.opportunityId,
     participantStatus: participant.participantStatus ?? 'pending',
     respondedAt: participant.respondedAt ?? null,
+    partyId: participant.partyId,
+    workspaceId: participant.workspaceId,
+    representativeUserIds: participant.representativeUserIds
+      ? [...participant.representativeUserIds]
+      : undefined,
   }))
 
   const base = {

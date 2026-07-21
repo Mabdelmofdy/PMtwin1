@@ -34,6 +34,16 @@ describe('mergeSeedWithOverrides', () => {
 
     assert.deepEqual(merged, [{ id: 'a', value: 99 }])
   })
+
+  it('applies patches to runtime-created new items', () => {
+    const merged = mergeSeedWithOverrides({
+      seed: [],
+      newItems: [{ id: 'n1', value: 1, read: false }],
+      patches: { n1: { read: true } },
+    })
+
+    assert.deepEqual(merged, [{ id: 'n1', value: 1, read: true }])
+  })
 })
 
 describe('mergeAuditEntries', () => {

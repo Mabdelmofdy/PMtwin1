@@ -23,6 +23,7 @@ import { OpportunityRepository } from '@/repositories/opportunity-repository.ts'
 import { PostMatchRepository } from '@/repositories/post-match-repository.ts'
 import { UserRepository } from '@/repositories/user-repository.ts'
 import { PartyRepository } from '@/repositories/party-repository.ts'
+import { NotificationRepository } from '@/repositories/notification-repository.ts'
 
 export const TEST_ADMIN_ACTOR: CommandPermissionActor = {
   userId: 'test-admin',
@@ -65,6 +66,7 @@ export type CommandGatewayTestStack = {
   contractRepository: ContractRepository
   opportunityRepository: OpportunityRepository
   auditRepository: AuditRepository
+  notificationRepository: NotificationRepository
   gateway: DefaultCommandGateway
   idempotencyStore: InMemoryIdempotencyStore
 }
@@ -78,6 +80,7 @@ export type CommandGatewayTestStackOptions = {
   opportunities?: Opportunity[]
   users?: PlatformUser[]
   auditLog?: AuditEntry[]
+  notifications?: import('@/types/domain.ts').AppNotification[]
   commandPermissionActor?: import('@/domain/rbac/context/command-permission-context.ts').CommandPermissionActor | null
 }
 
@@ -132,6 +135,10 @@ export function createCommandGatewayTestStack(
     storage,
     () => options.auditLog ?? [],
   )
+  const notificationRepository = new NotificationRepository(
+    storage,
+    () => options.notifications ?? [],
+  )
   const idempotencyStore = new InMemoryIdempotencyStore()
   const opportunityHandler = new OpportunityCommandHandler({
     opportunityRepository,
@@ -149,6 +156,7 @@ export function createCommandGatewayTestStack(
     postMatchHandler: new PostMatchCommandHandler({
       postMatchRepository,
       auditRepository,
+      notificationRepository,
     }),
     negotiationHandler: new NegotiationCommandHandler({
       negotiationRepository,
@@ -156,6 +164,7 @@ export function createCommandGatewayTestStack(
       opportunityRepository,
       applicationRepository,
       auditRepository,
+      notificationRepository,
     }),
     negotiationRoomHandler: new NegotiationRoomCommandHandler({
       negotiationRepository,
@@ -173,6 +182,7 @@ export function createCommandGatewayTestStack(
       opportunityRepository,
       applicationRepository,
       auditRepository,
+      notificationRepository,
     }),
     contractHandler: new ContractCommandHandler({
       contractRepository,
@@ -180,6 +190,7 @@ export function createCommandGatewayTestStack(
       opportunityRepository,
       postMatchRepository,
       auditRepository,
+      notificationRepository,
     }),
     idempotencyStore,
     resolveCommandPermissionActor: () =>
@@ -221,6 +232,7 @@ export function createCommandGatewayTestStack(
     contractRepository,
     opportunityRepository,
     auditRepository,
+    notificationRepository,
     gateway,
     idempotencyStore,
   }

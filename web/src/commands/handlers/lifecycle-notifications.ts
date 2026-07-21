@@ -12,7 +12,10 @@ export type NotificationSink = {
   create(data: Omit<AppNotification, 'id' | 'createdAt'>): unknown
 }
 
-export type NotifiableParticipant = { readonly userId?: string }
+export type NotifiableParticipant = {
+  readonly userId?: string
+  readonly representativeUserIds?: readonly string[]
+}
 
 export type EmitParticipantNotificationsInput = {
   readonly participants: readonly NotifiableParticipant[]
@@ -25,6 +28,26 @@ export type EmitParticipantNotificationsInput = {
   readonly entityId: string
 }
 
+/** Collect distinct human recipient ids from a participant row. */
+export function resolveNotificationRecipientIds(
+  participant: NotifiableParticipant,
+): string[] {
+  const recipients: string[] = []
+  const seen = new Set<string>()
+  const push = (id: string | undefined): void => {
+    const trimmed = id?.trim()
+    if (!trimmed || seen.has(trimmed)) return
+    seen.add(trimmed)
+    recipients.push(trimmed)
+  }
+
+  push(participant.userId)
+  for (const representativeId of participant.representativeUserIds ?? []) {
+    push(representativeId)
+  }
+  return recipients
+}
+
 export function emitParticipantNotifications(
   sink: NotificationSink | null | undefined,
   input: EmitParticipantNotificationsInput,
@@ -33,21 +56,23 @@ export function emitParticipantNotifications(
   try {
     const seen = new Set<string>()
     for (const participant of input.participants) {
-      const userId = participant.userId
-      if (!userId || userId === input.excludeUserId || seen.has(userId)) {
-        continue
+      for (const userId of resolveNotificationRecipientIds(participant)) {
+        if (userId === input.excludeUserId || seen.has(userId)) {
+          continue
+        }
+        seen.add(userId)
+        sink.create({
+          userId,
+          recipientUserId: userId,
+          type: input.type,
+          title: input.title,
+          message: input.message,
+          link: input.link,
+          read: false,
+          entityType: input.entityType,
+          entityId: input.entityId,
+        })
       }
-      seen.add(userId)
-      sink.create({
-        userId,
-        type: input.type,
-        title: input.title,
-        message: input.message,
-        link: input.link,
-        read: false,
-        entityType: input.entityType,
-        entityId: input.entityId,
-      })
     }
   } catch {
     // best-effort: notifications must never fail a command

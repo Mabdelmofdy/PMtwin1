@@ -109,15 +109,18 @@ export function buildDiscoverParticipant(
   const owner = resolveOpportunityOwner(opportunity, ctx)
   if (!owner) return null
 
-  const userId =
+  // Prefer a human actor id. Never notify a company id as if it were a user.
+  const candidateUserId =
     owner.representativeUserId ??
     opportunity.createdByUserId ??
-    opportunity.creatorId
-  if (!userId) return null
+    (opportunity.creatorId && ctx.userIds.has(opportunity.creatorId)
+      ? opportunity.creatorId
+      : undefined)
+  if (!candidateUserId || ctx.companyIds.has(candidateUserId)) return null
 
   const mapped = toBusinessParticipant(
     {
-      userId,
+      userId: candidateUserId,
       role,
       opportunityId: opportunity.id,
       partyId: owner.ownerPartyId,
@@ -127,14 +130,14 @@ export function buildDiscoverParticipant(
   )
 
   return {
-    userId,
+    userId: candidateUserId,
     role,
     opportunityId: opportunity.id,
     participantStatus,
     respondedAt: null,
     partyId: mapped.partyId,
     workspaceId: mapped.workspaceId,
-    representativeUserIds: mapped.representativeUserIds,
+    representativeUserIds: mapped.representativeUserIds ?? [candidateUserId],
   } as PostMatchParticipant
 }
 
