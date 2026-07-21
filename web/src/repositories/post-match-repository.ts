@@ -69,7 +69,15 @@ export class PostMatchRepository extends BaseRepository<PostMatch> {
 
     return this.getAll().filter((m) =>
 
-      m.participants.some((p) => p.userId === userId),
+      m.participants.some(
+
+        (p) =>
+
+          p.userId === userId ||
+
+          p.representativeUserIds?.includes(userId),
+
+      ),
 
     )
 

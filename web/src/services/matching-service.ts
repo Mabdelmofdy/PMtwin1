@@ -104,6 +104,9 @@ export type PublishMatchingDeps = {
   readonly runMatching?: typeof runMatchingForPost
   readonly getMatchingEngineContext?: typeof getMatchingEngineContext
   readonly engineOptions?: MatchEngineOptions
+  readonly actorId?: string
+  readonly actorRole?: string | null
+  readonly recordMatchingRunAudit?: (input: RecordMatchingRunAuditInput) => void
 }
 
 export type CircularMatchingResult = {
@@ -267,6 +270,7 @@ function runPublishMatchingForOpportunity(
     matchingErrors: [],
     postMatchIds: [],
   }
+  const startedAt = new Date().toISOString()
 
   const getOpportunityById =
     deps?.getOpportunityById ?? ((id) => opportunityRepository.getById(id))
@@ -348,6 +352,28 @@ function runPublishMatchingForOpportunity(
       discoveredMatchesCount += 1
       postMatchIds.push(command.aggregateId)
     }
+  }
+
+  try {
+    const record =
+      deps?.recordMatchingRunAudit
+      ?? ((auditInput: RecordMatchingRunAuditInput) => {
+        recordMatchingRunAudit(auditRepository, auditInput)
+      })
+    record({
+      runId,
+      runType: 'publish',
+      actorId: deps?.actorId,
+      actorRole: deps?.actorRole,
+      startedAt,
+      completedAt: new Date().toISOString(),
+      discoveredMatchesCount,
+      skippedDuplicatesCount,
+      matchingErrors,
+      status: resolveMatchingRunStatus(matchingErrors),
+    })
+  } catch {
+    // best-effort: publish matching must not fail when audit write fails
   }
 
   return {

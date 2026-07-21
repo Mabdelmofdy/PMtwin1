@@ -42,6 +42,10 @@ import {
 } from '@/domain/identity/command-actor-stamping.ts'
 import { getCommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
 import { resolveOpportunityOwner } from '@/domain/identity/matching-discovery-context.ts'
+import {
+  createLifecycleOrchestrator,
+  type LifecycleOrchestrator,
+} from '@/services/lifecycle-orchestrator.ts'
 
 const POST_MATCH_ENTITY = 'match' as const
 const NEGOTIATION_ENTITY = 'negotiation' as const
@@ -58,6 +62,7 @@ export type NegotiationCommandHandlerDeps = {
   readonly applicationRepository?: ApplicationRepository | null
   readonly auditRepository?: AuditRepository | null
   readonly notificationRepository?: NotificationSink | null
+  readonly lifecycleOrchestrator?: LifecycleOrchestrator | null
 }
 
 function failure(
@@ -198,6 +203,7 @@ export class NegotiationCommandHandler {
   private readonly applicationRepository: ApplicationRepository | null
   private readonly auditRepository: AuditRepository | null
   private readonly notificationRepository: NotificationSink | null
+  private readonly lifecycleOrchestrator: LifecycleOrchestrator | null
 
   constructor(deps: NegotiationCommandHandlerDeps) {
     this.negotiationRepository = deps.negotiationRepository
@@ -206,6 +212,14 @@ export class NegotiationCommandHandler {
     this.applicationRepository = deps.applicationRepository ?? null
     this.auditRepository = deps.auditRepository ?? null
     this.notificationRepository = deps.notificationRepository ?? null
+    this.lifecycleOrchestrator =
+      deps.lifecycleOrchestrator ??
+      (deps.opportunityRepository
+        ? createLifecycleOrchestrator({
+            opportunityRepository: deps.opportunityRepository,
+            postMatchRepository: deps.postMatchRepository,
+          })
+        : null)
   }
 
   handle(command: Command): CommandResult {
@@ -323,6 +337,10 @@ export class NegotiationCommandHandler {
     this.postMatchRepository.update(postMatchId, {
       negotiationId: negotiation.id,
     })
+
+    this.lifecycleOrchestrator?.syncOpportunitiesFromNegotiationStarted(
+      negotiation,
+    )
 
     emitParticipantNotifications(this.notificationRepository, {
       participants,

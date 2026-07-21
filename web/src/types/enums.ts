@@ -87,6 +87,8 @@ export type NotificationType =
   | 'contract_fully_signed'
   | 'negotiation_started'
   | 'match_confirmed'
+  | 'match_accepted'
+  | 'match_declined'
   | 'review_received'
   | 'commercial_agreement_awarded'
   | 'commercial_agreement_accepted'

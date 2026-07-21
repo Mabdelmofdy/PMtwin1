@@ -43,6 +43,10 @@ import {
   stampParticipants,
 } from '@/domain/identity/command-actor-stamping.ts'
 import { getCommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
+import {
+  createLifecycleOrchestrator,
+  type LifecycleOrchestrator,
+} from '@/services/lifecycle-orchestrator.ts'
 
 const POST_MATCH_ENTITY = 'match' as const
 const NEGOTIATION_ENTITY = 'negotiation' as const
@@ -57,6 +61,7 @@ export type DealCommandHandlerDeps = {
   readonly applicationRepository?: ApplicationRepository | null
   readonly auditRepository?: AuditRepository | null
   readonly notificationRepository?: NotificationSink | null
+  readonly lifecycleOrchestrator?: LifecycleOrchestrator | null
 }
 
 function failure(
@@ -157,6 +162,7 @@ export class DealCommandHandler {
   private readonly applicationRepository: ApplicationRepository | null
   private readonly auditRepository: AuditRepository | null
   private readonly notificationRepository: NotificationSink | null
+  private readonly lifecycleOrchestrator: LifecycleOrchestrator | null
 
   constructor(deps: DealCommandHandlerDeps) {
     this.dealRepository = deps.dealRepository
@@ -167,6 +173,13 @@ export class DealCommandHandler {
     this.applicationRepository = deps.applicationRepository ?? null
     this.auditRepository = deps.auditRepository ?? null
     this.notificationRepository = deps.notificationRepository ?? null
+    this.lifecycleOrchestrator =
+      deps.lifecycleOrchestrator ??
+      createLifecycleOrchestrator({
+        dealRepository: deps.dealRepository,
+        opportunityRepository: deps.opportunityRepository ?? undefined,
+        postMatchRepository: deps.postMatchRepository,
+      })
   }
 
   handle(command: Command): CommandResult {
@@ -382,6 +395,8 @@ export class DealCommandHandler {
       dealId: deal.id,
     })
 
+    this.lifecycleOrchestrator?.syncOpportunitiesFromDealCreated(deal)
+
     emitParticipantNotifications(this.notificationRepository, {
       participants,
       type: 'deal_created_from_application',
@@ -582,6 +597,8 @@ export class DealCommandHandler {
       commercialAgreementId: deal.id,
       dealId: deal.id,
     })
+
+    this.lifecycleOrchestrator?.syncOpportunitiesFromDealCreated(deal)
 
     emitParticipantNotifications(this.notificationRepository, {
       participants,

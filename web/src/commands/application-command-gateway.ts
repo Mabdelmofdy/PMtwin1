@@ -50,6 +50,7 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
     postMatchRepository,
     auditRepository,
     notificationRepository,
+    opportunityRepository,
   })
   const negotiationHandler = new NegotiationCommandHandler({
     negotiationRepository,

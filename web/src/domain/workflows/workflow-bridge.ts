@@ -51,6 +51,10 @@ export function toWorkflowEntitySnapshot(
       role: participant.role,
       opportunityId: participant.opportunityId,
       participantStatus: participant.participantStatus,
+      partyId: participant.partyId,
+      representativeUserIds: participant.representativeUserIds
+        ? [...participant.representativeUserIds]
+        : undefined,
     })),
     commercialTerms: entity.commercialTerms as Record<string, unknown> | undefined,
   }

@@ -34,6 +34,7 @@ export {
   canonicalEntityStatus,
   canEntityTransition,
   isEntityTerminal,
+  findParticipant,
 } from './lifecycle-helpers.ts'
 
 export {

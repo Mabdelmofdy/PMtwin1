@@ -34,10 +34,33 @@ export function isParticipantPending(
   return status !== 'accepted' && status !== 'declined'
 }
 
+export type FindParticipantOptions = {
+  readonly activePartyId?: string | null
+}
+
 export function findParticipant(
-  participants: readonly { userId: string; participantStatus?: string }[] | undefined,
+  participants:
+    | readonly {
+        userId: string
+        participantStatus?: string
+        partyId?: string
+        representativeUserIds?: readonly string[]
+      }[]
+    | undefined,
   userId: string | null | undefined,
+  options?: FindParticipantOptions,
 ) {
   if (!userId || !participants) return undefined
-  return participants.find((participant) => participant.userId === userId)
+  return participants.find((participant) => {
+    if (participant.userId === userId) return true
+    if (participant.representativeUserIds?.includes(userId)) return true
+    if (
+      options?.activePartyId &&
+      participant.partyId &&
+      participant.partyId === options.activePartyId
+    ) {
+      return true
+    }
+    return false
+  })
 }

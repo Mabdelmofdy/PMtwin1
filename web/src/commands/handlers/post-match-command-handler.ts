@@ -28,12 +28,17 @@ import {
   validateDiscoverPostMatchCommand,
 } from '@/domain/normalized/post-match-discover-validation.ts'
 import type { AuditRepository } from '@/repositories/audit-repository.ts'
+import type { OpportunityRepository } from '@/repositories/opportunity-repository.ts'
 import type { PostMatchRepository } from '@/repositories/post-match-repository.ts'
 import {
   emitParticipantNotifications,
   type NotificationSink,
 } from '@/commands/handlers/lifecycle-notifications.ts'
 import { getCommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
+import {
+  createLifecycleOrchestrator,
+  type LifecycleOrchestrator,
+} from '@/services/lifecycle-orchestrator.ts'
 
 /** Canonical lifecycle entity key — never use `post_match`. */
 export const POST_MATCH_ENTITY_TYPE = 'match' as const
@@ -42,6 +47,8 @@ export type PostMatchCommandHandlerDeps = {
   readonly postMatchRepository: PostMatchRepository
   readonly auditRepository?: AuditRepository | null
   readonly notificationRepository?: NotificationSink | null
+  readonly lifecycleOrchestrator?: LifecycleOrchestrator | null
+  readonly opportunityRepository?: OpportunityRepository | null
 }
 
 function failure(
@@ -328,11 +335,27 @@ export class PostMatchCommandHandler {
   private readonly postMatchRepository: PostMatchRepository
   private readonly auditRepository: AuditRepository | null
   private readonly notificationRepository: NotificationSink | null
+  private readonly lifecycleOrchestrator: LifecycleOrchestrator | null
 
   constructor(deps: PostMatchCommandHandlerDeps) {
     this.postMatchRepository = deps.postMatchRepository
     this.auditRepository = deps.auditRepository ?? null
     this.notificationRepository = deps.notificationRepository ?? null
+    this.lifecycleOrchestrator =
+      deps.lifecycleOrchestrator ??
+      (deps.opportunityRepository
+        ? createLifecycleOrchestrator({
+            opportunityRepository: deps.opportunityRepository,
+            postMatchRepository: deps.postMatchRepository,
+          })
+        : null)
+  }
+
+  private syncOpportunitiesOnConfirm(postMatchId: string): void {
+    if (!this.lifecycleOrchestrator) return
+    const postMatch = this.postMatchRepository.getById(postMatchId)
+    if (!postMatch) return
+    this.lifecycleOrchestrator.syncOpportunitiesFromConfirmedPostMatch(postMatch)
   }
 
   handle(command: Command): CommandResult {
@@ -492,6 +515,7 @@ export class PostMatchCommandHandler {
     this.postMatchRepository.update(command.aggregateId, patch)
 
     if (patch.status === 'confirmed') {
+      this.syncOpportunitiesOnConfirm(command.aggregateId)
       emitParticipantNotifications(this.notificationRepository, {
         participants,
         type: 'match_confirmed',
@@ -705,6 +729,10 @@ export class PostMatchCommandHandler {
       ...extraPatch,
       status: canonicalTarget,
     })
+
+    if (canonicalTarget === 'confirmed') {
+      this.syncOpportunitiesOnConfirm(command.aggregateId)
+    }
 
     this.appendAudit({
       action: 'post_match.status_changed',

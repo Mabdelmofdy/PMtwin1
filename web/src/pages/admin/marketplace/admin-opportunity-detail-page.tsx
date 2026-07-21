@@ -16,6 +16,7 @@ import { useAuth } from '@/providers/auth-provider.tsx'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { formatOpportunityPresentation } from '@/lib/enterprise-display.ts'
 import { formatDate } from '@/lib/format'
+import { runRerunMatchingUiAction } from '@/lib/run-rerun-matching-ui-action.ts'
 import {
   PmFormReadonly,
   PmFormReadonlyField,
@@ -48,9 +49,39 @@ export function AdminOpportunityDetailPage() {
       case 'opportunity.unpublish':
         toast.message('Use Moderation / Matching surfaces for publish controls')
         break
-      case 'opportunity.rerun_matching':
-        window.location.assign('/admin/matching')
+      case 'opportunity.rerun_matching': {
+        if (!id) break
+        const result = runRerunMatchingUiAction(id, {
+          userId: actor?.id,
+          userRole: actor?.role,
+        })
+        if (!result.success) {
+          toast.error(result.message)
+          break
+        }
+        const discovered =
+          result.discoveredMatchesCount + result.circularDiscoveredMatchesCount
+        const skipped =
+          result.skippedDuplicatesCount + result.circularSkippedDuplicatesCount
+        const errors = [
+          ...result.matchingErrors,
+          ...result.circularMatchingErrors,
+        ]
+        if (discovered > 0) {
+          toast.success(
+            `Matching re-run: ${discovered} new match${discovered === 1 ? '' : 'es'} discovered` +
+              (skipped > 0 ? ` (${skipped} skipped)` : ''),
+          )
+        } else if (skipped > 0) {
+          toast.message(`Matching re-run: no new matches (${skipped} duplicates skipped)`)
+        } else {
+          toast.message('Matching re-run: no matches discovered')
+        }
+        if (errors.length > 0) {
+          toast.warning(`${errors.length} matching error(s) during re-run`)
+        }
         break
+      }
       case 'opportunity.open_timeline':
       case 'opportunity.open_audit':
         window.location.assign('/admin/audit')

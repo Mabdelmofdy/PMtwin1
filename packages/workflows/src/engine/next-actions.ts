@@ -112,7 +112,9 @@ function evaluateAcceptMatch(context: WorkflowContext): WorkflowAction {
   const match = context.postMatch
   const userId = context.user.userId
   const status = canonicalEntityStatus(MATCH_ENTITY, match?.status)
-  const participant = findParticipant(match?.participants, userId)
+  const participant = findParticipant(match?.participants, userId, {
+    activePartyId: context.user.activePartyId,
+  })
   const visible =
     Boolean(match?.id)
     && !isEntityTerminal(MATCH_ENTITY, match?.status)
@@ -134,7 +136,9 @@ function evaluateAcceptMatch(context: WorkflowContext): WorkflowAction {
 function evaluateDeclineMatch(context: WorkflowContext): WorkflowAction {
   const match = context.postMatch
   const userId = context.user.userId
-  const participant = findParticipant(match?.participants, userId)
+  const participant = findParticipant(match?.participants, userId, {
+    activePartyId: context.user.activePartyId,
+  })
   const response = participant?.participantStatus?.toLowerCase()
   const visible =
     Boolean(match?.id)

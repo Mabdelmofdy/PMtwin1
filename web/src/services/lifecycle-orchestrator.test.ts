@@ -321,13 +321,19 @@ describe('LifecycleOrchestrator deal → opportunity sync', () => {
     stack.dealRepository.update('deal-draft-1', {
       needOpportunityId: 'missing-need',
       offerOpportunityId: 'missing-offer',
+      opportunityIds: [],
+      postMatchId: undefined,
+      matchId: undefined,
     })
 
     const result = orchestrator().syncOpportunitiesFromDeal(
       stack.dealRepository.getById('deal-draft-1')!,
     )
-    assert.ok(result.items.every((item) => item.errors.length > 0))
-    assert.match(result.items[0]?.errors.join(' ') ?? '', /not found/i)
+    const needOffer = result.items.filter(
+      (item) => item.role === 'need' || item.role === 'offer',
+    )
+    assert.ok(needOffer.every((item) => item.errors.length > 0))
+    assert.match(needOffer[0]?.errors.join(' ') ?? '', /not found/i)
   })
 
   it('does not downgrade terminal opportunities', () => {
@@ -426,5 +432,138 @@ describe('LifecycleOrchestrator contract → deal → opportunity chain', () => 
     const oppResult = orch.syncOpportunitiesFromDeal(deal)
     assert.equal(oppResult.targetStatus, 'cancelled')
     assert.ok(oppResult.items.every((item) => item.synced))
+  })
+})
+
+describe('LifecycleOrchestrator policy B early opportunity sync', () => {
+  let stack: CommandGatewayTestStack
+
+  beforeEach(() => {
+    stack = createCommandGatewayTestStack({
+      deals: [draftDealFixture('draft')],
+      opportunities: [
+        {
+          id: 'need-1',
+          title: 'Need',
+          status: 'published',
+          intent: 'need',
+          visibilityStatus: 'published',
+        },
+        {
+          id: 'offer-1',
+          title: 'Offer',
+          status: 'published',
+          intent: 'offer',
+          visibilityStatus: 'published',
+        },
+        {
+          id: 'role-2',
+          title: 'Consortium role',
+          status: 'published',
+          intent: 'offer',
+          visibilityStatus: 'published',
+        },
+      ],
+      postMatches: [postMatchFixture()],
+    })
+  })
+
+  function orchestrator() {
+    return createLifecycleOrchestrator({
+      dealRepository: stack.dealRepository,
+      opportunityRepository: stack.opportunityRepository,
+      postMatchRepository: stack.postMatchRepository,
+    })
+  }
+
+  it('confirmed postMatch advances published opportunities to matched', () => {
+    const result = orchestrator().syncOpportunitiesFromConfirmedPostMatch(
+      stack.postMatchRepository.getById('pm-1')!,
+    )
+    assert.equal(result.targetStatus, 'matched')
+    assert.ok(result.items.some((item) => item.synced))
+    assert.equal(
+      toCanonical('opportunity', stack.opportunityRepository.getById('need-1')?.status),
+      'matched',
+    )
+    assert.equal(
+      toCanonical('opportunity', stack.opportunityRepository.getById('offer-1')?.status),
+      'matched',
+    )
+  })
+
+  it('does not advance draft opportunities to matched', () => {
+    stack.opportunityRepository.update('need-1', { status: 'draft' })
+    const result = orchestrator().syncOpportunitiesFromConfirmedPostMatch(
+      stack.postMatchRepository.getById('pm-1')!,
+    )
+    const needItem = result.items.find((item) => item.opportunityId === 'need-1')
+    assert.equal(needItem?.synced, false)
+    assert.ok((needItem?.errors.length ?? 0) > 0)
+    assert.equal(stack.opportunityRepository.getById('need-1')?.status, 'draft')
+  })
+
+  it('negotiation started advances matched opportunities to negotiating', () => {
+    stack.opportunityRepository.update('need-1', { status: 'matched' })
+    stack.opportunityRepository.update('offer-1', { status: 'matched' })
+    const negotiation = {
+      id: 'neg-1',
+      postMatchId: 'pm-1',
+      needOpportunityId: 'need-1',
+      offerOpportunityId: 'offer-1',
+      opportunityIds: ['need-1', 'offer-1'],
+      status: 'active',
+      participants: [...participants],
+    }
+    const result = orchestrator().syncOpportunitiesFromNegotiationStarted(
+      negotiation as never,
+    )
+    assert.equal(result.targetStatus, 'negotiating')
+    assert.equal(
+      toCanonical('opportunity', stack.opportunityRepository.getById('need-1')?.status),
+      'negotiating',
+    )
+    assert.equal(
+      toCanonical('opportunity', stack.opportunityRepository.getById('offer-1')?.status),
+      'negotiating',
+    )
+  })
+
+  it('deal created advances linked opportunities to contracted including multi-party ids', () => {
+    stack.opportunityRepository.update('need-1', { status: 'negotiating' })
+    stack.opportunityRepository.update('offer-1', { status: 'negotiating' })
+    stack.opportunityRepository.update('role-2', { status: 'negotiating' })
+    stack.dealRepository.update('deal-draft-1', {
+      opportunityIds: ['need-1', 'offer-1', 'role-2'],
+    })
+    const result = orchestrator().syncOpportunitiesFromDealCreated(
+      stack.dealRepository.getById('deal-draft-1')!,
+    )
+    assert.equal(result.targetStatus, 'contracted')
+    assert.equal(result.items.filter((item) => item.synced).length, 3)
+    assert.equal(
+      toCanonical('opportunity', stack.opportunityRepository.getById('role-2')?.status),
+      'contracted',
+    )
+  })
+
+  it('late-stage deal sync includes multi-party opportunityIds', () => {
+    stack.dealRepository.update('deal-draft-1', {
+      status: 'executing',
+      opportunityIds: ['need-1', 'offer-1', 'role-2'],
+    })
+    stack.opportunityRepository.update('need-1', { status: 'contracted', visibilityStatus: 'closed' })
+    stack.opportunityRepository.update('offer-1', { status: 'contracted', visibilityStatus: 'closed' })
+    stack.opportunityRepository.update('role-2', { status: 'contracted', visibilityStatus: 'closed' })
+
+    const result = orchestrator().syncOpportunitiesFromDeal(
+      stack.dealRepository.getById('deal-draft-1')!,
+    )
+    assert.equal(result.items.length, 3)
+    assert.ok(result.items.every((item) => item.synced))
+    assert.equal(
+      toCanonical('opportunity', stack.opportunityRepository.getById('role-2')?.status),
+      'executing',
+    )
   })
 })

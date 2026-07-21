@@ -1,4 +1,4 @@
-export type MatchingRunType = 'circular'
+export type MatchingRunType = 'circular' | 'publish'
 
 export type MatchingRunStatus =
   | 'completed'
@@ -22,4 +22,5 @@ export type MatchingRunAuditDetails = {
 
 export const MATCHING_RUN_AUDIT_ACTIONS: Readonly<Record<MatchingRunType, string>> = {
   circular: 'matching_run.circular',
+  publish: 'matching_run.publish',
 }

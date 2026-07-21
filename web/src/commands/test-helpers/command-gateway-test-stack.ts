@@ -157,6 +157,7 @@ export function createCommandGatewayTestStack(
       postMatchRepository,
       auditRepository,
       notificationRepository,
+      opportunityRepository,
     }),
     negotiationHandler: new NegotiationCommandHandler({
       negotiationRepository,

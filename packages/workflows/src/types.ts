@@ -81,6 +81,8 @@ export type WorkflowParticipantSnapshot = {
   readonly role?: string
   readonly opportunityId?: string
   readonly participantStatus?: string
+  readonly partyId?: string
+  readonly representativeUserIds?: readonly string[]
 }
 
 export type WorkflowUserContext = {
@@ -91,6 +93,7 @@ export type WorkflowUserContext = {
   readonly isApplicant?: boolean
   readonly isParticipant?: boolean
   readonly canMutate?: boolean
+  readonly activePartyId?: string | null
 }
 
 export type WorkflowCollaborationContext = {

@@ -16,7 +16,7 @@ export const ADMIN_QUICK_ACTION_CATALOGUE: readonly AdminQuickActionDefinition[]
 
   { id: 'opportunity.moderate', label: 'Moderate', entityType: 'opportunity', requiredPermission: 'admin.opportunities.moderate', commandType: 'ModerateOpportunity', sensitive: true, requiresReason: true },
   { id: 'opportunity.unpublish', label: 'Close', entityType: 'opportunity', requiredPermission: 'admin.opportunities.moderate', commandType: 'CloseOpportunity', sensitive: true, requiresReason: true },
-  { id: 'opportunity.rerun_matching', label: 'Publish / Matching', entityType: 'opportunity', requiredPermission: 'admin.matching.execute', commandType: 'RerunMatching', href: '/admin/matching' },
+  { id: 'opportunity.rerun_matching', label: 'Re-run matching', entityType: 'opportunity', requiredPermission: 'admin.matching.execute' },
   { id: 'opportunity.open_post_matches', label: 'Related Objects', entityType: 'opportunity', requiredPermission: 'admin.matching.read', href: '/admin/post-matches' },
   { id: 'opportunity.open_timeline', label: 'Timeline', entityType: 'opportunity', requiredPermission: 'admin.opportunities.read' },
   { id: 'opportunity.open_audit', label: 'Audit', entityType: 'opportunity', requiredPermission: 'admin.audit.read', href: '/admin/audit' },
