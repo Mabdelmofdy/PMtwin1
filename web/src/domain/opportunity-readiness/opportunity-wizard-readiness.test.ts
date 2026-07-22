@@ -171,6 +171,33 @@ describe('opportunity readiness stabilization — single score source', () => {
     assert.deepEqual(result.missingRecommended, [])
   })
 
+  it('Creation 3.0 milestones + cash commercial structure reach 100%', () => {
+    const result = evaluateOpportunityWizardReadiness(
+      withStages({
+        ...requiredCompleteDraft,
+        preferredPartnerType: 'Company',
+        attachmentsText: 'design-brief.pdf',
+        complianceRequirementsText: 'Saudi Building Code',
+        deliveryMilestonesText: '',
+        milestones: [{ title: 'Concept design' }],
+        commercialStructure: {
+          components: [
+            {
+              type: 'cash',
+              enabled: true,
+              notes: 'Budget range 150000 – 400000 SAR',
+              paymentTerms: 'Milestone-Based',
+              paymentSchedule: [{ title: 'Kickoff', percentage: 20 }],
+            },
+          ],
+        },
+      }),
+    )
+
+    assert.equal(result.readinessScore, 100)
+    assert.deepEqual(result.missingRecommended, [])
+  })
+
   it('recommended fields improve score but required fields control publish eligibility', () => {
     const requiredOnly = evaluateOpportunityWizardReadiness(requiredCompleteDraft)
     assert.equal(requiredOnly.missingRequired.length, 0)

@@ -200,9 +200,17 @@ export function syncDraftExchangeFromCommercialStructure(
 
 export function toWizardDraft(draft: OpportunityDraft): OpportunityWizardDraft {
   const names = skillNames(draft.structuredSkills)
+  const milestoneTitles = draft.milestones
+    .map((milestone) => milestone.title.trim())
+    .filter(Boolean)
   return {
     ...draft,
     skills: names.length > 0 ? names.join(', ') : draft.skills,
+    deliveryMilestonesText:
+      draft.deliveryMilestonesText.trim()
+      || milestoneTitles.join(', '),
+    milestones: draft.milestones,
+    commercialStructure: draft.commercialStructure,
   }
 }
 

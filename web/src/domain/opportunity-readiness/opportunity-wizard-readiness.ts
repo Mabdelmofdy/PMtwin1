@@ -61,6 +61,26 @@ export type OpportunityWizardDraft = {
   readonly attachmentsText?: string
   readonly complianceRequirementsText?: string
   readonly deliveryMilestonesText?: string
+  /**
+   * Creation 3.0 structured milestones — counted for Delivery Milestones readiness
+   * when deliveryMilestonesText is empty.
+   */
+  readonly milestones?: ReadonlyArray<{ readonly title?: string }>
+  /**
+   * Creation 3.0 commercial structure — counted for Budget / Value Terms readiness.
+   */
+  readonly commercialStructure?: {
+    readonly components?: ReadonlyArray<{
+      readonly type?: string
+      readonly enabled?: boolean
+      readonly fixedAmount?: number
+      readonly minimumAmount?: number
+      readonly maximumAmount?: number
+      readonly notes?: string
+      readonly paymentTerms?: string
+      readonly paymentSchedule?: readonly unknown[]
+    }>
+  }
 }
 
 export type OpportunityWizardReadinessStage = {
@@ -145,6 +165,60 @@ function toAttachmentRecords(text: string | undefined): { name: string }[] {
 
 function toMilestoneRecords(text: string | undefined): { title: string }[] {
   return splitCsv(text).map((title) => ({ title }))
+}
+
+function resolveWizardMilestoneRecords(
+  draft: OpportunityWizardDraft,
+): { title: string }[] {
+  const fromText = toMilestoneRecords(draft.deliveryMilestonesText)
+  if (fromText.length > 0) return fromText
+  const structured = draft.milestones ?? []
+  return structured
+    .map((item) => (typeof item?.title === 'string' ? item.title.trim() : ''))
+    .filter(Boolean)
+    .map((title) => ({ title }))
+}
+
+/** Map Creation 3.0 cash commercial structure into exchangeData for readiness. */
+function applyCommercialStructureToExchangeData(
+  exchangeData: Record<string, unknown>,
+  draft: OpportunityWizardDraft,
+): Record<string, unknown> | undefined {
+  const components = draft.commercialStructure?.components ?? []
+  const cash = components.find(
+    (component) => component.type === 'cash' && component.enabled !== false,
+  )
+  if (!cash) return undefined
+
+  const amount =
+    cash.fixedAmount
+    ?? cash.maximumAmount
+    ?? cash.minimumAmount
+  if (amount != null && Number.isFinite(amount)) {
+    exchangeData.cashAmount = amount
+  }
+  if (cash.minimumAmount != null || cash.maximumAmount != null) {
+    exchangeData.budgetRange = {
+      ...(cash.minimumAmount != null ? { min: cash.minimumAmount } : {}),
+      ...(cash.maximumAmount != null ? { max: cash.maximumAmount } : {}),
+    }
+  }
+  if (hasText(cash.paymentTerms)) {
+    exchangeData.cashPaymentTerms = cash.paymentTerms
+  }
+  if (Array.isArray(cash.paymentSchedule) && cash.paymentSchedule.length > 0) {
+    exchangeData.paymentSchedule = cash.paymentSchedule
+  }
+
+  // Range/notes-only cash still counts as Budget / Value Terms (recommended).
+  return {
+    paymentTerms: hasText(cash.paymentTerms)
+      ? cash.paymentTerms
+      : 'cash',
+    ...(amount != null ? { budget: String(amount) } : {}),
+    ...(hasText(cash.notes) ? { notes: cash.notes!.trim() } : {}),
+    ...(cash.budgetType ? { budgetType: cash.budgetType } : {}),
+  }
 }
 
 function isBasicInfoComplete(draft: OpportunityWizardDraft): boolean {
@@ -295,7 +369,7 @@ export function buildOpportunityWizardReadinessInput(
   const attrs = draft.collaborationAttributes ?? {}
   const attachments = toAttachmentRecords(draft.attachmentsText)
   const compliance = splitCsv(draft.complianceRequirementsText)
-  const milestones = toMilestoneRecords(draft.deliveryMilestonesText)
+  const milestones = resolveWizardMilestoneRecords(draft)
 
   const exchangeData: Record<string, unknown> = {
     ...(hasText(draft.exchangeMode) ? { exchangeMode: draft.exchangeMode } : {}),
@@ -316,6 +390,8 @@ export function buildOpportunityWizardReadinessInput(
   if (attrs.equivalenceEstimate) exchangeData.equivalenceEstimate = attrs.equivalenceEstimate
   if (attrs.profitSplit) exchangeData.profitSplit = attrs.profitSplit
   if (attrs.equityPercentage) exchangeData.equityPercentage = attrs.equityPercentage
+  const commercialTermsFromStructure =
+    applyCommercialStructureToExchangeData(exchangeData, draft)
 
   const input: Record<string, unknown> = {
     title: draft.title ?? '',
@@ -342,6 +418,9 @@ export function buildOpportunityWizardReadinessInput(
     },
     collaborationAttributes: { ...attrs },
     exchangeData,
+    ...(commercialTermsFromStructure
+      ? { commercialTerms: commercialTermsFromStructure }
+      : {}),
     normalized:
       intent === 'offer'
         ? { offeredServices: services }

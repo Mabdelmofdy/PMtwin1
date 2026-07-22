@@ -7,6 +7,10 @@ Use these two fill scripts in **UAT** to create complementary opportunities by h
 
 **Runtime:** UAT (`VITE_RUNTIME_MODE=uat` or your UAT URL). Data stays in this browser’s namespaced LocalStorage.
 
+**Detailed field lists:**  
+- [Script A — Need](./uat-need-opportunity-script.md)  
+- [Script B — Offer](./uat-offer-opportunity-script.md)
+
 ---
 
 ## Accounts (two different users)
@@ -22,12 +26,32 @@ Use **Individual** account type if the login screen asks.
 
 ---
 
+## Wizard map (Creation Experience 3.0)
+
+Both scripts use the same **5-step** wizard. Matching structure is **auto-derived** (do not pick One Way / Two Way manually).
+
+| Step | Screen | What you fill |
+|------|--------|----------------|
+| 1 | Opportunity | Intent, title, description, category, role, location, dates |
+| 2 | Collaboration | Main model, sub-model, task-based collaboration details |
+| 3 | Scope & Work | Skills, services, resources, work packages/tasks, deliverables, milestones, timeline, documents |
+| 4 | Commercial Structure | Cash component, payment schedule, constraints |
+| 5 | Review & Publish | Confirm summary + readiness; Save Draft / Publish |
+
+**Dates:** use `2026-08-01` and later only. Past dates (e.g. 2024) turn the stepper red.
+
+**Skills:** Expert needs **≥ 5 years**. Intermediate / Expert with 3 and 5 years is valid.
+
+**Work packages:** each package needs **skills** and a **deadline**. Skills auto-seed from opportunity skills when empty — confirm `BIM, Revit` appear.
+
+---
+
 ## What you should see
 
 ### After Script A (Need) — before publish
 
-- Wizard readiness stages fill as you complete Opportunity → Collaboration → Scope → Commercial → Review
-- Readiness drawer / score moves up (aim for publish-ready ≥ ~80%)
+- Wizard readiness stages fill as you complete Opportunity → Collaboration → Scope & Work → Commercial → Review
+- Readiness drawer / score moves up (aim for publish-ready ≥ ~80%; with recommended fields aim ~100%)
 - Save Draft → Opportunity Details shows filled fields + readiness presentation
 
 ### After both published
@@ -40,7 +64,8 @@ Use **Individual** account type if the login screen asks.
 
 ## Script A — Need (User: Khalid)
 
-**Path:** Login as Khalid → **Create opportunity** / wizard → Intent **Need**
+**Path:** Login as Khalid → **Create opportunity** → Intent **Need**  
+**Full field tables:** [uat-need-opportunity-script.md](./uat-need-opportunity-script.md)
 
 ### Step 1 — Opportunity
 
@@ -48,61 +73,87 @@ Use **Individual** account type if the login screen asks.
 |-------|----------------|
 | Intent | **Need** |
 | Title | `UAT Need — BIM Architect for Riyadh tower` |
-| Description | `Need a BIM-capable Architect for coordination and Revit delivery on a mixed-use tower in Riyadh. Scope includes model federation, clash detection handoff, and design packages.` |
-| Category / sector | `Construction` |
+| Short description | `Need a BIM-capable Architect for coordination and Revit delivery on a mixed-use tower in Riyadh. Scope includes model federation, clash detection handoff, and design packages.` |
+| Category or profession | `Construction` |
 | Target role | `Architect` |
-| Location | `Riyadh` (or Remote / Riyadh if both options exist) |
+| Primary location | `Riyadh` |
+| Service area | `Riyadh metro` |
 | Start date | `2026-08-01` |
+| Deadline | `2026-12-31` |
+| Availability end date | `2026-12-31` |
 
 ### Step 2 — Collaboration
 
 | Field | Enter exactly |
 |-------|----------------|
-| Main collaboration model | Cash subcontracting / `cash_subcontracting` |
-| Model type | Project based |
-| Sub-model | Task based |
-| Exchange mode | Cash |
-| Accepted modes | Cash only |
+| Main collaboration model | Cash subcontracting |
+| Sub-model | Task-Based Engagement |
+| Matching structure | One Way (auto — do not select) |
+| Task Title | `BIM Architect — tower coordination` |
+| Task Type | `Design` |
+| Detailed Scope | `Design coordination for tower core and shell; BIM federation and clash reports` |
+| Duration (days) | `180` |
+| Required Skills | `BIM`, `Revit` |
+| Experience Level | `Senior` |
+| Start Date | `2026-08-01` |
+| Payment Terms | `Milestone-Based` |
 
-### Step 3 — Scope & work
+### Step 3 — Scope & Work
 
 | Field | Enter exactly |
 |-------|----------------|
-| Required skills | `BIM`, `Revit` (add both) |
-| Services required | `BIM Coordination, Revit Modeling` |
-| Detailed scope | `Design coordination for tower core and shell; BIM federation and clash reports` |
+| Skills Required | `BIM` (Intermediate, 3 yrs, cert + mandatory) · `Revit` (Expert, 5 yrs, cert + mandatory) |
+| Services Required | `BIM Coordination, Revit Modeling` |
+| Preferred partner type | `Company` |
+| Experience level | `Senior` |
+| Certifications | `LEED AP BD+C` |
+| Team size | `1–2` |
+| Minimum qualifications | `5+ years BIM coordination on towers; Revit proficiency` |
+| Resource | people · `BIM coordinator` · qty `1` · unit `FTE` · mandatory |
+| Work package title | `BIM federation & clash package` |
+| Package description | `Model federation, clash detection, and coordination reports for core and shell` |
+| Package skills | `BIM, Revit` |
+| Package start / deadline | `2026-08-01` / `2026-09-01` |
+| Tasks | `Prepare BIM model` · `Clash detection report` · `Design coordination package` |
+| Deliverables | Federated BIM model · Clash detection report · Design coordination package |
+| Milestone | `Concept design` · `2026-09-01` · payment trigger On |
 | Estimated duration | `6 months` |
-| Timeline / tender | End or tender around `2026-11-01` if asked |
-
-### Step 4 — Commercial
-
-| Field | Enter exactly |
-|-------|----------------|
-| Budget min | `150000` |
-| Budget max | `400000` |
-| Currency | `SAR` |
-| Payment schedule | `Milestone` |
-
-### Step 5 — Recommended (for 100% readiness demo)
-
-| Field | Enter exactly |
-|-------|----------------|
-| Preferred partner | Company |
-| Attachments note | `design-brief.pdf` |
+| Working days / shift | `Sun–Thu` / `Day` |
+| Must finish before | `2026-12-31` |
+| Flexible start / weekend | No / No |
+| Attachments | `design-brief.pdf` |
 | Compliance | `Saudi Building Code` |
-| Delivery milestone | `Concept design — 2026-09-01` |
+| Portfolio references | `Prior tower BIM coordination references available on request` |
 
-### Actions to show readiness
+### Step 4 — Commercial Structure
 
-1. Open **Readiness** drawer — stages complete, score high  
-2. **Save Draft** → open Details → confirm fields + readiness UI  
-3. **Do not publish yet** until Script B is ready (or publish Need first — match appears when Offer publishes)
+| Field | Enter exactly |
+|-------|----------------|
+| Components | **Cash** only (derived mode `cash`) |
+| Component title | `BIM Architect cash engagement` |
+| Applies to | Entire opportunity |
+| Currency | `SAR` |
+| Budget type | `Range` |
+| Notes | `Budget range 150000 – 400000 SAR` |
+| Advance % / Retention % | `10` / `5` |
+| Payment terms | `Milestone-Based` |
+| VAT handling | `15% VAT exclusive` |
+| Payment schedule | Kickoff 20% / Concept 40% / Final 40% |
+| Constraint | Budget ceiling `400000` |
+
+### Step 5 — Review & Publish
+
+1. Confirm no red validation banner  
+2. Open readiness drawer — high score  
+3. **Save Draft** → Details readiness UI  
+4. Publish when Script B is ready (or publish Need first)
 
 ---
 
 ## Script B — Offer (User: Sara)
 
-**Path:** Logout → Login as Sara → **Create opportunity** / wizard → Intent **Offer**
+**Path:** Logout → Login as Sara → **Create opportunity** → Intent **Offer**  
+**Full field tables:** [uat-offer-opportunity-script.md](./uat-offer-opportunity-script.md)
 
 ### Step 1 — Opportunity
 
@@ -110,54 +161,81 @@ Use **Individual** account type if the login screen asks.
 |-------|----------------|
 | Intent | **Offer** |
 | Title | `UAT Offer — BIM Architect delivery (Revit)` |
-| Description | `Offering BIM Architect services with Revit modeling and coordination for tower and mixed-use projects in Riyadh. Available for cash subcontracting engagements.` |
-| Category / sector | `Construction` |
+| Short description | `Offering BIM Architect services with Revit modeling and coordination for tower and mixed-use projects in Riyadh. Available for cash subcontracting engagements.` |
+| Category or profession | `Construction` |
 | Target role | `Architect` |
-| Location | `Riyadh` |
+| Primary location | `Riyadh` |
+| Service area | `Riyadh metro` |
 | Start date | `2026-08-01` |
+| Deadline | `2026-12-31` |
+| Availability end date | `2026-12-31` |
 
 ### Step 2 — Collaboration
 
 | Field | Enter exactly |
 |-------|----------------|
-| Main collaboration model | Cash subcontracting / `cash_subcontracting` |
-| Model type | Project based |
-| Sub-model | Task based |
-| Exchange mode | Cash |
-| Accepted modes | Cash only |
+| Main collaboration model | Cash subcontracting |
+| Sub-model | Task-Based Engagement |
+| Matching structure | One Way (auto — do not select) |
+| Task Title | `BIM Architect — Revit delivery` |
+| Task Type | `Design` |
+| Detailed Scope | `BIM federation, clash detection support, and Revit package delivery for tower projects` |
+| Duration (days) | `180` |
+| Required Skills | `BIM`, `Revit` |
+| Experience Level | `Senior` |
+| Start Date | `2026-08-01` |
+| Payment Terms | `Milestone-Based` |
 
-### Step 3 — Scope & work
+### Step 3 — Scope & Work
 
 | Field | Enter exactly |
 |-------|----------------|
-| Offered skills | `BIM`, `Revit` |
-| Services offered | `BIM Coordination, Revit Modeling` |
-| Detailed scope | `BIM federation, clash detection support, and Revit package delivery for tower projects` |
+| Skills Offered | `BIM` (Intermediate, 3 yrs, cert + mandatory) · `Revit` (Expert, 5 yrs, cert + mandatory) |
+| Services Offered | `BIM Coordination, Revit Modeling` |
+| Preferred partner type | `Company` |
+| Experience level | `Senior` |
+| Certifications | `LEED AP BD+C` |
+| Team size | `1` |
+| Minimum qualifications | `BIM Architect with Revit delivery on mixed-use / tower projects` |
+| Resource | people · `BIM Architect (Sara)` · qty `1` · unit `FTE` · mandatory |
+| Available / reserved / max capacity | `1` / `0` / `1` |
+| Work package title | `Revit modeling & coordination` |
+| Package description | `BIM federation support, clash detection, and Revit package delivery` |
+| Package skills | `BIM, Revit` |
+| Package start / deadline | `2026-08-01` / `2026-09-15` |
+| Tasks | `Revit model setup` · `Clash detection support` · `Coordination handoff` |
+| Deliverables | Revit model packages · Clash detection support notes · Coordination handoff pack |
+| Milestone | `Delivery kickoff` · `2026-09-15` · payment trigger On |
 | Estimated duration | `6 months` |
-
-### Step 4 — Commercial
-
-| Field | Enter exactly |
-|-------|----------------|
-| Budget / fee min | `120000` |
-| Budget / fee max | `350000` |
-| Currency | `SAR` |
-| Payment schedule | `Milestone` |
-
-### Step 5 — Recommended
-
-| Field | Enter exactly |
-|-------|----------------|
-| Preferred partner | Company |
-| Attachments note | `portfolio.pdf` |
+| Working days / shift | `Sun–Thu` / `Day` |
+| Must finish before | `2026-12-31` |
+| Flexible start / weekend | Yes / No |
+| Attachments | `portfolio.pdf` |
 | Compliance | `Saudi Building Code` |
-| Delivery milestone | `Delivery kickoff — 2026-09-15` |
+| Portfolio references | `Tower BIM coordination samples` |
 
-### Actions to show readiness
+### Step 4 — Commercial Structure
 
-1. Readiness drawer → high score  
-2. Save Draft → Details readiness redesign  
-3. **Publish** the Offer (and publish Need if still draft)
+| Field | Enter exactly |
+|-------|----------------|
+| Components | **Cash** only (derived mode `cash`) |
+| Component title | `BIM Architect delivery fee` |
+| Applies to | Entire opportunity |
+| Currency | `SAR` |
+| Budget type | `Range` |
+| Notes | `Fee range 120000 – 350000 SAR` |
+| Advance % / Retention % | `10` / `5` |
+| Payment terms | `Milestone-Based` |
+| VAT handling | `15% VAT exclusive` |
+| Payment schedule | Kickoff 25% / Mid 35% / Final 40% |
+| Constraint | Fee ceiling `350000` |
+
+### Step 5 — Review & Publish
+
+1. Confirm no red validation banner  
+2. Readiness drawer → high score  
+3. Save Draft → Details readiness  
+4. **Publish** Offer (and Need if still draft)
 
 ---
 
@@ -205,6 +283,7 @@ Offering BIM Architect services with Revit modeling and coordination for tower a
 | Symptom | Fix |
 |---------|-----|
 | Cannot publish | Complete required readiness fields; ensure account is not pending vetting |
+| Red tag on step 3 with fields filled | Confirm package **skills** + **deadline**; Expert years ≥ 5; dates not in the past |
 | No match after publish | Confirm both are **published**, different users, same role `Architect`, skills `BIM`+`Revit`, cash task-based |
 | Same user both sides | Switch to the second account — same-owner matches are blocked |
 | Old data noise | Admin → Environments → reset UAT, or use a clean browser profile |
@@ -213,6 +292,8 @@ Offering BIM Architect services with Revit modeling and coordination for tower a
 
 ## Related
 
+- [uat-need-opportunity-script.md](./uat-need-opportunity-script.md) — full Need field tables  
+- [uat-offer-opportunity-script.md](./uat-offer-opportunity-script.md) — full Offer field tables  
 - [matching-workflow.md](../workflow/matching-workflow.md) — when matching runs  
 - [opportunity-workflow.md](../workflow/opportunity-workflow.md) — status policy B  
 - Demo credentials: `POC/docs/DEMO_CREDENTIALS.md`
