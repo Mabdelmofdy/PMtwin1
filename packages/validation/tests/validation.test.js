@@ -286,6 +286,24 @@ describe('skills', () => {
     )
   })
 
+  it('accepts expert with 5 years (Creation 3.0 UI levels)', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        structuredSkills: [
+          { name: 'Revit', role: 'required', level: 'expert', years: 5 },
+          { name: 'BIM', role: 'required', level: 'intermediate', years: 3 },
+        ],
+      },
+      { operationScope: 'draft' },
+      { groups: ['skills'] },
+    )
+    assert.equal(
+      result.issues.some((i) => i.code === VAL_CODES.SKILL_LEVEL_YEARS_IMPOSSIBLE),
+      false,
+    )
+  })
+
   it('requires provided skill for offer on publish', () => {
     const result = validateOpportunityBusiness(
       {
@@ -352,6 +370,28 @@ describe('work packages', () => {
     assert.ok(result.issues.some((i) => i.code === VAL_CODES.PACKAGE_TITLE_REQUIRED))
     assert.ok(
       result.issues.some((i) => i.code === VAL_CODES.PACKAGE_DESCRIPTION_REQUIRED),
+    )
+  })
+
+  it('accepts requiredSkills as package skills (Creation 3.0)', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        workPackages: [
+          {
+            title: 'BIM federation',
+            description: 'Model federation',
+            requiredSkills: [{ name: 'BIM', role: 'required' }],
+            deadline: '2026-09-01',
+          },
+        ],
+      },
+      { operationScope: 'draft' },
+      { groups: ['workPackages'] },
+    )
+    assert.equal(
+      result.issues.some((i) => i.code === VAL_CODES.PACKAGE_SKILL_REQUIRED),
+      false,
     )
   })
 

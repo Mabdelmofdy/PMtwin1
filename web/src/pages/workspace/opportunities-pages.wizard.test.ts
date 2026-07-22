@@ -48,6 +48,8 @@ describe('Opportunity wizard — Creation Experience 3.0', () => {
     assert.match(createIndex, /ReviewPublishStep/)
     assert.match(wizardSource, /Publish Opportunity|handlePublish|onPublish/)
     assert.match(wizardSource, /WorkPackagesBuilder|ScopeWorkStep/)
+    assert.match(wizardSource, /validationIssues=\{liveValidation\.issues\}/)
+    assert.match(wizardSource, /errorStepIds\.includes\(stepId\)/)
     assert.doesNotMatch(wizardSource, /UserJourneyStrip/)
     assert.doesNotMatch(wizardSource, /SmartRightPanel/)
   })

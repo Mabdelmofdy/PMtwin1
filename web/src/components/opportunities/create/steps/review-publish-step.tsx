@@ -1,6 +1,12 @@
 import type { ReactNode } from 'react'
+import { AlertCircle } from 'lucide-react'
+import type { ValidationIssue } from '@pm-twin/validation'
 import type { OpportunityDraft } from '@/components/opportunity/wizard/draft-model.ts'
-import type { WizardStepId } from '@/components/opportunity/wizard/wizard-steps.ts'
+import {
+  WIZARD_STEPS,
+  type WizardStepId,
+} from '@/components/opportunity/wizard/wizard-steps.ts'
+import { resolveStepForValidationIssue } from '@/domain/opportunity-validation/validation-step-map.ts'
 import { buildCommercialStructureSummary } from '@/domain/opportunity-commercial-structure'
 import {
   resolveMainCollaborationModelLabel,
@@ -13,6 +19,12 @@ import { pmTypography } from '@/tokens'
 export type ReviewPublishStepProps = {
   draft: OpportunityDraft
   onEdit: (stepId: WizardStepId, sectionId?: string) => void
+  /** Live validation issues — shown so red stepper tags have visible details. */
+  validationIssues?: readonly ValidationIssue[]
+}
+
+function wizardStepLabel(stepId: WizardStepId): string {
+  return WIZARD_STEPS.find((step) => step.id === stepId)?.label ?? stepId
 }
 
 function ReviewSection({
@@ -37,7 +49,11 @@ function ReviewSection({
   )
 }
 
-export function ReviewPublishStep({ draft, onEdit }: ReviewPublishStepProps) {
+export function ReviewPublishStep({
+  draft,
+  onEdit,
+  validationIssues = [],
+}: ReviewPublishStepProps) {
   const taskCount = draft.workPackages.reduce(
     (sum, pkg) => sum + (pkg.tasks?.length ?? 0),
     0,
@@ -47,6 +63,9 @@ export function ReviewPublishStep({ draft, onEdit }: ReviewPublishStepProps) {
     0,
   )
   const commercial = buildCommercialStructureSummary(draft.commercialStructure)
+  const blockingIssues = validationIssues.filter(
+    (issue) => issue.severity === 'error' || issue.severity === 'blocker',
+  )
 
   return (
     <div data-slot="review-publish-step" className="space-y-4">
@@ -56,6 +75,58 @@ export function ReviewPublishStep({ draft, onEdit }: ReviewPublishStepProps) {
           Confirm the opportunity executive summary before publish. This review mirrors what appears on Opportunity Details after save.
         </p>
       </div>
+
+      {blockingIssues.length > 0 ? (
+        <div
+          className="space-y-3 rounded-lg border border-danger/30 bg-danger/5 p-4"
+          data-slot="review-validation-details"
+          role="alert"
+          aria-live="polite"
+        >
+          <div className="flex items-start gap-2">
+            <AlertCircle className="mt-0.5 size-5 shrink-0 text-danger" aria-hidden />
+            <div>
+              <p className={cn(pmTypography.label, 'text-danger')}>
+                Fix these issues before publishing
+              </p>
+              <p className={cn(pmTypography.caption, 'mt-0.5 text-muted-foreground')}>
+                Red step markers match the items below. Click an issue to jump to that step.
+              </p>
+            </div>
+          </div>
+          <ul className="space-y-1.5">
+            {blockingIssues.map((issue) => {
+              const stepId = resolveStepForValidationIssue(issue)
+              return (
+                <li key={`${issue.code}-${issue.fieldPaths.join('-')}-${issue.message}`}>
+                  <button
+                    type="button"
+                    className={cn(
+                      'flex w-full items-start gap-2 rounded-md border border-danger/20 bg-surface px-3 py-2 text-start',
+                      'hover:bg-danger/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    )}
+                    onClick={() => onEdit(stepId)}
+                  >
+                    <span className="min-w-0">
+                      <span className={cn(pmTypography.bodySm, 'font-medium text-danger')}>
+                        {issue.message}
+                      </span>
+                      <span
+                        className={cn(
+                          pmTypography.caption,
+                          'mt-0.5 block text-muted-foreground',
+                        )}
+                      >
+                        Go to {wizardStepLabel(stepId)} →
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      ) : null}
 
       <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
         <p className={cn(pmTypography.label, 'text-foreground')}>Executive summary</p>

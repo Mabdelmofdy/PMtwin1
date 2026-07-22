@@ -14,11 +14,15 @@ var DEFAULT_VALIDATION_CONFIG = {
   titleMaxLength: 150,
   descriptionMaxLength: 2e3,
   skillLevelMinYears: {
+    // Creation 3.0 UI levels (StructuredSkillsEditor)
+    basic: 0,
+    intermediate: 2,
+    expert: 5,
+    // Legacy aliases
     junior: 0,
     "mid-level": 2,
     mid: 2,
-    senior: 5,
-    expert: 8
+    senior: 5
   }
 };
 function mergeValidationConfig(override) {
@@ -941,6 +945,16 @@ function packageIssue(code, fieldPaths) {
     group: "workPackages"
   };
 }
+function packageHasSkills(pkg) {
+  if (pkg.skills?.some((skill) => hasText(skill))) return true;
+  const required = pkg.requiredSkills;
+  if (!required || required.length === 0) return false;
+  return required.some((entry) => {
+    if (typeof entry === "string") return hasText(entry);
+    if (!entry || typeof entry !== "object") return false;
+    return hasText(entry.name) || hasText(entry.skillId);
+  });
+}
 var packageFieldsRequired = {
   id: "package-fields-required",
   code: VAL_CODES.PACKAGE_TITLE_REQUIRED,
@@ -966,9 +980,12 @@ var packageFieldsRequired = {
           ])
         );
       }
-      if (!pkg.skills || pkg.skills.length === 0) {
+      if (!packageHasSkills(pkg)) {
         issues.push(
-          packageIssue(VAL_CODES.PACKAGE_SKILL_REQUIRED, [`${base}.skills`])
+          packageIssue(VAL_CODES.PACKAGE_SKILL_REQUIRED, [
+            `${base}.requiredSkills`,
+            `${base}.skills`
+          ])
         );
       }
       if (!hasText(pkg.deadline)) {

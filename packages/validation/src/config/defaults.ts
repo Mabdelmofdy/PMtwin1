@@ -15,11 +15,15 @@ export const DEFAULT_VALIDATION_CONFIG: ValidationConfig = {
   titleMaxLength: 150,
   descriptionMaxLength: 2000,
   skillLevelMinYears: {
+    // Creation 3.0 UI levels (StructuredSkillsEditor)
+    basic: 0,
+    intermediate: 2,
+    expert: 5,
+    // Legacy aliases
     junior: 0,
     'mid-level': 2,
     mid: 2,
     senior: 5,
-    expert: 8,
   },
 }
 

@@ -1,12 +1,16 @@
+import { useEffect, useRef } from 'react'
 import { ArrowDown, ArrowUp, Copy, Plus, Trash2 } from 'lucide-react'
 import { PmButton } from '@/components/ui/pm-button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
+  createEmptyStructuredSkill,
   createEmptyTask,
   createEmptyWorkPackage,
   createEmptyDeliverable,
+  skillNames,
   type OpportunityTask,
+  type StructuredSkill,
   type WorkPackage,
 } from '@/domain/opportunity-creation'
 import { cn } from '@/lib/utils'
@@ -24,20 +28,72 @@ function reorder<T>(items: T[], from: number, to: number): T[] {
   )
 }
 
+function skillsFromCsv(value: string): StructuredSkill[] {
+  return value
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean)
+    .map((name) => ({
+      ...createEmptyStructuredSkill(),
+      name,
+      mandatory: true,
+    }))
+}
+
 export type WorkPackagesBuilderProps = {
   packages: WorkPackage[]
   onChange: (packages: WorkPackage[]) => void
+  /** Opportunity-level skills used to seed new packages. */
+  seedSkills?: readonly StructuredSkill[]
+  showValidation?: boolean
 }
 
 export function WorkPackagesBuilder({
   packages,
   onChange,
+  seedSkills = [],
+  showValidation = false,
 }: WorkPackagesBuilderProps) {
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
+
   const update = (index: number, patch: Partial<WorkPackage>) => {
     onChange(
       packages.map((pkg, i) => (i === index ? { ...pkg, ...patch } : pkg)),
     )
   }
+
+  const addPackage = () => {
+    const next = createEmptyWorkPackage(packages.length)
+    const seeded = skillNames(seedSkills)
+    if (seeded.length > 0) {
+      next.requiredSkills = seeded.map((name) => ({
+        ...createEmptyStructuredSkill(),
+        name,
+        mandatory: true,
+      }))
+    }
+    onChange([...packages, next])
+  }
+
+  useEffect(() => {
+    const seeded = skillNames(seedSkills)
+    if (seeded.length === 0 || packages.length === 0) return
+    let changed = false
+    const next = packages.map((pkg) => {
+      if (pkg.requiredSkills?.some((skill) => skill.name.trim())) return pkg
+      changed = true
+      return {
+        ...pkg,
+        requiredSkills: seeded.map((name) => ({
+          ...createEmptyStructuredSkill(),
+          name,
+          mandatory: true,
+        })),
+      }
+    })
+    if (changed) onChangeRef.current(next)
+  }, [packages, seedSkills])
 
   return (
     <div data-slot="work-packages-builder" className="space-y-4">
@@ -48,12 +104,7 @@ export function WorkPackagesBuilder({
             Break the opportunity into manageable units of work.
           </p>
         </div>
-        <PmButton
-          type="button"
-          onClick={() =>
-            onChange([...packages, createEmptyWorkPackage(packages.length)])
-          }
-        >
+        <PmButton type="button" onClick={addPackage}>
           <Plus className="size-4" />
           Add Work Package
         </PmButton>
@@ -70,7 +121,7 @@ export function WorkPackagesBuilder({
             type="button"
             className="mt-3"
             variant="outline"
-            onClick={() => onChange([createEmptyWorkPackage(0)])}
+            onClick={addPackage}
           >
             Add First Work Package
           </PmButton>
@@ -79,6 +130,9 @@ export function WorkPackagesBuilder({
 
       {packages.map((pkg, index) => {
         const tasks = pkg.tasks ?? []
+        const missingSkills =
+          showValidation && !(pkg.requiredSkills?.some((s) => s.name.trim()) ?? false)
+        const missingDeadline = showValidation && !pkg.deadline?.trim()
         return (
           <div
             key={pkg.id}
@@ -162,17 +216,51 @@ export function WorkPackagesBuilder({
                     update(index, { description: e.target.value })
                   }
                 />
+                <div>
+                  <label className={cn(pmTypography.caption, 'mb-1 block text-muted-foreground')}>
+                    Package skills (required)
+                  </label>
+                  <Input
+                    value={skillNames(pkg.requiredSkills ?? []).join(', ')}
+                    placeholder="BIM, Revit"
+                    aria-invalid={missingSkills || undefined}
+                    onChange={(e) =>
+                      update(index, { requiredSkills: skillsFromCsv(e.target.value) })
+                    }
+                  />
+                  {missingSkills ? (
+                    <p className="mt-1 text-sm text-danger" role="alert">
+                      Every work package needs at least one skill.
+                    </p>
+                  ) : null}
+                </div>
                 <div className="grid gap-2 sm:grid-cols-2">
-                  <Input
-                    type="date"
-                    value={pkg.startDate ?? ''}
-                    onChange={(e) => update(index, { startDate: e.target.value })}
-                  />
-                  <Input
-                    type="date"
-                    value={pkg.deadline ?? ''}
-                    onChange={(e) => update(index, { deadline: e.target.value })}
-                  />
+                  <div>
+                    <label className={cn(pmTypography.caption, 'mb-1 block text-muted-foreground')}>
+                      Start date
+                    </label>
+                    <Input
+                      type="date"
+                      value={pkg.startDate ?? ''}
+                      onChange={(e) => update(index, { startDate: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className={cn(pmTypography.caption, 'mb-1 block text-muted-foreground')}>
+                      Deadline (required)
+                    </label>
+                    <Input
+                      type="date"
+                      value={pkg.deadline ?? ''}
+                      aria-invalid={missingDeadline || undefined}
+                      onChange={(e) => update(index, { deadline: e.target.value })}
+                    />
+                    {missingDeadline ? (
+                      <p className="mt-1 text-sm text-danger" role="alert">
+                        Every work package needs a deadline.
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
 
                 <div className="space-y-2 border-t border-border/60 pt-3">

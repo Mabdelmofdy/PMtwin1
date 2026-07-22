@@ -24,15 +24,21 @@ export type ScopeWorkStepProps = {
   draft: OpportunityDraft
   onChange: (patch: Partial<OpportunityDraft>) => void
   showValidation?: boolean
+  /** Live blocking validation messages for this step. */
+  validationMessages?: readonly string[]
 }
 
 export function ScopeWorkStep({
   draft,
   onChange,
   showValidation = false,
+  validationMessages = [],
 }: ScopeWorkStepProps) {
   const isOffer = draft.intent === 'offer'
   const hasNamedSkill = draft.structuredSkills.some((skill) => skill.name.trim())
+  const skillLevelYearsError = validationMessages.find((message) =>
+    /experience level and years/i.test(message),
+  )
 
   return (
     <div data-slot="scope-work-step" className="space-y-6">
@@ -42,6 +48,23 @@ export function ScopeWorkStep({
           Define requirements, work packages, tasks, deliverables, and milestones.
         </p>
       </div>
+
+      {showValidation && validationMessages.length > 0 ? (
+        <div
+          className="rounded-lg border border-danger/30 bg-danger/5 p-3"
+          role="alert"
+          data-slot="scope-work-validation"
+        >
+          <p className={cn(pmTypography.label, 'text-danger')}>
+            Fix these Scope & Work issues
+          </p>
+          <ul className={cn(pmTypography.bodySm, 'mt-2 list-inside list-disc space-y-1 text-danger/90')}>
+            {validationMessages.map((message) => (
+              <li key={message}>{message}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <details open className="rounded-lg border border-border p-4" id="section-requirements">
         <summary className={cn(pmTypography.label, 'cursor-pointer')}>
@@ -58,7 +81,9 @@ export function ScopeWorkStep({
                 ? isOffer
                   ? 'At least one offered skill is required'
                   : 'At least one required skill is required'
-                : null
+                : skillLevelYearsError
+                  ? skillLevelYearsError
+                  : null
             }
           />
           <ServicesField
@@ -134,6 +159,8 @@ export function ScopeWorkStep({
       <div id="section-work-packages">
         <WorkPackagesBuilder
           packages={draft.workPackages}
+          seedSkills={draft.structuredSkills}
+          showValidation={showValidation}
           onChange={(workPackages) => onChange({ workPackages })}
         />
       </div>

@@ -47,7 +47,10 @@ export type WorkPackageInput = {
   readonly id?: string
   readonly title?: string
   readonly description?: string
+  /** Legacy string skill list. */
   readonly skills?: readonly string[]
+  /** Creation 3.0 structured skills on the package. */
+  readonly requiredSkills?: readonly StructuredSkillInput[] | readonly string[]
   readonly deadline?: string
 }
 

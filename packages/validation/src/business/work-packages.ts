@@ -1,4 +1,8 @@
-import type { ValidationIssue, ValidationRule } from '../types.ts'
+import type {
+  ValidationIssue,
+  ValidationRule,
+  WorkPackageInput,
+} from '../types.ts'
 import { VAL_CODES } from '../rules/codes.ts'
 import { messageForCode } from '../messages/catalog.ts'
 import { hasText, parseIsoDate } from '../validators/primitives.ts'
@@ -19,6 +23,18 @@ function packageIssue(
     layer: 'business',
     group: 'workPackages',
   }
+}
+
+/** Accepts legacy `skills` strings and Creation 3.0 `requiredSkills`. */
+export function packageHasSkills(pkg: WorkPackageInput): boolean {
+  if (pkg.skills?.some((skill) => hasText(skill))) return true
+  const required = pkg.requiredSkills
+  if (!required || required.length === 0) return false
+  return required.some((entry) => {
+    if (typeof entry === 'string') return hasText(entry)
+    if (!entry || typeof entry !== 'object') return false
+    return hasText(entry.name) || hasText(entry.skillId)
+  })
 }
 
 export const packageFieldsRequired: ValidationRule = {
@@ -46,9 +62,12 @@ export const packageFieldsRequired: ValidationRule = {
           ]),
         )
       }
-      if (!pkg.skills || pkg.skills.length === 0) {
+      if (!packageHasSkills(pkg)) {
         issues.push(
-          packageIssue(VAL_CODES.PACKAGE_SKILL_REQUIRED, [`${base}.skills`]),
+          packageIssue(VAL_CODES.PACKAGE_SKILL_REQUIRED, [
+            `${base}.requiredSkills`,
+            `${base}.skills`,
+          ]),
         )
       }
       if (!hasText(pkg.deadline)) {

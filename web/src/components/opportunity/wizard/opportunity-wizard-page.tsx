@@ -350,6 +350,21 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
     return [...steps]
   }, [liveValidation.issues])
 
+  const scopeWorkValidationMessages = useMemo(() => {
+    return liveValidation.issues
+      .filter((issue) => {
+        if (issue.severity !== 'error' && issue.severity !== 'blocker') return false
+        return resolveStepForValidationIssue(issue) === 'scope_work'
+      })
+      .map((issue) => issue.message)
+  }, [liveValidation.issues])
+
+  useEffect(() => {
+    if (errorStepIds.includes(activeStepId)) {
+      setShowFieldValidation(true)
+    }
+  }, [activeStepId, errorStepIds])
+
   const readinessGroups = useMemo(() => {
     const recommendedLabels = [
       ...(draft.preferredPartnerType ? [] : ['Add a preferred partner type']),
@@ -643,9 +658,15 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         completedStepIds={completedStepIds}
         errorStepIds={errorStepIds}
         onStepClick={(stepId) => {
-          if (completedStepIds.includes(stepId) || stepId === activeStepId) {
-            goToStep(stepId)
+          const canOpen =
+            stepId === activeStepId
+            || completedStepIds.includes(stepId)
+            || errorStepIds.includes(stepId)
+          if (!canOpen) return
+          if (errorStepIds.includes(stepId)) {
+            setShowFieldValidation(true)
           }
+          goToStep(stepId)
         }}
       />
 
@@ -675,6 +696,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
               draft={draft}
               onChange={patchDraft}
               showValidation={showFieldValidation}
+              validationMessages={scopeWorkValidationMessages}
             />
           ) : null}
           {activeStepId === 'commercial' ? (
@@ -683,7 +705,13 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
           {activeStepId === 'review' ? (
             <ReviewPublishStep
               draft={draft}
-              onEdit={(stepId, sectionId) => goToStep(stepId, sectionId)}
+              validationIssues={liveValidation.issues}
+              onEdit={(stepId, sectionId) => {
+                if (errorStepIds.includes(stepId)) {
+                  setShowFieldValidation(true)
+                }
+                goToStep(stepId, sectionId)
+              }}
             />
           ) : null}
         </div>
