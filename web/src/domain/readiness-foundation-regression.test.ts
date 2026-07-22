@@ -196,8 +196,8 @@ describe('Matching Readiness Foundation — regression', () => {
         opportunity: stack.opportunityRepository.getById(readyDraftOpportunity.id),
       },
       {
-        transitionOpportunityStatus: (id, status) =>
-          opportunityCommandService.transitionOpportunityStatus(id, status),
+        transitionToPublished: (id) =>
+          opportunityCommandService.transitionToPublished(id),
       },
     )
 

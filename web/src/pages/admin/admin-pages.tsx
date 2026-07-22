@@ -481,7 +481,7 @@ export function AdminMatchingPage() {
         <PmPageHeader
           label="Admin"
           title="Matching engine"
-          description="Run Need↔Offer matching (and optional circular chains), then review matches."
+          description="Publish auto-discovers Need↔Offer matches. Use batch tools only for recovery or backfill."
           metric={<PmPageHeroMetric value={matches.length} label="Matches" />}
           badges={
             <PmBadge tone="muted">{matchingRuns.length} recent runs</PmBadge>
@@ -489,14 +489,14 @@ export function AdminMatchingPage() {
           actions={
             <div className="flex flex-wrap gap-2">
               <PmButton disabled={isRunning} onClick={handleRunPublishMatching}>
-                {isRunning ? 'Running matching…' : 'Run matching'}
+                {isRunning ? 'Running matching…' : 'Re-run matching'}
               </PmButton>
               <PmButton
                 variant="outline"
                 disabled={isRunning}
                 onClick={handleRunCircularMatching}
               >
-                Run circular
+                Re-run circular
               </PmButton>
             </div>
           }
@@ -507,7 +507,7 @@ export function AdminMatchingPage() {
         <section className="space-y-4">
           <PmSectionHeader
             title="Recent matching runs"
-            description="Audit trail for admin matching jobs (publish/one_way and circular)."
+            description="Audit trail for publish matching and admin recovery jobs."
           />
           <PmDataTable
             density="compact"
@@ -519,7 +519,7 @@ export function AdminMatchingPage() {
               <PmTableEmpty
                 variant="no-data"
                 title="No matching runs yet"
-                description="Use Run matching for Need↔Offer pairs, or Run circular for multi-party chains."
+                description="Matches are created automatically when opportunities are published. Use Re-run matching only for recovery."
               />
             }
           />
@@ -528,7 +528,7 @@ export function AdminMatchingPage() {
         <section className="space-y-4">
           <PmSectionHeader
             title="Recent matches"
-            description="Latest match records. Need↔Offer UAT pairs appear after both opportunities are published, or after Run matching."
+            description="Latest match records. Need↔Offer pairs appear automatically after both opportunities are published."
           />
           <PmDataTable
             density="compact"
@@ -545,7 +545,7 @@ export function AdminMatchingPage() {
               <PmTableEmpty
                 variant="no-data"
                 title="No matches"
-                description="Publish complementary Need and Offer opportunities, then click Run matching."
+                description="Publish complementary Need and Offer opportunities (different parties). Re-run matching only if a publish pass was missed."
               />
             }
           />

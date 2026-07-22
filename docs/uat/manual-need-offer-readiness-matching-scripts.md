@@ -245,6 +245,8 @@ Both scripts use the same **5-step** wizard. Matching structure is **auto-derive
 
 ## Matching check (after both published)
 
+Matching runs **automatically** on each successful publish (Local / Demo / UAT). No Admin → Run matching step in the happy path.
+
 | Check | Where | Expected |
 |-------|--------|----------|
 | Auto-match created | Opportunity → **Matching** / Related | one_way PostMatch linking both |
@@ -288,8 +290,8 @@ Offering BIM Architect services with Revit modeling and coordination for tower a
 |---------|-----|
 | Cannot publish | Complete required readiness fields; ensure account is not pending vetting |
 | Red tag on step 3 with fields filled | Confirm package **skills** + **deadline**; Expert years ≥ 5; dates not in the past |
-| No match after publish | Confirm both are **published**, different users, same role `Architect`, skills `BIM`+`Revit`, cash task-based. On `/admin/matching` click **Run matching** (not only Run circular — circular needs 3+ parties) |
-| Admin Matching empty after circular | Circular-only runs do not create Need↔Offer `one_way` matches. Use **Run matching** |
+| No match after publish | Confirm both are **published**, different users, same role `Architect`, skills `BIM`+`Revit`, cash task-based. Matching runs automatically on publish — no admin step required. If still empty, Admin → Matching → **Re-run matching** (recovery only; not circular-only) |
+| Admin Matching empty after circular | Circular-only recovery does not create Need↔Offer `one_way` matches. Use **Re-run matching**, or re-publish |
 | Same user both sides | Switch to the second account — same-owner matches are blocked |
 | Old data noise | Admin → Environments → reset UAT, or use a clean browser profile |
 

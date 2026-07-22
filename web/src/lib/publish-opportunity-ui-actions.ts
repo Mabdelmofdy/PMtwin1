@@ -21,12 +21,9 @@ import {
 import { buildPublishValidationExplanationLines } from '@/services/explainability/publish-validation-explain.ts'
 import type { ProfileKind, ProfileReadinessResult } from '@/domain/profile-readiness/types.ts'
 import {
-  matchingService,
-  type PublishMatchingResult,
-} from '@/services/matching-service.ts'
-import {
   createOpportunityCommandService,
   opportunityCommandService,
+  type PublishTransitionResult,
 } from '@/services/opportunity-command-service.ts'
 
 export const PUBLISH_VALIDATION_BLOCKED_CODE = 'PUBLISH_VALIDATION_BLOCKED' as const
@@ -53,23 +50,21 @@ export type PublishOpportunityUiActionResult =
     }
 
 export type PublishOrchestrationDeps = {
+  /**
+   * Canonical publish path: status → published + matching (once).
+   * Prefer this over raw transition + separate matching calls.
+   */
+  readonly transitionToPublished?: (
+    opportunityId: string,
+  ) => PublishTransitionResult
+  /**
+   * @deprecated Prefer `transitionToPublished`. Kept for tests that only stub
+   * the command result; matching will not run unless also provided below.
+   */
   readonly transitionOpportunityStatus?: (
     opportunityId: string,
     targetStatus: string,
   ) => CommandResult
-  readonly runPublishMatching?: (
-    opportunityId: string,
-  ) => PublishMatchingResult
-  readonly runCircularMatching?: (
-    opportunityId: string,
-  ) => PublishMatchingResult
-}
-
-const EMPTY_MATCHING_RESULT: PublishMatchingResult = {
-  discoveredMatchesCount: 0,
-  skippedDuplicatesCount: 0,
-  matchingErrors: [],
-  postMatchIds: [],
 }
 
 function formatCommandErrors(result: CommandResult): string {
@@ -79,47 +74,13 @@ function formatCommandErrors(result: CommandResult): string {
   return PUBLISH_READINESS_BLOCKED_MESSAGE
 }
 
-/** Transition to published and run matching after readiness gate has passed. */
-export function executePublishOpportunityOrchestration(
-  opportunityId: string,
-  deps?: PublishOrchestrationDeps,
-): PublishOpportunityUiActionResult {
-  const transitionOpportunityStatus =
-    deps?.transitionOpportunityStatus ??
-    opportunityCommandService.transitionOpportunityStatus.bind(
-      opportunityCommandService,
-    )
-
-  const result = transitionOpportunityStatus(opportunityId, 'published')
-  if (!result.success) {
+function toUiResult(publish: PublishTransitionResult): PublishOpportunityUiActionResult {
+  if (!publish.command.success) {
     return {
       success: false,
       code: 'COMMAND_FAILED',
-      message: formatCommandErrors(result),
-      details: result.errors,
-    }
-  }
-
-  const runPublishMatching =
-    deps?.runPublishMatching
-    ?? matchingService.runPublishMatchingForOpportunity.bind(matchingService)
-  const runCircularMatching =
-    deps?.runCircularMatching
-    ?? matchingService.runCircularMatchingForOpportunity.bind(matchingService)
-
-  const matching = runPublishMatching(opportunityId)
-
-  // Circular matching runs as an additional creator-anchored pass on publish
-  // (POC parity). It is best-effort and must never fail the publish action.
-  let circular: PublishMatchingResult
-  try {
-    circular = runCircularMatching(opportunityId)
-  } catch (error) {
-    circular = {
-      ...EMPTY_MATCHING_RESULT,
-      matchingErrors: [
-        error instanceof Error ? error.message : 'Circular matching failed',
-      ],
+      message: formatCommandErrors(publish.command),
+      details: publish.command.errors,
     }
   }
 
@@ -127,11 +88,53 @@ export function executePublishOpportunityOrchestration(
     success: true,
     published: true,
     discoveredMatchesCount:
-      matching.discoveredMatchesCount + circular.discoveredMatchesCount,
+      publish.matching.discoveredMatchesCount
+      + publish.circular.discoveredMatchesCount,
     skippedDuplicatesCount:
-      matching.skippedDuplicatesCount + circular.skippedDuplicatesCount,
-    matchingErrors: [...matching.matchingErrors, ...circular.matchingErrors],
+      publish.matching.skippedDuplicatesCount
+      + publish.circular.skippedDuplicatesCount,
+    matchingErrors: [
+      ...publish.matching.matchingErrors,
+      ...publish.circular.matchingErrors,
+    ],
   }
+}
+
+/**
+ * Transition to published and run matching once (via opportunity command service).
+ * Matching is part of the publish path — not a separate admin step.
+ */
+export function executePublishOpportunityOrchestration(
+  opportunityId: string,
+  deps?: PublishOrchestrationDeps,
+): PublishOpportunityUiActionResult {
+  if (deps?.transitionToPublished) {
+    return toUiResult(deps.transitionToPublished(opportunityId))
+  }
+
+  // Legacy test stub: command-only transition without service matching.
+  if (deps?.transitionOpportunityStatus) {
+    const result = deps.transitionOpportunityStatus(opportunityId, 'published')
+    if (!result.success) {
+      return {
+        success: false,
+        code: 'COMMAND_FAILED',
+        message: formatCommandErrors(result),
+        details: result.errors,
+      }
+    }
+    return {
+      success: true,
+      published: true,
+      discoveredMatchesCount: 0,
+      skippedDuplicatesCount: 0,
+      matchingErrors: [],
+    }
+  }
+
+  return toUiResult(
+    opportunityCommandService.transitionToPublished(opportunityId),
+  )
 }
 
 export function publishOpportunityUiAction(

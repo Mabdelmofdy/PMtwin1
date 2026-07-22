@@ -155,18 +155,26 @@ describe('pipelineOpportunityDrop publish orchestration', () => {
         profileKind: 'individual',
         opportunity: readyDraftOpportunity,
       }),
-      transitionOpportunityStatus: () => ({
-        success: true,
-        aggregateId: 'opp-ready',
-        commandType: 'TransitionOpportunityStatus',
-      }),
-      runPublishMatching: () => {
+      transitionToPublished: () => {
         matchingCalled = true
         return {
-          discoveredMatchesCount: 2,
-          skippedDuplicatesCount: 1,
-          matchingErrors: [],
-          postMatchIds: ['pm-1', 'pm-2'],
+          command: {
+            success: true,
+            aggregateId: 'opp-ready',
+            commandType: 'TransitionOpportunityStatus',
+          },
+          matching: {
+            discoveredMatchesCount: 2,
+            skippedDuplicatesCount: 1,
+            matchingErrors: [],
+            postMatchIds: ['pm-1', 'pm-2'],
+          },
+          circular: {
+            discoveredMatchesCount: 0,
+            skippedDuplicatesCount: 0,
+            matchingErrors: [],
+            postMatchIds: [],
+          },
         }
       },
     })
@@ -191,20 +199,28 @@ describe('pipelineOpportunityDrop publish orchestration', () => {
         profileKind: 'individual',
         opportunity: { ...readyDraftOpportunity, description: '' },
       }),
-      transitionOpportunityStatus: () => {
+      transitionToPublished: () => {
         transitionCalled = true
         return {
-          success: true,
-          aggregateId: 'opp-ready',
-          commandType: 'TransitionOpportunityStatus',
+          command: {
+            success: true,
+            aggregateId: 'opp-ready',
+            commandType: 'TransitionOpportunityStatus',
+          },
+          matching: {
+            discoveredMatchesCount: 0,
+            skippedDuplicatesCount: 0,
+            matchingErrors: [],
+            postMatchIds: [],
+          },
+          circular: {
+            discoveredMatchesCount: 0,
+            skippedDuplicatesCount: 0,
+            matchingErrors: [],
+            postMatchIds: [],
+          },
         }
       },
-      runPublishMatching: () => ({
-        discoveredMatchesCount: 0,
-        skippedDuplicatesCount: 0,
-        matchingErrors: [],
-        postMatchIds: [],
-      }),
     })
 
     assert.equal(result.success, false)
@@ -219,16 +235,24 @@ describe('pipelineOpportunityDrop publish orchestration', () => {
         profileKind: 'individual',
         opportunity: readyDraftOpportunity,
       }),
-      transitionOpportunityStatus: () => ({
-        success: true,
-        aggregateId: 'opp-ready',
-        commandType: 'TransitionOpportunityStatus',
-      }),
-      runPublishMatching: () => ({
-        discoveredMatchesCount: 4,
-        skippedDuplicatesCount: 2,
-        matchingErrors: ['duplicate skipped'],
-        postMatchIds: ['pm-1'],
+      transitionToPublished: () => ({
+        command: {
+          success: true,
+          aggregateId: 'opp-ready',
+          commandType: 'TransitionOpportunityStatus',
+        },
+        matching: {
+          discoveredMatchesCount: 4,
+          skippedDuplicatesCount: 2,
+          matchingErrors: ['duplicate skipped'],
+          postMatchIds: ['pm-1'],
+        },
+        circular: {
+          discoveredMatchesCount: 0,
+          skippedDuplicatesCount: 0,
+          matchingErrors: [],
+          postMatchIds: [],
+        },
       }),
     })
 

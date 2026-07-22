@@ -281,9 +281,6 @@ function createPublishStack(
 }
 
 function publishDeps(stack: CommandGatewayTestStack) {
-  const opportunityCommandService = createOpportunityCommandService({
-    gateway: stack.gateway,
-  })
   const postMatchService = createPostMatchCommandService({
     gateway: stack.gateway,
   })
@@ -303,13 +300,19 @@ function publishDeps(stack: CommandGatewayTestStack) {
     }),
   }
 
-  return {
-    transitionOpportunityStatus: (id: string, status: string) =>
-      opportunityCommandService.transitionOpportunityStatus(id, status),
+  const opportunityCommandService = createOpportunityCommandService({
+    gateway: stack.gateway,
     runPublishMatching: (opportunityId: string) =>
       matchingService.runPublishMatchingForOpportunity(opportunityId, matchingDeps),
     runCircularMatching: (opportunityId: string) =>
       matchingService.runCircularMatchingForOpportunity(opportunityId, matchingDeps),
+  })
+
+  return {
+    transitionToPublished: (id: string) =>
+      opportunityCommandService.transitionToPublished(id),
+    opportunityCommandService,
+    matchingDeps,
   }
 }
 
@@ -457,18 +460,26 @@ describe('publish matching wiring', () => {
         opportunity: need,
       },
       {
-        transitionOpportunityStatus: () => ({
-          success: true,
-          aggregateId: need.id,
-          commandType: 'TransitionOpportunityStatus',
-        }),
-        runPublishMatching: () => {
+        transitionToPublished: () => {
           matchingCalls += 1
           return {
-            discoveredMatchesCount: 0,
-            skippedDuplicatesCount: 0,
-            matchingErrors: [],
-            postMatchIds: [],
+            command: {
+              success: true,
+              aggregateId: need.id,
+              commandType: 'TransitionOpportunityStatus',
+            },
+            matching: {
+              discoveredMatchesCount: 0,
+              skippedDuplicatesCount: 0,
+              matchingErrors: [],
+              postMatchIds: [],
+            },
+            circular: {
+              discoveredMatchesCount: 0,
+              skippedDuplicatesCount: 0,
+              matchingErrors: [],
+              postMatchIds: [],
+            },
           }
         },
       },
@@ -485,12 +496,41 @@ describe('publish matching wiring', () => {
     const offerA = matchingOffer('offer-partial-a', 'user-offer-a', 'published')
     const offerB = matchingOffer('offer-partial-b', 'user-offer-b', 'published')
     const stack = createPublishStack([need, offerA, offerB])
-    const opportunityCommandService = createOpportunityCommandService({
-      gateway: stack.gateway,
-    })
+    const postMatchService = createPostMatchCommandService({ gateway: stack.gateway })
 
     let discoverCalls = 0
-    const postMatchService = createPostMatchCommandService({ gateway: stack.gateway })
+    const opportunityCommandService = createOpportunityCommandService({
+      gateway: stack.gateway,
+      runPublishMatching: (opportunityId) =>
+        matchingService.runPublishMatchingForOpportunity(opportunityId, {
+          getOpportunityById: (id) => stack.opportunityRepository.getById(id),
+          listPublishedOpportunities: () =>
+            stack.opportunityRepository
+              .getAll()
+              .filter((opp) => opp.status === 'published'),
+          discoverPostMatch: (command) => {
+            discoverCalls += 1
+            if (discoverCalls === 1) {
+              return postMatchService.discoverPostMatch(command)
+            }
+            return {
+              success: false,
+              commandType: 'DiscoverPostMatch',
+              aggregateId: command.aggregateId,
+              errors: ['Injected discover failure'],
+            }
+          },
+          findActiveDuplicateByStrongKey: (strongKey) =>
+            stack.postMatchRepository.findActiveDuplicateByStrongKey(strongKey),
+          getMatchingEngineContext: () => ({ canonical: {}, config: engineConfig }),
+        }),
+      runCircularMatching: () => ({
+        discoveredMatchesCount: 0,
+        skippedDuplicatesCount: 0,
+        matchingErrors: [],
+        postMatchIds: [],
+      }),
+    })
 
     const result = publishOpportunityUiAction(
       need.id,
@@ -500,31 +540,8 @@ describe('publish matching wiring', () => {
         opportunity: stack.opportunityRepository.getById(need.id),
       },
       {
-        transitionOpportunityStatus: (id, status) =>
-          opportunityCommandService.transitionOpportunityStatus(id, status),
-        runPublishMatching: (opportunityId) =>
-          matchingService.runPublishMatchingForOpportunity(opportunityId, {
-            getOpportunityById: (id) => stack.opportunityRepository.getById(id),
-            listPublishedOpportunities: () =>
-              stack.opportunityRepository
-                .getAll()
-                .filter((opp) => opp.status === 'published'),
-            discoverPostMatch: (command) => {
-              discoverCalls += 1
-              if (discoverCalls === 1) {
-                return postMatchService.discoverPostMatch(command)
-              }
-              return {
-                success: false,
-                commandType: 'DiscoverPostMatch',
-                aggregateId: command.aggregateId,
-                errors: ['Injected discover failure'],
-              }
-            },
-            findActiveDuplicateByStrongKey: (strongKey) =>
-              stack.postMatchRepository.findActiveDuplicateByStrongKey(strongKey),
-            getMatchingEngineContext: () => ({ canonical: {}, config: engineConfig }),
-          }),
+        transitionToPublished: (id) =>
+          opportunityCommandService.transitionToPublished(id),
       },
     )
 
@@ -581,24 +598,26 @@ describe('publish matching wiring', () => {
         opportunity: stack.opportunityRepository.getById(need.id),
       },
       {
-        transitionOpportunityStatus: () => ({
-          success: true,
-          aggregateId: need.id,
-          commandType: 'TransitionOpportunityStatus',
-        }),
-        runPublishMatching: () => ({
-          discoveredMatchesCount: 0,
-          skippedDuplicatesCount: 0,
-          matchingErrors: [],
-          postMatchIds: [],
-        }),
-        runCircularMatching: () => {
+        transitionToPublished: () => {
           circularCalls += 1
           return {
-            discoveredMatchesCount: 1,
-            skippedDuplicatesCount: 0,
-            matchingErrors: [],
-            postMatchIds: ['pm-circular'],
+            command: {
+              success: true,
+              aggregateId: need.id,
+              commandType: 'TransitionOpportunityStatus',
+            },
+            matching: {
+              discoveredMatchesCount: 0,
+              skippedDuplicatesCount: 0,
+              matchingErrors: [],
+              postMatchIds: [],
+            },
+            circular: {
+              discoveredMatchesCount: 1,
+              skippedDuplicatesCount: 0,
+              matchingErrors: [],
+              postMatchIds: ['pm-circular'],
+            },
           }
         },
       },
@@ -613,6 +632,18 @@ describe('publish matching wiring', () => {
   it('publish succeeds when circular matching throws', () => {
     const need = matchingNeed('need-circular-throw', 'user-need', 'draft')
     const stack = createPublishStack([need])
+    const opportunityCommandService = createOpportunityCommandService({
+      gateway: stack.gateway,
+      runPublishMatching: () => ({
+        discoveredMatchesCount: 2,
+        skippedDuplicatesCount: 0,
+        matchingErrors: [],
+        postMatchIds: ['pm-1', 'pm-2'],
+      }),
+      runCircularMatching: () => {
+        throw new Error('Circular engine failure')
+      },
+    })
 
     const result = publishOpportunityUiAction(
       need.id,
@@ -622,20 +653,8 @@ describe('publish matching wiring', () => {
         opportunity: stack.opportunityRepository.getById(need.id),
       },
       {
-        transitionOpportunityStatus: () => ({
-          success: true,
-          aggregateId: need.id,
-          commandType: 'TransitionOpportunityStatus',
-        }),
-        runPublishMatching: () => ({
-          discoveredMatchesCount: 2,
-          skippedDuplicatesCount: 0,
-          matchingErrors: [],
-          postMatchIds: ['pm-1', 'pm-2'],
-        }),
-        runCircularMatching: () => {
-          throw new Error('Circular engine failure')
-        },
+        transitionToPublished: (id) =>
+          opportunityCommandService.transitionToPublished(id),
       },
     )
 

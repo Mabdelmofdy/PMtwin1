@@ -97,8 +97,8 @@ export function pipelineOpportunityDrop(
       opportunityId,
       resolvePublishContext(opportunity),
       {
+        transitionToPublished: deps?.transitionToPublished,
         transitionOpportunityStatus: deps?.transitionOpportunityStatus,
-        runPublishMatching: deps?.runPublishMatching,
       },
     )
 

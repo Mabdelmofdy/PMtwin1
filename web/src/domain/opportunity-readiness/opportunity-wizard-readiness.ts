@@ -73,6 +73,7 @@ export type OpportunityWizardDraft = {
     readonly components?: ReadonlyArray<{
       readonly type?: string
       readonly enabled?: boolean
+      readonly budgetType?: string
       readonly fixedAmount?: number
       readonly minimumAmount?: number
       readonly maximumAmount?: number

@@ -16,25 +16,29 @@ Publish is the primary trigger. Status sync (policy B) and notifications depend 
 
 ```mermaid
 flowchart LR
-  PublishUI[publishOpportunityUiAction] --> Transition[TransitionOpportunityStatus published]
-  Transition --> Auto[runPublishMatchingForOpportunity]
+  PublishUI[publishOpportunityUiAction] --> Service[transitionToPublished]
+  Service --> Trans[TransitionOpportunityStatus published]
+  Trans --> Auto[runPublishMatchingForOpportunity]
   Auto --> Engine["@pm-twin/matching auto models"]
   Engine --> Discover[DiscoverPostMatch]
   Discover --> Notify[new_match_found]
-  PublishUI --> Circular[runCircularMatchingForOpportunity]
+  Service --> Circular[runCircularMatchingForOpportunity]
   Circular --> Discover
   AdminRerun[Admin Re-run matching] --> Auto
   AdminRerun --> Circular
-  AdminBatch[Admin circular batch] --> BatchCircular[runCircularMatchingForPublishedOpportunities]
+  AdminBatch[Admin recovery batch] --> BatchPublish[runPublishMatchingForPublishedOpportunities]
 ```
 
 | Trigger | Behavior |
 |---------|----------|
-| Publish UI / pipeline drop | Auto models (one_way / two_way / consortium) + circular pass |
-| Admin opportunity **Re-run matching** | Same as publish matching for that opportunity |
-| Admin matching page circular run | Batch circular across published pool |
+| **Publish** (wizard, details, pipeline drop) | **Normal path.** Auto models (one_way / two_way / consortium) + circular pass. Creates PostMatches and `new_match_found` immediately. Same in Local, Demo, and UAT. |
+| Direct `transitionOpportunityStatus(..., 'published')` / `publishOpportunity` | Same matching side effect after a successful publish command |
+| Admin opportunity **Re-run matching** | Maintenance / recovery only — same as publish matching for that opportunity |
+| Admin matching page **Re-run matching** / circular | Maintenance / recovery / backfill across published pool |
 | Draft create / edit | No matching |
 | Edit published without re-publish | No matching |
+
+No manual admin step is required for the normal user workflow.
 
 Canonical records are **PostMatch** entities (`postMatchRepository` / `pmtwin_web_overrides`).
 

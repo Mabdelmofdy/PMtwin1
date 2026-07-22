@@ -302,16 +302,9 @@ describe('pipelineOpportunityDrop command routing', () => {
 
   it('pipeline drag uses opportunity command service and triggers matching when readiness passes', () => {
     let matchingCalled = false
-    const result = pipelineOpportunityDrop('opp-ready-draft', 'published', {
-      readOpportunity: (id) => stack.opportunityRepository.getById(id),
-      resolvePublishReadinessContext: (opportunity) => ({
-        profile: readyCreator.profile,
-        profileKind: 'individual',
-        opportunity,
-      }),
-      transitionOpportunityStatus: (id, status) =>
-        commandService.transitionOpportunityStatus(id, status),
-      runPublishMatching: (id) => {
+    const commandServiceWithMatching = createOpportunityCommandService({
+      gateway: stack.gateway,
+      runPublishMatching: () => {
         matchingCalled = true
         return {
           discoveredMatchesCount: 1,
@@ -320,6 +313,22 @@ describe('pipelineOpportunityDrop command routing', () => {
           postMatchIds: ['pm-test'],
         }
       },
+      runCircularMatching: () => ({
+        discoveredMatchesCount: 0,
+        skippedDuplicatesCount: 0,
+        matchingErrors: [],
+        postMatchIds: [],
+      }),
+    })
+    const result = pipelineOpportunityDrop('opp-ready-draft', 'published', {
+      readOpportunity: (id) => stack.opportunityRepository.getById(id),
+      resolvePublishReadinessContext: (opportunity) => ({
+        profile: readyCreator.profile,
+        profileKind: 'individual',
+        opportunity,
+      }),
+      transitionToPublished: (id) =>
+        commandServiceWithMatching.transitionToPublished(id),
     })
 
     assert.equal(result.success, true)
@@ -431,8 +440,7 @@ describe('publish opportunity UI actions', () => {
         opportunity: stack.opportunityRepository.getById('opp-ready-draft'),
       },
       {
-        transitionOpportunityStatus: (id, status) =>
-          commandService.transitionOpportunityStatus(id, status),
+        transitionToPublished: (id) => commandService.transitionToPublished(id),
       },
     )
 
