@@ -98,6 +98,29 @@ function validateCashComponent(
   component: CashCommercialComponent,
 ): CommercialValidationIssue[] {
   const issues: CommercialValidationIssue[] = []
+
+  if (component.budgetType === 'range') {
+    const min = component.minimumAmount
+    const max = component.maximumAmount
+    if (min == null && max == null) {
+      issues.push({
+        severity: 'warning',
+        code: 'CASH_RANGE_AMOUNTS',
+        message: 'Cash range: enter a minimum and/or maximum amount.',
+        componentId: component.id,
+        field: 'minimumAmount',
+      })
+    } else if (min != null && max != null && min > max) {
+      issues.push({
+        severity: 'error',
+        code: 'CASH_RANGE_ORDER',
+        message: 'Cash range: minimum amount cannot exceed maximum amount.',
+        componentId: component.id,
+        field: 'minimumAmount',
+      })
+    }
+  }
+
   const schedule = component.paymentSchedule ?? []
   if (schedule.length === 0) return issues
 

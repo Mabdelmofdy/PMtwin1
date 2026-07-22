@@ -519,6 +519,12 @@ function MultiCheck({
   )
 }
 
+function parseOptionalAmount(raw: string): number | undefined {
+  if (raw.trim() === '') return undefined
+  const value = Number(raw)
+  return Number.isFinite(value) ? value : undefined
+}
+
 function CashFields({
   component,
   onChange,
@@ -527,6 +533,7 @@ function CashFields({
   onChange: (patch: Partial<CashCommercialComponent>) => void
 }) {
   const schedule = component.paymentSchedule ?? []
+  const budgetType = component.budgetType ?? 'to_be_negotiated'
   return (
     <div className="space-y-3">
       <div className="grid gap-2 sm:grid-cols-2">
@@ -537,12 +544,27 @@ function CashFields({
         />
         <select
           className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-          value={component.budgetType ?? 'to_be_negotiated'}
-          onChange={(e) =>
-            onChange({
-              budgetType: e.target.value as CashCommercialComponent['budgetType'],
-            })
-          }
+          value={budgetType}
+          onChange={(e) => {
+            const next =
+              e.target.value as CashCommercialComponent['budgetType']
+            if (next === 'range') {
+              onChange({
+                budgetType: next,
+                fixedAmount: undefined,
+              })
+              return
+            }
+            if (next === 'fixed') {
+              onChange({
+                budgetType: next,
+                minimumAmount: undefined,
+                maximumAmount: undefined,
+              })
+              return
+            }
+            onChange({ budgetType: next })
+          }}
         >
           <option value="fixed">Fixed</option>
           <option value="range">Range</option>
@@ -550,14 +572,46 @@ function CashFields({
           <option value="milestone_based">Milestone-based</option>
           <option value="to_be_negotiated">To be negotiated</option>
         </select>
-        <Input
-          type="number"
-          placeholder="Fixed amount"
-          value={component.fixedAmount ?? ''}
-          onChange={(e) =>
-            onChange({ fixedAmount: Number(e.target.value) || undefined })
-          }
-        />
+        {budgetType === 'fixed' ? (
+          <Input
+            type="number"
+            min={0}
+            placeholder="Fixed amount"
+            aria-label="Fixed amount"
+            value={component.fixedAmount ?? ''}
+            onChange={(e) =>
+              onChange({ fixedAmount: parseOptionalAmount(e.target.value) })
+            }
+          />
+        ) : null}
+        {budgetType === 'range' ? (
+          <>
+            <Input
+              type="number"
+              min={0}
+              placeholder="Min amount"
+              aria-label="Minimum amount"
+              value={component.minimumAmount ?? ''}
+              onChange={(e) =>
+                onChange({
+                  minimumAmount: parseOptionalAmount(e.target.value),
+                })
+              }
+            />
+            <Input
+              type="number"
+              min={0}
+              placeholder="Max amount"
+              aria-label="Maximum amount"
+              value={component.maximumAmount ?? ''}
+              onChange={(e) =>
+                onChange({
+                  maximumAmount: parseOptionalAmount(e.target.value),
+                })
+              }
+            />
+          </>
+        ) : null}
         <Input
           type="number"
           placeholder="Advance %"

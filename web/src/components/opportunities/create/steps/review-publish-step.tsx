@@ -246,6 +246,20 @@ export function ReviewPublishStep({
               <p className="mt-2 font-medium text-foreground">Payment</p>
               <p>Currency: {cash.currency || '—'}</p>
               <p>Budget type: {cash.budgetType || '—'}</p>
+              {cash.budgetType === 'fixed' ? (
+                <p>
+                  Fixed amount:{' '}
+                  {cash.fixedAmount != null ? cash.fixedAmount.toLocaleString() : '—'}
+                </p>
+              ) : null}
+              {cash.budgetType === 'range' ? (
+                <p>
+                  Range:{' '}
+                  {cash.minimumAmount != null || cash.maximumAmount != null
+                    ? `${cash.minimumAmount?.toLocaleString() ?? '—'} – ${cash.maximumAmount?.toLocaleString() ?? '—'}`
+                    : '—'}
+                </p>
+              ) : null}
               <p>Advance: {cash.advancePercentage != null ? `${cash.advancePercentage}%` : '—'}</p>
               <p>Retention: {cash.retentionPercentage != null ? `${cash.retentionPercentage}%` : '—'}</p>
               <p>

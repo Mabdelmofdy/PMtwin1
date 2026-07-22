@@ -257,7 +257,8 @@ Add **two** skills:
 | Applies to      | `Entire opportunity`                                        |
 | Currency        | `SAR`                                                       |
 | Budget type     | `Range`                                                     |
-| Fixed amount    | `235000` (mid estimate — required so cash budget validates) |
+| Min amount      | `120000`                                                    |
+| Max amount      | `350000`                                                    |
 | Advance %       | `10`                                                        |
 | Retention %     | `5`                                                         |
 | Payment terms   | `Milestone-Based`                                           |

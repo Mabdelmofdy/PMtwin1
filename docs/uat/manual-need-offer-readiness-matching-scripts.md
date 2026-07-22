@@ -134,6 +134,8 @@ Both scripts use the same **5-step** wizard. Matching structure is **auto-derive
 | Applies to | Entire opportunity |
 | Currency | `SAR` |
 | Budget type | `Range` |
+| Min amount | `150000` |
+| Max amount | `400000` |
 | Notes | `Budget range 150000 – 400000 SAR` |
 | Advance % / Retention % | `10` / `5` |
 | Payment terms | `Milestone-Based` |
@@ -223,6 +225,8 @@ Both scripts use the same **5-step** wizard. Matching structure is **auto-derive
 | Applies to | Entire opportunity |
 | Currency | `SAR` |
 | Budget type | `Range` |
+| Min amount | `120000` |
+| Max amount | `350000` |
 | Notes | `Fee range 120000 – 350000 SAR` |
 | Advance % / Retention % | `10` / `5` |
 | Payment terms | `Milestone-Based` |
