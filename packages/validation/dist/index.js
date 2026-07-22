@@ -619,8 +619,46 @@ function resolveBudget(input) {
       "minimumAmount"
     ]);
     if (amount !== null) return amount;
+    const fromSchedule = resolveBudgetFromPaymentSchedule(cash.paymentSchedule);
+    if (fromSchedule !== null) return fromSchedule;
+    const fromNotes = resolveBudgetFromNotes(cash.notes);
+    if (fromNotes !== null) return fromNotes;
   }
   return null;
+}
+function resolveBudgetFromPaymentSchedule(schedule) {
+  if (!Array.isArray(schedule)) return null;
+  for (const item of schedule) {
+    if (!item || typeof item !== "object") continue;
+    const amount = toNumber(item.amount);
+    if (amount !== null && amount > 0) return amount;
+  }
+  return null;
+}
+function resolveBudgetFromNotes(notes) {
+  if (!hasText(notes)) return null;
+  const match = String(notes).match(/(\d+(?:[.,]\d+)?)/);
+  if (!match?.[1]) return null;
+  return toNumber(match[1].replace(/,/g, ""));
+}
+function hasConfiguredCashCommercial(input) {
+  for (const source of [input.exchangeData, input.collaborationAttributes]) {
+    const structure = source?.commercialStructure;
+    if (!structure || typeof structure !== "object") continue;
+    const components = structure.components;
+    if (!Array.isArray(components)) continue;
+    const cash = components.find(
+      (component) => component !== null && typeof component === "object" && component.type === "cash" && component.enabled !== false
+    );
+    if (!cash) continue;
+    if (hasText(cash.notes) || hasText(cash.paymentTerms) || hasText(cash.budgetType)) {
+      return true;
+    }
+    if (Array.isArray(cash.paymentSchedule) && cash.paymentSchedule.length > 0) {
+      return true;
+    }
+  }
+  return false;
 }
 var budgetCashRequired = {
   id: "budget-cash-required",
@@ -636,6 +674,7 @@ var budgetCashRequired = {
     if (mode !== "cash") return null;
     const budget = resolveBudget(input);
     if (budget !== null && budget > 0) return null;
+    if (hasConfiguredCashCommercial(input)) return null;
     return budgetIssue(VAL_CODES.BUDGET_CASH_REQUIRED, ["budget"], PUBLISH_ONLY);
   }
 };

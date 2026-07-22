@@ -169,7 +169,7 @@ Add **two** skills:
 | Applies to | `Entire opportunity` |
 | Currency | `SAR` |
 | Budget type | `Range` |
-| Fixed amount | leave blank (range is in Notes) — or mid estimate `235000` if a number is required |
+| Fixed amount | `235000` (mid estimate — required so cash budget validates) |
 | Advance % | `10` |
 | Retention % | `5` |
 | Payment terms | `Milestone-Based` |

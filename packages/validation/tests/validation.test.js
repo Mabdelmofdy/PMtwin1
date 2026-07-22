@@ -206,6 +206,33 @@ describe('budget and exchange', () => {
     assert.ok(!result.issues.some((i) => i.code === VAL_CODES.BUDGET_CASH_REQUIRED))
   })
 
+  it('accepts cash commercial structure with range notes on publish', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        exchangeMode: 'cash',
+        collaborationAttributes: {
+          commercialStructure: {
+            components: [
+              {
+                type: 'cash',
+                enabled: true,
+                budgetType: 'range',
+                notes: 'Budget range 150000 – 400000 SAR',
+                paymentTerms: 'Milestone-Based',
+                paymentSchedule: [{ title: 'Kickoff', percentage: 20, amount: 55000 }],
+              },
+            ],
+          },
+        },
+      },
+      { operationScope: 'publish' },
+      { scopes: ['publish'], groups: ['budget'] },
+    )
+
+    assert.ok(!result.issues.some((i) => i.code === VAL_CODES.BUDGET_CASH_REQUIRED))
+  })
+
   it('uses config minimumBudget', () => {
     const result = validateOpportunityBusiness(
       { title: 'T', exchangeMode: 'cash', budget: 50 },

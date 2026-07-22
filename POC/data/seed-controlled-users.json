@@ -17,6 +17,22 @@
         "headline": "Senior Architect — Sustainable Design",
         "title": "Senior Architect",
         "phone": "+966 55 001 2000",
+        "website": "https://khalid.alharbi.pmtwin.test",
+        "linkedIn": "https://www.linkedin.com/in/khalid-alharbi-pmtwin",
+        "socialLinks": {
+          "linkedin": "https://www.linkedin.com/in/khalid-alharbi-pmtwin",
+          "x": "https://x.com/khalid_pmtwin"
+        },
+        "education": [
+          "BArch — King Saud University"
+        ],
+        "languages": [
+          "Arabic",
+          "English"
+        ],
+        "testimonials": [
+          "Delivered BIM coordination packages on time for Riyadh tower projects."
+        ],
         "location": "Riyadh, Saudi Arabia",
         "locationCity": "Riyadh",
         "bio": "Senior architect with 9+ years leading sustainable, BIM-driven building design across Saudi Arabia, focused on LEED-certified commercial and mixed-use developments.",
@@ -89,6 +105,22 @@
         "headline": "Architectural & BIM Consultant",
         "title": "BIM Consultant",
         "phone": "+966 55 002 2000",
+        "website": "https://sara.almutairi.pmtwin.test",
+        "linkedIn": "https://www.linkedin.com/in/sara-almutairi-pmtwin",
+        "socialLinks": {
+          "linkedin": "https://www.linkedin.com/in/sara-almutairi-pmtwin",
+          "x": "https://x.com/sara_pmtwin"
+        },
+        "education": [
+          "MSc Architecture — KFUPM"
+        ],
+        "languages": [
+          "Arabic",
+          "English"
+        ],
+        "testimonials": [
+          "Reliable Revit delivery and clash support across mixed-use packages."
+        ],
         "location": "Riyadh, Saudi Arabia",
         "locationCity": "Riyadh",
         "bio": "Multi-disciplinary architectural consultant offering BIM modelling, Revit detailing and structural coordination services to developers and contractors.",

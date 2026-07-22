@@ -237,7 +237,38 @@ function hasBudgetOrValueTerms(opportunity: Record<string, unknown>): boolean {
   if (asRecord(attrs.budget).min != null || hasPresentNumber(attrs.budget)) return true
   if (asRecord(attrs.budgetRange).min != null) return true
   if (hasPresentNumber(attrs.cashAmount)) return true
-  return hasAnyString(opportunity, ['valueTerms', 'paymentSchedule'])
+  if (hasAnyString(opportunity, ['valueTerms', 'paymentSchedule'])) return true
+  return hasCashCommercialStructure(exchangeData) || hasCashCommercialStructure(attrs)
+}
+
+function hasCashCommercialStructure(source: Record<string, unknown>): boolean {
+  const structure = asRecord(source.commercialStructure)
+  const components = structure.components
+  if (!Array.isArray(components)) return false
+  return components.some((component) => {
+    if (!component || typeof component !== 'object' || Array.isArray(component)) {
+      return false
+    }
+    const record = component as Record<string, unknown>
+    if (record.type !== 'cash' || record.enabled === false) return false
+    if (hasPresentNumber(record.fixedAmount) || hasPresentNumber(record.minimumAmount) || hasPresentNumber(record.maximumAmount)) {
+      return true
+    }
+    if (hasNonEmptyString(record.notes) || hasNonEmptyString(record.paymentTerms) || hasNonEmptyString(record.budgetType)) {
+      return true
+    }
+    return Array.isArray(record.paymentSchedule) && record.paymentSchedule.length > 0
+  })
+}
+
+function hasDeliveryMilestones(opportunity: Record<string, unknown>): boolean {
+  const attributes = nested(opportunity, 'attributes')
+  const collaboration = nested(opportunity, 'collaborationAttributes')
+  return (
+    hasAnyArray(opportunity, ['deliveryMilestones', 'milestones']) ||
+    hasAnyArray(attributes, ['deliveryMilestones', 'milestones']) ||
+    hasAnyArray(collaboration, ['deliveryMilestones', 'milestones'])
+  )
 }
 
 function hasPreferredPartnerType(opportunity: Record<string, unknown>): boolean {
@@ -262,14 +293,6 @@ function hasComplianceRequirements(opportunity: Record<string, unknown>): boolea
     hasAnyArray(opportunity, ['complianceRequirements', 'certifications', 'regulatoryRequirements']) ||
     hasAnyArray(scope, ['certifications', 'complianceRequirements', 'regulatoryRequirements']) ||
     hasAnyArray(attributes, ['complianceRequirements', 'certifications', 'regulatoryRequirements'])
-  )
-}
-
-function hasDeliveryMilestones(opportunity: Record<string, unknown>): boolean {
-  const attributes = nested(opportunity, 'attributes')
-  return (
-    hasAnyArray(opportunity, ['deliveryMilestones', 'milestones']) ||
-    hasAnyArray(attributes, ['deliveryMilestones', 'milestones'])
   )
 }
 

@@ -64,8 +64,57 @@ function resolveBudget(input: {
       'minimumAmount',
     ])
     if (amount !== null) return amount
+    const fromSchedule = resolveBudgetFromPaymentSchedule(cash.paymentSchedule)
+    if (fromSchedule !== null) return fromSchedule
+    const fromNotes = resolveBudgetFromNotes(cash.notes)
+    if (fromNotes !== null) return fromNotes
   }
   return null
+}
+
+function resolveBudgetFromPaymentSchedule(schedule: unknown): number | null {
+  if (!Array.isArray(schedule)) return null
+  for (const item of schedule) {
+    if (!item || typeof item !== 'object') continue
+    const amount = toNumber((item as Record<string, unknown>).amount)
+    if (amount !== null && amount > 0) return amount
+  }
+  return null
+}
+
+/** Parse first positive number from notes like "Budget range 150000 – 400000 SAR". */
+function resolveBudgetFromNotes(notes: unknown): number | null {
+  if (!hasText(notes)) return null
+  const match = String(notes).match(/(\d+(?:[.,]\d+)?)/)
+  if (!match?.[1]) return null
+  return toNumber(match[1].replace(/,/g, ''))
+}
+
+function hasConfiguredCashCommercial(input: {
+  exchangeData?: Readonly<Record<string, unknown>>
+  collaborationAttributes?: Readonly<Record<string, unknown>>
+}): boolean {
+  for (const source of [input.exchangeData, input.collaborationAttributes]) {
+    const structure = source?.commercialStructure
+    if (!structure || typeof structure !== 'object') continue
+    const components = (structure as Record<string, unknown>).components
+    if (!Array.isArray(components)) continue
+    const cash = components.find(
+      (component) =>
+        component !== null &&
+        typeof component === 'object' &&
+        (component as Record<string, unknown>).type === 'cash' &&
+        (component as Record<string, unknown>).enabled !== false,
+    ) as Record<string, unknown> | undefined
+    if (!cash) continue
+    if (hasText(cash.notes) || hasText(cash.paymentTerms) || hasText(cash.budgetType)) {
+      return true
+    }
+    if (Array.isArray(cash.paymentSchedule) && cash.paymentSchedule.length > 0) {
+      return true
+    }
+  }
+  return false
 }
 
 export const budgetCashRequired: ValidationRule = {
@@ -82,6 +131,8 @@ export const budgetCashRequired: ValidationRule = {
     if (mode !== 'cash') return null
     const budget = resolveBudget(input)
     if (budget !== null && budget > 0) return null
+    // Creation 3.0 cash component with range/notes/schedule counts as budget terms.
+    if (hasConfiguredCashCommercial(input)) return null
     return budgetIssue(VAL_CODES.BUDGET_CASH_REQUIRED, ['budget'], PUBLISH_ONLY)
   },
 }

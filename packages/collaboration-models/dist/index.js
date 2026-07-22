@@ -3097,7 +3097,32 @@ function hasBudgetOrValueTerms(opportunity) {
   if (asRecord(attrs2.budget).min != null || hasPresentNumber(attrs2.budget)) return true;
   if (asRecord(attrs2.budgetRange).min != null) return true;
   if (hasPresentNumber(attrs2.cashAmount)) return true;
-  return hasAnyString(opportunity, ["valueTerms", "paymentSchedule"]);
+  if (hasAnyString(opportunity, ["valueTerms", "paymentSchedule"])) return true;
+  return hasCashCommercialStructure(exchangeData) || hasCashCommercialStructure(attrs2);
+}
+function hasCashCommercialStructure(source) {
+  const structure = asRecord(source.commercialStructure);
+  const components = structure.components;
+  if (!Array.isArray(components)) return false;
+  return components.some((component) => {
+    if (!component || typeof component !== "object" || Array.isArray(component)) {
+      return false;
+    }
+    const record = component;
+    if (record.type !== "cash" || record.enabled === false) return false;
+    if (hasPresentNumber(record.fixedAmount) || hasPresentNumber(record.minimumAmount) || hasPresentNumber(record.maximumAmount)) {
+      return true;
+    }
+    if (hasNonEmptyString(record.notes) || hasNonEmptyString(record.paymentTerms) || hasNonEmptyString(record.budgetType)) {
+      return true;
+    }
+    return Array.isArray(record.paymentSchedule) && record.paymentSchedule.length > 0;
+  });
+}
+function hasDeliveryMilestones(opportunity) {
+  const attributes = nested(opportunity, "attributes");
+  const collaboration = nested(opportunity, "collaborationAttributes");
+  return hasAnyArray(opportunity, ["deliveryMilestones", "milestones"]) || hasAnyArray(attributes, ["deliveryMilestones", "milestones"]) || hasAnyArray(collaboration, ["deliveryMilestones", "milestones"]);
 }
 function hasPreferredPartnerType(opportunity) {
   const attributes = nested(opportunity, "attributes");
@@ -3110,10 +3135,6 @@ function hasComplianceRequirements(opportunity) {
   const scope = nested(opportunity, "scope");
   const attributes = nested(opportunity, "attributes");
   return hasAnyArray(opportunity, ["complianceRequirements", "certifications", "regulatoryRequirements"]) || hasAnyArray(scope, ["certifications", "complianceRequirements", "regulatoryRequirements"]) || hasAnyArray(attributes, ["complianceRequirements", "certifications", "regulatoryRequirements"]);
-}
-function hasDeliveryMilestones(opportunity) {
-  const attributes = nested(opportunity, "attributes");
-  return hasAnyArray(opportunity, ["deliveryMilestones", "milestones"]) || hasAnyArray(attributes, ["deliveryMilestones", "milestones"]);
 }
 var CORE_PRESENCE = {
   title: (o) => hasAnyString(o, ["title", "name"]),

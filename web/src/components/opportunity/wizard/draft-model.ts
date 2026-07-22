@@ -481,7 +481,17 @@ export function buildCollaborationCommandPayload(
     cashComponent?.type === 'cash'
       ? cashComponent.fixedAmount ??
         cashComponent.maximumAmount ??
-        cashComponent.minimumAmount
+        cashComponent.minimumAmount ??
+        (() => {
+          const scheduleAmount = cashComponent.paymentSchedule?.find(
+            (item) => typeof item.amount === 'number' && item.amount > 0,
+          )?.amount
+          if (scheduleAmount != null) return scheduleAmount
+          const noteMatch = cashComponent.notes?.match(/(\d+(?:[.,]\d+)?)/)
+          if (!noteMatch?.[1]) return undefined
+          const parsed = Number(noteMatch[1].replace(/,/g, ''))
+          return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined
+        })()
       : undefined
   return {
     title: synced.title,
