@@ -59,7 +59,9 @@ function CommandDialog({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        {children}
+        <Command className="max-h-[min(70vh,28rem)] rounded-none bg-transparent p-0">
+          {children}
+        </Command>
       </DialogContent>
     </Dialog>
   )
