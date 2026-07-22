@@ -421,12 +421,24 @@ export function buildOpportunityWizardReadinessInput(
     ...(commercialTermsFromStructure
       ? { commercialTerms: commercialTermsFromStructure }
       : {}),
-    normalized:
-      intent === 'offer'
-        ? { offeredServices: services }
+    normalized: {
+      role: hasText(draft.targetRole) ? draft.targetRole!.trim() : undefined,
+      ...(intent === 'offer'
+        ? {
+            offeredServices: skills.length > 0 ? skills : services,
+            skills: skills.length > 0 ? skills : services,
+          }
         : intent === 'hybrid'
-          ? { requiredServices: services, offeredServices: services }
-          : { requiredServices: services },
+          ? {
+              requiredServices: skills.length > 0 ? skills : services,
+              offeredServices: skills.length > 0 ? skills : services,
+              skills: skills.length > 0 ? skills : services,
+            }
+          : {
+              requiredServices: skills.length > 0 ? skills : services,
+              skills: skills.length > 0 ? skills : services,
+            }),
+    },
   }
 
   if (intent) {

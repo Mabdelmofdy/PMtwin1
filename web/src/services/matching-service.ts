@@ -384,6 +384,91 @@ function runPublishMatchingForOpportunity(
   }
 }
 
+export type BatchPublishMatchingResult = {
+  readonly runId: string
+  readonly discoveredMatchesCount: number
+  readonly skippedDuplicatesCount: number
+  readonly matchingErrors: readonly string[]
+  readonly postMatchIds: readonly string[]
+  readonly opportunitiesProcessed: number
+  readonly status: MatchingRunStatus
+  readonly auditWarning?: string
+}
+
+/**
+ * Admin / ops: re-run publish (auto / one_way) matching for every published
+ * opportunity. Use this for Need↔Offer pairs — circular matching alone will
+ * not discover them (circular requires cycles of length ≥ 3).
+ */
+function runPublishMatchingForPublishedOpportunities(
+  deps?: PublishMatchingDeps & {
+    readonly listPublishedOpportunities?: () => readonly Opportunity[]
+  },
+): BatchPublishMatchingResult {
+  const startedAt = new Date().toISOString()
+  const runId = createPublishRunId()
+  const listPublishedOpportunities =
+    deps?.listPublishedOpportunities
+    ?? (() => opportunityRepository.getAll().filter((opp) => opp.status === 'published'))
+
+  const published = listPublishedOpportunities()
+  const seenPostMatchIds = new Set<string>()
+  const matchingErrors: string[] = []
+  let discoveredMatchesCount = 0
+  let skippedDuplicatesCount = 0
+
+  for (const opportunity of published) {
+    const result = runPublishMatchingForOpportunity(opportunity.id, {
+      ...deps,
+      // Suppress per-opportunity audit; we write one batch audit below.
+      recordMatchingRunAudit: () => undefined,
+      listPublishedOpportunities: () => published,
+    })
+    discoveredMatchesCount += result.discoveredMatchesCount
+    skippedDuplicatesCount += result.skippedDuplicatesCount
+    matchingErrors.push(...result.matchingErrors)
+    for (const id of result.postMatchIds) {
+      if (!seenPostMatchIds.has(id)) seenPostMatchIds.add(id)
+    }
+  }
+
+  const status = resolveMatchingRunStatus(matchingErrors)
+  let auditWarning: string | undefined
+  try {
+    const record =
+      deps?.recordMatchingRunAudit
+      ?? ((auditInput: RecordMatchingRunAuditInput) => {
+        recordMatchingRunAudit(auditRepository, auditInput)
+      })
+    record({
+      runId,
+      runType: 'publish',
+      actorId: deps?.actorId,
+      actorRole: deps?.actorRole,
+      startedAt,
+      completedAt: new Date().toISOString(),
+      discoveredMatchesCount,
+      skippedDuplicatesCount,
+      matchingErrors,
+      status,
+    })
+  } catch {
+    auditWarning =
+      'Matching results were saved, but the audit record could not be written.'
+  }
+
+  return {
+    runId,
+    discoveredMatchesCount,
+    skippedDuplicatesCount,
+    matchingErrors,
+    postMatchIds: [...seenPostMatchIds],
+    opportunitiesProcessed: published.length,
+    status,
+    auditWarning,
+  }
+}
+
 function runCircularMatchingForPublishedOpportunities(
   deps?: CircularMatchingDeps,
 ): CircularMatchingResult {
@@ -668,6 +753,7 @@ export const matchingService = {
   discoverNeedOfferMatch,
   resolveDiscoverMatchScore,
   runPublishMatchingForOpportunity,
+  runPublishMatchingForPublishedOpportunities,
   runCircularMatchingForOpportunity,
   runCircularMatchingForPublishedOpportunities,
 

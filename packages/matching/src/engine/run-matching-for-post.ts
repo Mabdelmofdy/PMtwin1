@@ -20,15 +20,79 @@ import type {
 } from '../types/model-results.ts'
 import type { OpportunityPost } from '../types/opportunity.ts'
 
+function hasServiceSignal(
+  normalized: NonNullable<OpportunityPost['normalized']>,
+): boolean {
+  return (
+    (normalized.requiredServices?.length ?? 0) > 0
+    || (normalized.offeredServices?.length ?? 0) > 0
+    || (normalized.skills?.length ?? 0) > 0
+    || (normalized.coreSkills?.length ?? 0) > 0
+  )
+}
+
+/** Wizard often persists `{ requiredServices: [] }` without role — treat as missing. */
+function isSparseNormalized(
+  normalized: OpportunityPost['normalized'] | undefined,
+): boolean {
+  if (!normalized) return true
+  if (!normalized.role) return true
+  return !hasServiceSignal(normalized)
+}
+
 function normalizePost(
   post: OpportunityPost,
   canonical: CanonicalData,
   config: MatchingConfig,
 ): OpportunityPost {
-  if (post.normalized) return post
+  if (post.normalized && !isSparseNormalized(post.normalized)) {
+    return post
+  }
+
+  const extracted = extractAndNormalize(
+    { ...post, normalized: undefined },
+    canonical,
+    { config },
+  )
+  const existing = post.normalized
+  if (!existing) {
+    return { ...post, normalized: extracted }
+  }
+
   return {
     ...post,
-    normalized: extractAndNormalize(post, canonical, { config }),
+    normalized: {
+      ...extracted,
+      ...existing,
+      role: existing.role || extracted.role,
+      location: existing.location || extracted.location,
+      requiredServices:
+        (existing.requiredServices?.length
+          ? existing.requiredServices
+          : extracted.requiredServices) ?? [],
+      offeredServices:
+        (existing.offeredServices?.length
+          ? existing.offeredServices
+          : extracted.offeredServices) ?? [],
+      skills:
+        (existing.skills?.length ? existing.skills : extracted.skills) ?? [],
+      coreSkills:
+        (existing.coreSkills?.length
+          ? existing.coreSkills
+          : extracted.coreSkills) ?? [],
+      modelType: existing.modelType ?? extracted.modelType,
+      subModelType: existing.subModelType ?? extracted.subModelType,
+      categories:
+        (existing.categories?.length
+          ? existing.categories
+          : extracted.categories) ?? [],
+      budget: existing.budget ?? extracted.budget,
+      timeline: existing.timeline ?? extracted.timeline,
+      deadline: existing.deadline ?? extracted.deadline,
+      availability: existing.availability ?? extracted.availability,
+      reputation: existing.reputation ?? extracted.reputation,
+      intent: existing.intent ?? extracted.intent,
+    },
   }
 }
 

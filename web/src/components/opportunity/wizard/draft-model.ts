@@ -461,9 +461,18 @@ export function buildOpportunityDraftInput(
           }))
         : base.deliveryMilestones,
     normalized: {
+      role: synced.targetRole || undefined,
       ...(synced.intent === 'offer'
-        ? { offeredServices: services }
-        : { requiredServices: services }),
+        ? {
+            offeredServices:
+              legacySkills.length > 0 ? legacySkills : services,
+            skills: legacySkills.length > 0 ? legacySkills : services,
+          }
+        : {
+            requiredServices:
+              legacySkills.length > 0 ? legacySkills : services,
+            skills: legacySkills.length > 0 ? legacySkills : services,
+          }),
     },
   }
 }

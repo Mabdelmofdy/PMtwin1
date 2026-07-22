@@ -256,4 +256,60 @@ describe('runMatchingForPost — limits and constraints', () => {
     assert.equal(DEFAULT_MATCHING_CONFIG.POST_TO_POST_THRESHOLD, 0.50)
     assert.ok(results[0].matches[0].matchScore >= DEFAULT_MATCHING_CONFIG.POST_TO_POST_THRESHOLD)
   })
+
+  it('discovers one_way when wizard normalized is incomplete but scope has skills', () => {
+    const need = {
+      id: 'need-wizard-1',
+      intent: 'request',
+      status: 'published',
+      creatorId: 'khalid',
+      exchangeMode: 'cash',
+      modelType: 'project_based',
+      subModelType: 'task_based',
+      mainCollaborationModel: 'cash_subcontracting',
+      location: 'Riyadh',
+      scope: {
+        sectors: ['Construction'],
+        requiredSkills: ['BIM', 'Revit'],
+        coreSkills: ['BIM', 'Revit'],
+      },
+      attributes: { targetRole: 'Architect' },
+      normalized: { requiredServices: [] },
+    }
+    const offer = {
+      id: 'offer-wizard-1',
+      intent: 'offer',
+      status: 'published',
+      creatorId: 'sara',
+      exchangeMode: 'cash',
+      modelType: 'project_based',
+      subModelType: 'task_based',
+      mainCollaborationModel: 'cash_subcontracting',
+      location: 'Riyadh',
+      scope: {
+        sectors: ['Construction'],
+        offeredSkills: ['BIM', 'Revit'],
+        coreSkills: ['BIM', 'Revit'],
+      },
+      attributes: { targetRole: 'Architect' },
+      normalized: { offeredServices: [] },
+    }
+
+    const results = runMatchingForPost({
+      anchorPost: need,
+      opportunities: [need, offer],
+      config,
+      options: { model: 'one_way' },
+    })
+
+    const oneWay = results.find((result) => result.model === 'one_way')
+    assert.ok(oneWay)
+    assert.ok(
+      oneWay.matches.some(
+        (match) =>
+          match.needOpportunityId === need.id
+          && match.offerOpportunityId === offer.id,
+      ),
+    )
+  })
 })

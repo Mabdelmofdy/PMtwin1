@@ -133,7 +133,7 @@ function passesCoreSkills(needNorm, offerNorm) {
 function passesServiceOverlap(needNorm, offerNorm, config) {
   const needServices = needNorm.requiredServices ?? [];
   if (!needServices.length) return { ok: true };
-  const offerServices = offerNorm.offeredServices ?? offerNorm.skills ?? [];
+  const offerServices = (offerNorm.offeredServices?.length ? offerNorm.offeredServices : void 0) ?? (offerNorm.skills?.length ? offerNorm.skills : void 0) ?? (offerNorm.requiredServices?.length ? offerNorm.requiredServices : void 0) ?? [];
   const overlap = serviceOverlapScore(needServices, offerServices);
   const minOverlap = config.MIN_REQUIRED_SERVICE_OVERLAP ?? 0.5;
   if (overlap < minOverlap) {
@@ -367,8 +367,8 @@ function labelFromScore(score) {
 
 // src/scoring/post-to-post-scoring.ts
 function attributeOverlap(needNorm, offerNorm) {
-  const needServices = needNorm.requiredServices ?? needNorm.skills ?? [];
-  const offerServices = offerNorm.offeredServices ?? offerNorm.skills ?? [];
+  const needServices = (needNorm.requiredServices?.length ? needNorm.requiredServices : void 0) ?? (needNorm.skills?.length ? needNorm.skills : void 0) ?? [];
+  const offerServices = (offerNorm.offeredServices?.length ? offerNorm.offeredServices : void 0) ?? (offerNorm.skills?.length ? offerNorm.skills : void 0) ?? (offerNorm.requiredServices?.length ? offerNorm.requiredServices : void 0) ?? [];
   if (!needServices.length) return { score: 1, label: "Match", matched: 0, total: 0 };
   const needSet = new Set(needServices.map((service) => String(service).toLowerCase()));
   const offerSet = new Set(offerServices.map((service) => String(service).toLowerCase()));
@@ -3667,11 +3667,48 @@ function findCircularExchangesPure(needPosts, offerPosts, config, canonical = {}
 }
 
 // src/engine/run-matching-for-post.ts
+function hasServiceSignal(normalized2) {
+  return (normalized2.requiredServices?.length ?? 0) > 0 || (normalized2.offeredServices?.length ?? 0) > 0 || (normalized2.skills?.length ?? 0) > 0 || (normalized2.coreSkills?.length ?? 0) > 0;
+}
+function isSparseNormalized(normalized2) {
+  if (!normalized2) return true;
+  if (!normalized2.role) return true;
+  return !hasServiceSignal(normalized2);
+}
 function normalizePost(post, canonical, config) {
-  if (post.normalized) return post;
+  if (post.normalized && !isSparseNormalized(post.normalized)) {
+    return post;
+  }
+  const extracted = extractAndNormalize(
+    { ...post, normalized: void 0 },
+    canonical,
+    { config }
+  );
+  const existing = post.normalized;
+  if (!existing) {
+    return { ...post, normalized: extracted };
+  }
   return {
     ...post,
-    normalized: extractAndNormalize(post, canonical, { config })
+    normalized: {
+      ...extracted,
+      ...existing,
+      role: existing.role || extracted.role,
+      location: existing.location || extracted.location,
+      requiredServices: (existing.requiredServices?.length ? existing.requiredServices : extracted.requiredServices) ?? [],
+      offeredServices: (existing.offeredServices?.length ? existing.offeredServices : extracted.offeredServices) ?? [],
+      skills: (existing.skills?.length ? existing.skills : extracted.skills) ?? [],
+      coreSkills: (existing.coreSkills?.length ? existing.coreSkills : extracted.coreSkills) ?? [],
+      modelType: existing.modelType ?? extracted.modelType,
+      subModelType: existing.subModelType ?? extracted.subModelType,
+      categories: (existing.categories?.length ? existing.categories : extracted.categories) ?? [],
+      budget: existing.budget ?? extracted.budget,
+      timeline: existing.timeline ?? extracted.timeline,
+      deadline: existing.deadline ?? extracted.deadline,
+      availability: existing.availability ?? extracted.availability,
+      reputation: existing.reputation ?? extracted.reputation,
+      intent: existing.intent ?? extracted.intent
+    }
   };
 }
 function splitPool(pool) {

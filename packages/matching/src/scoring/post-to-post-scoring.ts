@@ -14,8 +14,15 @@ export function attributeOverlap(
   needNorm: NormalizedPost,
   offerNorm: NormalizedPost,
 ): ScoreFactorResult {
-  const needServices = needNorm.requiredServices ?? needNorm.skills ?? []
-  const offerServices = offerNorm.offeredServices ?? offerNorm.skills ?? []
+  const needServices =
+    (needNorm.requiredServices?.length ? needNorm.requiredServices : undefined)
+    ?? (needNorm.skills?.length ? needNorm.skills : undefined)
+    ?? []
+  const offerServices =
+    (offerNorm.offeredServices?.length ? offerNorm.offeredServices : undefined)
+    ?? (offerNorm.skills?.length ? offerNorm.skills : undefined)
+    ?? (offerNorm.requiredServices?.length ? offerNorm.requiredServices : undefined)
+    ?? []
 
   if (!needServices.length) return { score: 1, label: 'Match', matched: 0, total: 0 }
 

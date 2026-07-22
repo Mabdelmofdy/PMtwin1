@@ -111,7 +111,11 @@ export function passesServiceOverlap(
   const needServices = needNorm.requiredServices ?? []
   if (!needServices.length) return { ok: true }
 
-  const offerServices = offerNorm.offeredServices ?? offerNorm.skills ?? []
+  const offerServices =
+    (offerNorm.offeredServices?.length ? offerNorm.offeredServices : undefined)
+    ?? (offerNorm.skills?.length ? offerNorm.skills : undefined)
+    ?? (offerNorm.requiredServices?.length ? offerNorm.requiredServices : undefined)
+    ?? []
   const overlap = serviceOverlapScore(needServices, offerServices)
   const minOverlap = config.MIN_REQUIRED_SERVICE_OVERLAP ?? 0.50
 

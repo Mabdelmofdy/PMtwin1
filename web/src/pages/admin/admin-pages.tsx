@@ -77,6 +77,11 @@ import {
   showCircularMatchingFeedback,
 } from '@/lib/run-circular-matching-feedback.ts'
 import { runCircularMatchingUiAction } from '@/lib/run-circular-matching-ui-action.ts'
+import {
+  showPublishMatchingAccessDenied,
+  showPublishMatchingFeedback,
+} from '@/lib/run-publish-matching-feedback.ts'
+import { runPublishMatchingUiAction } from '@/lib/run-publish-matching-ui-action.ts'
 import { useAuth } from '@/providers/auth-provider.tsx'
 import { VettingReviewDialog } from '@/components/admin/vetting-review-dialog.tsx'
 import { VettingSlaBadge } from '@/components/admin/vetting-sla-badge.tsx'
@@ -412,6 +417,29 @@ export function AdminMatchingPage() {
     [version],
   )
 
+  function handleRunPublishMatching() {
+    if (isRunning) return
+    setIsRunning(true)
+
+    try {
+      const result = runPublishMatchingUiAction({
+        userId: user?.id,
+        userRole: user?.role,
+      })
+      if (!result.success) {
+        showPublishMatchingAccessDenied(result.message)
+        return
+      }
+      showPublishMatchingFeedback(result)
+    } catch (error) {
+      toast.error('Matching failed.', {
+        description: error instanceof Error ? error.message : 'Unexpected error',
+      })
+    } finally {
+      setIsRunning(false)
+    }
+  }
+
   function handleRunCircularMatching() {
     if (isRunning) return
     setIsRunning(true)
@@ -453,15 +481,24 @@ export function AdminMatchingPage() {
         <PmPageHeader
           label="Admin"
           title="Matching engine"
-          description="Run matching, review queues, and diagnostics."
+          description="Run Need↔Offer matching (and optional circular chains), then review matches."
           metric={<PmPageHeroMetric value={matches.length} label="Matches" />}
           badges={
             <PmBadge tone="muted">{matchingRuns.length} recent runs</PmBadge>
           }
           actions={
-            <PmButton disabled={isRunning} onClick={handleRunCircularMatching}>
-              {isRunning ? 'Running circular matching…' : 'Run circular matching'}
-            </PmButton>
+            <div className="flex flex-wrap gap-2">
+              <PmButton disabled={isRunning} onClick={handleRunPublishMatching}>
+                {isRunning ? 'Running matching…' : 'Run matching'}
+              </PmButton>
+              <PmButton
+                variant="outline"
+                disabled={isRunning}
+                onClick={handleRunCircularMatching}
+              >
+                Run circular
+              </PmButton>
+            </div>
           }
         />
       }
@@ -470,7 +507,7 @@ export function AdminMatchingPage() {
         <section className="space-y-4">
           <PmSectionHeader
             title="Recent matching runs"
-            description="Audit trail for manual circular matching jobs."
+            description="Audit trail for admin matching jobs (publish/one_way and circular)."
           />
           <PmDataTable
             density="compact"
@@ -482,14 +519,17 @@ export function AdminMatchingPage() {
               <PmTableEmpty
                 variant="no-data"
                 title="No matching runs yet"
-                description="Run circular matching to populate the audit trail."
+                description="Use Run matching for Need↔Offer pairs, or Run circular for multi-party chains."
               />
             }
           />
         </section>
 
         <section className="space-y-4">
-          <PmSectionHeader title="Recent matches" description="Latest match records (same presentation as user portal)." />
+          <PmSectionHeader
+            title="Recent matches"
+            description="Latest match records. Need↔Offer UAT pairs appear after both opportunities are published, or after Run matching."
+          />
           <PmDataTable
             density="compact"
             columns={matchColumns}
@@ -501,7 +541,13 @@ export function AdminMatchingPage() {
                 <PmTableToolbar />
               </PmToolbarSurface>
             }
-            empty={<PmTableEmpty variant="no-data" title="No matches" />}
+            empty={
+              <PmTableEmpty
+                variant="no-data"
+                title="No matches"
+                description="Publish complementary Need and Offer opportunities, then click Run matching."
+              />
+            }
           />
         </section>
       </div>
