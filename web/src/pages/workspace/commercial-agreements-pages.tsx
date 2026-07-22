@@ -71,7 +71,7 @@ import {
   canViewDealDetail,
   filterDealsForViewer,
 } from '@/lib/entity-view-visibility.ts'
-import { formatDealDisplayTitle } from '@/lib/entity-display-titles.ts'
+import { formatDealDisplayTitle, formatDealDisplayTitleWithOpportunities } from '@/lib/entity-display-titles.ts'
 import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import { PmTechnicalDetails } from '@/components/ui/pm-technical-details.tsx'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -170,7 +170,10 @@ function CommercialAgreementListCard({ commercialAgreement }: { commercialAgreem
     : null
   return (
     <PmEntityListCard
-      title={formatDealDisplayTitle(commercialAgreement)}
+      title={formatDealDisplayTitleWithOpportunities(
+        commercialAgreement,
+        (id) => opportunitiesApi.get(id),
+      )}
       href={`/commercial-agreements/${commercialAgreement.id}`}
       badge={<PmWorkflowBadge status={commercialAgreement.status} entity="deal" size="sm" />}
       meta={
@@ -247,7 +250,7 @@ export function CommercialAgreementsPage() {
       label: 'Title',
       cell: (d) => (
         <Link to={`/commercial-agreements/${d.id}`} className={cn(pmTypography.bodySm, 'font-medium hover:text-primary')}>
-          {formatDealDisplayTitle(d)}
+          {formatDealDisplayTitleWithOpportunities(d, (id) => opportunitiesApi.get(id))}
         </Link>
       ),
     },
@@ -576,7 +579,10 @@ export function CommercialAgreementDetailPage() {
       header={
         <PmPageHeader
           label={productLanguage.label('commercialAgreement')}
-          title={formatDealDisplayTitle(model.commercialAgreement)}
+          title={formatDealDisplayTitle(model.commercialAgreement, {
+            needTitle: model.needTitle,
+            offerTitle: model.offerTitle,
+          })}
           description={`Created ${formatDate(model.commercialAgreement.createdAt)} · Updated ${formatDate(model.commercialAgreement.updatedAt)}`}
           tone="deal"
           metric={

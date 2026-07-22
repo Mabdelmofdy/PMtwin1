@@ -1,11 +1,14 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import {
+  buildCommercialAgreementStoredTitle,
   formatContractDisplayTitle,
   formatDealDisplayTitle,
+  formatDealDisplayTitleWithOpportunities,
   formatMatchPairingLabel,
   formatNegotiationDisplayTitle,
   formatOpportunityDisplayTitle,
+  isTechnicalStoredTitle,
   UNTITLED_CONTRACT,
   UNTITLED_DEAL,
   UNTITLED_NEGOTIATION,
@@ -22,6 +25,57 @@ describe('entity-display-titles', () => {
   it('formats deal title with fallback', () => {
     assert.equal(formatDealDisplayTitle({ title: 'Design Collaboration' }), 'Design Collaboration')
     assert.equal(formatDealDisplayTitle(undefined), UNTITLED_DEAL)
+  })
+
+  it('skips technical deal titles in favor of Need/Offer subjects', () => {
+    assert.equal(
+      formatDealDisplayTitle(
+        { title: 'Commercial Agreement – pm-e2cf6f2d-ba01-4382-b5cb-a8523adc1f51' },
+        {
+          needTitle: 'BIM Architect for Riyadh tower',
+          offerTitle: 'BIM Architect delivery (Revit)',
+        },
+      ),
+      'BIM Architect for Riyadh tower ↔ BIM Architect delivery (Revit)',
+    )
+    assert.equal(
+      formatDealDisplayTitle({ title: 'Commercial Agreement – pm-confirmed' }),
+      UNTITLED_DEAL,
+    )
+  })
+
+  it('builds stored commercial agreement titles from subjects', () => {
+    assert.equal(
+      buildCommercialAgreementStoredTitle({
+        needTitle: 'BIM Architect for Riyadh tower',
+        offerTitle: 'BIM Architect delivery (Revit)',
+      }),
+      'BIM Architect for Riyadh tower ↔ BIM Architect delivery (Revit)',
+    )
+    assert.equal(buildCommercialAgreementStoredTitle({}), UNTITLED_DEAL)
+  })
+
+  it('detects technical stored titles', () => {
+    assert.equal(isTechnicalStoredTitle('Commercial Agreement – pm-confirmed'), true)
+    assert.equal(isTechnicalStoredTitle('Deal – pm-1'), true)
+    assert.equal(isTechnicalStoredTitle('Airport Design Deal'), false)
+  })
+
+  it('formats deal title via opportunity lookup', () => {
+    const title = formatDealDisplayTitleWithOpportunities(
+      {
+        title: 'Commercial Agreement – pm-1',
+        needOpportunityId: 'need-1',
+        offerOpportunityId: 'offer-1',
+      },
+      (id) =>
+        id === 'need-1'
+          ? { id, title: 'Need A', status: 'published' }
+          : id === 'offer-1'
+            ? { id, title: 'Offer B', status: 'published' }
+            : undefined,
+    )
+    assert.equal(title, 'Need A ↔ Offer B')
   })
 
   it('formats negotiation title from linked opportunity', () => {
@@ -46,6 +100,14 @@ describe('entity-display-titles', () => {
     assert.equal(
       formatContractDisplayTitle({ needTitle: 'Architect Needed' }),
       'Architect Needed Contract',
+    )
+    assert.equal(
+      formatContractDisplayTitle({
+        dealTitle: 'Commercial Agreement – pm-e2cf6f2d-ba01-4382-b5cb-a8523adc1f51',
+        needTitle: 'BIM Architect for Riyadh tower',
+        offerTitle: 'BIM Architect delivery (Revit)',
+      }),
+      'BIM Architect for Riyadh tower ↔ BIM Architect delivery (Revit) Contract',
     )
     assert.equal(formatContractDisplayTitle({}), UNTITLED_CONTRACT)
   })

@@ -61,7 +61,10 @@ export function AdminCommercialAgreementDetailPage() {
     )
   }
 
-  const presentation = formatCommercialAgreementPresentation(agreement)
+  const presentation = formatCommercialAgreementPresentation(
+    agreement,
+    (opportunityId) => opportunitiesApi.get(opportunityId),
+  )
   const opportunity = agreement.opportunityId
     ? opportunitiesApi.get(agreement.opportunityId)
     : undefined

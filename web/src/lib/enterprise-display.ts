@@ -150,13 +150,24 @@ export function formatNegotiationPresentation(
 }
 
 export function formatCommercialAgreementPresentation(
-  agreement: Pick<Deal, 'id' | 'title' | 'createdAt'>,
+  agreement: Pick<
+    Deal,
+    'id' | 'title' | 'createdAt' | 'needOpportunityId' | 'offerOpportunityId'
+  >,
+  getOpportunity?: OpportunityLookup,
 ): {
   readonly name: string
   readonly reference: string
 } {
   return {
-    name: formatDealDisplayTitle(agreement),
+    name: formatDealDisplayTitle(agreement, {
+      needTitle: agreement.needOpportunityId
+        ? getOpportunity?.(agreement.needOpportunityId)?.title
+        : null,
+      offerTitle: agreement.offerOpportunityId
+        ? getOpportunity?.(agreement.offerOpportunityId)?.title
+        : null,
+    }),
     reference: formatEnterpriseReference(
       'commercial_agreement',
       agreement.id,

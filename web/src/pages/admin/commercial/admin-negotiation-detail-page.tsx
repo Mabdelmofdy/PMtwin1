@@ -118,7 +118,9 @@ export function AdminNegotiationDetailPage() {
     ? formatEnterpriseReference('post_match', negotiation.matchId, negotiation.createdAt)
     : null
   const ca = relatedCas[0]
-  const caView = ca ? formatCommercialAgreementPresentation(ca) : null
+  const caView = ca
+    ? formatCommercialAgreementPresentation(ca, (oid) => opportunitiesApi.get(oid))
+    : null
 
   const related: AdminRelatedObject[] = [
     {

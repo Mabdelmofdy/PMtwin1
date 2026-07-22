@@ -17,7 +17,7 @@ import {
 } from '@/lib/enterprise-display.ts'
 import {
   formatContractDisplayTitle,
-  formatDealDisplayTitle,
+  formatDealDisplayTitleWithOpportunities,
   formatNegotiationDisplayTitle,
   formatOpportunityDisplayTitle,
   type OpportunityLookup,
@@ -152,7 +152,11 @@ export function adminNegotiationSearchText(
 }
 
 export function adminDealSearchText(deal: Deal): string {
-  return [formatDealDisplayTitle(deal), deal.status, deal.exchangeMode]
+  return [
+    formatDealDisplayTitleWithOpportunities(deal, (id) => opportunitiesApi.get(id)),
+    deal.status,
+    deal.exchangeMode,
+  ]
     .filter(Boolean)
     .join(' ')
 }
@@ -339,8 +343,9 @@ export function buildAdminDealListColumns(): PmDataTableColumn<Deal>[] {
     {
       id: 'title',
       label: 'Agreement Name',
-      cell: (d) => formatDealDisplayTitle(d),
-      exportValue: (d) => formatDealDisplayTitle(d),
+      cell: (d) => formatDealDisplayTitleWithOpportunities(d, (id) => opportunitiesApi.get(id)),
+      exportValue: (d) =>
+        formatDealDisplayTitleWithOpportunities(d, (id) => opportunitiesApi.get(id)),
     },
     {
       id: 'business',
@@ -384,7 +389,9 @@ export function buildAdminContractListColumns(input: {
       defaultVisible: true,
       cell: (c) => {
         const deal = c.dealId ? dealsApi.get(c.dealId) : undefined
-        return deal ? formatDealDisplayTitle(deal) : '—'
+        return deal
+          ? formatDealDisplayTitleWithOpportunities(deal, (id) => opportunitiesApi.get(id))
+          : '—'
       },
     },
     {

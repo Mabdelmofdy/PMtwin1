@@ -77,7 +77,11 @@ import {
   filterContractsForViewer,
 } from '@/lib/entity-view-visibility.ts'
 import { EntityAccessDenied } from '@/components/auth/entity-access-state'
-import { formatContractDisplayTitle } from '@/lib/entity-display-titles.ts'
+import {
+  formatContractDisplayTitle,
+  formatDealDisplayTitle,
+  formatDealDisplayTitleWithOpportunities,
+} from '@/lib/entity-display-titles.ts'
 import { PRODUCT_LANGUAGE } from '@/lib/product-language'
 import { PmTechnicalDetails } from '@/components/ui/pm-technical-details.tsx'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -181,12 +185,15 @@ function ContractListCard({ contract }: { contract: Contract }) {
   const taxonomy = relatedOpportunity
     ? resolveOpportunityTaxonomyLabels(relatedOpportunity)
     : null
+  const dealLabel = deal
+    ? formatDealDisplayTitleWithOpportunities(deal, (id) => opportunitiesApi.get(id))
+    : 'Commercial agreement'
   return (
     <PmEntityListCard
       title={title}
       href={`/contracts/${contract.id}`}
       badge={<PmWorkflowBadge status={contract.status} entity="contract" size="sm" />}
-      meta={`${taxonomy?.mainModel ?? deal?.title ?? 'Commercial agreement'} · ${taxonomy?.exchangeMode ?? '—'} · Updated ${formatDate(contract.updatedAt)}`}
+      meta={`${taxonomy?.mainModel ?? dealLabel} · ${taxonomy?.exchangeMode ?? '—'} · Updated ${formatDate(contract.updatedAt)}`}
       primary={{ label: 'Open contract', href: `/contracts/${contract.id}` }}
     />
   )
@@ -267,7 +274,9 @@ export function ContractsPage() {
       label: 'Source record',
       cell: (c) => {
         const deal = c.dealId ? dealsApi.get(c.dealId) : undefined
-        return deal?.title ?? '—'
+        return deal
+          ? formatDealDisplayTitleWithOpportunities(deal, (id) => opportunitiesApi.get(id))
+          : '—'
       },
     },
     {
@@ -646,7 +655,16 @@ export function ContractDetailPage() {
             <PmContentCard title="Summary">
               <PmFormReadonly>
                 <PmFormReadonlySection>
-                  <PmFormReadonlyField label="Source record" value={model.dealTitle} />
+                  <PmFormReadonlyField
+                    label="Source record"
+                    value={formatDealDisplayTitle(
+                      model.dealTitle ? { title: model.dealTitle } : null,
+                      {
+                        needTitle: model.needTitle,
+                        offerTitle: model.offerTitle,
+                      },
+                    )}
+                  />
                   <PmFormReadonlyField label="Need" value={model.needTitle} />
                   <PmFormReadonlyField label="Offer" value={model.offerTitle} />
                 </PmFormReadonlySection>

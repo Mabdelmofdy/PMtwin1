@@ -11,7 +11,7 @@ import { peopleApi } from '@/api/people.ts'
 import { routeLabels } from '@/config/navigation'
 import {
   formatContractDisplayTitle,
-  formatDealDisplayTitle,
+  formatDealDisplayTitleWithOpportunities,
   formatNegotiationDisplayTitle,
   formatOpportunityDisplayTitle,
 } from '@/lib/entity-display-titles.ts'
@@ -23,6 +23,7 @@ const ENTITY_PARENT_SEGMENTS = new Set([
   'matches',
   'negotiations',
   'deals',
+  'commercial-agreements',
   'contracts',
   'people',
   'users',
@@ -65,7 +66,8 @@ export function resolveBreadcrumbSegmentLabel(
         : 'Negotiation'
     }
     case 'deals':
-      return formatDealDisplayTitle(dealsApi.get(segment))
+    case 'commercial-agreements':
+      return formatDealDisplayTitleWithOpportunities(dealsApi.get(segment), getOpportunity)
     case 'contracts': {
       const contract = contractsApi.get(segment)
       if (!contract) return 'Contract'

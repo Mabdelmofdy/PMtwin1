@@ -103,7 +103,9 @@ export function resolveEnterpriseSubject(
     case 'deal': {
       const ca = commercialAgreementRepository.getById(id)
       if (ca) {
-        const view = formatCommercialAgreementPresentation(ca)
+        const view = formatCommercialAgreementPresentation(ca, (opportunityId) =>
+          opportunityRepository.getById(opportunityId),
+        )
         return { title: view.name, reference: view.reference }
       }
       return {
@@ -185,7 +187,9 @@ export function resolveEnterpriseSubjectById(
   }
   const ca = commercialAgreementRepository.getById(id)
   if (ca) {
-    const view = formatCommercialAgreementPresentation(ca)
+    const view = formatCommercialAgreementPresentation(ca, (opportunityId) =>
+      opportunityRepository.getById(opportunityId),
+    )
     return { title: view.name, reference: view.reference }
   }
   const contract = contractRepository.getById(id)

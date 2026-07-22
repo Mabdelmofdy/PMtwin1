@@ -157,7 +157,9 @@ export function searchAdminEntities(
   }
 
   for (const ca of commercialAgreementRepository.getAll()) {
-    const view = formatCommercialAgreementPresentation(ca)
+    const view = formatCommercialAgreementPresentation(ca, (id) =>
+      opportunityRepository.getById(id),
+    )
     if (!matchesQuery(`${view.name} ${view.reference} ${ca.id} ${ca.status}`, q)) continue
     results.push({
       id: `ca-${ca.id}`,

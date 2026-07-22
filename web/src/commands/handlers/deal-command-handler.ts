@@ -47,6 +47,7 @@ import {
   createLifecycleOrchestrator,
   type LifecycleOrchestrator,
 } from '@/services/lifecycle-orchestrator.ts'
+import { buildCommercialAgreementStoredTitle } from '@/lib/entity-display-titles.ts'
 
 const POST_MATCH_ENTITY = 'match' as const
 const NEGOTIATION_ENTITY = 'negotiation' as const
@@ -377,12 +378,18 @@ export class DealCommandHandler {
         negotiation.initialTerms,
     )
 
+    const applicationOpportunity = this.opportunityRepository?.getById(
+      application.opportunityId,
+    )
+
     const deal = this.dealRepository.create({
       negotiationId: command.negotiationId,
       applicationId,
       opportunityId: application.opportunityId,
       opportunityIds: [application.opportunityId],
-      title: `Commercial Agreement – Application ${applicationId}`,
+      title: buildCommercialAgreementStoredTitle({
+        needTitle: applicationOpportunity?.title,
+      }),
       status: 'draft',
       participants,
       parties: participants,
@@ -567,6 +574,12 @@ export class DealCommandHandler {
 
     const primaryOpportunityId = needOpportunityId ?? opportunityIds[0]
     const opportunity = this.opportunityRepository?.getById(primaryOpportunityId)
+    const needOpportunity = needOpportunityId
+      ? this.opportunityRepository?.getById(needOpportunityId)
+      : undefined
+    const offerOpportunity = offerOpportunityId
+      ? this.opportunityRepository?.getById(offerOpportunityId)
+      : undefined
     const originatingOwnerPartyId = opportunity
       ? resolveOpportunityOwner(opportunity, ownershipContextForHandlers())?.ownerPartyId
       : negotiation.originatingOwnerPartyId
@@ -583,7 +596,10 @@ export class DealCommandHandler {
       opportunityId: primaryOpportunityId,
       opportunityIds: [...opportunityIds],
       matchType: postMatch.matchType,
-      title: `Commercial Agreement – ${postMatchId}`,
+      title: buildCommercialAgreementStoredTitle({
+        needTitle: needOpportunity?.title,
+        offerTitle: offerOpportunity?.title,
+      }),
       status: 'draft',
       participants,
       parties: participants,

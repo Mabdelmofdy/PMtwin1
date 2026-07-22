@@ -56,7 +56,9 @@ export function AdminContractDetailPage() {
   }
 
   const presentation = formatContractPresentation(contract)
-  const caView = agreement ? formatCommercialAgreementPresentation(agreement) : null
+  const caView = agreement
+    ? formatCommercialAgreementPresentation(agreement, (oid) => opportunitiesApi.get(oid))
+    : null
   const opportunity = agreement?.opportunityId
     ? opportunitiesApi.get(agreement.opportunityId)
     : undefined

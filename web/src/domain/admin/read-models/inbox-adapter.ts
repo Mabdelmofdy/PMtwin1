@@ -150,7 +150,9 @@ export function buildAdminInbox(
     if (!(s === 'draft' || s === 'negotiating' || s === 'review' || s === 'signing')) continue
     const created = ca.updatedAt ?? ca.createdAt ?? nowIso
     const age = ageMsFrom(created)
-    const view = formatCommercialAgreementPresentation(ca)
+    const view = formatCommercialAgreementPresentation(ca, (id) =>
+      opportunityRepository.getById(id),
+    )
     items.push({
       id: `ca-review-${ca.id}`,
       itemType: 'commercial_agreement_review',
