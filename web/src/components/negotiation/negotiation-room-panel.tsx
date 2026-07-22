@@ -51,6 +51,7 @@ import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { ExplanationPanel } from '@/components/explainability/explanation-panel.tsx'
 import { buildNegotiationExplanation } from '@/services/explainability/index.ts'
+import { AttachmentsUploadControl } from '@/components/shared/attachments-upload-control.tsx'
 
 export type NegotiationRoomPanelProps = {
   readonly negotiation: Negotiation
@@ -450,7 +451,45 @@ export function NegotiationRoomPanel({
       </TabsContent>
 
       <TabsContent value="attachments">
-        <PmContentCard title="Attachments">
+        <PmContentCard
+          title="Attachments"
+          actions={
+            canWriteMessage ? (
+              <AttachmentsUploadControl
+                label="Upload"
+                aria-label="Upload negotiation attachments"
+                disabled={pending}
+                onFilesSelected={(files) => {
+                  if (!viewer.userId) {
+                    toast.error('Sign in to upload attachments')
+                    return
+                  }
+                  setPending(true)
+                  try {
+                    const names = files.map((file) => file.fileName).join(', ')
+                    const result = sendNegotiationMessage(
+                      negotiation.id,
+                      viewer.userId,
+                      `Attached: ${names}`,
+                      files.map((file) => ({
+                        fileName: file.fileName,
+                        ...(file.mimeType ? { mimeType: file.mimeType } : {}),
+                        ...(file.sizeBytes != null ? { sizeBytes: file.sizeBytes } : {}),
+                      })),
+                    )
+                    if (!result.ok) {
+                      toast.error(result.errors?.join('. ') ?? 'Attachment could not be uploaded')
+                      return
+                    }
+                    toast.success(files.length === 1 ? 'Attachment uploaded' : 'Attachments uploaded')
+                  } finally {
+                    setPending(false)
+                  }
+                }}
+              />
+            ) : undefined
+          }
+        >
           {readModel.messages.every((message) => !message.attachments?.length) ? (
             <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>
               No attachments in this negotiation room yet.

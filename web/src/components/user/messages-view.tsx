@@ -1,11 +1,17 @@
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import { ArrowLeft, Paperclip } from 'lucide-react'
+import { toast } from 'sonner'
 import { MOCK_MESSAGE_THREADS } from '@/components/user/user-display'
 import { PmContentCard } from '@/components/layout/pm-layout-index'
 import { PmSplitLayout } from '@/components/layout/pm-split-layout'
 import { PmFormField } from '@/components/forms/pm-form-index'
 import { PmBadge, PmButton, PmEmptyState } from '@/components/ui/pm-index'
 import { Input } from '@/components/ui/input'
+import {
+  AttachmentsUploadControl,
+  type AttachmentFileMeta,
+} from '@/components/shared/attachments-upload-control.tsx'
 import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
 
@@ -16,6 +22,7 @@ export type MessagesViewProps = {
 /** Messages master-detail layout — mock threads preserved from legacy page. */
 export function MessagesView({ activeThreadId }: MessagesViewProps) {
   const activeThread = MOCK_MESSAGE_THREADS.find((t) => t.id === activeThreadId)
+  const [draftAttachments, setDraftAttachments] = useState<readonly AttachmentFileMeta[]>([])
 
   return (
     <PmSplitLayout
@@ -75,9 +82,34 @@ export function MessagesView({ activeThreadId }: MessagesViewProps) {
                 />
               </div>
               <div className="mt-auto space-y-2 border-t border-border/60 pt-4">
-                <div className={cn('flex items-center gap-2', pmTypography.caption, 'text-muted-foreground')}>
-                  <Paperclip className="size-3.5" aria-hidden />
-                  Attachments placeholder
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className={cn('flex items-center gap-2', pmTypography.caption, 'text-muted-foreground')}>
+                    <Paperclip className="size-3.5" aria-hidden />
+                    Attachments
+                    {draftAttachments.length > 0
+                      ? ` (${draftAttachments.map((file) => file.fileName).join(', ')})`
+                      : ''}
+                  </div>
+                  <AttachmentsUploadControl
+                    label="Upload"
+                    aria-label="Upload message attachments"
+                    onFilesSelected={(files) => {
+                      setDraftAttachments((current) => {
+                        const seen = new Set(current.map((item) => item.fileName.toLowerCase()))
+                        const merged = [...current]
+                        for (const file of files) {
+                          const key = file.fileName.toLowerCase()
+                          if (seen.has(key)) continue
+                          seen.add(key)
+                          merged.push(file)
+                        }
+                        return merged
+                      })
+                      toast.success(
+                        files.length === 1 ? 'Attachment added' : 'Attachments added',
+                      )
+                    }}
+                  />
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <PmFormField id="message-compose" label="Message" className="min-w-0 flex-1">

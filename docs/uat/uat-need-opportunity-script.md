@@ -5,11 +5,11 @@
 **Wizard:** Create Opportunity — 5 steps  
 **Pairs with:** [Script B — Offer](./uat-offer-opportunity-script.md)
 
-## Goal
-
-Fill a publish-ready **Need** that will auto-match Sara’s Offer after both are published. Use this to show **opportunity readiness** UI before publish.
+## Goal**adiness** UI before publish.
 
 Enter values **exactly** as listed. Dates must be **today or later** (do not use 2024 dates).
+
+Fill a publish-ready **Need** that will auto-match Sara’s Offer after both are published. Use this to show **opportunity re**
 
 ---
 
@@ -240,20 +240,20 @@ Add **two** skills:
 ### Cash component
 
 
-| Field           | Value                                                                              |
-| --------------- | ---------------------------------------------------------------------------------- |
-| Component title | `BIM Architect cash engagement`                                                    |
-| Applies to      | `Entire opportunity`                                                               |
-| Currency        | `SAR`                                                                              |
-| Budget type     | `Range`                                                                            |
-| Min amount      | `150000`                                                                           |
-| Max amount      | `400000`                                                                           |
-| Advance %       | `10`                                                                               |
-| Retention %     | `5`                                                                                |
-| Payment terms   | `Milestone-Based`                                                                  |
-| VAT handling    | `15% VAT exclusive`                                                                |
-| Bank guarantee  | leave blank                                                                        |
-| Notes           | `Budget range 150000 – 400000 SAR`                                                 |
+| Field           | Value                              |
+| --------------- | ---------------------------------- |
+| Component title | `BIM Architect cash engagement`    |
+| Applies to      | `Entire opportunity`               |
+| Currency        | `SAR`                              |
+| Budget type     | `Range`                            |
+| Min amount      | `150000`                           |
+| Max amount      | `400000`                           |
+| Advance %       | `10`                               |
+| Retention %     | `5`                                |
+| Payment terms   | `Milestone-Based`                  |
+| VAT handling    | `15% VAT exclusive`                |
+| Bank guarantee  | leave blank                        |
+| Notes           | `Budget range 150000 – 400000 SAR` |
 
 
 

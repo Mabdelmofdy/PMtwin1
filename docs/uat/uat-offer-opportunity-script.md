@@ -251,20 +251,20 @@ Add **two** skills:
 ### Cash component
 
 
-| Field           | Value                                                       |
-| --------------- | ----------------------------------------------------------- |
-| Component title | `BIM Architect delivery fee`                                |
-| Applies to      | `Entire opportunity`                                        |
-| Currency        | `SAR`                                                       |
-| Budget type     | `Range`                                                     |
-| Min amount      | `120000`                                                    |
-| Max amount      | `350000`                                                    |
-| Advance %       | `10`                                                        |
-| Retention %     | `5`                                                         |
-| Payment terms   | `Milestone-Based`                                           |
-| VAT handling    | `15% VAT exclusive`                                         |
-| Bank guarantee  | leave blank                                                 |
-| Notes           | `Fee range 120000 – 350000 SAR`                             |
+| Field           | Value                           |
+| --------------- | ------------------------------- |
+| Component title | `BIM Architect delivery fee`    |
+| Applies to      | `Entire opportunity`            |
+| Currency        | `SAR`                           |
+| Budget type     | `Range`                         |
+| Min amount      | `120000`                        |
+| Max amount      | `350000`                        |
+| Advance %       | `10`                            |
+| Retention %     | `5`                             |
+| Payment terms   | `Milestone-Based`               |
+| VAT handling    | `15% VAT exclusive`             |
+| Bank guarantee  | leave blank                     |
+| Notes           | `Fee range 120000 – 350000 SAR` |
 
 
 

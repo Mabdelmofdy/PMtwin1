@@ -20,6 +20,7 @@ export function sendNegotiationMessage(
   negotiationId: string,
   userId: string,
   body: string,
+  attachments?: SendNegotiationMessageCommand['attachments'],
 ): CommandResult {
   const command = {
     commandType: 'SendNegotiationMessage',
@@ -27,6 +28,7 @@ export function sendNegotiationMessage(
     clientRequestId: createClientRequestId('SendNegotiationMessage'),
     userId,
     body,
+    ...(attachments && attachments.length > 0 ? { attachments } : {}),
   } satisfies SendNegotiationMessageCommand
   return getApplicationCommandGateway().execute(command)
 }

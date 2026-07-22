@@ -17,6 +17,10 @@ import {
   DeliverablesBuilder,
   MilestonesBuilder,
 } from '../work/deliverables-milestones-builders.tsx'
+import {
+  appendAttachmentNames,
+  AttachmentsUploadControl,
+} from '@/components/shared/attachments-upload-control.tsx'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/tokens'
 
@@ -206,12 +210,27 @@ export function ScopeWorkStep({
         </summary>
         <div className="mt-4 space-y-3">
           <PmFormField id="attachmentsText" label="Attachments">
-            <Input
-              data-field-id="attachmentsText"
-              value={draft.attachmentsText}
-              onChange={(e) => onChange({ attachmentsText: e.target.value })}
-              placeholder="Comma-separated document names"
-            />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+              <Input
+                data-field-id="attachmentsText"
+                value={draft.attachmentsText}
+                onChange={(e) => onChange({ attachmentsText: e.target.value })}
+                placeholder="Comma-separated document names"
+                className="min-w-0 flex-1"
+              />
+              <AttachmentsUploadControl
+                label="Upload"
+                aria-label="Upload attachment files"
+                onFilesSelected={(files) =>
+                  onChange({
+                    attachmentsText: appendAttachmentNames(draft.attachmentsText, files),
+                  })
+                }
+              />
+            </div>
+            <p className={cn(pmTypography.caption, 'mt-1.5 text-muted-foreground')}>
+              Upload files or type names. File names are saved for readiness; binary storage is not connected yet.
+            </p>
           </PmFormField>
           <PmFormField id="complianceRequirementsText" label="Compliance requirements">
             <Textarea

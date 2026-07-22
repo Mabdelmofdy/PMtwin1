@@ -1,5 +1,5 @@
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { contractsApi } from '@/api/contracts.ts'
 import { dealsApi } from '@/api/deals.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
@@ -86,6 +86,11 @@ import { useProductLanguage } from '@/providers/product-language-provider'
 import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'
 import { ExecutiveEntityMetadata } from '@/components/shared/executive-entity-metadata'
 import { useExecutiveListFilters } from '@/lib/executive-list-filters'
+import {
+  AttachmentsUploadControl,
+  type AttachmentFileMeta,
+} from '@/components/shared/attachments-upload-control.tsx'
+import { toast } from 'sonner'
 
 function buildContractRecommendedAction(
   model: NonNullable<ReturnType<typeof buildContractDetailReadModel>>,
@@ -457,6 +462,11 @@ export function ContractDetailPage() {
   const { user, canAccessAdmin, activeWorkspace, activeParty } = useAuth()
   const { productLanguage } = useProductLanguage()
   const { id } = useParams()
+  const [sessionAttachments, setSessionAttachments] = useState<readonly AttachmentFileMeta[]>([])
+
+  useEffect(() => {
+    setSessionAttachments([])
+  }, [id])
 
   const viewer = useMemo(
     () =>
@@ -688,12 +698,58 @@ export function ContractDetailPage() {
               )}
             </PmContentCard>
 
-            <PmContentCard title="Attachments">
-              <PmEmptyState
-                title="No attachments yet"
-                description="File uploads are not available in this preview build. Attachments will appear here once document storage is connected."
-                size="compact"
-              />
+            <PmContentCard
+              title="Attachments"
+              actions={
+                <AttachmentsUploadControl
+                  label="Upload"
+                  aria-label="Upload contract attachments"
+                  onFilesSelected={(files) => {
+                    setSessionAttachments((current) => {
+                      const seen = new Set(current.map((item) => item.fileName.toLowerCase()))
+                      const merged = [...current]
+                      for (const file of files) {
+                        const key = file.fileName.toLowerCase()
+                        if (seen.has(key)) continue
+                        seen.add(key)
+                        merged.push(file)
+                      }
+                      return merged
+                    })
+                    toast.success(
+                      files.length === 1 ? 'Attachment added' : 'Attachments added',
+                    )
+                  }}
+                />
+              }
+            >
+              {sessionAttachments.length === 0 ? (
+                <PmEmptyState
+                  title="No attachments yet"
+                  description="Upload document references for this contract. File names are kept in this session; binary storage is not connected yet."
+                  size="compact"
+                />
+              ) : (
+                <ul className="space-y-2">
+                  {sessionAttachments.map((attachment) => (
+                    <li
+                      key={attachment.fileName}
+                      className={cn(pmTypography.bodySm, 'rounded border border-border p-2')}
+                    >
+                      <span className="font-medium">{attachment.fileName}</span>
+                      {attachment.mimeType ? (
+                        <span className="text-muted-foreground"> · {attachment.mimeType}</span>
+                      ) : null}
+                      {attachment.sizeBytes != null ? (
+                        <span className="text-muted-foreground">
+                          {' '}
+                          · {attachment.sizeBytes} bytes
+                        </span>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </PmContentCard>
           </>
         }
