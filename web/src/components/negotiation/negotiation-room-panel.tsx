@@ -477,7 +477,7 @@ export function NegotiationRoomPanel({
                         ...(file.sizeBytes != null ? { sizeBytes: file.sizeBytes } : {}),
                       })),
                     )
-                    if (!result.ok) {
+                    if (!result.success) {
                       toast.error(result.errors?.join('. ') ?? 'Attachment could not be uploaded')
                       return
                     }
