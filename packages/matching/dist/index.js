@@ -3399,6 +3399,25 @@ function findNeedsForOfferPure(offerPost, needPosts, config, canonical = {}, opt
 }
 
 // src/models/two-way.ts
+function averageFactor(a, b) {
+  return Math.round((a + b) / 2 * 1e3) / 1e3;
+}
+function averageScoreBreakdown(a, b) {
+  return {
+    skillMatch: averageFactor(a.skillMatch, b.skillMatch),
+    attributeOverlap: averageFactor(a.attributeOverlap, b.attributeOverlap),
+    serviceOverlapPct: averageFactor(a.serviceOverlapPct, b.serviceOverlapPct),
+    exchangeCompatibility: averageFactor(
+      a.exchangeCompatibility,
+      b.exchangeCompatibility
+    ),
+    valueCompatibility: averageFactor(a.valueCompatibility, b.valueCompatibility),
+    budgetFit: averageFactor(a.budgetFit, b.budgetFit),
+    timelineFit: averageFactor(a.timelineFit, b.timelineFit),
+    locationFit: averageFactor(a.locationFit, b.locationFit),
+    reputation: averageFactor(a.reputation, b.reputation)
+  };
+}
 function findBarterMatchesPure(anchorPost, needPosts, offerPosts, config, canonical = {}, _options = {}) {
   const resolvedConfig = withRunnerConfig(config);
   const threshold = resolveThreshold(resolvedConfig);
@@ -3419,17 +3438,21 @@ function findBarterMatchesPure(anchorPost, needPosts, offerPosts, config, canoni
       const normOfferB = resolveNormalized(offerB, canonical, resolvedConfig);
       if (!passHardGate(needB, offerA, normNeedB, normOfferA, resolvedConfig)) continue;
       if (!passHardGate(needA, offerB, normNeedA, normOfferB, resolvedConfig)) continue;
-      const scoreAtoB = scorePair(needB, offerA, resolvedConfig, normNeedB, normOfferA).score;
-      const scoreBtoA = scorePair(needA, offerB, resolvedConfig, normNeedA, normOfferB).score;
-      if (scoreAtoB < threshold || scoreBtoA < threshold) continue;
-      const pairScore = (scoreAtoB + scoreBtoA) / 2;
+      const scoredAtoB = scorePair(needB, offerA, resolvedConfig, normNeedB, normOfferA);
+      const scoredBtoA = scorePair(needA, offerB, resolvedConfig, normNeedA, normOfferB);
+      if (scoredAtoB.score < threshold || scoredBtoA.score < threshold) continue;
+      const pairScore = (scoredAtoB.score + scoredBtoA.score) / 2;
       const equivalence = barterValueEquivalence(
         barterSidePost(needA, offerA),
         barterSidePost(needB, offerB)
       );
       matches.push({
         matchScore: pairScore,
-        breakdown: { scoreAtoB, scoreBtoA },
+        breakdown: {
+          ...averageScoreBreakdown(scoredAtoB.breakdown, scoredBtoA.breakdown),
+          scoreAtoB: scoredAtoB.score,
+          scoreBtoA: scoredBtoA.score
+        },
         valueEquivalence: valueEquivalenceText(offerA, needB) ?? valueEquivalenceText(offerB, needA),
         valueAnalysis: { equivalence },
         suggestedPartners: [
@@ -3852,6 +3875,7 @@ export {
   ROLE_ALIASES,
   ROLE_COMPATIBILITY,
   attributeOverlap,
+  averageScoreBreakdown,
   barterSidePost,
   barterValueEquivalence,
   budgetCompatible,

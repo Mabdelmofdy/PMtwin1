@@ -785,6 +785,10 @@ describe('modelRunResult → DiscoverPostMatch adapter', () => {
     assert.ok(isDiscoverTwoWayPostMatch(probe))
     assert.ok(probe.sideA.needId)
     assert.ok(probe.sideB.needId)
+    assert.ok(probe.matchCriteria)
+    assert.equal(typeof probe.matchCriteria?.skillMatch, 'number')
+    assert.equal(typeof probe.matchCriteria?.timelineFit, 'number')
+    assert.equal(typeof probe.matchCriteria?.locationFit, 'number')
   })
 
   it('maps consortium result to DiscoverConsortiumPostMatchCommand', () => {

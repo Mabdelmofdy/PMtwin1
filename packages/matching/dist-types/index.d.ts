@@ -15,7 +15,7 @@ export { rankMatches } from './routing/rank-matches.ts';
 export { runMatchingForPost } from './engine/index.ts';
 export { normalizeSkill, toSkillString, normalizeLocation, normalizeCategory, extractBudget, extractTimeline, extractAndNormalize, expandTerm, buildSemanticProfile, } from './normalize/index.ts';
 export type { ExtractNormalizeOptions } from './normalize/index.ts';
-export { resolveThreshold, resolveMaxCandidates, resolveNormalized, passHardGate, withRunnerConfig, parseRoleDefinitions, buildRoleServices, buildSyntheticNeedForRole, estimateValueSar, valueEquivalenceText, barterSidePost, findOffersForNeedPure, findNeedsForOfferPure, findBarterMatchesPure, findConsortiumMatchesPure, normalizeCycleRing, buildCircularLinkScores, findCircularExchangesPure, } from './models/index.ts';
+export { resolveThreshold, resolveMaxCandidates, resolveNormalized, passHardGate, withRunnerConfig, parseRoleDefinitions, buildRoleServices, buildSyntheticNeedForRole, estimateValueSar, valueEquivalenceText, barterSidePost, findOffersForNeedPure, findNeedsForOfferPure, findBarterMatchesPure, averageScoreBreakdown, findConsortiumMatchesPure, normalizeCycleRing, buildCircularLinkScores, findCircularExchangesPure, } from './models/index.ts';
 export type { RoleDefinition, CircularEdgeDetail, CircularEdgeMap, } from './models/index.ts';
 export type { SuggestedPartner, ScoredMatch, CircularLinkScore, ModelRunResultBase, OneWayMatchResult, TwoWayMatchResult, ConsortiumRoleResult, ConsortiumMatchResult, CircularMatchResult, ModelRunnerOptions, } from './types/index.ts';
 export type { MatchEngineInput, MatchEngineOptions, MatchEngineModelOption, ModelRunResult, } from './types/index.ts';

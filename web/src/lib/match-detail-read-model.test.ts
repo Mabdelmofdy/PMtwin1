@@ -280,6 +280,23 @@ describe('buildMatchDetailReadModel', () => {
     assert.equal(twoWayMissingFactors.locationFit, '—')
     assert.equal(twoWayMissingFactors.scoreAtoB, '90%')
     assert.equal(twoWayMissingFactors.scoreBtoA, '86%')
+
+    const enriched = resolveMatchScoreFactors(
+      discoveredMatch({
+        matchType: 'two_way',
+        matchScore: 0.88,
+        payload: {
+          sideA: { userId: 'A', needId: 'a-need', offerId: 'offer-a' },
+          sideB: { userId: 'B', needId: 'b-need', offerId: 'offer-b' },
+          scoreAtoB: 0.9,
+          scoreBtoA: 0.86,
+        },
+      }),
+      { skillMatch: 0.8, timelineFit: 0.75, locationFit: 1 },
+    )
+    assert.equal(enriched.skillMatch, '80%')
+    assert.equal(enriched.timelineFit, '75%')
+    assert.equal(enriched.locationFit, '100%')
   })
 })
 

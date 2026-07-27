@@ -17,6 +17,7 @@ import {
   resolvePostMatchRelatedOpportunities,
   type RelatedOpportunityRef,
 } from '@/lib/post-match-related-opportunities.ts'
+import { enrichTwoWayMatchScoreBreakdown } from '@/lib/match-score-factor-enrichment.ts'
 
 const MATCH_ENTITY = 'match' as const
 export const MATCH_DETAIL_NEUTRAL_CONTEXT_ID = '__match_detail_neutral__'
@@ -69,15 +70,17 @@ function optionalPercentLabel(value: number | undefined): string {
 }
 
 /**
- * Resolve factor scores from matchCriteria / payload.breakdown.
+ * Resolve factor scores from matchCriteria / payload.breakdown / enrichment.
  * Missing factors stay undefined so UI can show "—" instead of fake 0%.
  */
 export function resolveMatchScoreFactors(
   match: PostMatch,
+  enrichedBreakdown?: Readonly<Record<string, number>> | null,
 ): MatchScoreFactorLabels {
   const breakdown = {
     ...(match.matchCriteria ?? {}),
     ...(match.payload?.breakdown ?? {}),
+    ...(enrichedBreakdown ?? {}),
   }
   const read = (key: string): number | undefined => {
     const value = breakdown[key]
@@ -159,13 +162,17 @@ export function buildMatchDetailReadModel(
     deps.getOpportunity,
     deps.getPersonName,
   )
+  const enrichedBreakdown = enrichTwoWayMatchScoreBreakdown(
+    match,
+    deps.getOpportunity,
+  )
 
   return {
     match,
     matchTypeLabel: formatMatchTypeLabel(match.matchType),
     canonicalStatus: toCanonical(MATCH_ENTITY, match.status ?? '') ?? match.status,
     scoreLabel: formatPercent(match.matchScore),
-    scoreFactors: resolveMatchScoreFactors(match),
+    scoreFactors: resolveMatchScoreFactors(match, enrichedBreakdown),
     relatedOpportunities: related.items,
     participants,
     actions,
