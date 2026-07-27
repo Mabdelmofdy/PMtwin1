@@ -137,6 +137,7 @@ export {
   findOffersForNeedPure,
   findNeedsForOfferPure,
   findBarterMatchesPure,
+  averageScoreBreakdown,
   findConsortiumMatchesPure,
   normalizeCycleRing,
   buildCircularLinkScores,

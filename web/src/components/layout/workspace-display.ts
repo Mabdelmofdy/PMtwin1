@@ -1,4 +1,5 @@
 import { APP_NAME, routeLabels } from '@/config/navigation'
+import { resolveBreadcrumbSegmentLabel } from '@/lib/breadcrumb-display.ts'
 
 export function getUserInitials(name: string): string {
   return name
@@ -52,13 +53,11 @@ export function resolveWorkspaceContext(
   const last = segments[segments.length - 1]
   const sectionKey = segments[0]
   const sectionLabel =
-    routeLabels[sectionKey] ??
-    sectionKey.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+    routeLabels[sectionKey] ?? resolveBreadcrumbSegmentLabel(sectionKey)
 
   const pageLabel =
     last && last !== sectionKey
-      ? routeLabels[last] ??
-        last.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+      ? (routeLabels[last] ?? resolveBreadcrumbSegmentLabel(last, sectionKey))
       : sectionLabel
 
   return {

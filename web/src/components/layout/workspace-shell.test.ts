@@ -38,6 +38,17 @@ describe('workspace-display', () => {
     assert.equal(ctx.title, 'Company workspace')
   })
 
+  it('resolves match detail title without exposing raw match id', () => {
+    const matchId = 'pm-3748b1fe-7032-4462-8494-8c469d4c87e8'
+    const ctx = resolveWorkspaceContext(`/matches/${matchId}`, {
+      isCompanyUser: false,
+      isAdminArea: false,
+    })
+    assert.equal(ctx.subtitle, 'Matches')
+    assert.notEqual(ctx.title, 'Pm 3748b1fe 7032 4462 8494 8c469d4c87e8')
+    assert.ok(!ctx.title.toLowerCase().startsWith('pm 3748'))
+  })
+
   it('resolves breadcrumb home for admin routes', () => {
     assert.equal(
       resolveBreadcrumbHomeHref('/admin/matching', false),
