@@ -1,4 +1,4 @@
-export { resolveThreshold, resolveMaxCandidates, resolveNormalized, passHardGate, withRunnerConfig, parseRoleDefinitions, buildRoleServices, buildSyntheticNeedForRole, } from './shared.ts';
+export { resolveThreshold, resolveMaxCandidates, resolveNormalized, passHardGate, withRunnerConfig, parseRoleDefinitions, buildRoleServices, buildRoleSkillHints, buildSyntheticNeedForRole, } from './shared.ts';
 export type { RoleDefinition } from './shared.ts';
 export { estimateValueSar, valueEquivalenceText, barterSidePost } from './value-estimate.ts';
 export { findOffersForNeedPure, findNeedsForOfferPure } from './one-way.ts';

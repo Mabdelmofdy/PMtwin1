@@ -129,6 +129,7 @@ export {
   withRunnerConfig,
   parseRoleDefinitions,
   buildRoleServices,
+  buildRoleSkillHints,
   buildSyntheticNeedForRole,
   estimateValueSar,
   valueEquivalenceText,

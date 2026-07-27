@@ -43,7 +43,7 @@ A **lead Need** lists required **member roles**. Matching picks the best Offer *
 | Step | Screen | What you fill |
 |------|--------|----------------|
 | 1 | Opportunity | Intent, title, description, category, role, location, dates |
-| 2 | Collaboration | Lead: JV → Consortium + member roles · Partners: Cash → Task-Based |
+| 2 | Collaboration | Lead: JV → Consortium + JSON Member Roles / Minimum Requirements · Partners: Cash → Task-Based |
 | 3 | Scope & Work | Skills, services, resources, work package, deliverables, milestones, timeline, documents |
 | 4 | Commercial Structure | Cash (or hybrid on lead) |
 | 5 | Review & Publish | Confirm · Publish |
@@ -92,27 +92,54 @@ A **lead Need** lists required **member roles**. Matching picks the best Offer *
 
 ### Collaboration details (Consortium)
 
+Fill **every** field below. **Member Roles** and **Minimum Requirements** are JSON textareas — paste the JSON exactly (do not use free-text tables).
+
 | Field | Value |
 |-------|--------|
 | Project Title | `Riyadh tower consortium delivery` |
-| Required Members | `2` |
-| Scope Division | `By Trade` |
+| Required Members | `2` (minimum 2; must equal number of member roles) |
+| Scope Division | `By Trade` (options: By Trade · By Phase · By Geography · Mixed) |
 | Tender Deadline | `2026-08-15` |
 
-### Member Roles (add two)
+### Member Roles (JSON textarea — paste as-is)
 
-| Role | Scope |
-|------|--------|
-| `Architect` | `BIM coordination, Revit modeling, design packages` |
-| `Structural Engineer` | `Structural analysis, SAP2000 models, foundation design` |
+Paste into the **Member Roles** field:
 
-### Minimum Requirements (add entries)
+```json
+[
+  {
+    "role": "Architect",
+    "scope": "BIM coordination, Revit modeling, design packages"
+  },
+  {
+    "role": "Structural Engineer",
+    "scope": "Structural analysis, SAP2000 models, foundation design"
+  }
+]
+```
 
-| Requirement | Detail |
-|-------------|--------|
-| Experience | `KSA tower experience` |
-| Compliance | `Saudi Building Code` |
-| Capacity | `Available from 2026-08-01` |
+| Key | Meaning |
+|-----|---------|
+| `role` | Member role name (must match partner Offer target roles) |
+| `scope` | Scope / package description for that role |
+
+### Minimum Requirements (JSON textarea — paste as-is)
+
+Paste into the **Minimum Requirements** field:
+
+```json
+[
+  { "requirement": "Experience: KSA tower experience" },
+  { "requirement": "Compliance: Saudi Building Code" },
+  { "requirement": "Capacity: Available from 2026-08-01" }
+]
+```
+
+| Key | Meaning |
+|-----|---------|
+| `requirement` | One minimum requirement string (no separate Detail column in UI) |
+
+**Publish blockers if empty:** Project Title · Required Members (≥ 2) · Member Roles · Scope Division · Minimum Requirements
 
 ---
 
@@ -728,8 +755,9 @@ Add **two** skills:
 |---------|-----|
 | Wrong match type | Lead must be **Joint Venture** → **Consortium** with member roles |
 | Consortium incomplete | Publish Offer for **every** role from **distinct** users |
-| Cannot publish lead | Fill Project Title, Required Members ≥ 2, Member Roles, Scope Division, Minimum Requirements |
-| No match | All three published; roles/skills align; Admin → **Re-run matching** |
+| Cannot publish lead | Fill Project Title, Required Members ≥ 2, Member Roles (JSON), Scope Division, Minimum Requirements (JSON) |
+| No match after publish | Publish **all three** posts first, then Admin → Matching → **Re-run matching** (not Re-run circular) |
+| Re-run shows toast but still 0 | Confirm Member Roles JSON has `role` keys matching partner **Target role** (`Architect`, `Structural Engineer`) |
 
 ---
 

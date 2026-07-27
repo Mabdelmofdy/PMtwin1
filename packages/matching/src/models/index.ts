@@ -6,6 +6,7 @@ export {
   withRunnerConfig,
   parseRoleDefinitions,
   buildRoleServices,
+  buildRoleSkillHints,
   buildSyntheticNeedForRole,
 } from './shared.ts'
 export type { RoleDefinition } from './shared.ts'

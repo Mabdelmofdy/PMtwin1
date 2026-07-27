@@ -59,13 +59,53 @@ export function parseRoleDefinitions(
 }
 
 export function buildRoleServices(roleDef: RoleDefinition): string[] {
-  const role = roleDef.role
-  const scopeWords = (roleDef.scope ?? '')
-    .split(/[\s,/|&+-]+/)
+  const scope = roleDef.scope?.trim() ?? ''
+  if (!scope) return []
+
+  // Prefer comma/semicolon phrases over word-splitting prose into hard requirements.
+  // Keep short skill-like phrases (≤ 3 words). Long descriptive clauses are ignored.
+  const stop = new Set([
+    'and',
+    'the',
+    'for',
+    'with',
+    'from',
+    'into',
+    'across',
+    'including',
+  ])
+  return scope
+    .split(/[,;|]/)
+    .map((phrase) => phrase.trim())
+    .filter((phrase) => {
+      const words = phrase.split(/\s+/).filter(Boolean)
+      if (words.length === 0 || words.length > 3) return false
+      return words.every((word) => !stop.has(word.toLowerCase()))
+    })
+    .filter((value, index, array) => array.indexOf(value) === index)
+    .slice(0, 10)
+}
+
+/**
+ * Soft skill hints for consortium role scoring (not hard requiredServices).
+ * Extracts technical tokens / short phrases from role scope prose.
+ */
+export function buildRoleSkillHints(roleDef: RoleDefinition): string[] {
+  const fromPhrases = buildRoleServices(roleDef)
+  const scope = roleDef.scope?.trim() ?? ''
+  if (!scope) return fromPhrases
+
+  const techTokens = scope
+    .split(/[\s,/|&+;-]+/)
     .map((word) => word.trim())
-    .filter((word) => word.length > 2)
-  return [role, ...scopeWords]
-    .filter((value, index, array) => value && array.indexOf(value) === index)
+    .filter((word) => {
+      if (word.length < 2) return false
+      // Acronyms / product codes (BIM, SAP2000) or Capitalized tokens
+      return /^[A-Z]{2,}[0-9]*$/.test(word) || /^[A-Z][a-zA-Z0-9+]{2,}$/.test(word)
+    })
+
+  return [...fromPhrases, ...techTokens]
+    .filter((value, index, array) => array.indexOf(value) === index)
     .slice(0, 10)
 }
 
@@ -75,17 +115,25 @@ export function buildSyntheticNeedForRole(
   roleDef: RoleDefinition,
 ): OpportunityPost {
   const role = roleDef.role
-  const roleServices = buildRoleServices(roleDef)
+  const skillHints = buildRoleSkillHints(roleDef)
   return {
     ...leadNeed,
     id: `${leadNeed.id ?? 'need'}-role-${role.replace(/\s/g, '_')}`,
     attributes: { ...(leadNeed.attributes ?? {}), targetRole: role },
-    scope: { ...(leadNeed.scope ?? {}), requiredSkills: roleServices },
+    scope: {
+      ...(leadNeed.scope ?? {}),
+      requiredSkills: skillHints,
+      coreSkills: [],
+    },
     normalized: {
       ...leadNorm,
       role,
-      requiredServices: roleServices,
-      skills: roleServices,
+      // Role slots must not inherit the lead Need's mandatory coreSkills
+      // (e.g. BIM/Revit on an Architect+Structural consortium lead).
+      coreSkills: [],
+      // Do not hard-gate on tokenized scope prose; role compatibility + scoring suffice.
+      requiredServices: [],
+      skills: skillHints.length > 0 ? skillHints : [role],
     },
   }
 }

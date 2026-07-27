@@ -12,5 +12,10 @@ export interface RoleDefinition {
 }
 export declare function parseRoleDefinitions(attributes: Readonly<Record<string, unknown>> | undefined): RoleDefinition[];
 export declare function buildRoleServices(roleDef: RoleDefinition): string[];
+/**
+ * Soft skill hints for consortium role scoring (not hard requiredServices).
+ * Extracts technical tokens / short phrases from role scope prose.
+ */
+export declare function buildRoleSkillHints(roleDef: RoleDefinition): string[];
 export declare function buildSyntheticNeedForRole(leadNeed: OpportunityPost, leadNorm: NormalizedPost, roleDef: RoleDefinition): OpportunityPost;
 //# sourceMappingURL=shared.d.ts.map

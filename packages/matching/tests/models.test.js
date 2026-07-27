@@ -190,6 +190,55 @@ describe('model runners — consortium', () => {
     assert.equal(result.matches.length, 1)
     assert.ok(result.matches[0].matchScore > 0)
   })
+
+  it('fills Architect + Structural roles with UAT-like scopes despite lead coreSkills', () => {
+    const leadNeed = publishedNeed(
+      'lead-uat',
+      'company-lead',
+      'Architect',
+      ['BIM', 'Revit'],
+      {
+        attributes: {
+          targetRole: 'Architect',
+          memberRoles: [
+            {
+              role: 'Architect',
+              scope: 'BIM coordination, Revit modeling, design packages',
+            },
+            {
+              role: 'Structural Engineer',
+              scope: 'Structural analysis, SAP2000 models, foundation design',
+            },
+          ],
+        },
+        normalized: {
+          role: 'Architect',
+          requiredServices: ['BIM', 'Revit'],
+          skills: ['BIM', 'Revit'],
+          coreSkills: ['BIM', 'Revit'],
+          location: 'remote',
+          modelType: 'project_based',
+        },
+      },
+    )
+
+    const offers = [
+      publishedOffer('offer-khalid', 'khalid', 'Architect', ['BIM', 'Revit']),
+      publishedOffer('offer-hala', 'hala', 'Structural Engineer', [
+        'Structural Analysis',
+        'SAP2000',
+      ]),
+    ]
+
+    const result = findConsortiumMatchesPure(leadNeed, offers, config)
+    assert.equal(result.complete, true)
+    assert.equal(result.roleResults?.length, 2)
+    const byRole = Object.fromEntries(
+      (result.roleResults ?? []).map((entry) => [entry.role, entry.opportunityId]),
+    )
+    assert.equal(byRole.Architect, 'offer-khalid')
+    assert.equal(byRole['Structural Engineer'], 'offer-hala')
+  })
 })
 
 describe('model runners — circular', () => {
