@@ -12,7 +12,7 @@ export type { RoleDefinition } from './shared.ts'
 
 export { estimateValueSar, valueEquivalenceText, barterSidePost } from './value-estimate.ts'
 export { findOffersForNeedPure, findNeedsForOfferPure } from './one-way.ts'
-export { findBarterMatchesPure } from './two-way.ts'
+export { findBarterMatchesPure, averageScoreBreakdown } from './two-way.ts'
 export { findConsortiumMatchesPure } from './consortium.ts'
 export {
   normalizeCycleRing,

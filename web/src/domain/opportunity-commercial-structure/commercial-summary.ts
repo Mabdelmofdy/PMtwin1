@@ -62,12 +62,18 @@ function componentPreview(c: CommercialComponent): string[] {
       ].filter(Boolean)
     case 'barter':
       return [
+        c.title?.trim() ? c.title.trim() : '',
         c.offeredAssetOrService
           ? `Offers: ${c.offeredAssetOrService}`
           : 'Barter',
         c.requestedAssetOrService
           ? `Requests: ${c.requestedAssetOrService}`
           : '',
+        c.estimatedValue != null
+          ? `Estimated value: ${c.estimatedValue.toLocaleString('en-GB')} SAR`
+          : '',
+        c.valuationMethod ? `Valuation: ${c.valuationMethod}` : '',
+        c.condition ? `Conditions: ${c.condition}` : '',
       ].filter(Boolean)
     case 'custom':
       return [c.description || c.title || 'Custom'].filter(Boolean)

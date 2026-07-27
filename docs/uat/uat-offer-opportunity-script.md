@@ -339,4 +339,6 @@ Already covered above — confirm these are filled:
 | After both Accept         | `matched`             |
 
 
-Full walkthrough: [manual-need-offer-readiness-matching-scripts.md](./manual-need-offer-readiness-matching-scripts.md)
+Full walkthrough: [manual-need-offer-readiness-matching-scripts.md](./manual-need-offer-readiness-matching-scripts.md)  
+One Way matching: [uat-matching-one-way-script.md](./uat-matching-one-way-script.md)  
+All match types: [uat-matching-four-types-examples.md](./uat-matching-four-types-examples.md)

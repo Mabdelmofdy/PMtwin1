@@ -191,6 +191,23 @@ export function RichTimelineFields({
               </SelectContent>
             </Select>
           </PmFormField>
+          <PmFormField id="tl-delivery-method" label="Delivery method">
+            <Select
+              value={timeline.deliveryMethod ?? undefined}
+              onValueChange={(value) =>
+                onTimelineChange({ ...timeline, deliveryMethod: value })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select delivery method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="remote">Remote</SelectItem>
+                <SelectItem value="on_site">On site</SelectItem>
+                <SelectItem value="hybrid">Hybrid</SelectItem>
+              </SelectContent>
+            </Select>
+          </PmFormField>
         </PmFormGrid>
       </PmFormSection>
     </div>

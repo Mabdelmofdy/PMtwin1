@@ -302,14 +302,16 @@ function mapTwoWayMatch(
   ]
 
   const breakdown = toMatchCriteria(match.breakdown)
+  const { scoreAtoB, scoreBtoA, ...factorCriteria } = breakdown
   return {
     aggregateId: context.createAggregateId(),
     matchType: 'two_way',
     matchScore: match.matchScore,
     sideA: { userId: sideA.userId, needId: sideA.needId, offerId: sideA.offerId },
     sideB: { userId: sideB.userId, needId: sideB.needId, offerId: sideB.offerId },
-    scoreAtoB: breakdown.scoreAtoB,
-    scoreBtoA: breakdown.scoreBtoA,
+    scoreAtoB,
+    scoreBtoA,
+    matchCriteria: factorCriteria,
     valueEquivalence: match.valueEquivalence ?? null,
     participants,
     runId: context.runId,

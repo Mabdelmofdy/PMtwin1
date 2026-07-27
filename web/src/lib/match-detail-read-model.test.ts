@@ -5,6 +5,7 @@ import {
   buildMatchDetailReadModel,
   isParticipantOnMatch,
   resolveMatchDetailContextOpportunityId,
+  resolveMatchScoreFactors,
 } from '@/lib/match-detail-read-model.ts'
 
 const participants = [
@@ -241,6 +242,44 @@ describe('buildMatchDetailReadModel', () => {
     assert.equal(model.actions.showViewDeal, true)
     assert.equal(model.actions.dealId, 'deal-1')
     assert.equal(model.actions.showStartNegotiation, false)
+  })
+
+  it('resolves factor scores from breakdown and does not fake zero', () => {
+    const withFactors = buildMatchDetailReadModel(
+      discoveredMatch({
+        payload: {
+          needOpportunityId: 'need-1',
+          offerOpportunityId: 'offer-1',
+          breakdown: {
+            skillMatch: 0.82,
+            timelineFit: 0.7,
+            locationFit: 0.9,
+          },
+        },
+      }),
+      baseDeps({ opportunities }),
+    )
+    assert.equal(withFactors.scoreFactors.skillMatch, '82%')
+    assert.equal(withFactors.scoreFactors.timelineFit, '70%')
+    assert.equal(withFactors.scoreFactors.locationFit, '90%')
+
+    const twoWayMissingFactors = resolveMatchScoreFactors(
+      discoveredMatch({
+        matchType: 'two_way',
+        matchScore: 0.88,
+        payload: {
+          sideA: { userId: 'A', needId: 'a-need', offerId: 'offer-a' },
+          sideB: { userId: 'B', needId: 'b-need', offerId: 'offer-b' },
+          scoreAtoB: 0.9,
+          scoreBtoA: 0.86,
+        },
+      }),
+    )
+    assert.equal(twoWayMissingFactors.skillMatch, '—')
+    assert.equal(twoWayMissingFactors.timelineFit, '—')
+    assert.equal(twoWayMissingFactors.locationFit, '—')
+    assert.equal(twoWayMissingFactors.scoreAtoB, '90%')
+    assert.equal(twoWayMissingFactors.scoreBtoA, '86%')
   })
 })
 

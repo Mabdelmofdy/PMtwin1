@@ -115,6 +115,9 @@ export interface DiscoverTwoWayPayload {
 
   readonly scoreBtoA?: number
 
+  /** Averaged factor scores (skill/timeline/location/…) for detail UI. */
+  readonly matchCriteria?: PostMatchCriteria
+
   readonly valueEquivalence?: string | null
 
 }

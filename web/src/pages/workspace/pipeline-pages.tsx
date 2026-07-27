@@ -7,7 +7,7 @@ import { negotiationsApi } from '@/api/negotiations.ts'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { peopleApi } from '@/api/people.ts'
 import { dealsApi } from '@/api/deals.ts'
-import { formatDate, formatPercent } from '@/lib/format'
+import { formatDate } from '@/lib/format'
 import {
   acceptPostMatchUiAction,
   declinePostMatchUiAction,
@@ -903,20 +903,36 @@ export function MatchDetailPage() {
             <div className="grid gap-4 sm:grid-cols-3">
               <PmStatCard
                 label="Skill match"
-                value={formatPercent(match.payload?.breakdown?.skillMatch ?? 0)}
+                value={model.scoreFactors.skillMatch}
                 dense
               />
               <PmStatCard
                 label="Timeline fit"
-                value={formatPercent(match.payload?.breakdown?.timelineFit ?? 0)}
+                value={model.scoreFactors.timelineFit}
                 dense
               />
               <PmStatCard
                 label="Location fit"
-                value={formatPercent(match.payload?.breakdown?.locationFit ?? 0)}
+                value={model.scoreFactors.locationFit}
                 dense
               />
             </div>
+
+            {model.scoreFactors.scoreAtoB != null ||
+            model.scoreFactors.scoreBtoA != null ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <PmStatCard
+                  label="A → B score"
+                  value={model.scoreFactors.scoreAtoB ?? '—'}
+                  dense
+                />
+                <PmStatCard
+                  label="B → A score"
+                  value={model.scoreFactors.scoreBtoA ?? '—'}
+                  dense
+                />
+              </div>
+            ) : null}
 
             <MatchTopologyDiagram topology={model.topology} className="border-border/60 bg-surface-muted/30" />
 

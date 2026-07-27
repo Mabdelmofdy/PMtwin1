@@ -293,14 +293,25 @@ function pickDiscoverRecord(command: DiscoverPostMatchCommand): PostMatch {
   }
 
   if (isDiscoverTwoWayPostMatch(command)) {
+    const matchCriteria = command.matchCriteria
+      ? { ...command.matchCriteria }
+      : undefined
     return {
       ...base,
+      matchCriteria,
       payload: {
         sideA: { ...command.sideA },
         sideB: { ...command.sideB },
         scoreAtoB: command.scoreAtoB,
         scoreBtoA: command.scoreBtoA,
         valueEquivalence: command.valueEquivalence,
+        breakdown: matchCriteria
+          ? {
+              ...matchCriteria,
+              ...(command.scoreAtoB != null ? { scoreAtoB: command.scoreAtoB } : {}),
+              ...(command.scoreBtoA != null ? { scoreBtoA: command.scoreBtoA } : {}),
+            }
+          : undefined,
       },
     }
   }

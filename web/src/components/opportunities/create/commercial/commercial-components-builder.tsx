@@ -330,6 +330,12 @@ function ComponentForm({
               onChange({ estimatedValue: Number(e.target.value) || undefined })
             }
           />
+          <Input
+            className="sm:col-span-2"
+            placeholder="Exchange conditions"
+            value={component.condition ?? ''}
+            onChange={(e) => onChange({ condition: e.target.value })}
+          />
         </div>
       ) : null}
       {component.type === 'profit_sharing' ? (

@@ -7,7 +7,11 @@ import {
   type WizardStepId,
 } from '@/components/opportunity/wizard/wizard-steps.ts'
 import { resolveStepForValidationIssue } from '@/domain/opportunity-validation/validation-step-map.ts'
-import { buildCommercialStructureSummary } from '@/domain/opportunity-commercial-structure'
+import {
+  buildCommercialStructureSummary,
+  commercialComponentLabel,
+  type CommercialComponent,
+} from '@/domain/opportunity-commercial-structure'
 import {
   resolveMainCollaborationModelLabel,
   resolveSubModelLabel,
@@ -15,6 +19,199 @@ import {
 import { PmButton } from '@/components/ui/pm-button'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/tokens'
+
+function reviewValue(value: string | number | boolean | null | undefined): string {
+  if (value == null || value === '') return '—'
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No'
+  return String(value)
+}
+
+function deliveryMethodLabel(value: string | undefined): string {
+  if (!value) return '—'
+  const labels: Record<string, string> = {
+    remote: 'Remote',
+    on_site: 'On site',
+    hybrid: 'Hybrid',
+  }
+  return labels[value] ?? value
+}
+
+function CommercialComponentReview({
+  component,
+}: {
+  readonly component: CommercialComponent
+}) {
+  const lines: { label: string; value: string }[] = [
+    { label: 'Title', value: component.title || commercialComponentLabel(component.type) },
+    { label: 'Type', value: commercialComponentLabel(component.type) },
+    {
+      label: 'Applies to',
+      value:
+        component.appliesTo === 'entire_opportunity'
+          ? 'Entire opportunity'
+          : 'Selected work items',
+    },
+  ]
+
+  if (component.type === 'cash') {
+    lines.push(
+      { label: 'Currency', value: reviewValue(component.currency) },
+      { label: 'Budget type', value: reviewValue(component.budgetType) },
+    )
+    if (component.budgetType === 'fixed') {
+      lines.push({
+        label: 'Fixed amount',
+        value:
+          component.fixedAmount != null
+            ? component.fixedAmount.toLocaleString('en-GB')
+            : '—',
+      })
+    }
+    if (component.budgetType === 'range') {
+      lines.push({
+        label: 'Range',
+        value:
+          component.minimumAmount != null || component.maximumAmount != null
+            ? `${component.minimumAmount?.toLocaleString('en-GB') ?? '—'} – ${component.maximumAmount?.toLocaleString('en-GB') ?? '—'}`
+            : '—',
+      })
+    }
+    lines.push(
+      {
+        label: 'Advance',
+        value:
+          component.advancePercentage != null
+            ? `${component.advancePercentage}%`
+            : '—',
+      },
+      {
+        label: 'Retention',
+        value:
+          component.retentionPercentage != null
+            ? `${component.retentionPercentage}%`
+            : '—',
+      },
+      {
+        label: 'Payment schedule',
+        value: component.paymentSchedule?.length
+          ? `${component.paymentSchedule.length} milestone(s)`
+          : '—',
+      },
+      { label: 'VAT handling', value: reviewValue(component.vatHandling) },
+      { label: 'Payment terms', value: reviewValue(component.paymentTerms) },
+    )
+  }
+
+  if (component.type === 'barter') {
+    lines.push(
+      { label: 'Offered', value: reviewValue(component.offeredAssetOrService) },
+      {
+        label: 'Requested',
+        value: reviewValue(component.requestedAssetOrService),
+      },
+      {
+        label: 'Estimated value',
+        value:
+          component.estimatedValue != null
+            ? `${component.estimatedValue.toLocaleString('en-GB')} SAR`
+            : '—',
+      },
+      {
+        label: 'Valuation method',
+        value: reviewValue(component.valuationMethod),
+      },
+      { label: 'Exchange ratio', value: reviewValue(component.exchangeRatio) },
+      { label: 'Condition', value: reviewValue(component.condition) },
+      {
+        label: 'Delivery',
+        value: reviewValue(
+          component.deliveryLocation ?? component.deliveryDate,
+        ),
+      },
+    )
+  }
+
+  if (component.type === 'profit_sharing') {
+    lines.push(
+      {
+        label: 'Profit share',
+        value:
+          component.profitSharePercentage != null
+            ? `${component.profitSharePercentage}% of ${component.grossOrNet ?? 'net'}`
+            : '—',
+      },
+      {
+        label: 'Settlement',
+        value: reviewValue(component.settlementPeriod),
+      },
+      {
+        label: 'Calculation basis',
+        value: reviewValue(component.calculationBasis),
+      },
+    )
+  }
+
+  if (component.type === 'revenue_sharing') {
+    lines.push(
+      {
+        label: 'Revenue share',
+        value:
+          component.revenueSharePercentage != null
+            ? `${component.revenueSharePercentage}%`
+            : '—',
+      },
+      {
+        label: 'Revenue definition',
+        value: reviewValue(component.revenueDefinition),
+      },
+    )
+  }
+
+  if (component.type === 'equity') {
+    lines.push(
+      {
+        label: 'Equity',
+        value:
+          component.equityPercentage != null
+            ? `${component.equityPercentage}%`
+            : reviewValue(component.equityType),
+      },
+      {
+        label: 'Entity',
+        value: reviewValue(
+          component.companyOrSpv === 'spv'
+            ? 'SPV'
+            : component.targetEntity,
+        ),
+      },
+      { label: 'Share class', value: reviewValue(component.shareClass) },
+    )
+  }
+
+  if (component.type === 'custom') {
+    lines.push(
+      { label: 'Description', value: reviewValue(component.description) },
+      {
+        label: 'Calculation',
+        value: reviewValue(component.calculationMethod),
+      },
+    )
+  }
+
+  if (component.notes?.trim()) {
+    lines.push({ label: 'Notes', value: component.notes.trim() })
+  }
+
+  return (
+    <div className="mt-2 space-y-1 rounded-md border border-border/50 bg-surface px-3 py-2">
+      {lines.map((line) => (
+        <p key={`${component.id}-${line.label}`}>
+          <span className="text-foreground">{line.label}:</span> {line.value}
+        </p>
+      ))}
+    </div>
+  )
+}
 
 export type ReviewPublishStepProps = {
   draft: OpportunityDraft
@@ -193,19 +390,27 @@ export function ReviewPublishStep({
             ? draft.resources.map((r) => r.name).filter(Boolean).join(', ')
             : '—'}
         </p>
-        <p>
-          Capacity:{' '}
-          {[
-            draft.capacity?.availableCapacity != null
-              ? `Available ${draft.capacity.availableCapacity}`
-              : null,
-            draft.capacity?.maximumCapacity != null
-              ? `Max ${draft.capacity.maximumCapacity}`
-              : null,
-          ]
-            .filter(Boolean)
-            .join(' · ') || '—'}
-        </p>
+        {draft.intent === 'offer' ? (
+          <p>
+            Capacity:{' '}
+            {[
+              draft.capacity?.availableCapacity != null
+                ? `Available ${draft.capacity.availableCapacity}`
+                : null,
+              draft.capacity?.reservedCapacity != null
+                ? `Reserved ${draft.capacity.reservedCapacity}`
+                : null,
+              draft.capacity?.maximumCapacity != null
+                ? `Max ${draft.capacity.maximumCapacity}`
+                : null,
+              draft.capacity?.availableFrom
+                ? `From ${draft.capacity.availableFrom}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(' · ') || '—'}
+          </p>
+        ) : null}
       </ReviewSection>
 
       <ReviewSection
@@ -232,45 +437,50 @@ export function ReviewPublishStep({
         onEdit={() => onEdit('commercial')}
       >
         <p>
-          {commercial.isHybrid ? 'Hybrid' : commercial.derivedExchangeMode} —{' '}
-          {commercial.componentLabels.join(' + ') || 'No components'}
+          Mode:{' '}
+          {commercial.isHybrid
+            ? `Hybrid (${commercial.componentLabels.join(' + ') || 'no components'})`
+            : commercial.derivedExchangeMode}
         </p>
-        {commercial.allocationLines.map((line) => (
-          <p key={line}>{line}</p>
-        ))}
-        {(() => {
-          const cash = draft.commercialStructure.components.find((c) => c.type === 'cash' && c.enabled)
-          if (!cash || cash.type !== 'cash') return null
-          return (
-            <>
-              <p className="mt-2 font-medium text-foreground">Payment</p>
-              <p>Currency: {cash.currency || '—'}</p>
-              <p>Budget type: {cash.budgetType || '—'}</p>
-              {cash.budgetType === 'fixed' ? (
-                <p>
-                  Fixed amount:{' '}
-                  {cash.fixedAmount != null ? cash.fixedAmount.toLocaleString() : '—'}
-                </p>
-              ) : null}
-              {cash.budgetType === 'range' ? (
-                <p>
-                  Range:{' '}
-                  {cash.minimumAmount != null || cash.maximumAmount != null
-                    ? `${cash.minimumAmount?.toLocaleString() ?? '—'} – ${cash.maximumAmount?.toLocaleString() ?? '—'}`
-                    : '—'}
-                </p>
-              ) : null}
-              <p>Advance: {cash.advancePercentage != null ? `${cash.advancePercentage}%` : '—'}</p>
-              <p>Retention: {cash.retentionPercentage != null ? `${cash.retentionPercentage}%` : '—'}</p>
-              <p>
-                Schedule:{' '}
-                {cash.paymentSchedule?.length
-                  ? `${cash.paymentSchedule.length} milestone(s)`
-                  : '—'}
+        {draft.commercialStructure.allocationMethod &&
+        draft.commercialStructure.allocationMethod !== 'not_applicable' ? (
+          <p>Allocation: {draft.commercialStructure.allocationMethod}</p>
+        ) : null}
+        {commercial.allocationLines.length > 0 &&
+        draft.commercialStructure.allocationMethod !== 'not_applicable' ? (
+          <ul className="mt-1 list-inside list-disc space-y-0.5">
+            {commercial.allocationLines.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        ) : null}
+        {draft.commercialStructure.components.filter((c) => c.enabled).length ===
+        0 ? (
+          <p>No components</p>
+        ) : (
+          draft.commercialStructure.components
+            .filter((c) => c.enabled)
+            .map((component) => (
+              <CommercialComponentReview
+                key={component.id}
+                component={component}
+              />
+            ))
+        )}
+        {draft.commercialStructure.notes?.trim() ? (
+          <p className="mt-2">Notes: {draft.commercialStructure.notes.trim()}</p>
+        ) : null}
+        {(draft.commercialStructure.constraints?.length ?? 0) > 0 ? (
+          <div className="mt-2 space-y-1">
+            <p className="font-medium text-foreground">Constraints</p>
+            {draft.commercialStructure.constraints!.map((constraint) => (
+              <p key={constraint.id}>
+                {constraint.label ?? constraint.type}
+                {constraint.value != null ? `: ${String(constraint.value)}` : ''}
               </p>
-            </>
-          )
-        })()}
+            ))}
+          </div>
+        ) : null}
       </ReviewSection>
 
       <ReviewSection
@@ -279,17 +489,28 @@ export function ReviewPublishStep({
       >
         <p>Primary location: {draft.location || '—'}</p>
         <p>Service area: {draft.serviceArea || '—'}</p>
-        <p>Delivery method: {draft.richTimeline.deliveryMethod || '—'}</p>
+        <p>
+          Delivery method: {deliveryMethodLabel(draft.richTimeline.deliveryMethod)}
+        </p>
+        <p>
+          Start date: {draft.startDate || '—'}
+          {draft.intent === 'need'
+            ? ` → Deadline: ${draft.tenderDeadline || '—'}`
+            : ''}
+        </p>
         <p>Duration: {draft.richTimeline.estimatedDuration || '—'}</p>
+        <p>
+          Must finish before: {draft.richTimeline.mustFinishBefore || '—'}
+        </p>
         <p>Working days: {draft.richTimeline.workingDays || '—'}</p>
         <p>Shift: {draft.richTimeline.shiftType || '—'}</p>
         <p>
           Flexible start:{' '}
-          {draft.richTimeline.flexibleStart == null
-            ? '—'
-            : draft.richTimeline.flexibleStart
-              ? 'Yes'
-              : 'No'}
+          {draft.richTimeline.flexibleStart ? 'Yes' : 'No'}
+        </p>
+        <p>
+          Weekend allowed:{' '}
+          {draft.richTimeline.weekendAllowed ? 'Yes' : 'No'}
         </p>
       </ReviewSection>
 

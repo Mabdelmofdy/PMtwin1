@@ -21,11 +21,20 @@ import {
 const MATCH_ENTITY = 'match' as const
 export const MATCH_DETAIL_NEUTRAL_CONTEXT_ID = '__match_detail_neutral__'
 
+export type MatchScoreFactorLabels = {
+  readonly skillMatch: string
+  readonly timelineFit: string
+  readonly locationFit: string
+  readonly scoreAtoB?: string
+  readonly scoreBtoA?: string
+}
+
 export type MatchDetailReadModel = {
   readonly match: PostMatch
   readonly matchTypeLabel: string
   readonly canonicalStatus: string
   readonly scoreLabel: string
+  readonly scoreFactors: MatchScoreFactorLabels
   readonly relatedOpportunities: readonly RelatedOpportunityRef[]
   readonly participants: readonly OpportunityMatchParticipantSummary[]
   readonly actions: OpportunityMatchCardActions
@@ -51,6 +60,51 @@ function resolveParticipantDisplayName(
 ): string {
   const name = deps.getPersonName?.(userId)
   return name?.trim() ? name : userId
+}
+
+function optionalPercentLabel(value: number | undefined): string {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? formatPercent(value)
+    : '—'
+}
+
+/**
+ * Resolve factor scores from matchCriteria / payload.breakdown.
+ * Missing factors stay undefined so UI can show "—" instead of fake 0%.
+ */
+export function resolveMatchScoreFactors(
+  match: PostMatch,
+): MatchScoreFactorLabels {
+  const breakdown = {
+    ...(match.matchCriteria ?? {}),
+    ...(match.payload?.breakdown ?? {}),
+  }
+  const read = (key: string): number | undefined => {
+    const value = breakdown[key]
+    return typeof value === 'number' && Number.isFinite(value) ? value : undefined
+  }
+
+  const factors: MatchScoreFactorLabels = {
+    skillMatch: optionalPercentLabel(read('skillMatch')),
+    timelineFit: optionalPercentLabel(read('timelineFit')),
+    locationFit: optionalPercentLabel(read('locationFit')),
+  }
+
+  const scoreAtoB = read('scoreAtoB') ?? match.payload?.scoreAtoB
+  const scoreBtoA = read('scoreBtoA') ?? match.payload?.scoreBtoA
+  if (match.matchType === 'two_way' || scoreAtoB != null || scoreBtoA != null) {
+    return {
+      ...factors,
+      scoreAtoB: optionalPercentLabel(
+        typeof scoreAtoB === 'number' ? scoreAtoB : undefined,
+      ),
+      scoreBtoA: optionalPercentLabel(
+        typeof scoreBtoA === 'number' ? scoreBtoA : undefined,
+      ),
+    }
+  }
+
+  return factors
 }
 
 /**
@@ -111,6 +165,7 @@ export function buildMatchDetailReadModel(
     matchTypeLabel: formatMatchTypeLabel(match.matchType),
     canonicalStatus: toCanonical(MATCH_ENTITY, match.status ?? '') ?? match.status,
     scoreLabel: formatPercent(match.matchScore),
+    scoreFactors: resolveMatchScoreFactors(match),
     relatedOpportunities: related.items,
     participants,
     actions,

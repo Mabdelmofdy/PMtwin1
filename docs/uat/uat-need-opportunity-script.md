@@ -316,4 +316,6 @@ Already covered above — confirm these are filled:
 3. Save Draft → Details readiness redesign
 4. Publish after Script B is ready (or publish first; match appears when Offer publishes)
 
-Full walkthrough: [manual-need-offer-readiness-matching-scripts.md](./manual-need-offer-readiness-matching-scripts.md)
+Full walkthrough: [manual-need-offer-readiness-matching-scripts.md](./manual-need-offer-readiness-matching-scripts.md)  
+One Way matching: [uat-matching-one-way-script.md](./uat-matching-one-way-script.md)  
+All match types: [uat-matching-four-types-examples.md](./uat-matching-four-types-examples.md)

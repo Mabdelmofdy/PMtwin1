@@ -299,6 +299,11 @@ Offering BIM Architect services with Revit modeling and coordination for tower a
 
 ## Related
 
+- [uat-matching-one-way-script.md](./uat-matching-one-way-script.md) — One Way matching  
+- [uat-matching-two-way-script.md](./uat-matching-two-way-script.md) — Two-Way matching  
+- [uat-matching-group-script.md](./uat-matching-group-script.md) — Group Formation (consortium)  
+- [uat-matching-circular-script.md](./uat-matching-circular-script.md) — Circular Exchange  
+- [uat-matching-four-types-examples.md](./uat-matching-four-types-examples.md) — index of all four  
 - [uat-need-opportunity-script.md](./uat-need-opportunity-script.md) — full Need field tables  
 - [uat-offer-opportunity-script.md](./uat-offer-opportunity-script.md) — full Offer field tables  
 - [matching-workflow.md](../workflow/matching-workflow.md) — when matching runs  

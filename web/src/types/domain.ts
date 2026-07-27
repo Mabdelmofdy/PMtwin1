@@ -275,6 +275,7 @@ export type PostMatchTwoWayPayload = {
   scoreAtoB?: number
   scoreBtoA?: number
   valueEquivalence?: string | null
+  breakdown?: Record<string, number>
 }
 
 export type PostMatchConsortiumPayload = {
