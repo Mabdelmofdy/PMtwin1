@@ -26,7 +26,7 @@ export function AppHeader() {
     <header
       data-slot="app-header"
       className={cn(
-        'sticky top-0 z-20 flex h-14 min-w-0 shrink-0 items-center gap-2 border-b border-border/60',
+        'sticky top-0 z-20 flex h-14 min-w-0 shrink-0 items-center gap-2 overflow-x-clip border-b border-border/60',
         'bg-background/90 px-3 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80',
         'md:gap-3 md:px-4',
       )}
@@ -51,23 +51,23 @@ export function AppHeader() {
 
       <Separator orientation="vertical" className="mx-0.5 hidden h-5 md:block" />
 
-      <div className="hidden min-w-0 flex-1 items-center gap-3 md:flex">
-        <div className="hidden min-w-0 xl:block">
-          <p className={cn(pmTypography.caption, 'leading-none')}>
+      <div className="hidden min-w-0 flex-1 items-center gap-3 overflow-hidden md:flex">
+        <div className="hidden min-w-0 max-w-[14rem] shrink xl:block 2xl:max-w-[18rem]">
+          <p className={cn(pmTypography.caption, 'truncate leading-none')}>
             {activeWorkspace?.name ??
               (isCompanyUser ? 'Company workspace' : 'My Workspace')}
           </p>
           <p className={cn(pmTypography.label, 'truncate')}>{workspace.title}</p>
         </div>
-        <Separator orientation="vertical" className="hidden h-5 xl:block" />
-        <PageBreadcrumbs className="min-w-0 flex-1" />
+        <Separator orientation="vertical" className="hidden h-5 shrink-0 xl:block" />
+        <PageBreadcrumbs className="min-w-0 flex-1 overflow-hidden" />
       </div>
 
-      <div className="hidden flex-1 justify-center px-2 md:flex lg:max-w-md xl:max-w-lg">
+      <div className="hidden min-w-0 flex-1 justify-center px-2 md:flex lg:max-w-md xl:max-w-lg">
         <GlobalSearch className="max-w-full" />
       </div>
 
-      <div className="ms-auto flex items-center gap-0.5 sm:gap-1">
+      <div className="ms-auto flex shrink-0 items-center gap-0.5 sm:gap-1">
         <GlobalSearch variant="compact" className="md:hidden" />
         <QuickCreateMenu />
         <NotificationCenter />
