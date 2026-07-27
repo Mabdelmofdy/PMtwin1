@@ -206,7 +206,7 @@ function categoryOverlap(needNorm, offerNorm) {
   const offerCat = new Set(
     [offerNorm.modelType, offerNorm.subModelType, ...offerNorm.categories ?? []].filter(Boolean)
   );
-  if (needCat.size === 0 && offerCat.size === 0) return true;
+  if (needCat.size === 0 || offerCat.size === 0) return true;
   for (const category of needCat) {
     if (offerCat.has(category)) return true;
   }
@@ -3300,7 +3300,12 @@ function buildSyntheticNeedForRole(leadNeed, leadNorm, roleDef) {
       coreSkills: [],
       // Do not hard-gate on tokenized scope prose; role compatibility + scoring suffice.
       requiredServices: [],
-      skills: skillHints.length > 0 ? skillHints : [role]
+      skills: skillHints.length > 0 ? skillHints : [role],
+      // Do not inherit lead JV/consortium categories — partner offers are often
+      // cash/task_based and would fail categoryOverlap otherwise.
+      modelType: void 0,
+      subModelType: void 0,
+      categories: []
     }
   };
 }

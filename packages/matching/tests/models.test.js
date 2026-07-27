@@ -198,6 +198,8 @@ describe('model runners — consortium', () => {
       'Architect',
       ['BIM', 'Revit'],
       {
+        modelType: 'joint_venture',
+        subModelType: 'consortium',
         attributes: {
           targetRole: 'Architect',
           memberRoles: [
@@ -216,18 +218,44 @@ describe('model runners — consortium', () => {
           requiredServices: ['BIM', 'Revit'],
           skills: ['BIM', 'Revit'],
           coreSkills: ['BIM', 'Revit'],
-          location: 'remote',
-          modelType: 'project_based',
+          location: 'Riyadh',
+          modelType: 'joint_venture',
+          subModelType: 'consortium',
+          categories: ['joint_venture', 'consortium'],
         },
       },
     )
 
     const offers = [
-      publishedOffer('offer-khalid', 'khalid', 'Architect', ['BIM', 'Revit']),
+      publishedOffer('offer-khalid', 'khalid', 'Architect', ['BIM', 'Revit'], {
+        modelType: 'cash_subcontracting',
+        subModelType: 'task_based',
+        normalized: {
+          role: 'Architect',
+          offeredServices: ['BIM', 'Revit'],
+          skills: ['BIM', 'Revit'],
+          location: 'Riyadh',
+          modelType: 'cash_subcontracting',
+          subModelType: 'task_based',
+          categories: ['cash_subcontracting', 'task_based'],
+        },
+      }),
       publishedOffer('offer-hala', 'hala', 'Structural Engineer', [
         'Structural Analysis',
         'SAP2000',
-      ]),
+      ], {
+        modelType: 'cash_subcontracting',
+        subModelType: 'task_based',
+        normalized: {
+          role: 'Structural Engineer',
+          offeredServices: ['Structural Analysis', 'SAP2000'],
+          skills: ['Structural Analysis', 'SAP2000'],
+          location: 'Riyadh',
+          modelType: 'cash_subcontracting',
+          subModelType: 'task_based',
+          categories: ['cash_subcontracting', 'task_based'],
+        },
+      }),
     ]
 
     const result = findConsortiumMatchesPure(leadNeed, offers, config)

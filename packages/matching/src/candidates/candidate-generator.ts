@@ -60,7 +60,9 @@ export function categoryOverlap(needNorm: NormalizedPost, offerNorm: NormalizedP
   const offerCat = new Set(
     [offerNorm.modelType, offerNorm.subModelType, ...(offerNorm.categories ?? [])].filter(Boolean),
   )
-  if (needCat.size === 0 && offerCat.size === 0) return true
+  // No category constraint on either side → compatible (consortium role fills
+  // often pair JV lead with task_based / cash offers).
+  if (needCat.size === 0 || offerCat.size === 0) return true
   for (const category of needCat) {
     if (offerCat.has(category)) return true
   }
