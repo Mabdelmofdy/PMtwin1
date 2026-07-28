@@ -68,11 +68,14 @@ export function enrichTwoWayMatchScoreBreakdown(
     toNorm(offerBPost),
   )
 
-  const { rejected: _rejected, ...averaged } = averageScoreBreakdown(
-    scoredAtoB.breakdown,
-    scoredBtoA.breakdown,
-  )
+  const {
+    rejected: _rejected,
+    locationTier: _locationTier,
+    locationDetail: _locationDetail,
+    ...averaged
+  } = averageScoreBreakdown(scoredAtoB.breakdown, scoredBtoA.breakdown)
 
+  // Persist numeric factors only — locationTier/locationDetail are string metadata.
   return {
     ...averaged,
     scoreAtoB: scoredAtoB.score,

@@ -139,6 +139,7 @@ export {
   summarizeDiagnostics,
   diagnosticCheck,
   rejectReasonFromHardGate,
+  diagnoseGateAndScore,
 } from './dist-types/diagnostics/matching-diagnostics'
 export type {
   MatchingDiagnosticCheckId,

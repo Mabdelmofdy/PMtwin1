@@ -1,4 +1,10 @@
 import { scorePair } from '../scoring/post-to-post-scoring.ts'
+import { passesPair } from '../constraints/hard-constraints.ts'
+import {
+  diagnoseGateAndScore,
+  summarizeDiagnostics,
+  type MatchingCandidateDiagnostic,
+} from '../diagnostics/matching-diagnostics.ts'
 import type { CanonicalData } from '../types/canonical.ts'
 import type { MatchingConfig } from '../types/matching-config.ts'
 import type {
@@ -10,7 +16,6 @@ import type {
 } from '../types/model-results.ts'
 import type { OpportunityPost } from '../types/opportunity.ts'
 import {
-  passHardGate,
   resolveNormalized,
   resolveThreshold,
   withRunnerConfig,
@@ -70,9 +75,14 @@ function buildCreatorGraph(
   config: MatchingConfig,
   canonical: CanonicalData,
   threshold: number,
-): { outEdges: Record<string, string[]>; edgeDetails: CircularEdgeMap } {
+): {
+  outEdges: Record<string, string[]>
+  edgeDetails: CircularEdgeMap
+  diagnostics: MatchingCandidateDiagnostic[]
+} {
   const outEdges: Record<string, string[]> = {}
   const edgeDetails: Record<string, CircularEdgeDetail> = {}
+  const diagnostics: MatchingCandidateDiagnostic[] = []
 
   for (const need of needPosts) {
     const needNorm = resolveNormalized(need, canonical, config)
@@ -82,23 +92,32 @@ function buildCreatorGraph(
     for (const offer of offerPosts) {
       if (offer.creatorId === fromCreator) continue
       const offerNorm = resolveNormalized(offer, canonical, config)
-      if (!passHardGate(need, offer, needNorm, offerNorm, config)) continue
+      const gate = passesPair(need, offer, config, { needNorm, offerNorm })
+      const scored = gate.ok
+        ? scorePair(need, offer, config, needNorm, offerNorm)
+        : undefined
+      const diagnostic = diagnoseGateAndScore({
+        candidateOpportunityId: String(offer.id ?? ''),
+        gate,
+        scored,
+        threshold,
+      })
+      diagnostics.push(diagnostic)
 
-      const { score } = scorePair(need, offer, config, needNorm, offerNorm)
-      if (score < threshold || !offer.creatorId) continue
+      if (!gate.ok || !scored || scored.score < threshold || !offer.creatorId) continue
 
       const toCreator = offer.creatorId
       if (!outEdges[fromCreator]) outEdges[fromCreator] = []
       if (!outEdges[fromCreator].includes(toCreator)) outEdges[fromCreator].push(toCreator)
 
       const key = `${fromCreator}->${toCreator}`
-      if (!edgeDetails[key] || score > edgeDetails[key].score) {
-        edgeDetails[key] = { score, need, offer }
+      if (!edgeDetails[key] || scored.score > edgeDetails[key].score) {
+        edgeDetails[key] = { score: scored.score, need, offer }
       }
     }
   }
 
-  return { outEdges, edgeDetails }
+  return { outEdges, edgeDetails, diagnostics }
 }
 
 function findCycles(
@@ -159,7 +178,8 @@ export function findCircularExchangesPure(
   const resolvedConfig = withRunnerConfig(config)
   const threshold = resolveThreshold(resolvedConfig)
   const minCycleLength = options.minCycleLength ?? 3
-  const { outEdges, edgeDetails } = buildCreatorGraph(
+  const sourceId = String(needPosts[0]?.id ?? offerPosts[0]?.id ?? 'circular')
+  const { outEdges, edgeDetails, diagnostics } = buildCreatorGraph(
     needPosts,
     offerPosts,
     resolvedConfig,
@@ -203,5 +223,9 @@ export function findCircularExchangesPure(
   }
 
   uniqueCycles.sort((a, b) => b.matchScore - a.matchScore)
-  return { model: 'circular', matches: uniqueCycles }
+  return {
+    model: 'circular',
+    matches: uniqueCycles,
+    diagnostic: summarizeDiagnostics(sourceId, diagnostics),
+  }
 }

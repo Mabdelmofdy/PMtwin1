@@ -1,12 +1,17 @@
 import { barterValueEquivalence } from '../value/value-compatibility.ts'
 import { scorePair } from '../scoring/post-to-post-scoring.ts'
+import { passesPair } from '../constraints/hard-constraints.ts'
+import {
+  diagnoseGateAndScore,
+  summarizeDiagnostics,
+  type MatchingCandidateDiagnostic,
+} from '../diagnostics/matching-diagnostics.ts'
 import type { CanonicalData } from '../types/canonical.ts'
 import type { MatchingConfig } from '../types/matching-config.ts'
 import type { ScoreBreakdown } from '../types/match-result.ts'
 import type { ModelRunnerOptions, ScoredMatch, TwoWayMatchResult } from '../types/model-results.ts'
 import type { OpportunityPost } from '../types/opportunity.ts'
 import {
-  passHardGate,
   resolveNormalized,
   resolveThreshold,
   withRunnerConfig,
@@ -24,6 +29,7 @@ export function averageScoreBreakdown(
   a: ScoreBreakdown,
   b: ScoreBreakdown,
 ): ScoreBreakdown {
+  const preferA = (a.locationFit ?? 0) >= (b.locationFit ?? 0)
   return {
     skillMatch: averageFactor(a.skillMatch, b.skillMatch),
     attributeOverlap: averageFactor(a.attributeOverlap, b.attributeOverlap),
@@ -37,6 +43,8 @@ export function averageScoreBreakdown(
     timelineFit: averageFactor(a.timelineFit, b.timelineFit),
     locationFit: averageFactor(a.locationFit, b.locationFit),
     reputation: averageFactor(a.reputation, b.reputation),
+    locationTier: preferA ? a.locationTier : b.locationTier,
+    locationDetail: preferA ? a.locationDetail : b.locationDetail,
   }
 }
 
@@ -50,12 +58,25 @@ export function findBarterMatchesPure(
 ): TwoWayMatchResult {
   const resolvedConfig = withRunnerConfig(config)
   const threshold = resolveThreshold(resolvedConfig)
+  const sourceId = String(anchorPost.id ?? '')
   const creatorIdA = anchorPost.creatorId
-  if (!creatorIdA) return { model: 'two_way', matches: [] }
+  if (!creatorIdA) {
+    return {
+      model: 'two_way',
+      matches: [],
+      diagnostic: summarizeDiagnostics(sourceId, []),
+    }
+  }
 
   const needA = needPosts.find((post) => post.creatorId === creatorIdA)
   const offerA = offerPosts.find((post) => post.creatorId === creatorIdA)
-  if (!needA || !offerA) return { model: 'two_way', matches: [] }
+  if (!needA || !offerA) {
+    return {
+      model: 'two_way',
+      matches: [],
+      diagnostic: summarizeDiagnostics(sourceId, []),
+    }
+  }
 
   const normNeedA = resolveNormalized(needA, canonical, resolvedConfig)
   const normOfferA = resolveNormalized(offerA, canonical, resolvedConfig)
@@ -63,19 +84,63 @@ export function findBarterMatchesPure(
   const otherOffers = offerPosts.filter((post) => post.creatorId !== creatorIdA)
 
   const matches: ScoredMatch[] = []
+  const diagnostics: MatchingCandidateDiagnostic[] = []
+
   for (const needB of otherNeeds) {
     const offersByCreator = otherOffers.filter((offer) => offer.creatorId === needB.creatorId)
     for (const offerB of offersByCreator) {
+      const candidateId = String(offerB.id ?? needB.id ?? '')
       const normNeedB = resolveNormalized(needB, canonical, resolvedConfig)
       const normOfferB = resolveNormalized(offerB, canonical, resolvedConfig)
-      if (!passHardGate(needB, offerA, normNeedB, normOfferA, resolvedConfig)) continue
-      if (!passHardGate(needA, offerB, normNeedA, normOfferB, resolvedConfig)) continue
+
+      const gateAtoB = passesPair(needB, offerA, resolvedConfig, {
+        needNorm: normNeedB,
+        offerNorm: normOfferA,
+      })
+      if (!gateAtoB.ok) {
+        diagnostics.push(
+          diagnoseGateAndScore({
+            candidateOpportunityId: candidateId,
+            gate: gateAtoB,
+            threshold,
+          }),
+        )
+        continue
+      }
+
+      const gateBtoA = passesPair(needA, offerB, resolvedConfig, {
+        needNorm: normNeedA,
+        offerNorm: normOfferB,
+      })
+      if (!gateBtoA.ok) {
+        diagnostics.push(
+          diagnoseGateAndScore({
+            candidateOpportunityId: candidateId,
+            gate: gateBtoA,
+            threshold,
+          }),
+        )
+        continue
+      }
 
       const scoredAtoB = scorePair(needB, offerA, resolvedConfig, normNeedB, normOfferA)
       const scoredBtoA = scorePair(needA, offerB, resolvedConfig, normNeedA, normOfferB)
-      if (scoredAtoB.score < threshold || scoredBtoA.score < threshold) continue
+
+      if (scoredAtoB.score < threshold || scoredBtoA.score < threshold) {
+        const weak = scoredAtoB.score <= scoredBtoA.score ? scoredAtoB : scoredBtoA
+        diagnostics.push(
+          diagnoseGateAndScore({
+            candidateOpportunityId: candidateId,
+            gate: { ok: true },
+            scored: weak,
+            threshold,
+          }),
+        )
+        continue
+      }
 
       const pairScore = (scoredAtoB.score + scoredBtoA.score) / 2
+      const averaged = averageScoreBreakdown(scoredAtoB.breakdown, scoredBtoA.breakdown)
       const equivalence = barterValueEquivalence(
         barterSidePost(needA, offerA),
         barterSidePost(needB, offerB),
@@ -83,7 +148,7 @@ export function findBarterMatchesPure(
       matches.push({
         matchScore: pairScore,
         breakdown: {
-          ...averageScoreBreakdown(scoredAtoB.breakdown, scoredBtoA.breakdown),
+          ...averaged,
           scoreAtoB: scoredAtoB.score,
           scoreBtoA: scoredBtoA.score,
         },
@@ -96,9 +161,25 @@ export function findBarterMatchesPure(
         needOpportunityId: needB.id,
         offerOpportunityId: offerB.id,
       })
+      diagnostics.push(
+        diagnoseGateAndScore({
+          candidateOpportunityId: candidateId,
+          gate: { ok: true },
+          scored: {
+            score: pairScore,
+            breakdown: averaged,
+            labels: scoredAtoB.labels,
+          },
+          threshold,
+        }),
+      )
     }
   }
 
   matches.sort((a, b) => b.matchScore - a.matchScore)
-  return { model: 'two_way', matches }
+  return {
+    model: 'two_way',
+    matches,
+    diagnostic: summarizeDiagnostics(sourceId, diagnostics),
+  }
 }

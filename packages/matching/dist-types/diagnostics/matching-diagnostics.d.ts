@@ -38,6 +38,7 @@ export declare const MATCHING_REJECT_REASONS: {
     readonly SKILL_FLOOR: "SKILL_FLOOR";
     readonly BELOW_MATCH_THRESHOLD: "BELOW_MATCH_THRESHOLD";
     readonly SOURCE_INTENT_INVALID: "SOURCE_INTENT_INVALID";
+    readonly ROLE_UNFILLED: "ROLE_UNFILLED";
 };
 export type MatchingRejectReason = (typeof MATCHING_REJECT_REASONS)[keyof typeof MATCHING_REJECT_REASONS];
 declare function check(id: MatchingDiagnosticCheckId, status: MatchingDiagnosticCheckStatus, detail?: string): MatchingDiagnosticCheck;
@@ -54,6 +55,16 @@ export declare function buildRejectedDiagnostic(input: {
     readonly finalScore?: number;
     readonly locationTier?: string;
     readonly locationScore?: number;
+}): MatchingCandidateDiagnostic;
+/**
+ * Shared gate+score diagnostic for two-way / consortium / circular
+ * (models that do not use one-way's budget/timeline/category pre-filters).
+ */
+export declare function diagnoseGateAndScore(input: {
+    readonly candidateOpportunityId: string;
+    readonly gate: HardConstraintResult;
+    readonly scored?: ScorePairResult;
+    readonly threshold: number;
 }): MatchingCandidateDiagnostic;
 export declare function summarizeDiagnostics(sourceOpportunityId: string, candidates: readonly MatchingCandidateDiagnostic[]): MatchingRunDiagnostic;
 export { check as diagnosticCheck };

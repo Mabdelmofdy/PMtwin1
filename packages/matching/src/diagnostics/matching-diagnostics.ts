@@ -55,6 +55,7 @@ export const MATCHING_REJECT_REASONS = {
   SKILL_FLOOR: 'SKILL_FLOOR',
   BELOW_MATCH_THRESHOLD: 'BELOW_MATCH_THRESHOLD',
   SOURCE_INTENT_INVALID: 'SOURCE_INTENT_INVALID',
+  ROLE_UNFILLED: 'ROLE_UNFILLED',
 } as const
 
 export type MatchingRejectReason =
@@ -139,6 +140,112 @@ export function buildRejectedDiagnostic(input: {
     locationScore: input.locationScore,
     postMatchCreated: false,
   }
+}
+
+/**
+ * Shared gate+score diagnostic for two-way / consortium / circular
+ * (models that do not use one-way's budget/timeline/category pre-filters).
+ */
+export function diagnoseGateAndScore(input: {
+  readonly candidateOpportunityId: string
+  readonly gate: HardConstraintResult
+  readonly scored?: ScorePairResult
+  readonly threshold: number
+}): MatchingCandidateDiagnostic {
+  if (!input.gate.ok) {
+    const rejectReason = rejectReasonFromHardGate(input.gate)
+    const roleFail =
+      input.gate.reason === 'role_missing' || input.gate.reason === 'role_incompatible'
+    const skillFail =
+      input.gate.reason === 'core_skill_missing'
+      || input.gate.reason === 'service_overlap_low'
+    return buildRejectedDiagnostic({
+      candidateOpportunityId: input.candidateOpportunityId,
+      rejectReason,
+      checks: [
+        check('published', 'pass'),
+        check('different_party', 'pass'),
+        check(
+          'target_role',
+          roleFail ? 'fail' : 'pass',
+          input.gate.reason === 'role_missing'
+            ? 'Target role missing'
+            : input.gate.reason === 'role_incompatible'
+              ? 'Roles incompatible'
+              : undefined,
+        ),
+        check('skills', skillFail ? 'fail' : 'pass', input.gate.reason),
+        check('location', 'n/a'),
+        check('threshold', 'n/a'),
+      ],
+    })
+  }
+
+  const scored = input.scored
+  if (!scored) {
+    return buildRejectedDiagnostic({
+      candidateOpportunityId: input.candidateOpportunityId,
+      rejectReason: MATCHING_REJECT_REASONS.BELOW_MATCH_THRESHOLD,
+      checks: [
+        check('published', 'pass'),
+        check('different_party', 'pass'),
+        check('target_role', 'pass'),
+        check('skills', 'pass'),
+        check('threshold', 'fail', 'No score produced'),
+      ],
+    })
+  }
+
+  if (scored.breakdown.rejected === 'skill_floor') {
+    return buildRejectedDiagnostic({
+      candidateOpportunityId: input.candidateOpportunityId,
+      rejectReason: MATCHING_REJECT_REASONS.SKILL_FLOOR,
+      checks: [
+        check('published', 'pass'),
+        check('different_party', 'pass'),
+        check('target_role', 'pass'),
+        check('skills', 'fail', 'Skill overlap below floor'),
+        check('location', 'pass', scored.breakdown.locationDetail),
+        check('threshold', 'fail', `Score ${scored.score}`),
+      ],
+      finalScore: scored.score,
+      locationTier: scored.breakdown.locationTier,
+      locationScore: scored.breakdown.locationFit,
+    })
+  }
+
+  if (scored.score < input.threshold) {
+    return buildRejectedDiagnostic({
+      candidateOpportunityId: input.candidateOpportunityId,
+      rejectReason: MATCHING_REJECT_REASONS.BELOW_MATCH_THRESHOLD,
+      checks: [
+        check('published', 'pass'),
+        check('different_party', 'pass'),
+        check('target_role', 'pass'),
+        check('skills', 'pass'),
+        check(
+          'location',
+          'pass',
+          scored.breakdown.locationDetail
+            ? `${scored.breakdown.locationDetail} Score ${scored.breakdown.locationFit}`
+            : undefined,
+        ),
+        check(
+          'threshold',
+          'fail',
+          `Final score ${scored.score} below threshold ${input.threshold}`,
+        ),
+      ],
+      finalScore: scored.score,
+      locationTier: scored.breakdown.locationTier,
+      locationScore: scored.breakdown.locationFit,
+    })
+  }
+
+  return buildMatchedDiagnostic({
+    candidateOpportunityId: input.candidateOpportunityId,
+    scored,
+  })
 }
 
 export function summarizeDiagnostics(

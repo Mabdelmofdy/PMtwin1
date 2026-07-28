@@ -82,7 +82,7 @@ export function getCandidates(
     if (offer.status !== 'published') return false
     const offerNorm = offer.normalized ?? {}
     if (!budgetCompatible(needNorm, offerNorm)) return false
-    if (!locationCompatible(needNorm, offerNorm)) return false
+    // Location is soft-scored via locationFit — never a hard reject.
     if (!timelineOverlap(needNorm, offerNorm)) return false
     if (!categoryOverlap(needNorm, offerNorm)) return false
     const gate = passesPair(needPost, offer, config, { needNorm, offerNorm })
@@ -116,7 +116,7 @@ export function getCandidatesForOffer(
     if (need.status !== 'published') return false
     const needNorm = need.normalized ?? {}
     if (!budgetCompatible(needNorm, offerNorm)) return false
-    if (!locationCompatible(needNorm, offerNorm)) return false
+    // Location is soft-scored via locationFit — never a hard reject.
     if (!timelineOverlap(needNorm, offerNorm)) return false
     if (!categoryOverlap(needNorm, offerNorm)) return false
     const gate = passesPair(need, offerPost, config, { needNorm, offerNorm })

@@ -1,5 +1,14 @@
 import { getCandidates } from '../candidates/candidate-generator.ts'
 import { scorePair } from '../scoring/post-to-post-scoring.ts'
+import { passesPair } from '../constraints/hard-constraints.ts'
+import {
+  buildRejectedDiagnostic,
+  diagnoseGateAndScore,
+  diagnosticCheck,
+  MATCHING_REJECT_REASONS,
+  summarizeDiagnostics,
+  type MatchingCandidateDiagnostic,
+} from '../diagnostics/matching-diagnostics.ts'
 import type { CanonicalData } from '../types/canonical.ts'
 import type { MatchingConfig } from '../types/matching-config.ts'
 import type {
@@ -14,7 +23,6 @@ import { findOffersForNeedPure } from './one-way.ts'
 import {
   buildSyntheticNeedForRole,
   parseRoleDefinitions,
-  passHardGate,
   resolveNormalized,
   resolveThreshold,
   withRunnerConfig,
@@ -28,6 +36,7 @@ export function findConsortiumMatchesPure(
   options: ModelRunnerOptions = {},
 ): ConsortiumMatchResult {
   const resolvedConfig = withRunnerConfig(config)
+  const sourceId = String(leadNeed.id ?? '')
   const roleDefs = parseRoleDefinitions(leadNeed.attributes)
   const roles = roleDefs.map((roleDef) => roleDef.role)
 
@@ -42,6 +51,7 @@ export function findConsortiumMatchesPure(
       roleResults: [],
       complete: oneWay.matches.length > 0,
       matches: oneWay.matches.map((match) => ({ ...match, role: 'General' })),
+      diagnostic: oneWay.diagnostic ?? summarizeDiagnostics(sourceId, []),
     }
   }
 
@@ -50,6 +60,7 @@ export function findConsortiumMatchesPure(
   const usedCreatorIds = new Set(leadNeed.creatorId ? [leadNeed.creatorId] : [])
   const suggestedPartners: SuggestedPartner[] = []
   const roleResults: ConsortiumRoleResult[] = []
+  const diagnostics: MatchingCandidateDiagnostic[] = []
 
   for (const roleDef of roleDefs) {
     const role = roleDef.role
@@ -61,23 +72,46 @@ export function findConsortiumMatchesPure(
 
     let best: OpportunityPost | null = null
     let bestScore = threshold
+    let bestScoredDiagnostic: MatchingCandidateDiagnostic | null = null
+
     for (const offer of candidates) {
       if (offer.creatorId && usedCreatorIds.has(offer.creatorId)) continue
       const offerNorm = resolveNormalized(offer, canonical, resolvedConfig)
-      if (!passHardGate(syntheticNeed, offer, syntheticNeed.normalized ?? {}, offerNorm, resolvedConfig)) {
-        continue
-      }
-      const { score } = scorePair(
-        syntheticNeed,
-        offer,
-        resolvedConfig,
-        syntheticNeed.normalized,
+      const gate = passesPair(syntheticNeed, offer, resolvedConfig, {
+        needNorm: syntheticNeed.normalized ?? {},
         offerNorm,
-      )
-      if (score > bestScore) {
-        bestScore = score
-        best = offer
-      }
+      })
+      const scored = gate.ok
+        ? scorePair(
+          syntheticNeed,
+          offer,
+          resolvedConfig,
+          syntheticNeed.normalized,
+          offerNorm,
+        )
+        : undefined
+      const diagnostic = diagnoseGateAndScore({
+        candidateOpportunityId: String(offer.id ?? `${role}:${offer.creatorId ?? ''}`),
+        gate,
+        scored,
+        threshold,
+      })
+      diagnostics.push({
+        ...diagnostic,
+        // Tag role in detail without changing reject codes
+        checks: diagnostic.checks.map((c) =>
+          c.id === 'target_role' && c.detail
+            ? { ...c, detail: `${c.detail} (role slot: ${role})` }
+            : c.id === 'target_role'
+              ? { ...c, detail: `Role slot: ${role}` }
+              : c,
+        ),
+      })
+
+      if (!gate.ok || !scored || scored.score <= bestScore) continue
+      bestScore = scored.score
+      best = offer
+      bestScoredDiagnostic = diagnostic
     }
 
     if (best) {
@@ -93,6 +127,29 @@ export function findConsortiumMatchesPure(
         creatorId: best.creatorId,
         role,
       })
+      if (bestScoredDiagnostic) {
+        // Ensure winning slot is marked matched
+        const idx = diagnostics.findIndex(
+          (d) => d.candidateOpportunityId === bestScoredDiagnostic.candidateOpportunityId
+            && d.result === 'matched',
+        )
+        if (idx < 0) {
+          diagnostics.push({ ...bestScoredDiagnostic, result: 'matched', postMatchCreated: true })
+        }
+      }
+    } else {
+      diagnostics.push(
+        buildRejectedDiagnostic({
+          candidateOpportunityId: `role:${role}`,
+          rejectReason: MATCHING_REJECT_REASONS.ROLE_UNFILLED,
+          checks: [
+            diagnosticCheck('published', 'pass'),
+            diagnosticCheck('target_role', 'pass', `Role slot: ${role}`),
+            diagnosticCheck('skills', 'fail', `No compatible offer for role ${role}`),
+            diagnosticCheck('threshold', 'fail'),
+          ],
+        }),
+      )
     }
   }
 
@@ -116,7 +173,8 @@ export function findConsortiumMatchesPure(
         matchScore: aggregateScore,
         breakdown,
         suggestedPartners,
-      }]
+      } satisfies ScoredMatch]
       : [],
+    diagnostic: summarizeDiagnostics(sourceId, diagnostics),
   }
 }

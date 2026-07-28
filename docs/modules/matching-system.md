@@ -260,7 +260,7 @@ Implemented in [post-to-post-scoring.js](../../POC/src/services/matching/post-to
 
 **Location policy (active runtime `@pm-twin/matching`):** Location is a **soft score only** — never a hard candidate reject. Coverage hierarchy: Remote / Nationwide (Saudi Arabia service area) / GCC regional / Same city / Same country (different city) / Different GCC country. Primary city is a preference under business coverage.
 
-**Diagnostics:** One-way matching returns per-candidate diagnostics (pass/fail checks, location tier, final score, reject reason). Summaries are stored on matching-run audit and shown on Admin → Matching.
+**Diagnostics:** All matching models (`one_way`, `two_way`, `consortium`, `circular`) return per-candidate diagnostics (pass/fail checks, location tier, final score, reject reason). Summaries are stored on matching-run audit (publish + circular) and shown on Admin → Matching.
 
 - **Threshold:** `CONFIG.MATCHING.POST_TO_POST_THRESHOLD` (default **0.50**). Pairs below this are filtered out.
 - **Labels per factor:** Match (≥1), Partial (≥0.25), No Match (&lt;0.25).

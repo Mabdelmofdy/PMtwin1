@@ -121,6 +121,7 @@ export type CircularMatchingResult = {
   readonly matchingErrors: readonly string[]
   readonly status: MatchingRunStatus
   readonly auditWarning?: string
+  readonly diagnosticSummary?: MatchingRunDiagnosticSummary
 }
 
 export type CircularMatchingDeps = {
@@ -241,6 +242,7 @@ function finalizeCircularMatchingResult(
   matchingErrors: readonly string[],
   status: MatchingRunStatus,
   failureReason?: string,
+  diagnosticSummary?: MatchingRunDiagnosticSummary,
 ): CircularMatchingResult {
   const auditWarning = writeCircularMatchingRunAudit(deps, {
     runId,
@@ -253,6 +255,7 @@ function finalizeCircularMatchingResult(
     matchingErrors,
     status,
     failureReason,
+    diagnosticSummary,
   })
 
   return {
@@ -262,6 +265,7 @@ function finalizeCircularMatchingResult(
     matchingErrors,
     status,
     auditWarning,
+    diagnosticSummary,
   }
 }
 
@@ -331,7 +335,7 @@ function runPublishMatchingForOpportunity(
   }
 
   for (const result of engineResults as ModelRunResult[]) {
-    if (result.model === 'one_way' && result.diagnostic) {
+    if (result.diagnostic) {
       const summary = toMatchingRunDiagnosticSummary(result.diagnostic)
       if (summary) diagnosticSummaries.push(summary)
     }
@@ -531,6 +535,7 @@ function runCircularMatchingForPublishedOpportunities(
     const matchingErrors: string[] = []
     let discoveredMatchesCount = 0
     let skippedDuplicatesCount = 0
+    const diagnosticSummaries: MatchingRunDiagnosticSummary[] = []
 
     const ownershipContext = buildMatchingOwnershipContext()
     const anchorsByOwnerParty = new Map<string, Opportunity>()
@@ -561,6 +566,10 @@ function runCircularMatchingForPublishedOpportunities(
 
       for (const result of engineResults as ModelRunResult[]) {
         if (result.model !== 'circular') continue
+        if (result.diagnostic) {
+          const summary = toMatchingRunDiagnosticSummary(result.diagnostic)
+          if (summary) diagnosticSummaries.push(summary)
+        }
 
         const commands = modelRunResultToDiscoverCommands(result, discoverContext, posts)
         for (const command of commands) {
@@ -601,6 +610,8 @@ function runCircularMatchingForPublishedOpportunities(
       skippedDuplicatesCount,
       matchingErrors,
       resolveMatchingRunStatus(matchingErrors),
+      undefined,
+      mergeMatchingRunDiagnosticSummaries(diagnosticSummaries),
     )
   } catch (error) {
     const failureReason =
@@ -666,6 +677,7 @@ function runCircularMatchingForOpportunity(
   const postMatchIds: string[] = []
   let discoveredMatchesCount = 0
   let skippedDuplicatesCount = 0
+  const diagnosticSummaries: MatchingRunDiagnosticSummary[] = []
 
   const engineResults = runMatching({
     anchorPost: opportunityToPost(anchorOpportunity),
@@ -687,6 +699,10 @@ function runCircularMatchingForOpportunity(
 
   for (const result of engineResults as ModelRunResult[]) {
     if (result.model !== 'circular') continue
+    if (result.diagnostic) {
+      const summary = toMatchingRunDiagnosticSummary(result.diagnostic)
+      if (summary) diagnosticSummaries.push(summary)
+    }
 
     const commands = modelRunResultToDiscoverCommands(result, discoverContext, posts)
     for (const command of commands) {
@@ -719,11 +735,14 @@ function runCircularMatchingForOpportunity(
     }
   }
 
+  const diagnosticSummary = mergeMatchingRunDiagnosticSummaries(diagnosticSummaries)
+
   return {
     discoveredMatchesCount,
     skippedDuplicatesCount,
     matchingErrors,
     postMatchIds,
+    diagnosticSummary,
   }
 }
 

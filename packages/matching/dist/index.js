@@ -215,7 +215,6 @@ function getCandidates(needPost, offerPosts, config, options = {}) {
     if (offer.status !== "published") return false;
     const offerNorm = offer.normalized ?? {};
     if (!budgetCompatible(needNorm, offerNorm)) return false;
-    if (!locationCompatible(needNorm, offerNorm)) return false;
     if (!timelineOverlap(needNorm, offerNorm)) return false;
     if (!categoryOverlap(needNorm, offerNorm)) return false;
     const gate = passesPair(needPost, offer, config, { needNorm, offerNorm });
@@ -241,7 +240,6 @@ function getCandidatesForOffer(offerPost, needPosts, config, options = {}) {
     if (need.status !== "published") return false;
     const needNorm = need.normalized ?? {};
     if (!budgetCompatible(needNorm, offerNorm)) return false;
-    if (!locationCompatible(needNorm, offerNorm)) return false;
     if (!timelineOverlap(needNorm, offerNorm)) return false;
     if (!categoryOverlap(needNorm, offerNorm)) return false;
     const gate = passesPair(need, offerPost, config, { needNorm, offerNorm });
@@ -3596,7 +3594,8 @@ var MATCHING_REJECT_REASONS = {
   CATEGORY_INCOMPATIBLE: "CATEGORY_INCOMPATIBLE",
   SKILL_FLOOR: "SKILL_FLOOR",
   BELOW_MATCH_THRESHOLD: "BELOW_MATCH_THRESHOLD",
-  SOURCE_INTENT_INVALID: "SOURCE_INTENT_INVALID"
+  SOURCE_INTENT_INVALID: "SOURCE_INTENT_INVALID",
+  ROLE_UNFILLED: "ROLE_UNFILLED"
 };
 function check(id, status, detail) {
   return detail ? { id, status, detail } : { id, status };
@@ -3651,6 +3650,89 @@ function buildRejectedDiagnostic(input) {
     locationScore: input.locationScore,
     postMatchCreated: false
   };
+}
+function diagnoseGateAndScore(input) {
+  if (!input.gate.ok) {
+    const rejectReason = rejectReasonFromHardGate(input.gate);
+    const roleFail = input.gate.reason === "role_missing" || input.gate.reason === "role_incompatible";
+    const skillFail = input.gate.reason === "core_skill_missing" || input.gate.reason === "service_overlap_low";
+    return buildRejectedDiagnostic({
+      candidateOpportunityId: input.candidateOpportunityId,
+      rejectReason,
+      checks: [
+        check("published", "pass"),
+        check("different_party", "pass"),
+        check(
+          "target_role",
+          roleFail ? "fail" : "pass",
+          input.gate.reason === "role_missing" ? "Target role missing" : input.gate.reason === "role_incompatible" ? "Roles incompatible" : void 0
+        ),
+        check("skills", skillFail ? "fail" : "pass", input.gate.reason),
+        check("location", "n/a"),
+        check("threshold", "n/a")
+      ]
+    });
+  }
+  const scored = input.scored;
+  if (!scored) {
+    return buildRejectedDiagnostic({
+      candidateOpportunityId: input.candidateOpportunityId,
+      rejectReason: MATCHING_REJECT_REASONS.BELOW_MATCH_THRESHOLD,
+      checks: [
+        check("published", "pass"),
+        check("different_party", "pass"),
+        check("target_role", "pass"),
+        check("skills", "pass"),
+        check("threshold", "fail", "No score produced")
+      ]
+    });
+  }
+  if (scored.breakdown.rejected === "skill_floor") {
+    return buildRejectedDiagnostic({
+      candidateOpportunityId: input.candidateOpportunityId,
+      rejectReason: MATCHING_REJECT_REASONS.SKILL_FLOOR,
+      checks: [
+        check("published", "pass"),
+        check("different_party", "pass"),
+        check("target_role", "pass"),
+        check("skills", "fail", "Skill overlap below floor"),
+        check("location", "pass", scored.breakdown.locationDetail),
+        check("threshold", "fail", `Score ${scored.score}`)
+      ],
+      finalScore: scored.score,
+      locationTier: scored.breakdown.locationTier,
+      locationScore: scored.breakdown.locationFit
+    });
+  }
+  if (scored.score < input.threshold) {
+    return buildRejectedDiagnostic({
+      candidateOpportunityId: input.candidateOpportunityId,
+      rejectReason: MATCHING_REJECT_REASONS.BELOW_MATCH_THRESHOLD,
+      checks: [
+        check("published", "pass"),
+        check("different_party", "pass"),
+        check("target_role", "pass"),
+        check("skills", "pass"),
+        check(
+          "location",
+          "pass",
+          scored.breakdown.locationDetail ? `${scored.breakdown.locationDetail} Score ${scored.breakdown.locationFit}` : void 0
+        ),
+        check(
+          "threshold",
+          "fail",
+          `Final score ${scored.score} below threshold ${input.threshold}`
+        )
+      ],
+      finalScore: scored.score,
+      locationTier: scored.breakdown.locationTier,
+      locationScore: scored.breakdown.locationFit
+    });
+  }
+  return buildMatchedDiagnostic({
+    candidateOpportunityId: input.candidateOpportunityId,
+    scored
+  });
 }
 function summarizeDiagnostics(sourceOpportunityId, candidates) {
   const matched = candidates.filter((c) => c.result === "matched");
@@ -3995,6 +4077,7 @@ function averageFactor(a, b) {
   return Math.round((a + b) / 2 * 1e3) / 1e3;
 }
 function averageScoreBreakdown(a, b) {
+  const preferA = (a.locationFit ?? 0) >= (b.locationFit ?? 0);
   return {
     skillMatch: averageFactor(a.skillMatch, b.skillMatch),
     attributeOverlap: averageFactor(a.attributeOverlap, b.attributeOverlap),
@@ -4007,33 +4090,88 @@ function averageScoreBreakdown(a, b) {
     budgetFit: averageFactor(a.budgetFit, b.budgetFit),
     timelineFit: averageFactor(a.timelineFit, b.timelineFit),
     locationFit: averageFactor(a.locationFit, b.locationFit),
-    reputation: averageFactor(a.reputation, b.reputation)
+    reputation: averageFactor(a.reputation, b.reputation),
+    locationTier: preferA ? a.locationTier : b.locationTier,
+    locationDetail: preferA ? a.locationDetail : b.locationDetail
   };
 }
 function findBarterMatchesPure(anchorPost, needPosts, offerPosts, config, canonical = {}, _options = {}) {
   const resolvedConfig = withRunnerConfig(config);
   const threshold = resolveThreshold(resolvedConfig);
+  const sourceId = String(anchorPost.id ?? "");
   const creatorIdA = anchorPost.creatorId;
-  if (!creatorIdA) return { model: "two_way", matches: [] };
+  if (!creatorIdA) {
+    return {
+      model: "two_way",
+      matches: [],
+      diagnostic: summarizeDiagnostics(sourceId, [])
+    };
+  }
   const needA = needPosts.find((post) => post.creatorId === creatorIdA);
   const offerA = offerPosts.find((post) => post.creatorId === creatorIdA);
-  if (!needA || !offerA) return { model: "two_way", matches: [] };
+  if (!needA || !offerA) {
+    return {
+      model: "two_way",
+      matches: [],
+      diagnostic: summarizeDiagnostics(sourceId, [])
+    };
+  }
   const normNeedA = resolveNormalized(needA, canonical, resolvedConfig);
   const normOfferA = resolveNormalized(offerA, canonical, resolvedConfig);
   const otherNeeds = needPosts.filter((post) => post.creatorId !== creatorIdA);
   const otherOffers = offerPosts.filter((post) => post.creatorId !== creatorIdA);
   const matches = [];
+  const diagnostics = [];
   for (const needB of otherNeeds) {
     const offersByCreator = otherOffers.filter((offer) => offer.creatorId === needB.creatorId);
     for (const offerB of offersByCreator) {
+      const candidateId = String(offerB.id ?? needB.id ?? "");
       const normNeedB = resolveNormalized(needB, canonical, resolvedConfig);
       const normOfferB = resolveNormalized(offerB, canonical, resolvedConfig);
-      if (!passHardGate(needB, offerA, normNeedB, normOfferA, resolvedConfig)) continue;
-      if (!passHardGate(needA, offerB, normNeedA, normOfferB, resolvedConfig)) continue;
+      const gateAtoB = passesPair(needB, offerA, resolvedConfig, {
+        needNorm: normNeedB,
+        offerNorm: normOfferA
+      });
+      if (!gateAtoB.ok) {
+        diagnostics.push(
+          diagnoseGateAndScore({
+            candidateOpportunityId: candidateId,
+            gate: gateAtoB,
+            threshold
+          })
+        );
+        continue;
+      }
+      const gateBtoA = passesPair(needA, offerB, resolvedConfig, {
+        needNorm: normNeedA,
+        offerNorm: normOfferB
+      });
+      if (!gateBtoA.ok) {
+        diagnostics.push(
+          diagnoseGateAndScore({
+            candidateOpportunityId: candidateId,
+            gate: gateBtoA,
+            threshold
+          })
+        );
+        continue;
+      }
       const scoredAtoB = scorePair(needB, offerA, resolvedConfig, normNeedB, normOfferA);
       const scoredBtoA = scorePair(needA, offerB, resolvedConfig, normNeedA, normOfferB);
-      if (scoredAtoB.score < threshold || scoredBtoA.score < threshold) continue;
+      if (scoredAtoB.score < threshold || scoredBtoA.score < threshold) {
+        const weak = scoredAtoB.score <= scoredBtoA.score ? scoredAtoB : scoredBtoA;
+        diagnostics.push(
+          diagnoseGateAndScore({
+            candidateOpportunityId: candidateId,
+            gate: { ok: true },
+            scored: weak,
+            threshold
+          })
+        );
+        continue;
+      }
       const pairScore = (scoredAtoB.score + scoredBtoA.score) / 2;
+      const averaged = averageScoreBreakdown(scoredAtoB.breakdown, scoredBtoA.breakdown);
       const equivalence = barterValueEquivalence(
         barterSidePost(needA, offerA),
         barterSidePost(needB, offerB)
@@ -4041,7 +4179,7 @@ function findBarterMatchesPure(anchorPost, needPosts, offerPosts, config, canoni
       matches.push({
         matchScore: pairScore,
         breakdown: {
-          ...averageScoreBreakdown(scoredAtoB.breakdown, scoredBtoA.breakdown),
+          ...averaged,
           scoreAtoB: scoredAtoB.score,
           scoreBtoA: scoredBtoA.score
         },
@@ -4054,15 +4192,32 @@ function findBarterMatchesPure(anchorPost, needPosts, offerPosts, config, canoni
         needOpportunityId: needB.id,
         offerOpportunityId: offerB.id
       });
+      diagnostics.push(
+        diagnoseGateAndScore({
+          candidateOpportunityId: candidateId,
+          gate: { ok: true },
+          scored: {
+            score: pairScore,
+            breakdown: averaged,
+            labels: scoredAtoB.labels
+          },
+          threshold
+        })
+      );
     }
   }
   matches.sort((a, b) => b.matchScore - a.matchScore);
-  return { model: "two_way", matches };
+  return {
+    model: "two_way",
+    matches,
+    diagnostic: summarizeDiagnostics(sourceId, diagnostics)
+  };
 }
 
 // src/models/consortium.ts
 function findConsortiumMatchesPure(leadNeed, offerPosts, config, canonical = {}, options = {}) {
   const resolvedConfig = withRunnerConfig(config);
+  const sourceId = String(leadNeed.id ?? "");
   const roleDefs = parseRoleDefinitions(leadNeed.attributes);
   const roles = roleDefs.map((roleDef) => roleDef.role);
   if (roles.length === 0) {
@@ -4075,7 +4230,8 @@ function findConsortiumMatchesPure(leadNeed, offerPosts, config, canonical = {},
       roles: ["General"],
       roleResults: [],
       complete: oneWay.matches.length > 0,
-      matches: oneWay.matches.map((match) => ({ ...match, role: "General" }))
+      matches: oneWay.matches.map((match) => ({ ...match, role: "General" })),
+      diagnostic: oneWay.diagnostic ?? summarizeDiagnostics(sourceId, [])
     };
   }
   const threshold = resolveThreshold(resolvedConfig);
@@ -4083,6 +4239,7 @@ function findConsortiumMatchesPure(leadNeed, offerPosts, config, canonical = {},
   const usedCreatorIds = new Set(leadNeed.creatorId ? [leadNeed.creatorId] : []);
   const suggestedPartners = [];
   const roleResults = [];
+  const diagnostics = [];
   for (const roleDef of roleDefs) {
     const role = roleDef.role;
     const syntheticNeed = buildSyntheticNeedForRole(leadNeed, leadNorm, roleDef);
@@ -4092,23 +4249,38 @@ function findConsortiumMatchesPure(leadNeed, offerPosts, config, canonical = {},
     });
     let best = null;
     let bestScore = threshold;
+    let bestScoredDiagnostic = null;
     for (const offer of candidates) {
       if (offer.creatorId && usedCreatorIds.has(offer.creatorId)) continue;
       const offerNorm = resolveNormalized(offer, canonical, resolvedConfig);
-      if (!passHardGate(syntheticNeed, offer, syntheticNeed.normalized ?? {}, offerNorm, resolvedConfig)) {
-        continue;
-      }
-      const { score } = scorePair(
+      const gate = passesPair(syntheticNeed, offer, resolvedConfig, {
+        needNorm: syntheticNeed.normalized ?? {},
+        offerNorm
+      });
+      const scored = gate.ok ? scorePair(
         syntheticNeed,
         offer,
         resolvedConfig,
         syntheticNeed.normalized,
         offerNorm
-      );
-      if (score > bestScore) {
-        bestScore = score;
-        best = offer;
-      }
+      ) : void 0;
+      const diagnostic = diagnoseGateAndScore({
+        candidateOpportunityId: String(offer.id ?? `${role}:${offer.creatorId ?? ""}`),
+        gate,
+        scored,
+        threshold
+      });
+      diagnostics.push({
+        ...diagnostic,
+        // Tag role in detail without changing reject codes
+        checks: diagnostic.checks.map(
+          (c) => c.id === "target_role" && c.detail ? { ...c, detail: `${c.detail} (role slot: ${role})` } : c.id === "target_role" ? { ...c, detail: `Role slot: ${role}` } : c
+        )
+      });
+      if (!gate.ok || !scored || scored.score <= bestScore) continue;
+      bestScore = scored.score;
+      best = offer;
+      bestScoredDiagnostic = diagnostic;
     }
     if (best) {
       if (best.creatorId) usedCreatorIds.add(best.creatorId);
@@ -4123,6 +4295,27 @@ function findConsortiumMatchesPure(leadNeed, offerPosts, config, canonical = {},
         creatorId: best.creatorId,
         role
       });
+      if (bestScoredDiagnostic) {
+        const idx = diagnostics.findIndex(
+          (d) => d.candidateOpportunityId === bestScoredDiagnostic.candidateOpportunityId && d.result === "matched"
+        );
+        if (idx < 0) {
+          diagnostics.push({ ...bestScoredDiagnostic, result: "matched", postMatchCreated: true });
+        }
+      }
+    } else {
+      diagnostics.push(
+        buildRejectedDiagnostic({
+          candidateOpportunityId: `role:${role}`,
+          rejectReason: MATCHING_REJECT_REASONS.ROLE_UNFILLED,
+          checks: [
+            check("published", "pass"),
+            check("target_role", "pass", `Role slot: ${role}`),
+            check("skills", "fail", `No compatible offer for role ${role}`),
+            check("threshold", "fail")
+          ]
+        })
+      );
     }
   }
   const aggregateScore = roleResults.length > 0 ? roleResults.reduce((sum, result) => sum + result.matchScore, 0) / roleResults.length : 0;
@@ -4140,7 +4333,8 @@ function findConsortiumMatchesPure(leadNeed, offerPosts, config, canonical = {},
       matchScore: aggregateScore,
       breakdown,
       suggestedPartners
-    }] : []
+    }] : [],
+    diagnostic: summarizeDiagnostics(sourceId, diagnostics)
   };
 }
 
@@ -4176,6 +4370,7 @@ function buildCircularLinkScores(ring, edgeDetails) {
 function buildCreatorGraph(needPosts, offerPosts, config, canonical, threshold) {
   const outEdges = {};
   const edgeDetails = {};
+  const diagnostics = [];
   for (const need of needPosts) {
     const needNorm = resolveNormalized(need, canonical, config);
     const fromCreator = need.creatorId;
@@ -4183,19 +4378,26 @@ function buildCreatorGraph(needPosts, offerPosts, config, canonical, threshold) 
     for (const offer of offerPosts) {
       if (offer.creatorId === fromCreator) continue;
       const offerNorm = resolveNormalized(offer, canonical, config);
-      if (!passHardGate(need, offer, needNorm, offerNorm, config)) continue;
-      const { score } = scorePair(need, offer, config, needNorm, offerNorm);
-      if (score < threshold || !offer.creatorId) continue;
+      const gate = passesPair(need, offer, config, { needNorm, offerNorm });
+      const scored = gate.ok ? scorePair(need, offer, config, needNorm, offerNorm) : void 0;
+      const diagnostic = diagnoseGateAndScore({
+        candidateOpportunityId: String(offer.id ?? ""),
+        gate,
+        scored,
+        threshold
+      });
+      diagnostics.push(diagnostic);
+      if (!gate.ok || !scored || scored.score < threshold || !offer.creatorId) continue;
       const toCreator = offer.creatorId;
       if (!outEdges[fromCreator]) outEdges[fromCreator] = [];
       if (!outEdges[fromCreator].includes(toCreator)) outEdges[fromCreator].push(toCreator);
       const key = `${fromCreator}->${toCreator}`;
-      if (!edgeDetails[key] || score > edgeDetails[key].score) {
-        edgeDetails[key] = { score, need, offer };
+      if (!edgeDetails[key] || scored.score > edgeDetails[key].score) {
+        edgeDetails[key] = { score: scored.score, need, offer };
       }
     }
   }
-  return { outEdges, edgeDetails };
+  return { outEdges, edgeDetails, diagnostics };
 }
 function findCycles(outEdges, minCycleLength) {
   const creatorIds = [
@@ -4241,7 +4443,8 @@ function findCircularExchangesPure(needPosts, offerPosts, config, canonical = {}
   const resolvedConfig = withRunnerConfig(config);
   const threshold = resolveThreshold(resolvedConfig);
   const minCycleLength = options.minCycleLength ?? 3;
-  const { outEdges, edgeDetails } = buildCreatorGraph(
+  const sourceId = String(needPosts[0]?.id ?? offerPosts[0]?.id ?? "circular");
+  const { outEdges, edgeDetails, diagnostics } = buildCreatorGraph(
     needPosts,
     offerPosts,
     resolvedConfig,
@@ -4278,7 +4481,11 @@ function findCircularExchangesPure(needPosts, offerPosts, config, canonical = {}
     });
   }
   uniqueCycles.sort((a, b) => b.matchScore - a.matchScore);
-  return { model: "circular", matches: uniqueCycles };
+  return {
+    model: "circular",
+    matches: uniqueCycles,
+    diagnostic: summarizeDiagnostics(sourceId, diagnostics)
+  };
 }
 
 // src/engine/run-matching-for-post.ts
@@ -4484,6 +4691,7 @@ export {
   buildSyntheticNeedForRole,
   categoryOverlap,
   detectMatchingModel,
+  diagnoseGateAndScore,
   check as diagnosticCheck,
   estimateValueSar,
   evaluateLocationCoverage,

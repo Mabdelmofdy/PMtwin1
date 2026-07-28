@@ -184,6 +184,7 @@ export {
   summarizeDiagnostics,
   diagnosticCheck,
   rejectReasonFromHardGate,
+  diagnoseGateAndScore,
 } from './diagnostics/matching-diagnostics.ts'
 export type {
   MatchingDiagnosticCheckId,

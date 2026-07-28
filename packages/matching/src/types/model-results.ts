@@ -34,12 +34,13 @@ export interface CircularLinkScore {
 export interface ModelRunResultBase {
   readonly model: MatchingModelName
   readonly matches: readonly ScoredMatch[]
+  /** Per-candidate diagnostics — present for all matching model runners. */
+  readonly diagnostic?: MatchingRunDiagnostic
 }
 
 export interface OneWayMatchResult extends ModelRunResultBase {
   readonly model: 'one_way'
   readonly direction?: 'offer_to_needs'
-  readonly diagnostic?: MatchingRunDiagnostic
 }
 
 export interface TwoWayMatchResult extends ModelRunResultBase {

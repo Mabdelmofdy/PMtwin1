@@ -19,6 +19,6 @@ export { resolveThreshold, resolveMaxCandidates, resolveNormalized, passHardGate
 export type { RoleDefinition, CircularEdgeDetail, CircularEdgeMap, } from './models/index.ts';
 export type { SuggestedPartner, ScoredMatch, CircularLinkScore, ModelRunResultBase, OneWayMatchResult, TwoWayMatchResult, ConsortiumRoleResult, ConsortiumMatchResult, CircularMatchResult, ModelRunnerOptions, } from './types/index.ts';
 export type { MatchEngineInput, MatchEngineOptions, MatchEngineModelOption, ModelRunResult, } from './types/index.ts';
-export { MATCHING_REJECT_REASONS, buildMatchedDiagnostic, buildRejectedDiagnostic, summarizeDiagnostics, diagnosticCheck, rejectReasonFromHardGate, } from './diagnostics/matching-diagnostics.ts';
+export { MATCHING_REJECT_REASONS, buildMatchedDiagnostic, buildRejectedDiagnostic, summarizeDiagnostics, diagnosticCheck, rejectReasonFromHardGate, diagnoseGateAndScore, } from './diagnostics/matching-diagnostics.ts';
 export type { MatchingDiagnosticCheckId, MatchingDiagnosticCheckStatus, MatchingDiagnosticCheck, MatchingCandidateDiagnostic, MatchingRunDiagnostic, MatchingRejectReason, } from './diagnostics/matching-diagnostics.ts';
 //# sourceMappingURL=index.d.ts.map
