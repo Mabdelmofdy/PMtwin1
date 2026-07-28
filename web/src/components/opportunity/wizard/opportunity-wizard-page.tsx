@@ -192,7 +192,20 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
   const autosaveReadyRef = useRef(Boolean(existingOpportunity))
   const draftRef = useRef(draft)
   draftRef.current = draft
+  // Refs keep useBlocker in sync when navigate() runs in the same tick as
+  // setDirty(false) — React state alone is still stale inside the blocker.
+  const dirtyRef = useRef(false)
+  const allowNavigationRef = useRef(false)
+  dirtyRef.current = dirty
+  allowNavigationRef.current = allowNavigation
   const trackedStartRef = useRef(false)
+
+  const unlockNavigation = () => {
+    dirtyRef.current = false
+    allowNavigationRef.current = true
+    setDirty(false)
+    setAllowNavigation(true)
+  }
 
   const existingDrafts = useMemo((): readonly DuplicateDraftCandidate[] => {
     if (!user?.id) return []
@@ -335,8 +348,8 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
 
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      dirty
-      && !allowNavigation
+      dirtyRef.current
+      && !allowNavigationRef.current
       && currentLocation.pathname !== nextLocation.pathname,
   )
 
@@ -487,8 +500,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         clearLocalDraftSnapshot(mode, opportunityId)
         clearLocalDraftRecoveryDismissal(mode, opportunityId)
         trackOcxEvent('draft_saved', { opportunityId: newId })
-        setDirty(false)
-        setAllowNavigation(true)
+        unlockNavigation()
         toast.success('Draft opportunity created')
         navigate(`/opportunities/${newId}`)
         return
@@ -506,8 +518,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       clearLocalDraftSnapshot(mode, opportunityId)
       clearLocalDraftRecoveryDismissal(mode, opportunityId)
       trackOcxEvent('draft_saved', { opportunityId: resolvedOpportunityId })
-      setDirty(false)
-      setAllowNavigation(true)
+      unlockNavigation()
       setLastSavedAt(new Date().toISOString())
       setAutosaveStatus('saved')
       toast.success('Draft saved')
@@ -556,8 +567,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       trackOcxEvent('published_from_detail', {
         opportunityId: resolvedOpportunityId,
       })
-      setDirty(false)
-      setAllowNavigation(true)
+      unlockNavigation()
       clearLocalDraftSnapshot(mode, opportunityId)
       clearLocalDraftRecoveryDismissal(mode, opportunityId)
       toast.success('Opportunity published')
@@ -773,6 +783,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
         onStay={() => blocker.reset?.()}
         onLeave={() => {
           trackOcxEvent('wizard_abandoned', { stepId: activeStepId })
+          allowNavigationRef.current = true
           setAllowNavigation(true)
           blocker.proceed?.()
         }}

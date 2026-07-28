@@ -64,6 +64,13 @@ describe('Opportunity wizard — Creation Experience 3.0', () => {
     assert.match(footer, /Save Draft/)
   })
 
+  it('unlocks navigation before post-save navigate so unsaved dialog does not flash', () => {
+    assert.match(wizardSource, /unlockNavigation/)
+    assert.match(wizardSource, /dirtyRef\.current/)
+    assert.match(wizardSource, /allowNavigationRef\.current/)
+    assert.match(wizardSource, /useBlocker/)
+  })
+
   it('gates Continue on post type and wires Back / Continue handlers', () => {
     assert.match(wizardSource, /validateWizardStepAdvance|Choose Need or Offer/)
     assert.match(wizardSource, /handleContinue/)
