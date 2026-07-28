@@ -26,14 +26,12 @@ export function budgetCompatible(needNorm: NormalizedPost, offerNorm: Normalized
   return Math.max(needMin, offerMin) <= Math.min(needMax, offerMax)
 }
 
-export function locationCompatible(needNorm: NormalizedPost, offerNorm: NormalizedPost): boolean {
-  const needLoc = (needNorm.location ?? '').toLowerCase()
-  const offerLoc = (offerNorm.location ?? '').toLowerCase()
-  if (needLoc === 'remote' || offerLoc === 'remote') return true
-  if (needLoc === offerLoc) return true
-  if (needLoc === 'ksa' && offerLoc) return true
-  if (offerLoc === 'ksa' && needLoc) return true
-  return false
+export function locationCompatible(
+  _needNorm: NormalizedPost,
+  _offerNorm: NormalizedPost,
+): boolean {
+  // Location is a soft score factor (coverage hierarchy), never a hard reject.
+  return true
 }
 
 export function timelineOverlap(needNorm: NormalizedPost, offerNorm: NormalizedPost): boolean {

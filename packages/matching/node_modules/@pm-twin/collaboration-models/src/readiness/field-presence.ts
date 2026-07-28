@@ -56,36 +56,17 @@ export function resolveIntent(
   return undefined
 }
 
-function hasRoleNeeded(opportunity: Record<string, unknown>): boolean {
+/**
+ * Matching + publish require the canonical attributes.targetRole field.
+ * Legacy aliases alone must not satisfy readiness (avoids silent role_missing).
+ */
+function hasCanonicalTargetRole(opportunity: Record<string, unknown>): boolean {
   const attributes = nested(opportunity, 'attributes')
-  const scope = nested(opportunity, 'scope')
-  const normalized = nested(opportunity, 'normalized')
-  return (
-    hasAnyString(opportunity, ['roleNeeded', 'requiredRole']) ||
-    hasAnyString(attributes, ['roleNeeded', 'requiredRole', 'targetRole']) ||
-    hasAnyString(scope, ['roleNeeded', 'requiredRole', 'targetRole']) ||
-    hasAnyString(normalized, ['roleNeeded', 'requiredRole', 'role'])
-  )
-}
-
-function hasRoleOffered(opportunity: Record<string, unknown>): boolean {
-  const attributes = nested(opportunity, 'attributes')
-  const scope = nested(opportunity, 'scope')
-  const normalized = nested(opportunity, 'normalized')
-  return (
-    hasAnyString(opportunity, ['roleOffered', 'offeredRole']) ||
-    hasAnyString(attributes, ['roleOffered', 'offeredRole', 'targetRole']) ||
-    hasAnyString(scope, ['roleOffered', 'offeredRole', 'targetRole']) ||
-    hasAnyString(normalized, ['roleOffered', 'offeredRole', 'role'])
-  )
+  return hasNonEmptyString(attributes.targetRole)
 }
 
 function hasRoleForIntent(opportunity: Record<string, unknown>): boolean {
-  const intent = resolveIntent(opportunity)
-  if (intent === 'need') return hasRoleNeeded(opportunity)
-  if (intent === 'offer') return hasRoleOffered(opportunity)
-  if (intent === 'hybrid') return hasRoleNeeded(opportunity) && hasRoleOffered(opportunity)
-  return hasRoleNeeded(opportunity) || hasRoleOffered(opportunity)
+  return hasCanonicalTargetRole(opportunity)
 }
 
 function hasRequiredSkills(opportunity: Record<string, unknown>): boolean {

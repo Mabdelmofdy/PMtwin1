@@ -4,6 +4,8 @@ const MESSAGES: Readonly<Record<string, string>> = {
   [VAL_CODES.FIELD_TITLE_REQUIRED]: 'A title is required.',
   [VAL_CODES.FIELD_TITLE_TOO_LONG]: 'Title is too long.',
   [VAL_CODES.FIELD_DESCRIPTION_TOO_LONG]: 'Description is too long.',
+  [VAL_CODES.FIELD_TARGET_ROLE_REQUIRED]:
+    'Target role is required before publishing.',
   [VAL_CODES.FIELD_POSITIVE_NUMBER]: 'Value must be a positive number.',
   [VAL_CODES.FIELD_PERCENT_RANGE]: 'Percentage must be between 0 and 100.',
   [VAL_CODES.FIELD_ARRAY_EMPTY]: 'At least one item is required.',

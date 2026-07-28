@@ -6,6 +6,10 @@ import {
 import type { MatchingConfig } from '../types/matching-config.ts'
 import type { ScoreFactorResult, ScorePairResult } from '../types/match-result.ts'
 import type { NormalizedPost, OpportunityPost } from '../types/opportunity.ts'
+import {
+  evaluateLocationCoverage,
+  resolveCoverage,
+} from '../normalize/location-coverage.ts'
 import { labelFromScore } from './label-from-score.ts'
 
 export { labelFromScore } from './label-from-score.ts'
@@ -102,14 +106,29 @@ export function timelineFit(needNorm: NormalizedPost, offerNorm: NormalizedPost)
   return { score: 0.5, label: 'Partial' }
 }
 
-export function locationFit(needNorm: NormalizedPost, offerNorm: NormalizedPost): ScoreFactorResult {
-  const needLoc = (needNorm.location ?? '').toLowerCase()
-  const offerLoc = (offerNorm.location ?? '').toLowerCase()
-  if (needLoc === 'remote' || offerLoc === 'remote') return { score: 1, label: 'Match' }
-  if (needLoc === offerLoc) return { score: 1, label: 'Match' }
-  if (needLoc === 'ksa' && offerLoc) return { score: 0.5, label: 'Partial' }
-  if (offerLoc === 'ksa' && needLoc) return { score: 0.5, label: 'Partial' }
-  return { score: 0, label: 'No Match' }
+export function locationFit(
+  needNorm: NormalizedPost,
+  offerNorm: NormalizedPost,
+  needAttributes?: Readonly<Record<string, unknown>>,
+  offerAttributes?: Readonly<Record<string, unknown>>,
+): ScoreFactorResult {
+  const needCoverage = resolveCoverage(
+    needNorm.location,
+    needNorm.coverageScopes,
+    needAttributes,
+  )
+  const offerCoverage = resolveCoverage(
+    offerNorm.location,
+    offerNorm.coverageScopes,
+    offerAttributes,
+  )
+  const result = evaluateLocationCoverage(needCoverage, offerCoverage)
+  return {
+    score: result.score,
+    label: labelFromScore(result.score),
+    tier: result.tier,
+    detail: result.label,
+  }
 }
 
 export function reputationScore(offerNorm: NormalizedPost): ScoreFactorResult {
@@ -134,7 +153,7 @@ export function scorePair(
   const value = valueCompatibilityFactor(needPost, offerPost)
   const budget = budgetFit(nNorm, oNorm)
   const timeline = timelineFit(nNorm, oNorm)
-  const location = locationFit(nNorm, oNorm)
+  const location = locationFit(nNorm, oNorm, needPost.attributes, offerPost.attributes)
   const reputation = reputationScore(oNorm)
 
   const minSkillForScore = config.MIN_SKILL_SCORE_FOR_MATCH ?? 0.50
@@ -176,6 +195,8 @@ export function scorePair(
     timelineFit: timeline.score,
     locationFit: location.score,
     reputation: reputation.score,
+    locationTier: location.tier,
+    locationDetail: location.detail,
   }
 
   const labels = {

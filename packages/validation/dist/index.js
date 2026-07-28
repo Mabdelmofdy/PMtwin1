@@ -42,6 +42,7 @@ var VAL_CODES = {
   FIELD_TITLE_REQUIRED: "VAL_FIELD_TITLE_REQUIRED",
   FIELD_TITLE_TOO_LONG: "VAL_FIELD_TITLE_TOO_LONG",
   FIELD_DESCRIPTION_TOO_LONG: "VAL_FIELD_DESCRIPTION_TOO_LONG",
+  FIELD_TARGET_ROLE_REQUIRED: "VAL_FIELD_TARGET_ROLE_REQUIRED",
   FIELD_POSITIVE_NUMBER: "VAL_FIELD_POSITIVE_NUMBER",
   FIELD_PERCENT_RANGE: "VAL_FIELD_PERCENT_RANGE",
   FIELD_ARRAY_EMPTY: "VAL_FIELD_ARRAY_EMPTY",
@@ -104,6 +105,7 @@ var MESSAGES = {
   [VAL_CODES.FIELD_TITLE_REQUIRED]: "A title is required.",
   [VAL_CODES.FIELD_TITLE_TOO_LONG]: "Title is too long.",
   [VAL_CODES.FIELD_DESCRIPTION_TOO_LONG]: "Description is too long.",
+  [VAL_CODES.FIELD_TARGET_ROLE_REQUIRED]: "Target role is required before publishing.",
   [VAL_CODES.FIELD_POSITIVE_NUMBER]: "Value must be a positive number.",
   [VAL_CODES.FIELD_PERCENT_RANGE]: "Percentage must be between 0 and 100.",
   [VAL_CODES.FIELD_ARRAY_EMPTY]: "At least one item is required.",
@@ -316,12 +318,13 @@ function complianceIncludes(requirements, needle) {
 
 // src/field/rules.ts
 var DRAFT_UPDATE_PUBLISH = ["draft", "update", "publish"];
-function fieldIssue(code, fieldPaths, severity = "error") {
+var PUBLISH_ONLY = ["publish"];
+function fieldIssue(code, fieldPaths, severity = "error", scope = DRAFT_UPDATE_PUBLISH) {
   return {
     code,
     source: "field",
     severity,
-    scope: DRAFT_UPDATE_PUBLISH,
+    scope,
     fieldPaths,
     message: messageForCode(code),
     layer: "field",
@@ -372,10 +375,34 @@ var fieldDescriptionLength = {
     return fieldIssue(VAL_CODES.FIELD_DESCRIPTION_TOO_LONG, ["description"]);
   }
 };
+var fieldTargetRoleRequired = {
+  id: "field-target-role-required",
+  code: VAL_CODES.FIELD_TARGET_ROLE_REQUIRED,
+  layer: "field",
+  source: "field",
+  severity: "error",
+  scope: PUBLISH_ONLY,
+  fieldPaths: ["attributes.targetRole"],
+  group: "field",
+  execute(input) {
+    const attributes = input.attributes ?? {};
+    const targetRole = attributes.targetRole;
+    if (hasText(typeof targetRole === "string" ? targetRole : void 0)) {
+      return null;
+    }
+    return fieldIssue(
+      VAL_CODES.FIELD_TARGET_ROLE_REQUIRED,
+      ["attributes.targetRole"],
+      "error",
+      PUBLISH_ONLY
+    );
+  }
+};
 var FIELD_RULES = [
   fieldTitleRequired,
   fieldTitleLength,
-  fieldDescriptionLength
+  fieldDescriptionLength,
+  fieldTargetRoleRequired
 ];
 
 // src/business/dates.ts
@@ -579,7 +606,7 @@ var DATE_RULES = [
 
 // src/business/budget.ts
 var DRAFT_UPDATE_PUBLISH3 = ["draft", "update", "publish"];
-var PUBLISH_ONLY = ["publish"];
+var PUBLISH_ONLY2 = ["publish"];
 function budgetIssue(code, fieldPaths, scope = DRAFT_UPDATE_PUBLISH3) {
   return {
     code,
@@ -666,7 +693,7 @@ var budgetCashRequired = {
   layer: "business",
   source: "business",
   severity: "error",
-  scope: PUBLISH_ONLY,
+  scope: PUBLISH_ONLY2,
   fieldPaths: ["budget", "exchangeData.budget"],
   group: "budget",
   execute(input) {
@@ -675,7 +702,7 @@ var budgetCashRequired = {
     const budget = resolveBudget(input);
     if (budget !== null && budget > 0) return null;
     if (hasConfiguredCashCommercial(input)) return null;
-    return budgetIssue(VAL_CODES.BUDGET_CASH_REQUIRED, ["budget"], PUBLISH_ONLY);
+    return budgetIssue(VAL_CODES.BUDGET_CASH_REQUIRED, ["budget"], PUBLISH_ONLY2);
   }
 };
 var budgetBelowMinimum = {
@@ -702,7 +729,7 @@ var budgetProfitFieldsRequired = {
   layer: "business",
   source: "business",
   severity: "error",
-  scope: PUBLISH_ONLY,
+  scope: PUBLISH_ONLY2,
   fieldPaths: ["exchangeData.profitSplit", "exchangeData.calculationBasis"],
   group: "budget",
   execute(input) {
@@ -717,7 +744,7 @@ var budgetProfitFieldsRequired = {
     return budgetIssue(
       VAL_CODES.BUDGET_PROFIT_FIELDS_REQUIRED,
       ["exchangeData.profitSplit"],
-      PUBLISH_ONLY
+      PUBLISH_ONLY2
     );
   }
 };
@@ -727,7 +754,7 @@ var budgetEquityFieldsRequired = {
   layer: "business",
   source: "business",
   severity: "error",
-  scope: PUBLISH_ONLY,
+  scope: PUBLISH_ONLY2,
   fieldPaths: ["exchangeData.equityPercentage"],
   group: "budget",
   execute(input) {
@@ -742,7 +769,7 @@ var budgetEquityFieldsRequired = {
     return budgetIssue(
       VAL_CODES.BUDGET_EQUITY_FIELDS_REQUIRED,
       ["exchangeData.equityPercentage"],
-      PUBLISH_ONLY
+      PUBLISH_ONLY2
     );
   }
 };
@@ -784,7 +811,7 @@ var BUDGET_RULES = [
 
 // src/business/skills.ts
 var DRAFT_UPDATE_PUBLISH4 = ["draft", "update", "publish"];
-var PUBLISH_ONLY2 = ["publish"];
+var PUBLISH_ONLY3 = ["publish"];
 function skillIssue(code, fieldPaths, scope = DRAFT_UPDATE_PUBLISH4) {
   return {
     code,
@@ -842,7 +869,7 @@ var skillRequiredMissing = {
   layer: "business",
   source: "business",
   severity: "error",
-  scope: PUBLISH_ONLY2,
+  scope: PUBLISH_ONLY3,
   fieldPaths: ["structuredSkills"],
   group: "skills",
   execute(input) {
@@ -856,14 +883,14 @@ var skillRequiredMissing = {
       return skillIssue(
         VAL_CODES.SKILL_REQUIRED_MISSING,
         ["structuredSkills"],
-        PUBLISH_ONLY2
+        PUBLISH_ONLY3
       );
     }
     if (skills.length > 0 && !hasRequired) {
       return skillIssue(
         VAL_CODES.SKILL_REQUIRED_MISSING,
         ["structuredSkills"],
-        PUBLISH_ONLY2
+        PUBLISH_ONLY3
       );
     }
     return null;
@@ -875,7 +902,7 @@ var skillProvidedMissing = {
   layer: "business",
   source: "business",
   severity: "error",
-  scope: PUBLISH_ONLY2,
+  scope: PUBLISH_ONLY3,
   fieldPaths: ["structuredSkills"],
   group: "skills",
   execute(input) {
@@ -888,7 +915,7 @@ var skillProvidedMissing = {
     return skillIssue(
       VAL_CODES.SKILL_PROVIDED_MISSING,
       ["structuredSkills"],
-      PUBLISH_ONLY2
+      PUBLISH_ONLY3
     );
   }
 };
@@ -1321,13 +1348,13 @@ var CAPACITY_RULES = [
 ];
 
 // src/business/documents.ts
-var PUBLISH_ONLY3 = ["publish"];
+var PUBLISH_ONLY4 = ["publish"];
 function docIssue(code, fieldPaths) {
   return {
     code,
     source: "document",
     severity: "blocker",
-    scope: PUBLISH_ONLY3,
+    scope: PUBLISH_ONLY4,
     fieldPaths,
     message: messageForCode(code),
     layer: "business",
@@ -1343,7 +1370,7 @@ var docCrRequired = {
   layer: "business",
   source: "document",
   severity: "blocker",
-  scope: PUBLISH_ONLY3,
+  scope: PUBLISH_ONLY4,
   fieldPaths: ["attachments", "complianceRequirements"],
   group: "documents",
   execute(input) {
@@ -1361,7 +1388,7 @@ var docInsuranceRequired = {
   layer: "business",
   source: "document",
   severity: "blocker",
-  scope: PUBLISH_ONLY3,
+  scope: PUBLISH_ONLY4,
   fieldPaths: ["attachments"],
   group: "documents",
   execute(input) {
@@ -1376,7 +1403,7 @@ var docPerformanceBondRequired = {
   layer: "business",
   source: "document",
   severity: "blocker",
-  scope: PUBLISH_ONLY3,
+  scope: PUBLISH_ONLY4,
   fieldPaths: ["attachments"],
   group: "documents",
   execute(input) {
@@ -1398,7 +1425,7 @@ var docExpired = {
   layer: "business",
   source: "document",
   severity: "blocker",
-  scope: PUBLISH_ONLY3,
+  scope: PUBLISH_ONLY4,
   fieldPaths: ["attributes.documentExpiresAt"],
   group: "documents",
   execute(input, context) {

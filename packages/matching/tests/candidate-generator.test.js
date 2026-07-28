@@ -32,9 +32,10 @@ describe('candidate generator — location compatibility', () => {
     assert.equal(locationCompatible({ location: 'remote' }, { location: 'Riyadh' }), true)
   })
 
-  it('requires same city when neither side is remote', () => {
-    assert.equal(locationCompatible({ location: 'Jeddah' }, { location: 'Riyadh' }), false)
+  it('does not hard-reject different cities (soft scoring only)', () => {
+    assert.equal(locationCompatible({ location: 'Jeddah' }, { location: 'Riyadh' }), true)
     assert.equal(locationCompatible({ location: 'Riyadh' }, { location: 'Riyadh' }), true)
+    assert.equal(locationCompatible({ location: 'Riyadh' }, { location: 'Dammam' }), true)
   })
 })
 

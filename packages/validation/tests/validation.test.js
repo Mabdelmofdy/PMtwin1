@@ -29,6 +29,60 @@ describe('field validation', () => {
     )
     assert.ok(result.issues.some((i) => i.code === VAL_CODES.FIELD_TITLE_TOO_LONG))
   })
+
+  it('does not require targetRole on draft', () => {
+    const result = validateOpportunityFields(
+      { title: 'Draft without role' },
+      { operationScope: 'draft' },
+      { scopes: ['draft'] },
+    )
+    assert.ok(
+      !result.issues.some((i) => i.code === VAL_CODES.FIELD_TARGET_ROLE_REQUIRED),
+    )
+  })
+
+  it('requires attributes.targetRole on publish', () => {
+    const result = validateOpportunityFields(
+      { title: 'Published without role', attributes: {} },
+      { operationScope: 'publish' },
+      { scopes: ['publish'] },
+    )
+    assert.ok(
+      result.issues.some((i) => i.code === VAL_CODES.FIELD_TARGET_ROLE_REQUIRED),
+    )
+    assert.equal(
+      messageForCode(VAL_CODES.FIELD_TARGET_ROLE_REQUIRED),
+      'Target role is required before publishing.',
+    )
+  })
+
+  it('does not accept title as a substitute for targetRole on publish', () => {
+    const result = validateOpportunityFields(
+      {
+        title: 'Architect for Riyadh tower',
+        attributes: { roleNeeded: 'Architect' },
+      },
+      { operationScope: 'publish' },
+      { scopes: ['publish'] },
+    )
+    assert.ok(
+      result.issues.some((i) => i.code === VAL_CODES.FIELD_TARGET_ROLE_REQUIRED),
+    )
+  })
+
+  it('accepts non-empty attributes.targetRole on publish', () => {
+    const result = validateOpportunityFields(
+      {
+        title: 'Need BIM Architect',
+        attributes: { targetRole: 'Architect' },
+      },
+      { operationScope: 'publish' },
+      { scopes: ['publish'] },
+    )
+    assert.ok(
+      !result.issues.some((i) => i.code === VAL_CODES.FIELD_TARGET_ROLE_REQUIRED),
+    )
+  })
 })
 
 describe('date validation', () => {
@@ -645,7 +699,7 @@ describe('publish validation', () => {
 
   it('allows when readiness, vetting, and validation pass', () => {
     const field = validateOpportunityFields(
-      { title: 'Ready' },
+      { title: 'Ready', attributes: { targetRole: 'Architect' } },
       { operationScope: 'publish' },
       { scopes: ['publish'] },
     )
@@ -656,6 +710,7 @@ describe('publish validation', () => {
         budget: DEFAULT_VALIDATION_CONFIG.minimumBudget + 10,
         startDate: '2026-08-01',
         endDate: '2026-09-01',
+        attributes: { targetRole: 'Architect' },
       },
       { today: '2026-07-10', operationScope: 'publish' },
       { scopes: ['publish'] },

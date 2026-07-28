@@ -204,6 +204,27 @@ describe('evaluateOpportunityReadiness — hybrid intent', () => {
     assert.ok(incompleteHybrid.missingRequired.includes('Services Required or Offered'))
     assert.notEqual(incompleteHybrid.status, 'ready_for_matching')
 
+    const aliasOnly = evaluateOpportunityReadiness({
+      title: 'Alias role only',
+      intent: 'need',
+      scope: {
+        sectors: ['Construction'],
+        requiredSkills: ['Program Management'],
+      },
+      attributes: {
+        roleNeeded: 'Program Manager',
+        startDate: '2026-05-01',
+      },
+      normalized: {
+        role: 'Program Manager',
+        requiredServices: ['PMO'],
+      },
+      location: 'Jeddah',
+      modelType: 'project_based',
+      description: 'Must require attributes.targetRole.',
+    })
+    assert.ok(aliasOnly.missingRequired.includes('Role Needed or Role Offered'))
+
     const readyHybrid = evaluateOpportunityReadiness({
       title: 'Hybrid exchange — complete',
       intent: 'hybrid',
@@ -213,8 +234,7 @@ describe('evaluateOpportunityReadiness — hybrid intent', () => {
         offeredSkills: ['Structural Review'],
       },
       attributes: {
-        roleNeeded: 'Program Manager',
-        roleOffered: 'Structural Engineer',
+        targetRole: 'Program Manager',
         startDate: '2026-05-01',
         tenderDeadline: '2026-10-01',
       },

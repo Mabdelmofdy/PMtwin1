@@ -112,6 +112,10 @@ export {
   normalizeSkill,
   toSkillString,
   normalizeLocation,
+  resolveLocationCountry,
+  resolveCoverage,
+  evaluateLocationCoverage,
+  extractCoverageScopes,
   normalizeCategory,
   extractBudget,
   extractTimeline,
@@ -119,7 +123,13 @@ export {
   expandTerm,
   buildSemanticProfile,
 } from './normalize/index.ts'
-export type { ExtractNormalizeOptions } from './normalize/index.ts'
+export type {
+  ExtractNormalizeOptions,
+  LocationCountryCode,
+  LocationCoverageTier,
+  LocationCoverageResult,
+  ResolvedCoverage,
+} from './normalize/index.ts'
 
 export {
   resolveThreshold,
@@ -166,3 +176,20 @@ export type {
   MatchEngineModelOption,
   ModelRunResult,
 } from './types/index.ts'
+
+export {
+  MATCHING_REJECT_REASONS,
+  buildMatchedDiagnostic,
+  buildRejectedDiagnostic,
+  summarizeDiagnostics,
+  diagnosticCheck,
+  rejectReasonFromHardGate,
+} from './diagnostics/matching-diagnostics.ts'
+export type {
+  MatchingDiagnosticCheckId,
+  MatchingDiagnosticCheckStatus,
+  MatchingDiagnosticCheck,
+  MatchingCandidateDiagnostic,
+  MatchingRunDiagnostic,
+  MatchingRejectReason,
+} from './diagnostics/matching-diagnostics.ts'

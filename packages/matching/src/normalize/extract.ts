@@ -5,6 +5,10 @@ import type { MatchingConfig } from '../types/matching-config.ts'
 import type { NormalizedPost, OpportunityPost } from '../types/opportunity.ts'
 import { extractBudget } from './budget.ts'
 import { normalizeLocation } from './location.ts'
+import {
+  extractCoverageScopes,
+  resolveLocationCountry,
+} from './location-coverage.ts'
 import { normalizeSkill, toSkillString } from './skill.ts'
 import { extractTimeline } from './timeline.ts'
 
@@ -98,6 +102,10 @@ export function extractAndNormalize(
     ? { start: timeline.start, end: timeline.end }
     : (attributes.availability as NormalizedPost['availability'] | undefined)
 
+  const location = normalizeLocation(opportunity, locationCanonical)
+  const coverageScopes = extractCoverageScopes(attributes)
+  const locationCountry = resolveLocationCountry(location)
+
   return {
     skills,
     requiredServices,
@@ -109,7 +117,9 @@ export function extractAndNormalize(
     timeline,
     deadline: deadline ?? undefined,
     availability: availability ?? undefined,
-    location: normalizeLocation(opportunity, locationCanonical),
+    location,
+    locationCountry,
+    coverageScopes,
     reputation: resolveReputation(options.creator),
     intent: opportunity.intent ?? 'request',
     modelType: opportunity.modelType,

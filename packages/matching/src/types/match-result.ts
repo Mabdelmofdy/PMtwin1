@@ -23,6 +23,10 @@ export interface ScoreFactorResult {
   readonly label: ScoreLabel
   readonly matched?: number
   readonly total?: number
+  /** Location coverage tier when factor is locationFit. */
+  readonly tier?: string
+  /** Human-readable location coverage detail (e.g. Same Country). */
+  readonly detail?: string
 }
 
 export interface ScoreBreakdown {
@@ -36,6 +40,8 @@ export interface ScoreBreakdown {
   readonly locationFit: number
   readonly reputation: number
   readonly rejected?: string
+  readonly locationTier?: string
+  readonly locationDetail?: string
 }
 
 export type ScoreLabels = {

@@ -123,10 +123,14 @@ buildMatchingExplanation(snapshot): ExplanationBundle  // engine: matching
 
 | Source code | Reason code |
 |-------------|-------------|
+| `role_missing` / `TARGET_ROLE_REQUIRED` | `MATCH_HARD_GATE_ROLE_MISSING` / `TARGET_ROLE_REQUIRED` |
 | `role_incompatible` | `MATCH_HARD_GATE_ROLE_INCOMPATIBLE` |
 | `core_skill_missing` | `MATCH_HARD_GATE_SKILL_MISSING` |
 | `service_overlap_low` | `MATCH_HARD_GATE_SERVICE_OVERLAP_LOW` |
 | `breakdown.rejected === 'skill_floor'` | `MATCH_SKILL_LOW` |
+| score &lt; threshold | `MATCH_BELOW_THRESHOLD` / `BELOW_MATCH_THRESHOLD` |
+
+Location city mismatch is **not** a hard gate; it only reduces `locationFit` (coverage hierarchy). Publish requires canonical `attributes.targetRole`.
 
 ### Tier and topology
 

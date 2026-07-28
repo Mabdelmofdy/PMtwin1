@@ -19,6 +19,7 @@ export type RecordMatchingRunAuditInput = {
   readonly matchingErrors: readonly string[]
   readonly status: MatchingRunStatus
   readonly failureReason?: string
+  readonly diagnosticSummary?: MatchingRunAuditDetails['diagnosticSummary']
 }
 
 export function resolveMatchingRunStatus(
@@ -46,6 +47,7 @@ export function buildMatchingRunAuditDetails(
     matchingErrors: [...input.matchingErrors],
     status: input.status,
     failureReason: input.failureReason,
+    diagnosticSummary: input.diagnosticSummary,
   }
 }
 
@@ -98,6 +100,11 @@ export function parseMatchingRunAuditDetails(
     status: details.status as MatchingRunStatus,
     failureReason:
       typeof details.failureReason === 'string' ? details.failureReason : undefined,
+    diagnosticSummary:
+      details.diagnosticSummary
+      && typeof details.diagnosticSummary === 'object'
+        ? (details.diagnosticSummary as MatchingRunAuditDetails['diagnosticSummary'])
+        : undefined,
   }
 }
 

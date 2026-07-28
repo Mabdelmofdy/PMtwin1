@@ -13,10 +13,12 @@ export type { OneWayValueFit, BarterValueEquivalence, } from './value/value-comp
 export { detectMatchingModel } from './routing/detect-model.ts';
 export { rankMatches } from './routing/rank-matches.ts';
 export { runMatchingForPost } from './engine/index.ts';
-export { normalizeSkill, toSkillString, normalizeLocation, normalizeCategory, extractBudget, extractTimeline, extractAndNormalize, expandTerm, buildSemanticProfile, } from './normalize/index.ts';
-export type { ExtractNormalizeOptions } from './normalize/index.ts';
+export { normalizeSkill, toSkillString, normalizeLocation, resolveLocationCountry, resolveCoverage, evaluateLocationCoverage, extractCoverageScopes, normalizeCategory, extractBudget, extractTimeline, extractAndNormalize, expandTerm, buildSemanticProfile, } from './normalize/index.ts';
+export type { ExtractNormalizeOptions, LocationCountryCode, LocationCoverageTier, LocationCoverageResult, ResolvedCoverage, } from './normalize/index.ts';
 export { resolveThreshold, resolveMaxCandidates, resolveNormalized, passHardGate, withRunnerConfig, parseRoleDefinitions, buildRoleServices, buildRoleSkillHints, buildSyntheticNeedForRole, estimateValueSar, valueEquivalenceText, barterSidePost, findOffersForNeedPure, findNeedsForOfferPure, findBarterMatchesPure, averageScoreBreakdown, findConsortiumMatchesPure, normalizeCycleRing, buildCircularLinkScores, findCircularExchangesPure, } from './models/index.ts';
 export type { RoleDefinition, CircularEdgeDetail, CircularEdgeMap, } from './models/index.ts';
 export type { SuggestedPartner, ScoredMatch, CircularLinkScore, ModelRunResultBase, OneWayMatchResult, TwoWayMatchResult, ConsortiumRoleResult, ConsortiumMatchResult, CircularMatchResult, ModelRunnerOptions, } from './types/index.ts';
 export type { MatchEngineInput, MatchEngineOptions, MatchEngineModelOption, ModelRunResult, } from './types/index.ts';
+export { MATCHING_REJECT_REASONS, buildMatchedDiagnostic, buildRejectedDiagnostic, summarizeDiagnostics, diagnosticCheck, rejectReasonFromHardGate, } from './diagnostics/matching-diagnostics.ts';
+export type { MatchingDiagnosticCheckId, MatchingDiagnosticCheckStatus, MatchingDiagnosticCheck, MatchingCandidateDiagnostic, MatchingRunDiagnostic, MatchingRejectReason, } from './diagnostics/matching-diagnostics.ts';
 //# sourceMappingURL=index.d.ts.map

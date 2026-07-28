@@ -6,7 +6,7 @@ export interface CandidateGeneratorOptions {
     readonly offerNormalized?: NormalizedPost;
 }
 export declare function budgetCompatible(needNorm: NormalizedPost, offerNorm: NormalizedPost): boolean;
-export declare function locationCompatible(needNorm: NormalizedPost, offerNorm: NormalizedPost): boolean;
+export declare function locationCompatible(_needNorm: NormalizedPost, _offerNorm: NormalizedPost): boolean;
 export declare function timelineOverlap(needNorm: NormalizedPost, offerNorm: NormalizedPost): boolean;
 export declare function categoryOverlap(needNorm: NormalizedPost, offerNorm: NormalizedPost): boolean;
 export declare function getCandidates(needPost: OpportunityPost, offerPosts: readonly OpportunityPost[], config: MatchingConfig, options?: CandidateGeneratorOptions): OpportunityPost[];

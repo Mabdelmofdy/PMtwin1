@@ -1,20 +1,22 @@
-import type { ValidationIssue, ValidationRule } from '../types.ts'
+import type { ValidationIssue, ValidationRule, ValidationScope } from '../types.ts'
 import { VAL_CODES } from '../rules/codes.ts'
 import { messageForCode } from '../messages/catalog.ts'
 import { hasText } from '../validators/primitives.ts'
 
 const DRAFT_UPDATE_PUBLISH = ['draft', 'update', 'publish'] as const
+const PUBLISH_ONLY = ['publish'] as const
 
 function fieldIssue(
   code: string,
   fieldPaths: readonly string[],
   severity: ValidationIssue['severity'] = 'error',
+  scope: readonly ValidationScope[] = DRAFT_UPDATE_PUBLISH,
 ): ValidationIssue {
   return {
     code,
     source: 'field',
     severity,
-    scope: DRAFT_UPDATE_PUBLISH,
+    scope,
     fieldPaths,
     message: messageForCode(code),
     layer: 'field',
@@ -69,8 +71,37 @@ export const fieldDescriptionLength: ValidationRule = {
   },
 }
 
+/**
+ * Canonical matching field — publish requires attributes.targetRole.
+ * Title / aliases are never accepted as substitutes.
+ */
+export const fieldTargetRoleRequired: ValidationRule = {
+  id: 'field-target-role-required',
+  code: VAL_CODES.FIELD_TARGET_ROLE_REQUIRED,
+  layer: 'field',
+  source: 'field',
+  severity: 'error',
+  scope: PUBLISH_ONLY,
+  fieldPaths: ['attributes.targetRole'],
+  group: 'field',
+  execute(input) {
+    const attributes = input.attributes ?? {}
+    const targetRole = attributes.targetRole
+    if (hasText(typeof targetRole === 'string' ? targetRole : undefined)) {
+      return null
+    }
+    return fieldIssue(
+      VAL_CODES.FIELD_TARGET_ROLE_REQUIRED,
+      ['attributes.targetRole'],
+      'error',
+      PUBLISH_ONLY,
+    )
+  },
+}
+
 export const FIELD_RULES: readonly ValidationRule[] = [
   fieldTitleRequired,
   fieldTitleLength,
   fieldDescriptionLength,
+  fieldTargetRoleRequired,
 ]

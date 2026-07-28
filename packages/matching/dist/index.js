@@ -174,14 +174,8 @@ function budgetCompatible(needNorm, offerNorm) {
   }
   return Math.max(needMin, offerMin) <= Math.min(needMax, offerMax);
 }
-function locationCompatible(needNorm, offerNorm) {
-  const needLoc = (needNorm.location ?? "").toLowerCase();
-  const offerLoc = (offerNorm.location ?? "").toLowerCase();
-  if (needLoc === "remote" || offerLoc === "remote") return true;
-  if (needLoc === offerLoc) return true;
-  if (needLoc === "ksa" && offerLoc) return true;
-  if (offerLoc === "ksa" && needLoc) return true;
-  return false;
+function locationCompatible(_needNorm, _offerNorm) {
+  return true;
 }
 function timelineOverlap(needNorm, offerNorm) {
   const needEnd = needNorm.deadline ?? needNorm.timeline?.end;
@@ -357,6 +351,217 @@ function barterValueEquivalence(postA, postB) {
   };
 }
 
+// src/normalize/location-coverage.ts
+var LABEL_TO_COUNTRY = {
+  remote: "REMOTE",
+  "on-site": "UNKNOWN",
+  onsite: "UNKNOWN",
+  hybrid: "UNKNOWN",
+  riyadh: "SA",
+  jeddah: "SA",
+  dammam: "SA",
+  "eastern province": "SA",
+  jubail: "SA",
+  tabuk: "SA",
+  neom: "SA",
+  "al khobar": "SA",
+  makkah: "SA",
+  asir: "SA",
+  abha: "SA",
+  ksa: "SA",
+  "saudi arabia": "SA",
+  sa: "SA",
+  gcc: "GCC",
+  mena: "MENA",
+  global: "GLOBAL",
+  uae: "AE",
+  dubai: "AE",
+  "abu dhabi": "AE",
+  qatar: "QA",
+  doha: "QA",
+  kuwait: "KW",
+  "kuwait city": "KW",
+  bahrain: "BH",
+  manama: "BH",
+  oman: "OM",
+  muscat: "OM"
+};
+var GCC_COUNTRIES = /* @__PURE__ */ new Set([
+  "SA",
+  "AE",
+  "QA",
+  "KW",
+  "BH",
+  "OM"
+]);
+var NATIONWIDE_TOKENS = /* @__PURE__ */ new Set([
+  "ksa",
+  "saudi arabia",
+  "saudi-arabia",
+  "nationwide",
+  "national",
+  "all saudi arabia",
+  "kingdom of saudi arabia",
+  "sa",
+  "countrywide",
+  "entire kingdom"
+]);
+var GCC_TOKENS = /* @__PURE__ */ new Set(["gcc", "gulf", "gulf cooperation council"]);
+var MENA_TOKENS = /* @__PURE__ */ new Set(["mena", "middle east", "middle-east"]);
+var GLOBAL_TOKENS = /* @__PURE__ */ new Set(["global", "worldwide", "international", "world"]);
+var REMOTE_TOKENS = /* @__PURE__ */ new Set(["remote", "work from home", "wfh"]);
+function normalizeToken(value) {
+  return value.trim().toLowerCase().replace(/[_/]+/g, " ").replace(/\s+/g, " ");
+}
+function resolveLocationCountry(locationLabel) {
+  if (!locationLabel) return "UNKNOWN";
+  const key = normalizeToken(locationLabel);
+  if (!key) return "UNKNOWN";
+  if (LABEL_TO_COUNTRY[key]) return LABEL_TO_COUNTRY[key];
+  const dashed = key.replace(/\s+/g, "-");
+  if (LABEL_TO_COUNTRY[dashed]) return LABEL_TO_COUNTRY[dashed];
+  return "UNKNOWN";
+}
+function pushUnique(target, value) {
+  const normalized2 = normalizeToken(value);
+  if (normalized2 && !target.includes(normalized2)) target.push(normalized2);
+}
+function collectRawCoverageTokens(primaryLocation, coverageScopes, attributes) {
+  const tokens = [];
+  if (primaryLocation) pushUnique(tokens, primaryLocation);
+  for (const scope of coverageScopes ?? []) {
+    pushUnique(tokens, scope);
+  }
+  if (!attributes) return tokens;
+  const stringKeys = [
+    "serviceArea",
+    "geographicScope",
+    "locationRequirement",
+    "workMode",
+    "coverageArea"
+  ];
+  for (const key of stringKeys) {
+    const value = attributes[key];
+    if (typeof value === "string") pushUnique(tokens, value);
+  }
+  const arrayKeys = [
+    "serviceAreas",
+    "coverageAreas",
+    "geographicScopes",
+    "operatingRegions"
+  ];
+  for (const key of arrayKeys) {
+    const value = attributes[key];
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        if (typeof item === "string") pushUnique(tokens, item);
+      }
+    }
+  }
+  return tokens;
+}
+function resolveCoverage(primaryLocation, coverageScopes, attributes) {
+  const tokens = collectRawCoverageTokens(primaryLocation, coverageScopes, attributes);
+  const primary = (primaryLocation ?? "").trim();
+  const country = resolveLocationCountry(primary);
+  let isRemote = country === "REMOTE";
+  let hasNationwide = country === "SA" && normalizeToken(primary) === "ksa";
+  let hasGccRegional = country === "GCC";
+  let hasMena = country === "MENA";
+  let hasGlobal = country === "GLOBAL";
+  for (const token of tokens) {
+    if (REMOTE_TOKENS.has(token) || token.includes("remote")) isRemote = true;
+    if (NATIONWIDE_TOKENS.has(token)) hasNationwide = true;
+    if (GCC_TOKENS.has(token)) hasGccRegional = true;
+    if (MENA_TOKENS.has(token)) hasMena = true;
+    if (GLOBAL_TOKENS.has(token)) hasGlobal = true;
+    if (token.includes("saudi") && (token.includes("all") || token.includes("nation"))) {
+      hasNationwide = true;
+    }
+  }
+  return {
+    primaryLocation: primary,
+    country,
+    isRemote,
+    hasNationwide,
+    hasGccRegional,
+    hasMena,
+    hasGlobal,
+    coverageScopes: tokens
+  };
+}
+function isGccCountry(code) {
+  return GCC_COUNTRIES.has(code);
+}
+function countriesCompatibleViaNationwide(coverage2, counterpartCountry) {
+  if (!coverage2.hasNationwide) return false;
+  return counterpartCountry === "SA" || counterpartCountry === "UNKNOWN";
+}
+function countriesCompatibleViaRegional(coverage2, counterpartCountry) {
+  if (coverage2.hasGlobal) return true;
+  if (coverage2.hasMena || coverage2.hasGccRegional) {
+    return isGccCountry(counterpartCountry) || counterpartCountry === "GCC" || counterpartCountry === "MENA" || counterpartCountry === "UNKNOWN";
+  }
+  return false;
+}
+function evaluateLocationCoverage(need, offer) {
+  if (need.isRemote || offer.isRemote) {
+    return { score: 1, tier: "remote", label: "Remote" };
+  }
+  const needCountry = need.country === "UNKNOWN" && need.hasNationwide ? "SA" : need.country;
+  const offerCountry = offer.country === "UNKNOWN" && offer.hasNationwide ? "SA" : offer.country;
+  if (countriesCompatibleViaNationwide(need, offerCountry) || countriesCompatibleViaNationwide(offer, needCountry)) {
+    return { score: 1, tier: "nationwide", label: "Nationwide" };
+  }
+  if (countriesCompatibleViaRegional(need, offerCountry) || countriesCompatibleViaRegional(offer, needCountry)) {
+    return { score: 0.85, tier: "regional_gcc", label: "Regional GCC" };
+  }
+  const needCity = normalizeToken(need.primaryLocation);
+  const offerCity = normalizeToken(offer.primaryLocation);
+  if (needCity && offerCity && needCity === offerCity) {
+    return { score: 1, tier: "same_city", label: "Same City" };
+  }
+  if (needCountry === "SA" && offerCountry === "SA" || normalizeToken(need.primaryLocation) === "ksa" && offerCountry === "SA" || normalizeToken(offer.primaryLocation) === "ksa" && needCountry === "SA") {
+    if (needCity && offerCity && needCity !== offerCity) {
+      if (needCity === "ksa" || offerCity === "ksa") {
+        return { score: 0.75, tier: "same_country", label: "Same Country" };
+      }
+      return { score: 0.75, tier: "same_country", label: "Same Country" };
+    }
+    return { score: 0.75, tier: "same_country", label: "Same Country" };
+  }
+  if (needCountry !== "UNKNOWN" && offerCountry !== "UNKNOWN" && needCountry === offerCountry && needCountry !== "REMOTE") {
+    return { score: 0.75, tier: "same_country", label: "Same Country" };
+  }
+  if (isGccCountry(needCountry) && isGccCountry(offerCountry) && needCountry !== offerCountry) {
+    return { score: 0.5, tier: "different_gcc_country", label: "Different GCC Country" };
+  }
+  if (needCountry === "GCC" && isGccCountry(offerCountry) || offerCountry === "GCC" && isGccCountry(needCountry)) {
+    return { score: 0.5, tier: "different_gcc_country", label: "Different GCC Country" };
+  }
+  return { score: 0.25, tier: "weak", label: "Weak Location Fit" };
+}
+function extractCoverageScopes(attributes) {
+  if (!attributes) return [];
+  const scopes = [];
+  const push = (value) => {
+    if (typeof value === "string" && value.trim()) pushUnique(scopes, value);
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        if (typeof item === "string" && item.trim()) pushUnique(scopes, item);
+      }
+    }
+  };
+  push(attributes.serviceArea);
+  push(attributes.serviceAreas);
+  push(attributes.coverageAreas);
+  push(attributes.coverageArea);
+  push(attributes.geographicScope);
+  push(attributes.geographicScopes);
+  push(attributes.operatingRegions);
+  return scopes;
+}
+
 // src/scoring/label-from-score.ts
 var LABEL_PARTIAL = 0.25;
 function labelFromScore(score) {
@@ -428,14 +633,24 @@ function timelineFit(needNorm, offerNorm) {
   }
   return { score: 0.5, label: "Partial" };
 }
-function locationFit(needNorm, offerNorm) {
-  const needLoc = (needNorm.location ?? "").toLowerCase();
-  const offerLoc = (offerNorm.location ?? "").toLowerCase();
-  if (needLoc === "remote" || offerLoc === "remote") return { score: 1, label: "Match" };
-  if (needLoc === offerLoc) return { score: 1, label: "Match" };
-  if (needLoc === "ksa" && offerLoc) return { score: 0.5, label: "Partial" };
-  if (offerLoc === "ksa" && needLoc) return { score: 0.5, label: "Partial" };
-  return { score: 0, label: "No Match" };
+function locationFit(needNorm, offerNorm, needAttributes, offerAttributes) {
+  const needCoverage = resolveCoverage(
+    needNorm.location,
+    needNorm.coverageScopes,
+    needAttributes
+  );
+  const offerCoverage = resolveCoverage(
+    offerNorm.location,
+    offerNorm.coverageScopes,
+    offerAttributes
+  );
+  const result = evaluateLocationCoverage(needCoverage, offerCoverage);
+  return {
+    score: result.score,
+    label: labelFromScore(result.score),
+    tier: result.tier,
+    detail: result.label
+  };
 }
 function reputationScore(offerNorm) {
   const raw = offerNorm.reputation != null ? Number(offerNorm.reputation) : 0.5;
@@ -451,7 +666,7 @@ function scorePair(needPost, offerPost, config, normalizedNeed, normalizedOffer)
   const value = valueCompatibilityFactor(needPost, offerPost);
   const budget = budgetFit(nNorm, oNorm);
   const timeline = timelineFit(nNorm, oNorm);
-  const location = locationFit(nNorm, oNorm);
+  const location = locationFit(nNorm, oNorm, needPost.attributes, offerPost.attributes);
   const reputation = reputationScore(oNorm);
   const minSkillForScore = config.MIN_SKILL_SCORE_FOR_MATCH ?? 0.5;
   if ((nNorm.requiredServices?.length ?? 0) > 0 && skill.score < minSkillForScore) {
@@ -490,7 +705,9 @@ function scorePair(needPost, offerPost, config, normalizedNeed, normalizedOffer)
     budgetFit: budget.score,
     timelineFit: timeline.score,
     locationFit: location.score,
-    reputation: reputation.score
+    reputation: reputation.score,
+    locationTier: location.tier,
+    locationDetail: location.detail
   };
   const labels = {
     skillMatch: skill.label,
@@ -3203,6 +3420,9 @@ function extractAndNormalize(opportunity, canonical = {}, options = {}) {
   const timeline = extractTimeline(opportunity);
   const deadline = timeline.end ?? (opportunity.intent === "request" ? attributes.tenderDeadline ?? attributes.applicationDeadline : void 0);
   const availability = timeline.start && timeline.end ? { start: timeline.start, end: timeline.end } : attributes.availability;
+  const location = normalizeLocation(opportunity, locationCanonical);
+  const coverageScopes = extractCoverageScopes(attributes);
+  const locationCountry = resolveLocationCountry(location);
   return {
     skills,
     requiredServices,
@@ -3214,7 +3434,9 @@ function extractAndNormalize(opportunity, canonical = {}, options = {}) {
     timeline,
     deadline: deadline ?? void 0,
     availability: availability ?? void 0,
-    location: normalizeLocation(opportunity, locationCanonical),
+    location,
+    locationCountry,
+    coverageScopes,
     reputation: resolveReputation(options.creator),
     intent: opportunity.intent ?? "request",
     modelType: opportunity.modelType,
@@ -3361,15 +3583,291 @@ function barterSidePost(needPost, offerPost) {
   };
 }
 
+// src/diagnostics/matching-diagnostics.ts
+var MATCHING_REJECT_REASONS = {
+  NOT_PUBLISHED: "NOT_PUBLISHED",
+  SAME_PARTY: "SAME_PARTY",
+  TARGET_ROLE_REQUIRED: "TARGET_ROLE_REQUIRED",
+  ROLE_INCOMPATIBLE: "ROLE_INCOMPATIBLE",
+  SKILL_MISSING: "SKILL_MISSING",
+  SERVICE_OVERLAP_LOW: "SERVICE_OVERLAP_LOW",
+  BUDGET_INCOMPATIBLE: "BUDGET_INCOMPATIBLE",
+  TIMELINE_INCOMPATIBLE: "TIMELINE_INCOMPATIBLE",
+  CATEGORY_INCOMPATIBLE: "CATEGORY_INCOMPATIBLE",
+  SKILL_FLOOR: "SKILL_FLOOR",
+  BELOW_MATCH_THRESHOLD: "BELOW_MATCH_THRESHOLD",
+  SOURCE_INTENT_INVALID: "SOURCE_INTENT_INVALID"
+};
+function check(id, status, detail) {
+  return detail ? { id, status, detail } : { id, status };
+}
+function rejectReasonFromHardGate(gate) {
+  if (gate.reason === "role_missing") return MATCHING_REJECT_REASONS.TARGET_ROLE_REQUIRED;
+  if (gate.reason === "role_incompatible") return MATCHING_REJECT_REASONS.ROLE_INCOMPATIBLE;
+  if (gate.reason === "core_skill_missing") return MATCHING_REJECT_REASONS.SKILL_MISSING;
+  if (gate.reason === "service_overlap_low") {
+    return MATCHING_REJECT_REASONS.SERVICE_OVERLAP_LOW;
+  }
+  return MATCHING_REJECT_REASONS.TARGET_ROLE_REQUIRED;
+}
+function buildMatchedDiagnostic(input) {
+  const locationScore = input.scored.breakdown.locationFit;
+  const locationTier = input.scored.breakdown.locationTier;
+  const locationDetail = input.locationDetail ?? input.scored.breakdown.locationDetail ?? void 0;
+  return {
+    candidateOpportunityId: input.candidateOpportunityId,
+    result: "matched",
+    checks: [
+      check("published", "pass"),
+      check("different_party", "pass"),
+      check("target_role", "pass"),
+      check("skills", "pass"),
+      check("collaboration_model", "pass"),
+      check("exchange_mode", "pass"),
+      check("sector", "pass"),
+      check("budget", "pass"),
+      check("timeline", "pass"),
+      check(
+        "location",
+        "pass",
+        locationDetail ? `${locationDetail} Score ${locationScore}` : `Score ${locationScore}`
+      ),
+      check("threshold", "pass", `Final score ${input.scored.score}`)
+    ],
+    locationTier,
+    locationScore,
+    finalScore: input.scored.score,
+    postMatchCreated: true
+  };
+}
+function buildRejectedDiagnostic(input) {
+  return {
+    candidateOpportunityId: input.candidateOpportunityId,
+    result: "rejected",
+    checks: input.checks,
+    rejectReason: input.rejectReason,
+    finalScore: input.finalScore,
+    locationTier: input.locationTier,
+    locationScore: input.locationScore,
+    postMatchCreated: false
+  };
+}
+function summarizeDiagnostics(sourceOpportunityId, candidates) {
+  const matched = candidates.filter((c) => c.result === "matched");
+  const rejected = candidates.filter((c) => c.result === "rejected");
+  const eligible = candidates.filter(
+    (c) => c.checks.every(
+      (checkItem) => checkItem.id === "threshold" ? true : checkItem.status !== "fail"
+    ) || c.result === "matched" || c.rejectReason === MATCHING_REJECT_REASONS.BELOW_MATCH_THRESHOLD || c.rejectReason === MATCHING_REJECT_REASONS.SKILL_FLOOR
+  );
+  return {
+    sourceOpportunityId,
+    scannedCount: candidates.length,
+    eligibleCount: eligible.length,
+    rejectedCount: rejected.length,
+    matchedCount: matched.length,
+    candidates
+  };
+}
+
 // src/models/one-way.ts
-function scoreOneWayMatch(needPost, offerPost, config, canonical, threshold) {
+function emptyDiagnostic(sourceId) {
+  return {
+    sourceOpportunityId: sourceId,
+    scannedCount: 0,
+    eligibleCount: 0,
+    rejectedCount: 0,
+    matchedCount: 0,
+    candidates: []
+  };
+}
+function evaluateOfferCandidate(needPost, offerPost, config, canonical, threshold) {
+  const candidateId = String(offerPost.id ?? "");
   const needNorm = resolveNormalized(needPost, canonical, config);
   const offerNorm = resolveNormalized(offerPost, canonical, config);
-  if (!passHardGate(needPost, offerPost, needNorm, offerNorm, config)) return null;
+  if (offerPost.status !== "published") {
+    return {
+      match: null,
+      diagnostic: buildRejectedDiagnostic({
+        candidateOpportunityId: candidateId,
+        rejectReason: MATCHING_REJECT_REASONS.NOT_PUBLISHED,
+        checks: [
+          check("published", "fail", "Candidate is not published"),
+          check("different_party", "n/a"),
+          check("target_role", "n/a"),
+          check("skills", "n/a"),
+          check("location", "n/a"),
+          check("threshold", "n/a")
+        ]
+      })
+    };
+  }
+  if (needPost.creatorId && offerPost.creatorId && needPost.creatorId === offerPost.creatorId) {
+    return {
+      match: null,
+      diagnostic: buildRejectedDiagnostic({
+        candidateOpportunityId: candidateId,
+        rejectReason: MATCHING_REJECT_REASONS.SAME_PARTY,
+        checks: [
+          check("published", "pass"),
+          check("different_party", "fail", "Same creator"),
+          check("target_role", "n/a"),
+          check("skills", "n/a"),
+          check("location", "n/a"),
+          check("threshold", "n/a")
+        ]
+      })
+    };
+  }
+  if (!budgetCompatible(needNorm, offerNorm)) {
+    return {
+      match: null,
+      diagnostic: buildRejectedDiagnostic({
+        candidateOpportunityId: candidateId,
+        rejectReason: MATCHING_REJECT_REASONS.BUDGET_INCOMPATIBLE,
+        checks: [
+          check("published", "pass"),
+          check("different_party", "pass"),
+          check("budget", "fail", "Budget ranges do not overlap"),
+          check("target_role", "n/a"),
+          check("skills", "n/a"),
+          check("location", "n/a"),
+          check("threshold", "n/a")
+        ]
+      })
+    };
+  }
+  if (!timelineOverlap(needNorm, offerNorm)) {
+    return {
+      match: null,
+      diagnostic: buildRejectedDiagnostic({
+        candidateOpportunityId: candidateId,
+        rejectReason: MATCHING_REJECT_REASONS.TIMELINE_INCOMPATIBLE,
+        checks: [
+          check("published", "pass"),
+          check("different_party", "pass"),
+          check("budget", "pass"),
+          check("timeline", "fail", "Timelines do not overlap"),
+          check("target_role", "n/a"),
+          check("skills", "n/a"),
+          check("location", "n/a"),
+          check("threshold", "n/a")
+        ]
+      })
+    };
+  }
+  if (!categoryOverlap(needNorm, offerNorm)) {
+    return {
+      match: null,
+      diagnostic: buildRejectedDiagnostic({
+        candidateOpportunityId: candidateId,
+        rejectReason: MATCHING_REJECT_REASONS.CATEGORY_INCOMPATIBLE,
+        checks: [
+          check("published", "pass"),
+          check("different_party", "pass"),
+          check("budget", "pass"),
+          check("timeline", "pass"),
+          check("sector", "fail", "No shared collaboration / sector category"),
+          check("collaboration_model", "fail"),
+          check("target_role", "n/a"),
+          check("skills", "n/a"),
+          check("location", "n/a"),
+          check("threshold", "n/a")
+        ]
+      })
+    };
+  }
+  const gate = passesPair(needPost, offerPost, config, { needNorm, offerNorm });
+  if (!gate.ok) {
+    const rejectReason = rejectReasonFromHardGate(gate);
+    const roleFail = gate.reason === "role_missing" || gate.reason === "role_incompatible";
+    const skillFail = gate.reason === "core_skill_missing" || gate.reason === "service_overlap_low";
+    return {
+      match: null,
+      diagnostic: buildRejectedDiagnostic({
+        candidateOpportunityId: candidateId,
+        rejectReason,
+        checks: [
+          check("published", "pass"),
+          check("different_party", "pass"),
+          check("budget", "pass"),
+          check("timeline", "pass"),
+          check("sector", "pass"),
+          check("collaboration_model", "pass"),
+          check(
+            "target_role",
+            roleFail ? "fail" : "pass",
+            gate.reason === "role_missing" ? "Target role missing" : gate.reason === "role_incompatible" ? "Roles incompatible" : void 0
+          ),
+          check(
+            "skills",
+            skillFail ? "fail" : "pass",
+            gate.reason
+          ),
+          check("location", "n/a"),
+          check("threshold", "n/a")
+        ]
+      })
+    };
+  }
   const scored = scorePair(needPost, offerPost, config, needNorm, offerNorm);
-  if (scored.score < threshold) return null;
-  const valueAnalysis = { ...oneWayValueFit(needPost, offerPost) };
-  return {
+  if (scored.breakdown.rejected === "skill_floor") {
+    return {
+      match: null,
+      diagnostic: buildRejectedDiagnostic({
+        candidateOpportunityId: candidateId,
+        rejectReason: MATCHING_REJECT_REASONS.SKILL_FLOOR,
+        checks: [
+          check("published", "pass"),
+          check("different_party", "pass"),
+          check("target_role", "pass"),
+          check("skills", "fail", "Skill overlap below floor"),
+          check("location", "pass", scored.breakdown.locationDetail),
+          check("threshold", "fail", `Score ${scored.score}`)
+        ],
+        finalScore: scored.score,
+        locationTier: scored.breakdown.locationTier,
+        locationScore: scored.breakdown.locationFit
+      })
+    };
+  }
+  if (scored.score < threshold) {
+    return {
+      match: null,
+      diagnostic: buildRejectedDiagnostic({
+        candidateOpportunityId: candidateId,
+        rejectReason: MATCHING_REJECT_REASONS.BELOW_MATCH_THRESHOLD,
+        checks: [
+          check("published", "pass"),
+          check("different_party", "pass"),
+          check("target_role", "pass"),
+          check("skills", "pass"),
+          check("collaboration_model", "pass"),
+          check("exchange_mode", "pass"),
+          check("sector", "pass"),
+          check("budget", "pass"),
+          check("timeline", "pass"),
+          check(
+            "location",
+            "pass",
+            scored.breakdown.locationDetail ? `${scored.breakdown.locationDetail} Score ${scored.breakdown.locationFit}` : void 0
+          ),
+          check(
+            "threshold",
+            "fail",
+            `Final score ${scored.score} below threshold ${threshold}`
+          )
+        ],
+        finalScore: scored.score,
+        locationTier: scored.breakdown.locationTier,
+        locationScore: scored.breakdown.locationFit
+      })
+    };
+  }
+  const valueAnalysis = {
+    ...oneWayValueFit(needPost, offerPost)
+  };
+  const match = {
     matchScore: scored.score,
     breakdown: scored.breakdown,
     labels: scored.labels,
@@ -3381,57 +3879,114 @@ function scoreOneWayMatch(needPost, offerPost, config, canonical, threshold) {
     needOpportunityId: needPost.id,
     offerOpportunityId: offerPost.id
   };
+  return {
+    match,
+    diagnostic: buildMatchedDiagnostic({
+      candidateOpportunityId: candidateId,
+      scored
+    })
+  };
 }
 function findOffersForNeedPure(needPost, offerPosts, config, canonical = {}, options = {}) {
   const resolvedConfig = withRunnerConfig(config);
+  const sourceId = String(needPost.id ?? "");
   if ((needPost.intent ?? "request") !== "request") {
-    return { model: "one_way", matches: [] };
+    return {
+      model: "one_way",
+      matches: [],
+      diagnostic: emptyDiagnostic(sourceId)
+    };
   }
   const threshold = resolveThreshold(resolvedConfig);
-  const needNorm = resolveNormalized(needPost, canonical, resolvedConfig);
-  const candidates = getCandidates(needPost, offerPosts, resolvedConfig, {
-    maxCandidates: resolveMaxCandidates(resolvedConfig, options.maxCandidates),
-    needNormalized: needNorm
+  const maxCandidates = resolveMaxCandidates(resolvedConfig, options.maxCandidates);
+  const diagnostics = [];
+  const matches = [];
+  const ordered = [...offerPosts].sort((a, b) => {
+    const aPub = a.status === "published" ? 0 : 1;
+    const bPub = b.status === "published" ? 0 : 1;
+    return aPub - bPub;
   });
-  const matches = candidates.map((offer) => scoreOneWayMatch(needPost, offer, resolvedConfig, canonical, threshold)).filter((match) => match != null).sort((a, b) => b.matchScore - a.matchScore);
+  for (const offer of ordered) {
+    if (offer.id && offer.id === needPost.id) continue;
+    const { match, diagnostic } = evaluateOfferCandidate(
+      needPost,
+      offer,
+      resolvedConfig,
+      canonical,
+      threshold
+    );
+    diagnostics.push(diagnostic);
+    if (match) {
+      matches.push(match);
+    }
+  }
+  matches.sort((a, b) => b.matchScore - a.matchScore);
+  const capped = matches.slice(0, maxCandidates);
   const topN = options.topN ?? 20;
-  return { model: "one_way", matches: matches.slice(0, topN) };
+  return {
+    model: "one_way",
+    matches: capped.slice(0, topN),
+    diagnostic: summarizeDiagnostics(sourceId, diagnostics)
+  };
 }
 function findNeedsForOfferPure(offerPost, needPosts, config, canonical = {}, options = {}) {
   const resolvedConfig = withRunnerConfig(config);
+  const sourceId = String(offerPost.id ?? "");
   if ((offerPost.intent ?? "") !== "offer" || offerPost.status !== "published") {
-    return { model: "one_way", direction: "offer_to_needs", matches: [] };
+    return {
+      model: "one_way",
+      direction: "offer_to_needs",
+      matches: [],
+      diagnostic: emptyDiagnostic(sourceId)
+    };
   }
   const threshold = resolveThreshold(resolvedConfig);
-  const offerNorm = resolveNormalized(offerPost, canonical, resolvedConfig);
-  const candidates = getCandidatesForOffer(offerPost, needPosts, resolvedConfig, {
-    maxCandidates: resolveMaxCandidates(resolvedConfig, options.maxCandidates),
-    offerNormalized: offerNorm
-  });
+  const maxCandidates = resolveMaxCandidates(resolvedConfig, options.maxCandidates);
+  const diagnostics = [];
   const matches = [];
-  for (const need of candidates) {
-    const needNorm = resolveNormalized(need, canonical, resolvedConfig);
-    if (!passHardGate(need, offerPost, needNorm, offerNorm, resolvedConfig)) continue;
-    const scored = scorePair(need, offerPost, resolvedConfig, needNorm, offerNorm);
-    if (scored.score < threshold) continue;
-    matches.push({
-      matchScore: scored.score,
-      breakdown: scored.breakdown,
-      labels: scored.labels,
-      suggestedPartners: [{
-        opportunityId: need.id,
-        creatorId: need.creatorId
-      }],
-      needOpportunityId: need.id,
-      offerOpportunityId: offerPost.id
-    });
+  for (const need of needPosts) {
+    if (need.id && need.id === offerPost.id) continue;
+    if (need.status !== "published") {
+      diagnostics.push(
+        buildRejectedDiagnostic({
+          candidateOpportunityId: String(need.id ?? ""),
+          rejectReason: MATCHING_REJECT_REASONS.NOT_PUBLISHED,
+          checks: [
+            check("published", "fail", "Need is not published"),
+            check("different_party", "n/a"),
+            check("target_role", "n/a"),
+            check("skills", "n/a"),
+            check("location", "n/a"),
+            check("threshold", "n/a")
+          ]
+        })
+      );
+      continue;
+    }
+    const { match, diagnostic } = evaluateOfferCandidate(
+      need,
+      offerPost,
+      resolvedConfig,
+      canonical,
+      threshold
+    );
+    const redirected = {
+      ...diagnostic,
+      candidateOpportunityId: String(need.id ?? diagnostic.candidateOpportunityId)
+    };
+    diagnostics.push(redirected);
+    if (match) {
+      matches.push(match);
+    }
   }
   matches.sort((a, b) => b.matchScore - a.matchScore);
+  const capped = matches.slice(0, maxCandidates);
   const topN = options.topN ?? 20;
   return {
     model: "one_way",
     direction: "offer_to_needs",
-    matches: matches.slice(0, topN)
+    matches: capped.slice(0, topN),
+    diagnostic: summarizeDiagnostics(sourceId, diagnostics)
   };
 }
 
@@ -3755,6 +4310,8 @@ function normalizePost(post, canonical, config) {
       ...existing,
       role: existing.role || extracted.role,
       location: existing.location || extracted.location,
+      locationCountry: existing.locationCountry || extracted.locationCountry,
+      coverageScopes: (existing.coverageScopes?.length ? existing.coverageScopes : extracted.coverageScopes) ?? [],
       requiredServices: (existing.requiredServices?.length ? existing.requiredServices : extracted.requiredServices) ?? [],
       offeredServices: (existing.offeredServices?.length ? existing.offeredServices : extracted.offeredServices) ?? [],
       skills: (existing.skills?.length ? existing.skills : extracted.skills) ?? [],
@@ -3908,6 +4465,7 @@ export {
   DEFAULT_WEIGHTS,
   EMPTY_CANONICAL_DATA,
   LABEL_PARTIAL,
+  MATCHING_REJECT_REASONS,
   PROFILE_FIT_SNAPSHOT_KIND,
   ROLE_ALIASES,
   ROLE_COMPATIBILITY,
@@ -3918,18 +4476,23 @@ export {
   budgetCompatible,
   budgetFit,
   buildCircularLinkScores,
+  buildMatchedDiagnostic,
+  buildRejectedDiagnostic,
   buildRoleServices,
   buildRoleSkillHints,
   buildSemanticProfile,
   buildSyntheticNeedForRole,
   categoryOverlap,
   detectMatchingModel,
+  check as diagnosticCheck,
   estimateValueSar,
+  evaluateLocationCoverage,
   exchangeCompatibility,
   exchangeCompatibilityFactor,
   expandTerm,
   extractAndNormalize,
   extractBudget,
+  extractCoverageScopes,
   extractTimeline,
   findBarterMatchesPure,
   findCircularExchangesPure,
@@ -3957,7 +4520,10 @@ export {
   passesPair,
   passesServiceOverlap,
   rankMatches,
+  rejectReasonFromHardGate,
   reputationScore,
+  resolveCoverage,
+  resolveLocationCountry,
   resolveMaxCandidates,
   resolveNormalized,
   resolveThreshold,
@@ -3967,6 +4533,7 @@ export {
   scorePair,
   scoreProfileFit,
   serviceOverlapScore,
+  summarizeDiagnostics,
   timelineFit,
   timelineOverlap,
   toSkillString,

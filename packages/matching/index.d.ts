@@ -113,6 +113,10 @@ export {
   normalizeSkill,
   toSkillString,
   normalizeLocation,
+  resolveLocationCountry,
+  resolveCoverage,
+  evaluateLocationCoverage,
+  extractCoverageScopes,
   normalizeCategory,
   extractBudget,
   extractTimeline,
@@ -121,6 +125,29 @@ export {
   buildSemanticProfile,
 } from './dist-types/normalize'
 export type { ExtractNormalizeOptions } from './dist-types/normalize/extract'
+export type {
+  LocationCountryCode,
+  LocationCoverageTier,
+  LocationCoverageResult,
+  ResolvedCoverage,
+} from './dist-types/normalize/location-coverage'
+
+export {
+  MATCHING_REJECT_REASONS,
+  buildMatchedDiagnostic,
+  buildRejectedDiagnostic,
+  summarizeDiagnostics,
+  diagnosticCheck,
+  rejectReasonFromHardGate,
+} from './dist-types/diagnostics/matching-diagnostics'
+export type {
+  MatchingDiagnosticCheckId,
+  MatchingDiagnosticCheckStatus,
+  MatchingDiagnosticCheck,
+  MatchingCandidateDiagnostic,
+  MatchingRunDiagnostic,
+  MatchingRejectReason,
+} from './dist-types/diagnostics/matching-diagnostics'
 
 export {
   resolveThreshold,

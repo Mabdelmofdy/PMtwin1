@@ -7,7 +7,7 @@ export declare function exchangeCompatibilityFactor(needPost: OpportunityPost, o
 export declare function valueCompatibilityFactor(needPost: OpportunityPost, offerPost: OpportunityPost): ScoreFactorResult;
 export declare function budgetFit(needNorm: NormalizedPost, offerNorm: NormalizedPost): ScoreFactorResult;
 export declare function timelineFit(needNorm: NormalizedPost, offerNorm: NormalizedPost): ScoreFactorResult;
-export declare function locationFit(needNorm: NormalizedPost, offerNorm: NormalizedPost): ScoreFactorResult;
+export declare function locationFit(needNorm: NormalizedPost, offerNorm: NormalizedPost, needAttributes?: Readonly<Record<string, unknown>>, offerAttributes?: Readonly<Record<string, unknown>>): ScoreFactorResult;
 export declare function reputationScore(offerNorm: NormalizedPost): ScoreFactorResult;
 export declare function scorePair(needPost: OpportunityPost, offerPost: OpportunityPost, config: MatchingConfig, normalizedNeed?: NormalizedPost, normalizedOffer?: NormalizedPost): ScorePairResult;
 //# sourceMappingURL=post-to-post-scoring.d.ts.map

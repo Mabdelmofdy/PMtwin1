@@ -28,6 +28,10 @@ export interface NormalizedPost {
     readonly skills?: readonly string[];
     readonly budget?: NormalizedBudget;
     readonly location?: string;
+    /** ISO-like country / region marker derived from primary location (SA, AE, …). */
+    readonly locationCountry?: string;
+    /** Business coverage tokens (service area, geographic scope, nationwide, GCC, …). */
+    readonly coverageScopes?: readonly string[];
     readonly deadline?: string;
     readonly timeline?: NormalizedTimeline;
     readonly availability?: {

@@ -405,6 +405,7 @@ export function AdminMatchingPage() {
   const { user } = useAuth()
   const version = useDataStoreVersion()
   const [isRunning, setIsRunning] = useState(false)
+  const [selectedRunId, setSelectedRunId] = useState<string | null>(null)
   const matches = useMemo(() => matchesApi.list(), [version])
   const matchingRuns = useMemo(
     () =>
@@ -416,6 +417,11 @@ export function AdminMatchingPage() {
         .slice(0, 10),
     [version],
   )
+  const selectedRun = useMemo(
+    () => matchingRuns.find((run) => run.runId === selectedRunId) ?? matchingRuns[0] ?? null,
+    [matchingRuns, selectedRunId],
+  )
+  const diagnostic = selectedRun?.diagnosticSummary
 
   function handleRunPublishMatching() {
     if (isRunning) return
@@ -469,7 +475,63 @@ export function AdminMatchingPage() {
     { id: 'discovered', label: 'Discovered', cell: (r) => String(r.discoveredMatchesCount) },
     { id: 'skipped', label: 'Skipped', cell: (r) => String(r.skippedDuplicatesCount) },
     { id: 'errors', label: 'Errors', cell: (r) => String(r.matchingErrorsCount) },
+    {
+      id: 'scanned',
+      label: 'Scanned',
+      cell: (r) => String(r.diagnosticSummary?.scannedCount ?? '—'),
+    },
     { id: 'completed', label: 'Completed', cell: (r) => formatDate(r.completedAt) },
+    {
+      id: 'diagnostics',
+      label: 'Diagnostics',
+      cell: (r) => (
+        <PmButton
+          variant="outline"
+          size="sm"
+          onClick={() => setSelectedRunId(r.runId)}
+        >
+          View
+        </PmButton>
+      ),
+    },
+  ]
+
+  const diagnosticColumns: PmDataTableColumn<
+    NonNullable<typeof diagnostic>['candidates'][number]
+  >[] = [
+    {
+      id: 'candidate',
+      label: 'Candidate',
+      cell: (c) => c.candidateOpportunityId || '—',
+    },
+    {
+      id: 'result',
+      label: 'Result',
+      cell: (c) => (c.result === 'matched' ? 'PostMatch Created' : 'Rejected'),
+    },
+    {
+      id: 'reason',
+      label: 'Reason',
+      cell: (c) => c.rejectReason ?? (c.result === 'matched' ? '—' : '—'),
+    },
+    {
+      id: 'score',
+      label: 'Score',
+      cell: (c) => (c.finalScore != null ? c.finalScore.toFixed(3) : '—'),
+    },
+    {
+      id: 'location',
+      label: 'Location',
+      cell: (c) =>
+        c.locationTier
+          ? `${c.locationTier}${c.locationScore != null ? ` (${c.locationScore})` : ''}`
+          : '—',
+    },
+    {
+      id: 'failed',
+      label: 'Failed checks',
+      cell: (c) => (c.failedChecks?.length ? c.failedChecks.join(', ') : '—'),
+    },
   ]
 
   const getOpportunity = (id: string) => opportunitiesApi.get(id)
@@ -520,6 +582,33 @@ export function AdminMatchingPage() {
                 variant="no-data"
                 title="No matching runs yet"
                 description="Matches are created automatically when opportunities are published. Use Re-run matching only for recovery."
+              />
+            }
+          />
+        </section>
+
+        <section className="space-y-4">
+          <PmSectionHeader
+            title="Matching diagnostics"
+            description={
+              selectedRun
+                ? `Run ${formatDate(selectedRun.completedAt)} — scanned ${diagnostic?.scannedCount ?? 0}, eligible ${diagnostic?.eligibleCount ?? 0}, rejected ${diagnostic?.rejectedCount ?? 0}, matched ${diagnostic?.matchedCount ?? 0}.`
+                : 'Select a matching run to inspect per-candidate pass/fail reasons.'
+            }
+          />
+          <PmDataTable
+            density="compact"
+            columns={diagnosticColumns}
+            data={diagnostic?.candidates ?? []}
+            getRowId={(c) =>
+              `${c.candidateOpportunityId || 'candidate'}-${c.result}-${c.rejectReason ?? 'ok'}`
+            }
+            caption="Matching diagnostics"
+            empty={
+              <PmTableEmpty
+                variant="no-data"
+                title="No diagnostics for this run"
+                description="Re-run matching to capture per-candidate rejection and score diagnostics."
               />
             }
           />

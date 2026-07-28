@@ -1,5 +1,6 @@
 import type { MatchingModelName } from './match-result.ts';
 import type { ScoreBreakdown, ScoreLabels } from './match-result.ts';
+import type { MatchingRunDiagnostic } from '../diagnostics/matching-diagnostics.ts';
 export interface SuggestedPartner {
     readonly opportunityId?: string;
     readonly creatorId?: string;
@@ -33,6 +34,7 @@ export interface ModelRunResultBase {
 export interface OneWayMatchResult extends ModelRunResultBase {
     readonly model: 'one_way';
     readonly direction?: 'offer_to_needs';
+    readonly diagnostic?: MatchingRunDiagnostic;
 }
 export interface TwoWayMatchResult extends ModelRunResultBase {
     readonly model: 'two_way';

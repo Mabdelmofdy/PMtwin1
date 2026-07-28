@@ -66,6 +66,11 @@ function normalizePost(
       ...existing,
       role: existing.role || extracted.role,
       location: existing.location || extracted.location,
+      locationCountry: existing.locationCountry || extracted.locationCountry,
+      coverageScopes:
+        (existing.coverageScopes?.length
+          ? existing.coverageScopes
+          : extracted.coverageScopes) ?? [],
       requiredServices:
         (existing.requiredServices?.length
           ? existing.requiredServices

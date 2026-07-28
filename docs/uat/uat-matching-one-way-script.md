@@ -493,14 +493,35 @@ Add **two** skills:
 
 ---
 
+## Target role publish gate
+
+| Check | Expected |
+|-------|----------|
+| Publish without Target role | **Blocked** — message includes that Target role is required |
+| Title alone (no Target role) | **Does not** satisfy role for publish or matching |
+| Matching field | Engine uses `attributes.targetRole` only |
+
+---
+
+## Cross-city / coverage (optional QA)
+
+| Scenario | Expected |
+|----------|----------|
+| Need Riyadh + Offer Dammam (city only, same role/skills) | **PostMatch created** if overall score ≥ ~0.50; location contribution reduced (same country ≈ 0.75) |
+| Need Riyadh + Service area / geographic scope **Saudi Arabia** + Offer Dammam | Location fit **full** (nationwide); not penalized for city difference |
+| Admin → Matching → View diagnostics | Shows scanned / rejected / matched candidates with reject reasons and scores |
+
+---
+
 ## Troubleshooting
 
 | Symptom | Fix |
 |---------|-----|
-| Cannot publish | Complete required readiness fields; account not pending vetting |
+| Cannot publish | Complete required readiness fields **including Target role**; account not pending vetting |
 | Red tag on step 3 | Confirm package **skills** + **deadline**; Expert years ≥ 5; dates not past |
 | No match | Both **published**, different users, role `Architect`, skills `BIM`+`Revit` |
-| Still empty | Admin → Matching → **Re-run matching** (not circular-only) |
+| Still empty | Admin → Matching → **Re-run matching** (not circular-only); open **Diagnostics** for reject reasons |
+| Publish OK but no matches | Check diagnostics for `TARGET_ROLE_REQUIRED` / `BELOW_MATCH_THRESHOLD` |
 
 ---
 

@@ -139,7 +139,7 @@ The operational matching system is **post-to-post** only. User-facing matches ar
 | VALUE_COMPATIBILITY | 0.20 | valueCompatibility.valueCompatibility(need, offer) or 0.5. |
 | BUDGET_FIT | 0.10 | Overlap of need vs offer budget ranges. |
 | TIMELINE | 0.10 | Overlap of need deadline/period vs offer availability. |
-| LOCATION | 0.10 | Remote = 1; same = 1; KSA vs other = 0.5. |
+| LOCATION | 0.10 | Coverage hierarchy (soft only — never a hard reject). Remote = 1; Nationwide (e.g. Saudi Arabia coverage) = 1; Same city = 1; GCC regional = 0.85; Same country different city = 0.75; Different GCC country = 0.50; Weak/unknown = 0.25. City is a preference under business coverage (`serviceArea` / geographic scope). |
 | REPUTATION | 0.05 | offerNorm.reputation (0–1) or 0.5. |
 
 **Labels per factor:** Match (score >= 1), Partial (>= 0.25), No Match (< 0.25).  
@@ -165,7 +165,8 @@ The operational matching system is **post-to-post** only. User-facing matches ar
 | Component | Role |
 |-----------|------|
 | **post-preprocessor.js** | extractAndNormalize(opportunity, canonical) → normalized { skills, budget, timeline, location, modelType, subModelType, categories }; loadSkillCanonical(BASE_PATH) for skill normalization. |
-| **candidate-generator.js** | getCandidates(needPost, offerPosts, options): filter offers by budgetCompatible, locationCompatible, timelineOverlap, categoryOverlap; cap at CANDIDATE_MAX (200). getCandidatesForOffer for offer→needs. |
+| **candidate-generator.js** | getCandidates(needPost, offerPosts, options): filter offers by budgetCompatible, timelineOverlap, categoryOverlap, hard role/skills; **locationCompatible always passes** (location is scored, not gated). Cap at CANDIDATE_MAX (200). getCandidatesForOffer for offer→needs. |
+| **matching-diagnostics** | One-way runs return per-candidate diagnostics (published, party, target role, skills, location tier/score, threshold) with reject reasons such as `TARGET_ROLE_REQUIRED` / `BELOW_MATCH_THRESHOLD`. Persisted (capped) on matching-run audit for Admin Matching. |
 | **semantic-profile.js** | buildSemanticProfile(normalized, opportunity, canonical) → expanded skills/categories for scoring (expandedSkillsOrCategories). |
 | **value-compatibility.js** | oneWayValueFit(need, offer), exchangeCompatibility(need, offer), valueCompatibility(need, offer), barterValueEquivalence(sideA, sideB), consortiumValueBalance(leadNeed, partnerOffers), circularValueBalance(cycle, edgeScores), getNormalized(post). Uses value-normalizer and value-estimator. |
 | **value-normalizer.js / value-estimator.js** | Normalize and estimate SAR values for compatibility and equivalence. |

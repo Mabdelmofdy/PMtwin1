@@ -71,3 +71,61 @@ describe('scoring — low skill score rejected', () => {
     assert.equal(result.breakdown.rejected, 'skill_floor')
   })
 })
+
+describe('scoring — location coverage hierarchy', () => {
+  it('scores same city as full location fit', () => {
+    const result = scorePair(need, offer, config)
+    assert.equal(result.breakdown.locationFit, 1)
+    assert.equal(result.breakdown.locationTier, 'same_city')
+  })
+
+  it('scores different SA cities without nationwide as same-country partial', () => {
+    const dammamOffer = {
+      ...offer,
+      normalized: { ...offer.normalized, location: 'Dammam', coverageScopes: [] },
+    }
+    const result = scorePair(need, dammamOffer, config)
+    assert.equal(result.breakdown.locationFit, 0.75)
+    assert.equal(result.breakdown.locationTier, 'same_country')
+    assert.ok(result.score >= 0.5, 'cross-city pair remains above threshold when other factors strong')
+  })
+
+  it('scores nationwide SA coverage vs different city as full location fit', () => {
+    const nationwideNeed = {
+      ...need,
+      attributes: { serviceArea: 'Saudi Arabia', geographicScope: 'Saudi Arabia' },
+      normalized: {
+        ...need.normalized,
+        location: 'Riyadh',
+        coverageScopes: ['saudi arabia'],
+      },
+    }
+    const dammamOffer = {
+      ...offer,
+      normalized: { ...offer.normalized, location: 'Dammam' },
+    }
+    const result = scorePair(nationwideNeed, dammamOffer, config)
+    assert.equal(result.breakdown.locationFit, 1)
+    assert.equal(result.breakdown.locationTier, 'nationwide')
+  })
+
+  it('scores remote as full location fit', () => {
+    const remoteOffer = {
+      ...offer,
+      normalized: { ...offer.normalized, location: 'Remote' },
+    }
+    const result = scorePair(need, remoteOffer, config)
+    assert.equal(result.breakdown.locationFit, 1)
+    assert.equal(result.breakdown.locationTier, 'remote')
+  })
+
+  it('scores different GCC countries lower without regional coverage', () => {
+    const dubaiOffer = {
+      ...offer,
+      normalized: { ...offer.normalized, location: 'Dubai', coverageScopes: [] },
+    }
+    const result = scorePair(need, dubaiOffer, config)
+    assert.equal(result.breakdown.locationFit, 0.5)
+    assert.equal(result.breakdown.locationTier, 'different_gcc_country')
+  })
+})

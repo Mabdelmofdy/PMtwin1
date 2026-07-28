@@ -31,12 +31,16 @@ import {
   type DiscoverOneWayPostMatchInput,
   type DiscoverPostMatchInput,
 } from '@/services/post-match-command-service.ts'
-import type { MatchingRunStatus } from '@/domain/matching-run-audit/types.ts'
+import type { MatchingRunStatus, MatchingRunDiagnosticSummary } from '@/domain/matching-run-audit/types.ts'
 import {
   recordMatchingRunAudit,
   resolveMatchingRunStatus,
   type RecordMatchingRunAuditInput,
 } from '@/services/matching/matching-run-audit.ts'
+import {
+  mergeMatchingRunDiagnosticSummaries,
+  toMatchingRunDiagnosticSummary,
+} from '@/services/matching/matching-diagnostic-summary.ts'
 
 export {
   ENABLE_PROFILE_FIT_MATCH_WEIGHTING,
@@ -94,6 +98,7 @@ export type PublishMatchingResult = {
   readonly skippedDuplicatesCount: number
   readonly matchingErrors: readonly string[]
   readonly postMatchIds: readonly string[]
+  readonly diagnosticSummary?: MatchingRunDiagnosticSummary
 }
 
 export type PublishMatchingDeps = {
@@ -313,6 +318,7 @@ function runPublishMatchingForOpportunity(
   const postMatchIds: string[] = []
   let discoveredMatchesCount = 0
   let skippedDuplicatesCount = 0
+  const diagnosticSummaries: MatchingRunDiagnosticSummary[] = []
 
   const ownershipContext = buildMatchingOwnershipContext()
   const discoverContext = {
@@ -325,6 +331,10 @@ function runPublishMatchingForOpportunity(
   }
 
   for (const result of engineResults as ModelRunResult[]) {
+    if (result.model === 'one_way' && result.diagnostic) {
+      const summary = toMatchingRunDiagnosticSummary(result.diagnostic)
+      if (summary) diagnosticSummaries.push(summary)
+    }
     const commands = modelRunResultToDiscoverCommands(result, discoverContext, posts)
     for (const command of commands) {
       const strongKey = discoverInputStrongKey(command)
@@ -354,6 +364,8 @@ function runPublishMatchingForOpportunity(
     }
   }
 
+  const diagnosticSummary = mergeMatchingRunDiagnosticSummaries(diagnosticSummaries)
+
   try {
     const record =
       deps?.recordMatchingRunAudit
@@ -371,6 +383,7 @@ function runPublishMatchingForOpportunity(
       skippedDuplicatesCount,
       matchingErrors,
       status: resolveMatchingRunStatus(matchingErrors),
+      diagnosticSummary,
     })
   } catch {
     // best-effort: publish matching must not fail when audit write fails
@@ -381,6 +394,7 @@ function runPublishMatchingForOpportunity(
     skippedDuplicatesCount,
     matchingErrors,
     postMatchIds,
+    diagnosticSummary,
   }
 }
 
@@ -393,6 +407,7 @@ export type BatchPublishMatchingResult = {
   readonly opportunitiesProcessed: number
   readonly status: MatchingRunStatus
   readonly auditWarning?: string
+  readonly diagnosticSummary?: MatchingRunDiagnosticSummary
 }
 
 /**
@@ -416,6 +431,7 @@ function runPublishMatchingForPublishedOpportunities(
   const matchingErrors: string[] = []
   let discoveredMatchesCount = 0
   let skippedDuplicatesCount = 0
+  const diagnosticSummaries: MatchingRunDiagnosticSummary[] = []
 
   for (const opportunity of published) {
     const result = runPublishMatchingForOpportunity(opportunity.id, {
@@ -427,12 +443,14 @@ function runPublishMatchingForPublishedOpportunities(
     discoveredMatchesCount += result.discoveredMatchesCount
     skippedDuplicatesCount += result.skippedDuplicatesCount
     matchingErrors.push(...result.matchingErrors)
+    if (result.diagnosticSummary) diagnosticSummaries.push(result.diagnosticSummary)
     for (const id of result.postMatchIds) {
       if (!seenPostMatchIds.has(id)) seenPostMatchIds.add(id)
     }
   }
 
   const status = resolveMatchingRunStatus(matchingErrors)
+  const diagnosticSummary = mergeMatchingRunDiagnosticSummaries(diagnosticSummaries)
   let auditWarning: string | undefined
   try {
     const record =
@@ -451,6 +469,7 @@ function runPublishMatchingForPublishedOpportunities(
       skippedDuplicatesCount,
       matchingErrors,
       status,
+      diagnosticSummary,
     })
   } catch {
     auditWarning =
@@ -466,6 +485,7 @@ function runPublishMatchingForPublishedOpportunities(
     opportunitiesProcessed: published.length,
     status,
     auditWarning,
+    diagnosticSummary,
   }
 }
 
