@@ -226,34 +226,40 @@ export function OpportunityDetailsShell({
   }
 
   const handleDeleteDraft = () => {
-    if (!window.confirm('Delete this draft opportunity? This cannot be undone.')) return
+    const isDraft = (opp.status ?? '').toLowerCase() === 'draft'
+    const confirmMessage = isDraft
+      ? 'Delete this draft opportunity? This cannot be undone.'
+      : 'Delete this opportunity from your workspace? This cannot be undone.'
+    if (!window.confirm(confirmMessage)) return
     const result = opportunityCommandService.deleteOpportunity(opp.id)
     if (!result.success) {
-      toast.error(result.errors?.join('\n') ?? 'Could not delete draft')
+      toast.error(result.errors?.join('\n') ?? 'Could not delete opportunity')
       return
     }
-    toast.success('Draft deleted')
+    toast.success(isDraft ? 'Draft deleted' : 'Opportunity deleted')
     navigate('/opportunities')
   }
 
   const handleArchive = () => {
-    if (!window.confirm('Archive this opportunity? It will be withdrawn from active marketplace visibility.')) return
+    if (!window.confirm('Archive this opportunity? It will leave your active work list and marketplace discovery.')) return
     const result = opportunityCommandService.archiveOpportunity(opp.id, 'Owner archived')
     if (!result.success) {
       toast.error(result.errors?.join('\n') ?? 'Could not archive')
       return
     }
     toast.success('Opportunity archived')
+    navigate('/opportunities')
   }
 
   const handleClose = () => {
-    if (!window.confirm('Close this opportunity? This ends the opportunity lifecycle for new matching.')) return
+    if (!window.confirm('Close this opportunity? It will leave your active work list and end new matching.')) return
     const result = opportunityCommandService.closeOpportunity(opp.id, 'Owner closed')
     if (!result.success) {
       toast.error(result.errors?.join('\n') ?? 'Could not close')
       return
     }
     toast.success('Opportunity closed')
+    navigate('/opportunities')
   }
 
   const handleDuplicate = (asTemplate: boolean) => {

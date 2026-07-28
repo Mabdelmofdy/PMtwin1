@@ -227,7 +227,9 @@ export function OpportunityExecutiveHeader({
                   }}
                 >
                   <Trash2 className="size-3.5" />
-                  Delete Draft
+                  {(opportunity.status ?? '').toLowerCase() === 'draft'
+                    ? 'Delete Draft'
+                    : 'Delete'}
                 </DropdownMenuItem>
               ) : null}
               {capabilities.canClose ? (

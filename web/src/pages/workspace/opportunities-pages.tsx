@@ -34,6 +34,7 @@ import {
 import {
   buildViewerContext,
   isDraftOpportunity,
+  isWithdrawnOpportunityVisibility,
 } from '@/lib/entity-view-visibility.ts'
 import {
   filterOpportunitiesByOwnershipFilter,
@@ -117,11 +118,14 @@ export function OpportunitiesPage() {
     [allOpportunities, ownershipFilter, viewer, user?.organizationId],
   )
 
-  // Portfolio hero uses the same scoped set as the list (before search/filters).
-  const heroSummary = useMemo(
-    () => summarizeOpportunityListHero(ownershipScoped),
-    [ownershipScoped],
-  )
+  // Portfolio hero: active workspace posts only (archived/closed are withdrawn).
+  const heroSummary = useMemo(() => {
+    const heroSource =
+      ownershipFilter === 'marketplace'
+        ? ownershipScoped
+        : ownershipScoped.filter((o) => !isWithdrawnOpportunityVisibility(o))
+    return summarizeOpportunityListHero(heroSource)
+  }, [ownershipScoped, ownershipFilter])
 
   const opportunities = useMemo(() => {
     return ownershipScoped.filter((o) => {
@@ -135,11 +139,25 @@ export function OpportunitiesPage() {
       if (ownershipFilter === 'marketplace' && isDraftOpportunity(o)) {
         return false
       }
+      const withdrawn = isWithdrawnOpportunityVisibility(o)
+      const visibility = (o.visibilityStatus ?? '').toLowerCase()
+      let matchesStatus = true
+      if (status === 'archived') {
+        matchesStatus = visibility === 'archived'
+      } else if (status === 'closed') {
+        matchesStatus = visibility === 'closed'
+      } else if (status === 'all') {
+        // My / company work scope defaults to active posts only.
+        matchesStatus =
+          ownershipFilter === 'marketplace' ? true : !withdrawn
+      } else {
+        // Lifecycle chip (published/draft/negotiating): exclude withdrawn posts.
+        matchesStatus = !withdrawn && o.status === status
+      }
       const matchesSearch =
         !search ||
         o.title.toLowerCase().includes(search.toLowerCase()) ||
         o.location?.toLowerCase().includes(search.toLowerCase())
-      const matchesStatus = status === 'all' || o.status === status
       const matchesMainModel =
         mainModels.length === 0 || (o.mainCollaborationModel != null && mainModels.includes(o.mainCollaborationModel))
       const matchesSubModel =
@@ -310,10 +328,12 @@ export function OpportunitiesPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All statuses</SelectItem>
+                        <SelectItem value="all">Active (default)</SelectItem>
                         <SelectItem value="published">Published</SelectItem>
                         <SelectItem value="draft">Draft</SelectItem>
                         <SelectItem value="negotiating">Negotiating</SelectItem>
+                        <SelectItem value="archived">Archived</SelectItem>
+                        <SelectItem value="closed">Closed</SelectItem>
                       </SelectContent>
                     </Select>
                   </PmFormField>

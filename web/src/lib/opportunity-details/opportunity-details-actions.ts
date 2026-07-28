@@ -57,6 +57,7 @@ export function resolveOpportunityDetailsCapabilities(
   const visibilityStatus = (opportunity.visibilityStatus ?? '').toLowerCase()
   const isDraft = status === 'draft'
   const isArchived = visibilityStatus === 'archived'
+  const isVisibilityClosed = visibilityStatus === 'closed'
   const isClosed = ['closed', 'cancelled', 'completed'].includes(status)
   const mutate = canMutate && !isAuditor
 
@@ -68,13 +69,15 @@ export function resolveOpportunityDetailsCapabilities(
     })
 
   return {
-    canEdit: mutate && isOwner && !isArchived && !isClosed,
+    canEdit: mutate && isOwner && !isArchived && !isClosed && !isVisibilityClosed,
     canPublish,
     canDuplicateDraft: mutate && isOwner,
     canDuplicateTemplate: mutate && isOwner,
-    canClose: mutate && isOwner && !isDraft && !isClosed && !isArchived,
+    canClose: mutate && isOwner && !isDraft && !isClosed && !isArchived && !isVisibilityClosed,
     canArchive: mutate && isOwner && !isDraft && !isArchived,
-    canDeleteDraft: mutate && isOwner && isDraft,
+    // Soft-delete: drafts, or posts already archived/closed (removed from active work).
+    canDeleteDraft:
+      mutate && isOwner && (isDraft || isArchived || isVisibilityClosed),
     canShare: true,
     canCopyLink: true,
     canPrint: true,

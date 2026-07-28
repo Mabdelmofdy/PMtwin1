@@ -46,11 +46,21 @@ describe('DeleteOpportunity via command service', () => {
     assert.equal(stack.opportunityRepository.getById('opp-draft-del'), undefined)
   })
 
-  it('published opportunity cannot be hard deleted', () => {
+  it('published opportunity cannot be hard deleted while active', () => {
     const service = createOpportunityCommandService({ gateway: stack.gateway })
     const result = service.deleteOpportunity('opp-pub-del')
     assert.equal(result.success, false)
-    assert.match(result.errors?.[0] ?? '', /Archive instead/i)
+    assert.match(result.errors?.[0] ?? '', /Archive or close/i)
     assert.ok(stack.opportunityRepository.getById('opp-pub-del'))
+  })
+
+  it('archived opportunity can be soft deleted', () => {
+    stack.opportunityRepository.update('opp-pub-del', {
+      visibilityStatus: 'archived',
+    })
+    const service = createOpportunityCommandService({ gateway: stack.gateway })
+    const result = service.deleteOpportunity('opp-pub-del')
+    assert.equal(result.success, true)
+    assert.equal(stack.opportunityRepository.getById('opp-pub-del'), undefined)
   })
 })

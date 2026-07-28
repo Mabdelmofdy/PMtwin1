@@ -459,9 +459,14 @@ export class OpportunityCommandHandler {
     }
 
     const status = (opportunity.status ?? '').toLowerCase()
-    if (status !== 'draft') {
+    const visibility = (opportunity.visibilityStatus ?? '').toLowerCase()
+    const isDraft = status === 'draft'
+    const isWithdrawn = visibility === 'archived' || visibility === 'closed'
+    // Drafts and withdrawn posts may soft-delete. Active published posts must
+    // Archive/Close first so marketplace history is intentional.
+    if (!isDraft && !isWithdrawn) {
       return failure(command.commandType, command.aggregateId, [
-        'Published opportunities cannot be hard-deleted. Archive instead.',
+        'Active published opportunities cannot be deleted. Archive or close them first.',
       ])
     }
 
@@ -471,7 +476,11 @@ export class OpportunityCommandHandler {
       entityType: 'opportunity',
       entityId: command.aggregateId,
       requestId: command.clientRequestId,
-      details: { reason: command.reason, status: 'draft' },
+      details: {
+        reason: command.reason,
+        status,
+        visibilityStatus: visibility || undefined,
+      },
     })
     return success(command.commandType, command.aggregateId)
   }

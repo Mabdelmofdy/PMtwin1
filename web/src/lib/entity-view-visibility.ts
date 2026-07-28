@@ -160,6 +160,14 @@ export function isDraftOpportunity(opportunity: Opportunity): boolean {
   return opportunityCanonicalStatus(opportunity) === 'draft'
 }
 
+/** Owner withdrew the post from active marketplace / workspace lists. */
+export function isWithdrawnOpportunityVisibility(
+  opportunity: Pick<Opportunity, 'visibilityStatus'>,
+): boolean {
+  const visibility = (opportunity.visibilityStatus ?? '').toLowerCase()
+  return visibility === 'archived' || visibility === 'closed'
+}
+
 /**
  * Draft opportunities are private. User-facing surfaces may show a draft only to
  * its owner (or future explicitly authorized collaborators). Platform admin

@@ -183,6 +183,23 @@ describe('opportunity-details-actions', () => {
     assert.equal(caps.canArchive, false)
   })
 
+  it('allows delete after archive', () => {
+    const caps = resolveOpportunityDetailsCapabilities({
+      opportunity: {
+        ...draftOpp,
+        status: 'published',
+        visibilityStatus: 'archived',
+      },
+      visibility: baseVisibility('owner'),
+      userId: 'user-1',
+      canMutate: true,
+      canViewCommercialAmounts: true,
+    })
+    assert.equal(caps.canArchive, false)
+    assert.equal(caps.canDeleteDraft, true)
+    assert.equal(caps.canEdit, false)
+  })
+
   it('keeps auditor read-only', () => {
     const caps = resolveOpportunityDetailsCapabilities({
       opportunity: { ...draftOpp, status: 'published' },

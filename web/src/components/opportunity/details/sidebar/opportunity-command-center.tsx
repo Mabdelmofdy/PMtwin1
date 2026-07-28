@@ -69,7 +69,7 @@ function CommandCenterBody({
           ) : null}
           {capabilities.canDeleteDraft ? (
             <PmButton size="sm" variant="destructive" onClick={() => handlers.onDeleteDraft?.()}>
-              Delete Draft
+              {(opportunity.status ?? '').toLowerCase() === 'draft' ? 'Delete Draft' : 'Delete'}
             </PmButton>
           ) : null}
         </div>
