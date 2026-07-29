@@ -722,6 +722,7 @@ export function ContractDetailPage() {
                 <AttachmentsUploadControl
                   label="Upload"
                   aria-label="Upload contract attachments"
+                  existingFileNames={sessionAttachments.map((file) => file.fileName)}
                   onFilesSelected={(files) => {
                     setSessionAttachments((current) => {
                       const seen = new Set(current.map((item) => item.fileName.toLowerCase()))

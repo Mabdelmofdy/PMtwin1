@@ -23,6 +23,7 @@ import {
 import {
   appendAttachmentNames,
   AttachmentsUploadControl,
+  parseAttachmentNames,
 } from '@/components/shared/attachments-upload-control.tsx'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/tokens'
@@ -220,9 +221,14 @@ export function ScopeWorkStep({
           Documents & Compliance
         </summary>
         <div className="mt-4 space-y-3">
-          <PmFormField id="attachmentsText" label="Attachments">
+          <PmFormField
+            id="attachmentsText"
+            label="Attachments"
+            hint="Upload files or type names. File names are saved for readiness; binary storage is not connected yet."
+          >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
               <Input
+                id="attachmentsText"
                 data-field-id="attachmentsText"
                 value={draft.attachmentsText}
                 onChange={(e) => onChange({ attachmentsText: e.target.value })}
@@ -232,6 +238,7 @@ export function ScopeWorkStep({
               <AttachmentsUploadControl
                 label="Upload"
                 aria-label="Upload attachment files"
+                existingFileNames={parseAttachmentNames(draft.attachmentsText)}
                 onFilesSelected={(files) =>
                   onChange({
                     attachmentsText: appendAttachmentNames(draft.attachmentsText, files),
@@ -239,9 +246,6 @@ export function ScopeWorkStep({
                 }
               />
             </div>
-            <p className={cn(pmTypography.caption, 'mt-1.5 text-muted-foreground')}>
-              Upload files or type names. File names are saved for readiness; binary storage is not connected yet.
-            </p>
           </PmFormField>
           <PmFormField id="complianceRequirementsText" label="Compliance requirements">
             <Textarea

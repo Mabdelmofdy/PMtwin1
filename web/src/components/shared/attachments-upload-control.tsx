@@ -1,11 +1,26 @@
-import { useId, useRef, type ChangeEvent } from 'react'
+import { useId, useState, type ChangeEvent } from 'react'
 import { Upload } from 'lucide-react'
-import { PmButton, type PmButtonProps } from '@/components/ui/pm-index'
+import {
+  pmButtonVariants,
+  type PmButtonProps,
+} from '@/components/ui/pm-index'
 import { cn } from '@/lib/utils'
-import type { AttachmentFileMeta } from './attachments-upload-helpers.ts'
+import { pmTypography } from '@/tokens'
+import {
+  ATTACHMENT_ACCEPT,
+  type AttachmentFileMeta,
+  validateAttachmentSelection,
+} from './attachments-upload-helpers.ts'
 
 export type { AttachmentFileMeta } from './attachments-upload-helpers.ts'
-export { appendAttachmentNames } from './attachments-upload-helpers.ts'
+export {
+  appendAttachmentNames,
+  parseAttachmentNames,
+  ATTACHMENT_ACCEPT,
+  MAX_ATTACHMENTS,
+  MAX_FILE_SIZE_BYTES,
+  validateAttachmentSelection,
+} from './attachments-upload-helpers.ts'
 
 export type AttachmentsUploadControlProps = {
   readonly onFilesSelected: (files: readonly AttachmentFileMeta[]) => void
@@ -17,15 +32,8 @@ export type AttachmentsUploadControlProps = {
   readonly variant?: PmButtonProps['variant']
   readonly className?: string
   readonly inputId?: string
+  readonly existingFileNames?: readonly string[]
   readonly 'aria-label'?: string
-}
-
-function toAttachmentMeta(file: File): AttachmentFileMeta {
-  return {
-    fileName: file.name,
-    ...(file.type ? { mimeType: file.type } : {}),
-    ...(Number.isFinite(file.size) ? { sizeBytes: file.size } : {}),
-  }
 }
 
 /**
@@ -34,7 +42,7 @@ function toAttachmentMeta(file: File): AttachmentFileMeta {
  */
 export function AttachmentsUploadControl({
   onFilesSelected,
-  accept = '.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.txt',
+  accept = ATTACHMENT_ACCEPT,
   multiple = true,
   disabled = false,
   label = 'Upload',
@@ -42,24 +50,49 @@ export function AttachmentsUploadControl({
   variant = 'outline',
   className,
   inputId,
+  existingFileNames = [],
   'aria-label': ariaLabel = 'Upload attachments',
 }: AttachmentsUploadControlProps) {
   const generatedId = useId()
   const resolvedInputId = inputId ?? `attachments-upload-${generatedId}`
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [selectedNames, setSelectedNames] = useState<readonly string[]>([])
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [errorMessages, setErrorMessages] = useState<readonly string[]>([])
 
   function handleChange(event: ChangeEvent<HTMLInputElement>): void {
     const selected = event.target.files
-    if (!selected || selected.length === 0) return
-    onFilesSelected(Array.from(selected).map(toAttachmentMeta))
+    if (!selected || selected.length === 0) {
+      event.target.value = ''
+      return
+    }
+
+    const result = validateAttachmentSelection({
+      files: Array.from(selected),
+      existingFileNames,
+    })
+
+    if (result.accepted.length > 0) {
+      onFilesSelected(result.accepted)
+      setSelectedNames(result.accepted.map((file) => file.fileName))
+      setSuccessMessage(
+        result.accepted.length === 1
+          ? '1 file selected'
+          : `${result.accepted.length} files selected`,
+      )
+    } else {
+      setSelectedNames([])
+      setSuccessMessage(null)
+    }
+
+    setErrorMessages(result.rejected.map((item) => item.message))
+
     // Allow selecting the same file again.
     event.target.value = ''
   }
 
   return (
-    <div className={cn('inline-flex', className)}>
+    <div className={cn('inline-flex flex-col gap-1.5', className)}>
       <input
-        ref={inputRef}
         id={resolvedInputId}
         type="file"
         accept={accept}
@@ -69,17 +102,43 @@ export function AttachmentsUploadControl({
         aria-label={ariaLabel}
         onChange={handleChange}
       />
-      <PmButton
-        type="button"
-        size={size}
-        variant={variant}
-        disabled={disabled}
-        aria-controls={resolvedInputId}
-        onClick={() => inputRef.current?.click()}
+      <label
+        htmlFor={resolvedInputId}
+        className={cn(
+          pmButtonVariants({ size, variant }),
+          disabled && 'pointer-events-none opacity-50',
+          'cursor-pointer',
+        )}
+        aria-disabled={disabled || undefined}
       >
         <Upload className="size-4" aria-hidden />
         {label}
-      </PmButton>
+      </label>
+
+      {successMessage ? (
+        <p
+          className={cn(pmTypography.caption, 'text-success')}
+          role="status"
+        >
+          {successMessage}
+        </p>
+      ) : null}
+
+      {selectedNames.length > 0 ? (
+        <ul className={cn(pmTypography.caption, 'text-muted-foreground')}>
+          {selectedNames.map((name) => (
+            <li key={name}>{name}</li>
+          ))}
+        </ul>
+      ) : null}
+
+      {errorMessages.length > 0 ? (
+        <ul className={cn(pmTypography.caption, 'text-danger')} role="alert">
+          {errorMessages.map((message) => (
+            <li key={message}>{message}</li>
+          ))}
+        </ul>
+      ) : null}
     </div>
   )
 }

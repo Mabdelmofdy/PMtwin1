@@ -93,6 +93,7 @@ export function MessagesView({ activeThreadId }: MessagesViewProps) {
                   <AttachmentsUploadControl
                     label="Upload"
                     aria-label="Upload message attachments"
+                    existingFileNames={draftAttachments.map((file) => file.fileName)}
                     onFilesSelected={(files) => {
                       setDraftAttachments((current) => {
                         const seen = new Set(current.map((item) => item.fileName.toLowerCase()))

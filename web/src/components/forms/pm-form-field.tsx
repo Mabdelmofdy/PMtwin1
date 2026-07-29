@@ -41,6 +41,38 @@ type ControlProps = {
   className?: string
 }
 
+/** Native layout tags that must not receive the field id / aria props. */
+const NON_CONTROL_HTML_TAGS = new Set([
+  'div',
+  'p',
+  'span',
+  'section',
+  'ul',
+  'ol',
+  'li',
+  'fieldset',
+  'legend',
+  'header',
+  'footer',
+  'article',
+  'aside',
+  'nav',
+  'main',
+  'label',
+])
+
+const NATIVE_CONTROL_TAGS = new Set(['input', 'textarea', 'select', 'button'])
+
+function isEnhanceableFormControl(child: ReactElement): boolean {
+  const type = child.type
+  if (typeof type === 'string') {
+    if (NON_CONTROL_HTML_TAGS.has(type)) return false
+    return NATIVE_CONTROL_TAGS.has(type)
+  }
+  // React components (Input, Textarea, Select, …) are treated as controls.
+  return true
+}
+
 /** Accessible field wrapper — label, markers, help, error, success, children slot. */
 export function PmFormField({
   id,
@@ -71,6 +103,7 @@ export function PmFormField({
 
   const enhancedChildren = Children.map(children, (child) => {
     if (!isValidElement<ControlProps>(child)) return child
+    if (!isEnhanceableFormControl(child as ReactElement)) return child
 
     const existingDescribedBy = child.props['aria-describedby']
     const mergedDescribedBy =

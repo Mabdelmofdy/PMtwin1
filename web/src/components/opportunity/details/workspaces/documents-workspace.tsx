@@ -43,20 +43,26 @@ export function DocumentsWorkspace() {
     toast.success(files.length === 1 ? 'Attachment uploaded' : 'Attachments uploaded')
   }
 
-  const uploadControl = (
-    <AttachmentsUploadControl
-      label="Upload"
-      aria-label="Upload opportunity attachments"
-      onFilesSelected={handleUpload}
-    />
-  )
-
   const byCategory = new Map<string, OpportunityDetailsDocumentItem[]>()
   for (const doc of model.documents) {
     const list = byCategory.get(doc.category) ?? []
     list.push(doc)
     byCategory.set(doc.category, list)
   }
+
+  const existingFileNames = [
+    ...model.documents.map((doc) => doc.name),
+    ...sessionAttachments.map((item) => item.fileName),
+  ]
+
+  const uploadControl = (
+    <AttachmentsUploadControl
+      label="Upload"
+      aria-label="Upload opportunity attachments"
+      existingFileNames={existingFileNames}
+      onFilesSelected={handleUpload}
+    />
+  )
 
   const hasStoredDocs = model.documents.length > 0
   const hasSessionDocs = sessionAttachments.length > 0

@@ -459,6 +459,9 @@ export function NegotiationRoomPanel({
                 label="Upload"
                 aria-label="Upload negotiation attachments"
                 disabled={pending}
+                existingFileNames={readModel.messages.flatMap((message) =>
+                  (message.attachments ?? []).map((attachment) => attachment.fileName),
+                )}
                 onFilesSelected={(files) => {
                   if (!viewer.userId) {
                     toast.error('Sign in to upload attachments')
