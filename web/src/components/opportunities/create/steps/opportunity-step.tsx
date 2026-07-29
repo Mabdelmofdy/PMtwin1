@@ -50,6 +50,10 @@ function IntentCard({
   )
 }
 
+function maxIsoDate(a: string, b: string): string {
+  return a >= b ? a : b
+}
+
 export function OpportunityStep({
   draft,
   onChange,
@@ -59,6 +63,19 @@ export function OpportunityStep({
   const skillsHint = isOffer ? 'Skills Offered' : 'Skills Required'
   const servicesHint = isOffer ? 'Services Offered' : 'Services Required'
   const minDate = todayIso()
+  const startLabel = isOffer ? 'Availability from' : 'Start date'
+  // Deadline / availability end must not be earlier than Start date (or today).
+  const minOnOrAfterStart = draft.startDate.trim()
+    ? maxIsoDate(draft.startDate.trim(), minDate)
+    : minDate
+  const deadlineBeforeStart =
+    Boolean(draft.startDate.trim()) &&
+    Boolean(draft.tenderDeadline.trim()) &&
+    draft.tenderDeadline.trim() < draft.startDate.trim()
+  const availabilityEndBeforeStart =
+    Boolean(draft.startDate.trim()) &&
+    Boolean(draft.availabilityEndDate.trim()) &&
+    draft.availabilityEndDate.trim() < draft.startDate.trim()
 
   return (
     <div data-slot="opportunity-step" className="space-y-8">
@@ -203,11 +220,11 @@ export function OpportunityStep({
           <PmFormGridItem span={1}>
             <PmFormField
               id="startDate"
-              label="Start date"
+              label={startLabel}
               required
               error={
                 showValidation && !draft.startDate.trim()
-                  ? 'Start date is required'
+                  ? `${startLabel} is required`
                   : null
               }
             >
@@ -221,22 +238,38 @@ export function OpportunityStep({
             </PmFormField>
           </PmFormGridItem>
           <PmFormGridItem span={1}>
-            <PmFormField id="tenderDeadline" label="Deadline">
+            <PmFormField
+              id="tenderDeadline"
+              label="Deadline"
+              error={
+                deadlineBeforeStart
+                  ? `Deadline cannot be before ${startLabel}.`
+                  : null
+              }
+            >
               <Input
                 data-field-id="tenderDeadline"
                 type="date"
-                min={minDate}
+                min={minOnOrAfterStart}
                 value={draft.tenderDeadline}
                 onChange={(e) => onChange({ tenderDeadline: e.target.value })}
               />
             </PmFormField>
           </PmFormGridItem>
           <PmFormGridItem span={1}>
-            <PmFormField id="availabilityEndDate" label="Availability end date (recommended)">
+            <PmFormField
+              id="availabilityEndDate"
+              label="Availability end date (recommended)"
+              error={
+                availabilityEndBeforeStart
+                  ? `Availability end date cannot be before ${startLabel}.`
+                  : null
+              }
+            >
               <Input
                 data-field-id="availabilityEndDate"
                 type="date"
-                min={minDate}
+                min={minOnOrAfterStart}
                 value={draft.availabilityEndDate}
                 onChange={(e) => onChange({ availabilityEndDate: e.target.value })}
               />
