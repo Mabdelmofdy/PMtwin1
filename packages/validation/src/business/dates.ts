@@ -1,8 +1,13 @@
-import type { ValidationIssue, ValidationRule } from '../types.ts'
+import type {
+  OpportunityValidationInput,
+  ValidationIssue,
+  ValidationRule,
+} from '../types.ts'
 import { VAL_CODES } from '../rules/codes.ts'
-import { messageForCode } from '../messages/catalog.ts'
+import { dateMessageForCode } from '../messages/catalog.ts'
 import {
   hoursBetween,
+  normalizeIntent,
   parseIsoDate,
   todayIso,
   toNumber,
@@ -14,6 +19,7 @@ function dateIssue(
   code: string,
   fieldPaths: readonly string[],
   severity: ValidationIssue['severity'],
+  input?: Pick<OpportunityValidationInput, 'intent'>,
 ): ValidationIssue {
   return {
     code,
@@ -21,7 +27,7 @@ function dateIssue(
     severity,
     scope: DRAFT_UPDATE_PUBLISH,
     fieldPaths,
-    message: messageForCode(code),
+    message: dateMessageForCode(code, normalizeIntent(input?.intent)),
     layer: 'business',
     group: 'dates',
   }
@@ -50,7 +56,7 @@ export const dateStartInPast: ValidationRule = {
     const today = parseIsoDate(context.today ?? todayIso(context.now))
     if (!today) return null
     if (start.getTime() >= today.getTime()) return null
-    return dateIssue(VAL_CODES.DATE_START_IN_PAST, ['startDate'], 'error')
+    return dateIssue(VAL_CODES.DATE_START_IN_PAST, ['startDate'], 'error', input)
   },
 }
 
@@ -68,7 +74,7 @@ export const dateEndBeforeStart: ValidationRule = {
     const end = parseIsoDate(input.endDate)
     if (!start || !end) return null
     if (end.getTime() >= start.getTime()) return null
-    return dateIssue(VAL_CODES.DATE_END_BEFORE_START, ['endDate'], 'error')
+    return dateIssue(VAL_CODES.DATE_END_BEFORE_START, ['endDate'], 'error', input)
   },
 }
 
@@ -86,7 +92,7 @@ export const dateDurationInvalid: ValidationRule = {
     const n = toNumber(input.duration)
     if (n === null) return null
     if (n > 0) return null
-    return dateIssue(VAL_CODES.DATE_DURATION_INVALID, ['duration'], 'error')
+    return dateIssue(VAL_CODES.DATE_DURATION_INVALID, ['duration'], 'error', input)
   },
 }
 
@@ -104,7 +110,12 @@ export const dateDeliveryAfterEnd: ValidationRule = {
     const end = parseIsoDate(input.endDate)
     if (!delivery || !end) return null
     if (delivery.getTime() <= end.getTime()) return null
-    return dateIssue(VAL_CODES.DATE_DELIVERY_AFTER_END, ['deliveryDeadline'], 'error')
+    return dateIssue(
+      VAL_CODES.DATE_DELIVERY_AFTER_END,
+      ['deliveryDeadline'],
+      'error',
+      input,
+    )
   },
 }
 
@@ -123,7 +134,7 @@ export const dateStartSoon: ValidationRule = {
     const now = context.now ?? new Date()
     const hours = hoursBetween(now, start)
     if (hours < 0 || hours >= config.warningStartWithinHours) return null
-    return dateIssue(VAL_CODES.DATE_START_SOON, ['startDate'], 'warning')
+    return dateIssue(VAL_CODES.DATE_START_SOON, ['startDate'], 'warning', input)
   },
 }
 
@@ -144,7 +155,7 @@ export const dateDeadlineInPast: ValidationRule = {
     if (!today) return null
     if (deadline.getTime() >= today.getTime()) return null
     const path = input.tenderDeadline ? 'tenderDeadline' : 'deliveryDeadline'
-    return dateIssue(VAL_CODES.DATE_DEADLINE_IN_PAST, [path], 'error')
+    return dateIssue(VAL_CODES.DATE_DEADLINE_IN_PAST, [path], 'error', input)
   },
 }
 
@@ -168,6 +179,7 @@ export const dateAvailabilityEndInPast: ValidationRule = {
       VAL_CODES.DATE_AVAILABILITY_END_IN_PAST,
       ['availabilityEndDate'],
       'error',
+      input,
     )
   },
 }
@@ -187,7 +199,12 @@ export const dateDeadlineBeforeStart: ValidationRule = {
     if (!start || !deadline) return null
     if (deadline.getTime() >= start.getTime()) return null
     const path = input.tenderDeadline ? 'tenderDeadline' : 'deliveryDeadline'
-    return dateIssue(VAL_CODES.DATE_DEADLINE_BEFORE_START, [path], 'error')
+    return dateIssue(
+      VAL_CODES.DATE_DEADLINE_BEFORE_START,
+      [path],
+      'error',
+      input,
+    )
   },
 }
 
@@ -209,6 +226,7 @@ export const dateAvailabilityEndBeforeStart: ValidationRule = {
       VAL_CODES.DATE_AVAILABILITY_END_BEFORE_START,
       ['availabilityEndDate'],
       'error',
+      input,
     )
   },
 }

@@ -188,6 +188,104 @@ describe('date validation', () => {
     )
   })
 
+  it('allows deadline and availability end after start', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        intent: 'need',
+        startDate: '2026-08-01',
+        tenderDeadline: '2026-09-01',
+        availabilityEndDate: '2026-08-15',
+      },
+      { today: '2026-07-10', operationScope: 'draft' },
+      { groups: ['dates'] },
+    )
+    assert.ok(!result.issues.some((i) => i.code === VAL_CODES.DATE_DEADLINE_BEFORE_START))
+    assert.ok(
+      !result.issues.some((i) => i.code === VAL_CODES.DATE_AVAILABILITY_END_BEFORE_START),
+    )
+  })
+
+  it('rejects need deadline before start date with Start date label', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        intent: 'need',
+        startDate: '2026-08-10',
+        tenderDeadline: '2026-08-01',
+      },
+      { today: '2026-07-10', operationScope: 'draft' },
+      { groups: ['dates'] },
+    )
+    const issue = result.issues.find(
+      (i) => i.code === VAL_CODES.DATE_DEADLINE_BEFORE_START,
+    )
+    assert.ok(issue)
+    assert.equal(issue.message, 'Deadline cannot be before Start date.')
+    assert.ok(assertNoCodeInMessage(issue.message, issue.code))
+  })
+
+  it('rejects offer availability end before Availability from', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        intent: 'offer',
+        startDate: '2026-08-10',
+        availabilityEndDate: '2026-08-05',
+      },
+      { today: '2026-07-10', operationScope: 'draft' },
+      { groups: ['dates'] },
+    )
+    const issue = result.issues.find(
+      (i) => i.code === VAL_CODES.DATE_AVAILABILITY_END_BEFORE_START,
+    )
+    assert.ok(issue)
+    assert.equal(
+      issue.message,
+      'Availability end date cannot be before Availability from.',
+    )
+    assert.ok(assertNoCodeInMessage(issue.message, issue.code))
+  })
+
+  it('rejects offer deadline before Availability from', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        intent: 'offer',
+        startDate: '2026-08-10',
+        tenderDeadline: '2026-08-01',
+      },
+      { today: '2026-07-10', operationScope: 'draft' },
+      { groups: ['dates'] },
+    )
+    const issue = result.issues.find(
+      (i) => i.code === VAL_CODES.DATE_DEADLINE_BEFORE_START,
+    )
+    assert.ok(issue)
+    assert.equal(issue.message, 'Deadline cannot be before Availability from.')
+  })
+
+  it('rejects need availability end before Start date', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        intent: 'need',
+        startDate: '2026-08-10',
+        availabilityEndDate: '2026-08-05',
+      },
+      { today: '2026-07-10', operationScope: 'draft' },
+      { groups: ['dates'] },
+    )
+    const issue = result.issues.find(
+      (i) => i.code === VAL_CODES.DATE_AVAILABILITY_END_BEFORE_START,
+    )
+    assert.ok(issue)
+    assert.equal(
+      issue.message,
+      'Availability end date cannot be before Start date.',
+    )
+  })
+
   it('rejects deadline and availability end before start', () => {
     const result = validateOpportunityBusiness(
       {
@@ -746,6 +844,139 @@ describe('publish validation', () => {
     assert.ok(
       result.blockingIssues.some(
         (i) => i.code === VAL_CODES.PUBLISH_VETTING_NOT_APPROVED,
+      ),
+    )
+  })
+
+  it('blocks publish when need deadline is before start date', () => {
+    const opportunity = {
+      title: 'Need dates',
+      intent: 'need',
+      exchangeMode: 'cash',
+      budget: DEFAULT_VALIDATION_CONFIG.minimumBudget + 10,
+      startDate: '2026-08-10',
+      tenderDeadline: '2026-08-01',
+      attributes: { targetRole: 'Architect' },
+    }
+    const field = validateOpportunityFields(opportunity, {
+      operationScope: 'publish',
+      isExistingDraft: true,
+    }, { scopes: ['publish'] })
+    const business = validateOpportunityBusiness(
+      opportunity,
+      {
+        today: '2026-07-10',
+        operationScope: 'publish',
+        isExistingDraft: true,
+      },
+      { scopes: ['publish'] },
+    )
+    const result = evaluatePublishValidation({
+      fieldResult: field,
+      businessResult: business,
+      publishReadiness: {
+        allowed: true,
+        profileReady: true,
+        opportunityPublishReady: true,
+        opportunityScore: 90,
+      },
+      vettingStatus: { approved: true },
+    })
+    assert.equal(result.status, 'blocked')
+    const deadlineIssue = result.blockingIssues.find(
+      (i) => i.code === VAL_CODES.DATE_DEADLINE_BEFORE_START,
+    )
+    assert.ok(deadlineIssue)
+    assert.equal(deadlineIssue.message, 'Deadline cannot be before Start date.')
+    assert.ok(result.recommendations.every((r) => !r.includes('VAL_')))
+  })
+
+  it('blocks publish when offer availability end is before Availability from', () => {
+    const opportunity = {
+      title: 'Offer dates',
+      intent: 'offer',
+      exchangeMode: 'cash',
+      budget: DEFAULT_VALIDATION_CONFIG.minimumBudget + 10,
+      startDate: '2026-08-10',
+      availabilityEndDate: '2026-08-05',
+      attributes: { targetRole: 'Architect' },
+    }
+    const field = validateOpportunityFields(opportunity, {
+      operationScope: 'publish',
+      isExistingDraft: true,
+    }, { scopes: ['publish'] })
+    const business = validateOpportunityBusiness(
+      opportunity,
+      {
+        today: '2026-07-10',
+        operationScope: 'publish',
+        isExistingDraft: true,
+      },
+      { scopes: ['publish'] },
+    )
+    const result = evaluatePublishValidation({
+      fieldResult: field,
+      businessResult: business,
+      publishReadiness: {
+        allowed: true,
+        profileReady: true,
+        opportunityPublishReady: true,
+        opportunityScore: 90,
+      },
+      vettingStatus: { approved: true },
+    })
+    assert.equal(result.status, 'blocked')
+    const availIssue = result.blockingIssues.find(
+      (i) => i.code === VAL_CODES.DATE_AVAILABILITY_END_BEFORE_START,
+    )
+    assert.ok(availIssue)
+    assert.equal(
+      availIssue.message,
+      'Availability end date cannot be before Availability from.',
+    )
+  })
+
+  it('allows publish when need and offer date order is valid', () => {
+    const opportunity = {
+      title: 'Valid dates',
+      intent: 'need',
+      exchangeMode: 'cash',
+      budget: DEFAULT_VALIDATION_CONFIG.minimumBudget + 10,
+      startDate: '2026-08-01',
+      tenderDeadline: '2026-09-01',
+      availabilityEndDate: '2026-08-15',
+      attributes: { targetRole: 'Architect' },
+    }
+    const field = validateOpportunityFields(opportunity, {
+      operationScope: 'publish',
+      isExistingDraft: true,
+    }, { scopes: ['publish'] })
+    const business = validateOpportunityBusiness(
+      opportunity,
+      {
+        today: '2026-07-10',
+        operationScope: 'publish',
+        isExistingDraft: true,
+      },
+      { scopes: ['publish'] },
+    )
+    const result = evaluatePublishValidation({
+      fieldResult: field,
+      businessResult: business,
+      publishReadiness: {
+        allowed: true,
+        profileReady: true,
+        opportunityPublishReady: true,
+        opportunityScore: 90,
+      },
+      vettingStatus: { approved: true },
+    })
+    assert.equal(result.status, 'allowed')
+    assert.ok(
+      !result.blockingIssues.some(
+        (i) =>
+          i.code === VAL_CODES.DATE_DEADLINE_BEFORE_START ||
+          i.code === VAL_CODES.DATE_AVAILABILITY_END_BEFORE_START,
       ),
     )
   })

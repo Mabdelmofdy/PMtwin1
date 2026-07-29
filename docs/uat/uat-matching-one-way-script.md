@@ -527,6 +527,7 @@ Add **two** skills:
 
 ## Related
 
+- [uat-matching-final-four-type-checklist.md](./uat-matching-final-four-type-checklist.md)
 - [uat-need-opportunity-script.md](./uat-need-opportunity-script.md) · [uat-offer-opportunity-script.md](./uat-offer-opportunity-script.md)
 - [uat-matching-two-way-script.md](./uat-matching-two-way-script.md)
 - [uat-matching-group-script.md](./uat-matching-group-script.md)

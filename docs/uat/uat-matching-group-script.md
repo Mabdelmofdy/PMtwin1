@@ -1022,6 +1022,7 @@ Add **two** skills:
 | ---------------- | ------------------------------------------------------ |
 | Match type       | `consortium`                                           |
 | Roles filled     | Architect + Structural Engineer (distinct creators)    |
+| Diagnostics      | Admin → Matching → View — role slots / offers evaluated |
 | Notification     | **New match found** for lead + partners                |
 | After all Accept | match `confirmed` · opps → `matched`                   |
 | Incomplete       | Only one role Offer → match incomplete / may be hidden |
@@ -1037,8 +1038,8 @@ Add **two** skills:
 | Symptom                        | Fix                                                                                                             |
 | ------------------------------ | --------------------------------------------------------------------------------------------------------------- |
 | Wrong match type               | Lead must be **Joint Venture** → **Consortium** with member roles                                               |
-| Consortium incomplete          | Publish Offer for **every** role from **distinct** users                                                        |
-| Cannot publish lead            | Fill Project Title, Required Members ≥ 2, Member Roles (JSON), Scope Division, Minimum Requirements (JSON)      |
+| Consortium incomplete          | Publish Offer for **every** role from **distinct** users; diagnostics may show `ROLE_UNFILLED`                  |
+| Cannot publish lead            | Fill Project Title, Required Members ≥ 2, Member Roles (JSON), Scope Division, Minimum Requirements (JSON); Target role on Offers |
 | No match after publish         | Publish **all three** posts first, then Admin → Matching → **Re-run matching** (not Re-run circular)            |
 | Re-run shows toast but still 0 | Confirm Member Roles JSON has `role` keys matching partner **Target role** (`Architect`, `Structural Engineer`) |
 
@@ -1049,6 +1050,7 @@ Add **two** skills:
 
 ## Related
 
+- [uat-matching-final-four-type-checklist.md](./uat-matching-final-four-type-checklist.md)
 - [uat-matching-one-way-script.md](./uat-matching-one-way-script.md)
 - [uat-matching-two-way-script.md](./uat-matching-two-way-script.md)
 - [uat-matching-circular-script.md](./uat-matching-circular-script.md)

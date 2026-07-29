@@ -1238,10 +1238,14 @@ Add **two** skills:
 | Match type | `circular` |
 | Cycle length | 3 |
 | Links | Omar←Layla (BIM), Layla←Faisal (Structural), Faisal←Omar (PM) |
+| Diagnostics | Admin → Matching (circular run) → View — edge candidates + reject reasons |
+| Audit | Matching-run audit row includes diagnostic summary |
 | Notifications | **New match found** for all three |
 | After all Accept | match `confirmed` · opps → `matched` |
 
 > Circular-only Admin recovery does **not** create Need↔Offer `one_way` matches. For one-way recovery use **Re-run matching**.
+
+**Final four-type sign-off:** [uat-matching-final-four-type-checklist.md](./uat-matching-final-four-type-checklist.md)
 
 ---
 
@@ -1249,8 +1253,8 @@ Add **two** skills:
 
 | Symptom | Fix |
 |---------|-----|
-| No circular ring | All 6 published; ≥ 3 creators; reciprocal skill edges; try Admin circular recovery |
-| Resource step blocks publish | Fill Resource Title, Type, Location, Availability, Transaction Type = **Barter** |
+| No circular ring | All 6 published; ≥ 3 creators; reciprocal skill edges; try Admin circular recovery; check diagnostics |
+| Resource step blocks publish | Fill Resource Title, Type, Location, Availability, Transaction Type = **Barter**; Target role required |
 | Only one_way appears | Also check Matching for `circular` type (separate pass) |
 | Expert skill rejected | Years ≥ 5 for Expert level |
 
@@ -1258,6 +1262,7 @@ Add **two** skills:
 
 ## Related
 
+- [uat-matching-final-four-type-checklist.md](./uat-matching-final-four-type-checklist.md)
 - [uat-matching-one-way-script.md](./uat-matching-one-way-script.md)
 - [uat-matching-two-way-script.md](./uat-matching-two-way-script.md)
 - [uat-matching-group-script.md](./uat-matching-group-script.md)

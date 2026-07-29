@@ -31,6 +31,7 @@ export type { ValCode } from './rules/codes.ts'
 
 export {
   messageForCode,
+  dateMessageForCode,
   assertNoCodeInMessage,
 } from './messages/catalog.ts'
 

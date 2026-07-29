@@ -20,9 +20,9 @@ const MESSAGES: Readonly<Record<string, string>> = {
   [VAL_CODES.DATE_AVAILABILITY_END_IN_PAST]:
     'Availability end date cannot be in the past.',
   [VAL_CODES.DATE_DEADLINE_BEFORE_START]:
-    'Deadline cannot be before start date.',
+    'Deadline cannot be before Start date.',
   [VAL_CODES.DATE_AVAILABILITY_END_BEFORE_START]:
-    'Availability end date cannot be before start date.',
+    'Availability end date cannot be before Start date.',
 
   [VAL_CODES.BUDGET_CASH_REQUIRED]: 'Budget is required for cash exchange.',
   [VAL_CODES.BUDGET_BELOW_MINIMUM]: 'Budget is below the configured minimum.',
@@ -115,6 +115,34 @@ export function messageForCode(
   fallback?: string,
 ): string {
   return MESSAGES[code] ?? fallback ?? 'Please review this field.'
+}
+
+/**
+ * Date messages that name the start field using wizard UI labels:
+ * Need → "Start date"; Offer → "Availability from".
+ */
+export function dateMessageForCode(
+  code: string,
+  intent?: 'need' | 'offer' | 'hybrid' | string | null,
+  fallback?: string,
+): string {
+  const startLabel =
+    typeof intent === 'string' && intent.toLowerCase().trim() === 'offer'
+      ? 'Availability from'
+      : 'Start date'
+
+  switch (code) {
+    case VAL_CODES.DATE_START_IN_PAST:
+      return `${startLabel} cannot be in the past.`
+    case VAL_CODES.DATE_START_SOON:
+      return `${startLabel} is within less than 48 hours.`
+    case VAL_CODES.DATE_DEADLINE_BEFORE_START:
+      return `Deadline cannot be before ${startLabel}.`
+    case VAL_CODES.DATE_AVAILABILITY_END_BEFORE_START:
+      return `Availability end date cannot be before ${startLabel}.`
+    default:
+      return messageForCode(code, fallback)
+  }
 }
 
 /** Ensures UI strings never accidentally include internal codes. */

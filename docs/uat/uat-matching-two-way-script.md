@@ -1182,11 +1182,14 @@ Add **two** skills:
 | Match type        | `two_way`                                           |
 | Payload           | sideA (Khalid need+offer) ↔ sideB (Sara need+offer) |
 | Direction scores  | scoreAtoB and scoreBtoA both above threshold        |
+| Diagnostics       | Admin → Matching → View — candidates matched/rejected with reasons |
 | Notification      | **New match found** for both                        |
 | After both Accept | match `confirmed` · opps → `matched`                |
 
 
 > If only `one_way` appears: confirm **Barter** on all four + Service Exchange, and each user published both Need and Offer.
+
+**Final four-type sign-off:** [uat-matching-final-four-type-checklist.md](./uat-matching-final-four-type-checklist.md)
 
 ---
 
@@ -1199,7 +1202,8 @@ Add **two** skills:
 | -------------------------------- | --------------------------------------------------------------- |
 | Expected two_way but got one_way | All four published; Barter enabled; each party has Need + Offer |
 | Cannot publish alliance step     | Fill Alliance Title, Type, Scope, Financial Terms, Duration ≥ 3 |
-| No match                         | Align Riyadh dates/skills; Admin → **Re-run matching**          |
+| No match                         | Align Riyadh dates/skills; Admin → **Re-run matching**; check diagnostics |
+| Cannot publish                   | Target role required on every post                              |
 
 
 ---
@@ -1208,6 +1212,7 @@ Add **two** skills:
 
 ## Related
 
+- [uat-matching-final-four-type-checklist.md](./uat-matching-final-four-type-checklist.md)
 - [uat-matching-one-way-script.md](./uat-matching-one-way-script.md)
 - [uat-matching-group-script.md](./uat-matching-group-script.md)
 - [uat-matching-circular-script.md](./uat-matching-circular-script.md)

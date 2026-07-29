@@ -6,6 +6,8 @@ Matching structure is **auto-derived** from collaboration model — do not pick 
 **Runtime:** UAT · Password `Pmtwin@2026`  
 After both/all posts are **published**, matching runs automatically. Check Matching workspace + bell: **New match found**.
 
+**Final UAT (required before release sign-off):** run [uat-matching-final-four-type-checklist.md](./uat-matching-final-four-type-checklist.md) — One-Way cross-city, Two-Way, Consortium, Circular + diagnostics/audit.
+
 | Match type (UI) | Engine key | Posts | Script (all fields · Steps 1–5) |
 |-----------------|------------|-------|----------------------------------|
 | One Way Matching | `one_way` | 2 | [uat-matching-one-way-script.md](./uat-matching-one-way-script.md) |
@@ -84,6 +86,7 @@ flowchart TB
 
 ## Related
 
+- [uat-matching-final-four-type-checklist.md](./uat-matching-final-four-type-checklist.md) — **run this for release sign-off**
 - [manual-need-offer-readiness-matching-scripts.md](./manual-need-offer-readiness-matching-scripts.md) — readiness + one-way happy path
 - [uat-need-opportunity-script.md](./uat-need-opportunity-script.md) — Need field reference
 - [uat-offer-opportunity-script.md](./uat-offer-opportunity-script.md) — Offer field reference
