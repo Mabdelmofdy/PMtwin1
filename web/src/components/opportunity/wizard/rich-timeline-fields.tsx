@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import { PmFormField, PmFormGrid, PmFormSection } from '@/components/forms/pm-form-index'
 import { Input } from '@/components/ui/input'
 import {
@@ -9,7 +8,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { RichTimeline } from '@/domain/opportunity-creation'
-import { todayIso } from '@pm-twin/validation'
+import { cn } from '@/lib/utils'
+import { pmTypography } from '@/tokens'
 
 export function RichTimelineFields({
   intent,
@@ -17,12 +17,8 @@ export function RichTimelineFields({
   startDate,
   tenderDeadline,
   timeline,
-  onLocationChange,
-  onStartDateChange,
-  onDeadlineChange,
   onTimelineChange,
-  locationStatus,
-  startDateStatus,
+  onEditOpportunityStep,
   showValidation = false,
 }: {
   intent: 'need' | 'offer' | ''
@@ -30,77 +26,86 @@ export function RichTimelineFields({
   startDate: string
   tenderDeadline: string
   timeline: RichTimeline
-  onLocationChange: (value: string) => void
-  onStartDateChange: (value: string) => void
-  onDeadlineChange: (value: string) => void
   onTimelineChange: (timeline: RichTimeline) => void
-  locationStatus?: ReactNode
-  startDateStatus?: ReactNode
+  /** Jump back to Opportunity step to edit core location / dates. */
+  onEditOpportunityStep?: () => void
   showValidation?: boolean
 }) {
-  const minDate = todayIso()
+  const missingLocation = showValidation && !location.trim()
+  const missingStart = showValidation && !startDate.trim()
 
   return (
     <div className="space-y-4" data-testid="rich-timeline-fields">
       <PmFormSection
         title="Timeline & location"
-        description={
-          intent === 'need'
-            ? 'Deadline and location requirements for the Need.'
-            : 'Availability and preferred location for the Offer.'
-        }
+        description="Inherited from the Opportunity step — edit there if you need different values."
       >
-        <PmFormGrid columns={2}>
-          <div>
-            <PmFormField
-              id="opp-location"
-              label={intent === 'need' ? 'Location' : 'Preferred location / service area'}
-              required
-              error={
-                showValidation && !location.trim()
-                  ? 'Location is required'
-                  : null
-              }
-            >
-              <Input
-                value={location}
-                onChange={(e) => onLocationChange(e.target.value)}
-                placeholder="Riyadh, Saudi Arabia"
-              />
-            </PmFormField>
-            {locationStatus}
+        <div
+          className="rounded-lg border border-border/60 bg-muted/20 p-3 space-y-3"
+          data-slot="inherited-opportunity-timeline"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
+              Inherited from Opportunity
+            </p>
+            {onEditOpportunityStep ? (
+              <button
+                type="button"
+                className={cn(
+                  pmTypography.caption,
+                  'text-primary underline-offset-2 hover:underline',
+                )}
+                onClick={onEditOpportunityStep}
+              >
+                Edit in Opportunity step
+              </button>
+            ) : null}
           </div>
-          <div>
-            <PmFormField
-              id="opp-start"
-              label={intent === 'need' ? 'Start date' : 'Availability from'}
-              required
-              error={
-                showValidation && !startDate.trim()
-                  ? 'Start date is required'
-                  : null
-              }
-            >
-              <Input
-                type="date"
-                min={minDate}
-                value={startDate}
-                onChange={(e) => onStartDateChange(e.target.value)}
-              />
-            </PmFormField>
-            {startDateStatus}
-          </div>
-          {intent === 'need' ? (
-            <PmFormField id="opp-deadline" label="Deadline">
-              <Input
-                type="date"
-                min={minDate}
-                value={tenderDeadline}
-                onChange={(e) => onDeadlineChange(e.target.value)}
-              />
-            </PmFormField>
-          ) : null}
-        </PmFormGrid>
+          <PmFormGrid columns={2}>
+            <div>
+              <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
+                {intent === 'need' ? 'Location' : 'Preferred location / service area'}
+                <span className="ms-0.5 text-danger" aria-hidden>
+                  *
+                </span>
+              </p>
+              <p className={cn(pmTypography.bodySm, 'mt-1')}>
+                {location.trim() || '—'}
+              </p>
+              {missingLocation ? (
+                <p className="mt-1 text-sm text-danger" role="alert">
+                  Required — set in the Opportunity step
+                </p>
+              ) : null}
+            </div>
+            <div>
+              <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
+                {intent === 'need' ? 'Start date' : 'Availability from'}
+                <span className="ms-0.5 text-danger" aria-hidden>
+                  *
+                </span>
+              </p>
+              <p className={cn(pmTypography.bodySm, 'mt-1')}>
+                {startDate.trim() || '—'}
+              </p>
+              {missingStart ? (
+                <p className="mt-1 text-sm text-danger" role="alert">
+                  Required — set in the Opportunity step
+                </p>
+              ) : null}
+            </div>
+            {intent === 'need' ? (
+              <div>
+                <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
+                  Deadline
+                </p>
+                <p className={cn(pmTypography.bodySm, 'mt-1')}>
+                  {tenderDeadline.trim() || '—'}
+                </p>
+              </div>
+            ) : null}
+          </PmFormGrid>
+        </div>
       </PmFormSection>
 
       <PmFormSection

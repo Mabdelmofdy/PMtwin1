@@ -7,6 +7,10 @@ import type {
   CommercialTermsByMode,
 } from '@/domain/opportunity-creation'
 
+// TODO: Remove this legacy unused wizard component — active flow uses
+// CommercialStructureStep + CommercialComponentsBuilder. Not mounted by
+// OpportunityWizardPage.
+
 const HYBRID_OPTIONS = [
   { key: 'cash', label: 'Cash' },
   { key: 'barter', label: 'Barter' },

@@ -142,3 +142,50 @@ describe('Creation domain normalizers', () => {
     assert.ok(deliverables[0]?.id)
   })
 })
+
+describe('Opportunity wizard inheritance (source contracts)', () => {
+  it('Timeline section no longer duplicates location or date inputs', () => {
+    const timelineSource = readFileSync(
+      join(root, '../../components/opportunity/wizard/rich-timeline-fields.tsx'),
+      'utf8',
+    )
+    assert.match(timelineSource, /Inherited from Opportunity/)
+    assert.match(timelineSource, /onEditOpportunityStep/)
+    assert.doesNotMatch(timelineSource, /onLocationChange/)
+    assert.doesNotMatch(timelineSource, /onStartDateChange/)
+    assert.doesNotMatch(timelineSource, /onDeadlineChange/)
+    assert.doesNotMatch(
+      timelineSource,
+      /onChange=\{\(e\) => onLocationChange/,
+    )
+  })
+
+  it('WorkPackagesBuilder inherits instead of auto-seeding skills', () => {
+    const builderSource = readFileSync(
+      join(
+        root,
+        '../../components/opportunities/create/work/work-packages-builder.tsx',
+      ),
+      'utf8',
+    )
+    assert.match(builderSource, /inherited\?: CoreInheritedFields/)
+    assert.match(builderSource, /resolveWorkPackageInheritance/)
+    assert.match(builderSource, /InheritedField/)
+    assert.doesNotMatch(builderSource, /seedSkills/)
+    assert.doesNotMatch(builderSource, /useEffect/)
+  })
+
+  it('ScopeWorkStep wires opportunityCoreFields and step navigation', () => {
+    const scopeSource = readFileSync(
+      join(
+        root,
+        '../../components/opportunities/create/steps/scope-work-step.tsx',
+      ),
+      'utf8',
+    )
+    assert.match(scopeSource, /opportunityCoreFields/)
+    assert.match(scopeSource, /onNavigateToStep/)
+    assert.match(scopeSource, /inherited=\{inherited\}/)
+    assert.doesNotMatch(scopeSource, /seedSkills/)
+  })
+})

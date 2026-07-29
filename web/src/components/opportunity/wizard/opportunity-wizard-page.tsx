@@ -707,6 +707,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
               onChange={patchDraft}
               showValidation={showFieldValidation}
               validationMessages={scopeWorkValidationMessages}
+              onNavigateToStep={(stepId, sectionId) => goToStep(stepId, sectionId)}
             />
           ) : null}
           {activeStepId === 'commercial' ? (

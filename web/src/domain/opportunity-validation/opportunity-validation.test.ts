@@ -226,6 +226,62 @@ describe('opportunity validation web adapter', () => {
       ),
     )
   })
+
+  it('inherits opportunity skills and deadline into sparse work packages for validation', () => {
+    const result = runDraftValidation({
+      title: 'Inherited package fields',
+      description: 'Packages without own skills or deadline',
+      location: 'Riyadh',
+      startDate: '2026-09-01',
+      attributes: { tenderDeadline: '2026-12-01', startDate: '2026-09-01' },
+      structuredSkills: [
+        { name: 'BIM', role: 'required', level: 'expert' },
+      ],
+      collaborationAttributes: {
+        workPackages: [
+          {
+            id: 'wp-1',
+            title: 'Package A',
+            description: 'Inherits from opportunity',
+            requiredSkills: [],
+          },
+        ],
+      },
+    })
+    assert.ok(
+      !result.result.issues.some(
+        (i) =>
+          i.code === VAL_CODES.PACKAGE_SKILL_REQUIRED ||
+          i.code === VAL_CODES.PACKAGE_DEADLINE_REQUIRED,
+      ),
+      result.messages.join('; '),
+    )
+  })
+
+  it('still requires package skills and deadline when opportunity lacks them', () => {
+    const result = runDraftValidation({
+      title: 'Sparse opportunity and packages',
+      description: 'No opportunity skills or deadline',
+      location: 'Riyadh',
+      startDate: '2026-09-01',
+      collaborationAttributes: {
+        workPackages: [
+          {
+            id: 'wp-1',
+            title: 'Package A',
+            description: 'Missing skills and deadline',
+            requiredSkills: [],
+          },
+        ],
+      },
+    })
+    assert.ok(
+      result.result.issues.some((i) => i.code === VAL_CODES.PACKAGE_SKILL_REQUIRED),
+    )
+    assert.ok(
+      result.result.issues.some((i) => i.code === VAL_CODES.PACKAGE_DEADLINE_REQUIRED),
+    )
+  })
 })
 
 const readyProfileForPublish = {

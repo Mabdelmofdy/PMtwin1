@@ -33,6 +33,9 @@ export function DeliverablesBuilder({
   workPackages: WorkPackage[]
   onChange: (items: OpportunityDeliverable[]) => void
 }) {
+  // TODO: Consolidate deliverables into one opportunity-level list keyed by
+  // workPackageId (merge-on-load + mirror-on-save), removing the parallel
+  // per-package deliverables editor in WorkPackagesBuilder.
   return (
     <div data-slot="deliverables-builder" className="space-y-3">
       <div className="flex items-center justify-between gap-2">

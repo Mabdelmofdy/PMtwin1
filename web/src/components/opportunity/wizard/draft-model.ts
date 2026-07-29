@@ -20,6 +20,8 @@ import {
   normalizeStructuredSkills,
   normalizeTemplateMetadata,
   normalizeWorkPackages,
+  opportunityCoreFields,
+  resolveWorkPackagesEffective,
   skillNames,
   type CommercialConstraints,
   type CommercialTermsByMode,
@@ -316,7 +318,15 @@ export function opportunityToDraft(existing: Opportunity): OpportunityDraft {
     complianceRequirementsText: (existing.complianceRequirements ?? []).join(', '),
     deliveryMilestonesText,
     structuredSkills,
-    workPackages: normalizeWorkPackages(attrs.workPackages ?? existing.workPackages),
+    workPackages: normalizeWorkPackages(
+      (() => {
+        const fromAttrs = attrs.workPackages
+        const fromTop = existing.workPackages
+        if (Array.isArray(fromAttrs) && fromAttrs.length > 0) return fromAttrs
+        if (Array.isArray(fromTop) && fromTop.length > 0) return fromTop
+        return fromAttrs ?? fromTop ?? []
+      })(),
+    ),
     deliverables: normalizeDeliverables(attrs.deliverables),
     milestones:
       milestonesFromAttrs.length > 0
@@ -384,11 +394,23 @@ export function buildOpportunityDraftInput(
     .map((m) => m.title.trim())
     .filter(Boolean)
 
+  const core = opportunityCoreFields(synced)
+  /**
+   * Inheritance resolution seam (see `domain/opportunity-creation/inheritance.ts`):
+   * - Top-level `workPackages` below = resolved (effective) for validation / commands.
+   * - `collaborationAttributes.workPackages` = sparse overrides only.
+   * Matching uses opportunity-level skills; WP skill overrides are intentionally ignored.
+   */
+  const effectiveWorkPackages = resolveWorkPackagesEffective(
+    synced.workPackages,
+    core,
+  )
+
   return {
     ...base,
     ...collaborationPatch,
     structuredSkills: synced.structuredSkills,
-    workPackages: synced.workPackages,
+    workPackages: effectiveWorkPackages,
     capacity: synced.intent === 'offer' ? synced.capacity : undefined,
     scope: {
       ...(base.scope as Record<string, unknown>),
@@ -426,6 +448,10 @@ export function buildOpportunityDraftInput(
         synced.richTimeline.estimatedDuration,
       ),
       structuredSkills: synced.structuredSkills,
+      /**
+       * Sparse overrides — empty fields mean inherit on next load.
+       * Do not write resolved packages here; that would break Override round-trip.
+       */
       workPackages: synced.workPackages,
       deliverables: synced.deliverables,
       milestones: synced.milestones,
@@ -524,6 +550,12 @@ export function buildCollaborationCommandPayload(
     attributes: built.attributes as Record<string, unknown>,
     normalized: built.normalized as Record<string, unknown>,
     exchangeData: built.exchangeData as Record<string, unknown>,
+    structuredSkills:
+      built.structuredSkills as OpportunityCollaborationPayload['structuredSkills'],
+    /** Effective (inherited) packages for validation / matching consumers. */
+    workPackages:
+      built.workPackages as OpportunityCollaborationPayload['workPackages'],
+    startDate: synced.startDate || undefined,
     budget,
     paymentModes: synced.paymentModes,
     preferredPartnerType: synced.preferredPartnerType || undefined,

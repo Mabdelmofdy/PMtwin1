@@ -1,4 +1,6 @@
+import { useMemo } from 'react'
 import type { OpportunityDraft } from '@/components/opportunity/wizard/draft-model.ts'
+import type { WizardStepId } from '@/components/opportunity/wizard/wizard-steps.ts'
 import {
   PmFormField,
   PmFormGrid,
@@ -12,6 +14,7 @@ import {
 } from '@/components/opportunity/wizard/structured-skills-editor.tsx'
 import { ResourcesCapacityEditor } from '@/components/opportunity/wizard/resources-capacity-editor.tsx'
 import { RichTimelineFields } from '@/components/opportunity/wizard/rich-timeline-fields.tsx'
+import { opportunityCoreFields } from '@/domain/opportunity-creation'
 import { WorkPackagesBuilder } from '../work/work-packages-builder.tsx'
 import {
   DeliverablesBuilder,
@@ -30,6 +33,8 @@ export type ScopeWorkStepProps = {
   showValidation?: boolean
   /** Live blocking validation messages for this step. */
   validationMessages?: readonly string[]
+  /** Navigate to another wizard step (e.g. edit inherited Opportunity fields). */
+  onNavigateToStep?: (step: WizardStepId, sectionId?: string) => void
 }
 
 export function ScopeWorkStep({
@@ -37,12 +42,14 @@ export function ScopeWorkStep({
   onChange,
   showValidation = false,
   validationMessages = [],
+  onNavigateToStep,
 }: ScopeWorkStepProps) {
   const isOffer = draft.intent === 'offer'
   const hasNamedSkill = draft.structuredSkills.some((skill) => skill.name.trim())
   const skillLevelYearsError = validationMessages.find((message) =>
     /experience level and years/i.test(message),
   )
+  const inherited = useMemo(() => opportunityCoreFields(draft), [draft])
 
   return (
     <div data-slot="scope-work-step" className="space-y-6">
@@ -163,7 +170,7 @@ export function ScopeWorkStep({
       <div id="section-work-packages">
         <WorkPackagesBuilder
           packages={draft.workPackages}
-          seedSkills={draft.structuredSkills}
+          inherited={inherited}
           showValidation={showValidation}
           onChange={(workPackages) => onChange({ workPackages })}
         />
@@ -196,9 +203,11 @@ export function ScopeWorkStep({
             tenderDeadline={draft.tenderDeadline}
             timeline={draft.richTimeline}
             showValidation={showValidation}
-            onLocationChange={(location) => onChange({ location })}
-            onStartDateChange={(startDate) => onChange({ startDate })}
-            onDeadlineChange={(tenderDeadline) => onChange({ tenderDeadline })}
+            onEditOpportunityStep={
+              onNavigateToStep
+                ? () => onNavigateToStep('opportunity')
+                : undefined
+            }
             onTimelineChange={(richTimeline) => onChange({ richTimeline })}
           />
         </div>

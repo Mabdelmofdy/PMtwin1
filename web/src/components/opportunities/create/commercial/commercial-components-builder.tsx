@@ -638,6 +638,9 @@ function CashFields({
         />
         <Input
           placeholder="Payment terms"
+          // TODO: Add opportunity-level default payment terms as SSOT; cash
+          // components should inherit with optional Override (same pattern as
+          // work-package field inheritance).
           value={component.paymentTerms ?? ''}
           onChange={(e) => onChange({ paymentTerms: e.target.value })}
         />

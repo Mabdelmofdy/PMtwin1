@@ -12,6 +12,10 @@ import {
   type WorkPackageDocumentRequirement,
 } from '@/domain/opportunity-creation'
 
+// TODO: Remove this legacy unused wizard component — active flow uses
+// `WorkPackagesBuilder` in opportunities/create/work/. Not mounted by
+// OpportunityWizardPage.
+
 function DocListEditor({
   label,
   docs,

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { ArrowDown, ArrowUp, Copy, Plus, Trash2 } from 'lucide-react'
 import { PmButton } from '@/components/ui/pm-button'
 import { Input } from '@/components/ui/input'
@@ -9,10 +9,14 @@ import {
   createEmptyWorkPackage,
   createEmptyDeliverable,
   skillNames,
+  resolveWorkPackageInheritance,
+  resolveTaskInheritance,
+  type CoreInheritedFields,
   type OpportunityTask,
   type StructuredSkill,
   type WorkPackage,
 } from '@/domain/opportunity-creation'
+import { InheritedField } from './inherited-field.tsx'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/tokens'
 
@@ -40,23 +44,27 @@ function skillsFromCsv(value: string): StructuredSkill[] {
     }))
 }
 
+function cloneSkills(
+  skills: readonly StructuredSkill[] | undefined,
+): StructuredSkill[] {
+  if (!skills?.length) return []
+  return skills.map((skill) => ({ ...skill }))
+}
+
 export type WorkPackagesBuilderProps = {
   packages: WorkPackage[]
   onChange: (packages: WorkPackage[]) => void
-  /** Opportunity-level skills used to seed new packages. */
-  seedSkills?: readonly StructuredSkill[]
+  /** Opportunity-level core fields used for inheritance. */
+  inherited?: CoreInheritedFields
   showValidation?: boolean
 }
 
 export function WorkPackagesBuilder({
   packages,
   onChange,
-  seedSkills = [],
+  inherited = {},
   showValidation = false,
 }: WorkPackagesBuilderProps) {
-  const onChangeRef = useRef(onChange)
-  onChangeRef.current = onChange
-
   const update = (index: number, patch: Partial<WorkPackage>) => {
     onChange(
       packages.map((pkg, i) => (i === index ? { ...pkg, ...patch } : pkg)),
@@ -64,36 +72,8 @@ export function WorkPackagesBuilder({
   }
 
   const addPackage = () => {
-    const next = createEmptyWorkPackage(packages.length)
-    const seeded = skillNames(seedSkills)
-    if (seeded.length > 0) {
-      next.requiredSkills = seeded.map((name) => ({
-        ...createEmptyStructuredSkill(),
-        name,
-        mandatory: true,
-      }))
-    }
-    onChange([...packages, next])
+    onChange([...packages, createEmptyWorkPackage(packages.length)])
   }
-
-  useEffect(() => {
-    const seeded = skillNames(seedSkills)
-    if (seeded.length === 0 || packages.length === 0) return
-    let changed = false
-    const next = packages.map((pkg) => {
-      if (pkg.requiredSkills?.some((skill) => skill.name.trim())) return pkg
-      changed = true
-      return {
-        ...pkg,
-        requiredSkills: seeded.map((name) => ({
-          ...createEmptyStructuredSkill(),
-          name,
-          mandatory: true,
-        })),
-      }
-    })
-    if (changed) onChangeRef.current(next)
-  }, [packages, seedSkills])
 
   return (
     <div data-slot="work-packages-builder" className="space-y-4">
@@ -101,7 +81,8 @@ export function WorkPackagesBuilder({
         <div>
           <h3 className={cn(pmTypography.h3)}>Work Packages</h3>
           <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
-            Break the opportunity into manageable units of work.
+            Break the opportunity into manageable units of work. Location, dates,
+            and skills inherit from the opportunity unless overridden.
           </p>
         </div>
         <PmButton type="button" onClick={addPackage}>
@@ -130,9 +111,19 @@ export function WorkPackagesBuilder({
 
       {packages.map((pkg, index) => {
         const tasks = pkg.tasks ?? []
+        const resolved = resolveWorkPackageInheritance(pkg, inherited)
+        const effectiveSkills = resolved.skills.value
         const missingSkills =
-          showValidation && !(pkg.requiredSkills?.some((s) => s.name.trim()) ?? false)
-        const missingDeadline = showValidation && !pkg.deadline?.trim()
+          showValidation && !effectiveSkills?.some((s) => s.name.trim())
+        const missingDeadline = showValidation && !resolved.deadline.value
+        const packageParent: CoreInheritedFields = {
+          location: resolved.location.value,
+          startDate: resolved.startDate.value,
+          deadline: resolved.deadline.value,
+          skills: resolved.skills.value,
+          experienceLevel: resolved.experienceLevel.value,
+        }
+
         return (
           <div
             key={pkg.id}
@@ -216,51 +207,156 @@ export function WorkPackagesBuilder({
                     update(index, { description: e.target.value })
                   }
                 />
-                <div>
-                  <label className={cn(pmTypography.caption, 'mb-1 block text-muted-foreground')}>
-                    Package skills (required)
-                  </label>
+
+                <InheritedField
+                  label="Package skills (required)"
+                  required
+                  displayValue={skillNames(effectiveSkills ?? []).join(', ')}
+                  isOverridden={resolved.skills.isOverridden}
+                  source={resolved.skills.source}
+                  onOverride={() =>
+                    update(index, {
+                      requiredSkills: cloneSkills(
+                        resolved.skills.inherited ?? inherited.skills,
+                      ),
+                    })
+                  }
+                  onClearOverride={() =>
+                    update(index, { requiredSkills: [] })
+                  }
+                  error={
+                    missingSkills
+                      ? 'Every work package needs at least one skill (set on the opportunity or override here).'
+                      : null
+                  }
+                >
                   <Input
                     value={skillNames(pkg.requiredSkills ?? []).join(', ')}
                     placeholder="BIM, Revit"
                     aria-invalid={missingSkills || undefined}
                     onChange={(e) =>
-                      update(index, { requiredSkills: skillsFromCsv(e.target.value) })
+                      update(index, {
+                        requiredSkills: skillsFromCsv(e.target.value),
+                      })
                     }
                   />
-                  {missingSkills ? (
-                    <p className="mt-1 text-sm text-danger" role="alert">
-                      Every work package needs at least one skill.
+                </InheritedField>
+
+                {resolved.experienceLevel.value ? (
+                  <div className="rounded-md border border-border/60 bg-muted/20 px-3 py-2">
+                    <p
+                      className={cn(
+                        pmTypography.caption,
+                        'text-muted-foreground',
+                      )}
+                    >
+                      Experience level
                     </p>
-                  ) : null}
-                </div>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <div>
-                    <label className={cn(pmTypography.caption, 'mb-1 block text-muted-foreground')}>
-                      Start date
-                    </label>
+                    <p className={cn(pmTypography.bodySm, 'mt-0.5')}>
+                      {resolved.experienceLevel.value}
+                    </p>
+                    <p
+                      className={cn(
+                        pmTypography.caption,
+                        'mt-0.5 text-muted-foreground',
+                      )}
+                    >
+                      Inherited from Opportunity
+                    </p>
+                  </div>
+                ) : null}
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <InheritedField
+                    label="Location"
+                    displayValue={resolved.location.value ?? ''}
+                    isOverridden={resolved.location.isOverridden}
+                    source={resolved.location.source}
+                    onOverride={() =>
+                      update(index, {
+                        location:
+                          resolved.location.inherited ??
+                          inherited.location ??
+                          '',
+                      })
+                    }
+                    onClearOverride={() =>
+                      update(index, { location: undefined })
+                    }
+                  >
+                    <Input
+                      value={pkg.location ?? ''}
+                      placeholder="Riyadh, Saudi Arabia"
+                      onChange={(e) =>
+                        update(index, {
+                          location: e.target.value || undefined,
+                        })
+                      }
+                    />
+                  </InheritedField>
+
+                  <InheritedField
+                    label="Start date"
+                    displayValue={resolved.startDate.value ?? ''}
+                    isOverridden={resolved.startDate.isOverridden}
+                    source={resolved.startDate.source}
+                    onOverride={() =>
+                      update(index, {
+                        startDate:
+                          resolved.startDate.inherited ??
+                          inherited.startDate ??
+                          '',
+                      })
+                    }
+                    onClearOverride={() =>
+                      update(index, { startDate: undefined })
+                    }
+                  >
                     <Input
                       type="date"
                       value={pkg.startDate ?? ''}
-                      onChange={(e) => update(index, { startDate: e.target.value })}
+                      onChange={(e) =>
+                        update(index, {
+                          startDate: e.target.value || undefined,
+                        })
+                      }
                     />
-                  </div>
-                  <div>
-                    <label className={cn(pmTypography.caption, 'mb-1 block text-muted-foreground')}>
-                      Deadline (required)
-                    </label>
+                  </InheritedField>
+
+                  <InheritedField
+                    label="Deadline (required)"
+                    required
+                    displayValue={resolved.deadline.value ?? ''}
+                    isOverridden={resolved.deadline.isOverridden}
+                    source={resolved.deadline.source}
+                    onOverride={() =>
+                      update(index, {
+                        deadline:
+                          resolved.deadline.inherited ??
+                          inherited.deadline ??
+                          '',
+                      })
+                    }
+                    onClearOverride={() =>
+                      update(index, { deadline: undefined })
+                    }
+                    error={
+                      missingDeadline
+                        ? 'Every work package needs a deadline (set on the opportunity or override here).'
+                        : null
+                    }
+                  >
                     <Input
                       type="date"
                       value={pkg.deadline ?? ''}
                       aria-invalid={missingDeadline || undefined}
-                      onChange={(e) => update(index, { deadline: e.target.value })}
+                      onChange={(e) =>
+                        update(index, {
+                          deadline: e.target.value || undefined,
+                        })
+                      }
                     />
-                    {missingDeadline ? (
-                      <p className="mt-1 text-sm text-danger" role="alert">
-                        Every work package needs a deadline.
-                      </p>
-                    ) : null}
-                  </div>
+                  </InheritedField>
                 </div>
 
                 <div className="space-y-2 border-t border-border/60 pt-3">
@@ -287,6 +383,7 @@ export function WorkPackagesBuilder({
                     <TaskRow
                       key={task.id}
                       task={task}
+                      packageParent={packageParent}
                       onChange={(patch) => {
                         const next = tasks.map((t, i) =>
                           i === taskIndex ? { ...t, ...patch } : t,
@@ -317,6 +414,8 @@ export function WorkPackagesBuilder({
                 </div>
 
                 <div className="space-y-2 border-t border-border/60 pt-3">
+                  {/* TODO: Remove per-package deliverables editor when consolidating
+                      into one opportunity-level list (see DeliverablesBuilder). */}
                   <div className="flex items-center justify-between">
                     <p className={cn(pmTypography.label)}>Package deliverables</p>
                     <PmButton
@@ -382,17 +481,36 @@ export function WorkPackagesBuilder({
 
 function TaskRow({
   task,
+  packageParent,
   onChange,
   onDelete,
   onMove,
   onDuplicate,
 }: {
   task: OpportunityTask
+  packageParent: CoreInheritedFields
   onChange: (patch: Partial<OpportunityTask>) => void
   onDelete: () => void
   onMove: (dir: -1 | 1) => void
   onDuplicate: () => void
 }) {
+  const [showOverrides, setShowOverrides] = useState(false)
+  const resolved = resolveTaskInheritance(task, packageParent)
+  const anyOverridden =
+    resolved.location.isOverridden ||
+    resolved.startDate.isOverridden ||
+    resolved.endDate.isOverridden
+  const summaryParts = [
+    resolved.startDate.value
+      ? `Start ${resolved.startDate.value}`
+      : null,
+    resolved.endDate.value ? `End ${resolved.endDate.value}` : null,
+    resolved.location.value || null,
+    resolved.skills.value
+      ? skillNames(resolved.skills.value).join(', ')
+      : null,
+  ].filter(Boolean)
+
   return (
     <div className="space-y-2 rounded-md border border-border/60 p-3">
       <div className="flex flex-wrap gap-1">
@@ -421,6 +539,102 @@ function TaskRow({
         placeholder="Task description"
         onChange={(e) => onChange({ description: e.target.value })}
       />
+
+      <div className="rounded-md border border-border/40 bg-muted/15 px-2.5 py-2 space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
+            {summaryParts.length > 0
+              ? summaryParts.join(' · ')
+              : 'Dates, location, and skills inherit from the work package'}
+            {!anyOverridden && summaryParts.length > 0
+              ? ' · Inherited from Work Package'
+              : null}
+          </p>
+          <button
+            type="button"
+            className={cn(
+              pmTypography.caption,
+              'text-primary underline-offset-2 hover:underline',
+            )}
+            onClick={() => setShowOverrides((v) => !v)}
+            aria-expanded={showOverrides}
+          >
+            {showOverrides || anyOverridden ? 'Hide overrides' : 'Override'}
+          </button>
+        </div>
+
+        {showOverrides || anyOverridden ? (
+          <div className="grid gap-2 sm:grid-cols-2">
+            <InheritedField
+              label="Start date"
+              displayValue={resolved.startDate.value ?? ''}
+              isOverridden={resolved.startDate.isOverridden}
+              source={resolved.startDate.source}
+              onOverride={() =>
+                onChange({
+                  startDate:
+                    resolved.startDate.inherited ??
+                    packageParent.startDate ??
+                    '',
+                })
+              }
+              onClearOverride={() => onChange({ startDate: undefined })}
+            >
+              <Input
+                type="date"
+                value={task.startDate ?? ''}
+                onChange={(e) =>
+                  onChange({ startDate: e.target.value || undefined })
+                }
+              />
+            </InheritedField>
+            <InheritedField
+              label="End date"
+              displayValue={resolved.endDate.value ?? ''}
+              isOverridden={resolved.endDate.isOverridden}
+              source={resolved.endDate.source}
+              onOverride={() =>
+                onChange({
+                  endDate:
+                    resolved.endDate.inherited ?? packageParent.deadline ?? '',
+                })
+              }
+              onClearOverride={() => onChange({ endDate: undefined })}
+            >
+              <Input
+                type="date"
+                value={task.endDate ?? ''}
+                onChange={(e) =>
+                  onChange({ endDate: e.target.value || undefined })
+                }
+              />
+            </InheritedField>
+            <InheritedField
+              label="Location"
+              displayValue={resolved.location.value ?? ''}
+              isOverridden={resolved.location.isOverridden}
+              source={resolved.location.source}
+              onOverride={() =>
+                onChange({
+                  location:
+                    resolved.location.inherited ??
+                    packageParent.location ??
+                    '',
+                })
+              }
+              onClearOverride={() => onChange({ location: undefined })}
+            >
+              <Input
+                value={task.location ?? ''}
+                placeholder="Location"
+                onChange={(e) =>
+                  onChange({ location: e.target.value || undefined })
+                }
+              />
+            </InheritedField>
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 }

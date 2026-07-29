@@ -10,6 +10,7 @@ import type {
   ValidationResult,
   ValidationRuleGroup,
   ValidationScope,
+  WorkPackageInput,
 } from '@pm-twin/validation'
 import {
   evaluatePublishValidation,
@@ -21,6 +22,12 @@ import {
 } from '@pm-twin/validation'
 import type { Opportunity } from '@/types/domain.ts'
 import type { PublishReadinessResult } from '@/domain/publish-readiness/types.ts'
+import {
+  normalizeWorkPackages,
+  opportunityCoreFields,
+  resolveWorkPackagesEffective,
+  skillNames,
+} from '@/domain/opportunity-creation'
 
 export type OpportunityValidationLiveState = 'valid' | 'warning' | 'error'
 
@@ -100,8 +107,13 @@ export function toOpportunityValidationInput(
     }
   }
 
-  const collaboration = opportunity.collaborationAttributes as
-    | { structuredSkills?: unknown; availabilityEndDate?: unknown }
+  const collabAttrs = opportunity.collaborationAttributes as
+    | {
+        structuredSkills?: unknown
+        availabilityEndDate?: unknown
+        workPackages?: unknown
+        experienceLevel?: unknown
+      }
     | undefined
   const intentRole =
     opportunity.intent === 'offer'
@@ -109,13 +121,63 @@ export function toOpportunityValidationInput(
       : ('required' as const)
   const structuredSkills =
     mapStructuredSkills(opportunity.structuredSkills, intentRole) ??
-    mapStructuredSkills(collaboration?.structuredSkills, intentRole)
+    mapStructuredSkills(collabAttrs?.structuredSkills, intentRole)
   const tenderDeadline =
     typeof attrs.tenderDeadline === 'string' ? attrs.tenderDeadline : undefined
   const availabilityEndDate =
-    typeof collaboration?.availabilityEndDate === 'string'
-      ? collaboration.availabilityEndDate
+    typeof collabAttrs?.availabilityEndDate === 'string'
+      ? collabAttrs.availabilityEndDate
       : undefined
+
+  const startDate =
+    opportunity.startDate ??
+    (typeof attrs.startDate === 'string' ? attrs.startDate : undefined)
+
+  const sparseSource =
+    (Array.isArray(collabAttrs?.workPackages) &&
+    (collabAttrs.workPackages as unknown[]).length > 0
+      ? collabAttrs.workPackages
+      : undefined) ??
+    opportunity.workPackages
+
+  let workPackages: WorkPackageInput[] | undefined
+
+  if (Array.isArray(sparseSource) && sparseSource.length > 0) {
+    const structuredForCore =
+      structuredSkills?.map((s) => ({
+        name: s.name ?? s.skillId ?? '',
+        level: (s.level as 'basic' | 'intermediate' | 'expert') ?? 'basic',
+        yearsRequired: s.years,
+        certificationRequired: false,
+        mandatory: true,
+      })) ?? []
+    const effective = resolveWorkPackagesEffective(
+      normalizeWorkPackages(sparseSource),
+      opportunityCoreFields({
+        location: opportunity.location,
+        startDate,
+        tenderDeadline,
+        structuredSkills: structuredForCore,
+        experienceLevel:
+          typeof collabAttrs?.experienceLevel === 'string'
+            ? collabAttrs.experienceLevel
+            : undefined,
+      }),
+    )
+    workPackages = effective.map((pkg) => ({
+      id: pkg.id,
+      title: pkg.title,
+      description: pkg.description,
+      skills: skillNames(pkg.requiredSkills),
+      requiredSkills: pkg.requiredSkills.map((s) => ({
+        name: s.name,
+        role: intentRole,
+        level: s.level,
+        years: s.yearsRequired,
+      })),
+      deadline: pkg.deadline,
+    }))
+  }
 
   return {
     id: opportunity.id,
@@ -131,9 +193,7 @@ export function toOpportunityValidationInput(
     modelType: opportunity.modelType,
     subModelType: opportunity.subModelType,
     exchangeMode: opportunity.exchangeMode,
-    startDate:
-      opportunity.startDate ??
-      (typeof attrs.startDate === 'string' ? attrs.startDate : undefined),
+    startDate,
     endDate: opportunity.endDate,
     duration: opportunity.duration,
     deliveryDeadline: opportunity.deliveryDeadline ?? tenderDeadline,
@@ -143,7 +203,7 @@ export function toOpportunityValidationInput(
     ownerId: opportunity.ownerPartyId,
     creatorId: opportunity.creatorId,
     structuredSkills,
-    workPackages: opportunity.workPackages,
+    workPackages,
     capacity: opportunity.capacity,
     scope,
     exchangeData: exchangeData as Record<string, unknown>,

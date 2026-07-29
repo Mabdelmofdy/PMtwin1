@@ -59,7 +59,9 @@ export function OpportunityCard({
   const taxonomy = resolveOpportunityTaxonomyLabels(opportunity)
 
   const attrs = opportunity.collaborationAttributes ?? {}
-  const workPackages = normalizeWorkPackages(attrs.workPackages)
+  const workPackages = normalizeWorkPackages(
+    attrs.workPackages ?? opportunity.workPackages,
+  )
   const taskCount = workPackages.reduce(
     (sum, pkg) => sum + (pkg.tasks?.length ?? 0),
     0,

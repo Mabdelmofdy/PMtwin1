@@ -27,6 +27,8 @@ import {
   normalizeResources,
   normalizeStructuredSkills,
   normalizeWorkPackages,
+  opportunityCoreFields,
+  resolveWorkPackagesEffective,
   type OfferCapacity,
   type OpportunityDeliverable,
   type OpportunityMilestone,
@@ -235,15 +237,9 @@ function asOfferCapacity(value: unknown): OfferCapacity | undefined {
 function extractScope(opportunity: Opportunity): OpportunityDetailsScope {
   const attrs = attrsOf(opportunity)
   const normalized = (opportunity.normalized ?? {}) as Record<string, unknown>
-  const packages = normalizeWorkPackages(
+  const sparsePackages = normalizeWorkPackages(
     attrs.workPackages ?? opportunity.workPackages ?? [],
   )
-  const milestones = normalizeMilestones(
-    attrs.milestones ?? opportunity.deliveryMilestones ?? opportunity.attributes?.deliveryMilestones ?? [],
-  )
-  const tasks = packages.flatMap((pkg) => pkg.tasks ?? [])
-  const topLevelDeliverables = normalizeDeliverables(attrs.deliverables)
-
   const skills = normalizeStructuredSkills(
     attrs.structuredSkills
       ?? opportunity.structuredSkills
@@ -251,6 +247,32 @@ function extractScope(opportunity: Opportunity): OpportunityDetailsScope {
       ?? opportunity.attributes?.coreSkills
       ?? [],
   )
+  const packages = resolveWorkPackagesEffective(
+    sparsePackages,
+    opportunityCoreFields({
+      location: opportunity.location,
+      startDate:
+        opportunity.startDate ??
+        (typeof opportunity.attributes?.startDate === 'string'
+          ? opportunity.attributes.startDate
+          : undefined),
+      tenderDeadline:
+        typeof opportunity.attributes?.tenderDeadline === 'string'
+          ? opportunity.attributes.tenderDeadline
+          : undefined,
+      structuredSkills: skills,
+      experienceLevel:
+        typeof attrs.experienceLevel === 'string'
+          ? attrs.experienceLevel
+          : undefined,
+    }),
+  )
+  const milestones = normalizeMilestones(
+    attrs.milestones ?? opportunity.deliveryMilestones ?? opportunity.attributes?.deliveryMilestones ?? [],
+  )
+  const tasks = packages.flatMap((pkg) => pkg.tasks ?? [])
+  const topLevelDeliverables = normalizeDeliverables(attrs.deliverables)
+
   const requiredSkills = skills.filter((s) => s.mandatory)
   const preferredSkills = skills.filter((s) => !s.mandatory)
 
