@@ -163,6 +163,8 @@ export function ScopeWorkStep({
             showCapacity={draft.intent === 'offer'}
             onResourcesChange={(resources) => onChange({ resources })}
             onCapacityChange={(capacity) => onChange({ capacity })}
+            primaryLocation={draft.location}
+            coverageAreas={draft.coverageAreas}
           />
         </div>
       </details>

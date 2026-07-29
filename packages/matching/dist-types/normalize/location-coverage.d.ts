@@ -1,9 +1,9 @@
 /**
  * Location coverage hierarchy for soft locationFit scoring.
- * Primary city is a preference; nationwide / regional coverage lifts fit.
+ * Primary city is a preference; nationwide / regional / coverage overlap lifts fit.
  */
-export type LocationCountryCode = 'SA' | 'AE' | 'QA' | 'KW' | 'BH' | 'OM' | 'REMOTE' | 'GCC' | 'MENA' | 'GLOBAL' | 'UNKNOWN';
-export type LocationCoverageTier = 'remote' | 'nationwide' | 'regional_gcc' | 'same_city' | 'same_country' | 'different_gcc_country' | 'weak';
+export type LocationCountryCode = 'SA' | 'AE' | 'QA' | 'KW' | 'BH' | 'OM' | 'EG' | 'REMOTE' | 'GCC' | 'MENA' | 'GLOBAL' | 'UNKNOWN';
+export type LocationCoverageTier = 'remote' | 'nationwide' | 'regional_gcc' | 'coverage_overlap' | 'same_city' | 'same_country' | 'different_gcc_country' | 'weak';
 export type LocationCoverageResult = {
     readonly score: number;
     readonly tier: LocationCoverageTier;

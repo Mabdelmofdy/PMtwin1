@@ -7,6 +7,11 @@ import { opportunitiesApi } from '@/api/opportunities.ts'
 import { peopleApi } from '@/api/people.ts'
 import { useAuth } from '@/providers/auth-provider'
 import type { Company, Opportunity, PlatformUser } from '@/types/domain.ts'
+import {
+  formatLocation,
+  opportunityMatchesLocationScopes,
+  primaryLocationSelectOptions,
+} from '@/domain/locations'
 
 type FindTab = 'people' | 'companies' | 'opportunities'
 
@@ -196,11 +201,14 @@ export function LegacyFindPage() {
                   onChange={(e) => setLocation(e.target.value)}
                 >
                   <option value="">All Locations</option>
-                  {['Riyadh', 'Jeddah', 'Dammam', 'Makkah', 'Madinah'].map((city) => (
-                    <option key={city} value={city}>
-                      {city}
-                    </option>
-                  ))}
+                  {primaryLocationSelectOptions()
+                    .filter((opt) => opt.description === 'City' || opt.id === 'remote')
+                    .slice(0, 40)
+                    .map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label}
+                      </option>
+                    ))}
                 </select>
               </div>
               {tab !== 'opportunities' ? (
@@ -359,8 +367,7 @@ function filterOpportunities(
       if (!matchesSearch(blob, query)) return false
     }
     if (location) {
-      const loc = String(opp.location || '')
-      if (!loc.toLowerCase().includes(location.toLowerCase())) return false
+      if (!opportunityMatchesLocationScopes(opp, [location])) return false
     }
     if (oppType && opp.intent !== oppType) return false
     if (model && opp.modelType !== model) return false
@@ -505,7 +512,7 @@ function FindOpportunityResults({
             <div className="preview-headline">{opp.description?.slice(0, 120) || 'Opportunity'}</div>
             <div className="preview-location">
               <i className="ph-duotone ph-map-pin" />
-              {opp.location || 'Saudi Arabia'}
+              {formatLocation(opp.location) || 'Saudi Arabia'}
             </div>
           </div>
           <div className="preview-badges">

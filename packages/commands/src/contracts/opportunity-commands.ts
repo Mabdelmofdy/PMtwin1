@@ -28,6 +28,8 @@ export type OpportunityCollaborationPayload = {
   readonly description?: string
   readonly intent?: 'need' | 'offer' | 'hybrid' | 'request'
   readonly location?: string
+  /** Canonical coverage scope IDs — single source of truth for multi-location. */
+  readonly coverageAreas?: readonly string[]
   readonly creatorId?: string
   readonly tenantId?: string
   readonly organizationId?: string

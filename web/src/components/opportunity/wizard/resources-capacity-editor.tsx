@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react'
+import { useMemo } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { PmFormField, PmFormGrid, PmFormSection } from '@/components/forms/pm-form-index'
 import { PmButton } from '@/components/ui/pm-button'
 import { Input } from '@/components/ui/input'
+import { PmSingleSelect } from '@/components/ui/pm-multi-select'
 import {
   Select,
   SelectContent,
@@ -16,6 +18,10 @@ import {
   type OpportunityResource,
   type WorkPackage,
 } from '@/domain/opportunity-creation'
+import {
+  isAssetOutsideCoverage,
+  primaryLocationSelectOptions,
+} from '@/domain/locations'
 
 const RESOURCE_TYPES: OpportunityResource['type'][] = [
   'people',
@@ -34,6 +40,8 @@ export function ResourcesCapacityEditor({
   onResourcesChange,
   onCapacityChange,
   fieldStatus,
+  primaryLocation,
+  coverageAreas = [],
 }: {
   resources: OpportunityResource[]
   capacity: OfferCapacity
@@ -42,12 +50,17 @@ export function ResourcesCapacityEditor({
   onResourcesChange: (resources: OpportunityResource[]) => void
   onCapacityChange: (capacity: OfferCapacity) => void
   fieldStatus?: ReactNode
+  /** Opportunity primary location scope ID — for asset-outside-coverage hints. */
+  primaryLocation?: string
+  coverageAreas?: readonly string[]
 }) {
   const updateAt = (index: number, patch: Partial<OpportunityResource>) => {
     onResourcesChange(
       resources.map((item, i) => (i === index ? { ...item, ...patch } : item)),
     )
   }
+
+  const locationOptions = useMemo(() => primaryLocationSelectOptions(), [])
 
   return (
     <div className="space-y-4" data-testid="resources-capacity-editor">
@@ -111,6 +124,33 @@ export function ResourcesCapacityEditor({
                     onChange={(e) =>
                       updateAt(index, { availability: e.target.value })
                     }
+                  />
+                </PmFormField>
+                <PmFormField
+                  id={`res-location-${index}`}
+                  label="Asset location"
+                  hint="Optional — where this asset sits"
+                  error={
+                    isAssetOutsideCoverage(
+                      resource.location,
+                      primaryLocation,
+                      coverageAreas,
+                    )
+                      ? 'Outside declared coverage areas'
+                      : null
+                  }
+                >
+                  <PmSingleSelect
+                    id={`res-location-${index}`}
+                    value={resource.location ?? ''}
+                    onChange={(next) =>
+                      updateAt(index, {
+                        location: next || undefined,
+                      })
+                    }
+                    options={locationOptions}
+                    placeholder="Select location (optional)"
+                    searchPlaceholder="Search locations…"
                   />
                 </PmFormField>
                 <PmFormField id={`res-wp-${index}`} label="Work package (optional)">

@@ -40,13 +40,41 @@ function isSparseNormalized(
   return !hasServiceSignal(normalized)
 }
 
+/** Merge location/coverage from top-level fields when wizard omitted them. */
+function mergeLocationFields(
+  existing: NonNullable<OpportunityPost['normalized']>,
+  extracted: NonNullable<OpportunityPost['normalized']>,
+): NonNullable<OpportunityPost['normalized']> {
+  return {
+    ...existing,
+    location: existing.location || extracted.location,
+    locationCountry: existing.locationCountry || extracted.locationCountry,
+    coverageScopes:
+      (existing.coverageScopes?.length
+        ? existing.coverageScopes
+        : extracted.coverageScopes) ?? [],
+  }
+}
+
 function normalizePost(
   post: OpportunityPost,
   canonical: CanonicalData,
   config: MatchingConfig,
 ): OpportunityPost {
   if (post.normalized && !isSparseNormalized(post.normalized)) {
-    return post
+    // Wizard often persists role+skills without location — backfill from top-level.
+    if (post.normalized.location) {
+      return post
+    }
+    const extracted = extractAndNormalize(
+      { ...post, normalized: undefined },
+      canonical,
+      { config },
+    )
+    return {
+      ...post,
+      normalized: mergeLocationFields(post.normalized, extracted),
+    }
   }
 
   const extracted = extractAndNormalize(
@@ -63,14 +91,8 @@ function normalizePost(
     ...post,
     normalized: {
       ...extracted,
-      ...existing,
+      ...mergeLocationFields(existing, extracted),
       role: existing.role || extracted.role,
-      location: existing.location || extracted.location,
-      locationCountry: existing.locationCountry || extracted.locationCountry,
-      coverageScopes:
-        (existing.coverageScopes?.length
-          ? existing.coverageScopes
-          : extracted.coverageScopes) ?? [],
       requiredServices:
         (existing.requiredServices?.length
           ? existing.requiredServices

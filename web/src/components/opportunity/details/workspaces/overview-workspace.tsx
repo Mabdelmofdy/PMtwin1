@@ -4,6 +4,11 @@ import { OpportunitySection } from '../shared/opportunity-section.tsx'
 import { formatOptionalDate } from '@/lib/opportunity-details'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/tokens'
+import {
+  formatLocation,
+  resolveOpportunityCoverageAreas,
+  resolveScopeLabels,
+} from '@/domain/locations'
 
 function Field({ label, value }: { label: string; value?: string | number | null }) {
   if (value == null || value === '') return null
@@ -21,6 +26,11 @@ export function OverviewWorkspace() {
   const layers = buildCollaborationLayerRows(model)
   const { scope } = model
   const q = scope.qualifications
+  const coverageLabels = resolveScopeLabels(resolveOpportunityCoverageAreas(opp))
+  const coverageDisplay =
+    coverageLabels.length > 0
+      ? coverageLabels.join(', ')
+      : scope.serviceArea
 
   return (
     <div className="space-y-6" role="tabpanel" aria-label="Overview">
@@ -50,9 +60,12 @@ export function OverviewWorkspace() {
           <Field label="Target role" value={opp.attributes?.targetRole} />
           <Field label="Owned by" value={model.ownerPartyName ?? model.creatorName} />
           <Field label="Created by" value={model.creatorName} />
-          <Field label="Primary location" value={opp.location ?? opp.city} />
+          <Field
+            label="Primary location"
+            value={formatLocation(opp.location) || opp.city}
+          />
           <Field label="Country" value={opp.country} />
-          <Field label="Service area" value={scope.serviceArea} />
+          <Field label="Coverage Areas" value={coverageDisplay} />
           <Field label="Delivery method" value={scope.deliveryMethod} />
           <Field
             label="Languages"

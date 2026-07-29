@@ -1,5 +1,6 @@
 import locationsSeed from '@seed-data/locations.json'
 import type { Opportunity } from '@/types/domain.ts'
+import { resolveScopeCoordinates } from '@/domain/locations'
 
 export type GeoCoordinate = {
   readonly lat: number
@@ -106,6 +107,10 @@ export function resolveOpportunityCoordinates(
   if (source.latitude != null && source.longitude != null) {
     return { lat: source.latitude, lng: source.longitude }
   }
+
+  // Canonical scope ID (e.g. sa/riyadh/riyadh-city)
+  const fromScope = resolveScopeCoordinates(source.location)
+  if (fromScope) return fromScope
 
   if (source.locationCity) {
     const city = cityById.get(source.locationCity)

@@ -355,7 +355,9 @@ var LABEL_TO_COUNTRY = {
   "on-site": "UNKNOWN",
   onsite: "UNKNOWN",
   hybrid: "UNKNOWN",
+  // Saudi Arabia — cities / regions
   riyadh: "SA",
+  "riyadh city": "SA",
   jeddah: "SA",
   dammam: "SA",
   "eastern province": "SA",
@@ -363,18 +365,34 @@ var LABEL_TO_COUNTRY = {
   tabuk: "SA",
   neom: "SA",
   "al khobar": "SA",
+  khobar: "SA",
+  dhahran: "SA",
   makkah: "SA",
+  taif: "SA",
   asir: "SA",
   abha: "SA",
+  "khamis mushait": "SA",
+  diriyah: "SA",
+  "al kharj": "SA",
+  buraydah: "SA",
+  unaizah: "SA",
+  qassim: "SA",
+  hail: "SA",
+  arar: "SA",
+  jazan: "SA",
+  najran: "SA",
+  "al bahah": "SA",
+  sakaka: "SA",
   ksa: "SA",
   "saudi arabia": "SA",
   sa: "SA",
-  gcc: "GCC",
-  mena: "MENA",
-  global: "GLOBAL",
+  // UAE
   uae: "AE",
+  "united arab emirates": "AE",
   dubai: "AE",
   "abu dhabi": "AE",
+  sharjah: "AE",
+  // Qatar / Kuwait / Bahrain / Oman
   qatar: "QA",
   doha: "QA",
   kuwait: "KW",
@@ -382,7 +400,17 @@ var LABEL_TO_COUNTRY = {
   bahrain: "BH",
   manama: "BH",
   oman: "OM",
-  muscat: "OM"
+  muscat: "OM",
+  // Egypt (MENA, not GCC)
+  egypt: "EG",
+  eg: "EG",
+  cairo: "EG",
+  alexandria: "EG",
+  giza: "EG",
+  // Regional
+  gcc: "GCC",
+  mena: "MENA",
+  global: "GLOBAL"
 };
 var GCC_COUNTRIES = /* @__PURE__ */ new Set([
   "SA",
@@ -391,6 +419,10 @@ var GCC_COUNTRIES = /* @__PURE__ */ new Set([
   "KW",
   "BH",
   "OM"
+]);
+var MENA_COUNTRIES = /* @__PURE__ */ new Set([
+  ...GCC_COUNTRIES,
+  "EG"
 ]);
 var NATIONWIDE_TOKENS = /* @__PURE__ */ new Set([
   "ksa",
@@ -408,6 +440,13 @@ var GCC_TOKENS = /* @__PURE__ */ new Set(["gcc", "gulf", "gulf cooperation counc
 var MENA_TOKENS = /* @__PURE__ */ new Set(["mena", "middle east", "middle-east"]);
 var GLOBAL_TOKENS = /* @__PURE__ */ new Set(["global", "worldwide", "international", "world"]);
 var REMOTE_TOKENS = /* @__PURE__ */ new Set(["remote", "work from home", "wfh"]);
+var GENERIC_COVERAGE_TOKENS = /* @__PURE__ */ new Set([
+  ...NATIONWIDE_TOKENS,
+  ...GCC_TOKENS,
+  ...MENA_TOKENS,
+  ...GLOBAL_TOKENS,
+  ...REMOTE_TOKENS
+]);
 function normalizeToken(value) {
   return value.trim().toLowerCase().replace(/[_/]+/g, " ").replace(/\s+/g, " ");
 }
@@ -491,16 +530,36 @@ function resolveCoverage(primaryLocation, coverageScopes, attributes) {
 function isGccCountry(code) {
   return GCC_COUNTRIES.has(code);
 }
+function isMenaCountry(code) {
+  return MENA_COUNTRIES.has(code);
+}
 function countriesCompatibleViaNationwide(coverage2, counterpartCountry) {
   if (!coverage2.hasNationwide) return false;
   return counterpartCountry === "SA" || counterpartCountry === "UNKNOWN";
 }
 function countriesCompatibleViaRegional(coverage2, counterpartCountry) {
   if (coverage2.hasGlobal) return true;
-  if (coverage2.hasMena || coverage2.hasGccRegional) {
-    return isGccCountry(counterpartCountry) || counterpartCountry === "GCC" || counterpartCountry === "MENA" || counterpartCountry === "UNKNOWN";
+  if (coverage2.hasMena) {
+    return isMenaCountry(counterpartCountry) || counterpartCountry === "GCC" || counterpartCountry === "MENA" || counterpartCountry === "UNKNOWN";
+  }
+  if (coverage2.hasGccRegional) {
+    return isGccCountry(counterpartCountry) || counterpartCountry === "GCC" || counterpartCountry === "UNKNOWN";
   }
   return false;
+}
+function specificCoverageTokens(coverage2) {
+  return coverage2.coverageScopes.filter((token) => !GENERIC_COVERAGE_TOKENS.has(token));
+}
+function coverageTokenCountries(coverage2) {
+  const countries = /* @__PURE__ */ new Set();
+  for (const token of coverage2.coverageScopes) {
+    const code = resolveLocationCountry(token);
+    if (code !== "UNKNOWN" && code !== "REMOTE") countries.add(code);
+  }
+  if (coverage2.country !== "UNKNOWN" && coverage2.country !== "REMOTE") {
+    countries.add(coverage2.country);
+  }
+  return countries;
 }
 function evaluateLocationCoverage(need, offer) {
   if (need.isRemote || offer.isRemote) {
@@ -519,17 +578,24 @@ function evaluateLocationCoverage(need, offer) {
   if (needCity && offerCity && needCity === offerCity) {
     return { score: 1, tier: "same_city", label: "Same City" };
   }
+  const needSpecific = specificCoverageTokens(need);
+  const offerSpecific = new Set(specificCoverageTokens(offer));
+  const overlap = needSpecific.filter((token) => offerSpecific.has(token));
+  if (overlap.length > 0) {
+    return { score: 1, tier: "coverage_overlap", label: "Coverage Overlap" };
+  }
   if (needCountry === "SA" && offerCountry === "SA" || normalizeToken(need.primaryLocation) === "ksa" && offerCountry === "SA" || normalizeToken(offer.primaryLocation) === "ksa" && needCountry === "SA") {
-    if (needCity && offerCity && needCity !== offerCity) {
-      if (needCity === "ksa" || offerCity === "ksa") {
-        return { score: 0.75, tier: "same_country", label: "Same Country" };
-      }
-      return { score: 0.75, tier: "same_country", label: "Same Country" };
-    }
     return { score: 0.75, tier: "same_country", label: "Same Country" };
   }
   if (needCountry !== "UNKNOWN" && offerCountry !== "UNKNOWN" && needCountry === offerCountry && needCountry !== "REMOTE") {
     return { score: 0.75, tier: "same_country", label: "Same Country" };
+  }
+  const needCountries = coverageTokenCountries(need);
+  const offerCountries = coverageTokenCountries(offer);
+  for (const code of needCountries) {
+    if (offerCountries.has(code) && code !== "GCC" && code !== "MENA" && code !== "GLOBAL") {
+      return { score: 0.75, tier: "same_country", label: "Same Country" };
+    }
   }
   if (isGccCountry(needCountry) && isGccCountry(offerCountry) && needCountry !== offerCountry) {
     return { score: 0.5, tier: "different_gcc_country", label: "Different GCC Country" };
@@ -3450,7 +3516,26 @@ function resolveMaxCandidates(config, override) {
   return override ?? config.CANDIDATE_MAX ?? 200;
 }
 function resolveNormalized(opportunity, canonical, config) {
-  return opportunity.normalized ?? extractAndNormalize(opportunity, canonical, { config });
+  if (!opportunity.normalized) {
+    return extractAndNormalize(opportunity, canonical, { config });
+  }
+  const existing = opportunity.normalized;
+  if (existing.location) {
+    if ((existing.coverageScopes?.length ?? 0) > 0) return existing;
+    const scopes = extractCoverageScopes(opportunity.attributes);
+    return scopes.length > 0 ? { ...existing, coverageScopes: scopes } : existing;
+  }
+  const extracted = extractAndNormalize(
+    { ...opportunity, normalized: void 0 },
+    canonical,
+    { config }
+  );
+  return {
+    ...existing,
+    location: extracted.location,
+    locationCountry: existing.locationCountry || extracted.locationCountry,
+    coverageScopes: (existing.coverageScopes?.length ? existing.coverageScopes : extracted.coverageScopes) ?? []
+  };
 }
 function passHardGate(needPost, offerPost, needNorm, offerNorm, config) {
   return passesPair(needPost, offerPost, config, { needNorm, offerNorm }).ok;
@@ -4497,9 +4582,28 @@ function isSparseNormalized(normalized2) {
   if (!normalized2.role) return true;
   return !hasServiceSignal(normalized2);
 }
+function mergeLocationFields(existing, extracted) {
+  return {
+    ...existing,
+    location: existing.location || extracted.location,
+    locationCountry: existing.locationCountry || extracted.locationCountry,
+    coverageScopes: (existing.coverageScopes?.length ? existing.coverageScopes : extracted.coverageScopes) ?? []
+  };
+}
 function normalizePost(post, canonical, config) {
   if (post.normalized && !isSparseNormalized(post.normalized)) {
-    return post;
+    if (post.normalized.location) {
+      return post;
+    }
+    const extracted2 = extractAndNormalize(
+      { ...post, normalized: void 0 },
+      canonical,
+      { config }
+    );
+    return {
+      ...post,
+      normalized: mergeLocationFields(post.normalized, extracted2)
+    };
   }
   const extracted = extractAndNormalize(
     { ...post, normalized: void 0 },
@@ -4514,11 +4618,8 @@ function normalizePost(post, canonical, config) {
     ...post,
     normalized: {
       ...extracted,
-      ...existing,
+      ...mergeLocationFields(existing, extracted),
       role: existing.role || extracted.role,
-      location: existing.location || extracted.location,
-      locationCountry: existing.locationCountry || extracted.locationCountry,
-      coverageScopes: (existing.coverageScopes?.length ? existing.coverageScopes : extracted.coverageScopes) ?? [],
       requiredServices: (existing.requiredServices?.length ? existing.requiredServices : extracted.requiredServices) ?? [],
       offeredServices: (existing.offeredServices?.length ? existing.offeredServices : extracted.offeredServices) ?? [],
       skills: (existing.skills?.length ? existing.skills : extracted.skills) ?? [],

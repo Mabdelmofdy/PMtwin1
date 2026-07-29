@@ -14,6 +14,14 @@ import {
   resolveListEmptyState,
 } from '@/components/data/pm-data-index'
 import { PmFormField } from '@/components/forms/pm-form-index'
+import { PmMultiSelect } from '@/components/ui/pm-multi-select'
+import {
+  coverageAreaSelectOptions,
+  formatLocation,
+  opportunityMatchesLocationQuery,
+  opportunityMatchesLocationScopes,
+  resolveScopeLabel,
+} from '@/domain/locations'
 import {
   PmContentCard,
   PmBrowsePage,
@@ -72,6 +80,7 @@ export function OpportunitiesPage() {
   const [subModels, setSubModels] = useState<string[]>([])
   const [exchangeModes, setExchangeModes] = useState<string[]>([])
   const [matchTypes, setMatchTypes] = useState<string[]>([])
+  const [locations, setLocations] = useState<string[]>([])
   const [ownershipFilter, setOwnershipFilter] = useState<OpportunityOwnershipFilter>(() =>
     resolveDefaultOpportunityOwnershipFilter(navState),
   )
@@ -88,6 +97,7 @@ export function OpportunitiesPage() {
     setSubModels(parseCsvParam(searchParams.get('subModels')))
     setExchangeModes(parseCsvParam(searchParams.get('exchangeModes')))
     setMatchTypes(parseCsvParam(searchParams.get('matchTypes')))
+    setLocations(parseCsvParam(searchParams.get('locations')))
   }, [searchParams])
 
   const allOpportunities = opportunitiesApi.list()
@@ -157,7 +167,8 @@ export function OpportunitiesPage() {
       const matchesSearch =
         !search ||
         o.title.toLowerCase().includes(search.toLowerCase()) ||
-        o.location?.toLowerCase().includes(search.toLowerCase())
+        opportunityMatchesLocationQuery(o, search)
+      const matchesLocations = opportunityMatchesLocationScopes(o, locations)
       const matchesMainModel =
         mainModels.length === 0 || (o.mainCollaborationModel != null && mainModels.includes(o.mainCollaborationModel))
       const matchesSubModel =
@@ -172,6 +183,7 @@ export function OpportunitiesPage() {
           matchTypes.includes(o.preferredMatchingTopology))
       return (
         matchesSearch &&
+        matchesLocations &&
         matchesStatus &&
         matchesMainModel &&
         matchesSubModel &&
@@ -188,6 +200,7 @@ export function OpportunitiesPage() {
     subModels,
     exchangeModes,
     matchTypes,
+    locations,
   ])
 
   const totalItems = opportunities.length
@@ -205,7 +218,8 @@ export function OpportunitiesPage() {
       mainModels.length > 0 ||
       subModels.length > 0 ||
       exchangeModes.length > 0 ||
-      matchTypes.length > 0,
+      matchTypes.length > 0 ||
+      locations.length > 0,
     firstRun: {
       title: isMarketplaceBrowse
         ? 'No opportunities available yet'
@@ -389,6 +403,20 @@ export function OpportunitiesPage() {
                       </SelectContent>
                     </Select>
                   </PmFormField>
+                  <PmFormField id="opp-filter-locations" label="Locations">
+                    <PmMultiSelect
+                      id="opp-filter-locations"
+                      value={locations}
+                      onChange={(next) => {
+                        setLocations(next)
+                        setPage(1)
+                      }}
+                      options={coverageAreaSelectOptions()}
+                      maxSelected={15}
+                      placeholder="Filter by location…"
+                      searchPlaceholder="Search areas…"
+                    />
+                  </PmFormField>
                 </div>
               </PmTableFilter>
             }
@@ -433,6 +461,17 @@ export function OpportunitiesPage() {
                     value: formatFrameworkMatchTypeLabel(type),
                     onRemove: () => {
                       setMatchTypes((current) => current.filter((item) => item !== type))
+                      setPage(1)
+                    },
+                  })),
+                  ...locations.map((scopeId) => ({
+                    id: `location-${scopeId}`,
+                    label: 'Location',
+                    value: resolveScopeLabel(scopeId),
+                    onRemove: () => {
+                      setLocations((current) =>
+                        current.filter((item) => item !== scopeId),
+                      )
                       setPage(1)
                     },
                   })),
@@ -507,6 +546,7 @@ export function OpportunitiesPage() {
                     setSubModels([])
                     setExchangeModes([])
                     setMatchTypes([])
+                    setLocations([])
                     setSearchParams({})
                   setPage(1)
                 }}
@@ -677,7 +717,8 @@ export function OpportunityMapPage() {
                       {truncate(opportunity.title, 48)}
                     </p>
                     <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
-                      {opportunity.location ?? 'Location unavailable'}
+                      {formatLocation(opportunity.location) ||
+                        'Location unavailable'}
                     </p>
                     <div className="mt-2 flex items-center gap-2">
                       {isOnMap ? (

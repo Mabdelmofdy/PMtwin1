@@ -1,5 +1,6 @@
 import { validateOpportunityCollaborationModel } from '@pm-twin/collaboration-models'
 import { skillNames } from '@/domain/opportunity-creation'
+import { isScopeId } from '@/domain/locations'
 import {
   buildCollaborationCommandPayload,
   type OpportunityDraft,
@@ -40,6 +41,23 @@ export function validateCreateOpportunityDraft(
   }
   if (!hasText(draft.location)) {
     errors.push('Primary location is required')
+  } else if (!isScopeId(draft.location.trim())) {
+    errors.push('Primary location must be a known location from the list')
+  }
+  if (draft.coverageAreas.length > 25) {
+    errors.push('Coverage areas are limited to 25 selections')
+  }
+  for (const area of draft.coverageAreas) {
+    if (!isScopeId(area)) {
+      errors.push(`Unknown coverage area: ${area}`)
+      break
+    }
+  }
+  for (const resource of draft.resources) {
+    if (resource.location && !isScopeId(resource.location)) {
+      errors.push(`Unknown asset location on resource "${resource.name || 'untitled'}"`)
+      break
+    }
   }
   if (!hasText(draft.startDate)) {
     errors.push('Start date is required')

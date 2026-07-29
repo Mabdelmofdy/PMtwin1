@@ -35,7 +35,7 @@ const collab = {
   acceptedExchangeModes: ['cash'],
 } as const
 
-/** Shape produced by opportunity wizard draft-model (no location in normalized). */
+/** Legacy wizard shape (role+skills, location only on top-level). */
 function wizardNeed(
   id: string,
   creatorId: string,

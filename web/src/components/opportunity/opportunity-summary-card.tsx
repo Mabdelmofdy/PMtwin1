@@ -5,6 +5,7 @@ import { pmTypography } from '@/tokens'
 import { PmContentCard } from '@/components/layout/pm-layout-panels'
 import { OpportunityStatusBadge } from '@/components/opportunity/opportunity-status-badge'
 import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'
+import { formatLocation } from '@/domain/locations'
 
 type OpportunitySummaryCardProps = {
   readonly opportunity: Opportunity
@@ -33,10 +34,12 @@ export function OpportunitySummaryCard({
         <p className={cn(pmTypography.bodySm, 'text-muted-foreground')}>No description provided.</p>
       )}
       <dl className={cn(pmTypography.caption, 'mt-4 grid gap-2 sm:grid-cols-2')}>
-        {opportunity.location ? (
+        {formatLocation(opportunity.location) ? (
           <div>
             <dt className="text-muted-foreground">Location</dt>
-            <dd className="font-medium text-foreground">{opportunity.location}</dd>
+            <dd className="font-medium text-foreground">
+              {formatLocation(opportunity.location)}
+            </dd>
           </div>
         ) : null}
         {creatorName ? (

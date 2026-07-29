@@ -42,13 +42,20 @@ import {
   emptyCommercialStructure,
 } from '@/domain/opportunity-commercial-structure'
 import type { Opportunity } from '@/types/domain.ts'
+import {
+  collapseRedundantScopes,
+  normalizeStoredLocation,
+  resolveOpportunityCoverageAreas,
+  resolveScopeIdFromText,
+} from '@/domain/locations'
 
 export type OpportunityDraft = {
   title: string
   intent: 'need' | 'offer' | ''
   description: string
   location: string
-  serviceArea: string
+  /** Canonical coverage scope IDs (single source of truth). */
+  coverageAreas: string[]
   mainCollaborationModel: string
   modelType: string
   subModelType: string
@@ -90,7 +97,7 @@ export const initialDraft: OpportunityDraft = {
   intent: '',
   description: EMPTY_OPPORTUNITY_WIZARD_DRAFT.description ?? '',
   location: EMPTY_OPPORTUNITY_WIZARD_DRAFT.location ?? '',
-  serviceArea: '',
+  coverageAreas: [],
   mainCollaborationModel: EMPTY_OPPORTUNITY_WIZARD_DRAFT.mainCollaborationModel ?? '',
   modelType: EMPTY_OPPORTUNITY_WIZARD_DRAFT.modelType ?? '',
   subModelType: EMPTY_OPPORTUNITY_WIZARD_DRAFT.subModelType ?? '',
@@ -286,8 +293,16 @@ export function opportunityToDraft(existing: Opportunity): OpportunityDraft {
           ? 'need'
           : '',
     description: existing.description ?? '',
-    location: existing.location ?? '',
-    serviceArea: String(attrs.serviceArea ?? ''),
+    location: normalizeStoredLocation(existing.location ?? ''),
+    coverageAreas: (() => {
+      const areas = resolveOpportunityCoverageAreas(existing)
+      if (areas.length > 0) return collapseRedundantScopes(areas).collapsed
+      // Last-resort: free-text serviceArea that did not resolve still ignored
+      const legacy = String(attrs.serviceArea ?? '').trim()
+      if (!legacy) return []
+      const id = resolveScopeIdFromText(legacy)
+      return id ? [id] : []
+    })(),
     mainCollaborationModel: existing.mainCollaborationModel ?? '',
     modelType: existing.modelType ?? '',
     subModelType: existing.subModelType ?? '',
@@ -409,6 +424,8 @@ export function buildOpportunityDraftInput(
   return {
     ...base,
     ...collaborationPatch,
+    location: normalizeStoredLocation(synced.location) || synced.location,
+    coverageAreas: collapseRedundantScopes(synced.coverageAreas).collapsed,
     structuredSkills: synced.structuredSkills,
     workPackages: effectiveWorkPackages,
     capacity: synced.intent === 'offer' ? synced.capacity : undefined,
@@ -460,7 +477,8 @@ export function buildOpportunityDraftInput(
       richTimeline: synced.richTimeline,
       commercialConstraints: synced.commercialConstraints,
       commercialStructure: synced.commercialStructure,
-      serviceArea: synced.serviceArea || undefined,
+      // Coverage SSOT is top-level coverageAreas — do not mirror serviceArea.
+      serviceArea: undefined,
       availabilityEndDate: synced.availabilityEndDate || undefined,
       experienceLevel: synced.experienceLevel || undefined,
       teamSize: synced.teamSize || undefined,
@@ -486,6 +504,7 @@ export function buildOpportunityDraftInput(
             targetDate: m.targetDate,
           }))
         : base.deliveryMilestones,
+    // Location / coverage tokens are derived in opportunityToPost — do not persist.
     normalized: {
       role: synced.targetRole || undefined,
       ...(synced.intent === 'offer'
@@ -535,7 +554,8 @@ export function buildCollaborationCommandPayload(
       synced.intent === 'offer' || synced.intent === 'need'
         ? synced.intent
         : undefined,
-    location: synced.location,
+    location: normalizeStoredLocation(synced.location) || synced.location,
+    coverageAreas: collapseRedundantScopes(synced.coverageAreas).collapsed,
     creatorId,
     mainCollaborationModel: synced.mainCollaborationModel,
     modelType: synced.modelType,

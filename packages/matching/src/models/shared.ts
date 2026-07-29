@@ -1,6 +1,7 @@
 import { withMatchingDefaults } from '../config/defaults.ts'
 import { passesPair } from '../constraints/hard-constraints.ts'
 import { extractAndNormalize } from '../normalize/extract.ts'
+import { extractCoverageScopes } from '../normalize/location-coverage.ts'
 import type { CanonicalData } from '../types/canonical.ts'
 import type { MatchingConfig } from '../types/matching-config.ts'
 import type { NormalizedPost, OpportunityPost } from '../types/opportunity.ts'
@@ -13,12 +14,40 @@ export function resolveMaxCandidates(config: MatchingConfig, override?: number):
   return override ?? config.CANDIDATE_MAX ?? 200
 }
 
+/**
+ * Prefer persisted normalized, but backfill location/coverage when the wizard
+ * wrote role+skills without location (top-level opportunity.location still set).
+ */
 export function resolveNormalized(
   opportunity: OpportunityPost,
   canonical: CanonicalData,
   config: MatchingConfig,
 ): NormalizedPost {
-  return opportunity.normalized ?? extractAndNormalize(opportunity, canonical, { config })
+  if (!opportunity.normalized) {
+    return extractAndNormalize(opportunity, canonical, { config })
+  }
+
+  const existing = opportunity.normalized
+  if (existing.location) {
+    if ((existing.coverageScopes?.length ?? 0) > 0) return existing
+    const scopes = extractCoverageScopes(opportunity.attributes)
+    return scopes.length > 0 ? { ...existing, coverageScopes: scopes } : existing
+  }
+
+  const extracted = extractAndNormalize(
+    { ...opportunity, normalized: undefined },
+    canonical,
+    { config },
+  )
+  return {
+    ...existing,
+    location: extracted.location,
+    locationCountry: existing.locationCountry || extracted.locationCountry,
+    coverageScopes:
+      (existing.coverageScopes?.length
+        ? existing.coverageScopes
+        : extracted.coverageScopes) ?? [],
+  }
 }
 
 export function passHardGate(

@@ -2,6 +2,7 @@
 
 import type { OpportunityDetailsReadModel } from './opportunity-details-read-model.ts'
 import { formatReadinessScorePercent } from '@/components/ui/pm-readiness-score-display'
+import { formatLocation } from '@/domain/locations'
 
 export type ExecutiveHeaderViewModel = {
   readonly title: string
@@ -36,7 +37,7 @@ export function buildExecutiveHeaderViewModel(
     matchingTopology: collaboration.matchingTopology,
     ownerLabel: model.ownerPartyName ?? creatorName,
     createdByLabel: creatorName,
-    location: opportunity.location ?? opportunity.city,
+    location: formatLocation(opportunity.location) || opportunity.city,
     readinessLabel: capabilities.canViewReadinessDetails
       ? `${formatReadinessScorePercent(kpis.readiness.score)} Ready`
       : undefined,

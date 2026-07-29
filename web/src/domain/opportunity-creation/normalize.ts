@@ -376,6 +376,9 @@ export function normalizeResources(value: unknown): OpportunityResource[] {
         mandatory: Boolean(item.mandatory),
         availability: item.availability ? String(item.availability) : undefined,
         notes: item.notes ? String(item.notes) : undefined,
+        location: item.location
+          ? String(item.location).trim() || undefined
+          : undefined,
         workPackageId:
           item.workPackageId == null || item.workPackageId === ''
             ? null

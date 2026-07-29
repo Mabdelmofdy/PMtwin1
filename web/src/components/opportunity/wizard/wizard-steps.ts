@@ -24,6 +24,7 @@ export const FIELD_TO_WIZARD_STEP: Readonly<Record<string, WizardStepId>> = {
   skillsIntent: 'scope_work',
   servicesIntent: 'scope_work',
   location: 'opportunity',
+  coverageAreas: 'opportunity',
   timeline: 'scope_work',
   budgetValueTerms: 'commercial',
   compliance: 'scope_work',

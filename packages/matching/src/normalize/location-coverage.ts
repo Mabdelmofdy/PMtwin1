@@ -1,6 +1,6 @@
 /**
  * Location coverage hierarchy for soft locationFit scoring.
- * Primary city is a preference; nationwide / regional coverage lifts fit.
+ * Primary city is a preference; nationwide / regional / coverage overlap lifts fit.
  */
 
 export type LocationCountryCode =
@@ -10,6 +10,7 @@ export type LocationCountryCode =
   | 'KW'
   | 'BH'
   | 'OM'
+  | 'EG'
   | 'REMOTE'
   | 'GCC'
   | 'MENA'
@@ -20,6 +21,7 @@ export type LocationCoverageTier =
   | 'remote'
   | 'nationwide'
   | 'regional_gcc'
+  | 'coverage_overlap'
   | 'same_city'
   | 'same_country'
   | 'different_gcc_country'
@@ -37,7 +39,9 @@ const LABEL_TO_COUNTRY: Readonly<Record<string, LocationCountryCode>> = {
   'on-site': 'UNKNOWN',
   onsite: 'UNKNOWN',
   hybrid: 'UNKNOWN',
+  // Saudi Arabia — cities / regions
   riyadh: 'SA',
+  'riyadh city': 'SA',
   jeddah: 'SA',
   dammam: 'SA',
   'eastern province': 'SA',
@@ -45,18 +49,34 @@ const LABEL_TO_COUNTRY: Readonly<Record<string, LocationCountryCode>> = {
   tabuk: 'SA',
   neom: 'SA',
   'al khobar': 'SA',
+  khobar: 'SA',
+  dhahran: 'SA',
   makkah: 'SA',
+  taif: 'SA',
   asir: 'SA',
   abha: 'SA',
+  'khamis mushait': 'SA',
+  diriyah: 'SA',
+  'al kharj': 'SA',
+  buraydah: 'SA',
+  unaizah: 'SA',
+  qassim: 'SA',
+  hail: 'SA',
+  arar: 'SA',
+  jazan: 'SA',
+  najran: 'SA',
+  'al bahah': 'SA',
+  sakaka: 'SA',
   ksa: 'SA',
   'saudi arabia': 'SA',
   sa: 'SA',
-  gcc: 'GCC',
-  mena: 'MENA',
-  global: 'GLOBAL',
+  // UAE
   uae: 'AE',
+  'united arab emirates': 'AE',
   dubai: 'AE',
   'abu dhabi': 'AE',
+  sharjah: 'AE',
+  // Qatar / Kuwait / Bahrain / Oman
   qatar: 'QA',
   doha: 'QA',
   kuwait: 'KW',
@@ -65,6 +85,16 @@ const LABEL_TO_COUNTRY: Readonly<Record<string, LocationCountryCode>> = {
   manama: 'BH',
   oman: 'OM',
   muscat: 'OM',
+  // Egypt (MENA, not GCC)
+  egypt: 'EG',
+  eg: 'EG',
+  cairo: 'EG',
+  alexandria: 'EG',
+  giza: 'EG',
+  // Regional
+  gcc: 'GCC',
+  mena: 'MENA',
+  global: 'GLOBAL',
 }
 
 const GCC_COUNTRIES: ReadonlySet<LocationCountryCode> = new Set([
@@ -74,6 +104,11 @@ const GCC_COUNTRIES: ReadonlySet<LocationCountryCode> = new Set([
   'KW',
   'BH',
   'OM',
+])
+
+const MENA_COUNTRIES: ReadonlySet<LocationCountryCode> = new Set([
+  ...GCC_COUNTRIES,
+  'EG',
 ])
 
 const NATIONWIDE_TOKENS = new Set([
@@ -93,6 +128,14 @@ const GCC_TOKENS = new Set(['gcc', 'gulf', 'gulf cooperation council'])
 const MENA_TOKENS = new Set(['mena', 'middle east', 'middle-east'])
 const GLOBAL_TOKENS = new Set(['global', 'worldwide', 'international', 'world'])
 const REMOTE_TOKENS = new Set(['remote', 'work from home', 'wfh'])
+
+const GENERIC_COVERAGE_TOKENS = new Set([
+  ...NATIONWIDE_TOKENS,
+  ...GCC_TOKENS,
+  ...MENA_TOKENS,
+  ...GLOBAL_TOKENS,
+  ...REMOTE_TOKENS,
+])
 
 function normalizeToken(value: string): string {
   return value.trim().toLowerCase().replace(/[_/]+/g, ' ').replace(/\s+/g, ' ')
@@ -188,7 +231,6 @@ export function resolveCoverage(
     if (GCC_TOKENS.has(token)) hasGccRegional = true
     if (MENA_TOKENS.has(token)) hasMena = true
     if (GLOBAL_TOKENS.has(token)) hasGlobal = true
-    // Free-text service areas like "Riyadh metro" / "Eastern Province" stay city/region preference
     if (token.includes('saudi') && (token.includes('all') || token.includes('nation'))) {
       hasNationwide = true
     }
@@ -210,12 +252,15 @@ function isGccCountry(code: LocationCountryCode): boolean {
   return GCC_COUNTRIES.has(code)
 }
 
+function isMenaCountry(code: LocationCountryCode): boolean {
+  return MENA_COUNTRIES.has(code)
+}
+
 function countriesCompatibleViaNationwide(
   coverage: ResolvedCoverage,
   counterpartCountry: LocationCountryCode,
 ): boolean {
   if (!coverage.hasNationwide) return false
-  // Nationwide (Saudi Arabia / KSA) covers SA cities and unknown marketplace locations
   return counterpartCountry === 'SA' || counterpartCountry === 'UNKNOWN'
 }
 
@@ -224,15 +269,39 @@ function countriesCompatibleViaRegional(
   counterpartCountry: LocationCountryCode,
 ): boolean {
   if (coverage.hasGlobal) return true
-  if (coverage.hasMena || coverage.hasGccRegional) {
+  if (coverage.hasMena) {
     return (
-      isGccCountry(counterpartCountry)
+      isMenaCountry(counterpartCountry)
       || counterpartCountry === 'GCC'
       || counterpartCountry === 'MENA'
       || counterpartCountry === 'UNKNOWN'
     )
   }
+  if (coverage.hasGccRegional) {
+    return (
+      isGccCountry(counterpartCountry)
+      || counterpartCountry === 'GCC'
+      || counterpartCountry === 'UNKNOWN'
+    )
+  }
   return false
+}
+
+/** Specific (non-generic) coverage tokens for intersection scoring. */
+function specificCoverageTokens(coverage: ResolvedCoverage): string[] {
+  return coverage.coverageScopes.filter((token) => !GENERIC_COVERAGE_TOKENS.has(token))
+}
+
+function coverageTokenCountries(coverage: ResolvedCoverage): Set<LocationCountryCode> {
+  const countries = new Set<LocationCountryCode>()
+  for (const token of coverage.coverageScopes) {
+    const code = resolveLocationCountry(token)
+    if (code !== 'UNKNOWN' && code !== 'REMOTE') countries.add(code)
+  }
+  if (coverage.country !== 'UNKNOWN' && coverage.country !== 'REMOTE') {
+    countries.add(coverage.country)
+  }
+  return countries
 }
 
 /**
@@ -249,7 +318,6 @@ export function evaluateLocationCoverage(
   const needCountry = need.country === 'UNKNOWN' && need.hasNationwide ? 'SA' : need.country
   const offerCountry = offer.country === 'UNKNOWN' && offer.hasNationwide ? 'SA' : offer.country
 
-  // Nationwide coverage covering counterpart country → full compatibility
   if (
     countriesCompatibleViaNationwide(need, offerCountry)
     || countriesCompatibleViaNationwide(offer, needCountry)
@@ -257,7 +325,6 @@ export function evaluateLocationCoverage(
     return { score: 1, tier: 'nationwide', label: 'Nationwide' }
   }
 
-  // GCC / MENA / Global regional coverage
   if (
     countriesCompatibleViaRegional(need, offerCountry)
     || countriesCompatibleViaRegional(offer, needCountry)
@@ -265,25 +332,26 @@ export function evaluateLocationCoverage(
     return { score: 0.85, tier: 'regional_gcc', label: 'Regional GCC' }
   }
 
+  // Same primary city — prefer this tier for diagnostics when HQ cities match
   const needCity = normalizeToken(need.primaryLocation)
   const offerCity = normalizeToken(offer.primaryLocation)
   if (needCity && offerCity && needCity === offerCity) {
     return { score: 1, tier: 'same_city', label: 'Same City' }
   }
 
-  // Country-level KSA label vs SA city (without nationwide flag already handled)
+  // Specific coverage intersection (primary + coverage areas), excluding generics
+  const needSpecific = specificCoverageTokens(need)
+  const offerSpecific = new Set(specificCoverageTokens(offer))
+  const overlap = needSpecific.filter((token) => offerSpecific.has(token))
+  if (overlap.length > 0) {
+    return { score: 1, tier: 'coverage_overlap', label: 'Coverage Overlap' }
+  }
+
   if (
     (needCountry === 'SA' && offerCountry === 'SA')
     || (normalizeToken(need.primaryLocation) === 'ksa' && offerCountry === 'SA')
     || (normalizeToken(offer.primaryLocation) === 'ksa' && needCountry === 'SA')
   ) {
-    if (needCity && offerCity && needCity !== offerCity) {
-      // Same country, different city preference
-      if (needCity === 'ksa' || offerCity === 'ksa') {
-        return { score: 0.75, tier: 'same_country', label: 'Same Country' }
-      }
-      return { score: 0.75, tier: 'same_country', label: 'Same Country' }
-    }
     return { score: 0.75, tier: 'same_country', label: 'Same Country' }
   }
 
@@ -294,6 +362,16 @@ export function evaluateLocationCoverage(
     && needCountry !== 'REMOTE'
   ) {
     return { score: 0.75, tier: 'same_country', label: 'Same Country' }
+  }
+
+  // Same country via coverage tokens (e.g. Dubai HQ covering Riyadh vs Riyadh need
+  // already handled by overlap; this catches country-level soft fit)
+  const needCountries = coverageTokenCountries(need)
+  const offerCountries = coverageTokenCountries(offer)
+  for (const code of needCountries) {
+    if (offerCountries.has(code) && code !== 'GCC' && code !== 'MENA' && code !== 'GLOBAL') {
+      return { score: 0.75, tier: 'same_country', label: 'Same Country' }
+    }
   }
 
   if (isGccCountry(needCountry) && isGccCountry(offerCountry) && needCountry !== offerCountry) {

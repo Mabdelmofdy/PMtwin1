@@ -7,9 +7,16 @@ import {
 } from '@/components/forms/pm-form-index'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { PmMultiSelect, PmSingleSelect } from '@/components/ui/pm-multi-select'
 import { cn } from '@/lib/utils'
 import { pmTypography } from '@/tokens'
 import { todayIso } from '@pm-twin/validation'
+import {
+  collapseRedundantScopes,
+  coverageAreaSelectOptions,
+  primaryLocationSelectOptions,
+} from '@/domain/locations'
+import { useMemo } from 'react'
 
 export type OpportunityStepProps = {
   draft: OpportunityDraft
@@ -76,6 +83,9 @@ export function OpportunityStep({
     Boolean(draft.startDate.trim()) &&
     Boolean(draft.availabilityEndDate.trim()) &&
     draft.availabilityEndDate.trim() < draft.startDate.trim()
+
+  const primaryOptions = useMemo(() => primaryLocationSelectOptions(), [])
+  const coverageOptions = useMemo(() => coverageAreaSelectOptions(), [])
 
   return (
     <div data-slot="opportunity-step" className="space-y-8">
@@ -195,26 +205,46 @@ export function OpportunityStep({
               id="location"
               label="Primary location"
               required
+              hint="Head office or main project location"
               error={
                 showValidation && !draft.location.trim()
                   ? 'Primary location is required'
                   : null
               }
             >
-              <Input
-                data-field-id="location"
+              <PmSingleSelect
+                id="location"
                 value={draft.location}
-                onChange={(e) => onChange({ location: e.target.value })}
+                onChange={(next) => onChange({ location: next })}
+                options={primaryOptions}
+                placeholder="Select primary location"
+                searchPlaceholder="Search cities, regions…"
               />
             </PmFormField>
           </PmFormGridItem>
-          <PmFormGridItem span={1}>
-            <PmFormField id="serviceArea" label="Service area">
-              <Input
-                data-field-id="serviceArea"
-                value={draft.serviceArea}
-                onChange={(e) => onChange({ serviceArea: e.target.value })}
+          <PmFormGridItem span={2}>
+            <PmFormField
+              id="coverageAreas"
+              label="Coverage Areas / Available In"
+              hint="Where you can actually deliver. Primary location is always included."
+            >
+              <PmMultiSelect
+                id="coverageAreas"
+                value={draft.coverageAreas}
+                onChange={(next) => {
+                  const { collapsed } = collapseRedundantScopes(next)
+                  onChange({ coverageAreas: collapsed })
+                }}
+                options={coverageOptions}
+                maxSelected={25}
+                placeholder="Add coverage area"
+                searchPlaceholder="Search areas…"
               />
+              {draft.coverageAreas.length > 0 ? (
+                <p className={cn(pmTypography.caption, 'mt-1 text-muted-foreground')}>
+                  {draft.coverageAreas.length} of 25 selected
+                </p>
+              ) : null}
             </PmFormField>
           </PmFormGridItem>
           <PmFormGridItem span={1}>

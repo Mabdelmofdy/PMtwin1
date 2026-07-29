@@ -16,6 +16,7 @@ import { useAuth } from '@/providers/auth-provider.tsx'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
 import { formatOpportunityPresentation } from '@/lib/enterprise-display.ts'
 import { formatDate } from '@/lib/format'
+import { formatLocation } from '@/domain/locations'
 import { runRerunMatchingUiAction } from '@/lib/run-rerun-matching-ui-action.ts'
 import {
   PmFormReadonly,
@@ -170,7 +171,12 @@ export function AdminOpportunityDetailPage() {
             />
             <PmFormReadonlyField
               label="Location"
-              value={String(opportunity.location ?? opportunity.city ?? opportunity.country ?? '—')}
+              value={String(
+                formatLocation(opportunity.location) ||
+                  opportunity.city ||
+                  opportunity.country ||
+                  '—',
+              )}
             />
             <PmFormReadonlyField
               label="Created"

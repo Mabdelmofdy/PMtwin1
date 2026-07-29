@@ -13,6 +13,11 @@ import { pmTypography } from '@/tokens'
 import { trackOcxEvent } from '@/lib/ocx-analytics.ts'
 import { formatOptionalDate } from '@/lib/opportunity-details'
 import type { WorkPackage } from '@/domain/opportunity-creation'
+import {
+  formatLocation,
+  resolveOpportunityCoverageAreas,
+  resolveScopeLabels,
+} from '@/domain/locations'
 
 function WorkPackageCard({
   pkg,
@@ -138,6 +143,11 @@ export function ScopeWorkspace() {
   }
 
   const { scope, capabilities, opportunity } = model
+  const coverageLabels = resolveScopeLabels(
+    resolveOpportunityCoverageAreas(opportunity),
+  )
+  const coverageDisplay =
+    coverageLabels.length > 0 ? coverageLabels.join(', ') : scope.serviceArea
   const hasAny =
     scope.workPackages.length > 0
     || scope.skills.length > 0
@@ -352,16 +362,22 @@ export function ScopeWorkspace() {
           <dl className="grid gap-2 sm:grid-cols-2">
             <div>
               <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Primary location</dt>
-              <dd className={cn(pmTypography.bodySm)}>{opportunity.location ?? opportunity.city ?? '—'}</dd>
+              <dd className={cn(pmTypography.bodySm)}>
+                {formatLocation(opportunity.location) ||
+                  opportunity.city ||
+                  '—'}
+              </dd>
             </div>
             <div>
               <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Delivery method</dt>
               <dd className={cn(pmTypography.bodySm)}>{scope.deliveryMethod ?? opportunity.workMode ?? '—'}</dd>
             </div>
-            {scope.serviceArea ? (
+            {coverageDisplay ? (
               <div>
-                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>Service area</dt>
-                <dd className={cn(pmTypography.bodySm)}>{scope.serviceArea}</dd>
+                <dt className={cn(pmTypography.caption, 'text-muted-foreground')}>
+                  Coverage Areas
+                </dt>
+                <dd className={cn(pmTypography.bodySm)}>{coverageDisplay}</dd>
               </div>
             ) : null}
             <div>

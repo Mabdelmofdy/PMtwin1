@@ -153,6 +153,10 @@ function payloadToOpportunityFields(
     description: payload.description,
     intent: payload.intent === 'request' ? 'need' : payload.intent,
     location: payload.location,
+    coverageAreas:
+      payload.coverageAreas !== undefined
+        ? [...payload.coverageAreas]
+        : undefined,
     creatorId: payload.creatorId,
     tenantId: payload.tenantId,
     organizationId: payload.organizationId,
@@ -319,6 +323,10 @@ export class OpportunityCommandHandler {
         description: payload.description ?? existing.description,
         intent: (payload.intent ?? existing.intent) as OpportunityCollaborationPayload['intent'],
         location: payload.location ?? existing.location,
+        coverageAreas:
+          payload.coverageAreas !== undefined
+            ? [...payload.coverageAreas]
+            : existing.coverageAreas,
         mainCollaborationModel:
           payload.mainCollaborationModel ?? existing.mainCollaborationModel ?? '',
         modelType: payload.modelType ?? existing.modelType ?? '',

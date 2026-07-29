@@ -46,7 +46,7 @@ describe('opportunityToDraft', () => {
     assert.equal(draft.title, opportunity.title)
     assert.equal(draft.description, opportunity.description)
     assert.equal(draft.intent, 'offer')
-    assert.equal(draft.location, 'Riyadh')
+    assert.equal(draft.location, 'sa/riyadh/riyadh-city')
     assert.equal(draft.mainCollaborationModel, 'cash_subcontracting')
     assert.equal(draft.services, 'PMO setup, Project controls')
     assert.equal(draft.startDate, '2026-08-01')
@@ -251,5 +251,65 @@ describe('buildOpportunityDraftInput inheritance seam', () => {
     }
     assert.equal(attrs.workPackages?.[0]?.requiredSkills?.length ?? 0, 0)
     assert.equal(attrs.workPackages?.[0]?.deadline, undefined)
+  })
+})
+
+describe('buildCollaborationCommandPayload location', () => {
+  it('stores coverage once as top-level coverageAreas (SSOT)', () => {
+    const payload = buildCollaborationCommandPayload({
+      ...initialDraft,
+      title: 'Riyadh tower coordination',
+      description: 'BIM coordination for Riyadh tower',
+      intent: 'need',
+      location: 'sa/riyadh/riyadh-city',
+      coverageAreas: ['sa/makkah/jeddah', 'gcc'],
+      targetRole: 'Architect',
+      services: 'BIM, Revit',
+      mainCollaborationModel: 'cash_subcontracting',
+      modelType: 'project_based',
+      subModelType: 'task_based',
+      exchangeMode: 'cash',
+      paymentModes: ['cash'],
+    })
+
+    assert.equal(payload.location, 'sa/riyadh/riyadh-city')
+    assert.deepEqual(payload.coverageAreas, ['sa/makkah/jeddah', 'gcc'])
+    assert.equal(payload.normalized?.location, undefined)
+    assert.equal(payload.normalized?.coverageScopes, undefined)
+    assert.equal(payload.collaborationAttributes?.serviceArea, undefined)
+  })
+
+  it('normalizes free-text primary location to a scope id when possible', () => {
+    const payload = buildCollaborationCommandPayload({
+      ...initialDraft,
+      title: 'Local Riyadh need',
+      description: 'Need BIM help in Riyadh',
+      intent: 'need',
+      location: 'Riyadh',
+      coverageAreas: [],
+      targetRole: 'Architect',
+      services: 'BIM',
+      mainCollaborationModel: 'cash_subcontracting',
+      modelType: 'project_based',
+      subModelType: 'task_based',
+      exchangeMode: 'cash',
+      paymentModes: ['cash'],
+    })
+
+    assert.equal(payload.location, 'sa/riyadh/riyadh-city')
+    assert.deepEqual(payload.coverageAreas, [])
+  })
+
+  it('hydrates coverageAreas from legacy serviceArea on edit', () => {
+    const draft = opportunityToDraft({
+      id: 'opp-legacy-cov',
+      title: 'Legacy',
+      status: 'draft',
+      intent: 'need',
+      location: 'Riyadh, Saudi Arabia',
+      collaborationAttributes: { serviceArea: 'Jeddah' },
+    })
+    assert.equal(draft.location, 'sa/riyadh/riyadh-city')
+    assert.deepEqual(draft.coverageAreas, ['sa/makkah/jeddah'])
   })
 })

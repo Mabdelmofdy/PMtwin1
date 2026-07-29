@@ -136,6 +136,8 @@ export type OpportunityResource = {
   mandatory: boolean
   availability?: string
   notes?: string
+  /** Canonical location scope ID for asset/equipment placement. */
+  location?: string
   /** Omit / null = global opportunity resource. */
   workPackageId?: string | null
 }

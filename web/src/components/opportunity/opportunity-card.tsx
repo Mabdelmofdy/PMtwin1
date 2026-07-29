@@ -22,6 +22,10 @@ import {
   redactCommercialForMarketplace,
 } from '@/domain/opportunity-commercial-structure'
 import { normalizeWorkPackages } from '@/domain/opportunity-creation'
+import {
+  formatLocation,
+  resolveOpportunityCoverageAreas,
+} from '@/domain/locations'
 
 export type OpportunityCardProps = {
   opportunity: Opportunity
@@ -194,7 +198,15 @@ export function OpportunityCard({
       >
         <span className="inline-flex items-center gap-1.5">
           <MapPin className="size-3.5 shrink-0" aria-hidden />
-          {opportunity.location || '—'}
+          {formatLocation(opportunity.location) || '—'}
+          {(() => {
+            const extra = resolveOpportunityCoverageAreas(opportunity).length
+            return extra > 0 ? (
+              <PmBadge tone="outline" className="ms-1 font-normal">
+                +{extra} area{extra === 1 ? '' : 's'}
+              </PmBadge>
+            ) : null
+          })()}
         </span>
         <span>Updated {formatDate(opportunity.updatedAt)}</span>
         {matchCount > 0 ? (

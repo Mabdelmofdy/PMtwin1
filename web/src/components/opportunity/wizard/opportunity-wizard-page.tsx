@@ -127,6 +127,9 @@ function validateWizardStepAdvance(
       if (!draft.location.trim()) {
         return 'Add a primary location before continuing.'
       }
+      if (draft.coverageAreas.length > 25) {
+        return 'Coverage areas are limited to 25 selections.'
+      }
       if (!draft.startDate.trim()) {
         return 'Add a start date before continuing.'
       }

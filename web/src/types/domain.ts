@@ -149,7 +149,16 @@ export type Opportunity = TenantScoped & {
   creatorId?: string
   /** Canonical party owner — optional in seed; resolved via adapter from creatorId. */
   ownerPartyId?: string
+  /**
+   * Primary location — canonical scope ID (e.g. `sa/riyadh/riyadh-city`).
+   * Legacy free-text strings are tolerated on read via formatLocation / resolvers.
+   */
   location?: string
+  /**
+   * Coverage areas / available-in — canonical scope IDs.
+   * Single source of truth; labels and match tokens are derived at read time.
+   */
+  coverageAreas?: string[]
   /** UX-level main collaboration model (5 models). */
   mainCollaborationModel?: string
   exchangeMode?: string

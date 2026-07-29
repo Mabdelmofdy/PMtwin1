@@ -6,6 +6,7 @@ import {
   DEFAULT_MAP_ZOOM,
   type GeoCoordinate,
 } from '@/services/geospatial/location-coordinates.ts'
+import { formatLocation } from '@/domain/locations'
 import 'leaflet/dist/leaflet.css'
 
 export type OpportunityMapPoint = {
@@ -38,7 +39,10 @@ function createMarkerIcon(color: string, size = 32): L.DivIcon {
 function buildPopupContent(opportunity: Opportunity): string {
   const intentLabel =
     opportunity.intent === 'offer' ? 'Offer' : opportunity.intent === 'need' ? 'Need' : 'Opportunity'
-  const location = opportunity.location ?? opportunity.city ?? 'Location unavailable'
+  const location =
+    formatLocation(opportunity.location) ||
+    opportunity.city ||
+    'Location unavailable'
   const href = `/opportunities/${opportunity.id}`
 
   return `

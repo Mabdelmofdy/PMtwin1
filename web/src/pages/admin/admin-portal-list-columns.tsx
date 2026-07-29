@@ -24,6 +24,7 @@ import {
 } from '@/lib/entity-display-titles.ts'
 import { formatMatchDisplayTitle } from '@/lib/match-display.ts'
 import { resolveOpportunityTaxonomyLabels } from '@/lib/collaboration-taxonomy-display.ts'
+import { formatLocation, opportunityLocationSearchText } from '@/domain/locations'
 import { formatDate } from '@/lib/format'
 import { pmTypography } from '@/tokens'
 import { cn } from '@/lib/utils'
@@ -117,7 +118,7 @@ export function adminOpportunitySearchText(opportunity: Opportunity): string {
   return [
     formatOpportunityDisplayTitle(opportunity),
     opportunity.status,
-    opportunity.location,
+    opportunityLocationSearchText(opportunity),
     taxonomy.mainModel,
     taxonomy.subModel,
     taxonomy.exchangeMode,
@@ -199,8 +200,8 @@ export function buildAdminOpportunityListColumns(input: {
     {
       id: 'location',
       label: 'Location',
-      cell: (o) => o.location ?? '—',
-      exportValue: (o) => String(o.location ?? ''),
+      cell: (o) => formatLocation(o.location) || '—',
+      exportValue: (o) => formatLocation(o.location) || '',
     },
     {
       id: 'readiness',

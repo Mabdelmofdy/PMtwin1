@@ -38,6 +38,7 @@ const PATH_PREFIX_TO_STEP: ReadonlyArray<readonly [string, WizardStepId]> = [
   ['availabilityEndDate', 'opportunity'],
   ['duration', 'scope_work'],
   ['location', 'opportunity'],
+  ['coverageAreas', 'opportunity'],
   ['country', 'opportunity'],
   ['city', 'opportunity'],
   ['workMode', 'scope_work'],

@@ -18,6 +18,7 @@ import {
 } from '@/domain/collaboration/opportunity-collaboration.ts'
 import { PmButton } from '@/components/ui/pm-button'
 import { cn } from '@/lib/utils'
+import { formatLocation, resolveScopeLabels } from '@/domain/locations'
 import { pmTypography } from '@/tokens'
 
 function reviewValue(value: string | number | boolean | null | undefined): string {
@@ -487,8 +488,13 @@ export function ReviewPublishStep({
         title="Timeline and Location"
         onEdit={() => onEdit('scope_work', 'timeline')}
       >
-        <p>Primary location: {draft.location || '—'}</p>
-        <p>Service area: {draft.serviceArea || '—'}</p>
+        <p>Primary location: {formatLocation(draft.location) || '—'}</p>
+        <p>
+          Coverage areas:{' '}
+          {draft.coverageAreas.length > 0
+            ? resolveScopeLabels(draft.coverageAreas).join(', ')
+            : '—'}
+        </p>
         <p>
           Delivery method: {deliveryMethodLabel(draft.richTimeline.deliveryMethod)}
         </p>

@@ -119,6 +119,68 @@ describe('scoring — location coverage hierarchy', () => {
     assert.equal(result.breakdown.locationTier, 'remote')
   })
 
+  it('scores coverage overlap when offer covers need city from another HQ', () => {
+    const dubaiOffer = {
+      ...offer,
+      location: 'Dubai',
+      normalized: {
+        ...offer.normalized,
+        location: 'Dubai',
+        coverageScopes: ['Riyadh', 'Riyadh City'],
+      },
+    }
+    const result = scorePair(need, dubaiOffer, config)
+    assert.equal(result.breakdown.locationFit, 1)
+    assert.equal(result.breakdown.locationTier, 'coverage_overlap')
+  })
+
+  it('does not treat two GCC-wide posts as coverage_overlap', () => {
+    const gccNeed = {
+      ...need,
+      location: 'Dubai',
+      normalized: {
+        ...need.normalized,
+        location: 'Dubai',
+        coverageScopes: ['gcc'],
+      },
+    }
+    const gccOffer = {
+      ...offer,
+      location: 'Doha',
+      normalized: {
+        ...offer.normalized,
+        location: 'Doha',
+        coverageScopes: ['gcc'],
+      },
+    }
+    const result = scorePair(gccNeed, gccOffer, config)
+    assert.notEqual(result.breakdown.locationTier, 'coverage_overlap')
+    assert.ok(
+      result.breakdown.locationTier === 'regional_gcc'
+        || result.breakdown.locationTier === 'different_gcc_country',
+    )
+  })
+
+  it('scores Egypt as EG country rather than UNKNOWN weak fit vs another EG city', () => {
+    const cairoNeed = {
+      ...need,
+      location: 'Cairo',
+      normalized: { ...need.normalized, location: 'Cairo', coverageScopes: [] },
+    }
+    const alexOffer = {
+      ...offer,
+      location: 'Alexandria',
+      normalized: {
+        ...offer.normalized,
+        location: 'Alexandria',
+        coverageScopes: [],
+      },
+    }
+    const result = scorePair(cairoNeed, alexOffer, config)
+    assert.equal(result.breakdown.locationFit, 0.75)
+    assert.equal(result.breakdown.locationTier, 'same_country')
+  })
+
   it('scores different GCC countries lower without regional coverage', () => {
     const dubaiOffer = {
       ...offer,

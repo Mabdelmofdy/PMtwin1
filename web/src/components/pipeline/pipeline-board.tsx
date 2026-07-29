@@ -13,6 +13,7 @@ import { peopleApi } from '@/api/people.ts'
 import { applicationRepository } from '@/repositories/index.ts'
 import { pipelineApplicationDrop } from '@/lib/pipeline-application-drop.ts'
 import { pipelineOpportunityDrop } from '@/lib/pipeline-opportunity-drop.ts'
+import { formatLocation } from '@/domain/locations'
 import { dealService } from '@/services/deal-service.ts'
 import { negotiationService } from '@/services/negotiation-service.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
@@ -326,7 +327,7 @@ export function PipelineBoard({ mode }: { mode: BoardMode }) {
                     key={item.id}
                     id={item.id}
                     title={item.title}
-                    subtitle={item.location}
+                    subtitle={formatLocation(item.location) || undefined}
                     ownerLabel={owner?.profile?.name ? `Owner: ${owner.profile.name}` : undefined}
                     status={item.status}
                     statusEntity="opportunity"

@@ -5,6 +5,7 @@ import {
   type SemanticMirrorPair,
 } from '@/config/need-offer-framework.ts'
 import type { Opportunity } from '@/types/domain.ts'
+import { formatLocation } from '@/domain/locations'
 
 export type SemanticAttributeValue = {
   readonly label: string
@@ -75,7 +76,13 @@ function resolveNeedAttributes(opp: ExtendedOpportunity): SemanticAttributeValue
     ?? (opp.exchangeMode ? formatValueExchangeHint(opp.exchangeMode) : undefined)
 
   const deadline = opp.attributes?.tenderDeadline ?? opp.attributes?.startDate
-  const location = opp.location ?? opp.attributes?.locationRequirement
+  const location =
+    formatLocation(
+      typeof opp.location === 'string' ? opp.location : undefined,
+    ) ||
+    (typeof opp.attributes?.locationRequirement === 'string'
+      ? opp.attributes.locationRequirement
+      : undefined)
 
   return [
     { label: 'Required Skills', value: skills ?? '—' },
@@ -97,7 +104,13 @@ function resolveOfferAttributes(opp: ExtendedOpportunity): SemanticAttributeValu
     ?? (opp.exchangeMode ? formatValueExchangeHint(opp.exchangeMode) : undefined)
 
   const availability = opp.attributes?.availabilityDate ?? opp.attributes?.startDate
-  const location = opp.attributes?.preferredLocation ?? opp.location
+  const preferred =
+    typeof opp.attributes?.preferredLocation === 'string'
+      ? opp.attributes.preferredLocation
+      : undefined
+  const location =
+    formatLocation(typeof opp.location === 'string' ? opp.location : undefined) ||
+    preferred
 
   return [
     { label: 'Available Skills', value: skills ?? '—' },

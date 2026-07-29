@@ -312,4 +312,70 @@ describe('runMatchingForPost — limits and constraints', () => {
       ),
     )
   })
+
+  it('backfills wizard primary location into match scoring when normalized omits it', () => {
+    const need = {
+      id: 'need-loc-1',
+      intent: 'request',
+      status: 'published',
+      creatorId: 'khalid',
+      exchangeMode: 'cash',
+      modelType: 'project_based',
+      subModelType: 'task_based',
+      mainCollaborationModel: 'cash_subcontracting',
+      location: 'Riyadh',
+      scope: {
+        sectors: ['Construction'],
+        requiredSkills: ['BIM', 'Revit'],
+        coreSkills: ['BIM', 'Revit'],
+      },
+      attributes: { targetRole: 'Architect' },
+      // Wizard shape: role+skills present, location only on top-level
+      normalized: {
+        role: 'Architect',
+        requiredServices: ['BIM', 'Revit'],
+        skills: ['BIM', 'Revit'],
+      },
+    }
+    const offer = {
+      id: 'offer-loc-1',
+      intent: 'offer',
+      status: 'published',
+      creatorId: 'sara',
+      exchangeMode: 'cash',
+      modelType: 'project_based',
+      subModelType: 'task_based',
+      mainCollaborationModel: 'cash_subcontracting',
+      location: 'Riyadh',
+      scope: {
+        sectors: ['Construction'],
+        offeredSkills: ['BIM', 'Revit'],
+        coreSkills: ['BIM', 'Revit'],
+      },
+      attributes: { targetRole: 'Architect' },
+      normalized: {
+        role: 'Architect',
+        offeredServices: ['BIM', 'Revit'],
+        skills: ['BIM', 'Revit'],
+      },
+    }
+
+    const results = runMatchingForPost({
+      anchorPost: need,
+      opportunities: [need, offer],
+      config,
+      options: { model: 'one_way' },
+    })
+
+    const oneWay = results.find((result) => result.model === 'one_way')
+    assert.ok(oneWay)
+    const match = oneWay.matches.find(
+      (entry) =>
+        entry.needOpportunityId === need.id
+        && entry.offerOpportunityId === offer.id,
+    )
+    assert.ok(match, 'expected Riyadh need/offer pair')
+    assert.equal(match.breakdown.locationFit, 1)
+    assert.equal(match.breakdown.locationTier, 'same_city')
+  })
 })

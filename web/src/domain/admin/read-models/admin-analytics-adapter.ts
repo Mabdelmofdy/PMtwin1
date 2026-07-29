@@ -12,6 +12,7 @@ import {
   userRepository,
 } from '@/repositories/index.ts'
 import { buildPipelineSummary } from './command-center-adapter.ts'
+import { formatLocation } from '@/domain/locations'
 
 export type AdminDistributionBucket = {
   readonly id: string
@@ -97,7 +98,9 @@ export function buildAdminAnalyticsBundle(): AdminAnalyticsBundle {
 
   const topRegions = topCounts(
     opportunities.map((o) => ({
-      key: String(o.location ?? o.city ?? o.country ?? 'Unspecified'),
+      key: String(
+        formatLocation(o.location) || o.city || o.country || 'Unspecified',
+      ),
       href: '/admin/opportunities',
     })),
   )

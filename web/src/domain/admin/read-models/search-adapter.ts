@@ -23,6 +23,7 @@ import {
   formatUserPresentation,
 } from '@/lib/enterprise-display.ts'
 import { formatEnterpriseSubjectLine } from './enterprise-subject-adapter.ts'
+import { opportunityLocationSearchText } from '@/domain/locations'
 import type { AdminGlobalSearchResult } from './types.ts'
 
 export type AdminSearchOptions = {
@@ -111,7 +112,7 @@ export function searchAdminEntities(
     const view = formatOpportunityPresentation(opp)
     if (
       !matchesQuery(
-        `${view.name} ${view.reference} ${opp.id} ${opp.status} ${opp.location ?? ''}`,
+        `${view.name} ${view.reference} ${opp.id} ${opp.status} ${opportunityLocationSearchText(opp)}`,
         q,
       )
     ) {
