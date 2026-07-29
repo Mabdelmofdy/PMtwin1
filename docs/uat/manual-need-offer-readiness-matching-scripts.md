@@ -7,6 +7,8 @@ Use these two fill scripts in **UAT** to create complementary opportunities by h
 
 **Runtime:** UAT (`VITE_RUNTIME_MODE=uat` or your UAT URL). Data stays in this browser’s namespaced LocalStorage.
 
+**Locations:** Primary location is a **canonical searchable picker** (e.g. select **Riyadh City**) — do not type free text. Coverage Areas / Available In is optional multi-select (e.g. **Riyadh** region). Matching uses both fields.
+
 **Detailed field lists:**  
 - [Script A — Need](./uat-need-opportunity-script.md)  
 - [Script B — Offer](./uat-offer-opportunity-script.md)
@@ -32,7 +34,7 @@ Both scripts use the same **5-step** wizard. Matching structure is **auto-derive
 
 | Step | Screen | What you fill |
 |------|--------|----------------|
-| 1 | Opportunity | Intent, title, description, category, role, location, dates |
+| 1 | Opportunity | Intent, title, description, category, role, primary location, coverage areas, dates |
 | 2 | Collaboration | Main model, sub-model, task-based collaboration details |
 | 3 | Scope & Work | Skills, services, resources, work packages/tasks, deliverables, milestones, timeline, documents |
 | 4 | Commercial Structure | Cash component, payment schedule, constraints |
@@ -76,8 +78,8 @@ Both scripts use the same **5-step** wizard. Matching structure is **auto-derive
 | Short description | `Need a BIM-capable Architect for coordination and Revit delivery on a mixed-use tower in Riyadh. Scope includes model federation, clash detection handoff, and design packages.` |
 | Category or profession | `Construction` |
 | Target role | `Architect` |
-| Primary location | `Riyadh` |
-| Service area | `Riyadh metro` |
+| Primary location | Select **Riyadh City** |
+| Coverage Areas / Available In | Select **Riyadh** (region) — optional; Primary is always included |
 | Start date | `2026-08-01` |
 | Deadline | `2026-12-31` |
 | Availability end date | `2026-12-31` |
@@ -166,8 +168,8 @@ Both scripts use the same **5-step** wizard. Matching structure is **auto-derive
 | Short description | `Offering BIM Architect services with Revit modeling and coordination for tower and mixed-use projects in Riyadh. Available for cash subcontracting engagements.` |
 | Category or profession | `Construction` |
 | Target role | `Architect` |
-| Primary location | `Riyadh` |
-| Service area | `Riyadh metro` |
+| Primary location | Select **Riyadh City** |
+| Coverage Areas / Available In | Select **Riyadh** (region) — optional; Primary is always included |
 | Start date | `2026-08-01` |
 | Deadline | `2026-12-31` |
 | Availability end date | `2026-12-31` |

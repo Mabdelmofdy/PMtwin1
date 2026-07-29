@@ -10,6 +10,7 @@
 Fill a publish-ready **Offer** that auto-matches Khalid’s Need. Use this to show **opportunity readiness**, then **matching redesign** after publish.
 
 Enter values **exactly** as listed. Dates must be **today or later** (do not use 2024 dates).
+**Locations:** use the **canonical picker** for Primary location (e.g. **Riyadh City**) — do not type free text. Coverage Areas / Available In is optional multi-select.
 
 ---
 
@@ -34,8 +35,8 @@ Enter values **exactly** as listed. Dates must be **today or later** (do not use
 | Short description      | `Offering BIM Architect services with Revit modeling and coordination for tower and mixed-use projects in Riyadh. Available for cash subcontracting engagements.` |
 | Category or profession | `Construction`                                                                                                                                                    |
 | Target role            | `Architect`                                                                                                                                                       |
-| Primary location       | `Riyadh`                                                                                                                                                          |
-| Service area           | `Riyadh metro`                                                                                                                                                    |
+| Primary location       | Select **Riyadh City**                                                                                                                                                          |
+| Coverage Areas / Available In           | Select **Riyadh** (region) — optional; Primary is always included                                                                                                                                                    |
 | Start date             | `2026-08-01`                                                                                                                                                      |
 | Deadline               | `2026-12-31`                                                                                                                                                      |
 | Availability end date  | `2026-12-31`                                                                                                                                                      |
@@ -206,7 +207,7 @@ Add **two** skills:
 
 | Field                             | Value        |
 | --------------------------------- | ------------ |
-| Preferred location / service area | `Riyadh`     |
+| Preferred location / service area | `Riyadh City` (from Primary location)     |
 | Availability from                 | `2026-08-01` |
 | Flexible start                    | Yes          |
 | Weekend allowed                   | No           |
@@ -295,7 +296,7 @@ Add **two** skills:
 
 ## Step 5 — Review & Publish
 
-1. Confirm executive summary shows Offer · Cash subcontracting · Task-Based · cash · Riyadh
+1. Confirm executive summary shows Offer · Cash subcontracting · Task-Based · cash · Riyadh City City
 2. Confirm no red error banner on Review
 3. Open **View Details** readiness drawer — score should be high / near 100%
 4. **Save Draft** → Details readiness redesign

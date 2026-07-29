@@ -8,6 +8,7 @@
 **Runtime:** UAT · Password `Pmtwin@2026` · **Individual** account type  
 Matching structure is **auto-derived** — do not pick it manually.  
 Enter values **exactly** as listed. Dates must be **2026-08-01 or later**.
+**Locations:** use the **canonical picker** for Primary location (e.g. **Riyadh City**) — do not type free text. Coverage Areas / Available In is optional multi-select.
 
 ---
 
@@ -46,7 +47,7 @@ Each party must publish **both** a Need and an Offer.
 
 | Step | Screen               | What you fill                                                                            |
 | ---- | -------------------- | ---------------------------------------------------------------------------------------- |
-| 1    | Opportunity          | Intent, title, description, category, role, location, dates                              |
+| 1    | Opportunity          | Intent, title, description, category, role, primary location, coverage areas, dates                              |
 | 2    | Collaboration        | Service Exchange → Strategic Alliance + alliance fields                                  |
 | 3    | Scope & Work         | Skills, services, resources, work package, deliverables, milestones, timeline, documents |
 | 4    | Commercial Structure | **Barter** component (not cash-only)                                                     |
@@ -86,8 +87,8 @@ Each party must publish **both** a Need and an Offer.
 | Short description      | `Need BIM coordination and Revit delivery capacity in exchange for project management support on a Riyadh tower program.` |
 | Category or profession | `Construction`                                                                                                            |
 | Target role            | `Architect`                                                                                                               |
-| Primary location       | `Riyadh`                                                                                                                  |
-| Service area           | `Riyadh metro`                                                                                                            |
+| Primary location       | Select **Riyadh City**                                                                                                                  |
+| Coverage Areas / Available In           | Select **Riyadh** (region) — optional; Primary is always included                                                                                                            |
 | Start date             | `2026-08-01`                                                                                                              |
 | Deadline               | `2026-12-31`                                                                                                              |
 | Availability end date  | `2026-12-31`                                                                                                              |
@@ -240,7 +241,7 @@ Add **two** skills:
 
 | Field              | Value        |
 | ------------------ | ------------ |
-| Location           | `Riyadh`     |
+| Location           | `Riyadh City` (from Primary location)     |
 | Start date         | `2026-08-01` |
 | Deadline           | `2026-12-31` |
 | Flexible start     | No           |
@@ -314,7 +315,7 @@ Add **two** skills:
 
 ## Step 5 — Review & Publish
 
-1. Confirm executive summary: Need · Service Exchange · Strategic Alliance · barter · Riyadh
+1. Confirm executive summary: Need · Service Exchange · Strategic Alliance · barter · Riyadh City
 2. Confirm no red error banner on Review
 3. Open **View Details** readiness drawer — score should be high / near 100%
 4. **Save Draft** (optional) → **Publish**
@@ -360,8 +361,8 @@ Add **two** skills:
 | Short description      | `Offering project management and planning services for construction programs in Riyadh, available for barter exchange against BIM capacity.` |
 | Category or profession | `Construction`                                                                                                                               |
 | Target role            | `Project Manager`                                                                                                                            |
-| Primary location       | `Riyadh`                                                                                                                                     |
-| Service area           | `Riyadh metro`                                                                                                                               |
+| Primary location       | Select **Riyadh City**                                                                                                                                     |
+| Coverage Areas / Available In           | Select **Riyadh** (region) — optional; Primary is always included                                                                                                                               |
 | Start date             | `2026-08-01`                                                                                                                                 |
 | Deadline               | `2026-12-31`                                                                                                                                 |
 | Availability end date  | `2026-12-31`                                                                                                                                 |
@@ -526,7 +527,7 @@ Add **two** skills:
 
 | Field                             | Value        |
 | --------------------------------- | ------------ |
-| Preferred location / service area | `Riyadh`     |
+| Preferred location / service area | `Riyadh City` (from Primary location)     |
 | Availability from                 | `2026-08-01` |
 | Flexible start                    | Yes          |
 | Weekend allowed                   | No           |
@@ -599,7 +600,7 @@ Add **two** skills:
 
 ## Step 5 — Review & Publish
 
-1. Confirm executive summary: Offer · Service Exchange · Strategic Alliance · barter · Riyadh
+1. Confirm executive summary: Offer · Service Exchange · Strategic Alliance · barter · Riyadh City
 2. Confirm no red error banner · readiness high
 3. **Publish**
 
@@ -644,8 +645,8 @@ Add **two** skills:
 | Short description      | `Need project management and planning support in exchange for BIM/Revit coordination capacity on Riyadh projects.` |
 | Category or profession | `Construction`                                                                                                     |
 | Target role            | `Project Manager`                                                                                                  |
-| Primary location       | `Riyadh`                                                                                                           |
-| Service area           | `Riyadh metro`                                                                                                     |
+| Primary location       | Select **Riyadh City**                                                                                                           |
+| Coverage Areas / Available In           | Select **Riyadh** (region) — optional; Primary is always included                                                                                                     |
 | Start date             | `2026-08-01`                                                                                                       |
 | Deadline               | `2026-12-31`                                                                                                       |
 | Availability end date  | `2026-12-31`                                                                                                       |
@@ -798,7 +799,7 @@ Add **two** skills:
 
 | Field              | Value        |
 | ------------------ | ------------ |
-| Location           | `Riyadh`     |
+| Location           | `Riyadh City` (from Primary location)     |
 | Start date         | `2026-08-01` |
 | Deadline           | `2026-12-31` |
 | Flexible start     | No           |
@@ -872,7 +873,7 @@ Add **two** skills:
 
 ## Step 5 — Review & Publish
 
-1. Confirm executive summary: Need · Service Exchange · Strategic Alliance · barter · Riyadh
+1. Confirm executive summary: Need · Service Exchange · Strategic Alliance · barter · Riyadh City
 2. Confirm no red error banner · readiness high
 3. **Publish**
 
@@ -917,8 +918,8 @@ Add **two** skills:
 | Short description      | `Offering BIM Architect services with Revit modeling for Riyadh projects, available for barter against project management capacity.` |
 | Category or profession | `Construction`                                                                                                                       |
 | Target role            | `Architect`                                                                                                                          |
-| Primary location       | `Riyadh`                                                                                                                             |
-| Service area           | `Riyadh metro`                                                                                                                       |
+| Primary location       | Select **Riyadh City**                                                                                                                             |
+| Coverage Areas / Available In           | Select **Riyadh** (region) — optional; Primary is always included                                                                                                                       |
 | Start date             | `2026-08-01`                                                                                                                         |
 | Deadline               | `2026-12-31`                                                                                                                         |
 | Availability end date  | `2026-12-31`                                                                                                                         |
@@ -1083,7 +1084,7 @@ Add **two** skills:
 
 | Field                             | Value        |
 | --------------------------------- | ------------ |
-| Preferred location / service area | `Riyadh`     |
+| Preferred location / service area | `Riyadh City` (from Primary location)     |
 | Availability from                 | `2026-08-01` |
 | Flexible start                    | Yes          |
 | Weekend allowed                   | No           |
@@ -1156,7 +1157,7 @@ Add **two** skills:
 
 ## Step 5 — Review & Publish
 
-1. Confirm executive summary: Offer · Service Exchange · Strategic Alliance · barter · Riyadh
+1. Confirm executive summary: Offer · Service Exchange · Strategic Alliance · barter · Riyadh City
 2. Confirm no red error banner · readiness high
 3. **Publish**
 

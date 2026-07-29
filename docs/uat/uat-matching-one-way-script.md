@@ -7,7 +7,8 @@
 
 **Runtime:** UAT · Password `Pmtwin@2026` · **Individual** account type  
 Matching structure is **auto-derived** — do not pick it manually.  
-Enter values **exactly** as listed. Dates must be **2026-08-01 or later**.
+Enter values **exactly** as listed. Dates must be **2026-08-01 or later**.  
+**Locations:** use the **canonical picker** for Primary location (e.g. **Riyadh City**) — do not type free text. Coverage Areas / Available In is optional multi-select.
 
 ---
 
@@ -38,7 +39,7 @@ One published **Need** finds compatible published **Offers**. Score uses skills,
 
 | Step | Screen | What you fill |
 |------|--------|----------------|
-| 1 | Opportunity | Intent, title, description, category, role, location, dates |
+| 1 | Opportunity | Intent, title, description, category, role, primary location, coverage areas, dates |
 | 2 | Collaboration | Main model, sub-model, task-based details |
 | 3 | Scope & Work | Skills, services, resources, work packages, deliverables, milestones, timeline, documents |
 | 4 | Commercial Structure | Cash component, payment schedule, constraints |
@@ -68,8 +69,8 @@ One published **Need** finds compatible published **Offers**. Score uses skills,
 | Short description | `Need a BIM-capable Architect for coordination and Revit delivery on a mixed-use tower in Riyadh. Scope includes model federation, clash detection handoff, and design packages.` |
 | Category or profession | `Construction` |
 | Target role | `Architect` |
-| Primary location | `Riyadh` |
-| Service area | `Riyadh metro` |
+| Primary location | Select **Riyadh City** |
+| Coverage Areas / Available In | Select **Riyadh** (region) — optional; Primary is always included |
 | Start date | `2026-08-01` |
 | Deadline | `2026-12-31` |
 | Availability end date | `2026-12-31` |
@@ -132,6 +133,7 @@ Add **two** skills:
 | Quantity | `1` |
 | Unit | `FTE` |
 | Availability | `Full-time from 2026-08-01` |
+| Asset location | Select **Riyadh City** (optional — same canonical picker) |
 | Work package | Global (opportunity-level) |
 | Mandatory | Yes |
 | Notes | `On-site / hybrid coordination support` |
@@ -180,7 +182,7 @@ Add **two** skills:
 
 | Field | Value |
 |-------|--------|
-| Location | `Riyadh` |
+| Location | `Riyadh City` (from Primary location) |
 | Start date | `2026-08-01` |
 | Deadline | `2026-12-31` |
 | Flexible start | No |
@@ -245,7 +247,7 @@ Add **two** skills:
 
 ## Step 5 — Review & Publish
 
-1. Confirm executive summary shows Need · Cash Subcontracting · Task-Based · cash · Riyadh
+1. Confirm executive summary shows Need · Cash Subcontracting · Task-Based · cash · Riyadh City City
 2. Confirm no red error banner on Review (fix any listed issues first)
 3. Open **View Details** readiness drawer — score should be high / near 100%
 4. **Save Draft** (optional) → Opportunity Details shows fields + readiness
@@ -281,8 +283,8 @@ Add **two** skills:
 | Short description | `Offering BIM Architect services with Revit modeling and coordination for tower and mixed-use projects in Riyadh. Available for cash subcontracting engagements.` |
 | Category or profession | `Construction` |
 | Target role | `Architect` |
-| Primary location | `Riyadh` |
-| Service area | `Riyadh metro` |
+| Primary location | Select **Riyadh City** |
+| Coverage Areas / Available In | Select **Riyadh** (region) — optional; Primary is always included |
 | Start date | `2026-08-01` |
 | Deadline | `2026-12-31` |
 | Availability end date | `2026-12-31` |
@@ -345,6 +347,7 @@ Add **two** skills:
 | Quantity | `1` |
 | Unit | `FTE` |
 | Availability | `Available from 2026-08-01` |
+| Asset location | Select **Riyadh City** (optional — same canonical picker) |
 | Work package | Global (opportunity-level) |
 | Mandatory | Yes |
 | Notes | `Hybrid delivery; Riyadh on-site as needed` |
@@ -401,7 +404,7 @@ Add **two** skills:
 
 | Field | Value |
 |-------|--------|
-| Preferred location / service area | `Riyadh` |
+| Preferred location / service area | `Riyadh City` (from Primary location) |
 | Availability from | `2026-08-01` |
 | Flexible start | Yes |
 | Weekend allowed | No |
@@ -465,7 +468,7 @@ Add **two** skills:
 
 ## Step 5 — Review & Publish
 
-1. Confirm executive summary shows Offer · Cash Subcontracting · Task-Based · cash · Riyadh
+1. Confirm executive summary shows Offer · Cash Subcontracting · Task-Based · cash · Riyadh City City
 2. Confirm no red error banner on Review
 3. Open **View Details** readiness drawer — score should be high / near 100%
 4. **Save Draft** (optional) → Details readiness redesign
@@ -505,11 +508,14 @@ Add **two** skills:
 
 ## Cross-city / coverage (optional QA)
 
+Primary location and Coverage Areas use the **canonical location picker** (countries → regions → cities). Matching scores **both** Primary location and Coverage Areas (soft location fit — never a hard city reject).
+
 | Scenario | Expected |
 |----------|----------|
-| Need Riyadh + Offer Dammam (city only, same role/skills) | **PostMatch created** if overall score ≥ ~0.50; location contribution reduced (same country ≈ 0.75) |
-| Need Riyadh + Service area / geographic scope **Saudi Arabia** + Offer Dammam | Location fit **full** (nationwide); not penalized for city difference |
-| Admin → Matching → View diagnostics | Shows scanned / rejected / matched candidates with reject reasons and scores |
+| Need **Riyadh City** + Offer **Dammam** (city-only Coverage Areas empty; same role/skills) | **PostMatch created** if overall score ≥ ~0.50; location tier **Same Country** (~0.75) |
+| Need **Riyadh City** + Coverage Areas **Nationwide — Saudi Arabia** + Offer **Dammam** | Location tier **Nationwide** (full location fit); not penalized for city difference |
+| Need **Riyadh City** + Offer Primary **Dubai** with Coverage Areas including **Riyadh City** | Location tier **Coverage Overlap** (full location fit) |
+| Admin → Matching → View diagnostics | Shows scanned / rejected / matched candidates with reject reasons, location tier, and scores |
 
 ---
 

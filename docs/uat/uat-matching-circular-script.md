@@ -8,6 +8,7 @@
 **Runtime:** UAT · Password `Pmtwin@2026` · **Individual** account type  
 Matching structure is **auto-derived**. Circular also runs as a **separate pass** on publish when a ring exists.  
 Enter values **exactly** as listed. Dates must be **2026-08-01 or later**.
+**Locations:** use the **canonical picker** for Primary location (e.g. **Riyadh City**) — do not type free text. Coverage Areas / Available In is optional multi-select.
 
 ---
 
@@ -38,7 +39,7 @@ Ring: Omar → Layla → Faisal → Omar
 
 | Step | Screen | What you fill |
 |------|--------|----------------|
-| 1 | Opportunity | Intent, title, description, category, role, location, dates |
+| 1 | Opportunity | Intent, title, description, category, role, primary location, coverage areas, dates |
 | 2 | Collaboration | Resource Sharing → Resource Sharing & Exchange + resource fields |
 | 3 | Scope & Work | Skills, services, resources, work package, deliverables, milestones, timeline, documents |
 | 4 | Commercial Structure | **Barter** |
@@ -66,8 +67,8 @@ Ring: Omar → Layla → Faisal → Omar
 | Short description | `Need BIM/Revit coordination capacity via resource barter ring on Riyadh projects.` |
 | Category or profession | `Construction` |
 | Target role | `Architect` |
-| Primary location | `Riyadh` |
-| Service area | `Riyadh metro` |
+| Primary location | Select **Riyadh City** |
+| Coverage Areas / Available In | Select **Riyadh** (region) — optional; Primary is always included |
 | Start date | `2026-08-01` |
 | Deadline | `2026-12-31` |
 | Availability end date | `2026-12-31` |
@@ -90,7 +91,7 @@ Ring: Omar → Layla → Faisal → Omar
 |-------|--------|
 | Resource Title | `Omar — BIM capacity needed` |
 | Resource Type | `Services` |
-| Location | `Riyadh` |
+| Location | `Riyadh City` |
 | Availability start | `2026-08-01` |
 | Availability end | `2026-12-31` |
 | Transaction Type | `Barter` |
@@ -173,7 +174,7 @@ Add **two** skills:
 
 | Field | Value |
 |-------|--------|
-| Location | `Riyadh` |
+| Location | `Riyadh City` (from Primary location) |
 | Start date | `2026-08-01` |
 | Deadline | `2026-12-31` |
 | Flexible start | No |
@@ -226,7 +227,7 @@ Add **two** skills:
 
 ## Step 5 — Review & Publish
 
-1. Confirm executive summary: Need · Resource Sharing · Resource Sharing & Exchange · barter · Riyadh
+1. Confirm executive summary: Need · Resource Sharing · Resource Sharing & Exchange · barter · Riyadh City
 2. Confirm no red error banner · readiness high
 3. **Publish**
 
@@ -260,8 +261,8 @@ Add **two** skills:
 | Short description | `Offering project management and planning capacity for circular resource barter in Riyadh.` |
 | Category or profession | `Construction` |
 | Target role | `Project Manager` |
-| Primary location | `Riyadh` |
-| Service area | `Riyadh metro` |
+| Primary location | Select **Riyadh City** |
+| Coverage Areas / Available In | Select **Riyadh** (region) — optional; Primary is always included |
 | Start date | `2026-08-01` |
 | Deadline | `2026-12-31` |
 | Availability end date | `2026-12-31` |
@@ -284,7 +285,7 @@ Add **two** skills:
 |-------|--------|
 | Resource Title | `Omar — PM capacity offered` |
 | Resource Type | `Services` |
-| Location | `Riyadh` |
+| Location | `Riyadh City` |
 | Availability start | `2026-08-01` |
 | Availability end | `2026-12-31` |
 | Transaction Type | `Barter` |
@@ -375,7 +376,7 @@ Add **two** skills:
 
 | Field | Value |
 |-------|--------|
-| Preferred location / service area | `Riyadh` |
+| Preferred location / service area | `Riyadh City` (from Primary location) |
 | Availability from | `2026-08-01` |
 | Flexible start | Yes |
 | Weekend allowed | No |
@@ -427,7 +428,7 @@ Add **two** skills:
 
 ## Step 5 — Review & Publish
 
-1. Confirm executive summary: Offer · Resource Sharing · Resource Sharing & Exchange · barter · Riyadh
+1. Confirm executive summary: Offer · Resource Sharing · Resource Sharing & Exchange · barter · Riyadh City
 2. Confirm no red error banner · readiness high
 3. **Publish**
 
@@ -461,8 +462,8 @@ Add **two** skills:
 | Short description | `Need structural analysis / SAP2000 capacity via circular resource barter in Riyadh.` |
 | Category or profession | `Construction` |
 | Target role | `Civil Engineer` |
-| Primary location | `Riyadh` |
-| Service area | `Riyadh metro` |
+| Primary location | Select **Riyadh City** |
+| Coverage Areas / Available In | Select **Riyadh** (region) — optional; Primary is always included |
 | Start date | `2026-08-01` |
 | Deadline | `2026-12-31` |
 | Availability end date | `2026-12-31` |
@@ -485,7 +486,7 @@ Add **two** skills:
 |-------|--------|
 | Resource Title | `Layla — Structural capacity needed` |
 | Resource Type | `Services` |
-| Location | `Riyadh` |
+| Location | `Riyadh City` |
 | Availability start | `2026-08-01` |
 | Availability end | `2026-12-31` |
 | Transaction Type | `Barter` |
@@ -568,7 +569,7 @@ Add **two** skills:
 
 | Field | Value |
 |-------|--------|
-| Location | `Riyadh` |
+| Location | `Riyadh City` (from Primary location) |
 | Start date | `2026-08-01` |
 | Deadline | `2026-12-31` |
 | Flexible start | No |
@@ -621,7 +622,7 @@ Add **two** skills:
 
 ## Step 5 — Review & Publish
 
-1. Confirm executive summary: Need · Resource Sharing · Resource Sharing & Exchange · barter · Riyadh
+1. Confirm executive summary: Need · Resource Sharing · Resource Sharing & Exchange · barter · Riyadh City
 2. Confirm no red error banner · readiness high
 3. **Publish**
 
@@ -655,8 +656,8 @@ Add **two** skills:
 | Short description | `Offering BIM/Revit coordination for circular resource barter in Riyadh.` |
 | Category or profession | `Construction` |
 | Target role | `Architect` |
-| Primary location | `Riyadh` |
-| Service area | `Riyadh metro` |
+| Primary location | Select **Riyadh City** |
+| Coverage Areas / Available In | Select **Riyadh** (region) — optional; Primary is always included |
 | Start date | `2026-08-01` |
 | Deadline | `2026-12-31` |
 | Availability end date | `2026-12-31` |
@@ -679,7 +680,7 @@ Add **two** skills:
 |-------|--------|
 | Resource Title | `Layla — BIM capacity offered` |
 | Resource Type | `Services` |
-| Location | `Riyadh` |
+| Location | `Riyadh City` |
 | Availability start | `2026-08-01` |
 | Availability end | `2026-12-31` |
 | Transaction Type | `Barter` |
@@ -770,7 +771,7 @@ Add **two** skills:
 
 | Field | Value |
 |-------|--------|
-| Preferred location / service area | `Riyadh` |
+| Preferred location / service area | `Riyadh City` (from Primary location) |
 | Availability from | `2026-08-01` |
 | Flexible start | Yes |
 | Weekend allowed | No |
@@ -822,7 +823,7 @@ Add **two** skills:
 
 ## Step 5 — Review & Publish
 
-1. Confirm executive summary: Offer · Resource Sharing · Resource Sharing & Exchange · barter · Riyadh
+1. Confirm executive summary: Offer · Resource Sharing · Resource Sharing & Exchange · barter · Riyadh City
 2. Confirm no red error banner · readiness high
 3. **Publish**
 
@@ -856,8 +857,8 @@ Add **two** skills:
 | Short description | `Need project management / planning capacity via circular resource barter in Riyadh.` |
 | Category or profession | `Construction` |
 | Target role | `Project Manager` |
-| Primary location | `Riyadh` |
-| Service area | `Riyadh metro` |
+| Primary location | Select **Riyadh City** |
+| Coverage Areas / Available In | Select **Riyadh** (region) — optional; Primary is always included |
 | Start date | `2026-08-01` |
 | Deadline | `2026-12-31` |
 | Availability end date | `2026-12-31` |
@@ -880,7 +881,7 @@ Add **two** skills:
 |-------|--------|
 | Resource Title | `Faisal — PM capacity needed` |
 | Resource Type | `Services` |
-| Location | `Riyadh` |
+| Location | `Riyadh City` |
 | Availability start | `2026-08-01` |
 | Availability end | `2026-12-31` |
 | Transaction Type | `Barter` |
@@ -963,7 +964,7 @@ Add **two** skills:
 
 | Field | Value |
 |-------|--------|
-| Location | `Riyadh` |
+| Location | `Riyadh City` (from Primary location) |
 | Start date | `2026-08-01` |
 | Deadline | `2026-12-31` |
 | Flexible start | No |
@@ -1016,7 +1017,7 @@ Add **two** skills:
 
 ## Step 5 — Review & Publish
 
-1. Confirm executive summary: Need · Resource Sharing · Resource Sharing & Exchange · barter · Riyadh
+1. Confirm executive summary: Need · Resource Sharing · Resource Sharing & Exchange · barter · Riyadh City
 2. Confirm no red error banner · readiness high
 3. **Publish**
 
@@ -1050,8 +1051,8 @@ Add **two** skills:
 | Short description | `Offering structural analysis / SAP2000 capacity for circular resource barter in Riyadh.` |
 | Category or profession | `Construction` |
 | Target role | `Civil Engineer` |
-| Primary location | `Riyadh` |
-| Service area | `Riyadh metro` |
+| Primary location | Select **Riyadh City** |
+| Coverage Areas / Available In | Select **Riyadh** (region) — optional; Primary is always included |
 | Start date | `2026-08-01` |
 | Deadline | `2026-12-31` |
 | Availability end date | `2026-12-31` |
@@ -1074,7 +1075,7 @@ Add **two** skills:
 |-------|--------|
 | Resource Title | `Faisal — Structural capacity offered` |
 | Resource Type | `Services` |
-| Location | `Riyadh` |
+| Location | `Riyadh City` |
 | Availability start | `2026-08-01` |
 | Availability end | `2026-12-31` |
 | Transaction Type | `Barter` |
@@ -1165,7 +1166,7 @@ Add **two** skills:
 
 | Field | Value |
 |-------|--------|
-| Preferred location / service area | `Riyadh` |
+| Preferred location / service area | `Riyadh City` (from Primary location) |
 | Availability from | `2026-08-01` |
 | Flexible start | Yes |
 | Weekend allowed | No |
@@ -1217,7 +1218,7 @@ Add **two** skills:
 
 ## Step 5 — Review & Publish
 
-1. Confirm executive summary: Offer · Resource Sharing · Resource Sharing & Exchange · barter · Riyadh
+1. Confirm executive summary: Offer · Resource Sharing · Resource Sharing & Exchange · barter · Riyadh City
 2. Confirm no red error banner · readiness high
 3. **Publish**
 
@@ -1254,7 +1255,7 @@ Add **two** skills:
 | Symptom | Fix |
 |---------|-----|
 | No circular ring | All 6 published; ≥ 3 creators; reciprocal skill edges; try Admin circular recovery; check diagnostics |
-| Resource step blocks publish | Fill Resource Title, Type, Location, Availability, Transaction Type = **Barter**; Target role required |
+| Resource step blocks publish | Fill Resource Title, Type, Availability, Transaction Type = **Barter**; Target role required. Optional **Asset location** uses the same canonical location picker |
 | Only one_way appears | Also check Matching for `circular` type (separate pass) |
 | Expert skill rejected | Years ≥ 5 for Expert level |
 

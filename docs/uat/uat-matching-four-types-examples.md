@@ -25,6 +25,8 @@ After both/all posts are **published**, matching runs automatically. Check Match
 4. Work packages need **skills** + **deadline**.
 5. Confirm path: every participant **Accept** → match `confirmed` → opportunities → `matched`.
 6. Fill **every field** listed under each step (including recommended readiness fields: preferred partner, attachments, compliance, milestones, commercial).
+7. **Locations (canonical picker):** Primary location is required — select from the searchable tree (e.g. **Riyadh City**, **Dammam**, **Dubai**). Do **not** type free text. Coverage Areas / Available In is optional multi-select (e.g. **Riyadh** region, **Nationwide — Saudi Arabia**, **GCC**, **Remote**). Matching uses both Primary and Coverage Areas.
+8. **Asset location** (optional on Resources): use the same location picker; a warning appears if the asset sits outside declared Coverage Areas (does not block publish).
 
 ---
 
@@ -32,9 +34,9 @@ After both/all posts are **published**, matching runs automatically. Check Match
 
 | Step | Screen | Fields to fill |
 |------|--------|----------------|
-| 1 | Opportunity | Intent · Title · Short description · Category · Target role · Primary location · Service area · Start · Deadline · Availability end |
+| 1 | Opportunity | Intent · Title · Short description · Category · Target role · Primary location (canonical picker) · Coverage Areas / Available In (multi-select) · Start · Deadline · Availability end |
 | 2 | Collaboration | Main model · Sub-model · Matching structure (auto) · Model-specific details (task / alliance / consortium / resource) |
-| 3 | Scope & Work | Skills · Services · Preferred partner · Experience · Certifications · Team size · Min qualifications · Resources (+ capacity for Offer) · Work package · Tasks · Package deliverables · Opportunity deliverables · Milestones · Timeline & location · Documents & compliance |
+| 3 | Scope & Work | Skills · Services · Preferred partner · Experience · Certifications · Team size · Min qualifications · Resources (+ Asset location + capacity for Offer) · Work package · Tasks · Package deliverables · Opportunity deliverables · Milestones · Timeline & location · Documents & compliance |
 | 4 | Commercial Structure | Exchange enable (Cash and/or Barter) · Component fields · Payment schedule (cash) · Constraints · VAT `15% VAT exclusive` |
 | 5 | Review & Publish | Summary check · Readiness drawer · Save Draft / Publish |
 

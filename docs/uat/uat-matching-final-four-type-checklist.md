@@ -1,11 +1,11 @@
 # UAT Matching — Final four-type checklist
 
-**Purpose:** End-to-end UAT after Target Role publish gate, coverage-aware location scoring, and matching diagnostics.  
+**Purpose:** End-to-end UAT after Target Role publish gate, canonical multi-location (Primary + Coverage Areas), coverage-aware location scoring, and matching diagnostics.  
 **Do not rely on unit tests alone** — run these scenarios in the UAT runtime.
 
 **Runtime:** UAT · Password `Pmtwin@2026`  
 **Admin:** Matching → recent runs → **View** diagnostics  
-**Shared gates:** Target role required to publish · Title is never used for role matching · Location is soft-scored (no hard city reject)
+**Shared gates:** Target role required to publish · Title is never used for role matching · Location is soft-scored (no hard city reject) · Primary location is a **canonical picker** · Coverage Areas / Available In is optional multi-select
 
 Detailed field scripts: [four-types index](./uat-matching-four-types-examples.md)
 
@@ -18,6 +18,7 @@ Detailed field scripts: [four-types index](./uat-matching-four-types-examples.md
 | P1 | Publish opportunity with empty Target role | **Blocked** — clear Target role message |
 | P2 | Publish with title containing a role but no Target role | Still **blocked** |
 | P3 | Admin → Matching after any publish / Re-run | Diagnostics panel shows scanned / rejected / matched |
+| P4 | Opportunity step: Primary location is a searchable picker (not free text); Coverage Areas is multi-select chips | Can select **Riyadh City**, **Dammam**, **Nationwide — Saudi Arabia**, **GCC**, **Remote** |
 
 ---
 
@@ -28,11 +29,12 @@ Detailed field scripts: [four-types index](./uat-matching-four-types-examples.md
 
 | Step | Action | Prediction |
 |------|--------|------------|
-| 1 | Follow one-way script but set Need **Primary location = Riyadh**, Offer **Primary location = Dammam** (city-only; same Target role `Architect`, skills `BIM`+`Revit`, cash) | Posts publish |
+| 1 | Follow one-way script but set Need **Primary location = Riyadh City**, Offer **Primary location = Dammam** (Coverage Areas empty; same Target role `Architect`, skills `BIM`+`Revit`, cash) | Posts publish |
 | 2 | Wait for auto-match (or Admin → **Re-run matching**) | **PostMatch created** (`one_way`) |
 | 3 | Open match / notifications | **New match found** for both |
 | 4 | Admin → Matching → diagnostics for the run | Candidate **matched**; location tier **Same Country** (~0.75); reject list empty or unrelated |
-| 5 | Optional: Need Service area / geographic scope **Saudi Arabia** + Offer Dammam | Location tier **Nationwide** (full location fit) |
+| 5 | Optional: Need Coverage Areas = **Nationwide — Saudi Arabia** + Offer Dammam | Location tier **Nationwide** (full location fit) |
+| 6 | Optional: Offer Primary = **Dubai**, Coverage Areas includes **Riyadh City**, Need = **Riyadh City** | Location tier **Coverage Overlap** (full location fit) |
 
 **Pass criteria:** Match + Diagnostics + Notification
 
