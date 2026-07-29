@@ -72,6 +72,10 @@ function runPostPublishMatching(
   readonly matching: PublishMatchingResult
   readonly circular: PublishMatchingResult
 } {
+  console.info('[pmtwin:publish-matching] publish completed — starting post-publish matching', {
+    opportunityId,
+  })
+
   const runPublishMatching =
     deps?.runPublishMatching
     ?? matchingService.runPublishMatchingForOpportunity.bind(matchingService)
@@ -82,10 +86,23 @@ function runPostPublishMatching(
   const matching = runPublishMatching(opportunityId)
 
   // Circular matching is best-effort and must never fail the publish action.
+  console.info('[pmtwin:publish-matching] circular matching started', {
+    opportunityId,
+  })
   let circular: PublishMatchingResult
   try {
     circular = runCircularMatching(opportunityId)
+    console.info('[pmtwin:publish-matching] circular matching completed', {
+      opportunityId,
+      discoveredMatchesCount: circular.discoveredMatchesCount,
+      matchingErrors: circular.matchingErrors,
+    })
   } catch (error) {
+    console.error('[pmtwin:publish-matching] circular matching exception', {
+      opportunityId,
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    })
     circular = {
       ...EMPTY_MATCHING_RESULT,
       matchingErrors: [
@@ -103,6 +120,10 @@ function toPublishTransitionResult(
   deps?: OpportunityCommandServiceDeps,
 ): PublishTransitionResult {
   if (!command.success) {
+    console.info('[pmtwin:publish-matching] publish failed — matching not run', {
+      opportunityId,
+      errors: command.errors,
+    })
     return {
       command,
       matching: EMPTY_MATCHING_RESULT,
@@ -165,6 +186,10 @@ export function createOpportunityCommandService(
       opportunityId: string,
       reason?: string,
     ): PublishTransitionResult {
+      console.info('[pmtwin:publish-matching] publish started', {
+        opportunityId,
+        path: 'publishOpportunity',
+      })
       const commandPayload = {
         commandType: 'PublishOpportunity',
         aggregateId: opportunityId,
@@ -239,6 +264,10 @@ export function createOpportunityCommandService(
       opportunityId: string,
       reason?: string,
     ): PublishTransitionResult {
+      console.info('[pmtwin:publish-matching] publish started', {
+        opportunityId,
+        path: 'transitionToPublished',
+      })
       const commandPayload = {
         commandType: 'TransitionOpportunityStatus',
         aggregateId: opportunityId,

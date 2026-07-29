@@ -57,6 +57,9 @@ var ROLE_COMPATIBILITY = {
 };
 var ROLE_ALIASES = {
   "architectural design": "Architect",
+  "senior architect": "Architect",
+  "bim architect": "Architect",
+  "lead architect": "Architect",
   "interior design": "Interior Designer",
   "civil engineering": "Civil Engineer",
   "structural engineering": "Structural Engineer"
@@ -3520,21 +3523,31 @@ function resolveNormalized(opportunity, canonical, config) {
     return extractAndNormalize(opportunity, canonical, { config });
   }
   const existing = opportunity.normalized;
-  if (existing.location) {
-    if ((existing.coverageScopes?.length ?? 0) > 0) return existing;
-    const scopes = extractCoverageScopes(opportunity.attributes);
-    return scopes.length > 0 ? { ...existing, coverageScopes: scopes } : existing;
-  }
   const extracted = extractAndNormalize(
     { ...opportunity, normalized: void 0 },
     canonical,
     { config }
   );
   return {
+    ...extracted,
     ...existing,
-    location: extracted.location,
+    location: existing.location || extracted.location,
     locationCountry: existing.locationCountry || extracted.locationCountry,
-    coverageScopes: (existing.coverageScopes?.length ? existing.coverageScopes : extracted.coverageScopes) ?? []
+    coverageScopes: (existing.coverageScopes?.length ? existing.coverageScopes : extracted.coverageScopes) ?? [],
+    requiredServices: (existing.requiredServices?.length ? existing.requiredServices : extracted.requiredServices) ?? [],
+    offeredServices: (existing.offeredServices?.length ? existing.offeredServices : extracted.offeredServices) ?? [],
+    skills: (existing.skills?.length ? existing.skills : extracted.skills) ?? [],
+    coreSkills: (existing.coreSkills?.length ? existing.coreSkills : extracted.coreSkills) ?? [],
+    role: existing.role || extracted.role,
+    modelType: existing.modelType ?? extracted.modelType,
+    subModelType: existing.subModelType ?? extracted.subModelType,
+    categories: (existing.categories?.length ? existing.categories : extracted.categories) ?? [],
+    budget: existing.budget ?? extracted.budget,
+    timeline: existing.timeline ?? extracted.timeline,
+    deadline: existing.deadline ?? extracted.deadline,
+    availability: existing.availability ?? extracted.availability,
+    reputation: existing.reputation ?? extracted.reputation,
+    intent: existing.intent ?? extracted.intent
   };
 }
 function passHardGate(needPost, offerPost, needNorm, offerNorm, config) {
@@ -4574,37 +4587,7 @@ function findCircularExchangesPure(needPosts, offerPosts, config, canonical = {}
 }
 
 // src/engine/run-matching-for-post.ts
-function hasServiceSignal(normalized2) {
-  return (normalized2.requiredServices?.length ?? 0) > 0 || (normalized2.offeredServices?.length ?? 0) > 0 || (normalized2.skills?.length ?? 0) > 0 || (normalized2.coreSkills?.length ?? 0) > 0;
-}
-function isSparseNormalized(normalized2) {
-  if (!normalized2) return true;
-  if (!normalized2.role) return true;
-  return !hasServiceSignal(normalized2);
-}
-function mergeLocationFields(existing, extracted) {
-  return {
-    ...existing,
-    location: existing.location || extracted.location,
-    locationCountry: existing.locationCountry || extracted.locationCountry,
-    coverageScopes: (existing.coverageScopes?.length ? existing.coverageScopes : extracted.coverageScopes) ?? []
-  };
-}
 function normalizePost(post, canonical, config) {
-  if (post.normalized && !isSparseNormalized(post.normalized)) {
-    if (post.normalized.location) {
-      return post;
-    }
-    const extracted2 = extractAndNormalize(
-      { ...post, normalized: void 0 },
-      canonical,
-      { config }
-    );
-    return {
-      ...post,
-      normalized: mergeLocationFields(post.normalized, extracted2)
-    };
-  }
   const extracted = extractAndNormalize(
     { ...post, normalized: void 0 },
     canonical,
@@ -4618,7 +4601,10 @@ function normalizePost(post, canonical, config) {
     ...post,
     normalized: {
       ...extracted,
-      ...mergeLocationFields(existing, extracted),
+      ...existing,
+      location: existing.location || extracted.location,
+      locationCountry: existing.locationCountry || extracted.locationCountry,
+      coverageScopes: (existing.coverageScopes?.length ? existing.coverageScopes : extracted.coverageScopes) ?? [],
       role: existing.role || extracted.role,
       requiredServices: (existing.requiredServices?.length ? existing.requiredServices : extracted.requiredServices) ?? [],
       offeredServices: (existing.offeredServices?.length ? existing.offeredServices : extracted.offeredServices) ?? [],

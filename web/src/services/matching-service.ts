@@ -269,6 +269,14 @@ function finalizeCircularMatchingResult(
   }
 }
 
+function logPublishMatching(
+  stage: string,
+  details: Readonly<Record<string, unknown>>,
+): void {
+  // Temporary UAT diagnostics — keep structured and greppable.
+  console.info(`[pmtwin:publish-matching] ${stage}`, details)
+}
+
 function runPublishMatchingForOpportunity(
   opportunityId: string,
   deps?: PublishMatchingDeps,
@@ -280,6 +288,12 @@ function runPublishMatchingForOpportunity(
     postMatchIds: [],
   }
   const startedAt = new Date().toISOString()
+  const matchingModel = deps?.engineOptions?.model ?? 'auto'
+
+  logPublishMatching('auto matching started', {
+    opportunityId,
+    matchingModel,
+  })
 
   const getOpportunityById =
     deps?.getOpportunityById ?? ((id) => opportunityRepository.getById(id))
@@ -297,7 +311,20 @@ function runPublishMatchingForOpportunity(
 
   const anchorOpportunity = getOpportunityById(opportunityId)
   if (!anchorOpportunity || anchorOpportunity.status !== 'published') {
-    return empty
+    const reason = !anchorOpportunity
+      ? 'anchor_missing'
+      : 'anchor_not_published'
+    logPublishMatching('auto matching skipped', {
+      opportunityId,
+      reason,
+      status: anchorOpportunity?.status ?? null,
+    })
+    return {
+      ...empty,
+      matchingErrors: [
+        `Publish matching skipped: opportunity ${opportunityId} is ${reason.replaceAll('_', ' ')}.`,
+      ],
+    }
   }
 
   const publishedPool = listPublishedOpportunities()
@@ -310,18 +337,57 @@ function runPublishMatchingForOpportunity(
   const runId = createPublishRunId()
   const seenStrongKeys = new Set<string>()
 
-  const engineResults = runMatching({
-    anchorPost: opportunityToPost(anchorOpportunity),
-    opportunities: posts,
-    canonical,
-    config,
-    options: deps?.engineOptions ?? { model: 'auto' },
+  logPublishMatching('matching pool ready', {
+    opportunityId,
+    runId,
+    matchingModel,
+    publishedPoolSize: publishedPool.length,
+    anchorIntent: anchorOpportunity.intent,
+    anchorOwnerPartyId: anchorOpportunity.ownerPartyId ?? null,
+    anchorWorkspaceId: anchorOpportunity.workspaceId ?? null,
+  })
+
+  let engineResults: ModelRunResult[]
+  try {
+    engineResults = runMatching({
+      anchorPost: opportunityToPost(anchorOpportunity),
+      opportunities: posts,
+      canonical,
+      config,
+      options: deps?.engineOptions ?? { model: 'auto' },
+    })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    const stack = error instanceof Error ? error.stack : undefined
+    logPublishMatching('matching engine exception', {
+      opportunityId,
+      runId,
+      message,
+      stack,
+    })
+    return {
+      ...empty,
+      matchingErrors: [`Matching engine failed: ${message}`],
+    }
+  }
+
+  const engineCandidateCount = engineResults.reduce(
+    (count, result) => count + result.matches.length,
+    0,
+  )
+  logPublishMatching('engine candidates', {
+    opportunityId,
+    runId,
+    matchingModel,
+    engineCandidateCount,
+    models: engineResults.map((result) => result.model),
   })
 
   const matchingErrors: string[] = []
   const postMatchIds: string[] = []
   let discoveredMatchesCount = 0
   let skippedDuplicatesCount = 0
+  let adapterDroppedCount = 0
   const diagnosticSummaries: MatchingRunDiagnosticSummary[] = []
 
   const ownershipContext = buildMatchingOwnershipContext()
@@ -340,6 +406,18 @@ function runPublishMatchingForOpportunity(
       if (summary) diagnosticSummaries.push(summary)
     }
     const commands = modelRunResultToDiscoverCommands(result, discoverContext, posts)
+    const dropped = result.matches.length - commands.length
+    if (dropped > 0) {
+      adapterDroppedCount += dropped
+      logPublishMatching('adapter drops', {
+        opportunityId,
+        runId,
+        model: result.model,
+        engineMatches: result.matches.length,
+        discoverCommands: commands.length,
+        dropped,
+      })
+    }
     for (const command of commands) {
       const strongKey = discoverInputStrongKey(command)
       if (strongKey) {
@@ -360,12 +438,32 @@ function runPublishMatchingForOpportunity(
         matchingErrors.push(
           ...(commandResult.errors ?? [`DiscoverPostMatch failed for ${command.aggregateId}`]),
         )
+        logPublishMatching('DiscoverPostMatch failed', {
+          opportunityId,
+          runId,
+          aggregateId: command.aggregateId,
+          errors: commandResult.errors,
+        })
         continue
       }
 
       discoveredMatchesCount += 1
       postMatchIds.push(command.aggregateId)
     }
+  }
+
+  if (
+    engineCandidateCount > 0
+    && discoveredMatchesCount === 0
+    && skippedDuplicatesCount === 0
+  ) {
+    matchingErrors.push(
+      `Matching engine returned ${engineCandidateCount} candidate(s) but none could be persisted (ownership/participant resolution or validation failed).`,
+    )
+  } else if (adapterDroppedCount > 0 && discoveredMatchesCount === 0) {
+    matchingErrors.push(
+      `Dropped ${adapterDroppedCount} engine candidate(s) while building DiscoverPostMatch (check ownerPartyId/workspaceId/createdByUserId).`,
+    )
   }
 
   const diagnosticSummary = mergeMatchingRunDiagnosticSummaries(diagnosticSummaries)
@@ -389,9 +487,27 @@ function runPublishMatchingForOpportunity(
       status: resolveMatchingRunStatus(matchingErrors),
       diagnosticSummary,
     })
-  } catch {
+  } catch (error) {
     // best-effort: publish matching must not fail when audit write fails
+    logPublishMatching('matching audit write failed', {
+      opportunityId,
+      runId,
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    })
   }
+
+  logPublishMatching('auto matching completed', {
+    opportunityId,
+    runId,
+    matchingModel,
+    engineCandidateCount,
+    discoveredMatchesCount,
+    skippedDuplicatesCount,
+    adapterDroppedCount,
+    matchingErrors,
+    postMatchIds,
+  })
 
   return {
     discoveredMatchesCount,

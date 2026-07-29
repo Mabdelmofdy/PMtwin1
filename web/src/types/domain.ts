@@ -530,7 +530,7 @@ export type AuthSession = {
   userId: string
   rememberMe: boolean
   activeWorkspaceId?: string
-  activePartyId: string
+  activePartyId?: string
   activeMembershipId: string
   partyType: string
   platformContextActive?: boolean

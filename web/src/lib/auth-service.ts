@@ -24,7 +24,8 @@ export type { AccountType, AuthSession }
 
 export type SessionPartyContext = {
   activeWorkspaceId?: string
-  activePartyId: string
+  /** May be undefined when identity projection has not recovered a party yet. */
+  activePartyId?: string
   activeMembershipId: string
   partyType: ImplementedPartyType | string
   platformContextActive?: boolean
@@ -91,8 +92,10 @@ function resolveSessionPartyContext(
   const legacyParty = partiesApi.resolveActiveParty(userId)
   const legacyMembership = partiesApi.getPrimaryMembership(userId)
 
+  // Prefer undefined over '' for party/workspace — blank strings persist onto
+  // opportunities and block matching participant resolution.
   return {
-    activePartyId: legacyParty?.id ?? '',
+    activePartyId: legacyParty?.id || undefined,
     activeMembershipId: legacyMembership
       ? formatMembershipId(legacyMembership)
       : '',

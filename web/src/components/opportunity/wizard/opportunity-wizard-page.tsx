@@ -42,6 +42,7 @@ import {
   publishOpportunityUiAction,
   resolveProfileKindFromUser,
 } from '@/lib/publish-opportunity-ui-actions.ts'
+import { showPublishSuccessFeedback } from '@/lib/publish-opportunity-feedback.ts'
 import { pmWizardSticky } from '@/tokens/layers/layout.ts'
 import { cn } from '@/lib/utils'
 import {
@@ -573,7 +574,7 @@ export function OpportunityWizardPage({ mode }: { mode: 'create' | 'edit' }) {
       unlockNavigation()
       clearLocalDraftSnapshot(mode, opportunityId)
       clearLocalDraftRecoveryDismissal(mode, opportunityId)
-      toast.success('Opportunity published')
+      showPublishSuccessFeedback(result)
       navigate(`/opportunities/${resolvedOpportunityId}`)
     } finally {
       setPublishing(false)

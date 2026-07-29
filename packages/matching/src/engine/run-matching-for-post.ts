@@ -20,63 +20,13 @@ import type {
 } from '../types/model-results.ts'
 import type { OpportunityPost } from '../types/opportunity.ts'
 
-function hasServiceSignal(
-  normalized: NonNullable<OpportunityPost['normalized']>,
-): boolean {
-  return (
-    (normalized.requiredServices?.length ?? 0) > 0
-    || (normalized.offeredServices?.length ?? 0) > 0
-    || (normalized.skills?.length ?? 0) > 0
-    || (normalized.coreSkills?.length ?? 0) > 0
-  )
-}
-
-/** Wizard often persists `{ requiredServices: [] }` without role — treat as missing. */
-function isSparseNormalized(
-  normalized: OpportunityPost['normalized'] | undefined,
-): boolean {
-  if (!normalized) return true
-  if (!normalized.role) return true
-  return !hasServiceSignal(normalized)
-}
-
-/** Merge location/coverage from top-level fields when wizard omitted them. */
-function mergeLocationFields(
-  existing: NonNullable<OpportunityPost['normalized']>,
-  extracted: NonNullable<OpportunityPost['normalized']>,
-): NonNullable<OpportunityPost['normalized']> {
-  return {
-    ...existing,
-    location: existing.location || extracted.location,
-    locationCountry: existing.locationCountry || extracted.locationCountry,
-    coverageScopes:
-      (existing.coverageScopes?.length
-        ? existing.coverageScopes
-        : extracted.coverageScopes) ?? [],
-  }
-}
-
 function normalizePost(
   post: OpportunityPost,
   canonical: CanonicalData,
   config: MatchingConfig,
 ): OpportunityPost {
-  if (post.normalized && !isSparseNormalized(post.normalized)) {
-    // Wizard often persists role+skills without location — backfill from top-level.
-    if (post.normalized.location) {
-      return post
-    }
-    const extracted = extractAndNormalize(
-      { ...post, normalized: undefined },
-      canonical,
-      { config },
-    )
-    return {
-      ...post,
-      normalized: mergeLocationFields(post.normalized, extracted),
-    }
-  }
-
+  // Always merge through extract so wizard role+skills posts also get
+  // budget/timeline/categories/location from top-level fields.
   const extracted = extractAndNormalize(
     { ...post, normalized: undefined },
     canonical,
@@ -91,7 +41,13 @@ function normalizePost(
     ...post,
     normalized: {
       ...extracted,
-      ...mergeLocationFields(existing, extracted),
+      ...existing,
+      location: existing.location || extracted.location,
+      locationCountry: existing.locationCountry || extracted.locationCountry,
+      coverageScopes:
+        (existing.coverageScopes?.length
+          ? existing.coverageScopes
+          : extracted.coverageScopes) ?? [],
       role: existing.role || extracted.role,
       requiredServices:
         (existing.requiredServices?.length

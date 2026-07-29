@@ -4,8 +4,8 @@ import type { NormalizedPost, OpportunityPost } from '../types/opportunity.ts';
 export declare function resolveThreshold(config: MatchingConfig): number;
 export declare function resolveMaxCandidates(config: MatchingConfig, override?: number): number;
 /**
- * Prefer persisted normalized, but backfill location/coverage when the wizard
- * wrote role+skills without location (top-level opportunity.location still set).
+ * Prefer persisted normalized, but backfill location/coverage/budget/timeline
+ * when the wizard wrote role+skills without those fields.
  */
 export declare function resolveNormalized(opportunity: OpportunityPost, canonical: CanonicalData, config: MatchingConfig): NormalizedPost;
 export declare function passHardGate(needPost: OpportunityPost, offerPost: OpportunityPost, needNorm: NormalizedPost, offerNorm: NormalizedPost, config: MatchingConfig): boolean;

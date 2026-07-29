@@ -28,18 +28,30 @@ type OpportunityOwnershipInput = Pick<
   readonly createdByActor?: CreatedByActor
 }
 
+/** Treat blank strings as absent so legacy ownership can resolve. */
+export function normalizeOptionalOwnershipId(
+  value: string | null | undefined,
+): string | undefined {
+  if (typeof value !== 'string') return undefined
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : undefined
+}
+
 export function resolveOpportunityOwnership(
   opportunity: OpportunityOwnershipInput,
   ctx: OpportunityOwnershipContext,
 ): OpportunityOwnership {
+  const ownerPartyId = normalizeOptionalOwnershipId(opportunity.ownerPartyId)
+  const workspaceId = normalizeOptionalOwnershipId(opportunity.workspaceId)
   const legacy = resolveLegacyOpportunityOwnership({
     creatorId: opportunity.creatorId,
-    ownerPartyId: opportunity.ownerPartyId,
+    ownerPartyId,
     companyIds: ctx.companyIds,
     userIds: ctx.userIds,
   })
   const createdByUserId =
-    opportunity.createdByUserId ?? legacy.createdByUserId
+    normalizeOptionalOwnershipId(opportunity.createdByUserId)
+    ?? legacy.createdByUserId
   const actorUserId = createdByUserId ?? opportunity.creatorId
   const createdByActor = resolveCreatedByActor({
     createdByActor: opportunity.createdByActor,
@@ -52,8 +64,8 @@ export function resolveOpportunityOwnership(
   })
 
   return {
-    workspaceId: opportunity.workspaceId ?? legacy.workspaceId,
-    ownerPartyId: opportunity.ownerPartyId ?? legacy.ownerPartyId,
+    workspaceId: workspaceId ?? legacy.workspaceId,
+    ownerPartyId: ownerPartyId ?? legacy.ownerPartyId,
     createdByUserId,
     createdByActor,
   }

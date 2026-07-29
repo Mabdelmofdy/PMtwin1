@@ -1,7 +1,6 @@
 import { withMatchingDefaults } from '../config/defaults.ts'
 import { passesPair } from '../constraints/hard-constraints.ts'
 import { extractAndNormalize } from '../normalize/extract.ts'
-import { extractCoverageScopes } from '../normalize/location-coverage.ts'
 import type { CanonicalData } from '../types/canonical.ts'
 import type { MatchingConfig } from '../types/matching-config.ts'
 import type { NormalizedPost, OpportunityPost } from '../types/opportunity.ts'
@@ -15,8 +14,8 @@ export function resolveMaxCandidates(config: MatchingConfig, override?: number):
 }
 
 /**
- * Prefer persisted normalized, but backfill location/coverage when the wizard
- * wrote role+skills without location (top-level opportunity.location still set).
+ * Prefer persisted normalized, but backfill location/coverage/budget/timeline
+ * when the wizard wrote role+skills without those fields.
  */
 export function resolveNormalized(
   opportunity: OpportunityPost,
@@ -28,25 +27,49 @@ export function resolveNormalized(
   }
 
   const existing = opportunity.normalized
-  if (existing.location) {
-    if ((existing.coverageScopes?.length ?? 0) > 0) return existing
-    const scopes = extractCoverageScopes(opportunity.attributes)
-    return scopes.length > 0 ? { ...existing, coverageScopes: scopes } : existing
-  }
-
   const extracted = extractAndNormalize(
     { ...opportunity, normalized: undefined },
     canonical,
     { config },
   )
+
+  // Always merge soft/scoring fields the wizard often omits from `normalized`.
   return {
+    ...extracted,
     ...existing,
-    location: extracted.location,
+    location: existing.location || extracted.location,
     locationCountry: existing.locationCountry || extracted.locationCountry,
     coverageScopes:
       (existing.coverageScopes?.length
         ? existing.coverageScopes
         : extracted.coverageScopes) ?? [],
+    requiredServices:
+      (existing.requiredServices?.length
+        ? existing.requiredServices
+        : extracted.requiredServices) ?? [],
+    offeredServices:
+      (existing.offeredServices?.length
+        ? existing.offeredServices
+        : extracted.offeredServices) ?? [],
+    skills:
+      (existing.skills?.length ? existing.skills : extracted.skills) ?? [],
+    coreSkills:
+      (existing.coreSkills?.length
+        ? existing.coreSkills
+        : extracted.coreSkills) ?? [],
+    role: existing.role || extracted.role,
+    modelType: existing.modelType ?? extracted.modelType,
+    subModelType: existing.subModelType ?? extracted.subModelType,
+    categories:
+      (existing.categories?.length
+        ? existing.categories
+        : extracted.categories) ?? [],
+    budget: existing.budget ?? extracted.budget,
+    timeline: existing.timeline ?? extracted.timeline,
+    deadline: existing.deadline ?? extracted.deadline,
+    availability: existing.availability ?? extracted.availability,
+    reputation: existing.reputation ?? extracted.reputation,
+    intent: existing.intent ?? extracted.intent,
   }
 }
 

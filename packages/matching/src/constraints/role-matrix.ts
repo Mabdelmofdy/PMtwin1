@@ -10,6 +10,9 @@ export const ROLE_COMPATIBILITY: Readonly<Record<string, readonly string[]>> = {
 
 export const ROLE_ALIASES: Readonly<Record<string, string>> = {
   'architectural design': 'Architect',
+  'senior architect': 'Architect',
+  'bim architect': 'Architect',
+  'lead architect': 'Architect',
   'interior design': 'Interior Designer',
   'civil engineering': 'Civil Engineer',
   'structural engineering': 'Structural Engineer',

@@ -279,12 +279,16 @@ export class OpportunityCommandHandler {
       return failure(command.commandType, command.aggregateId, draftCheck.messages)
     }
 
+    const activeWorkspaceId = actor?.activeWorkspaceId?.trim() || undefined
+    const activePartyId = actor?.activePartyId?.trim() || undefined
     const created = this.opportunityRepository.create({
       ...fields,
       id: command.aggregateId,
       status: 'draft',
-      workspaceId: actor?.activeWorkspaceId,
-      ownerPartyId: actor?.activePartyId,
+      // Never persist blank party/workspace ids — they block legacy ownership
+      // resolution and silently drop DiscoverPostMatch participant builds.
+      workspaceId: activeWorkspaceId,
+      ownerPartyId: activePartyId,
       createdByUserId,
       creatorId: createdByUserId,
       lastModifiedByUserId: createdByUserId,
@@ -381,10 +385,14 @@ export class OpportunityCommandHandler {
     }
 
     const { status: _status, id: _id, createdAt: _createdAt, ...patch } = merged
+    const existingWorkspaceId = existing.workspaceId?.trim() || undefined
+    const existingOwnerPartyId = existing.ownerPartyId?.trim() || undefined
+    const activeWorkspaceId = actor?.activeWorkspaceId?.trim() || undefined
+    const activePartyId = actor?.activePartyId?.trim() || undefined
     this.opportunityRepository.update(command.aggregateId, {
       ...patch,
-      workspaceId: existing.workspaceId ?? actor?.activeWorkspaceId,
-      ownerPartyId: existing.ownerPartyId ?? actor?.activePartyId,
+      workspaceId: existingWorkspaceId ?? activeWorkspaceId,
+      ownerPartyId: existingOwnerPartyId ?? activePartyId,
       lastModifiedByUserId:
         actor?.userId ??
         payload.creatorId ??
