@@ -168,6 +168,28 @@ const seedPostMatches: PostMatch[] = [
     },
   },
   {
+    id: 'pm-expired-with-participants',
+    matchType: 'one_way',
+    status: 'expired',
+    matchScore: 0.65,
+    needOpportunityId: 'need-expired-participants',
+    offerOpportunityId: 'offer-expired-participants',
+    participants: [
+      {
+        userId: 'user-need-expired',
+        role: 'need_owner',
+        opportunityId: 'need-expired-participants',
+        participantStatus: 'pending',
+      },
+      {
+        userId: 'user-offer-expired',
+        role: 'offer_provider',
+        opportunityId: 'offer-expired-participants',
+        participantStatus: 'pending',
+      },
+    ],
+  },
+  {
     id: 'pm-superseded-pair',
     matchType: 'one_way',
     status: 'superseded',
@@ -467,6 +489,21 @@ describe('PostMatchCommandHandler', () => {
     assert.equal(
       stack.postMatchRepository.getById('pm-confirmed')?.status,
       'confirmed',
+    )
+  })
+
+  it('AcceptPostMatch after the match expired is rejected', () => {
+    const result = stack.gateway.execute({
+      commandType: 'AcceptPostMatch',
+      aggregateId: 'pm-expired-with-participants',
+      clientRequestId: 'req-accept-expired',
+      userId: 'user-need-expired',
+    })
+
+    assert.equal(result.success, false)
+    assert.equal(
+      stack.postMatchRepository.getById('pm-expired-with-participants')?.status,
+      'expired',
     )
   })
 

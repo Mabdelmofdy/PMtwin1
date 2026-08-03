@@ -43,6 +43,7 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
     opportunityRepository,
     auditRepository,
     postMatchRepository,
+    notificationRepository,
     resolveCommandActor: getCommandPermissionActor,
     resolvePublishReadinessContext: (opportunity) =>
       resolvePublishReadinessContextForOpportunity(opportunity),

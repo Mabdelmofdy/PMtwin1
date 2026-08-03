@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it, beforeEach } from 'node:test'
-import type { Deal, Negotiation, Opportunity, PostMatch } from '@/types/domain.ts'
+import type { Negotiation, Opportunity, PostMatch } from '@/types/domain.ts'
 import {
   createCommandGatewayTestStack,
   type CommandGatewayTestStack,

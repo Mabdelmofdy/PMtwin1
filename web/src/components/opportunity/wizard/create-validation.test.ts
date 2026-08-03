@@ -36,7 +36,7 @@ describe('validateCreateOpportunityDraft', () => {
       intent: 'need',
       sector: 'Construction',
       targetRole: 'BIM Coordinator',
-      location: 'Riyadh',
+      location: 'sa/riyadh/riyadh-city',
       startDate: '2026-08-01',
       services: 'BIM Coordination',
       mainCollaborationModel: 'cash_subcontracting',

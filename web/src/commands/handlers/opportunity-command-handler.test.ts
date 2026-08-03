@@ -572,3 +572,159 @@ describe('OpportunityCommandHandler close/archive match sync', () => {
     assert.equal(stack.postMatchRepository.getById('pm-archive-open')?.status, 'expired')
   })
 })
+
+describe('OpportunityCommandHandler match expiration notifications', () => {
+  const NEED_OWNER = 'user-need-owner'
+  const OFFER_OWNER = 'user-offer-owner'
+
+  function participantPair() {
+    return [
+      { userId: NEED_OWNER, role: 'need_owner', opportunityId: 'opp-expiry-notify' },
+      { userId: OFFER_OWNER, role: 'offer_provider', opportunityId: 'offer-side' },
+    ]
+  }
+
+  function stackWith(matchStatus: string) {
+    return createCommandGatewayTestStack({
+      opportunities: [
+        {
+          ...opportunityFixture('opp-expiry-notify', 'published'),
+          visibilityStatus: 'published',
+        },
+      ],
+      postMatches: [
+        {
+          id: 'pm-expiry-notify',
+          matchType: 'one_way',
+          status: matchStatus,
+          matchScore: 0.82,
+          needOpportunityId: 'opp-expiry-notify',
+          offerOpportunityId: 'offer-side',
+          participants: participantPair(),
+        },
+      ],
+    })
+  }
+
+  function expiredNotifications(
+    stack: ReturnType<typeof createCommandGatewayTestStack>,
+    userId: string,
+  ) {
+    return stack.notificationRepository
+      .getByUserId(userId)
+      .filter((notification) => notification.type === 'match_expired')
+  }
+
+  it('notifies both participants when close expires an open match', () => {
+    const stack = stackWith('discovered')
+
+    const result = stack.gateway.execute({
+      commandType: 'CloseOpportunity',
+      aggregateId: 'opp-expiry-notify',
+      clientRequestId: 'req-close-notify',
+    })
+
+    assert.equal(result.success, true)
+    assert.equal(stack.postMatchRepository.getById('pm-expiry-notify')?.status, 'expired')
+
+    for (const userId of [NEED_OWNER, OFFER_OWNER]) {
+      const notifications = expiredNotifications(stack, userId)
+      assert.equal(notifications.length, 1)
+      assert.equal(
+        notifications[0]?.message,
+        'The opportunity has been closed. Your match has expired.',
+      )
+      assert.equal(notifications[0]?.entityType, 'post_match')
+      assert.equal(notifications[0]?.entityId, 'pm-expiry-notify')
+      assert.equal(notifications[0]?.read, false)
+    }
+  })
+
+  it('uses archived wording when archive expires an open match', () => {
+    const stack = stackWith('accepted')
+
+    const result = stack.gateway.execute({
+      commandType: 'ArchiveOpportunity',
+      aggregateId: 'opp-expiry-notify',
+      clientRequestId: 'req-archive-notify',
+    })
+
+    assert.equal(result.success, true)
+    assert.equal(
+      expiredNotifications(stack, NEED_OWNER)[0]?.message,
+      'The opportunity has been archived. Your match has expired.',
+    )
+    assert.equal(
+      expiredNotifications(stack, OFFER_OWNER)[0]?.message,
+      'The opportunity has been archived. Your match has expired.',
+    )
+  })
+
+  it('does not notify participants of a confirmed match', () => {
+    const stack = stackWith('confirmed')
+
+    stack.gateway.execute({
+      commandType: 'CloseOpportunity',
+      aggregateId: 'opp-expiry-notify',
+      clientRequestId: 'req-close-confirmed',
+    })
+
+    assert.equal(stack.postMatchRepository.getById('pm-expiry-notify')?.status, 'confirmed')
+    assert.equal(expiredNotifications(stack, NEED_OWNER).length, 0)
+    assert.equal(expiredNotifications(stack, OFFER_OWNER).length, 0)
+  })
+
+  it('does not duplicate notifications when close runs twice', () => {
+    const stack = stackWith('discovered')
+
+    stack.gateway.execute({
+      commandType: 'CloseOpportunity',
+      aggregateId: 'opp-expiry-notify',
+      clientRequestId: 'req-close-first',
+    })
+    stack.gateway.execute({
+      commandType: 'CloseOpportunity',
+      aggregateId: 'opp-expiry-notify',
+      clientRequestId: 'req-close-second',
+    })
+
+    assert.equal(expiredNotifications(stack, NEED_OWNER).length, 1)
+    assert.equal(expiredNotifications(stack, OFFER_OWNER).length, 1)
+  })
+
+  it('records notified recipients on the match audit entry', () => {
+    const stack = stackWith('discovered')
+
+    stack.gateway.execute({
+      commandType: 'CloseOpportunity',
+      aggregateId: 'opp-expiry-notify',
+      clientRequestId: 'req-close-audit',
+    })
+
+    const entry = stack.auditRepository
+      .getAll()
+      .find(
+        (audit) =>
+          audit.action === 'post_match.status_changed' &&
+          audit.entityId === 'pm-expiry-notify',
+      )
+    assert.ok(entry)
+    assert.deepEqual(entry?.details?.notifiedUserIds, [NEED_OWNER, OFFER_OWNER])
+  })
+
+  it('still expires the match when the notification sink throws', () => {
+    const stack = stackWith('discovered')
+    stack.notificationRepository.create = () => {
+      throw new Error('notification sink unavailable')
+    }
+
+    const result = stack.gateway.execute({
+      commandType: 'CloseOpportunity',
+      aggregateId: 'opp-expiry-notify',
+      clientRequestId: 'req-close-throwing-sink',
+    })
+
+    assert.equal(result.success, true)
+    assert.equal(stack.postMatchRepository.getById('pm-expiry-notify')?.status, 'expired')
+  })
+})

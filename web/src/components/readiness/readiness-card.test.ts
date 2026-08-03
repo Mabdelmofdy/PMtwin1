@@ -5,9 +5,7 @@ import {
   formatReadinessScore,
   formatReadinessStatusLabel,
   getReadinessStatusTone,
-  getReadinessSummaryMessage,
   getReadinessToneTextClass,
-  READINESS_READY_MESSAGE,
 } from '@/components/readiness/readiness-display.ts'
 import { resolveOpportunityReadiness } from '@/components/readiness/opportunity-readiness-card.tsx'
 import { resolveProfileReadiness } from '@/components/readiness/profile-readiness-card.tsx'

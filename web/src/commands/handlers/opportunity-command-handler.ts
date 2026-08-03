@@ -37,6 +37,7 @@ import {
   normalizeOpportunityCollaboration,
 } from '@/domain/collaboration/opportunity-collaboration.ts'
 import { expireActiveMatchesOnOpportunityWithdrawn } from '@/domain/matching/expire-matches-on-opportunity-withdrawn.ts'
+import type { NotificationSink } from '@/commands/handlers/lifecycle-notifications.ts'
 import { toStoredStatus } from '@/domain/workflow/legacy-map.ts'
 import {
   composePublishValidation,
@@ -59,6 +60,8 @@ export type OpportunityCommandHandlerDeps = {
   readonly auditRepository?: AuditRepository | null
   /** When set, Close/Archive expire discovered/accepted PostMatches for the opportunity. */
   readonly postMatchRepository?: PostMatchRepository | null
+  /** When set, participants of matches expired by Close/Archive are notified. */
+  readonly notificationRepository?: NotificationSink | null
   readonly resolvePublishReadinessContext?: (
     opportunity: Opportunity,
   ) => PublishReadinessContext
@@ -201,6 +204,7 @@ export class OpportunityCommandHandler {
   private readonly opportunityRepository: OpportunityRepository
   private readonly auditRepository: AuditRepository | null
   private readonly postMatchRepository: PostMatchRepository | null
+  private readonly notificationRepository: NotificationSink | null
   private readonly resolvePublishReadinessContext?: (
     opportunity: Opportunity,
   ) => PublishReadinessContext
@@ -210,6 +214,7 @@ export class OpportunityCommandHandler {
     this.opportunityRepository = deps.opportunityRepository
     this.auditRepository = deps.auditRepository ?? null
     this.postMatchRepository = deps.postMatchRepository ?? null
+    this.notificationRepository = deps.notificationRepository ?? null
     this.resolvePublishReadinessContext = deps.resolvePublishReadinessContext
     this.resolveCommandActor = deps.resolveCommandActor
   }
@@ -504,9 +509,13 @@ export class OpportunityCommandHandler {
     clientRequestId: string,
     visibilityStatus: 'closed' | 'archived',
     reason?: string,
-  ): { expiredMatchIds: readonly string[]; skippedMatchIds: readonly string[] } {
+  ): {
+    expiredMatchIds: readonly string[]
+    skippedMatchIds: readonly string[]
+    notifiedUserIds: readonly string[]
+  } {
     if (!this.postMatchRepository) {
-      return { expiredMatchIds: [], skippedMatchIds: [] }
+      return { expiredMatchIds: [], skippedMatchIds: [], notifiedUserIds: [] }
     }
     return expireActiveMatchesOnOpportunityWithdrawn({
       opportunityId,
@@ -515,6 +524,7 @@ export class OpportunityCommandHandler {
       reason,
       postMatchRepository: this.postMatchRepository,
       auditRepository: this.auditRepository,
+      notificationRepository: this.notificationRepository,
     })
   }
 

@@ -129,7 +129,8 @@ describe('buildReadinessAnalytics', () => {
       resolveProfileForOpportunity: () => null,
     })
 
-    assert.equal(analytics.profiles.averageScore, 85)
+    // ready=82, needs_review=73 → average 77.5 (recommended-field weighting)
+    assert.equal(analytics.profiles.averageScore, 77.5)
   })
 
   it('counts ready, needs_review, and incomplete opportunities', () => {

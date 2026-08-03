@@ -144,6 +144,7 @@ export function createCommandGatewayTestStack(
     opportunityRepository,
     auditRepository,
     postMatchRepository,
+    notificationRepository,
     resolvePublishReadinessContext: createPublishReadinessResolver(
       options.users ?? [],
     ),

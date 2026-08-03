@@ -17,11 +17,7 @@ import {
 } from '@/infrastructure/environment/environment-import-service.ts'
 import { readEnvironmentBootstrapMetadata } from '@/infrastructure/environment/environment-bootstrap-service.ts'
 import { OVERRIDES_KEY } from '@/types/storage.ts'
-import {
-  NEGOTIATION_MESSAGES_STORAGE_KEY,
-  NEGOTIATION_OFFERS_STORAGE_KEY,
-  NEGOTIATION_TRANSCRIPT_STORAGE_KEY,
-} from '@/types/negotiation-discussion.ts'
+import { NEGOTIATION_MESSAGES_STORAGE_KEY } from '@/types/negotiation-discussion.ts'
 
 class MemoryLocalStorage {
   private readonly data = new Map<string, string>()

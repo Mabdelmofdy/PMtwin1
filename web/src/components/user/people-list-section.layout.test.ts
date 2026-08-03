@@ -22,7 +22,7 @@ describe('PeopleListSection layout contract', () => {
     assert.ok(tableStart >= 0)
 
     const tableSource = source.slice(tableStart)
-    assert.match(tableSource, /to=\{\`\/people\/\$\{person\.id\}\`\}/)
+    assert.match(tableSource, /to=\{`\/people\/\$\{person\.id\}`\}/)
     assert.match(tableSource, /navigate\(`\/people\/\$\{person\.id\}`\)/)
     assert.match(tableSource, /<PmDataTable/)
   })

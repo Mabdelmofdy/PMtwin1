@@ -5,12 +5,12 @@
 **Wizard:** Create Opportunity — 5 steps  
 **Pairs with:** [Script B — Offer](./uat-offer-opportunity-script.md)
 
-## Goal**adiness** UI before publish.
+## Goal
+
+Fill a publish-ready **Need** that will auto-match Sara’s Offer after both are published. Use this to show **opportunity readiness** UI before publish.
 
 Enter values **exactly** as listed. Dates must be **today or later** (do not use 2024 dates).
 **Locations:** use the **canonical picker** for Primary location (e.g. **Riyadh City**) — do not type free text. Coverage Areas / Available In is optional multi-select.
-
-Fill a publish-ready **Need** that will auto-match Sara’s Offer after both are published. Use this to show **opportunity re**
 
 ---
 

@@ -151,7 +151,7 @@ export function OpportunitiesPage() {
       }
       const withdrawn = isWithdrawnOpportunityVisibility(o)
       const visibility = (o.visibilityStatus ?? '').toLowerCase()
-      let matchesStatus = true
+      let matchesStatus: boolean
       if (status === 'archived') {
         matchesStatus = visibility === 'archived'
       } else if (status === 'closed') {

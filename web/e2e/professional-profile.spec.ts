@@ -18,7 +18,8 @@ async function signIn(
   )
   await page.getByLabel('Password').fill('Pmtwin@2026')
   await page.getByRole('button', { name: 'Login' }).click()
-  await expect(page).toHaveURL(/\/dashboard/)
+  // Company accounts land on /company-dashboard, individuals on /dashboard.
+  await expect(page).toHaveURL(/dashboard/)
 }
 
 test('professional profile edits persist and settings remain private by default', async ({

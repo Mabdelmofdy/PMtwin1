@@ -67,8 +67,6 @@ function applicationNegotiation(): Negotiation {
   }
 }
 
-import { createCommercialAgreementCommandService } from '@/services/commercial-agreement-command-service.ts'
-
 function buildService(stack: CommandGatewayTestStack) {
   const commandServiceDeps = {
     gateway: stack.gateway,

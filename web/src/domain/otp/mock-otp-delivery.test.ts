@@ -18,7 +18,7 @@ describe('MockOtpDelivery', () => {
   })
 
   it('verifies correct code and rejects wrong code', async () => {
-    let now = 1_000_000
+    const now = 1_000_000
     const otp = new MockOtpDelivery({
       fixedCode: '111111',
       maxAttempts: 3,

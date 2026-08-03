@@ -449,7 +449,7 @@ describe('publish matching wiring', () => {
 
   it('blocked readiness does not run matching', () => {
     const need = matchingNeed('need-blocked', 'user-need', 'draft')
-    const stack = createPublishStack([need])
+    createPublishStack([need])
     let matchingCalls = 0
 
     const result = publishOpportunityUiAction(

@@ -78,6 +78,22 @@ stateDiagram-v2
 
 `CloseOpportunity` / `ArchiveOpportunity` set `visibilityStatus` to `closed` / `archived` (marketplace withdrawal). Lifecycle `status` is unchanged.
 
-**Match sync (intended):** discovered and accepted PostMatches linked to the opportunity are expired so they leave the active match list. Confirmed matches are left unchanged so negotiation/deal pipelines can continue. Prefer lifecycle `cancelled` / `completed` for terminal business outcomes when wiring automation.
+**Match sync:** discovered and accepted PostMatches linked to the opportunity are expired so they leave the active match list. Confirmed matches are left unchanged so negotiation/deal pipelines can continue. Prefer lifecycle `cancelled` / `completed` for terminal business outcomes when wiring automation.
+
+**Participant notifications:** every match that transitions to `expired` emits a `match_expired` notification to both participants (`userId` plus `representativeUserIds`), with copy keyed off the new visibility:
+
+| Visibility | Message |
+|------------|---------|
+| `closed` | The opportunity has been closed. Your match has expired. |
+| `archived` | The opportunity has been archived. Your match has expired. |
+
+Implemented in [`expireActiveMatchesOnOpportunityWithdrawn`](../../web/src/domain/matching/expire-matches-on-opportunity-withdrawn.ts) so Close and Archive share one code path.
+
+- **No duplicates.** Only `discovered` / `accepted` matches transition, so a second Close or Archive finds nothing expirable and emits nothing.
+- **Confirmed and terminal matches are never notified**, matching the skip in the expiry gate.
+- **Audit.** The `post_match.status_changed` entry records `notifiedUserIds`; the `opportunity.closed` / `opportunity.archived` entry keeps `expiredMatchIds` and `skippedMatchIds`, so the entity timeline and admin audit log show the whole chain.
+- **Failure isolation.** Notification emission is wrapped, so a failing sink cannot fail the Close/Archive command.
+
+Once expired, Accept on the match is rejected by the PostMatch lifecycle gate.
 
 Closed/archived opportunities are excluded from the publish-matching candidate pool.

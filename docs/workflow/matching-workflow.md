@@ -94,7 +94,10 @@ Opportunity status does **not** change on discover alone.
 | Partial accept | `match_accepted` |
 | Confirmed | `match_confirmed` |
 | Decline | `match_declined` |
+| Linked opportunity closed / archived | `match_expired` |
 | Negotiation started | `negotiation_started` |
 | Deal from match | `deal_created_from_match` |
 
 Recipients: participant `userId` and `representativeUserIds` (never company id as human recipient).
+
+`match_expired` is emitted only for matches that actually transition to `expired` (`discovered` / `accepted`). Confirmed and terminal matches are skipped, so a repeat Close or Archive finds nothing expirable and emits nothing. See [opportunity-workflow.md](opportunity-workflow.md#close--archive).

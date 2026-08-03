@@ -72,10 +72,9 @@ describe('commercial agreement label governance', () => {
     )
     assert.equal(adminItem?.title, 'Commercial Agreements')
 
-    const adminPagesSource = readFileSync(
-      join(webRoot, 'pages/admin/admin-pages.tsx'),
-      'utf8',
-    )
+    const adminPagesSource = listSourceFiles(join(webRoot, 'pages/admin'))
+      .map((absolutePath) => readFileSync(absolutePath, 'utf8'))
+      .join('\n')
     assert.match(adminPagesSource, /commercial agreements/i)
     assert.doesNotMatch(adminPagesSource, /\bplatform deals\b/i)
   })

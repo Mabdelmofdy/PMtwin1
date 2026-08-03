@@ -89,6 +89,7 @@ export type NotificationType =
   | 'match_confirmed'
   | 'match_accepted'
   | 'match_declined'
+  | 'match_expired'
   | 'review_received'
   | 'commercial_agreement_awarded'
   | 'commercial_agreement_accepted'

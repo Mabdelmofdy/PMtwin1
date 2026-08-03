@@ -90,6 +90,33 @@ Detailed field scripts: [four-types index](./uat-matching-four-types-examples.md
 
 ## Sign-off matrix
 
+### Automated verification (2026-08-03)
+
+Filled from the `npm run test` pass at commit `b869e61` + UAT stabilization changes — 1454 tests / 377 suites, 0 failures. Pass means the behaviour is asserted by a suite in CI, not that a human ran the script.
+
+| Type | Match | Diagnostics | Notification | Audit row | Evidence |
+|------|-------|-------------|--------------|-----------|----------|
+| One-Way (Riyadh↔Dammam) | Pass | Pass | Pass | Pass | `publish-matching.test.ts`, `matching-diagnostic-summary.test.ts`, `lifecycle-notifications.test.ts`, `opportunity-location-match.test.ts` |
+| Two-Way | Pass | Pass | Pass | Pass | `four-match-types-parity.test.ts` (quorum + full lifecycle + notifications), `matching-service.test.ts` |
+| Consortium | Pass | Pass | Pass | Pass | `four-match-types-parity.test.ts` (consortium lifecycle), `matching-service.test.ts` |
+| Circular | Pass | Pass | Pass | Pass | `circular-matching.test.ts`, `four-match-types-parity.test.ts` (circular quorum + lifecycle) |
+
+Match expiry on Close/Archive (all four types share the one code path):
+
+| Behaviour | Result | Evidence |
+|-----------|--------|----------|
+| Open matches expire on Close / Archive | Pass | `opportunity-command-handler.test.ts` — close/archive match sync |
+| Confirmed matches untouched | Pass | `opportunity-command-handler.test.ts` — close/archive match sync |
+| `match_expired` to both participants, closed vs archived copy | Pass | `opportunity-command-handler.test.ts` — match expiration notifications |
+| No duplicate notification on repeat Close | Pass | `opportunity-command-handler.test.ts` — match expiration notifications |
+| Accept blocked after expiry | Pass | `post-match-command-handler.test.ts` |
+| Opportunity leaves the matching pool | Pass | `uat-one-way-findings.test.ts` |
+| End-to-end in the browser (Scenarios 1–3) | Pass | `web/e2e/uat-match-expiration.spec.ts` — 3 specs, part of a 5-spec Playwright run |
+
+### Manual runtime sign-off
+
+Still required for the visual / diagnostics surfaces that automation does not assert (Admin diagnostics panel rendering, RTL, cross-city scoring tiers).
+
 | Type | Match | Diagnostics | Notification | Audit row |
 |------|-------|-------------|--------------|-----------|
 | One-Way (Riyadh↔Dammam) | ☐ | ☐ | ☐ | ☐ |

@@ -112,7 +112,8 @@ describe('buildMatchingQualityAnalytics', () => {
       deals: [],
     })
 
-    assert.equal(analytics.averageProfileReadiness, 85)
+    // ready=82, partial=73 → average 77.5 (recommended-field weighting)
+    assert.equal(analytics.averageProfileReadiness, 77.5)
     // ready=100, needs_review (9/10 required * 80)=72 → average 86
     assert.equal(analytics.averageOpportunityReadiness, 86)
   })
