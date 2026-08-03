@@ -35,6 +35,8 @@ import {
   type NotificationSink,
 } from '@/commands/handlers/lifecycle-notifications.ts'
 import { getCommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
+import { collectPostMatchOpportunityIds } from '@/domain/normalized/post-match-strong-key.ts'
+import { isWithdrawnOpportunityVisibility } from '@/lib/entity-view-visibility.ts'
 import {
   createLifecycleOrchestrator,
   type LifecycleOrchestrator,
@@ -346,12 +348,14 @@ export class PostMatchCommandHandler {
   private readonly postMatchRepository: PostMatchRepository
   private readonly auditRepository: AuditRepository | null
   private readonly notificationRepository: NotificationSink | null
+  private readonly opportunityRepository: OpportunityRepository | null
   private readonly lifecycleOrchestrator: LifecycleOrchestrator | null
 
   constructor(deps: PostMatchCommandHandlerDeps) {
     this.postMatchRepository = deps.postMatchRepository
     this.auditRepository = deps.auditRepository ?? null
     this.notificationRepository = deps.notificationRepository ?? null
+    this.opportunityRepository = deps.opportunityRepository ?? null
     this.lifecycleOrchestrator =
       deps.lifecycleOrchestrator ??
       (deps.opportunityRepository
@@ -473,6 +477,18 @@ export class PostMatchCommandHandler {
       return failure(command.commandType, command.aggregateId, [
         `PostMatch is in terminal state "${canonicalStatus(postMatch.status)}"`,
       ])
+    }
+
+    if (this.opportunityRepository) {
+      const linkedIds = collectPostMatchOpportunityIds(postMatch)
+      for (const opportunityId of linkedIds) {
+        const opportunity = this.opportunityRepository.getById(opportunityId)
+        if (opportunity && isWithdrawnOpportunityVisibility(opportunity)) {
+          return failure(command.commandType, command.aggregateId, [
+            `Cannot accept match: opportunity "${opportunityId}" is ${opportunity.visibilityStatus}`,
+          ])
+        }
+      }
     }
 
     const actor = getCommandPermissionActor()

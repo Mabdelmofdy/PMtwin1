@@ -143,6 +143,7 @@ export function createCommandGatewayTestStack(
   const opportunityHandler = new OpportunityCommandHandler({
     opportunityRepository,
     auditRepository,
+    postMatchRepository,
     resolvePublishReadinessContext: createPublishReadinessResolver(
       options.users ?? [],
     ),

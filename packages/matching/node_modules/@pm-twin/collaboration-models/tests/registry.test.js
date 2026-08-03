@@ -228,3 +228,51 @@ describe('sub-model business validation', () => {
     assert.equal(valid.valid, true)
   })
 })
+
+describe('taxonomy ownership and exchange-mode guards', () => {
+  it('owns task_based under cash_subcontracting only (not service_exchange)', () => {
+    assert.equal(SUB_MODEL_REGISTRY.task_based.mainCollaborationModel, 'cash_subcontracting')
+    assert.ok(MAIN_MODEL_REGISTRY.cash_subcontracting.subModelKeys.includes('task_based'))
+    assert.equal(
+      MAIN_MODEL_REGISTRY.service_exchange.subModelKeys.includes('task_based'),
+      false,
+    )
+
+    const invalid = validateCollaborationTaxonomy({
+      mainCollaborationModel: 'service_exchange',
+      modelType: 'project_based',
+      subModelType: 'task_based',
+      exchangeMode: 'barter',
+    })
+    assert.equal(invalid.valid, false)
+    assert.ok(invalid.errors.some((e) => e.includes('belongs to cash_subcontracting')))
+
+    const valid = validateCollaborationTaxonomy({
+      mainCollaborationModel: 'cash_subcontracting',
+      modelType: 'project_based',
+      subModelType: 'task_based',
+      exchangeMode: 'cash',
+    })
+    assert.equal(valid.valid, true, valid.errors.join('; '))
+  })
+
+  it('rejects barter for competition_rfp and project_jv', () => {
+    const rfp = validateCollaborationTaxonomy({
+      mainCollaborationModel: 'cash_subcontracting',
+      modelType: 'competition',
+      subModelType: 'competition_rfp',
+      exchangeMode: 'barter',
+    })
+    assert.equal(rfp.valid, false)
+    assert.ok(rfp.errors.some((e) => e.includes('barter') && e.includes('competition_rfp')))
+
+    const jv = validateCollaborationTaxonomy({
+      mainCollaborationModel: 'joint_venture',
+      modelType: 'project_based',
+      subModelType: 'project_jv',
+      exchangeMode: 'barter',
+    })
+    assert.equal(jv.valid, false)
+    assert.ok(jv.errors.some((e) => e.includes('barter') && e.includes('project_jv')))
+  })
+})

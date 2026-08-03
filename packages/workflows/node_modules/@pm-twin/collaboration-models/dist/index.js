@@ -2142,7 +2142,7 @@ var MAIN_MODEL_REGISTRY = {
     name: "Service Exchange / Barter",
     description: "Trade services or resources of comparable value instead of cash.",
     defaultModelType: "strategic_partnership",
-    subModelKeys: ["strategic_alliance", "mentorship", "task_based"],
+    subModelKeys: ["strategic_alliance", "mentorship"],
     allowedMatchTopologies: ["two_way", "one_way"],
     allowedExchangeModes: ["barter", "hybrid"]
   },

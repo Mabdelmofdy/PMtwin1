@@ -479,3 +479,96 @@ describe('publish opportunity UI actions', () => {
     })
   })
 })
+
+describe('OpportunityCommandHandler close/archive match sync', () => {
+  it('expires discovered and accepted matches on close; leaves confirmed', () => {
+    const stack = createCommandGatewayTestStack({
+      opportunities: [
+        {
+          ...opportunityFixture('opp-close-sync', 'published'),
+          visibilityStatus: 'published',
+        },
+      ],
+      postMatches: [
+        {
+          id: 'pm-close-discovered',
+          matchType: 'one_way',
+          status: 'discovered',
+          matchScore: 0.8,
+          needOpportunityId: 'opp-close-sync',
+          offerOpportunityId: 'offer-x',
+          participants: [],
+        },
+        {
+          id: 'pm-close-accepted',
+          matchType: 'one_way',
+          status: 'accepted',
+          matchScore: 0.8,
+          needOpportunityId: 'opp-close-sync',
+          offerOpportunityId: 'offer-y',
+          participants: [],
+        },
+        {
+          id: 'pm-close-confirmed',
+          matchType: 'one_way',
+          status: 'confirmed',
+          matchScore: 0.9,
+          needOpportunityId: 'opp-close-sync',
+          offerOpportunityId: 'offer-z',
+          participants: [],
+        },
+      ],
+    })
+
+    const result = stack.gateway.execute({
+      commandType: 'CloseOpportunity',
+      aggregateId: 'opp-close-sync',
+      clientRequestId: 'req-close-sync',
+      reason: 'uat-close',
+    })
+
+    assert.equal(result.success, true)
+    assert.equal(
+      stack.opportunityRepository.getById('opp-close-sync')?.visibilityStatus,
+      'closed',
+    )
+    assert.equal(stack.postMatchRepository.getById('pm-close-discovered')?.status, 'expired')
+    assert.equal(stack.postMatchRepository.getById('pm-close-accepted')?.status, 'expired')
+    assert.equal(stack.postMatchRepository.getById('pm-close-confirmed')?.status, 'confirmed')
+  })
+
+  it('expires open matches on archive', () => {
+    const stack = createCommandGatewayTestStack({
+      opportunities: [
+        {
+          ...opportunityFixture('opp-archive-sync', 'published'),
+          visibilityStatus: 'published',
+        },
+      ],
+      postMatches: [
+        {
+          id: 'pm-archive-open',
+          matchType: 'one_way',
+          status: 'discovered',
+          matchScore: 0.7,
+          needOpportunityId: 'opp-archive-sync',
+          offerOpportunityId: 'offer-a',
+          participants: [],
+        },
+      ],
+    })
+
+    const result = stack.gateway.execute({
+      commandType: 'ArchiveOpportunity',
+      aggregateId: 'opp-archive-sync',
+      clientRequestId: 'req-archive-sync',
+    })
+
+    assert.equal(result.success, true)
+    assert.equal(
+      stack.opportunityRepository.getById('opp-archive-sync')?.visibilityStatus,
+      'archived',
+    )
+    assert.equal(stack.postMatchRepository.getById('pm-archive-open')?.status, 'expired')
+  })
+})

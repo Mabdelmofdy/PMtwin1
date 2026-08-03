@@ -74,6 +74,10 @@ stateDiagram-v2
 
 ---
 
-## Close
+## Close / Archive
 
-`CloseOpportunity` updates visibility / close semantics; prefer lifecycle `cancelled` / `completed` for terminal business outcomes when wiring automation.
+`CloseOpportunity` / `ArchiveOpportunity` set `visibilityStatus` to `closed` / `archived` (marketplace withdrawal). Lifecycle `status` is unchanged.
+
+**Match sync (intended):** discovered and accepted PostMatches linked to the opportunity are expired so they leave the active match list. Confirmed matches are left unchanged so negotiation/deal pipelines can continue. Prefer lifecycle `cancelled` / `completed` for terminal business outcomes when wiring automation.
+
+Closed/archived opportunities are excluded from the publish-matching candidate pool.

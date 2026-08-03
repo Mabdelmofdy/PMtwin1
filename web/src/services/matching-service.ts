@@ -18,6 +18,7 @@ import {
   buildMatchingDiscoveryContext,
   resolveOpportunityOwner,
 } from '@/domain/identity/matching-discovery-context.ts'
+import { isMatchingPoolOpportunity } from '@/domain/matching/matching-pool-eligibility.ts'
 import {
   discoverInputStrongKey,
   modelRunResultToDiscoverCommands,
@@ -299,7 +300,7 @@ function runPublishMatchingForOpportunity(
     deps?.getOpportunityById ?? ((id) => opportunityRepository.getById(id))
   const listPublishedOpportunities =
     deps?.listPublishedOpportunities
-    ?? (() => opportunityRepository.getAll().filter((opp) => opp.status === 'published'))
+    ?? (() => opportunityRepository.getAll().filter((opp) => isMatchingPoolOpportunity(opp)))
   const discoverPostMatch =
     deps?.discoverPostMatch
     ?? postMatchCommandService.discoverPostMatch.bind(postMatchCommandService)
@@ -310,14 +311,17 @@ function runPublishMatchingForOpportunity(
   const resolveEngineContext = deps?.getMatchingEngineContext ?? getMatchingEngineContext
 
   const anchorOpportunity = getOpportunityById(opportunityId)
-  if (!anchorOpportunity || anchorOpportunity.status !== 'published') {
+  if (!anchorOpportunity || !isMatchingPoolOpportunity(anchorOpportunity)) {
     const reason = !anchorOpportunity
       ? 'anchor_missing'
-      : 'anchor_not_published'
+      : anchorOpportunity.status !== 'published'
+        ? 'anchor_not_published'
+        : 'anchor_not_visible'
     logPublishMatching('auto matching skipped', {
       opportunityId,
       reason,
       status: anchorOpportunity?.status ?? null,
+      visibilityStatus: anchorOpportunity?.visibilityStatus ?? null,
     })
     return {
       ...empty,
@@ -544,7 +548,7 @@ function runPublishMatchingForPublishedOpportunities(
   const runId = createPublishRunId()
   const listPublishedOpportunities =
     deps?.listPublishedOpportunities
-    ?? (() => opportunityRepository.getAll().filter((opp) => opp.status === 'published'))
+    ?? (() => opportunityRepository.getAll().filter((opp) => isMatchingPoolOpportunity(opp)))
 
   const published = listPublishedOpportunities()
   const seenPostMatchIds = new Set<string>()
@@ -618,7 +622,7 @@ function runCircularMatchingForPublishedOpportunities(
   try {
     const listPublishedOpportunities =
       deps?.listPublishedOpportunities
-      ?? (() => opportunityRepository.getAll().filter((opp) => opp.status === 'published'))
+      ?? (() => opportunityRepository.getAll().filter((opp) => isMatchingPoolOpportunity(opp)))
     const discoverPostMatch =
       deps?.discoverPostMatch
       ?? postMatchCommandService.discoverPostMatch.bind(postMatchCommandService)
@@ -765,7 +769,7 @@ function runCircularMatchingForOpportunity(
     deps?.getOpportunityById ?? ((id) => opportunityRepository.getById(id))
   const listPublishedOpportunities =
     deps?.listPublishedOpportunities
-    ?? (() => opportunityRepository.getAll().filter((opp) => opp.status === 'published'))
+    ?? (() => opportunityRepository.getAll().filter((opp) => isMatchingPoolOpportunity(opp)))
   const discoverPostMatch =
     deps?.discoverPostMatch
     ?? postMatchCommandService.discoverPostMatch.bind(postMatchCommandService)
@@ -776,7 +780,7 @@ function runCircularMatchingForOpportunity(
   const resolveEngineContext = deps?.getMatchingEngineContext ?? getMatchingEngineContext
 
   const anchorOpportunity = getOpportunityById(opportunityId)
-  if (!anchorOpportunity || anchorOpportunity.status !== 'published') {
+  if (!anchorOpportunity || !isMatchingPoolOpportunity(anchorOpportunity)) {
     return empty
   }
 

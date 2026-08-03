@@ -23,6 +23,11 @@ import {
   type AutosaveStatus,
   type LocalDraftSnapshot,
 } from '@/lib/wizard-local-draft.ts'
+import { validateCollaborationTaxonomy } from '@pm-twin/collaboration-models'
+import {
+  allowedCommercialComponentTypesForSubModel,
+  deriveLegacyExchangeMode,
+} from '@/domain/opportunity-commercial-structure'
 import { evaluateLiveOpportunityValidation } from '@/domain/opportunity-validation/index.ts'
 import { resolveStepForValidationIssue } from '@/domain/opportunity-validation/validation-step-map.ts'
 import { DuplicateDraftDialog } from '@/components/opportunity/wizard/duplicate-draft-dialog.tsx'
@@ -139,6 +144,16 @@ function validateWizardStepAdvance(
       if (!draft.mainCollaborationModel.trim() || !draft.subModelType.trim()) {
         return 'Select a collaboration model and sub-model before continuing.'
       }
+      {
+        const taxonomy = validateCollaborationTaxonomy({
+          mainCollaborationModel: draft.mainCollaborationModel,
+          modelType: draft.modelType || undefined,
+          subModelType: draft.subModelType,
+        })
+        if (!taxonomy.valid) {
+          return taxonomy.errors[0] ?? 'Collaboration selection is invalid.'
+        }
+      }
       return null
     case 'scope_work': {
       const hasSkill = draft.structuredSkills.some((skill) => skill.name.trim())
@@ -154,6 +169,32 @@ function validateWizardStepAdvance(
       }
       if (!draft.richTimeline.estimatedDuration?.trim()) {
         return 'Add an estimated duration before continuing.'
+      }
+      return null
+    }
+    case 'commercial': {
+      const allowedTypes = allowedCommercialComponentTypesForSubModel(
+        draft.subModelType,
+      )
+      const disallowed = draft.commercialStructure.components.filter(
+        (component) =>
+          component.enabled && !allowedTypes.includes(component.type),
+      )
+      if (disallowed.length > 0) {
+        return `Exchange component "${disallowed[0]!.type}" is not allowed for sub-model "${draft.subModelType}".`
+      }
+      const exchangeMode = deriveLegacyExchangeMode(draft.commercialStructure)
+      if (!exchangeMode) {
+        return 'Select at least one value-exchange component before continuing.'
+      }
+      const taxonomy = validateCollaborationTaxonomy({
+        mainCollaborationModel: draft.mainCollaborationModel,
+        modelType: draft.modelType || undefined,
+        subModelType: draft.subModelType,
+        exchangeMode,
+      })
+      if (!taxonomy.valid) {
+        return taxonomy.errors[0] ?? 'Commercial selection is invalid.'
       }
       return null
     }

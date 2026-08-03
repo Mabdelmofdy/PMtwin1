@@ -42,6 +42,7 @@ export function createApplicationCommandGateway(): DefaultCommandGateway {
   const opportunityHandler = new OpportunityCommandHandler({
     opportunityRepository,
     auditRepository,
+    postMatchRepository,
     resolveCommandActor: getCommandPermissionActor,
     resolvePublishReadinessContext: (opportunity) =>
       resolvePublishReadinessContextForOpportunity(opportunity),

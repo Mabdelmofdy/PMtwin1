@@ -504,7 +504,7 @@ Pick the engagement pattern under the main model. Examples:
 | Main model | Sub-models (examples) |
 |------------|------------------------|
 | Cash Subcontracting | Task-Based Engagement; Competition / RFP |
-| Service Exchange | Long-Term Strategic Alliance; Mentorship Program; Task-Based Engagement |
+| Service Exchange | Long-Term Strategic Alliance; Mentorship Program |
 | Joint Venture | Consortium; Project-Specific Joint Venture; Special Purpose Vehicle; Strategic Joint Venture |
 | Resource Sharing | Bulk Purchasing; Equipment Sharing; Resource Sharing & Exchange |
 | Hiring | Professional Hiring; Consultant Hiring |

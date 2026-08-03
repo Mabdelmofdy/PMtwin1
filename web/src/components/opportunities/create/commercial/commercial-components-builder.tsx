@@ -3,7 +3,7 @@ import { PmButton } from '@/components/ui/pm-button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
-  COMMERCIAL_COMPONENT_TYPES,
+  allowedCommercialComponentTypesForSubModel,
   buildCommercialStructureSummary,
   commercialComponentLabel,
   createEmptyCommercialComponent,
@@ -86,19 +86,26 @@ export function CommercialComponentsBuilder({
 
   const summary = buildCommercialStructureSummary(structure)
   const derived = deriveLegacyExchangeMode(structure)
+  const selectableTypes = allowedCommercialComponentTypesForSubModel(
+    draft.subModelType,
+  )
+  const disallowedSelected = structure.components.filter(
+    (component) =>
+      component.enabled && !selectableTypes.includes(component.type),
+  )
 
   return (
     <div data-slot="commercial-components-builder" className="space-y-6">
       <div>
         <h3 className={cn(pmTypography.h3)}>How will value be exchanged?</h3>
         <p className={cn(pmTypography.caption, 'text-muted-foreground')}>
-          Select one or more components. Hybrid is derived automatically when more
-          than one is enabled.
+          Select one or more components allowed for this collaboration sub-model.
+          Hybrid is derived automatically when more than one is enabled.
         </p>
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {COMMERCIAL_COMPONENT_TYPES.map((type) => {
+        {selectableTypes.map((type) => {
           const selected = enabledTypes.has(type)
           return (
             <button
@@ -121,10 +128,27 @@ export function CommercialComponentsBuilder({
         })}
       </div>
 
-      <PmButton type="button" variant="outline" onClick={() => toggleType('custom')}>
-        <Plus className="size-4" />
-        Add Exchange Component
-      </PmButton>
+      {disallowedSelected.length > 0 ? (
+        <p
+          className={cn(pmTypography.caption, 'text-destructive')}
+          role="alert"
+          data-testid="commercial-disallowed-modes"
+        >
+          {disallowedSelected
+            .map((component) => commercialComponentLabel(component.type))
+            .join(', ')}{' '}
+          {disallowedSelected.length === 1 ? 'is' : 'are'} not allowed for the
+          selected sub-model. Disable {disallowedSelected.length === 1 ? 'it' : 'them'}{' '}
+          before continuing.
+        </p>
+      ) : null}
+
+      {selectableTypes.includes('custom') ? (
+        <PmButton type="button" variant="outline" onClick={() => toggleType('custom')}>
+          <Plus className="size-4" />
+          Add Exchange Component
+        </PmButton>
+      ) : null}
 
       {structure.components.filter((c) => c.enabled).length > 1 ? (
         <AllocationBuilder structure={structure} onChange={setStructure} />

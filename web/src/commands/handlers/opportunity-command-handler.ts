@@ -25,6 +25,7 @@ import {
 import type { AuditEntry, Opportunity } from '@/types/domain.ts'
 import type { AuditRepository } from '@/repositories/audit-repository.ts'
 import type { OpportunityRepository } from '@/repositories/opportunity-repository.ts'
+import type { PostMatchRepository } from '@/repositories/post-match-repository.ts'
 import type { ProfileKind } from '@/domain/profile-readiness/types.ts'
 import type { CommandPermissionActor } from '@/domain/rbac/context/command-permission-context.ts'
 import {
@@ -35,6 +36,7 @@ import {
   buildOpportunityCollaborationPatch,
   normalizeOpportunityCollaboration,
 } from '@/domain/collaboration/opportunity-collaboration.ts'
+import { expireActiveMatchesOnOpportunityWithdrawn } from '@/domain/matching/expire-matches-on-opportunity-withdrawn.ts'
 import { toStoredStatus } from '@/domain/workflow/legacy-map.ts'
 import {
   composePublishValidation,
@@ -55,6 +57,8 @@ export type PublishReadinessContext = {
 export type OpportunityCommandHandlerDeps = {
   readonly opportunityRepository: OpportunityRepository
   readonly auditRepository?: AuditRepository | null
+  /** When set, Close/Archive expire discovered/accepted PostMatches for the opportunity. */
+  readonly postMatchRepository?: PostMatchRepository | null
   readonly resolvePublishReadinessContext?: (
     opportunity: Opportunity,
   ) => PublishReadinessContext
@@ -196,6 +200,7 @@ function payloadToOpportunityFields(
 export class OpportunityCommandHandler {
   private readonly opportunityRepository: OpportunityRepository
   private readonly auditRepository: AuditRepository | null
+  private readonly postMatchRepository: PostMatchRepository | null
   private readonly resolvePublishReadinessContext?: (
     opportunity: Opportunity,
   ) => PublishReadinessContext
@@ -204,6 +209,7 @@ export class OpportunityCommandHandler {
   constructor(deps: OpportunityCommandHandlerDeps) {
     this.opportunityRepository = deps.opportunityRepository
     this.auditRepository = deps.auditRepository ?? null
+    this.postMatchRepository = deps.postMatchRepository ?? null
     this.resolvePublishReadinessContext = deps.resolvePublishReadinessContext
     this.resolveCommandActor = deps.resolveCommandActor
   }
@@ -443,6 +449,23 @@ export class OpportunityCommandHandler {
     this.opportunityRepository.update(command.aggregateId, {
       visibilityStatus: 'closed',
     })
+    const matchSync = this.expireMatchesOnWithdrawn(
+      command.aggregateId,
+      command.clientRequestId,
+      'closed',
+      command.reason,
+    )
+    this.appendAudit({
+      action: 'opportunity.closed',
+      entityType: 'opportunity',
+      entityId: command.aggregateId,
+      requestId: command.clientRequestId,
+      details: {
+        reason: command.reason,
+        expiredMatchIds: matchSync.expiredMatchIds,
+        skippedMatchIds: matchSync.skippedMatchIds,
+      },
+    })
     return success(command.commandType, command.aggregateId)
   }
 
@@ -456,14 +479,43 @@ export class OpportunityCommandHandler {
     this.opportunityRepository.update(command.aggregateId, {
       visibilityStatus: 'archived',
     })
+    const matchSync = this.expireMatchesOnWithdrawn(
+      command.aggregateId,
+      command.clientRequestId,
+      'archived',
+      command.reason,
+    )
     this.appendAudit({
       action: 'opportunity.archived',
       entityType: 'opportunity',
       entityId: command.aggregateId,
       requestId: command.clientRequestId,
-      details: { reason: command.reason },
+      details: {
+        reason: command.reason,
+        expiredMatchIds: matchSync.expiredMatchIds,
+        skippedMatchIds: matchSync.skippedMatchIds,
+      },
     })
     return success(command.commandType, command.aggregateId)
+  }
+
+  private expireMatchesOnWithdrawn(
+    opportunityId: string,
+    clientRequestId: string,
+    visibilityStatus: 'closed' | 'archived',
+    reason?: string,
+  ): { expiredMatchIds: readonly string[]; skippedMatchIds: readonly string[] } {
+    if (!this.postMatchRepository) {
+      return { expiredMatchIds: [], skippedMatchIds: [] }
+    }
+    return expireActiveMatchesOnOpportunityWithdrawn({
+      opportunityId,
+      clientRequestId,
+      visibilityStatus,
+      reason,
+      postMatchRepository: this.postMatchRepository,
+      auditRepository: this.auditRepository,
+    })
   }
 
   private handleDelete(command: DeleteOpportunityCommand): CommandResult {
