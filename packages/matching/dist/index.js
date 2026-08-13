@@ -3399,6 +3399,11 @@ function normalizeSkill(skill, synonyms = {}) {
 }
 
 // src/normalize/timeline.ts
+function nonEmptyDateString(value) {
+  if (value == null) return null;
+  const text = String(value).trim();
+  return text.length > 0 ? text : null;
+}
 function extractTimeline(opportunity) {
   const attributes = opportunity.attributes ?? {};
   let start = null;
@@ -3421,6 +3426,11 @@ function extractTimeline(opportunity) {
     const record = deliveryTimeline;
     start = record.start ?? start;
     end = record.end ?? end;
+  }
+  const availabilityEndDate = nonEmptyDateString(attributes.availabilityEndDate);
+  if (availabilityEndDate) {
+    const isOffer = opportunity.intent === "offer";
+    if (isOffer || !end) end = availabilityEndDate;
   }
   if (attributes.duration != null) durationDays = Number(attributes.duration);
   if (attributes.projectDuration != null) durationDays = Number(attributes.projectDuration);

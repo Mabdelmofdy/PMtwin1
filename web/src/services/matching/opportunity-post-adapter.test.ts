@@ -47,4 +47,25 @@ describe('opportunityToPost location derivation', () => {
     assert.equal(post.location, 'Riyadh City')
     assert.ok(post.normalized?.coverageScopes?.includes('Jeddah'))
   })
+
+  it('maps collaborationAttributes.availabilityEndDate onto engine attributes', () => {
+    const opportunity = {
+      id: 'offer-avail',
+      title: 'Offer',
+      status: 'published',
+      intent: 'offer',
+      location: 'remote',
+      attributes: {
+        targetRole: 'Architect',
+        startDate: '2026-01-01',
+      },
+      collaborationAttributes: {
+        availabilityEndDate: '2026-03-01',
+      },
+    } as Opportunity
+
+    const post = opportunityToPost(opportunity)
+    assert.equal(post.attributes?.availabilityEndDate, '2026-03-01')
+    assert.equal(post.attributes?.startDate, '2026-01-01')
+  })
 })

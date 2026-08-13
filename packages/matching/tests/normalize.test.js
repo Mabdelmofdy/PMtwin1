@@ -121,6 +121,87 @@ describe('normalize — timeline extraction', () => {
     assert.equal(timeline.start, '2026-02-01')
     assert.equal(timeline.end, '2026-08-01')
   })
+
+  it('converts Offer availabilityEndDate into timeline.end', () => {
+    const timeline = extractTimeline({
+      intent: 'offer',
+      attributes: {
+        startDate: '2026-01-01',
+        availabilityEndDate: '2026-03-01',
+      },
+    })
+    assert.equal(timeline.start, '2026-01-01')
+    assert.equal(timeline.end, '2026-03-01')
+  })
+
+  it('ignores empty availabilityEndDate and does not throw on invalid values', () => {
+    assert.equal(
+      extractTimeline({
+        intent: 'offer',
+        attributes: { startDate: '2026-01-01', availabilityEndDate: '' },
+      }).end,
+      undefined,
+    )
+    assert.equal(
+      extractTimeline({
+        intent: 'offer',
+        attributes: { startDate: '2026-01-01', availabilityEndDate: '   ' },
+      }).end,
+      undefined,
+    )
+    assert.doesNotThrow(() => {
+      extractTimeline({
+        intent: 'offer',
+        attributes: { startDate: '2026-01-01', availabilityEndDate: 'not-a-date' },
+      })
+    })
+    assert.equal(
+      extractTimeline({
+        intent: 'offer',
+        attributes: { startDate: '2026-01-01', availabilityEndDate: 'not-a-date' },
+      }).end,
+      'not-a-date',
+    )
+  })
+
+  it('falls back to availability.end when availabilityEndDate is absent', () => {
+    const timeline = extractTimeline({
+      intent: 'offer',
+      attributes: {
+        startDate: '2026-02-01',
+        availability: { end: '2026-08-01' },
+      },
+    })
+    assert.equal(timeline.end, '2026-08-01')
+  })
+
+  it('prefers Offer availabilityEndDate over other end-date fields', () => {
+    const timeline = extractTimeline({
+      intent: 'offer',
+      attributes: {
+        startDate: '2026-01-01',
+        tenderDeadline: '2026-12-31',
+        applicationDeadline: '2026-11-30',
+        endDate: '2026-10-31',
+        availability: { end: '2026-09-30' },
+        deliveryTimeline: { end: '2026-08-31' },
+        availabilityEndDate: '2026-03-01',
+      },
+    })
+    assert.equal(timeline.end, '2026-03-01')
+  })
+
+  it('does not let Need availabilityEndDate override tenderDeadline', () => {
+    const timeline = extractTimeline({
+      intent: 'request',
+      attributes: {
+        startDate: '2026-01-01',
+        tenderDeadline: '2026-12-31',
+        availabilityEndDate: '2026-03-01',
+      },
+    })
+    assert.equal(timeline.end, '2026-12-31')
+  })
 })
 
 describe('normalize — semantic profile expansion', () => {

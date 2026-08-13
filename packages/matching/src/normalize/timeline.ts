@@ -1,6 +1,24 @@
 import type { NormalizedTimeline } from '../types/opportunity.ts'
 import type { OpportunityPost } from '../types/opportunity.ts'
 
+/**
+ * End-date precedence (live wizard stores Offer availability as
+ * `collaborationAttributes.availabilityEndDate`, merged onto `attributes` by
+ * web `opportunityToPost`):
+ * 1. `availabilityEndDate` — explicit Offer availability end. For `intent=offer`
+ *    this wins over other end fields. For other intents it is a fill-only fallback
+ *    so Need-specific deadlines (`tenderDeadline` / `applicationDeadline`) stay
+ *    canonical.
+ * 2. Existing cascade when `availabilityEndDate` is absent (or unused on Needs):
+ *    `deliveryTimeline.end` / `availability.end` (overwrite) →
+ *    `applicationDeadline` → `tenderDeadline` → `endDate` (fill-only).
+ */
+function nonEmptyDateString(value: unknown): string | null {
+  if (value == null) return null
+  const text = String(value).trim()
+  return text.length > 0 ? text : null
+}
+
 export function extractTimeline(opportunity: OpportunityPost): NormalizedTimeline {
   const attributes = opportunity.attributes ?? {}
   let start: string | null = null
@@ -26,6 +44,12 @@ export function extractTimeline(opportunity: OpportunityPost): NormalizedTimelin
     const record = deliveryTimeline as { start?: string; end?: string }
     start = record.start ?? start
     end = record.end ?? end
+  }
+
+  const availabilityEndDate = nonEmptyDateString(attributes.availabilityEndDate)
+  if (availabilityEndDate) {
+    const isOffer = opportunity.intent === 'offer'
+    if (isOffer || !end) end = availabilityEndDate
   }
 
   if (attributes.duration != null) durationDays = Number(attributes.duration)

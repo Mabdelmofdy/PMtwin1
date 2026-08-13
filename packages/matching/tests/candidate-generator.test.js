@@ -59,6 +59,16 @@ describe('candidate generator — timeline overlap', () => {
       true,
     )
   })
+
+  it('rejects when Offer availability.end is before Need start', () => {
+    assert.equal(
+      timelineOverlap(
+        { timeline: { start: '2026-06-01', end: '2026-12-31' } },
+        { availability: { start: '2026-01-01', end: '2026-03-01' } },
+      ),
+      false,
+    )
+  })
 })
 
 describe('candidate generator — category overlap', () => {
