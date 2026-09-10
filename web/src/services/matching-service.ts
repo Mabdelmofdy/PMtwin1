@@ -13,10 +13,14 @@ import {
   auditRepository,
   userRepository,
   companyRepository,
+  workspaceMembershipRepository,
 } from '@/repositories/index.ts'
 import {
   buildMatchingDiscoveryContext,
+  collectCompanyHumanLinksFromAccounts,
+  collectCompanyHumanLinksFromMemberships,
   resolveOpportunityOwner,
+  type MatchingDiscoveryOwnershipContext,
 } from '@/domain/identity/matching-discovery-context.ts'
 import { isMatchingPoolOpportunity } from '@/domain/matching/matching-pool-eligibility.ts'
 import {
@@ -52,16 +56,34 @@ export {
   type ProfileOpportunityRecommendation,
 } from '@/services/matching/profile-fit-service.ts'
 
-function buildMatchingOwnershipContext(): ReturnType<typeof buildMatchingDiscoveryContext> {
+function buildMatchingOwnershipContext(): MatchingDiscoveryOwnershipContext {
+  const users = userRepository.getAll()
+  const companies = companyRepository.getAll()
+  const companyIds = companies.map((company) => company.id)
+  const companyIdSet = new Set(companyIds)
+  const companyHumanLinks = [
+    ...collectCompanyHumanLinksFromAccounts(users, companyIdSet),
+    ...collectCompanyHumanLinksFromMemberships(
+      workspaceMembershipRepository.getAll(),
+      companyIdSet,
+    ),
+  ]
   return buildMatchingDiscoveryContext(
-    userRepository.getAll().map((user) => user.id),
-    companyRepository.getAll().map((company) => company.id),
+    users.map((user) => user.id),
+    companyIds,
+    { companyHumanLinks },
   )
+}
+
+function resolveMatchingOwnershipContext(
+  deps?: { readonly ownershipContext?: MatchingDiscoveryOwnershipContext },
+): MatchingDiscoveryOwnershipContext {
+  return deps?.ownershipContext ?? buildMatchingOwnershipContext()
 }
 
 function resolveAnchorOwnerPartyKey(
   opportunity: Opportunity,
-  ownershipContext: ReturnType<typeof buildMatchingDiscoveryContext>,
+  ownershipContext: MatchingDiscoveryOwnershipContext,
 ): string | undefined {
   if (opportunity.ownerPartyId) return opportunity.ownerPartyId
   return resolveOpportunityOwner(opportunity, ownershipContext)?.ownerPartyId
@@ -113,6 +135,7 @@ export type PublishMatchingDeps = {
   readonly actorId?: string
   readonly actorRole?: string | null
   readonly recordMatchingRunAudit?: (input: RecordMatchingRunAuditInput) => void
+  readonly ownershipContext?: MatchingDiscoveryOwnershipContext
 }
 
 export type CircularMatchingResult = {
@@ -135,6 +158,7 @@ export type CircularMatchingDeps = {
   readonly getMatchingEngineContext?: typeof getMatchingEngineContext
   readonly engineOptions?: MatchEngineOptions
   readonly recordMatchingRunAudit?: (input: RecordMatchingRunAuditInput) => void
+  readonly ownershipContext?: MatchingDiscoveryOwnershipContext
 }
 
 function createPostMatchId(): string {
@@ -394,7 +418,7 @@ function runPublishMatchingForOpportunity(
   let adapterDroppedCount = 0
   const diagnosticSummaries: MatchingRunDiagnosticSummary[] = []
 
-  const ownershipContext = buildMatchingOwnershipContext()
+  const ownershipContext = resolveMatchingOwnershipContext(deps)
   const discoverContext = {
     anchorOpportunity,
     opportunityById,
@@ -657,7 +681,7 @@ function runCircularMatchingForPublishedOpportunities(
     let skippedDuplicatesCount = 0
     const diagnosticSummaries: MatchingRunDiagnosticSummary[] = []
 
-    const ownershipContext = buildMatchingOwnershipContext()
+    const ownershipContext = resolveMatchingOwnershipContext(deps)
     const anchorsByOwnerParty = new Map<string, Opportunity>()
     for (const opportunity of publishedPool) {
       const ownerPartyKey = resolveAnchorOwnerPartyKey(opportunity, ownershipContext)
@@ -807,7 +831,7 @@ function runCircularMatchingForOpportunity(
     options: deps?.engineOptions ?? { model: 'circular', minCycleLength: 3 },
   })
 
-  const ownershipContext = buildMatchingOwnershipContext()
+  const ownershipContext = resolveMatchingOwnershipContext(deps)
   const discoverContext = {
     anchorOpportunity,
     opportunityById,

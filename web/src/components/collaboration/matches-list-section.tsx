@@ -38,6 +38,12 @@ import { cn } from '@/lib/utils'
 import type { PostMatch } from '@/types/domain.ts'
 import { collectPostMatchOpportunityIds } from '@/domain/normalized/post-match-strong-key.ts'
 import { formatCollaborationExchangeMode } from '@/lib/collaboration-taxonomy-display.ts'
+import {
+  MATCH_LIST_ALL_STATUSES_FILTER,
+  MATCH_LIST_DEFAULT_STATUS_FILTER,
+  matchListStatusFilterLabel,
+  matchPassesListStatusFilter,
+} from '@/components/collaboration/matches-list-status-filter.ts'
 
 export type MatchesListFilters = ReturnType<typeof useMatchesListFilters>
 
@@ -60,7 +66,7 @@ export function useMatchesListFilters(
 ) {
   const compact = options?.compact ?? false
   const [search, setSearchState] = useState('')
-  const [status, setStatusState] = useState('all')
+  const [status, setStatusState] = useState(MATCH_LIST_DEFAULT_STATUS_FILTER)
   const [matchType, setMatchTypeState] = useState('all')
   const [mainModel, setMainModelState] = useState('all')
   const [exchangeMode, setExchangeModeState] = useState('all')
@@ -96,7 +102,7 @@ export function useMatchesListFilters(
     return matches.filter((m) => {
       const pairing = formatMatchDisplayTitle(m, (id) => opportunitiesApi.get(id)).toLowerCase()
       const matchesSearch = !search || pairing.includes(search.toLowerCase())
-      const matchesStatus = status === 'all' || m.status === status
+      const matchesStatus = matchPassesListStatusFilter(m.status, status)
       const matchesType =
         matchType === 'all' || (m.matchType || 'one_way').toLowerCase() === matchType
       const relatedOpportunities = collectPostMatchOpportunityIds(m)
@@ -129,12 +135,14 @@ export function useMatchesListFilters(
 
   const hasActiveFilters =
     search.length > 0 ||
-    status !== 'all' ||
+    status !== MATCH_LIST_DEFAULT_STATUS_FILTER ||
     matchType !== 'all' ||
     mainModel !== 'all' ||
     exchangeMode !== 'all'
   const listEmpty = resolveListEmptyState({
-    hasSourceData: matches.length > 0,
+    hasSourceData: matches.some((match) =>
+      matchPassesListStatusFilter(match.status, MATCH_LIST_DEFAULT_STATUS_FILTER),
+    ),
     hasActiveFilters,
     firstRun: {
       title: 'No matches yet',
@@ -148,13 +156,13 @@ export function useMatchesListFilters(
   })
 
   const activeFilterChips: PmFilterChip[] = [
-    ...(status !== 'all'
+    ...(status !== MATCH_LIST_DEFAULT_STATUS_FILTER
       ? [
           {
             id: 'status',
             label: 'Status',
-            value: status.charAt(0).toUpperCase() + status.slice(1),
-            onRemove: () => setStatus('all'),
+            value: matchListStatusFilterLabel(status),
+            onRemove: () => setStatus(MATCH_LIST_DEFAULT_STATUS_FILTER),
           },
         ]
       : []),
@@ -193,7 +201,7 @@ export function useMatchesListFilters(
 
   const clearAllFilters = () => {
     setSearchState('')
-    setStatusState('all')
+    setStatusState(MATCH_LIST_DEFAULT_STATUS_FILTER)
     setMatchTypeState('all')
     setMainModelState('all')
     setExchangeModeState('all')
@@ -270,7 +278,7 @@ export function MatchesBrowseToolbar({
       }
       filters={
         <PmTableFilter
-          activeCount={(status !== 'all' ? 1 : 0) + (matchType !== 'all' ? 1 : 0)}
+          activeCount={(status !== MATCH_LIST_DEFAULT_STATUS_FILTER ? 1 : 0) + (matchType !== 'all' ? 1 : 0)}
           label="Filters"
         >
           <div className="space-y-3">
@@ -281,12 +289,13 @@ export function MatchesBrowseToolbar({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value={MATCH_LIST_DEFAULT_STATUS_FILTER}>All active</SelectItem>
                   <SelectItem value="discovered">Discovered</SelectItem>
                   <SelectItem value="accepted">Accepted</SelectItem>
                   <SelectItem value="confirmed">Confirmed</SelectItem>
                   <SelectItem value="declined">Declined</SelectItem>
                   <SelectItem value="expired">Expired</SelectItem>
+                  <SelectItem value={MATCH_LIST_ALL_STATUSES_FILTER}>All statuses</SelectItem>
                 </SelectContent>
               </Select>
             </div>

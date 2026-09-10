@@ -32,6 +32,7 @@ function publishedNeed(id, creatorId, role, services, overrides = {}) {
       skills: services,
       location: 'remote',
       modelType: 'project_based',
+      timeline: { start: '2026-01-01', end: '2026-12-31' },
     },
     ...overrides,
   }
@@ -51,6 +52,7 @@ function publishedOffer(id, creatorId, role, services, overrides = {}) {
       skills: services,
       location: 'remote',
       modelType: 'project_based',
+      availability: { start: '2026-01-01', end: '2026-12-31' },
     },
     ...overrides,
   }
@@ -222,6 +224,7 @@ describe('model runners — consortium', () => {
           modelType: 'joint_venture',
           subModelType: 'consortium',
           categories: ['joint_venture', 'consortium'],
+          timeline: { start: '2026-01-01', end: '2026-12-31' },
         },
       },
     )
@@ -238,6 +241,7 @@ describe('model runners — consortium', () => {
           modelType: 'cash_subcontracting',
           subModelType: 'task_based',
           categories: ['cash_subcontracting', 'task_based'],
+          availability: { start: '2026-01-01', end: '2026-12-31' },
         },
       }),
       publishedOffer('offer-hala', 'hala', 'Structural Engineer', [
@@ -254,6 +258,7 @@ describe('model runners — consortium', () => {
           modelType: 'cash_subcontracting',
           subModelType: 'task_based',
           categories: ['cash_subcontracting', 'task_based'],
+          availability: { start: '2026-01-01', end: '2026-12-31' },
         },
       }),
     ]

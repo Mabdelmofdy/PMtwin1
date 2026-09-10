@@ -69,6 +69,27 @@ describe('candidate generator — timeline overlap', () => {
       false,
     )
   })
+
+  it('treats a shared boundary date as compatible', () => {
+    assert.equal(
+      timelineOverlap(
+        { timeline: { start: '2026-10-01', end: '2026-10-31' } },
+        { availability: { start: '2026-10-31', end: '2026-11-30' } },
+      ),
+      true,
+    )
+  })
+
+  it('treats missing timelines as eligible (not a hard reject)', () => {
+    assert.equal(timelineOverlap({}, {}), true)
+    assert.equal(
+      timelineOverlap(
+        { timeline: { start: '2026-10-01' } },
+        { availability: { end: '2026-12-31' } },
+      ),
+      true,
+    )
+  })
 })
 
 describe('candidate generator — category overlap', () => {

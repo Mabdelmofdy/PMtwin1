@@ -26,6 +26,8 @@ import {
   buildDiscoverParticipant,
   buildMatchingDiscoveryContextFromOpportunities,
   filterCrossOwnerPartyMatches,
+  isValidHumanParticipantUserId,
+  resolveHumanParticipantUserId,
   resolveOpportunityOwner,
   resolvePostOwnerPartyId,
   sameOwnerParty,
@@ -143,13 +145,22 @@ function hydrateBarterSideByOwner(
   const anchorOwner = anchorOpportunity
     ? resolveOpportunityOwner(anchorOpportunity, ctx)
     : null
-  const userId =
-    representativeUserId ??
-    anchorOwner?.representativeUserId ??
-    anchorOpportunity?.createdByUserId ??
-    (anchorOpportunity?.creatorId && ctx.userIds.has(anchorOpportunity.creatorId)
-      ? anchorOpportunity.creatorId
-      : undefined)
+  const userId = resolveHumanParticipantUserId(
+    {
+      creatorId: anchorOpportunity?.creatorId,
+      createdByUserId: anchorOpportunity?.createdByUserId,
+      ownerPartyId,
+      workspaceId: anchorOwner?.workspaceId ?? anchorOpportunity?.workspaceId,
+    },
+    ctx,
+    {
+      ownerPartyId,
+      workspaceId: anchorOwner?.workspaceId,
+      createdByUserId: isValidHumanParticipantUserId(representativeUserId, ctx)
+        ? representativeUserId
+        : anchorOwner?.representativeUserId,
+    },
+  )
 
   if (!userId || ctx.companyIds.has(userId)) return null
 
@@ -328,12 +339,14 @@ function mapConsortiumMatch(
     context.anchorOpportunity,
     context.ownershipContext,
   )
-  if (!leadOwner?.representativeUserId && !context.anchorOpportunity.creatorId) {
+  const leadUserId = resolveHumanParticipantUserId(
+    context.anchorOpportunity,
+    context.ownershipContext,
+    leadOwner ?? undefined,
+  )
+  if (!leadUserId) {
     return null
   }
-
-  const leadUserId =
-    leadOwner?.representativeUserId ?? context.anchorOpportunity.creatorId ?? ''
 
   const roles: PostMatchConsortiumRole[] = []
   for (const partner of match.suggestedPartners ?? []) {
@@ -349,12 +362,15 @@ function mapConsortiumMatch(
     ) {
       continue
     }
-    const userId =
-      partnerOwner?.representativeUserId ??
-      partner.creatorId ??
-      partnerOpp?.createdByUserId ??
-      partnerOpp?.creatorId ??
-      ''
+    const userId = partnerOpp
+      ? resolveHumanParticipantUserId(
+          partnerOpp,
+          context.ownershipContext,
+          partnerOwner ?? undefined,
+        )
+      : (isValidHumanParticipantUserId(partner.creatorId, context.ownershipContext)
+        ? partner.creatorId
+        : undefined)
     if (!partner.opportunityId || !userId) continue
     roles.push({
       role: partner.role ?? 'General',
@@ -452,15 +468,20 @@ function mapCircularMatch(
     const participant = opportunity
       ? buildDiscoverParticipant(opportunity, 'chain_participant', context.ownershipContext)
       : null
-    participants.push(
-      participant ?? {
-        userId,
-        role: 'chain_participant',
-        opportunityId,
-        participantStatus: 'pending',
-        respondedAt: null,
-      },
-    )
+    if (participant) {
+      participants.push(participant)
+      continue
+    }
+    if (!isValidHumanParticipantUserId(userId, context.ownershipContext)) {
+      return null
+    }
+    participants.push({
+      userId,
+      role: 'chain_participant',
+      opportunityId,
+      participantStatus: 'pending',
+      respondedAt: null,
+    })
   }
 
   return {

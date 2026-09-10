@@ -35,4 +35,12 @@ describe('MatchesListSection layout contract', () => {
     assert.match(source.slice(tableStart), /<PmDataTable/)
     assert.match(source.slice(tableStart), /renderMobileCard/)
   })
+
+  it('defaults the status filter to All active and keeps Expired plus All statuses', () => {
+    assert.match(source, /useState\(MATCH_LIST_DEFAULT_STATUS_FILTER\)/)
+    assert.match(source, /All active/)
+    assert.match(source, /SelectItem value="expired">Expired/)
+    assert.match(source, /MATCH_LIST_ALL_STATUSES_FILTER/)
+    assert.match(source, /matchPassesListStatusFilter\(m.status, status\)/)
+  })
 })

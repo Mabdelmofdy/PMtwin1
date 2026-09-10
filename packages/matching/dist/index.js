@@ -677,28 +677,41 @@ function budgetFit(needNorm, offerNorm) {
   const score = needSpan > 0 ? overlapSpan / needSpan : 1;
   return { score, label: labelFromScore(score) };
 }
+var MS_PER_UTC_DAY = 864e5;
+function parseUtcTimelineInstant(value) {
+  if (!value) return null;
+  const time = new Date(value).getTime();
+  return Number.isFinite(time) ? time : null;
+}
+function inclusiveUtcDayCount(startMs, endMs) {
+  if (endMs < startMs) return 0;
+  return Math.round((endMs - startMs) / MS_PER_UTC_DAY) + 1;
+}
 function timelineFit(needNorm, offerNorm) {
   const needEnd = needNorm.deadline ?? needNorm.timeline?.end;
   const needStart = needNorm.timeline?.start;
   const offerStart = offerNorm.availability?.start ?? offerNorm.timeline?.start;
   const offerEnd = offerNorm.availability?.end ?? offerNorm.timeline?.end;
-  const toDate = (value) => value ? new Date(value).getTime() : null;
-  const nEnd = toDate(needEnd);
-  const nStart = toDate(needStart);
-  const oStart = toDate(offerStart);
-  const oEnd = toDate(offerEnd);
-  if (nEnd == null && nStart == null && oStart == null && oEnd == null) {
-    return { score: 1, label: "Match" };
+  const nEnd = parseUtcTimelineInstant(needEnd);
+  const nStart = parseUtcTimelineInstant(needStart);
+  const oStart = parseUtcTimelineInstant(offerStart);
+  const oEnd = parseUtcTimelineInstant(offerEnd);
+  if (nStart == null || nEnd == null || oStart == null || oEnd == null) {
+    return { score: 0, label: "No Match" };
   }
-  if (nEnd != null && oStart != null && oStart > nEnd) return { score: 0, label: "No Match" };
-  if (oEnd != null && nStart != null && nStart > oEnd) return { score: 0, label: "No Match" };
-  if (nStart != null && nEnd != null && oStart != null && oEnd != null) {
-    const overlap = Math.max(0, Math.min(nEnd, oEnd) - Math.max(nStart, oStart));
-    const needLen = nEnd - nStart;
-    const score = needLen > 0 ? overlap / needLen : 0.5;
-    return { score, label: labelFromScore(score) };
+  if (oStart > nEnd || nStart > oEnd) {
+    return { score: 0, label: "No Match" };
   }
-  return { score: 0.5, label: "Partial" };
+  const needDays = inclusiveUtcDayCount(nStart, nEnd);
+  if (needDays <= 0) {
+    return { score: 0, label: "No Match" };
+  }
+  const overlapDays = inclusiveUtcDayCount(
+    Math.max(nStart, oStart),
+    Math.min(nEnd, oEnd)
+  );
+  const score = Math.max(0, Math.min(1, overlapDays / needDays));
+  return { score, label: labelFromScore(score) };
 }
 function locationFit(needNorm, offerNorm, needAttributes, offerAttributes) {
   const needCoverage = resolveCoverage(

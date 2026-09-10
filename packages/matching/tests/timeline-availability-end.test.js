@@ -9,16 +9,20 @@ import {
   withMatchingDefaults,
 } from '../dist/index.js'
 
-/** Same Date parsing as timelineFit / timelineOverlap (ISO date-only = UTC). */
+/** Inclusive UTC day overlap / Need duration — same formula as timelineFit. */
 function expectedTimelineFitScore(needStart, needEnd, offerStart, offerEnd) {
+  const MS_PER_UTC_DAY = 86_400_000
   const toDate = (value) => new Date(value).getTime()
   const nStart = toDate(needStart)
   const nEnd = toDate(needEnd)
   const oStart = toDate(offerStart)
   const oEnd = toDate(offerEnd)
-  const overlap = Math.max(0, Math.min(nEnd, oEnd) - Math.max(nStart, oStart))
-  const needLen = nEnd - nStart
-  return needLen > 0 ? overlap / needLen : 0.5
+  if (oStart > nEnd || nStart > oEnd) return 0
+  const needDays = Math.round((nEnd - nStart) / MS_PER_UTC_DAY) + 1
+  if (needDays <= 0) return 0
+  const overlapDays =
+    Math.round((Math.min(nEnd, oEnd) - Math.max(nStart, oStart)) / MS_PER_UTC_DAY) + 1
+  return Math.max(0, Math.min(1, overlapDays / needDays))
 }
 
 function needPost(overrides = {}) {

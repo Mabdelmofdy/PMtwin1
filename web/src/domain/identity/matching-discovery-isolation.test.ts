@@ -12,8 +12,18 @@ import type { Opportunity } from '@/types/domain.ts'
 import { opportunityToPost } from '@/services/matching/opportunity-post-adapter.ts'
 
 const ctx = buildMatchingDiscoveryContext(
-  ['user-personal-a', 'user-personal-b', 'employee-co-a'],
+  ['user-personal-a', 'user-personal-b', 'employee-co-a', 'employee-co-b'],
   ['seed-co-corp-001'],
+)
+
+const ctxWithCompanyHumans = buildMatchingDiscoveryContext(
+  ['user-personal-a', 'user-personal-b', 'employee-co-a', 'employee-co-b'],
+  ['seed-co-corp-001'],
+  {
+    companyHumanLinks: [
+      { companyId: 'seed-co-corp-001', userId: 'employee-co-a', role: 'member' },
+    ],
+  },
 )
 
 function opp(
@@ -207,5 +217,115 @@ describe('matching discovery canonical scoping', () => {
       workspaceId: 'ws-company-seed-co-corp-001',
     })
     assert.equal(buildDiscoverParticipant(companyOwned, 'need_owner', ctx), null)
+  })
+
+  it('resolves a human participant for a company-owned opportunity without changing owner party', () => {
+    const companyOwned = opp('company-with-actor', {
+      creatorId: 'seed-co-corp-001',
+      createdByUserId: 'seed-co-corp-001',
+      ownerPartyId: 'party-company-seed-co-corp-001',
+      workspaceId: 'ws-company-seed-co-corp-001',
+    })
+    const owner = resolveOpportunityOwner(companyOwned, ctxWithCompanyHumans)
+    assert.equal(owner?.ownerPartyId, 'party-company-seed-co-corp-001')
+    assert.equal(owner?.representativeUserId, 'employee-co-a')
+
+    const participant = buildDiscoverParticipant(
+      companyOwned,
+      'need_owner',
+      ctxWithCompanyHumans,
+    )
+    assert.ok(participant)
+    assert.equal(participant?.userId, 'employee-co-a')
+    assert.equal(participant?.partyId, 'party-company-seed-co-corp-001')
+    assert.equal(participant?.workspaceId, 'ws-company-seed-co-corp-001')
+    assert.notEqual(participant?.userId, 'seed-co-corp-001')
+  })
+
+  it('prefers a valid human createdByUserId over a mapped company representative', () => {
+    const companyOwned = opp('company-human-creator', {
+      creatorId: 'seed-co-corp-001',
+      createdByUserId: 'employee-co-b',
+      ownerPartyId: 'party-company-seed-co-corp-001',
+      workspaceId: 'ws-company-seed-co-corp-001',
+    })
+    const participant = buildDiscoverParticipant(
+      companyOwned,
+      'need_owner',
+      ctxWithCompanyHumans,
+    )
+    assert.equal(participant?.userId, 'employee-co-b')
+    assert.equal(participant?.partyId, 'party-company-seed-co-corp-001')
+  })
+
+  it('does not treat system-migration-actor as a human participant when a company human exists', () => {
+    const companyOwned = opp('company-system-actor', {
+      creatorId: 'seed-co-corp-001',
+      createdByUserId: 'system-migration-actor',
+      ownerPartyId: 'party-company-seed-co-corp-001',
+      workspaceId: 'ws-company-seed-co-corp-001',
+    })
+    const participant = buildDiscoverParticipant(
+      companyOwned,
+      'need_owner',
+      ctxWithCompanyHumans,
+    )
+    assert.equal(participant?.userId, 'employee-co-a')
+    assert.equal(participant?.partyId, 'party-company-seed-co-corp-001')
+  })
+
+  it('keeps same-company isolation after human participant resolution', () => {
+    const need = opp('need-mapped', {
+      creatorId: 'seed-co-corp-001',
+      createdByUserId: 'seed-co-corp-001',
+      ownerPartyId: 'party-company-seed-co-corp-001',
+      workspaceId: 'ws-company-seed-co-corp-001',
+      intent: 'request',
+    })
+    const offer = opp('offer-mapped', {
+      creatorId: 'employee-co-a',
+      createdByUserId: 'employee-co-a',
+      ownerPartyId: 'party-company-seed-co-corp-001',
+      workspaceId: 'ws-company-seed-co-corp-001',
+      intent: 'offer',
+    })
+    const opportunityById = new Map([
+      ['need-mapped', need],
+      ['offer-mapped', offer],
+    ])
+    const posts = [opportunityToPost(need), opportunityToPost(offer)]
+    const postById = new Map(posts.map((post) => [post.id as string, post]))
+
+    assert.equal(
+      filterCrossOwnerPartyMatches(
+        'need-mapped',
+        'offer-mapped',
+        opportunityById,
+        ctxWithCompanyHumans,
+      ),
+      false,
+    )
+
+    const commands = modelRunResultToDiscoverCommands(
+      {
+        model: 'one_way',
+        matches: [{
+          needOpportunityId: 'need-mapped',
+          offerOpportunityId: 'offer-mapped',
+          matchScore: 0.9,
+        }],
+      },
+      {
+        anchorOpportunity: need,
+        opportunityById,
+        postById,
+        ownershipContext: ctxWithCompanyHumans,
+        runId: 'run-same-company',
+        createAggregateId: () => 'pm-same-company',
+      },
+      posts,
+    )
+
+    assert.equal(commands.length, 0)
   })
 })

@@ -8,6 +8,10 @@ import { contractsApi } from '@/api/contracts.ts'
 import { notificationsApi } from '@/api/notifications.ts'
 import { peopleApi } from '@/api/people.ts'
 import { MatchCard } from '@/components/collaboration/match-card'
+import {
+  MATCH_LIST_DEFAULT_STATUS_FILTER,
+  matchPassesListStatusFilter,
+} from '@/components/collaboration/matches-list-status-filter.ts'
 import { formatNegotiationDisplayTitle } from '@/lib/entity-display-titles.ts'
 import {
   PmContentCard,
@@ -231,6 +235,9 @@ export function WorkspaceDashboardComposition() {
   })
 
   const recommendedMatches = [...matches]
+    .filter((match) =>
+      matchPassesListStatusFilter(match.status, MATCH_LIST_DEFAULT_STATUS_FILTER),
+    )
     .sort((a, b) => b.matchScore - a.matchScore)
     .slice(0, 3)
 
