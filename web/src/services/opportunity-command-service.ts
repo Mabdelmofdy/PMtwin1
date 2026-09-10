@@ -12,6 +12,10 @@ import type {
 } from '@pm-twin/commands'
 import type { DefaultCommandGateway } from '@/commands/default-command-gateway.ts'
 import { getApplicationCommandGateway } from '@/commands/application-command-gateway.ts'
+import type { Opportunity } from '@/types/domain.ts'
+import { isMatchingPoolOpportunity } from '@/domain/matching/matching-pool-eligibility.ts'
+import { buildMatchingFingerprint } from '@/services/matching/matching-fingerprint.ts'
+import { opportunityRepository } from '@/repositories/index.ts'
 import {
   matchingService,
   type PublishMatchingResult,
@@ -21,6 +25,7 @@ export type OpportunityCommandServiceDeps = {
   readonly gateway?: DefaultCommandGateway
   readonly runPublishMatching?: (opportunityId: string) => PublishMatchingResult
   readonly runCircularMatching?: (opportunityId: string) => PublishMatchingResult
+  readonly getOpportunityById?: (id: string) => Opportunity | undefined
 }
 
 export type PublishTransitionResult = {
@@ -114,6 +119,37 @@ function runPostPublishMatching(
   return { matching, circular }
 }
 
+function resolveOpportunityById(
+  opportunityId: string,
+  deps?: OpportunityCommandServiceDeps,
+): Opportunity | undefined {
+  const read =
+    deps?.getOpportunityById
+    ?? ((id: string) => opportunityRepository.getById(id))
+  return read(opportunityId)
+}
+
+function maybeRematchAfterUpdate(
+  beforeFingerprint: string | null,
+  after: Opportunity | undefined,
+  opportunityId: string,
+  deps?: OpportunityCommandServiceDeps,
+): void {
+  if (!after || !isMatchingPoolOpportunity(after)) return
+  if (beforeFingerprint == null) return
+  if (beforeFingerprint === buildMatchingFingerprint(after)) return
+
+  try {
+    runPostPublishMatching(opportunityId, deps)
+  } catch (error) {
+    console.error('[pmtwin:publish-matching] update rematch exception', {
+      opportunityId,
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    })
+  }
+}
+
 function toPublishTransitionResult(
   command: CommandResult,
   opportunityId: string,
@@ -156,13 +192,20 @@ export function createOpportunityCommandService(
       opportunityId: string,
       payload: Partial<OpportunityCollaborationPayload>,
     ): CommandResult {
+      const before = resolveOpportunityById(opportunityId, deps)
+      const beforeFingerprint = before ? buildMatchingFingerprint(before) : null
       const command = {
         commandType: 'UpdateOpportunity',
         aggregateId: opportunityId,
         clientRequestId: createClientRequestId('UpdateOpportunity'),
         payload,
       } satisfies UpdateOpportunityCommand
-      return resolveGateway(deps).execute(command)
+      const result = resolveGateway(deps).execute(command)
+      if (!result.success) return result
+
+      const after = resolveOpportunityById(opportunityId, deps)
+      maybeRematchAfterUpdate(beforeFingerprint, after, opportunityId, deps)
+      return result
     },
 
     validateOpportunityCollaborationModel(
